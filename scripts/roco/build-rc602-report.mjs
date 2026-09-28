@@ -35,6 +35,14 @@ const RED_PROOFS_ON_DISK = (() => {
   }
 })();
 
+// 2026-09-28：语料从 49 个个体扩到 542 个（C(542,2) = 146611 对）之后，
+// `Math.min(...arr)` 这种展开会把调用栈撑爆（RangeError: Maximum call stack size exceeded）。
+// 换成一次遍历求 min/max：语义完全相同，只是不再把数组摊成参数。
+const minMax = (numbers) => numbers.reduce((acc, value) => ({
+  min: acc.min === null || value < acc.min ? value : acc.min,
+  max: acc.max === null || value > acc.max ? value : acc.max,
+}), {min: null, max: null});
+
 const round = (value, decimals = 4) => (Number.isFinite(value) ? Number(value.toFixed(decimals)) : value);
 const arr = (value) => (Array.isArray(value) ? value : []);
 const stableJson = (value) => JSON.stringify(value, null, 2);
@@ -233,8 +241,8 @@ export function buildRc602Report({inputs, source = null, now = null} = {}) {
         samples: pairLatencies.length,
         p50: percentile(pairLatencies, 0.5),
         p95: percentile(pairLatencies, 0.95),
-        min: round(Math.min(...pairLatencies), 3),
-        max: round(Math.max(...pairLatencies), 3),
+        min: round(minMax(pairLatencies).min, 3),
+        max: round(minMax(pairLatencies).max, 3),
         total: round(pairLatencies.reduce((a, b) => a + b, 0), 3),
       },
       per_axis_availability: Object.fromEntries(FEATURE_IDS.map((id) => {
@@ -266,8 +274,8 @@ export function buildRc602Report({inputs, source = null, now = null} = {}) {
         samples: pairwiseTeamLatencies.length,
         p50: percentile(pairwiseTeamLatencies, 0.5),
         p95: percentile(pairwiseTeamLatencies, 0.95),
-        min: round(Math.min(...pairwiseTeamLatencies), 3),
-        max: round(Math.max(...pairwiseTeamLatencies), 3),
+        min: round(minMax(pairwiseTeamLatencies).min, 3),
+        max: round(minMax(pairwiseTeamLatencies).max, 3),
       },
       sample_pairing: pairings[0],
     },
@@ -284,8 +292,8 @@ export function buildRc602Report({inputs, source = null, now = null} = {}) {
         samples: rankLatencies.length,
         p50: percentile(rankLatencies, 0.5),
         p95: percentile(rankLatencies, 0.95),
-        min: round(Math.min(...rankLatencies), 3),
-        max: round(Math.max(...rankLatencies), 3),
+        min: round(minMax(rankLatencies).min, 3),
+        max: round(minMax(rankLatencies).max, 3),
       },
     },
     partial_completion_value: {
@@ -296,8 +304,8 @@ export function buildRc602Report({inputs, source = null, now = null} = {}) {
         samples: partialLatencies.length,
         p50: percentile(partialLatencies, 0.5),
         p95: percentile(partialLatencies, 0.95),
-        min: round(Math.min(...partialLatencies), 3),
-        max: round(Math.max(...partialLatencies), 3),
+        min: round(minMax(partialLatencies).min, 3),
+        max: round(minMax(partialLatencies).max, 3),
       },
       rows: partials,
       boundary_cases: boundarySummary,

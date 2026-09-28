@@ -103,7 +103,7 @@
     {
       "id": "playable-48-layer",
       "kind": "data",
-      "status": "legacy-fixture",
+      "status": "current",
       "path": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
       "depends_on": [
         "roster.universe",
@@ -115,8 +115,8 @@
         "battle_mode.standard_pvp",
         "turn_order.action_order"
       ],
-      "rebuild": "node scripts/roco/build-roster-48-engine-inputs.mjs",
-      "note": "48 只是**迁移夹具**：它的可玩性以当前引擎规则为准，规则一改资格要重算。"
+      "rebuild": "node scripts/roco/build-all-pets-engine-inputs.mjs",
+      "note": "2026-09-28 起这一层是**抓包派生**的可玩层（人类逐字：「所有精灵实装」）：抓包 547 − 剔除 8 = 539 只，去掉基线已有的 9 只 ⇒ 本层 530 只，合计 542 只。（旧值与旧生成器不删：它曾经是 `node scripts/roco/build-roster-48-engine-inputs.mjs` 生成的 36 只「迁移夹具」；那个脚本现在默认拒绝写盘，要复现历史版本得加 `--legacy-48`。）目录名 `layer-playable-48` 是引擎写死的常量（`roco/src/roco_env/data.py:22`），不许改。"
     },
     {
       "id": "full-catalog-l1",

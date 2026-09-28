@@ -194,14 +194,17 @@ export function buildOnDemandBuilds({catalog, skills, frozenBuilds = {}, hashes}
     ruleset_id: catalog.ruleset_id ?? null,
     generated_by: 'scripts/roco/build-on-demand-builds.mjs',
     why: '全量图鉴每只精灵都带 learnable_skills（实测 622/622、8787 条引用全部可解析），'
-      + '但冻结 learnsets.json 只覆盖 48 只 ⇒ 另外 574 只「选得到、上不了场」。'
-      + '本产物把这批编成确定、可复核、可替换的四个技能，并**明确标成未核验**。',
+      + '但冻结层覆盖不到全部 ⇒ 剩下的「选得到、上不了场」。'
+      + '本产物把这批编成确定、可复核、可替换的四个技能，并**明确标成未核验**。'
+      + '（2026-09-28 改钉：旧值是「冻结 learnsets.json 只覆盖 48 只 ⇒ 另外 574 只」；'
+      + '人类拍板「所有精灵实装」之后冻结那一档变成可玩层的 542 只，推算那一档 80 只。'
+      + '两档的实际条数以 summary 为准。）',
     selection_rule: {...SELECTION_RULE},
     derived_from: {
       catalog: {path: 'data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json', sha256: hashes.catalog},
       skills: {path: 'data/roco/normalized/roco-world-s4-2026-09-10/skills.json', sha256: hashes.skills},
       frozen_learnsets: frozenBuilds.__source
-        ? {path: 'data/roco/owned/owned-pets.json#battle_builds', sha256: hashes.frozen, count: frozenCount(frozenBuilds)}
+        ? {path: frozenBuilds.__source, sha256: hashes.frozen, count: frozenCount(frozenBuilds)}
         : null,
     },
     summary: {
@@ -218,7 +221,15 @@ export function buildOnDemandBuilds({catalog, skills, frozenBuilds = {}, hashes}
   };
 }
 
-const frozenCount = (frozenBuilds) => Object.keys(frozenBuilds).filter((key) => key !== '__source').length;
+const frozenCount = (frozenBuilds) => Object.keys(frozenBuilds)
+  .filter((key) => key !== '__source' && key !== '__from').length;
+
+/**
+ * 冻结那一档现在是**两份**文件（基线 `support-matrix.json` + 可玩层同名的另一份），
+ * 而产物里 `derived_from.frozen_learnsets` 只有一个 `sha256` 位 —— 所以这里把它定义成
+ * 「两份原文按顺序用 `\n` 连起来再取 sha256」，生产者与校验器都用这一个函数，不许各算各的。
+ */
+export const combinedFrozenHash = (texts) => sha256(texts.join('\n'));
 
 /**
  * 检查一份产物。每条判据都配一条必红方向（见 `selftest()` 与 tests）。
@@ -238,17 +249,19 @@ export function checkOnDemandBuilds(doc, {catalog, skills, frozenBuilds = {}, ha
     add('derived_from_stale', '-', 'skills sha256 与磁盘不符');
   }
   // 2026-09-25（前一位子代理抓到的真缺口）：这条**原来漏了** ——
-  // `derived_from.frozen_learnsets.sha256` 记的是 `owned-pets.json` 整文件的 sha256，
+  // `derived_from.frozen_learnsets.sha256` 记的是上游整文件的 sha256，
   // 而校验器只比 catalog 与 skills ⇒ **产物过期时 `--check` 照样绿**（静默过期）。
   // 实测：`owned-pets.json` 改成引擎 loadout 之后，产物仍记 `1a7ade75…`，磁盘已是别的 sha，
   // 于是 `compiled_matches_frozen` 比的是**旧快照**。
   // 现在：只要这次核对给了 `hashes.frozen`，产物就必须带着**同一个** sha，缺了也红（fail closed）。
+  // 2026-09-28 换源（旧值不删）：这一份过去是 `owned-pets.json` 整文件，现在是基线
+  // `support-matrix.json` + 可玩层同名那份（用 `combinedFrozenHash()` 算），见 CLI 的注释。
   if (hashes && hashes.frozen) {
     const recorded = doc.derived_from?.frozen_learnsets?.sha256 ?? null;
     if (recorded !== hashes.frozen) {
       add('derived_from_stale', '-', recorded === null
-        ? '产物没有登记 derived_from.frozen_learnsets.sha256，但这次核对给了 owned-pets.json 的 sha —— 来源不许省'
-        : 'frozen_learnsets（owned-pets.json）sha256 与磁盘不符 —— 产物过期，'
+        ? '产物没有登记 derived_from.frozen_learnsets.sha256，但这次核对给了冻结层的 sha —— 来源不许省'
+        : 'frozen_learnsets（冻结层两份 support-matrix）sha256 与磁盘不符 —— 产物过期，'
           + '重跑 `node scripts/roco/build-on-demand-builds.mjs` 并重建报告');
     }
   }

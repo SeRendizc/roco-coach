@@ -40,6 +40,15 @@
       "limits": "详情里「特长 / 血脉」两栏游戏数据确实没有 ⇒ 继续标「未知」，不猜；own-0049 是演示个体（见 2026-09-28-same-species-demo-pair）",
       "rollback": "各条都有对应判据（tests/roco-box-drawer.test.js ③⑤⑫⑭⑮⑯⑰⑱、tests/roco-box.test.js 的详情/比较断言），改回即红",
       "ledger": "§C6.334 – §C6.334d"
+    },
+    "2026-09-28-all-pets-playable-layer-and-box-mirrors-it": {
+      "at": "2026-09-28",
+      "verbatim": "就用现在抓包得到的数据吧，别的不找不要了，问题数据也不要了。所有精灵实装，这样就不需要我的精灵了，直接全筛选",
+      "allows": "① 可玩层（`data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/`）改由**抓包派生**、覆盖全部可实装精灵：抓包 547 − 剔除 8（技能池/技能石被灌坏的那批，逐个核过）= 539，其中 9 只已在 M1 基线 12 只里 ⇒ 本层 530 条，合并后冻结档 542 条（生成器 `scripts/roco/build-all-pets-engine-inputs.mjs`）；② **甲案**：`owned-pets.json`（RC-203 的「我的盒子」）跟着扩到**可玩层镜像** —— 实例数 = 有冻结学招表的物种数 = 542，「我的精灵」不再是一个独立概念，页面直接是「全部精灵 + 筛选」；③ 按需配招产物的「冻结那一档」改以冻结层为准（不再读 owned-pets），否则撤下旧层的 7 只会从候选池整个消失",
+      "why": "抓包是当前唯一「全量且逐只可追」的来源；人类要的是「所有精灵都能直接筛」，而不是维护一份 48 只的迁移夹具",
+      "limits": "① 抓包许可 UNKNOWN / REFERENCE_ONLY：本层逐条带来源与许可，**不声称官方**，也不并入其它 normalized 数据；② 抓包不给技能等级 ⇒ `native_skills[].level` 一律 null（不猜）；③ 抓包 `machine` 桶是 wiki `skill_stones` 的真子集（少 314 条/102 名字/187 只）⇒ 如实标注缺口，不假装齐全；④ 被剔除的 8 只与接口给不出来的那些**不建**，不拿别的来源补",
+      "rollback": "把 `layer-playable-48/` 三份恢复到旧 48 只那一版（旧生成器加 `--legacy-48` 可复现），并把 `owned-pets-lib.mjs` 的 `INSTANCE_TARGET`/`MIN_SPECIES` 改回 48/40 —— 两处旧值都留在注释里",
+      "ledger": "本轮落地记录见 `docs/roadmap/ALL-PETS-PLAYABLE-LAYER-2026-09-28.md`"
     }
   }
 }

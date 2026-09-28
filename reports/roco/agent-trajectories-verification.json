@@ -82,20 +82,20 @@
  },
  "replay": {
   "total": 6912,
-  "passed": 6912,
-  "failed": 0,
+  "passed": 6297,
+  "failed": 615,
   "by_arm": {
    "replay": {
     "total": 864,
-    "passed": 864
+    "passed": 828
    },
    "baseline": {
     "total": 864,
-    "passed": 864
+    "passed": 720
    },
    "stubborn": {
     "total": 864,
-    "passed": 864
+    "passed": 597
    },
    "stop_now": {
     "total": 864,
@@ -107,18 +107,49 @@
    },
    "drop_args": {
     "total": 864,
-    "passed": 864
+    "passed": 720
    },
    "blind": {
     "total": 864,
-    "passed": 864
+    "passed": 840
    },
    "local_4b": {
     "total": 864,
     "passed": 864
    }
   },
-  "first_failures": [],
+  "first_failures": [
+   {
+    "traj_id": "rl-ruleset-f0-01@camp-0#replay",
+    "problems": [
+     "回放 query_rules 的回执与记录不一致（记录 b4aec4a7bf34，现在 0eea3f6a5e82）"
+    ]
+   },
+   {
+    "traj_id": "rl-ruleset-f0-01@camp-0#baseline",
+    "problems": [
+     "回放 query_rules 的回执与记录不一致（记录 b4aec4a7bf34，现在 0eea3f6a5e82）"
+    ]
+   },
+   {
+    "traj_id": "rl-ruleset-f0-01@camp-0#stubborn",
+    "problems": [
+     "回放 query_rules 的回执与记录不一致（记录 b4aec4a7bf34，现在 0eea3f6a5e82）"
+    ]
+   },
+   {
+    "traj_id": "rl-ruleset-f0-01@camp-0#drop_args",
+    "problems": [
+     "回放 query_rules 的回执与记录不一致（记录 b4aec4a7bf34，现在 0eea3f6a5e82）"
+    ]
+   },
+   {
+    "traj_id": "rl-ruleset-f0-01@camp-0#blind",
+    "problems": [
+     "回放 query_rules 的回执与记录不一致（记录 b4aec4a7bf34，现在 0eea3f6a5e82）"
+    ]
+   }
+  ],
   "skipped": 0,
   "note": null
  },
@@ -236,5 +267,5 @@
   "drift_example": null,
   "passes": true
  },
- "verdict": true
+ "verdict": false
 }

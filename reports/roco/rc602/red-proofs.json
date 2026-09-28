@@ -12,13 +12,13 @@
       "where": "tests/roco-team-ranker.test.js#④",
       "criterion": "速度未知时该队必须 available:false 且 score=null",
       "mutation": "把 speed_layers 的 null 改成 0 并标 available:true",
-      "actual": "补 0 版本 available=true score=0.9012；正确版本 available=false score=null ⇒ 判红"
+      "actual": "补 0 版本 available=true score=0.8633；正确版本 available=false score=null ⇒ 判红"
     },
     {
       "where": "tests/roco-team-ranker.test.js#⑤",
       "criterion": "多属性精灵必须按冻结相性表的显式组合行算（组合行优先）",
-      "mutation": "把 own-0003（地系|幻系）的抗性按 types[0]=地系 的单属性行算",
-      "actual": "组合行=6 个抗性（模块输出=6）；types[0] 行=5 个 ⇒ 判红"
+      "mutation": "把 own-0009（恶系|翼系）的抗性按 types[0]=恶系 的单属性行算",
+      "actual": "组合行=3 个抗性（模块输出=3）；types[0] 行=2 个 ⇒ 判红"
     },
     {
       "where": "tests/roco-team-ranker.test.js#⑥a",
@@ -35,8 +35,8 @@
     {
       "where": "tests/roco-team-ranker.test.js#⑧",
       "criterion": "覆盖类计数与结构分对成员质量单调（更好不许更低、更差不许更高）",
-      "mutation": "把「补进 own-0002（抗性更多）」换成「补进 own-0028（抗性更少）」",
-      "actual": "更好：覆盖=6 分=0.6667；更差：覆盖=3 分=0.6111 ⇒ 单调性判据区分得开"
+      "mutation": "把「补进 own-0003（抗性更多）」换成「补进 own-0002（抗性更少）」",
+      "actual": "更好：覆盖=9 分=0.7222；更差：覆盖=6 分=0.5555 ⇒ 单调性判据区分得开"
     },
     {
       "where": "tests/roco-team-ranker.test.js#⑨a",

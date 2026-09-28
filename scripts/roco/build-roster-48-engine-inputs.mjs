@@ -38,9 +38,13 @@
 //      `not_provided_by_source`，**不猜**（引擎只读 `skill_id`，见 data.py 的 Learnset 构造）。
 //
 // 用法：
-//   node scripts/roco/build-roster-48-engine-inputs.mjs            # 生成（覆盖本层三份）
+//   node scripts/roco/build-roster-48-engine-inputs.mjs            # ⚠ 2026-09-28 起**拒绝写盘**（见 main()）
+//   node scripts/roco/build-roster-48-engine-inputs.mjs --legacy-48 # 复现历史「48 只」那一版（会覆盖当前层）
 //   node scripts/roco/build-roster-48-engine-inputs.mjs --verify   # 只读校验：与磁盘逐字节比对 + 基线未漂移
 //   node scripts/roco/build-roster-48-engine-inputs.mjs --json     # 机器可读摘要
+//
+// 2026-09-28 交接：这一层现在归 `scripts/roco/build-all-pets-engine-inputs.mjs` 写（人类拍板
+// 「所有精灵实装」）。本脚本保留 = 保留「M1 那 48 只是怎么来的」这条可复现路径，不再参与日常生成。
 
 import {createHash} from 'node:crypto';
 import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs';
@@ -514,6 +518,19 @@ function summary(built) {
 
 function main() {
   const args = process.argv.slice(2);
+  // ── 2026-09-28：本脚本**不再是 `layer-playable-48/` 的写入者**（保留旧路径 = 保留历史，不删）──
+  // 人类 2026-09-28 拍板「就用现在抓包得到的数据吧……所有精灵实装」。那一层现在由
+  // `scripts/roco/build-all-pets-engine-inputs.mjs` 独占写入（抓包 539 只，本层 530 只）。
+  // 本脚本的输入是「48 只登记层 + tmp/roco-full-catalog.json」，输出只可能是 36 只 ——
+  // 两条链同时写同一批文件 = 没人说得清磁盘上那一份是谁写的（本轮开工前 --verify 实测 exit 1
+  // 就是这个病）。所以要复现历史 48 只那一版，必须显式带 `--legacy-48`：
+  // 那时写出来的三份是**历史快照**，会被下一次 `build-all-pets-engine-inputs.mjs` 覆盖回去。
+  if (!args.includes('--legacy-48')) {
+    console.error('✖ 本脚本自 2026-09-28 起不再是 layer-playable-48 的写入者。');
+    console.error('  现在这一层由 node scripts/roco/build-all-pets-engine-inputs.mjs 独占写入（抓包 539 只）。');
+    console.error('  要复现历史「48 只」那一版（会覆盖当前这一层）：加 --legacy-48 再跑。');
+    process.exit(1);
+  }
   const built = build(loadInputs());
   const info = summary(built);
 

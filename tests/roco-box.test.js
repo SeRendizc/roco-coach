@@ -135,8 +135,11 @@ test('路由契约：kind=mine 的条数 = owned-pets.json 的实例数（一人
   assert.equal(json.player.total, OWNED.instances.length,
     `我的盒子应当是 ${OWNED.instances.length} 个个体，实际 ${json.player.total}`);
   // 逐页取回来，条数之和必须等于总数（分页不是装饰）
+  // 2026-09-28 改钉（**旧值不删**：循环上界原来是写死的 `offset < 200`，当时实例只有 48 只）。
+  // 甲案（盒子 = 可玩层镜像）⇒ 542 个实例，写死 200 只能取到前 216 个 ⇒ 判据假红。
+  // 现在按**数据文件自己的条数**走完：判据没放宽（分页之和必须等于实例数，一页都不许漏）。
   let seen = 0;
-  for (let offset = 0; offset < 200; offset += 24) {
+  for (let offset = 0; offset < OWNED.instances.length; offset += 24) {
     const page = await box(`kind=mine&limit=24&offset=${offset}`);
     seen += page.json.player.count;
   }

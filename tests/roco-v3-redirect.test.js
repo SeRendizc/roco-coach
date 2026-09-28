@@ -803,14 +803,21 @@ test('RC-203 诚实条款：这批 owned 实例**不得**被说成「600+ 都能
   const ceiling = report.buildability_ceiling;
   assert.ok(ceiling, '报告必须有 buildability_ceiling 一段');
   assert.equal(ceiling.proves_600_buildable, false, '本批**不能**证明 600+ 都能出战');
-  assert.equal(ceiling.species_with_frozen_learnset, 48);
-  assert.equal(ceiling.candidates_without_frozen_learnset, 574);
-  assert.equal(ceiling.buildable_subset_equals_roster_48, true);
+  // 2026-09-28 改钉（**旧值不删**：`48` / `574` / `buildable_subset_equals_roster_48 === true`）。
+  // 甲案（人类：「所有精灵实装，这样就不需要我的精灵了，直接全筛选」）⇒ 冻结 learnset 覆盖 542 只、
+  // 缺的 80 只；可出战子集**不再**等于 roster-48（roster-48 是 M1 的选择登记层，只有 48 只）。
+  // 判据的原意一字未改：**不得**把这批实例说成全量都能出战，且必须把「因缺 learnset 而跳过的数量」摆出来。
+  assert.equal(ceiling.species_with_frozen_learnset, 542);
+  assert.equal(ceiling.candidates_without_frozen_learnset, 80);
+  assert.equal(ceiling.buildable_subset_equals_roster_48, false,
+    '2026-09-28 起可出战子集 = 可玩层 542 只 ≠ roster-48 的 48 只');
   assert.match(ceiling.why_not, /learnset/);
   assert.match(ceiling.needed_to_prove, /RC-402|导入/);
   const alt = report.outside_layer_playable_48.alternative_reading;
-  assert.equal(alt.species_outside_roster_48, 0,
-    `按 roster-48 口径池外必须是 0，实际 ${alt.species_outside_roster_48}`);
+  // 2026-09-28 改钉（**旧值不删**：`0`）。旧口径下「有冻结 learnset 的 48 只 == roster-48」，池外自然是 0；
+  // 甲案之后可出战子集是 542 只，其中 **501 只**不在 roster-48 里（542 − 41）。
+  assert.equal(alt.species_outside_roster_48, 501,
+    `按 roster-48 口径池外的 species 数变了，实际 ${alt.species_outside_roster_48}`);
   assert.match(report.outside_layer_playable_48.what_this_proves, /基线层/);
   // 反向控制：把 proves_600_buildable 翻成 true，同一条判据必须能判出来
   const judgeCeiling = (c) => (c.proves_600_buildable === false && c.candidates_without_frozen_learnset > 0

@@ -190,7 +190,7 @@
       "mutation": "分母 K=7 改成 K=8",
       "criterion": "[严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
       "expect_code": "权重与四轴加权值随之变",
-      "actual": "{\"weight_after\":0.125,\"environment_value_after\":{\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可复算的声明依据**：`basis.kind === \\\"uniform-over-candidate-universe\\\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \\\"share\\\"`、`confidence === \\\"ENGINE_HYPOTHESIS\\\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。\",\"delta\":0.064592,\"winner\":\"rc304-six-a\"}}"
+      "actual": "{\"weight_after\":0.125,\"environment_value_after\":{\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可复算的声明依据**：`basis.kind === \\\"uniform-over-candidate-universe\\\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \\\"share\\\"`、`confidence === \\\"ENGINE_HYPOTHESIS\\\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。\",\"delta\":0.128647,\"winner\":\"rc304-six-a\"}}"
     },
     {
       "where": "compare.axes.environment_value.structural_basis",
@@ -267,7 +267,7 @@
       "mutation": "把成员的 build 数据整体抽掉（cost.build_support 与 energy.build_curve 一起清空）",
       "criterion": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。",
       "expect_code": "覆盖置信必须变低（否则它没读 build 数据）",
-      "actual": "{\"before\":0.84,\"after\":0.506667}"
+      "actual": "{\"before\":0.809524,\"after\":0.47619}"
     },
     {
       "where": "compare.axes.coverage_confidence.value_parts",
@@ -323,7 +323,7 @@
       "mutation": "把第二次运行的结果改掉一个值",
       "criterion": "同一份输入连续两次调用，五个口径 + 最小替换 + 渲染文本的 `JSON.stringify` 结果必须逐字节相同（含 tie-break），否则 `NONDETERMINISTIC`（红）。",
       "expect_code": "NONDETERMINISTIC",
-      "actual": "[\"[NONDETERMINISTIC] compareTeams/minimalReplacement:compare：同一输入两次运行的 JSON.stringify 不一致（含 tie-break）：{\\\"schema\\\":\\\"roco-team-compare/v1\\\",\\\"axes\\\":{\\\"environment_value\\\":{\\\"axis\\\":\\\"environment_value\\\",\\\"prior_field\\\":\\\"expected_meta_value\\\",\\\"label\\\":\\\"环境价值\\\",\\\"definition\\\":\\\"队伍对**版 vs {\\\"schema\\\":\\\"roco-team-compare/v1\\\",\\\"axes\\\":{\\\"environment_value\\\":{\\\"axis\\\":\\\"environment_value\\\",\\\"prior_field\\\":\\\"expected_meta_value\\\",\\\"label\\\":\\\"环境价值\\\",\\\"definition\\\":\\\"队伍对**版\",\"[NONDETERMINISTIC] compareTeams/minimalReplacement:replacement：同一输入两次运行的 JSON.stringify 不一致（含 tie-break）：{\\\"schema\\\":\\\"roco-minimal-replacement/v1\\\",\\\"team_id\\\":\\\"rc304-six-a\\\",\\\"candidate_universe_size\\\":4,\\\"replacement\\\":{\\\"out\\\":{\\\"key\\\":\\\"instance:own-0004\\\",\\\"unanswered_weakness vs null\"]"
+      "actual": "[\"[NONDETERMINISTIC] compareTeams/minimalReplacement:compare：同一输入两次运行的 JSON.stringify 不一致（含 tie-break）：{\\\"schema\\\":\\\"roco-team-compare/v1\\\",\\\"axes\\\":{\\\"environment_value\\\":{\\\"axis\\\":\\\"environment_value\\\",\\\"prior_field\\\":\\\"expected_meta_value\\\",\\\"label\\\":\\\"环境价值\\\",\\\"definition\\\":\\\"队伍对**版 vs {\\\"schema\\\":\\\"roco-team-compare/v1\\\",\\\"axes\\\":{\\\"environment_value\\\":{\\\"axis\\\":\\\"environment_value\\\",\\\"prior_field\\\":\\\"expected_meta_value\\\",\\\"label\\\":\\\"环境价值\\\",\\\"definition\\\":\\\"队伍对**版\",\"[NONDETERMINISTIC] compareTeams/minimalReplacement:replacement：同一输入两次运行的 JSON.stringify 不一致（含 tie-break）：{\\\"schema\\\":\\\"roco-minimal-replacement/v1\\\",\\\"team_id\\\":\\\"rc304-six-a\\\",\\\"candidate_universe_size\\\":4,\\\"replacement\\\":{\\\"out\\\":{\\\"key\\\":\\\"instance:own-0001\\\",\\\"unanswered_weakness vs null\"]"
     }
   ],
   "measured_control_sample": {
@@ -377,21 +377,21 @@
       },
       "matchup_spread": 0.42,
       "execution_tolerance": 0.745,
-      "coverage_confidence": 0.848485
+      "coverage_confidence": 0.809524
     },
     "environment_value_recomputed_from_injected_distribution": 0.505,
     "environment_value_matches_weighted_mean": true,
     "coverage_confidence_unchanged": true,
     "minimal_replacement": {
       "out": {
-        "key": "instance:own-0004",
+        "key": "instance:own-0001",
         "unanswered_weaknesses": 2
       },
       "in": {
         "key": "cand:aaa",
         "covers_types": [
-          "地系",
-          "幽系"
+          "幽系",
+          "普通系"
         ],
         "has_build": true
       }
@@ -399,7 +399,7 @@
     "minimal_replacement_confirmed_by_distribution": true,
     "audit_ok": true,
     "audit_problems": [],
-    "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：两队在这一份注入分布上相同（不排名）\nworst_archetype：两队在这一份注入分布上相同（不排名）\nmatchup_spread：两队在这一份注入分布上相同（不排名）\nexecution_tolerance：两队在这一份注入分布上相同（不排名）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0004，换上 cand:aaa"
+    "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：两队在这一份注入分布上相同（不排名）\nworst_archetype：两队在这一份注入分布上相同（不排名）\nmatchup_spread：两队在这一份注入分布上相同（不排名）\nexecution_tolerance：两队在这一份注入分布上相同（不排名）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0001，换上 cand:aaa"
   },
   "negative_controls": {
     "unknown": {
@@ -499,12 +499,12 @@
     "weight_after": 0.125,
     "environment_value_before": {
       "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-      "delta": 0.044056,
+      "delta": 0.120833,
       "winner": "rc304-six-a"
     },
     "environment_value_after": {
       "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-      "delta": 0.064592,
+      "delta": 0.128647,
       "winner": "rc304-six-a"
     },
     "availability": {
@@ -522,8 +522,8 @@
       "label": "真实数据下五轴全部可用（coverage_confidence 真算 + 四轴 assumption 结构分）",
       "criteria": "[严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
       "actual": [
-        "available=5/5 kind=assumption environment_value={\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可/ENGINE_HYPOTHESIS worst_archetype={\"archetype_id\":\"wing_king_flyer\",\"label\":\"翼王飞翼\"/ENGINE_HYPOTHESIS matchup_spread={\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可/ENGINE_HYPOTHESIS execution_tolerance={\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可/ENGINE_HYPOTHESIS coverage=0.848485/COMMUNITY_CURRENT",
-        "available=5/5 kind=assumption environment_value={\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可/ENGINE_HYPOTHESIS worst_archetype={\"archetype_id\":\"wing_king_flyer\",\"label\":\"翼王飞翼\"/ENGINE_HYPOTHESIS matchup_spread=0.5/ENGINE_HYPOTHESIS execution_tolerance={\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可/ENGINE_HYPOTHESIS coverage=0.84/COMMUNITY_CURRENT"
+        "available=5/5 kind=assumption environment_value={\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可/ENGINE_HYPOTHESIS worst_archetype={\"archetype_id\":\"wing_king_flyer\",\"label\":\"翼王飞翼\"/ENGINE_HYPOTHESIS matchup_spread={\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可/ENGINE_HYPOTHESIS execution_tolerance={\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可/ENGINE_HYPOTHESIS coverage=0.809524/ENGINE_HYPOTHESIS",
+        "available=5/5 kind=assumption environment_value={\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可/ENGINE_HYPOTHESIS worst_archetype={\"archetype_id\":\"wing_king_flyer\",\"label\":\"翼王飞翼\"/ENGINE_HYPOTHESIS matchup_spread={\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可/ENGINE_HYPOTHESIS execution_tolerance={\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可/ENGINE_HYPOTHESIS coverage=0.809524/ENGINE_HYPOTHESIS"
       ],
       "ok": true
     },
@@ -552,7 +552,7 @@
     {
       "label": "四轴对**分母**敏感：K → K+1（每行 1/(K+1)）⇒ 权重与加权值随之变，且仍然可用",
       "criteria": "[严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-      "actual": "K 7 → 8、weight 0.142857 → 0.125、environment_value {\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可复算的声明依据**：`basis.kind === \\\"uniform-over-candidate-universe\\\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \\\"share\\\"`、`confidence === \\\"ENGINE_HYPOTHESIS\\\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。\",\"delta\":0.044056,\"winner\":\"rc304-six-a\"} → {\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可复算的声明依据**：`basis.kind === \\\"uniform-over-candidate-universe\\\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \\\"share\\\"`、`confidence === \\\"ENGINE_HYPOTHESIS\\\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。\",\"delta\":0.064592,\"winner\":\"rc304-six-a\"}、partition_ok=true",
+      "actual": "K 7 → 8、weight 0.142857 → 0.125、environment_value {\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可复算的声明依据**：`basis.kind === \\\"uniform-over-candidate-universe\\\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \\\"share\\\"`、`confidence === \\\"ENGINE_HYPOTHESIS\\\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。\",\"delta\":0.120833,\"winner\":\"rc304-six-a\"} → {\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可复算的声明依据**：`basis.kind === \\\"uniform-over-candidate-universe\\\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \\\"share\\\"`、`confidence === \\\"ENGINE_HYPOTHESIS\\\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。\",\"delta\":0.128647,\"winner\":\"rc304-six-a\"}、partition_ok=true",
       "ok": true
     },
     {
@@ -583,13 +583,13 @@
       "label": "最小替换恰好一个方案且带 why；分布 unknown 时只给结构理由",
       "criteria": "`minimalReplacement()` 必须给**恰好一个**方案（`replacement.out` + `replacement.in` 各恰好一个），且必须带非空的 `why` 与 `evidence[]`；返回数组 / 多方案 / 没有 `why` ⇒ `REPLACEMENT_SHAPE`（红）。",
       "actual": [
-        "rc304-six-a vs rc304-six-b: instance:own-0004 → cand:aaa confirmed_by_distribution=false",
-        "rc304-six-a vs rc304-six-c: instance:own-0004 → cand:aaa confirmed_by_distribution=false",
-        "rc304-six-b vs rc304-six-c: instance:own-0008 → cand:aaa confirmed_by_distribution=false",
-        "rc304-six-d vs rc304-six-e: instance:own-0006 → cand:aaa confirmed_by_distribution=false",
-        "rc304-six-a vs rc304-six-e: instance:own-0004 → cand:aaa confirmed_by_distribution=false",
+        "rc304-six-a vs rc304-six-b: instance:own-0001 → cand:aaa confirmed_by_distribution=false",
+        "rc304-six-a vs rc304-six-c: instance:own-0001 → cand:aaa confirmed_by_distribution=false",
+        "rc304-six-b vs rc304-six-c: instance:own-0007 → cand:aaa confirmed_by_distribution=false",
+        "rc304-six-d vs rc304-six-e: instance:own-0001 → cand:aaa confirmed_by_distribution=false",
+        "rc304-six-a vs rc304-six-e: instance:own-0001 → cand:aaa confirmed_by_distribution=false",
         "rc304-six-c vs rc304-six-f: 给不出（why 已写） confirmed_by_distribution=false",
-        "rc304-six-e vs rc304-six-f: instance:own-0009 → cand:aaa confirmed_by_distribution=false"
+        "rc304-six-e vs rc304-six-f: instance:own-0001 → cand:aaa confirmed_by_distribution=false"
       ],
       "ok": true
     },
@@ -630,9 +630,9 @@
       ],
       "member_count": 6,
       "ok": true,
-      "gap_count": 22,
+      "gap_count": 21,
       "dimension_unknown_counts": {
-        "coverage": 4,
+        "coverage": 6,
         "energy": 1,
         "pivot": 1,
         "respond": 1,
@@ -642,11 +642,11 @@
       "coverage_confidence": {
         "axis": "coverage_confidence",
         "available": true,
-        "value": 0.848485,
+        "value": 0.809524,
         "unit": "相对分（0～1 的序数标度，不预测胜负）",
         "unknown_reason": null,
         "value_parts": {
-          "criterion": 0.545455,
+          "criterion": 0.428571,
           "evidence": 1,
           "build_data": 1
         },
@@ -656,7 +656,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-a].gaps",
             "field": "length",
-            "value": 22,
+            "value": 21,
             "note": "覆盖置信的输入是 RC-302 的缺口诊断条数"
           },
           {
@@ -677,7 +677,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-a].gaps[].machine_evidence",
             "field": "gaps_with_evidence",
-            "value": 22,
+            "value": 21,
             "note": "带完整机器证据的缺口条数"
           },
           {
@@ -695,33 +695,33 @@
             "note": "有具体 build 数据的成员登记键（RC-302 的 cost.build_support 记 validated_members = 6 只；其余成员按 build_data = 0 计，不猜）"
           }
         ],
-        "confidence": "COMMUNITY_CURRENT",
+        "confidence": "ENGINE_HYPOTHESIS",
         "unverified": [
           "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
-          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 10 / 22 条缺口），已按条数计入覆盖置信的扣分"
+          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 12 / 21 条缺口），已按条数计入覆盖置信的扣分"
         ],
         "missing": []
       },
       "dimension_gap_counts": {
         "cost": 2,
-        "coverage": 4,
+        "coverage": 6,
         "energy": 2,
         "pivot": 2,
         "respond": 1,
         "speed": 3,
-        "synergy": 8
+        "synergy": 5
       },
       "uncovered_attack_types": [
-        "地系",
         "幽系",
-        "恶系",
+        "普通系",
+        "武系",
+        "毒系",
+        "翼系",
         "龙系"
       ],
       "unanswered_weaknesses": {
-        "instance:own-0002": 1,
-        "instance:own-0003": 1,
-        "instance:own-0004": 2,
-        "instance:own-0006": 1
+        "instance:own-0001": 2,
+        "instance:own-0004": 1
       },
       "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。"
     },
@@ -734,222 +734,6 @@
         "instance:own-0010",
         "instance:own-0011",
         "instance:own-0012"
-      ],
-      "member_count": 6,
-      "ok": true,
-      "gap_count": 30,
-      "dimension_unknown_counts": {
-        "coverage": 4,
-        "energy": 1,
-        "pivot": 1,
-        "respond": 1,
-        "speed": 2,
-        "synergy": 1
-      },
-      "coverage_confidence": {
-        "axis": "coverage_confidence",
-        "available": true,
-        "value": 0.888889,
-        "unit": "相对分（0～1 的序数标度，不预测胜负）",
-        "unknown_reason": null,
-        "value_parts": {
-          "criterion": 0.666667,
-          "evidence": 1,
-          "build_data": 1
-        },
-        "weakest_part": "criterion",
-        "evidence": [
-          {
-            "source_file": "injected:gapsByTeam",
-            "pointer": "gapsByTeam[rc304-six-b].gaps",
-            "field": "length",
-            "value": 30,
-            "note": "覆盖置信的输入是 RC-302 的缺口诊断条数"
-          },
-          {
-            "source_file": "injected:gapsByTeam",
-            "pointer": "gapsByTeam[rc304-six-b].gaps[].confidence",
-            "field": "dimensions_with_unknown",
-            "value": [
-              "coverage",
-              "energy",
-              "pivot",
-              "respond",
-              "speed",
-              "synergy"
-            ],
-            "note": "台账标 UNKNOWN 的维度：这些量我们**不知道**，必须计入扣分"
-          },
-          {
-            "source_file": "injected:gapsByTeam",
-            "pointer": "gapsByTeam[rc304-six-b].gaps[].machine_evidence",
-            "field": "gaps_with_evidence",
-            "value": 30,
-            "note": "带完整机器证据的缺口条数"
-          },
-          {
-            "source_file": "injected:gapsByTeam",
-            "pointer": "gapsByTeam[rc304-six-b].energy.build_curve",
-            "field": "members_with_build",
-            "value": [
-              "instance:own-0007",
-              "instance:own-0008",
-              "instance:own-0009",
-              "instance:own-0010",
-              "instance:own-0011",
-              "instance:own-0012"
-            ],
-            "note": "有具体 build 数据的成员登记键（RC-302 的 cost.build_support 记 validated_members = 6 只；其余成员按 build_data = 0 计，不猜）"
-          }
-        ],
-        "confidence": "COMMUNITY_CURRENT",
-        "unverified": [
-          "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
-          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 10 / 30 条缺口），已按条数计入覆盖置信的扣分"
-        ],
-        "missing": []
-      },
-      "dimension_gap_counts": {
-        "cost": 2,
-        "coverage": 4,
-        "energy": 2,
-        "pivot": 2,
-        "respond": 1,
-        "speed": 3,
-        "synergy": 16
-      },
-      "uncovered_attack_types": [
-        "地系",
-        "幻系",
-        "机械系",
-        "龙系"
-      ],
-      "unanswered_weaknesses": {
-        "instance:own-0008": 3,
-        "instance:own-0009": 3,
-        "instance:own-0011": 2,
-        "instance:own-0012": 2
-      },
-      "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。"
-    },
-    {
-      "team_id": "rc304-six-c",
-      "members": [
-        "instance:own-0013",
-        "instance:own-0014",
-        "instance:own-0015",
-        "instance:own-0016",
-        "instance:own-0017",
-        "instance:own-0018"
-      ],
-      "member_count": 6,
-      "ok": true,
-      "gap_count": 25,
-      "dimension_unknown_counts": {
-        "coverage": 6,
-        "energy": 1,
-        "pivot": 1,
-        "respond": 1,
-        "speed": 2,
-        "synergy": 1
-      },
-      "coverage_confidence": {
-        "axis": "coverage_confidence",
-        "available": true,
-        "value": 0.84,
-        "unit": "相对分（0～1 的序数标度，不预测胜负）",
-        "unknown_reason": null,
-        "value_parts": {
-          "criterion": 0.52,
-          "evidence": 1,
-          "build_data": 1
-        },
-        "weakest_part": "criterion",
-        "evidence": [
-          {
-            "source_file": "injected:gapsByTeam",
-            "pointer": "gapsByTeam[rc304-six-c].gaps",
-            "field": "length",
-            "value": 25,
-            "note": "覆盖置信的输入是 RC-302 的缺口诊断条数"
-          },
-          {
-            "source_file": "injected:gapsByTeam",
-            "pointer": "gapsByTeam[rc304-six-c].gaps[].confidence",
-            "field": "dimensions_with_unknown",
-            "value": [
-              "coverage",
-              "energy",
-              "pivot",
-              "respond",
-              "speed",
-              "synergy"
-            ],
-            "note": "台账标 UNKNOWN 的维度：这些量我们**不知道**，必须计入扣分"
-          },
-          {
-            "source_file": "injected:gapsByTeam",
-            "pointer": "gapsByTeam[rc304-six-c].gaps[].machine_evidence",
-            "field": "gaps_with_evidence",
-            "value": 25,
-            "note": "带完整机器证据的缺口条数"
-          },
-          {
-            "source_file": "injected:gapsByTeam",
-            "pointer": "gapsByTeam[rc304-six-c].energy.build_curve",
-            "field": "members_with_build",
-            "value": [
-              "instance:own-0013",
-              "instance:own-0014",
-              "instance:own-0015",
-              "instance:own-0016",
-              "instance:own-0017",
-              "instance:own-0018"
-            ],
-            "note": "有具体 build 数据的成员登记键（RC-302 的 cost.build_support 记 validated_members = 6 只；其余成员按 build_data = 0 计，不猜）"
-          }
-        ],
-        "confidence": "COMMUNITY_CURRENT",
-        "unverified": [
-          "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
-          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 12 / 25 条缺口），已按条数计入覆盖置信的扣分"
-        ],
-        "missing": []
-      },
-      "dimension_gap_counts": {
-        "cost": 2,
-        "coverage": 6,
-        "energy": 2,
-        "pivot": 2,
-        "respond": 1,
-        "speed": 3,
-        "synergy": 9
-      },
-      "uncovered_attack_types": [
-        "冰系",
-        "幻系",
-        "武系",
-        "水系",
-        "萌系",
-        "龙系"
-      ],
-      "unanswered_weaknesses": {
-        "instance:own-0013": 1,
-        "instance:own-0014": 1,
-        "instance:own-0017": 2,
-        "instance:own-0018": 1
-      },
-      "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。"
-    },
-    {
-      "team_id": "rc304-six-d",
-      "members": [
-        "instance:own-0001",
-        "instance:own-0006",
-        "instance:own-0010",
-        "instance:own-0011",
-        "instance:own-0013",
-        "instance:own-0014"
       ],
       "member_count": 6,
       "ok": true,
@@ -977,14 +761,14 @@
         "evidence": [
           {
             "source_file": "injected:gapsByTeam",
-            "pointer": "gapsByTeam[rc304-six-d].gaps",
+            "pointer": "gapsByTeam[rc304-six-b].gaps",
             "field": "length",
             "value": 41,
             "note": "覆盖置信的输入是 RC-302 的缺口诊断条数"
           },
           {
             "source_file": "injected:gapsByTeam",
-            "pointer": "gapsByTeam[rc304-six-d].gaps[].confidence",
+            "pointer": "gapsByTeam[rc304-six-b].gaps[].confidence",
             "field": "dimensions_with_unknown",
             "value": [
               "coverage",
@@ -998,22 +782,22 @@
           },
           {
             "source_file": "injected:gapsByTeam",
-            "pointer": "gapsByTeam[rc304-six-d].gaps[].machine_evidence",
+            "pointer": "gapsByTeam[rc304-six-b].gaps[].machine_evidence",
             "field": "gaps_with_evidence",
             "value": 41,
             "note": "带完整机器证据的缺口条数"
           },
           {
             "source_file": "injected:gapsByTeam",
-            "pointer": "gapsByTeam[rc304-six-d].energy.build_curve",
+            "pointer": "gapsByTeam[rc304-six-b].energy.build_curve",
             "field": "members_with_build",
             "value": [
-              "instance:own-0001",
-              "instance:own-0006",
+              "instance:own-0007",
+              "instance:own-0008",
+              "instance:own-0009",
               "instance:own-0010",
               "instance:own-0011",
-              "instance:own-0013",
-              "instance:own-0014"
+              "instance:own-0012"
             ],
             "note": "有具体 build 数据的成员登记键（RC-302 的 cost.build_support 记 validated_members = 6 只；其余成员按 build_data = 0 计，不猜）"
           }
@@ -1035,24 +819,245 @@
         "synergy": 21
       },
       "uncovered_attack_types": [
-        "地系",
+        "冰系",
         "幻系",
         "普通系",
         "机械系",
         "毒系",
         "火系",
-        "电系",
         "翼系",
         "萌系",
+        "虫系",
         "龙系"
       ],
       "unanswered_weaknesses": {
-        "instance:own-0001": 2,
-        "instance:own-0006": 4,
-        "instance:own-0010": 3,
-        "instance:own-0011": 3,
-        "instance:own-0013": 3,
-        "instance:own-0014": 3
+        "instance:own-0007": 5,
+        "instance:own-0008": 5,
+        "instance:own-0009": 2,
+        "instance:own-0010": 2,
+        "instance:own-0012": 2
+      },
+      "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。"
+    },
+    {
+      "team_id": "rc304-six-c",
+      "members": [
+        "instance:own-0013",
+        "instance:own-0014",
+        "instance:own-0015",
+        "instance:own-0016",
+        "instance:own-0017",
+        "instance:own-0018"
+      ],
+      "member_count": 6,
+      "ok": true,
+      "gap_count": 39,
+      "dimension_unknown_counts": {
+        "coverage": 6,
+        "energy": 1,
+        "pivot": 1,
+        "respond": 1,
+        "speed": 2,
+        "synergy": 1
+      },
+      "coverage_confidence": {
+        "axis": "coverage_confidence",
+        "available": true,
+        "value": 0.897436,
+        "unit": "相对分（0～1 的序数标度，不预测胜负）",
+        "unknown_reason": null,
+        "value_parts": {
+          "criterion": 0.692308,
+          "evidence": 1,
+          "build_data": 1
+        },
+        "weakest_part": "criterion",
+        "evidence": [
+          {
+            "source_file": "injected:gapsByTeam",
+            "pointer": "gapsByTeam[rc304-six-c].gaps",
+            "field": "length",
+            "value": 39,
+            "note": "覆盖置信的输入是 RC-302 的缺口诊断条数"
+          },
+          {
+            "source_file": "injected:gapsByTeam",
+            "pointer": "gapsByTeam[rc304-six-c].gaps[].confidence",
+            "field": "dimensions_with_unknown",
+            "value": [
+              "coverage",
+              "energy",
+              "pivot",
+              "respond",
+              "speed",
+              "synergy"
+            ],
+            "note": "台账标 UNKNOWN 的维度：这些量我们**不知道**，必须计入扣分"
+          },
+          {
+            "source_file": "injected:gapsByTeam",
+            "pointer": "gapsByTeam[rc304-six-c].gaps[].machine_evidence",
+            "field": "gaps_with_evidence",
+            "value": 39,
+            "note": "带完整机器证据的缺口条数"
+          },
+          {
+            "source_file": "injected:gapsByTeam",
+            "pointer": "gapsByTeam[rc304-six-c].energy.build_curve",
+            "field": "members_with_build",
+            "value": [
+              "instance:own-0013",
+              "instance:own-0014",
+              "instance:own-0015",
+              "instance:own-0016",
+              "instance:own-0017",
+              "instance:own-0018"
+            ],
+            "note": "有具体 build 数据的成员登记键（RC-302 的 cost.build_support 记 validated_members = 6 只；其余成员按 build_data = 0 计，不猜）"
+          }
+        ],
+        "confidence": "COMMUNITY_CURRENT",
+        "unverified": [
+          "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
+          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 12 / 39 条缺口），已按条数计入覆盖置信的扣分"
+        ],
+        "missing": []
+      },
+      "dimension_gap_counts": {
+        "cost": 2,
+        "coverage": 6,
+        "energy": 2,
+        "pivot": 2,
+        "respond": 1,
+        "speed": 3,
+        "synergy": 23
+      },
+      "uncovered_attack_types": [
+        "冰系",
+        "地系",
+        "幻系",
+        "机械系",
+        "虫系",
+        "龙系"
+      ],
+      "unanswered_weaknesses": {
+        "instance:own-0013": 2,
+        "instance:own-0014": 2,
+        "instance:own-0015": 3,
+        "instance:own-0016": 2,
+        "instance:own-0017": 2,
+        "instance:own-0018": 2
+      },
+      "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。"
+    },
+    {
+      "team_id": "rc304-six-d",
+      "members": [
+        "instance:own-0001",
+        "instance:own-0002",
+        "instance:own-0005",
+        "instance:own-0007",
+        "instance:own-0011",
+        "instance:own-0012"
+      ],
+      "member_count": 6,
+      "ok": true,
+      "gap_count": 31,
+      "dimension_unknown_counts": {
+        "coverage": 9,
+        "energy": 1,
+        "pivot": 1,
+        "respond": 1,
+        "speed": 2,
+        "synergy": 1
+      },
+      "coverage_confidence": {
+        "axis": "coverage_confidence",
+        "available": true,
+        "value": 0.83871,
+        "unit": "相对分（0～1 的序数标度，不预测胜负）",
+        "unknown_reason": null,
+        "value_parts": {
+          "criterion": 0.516129,
+          "evidence": 1,
+          "build_data": 1
+        },
+        "weakest_part": "criterion",
+        "evidence": [
+          {
+            "source_file": "injected:gapsByTeam",
+            "pointer": "gapsByTeam[rc304-six-d].gaps",
+            "field": "length",
+            "value": 31,
+            "note": "覆盖置信的输入是 RC-302 的缺口诊断条数"
+          },
+          {
+            "source_file": "injected:gapsByTeam",
+            "pointer": "gapsByTeam[rc304-six-d].gaps[].confidence",
+            "field": "dimensions_with_unknown",
+            "value": [
+              "coverage",
+              "energy",
+              "pivot",
+              "respond",
+              "speed",
+              "synergy"
+            ],
+            "note": "台账标 UNKNOWN 的维度：这些量我们**不知道**，必须计入扣分"
+          },
+          {
+            "source_file": "injected:gapsByTeam",
+            "pointer": "gapsByTeam[rc304-six-d].gaps[].machine_evidence",
+            "field": "gaps_with_evidence",
+            "value": 31,
+            "note": "带完整机器证据的缺口条数"
+          },
+          {
+            "source_file": "injected:gapsByTeam",
+            "pointer": "gapsByTeam[rc304-six-d].energy.build_curve",
+            "field": "members_with_build",
+            "value": [
+              "instance:own-0001",
+              "instance:own-0002",
+              "instance:own-0005",
+              "instance:own-0007",
+              "instance:own-0011",
+              "instance:own-0012"
+            ],
+            "note": "有具体 build 数据的成员登记键（RC-302 的 cost.build_support 记 validated_members = 6 只；其余成员按 build_data = 0 计，不猜）"
+          }
+        ],
+        "confidence": "COMMUNITY_CURRENT",
+        "unverified": [
+          "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
+          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 15 / 31 条缺口），已按条数计入覆盖置信的扣分"
+        ],
+        "missing": []
+      },
+      "dimension_gap_counts": {
+        "cost": 2,
+        "coverage": 9,
+        "energy": 2,
+        "pivot": 2,
+        "respond": 1,
+        "speed": 3,
+        "synergy": 12
+      },
+      "uncovered_attack_types": [
+        "冰系",
+        "幻系",
+        "恶系",
+        "普通系",
+        "毒系",
+        "翼系",
+        "萌系",
+        "虫系",
+        "龙系"
+      ],
+      "unanswered_weaknesses": {
+        "instance:own-0001": 4,
+        "instance:own-0007": 4,
+        "instance:own-0012": 1
       },
       "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。"
     },
@@ -1068,9 +1073,9 @@
       ],
       "member_count": 6,
       "ok": true,
-      "gap_count": 21,
+      "gap_count": 23,
       "dimension_unknown_counts": {
-        "coverage": 3,
+        "coverage": 6,
         "energy": 1,
         "pivot": 1,
         "respond": 1,
@@ -1080,11 +1085,11 @@
       "coverage_confidence": {
         "axis": "coverage_confidence",
         "available": true,
-        "value": 0.857143,
+        "value": 0.826087,
         "unit": "相对分（0～1 的序数标度，不预测胜负）",
         "unknown_reason": null,
         "value_parts": {
-          "criterion": 0.571429,
+          "criterion": 0.478261,
           "evidence": 1,
           "build_data": 1
         },
@@ -1094,7 +1099,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-e].gaps",
             "field": "length",
-            "value": 21,
+            "value": 23,
             "note": "覆盖置信的输入是 RC-302 的缺口诊断条数"
           },
           {
@@ -1115,7 +1120,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-e].gaps[].machine_evidence",
             "field": "gaps_with_evidence",
-            "value": 21,
+            "value": 23,
             "note": "带完整机器证据的缺口条数"
           },
           {
@@ -1133,31 +1138,34 @@
             "note": "有具体 build 数据的成员登记键（RC-302 的 cost.build_support 记 validated_members = 6 只；其余成员按 build_data = 0 计，不猜）"
           }
         ],
-        "confidence": "COMMUNITY_CURRENT",
+        "confidence": "ENGINE_HYPOTHESIS",
         "unverified": [
           "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
-          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 9 / 21 条缺口），已按条数计入覆盖置信的扣分"
+          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 12 / 23 条缺口），已按条数计入覆盖置信的扣分"
         ],
         "missing": []
       },
       "dimension_gap_counts": {
         "cost": 2,
-        "coverage": 3,
+        "coverage": 6,
         "energy": 2,
         "pivot": 2,
         "respond": 1,
         "speed": 3,
-        "synergy": 8
+        "synergy": 7
       },
       "uncovered_attack_types": [
-        "地系",
-        "机械系",
+        "幻系",
+        "普通系",
+        "武系",
+        "毒系",
+        "翼系",
         "龙系"
       ],
       "unanswered_weaknesses": {
-        "instance:own-0003": 1,
-        "instance:own-0009": 2,
-        "instance:own-0011": 2
+        "instance:own-0001": 2,
+        "instance:own-0007": 2,
+        "instance:own-0011": 1
       },
       "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。"
     },
@@ -1173,9 +1181,9 @@
       ],
       "member_count": 6,
       "ok": true,
-      "gap_count": 28,
+      "gap_count": 18,
       "dimension_unknown_counts": {
-        "coverage": 5,
+        "coverage": 4,
         "energy": 1,
         "pivot": 1,
         "respond": 1,
@@ -1185,11 +1193,11 @@
       "coverage_confidence": {
         "axis": "coverage_confidence",
         "available": true,
-        "value": 0.869048,
+        "value": 0.814815,
         "unit": "相对分（0～1 的序数标度，不预测胜负）",
         "unknown_reason": null,
         "value_parts": {
-          "criterion": 0.607143,
+          "criterion": 0.444444,
           "evidence": 1,
           "build_data": 1
         },
@@ -1199,7 +1207,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-f].gaps",
             "field": "length",
-            "value": 28,
+            "value": 18,
             "note": "覆盖置信的输入是 RC-302 的缺口诊断条数"
           },
           {
@@ -1220,7 +1228,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-f].gaps[].machine_evidence",
             "field": "gaps_with_evidence",
-            "value": 28,
+            "value": 18,
             "note": "带完整机器证据的缺口条数"
           },
           {
@@ -1238,34 +1246,30 @@
             "note": "有具体 build 数据的成员登记键（RC-302 的 cost.build_support 记 validated_members = 6 只；其余成员按 build_data = 0 计，不猜）"
           }
         ],
-        "confidence": "COMMUNITY_CURRENT",
+        "confidence": "ENGINE_HYPOTHESIS",
         "unverified": [
           "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
-          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 11 / 28 条缺口），已按条数计入覆盖置信的扣分"
+          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 10 / 18 条缺口），已按条数计入覆盖置信的扣分"
         ],
         "missing": []
       },
       "dimension_gap_counts": {
         "cost": 2,
-        "coverage": 5,
+        "coverage": 4,
         "energy": 2,
         "pivot": 2,
         "respond": 1,
         "speed": 3,
-        "synergy": 13
+        "synergy": 4
       },
       "uncovered_attack_types": [
-        "地系",
-        "幻系",
-        "幽系",
-        "恶系",
+        "普通系",
+        "毒系",
+        "翼系",
         "龙系"
       ],
       "unanswered_weaknesses": {
-        "instance:own-0002": 1,
-        "instance:own-0004": 2,
-        "instance:own-0006": 1,
-        "instance:own-0008": 3,
+        "instance:own-0008": 2,
         "instance:own-0012": 1
       },
       "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。"
@@ -1288,55 +1292,55 @@
       "values": {
         "environment_value": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": 0.044056,
+          "delta": 0.120833,
           "winner": "rc304-six-a"
         },
         "worst_archetype": {
           "archetype_id": "wing_king_flyer",
           "label": "翼王飞翼",
-          "relative_score": 0.416667,
+          "relative_score": 0.466667,
           "weight": 0.142857,
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
           "structural": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
         },
         "matchup_spread": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": 0.035715,
-          "winner": "rc304-six-b"
+          "delta": -0.055554,
+          "winner": "rc304-six-a"
         },
         "execution_tolerance": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": 0.051562,
+          "delta": 0.222449,
           "winner": "rc304-six-a"
         },
-        "coverage_confidence": 0.848485
+        "coverage_confidence": 0.809524
       },
       "comparison_winners": {
         "environment_value": "rc304-six-a",
         "worst_archetype": "rc304-six-b",
-        "matchup_spread": "rc304-six-b",
+        "matchup_spread": "rc304-six-a",
         "execution_tolerance": "rc304-six-a",
         "coverage_confidence": null
       },
       "minimal_replacement": {
         "out": {
-          "key": "instance:own-0004",
+          "key": "instance:own-0001",
           "unanswered_weaknesses": 2
         },
         "in": {
           "key": "cand:aaa",
           "covers_types": [
-            "地系",
-            "幽系"
+            "幽系",
+            "普通系"
           ],
           "has_build": true
         }
       },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0004 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系 / 幽系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
+      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0001 换成 cand:aaa，它声明能接住队里现在**没有人接**的 幽系 / 普通系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
-      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-a（差 0.044056，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-b（差 0.013889，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-b（差 0.035715，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-a（差 0.051562，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0004，换上 cand:aaa"
+      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-a（差 0.120833，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-b（差 0.116666，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-a（差 -0.055554，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-a（差 0.222449，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0001，换上 cand:aaa"
     },
     {
       "teams": [
@@ -1354,51 +1358,55 @@
       "values": {
         "environment_value": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": -0.018113,
-          "winner": "rc304-six-c"
+          "delta": 0.110077,
+          "winner": "rc304-six-a"
         },
         "worst_archetype": {
           "archetype_id": "wing_king_flyer",
           "label": "翼王飞翼",
-          "relative_score": 0.430556,
+          "relative_score": 0.37963,
           "weight": 0.142857,
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
           "structural": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
         },
-        "matchup_spread": 0.5,
+        "matchup_spread": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": -0.166666,
+          "winner": "rc304-six-a"
+        },
         "execution_tolerance": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": -0.006828,
-          "winner": "rc304-six-c"
+          "delta": 0.178427,
+          "winner": "rc304-six-a"
         },
-        "coverage_confidence": 0.84
+        "coverage_confidence": 0.809524
       },
       "comparison_winners": {
-        "environment_value": "rc304-six-c",
-        "worst_archetype": "rc304-six-a",
-        "matchup_spread": null,
-        "execution_tolerance": "rc304-six-c",
+        "environment_value": "rc304-six-a",
+        "worst_archetype": "rc304-six-c",
+        "matchup_spread": "rc304-six-a",
+        "execution_tolerance": "rc304-six-a",
         "coverage_confidence": null
       },
       "minimal_replacement": {
         "out": {
-          "key": "instance:own-0004",
+          "key": "instance:own-0001",
           "unanswered_weaknesses": 2
         },
         "in": {
           "key": "cand:aaa",
           "covers_types": [
-            "地系",
-            "幽系"
+            "幽系",
+            "普通系"
           ],
           "has_build": true
         }
       },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0004 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系 / 幽系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
+      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0001 换成 cand:aaa，它声明能接住队里现在**没有人接**的 幽系 / 普通系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
-      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-c（差 -0.018113，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-a（差 -0.023148，相对分，不是胜率）\nmatchup_spread：两队在这一份注入分布上相同（不排名）\nexecution_tolerance：更有利的是 rc304-six-c（差 -0.006828，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0004，换上 cand:aaa"
+      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-a（差 0.110077，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-c（差 0.203703，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-a（差 -0.166666，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-a（差 0.178427，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0001，换上 cand:aaa"
     },
     {
       "teams": [
@@ -1416,54 +1424,54 @@
       "values": {
         "environment_value": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": -0.062169,
+          "delta": -0.010756,
           "winner": "rc304-six-c"
         },
         "worst_archetype": {
           "archetype_id": "wing_king_flyer",
           "label": "翼王飞翼",
-          "relative_score": 0.416667,
+          "relative_score": 0.37963,
           "weight": 0.142857,
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
           "structural": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
         },
         "matchup_spread": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": -0.035715,
+          "delta": -0.111112,
           "winner": "rc304-six-b"
         },
         "execution_tolerance": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": -0.05839,
+          "delta": -0.044022,
           "winner": "rc304-six-c"
         },
-        "coverage_confidence": 0.84
+        "coverage_confidence": 0.869919
       },
       "comparison_winners": {
         "environment_value": "rc304-six-c",
-        "worst_archetype": "rc304-six-b",
+        "worst_archetype": "rc304-six-c",
         "matchup_spread": "rc304-six-b",
         "execution_tolerance": "rc304-six-c",
         "coverage_confidence": null
       },
       "minimal_replacement": {
         "out": {
-          "key": "instance:own-0008",
-          "unanswered_weaknesses": 3
+          "key": "instance:own-0007",
+          "unanswered_weaknesses": 5
         },
         "in": {
           "key": "cand:aaa",
           "covers_types": [
-            "地系"
+            "普通系"
           ],
           "has_build": true
         }
       },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0008 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系（1 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
+      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0007 换成 cand:aaa，它声明能接住队里现在**没有人接**的 普通系（1 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
-      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-c（差 -0.062169，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-b（差 -0.037037，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-b（差 -0.035715，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-c（差 -0.05839，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0008，换上 cand:aaa"
+      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-c（差 -0.010756，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-c（差 0.087037，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-b（差 -0.111112，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-c（差 -0.044022，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0007，换上 cand:aaa"
     },
     {
       "teams": [
@@ -1481,54 +1489,54 @@
       "values": {
         "environment_value": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": -0.024914,
+          "delta": -0.029794,
           "winner": "rc304-six-e"
         },
         "worst_archetype": {
           "archetype_id": "wing_king_flyer",
           "label": "翼王飞翼",
-          "relative_score": 0.407407,
+          "relative_score": 0.5,
           "weight": 0.142857,
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
           "structural": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
         },
         "matchup_spread": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": -0.078705,
+          "delta": -0.000001,
           "winner": "rc304-six-d"
         },
         "execution_tolerance": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": -0.091826,
+          "delta": -0.08004,
           "winner": "rc304-six-e"
         },
-        "coverage_confidence": 0.857143
+        "coverage_confidence": 0.826087
       },
       "comparison_winners": {
         "environment_value": "rc304-six-e",
-        "worst_archetype": "rc304-six-e",
+        "worst_archetype": "rc304-six-d",
         "matchup_spread": "rc304-six-d",
         "execution_tolerance": "rc304-six-e",
         "coverage_confidence": null
       },
       "minimal_replacement": {
         "out": {
-          "key": "instance:own-0006",
+          "key": "instance:own-0001",
           "unanswered_weaknesses": 4
         },
         "in": {
           "key": "cand:aaa",
           "covers_types": [
-            "地系"
+            "普通系"
           ],
           "has_build": true
         }
       },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0006 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系（1 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
+      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0001 换成 cand:aaa，它声明能接住队里现在**没有人接**的 普通系（1 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
-      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-e（差 -0.024914，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-e（差 0.048149，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-d（差 -0.078705，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-e（差 -0.091826，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0006，换上 cand:aaa"
+      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-e（差 -0.029794，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-d（差 -0.009259，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-d（差 -0.000001，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-e（差 -0.08004，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0001，换上 cand:aaa"
     },
     {
       "teams": [
@@ -1546,28 +1554,28 @@
       "values": {
         "environment_value": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": 0.017436,
+          "delta": 0.014522,
           "winner": "rc304-six-a"
         },
         "worst_archetype": {
           "archetype_id": "wing_king_flyer",
           "label": "翼王飞翼",
-          "relative_score": 0.407407,
+          "relative_score": 0.509259,
           "weight": 0.142857,
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
           "structural": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
         },
         "matchup_spread": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": -0.023149,
+          "delta": -0.111111,
           "winner": "rc304-six-a"
         },
         "execution_tolerance": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": 0.01443,
+          "delta": 0.061696,
           "winner": "rc304-six-a"
         },
-        "coverage_confidence": 0.848485
+        "coverage_confidence": 0.809524
       },
       "comparison_winners": {
         "environment_value": "rc304-six-a",
@@ -1578,23 +1586,23 @@
       },
       "minimal_replacement": {
         "out": {
-          "key": "instance:own-0004",
+          "key": "instance:own-0001",
           "unanswered_weaknesses": 2
         },
         "in": {
           "key": "cand:aaa",
           "covers_types": [
-            "地系",
-            "幽系"
+            "幽系",
+            "普通系"
           ],
           "has_build": true
         }
       },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0004 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系 / 幽系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
+      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0001 换成 cand:aaa，它声明能接住队里现在**没有人接**的 幽系 / 普通系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
-      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-a（差 0.017436，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-e（差 0.023149，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-a（差 -0.023149，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-a（差 0.01443，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0004，换上 cand:aaa"
+      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-a（差 0.014522，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-e（差 0.074074，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-a（差 -0.111111，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-a（差 0.061696，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0001，换上 cand:aaa"
     },
     {
       "teams": [
@@ -1612,28 +1620,28 @@
       "values": {
         "environment_value": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": -0.006832,
+          "delta": -0.047058,
           "winner": "rc304-six-f"
         },
         "worst_archetype": {
           "archetype_id": "wing_king_flyer",
           "label": "翼王飞翼",
-          "relative_score": 0.453704,
+          "relative_score": 0.37963,
           "weight": 0.142857,
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
           "structural": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
         },
         "matchup_spread": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": 0.111111,
+          "delta": 0.166667,
           "winner": "rc304-six-f"
         },
         "execution_tolerance": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": -0.028528,
+          "delta": -0.068904,
           "winner": "rc304-six-f"
         },
-        "coverage_confidence": 0.84
+        "coverage_confidence": 0.814815
       },
       "comparison_winners": {
         "environment_value": "rc304-six-f",
@@ -1643,11 +1651,11 @@
         "coverage_confidence": null
       },
       "minimal_replacement": null,
-      "minimal_replacement_why": "注入的候选里没有一只声明能接住队里无人承接的 冰系 / 幻系 / 武系 / 水系 / 萌系 / 龙系：给不出一个能改结构的最小替换。结构理由之外的结论（换谁更强）现在**没有**依据：版本对手分布是 unknown，所以这里明确说不知道，不编一个「更优」结论",
+      "minimal_replacement_why": "注入的候选里没有一只声明能接住队里无人承接的 冰系 / 地系 / 幻系 / 机械系 / 虫系 / 龙系：给不出一个能改结构的最小替换。结构理由之外的结论（换谁更强）现在**没有**依据：版本对手分布是 unknown，所以这里明确说不知道，不编一个「更优」结论",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
-      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-f（差 -0.006832，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-c（差 -0.068518，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-f（差 0.111111，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-f（差 -0.028528，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换：给不出（见 why）"
+      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-f（差 -0.047058，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-c（差 -0.134259，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-f（差 0.166667，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-f（差 -0.068904，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换：给不出（见 why）"
     },
     {
       "teams": [
@@ -1665,54 +1673,54 @@
       "values": {
         "environment_value": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": -0.042381,
-          "winner": "rc304-six-f"
+          "delta": 0.048497,
+          "winner": "rc304-six-e"
         },
         "worst_archetype": {
           "archetype_id": "wing_king_flyer",
           "label": "翼王飞翼",
-          "relative_score": 0.407407,
+          "relative_score": 0.509259,
           "weight": 0.142857,
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
           "structural": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
         },
         "matchup_spread": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": 0.13426,
+          "delta": 0.111112,
           "winner": "rc304-six-f"
         },
         "execution_tolerance": {
           "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
-          "delta": -0.049786,
-          "winner": "rc304-six-f"
+          "delta": 0.047827,
+          "winner": "rc304-six-e"
         },
-        "coverage_confidence": 0.857143
+        "coverage_confidence": 0.814815
       },
       "comparison_winners": {
-        "environment_value": "rc304-six-f",
+        "environment_value": "rc304-six-e",
         "worst_archetype": "rc304-six-e",
         "matchup_spread": "rc304-six-f",
-        "execution_tolerance": "rc304-six-f",
+        "execution_tolerance": "rc304-six-e",
         "coverage_confidence": null
       },
       "minimal_replacement": {
         "out": {
-          "key": "instance:own-0009",
+          "key": "instance:own-0001",
           "unanswered_weaknesses": 2
         },
         "in": {
           "key": "cand:aaa",
           "covers_types": [
-            "地系"
+            "普通系"
           ],
           "has_build": true
         }
       },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0009 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系（1 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
+      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0001 换成 cand:aaa，它声明能接住队里现在**没有人接**的 普通系（1 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
-      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-f（差 -0.042381，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-e（差 -0.114815，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-f（差 0.13426，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-f（差 -0.049786，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0009，换上 cand:aaa"
+      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-e（差 0.048497，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-e（差 -0.00463，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-f（差 0.111112，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-e（差 0.047827，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0001，换上 cand:aaa"
     }
   ],
   "ranker": {

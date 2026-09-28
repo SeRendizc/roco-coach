@@ -56,7 +56,7 @@ class TestRulesetLoading(unittest.TestCase):
         self.assertEqual(RS.ruleset_id, "roco-world-s4-2026-09-10")
 
     def test_baseline_12_intact_and_pool_split_by_support_level(self):
-        """基线 12 只一只不少；候选池按**支持等级**分成「已核验 48」与「按需推算 574」（RC-402）。
+        """基线 12 只一只不少；候选池按**支持等级**分成「已核验 542」与「按需推算 80」（RC-402）。
 
         第 60 轮这条判据钉的是「池子正好 48」——那是当时的真相。RC-402 把冻结学招表
         覆盖不到的 574 只也编成了可上场配招（全量图鉴每只都带 `learnable_skills`），
@@ -67,6 +67,15 @@ class TestRulesetLoading(unittest.TestCase):
           · 冻结层那 48 只必须是 `FULL_VERIFIED`——**不许**被按需产物改写；
           · 按需推算的每一只必须是 `SIMULATABLE_UNVERIFIED`；
           · 两只集合不相交，合起来正好是候选池。
+
+        ⚠ 2026-09-28 改钉（**旧值不删**：旧断言是「已核验 48」/「按需推算 574」/「冻结 48 + 按需
+        574 = 622」）。为什么改：人类 2026-09-28 逐字拍板「就用现在抓包得到的数据吧，别的不找
+        不要了。问题数据也不要了。**所有精灵实装**，这样就不需要我的精灵了，直接全筛选」——
+        冻结那一档从「M1 的 48 只」变成「抓包 539 只里刨掉基线已有的 9 只 = 本层 530 只」
+        （基线 12 只仍属冻结档，12 + 530 = 542），按需那一档相应变成 622 − 542 = 80。
+        口径依据：`docs/roadmap/FEASIBILITY-547-ALL.md` §⑩；生成器
+        `scripts/roco/build-all-pets-engine-inputs.mjs`。
+        **判据本身一条没放宽**：仍然是「12 只基线一只不少 + 两档不相交 + 并集 = 候选池」。
 
         这里直接从磁盘读基线，**不复制名单**：复制一份名单就会有第二个真相。
         """
@@ -88,11 +97,11 @@ class TestRulesetLoading(unittest.TestCase):
         supports = {pid: RS.build_support_of(pid) for pid in RS.pets}
         full = {pid for pid, level in supports.items() if level == SUPPORT_FULL_VERIFIED}
         on_demand = {pid for pid, level in supports.items() if level == SUPPORT_SIMULATABLE_UNVERIFIED}
-        self.assertEqual(len(full), 48, f"冻结层应当是 48 只，实际 {len(full)}")
-        self.assertEqual(len(on_demand), 574, f"按需推算应当是 574 只，实际 {len(on_demand)}")
+        self.assertEqual(len(full), 542, f"冻结层应当是 542 只，实际 {len(full)}")
+        self.assertEqual(len(on_demand), 80, f"按需推算应当是 80 只，实际 {len(on_demand)}")
         self.assertEqual(full & on_demand, set(), "同一只不许同时属于两档（等级混了就说不清了）")
         self.assertEqual(full | on_demand, set(RS.pets), "候选池里每一只都必须有一档支持等级")
-        self.assertEqual(len(RS.pets), 622, "候选池 = 冻结 48 + 按需 574 = 622（全量图鉴）")
+        self.assertEqual(len(RS.pets), 622, "候选池 = 冻结 542 + 按需 80 = 622（全量图鉴）")
 
     def test_every_pet_has_exactly_four_candidate_moves(self):
         """每只精灵都必须正好 4 个规范配招技能（3v3 的四个技能位都要有牌可打）。"""

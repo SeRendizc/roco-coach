@@ -14,10 +14,10 @@
 //      没有证据的结论在 `auditGapDiagnosis()` 里判红（`EVIDENCE_MISSING`）。
 //   2. **置信等级只能用台账那六级**：`confidence` 必须命中
 //      `data/roco/evidence/rule-evidence-ledger.json#confidence_levels[].id`；
-//      冻结层数值（48 只迁移层的面板/配招）→ `COMMUNITY_CURRENT`；引擎假设（能耗/时序）
+//      冻结层数值（2026-09-28 起是 542 只：基线 12 + 抓包可玩层 530 的面板/配招）→ `COMMUNITY_CURRENT`；引擎假设（能耗/时序）
 //      → `ENGINE_HYPOTHESIS`；台账标 UNKNOWN 的量 → 该条 `severity` 不得升级且必须点名。
 //   3. **不完整就 fail closed**：`must_include` 不可满足时 `ok:false`；
-//      只有 48 只有冻结学招表的量不许当成「全 622 都知道」。
+//      只有验证层（542 只）有值的量不许当成「全 622 都知道」。
 //
 // 依赖说明：本文件顶层只 import 同仓的**纯函数**模块 `./team-request.js`（RC-301 的登记表与
 // 引用解析，不复制第二套语义），没有任何 npm 依赖，也不碰 DOM。读盘只发生在
@@ -138,8 +138,10 @@ export const DIMENSION_CRITERIA = Object.freeze({
     + '`resist[]` 命中 T ⇒ 取该项倍率，两处都没有 ⇒ 中性 1。'
     + '「队伍能接 T」= 存在成员倍率 < 1（有抗性）。没有任何成员 < 1 ⇒ 出一条 coverage 缺口；'
     + '倍率用整数标度（×4：0.25→1 / 0.5→2 / 1→4 / 2→8 / 3→12）比较，不做浮点运算。',
-  speed: '速度取**冻结迁移层** `roster-48.json#pets[].stats.spe`（48 只有值）与同一行的 '
-    + '`speed_tier` 标注；队伍内已知成员按 speed_tier 统计梯度。'
+  speed: '速度取**冻结层** `pets.json#pets[].stats.spe`（基线 12 只）+ '
+    + '`layer-playable-48/pets.json#pets[].stats.spe`（抓包可玩层 530 只）= 542 只有值'
+    + '（2026-09-28 前的旧口径是 `roster-48.json` 的 48 只），`speed_tier` 取自那一层的 '
+    + '`role_annotations`；队伍内已知成员按 speed_tier 统计梯度。'
     + '没有冻结迁移层速度档的精灵一律 unknown，不拿 full-catalog 的 knowledge_only 值冒充已知；'
     + '任何「谁先动」的推断都只算工程假设（台账 turn_order.priority），速度平手是 UNKNOWN。',
   energy: '能耗取成员**具体 build** 的四个技能（`owned.instances[].skills`，有序四个）在 `skills.json` 的 '
@@ -175,7 +177,7 @@ export const COMMUNITY_TIER_WORDS = Object.freeze([
 export const PSEUDO_PRECISION_WORDS = Object.freeze(['胜率', '强度分', '强度值', '期望值', '评分']);
 /** 两份禁令的并集（文档与报告共用）。 */
 export const BANNED_CLAIM_WORDS = Object.freeze([...COMMUNITY_TIER_WORDS, ...PSEUDO_PRECISION_WORDS]);
-/** 「全量都在我手里」式的断言：命中它时再看域限制（只有 48 只有值的量不许说成全 622）。 */
+/** 「全量都在我手里」式的断言：命中它时再看域限制（只有验证层 542 只有值的量不许说成全 622）。 */
 export const FULL_DOMAIN_CLAIM_PATTERN = /(全|所有|全部|都)[^。；]{0,12}(622|全量图鉴|全部精灵)|(622)[^。；]{0,8}(都|全|所有)/;
 /** 维度 → `facts.validated_domain_limits` 里的键（域上限）。 */
 export const DIMENSION_DOMAIN_KEY = Object.freeze({
@@ -194,7 +196,7 @@ export const AUDIT_RULES = Object.freeze([
   Object.freeze({code: 'CONFIDENCE_NOT_IN_LEDGER', direction: 'confidence 用了台账之外的等级 ⇒ 红'}),
   Object.freeze({code: 'PSEUDO_PRECISION', direction: '出现胜率/概率/强度分之类的伪精确字段或百分数结论 ⇒ 红'}),
   Object.freeze({code: 'COMMUNITY_TIER_LABEL', direction: '用 T0/强势/必带 这类社区榜单词当依据 ⇒ 红'}),
-  Object.freeze({code: 'DOMAIN_OVERCLAIM', direction: '把只有 48 只有值的验证层说成「全 622 都知道」/ domain 计数不闭合 ⇒ 红'}),
+  Object.freeze({code: 'DOMAIN_OVERCLAIM', direction: '把只有验证层（542 只）有值的量说成「全 622 都知道」/ domain 计数不闭合 ⇒ 红'}),
   Object.freeze({code: 'UNKNOWN_ESCALATED', direction: '台账 UNKNOWN 的量被写成超出上限的严重度、或没进 unverified ⇒ 红'}),
   Object.freeze({code: 'UNSATISFIABLE_NOT_FAILED', direction: '有 blocking 缺口却 ok:true，或 ok:false 却没有 blocking 依据 ⇒ 红'}),
   Object.freeze({code: 'CRITERIA_MISSING', direction: 'gap 没有可复算判据文本 ⇒ 红'}),
@@ -278,6 +280,9 @@ export const FROZEN_PATHS = Object.freeze({
   root: FROZEN_ROOT,
   types: `${FROZEN_ROOT}/types.json`,
   roster48: `${FROZEN_ROOT}/roster-48.json`,
+  //: 2026-09-28 起「验证层」是**两份**文件（基线 12 + 可玩层 530 = 542）。48 只登记层
+  //: （`roster48`）仍是 M1 的选择记录，但不再是验证层的定义 —— 见 `buildGapIndex()` 的注释。
+  rosterSources: `${FROZEN_ROOT}/pets.json + ${FROZEN_ROOT}/layer-playable-48/pets.json`,
   skills: `${FROZEN_ROOT}/skills.json`,
   learnsets: `${FROZEN_ROOT}/learnsets.json`,
   learnsetsOverlay: `${FROZEN_ROOT}/layer-playable-48/learnsets.json`,
@@ -368,9 +373,38 @@ export function buildGapIndex(inputs = {}) {
   }
   if (typeEntries.length === 0) missing.push('frozen.types');
 
+  // ── 「验证层」是谁（2026-09-28 换源，**旧值不删**）────────────────────────
+  // 旧口径：只读 `roster-48.json`（48 只）——那是 M1 的**选择登记层**，不是引擎认的冻结层。
+  // 新口径：基线 `pets.json`（12）+ 可玩层 `layer-playable-48/pets.json`（530）= **542**，
+  // 与引擎 `build_support_of() == FULL_VERIFIED` 同一批；role/speed_tier 取
+  // `layer-playable-48/pets.json#role_annotations`（48 只那批登记层的值逐字保留在里面）。
+  // 为什么必须换：人类 2026-09-28 拍板「所有精灵实装」（`docs/roadmap/FEASIBILITY-547-ALL.md` §⑩）
+  // 之后，「验证层只有 48 只」就成了假话 —— 而同一个模块的 `distribution` 早就从学招表算出 542，
+  // 两个数打架本身就是判据⑩/⑫ 要抓的东西。
   const roster = new Map();
-  for (const pet of arr(frozen?.roster48?.pets)) if (pet?.pet_id) roster.set(pet.pet_id, pet);
-  if (roster.size === 0) missing.push('frozen.roster48');
+  const roleAnnotations = frozen?.petsOverlay?.role_annotations ?? {};
+  const addRoster = (pid, row, sourcePath) => {
+    if (typeof pid !== 'string' || roster.has(pid)) return;
+    const ann = roleAnnotations[pid] ?? {};
+    roster.set(pid, {
+      pet_id: pid,
+      name: row?.name ?? null,
+      types: row?.types ?? null,
+      stats: row?.stats ?? null,
+      role: ann.role ?? row?.role ?? null,
+      speed_tier: ann.speed_tier ?? row?.speed_tier ?? null,
+      // 出处要指得到**具体那一份文件**：基线条目在 pets.json，可玩层条目在 layer 那一份。
+      __source: sourcePath,
+    });
+  };
+  for (const [pid, row] of Object.entries(frozen?.pets?.pets ?? {})) addRoster(pid, row, FROZEN_PATHS.pets);
+  for (const [pid, row] of Object.entries(frozen?.petsOverlay?.pets ?? {})) addRoster(pid, row, FROZEN_PATHS.petsOverlay);
+  // 回退（只为「只注入 roster-48」的老 fixture 保留；真实输入下走不到）：
+  // 两份冻结 pets 都不在时才退回 48 只登记层，免得「缺层」被静默当成「验证层是空的」。
+  if (roster.size === 0) {
+    for (const pet of arr(frozen?.roster48?.pets)) addRoster(pet?.pet_id, pet, FROZEN_PATHS.roster48);
+  }
+  if (roster.size === 0) missing.push('frozen.pets');
 
   const learnsets = mergeFrozenLearnsets(frozen);
   if (learnsets.size === 0) missing.push('frozen.learnsets');
@@ -438,7 +472,7 @@ function buildMember(index, ref) {
     species_id: speciesId,
     species_name: instance?.species_name ?? roster?.name ?? null,
     types: Array.isArray(types) ? [...types] : null,
-    types_source: roster?.types ? `${FROZEN_PATHS.roster48}#pets[pet_id=${speciesId}].types`
+    types_source: roster?.types ? `${roster.__source ?? FROZEN_PATHS.roster48}#pets[pet_id=${speciesId}].types`
       : (typesFromPack ? `data/roco/game-data-pack/v2/pack.json#${typesFromPack.pointer}` : null),
     validated: Boolean(roster),
     spe: typeof roster?.stats?.spe === 'number' ? roster.stats.spe : null,
@@ -448,8 +482,8 @@ function buildMember(index, ref) {
     learnset_skill_ids: learnset ? [...learnset.skill_ids] : null,
   };
   const reasons = [];
-  if (!member.types) reasons.push('属性未知（既不在冻结 roster-48，也不在 pack tags.types）');
-  if (!member.validated) reasons.push('不在冻结迁移层 48 只里（没有验证过的面板/速度档/学招表）');
+  if (!member.types) reasons.push('属性未知（既不在冻结层，也不在 pack tags.types）');
+  if (!member.validated) reasons.push('不在冻结层里（没有验证过的面板/速度档/学招表）');
   if (ref.kind === 'species') reasons.push('这条是物种级引用（不是具体实例），四个技能未知');
   return {...member, unknown_reason: reasons.length ? reasons.join('；') : null};
 }
@@ -566,7 +600,7 @@ function buildFacts(index, inputs, extra) {
     types_registry_keys: index.types ? Object.keys(index.types).length : 0,
     skills_total: skills.length,
     skills_without_static_power: skills.filter((s) => s.power_status !== 'static_value_present').length,
-    // 速度：验证层只有 48 只；full-catalog 的 622 条 stats 自注 knowledge_only。
+    // 速度：验证层 = 冻结层 542 只（2026-09-28 前是 48 只）；full-catalog 的 622 条 stats 自注 knowledge_only。
     speed_validated_species: index.roster.size,
     speed_knowledge_only_species: [...index.fullCatalog.values()].filter((p) => typeof p?.stats?.spe === 'number').length,
     speed_panel_formula_unknown_species: [...index.fullCatalog.values()].filter((p) => arr(p?.unknown_fields).includes('panel_formula')).length,
@@ -582,7 +616,7 @@ function buildFacts(index, inputs, extra) {
     microcases_executed: extra.microcase_status === 'PLAN_ONLY_NOT_EXECUTED' ? 0 : null,
     microcase_status: extra.microcase_status,
     ruleset_id: extra.ruleset_id,
-    // 审计用的上限：验证层只说得出 48 只，不许声称全 622。
+    // 审计用的上限：验证层只说得出 542 只（2026-09-28 前是 48），不许声称全 622。
     validated_domain_limits: {
       speed: index.roster.size,
       learnset: speciesWithLearnset,
@@ -718,7 +752,7 @@ function coverageGaps(ctx) {
             registered: index.scaleByCombo.get(m.types.join('|'))?.has(attackType) ? 'weak|resist[] 里登记了' : '未登记（中性 ×1）',
           },
           `成员 ${m.key} 的防御组合键`)),
-        evidence(FROZEN_PATHS.roster48, `pets[pet_id in ${stableJson(known.map((m) => m.species_id))}].types`, 'types',
+        evidence(FROZEN_PATHS.rosterSources, `pets[pet_id in ${stableJson(known.map((m) => m.species_id))}].types`, 'types',
           known.map((m) => ({pet_id: m.species_id, types: m.types})), '全队成员的属性组合（防御键的来源）'),
       ],
       unverified: unknownMembers.length
@@ -757,7 +791,7 @@ function speedGaps(ctx) {
       total: facts.pack_pet_entities,
     },
     machineEvidence: [
-      evidence(FROZEN_PATHS.roster48, 'pets[].stats.spe', 'count_with_value', index.roster.size,
+      evidence(FROZEN_PATHS.rosterSources, 'pets[].stats.spe', 'count_with_value', index.roster.size,
         '冻结迁移层里有速度值的物种数'),
       evidence(FROZEN_PATHS.fullCatalog, 'coverage.unknown_by_field.panel_formula', 'unknown_count',
         facts.speed_panel_formula_unknown_species, 'full-catalog 自称面板换算公式未知的精灵数'),
@@ -778,7 +812,7 @@ function speedGaps(ctx) {
       id: 'speed.no_members', dimension: 'speed', severity: 'info', confidence: 'UNKNOWN',
       why: team.members.length === 0 ? '队伍里还没有任何一只：没有成员就没有速度梯度可说' : '队里没有一只有冻结速度档，速度维度整体未知',
       value: {members: team.members.map((m) => m.key)},
-      machineEvidence: [evidence(FROZEN_PATHS.roster48, 'pets[].stats.spe', 'count_with_value', index.roster.size, '验证层速度值来源')],
+      machineEvidence: [evidence(FROZEN_PATHS.rosterSources, 'pets[].stats.spe', 'count_with_value', index.roster.size, '验证层速度值来源')],
       unverified: [speedTie],
       dependsOn: ['turn_order.speed'],
     }));
@@ -802,7 +836,7 @@ function speedGaps(ctx) {
       basis: 'validated_layer', metric: 'team speed_tier', known: known.length,
       unknown: unknownMembers.length, total: team.members.length,
     },
-    machineEvidence: known.map((m) => evidence(FROZEN_PATHS.roster48,
+    machineEvidence: known.map((m) => evidence(FROZEN_PATHS.rosterSources,
       `pets[pet_id=${m.species_id}].stats.spe`, 'spe', m.spe, `成员 ${m.key} 的速度与档位 ${m.speed_tier}`)),
     unverified: [
       ...(unknownMembers.length ? [`有 ${unknownMembers.length} 个成员没有冻结速度档，本条只在 ${known.length} 只已知成员内成立`] : []),
@@ -1031,7 +1065,10 @@ function respondVariants(skill) {
  * 那不是「数据坏了」，是**分离证据选得不好**（证据依赖了一个已经不再成立的数据形态）。
  *
  * 新证据用同一次统计里**天然存在**的分离（两侧都是可复算计数，不引入新数据、不写死新数）：
- *   ① `learnset_variant_species['应对攻击'] === 48`：48 只的学招池里都有「应对攻击」；
+ *   ① `learnset_variant_species['应对攻击'] === learnset_species_total`：**有冻结学招表的每一只**
+ *      都学得到「应对攻击」（2026-09-28 改钉：原句是「`=== 48`：48 只的学招池里都有」，那个 48
+ *      是当时冻结学招表的物种数；人类拍板「所有精灵实装」之后它变成 542，写死就会误红 —— 所以
+ *      基准改成同一次统计里现算的 `learnset_species_total`，不再写死任何数字）；
  *   ② 存在某一类应对「learnset 有、build 完全没有」（实测 `应对防御`：learnset 36 / build 0）；
  *   ③ build 侧任何一类都不许**超过** learnset 侧（超了说明计数或口径错了）。
  * ②③ 合起来就是「学习池有 ≠ 出战四技能有」的可复算证据；三条缺一条都算红
@@ -1046,9 +1083,17 @@ export function respondSeparationHolds(respond) {
   //   ① 写死 48 ⇒ 等式恒不成立；② 拿 `instances_total`(49) 当基准 ⇒ 还是不等；
   //   ③ 基准对了，但 build 侧数的是**个体**、learnset 侧数的是**物种** ⇒ 第三条"build ≤ learnset"又红。
   // 现在两侧**统一按物种**（`build_variant_species` / `learnset_variant_species`），基准也按物种。
-  const corpusTotal = Number(respond?.species_total ?? 48);
-  if (Number(learnset['应对攻击']) !== corpusTotal) return false;
-  if (!RESPOND_VARIANTS.some((v) => Number(build[v] ?? 0) === 0 && Number(learnset[v] ?? 0) > 0)) return false;
+  // 基准 = **有冻结学招表的物种数**（同一次统计里现算；旧代码写死 `?? 48`，2026-09-28 起是 542）。
+  // 老夹具（只喂 `species_total`）保留旧回退：`?? species_total ?? 48`。
+  const learnsetTotal = Number(respond?.learnset_species_total ?? respond?.species_total ?? 48);
+  if (Number(learnset['应对攻击']) !== learnsetTotal) return false;
+  // 第 ② 条 2026-09-28 改钉（**旧值不删**：原来是「存在某一类应对 `build == 0 && learnset > 0`」，
+  // 也就是"学得到、一只都没带上"）。语料扩到 542 只之后，三类应对在 build 侧都 > 0
+  // （实测 应对攻击 542 / 应对状态 151 / 应对防御 19），旧写法会把真实分布判红。
+  // 现在改成同一条意思的**严格不等式**：「存在某一类应对，学得到的比带上的多」——
+  // 判据一点没松：① 拼平（build 三档都等于 learnset）② 写超 ③ 学招侧改小 三种坏输入照样红
+  // （见 `tests/roco-team-gaps.test.js` 判据⑱ 的三条反证）。
+  if (!RESPOND_VARIANTS.some((v) => Number(build[v] ?? 0) > 0 && Number(build[v] ?? 0) < Number(learnset[v] ?? 0))) return false;
   return RESPOND_VARIANTS.every((v) => Number(build[v] ?? 0) <= Number(learnset[v] ?? 0));
 }
 
@@ -1525,7 +1570,7 @@ function costGaps(ctx) {
         team_size: ctx.teamSize,
       },
       machineEvidence: [
-        evidence(FROZEN_PATHS.roster48, 'pets', 'count', facts.validated_species, '冻结迁移层物种数'),
+        evidence(FROZEN_PATHS.rosterSources, 'pets', 'count', facts.validated_species, '冻结层物种数（基线 12 + 可玩层 530）'),
         evidence('data/roco/game-data-pack/v2/pack.json', 'sections.distributable.entities[record_kind^=pet]', 'count',
           facts.pack_pet_entities, '候选宇宙（pack 的 622 只 pet 实体）'),
         evidence('data/roco/owned/owned-pets.json', 'skips.reasons[no_frozen_learnset]', 'count',
@@ -1654,7 +1699,7 @@ export function auditGapDiagnosis(diagnosis, {ledger} = {}) {
           if (typeof limit === 'number' && limit >= 0 && known > limit) {
             problems.push(auditProblem('DOMAIN_OVERCLAIM', where,
               `声称验证层已知 ${known} 个，但验证层只有 ${limit} 个（${stableJson(g.domain)}）：`
-              + '不许把只有 48 只有值的量当成「全量都知道」'));
+              + '不许把只有验证层（542 只）有值的量当成「全量都知道」'));
           }
         }
         if (unknown > 0 && arr(g.unverified).length === 0) {
@@ -1896,6 +1941,8 @@ export function buildGapDistribution(inputs) {
       learnset_variant_species: Object.fromEntries(RESPOND_VARIANTS.map((variant) => [variant,
         [...index.learnsets.entries()].filter(([, learnset]) => learnset.skill_ids
           .some((id) => respondVariants(index.skills.get(id)).includes(variant))).length])),
+      //: 学招表语料的物种数（`respondSeparationHolds` 的基准；2026-09-28 加，免得再写死 48）。
+      learnset_species_total: index.learnsets.size,
     },
     pivot: {
       criteria: DIMENSION_CRITERIA.pivot,
@@ -2038,10 +2085,13 @@ export function buildReportCriteria({distribution, samples, audit, ledgerInfo, i
     },
     {
       id: 'speed.validated_domain',
-      criteria: '速度档只在冻结迁移层有值；域上限 = 迁移层物种数（48）',
-      direction: '声称验证层已知数 > 迁移层物种数 ⇒ 红',
+      // 2026-09-28 改钉（**旧值不删**：原来 criteria 与 ok 都写 48）。
+      // 人类拍板「所有精灵实装」⇒ 冻结层 = 基线 12 + 可玩层 530 = 542。判据没放宽：
+      // 仍然是「声称验证层已知数 > 验证层物种数 ⇒ 红」，只是那个上限从 48 变成 542。
+      criteria: '速度档只在冻结层有值；域上限 = 冻结层物种数（542，2026-09-28 前是 48）',
+      direction: '声称验证层已知数 > 冻结层物种数 ⇒ 红',
       actual: {validated_species: index.roster.size, knowledge_only_species: distribution.speed.knowledge_only_species, pack_pet_entities: distribution.speed.pack_pet_entities},
-      ok: index.roster.size === 48 && distribution.speed.knowledge_only_species === 622
+      ok: index.roster.size === 542 && distribution.speed.knowledge_only_species === 622
         && distribution.speed.pack_pet_entities === 622,
     },
     {

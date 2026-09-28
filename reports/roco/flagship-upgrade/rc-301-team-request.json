@@ -15,8 +15,8 @@
     }
   },
   "data_basis": {
-    "owned_instances": 49,
-    "owned_species": 48,
+    "owned_instances": 542,
+    "owned_species": 542,
     "pack_pet_entities": 622,
     "battle_modes": [
       "demo-training-3v3",
@@ -32,10 +32,10 @@
     ],
     "missing": [],
     "sample_instance_id": "own-0001",
-    "sample_species_id": "pet_000012",
+    "sample_species_id": "pet_000001",
     "favourite_instance_id": "own-0001",
-    "pack_only_species_id": "pet_000001",
-    "second_owned_species_id": "pet_000062"
+    "pack_only_species_id": "pet_000139",
+    "second_owned_species_id": "pet_000003"
   },
   "contract": {
     "allowed_fields": [
@@ -461,7 +461,7 @@
     "unknown_prematch_rejects_named_opponent": {
       "ok": false,
       "code": "OPPONENT_INFO_NOT_ALLOWED",
-      "detail": "[OPPONENT_INFO_NOT_ALLOWED] opponent_roster：visibility=UNKNOWN_PREMATCH 下不允许给出具体对手：匹配前不知道对手，不能把匹配前当成匹配后（实际值 [\"pet_000012\"]）"
+      "detail": "[OPPONENT_INFO_NOT_ALLOWED] opponent_roster：visibility=UNKNOWN_PREMATCH 下不允许给出具体对手：匹配前不知道对手，不能把匹配前当成匹配后（实际值 [\"pet_000001\"]）"
     },
     "non_default_is_recorded_not_silent": {
       "ok": true,
@@ -1089,7 +1089,7 @@
           "preference": null,
           "ruleset_config_id": "mobile_s4_candidate_v3",
           "opponent_roster": [
-            "pet_000012"
+            "pet_000001"
           ]
         },
         "info": [
@@ -1126,7 +1126,7 @@
       "actual": "OPPONENT_INFO_NOT_ALLOWED",
       "ok": true,
       "actual_output": [
-        "[OPPONENT_INFO_NOT_ALLOWED] opponent_roster：visibility=UNKNOWN_PREMATCH 下不允许给出具体对手：匹配前不知道对手，不能把匹配前当成匹配后（实际值 [\"pet_000012\"]）"
+        "[OPPONENT_INFO_NOT_ALLOWED] opponent_roster：visibility=UNKNOWN_PREMATCH 下不允许给出具体对手：匹配前不知道对手，不能把匹配前当成匹配后（实际值 [\"pet_000001\"]）"
       ]
     },
     {
@@ -1144,7 +1144,7 @@
       "actual": "true",
       "ok": true,
       "actual_output": {
-        "pack_only_species_id": "pet_000001"
+        "pack_only_species_id": "pet_000139"
       }
     },
     {
@@ -1154,8 +1154,8 @@
       "actual": "MUST_INCLUDE_HAS_UNOWNED_SPECIES",
       "ok": true,
       "actual_output": [
-        "[MUST_INCLUDE_HAS_UNOWNED_SPECIES] must_include：favourites_only=true，但 pet_000062 对应的物种 pet_000062 没有任何一只收藏个体（实际值 \"pet_000062\"）",
-        "[LOCKED_FAVOURITES_ONLY_CONFLICT] favourites_only：favourites_only=true，但 must_include/locked 里 [\"pet_000062\"] 没有一只是收藏：约束不可同时满足（实际值 [\"pet_000062\"]）"
+        "[MUST_INCLUDE_HAS_UNOWNED_SPECIES] must_include：favourites_only=true，但 pet_000003 对应的物种 pet_000003 没有任何一只收藏个体（实际值 \"pet_000003\"）",
+        "[LOCKED_FAVOURITES_ONLY_CONFLICT] favourites_only：favourites_only=true，但 must_include/locked 里 [\"pet_000003\"] 没有一只是收藏：约束不可同时满足（实际值 [\"pet_000003\"]）"
       ]
     },
     {
@@ -1177,11 +1177,11 @@
       "actual_output": {
         "forward": [
           "own-0001",
-          "pet_000062"
+          "pet_000003"
         ],
         "backward": [
           "own-0001",
-          "pet_000062"
+          "pet_000003"
         ]
       }
     },

@@ -66,7 +66,12 @@ const OWNED = readJson('data/roco/owned/owned-pets.json');
 const ROSTER = readJson('data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json');
 const TYPE_TABLE = readJson('data/roco/normalized/roco-world-s4-2026-09-10/types.json').types;
 const ownedById = new Map(OWNED.instances.map((row) => [row.instance_id, row]));
-const speciesById = new Map(ROSTER.pets.map((pet) => [pet.pet_id, pet]));
+// 2026-09-28：`typesOf()` 原来从 `roster-48.json`（48 只）取属性 —— 扩到 542 只之后
+// 有 494 只在 roster-48 里根本没有条目（⑤/⑧ 直接 TypeError: reading 'types'）。
+// 属性改从**冻结图鉴层** `full-catalog.json`（622 只，逐只带 types）取：
+// 它同样是**独立于被测模块**的冻结事实源（相性表仍然只用 `TYPE_TABLE` 现算）。
+const FULL_CATALOG = readJson('data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json');
+const speciesById = new Map(FULL_CATALOG.pets.map((pet) => [pet.pet_id, pet]));
 /** 能耗上限：从注入规则配置里按 `ruleset_config_id` 字典序取第一份（与产物同一口径）。 */
 const CAP = (() => {
   const rows = (inputs.rulesets ?? []).map((ruleset) => {
@@ -108,7 +113,17 @@ const indexWithoutSpeed = (instanceId) => {
   };
 };
 
-assert.ok(TEAMS.length === 8, `48 个个体应当正好分成 8 支六宠队，实际 ${TEAMS.length}`);
+// 2026-09-28 改钉（**旧值不删**：原来是 `TEAMS.length === 8`，消息「48 个个体应当正好分成 8 支六宠队」）。
+// 甲案（人类：「**所有精灵实装，这样就不需要我的精灵了，直接全筛选**」）⇒ 冻结个体从 48 扩到
+// 可玩层的 **542** 个物种 ⇒ 六宠队从 8 支变成 **90** 支（542 = 90×6 + 2）。
+// 判据没有放宽：仍然是「每 6 个个体切一支队、**每个个体都要被切进某一支队**」，
+// 并且把「切不进去的余数」如实摆出来（这里恰好 2 个），不许静默丢弃。
+const EXPECTED_INSTANCES = 542;
+assert.equal(IDS.length, EXPECTED_INSTANCES, `冻结个体应当是 ${EXPECTED_INSTANCES} 个，实际 ${IDS.length}`);
+assert.ok(TEAMS.length === Math.floor(IDS.length / 6),
+  `${IDS.length} 个个体应当切成 ${Math.floor(IDS.length / 6)} 支六宠队，实际 ${TEAMS.length}`);
+assert.equal(TEAMS.length * 6 + (IDS.length % 6), IDS.length,
+  `切完必须账目闭合：${TEAMS.length} 支 × 6 + 余数 ${IDS.length % 6} == ${IDS.length}`);
 assert.ok(Number.isFinite(CAP), `能耗上限必须从注入规则配置里读到，实际 ${CAP}`);
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -245,7 +260,7 @@ test('⑤ 多属性必须按组合行算：反证——退回 types[0] 单属性
     const single = frozenResist(types, {comboFirst: false});
     return combo && single && combo.join(',') !== single.join(',');
   });
-  assert.ok(dualId, '必须能在 48 个冻结个体里找到一只「组合行 ≠ 单属性行」的双属性个体');
+  assert.ok(dualId, `必须能在 ${IDS.length} 个冻结个体里找到一只「组合行 ≠ 单属性行」的双属性个体`);
   const types = typesOf(dualId);
   const comboResist = frozenResist(types, {comboFirst: true});
   const singleResist = frozenResist(types, {comboFirst: false});
@@ -586,12 +601,16 @@ test('⑬ 产物 reports/roco/rc602/team-ranker.json 与 buildRc602Report() 一�
   assert.equal(report.schema, RC602_REPORT_VERSION, '产物 schema 必须对上');
   assert.equal(report.ranker_id, RANKER_ID, '产物必须点名排序器');
   assert.equal(report.ranker_version, RANKER_VERSION, '产物必须点名版本');
-  // ⚠ 2026-09-28 改钉：48 → **49**（人类批准的那对同种演示个体；`own-0049`）。
-  // 这里仍然写死数字（不是"随便多少都行"）：数字再变一次就要有人来解释。
-  assert.equal(report.corpus.owned_instances, 49, `冻结个体必须是 49，实际 ${report.corpus.owned_instances}`);
-  // ⚠ 2026-09-28 改钉：48 → **49** 只冻结个体 ⇒ C(49,2) = **1176**（人类批准的那对演示个体多一只）。
-  assert.equal(report.pairwise_instances.pairs_total, 1176, 'C(49,2) 必须是 1176');
-  assert.equal(report.pairwise_instances.pairs_available + report.pairwise_instances.pairs_unavailable, 1176,
+  // 2026-09-28 改钉（**旧值不删**：`48 → 49` 两轮，然后是这两个常数 `49` 与 `C(49,2)=1176`）。
+  // 甲案 ⇒ 冻结个体 = 可玩层物种数 = **542**，总对数 C(542,2) = **146611**。
+  // 仍然写死数字（不是「随便多少都行」）：数字再变一次就要有人来解释；
+  // 而且它现在**两边都钉**：报告里的数与 IDS 现算的数必须一致。
+  assert.equal(report.corpus.owned_instances, EXPECTED_INSTANCES,
+    `冻结个体必须是 ${EXPECTED_INSTANCES}，实际 ${report.corpus.owned_instances}`);
+  const EXPECTED_PAIRS = (EXPECTED_INSTANCES * (EXPECTED_INSTANCES - 1)) / 2;
+  assert.equal(EXPECTED_PAIRS, 146611, 'C(542,2) 必须是 146611');
+  assert.equal(report.pairwise_instances.pairs_total, EXPECTED_PAIRS, `C(542,2) 必须是 ${EXPECTED_PAIRS}`);
+  assert.equal(report.pairwise_instances.pairs_available + report.pairwise_instances.pairs_unavailable, EXPECTED_PAIRS,
     '可算 + 不可算必须等于总对数');
   assert.equal(report.pairwise_instances.key_speed_lines.available, 0, '关键速度线必须如实报 0 可算');
   assert.equal(report.weights_audit.ok, true, '产物里的权重审计必须通过');
@@ -696,7 +715,9 @@ test('⑯ 在线模块不读盘、不联网、不起进程、不调引擎；反�
 // ─────────────────────────────────────────────────────────────────────────
 // 附：全量成对实测（真实测量）
 // ─────────────────────────────────────────────────────────────────────────
-test('⑰ 全量成对实测：1176 对逐对调一遍，可算/unknown 逐条计数', () => {
+// 2026-09-28 改钉（**旧值不删**：标题里的「1176 对」= C(49,2)）。
+// 甲案 ⇒ 542 个个体 ⇒ C(542,2) = **146611** 对，逐对真跑一遍（实测约数秒）。
+test('⑰ 全量成对实测：146611 对逐对调一遍，可算/unknown 逐条计数', () => {
   const latencies = [];
   let available = 0;
   const reasons = {};
@@ -714,9 +735,10 @@ test('⑰ 全量成对实测：1176 对逐对调一遍，可算/unknown 逐条�
   }
   const sorted = [...latencies].sort((a, b) => a - b);
   const pick = (q) => Number(sorted[Math.min(sorted.length - 1, Math.ceil(q * sorted.length) - 1)].toFixed(3));
-  assert.equal(latencies.length, 1176, '必须真的跑满 1176 对');
-  assert.equal(available + Object.values(reasons).reduce((a, b) => a + b, 0), 1176, '每对都要有结论');
+  const totalPairs = (IDS.length * (IDS.length - 1)) / 2;
+  assert.equal(latencies.length, totalPairs, `必须真的跑满 ${totalPairs} 对`);
+  assert.equal(available + Object.values(reasons).reduce((a, b) => a + b, 0), totalPairs, '每对都要有结论');
   assert.ok(pick(0.95) < 50, `单对 P95 必须远低于 50ms，实际 ${pick(0.95)}ms`);
-  log(`1176 对：可算 ${available}、不可算 ${1176 - available}；`
-    + `P50=${pick(0.5)}ms P95=${pick(0.95)}ms max=${Number(Math.max(...latencies).toFixed(3))}ms`);
+  log(`${totalPairs} 对：可算 ${available}、不可算 ${totalPairs - available}；`
+    + `P50=${pick(0.5)}ms P95=${pick(0.95)}ms max=${Number(latencies.reduce((a, b) => (b > a ? b : a), 0).toFixed(3))}ms`);
 });

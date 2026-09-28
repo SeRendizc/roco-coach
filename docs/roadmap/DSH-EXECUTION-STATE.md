@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `59a318c`（索引里那一笔**上一笔**是 `dd62038`；台账声明落后一两笔是正常的，**落后 >12 笔判红**）—— 第 92–94 轮从 `bb9b9bf` 一路推到这里（§C6.353–§C6.355）。头部这段口径照旧：
+| HEAD | `23e98ef`（第 96 轮；这一轮从 `59a318c` 推了 6 笔上来 —— §C6.356 的 547 拍板、盒子页四条批注收口、换技能进对局）。台账声明落后一两笔是正常的，**落后 >12 笔判红**。头部这段口径照旧：
 | 工作区 | **2026-09-23 接手轮的未提交改动**（第 140 轮又加了一层）：`src/client/{roco.html,roco.css,roco.js,team-workshop.js,battle-v3.css}`（战斗页顶栏/结算浮层/小芽重叠/首页槽位/愿力冲击高亮）、`src/server/{index.js,roco-service.js}`（立绘按物种 id 解析、视图带 loadouts/magic）、`roco/src/roco_env/*`（PVP 魔法动作类、每只 10 星）、`roco/tests/test_pvp_magic.py`、`data/roco/{battle-modes.json,evidence/*}`、`data/roco/rulesets/*`、**`data/roco/assets/pets/*`（96 张立绘重新对齐，见 §C6.63）**、`scripts/roco/{build-pvp-magic.mjs,build-rule-configs.mjs,build-pet-sprite-audit.mjs,verify-pet-sprites.mjs}`、`data/roco/derived/pet-sprite-audit.json`、`docs/roco/PET-SPRITES.md` |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **27 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / trajectories-model / sft-split / model-manifest / provenance / rag-eval / game-data-pack / reconciliation / **sprite-identity（第 140 轮新增）** / state-doc / guard-selftest / browser-acceptance / demo-acceptance / mobile-sweep / box-acceptance / workshop-acceptance / loadout-acceptance / **five-minute-chain（第 22 轮新增：RC-801 ②③ 五分钟链路 + 时间预算）** / roco-ux-acceptance / battle-feedback / **coverage-axes（第 29 轮新增：三套支持口径不许混 + 账本不许落后于引擎）** / retained-assets），产物 `reports/roco/verification/latest.json`；`last-green.json` 记的是**最近一次全绿**（套件数从 23 → 26 → 27 之后以产物为准）。**判据条数以产物为准**（demo-acceptance 当前 **129 通过 / 0 失败**（第 27 轮 +6：RC-802 四类逐类判据 + 一条反证 + 一条磁盘对账）、roco-ux-acceptance **39/39 + 反证 4/4**、workshop-acceptance 43/43、five-minute-chain **19/19 判据 + 19/19 反证**），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `，所以历史断点里的那一行必须写成 `| HEAD（…当时…） |` |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -13252,3 +13252,76 @@ console_errors: []
 
 **没做到**：报告自述 `3778` 起未探测 ⇒ 缺失段的全貌仍是**下界**；本轮**没有真的剔除数据**
 （那要在建 547 那一步做，还没开工）。
+
+#### §C6.357 第 96 轮：盒子页四条批注收口 —— 重复精灵下线、60 级面板、锁定随交接走、**换技能真的进得了对局**
+
+人类这一轮给了四条批注（逐字）：
+> ①「重复精灵不要了，把铠甲虫还原回来」②「天分为啥还是认不出？就说『一般般的天分』，不需要前面加天分俩字」
+> ③「还是体现不出多属性」④「换技能还是没实装是吧？实装一下」
+> ⑤「就用现在抓包得到的数据吧，别的不找不要了，问题数据也不要了。**所有精灵实装**，这样就不需要我的精灵了，**直接全筛选**」
+
+##### 一、默认视图换成「全部精灵」（⑤）
+
+`src/client/box.js` 的默认 `kind` 从 `mine` 改成 `catalog`（622 条）⇒ 人类要的"直接全筛选"。
+⚠ 抽出了 `syncTabs(kind)` 并在启动时调一次：`setKind()` 在 `state.kind === kind` 时**提前返回**，
+而 `box.html` 里写死的 `selected` 还在「我的盒子」那个按钮上 ⇒ 页面显示全部精灵、亮着的却是我的盒子。
+两条标签也改了名：「全部精灵」/「我的盒子」（原来叫「全图鉴」）。
+
+##### 二、"所有精灵实装"落在数据层（⑤）
+
+`data/roco/owned/owned-pets.json` 重建为 **542 实例 / 542 物种 / 0 组同种**
+（`species_in_layer = 530` + `species_outside_layer = 12` ⇒ 与可玩层的 530 写入 + 12 基线**逐数对得上**），
+`species_tier` 分布 overlay 530 / baseline 12。**逐项核过、不是听汇报**：
+`nature.value / talent.value` 全是 `null` —— 这一点和 `git show HEAD:` 的 48 版**逐字比过，HEAD 也是全 null**
+（性格/天分不存在 owned 里，是盒子按 individual_id 掷的）⇒ 没有弄丢已掷好的个体。
+
+##### 三、"换技能"原来**两头都不通**（④ —— 这一轮最实的一条）
+
+查下来两个半成品各自都"看起来做完了"：
+
+| 谁 | 写到哪 | 结果 |
+|---|---|---|
+| 盒子二级详情页 | `roco.box.loadout.v1`（键 = 个体 `own-…`） | **谁都不读**。那一页旧文案自己写着"去开局那一页时请照这四个重新带上" |
+| 工坊 | 一个**纯内存 Map**（键 = 引擎回执的 `pet_id`） | 开局确实交给服务端（`battle/new` 的 `loadouts`）⇒ 能进对局，但**刷新就丢** |
+
+⇒ 盒子里配好的四个**永远进不了对局**。新增 `src/client/loadout-store.js` 作为**唯一那把钥匙**
+（一个键 `roco.workshop.loadouts.v1`、一种形状、两个读写函数；形状与引擎对齐：恰好四个、互不重复），
+两边都改用它：`box-loadout.js` 保存时同时写一份（键 = 引擎回执的 `pet_id`，真机核过与盒子侧的
+`species` 是同一个 id 空间：`/api/roco/loadout/options?pet=pet_000012` 回 `pet_id=pet_000012`）；
+`team-workshop.js` 开局 `readSharedLoadouts()`、保存 `writeSharedLoadout()`。
+**交给服务端那条链一个字没动**（"进得了对局"靠的就是它）。
+
+顺带修掉一处自己撞自己的 bug：种子那句「这份配招是你在开局那一页选的」被读池子那一步
+无条件重设 `status` 冲掉了（读一次学习表就没了）⇒ 另记 `seededFrom` 标记放回去，并且换一只时清掉。
+
+##### 四、锁定随交接走：一个**产品缺口**（不是判据写法问题）
+
+二级详情页可以**按地址直达**（`?pet=`，分享链接与验收 25/26 走的都是这条），那一刻列表还没载入、
+这一只也不一定在第一页 ⇒ `state.petCard` 是空的 ⇒ 按钮上不写「含锁定 1 只」、交接 URL 上的
+`lock=` 也丢，**锁定传不到工坊**。服务端详情回执里一直带着这个事实（`player.badges` 里有「锁定」）
+⇒ 新增 `lockedOf()`：**两个来源都认**（`card.locked` / `state.petData.badges`），
+按钮文案与交接载荷两处都改用它。
+
+##### 五、判据（都配必红反证；"改钉不删"照旧 —— 旧断言留在注释里）
+
+| 判据 | 读数 | 这一轮改了什么 |
+|---|---|---|
+| `tests/roco-box-redo.test.js` | **13/13** | +㉓ 锁定判定两个来源（含"不许退回旧写法"的反向断言） |
+| `tests/roco-box-loadout.test.js` | **16/16** | ③d **改钉**（旧文案围着"记不下就会丢"写，现在要把两种情形分开说）+③e（存下去的是**玩家挑的**那份，不是预选）+③f（工坊配过、盒子读得到）；另加 `settle()` 助手（池子到手后 `prefill()` 还会再落一次预选，**点早了会被它盖掉** —— 我第一版四点点中了三点） |
+| `tests/roco-workshop.test.js` | **34/34** | +一条：必须引共用的键、开局读、保存写、交给服务端那条链不许动，两个文件都不许自己写死键名 |
+| `scripts/roco/browser-box-acceptance.mjs` | **判据 39/39 通过；反证 25/25 命中** | 02 改钉（默认 622）+反证、其后显式切回「我的盒子」；11 删掉半句站不住的比较（拿总个体数比这一页的物种数）；23/24/28/29/31/35/36/36b 补 `#tab-mine`（少这一下就等到超时再抛「找不到可点的元素」）；25 的计数从 `lockedCards.length`（切片最多 2）改成**实际带过去的那一只**；**+39 号**：真鼠标在二级页换掉一个技能并保存，核**开局那一页读的那份记录**（量的不是"面板画出来了没有"） |
+
+真机量到的那一条（39 号的实际输出）：`own-0001`（`pet_000001`）换掉一个技能后
+存下 `["skill_000273","skill_000286","skill_000340","skill_000624"]`，共用记录里键就是 `pet_000001`。
+
+##### 六、读数与**没做到**
+
+- `npm run test:unit`：**1756 条 / 1751 通过 / 5 红** —— 5 条**全是已知红**，0 条新红：
+  2 条 legacy 轨迹（判据链，**按纪律不许重跑**）、2 条 `roco-hke-layer`（**许可边界**：抓包不许进
+  `normalized/**` vs `roco/src/roco_env/data.py:22` 的层目录名 —— 这条要人判）、
+  1 条 `roco-weather-pvp`（探针写死的「智辉章脑 → 落雨」对在新抓包池里学不到）。
+- **没做到 ①**：`docs/roco/HUMAN-REVIEW-CHECKLIST.md` 与那 5 条红要一个人类决定（许可边界 / 探针换对）。
+- **没做到 ②**：人类说"不需要『我的精灵』这个概念"，但「我的盒子」这个标签**还在**（542 只可玩精灵
+  每只都有性格/天分，与 622 的图鉴是两件事）。这一轮只做到"默认落在全部精灵 + 全筛选"，
+  **没有把两个标签合成一个列表** —— 那是更大的交互改动，要不要做等人类发话。
+- **没做到 ③**：这一轮**没有跑** `npm run verify:release`（8 分钟）；盒子验收与单测都是单独跑的。

@@ -23,7 +23,7 @@ import {fileURLToPath} from 'node:url';
 
 import {
   BUILD_UNKNOWNS, SELECTION_RULE, SUPPORT_FULL_VERIFIED, SUPPORT_SIMULATABLE_UNVERIFIED,
-  checkOnDemandBuilds, compileBuild, selftest, sha256, skillSortKey,
+  checkOnDemandBuilds, combinedFrozenHash, compileBuild, selftest, sha256, skillSortKey,
 } from '../scripts/roco/on-demand-builds-lib.mjs';
 import {checkRepo} from '../scripts/roco/verify-on-demand-builds.mjs';
 
@@ -31,8 +31,14 @@ const ROOT = dirname(fileURLToPath(import.meta.url)).replace(/\/tests$/, '');
 const TARGET = join(ROOT, 'data/roco/derived/on-demand-builds.json');
 const CATALOG = join(ROOT, 'data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json');
 const SKILLS = join(ROOT, 'data/roco/normalized/roco-world-s4-2026-09-10/skills.json');
-// 2026-09-25：产物的 `derived_from.frozen_learnsets.sha256` 记的是这一份整文件的 sha
-const OWNED = join(ROOT, 'data/roco/owned/owned-pets.json');
+// 2026-09-25：产物的 `derived_from.frozen_learnsets.sha256` 记的是上游的 sha。
+// 2026-09-28 换源（旧值不删）：原来记的是 `data/roco/owned/owned-pets.json` 整文件；
+// 现在是**冻结层两份 support-matrix**（基线 12 只 + 可玩层 530 只），用与生产/校验**同一个**
+// `combinedFrozenHash()` 算 —— 理由见 `scripts/roco/build-on-demand-builds.mjs` 的
+// `frozenBuildsFromLayers` 注释（用 owned-pets 当源会让 7 只撤下旧层的精灵从候选池消失）。
+const OWNED = join(ROOT, 'data/roco/owned/owned-pets.json');   // 仅保留作历史对照，不再是上游
+const BASE_SUPPORT = join(ROOT, 'data/roco/normalized/roco-world-s4-2026-09-10/support-matrix.json');
+const LAYER_SUPPORT = join(ROOT, 'data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/support-matrix.json');
 const log = (...args) => console.log('  ·', ...args);
 const readJson = (abs) => JSON.parse(readFileSync(abs, 'utf8'));
 const copy = (value) => JSON.parse(JSON.stringify(value));
@@ -57,20 +63,23 @@ test('产物存在且真的能过检查（这条红了就是真问题）', () =>
 // 比的是**旧快照**。现在：产物的 `derived_from.frozen_learnsets.sha256` 必须等于**当前**
 // `owned-pets.json` 的 sha，缺了也红。反证走**真检查器** `checkRepo({file})`（就是 `--file` 那条路）：
 // 把 sha 改成 0×64 / 把来源块整块删掉，都必须红。
-test('产物新鲜度：derived_from 的 frozen sha 必须等于当前 owned-pets.json（过期就红）', () => {
-  const ownedText = readFileSync(OWNED, 'utf8');
-  const ownedHash = sha256(ownedText);
+// ⚠ 2026-09-28 改钉（**旧值不删**）：这条原来钉「frozen sha == owned-pets.json 整文件 sha」
+// 且「count == 48」。人类 2026-09-28 拍板「所有精灵实装，这样就不需要我的精灵了」之后，
+// 冻结那一档不再由 owned-pets.json 定义，而是**冻结层两份 support-matrix**（12 + 530 = 542，
+// 与引擎 `FULL_VERIFIED` 同口径）。判据本身没放宽：仍然是「产物记的 sha 必须等于当前磁盘上游，
+// 过期就红」+ 反证（sha 改 0 / 来源块删掉都必须报 derived_from_stale）。
+test('产物新鲜度：derived_from 的 frozen sha 必须等于当前冻结层（过期就红）', () => {
+  const frozenHash = combinedFrozenHash([readFileSync(BASE_SUPPORT, 'utf8'), readFileSync(LAYER_SUPPORT, 'utf8')]);
   const doc = readJson(TARGET);
-  const ownedDoc = JSON.parse(ownedText);
   log('[实际] 新鲜度', {artifact_sha: String(doc.derived_from?.frozen_learnsets?.sha256).slice(0, 16),
-    disk_sha: ownedHash.slice(0, 16), count: doc.derived_from?.frozen_learnsets?.count,
-    owned_battle_builds: (ownedDoc.battle_builds ?? []).length});
-  assert.equal(doc.derived_from?.frozen_learnsets?.sha256, ownedHash,
-    '产物的 frozen_learnsets.sha256 与磁盘 owned-pets.json 不符 —— 产物过期，重跑 node scripts/roco/build-on-demand-builds.mjs');
-  assert.equal(doc.derived_from.frozen_learnsets.count, 48, '冻结配招覆盖 48 只');
+    disk_sha: frozenHash.slice(0, 16), count: doc.derived_from?.frozen_learnsets?.count,
+    source: String(doc.derived_from?.frozen_learnsets?.path ?? '').slice(0, 80)});
+  assert.equal(doc.derived_from?.frozen_learnsets?.sha256, frozenHash,
+    '产物的 frozen_learnsets.sha256 与磁盘冻结层不符 —— 产物过期，重跑 node scripts/roco/build-on-demand-builds.mjs');
+  assert.equal(doc.derived_from.frozen_learnsets.count, 542, '冻结配招覆盖 542 只（2026-09-28 前是 48）');
   const catalogText = readFileSync(CATALOG, 'utf8');
   const skillsText = readFileSync(SKILLS, 'utf8');
-  const hashes = {catalog: sha256(catalogText), skills: sha256(skillsText), frozen: ownedHash};
+  const hashes = {catalog: sha256(catalogText), skills: sha256(skillsText), frozen: frozenHash};
   const badSha = copy(doc);
   badSha.derived_from.frozen_learnsets.sha256 = '0'.repeat(64);
   const noBlock = copy(doc);
@@ -87,15 +96,18 @@ test('产物新鲜度：derived_from 的 frozen sha 必须等于当前 owned-pet
   probe('noblock', noBlock);
 });
 
-test('覆盖账目自洽：622 只 = 已核验 48 + 推算 574（且没有既编又跳过的）', () => {
+// 2026-09-28 改钉（**旧值不删**：旧标题与旧断言是「622 只 = 已核验 48 + 推算 574」）。
+// 人类 2026-09-28 拍板「所有精灵实装」⇒ 冻结 542 + 推算 80。判据没放宽：
+// 仍然是「每一只都必须有交代（编出来或如实跳过）」+「两档加起来正好是全量图鉴」。
+test('覆盖账目自洽：622 只 = 已核验 542 + 推算 80（且没有既编又跳过的）', () => {
   const {doc, catalog} = context();
   const built = Object.keys(doc.builds).length;
   log('[实际] 覆盖', {catalog_pets: catalog.pets.length, built, skipped: doc.skipped.length,
     full: doc.summary[SUPPORT_FULL_VERIFIED], unverified: doc.summary[SUPPORT_SIMULATABLE_UNVERIFIED]});
   assert.equal(catalog.pets.length, 622);
   assert.equal(built + doc.skipped.length, catalog.pets.length, '每一只都必须有交代（编出来或如实跳过）');
-  assert.equal(doc.summary[SUPPORT_FULL_VERIFIED], 48, '冻结 learnset 覆盖的是 48 只');
-  assert.equal(doc.summary[SUPPORT_SIMULATABLE_UNVERIFIED], 574, '剩下 574 只走按需推算');
+  assert.equal(doc.summary[SUPPORT_FULL_VERIFIED], 542, '冻结层覆盖的是 542 只（2026-09-28 前是 48）');
+  assert.equal(doc.summary[SUPPORT_SIMULATABLE_UNVERIFIED], 80, '剩下 80 只走按需推算（2026-09-28 前是 574）');
   assert.equal(doc.skipped.length, 0);
 });
 
@@ -114,7 +126,8 @@ test('每个技能都能追溯：在该物种的学招表里，且在冻结 skil
       checked += 1;
     }
   }
-  assert.equal(checked, 574 * 4);
+  // 2026-09-28 改钉（**旧值不删**：旧断言是 574 * 4）。现在是 80 只 × 4 = 320。
+  assert.equal(checked, 80 * 4);
 });
 
 test('「已核验」与「推算」永不混淆：冻结那一份原样带出，推算的一律不带', () => {

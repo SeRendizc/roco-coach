@@ -10,14 +10,19 @@ import {existsSync, readFileSync} from 'node:fs';
 import {dirname, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-import {checkOnDemandBuilds, selftest, sha256} from './on-demand-builds-lib.mjs';
+import {checkOnDemandBuilds, combinedFrozenHash, selftest, sha256} from './on-demand-builds-lib.mjs';
 
 const ROOT = dirname(fileURLToPath(import.meta.url)).replace(/\/scripts\/roco$/, '');
 const CATALOG = 'data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json';
 const SKILLS = 'data/roco/normalized/roco-world-s4-2026-09-10/skills.json';
-// 2026-09-25：产物新鲜度也要比 —— 产物的 `derived_from.frozen_learnsets.sha256` 记的是这一份
-// （`owned-pets.json` 整文件）。原来这里不传 frozen ⇒ 「产物过期」这条判据**从没被跑过**（静默过期）。
-const OWNED = 'data/roco/owned/owned-pets.json';
+// 2026-09-25：产物新鲜度也要比 —— 产物的 `derived_from.frozen_learnsets.sha256` 记的是这一份。
+// 2026-09-28 换源（旧值不删）：它曾经记 `data/roco/owned/owned-pets.json` 整文件；现在记
+// **冻结层两份** `support-matrix.json`（基线 12 只 + 可玩层 530 只）。理由见
+// `build-on-demand-builds.mjs` 的 `frozenBuildsFromLayers` 注释（用 owned-pets 当源会让 7 只
+// 撤下旧层的精灵从候选池整个消失，实测 622 → 615）。这里必须用**同一个** hash 函数，
+// 否则「产物过期」这条判据拿错误的上游去比 —— 那是**假绿**。
+const BASE_SUPPORT = 'data/roco/normalized/roco-world-s4-2026-09-10/support-matrix.json';
+const LAYER_SUPPORT = 'data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/support-matrix.json';
 const TARGET = 'data/roco/derived/on-demand-builds.json';
 
 const json = (rel) => {
@@ -28,7 +33,8 @@ const json = (rel) => {
 export function checkRepo({file} = {}) {
   const catalog = json(CATALOG);
   const skills = json(SKILLS);
-  const owned = json(OWNED);
+  const base = readFileSync(join(ROOT, BASE_SUPPORT), 'utf8');
+  const layer = readFileSync(join(ROOT, LAYER_SUPPORT), 'utf8');
   const target = file ? resolve(file) : join(ROOT, TARGET);
   if (!existsSync(target)) {
     return {ok: false, issues: [{rule: 'artifact_missing', species_id: '-', detail: `产物不存在：${file ?? TARGET}`}]};
@@ -36,7 +42,7 @@ export function checkRepo({file} = {}) {
   const doc = JSON.parse(readFileSync(target, 'utf8'));
   const report = checkOnDemandBuilds(doc, {
     catalog: catalog.json, skills: skills.json,
-    hashes: {catalog: catalog.hash, skills: skills.hash, frozen: owned.hash},
+    hashes: {catalog: catalog.hash, skills: skills.hash, frozen: combinedFrozenHash([base, layer])},
   });
   return {...report, path: file ?? TARGET};
 }

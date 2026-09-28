@@ -9,8 +9,8 @@
 //
 //   ① **不许编数据**。四个技能逐个来自该 species 在冻结目录 learnsets.json 里的
 //      native_skills；species 必须真实存在；凑不出四个技能的精灵**跳过**，
-//      不补、不改、不猜。全量 622 只里只有 48 只在冻结目录里有 learnset，
-//      另外 574 只的跳过原因逐只落在报告里（不是「大概没数据」这种话）。
+//      不补、不改、不猜。全量 622 只里有 **542** 只在冻结目录里有 learnset（2026-09-28 甲案之前是 48），
+//      另外 80 只的跳过原因逐只落在报告里（不是「大概没数据」这种话）。
 //
 //   ② **不许发明养成公式**。性格 / 个体资质 / 特长 / 血脉只存**标签**，
 //      effect 恒为 UNKNOWN、reason 恒为 10 号文档 §13 那句话、microcase_id 恒为 null。
@@ -109,7 +109,7 @@ function shaOf(root, path) {
  * 把 622 只 pack 精灵逐只过一遍，能用的留下、不能用的记下**为什么**。
  *
  * 「候选宇宙 600+」不是口号：这里真的从 622 条记录出发，
- * 而不是从一个写死的 48 只白名单出发。48 只是**结果**（有冻结 learnset 的那批），
+ * 而不是从一个写死的白名单出发。542 是**结果**（有冻结 learnset 的那批 = 可玩层），
  * 不是**输入**。
  */
 function collectCandidates(root) {
@@ -149,11 +149,11 @@ function collectCandidates(root) {
   // ── 规范四技能 = 引擎 loadout（**唯一事实源**，2026-09-25 人类口径「配招这个你得修好」）──────
   // 合并规则与 `roco/src/roco_env/data.py:515-535` 逐条同义（见 owned-pets-lib 的
   // `mergeCanonicalLoadouts`）。**这里曾经是 `shuffle(rng, pool).slice(0,4)` 伪随机抽样** ——
-  // 那让 owned 的四技能与引擎实战装上的四技能 48/48 全不一致（集合级），是数据层的自相矛盾。
+  // 那让 owned 的四技能与引擎实战装上的四技能**逐只全不一致**（当时 48/48），是数据层的自相矛盾。
   const supportMatrices = [
     {label: 'support-matrix.json（基线 12）', doc: mainSupport,
       artifact_path: FROZEN_MAIN_SUPPORT, artifact_sha256: sources.FROZEN_MAIN_SUPPORT},
-    {label: 'layer-playable-48/support-matrix.json（叠加层 36）', doc: layerSupport,
+    {label: 'layer-playable-48/support-matrix.json（抓包可玩层 530）', doc: layerSupport,
       artifact_path: FROZEN_LAYER_SUPPORT, artifact_sha256: sources.FROZEN_LAYER_SUPPORT},
   ];
   const canonical = mergeCanonicalLoadouts(supportMatrices);
@@ -237,10 +237,19 @@ function collectCandidates(root) {
       });
       return;
     }
+    // 2026-09-28（甲案）：overlay 那批的**最上游**是社区抓包。本层（`layer-playable-48`）是
+    // 抓包派生层，每个 pet 记录里带着 `capture_file` / `capture_id`（见生成器
+    // `scripts/roco/build-all-pets-engine-inputs.mjs`）⇒ 逐条把那一跳也写进 provenance，
+    // 「出处指针指向真正来源」这条才算兑现（基线 12 只的值来自 wiki 快照，不带抓包指针）。
+    const captureRow = layerPetIds.has(petId) ? (layerPets.pets?.[petId] ?? null) : null;
+    const captureFile = typeof captureRow?.capture_file === 'string' ? captureRow.capture_file : null;
     candidates.push({
       petId,
       speciesName: name,
       tier: layerPetIds.has(petId) ? 'overlay' : 'baseline',
+      capture: captureFile && existsSync(join(root, captureFile))
+        ? {file: captureFile, sha256: shaOf(root, captureFile), capture_id: captureRow.capture_id ?? null}
+        : null,
       learnsetPath: artifactPath === FROZEN_MAIN_LEARNSETS ? FROZEN_MAIN_LEARNSETS : FROZEN_LAYER_LEARNSETS,
       learnsetSha: artifactPath === FROZEN_MAIN_LEARNSETS
         ? sources.FROZEN_MAIN_LEARNSETS
@@ -258,6 +267,7 @@ function collectCandidates(root) {
   };
 
   // 主 learnsets.json（12 只，**不在** layer-playable-48 目录里）
+  // 2026-09-28：旧值是 36 只 overlay（layer-playable-48 的迁移夹具），甲案之后是 530 只（抓包派生）。
   for (const [petId, entry] of Object.entries(mainLearnsets.learnsets ?? {})) {
     consider(petId, entry, FROZEN_MAIN_LEARNSETS);
   }
@@ -329,6 +339,26 @@ export function buildOwnedPets({root = ROOT} = {}) {
     throw new Error(`候选物种 ${projected} 个 ≠ 期望实例数 ${INSTANCE_TARGET} 个：`
       + '实例数现在等于物种数（一人一只），对不上说明候选宇宙变了，判据要跟着改');
   }
+  // ── 2026-09-28 甲案：盒子 = **可玩层镜像**（有牙的交叉判据，不是空判据）──────────
+  // 人类逐字：「**所有精灵实装，这样就不需要我的精灵了，直接全筛选**」⇒ 甲案：盒子跟着扩到
+  // 可玩层的物种数。下面三条把「542」这个数**钉在磁盘上**，谁少一只、谁多一只都报错退出：
+  //   ① 冻结层物种数（基线 learnsets.json + layer-playable-48/learnsets.json）必须**恰好**
+  //      等于 `INSTANCE_TARGET`；层改了而常量没改 ⇒ 这里先红，不会静默换个规模；
+  //   ② 每个有冻结学招表的物种都必须是候选（`candidates.length === withFrozenLearnset`）；
+  //   ③ 基线（**不在** layer-playable-48 目录里）那一档必须仍是 `MIN_OUTSIDE_LAYER` 只 ——
+  //      这条防的是「盒子只从可玩层目录里抄」。
+  const frozenSpecies = universe.withFrozenLearnset;
+  if (frozenSpecies !== INSTANCE_TARGET) {
+    throw new Error(`可玩层物种数 ${frozenSpecies} ≠ INSTANCE_TARGET ${INSTANCE_TARGET}：`
+      + '层变了就得一起改这个常量（改钉规矩：旧值留在 owned-pets-lib.mjs 的注释里），不许静默改规模');
+  }
+  if (candidates.length !== frozenSpecies) {
+    throw new Error(`候选物种 ${candidates.length} ≠ 有冻结学招表的物种 ${frozenSpecies}：`
+      + '有 learnset 的物种一只都不许被静默跳过（跳过原因逐只列在 skipped 里，见报告）');
+  }
+  if (baseline.length !== MIN_OUTSIDE_LAYER) {
+    throw new Error(`基线档（不在 layer-playable-48 目录里）应当恰好 ${MIN_OUTSIDE_LAYER} 只，实际 ${baseline.length} 只`);
+  }
 
   const instances = [];
   const battleBuilds = [];
@@ -354,7 +384,7 @@ export function buildOwnedPets({root = ROOT} = {}) {
       // `candidate_moveset`（`Ruleset.candidate_moveset()` 读的就是它）。
       const skills = [...candidate.canonicalSkills];
 
-      // 血脉：只有**真的带血脉名**的行才能当标签用。layer-playable-48 的 36 只 overlay 里
+      // 血脉：只有**真的带血脉名**的行才能当标签用。layer-playable-48 的 overlay 里
       // blood 是 null（blood_status=not_provided_by_source）——那就标 UNKNOWN，不拿 18 条
       // 无名的 skill_id 编一个「血脉」出来。
       const labelledBlood = candidate.bloodSkills.filter((row) => typeof row.blood === 'string' && row.blood.length > 0);
@@ -382,7 +412,7 @@ export function buildOwnedPets({root = ROOT} = {}) {
         bloodline,
         skills,
         // 这四技能**从哪来**：引擎 loadout 的那一片 support-matrix（基线 12 走主文件、
-        // 叠加层 36 走 layer-playable-48）里的 `candidate_moveset.skills`。
+        // 可玩层走 layer-playable-48）里的 `candidate_moveset.skills`。
         skills_source: {
           artifact_path: candidate.movesetSource.artifact_path,
           artifact_sha256: candidate.movesetSource.artifact_sha256,
@@ -428,6 +458,20 @@ export function buildOwnedPets({root = ROOT} = {}) {
             pointer: `pets[${candidate.catalogIndex}].stats`,
             note: '静态种族值出处（不是等级换算后的面板值）',
           },
+          // 2026-09-28（甲案）：overlay 那批多一条**最上游**的出处 —— 抓包原始响应的那一份文件。
+          // 没有它，「四个技能从哪来」只能追到 `layer-playable-48/support-matrix.json`（中间层），
+          // 追不到抓包本身。`source_id` 用抓包自己的 id（不是 `licence_ref`：抓包不在
+          // `data/roco/sources.yaml` 的登记来源里，许可未确认 ⇒ 标 REFERENCE_ONLY，C14 也会跳过它）。
+          ...(candidate.capture ? [{
+            source_id: 'hke-2026-09-27',
+            source_scope: 'capture_reference_only',
+            artifact_path: candidate.capture.file,
+            artifact_sha256: candidate.capture.sha256,
+            pointer: 'result.pet_detail.skill_list',
+            note: '四技能与技能池的**最上游**：小黑盒社区接口抓包（2026-09-27，许可 UNKNOWN / '
+              + 'REFERENCE_ONLY，**不是官方文本**）。它经 `layer-playable-48/{support-matrix,learnsets}.json` '
+              + '落进冻结层；本条是逐只可追的那一跳。',
+          }] : []),
         ],
         licence_ref: LICENCE_REF,
         unknown_fields: [],
@@ -603,7 +647,7 @@ export function buildOwnedPets({root = ROOT} = {}) {
         artifact_path: FROZEN_LAYER_LEARNSETS,
         artifact_sha256: sources.FROZEN_LAYER_LEARNSETS,
         pointer: 'learnsets',
-        note: 'layer-playable-48 overlay 36 只的 learnset',
+        note: 'layer-playable-48（抓包可玩层 530 只）的 learnset',
       },
       {
         source_id: LICENCE_REF,
@@ -679,26 +723,57 @@ export function buildReport({dataset, datasetText, checkResult, skipped, univers
     candidate_universe: dataset.candidate_universe,
     // **这批实例能证明什么、不能证明什么**（主线程补：防止「12 只在 layer-playable-48 之外」
     // 被读成「候选宇宙不止 48 只」的证据 —— 那 12 只是基线层，本来就在 roster-48 之内）。
-    buildability_ceiling: {
-      candidate_universe_species: dataset.candidate_universe.pack_pet_entities,
-      species_with_frozen_learnset: dataset.candidate_universe.with_frozen_learnset,
-      candidates_without_frozen_learnset: dataset.candidate_universe.pack_pet_entities - dataset.candidate_universe.with_frozen_learnset,
-      buildable_subset_equals_roster_48: new Set(dataset.instances.map((i) => i.species_id)).size === roster48.size
-        && [...new Set(dataset.instances.map((i) => i.species_id))].every((id) => roster48.has(id)),
-      proves_600_buildable: false,
-      why_not: '冻结目录只导入了 48 份 learnset（12 基线 + 36 overlay），上游快照另有 264 份未导入；'
-        + '622 个候选里 574 只在 no_frozen_learnset 上 fail closed 跳过，所以可出战子集现在恰好等于 roster-48。',
-      needed_to_prove: '导入其余 learnset，或走 RC-402 的按需 Capability Compiler。',
-      must_not_claim: '不得把本批 80 个实例说成「600+ 都能出战」。',
-    },
+    // 2026-09-28 改钉（**旧值不删**）：这一块原来是「可出战子集恰好等于 roster-48（48 只）」的
+    // 自我限制声明，三条旧值分别是 `buildable_subset_equals_roster_48`、`proves_600_buildable: false`、
+    // `must_not_claim: '不得把本批 80 个实例说成「600+ 都能出战」'`。
+    // 甲案（人类：「所有精灵实装，这样就不需要我的精灵了，直接全筛选」）之后，可出战子集
+    // **就是可玩层**（542 只：基线 12 + 抓包派生的 530），不再等于 roster-48。
+    // 判据没有放宽成空话，而是换成**三条逐项可算**的：
+    //   ① 可出战子集 == 有冻结学招表的物种数（instance 的 species 去重后一个不少）；
+    //   ② 它**仍然不等于**全量 pack（622）：还有 80 只没有冻结学招表 ⇒ `proves_600_buildable` 仍是 false；
+    //   ③ roster-48 的 48 只是它的**真子集**（旧口径是相等 —— 那是 48 时代的事）。
+    buildability_ceiling: (() => {
+      const builtSpecies = new Set(dataset.instances.map((i) => i.species_id));
+      const packSpecies = dataset.candidate_universe.pack_pet_entities;
+      const withLearnset = dataset.candidate_universe.with_frozen_learnset;
+      return {
+        candidate_universe_species: packSpecies,
+        species_with_frozen_learnset: withLearnset,
+        candidates_without_frozen_learnset: packSpecies - withLearnset,
+        buildable_subset_size: builtSpecies.size,
+        buildable_subset_equals_frozen_layer: builtSpecies.size === withLearnset,
+        buildable_subset_equals_pack: builtSpecies.size === packSpecies,
+        // 旧字段名保留（**旧值是 `true`**：48 时代可出战子集恰好 == roster-48）：现在它是 `false`，
+        // 而且**必须**是 false —— 可出战子集已经扩到 542，roster-48 只有 48 只。
+        // 下游（`tests/roco-v3-redirect.test.js` 的诚实条款）读的就是这个键，所以改值不改名。
+        buildable_subset_equals_roster_48: builtSpecies.size === roster48.size
+          && [...builtSpecies].every((id) => roster48.has(id)),
+        roster_48_subset_of_buildable: {
+          is_subset: [...roster48].every((id) => builtSpecies.has(id)),
+          roster_48_species: roster48.size,
+          buildable_species: builtSpecies.size,
+          missing_from_buildable: [...roster48].filter((id) => !builtSpecies.has(id)).sort(),
+          note: 'roster-48.json 是 M1 的**选择登记层**；它里面有 7 只（古啦多/学院呱呱/祭礼巨像/'
+            + '棋契陛下×2/新月鹭/智辉章脑）已不在冻结可玩层里（3 只被人类点名剔除、4 只抓包接口给不出来），'
+            + '所以它**不是**可出战子集的子集 —— 这是实况，不修数字。',
+        },
+        proves_600_buildable: false,
+        why_not: `冻结目录导入的是 ${withLearnset} 份 learnset（基线 12 + 抓包可玩层 ${withLearnset - 12}），`
+          + `pack 的 ${packSpecies} 个候选里还有 ${packSpecies - withLearnset} 只在 no_frozen_learnset 上 fail closed 跳过。`
+          + '所以可出战子集 = 可玩层（不是全量 622，也**不再**是 roster-48 那 48 只）。',
+        needed_to_prove: '把剩下那些也导入冻结 learnset，或走 RC-402 的按需 Capability Compiler（那一档是 SIMULATABLE_UNVERIFIED）。',
+        must_not_claim: `不得把本批 ${builtSpecies.size} 个实例说成「全量 ${packSpecies} 只都能出战」。`,
+      };
+    })(),
     outside_layer_playable_48: {
       criterion: 'C06',
       definition: '按任务文本点名的 layer-playable-48 目录算：不在 layer-playable-48/pets.json、layer-playable-48/learnsets.json、layer-playable-48/support-matrix.json 的 pet 集合里的 species',
       expected_min: MIN_OUTSIDE_LAYER,
       count: checkResult.facts.speciesOutsideLayerPlayable48,
       species: checkResult.facts.outsideLayerSpecies,
-      what_this_proves: '这 12 只是**基线层**的 12 只，它们本来就在 roster-48.json 的 48 只之内；'
-        + '所以这条**不能**用来证明「候选宇宙不止 48 只」（见 buildability_ceiling）。',
+      what_this_proves: '这 12 只是**基线层**的 12 只（主 `learnsets.json`，在 layer-playable-48 目录之外）；'
+        + '它们本来就在 roster-48.json 的 48 只之内。⚠ 2026-09-28（甲案）之后可出战子集已经**大于**'
+        + 'roster-48（542 > 48），所以这条判据的作用回到它字面上的意思：**盒子不是只从可玩层目录里抄的**。',
       alternative_reading: {
         definition: '若把 roster-48.json（48 条 = 12 基线 + 36 overlay）当成「48 层」',
         roster_48_species: roster48.size,

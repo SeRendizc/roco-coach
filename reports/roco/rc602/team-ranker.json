@@ -2,7 +2,7 @@
   "schema": "roco-rc602-team-ranker-report/v1",
   "generated_by": "scripts/roco/build-rc602-report.mjs",
   "ruleset_id": "roco-world-s4-2026-09-10",
-  "dataset_hash": "23cf46728e34c065ae6f4b508823dd2fec7ee2a677625214d04417bfbe8f5782",
+  "dataset_hash": "de62f69de8244ba33d12b91374da16958bf951afac20d8d18c26f1d42c14a527",
   "ranker_id": "roco-rule-pairwise-ranker",
   "ranker_version": "rc602/1",
   "ranker_status": {
@@ -43,11 +43,11 @@
     "milliseconds": "毫秒（实测墙钟，只用于延迟报告）"
   },
   "corpus": {
-    "owned_instances": 49,
-    "owned_species": 48,
+    "owned_instances": 542,
+    "owned_species": 542,
     "catalog_species": 622,
-    "validated_species": 48,
-    "species_with_frozen_learnset": 48,
+    "validated_species": 542,
+    "species_with_frozen_learnset": 542,
     "registered_attack_types": 18,
     "registered_type_combo_rows": 120,
     "speed_values_available": 622,
@@ -75,60 +75,60 @@
   },
   "pairwise_instances": {
     "criterion": "对 48 个冻结个体取全部 C(48,2) = 1128 对，逐对调 pairwiseFeatures()；可算 = 六个维度全部算得出（available:true）",
-    "pairs_total": 1176,
-    "pairs_available": 1176,
+    "pairs_total": 146611,
+    "pairs_available": 146611,
     "pairs_unavailable": 0,
     "unknown_reason_distribution": {},
     "latency_ms": {
       "unit": "毫秒（实测墙钟，只用于延迟报告）",
-      "samples": 1176,
-      "p50": 0.017,
-      "p95": 0.041,
-      "min": 0.012,
-      "max": 1.077,
-      "total": 29.646
+      "samples": 146611,
+      "p50": 0.013,
+      "p95": 0.019,
+      "min": 0.009,
+      "max": 276.85,
+      "total": 2606.64
     },
     "per_axis_availability": {
       "type_coverage": {
         "source": "teamFeatures().coverage",
-        "available": 1176,
+        "available": 146611,
         "unavailable": 0,
         "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）"
       },
       "weakness_exposure": {
         "source": "teamFeatures().synergy",
-        "available": 1176,
+        "available": 146611,
         "unavailable": 0,
         "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）"
       },
       "speed_layers": {
         "source": "teamFeatures().speed",
-        "available": 1176,
+        "available": 146611,
         "unavailable": 0,
         "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）"
       },
       "respond_coverage": {
         "source": "teamFeatures().respond",
-        "available": 1176,
+        "available": 146611,
         "unavailable": 0,
         "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）"
       },
       "energy_curve": {
         "source": "teamFeatures().energy",
-        "available": 1176,
+        "available": 146611,
         "unavailable": 0,
         "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）"
       },
       "pivot_sustain": {
         "source": "teamFeatures().pivot",
-        "available": 1176,
+        "available": 146611,
         "unavailable": 0,
         "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）"
       }
     },
     "key_speed_lines": {
       "available": 0,
-      "unavailable": 1176,
+      "unavailable": 146611,
       "required": "panel_stats（等级换算后的面板值）",
       "unknown_reason": "关键速度线要真实面板值（等级/性格/资质/特长/血脉换算后）才能判先手关系；冻结数据里 48 个实例的 `panel_stats` 一律 null、养成效果 `effect=UNKNOWN`（见 owned-pets.json 的 growth_attribute_policy），**现在算不出来**；这里只给速度档位层次（`speed_layers`），不给先手结论"
     }
@@ -223,18 +223,920 @@
           "instance:own-0047",
           "instance:own-0048"
         ]
+      },
+      {
+        "team_id": "rc602-team-09",
+        "members": [
+          "instance:own-0049",
+          "instance:own-0050",
+          "instance:own-0051",
+          "instance:own-0052",
+          "instance:own-0053",
+          "instance:own-0054"
+        ]
+      },
+      {
+        "team_id": "rc602-team-10",
+        "members": [
+          "instance:own-0055",
+          "instance:own-0056",
+          "instance:own-0057",
+          "instance:own-0058",
+          "instance:own-0059",
+          "instance:own-0060"
+        ]
+      },
+      {
+        "team_id": "rc602-team-11",
+        "members": [
+          "instance:own-0061",
+          "instance:own-0062",
+          "instance:own-0063",
+          "instance:own-0064",
+          "instance:own-0065",
+          "instance:own-0066"
+        ]
+      },
+      {
+        "team_id": "rc602-team-12",
+        "members": [
+          "instance:own-0067",
+          "instance:own-0068",
+          "instance:own-0069",
+          "instance:own-0070",
+          "instance:own-0071",
+          "instance:own-0072"
+        ]
+      },
+      {
+        "team_id": "rc602-team-13",
+        "members": [
+          "instance:own-0073",
+          "instance:own-0074",
+          "instance:own-0075",
+          "instance:own-0076",
+          "instance:own-0077",
+          "instance:own-0078"
+        ]
+      },
+      {
+        "team_id": "rc602-team-14",
+        "members": [
+          "instance:own-0079",
+          "instance:own-0080",
+          "instance:own-0081",
+          "instance:own-0082",
+          "instance:own-0083",
+          "instance:own-0084"
+        ]
+      },
+      {
+        "team_id": "rc602-team-15",
+        "members": [
+          "instance:own-0085",
+          "instance:own-0086",
+          "instance:own-0087",
+          "instance:own-0088",
+          "instance:own-0089",
+          "instance:own-0090"
+        ]
+      },
+      {
+        "team_id": "rc602-team-16",
+        "members": [
+          "instance:own-0091",
+          "instance:own-0092",
+          "instance:own-0093",
+          "instance:own-0094",
+          "instance:own-0095",
+          "instance:own-0096"
+        ]
+      },
+      {
+        "team_id": "rc602-team-17",
+        "members": [
+          "instance:own-0097",
+          "instance:own-0098",
+          "instance:own-0099",
+          "instance:own-0100",
+          "instance:own-0101",
+          "instance:own-0102"
+        ]
+      },
+      {
+        "team_id": "rc602-team-18",
+        "members": [
+          "instance:own-0103",
+          "instance:own-0104",
+          "instance:own-0105",
+          "instance:own-0106",
+          "instance:own-0107",
+          "instance:own-0108"
+        ]
+      },
+      {
+        "team_id": "rc602-team-19",
+        "members": [
+          "instance:own-0109",
+          "instance:own-0110",
+          "instance:own-0111",
+          "instance:own-0112",
+          "instance:own-0113",
+          "instance:own-0114"
+        ]
+      },
+      {
+        "team_id": "rc602-team-20",
+        "members": [
+          "instance:own-0115",
+          "instance:own-0116",
+          "instance:own-0117",
+          "instance:own-0118",
+          "instance:own-0119",
+          "instance:own-0120"
+        ]
+      },
+      {
+        "team_id": "rc602-team-21",
+        "members": [
+          "instance:own-0121",
+          "instance:own-0122",
+          "instance:own-0123",
+          "instance:own-0124",
+          "instance:own-0125",
+          "instance:own-0126"
+        ]
+      },
+      {
+        "team_id": "rc602-team-22",
+        "members": [
+          "instance:own-0127",
+          "instance:own-0128",
+          "instance:own-0129",
+          "instance:own-0130",
+          "instance:own-0131",
+          "instance:own-0132"
+        ]
+      },
+      {
+        "team_id": "rc602-team-23",
+        "members": [
+          "instance:own-0133",
+          "instance:own-0134",
+          "instance:own-0135",
+          "instance:own-0136",
+          "instance:own-0137",
+          "instance:own-0138"
+        ]
+      },
+      {
+        "team_id": "rc602-team-24",
+        "members": [
+          "instance:own-0139",
+          "instance:own-0140",
+          "instance:own-0141",
+          "instance:own-0142",
+          "instance:own-0143",
+          "instance:own-0144"
+        ]
+      },
+      {
+        "team_id": "rc602-team-25",
+        "members": [
+          "instance:own-0145",
+          "instance:own-0146",
+          "instance:own-0147",
+          "instance:own-0148",
+          "instance:own-0149",
+          "instance:own-0150"
+        ]
+      },
+      {
+        "team_id": "rc602-team-26",
+        "members": [
+          "instance:own-0151",
+          "instance:own-0152",
+          "instance:own-0153",
+          "instance:own-0154",
+          "instance:own-0155",
+          "instance:own-0156"
+        ]
+      },
+      {
+        "team_id": "rc602-team-27",
+        "members": [
+          "instance:own-0157",
+          "instance:own-0158",
+          "instance:own-0159",
+          "instance:own-0160",
+          "instance:own-0161",
+          "instance:own-0162"
+        ]
+      },
+      {
+        "team_id": "rc602-team-28",
+        "members": [
+          "instance:own-0163",
+          "instance:own-0164",
+          "instance:own-0165",
+          "instance:own-0166",
+          "instance:own-0167",
+          "instance:own-0168"
+        ]
+      },
+      {
+        "team_id": "rc602-team-29",
+        "members": [
+          "instance:own-0169",
+          "instance:own-0170",
+          "instance:own-0171",
+          "instance:own-0172",
+          "instance:own-0173",
+          "instance:own-0174"
+        ]
+      },
+      {
+        "team_id": "rc602-team-30",
+        "members": [
+          "instance:own-0175",
+          "instance:own-0176",
+          "instance:own-0177",
+          "instance:own-0178",
+          "instance:own-0179",
+          "instance:own-0180"
+        ]
+      },
+      {
+        "team_id": "rc602-team-31",
+        "members": [
+          "instance:own-0181",
+          "instance:own-0182",
+          "instance:own-0183",
+          "instance:own-0184",
+          "instance:own-0185",
+          "instance:own-0186"
+        ]
+      },
+      {
+        "team_id": "rc602-team-32",
+        "members": [
+          "instance:own-0187",
+          "instance:own-0188",
+          "instance:own-0189",
+          "instance:own-0190",
+          "instance:own-0191",
+          "instance:own-0192"
+        ]
+      },
+      {
+        "team_id": "rc602-team-33",
+        "members": [
+          "instance:own-0193",
+          "instance:own-0194",
+          "instance:own-0195",
+          "instance:own-0196",
+          "instance:own-0197",
+          "instance:own-0198"
+        ]
+      },
+      {
+        "team_id": "rc602-team-34",
+        "members": [
+          "instance:own-0199",
+          "instance:own-0200",
+          "instance:own-0201",
+          "instance:own-0202",
+          "instance:own-0203",
+          "instance:own-0204"
+        ]
+      },
+      {
+        "team_id": "rc602-team-35",
+        "members": [
+          "instance:own-0205",
+          "instance:own-0206",
+          "instance:own-0207",
+          "instance:own-0208",
+          "instance:own-0209",
+          "instance:own-0210"
+        ]
+      },
+      {
+        "team_id": "rc602-team-36",
+        "members": [
+          "instance:own-0211",
+          "instance:own-0212",
+          "instance:own-0213",
+          "instance:own-0214",
+          "instance:own-0215",
+          "instance:own-0216"
+        ]
+      },
+      {
+        "team_id": "rc602-team-37",
+        "members": [
+          "instance:own-0217",
+          "instance:own-0218",
+          "instance:own-0219",
+          "instance:own-0220",
+          "instance:own-0221",
+          "instance:own-0222"
+        ]
+      },
+      {
+        "team_id": "rc602-team-38",
+        "members": [
+          "instance:own-0223",
+          "instance:own-0224",
+          "instance:own-0225",
+          "instance:own-0226",
+          "instance:own-0227",
+          "instance:own-0228"
+        ]
+      },
+      {
+        "team_id": "rc602-team-39",
+        "members": [
+          "instance:own-0229",
+          "instance:own-0230",
+          "instance:own-0231",
+          "instance:own-0232",
+          "instance:own-0233",
+          "instance:own-0234"
+        ]
+      },
+      {
+        "team_id": "rc602-team-40",
+        "members": [
+          "instance:own-0235",
+          "instance:own-0236",
+          "instance:own-0237",
+          "instance:own-0238",
+          "instance:own-0239",
+          "instance:own-0240"
+        ]
+      },
+      {
+        "team_id": "rc602-team-41",
+        "members": [
+          "instance:own-0241",
+          "instance:own-0242",
+          "instance:own-0243",
+          "instance:own-0244",
+          "instance:own-0245",
+          "instance:own-0246"
+        ]
+      },
+      {
+        "team_id": "rc602-team-42",
+        "members": [
+          "instance:own-0247",
+          "instance:own-0248",
+          "instance:own-0249",
+          "instance:own-0250",
+          "instance:own-0251",
+          "instance:own-0252"
+        ]
+      },
+      {
+        "team_id": "rc602-team-43",
+        "members": [
+          "instance:own-0253",
+          "instance:own-0254",
+          "instance:own-0255",
+          "instance:own-0256",
+          "instance:own-0257",
+          "instance:own-0258"
+        ]
+      },
+      {
+        "team_id": "rc602-team-44",
+        "members": [
+          "instance:own-0259",
+          "instance:own-0260",
+          "instance:own-0261",
+          "instance:own-0262",
+          "instance:own-0263",
+          "instance:own-0264"
+        ]
+      },
+      {
+        "team_id": "rc602-team-45",
+        "members": [
+          "instance:own-0265",
+          "instance:own-0266",
+          "instance:own-0267",
+          "instance:own-0268",
+          "instance:own-0269",
+          "instance:own-0270"
+        ]
+      },
+      {
+        "team_id": "rc602-team-46",
+        "members": [
+          "instance:own-0271",
+          "instance:own-0272",
+          "instance:own-0273",
+          "instance:own-0274",
+          "instance:own-0275",
+          "instance:own-0276"
+        ]
+      },
+      {
+        "team_id": "rc602-team-47",
+        "members": [
+          "instance:own-0277",
+          "instance:own-0278",
+          "instance:own-0279",
+          "instance:own-0280",
+          "instance:own-0281",
+          "instance:own-0282"
+        ]
+      },
+      {
+        "team_id": "rc602-team-48",
+        "members": [
+          "instance:own-0283",
+          "instance:own-0284",
+          "instance:own-0285",
+          "instance:own-0286",
+          "instance:own-0287",
+          "instance:own-0288"
+        ]
+      },
+      {
+        "team_id": "rc602-team-49",
+        "members": [
+          "instance:own-0289",
+          "instance:own-0290",
+          "instance:own-0291",
+          "instance:own-0292",
+          "instance:own-0293",
+          "instance:own-0294"
+        ]
+      },
+      {
+        "team_id": "rc602-team-50",
+        "members": [
+          "instance:own-0295",
+          "instance:own-0296",
+          "instance:own-0297",
+          "instance:own-0298",
+          "instance:own-0299",
+          "instance:own-0300"
+        ]
+      },
+      {
+        "team_id": "rc602-team-51",
+        "members": [
+          "instance:own-0301",
+          "instance:own-0302",
+          "instance:own-0303",
+          "instance:own-0304",
+          "instance:own-0305",
+          "instance:own-0306"
+        ]
+      },
+      {
+        "team_id": "rc602-team-52",
+        "members": [
+          "instance:own-0307",
+          "instance:own-0308",
+          "instance:own-0309",
+          "instance:own-0310",
+          "instance:own-0311",
+          "instance:own-0312"
+        ]
+      },
+      {
+        "team_id": "rc602-team-53",
+        "members": [
+          "instance:own-0313",
+          "instance:own-0314",
+          "instance:own-0315",
+          "instance:own-0316",
+          "instance:own-0317",
+          "instance:own-0318"
+        ]
+      },
+      {
+        "team_id": "rc602-team-54",
+        "members": [
+          "instance:own-0319",
+          "instance:own-0320",
+          "instance:own-0321",
+          "instance:own-0322",
+          "instance:own-0323",
+          "instance:own-0324"
+        ]
+      },
+      {
+        "team_id": "rc602-team-55",
+        "members": [
+          "instance:own-0325",
+          "instance:own-0326",
+          "instance:own-0327",
+          "instance:own-0328",
+          "instance:own-0329",
+          "instance:own-0330"
+        ]
+      },
+      {
+        "team_id": "rc602-team-56",
+        "members": [
+          "instance:own-0331",
+          "instance:own-0332",
+          "instance:own-0333",
+          "instance:own-0334",
+          "instance:own-0335",
+          "instance:own-0336"
+        ]
+      },
+      {
+        "team_id": "rc602-team-57",
+        "members": [
+          "instance:own-0337",
+          "instance:own-0338",
+          "instance:own-0339",
+          "instance:own-0340",
+          "instance:own-0341",
+          "instance:own-0342"
+        ]
+      },
+      {
+        "team_id": "rc602-team-58",
+        "members": [
+          "instance:own-0343",
+          "instance:own-0344",
+          "instance:own-0345",
+          "instance:own-0346",
+          "instance:own-0347",
+          "instance:own-0348"
+        ]
+      },
+      {
+        "team_id": "rc602-team-59",
+        "members": [
+          "instance:own-0349",
+          "instance:own-0350",
+          "instance:own-0351",
+          "instance:own-0352",
+          "instance:own-0353",
+          "instance:own-0354"
+        ]
+      },
+      {
+        "team_id": "rc602-team-60",
+        "members": [
+          "instance:own-0355",
+          "instance:own-0356",
+          "instance:own-0357",
+          "instance:own-0358",
+          "instance:own-0359",
+          "instance:own-0360"
+        ]
+      },
+      {
+        "team_id": "rc602-team-61",
+        "members": [
+          "instance:own-0361",
+          "instance:own-0362",
+          "instance:own-0363",
+          "instance:own-0364",
+          "instance:own-0365",
+          "instance:own-0366"
+        ]
+      },
+      {
+        "team_id": "rc602-team-62",
+        "members": [
+          "instance:own-0367",
+          "instance:own-0368",
+          "instance:own-0369",
+          "instance:own-0370",
+          "instance:own-0371",
+          "instance:own-0372"
+        ]
+      },
+      {
+        "team_id": "rc602-team-63",
+        "members": [
+          "instance:own-0373",
+          "instance:own-0374",
+          "instance:own-0375",
+          "instance:own-0376",
+          "instance:own-0377",
+          "instance:own-0378"
+        ]
+      },
+      {
+        "team_id": "rc602-team-64",
+        "members": [
+          "instance:own-0379",
+          "instance:own-0380",
+          "instance:own-0381",
+          "instance:own-0382",
+          "instance:own-0383",
+          "instance:own-0384"
+        ]
+      },
+      {
+        "team_id": "rc602-team-65",
+        "members": [
+          "instance:own-0385",
+          "instance:own-0386",
+          "instance:own-0387",
+          "instance:own-0388",
+          "instance:own-0389",
+          "instance:own-0390"
+        ]
+      },
+      {
+        "team_id": "rc602-team-66",
+        "members": [
+          "instance:own-0391",
+          "instance:own-0392",
+          "instance:own-0393",
+          "instance:own-0394",
+          "instance:own-0395",
+          "instance:own-0396"
+        ]
+      },
+      {
+        "team_id": "rc602-team-67",
+        "members": [
+          "instance:own-0397",
+          "instance:own-0398",
+          "instance:own-0399",
+          "instance:own-0400",
+          "instance:own-0401",
+          "instance:own-0402"
+        ]
+      },
+      {
+        "team_id": "rc602-team-68",
+        "members": [
+          "instance:own-0403",
+          "instance:own-0404",
+          "instance:own-0405",
+          "instance:own-0406",
+          "instance:own-0407",
+          "instance:own-0408"
+        ]
+      },
+      {
+        "team_id": "rc602-team-69",
+        "members": [
+          "instance:own-0409",
+          "instance:own-0410",
+          "instance:own-0411",
+          "instance:own-0412",
+          "instance:own-0413",
+          "instance:own-0414"
+        ]
+      },
+      {
+        "team_id": "rc602-team-70",
+        "members": [
+          "instance:own-0415",
+          "instance:own-0416",
+          "instance:own-0417",
+          "instance:own-0418",
+          "instance:own-0419",
+          "instance:own-0420"
+        ]
+      },
+      {
+        "team_id": "rc602-team-71",
+        "members": [
+          "instance:own-0421",
+          "instance:own-0422",
+          "instance:own-0423",
+          "instance:own-0424",
+          "instance:own-0425",
+          "instance:own-0426"
+        ]
+      },
+      {
+        "team_id": "rc602-team-72",
+        "members": [
+          "instance:own-0427",
+          "instance:own-0428",
+          "instance:own-0429",
+          "instance:own-0430",
+          "instance:own-0431",
+          "instance:own-0432"
+        ]
+      },
+      {
+        "team_id": "rc602-team-73",
+        "members": [
+          "instance:own-0433",
+          "instance:own-0434",
+          "instance:own-0435",
+          "instance:own-0436",
+          "instance:own-0437",
+          "instance:own-0438"
+        ]
+      },
+      {
+        "team_id": "rc602-team-74",
+        "members": [
+          "instance:own-0439",
+          "instance:own-0440",
+          "instance:own-0441",
+          "instance:own-0442",
+          "instance:own-0443",
+          "instance:own-0444"
+        ]
+      },
+      {
+        "team_id": "rc602-team-75",
+        "members": [
+          "instance:own-0445",
+          "instance:own-0446",
+          "instance:own-0447",
+          "instance:own-0448",
+          "instance:own-0449",
+          "instance:own-0450"
+        ]
+      },
+      {
+        "team_id": "rc602-team-76",
+        "members": [
+          "instance:own-0451",
+          "instance:own-0452",
+          "instance:own-0453",
+          "instance:own-0454",
+          "instance:own-0455",
+          "instance:own-0456"
+        ]
+      },
+      {
+        "team_id": "rc602-team-77",
+        "members": [
+          "instance:own-0457",
+          "instance:own-0458",
+          "instance:own-0459",
+          "instance:own-0460",
+          "instance:own-0461",
+          "instance:own-0462"
+        ]
+      },
+      {
+        "team_id": "rc602-team-78",
+        "members": [
+          "instance:own-0463",
+          "instance:own-0464",
+          "instance:own-0465",
+          "instance:own-0466",
+          "instance:own-0467",
+          "instance:own-0468"
+        ]
+      },
+      {
+        "team_id": "rc602-team-79",
+        "members": [
+          "instance:own-0469",
+          "instance:own-0470",
+          "instance:own-0471",
+          "instance:own-0472",
+          "instance:own-0473",
+          "instance:own-0474"
+        ]
+      },
+      {
+        "team_id": "rc602-team-80",
+        "members": [
+          "instance:own-0475",
+          "instance:own-0476",
+          "instance:own-0477",
+          "instance:own-0478",
+          "instance:own-0479",
+          "instance:own-0480"
+        ]
+      },
+      {
+        "team_id": "rc602-team-81",
+        "members": [
+          "instance:own-0481",
+          "instance:own-0482",
+          "instance:own-0483",
+          "instance:own-0484",
+          "instance:own-0485",
+          "instance:own-0486"
+        ]
+      },
+      {
+        "team_id": "rc602-team-82",
+        "members": [
+          "instance:own-0487",
+          "instance:own-0488",
+          "instance:own-0489",
+          "instance:own-0490",
+          "instance:own-0491",
+          "instance:own-0492"
+        ]
+      },
+      {
+        "team_id": "rc602-team-83",
+        "members": [
+          "instance:own-0493",
+          "instance:own-0494",
+          "instance:own-0495",
+          "instance:own-0496",
+          "instance:own-0497",
+          "instance:own-0498"
+        ]
+      },
+      {
+        "team_id": "rc602-team-84",
+        "members": [
+          "instance:own-0499",
+          "instance:own-0500",
+          "instance:own-0501",
+          "instance:own-0502",
+          "instance:own-0503",
+          "instance:own-0504"
+        ]
+      },
+      {
+        "team_id": "rc602-team-85",
+        "members": [
+          "instance:own-0505",
+          "instance:own-0506",
+          "instance:own-0507",
+          "instance:own-0508",
+          "instance:own-0509",
+          "instance:own-0510"
+        ]
+      },
+      {
+        "team_id": "rc602-team-86",
+        "members": [
+          "instance:own-0511",
+          "instance:own-0512",
+          "instance:own-0513",
+          "instance:own-0514",
+          "instance:own-0515",
+          "instance:own-0516"
+        ]
+      },
+      {
+        "team_id": "rc602-team-87",
+        "members": [
+          "instance:own-0517",
+          "instance:own-0518",
+          "instance:own-0519",
+          "instance:own-0520",
+          "instance:own-0521",
+          "instance:own-0522"
+        ]
+      },
+      {
+        "team_id": "rc602-team-88",
+        "members": [
+          "instance:own-0523",
+          "instance:own-0524",
+          "instance:own-0525",
+          "instance:own-0526",
+          "instance:own-0527",
+          "instance:own-0528"
+        ]
+      },
+      {
+        "team_id": "rc602-team-89",
+        "members": [
+          "instance:own-0529",
+          "instance:own-0530",
+          "instance:own-0531",
+          "instance:own-0532",
+          "instance:own-0533",
+          "instance:own-0534"
+        ]
+      },
+      {
+        "team_id": "rc602-team-90",
+        "members": [
+          "instance:own-0535",
+          "instance:own-0536",
+          "instance:own-0537",
+          "instance:own-0538",
+          "instance:own-0539",
+          "instance:own-0540"
+        ]
       }
     ],
-    "pairs_total": 28,
-    "pairs_available": 28,
+    "pairs_total": 4005,
+    "pairs_available": 4005,
     "pairs_unavailable": 0,
     "latency_ms": {
       "unit": "毫秒（实测墙钟，只用于延迟报告）",
-      "samples": 28,
-      "p50": 0.085,
-      "p95": 0.125,
-      "min": 0.07,
-      "max": 0.208
+      "samples": 4005,
+      "p50": 0.059,
+      "p95": 0.075,
+      "min": 0.034,
+      "max": 1.808
     },
     "sample_pairing": {
       "team_a": "rc602-team-01",
@@ -244,18 +1146,18 @@
       "per_axis": {
         "type_coverage": {
           "values": {
-            "teamA": 0.7778,
-            "teamB": 0.7778
+            "teamA": 0.6667,
+            "teamB": 0.4444
           },
-          "advantage": 0,
-          "leads": null
+          "advantage": 0.2223,
+          "leads": "teamA"
         },
         "weakness_exposure": {
           "values": {
-            "teamA": 0.7727,
-            "teamB": 0.6429
+            "teamA": 0.8,
+            "teamB": 0.2381
           },
-          "advantage": 0.1298,
+          "advantage": 0.5619,
           "leads": "teamA"
         },
         "speed_layers": {
@@ -284,10 +1186,10 @@
         },
         "pivot_sustain": {
           "values": {
-            "teamA": 1,
+            "teamA": 0.8333,
             "teamB": 0.6667
           },
-          "advantage": 0.3333,
+          "advantage": 0.1666,
           "leads": "teamA"
         }
       },
@@ -301,218 +1203,40 @@
       "team_id_lexicographic",
       "input_order"
     ],
-    "teams_in": 8,
-    "ranked_count": 8,
+    "teams_in": 90,
+    "ranked_count": 90,
     "unranked_count": 0,
     "top5": [
       {
         "rank": 1,
-        "team_id": "rc602-team-07",
-        "score": 0.9063,
+        "team_id": "rc602-team-86",
+        "score": 0.9448,
         "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
         "tied_with_previous": false,
         "parts": {
           "type_coverage": {
-            "raw": 0.8333,
+            "raw": 0.8889,
             "weight": 0.24,
-            "contribution": 0.2,
+            "contribution": 0.2133,
             "from": "type_coverage",
             "provenance": "ENGINE_HYPOTHESIS",
             "reason": "冻结相性表（120 行，含 102 行组合）逐条可复算，是六个维度里证据最硬的一项",
             "values": {
-              "teamA": 0.8333,
-              "teamB": 0.8333
+              "teamA": 0.8889,
+              "teamB": 0.8889
             },
             "leads": null
           },
           "weakness_exposure": {
-            "raw": 0.8148,
+            "raw": 0.8571,
             "weight": 0.2,
-            "contribution": 0.163,
+            "contribution": 0.1714,
             "from": "weakness_exposure",
             "provenance": "ENGINE_HYPOTHESIS",
             "reason": "与属性覆盖同源（同一张相性表），但方向相反：未承接弱点越少越好；权重略低于覆盖因为它对队伍人数更敏感",
             "values": {
-              "teamA": 0.8148,
-              "teamB": 0.8148
-            },
-            "leads": null
-          },
-          "speed_layers": {
-            "raw": 1,
-            "weight": 0.16,
-            "contribution": 0.16,
-            "from": "speed_layers",
-            "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "只用冻结 roster-48 的 stats.spe 与 speed_tier（48/48 有值）；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
-            "values": {
-              "teamA": 1,
-              "teamB": 1
-            },
-            "leads": null
-          },
-          "respond_coverage": {
-            "raw": 1,
-            "weight": 0.16,
-            "contribution": 0.16,
-            "from": "respond_coverage",
-            "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），36/48 只有冻结学招表、12 只走图鉴推测 ⇒ 中档",
-            "values": {
-              "teamA": 1,
-              "teamB": 1
-            },
-            "leads": null
-          },
-          "energy_curve": {
-            "raw": 1,
-            "weight": 0.14,
-            "contribution": 0.14,
-            "from": "energy_curve",
-            "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "能耗来自冻结 skills[].energy 与注入规则配置的上限；上限本身在候选规则版本里（RC-601 未定）⇒ 中低档",
-            "values": {
-              "teamA": 1,
-              "teamB": 1
-            },
-            "leads": null
-          },
-          "pivot_sustain": {
-            "raw": 0.8333,
-            "weight": 0.1,
-            "contribution": 0.0833,
-            "from": "pivot_sustain",
-            "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "换入/离场只靠技能描述关键字（迅捷 / 自己脱离 / 立即替换），是六个维度里最弱的一条判据 ⇒ 最低",
-            "values": {
-              "teamA": 0.8333,
-              "teamB": 0.8333
-            },
-            "leads": null
-          }
-        },
-        "resolved_member_count": 6,
-        "unavailable_dimensions": []
-      },
-      {
-        "rank": 2,
-        "team_id": "rc602-team-08",
-        "score": 0.9027,
-        "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
-        "tied_with_previous": false,
-        "parts": {
-          "type_coverage": {
-            "raw": 0.8333,
-            "weight": 0.24,
-            "contribution": 0.2,
-            "from": "type_coverage",
-            "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "冻结相性表（120 行，含 102 行组合）逐条可复算，是六个维度里证据最硬的一项",
-            "values": {
-              "teamA": 0.8333,
-              "teamB": 0.8333
-            },
-            "leads": null
-          },
-          "weakness_exposure": {
-            "raw": 0.88,
-            "weight": 0.2,
-            "contribution": 0.176,
-            "from": "weakness_exposure",
-            "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "与属性覆盖同源（同一张相性表），但方向相反：未承接弱点越少越好；权重略低于覆盖因为它对队伍人数更敏感",
-            "values": {
-              "teamA": 0.88,
-              "teamB": 0.88
-            },
-            "leads": null
-          },
-          "speed_layers": {
-            "raw": 1,
-            "weight": 0.16,
-            "contribution": 0.16,
-            "from": "speed_layers",
-            "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "只用冻结 roster-48 的 stats.spe 与 speed_tier（48/48 有值）；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
-            "values": {
-              "teamA": 1,
-              "teamB": 1
-            },
-            "leads": null
-          },
-          "respond_coverage": {
-            "raw": 1,
-            "weight": 0.16,
-            "contribution": 0.16,
-            "from": "respond_coverage",
-            "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），36/48 只有冻结学招表、12 只走图鉴推测 ⇒ 中档",
-            "values": {
-              "teamA": 1,
-              "teamB": 1
-            },
-            "leads": null
-          },
-          "energy_curve": {
-            "raw": 1,
-            "weight": 0.14,
-            "contribution": 0.14,
-            "from": "energy_curve",
-            "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "能耗来自冻结 skills[].energy 与注入规则配置的上限；上限本身在候选规则版本里（RC-601 未定）⇒ 中低档",
-            "values": {
-              "teamA": 1,
-              "teamB": 1
-            },
-            "leads": null
-          },
-          "pivot_sustain": {
-            "raw": 0.6667,
-            "weight": 0.1,
-            "contribution": 0.0667,
-            "from": "pivot_sustain",
-            "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "换入/离场只靠技能描述关键字（迅捷 / 自己脱离 / 立即替换），是六个维度里最弱的一条判据 ⇒ 最低",
-            "values": {
-              "teamA": 0.6667,
-              "teamB": 0.6667
-            },
-            "leads": null
-          }
-        },
-        "resolved_member_count": 6,
-        "unavailable_dimensions": []
-      },
-      {
-        "rank": 3,
-        "team_id": "rc602-team-01",
-        "score": 0.9012,
-        "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
-        "tied_with_previous": false,
-        "parts": {
-          "type_coverage": {
-            "raw": 0.7778,
-            "weight": 0.24,
-            "contribution": 0.1867,
-            "from": "type_coverage",
-            "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "冻结相性表（120 行，含 102 行组合）逐条可复算，是六个维度里证据最硬的一项",
-            "values": {
-              "teamA": 0.7778,
-              "teamB": 0.7778
-            },
-            "leads": null
-          },
-          "weakness_exposure": {
-            "raw": 0.7727,
-            "weight": 0.2,
-            "contribution": 0.1545,
-            "from": "weakness_exposure",
-            "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "与属性覆盖同源（同一张相性表），但方向相反：未承接弱点越少越好；权重略低于覆盖因为它对队伍人数更敏感",
-            "values": {
-              "teamA": 0.7727,
-              "teamB": 0.7727
+              "teamA": 0.8571,
+              "teamB": 0.8571
             },
             "leads": null
           },
@@ -573,9 +1297,187 @@
         "unavailable_dimensions": []
       },
       {
+        "rank": 2,
+        "team_id": "rc602-team-83",
+        "score": 0.9327,
+        "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
+        "tied_with_previous": false,
+        "parts": {
+          "type_coverage": {
+            "raw": 0.8889,
+            "weight": 0.24,
+            "contribution": 0.2133,
+            "from": "type_coverage",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "冻结相性表（120 行，含 102 行组合）逐条可复算，是六个维度里证据最硬的一项",
+            "values": {
+              "teamA": 0.8889,
+              "teamB": 0.8889
+            },
+            "leads": null
+          },
+          "weakness_exposure": {
+            "raw": 0.88,
+            "weight": 0.2,
+            "contribution": 0.176,
+            "from": "weakness_exposure",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "与属性覆盖同源（同一张相性表），但方向相反：未承接弱点越少越好；权重略低于覆盖因为它对队伍人数更敏感",
+            "values": {
+              "teamA": 0.88,
+              "teamB": 0.88
+            },
+            "leads": null
+          },
+          "speed_layers": {
+            "raw": 1,
+            "weight": 0.16,
+            "contribution": 0.16,
+            "from": "speed_layers",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "只用冻结 roster-48 的 stats.spe 与 speed_tier（48/48 有值）；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "respond_coverage": {
+            "raw": 1,
+            "weight": 0.16,
+            "contribution": 0.16,
+            "from": "respond_coverage",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），36/48 只有冻结学招表、12 只走图鉴推测 ⇒ 中档",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "energy_curve": {
+            "raw": 1,
+            "weight": 0.14,
+            "contribution": 0.14,
+            "from": "energy_curve",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "能耗来自冻结 skills[].energy 与注入规则配置的上限；上限本身在候选规则版本里（RC-601 未定）⇒ 中低档",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "pivot_sustain": {
+            "raw": 0.8333,
+            "weight": 0.1,
+            "contribution": 0.0833,
+            "from": "pivot_sustain",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "换入/离场只靠技能描述关键字（迅捷 / 自己脱离 / 立即替换），是六个维度里最弱的一条判据 ⇒ 最低",
+            "values": {
+              "teamA": 0.8333,
+              "teamB": 0.8333
+            },
+            "leads": null
+          }
+        },
+        "resolved_member_count": 6,
+        "unavailable_dimensions": []
+      },
+      {
+        "rank": 3,
+        "team_id": "rc602-team-89",
+        "score": 0.8983,
+        "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
+        "tied_with_previous": false,
+        "parts": {
+          "type_coverage": {
+            "raw": 0.8889,
+            "weight": 0.24,
+            "contribution": 0.2133,
+            "from": "type_coverage",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "冻结相性表（120 行，含 102 行组合）逐条可复算，是六个维度里证据最硬的一项",
+            "values": {
+              "teamA": 0.8889,
+              "teamB": 0.8889
+            },
+            "leads": null
+          },
+          "weakness_exposure": {
+            "raw": 0.875,
+            "weight": 0.2,
+            "contribution": 0.175,
+            "from": "weakness_exposure",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "与属性覆盖同源（同一张相性表），但方向相反：未承接弱点越少越好；权重略低于覆盖因为它对队伍人数更敏感",
+            "values": {
+              "teamA": 0.875,
+              "teamB": 0.875
+            },
+            "leads": null
+          },
+          "speed_layers": {
+            "raw": 1,
+            "weight": 0.16,
+            "contribution": 0.16,
+            "from": "speed_layers",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "只用冻结 roster-48 的 stats.spe 与 speed_tier（48/48 有值）；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "respond_coverage": {
+            "raw": 1,
+            "weight": 0.16,
+            "contribution": 0.16,
+            "from": "respond_coverage",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），36/48 只有冻结学招表、12 只走图鉴推测 ⇒ 中档",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "energy_curve": {
+            "raw": 1,
+            "weight": 0.14,
+            "contribution": 0.14,
+            "from": "energy_curve",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "能耗来自冻结 skills[].energy 与注入规则配置的上限；上限本身在候选规则版本里（RC-601 未定）⇒ 中低档",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "pivot_sustain": {
+            "raw": 0.5,
+            "weight": 0.1,
+            "contribution": 0.05,
+            "from": "pivot_sustain",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "换入/离场只靠技能描述关键字（迅捷 / 自己脱离 / 立即替换），是六个维度里最弱的一条判据 ⇒ 最低",
+            "values": {
+              "teamA": 0.5,
+              "teamB": 0.5
+            },
+            "leads": null
+          }
+        },
+        "resolved_member_count": 6,
+        "unavailable_dimensions": []
+      },
+      {
         "rank": 4,
-        "team_id": "rc602-team-02",
-        "score": 0.8419,
+        "team_id": "rc602-team-31",
+        "score": 0.8842,
         "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
         "tied_with_previous": false,
         "parts": {
@@ -593,15 +1495,15 @@
             "leads": null
           },
           "weakness_exposure": {
-            "raw": 0.6429,
+            "raw": 0.9375,
             "weight": 0.2,
-            "contribution": 0.1286,
+            "contribution": 0.1875,
             "from": "weakness_exposure",
             "provenance": "ENGINE_HYPOTHESIS",
             "reason": "与属性覆盖同源（同一张相性表），但方向相反：未承接弱点越少越好；权重略低于覆盖因为它对队伍人数更敏感",
             "values": {
-              "teamA": 0.6429,
-              "teamB": 0.6429
+              "teamA": 0.9375,
+              "teamB": 0.9375
             },
             "leads": null
           },
@@ -645,15 +1547,15 @@
             "leads": null
           },
           "pivot_sustain": {
-            "raw": 0.6667,
+            "raw": 0.5,
             "weight": 0.1,
-            "contribution": 0.0667,
+            "contribution": 0.05,
             "from": "pivot_sustain",
             "provenance": "ENGINE_HYPOTHESIS",
             "reason": "换入/离场只靠技能描述关键字（迅捷 / 自己脱离 / 立即替换），是六个维度里最弱的一条判据 ⇒ 最低",
             "values": {
-              "teamA": 0.6667,
-              "teamB": 0.6667
+              "teamA": 0.5,
+              "teamB": 0.5
             },
             "leads": null
           }
@@ -663,8 +1565,8 @@
       },
       {
         "rank": 5,
-        "team_id": "rc602-team-04",
-        "score": 0.7815,
+        "team_id": "rc602-team-01",
+        "score": 0.8633,
         "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
         "tied_with_previous": false,
         "parts": {
@@ -682,15 +1584,15 @@
             "leads": null
           },
           "weakness_exposure": {
-            "raw": 0.7241,
+            "raw": 0.8,
             "weight": 0.2,
-            "contribution": 0.1448,
+            "contribution": 0.16,
             "from": "weakness_exposure",
             "provenance": "ENGINE_HYPOTHESIS",
             "reason": "与属性覆盖同源（同一张相性表），但方向相反：未承接弱点越少越好；权重略低于覆盖因为它对队伍人数更敏感",
             "values": {
-              "teamA": 0.7241,
-              "teamB": 0.7241
+              "teamA": 0.8,
+              "teamB": 0.8
             },
             "leads": null
           },
@@ -734,15 +1636,15 @@
             "leads": null
           },
           "pivot_sustain": {
-            "raw": 0.1667,
+            "raw": 0.8333,
             "weight": 0.1,
-            "contribution": 0.0167,
+            "contribution": 0.0833,
             "from": "pivot_sustain",
             "provenance": "ENGINE_HYPOTHESIS",
             "reason": "换入/离场只靠技能描述关键字（迅捷 / 自己脱离 / 立即替换），是六个维度里最弱的一条判据 ⇒ 最低",
             "values": {
-              "teamA": 0.1667,
-              "teamB": 0.1667
+              "teamA": 0.8333,
+              "teamB": 0.8333
             },
             "leads": null
           }
@@ -754,51 +1656,49 @@
     "latency_ms": {
       "unit": "毫秒（实测墙钟，只用于延迟报告）",
       "samples": 5,
-      "p50": 0.394,
-      "p95": 0.885,
-      "min": 0.348,
-      "max": 0.885
+      "p50": 3.083,
+      "p95": 4.394,
+      "min": 2.846,
+      "max": 4.394
     }
   },
   "partial_completion_value": {
     "criterion": "k ∈ [1,6] 才算；所有金额都是可复算的计数或占比；uncertainty 只描述候选池规模与 unknown 占比",
-    "candidate_pool_size": 43,
+    "candidate_pool_size": 536,
     "latency_ms": {
       "unit": "毫秒（实测墙钟，只用于延迟报告）",
       "samples": 6,
-      "p50": 0.088,
-      "p95": 0.4,
-      "min": 0.071,
-      "max": 0.4
+      "p50": 0.586,
+      "p95": 0.735,
+      "min": 0.536,
+      "max": 0.735
     },
     "rows": [
       {
         "k": 1,
         "available": true,
         "unknown_reason": null,
-        "score": 0.3704,
+        "score": 0.5185,
         "weakest_part": "coverage_resistable_types",
         "remaining_slots": 5,
         "parts": {
           "coverage_resistable_types": {
-            "value": 2,
+            "value": 4,
             "target": 18,
-            "ratio": 0.1111,
-            "gap_count": 16,
+            "ratio": 0.2222,
+            "gap_count": 14,
             "gap_types": [
-              "光系",
               "冰系",
-              "地系",
               "幻系",
               "幽系",
               "恶系",
               "普通系",
               "机械系",
+              "武系",
               "毒系",
-              "水系",
               "火系",
-              "电系",
               "翼系",
+              "草系",
               "萌系",
               "虫系",
               "龙系"
@@ -809,19 +1709,20 @@
             "value": 1,
             "target": 3,
             "bands": [
-              "mid"
+              "slow"
             ],
             "gap_count": 2,
             "unknown_members": []
           },
           "respond_variants_covered": {
-            "value": 2,
+            "value": 3,
             "target": 3,
             "variants": [
               "应对攻击",
-              "应对状态"
+              "应对状态",
+              "应对防御"
             ],
-            "gap_count": 1,
+            "gap_count": 0,
             "unknown_members": []
           },
           "pivot_holders": {
@@ -835,23 +1736,23 @@
           "pool_fillable_slots": {
             "value": 5,
             "remaining_slots": 5,
-            "pool_size": 42,
-            "pool_fully_known": 42,
+            "pool_size": 536,
+            "pool_fully_known": 536,
             "pool_unknown": 0,
-            "raw_pool_size": 43
+            "raw_pool_size": 536
           }
         },
         "uncertainty": {
-          "available_pool_size": 42,
-          "raw_candidate_count": 43,
+          "available_pool_size": 536,
+          "raw_candidate_count": 536,
           "pool_unknown_members": 0,
           "pool_unknown_ratio": 0,
           "pool_fully_known_ratio": 1,
           "fillability_ratio": 1,
-          "structural_gap_count": 19,
+          "structural_gap_count": 16,
           "score_band": {
-            "low": 0.3704,
-            "high": 0.3704
+            "low": 0.5185,
+            "high": 0.5185
           },
           "band_half_width": 0,
           "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
@@ -862,7 +1763,7 @@
         "k": 2,
         "available": true,
         "unknown_reason": null,
-        "score": 0.6667,
+        "score": 0.5555,
         "weakest_part": "coverage_resistable_types",
         "remaining_slots": 4,
         "parts": {
@@ -872,29 +1773,28 @@
             "ratio": 0.3333,
             "gap_count": 12,
             "gap_types": [
-              "光系",
-              "地系",
+              "冰系",
               "幻系",
               "幽系",
               "恶系",
               "普通系",
+              "武系",
               "毒系",
-              "水系",
-              "火系",
-              "电系",
               "翼系",
+              "草系",
+              "萌系",
+              "虫系",
               "龙系"
             ],
             "unknown_members": []
           },
           "speed_bands_covered": {
-            "value": 2,
+            "value": 1,
             "target": 3,
             "bands": [
-              "fast",
-              "mid"
+              "slow"
             ],
-            "gap_count": 1,
+            "gap_count": 2,
             "unknown_members": []
           },
           "respond_variants_covered": {
@@ -920,23 +1820,23 @@
           "pool_fillable_slots": {
             "value": 4,
             "remaining_slots": 4,
-            "pool_size": 42,
-            "pool_fully_known": 42,
+            "pool_size": 536,
+            "pool_fully_known": 536,
             "pool_unknown": 0,
-            "raw_pool_size": 43
+            "raw_pool_size": 536
           }
         },
         "uncertainty": {
-          "available_pool_size": 42,
-          "raw_candidate_count": 43,
+          "available_pool_size": 536,
+          "raw_candidate_count": 536,
           "pool_unknown_members": 0,
           "pool_unknown_ratio": 0,
           "pool_fully_known_ratio": 1,
           "fillability_ratio": 1,
-          "structural_gap_count": 13,
+          "structural_gap_count": 14,
           "score_band": {
-            "low": 0.6667,
-            "high": 0.6667
+            "low": 0.5555,
+            "high": 0.5555
           },
           "band_half_width": 0,
           "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
@@ -947,21 +1847,23 @@
         "k": 3,
         "available": true,
         "unknown_reason": null,
-        "score": 0.7778,
-        "weakest_part": "speed_bands_covered",
+        "score": 0.7408,
+        "weakest_part": "coverage_resistable_types",
         "remaining_slots": 3,
         "parts": {
           "coverage_resistable_types": {
-            "value": 12,
+            "value": 10,
             "target": 18,
-            "ratio": 0.6667,
-            "gap_count": 6,
+            "ratio": 0.5556,
+            "gap_count": 8,
             "gap_types": [
-              "光系",
-              "地系",
+              "幻系",
               "幽系",
               "恶系",
-              "水系",
+              "普通系",
+              "武系",
+              "毒系",
+              "翼系",
               "龙系"
             ],
             "unknown_members": []
@@ -970,8 +1872,8 @@
             "value": 2,
             "target": 3,
             "bands": [
-              "fast",
-              "mid"
+              "mid",
+              "slow"
             ],
             "gap_count": 1,
             "unknown_members": []
@@ -1000,15 +1902,95 @@
           "pool_fillable_slots": {
             "value": 3,
             "remaining_slots": 3,
-            "pool_size": 42,
-            "pool_fully_known": 42,
+            "pool_size": 536,
+            "pool_fully_known": 536,
             "pool_unknown": 0,
-            "raw_pool_size": 43
+            "raw_pool_size": 536
           }
         },
         "uncertainty": {
-          "available_pool_size": 42,
-          "raw_candidate_count": 43,
+          "available_pool_size": 536,
+          "raw_candidate_count": 536,
+          "pool_unknown_members": 0,
+          "pool_unknown_ratio": 0,
+          "pool_fully_known_ratio": 1,
+          "fillability_ratio": 1,
+          "structural_gap_count": 9,
+          "score_band": {
+            "low": 0.7408,
+            "high": 0.7408
+          },
+          "band_half_width": 0,
+          "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
+          "why": "区间宽度只由「候选池能填满几个剩余槽位」与「池里有多少只带 unknown」决定；它描述的是**我们不知道多少**，不是任何意义上的可能性"
+        }
+      },
+      {
+        "k": 4,
+        "available": true,
+        "unknown_reason": null,
+        "score": 0.7778,
+        "weakest_part": "speed_bands_covered",
+        "remaining_slots": 2,
+        "parts": {
+          "coverage_resistable_types": {
+            "value": 12,
+            "target": 18,
+            "ratio": 0.6667,
+            "gap_count": 6,
+            "gap_types": [
+              "幽系",
+              "普通系",
+              "武系",
+              "毒系",
+              "翼系",
+              "龙系"
+            ],
+            "unknown_members": []
+          },
+          "speed_bands_covered": {
+            "value": 2,
+            "target": 3,
+            "bands": [
+              "mid",
+              "slow"
+            ],
+            "gap_count": 1,
+            "unknown_members": []
+          },
+          "respond_variants_covered": {
+            "value": 3,
+            "target": 3,
+            "variants": [
+              "应对攻击",
+              "应对状态",
+              "应对防御"
+            ],
+            "gap_count": 0,
+            "unknown_members": []
+          },
+          "pivot_holders": {
+            "value": 3,
+            "target": 4,
+            "holders": [
+              "instance:own-0001",
+              "instance:own-0002",
+              "instance:own-0003"
+            ],
+            "ratio": 0.75
+          },
+          "pool_fillable_slots": {
+            "value": 2,
+            "remaining_slots": 2,
+            "pool_size": 536,
+            "pool_fully_known": 536,
+            "pool_unknown": 0,
+            "raw_pool_size": 536
+          }
+        },
+        "uncertainty": {
+          "available_pool_size": 536,
+          "raw_candidate_count": 536,
           "pool_unknown_members": 0,
           "pool_unknown_ratio": 0,
           "pool_fully_known_ratio": 1,
@@ -1024,22 +2006,24 @@
         }
       },
       {
-        "k": 4,
+        "k": 5,
         "available": true,
         "unknown_reason": null,
-        "score": 0.8148,
+        "score": 0.7778,
         "weakest_part": "speed_bands_covered",
-        "remaining_slots": 2,
+        "remaining_slots": 1,
         "parts": {
           "coverage_resistable_types": {
-            "value": 14,
+            "value": 12,
             "target": 18,
-            "ratio": 0.7778,
-            "gap_count": 4,
+            "ratio": 0.6667,
+            "gap_count": 6,
             "gap_types": [
-              "地系",
               "幽系",
-              "恶系",
+              "普通系",
+              "武系",
+              "毒系",
+              "翼系",
               "龙系"
             ],
             "unknown_members": []
@@ -1048,8 +2032,8 @@
             "value": 2,
             "target": 3,
             "bands": [
-              "fast",
-              "mid"
+              "mid",
+              "slow"
             ],
             "gap_count": 1,
             "unknown_members": []
@@ -1067,35 +2051,35 @@
           },
           "pivot_holders": {
             "value": 4,
-            "target": 4,
+            "target": 5,
             "holders": [
               "instance:own-0001",
               "instance:own-0002",
               "instance:own-0003",
-              "instance:own-0004"
+              "instance:own-0005"
             ],
-            "ratio": 1
+            "ratio": 0.8
           },
           "pool_fillable_slots": {
-            "value": 2,
-            "remaining_slots": 2,
-            "pool_size": 42,
-            "pool_fully_known": 42,
+            "value": 1,
+            "remaining_slots": 1,
+            "pool_size": 536,
+            "pool_fully_known": 536,
             "pool_unknown": 0,
-            "raw_pool_size": 43
+            "raw_pool_size": 536
           }
         },
         "uncertainty": {
-          "available_pool_size": 42,
-          "raw_candidate_count": 43,
+          "available_pool_size": 536,
+          "raw_candidate_count": 536,
           "pool_unknown_members": 0,
           "pool_unknown_ratio": 0,
           "pool_fully_known_ratio": 1,
           "fillability_ratio": 1,
-          "structural_gap_count": 5,
+          "structural_gap_count": 7,
           "score_band": {
-            "low": 0.8148,
-            "high": 0.8148
+            "low": 0.7778,
+            "high": 0.7778
           },
           "band_half_width": 0,
           "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
@@ -1103,34 +2087,37 @@
         }
       },
       {
-        "k": 5,
+        "k": 6,
         "available": true,
         "unknown_reason": null,
-        "score": 0.8148,
-        "weakest_part": "speed_bands_covered",
-        "remaining_slots": 1,
+        "score": 0.8889,
+        "weakest_part": "coverage_resistable_types",
+        "remaining_slots": 0,
         "parts": {
           "coverage_resistable_types": {
-            "value": 14,
+            "value": 12,
             "target": 18,
-            "ratio": 0.7778,
-            "gap_count": 4,
+            "ratio": 0.6667,
+            "gap_count": 6,
             "gap_types": [
-              "地系",
               "幽系",
-              "恶系",
+              "普通系",
+              "武系",
+              "毒系",
+              "翼系",
               "龙系"
             ],
             "unknown_members": []
           },
           "speed_bands_covered": {
-            "value": 2,
+            "value": 3,
             "target": 3,
             "bands": [
               "fast",
-              "mid"
+              "mid",
+              "slow"
             ],
-            "gap_count": 1,
+            "gap_count": 0,
             "unknown_members": []
           },
           "respond_variants_covered": {
@@ -1146,117 +2133,36 @@
           },
           "pivot_holders": {
             "value": 5,
-            "target": 5,
-            "holders": [
-              "instance:own-0001",
-              "instance:own-0002",
-              "instance:own-0003",
-              "instance:own-0004",
-              "instance:own-0005"
-            ],
-            "ratio": 1
-          },
-          "pool_fillable_slots": {
-            "value": 1,
-            "remaining_slots": 1,
-            "pool_size": 42,
-            "pool_fully_known": 42,
-            "pool_unknown": 0,
-            "raw_pool_size": 43
-          }
-        },
-        "uncertainty": {
-          "available_pool_size": 42,
-          "raw_candidate_count": 43,
-          "pool_unknown_members": 0,
-          "pool_unknown_ratio": 0,
-          "pool_fully_known_ratio": 1,
-          "fillability_ratio": 1,
-          "structural_gap_count": 5,
-          "score_band": {
-            "low": 0.8148,
-            "high": 0.8148
-          },
-          "band_half_width": 0,
-          "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
-          "why": "区间宽度只由「候选池能填满几个剩余槽位」与「池里有多少只带 unknown」决定；它描述的是**我们不知道多少**，不是任何意义上的可能性"
-        }
-      },
-      {
-        "k": 6,
-        "available": true,
-        "unknown_reason": null,
-        "score": 0.8148,
-        "weakest_part": "speed_bands_covered",
-        "remaining_slots": 0,
-        "parts": {
-          "coverage_resistable_types": {
-            "value": 14,
-            "target": 18,
-            "ratio": 0.7778,
-            "gap_count": 4,
-            "gap_types": [
-              "地系",
-              "幽系",
-              "恶系",
-              "龙系"
-            ],
-            "unknown_members": []
-          },
-          "speed_bands_covered": {
-            "value": 2,
-            "target": 3,
-            "bands": [
-              "fast",
-              "mid"
-            ],
-            "gap_count": 1,
-            "unknown_members": []
-          },
-          "respond_variants_covered": {
-            "value": 3,
-            "target": 3,
-            "variants": [
-              "应对攻击",
-              "应对状态",
-              "应对防御"
-            ],
-            "gap_count": 0,
-            "unknown_members": []
-          },
-          "pivot_holders": {
-            "value": 6,
             "target": 6,
             "holders": [
               "instance:own-0001",
               "instance:own-0002",
               "instance:own-0003",
-              "instance:own-0004",
               "instance:own-0005",
               "instance:own-0006"
             ],
-            "ratio": 1
+            "ratio": 0.8333
           },
           "pool_fillable_slots": {
             "value": 0,
             "remaining_slots": 0,
-            "pool_size": 42,
-            "pool_fully_known": 42,
+            "pool_size": 536,
+            "pool_fully_known": 536,
             "pool_unknown": 0,
-            "raw_pool_size": 43
+            "raw_pool_size": 536
           }
         },
         "uncertainty": {
-          "available_pool_size": 42,
-          "raw_candidate_count": 43,
+          "available_pool_size": 536,
+          "raw_candidate_count": 536,
           "pool_unknown_members": 0,
           "pool_unknown_ratio": 0,
           "pool_fully_known_ratio": 1,
           "fillability_ratio": 1,
-          "structural_gap_count": 5,
+          "structural_gap_count": 6,
           "score_band": {
-            "low": 0.8148,
-            "high": 0.8148
+            "low": 0.8889,
+            "high": 0.8889
           },
           "band_half_width": 0,
           "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
@@ -1512,13 +2418,13 @@
       "where": "tests/roco-team-ranker.test.js#④",
       "criterion": "速度未知时该队必须 available:false 且 score=null",
       "mutation": "把 speed_layers 的 null 改成 0 并标 available:true",
-      "actual": "补 0 版本 available=true score=0.9012；正确版本 available=false score=null ⇒ 判红"
+      "actual": "补 0 版本 available=true score=0.8633；正确版本 available=false score=null ⇒ 判红"
     },
     {
       "where": "tests/roco-team-ranker.test.js#⑤",
       "criterion": "多属性精灵必须按冻结相性表的显式组合行算（组合行优先）",
-      "mutation": "把 own-0003（地系|幻系）的抗性按 types[0]=地系 的单属性行算",
-      "actual": "组合行=6 个抗性（模块输出=6）；types[0] 行=5 个 ⇒ 判红"
+      "mutation": "把 own-0009（恶系|翼系）的抗性按 types[0]=恶系 的单属性行算",
+      "actual": "组合行=3 个抗性（模块输出=3）；types[0] 行=2 个 ⇒ 判红"
     },
     {
       "where": "tests/roco-team-ranker.test.js#⑥a",
@@ -1535,8 +2441,8 @@
     {
       "where": "tests/roco-team-ranker.test.js#⑧",
       "criterion": "覆盖类计数与结构分对成员质量单调（更好不许更低、更差不许更高）",
-      "mutation": "把「补进 own-0002（抗性更多）」换成「补进 own-0028（抗性更少）」",
-      "actual": "更好：覆盖=6 分=0.6667；更差：覆盖=3 分=0.6111 ⇒ 单调性判据区分得开"
+      "mutation": "把「补进 own-0003（抗性更多）」换成「补进 own-0002（抗性更少）」",
+      "actual": "更好：覆盖=9 分=0.7222；更差：覆盖=6 分=0.5555 ⇒ 单调性判据区分得开"
     },
     {
       "where": "tests/roco-team-ranker.test.js#⑨a",

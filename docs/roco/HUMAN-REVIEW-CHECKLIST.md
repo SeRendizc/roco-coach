@@ -4,7 +4,10 @@
 > 里面的数字**由判据钉住**（`tests/roco-human-todo.test.js` 会把下面那行注释与真源逐个数比对），
 > 所以它不会烂掉 —— 数字变了却没人改这份文档，判据就红。
 >
-> 数字：<!-- TODO-NUMBERS gold_approved=0 gold_total=59 phase_e_cases=18 rolled_individuals=49 owned_individuals=49 -->
+> 数字：<!-- TODO-NUMBERS gold_approved=0 gold_total=59 phase_e_cases=18 rolled_individuals=542 owned_individuals=542 -->
+> <!-- 2026-09-28 改钉（**旧值不删**）：`rolled_individuals` 与 `owned_individuals` 原来是 `49`（更早是 `48`）。
+>      人类拍板「所有精灵实装，这样就不需要我的精灵了，直接全筛选」并选甲案（盒子 = 可玩层镜像）⇒
+>      冷冻个体从 48 只扩到可玩层的 542 只，两个数都变成 542。判据（清单里的数 == 真源现算的数）没放宽。 -->
 
 ---
 
@@ -35,8 +38,7 @@
 
 ## 3. 每只精灵的真实**性格** / **天分**
 
-- **现状**：**49** 个个体**全部是掷点**（数据集里没有真值；2026-09-28 人类批准加了一对同种演示个体 ——
-  48 个物种 + `own-0049`，见 `data/roco/human-decisions.json`）—— `nature_source` / `talent_source` 都是
+- **现状**：**542** 个个体**全部是掷点**（数据集里没有真值）—— `nature_source` / `talent_source` 都是
   `rolled（…非官方概率）`，页面上也已经写明「这是模拟掷点，不是官方概率」。
 - **你要做什么**：把小黑盒（或任何一手来源）的那批导出发我。格式随便，够用就行：
   **一只一行：物种编号/名字 + 性格 + 六项天分（0–10）**（有突破次数更好）。

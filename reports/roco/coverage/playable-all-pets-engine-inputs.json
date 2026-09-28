@@ -1,0 +1,555 @@
+{
+  "schema_version": 1,
+  "generated_by": "scripts/roco/build-all-pets-engine-inputs.mjs",
+  "command": "node scripts/roco/build-all-pets-engine-inputs.mjs",
+  "human_ruling": "2026-09-28 人类逐字：「就用现在抓包得到的数据吧，别的不找不要了，问题数据也不要了。所有精灵实装，这样就不需要我的精灵了，直接全筛选」",
+  "excluded_capture_ids": {
+    "3620": "学院呱呱：machine 桶被灌了整张技能表（269 条、横跨全系别），level 只有 8 条",
+    "4083": "黑猫密探：level 桶被灌成绿翼鸟族那套 13 条（与应有池交集 0），重抓未修好",
+    "4084": "祭礼巨像：同上（且已在旧 layer-48 里，本轮一并撤下）",
+    "4085": "雪影冰灵：同上",
+    "4086": "棋契陛下：同上（且图鉴同名 8 条形态，本来就认不出是哪一条）",
+    "4087": "奇梦咪：同上",
+    "4101": "暮风隐者：同上（且图鉴同名 2 条形态）",
+    "4102": "淤泥乌泽：同上"
+  },
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "layer_dir": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+  "capture_files": 560,
+  "capture_pets": 547,
+  "excluded": 8,
+  "target_pets": 539,
+  "id_routes": {
+    "game_id": 521,
+    "name_and_stats": 18
+  },
+  "base_pets": 12,
+  "layer_pets": 530,
+  "total_pets": 542,
+  "base_overlap": [
+    {
+      "pet_id": "pet_000062",
+      "capture_id": "3071",
+      "name": "音速犬"
+    },
+    {
+      "pet_id": "pet_000112",
+      "capture_id": "3123",
+      "name": "雪影娃娃"
+    },
+    {
+      "pet_id": "pet_000124",
+      "capture_id": "3138",
+      "name": "化蝶"
+    },
+    {
+      "pet_id": "pet_000190",
+      "capture_id": "3216",
+      "name": "海豹船长"
+    },
+    {
+      "pet_id": "pet_000225",
+      "capture_id": "3269",
+      "name": "寂灭骨龙"
+    },
+    {
+      "pet_id": "pet_000417",
+      "capture_id": "3530",
+      "name": "圆号鱼"
+    },
+    {
+      "pet_id": "pet_000445",
+      "capture_id": "3569",
+      "name": "黑猫巫师"
+    },
+    {
+      "pet_id": "pet_000451",
+      "capture_id": "3579",
+      "name": "秩序鱿墨"
+    },
+    {
+      "pet_id": "pet_000474",
+      "capture_id": "3609",
+      "name": "画间沉铁兽"
+    }
+  ],
+  "role_annotations": 549,
+  "role_annotations_from_roster_48": 48,
+  "recomputed_vs_roster_48": [
+    {
+      "pet_id": "pet_000062",
+      "capture_id": "3071",
+      "recorded_role": "attacker",
+      "recomputed_role": "attacker",
+      "same": true,
+      "recorded_tier": ">=111",
+      "recomputed_tier": ">=111",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000112",
+      "capture_id": "3123",
+      "recorded_role": "recovery",
+      "recomputed_role": "recovery",
+      "same": true,
+      "recorded_tier": "71-90",
+      "recomputed_tier": "71-90",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000124",
+      "capture_id": "3138",
+      "recorded_role": "recovery",
+      "recomputed_role": "recovery",
+      "same": true,
+      "recorded_tier": "91-110",
+      "recomputed_tier": "91-110",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000190",
+      "capture_id": "3216",
+      "recorded_role": "support",
+      "recomputed_role": "support",
+      "same": true,
+      "recorded_tier": "91-110",
+      "recomputed_tier": "91-110",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000225",
+      "capture_id": "3269",
+      "recorded_role": "recovery",
+      "recomputed_role": "recovery",
+      "same": true,
+      "recorded_tier": "51-70",
+      "recomputed_tier": "51-70",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000417",
+      "capture_id": "3530",
+      "recorded_role": "recovery",
+      "recomputed_role": "recovery",
+      "same": true,
+      "recorded_tier": "91-110",
+      "recomputed_tier": "91-110",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000445",
+      "capture_id": "3569",
+      "recorded_role": "tank",
+      "recomputed_role": "tank",
+      "same": true,
+      "recorded_tier": "51-70",
+      "recomputed_tier": "51-70",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000451",
+      "capture_id": "3579",
+      "recorded_role": "attacker",
+      "recomputed_role": "attacker",
+      "same": true,
+      "recorded_tier": ">=111",
+      "recomputed_tier": ">=111",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000474",
+      "capture_id": "3609",
+      "recorded_role": "recovery",
+      "recomputed_role": "recovery",
+      "same": true,
+      "recorded_tier": "91-110",
+      "recomputed_tier": "91-110",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000484",
+      "capture_id": "3619",
+      "recorded_role": "tank",
+      "recomputed_role": "tank",
+      "same": true,
+      "recorded_tier": "71-90",
+      "recomputed_tier": "71-90",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000330",
+      "capture_id": "3411",
+      "recorded_role": "tank",
+      "recomputed_role": "tank",
+      "same": true,
+      "recorded_tier": "71-90",
+      "recomputed_tier": "71-90",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000167",
+      "capture_id": "3190",
+      "recorded_role": "recovery",
+      "recomputed_role": "recovery",
+      "same": true,
+      "recorded_tier": "71-90",
+      "recomputed_tier": "71-90",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000172",
+      "capture_id": "3195",
+      "recorded_role": "control",
+      "recomputed_role": "control",
+      "same": true,
+      "recorded_tier": "71-90",
+      "recomputed_tier": "71-90",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000219",
+      "capture_id": "3263",
+      "recorded_role": "control",
+      "recomputed_role": "control",
+      "same": true,
+      "recorded_tier": "71-90",
+      "recomputed_tier": "71-90",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000243",
+      "capture_id": "3293",
+      "recorded_role": "control",
+      "recomputed_role": "control",
+      "same": true,
+      "recorded_tier": "91-110",
+      "recomputed_tier": "91-110",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000218",
+      "capture_id": "3262",
+      "recorded_role": "control",
+      "recomputed_role": "control",
+      "same": true,
+      "recorded_tier": "51-70",
+      "recomputed_tier": "51-70",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000240",
+      "capture_id": "3290",
+      "recorded_role": "control",
+      "recomputed_role": "control",
+      "same": true,
+      "recorded_tier": "71-90",
+      "recomputed_tier": "71-90",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000479",
+      "capture_id": "3614",
+      "recorded_role": "recovery",
+      "recomputed_role": "recovery",
+      "same": true,
+      "recorded_tier": "91-110",
+      "recomputed_tier": "91-110",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000450",
+      "capture_id": "3578",
+      "recorded_role": "tank",
+      "recomputed_role": "tank",
+      "same": true,
+      "recorded_tier": "51-70",
+      "recomputed_tier": "51-70",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000248",
+      "capture_id": "3298",
+      "recorded_role": "recovery",
+      "recomputed_role": "recovery",
+      "same": true,
+      "recorded_tier": "<=50",
+      "recomputed_tier": "<=50",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000143",
+      "capture_id": "3157",
+      "recorded_role": "support",
+      "recomputed_role": "support",
+      "same": true,
+      "recorded_tier": "<=50",
+      "recomputed_tier": "<=50",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000308",
+      "capture_id": "3381",
+      "recorded_role": "tank",
+      "recomputed_role": "tank",
+      "same": true,
+      "recorded_tier": "<=50",
+      "recomputed_tier": "<=50",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000548",
+      "capture_id": "4021",
+      "recorded_role": "support",
+      "recomputed_role": "support",
+      "same": true,
+      "recorded_tier": "<=50",
+      "recomputed_tier": "<=50",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000152",
+      "capture_id": "3173",
+      "recorded_role": "recovery",
+      "recomputed_role": "recovery",
+      "same": true,
+      "recorded_tier": "<=50",
+      "recomputed_tier": "<=50",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000012",
+      "capture_id": "3013",
+      "recorded_role": "tank",
+      "recomputed_role": "recovery",
+      "same": false,
+      "recorded_tier": "71-90",
+      "recomputed_tier": "71-90",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000153",
+      "capture_id": "3174",
+      "recorded_role": "tank",
+      "recomputed_role": "tank",
+      "same": true,
+      "recorded_tier": "51-70",
+      "recomputed_tier": "51-70",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000545",
+      "capture_id": "4020",
+      "recorded_role": "tank",
+      "recomputed_role": "tank",
+      "same": true,
+      "recorded_tier": "91-110",
+      "recomputed_tier": "91-110",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000130",
+      "capture_id": "3144",
+      "recorded_role": "attacker",
+      "recomputed_role": "attacker",
+      "same": true,
+      "recorded_tier": ">=111",
+      "recomputed_tier": ">=111",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000328",
+      "capture_id": "3407",
+      "recorded_role": "attacker",
+      "recomputed_role": "support",
+      "same": false,
+      "recorded_tier": "91-110",
+      "recomputed_tier": "71-90",
+      "tier_same": false
+    },
+    {
+      "pet_id": "pet_000118",
+      "capture_id": "3129",
+      "recorded_role": "attacker",
+      "recomputed_role": "attacker",
+      "same": true,
+      "recorded_tier": ">=111",
+      "recomputed_tier": ">=111",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000458",
+      "capture_id": "3593",
+      "recorded_role": "attacker",
+      "recomputed_role": "attacker",
+      "same": true,
+      "recorded_tier": "91-110",
+      "recomputed_tier": "91-110",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000448",
+      "capture_id": "3573",
+      "recorded_role": "attacker",
+      "recomputed_role": "attacker",
+      "same": true,
+      "recorded_tier": "91-110",
+      "recomputed_tier": "91-110",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000137",
+      "capture_id": "3151",
+      "recorded_role": "support",
+      "recomputed_role": "support",
+      "same": true,
+      "recorded_tier": "51-70",
+      "recomputed_tier": "51-70",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000162",
+      "capture_id": "3183",
+      "recorded_role": "recovery",
+      "recomputed_role": "recovery",
+      "same": true,
+      "recorded_tier": "51-70",
+      "recomputed_tier": "51-70",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000456",
+      "capture_id": "3591",
+      "recorded_role": "support",
+      "recomputed_role": "support",
+      "same": true,
+      "recorded_tier": "51-70",
+      "recomputed_tier": "51-70",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000163",
+      "capture_id": "3184",
+      "recorded_role": "recovery",
+      "recomputed_role": "recovery",
+      "same": true,
+      "recorded_tier": "71-90",
+      "recomputed_tier": "71-90",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000100",
+      "capture_id": "3111",
+      "recorded_role": "tank",
+      "recomputed_role": "tank",
+      "same": true,
+      "recorded_tier": "71-90",
+      "recomputed_tier": "71-90",
+      "tier_same": true
+    },
+    {
+      "pet_id": "pet_000473",
+      "capture_id": "3608",
+      "recorded_role": "attacker",
+      "recomputed_role": "attacker",
+      "same": true,
+      "recorded_tier": ">=111",
+      "recomputed_tier": ">=111",
+      "tier_same": true
+    }
+  ],
+  "skill_bucket_totals": {
+    "native": 7601,
+    "blood": 9702,
+    "stones": 8890
+  },
+  "duplicate_bucket_entries": {
+    "entries_dropped": 18,
+    "pets_affected": 2,
+    "sample": [
+      {
+        "pet": "3234（牵线木偶）",
+        "bucket": "level",
+        "skill_id": "skill_000290",
+        "name": "借用"
+      },
+      {
+        "pet": "3234（牵线木偶）",
+        "bucket": "level",
+        "skill_id": "skill_000290",
+        "name": "借用"
+      },
+      {
+        "pet": "3234（牵线木偶）",
+        "bucket": "level",
+        "skill_id": "skill_000290",
+        "name": "借用"
+      },
+      {
+        "pet": "3234（牵线木偶）",
+        "bucket": "level",
+        "skill_id": "skill_000294",
+        "name": "取念"
+      },
+      {
+        "pet": "3234（牵线木偶）",
+        "bucket": "level",
+        "skill_id": "skill_000294",
+        "name": "取念"
+      }
+    ]
+  },
+  "capture_csv_cross_check": {
+    "csv_rows": 547,
+    "compared": 539,
+    "mismatches": 0
+  },
+  "pool_size": {
+    "min": 34,
+    "max": 58,
+    "median": 49
+  },
+  "ladder_use": {
+    "free_attack": {
+      "0": 430,
+      "1": 109
+    },
+    "reactive_defense": {
+      "0": 539
+    },
+    "main_attack": {
+      "0": 539
+    }
+  },
+  "mechanism_coverage": {
+    "charge": 18,
+    "damage": 539,
+    "energy": 407,
+    "escape": 133,
+    "heal": 178,
+    "mark": 49,
+    "multi_hit": 175,
+    "position": 64,
+    "priority": 90,
+    "random": 94,
+    "respond": 539,
+    "shield": 539,
+    "stat_mod": 161,
+    "status_dot": 116
+  },
+  "energy_max": 6,
+  "energy_max_source": "legacy_sim_v1.energy.max",
+  "files": {
+    "pets.json": {
+      "bytes": 1407261,
+      "sha256": "1a8dc3dc6b32e699606006bece966eb69cbc89dfaa363d817341a66292709c96"
+    },
+    "learnsets.json": {
+      "bytes": 3168565,
+      "sha256": "7586c4bdfd67208af1706670e873cf1d9ab8b9ae66dcbe9b7a0d84361836ac42"
+    },
+    "support-matrix.json": {
+      "bytes": 3234973,
+      "sha256": "9be4a49cc768b33960a57a4b0991d4eadae7242ee2e74a3c7ac1e0aada3ff231"
+    }
+  }
+}

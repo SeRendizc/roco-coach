@@ -290,7 +290,7 @@ export function buildCandidateIndex(inputs = {}) {
       species_id: speciesId,
       species_name: roster?.name ?? catalog?.name ?? pack?.entity?.name ?? null,
       types,
-      types_source: roster?.types ? `${FROZEN_PATHS.roster48}#pets[pet_id=${speciesId}].types`
+      types_source: roster?.types ? `${roster.__source ?? FROZEN_PATHS.roster48}#pets[pet_id=${speciesId}].types`
         : (arr(pack?.entity?.tags?.types).length ? `data/roco/game-data-pack/v2/pack.json#${pack.pointer}.tags.types`
           : (catalog?.types ? `${FROZEN_PATHS.fullCatalog}#pets[pet_id=${speciesId}].types` : null)),
       validated: Boolean(roster) || learnset !== null,
@@ -308,11 +308,11 @@ export function buildCandidateIndex(inputs = {}) {
       get pivot_tools() {return learnsetToolsFor(speciesId).pivot_tools;},
       get learnset_tier() {return learnsetToolsFor(speciesId).learnset_tier;},
       evidence: {
-        types: roster?.types ? {source_file: FROZEN_PATHS.roster48, pointer: `pets[pet_id=${speciesId}].types`}
+        types: roster?.types ? {source_file: roster.__source ?? FROZEN_PATHS.roster48, pointer: `pets[pet_id=${speciesId}].types`}
           : (arr(pack?.entity?.tags?.types).length ? {source_file: 'data/roco/game-data-pack/v2/pack.json', pointer: `${pack.pointer}.tags.types`}
             : (catalog?.types ? {source_file: FROZEN_PATHS.fullCatalog, pointer: `pets[pet_id=${speciesId}].types`} : null)),
         speed: typeof roster?.stats?.spe === 'number'
-          ? {source_file: FROZEN_PATHS.roster48, pointer: `pets[pet_id=${speciesId}].stats.spe`}
+          ? {source_file: roster.__source ?? FROZEN_PATHS.roster48, pointer: `pets[pet_id=${speciesId}].stats.spe`}
           : (typeof catalog?.stats?.spe === 'number'
             ? {source_file: FROZEN_PATHS.fullCatalog, pointer: `pets[pet_id=${speciesId}].stats.spe`} : null),
         pool: learnset ? {source_file: learnset.source_file, pointer: `learnsets.${speciesId}`} : null,
@@ -870,7 +870,7 @@ export function recallCandidates(request, inputs = {}) {
         index.facts.catalog_pet_entities, '候选宇宙是 pack 的 600+ 宠物实体，不是当前 48 只迁移夹具'),
       evidence(FROZEN_PATHS.types, 'types', 'keys', index.attackTypes.length,
         '召回用的属性互补判据：18 个单系攻击系别'),
-      evidence(FROZEN_PATHS.roster48, 'pets[].speed_tier', 'count_with_value', index.facts.speed_validated,
+      evidence(`${FROZEN_PATHS.pets} + ${FROZEN_PATHS.petsOverlay}`, 'pets[].speed_tier', 'count_with_value', index.facts.speed_validated,
         '速度层次只认冻结档位；其余用 full-catalog 的 base stats 并标 knowledge_only'),
       evidence(FROZEN_PATHS.skills, 'skills[].energy', 'values',
         uniqueSorted(selected.flatMap((row) => arr(row.profile.energy?.skills).map((s) => s.energy)).filter((e) => typeof e === 'number')),
@@ -958,7 +958,8 @@ export const RECALL_SCORE_CRITERIA = Object.freeze({
     + '（每条 1 / 条数归一）；某系别全队 ≥ 3 只都弱时再加权 —— 这是可复算计数，不是体系强弱判断。',
   preference: 'favourite = true 记 1 分、locked = true 记 1 分（已在队里的不会进候选），'
     + '其余记 0；请求里的 preference（温和/简短/详细）**不影响**候选与排序，只影响措辞。',
-  evidence_tier: '在冻结迁移层（48 只，有面板/配招/学招表）记 1 分；只有 pack 图鉴信息记 0.3 分，'
+  evidence_tier: '在冻结层（2026-09-28 起 542 只：基线 12 + 抓包可玩层 530，有面板/配招/学招表）记 1 分；'
+    + '只有 pack 图鉴信息记 0.3 分，'
     + '并在 unverified 里点名「四技能与合法性未校验」。',
 });
 
@@ -1044,7 +1045,14 @@ function candidateRecord(index, row, rank, {policy, rulesetEnergyCap, targetType
       p.build_known ? '能耗曲线只从这组有序四个技能算' : '这个实例没有配招：能耗曲线记为 unknown'));
   } else if (p.evidence.pool) {
     evidenceRows.push(evidence(p.evidence.pool.source_file, p.evidence.pool.pointer, 'skills',
-      {learnset_skill_count: p.learnset_skill_count, tier: p.learnset_tier},
+      // ⚠ 2026-09-28 修（**旧值不删**：这个对象原来写的是 `{learnset_skill_count, tier: p.learnset_tier}`）：
+      // 本模块自己的 `BANNED_CLAIM_KEYS` 把 **`tier`** 列为伪精确/榜单禁键（`:1810`），
+      // 而这条证据把「学招表来自哪一层」也命名成 `tier` ⇒ 只要候选真的带冻结学招表，审计就会
+      // 判自己一条 PSEUDO_PRECISION（`collectBannedText` 对键名精确匹配，`:1853`）——
+      // 这个坑在把冻结学招表从 48 只扩到 542 只之后**立刻现形**（带学招表的候选从个位数变几百个）。
+      // 修法是**改键名**（值是 'frozen_overlay'/'frozen_baseline' 这种来源标签，不是强度分），
+      // 不是把禁键表放宽。
+      {learnset_skill_count: p.learnset_skill_count, learnset_tier: p.learnset_tier},
       '图鉴候选的应对/换入手段只从冻结学招表读；没有冻结学招表时记 unknown'));
   }
   evidenceRows.push(evidence(RC303_REPORT_PATH, 'recall.policy.candidate_universe', 'value', policy.candidate_universe,
@@ -1052,7 +1060,7 @@ function candidateRecord(index, row, rank, {policy, rulesetEnergyCap, targetType
 
   const unverified = [];
   if (!p.has_frozen_learnset) {
-    unverified.push('未核实：四技能与配招合法性 —— 这只不在冻结迁移层（learnsets.json 只有 48 只条目），'
+    unverified.push('未核实：四技能与配招合法性 —— 这只不在冻结层（冻结 learnsets 覆盖 542 只，2026-09-28 前是 48 只），'
       + '图鉴口径只登记名称与系别');
   }
   if (p.spe_status === 'knowledge_only') {
@@ -1746,7 +1754,7 @@ export function progressiveNext(request, options = {}) {
       evidence('data/roco/owned/owned-pets.json', 'instances[].favourite', 'count',
         [...index.instances.values()].filter((i) => i.favourite === true).length,
         '偏好保留口径只看这个字段，不引用社区榜单'),
-      evidence(FROZEN_PATHS.roster48, 'pets[].stats.spe', 'count_with_value', index.facts.speed_validated,
+      evidence(`${FROZEN_PATHS.pets} + ${FROZEN_PATHS.petsOverlay}`, 'pets[].stats.spe', 'count_with_value', index.facts.speed_validated,
         '稳定口径里的速度层次只用冻结档位'),
     ],
     unverified: uniqueSorted([

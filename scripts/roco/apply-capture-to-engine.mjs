@@ -24,9 +24,15 @@ import {fileURLToPath} from 'node:url';
 const ROOT = dirname(fileURLToPath(import.meta.url)).replace(/\/scripts\/roco$/, '');
 const RULESET = 'roco-world-s4-2026-09-10';
 const CAPTURE_CSV = join(ROOT, 'data/roco/raw/hke-2026-09-27/pets.csv');
+// ⚠ 2026-09-28 改钉（旧值不删）：`TARGETS` 里原来还有第二份
+//   data/roco/normalized/<ruleset>/layer-playable-48/pets.json
+// 本轮起**不再由本脚本改写它**：那一层现在由 `scripts/roco/build-all-pets-engine-inputs.mjs`
+// 从**抓包原始响应**直接生成（六维、属性、特性、三桶技能池全部取自抓包，不再需要事后打补丁），
+// 而本脚本写盘用的是 1 空格缩进 + `stats_previous`/`capture_override` 补丁块 —— 两个写法同时写
+// 同一份文件，正是本轮开工前 `--verify` exit 1 的成因（实测 pets.json 75609 vs 82540 字节）。
+// 基线 `pets.json`（M1 那 12 只，仍从 wiki 快照来）继续由本脚本对齐抓包六维，这条没变。
 const TARGETS = [
   join(ROOT, 'data/roco/normalized', RULESET, 'pets.json'),
-  join(ROOT, 'data/roco/normalized', RULESET, 'layer-playable-48', 'pets.json'),
 ];
 const KEYS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
 const HUMAN_RULING = '2026-09-27 人类：「精灵就用现在抓出来的数据做吧」「按照抓包数据来吧」「以具体数据为准吧」';

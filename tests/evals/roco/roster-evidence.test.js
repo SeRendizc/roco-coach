@@ -96,7 +96,11 @@ T('无参回执：顶层带 roster 级出处，pets[] 逐只、moveset[] 逐招�
     for (const key of LEGACY_TOP_KEYS) assert.ok(key in out, `无参回执少了旧键 ${key}`);
     assert.equal(typeof out.count, 'number');
     assert.equal(out.team_size, 3);
-    assert.equal(out.pets.length, 48, `名单应当是全量 48 只，实际 ${out.pets.length}`);
+    // 2026-09-28 改钉（**旧值不删**：旧断言是 `out.pets.length === 48`，消息「名单应当是全量 48 只」）。
+    // 人类 2026-09-28 逐字拍板「所有精灵实装」（`docs/roadmap/FEASIBILITY-547-ALL.md` §⑩）⇒
+    // 默认名单（冻结档）= 基线 12 + 抓包可玩层 530 = **542**。判据本身没放宽：
+    // 仍然是「逐只、逐招都必须带自己的出处」+「核到了几只、几招也要钉住（全绿但为空是假绿）」。
+    assert.equal(out.pets.length, 542, `名单应当是冻结档 542 只，实际 ${out.pets.length}`);
     for (const key of LEGACY_PET_KEYS) assert.ok(key in out.pets[0], `pets[] 少了旧键 ${key}`);
     for (const key of LEGACY_MOVE_KEYS) assert.ok(key in out.pets[0].moveset[0], `moveset[] 少了旧键 ${key}`);
 
@@ -106,7 +110,7 @@ T('无参回执：顶层带 roster 级出处，pets[] 逐只、moveset[] 逐招�
 
     // 全绿但一条都没核到也是假绿——钉住「核了几只、几招」。
     const moves = out.pets.reduce((n, p) => n + p.moveset.length, 0);
-    assert.equal(moves, 192, '48 只 × 4 招 = 192 条技能级出处，逐条核过');
+    assert.equal(moves, 2168, '542 只 × 4 招 = 2168 条技能级出处，逐条核过（2026-09-28 前是 48 只 / 192 条）');
     log(`顶层 evidence_ids=${JSON.stringify(out.evidence_ids)}`);
     log(`抽样 ${out.pets[0].pet_id} 的出处=${JSON.stringify(out.pets[0].evidence_ids)}；`
       + `${out.pets[0].moveset[0].skill_id} 的出处=${JSON.stringify(out.pets[0].moveset[0].evidence_ids)}`);
@@ -118,11 +122,11 @@ T('分页分支同样带出处（limit/offset），且分页账目没被挤掉',
     const out = await service.roster({limit: 2, offset: 0});
     assert.equal(out.ok, true, `分页 roster 失败：${out.error ?? '(无错误信息)'}`);
     assert.equal(out.pets.length, 2);
-    assert.equal(out.total, 48);
+    assert.equal(out.total, 542);   // 2026-09-28 改钉（旧值 48）：冻结档 542 只
     assert.equal(out.limit, 2);
     const problems = rosterEvidenceProblems(out);
     assert.deepEqual(problems, [], `分页分支出处核对不通过：\n${problems.join('\n')}`);
-    assert.match(String(out.evidence_ids?.[0]), /:roster#total=48;offset=0;limit=2$/,
+    assert.match(String(out.evidence_ids?.[0]), /:roster#total=542;offset=0;limit=2$/,
       `分页分支的 roster 级出处应钉住 limit=2，实际 ${JSON.stringify(out.evidence_ids)}`);
   });
 });

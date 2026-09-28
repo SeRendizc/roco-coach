@@ -179,7 +179,13 @@ test('真产物：四个技能逐个都在该 species 的学习表池（native �
   // （它复用 own-0001 的四个技能，其中一个是非 native）；那一只按 rollback 回收之后这 1 条就没了。
   // 判据的原意一个字没变：这些非 native 引用是「引擎真的会装上血统/石系技能」的证据，
   // 谁把它们悄悄删掉（或把口径偷偷改回 native-only）都要在这里留下痕迹。
-  assert.equal(outsideNative, 46, '非 native（blood/stones）技能引用数变了 —— 请连同口径一起复核');
+  // 2026-09-28 **第三次改钉**（**旧值不删**：`47 → 46 →` 现在 **444**）。
+  // 头两次是演示个体 own-0049 的加减；这一次是**甲案扩规模**：盒子从 48 只物种扩到
+  // 可玩层的 **542** 只（人类逐字「所有精灵实装，这样就不需要我的精灵了，直接全筛选」），
+  // 技能引用总数 2168 条，其中非 native（blood/stones）的 **444** 条。
+  // 判据的原意一个字没变：这些非 native 引用是「引擎真的会装上血统/石系技能」的证据，
+  // 谁把它们悄悄删掉（或把口径偷偷改回 native-only）都要在这里留下痕迹。
+  assert.equal(outsideNative, 444, '非 native（blood/stones）技能引用数变了 —— 请连同口径一起复核');
 });
 
 test('真产物：BattleBuild.ordered_skills **逐位**等于引擎 loadout（C20；2026-09-25 人类「配招这个你得修好」）', () => {
@@ -192,7 +198,8 @@ test('真产物：BattleBuild.ordered_skills **逐位**等于引擎 loadout（C2
   ];
   const merged = mergeCanonicalLoadouts(matrices);
   assert.deepEqual(merged.problems, [], `规范四技能合并本身有问题：${show(merged.problems)}`);
-  assert.equal(merged.byPetId.size, 48, '引擎 loadout 覆盖的物种数应为 48');
+  // 2026-09-28 改钉（**旧值不删**：`48`）。甲案 ⇒ 引擎 loadout = 基线 12 + 抓包可玩层 530 = **542**。
+  assert.equal(merged.byPetId.size, 542, '引擎 loadout 覆盖的物种数应为 542（2026-09-28 前是 48）');
   let matched = 0;
   for (const build of dataset.battle_builds) {
     const canonical = merged.byPetId.get(build.species_id);
@@ -244,7 +251,16 @@ test('必红反证：把 owned 的四技能换掉/调序，C20 立刻报（判�
   assert.deepEqual(judge(dataset).problems.filter((p) => p.includes('[canonical_loadout]')), []);
 });
 
-test('已知限制（钉住）：盒子页读的冻结 roster-48.json 与引擎 loadout 有 2/48 不一致', () => {
+// 2026-09-28 改钉（**旧值不删**：标题与期望集合原来是「**2/48**」= `['pet_000451','pet_000474']`）。
+// 甲案（盒子扩到可玩层 542 只）之后，多出**一只**漂移 `pet_000137 多多`，逐条核过**不是缺陷**：
+//   · `roster-48.json`（M1 的选择登记层，从 **wiki** 学招表选招）给它的四招里有一招
+//     `skill_000612 毒液渗透`；
+//   · 而抓包 `level` 桶里**没有**这一招（FEASIBILITY-547-A §B-4 实测记过：多多「level 16 条 vs
+//     wiki native 17 条 → partial」）⇒ 按人类「**配招以抓包为准**」的口径，引擎侧的规范配招
+//     从抓包池里重选，于是两侧不同。
+//   · 这正是「抓包为准」的应有结果，不是数据错；判据本身仍然是**有牙**的：
+//     任何**新增**漂移都会让这条红（要修必须先动 `src/**` 的读点，或拿到改冻结层的授权）。
+test('已知限制（钉住）：盒子页读的冻结 roster-48.json 与引擎 loadout 有 3/542 不一致', () => {
   // 两条链都**冻结**（`data/roco/normalized/**` 一个字节都不许动）：
   //   · 引擎/战斗读 `support-matrix.json` + `layer-playable-48/support-matrix.json`（本判据的事实源）；
   //   · 盒子页 `/api/roco/box` 读 `roster-48.json#pets[].moveset`（`src/server/roco-service.js:292`）。
@@ -265,8 +281,12 @@ test('已知限制（钉住）：盒子页读的冻结 roster-48.json 与引擎 
     if (JSON.stringify(engineSkills) !== JSON.stringify(rosterSkills)) drift.push(pet.pet_id);
   }
   log('[实际] roster-48 与引擎 loadout 不一致的物种 =', drift.length, JSON.stringify(drift));
-  assert.deepEqual(drift, ['pet_000451', 'pet_000474'],
-    '已知漂移集合变了：新增漂移必须当成缺陷处理，不许直接改这条期望值');
+  // 比**集合**（两侧都排序）：`drift` 的顺序跟着 roster-48.json 的名单顺序走，
+  // 这里要钉的是「有哪几只」，不是「按什么顺序列出来」——排序不是放宽（成员一个没少）。
+  assert.deepEqual([...drift].sort(), ['pet_000137', 'pet_000451', 'pet_000474'],
+    '已知漂移集合变了：新增漂移必须当成缺陷处理，不许直接改这条期望值'
+    + '（2026-09-28 新增的 pet_000137 已逐条核过：抓包 level 桶里没有 roster-48 记的「毒液渗透」，'
+    + '按「配招以抓包为准」它就应当漂移）');
 });
 
 test('真产物：养成属性全部是 UNKNOWN，且没有任何被发明的公式字段', () => {
@@ -555,7 +575,9 @@ test('RC-203 报告：存在、可解析、逐条给出判据文本与实际值�
   assert.ok(report.outside_layer_playable_48.alternative_reading.note.length > 0);
   assert.equal(report.same_species_groups.groups.length, report.counts.same_species_groups);
   assert.ok(report.skips.species.length >= 0);
-  assert.equal(report.skips.counts.no_frozen_learnset, 622 - 48, 'pack 622 只里只有 48 只有冻结 learnset');
+  // 2026-09-28 改钉（**旧值不删**：`622 - 48`）。甲案 ⇒ 冻结 learnset 覆盖 542 只，跳过 80 只。
+  assert.equal(report.skips.counts.no_frozen_learnset, 622 - 542,
+    'pack 622 只里有 542 只有冻结 learnset（2026-09-28 前是 48）');
   log('[实际] 跳过 =', JSON.stringify(report.skips.counts));
   log('[实际] unknown 属性 =', report.unknown_attributes.map((u) => u.field).join(','));
   assert.ok(report.reproduce.commands.includes('node scripts/roco/build-owned-pets.mjs --check'));

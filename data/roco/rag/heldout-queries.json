@@ -169,10 +169,10 @@
     "ref": "owned:own-0001",
     "anchors": [
      "own-0001",
-     "铠甲虫"
+     "喵喵"
     ]
    },
-   "why": "出处=data/roco/owned/owned-pets.json 的实例 own-0001：species_id=pet_000012（铠甲虫）、四个技能 skill_000648/000633/000651/000645，provenance 指向 layer-playable-48/learnsets.json 与 full-catalog.json。等级记 COMMUNITY_CURRENT（技能来自冻结快照），面板类字段在语料里自带 UNKNOWN（unknown_fields=panel_stats）。"
+   "why": "出处=data/roco/owned/owned-pets.json 的实例 own-0001：species_id=pet_000001（喵喵）、四个技能 skill_000246/skill_000286/skill_000340/skill_000624，provenance 指向 layer-playable-48/{support-matrix,learnsets}.json、full-catalog.json 与抓包原始响应 pet-3001-1790537111.json。等级记 COMMUNITY_CURRENT（技能来自冻结快照），面板类字段在语料里自带 UNKNOWN（unknown_fields=panel_stats）。【2026-09-28 改钉：旧锚点是「铠甲虫」/pet_000012/skill_000648,000633,000651,000645 —— 人类拍板「所有精灵实装」（甲案：盒子 = 可玩层镜像）之后，冷冻个体从 48 只扩到可玩层的 542 只，实例按 species_id 升序重编，own-0001 因此从 pet_000012 变成 pet_000001；判据（期望值必须能在语料里逐条追到）一个字没改，改的是它指向的那条记录本身。】"
   },
   {
    "id": "E08",

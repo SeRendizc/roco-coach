@@ -326,9 +326,9 @@
           "inputs": [
             {
               "own_team_bands": {
-                "fast": 2,
+                "fast": 1,
                 "mid": 3,
-                "slow": 1
+                "slow": 2
               },
               "own_team_size": 6,
               "pool_bands": {
@@ -1557,60 +1557,57 @@
         "own_team": [
           {
             "key": "instance:own-0001",
-            "species_id": "pet_000012",
+            "species_id": "pet_000001",
             "types": [
-              "虫系"
+              "草系"
             ],
-            "speed": 75,
+            "speed": 33,
             "speed_band": "slow"
           },
           {
             "key": "instance:own-0002",
-            "species_id": "pet_000062",
+            "species_id": "pet_000002",
             "types": [
-              "火系"
+              "水系"
             ],
-            "speed": 120,
-            "speed_band": "fast"
+            "speed": 51,
+            "speed_band": "slow"
           },
           {
             "key": "instance:own-0003",
-            "species_id": "pet_000100",
+            "species_id": "pet_000003",
             "types": [
-              "地系",
-              "幻系"
+              "火系"
+            ],
+            "speed": 78,
+            "speed_band": "mid"
+          },
+          {
+            "key": "instance:own-0004",
+            "species_id": "pet_000004",
+            "types": [
+              "光系"
+            ],
+            "speed": 92,
+            "speed_band": "mid"
+          },
+          {
+            "key": "instance:own-0005",
+            "species_id": "pet_000005",
+            "types": [
+              "水系"
             ],
             "speed": 85,
             "speed_band": "mid"
           },
           {
-            "key": "instance:own-0004",
-            "species_id": "pet_000112",
-            "types": [
-              "冰系",
-              "萌系"
-            ],
-            "speed": 90,
-            "speed_band": "mid"
-          },
-          {
-            "key": "instance:own-0005",
-            "species_id": "pet_000118",
-            "types": [
-              "翼系"
-            ],
-            "speed": 120,
-            "speed_band": "fast"
-          },
-          {
             "key": "instance:own-0006",
-            "species_id": "pet_000124",
+            "species_id": "pet_000006",
             "types": [
-              "虫系",
-              "萌系"
+              "火系"
             ],
-            "speed": 100,
-            "speed_band": "mid"
+            "speed": 130,
+            "speed_band": "fast"
           }
         ],
         "mode": {

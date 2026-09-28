@@ -110,11 +110,26 @@ const expectRed = (planValue, code, label, options = {}) => {
 };
 
 /** 基线：已选 2 只（渐进推荐生效）+ 锁定一只 + must_include 一个图鉴物种 + 排除两只。 */
+// 2026-09-28 改钉（**旧值不删**：原来是 `must_include: [catalogSpeciesIds[0]]`）。
+// 甲案之前 own-0001 是 pet_000012（铠甲虫），而 `catalogSpeciesIds[0]` 是 pet_000001 ⇒ 两者不同种，
+// 这条样例请求侥幸通过；盒子扩到可玩层镜像之后 own-0001 = **pet_000001**（喵喵），
+// 与 `catalogSpeciesIds[0]` 撞成同物种 ⇒ RC-301 判 `DUPLICATE_SPECIES_IN_TEAM`（那是**对的**判定，
+// 撞的是样例本身）。所以 `must_include` 改成**从目录里挑一个没被选中/排除的物种**：
+// 判据（样例请求必须过 RC-301）没放宽，改的只是样例不再自相矛盾。
+const speciesOfInstance = new Map(inputs.owned.instances.map((row) => [row.instance_id, row.species_id]));
+const BASELINE_SELECTED = ids.slice(0, 2);
+const BASELINE_EXCLUDED = [ids[8], ids[9]];
+const BASELINE_MUST_INCLUDE = (() => {
+  const taken = new Set([...BASELINE_SELECTED, ...BASELINE_EXCLUDED].map((id) => speciesOfInstance.get(id)));
+  const hit = catalogSpeciesIds.find((sid) => !taken.has(sid));
+  assert.ok(hit, '目录里必须找得到一个没被选中/排除的物种');
+  return hit;
+})();
 const BASELINE_PATCH = () => ({
-  selected: ids.slice(0, 2),
+  selected: BASELINE_SELECTED,
   locked: [ids[0]],
-  must_include: [catalogSpeciesIds[0]],
-  must_exclude: [ids[8], ids[9]],
+  must_include: [BASELINE_MUST_INCLUDE],
+  must_exclude: BASELINE_EXCLUDED,
 });
 const baseline = () => plan(BASELINE_PATCH());
 
@@ -194,10 +209,15 @@ test('RC-303 判据①：召回数越界却不解释必须判红', () => {
   // ①-a：候选池真的不够时，必须给出 shortfall_reason（而不是沉默或凑数）
   const small = plan({selected: ids.slice(0, 2)}, {limits: {min: 20, max: 50}, policy: {candidate_universe: 'owned', include_catalog_species: false}});
   raw('①-2 candidate_universe=owned 的召回数', {count: small.plan.recall_count, pool: small.plan.recall.pool.pool_size});
-  // 真正的短欠场景：只从收藏池（24 只）召回、已选 3 只、再排除 16 只 ⇒ 池子只剩 5 个。
+  // 真正的短欠场景：只从收藏池召回、已选 3 只、再把剩下的排到只剩 5 个。
+  // 2026-09-28 改钉（**旧值不删**：原来是 `must_exclude: favouriteIds.slice(3, 19)` 与注释里的
+  // 「收藏池（24 只）…排除 16 只 ⇒ 池子只剩 5 个」）—— 甲案之后收藏池从 24 只变成一百多只，
+  // 写死 19 就排不空了。现在按**收藏池自己的规模**留 5 个：判据没放宽
+  // （仍然要求「这个样例必须真的凑不满下界」+ `shortfall_reason` 必须写出来）。
+  const STARVED_POOL = 5;
   const narrow = request({
     selected: favouriteIds.slice(0, 3), favourites_only: true,
-    must_exclude: favouriteIds.slice(3, 19),
+    must_exclude: favouriteIds.slice(3, Math.max(3, favouriteIds.length - STARVED_POOL)),
   });
   const narrowPlan = buildTeamCandidatePlan(narrow, {...inputs, __index: index,
     policy: {candidate_universe: 'owned', include_catalog_species: false}});
@@ -487,9 +507,12 @@ test('RC-303 判据⑤：违反硬约束的队伍必须判红', () => {
 
   // 反向控制：硬要求**够不着**时（召回里根本没有它）必须 fail closed。
   // 这里直接把召回结果里的 required 候选剔掉，模拟「召回没带上硬要求」这件事本身。
-  const impossible = request({selected: ids.slice(0, 2), must_include: [catalogSpeciesIds[0]]});
+  // 2026-09-28 同 BASELINE_PATCH 的改钉：`catalogSpeciesIds[0]`（= pet_000001）现在与
+  // `ids.slice(0,2)` 里的 own-0001（也是 pet_000001）同物种 ⇒ RC-301 会判 DUPLICATE。
+  // 换成 BASELINE_MUST_INCLUDE（目录里挑出来的、不与已选/排除撞车的那一只）。
+  const impossible = request({selected: ids.slice(0, 2), must_include: [BASELINE_MUST_INCLUDE]});
   const impossibleRecall = recallCandidates(impossible, {...inputs, __index: index});
-  const withoutRequired = impossibleRecall.candidates.filter((c) => c.species_id !== catalogSpeciesIds[0]);
+  const withoutRequired = impossibleRecall.candidates.filter((c) => c.species_id !== BASELINE_MUST_INCLUDE);
   const blockedBeam = beamComplete(impossible, withoutRequired, {inputs: {...inputs, __index: index}, __index: index});
   raw('⑤-5 召回里剔掉硬要求后的补全', {
     teams: blockedBeam.team_count, ok: blockedBeam.ok,

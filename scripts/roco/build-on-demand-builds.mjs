@@ -10,12 +10,16 @@ import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-import {buildOnDemandBuilds, checkOnDemandBuilds, selftest, sha256} from './on-demand-builds-lib.mjs';
+import {buildOnDemandBuilds, checkOnDemandBuilds, combinedFrozenHash, selftest, sha256} from './on-demand-builds-lib.mjs';
 
 const ROOT = dirname(fileURLToPath(import.meta.url)).replace(/\/scripts\/roco$/, '');
 const CATALOG = 'data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json';
 const SKILLS = 'data/roco/normalized/roco-world-s4-2026-09-10/skills.json';
-const OWNED = 'data/roco/owned/owned-pets.json';
+// ⚠ `data/roco/owned/owned-pets.json` 自 2026-09-28 起**不再是本产物的输入**（旧值不删：
+// 它曾经是 `frozenBuilds` 的来源）。冻结那一档现在只认冻结层（基线 12 + 可玩层 530）的规范配招 ——
+// 理由见下面的注释。
+const BASE_SUPPORT = 'data/roco/normalized/roco-world-s4-2026-09-10/support-matrix.json';
+const LAYER_SUPPORT = 'data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/support-matrix.json';
 const OUT = 'data/roco/derived/on-demand-builds.json';
 
 const read = (rel) => {
@@ -25,18 +29,29 @@ const read = (rel) => {
   return {text, json: JSON.parse(text), hash: sha256(text)};
 };
 
-/** 冻结 learnset 覆盖的那批配招（`owned-pets.json#battle_builds`），用来标 FULL_VERIFIED 并对账。 */
-function frozenBuildsFrom(ownedDoc) {
-  const out = {__source: `${OWNED}#battle_builds`};
-  const rows = Array.isArray(ownedDoc?.battle_builds) ? ownedDoc.battle_builds : [];
-  for (const value of rows) {
-    const speciesId = value?.species_id ?? null;
-    // RC-203 的字段名是 `ordered_skills`（有序四技能）；这里只读它，不改它。
-    const skills = Array.isArray(value?.ordered_skills) ? value.ordered_skills : null;
-    if (!speciesId || !skills || skills.length === 0) continue;
-    // 同一物种可能有多个个体；只要有一份冻结配招，就算这一物种已核验。
-    if (!out[speciesId]) {
-      out[speciesId] = skills.map((row) => (typeof row === 'string' ? row : row?.skill_id)).filter(Boolean);
+/**
+ * 「冻结已核验」那一档 = **冻结层的规范配招**：基线 `support-matrix.json`（12 只，M1 验收基线）
+ * ＋ 可玩层 `layer-playable-48/support-matrix.json`（530 只）—— 这正是引擎 `load_ruleset()`
+ * 真正会用的那 4 个技能（两份合起来 = 引擎里 `FULL_VERIFIED` 的 542 只）。
+ *
+ * ⚠ 2026-09-28 换源（旧值不删）：原来这一档取自 `data/roco/owned/owned-pets.json#battle_builds`
+ * （人类自己盒子里那些个体）。换源的两条理由都是实测出来的：
+ *   ① 人类 2026-09-28 逐字：「所有精灵实装，**这样就不需要我的精灵了**，直接全筛选」——
+ *      冻结那一档不该再由「我的盒子」定义；
+ *   ② 用 owned-pets 当源会**丢精灵**：旧可玩层撤下的 7 只（`pet_000139 古啦多` /
+ *      `pet_000485 学院呱呱` / `pet_000542 祭礼巨像` / `pet_000556 棋契陛下` /
+ *      `pet_000575 棋契陛下` / `pet_000609 新月鹭` / `pet_000613 智辉章脑`）在产物里仍是
+ *      `FULL_VERIFIED`，而引擎对 `FULL_VERIFIED` 的行直接 `continue`（它假定冻结层会管）——
+ *      于是这 7 只**既不在冻结层、也不会被按需补上**，从候选池整个消失（实测 622 → 615）。
+ *      换成冻结层当源之后，它们落到 `SIMULATABLE_UNVERIFIED`，由本模块编上 4 个技能。
+ */
+function frozenBuildsFromLayers(baseDoc, layerDoc) {
+  const out = {__source: `${BASE_SUPPORT}#pets[].candidate_moveset + ${LAYER_SUPPORT}#pets[].candidate_moveset`};
+  for (const doc of [baseDoc, layerDoc]) {
+    for (const entry of Array.isArray(doc?.pets) ? doc.pets : []) {
+      const skills = (entry?.candidate_moveset?.skills ?? []).map((row) => row?.skill_id).filter(Boolean);
+      if (!entry?.pet_id || skills.length === 0) continue;
+      if (!out[entry.pet_id]) out[entry.pet_id] = skills;
     }
   }
   return out;
@@ -45,11 +60,12 @@ function frozenBuildsFrom(ownedDoc) {
 export function build() {
   const catalog = read(CATALOG);
   const skills = read(SKILLS);
-  const owned = read(OWNED);
-  const frozenBuilds = frozenBuildsFrom(owned.json);
+  const base = read(BASE_SUPPORT);
+  const layer = read(LAYER_SUPPORT);
+  const frozenBuilds = frozenBuildsFromLayers(base.json, layer.json);
   const doc = buildOnDemandBuilds({
     catalog: catalog.json, skills: skills.json, frozenBuilds,
-    hashes: {catalog: catalog.hash, skills: skills.hash, frozen: owned.hash},
+    hashes: {catalog: catalog.hash, skills: skills.hash, frozen: combinedFrozenHash([base.text, layer.text])},
   });
   const checked = checkOnDemandBuilds(doc, {catalog: catalog.json, skills: skills.json, frozenBuilds,
     hashes: {catalog: catalog.hash, skills: skills.hash}});

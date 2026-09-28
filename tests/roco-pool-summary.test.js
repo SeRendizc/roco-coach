@@ -30,7 +30,10 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CLIENT_SRC = readFileSync(join(ROOT, 'src', 'client', 'roco.js'), 'utf8');
 
 const PETS = Array.from({length: 12}, (_, i) => ({id: `pet_${String(i + 1).padStart(6, '0')}`, name: `宠${i + 1}`}));
-const SUMMARY = {total: 622, page: 1, pages: 52, source: 'catalog', roster_total: 48};
+// 2026-09-28 改钉（**旧值不删**：这里原来是 `roster_total: 48`）。人类同日逐字拍板
+// 「所有精灵实装」（`docs/roadmap/FEASIBILITY-547-ALL.md` §⑩）⇒ 玩家可用名单 = 冻结层 542。
+// 这是**页面给的概况**夹具，判据没放宽（仍然查加性校验 + 说明里必须出现这个数）。
+const SUMMARY = {total: 622, page: 1, pages: 52, source: 'catalog', roster_total: 542};
 
 function bodyWith(summary) {
   const profile = {pets: PETS};
@@ -82,7 +85,7 @@ test('③ 一页说明：只在「总数 > 本页条数」时出现，带真实�
   assert.equal(rosterIsPage({profile: {pets: PETS, pool_summary: SUMMARY}}), true);
   const note = rosterNote({profile: {pets: PETS, pool_summary: SUMMARY}});
   assert.match(note, /622/, '说明里要有候选宇宙总数（页面给的数）');
-  assert.match(note, /48/, '说明里要有玩家可用名单的总数');
+  assert.match(note, /542/, '说明里要有玩家可用名单的总数（2026-09-28 前是 48）');
   assert.match(note, /12/, '说明里要点出本页条数');
   assert.match(note, /不是玩家名下的全部/, '说明必须点破"这不是全部"');
   assert.ok(!/建议|推荐|应该|最好|更强|胜率/.test(note),

@@ -53,8 +53,12 @@ class SupportLevelsTest(unittest.TestCase):
         supports = {pid: RS.build_support_of(pid) for pid in RS.pets}
         full = {pid for pid, level in supports.items() if level == SUPPORT_FULL_VERIFIED}
         on_demand = {pid for pid, level in supports.items() if level == SUPPORT_SIMULATABLE_UNVERIFIED}
-        self.assertEqual(len(full), 48)
-        self.assertEqual(len(on_demand), 574)
+        # 2026-09-28 改钉（**旧值不删**：旧断言是 `len(full) == 48` / `len(on_demand) == 574`）。
+        # 人类 2026-09-28 逐字拍板「所有精灵实装」（原文见
+        # `docs/roadmap/FEASIBILITY-547-ALL.md` §⑩）⇒ 冻结那一档 = 基线 12 + 抓包本层 530 = 542，
+        # 按需那一档 = 622 − 542 = 80。判据本身没放宽：仍然是「两档不相交、并集 = 候选池」。
+        self.assertEqual(len(full), 542)
+        self.assertEqual(len(on_demand), 80)
         self.assertEqual(full & on_demand, set())
         self.assertEqual(full | on_demand, set(RS.pets))
 
@@ -87,7 +91,11 @@ class SupportLevelsTest(unittest.TestCase):
             self.assertEqual(tuple(RS.candidate_moveset(pid)), frozen[pid],
                              f"{pid} 的配招被改过（冻结那一份不许动）")
             checked += 1
-        self.assertEqual(checked, 48, "已核验那一档必须正好 48 只")
+        # 2026-09-28 改钉（**旧值不删**：旧断言是 `checked == 48`，理由「已核验那一档必须正好
+        # 48 只」）。人类 2026-09-28 逐字拍板「所有精灵实装」（FEASIBILITY-547-ALL.md §⑩）⇒
+        # 冻结档 = 基线 12 + 抓包本层 530 = 542。判据没放宽：仍然是「引擎里标成已核验的每一只，
+        # 配招必须逐位等于冻结 support-matrix 那一份」。
+        self.assertEqual(checked, 542, "已核验那一档必须正好 542 只（2026-09-28 前是 48）")
 
     def test_on_demand_species_get_the_compiled_build(self):
         """按需推算的每一只，配招必须**正是** RC-402 产物里编出来的那四个。"""
@@ -107,7 +115,9 @@ class SupportLevelsTest(unittest.TestCase):
             self.assertEqual(set(RS.learnsets[pid].all_skill_ids),
                              set(builds[pid]["learnable_pool"]), f"{pid} 的可学池与产物不一致")
             checked += 1
-        self.assertEqual(checked, 574)
+        # 2026-09-28 改钉（**旧值不删**：旧断言是 `checked == 574`）。同一句人类拍板：
+        # 按需那一档 = 622 − 542 = 80。判据没放宽（仍然是逐只「配招 = 产物编的那四个」+ 可学池逐集合相等）。
+        self.assertEqual(checked, 80)
 
     def test_on_demand_moves_are_inside_the_learnable_pool_and_resolvable(self):
         catalog_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..",
@@ -128,7 +138,9 @@ class SupportLevelsTest(unittest.TestCase):
                 self.assertTrue(RS.is_learnable(pid, sid))
                 self.assertIn(sid, RS.skills)
                 checked += 1
-        self.assertEqual(checked, 574 * 4)
+        # 2026-09-28 改钉（**旧值不删**：旧断言是 `checked == 574 * 4` = 2296）。
+        # 现在是 80 只 × 4 = 320；判据没放宽（每一招都要在可学池里、能解析、is_learnable 为真）。
+        self.assertEqual(checked, 80 * 4)
 
 
 class OnDemandBattleTest(unittest.TestCase):

@@ -126,11 +126,16 @@ class RosterCarriesPerPetAndPerSkillEvidence(unittest.TestCase):
         # 顺便钉住「核到了几只在 / 几招」：全绿但 pets 为空也算通过，那是假绿。
         # RC-402 起默认名单是**冻结已核验的 48 只**（练习局/迁移夹具口径）；
         # 全量 622 走 `support=all`（配队与检索口径），下面单独钉。
+        # 2026-09-28 改钉（**旧值不删**：旧断言是 `len(pets) == 48` 与 `sum(...) == 192`）。
+        # 人类 2026-09-28 逐字拍板「就用现在抓包得到的数据吧……**所有精灵实装**，这样就不需要
+        # 我的精灵了，直接全筛选」（`docs/roadmap/FEASIBILITY-547-ALL.md` §⑩）⇒ 默认名单
+        # = 冻结档 542 只（基线 12 + 抓包本层 530），542 × 4 招 = 2168 条技能级出处。
+        # 判据没放宽：仍然是「逐只逐招都有自己的出处」+「默认名单里不出现按需那一档」。
         pets = result["pets"]
-        self.assertEqual(len(pets), 48, f"默认名单应当仍是 48 只（已核验档），实际 {len(pets)}")
+        self.assertEqual(len(pets), 542, f"默认名单应当是 542 只（已核验档），实际 {len(pets)}")
         self.assertTrue(all(p["moveset_size"] == len(p["moveset"]) for p in pets))
-        self.assertEqual(sum(len(p["moveset"]) for p in pets), 192,
-                         "48 只 × 4 招 = 192 条技能级出处，逐条核过")
+        self.assertEqual(sum(len(p["moveset"]) for p in pets), 2168,
+                         "542 只 × 4 招 = 2168 条技能级出处，逐条核过（2026-09-28 前是 48 只 / 192 条）")
         self.assertTrue(all(p["build_support"] == "FULL_VERIFIED" for p in pets),
                         "默认名单里不该出现按需推算的那一档")
 
@@ -146,8 +151,11 @@ class RosterCarriesPerPetAndPerSkillEvidence(unittest.TestCase):
         for pet in pets:
             by_support.setdefault(pet["build_support"], []).append(pet["pet_id"])
         self.assertEqual(sorted(by_support), ["FULL_VERIFIED", "SIMULATABLE_UNVERIFIED"])
-        self.assertEqual(len(by_support["FULL_VERIFIED"]), 48)
-        self.assertEqual(len(by_support["SIMULATABLE_UNVERIFIED"]), 574)
+        # 2026-09-28 改钉（**旧值不删**：旧断言是 48 / 574）。同一句人类拍板「所有精灵实装」
+        # （FEASIBILITY-547-ALL.md §⑩）⇒ 全量 622 = 冻结 542 + 按需 80。
+        # 判据没放宽：每一只的出处**文件**仍必须与它自己的支持等级对上。
+        self.assertEqual(len(by_support["FULL_VERIFIED"]), 542)
+        self.assertEqual(len(by_support["SIMULATABLE_UNVERIFIED"]), 80)
         for pet in pets:
             want_file = "on-demand-builds.json" if pet["build_support"] == "SIMULATABLE_UNVERIFIED" else "pets.json"
             self.assertIn(f":{want_file}#{pet['pet_id']}", pet["evidence_ids"][0],

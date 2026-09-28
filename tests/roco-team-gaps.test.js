@@ -39,6 +39,22 @@ const readJson = (rel) => JSON.parse(readFileSync(join(ROOT, rel), 'utf8'));
 const log = (...args) => console.log('  ·', ...args);
 
 /** 每条反证打印**实际输出原文**：报告里贴的就是这些行。 */
+// 2026-09-28：盒子里的物种 id 集合（甲案之后 = 可玩层 542 只）。用来找一只**不在盒子里**的物种：
+// 「法律上合法、但这份数据满足不了」那条边界样例需要它（旧值是写死的 pet_000001，现在它在盒子里）。
+const OWNED_SPECIES_IDS = new Set((() => {
+  try {
+    const doc = JSON.parse(readFileSync(new URL('../data/roco/owned/owned-pets.json', import.meta.url), 'utf8'));
+    return doc.instances.map((row) => row.species_id);
+  } catch { return []; }
+})());
+const UNOWNED_SPECIES_ID = (() => {
+  try {
+    const cat = JSON.parse(readFileSync(new URL('../data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json', import.meta.url), 'utf8'));
+    const hit = cat.pets.map((row) => row.pet_id).find((id) => !OWNED_SPECIES_IDS.has(id));
+    return hit ?? 'pet_000001';
+  } catch { return 'pet_000001'; }
+})();
+
 const raw = (label, value) => {
   const text = typeof value === 'string' ? value : JSON.stringify(value, null, 1);
   console.log(`  · [实际输出] ${label} = ${text}`);
@@ -131,15 +147,20 @@ test('RC-302 判据②：confidence 用了台账之外的等级必须判红', ()
   expectRed(brokenTotal, 'CONFIDENCE_NOT_IN_LEDGER', '② 总置信用了台账外的等级');
 });
 
-test('RC-302 判据③：只有 48 只有值的量不许说成「全 622 都知道」', () => {
+// 2026-09-28 改钉（**旧值不删**：旧标题是「只有 **48** 只有值的量不许说成『全 622 都知道』」，
+// 旧断言是 `known: 48, unknown: 574` 与 `facts.validated_species === 48`）。
+// 人类 2026-09-28 逐字拍板「所有精灵实装」（`docs/roadmap/FEASIBILITY-547-ALL.md` §⑩）⇒
+// 验证层（冻结层）= 基线 12 + 抓包可玩层 530 = **542**，域上限跟着变成 542 / unknown 80。
+// 判据本身一条没放宽：仍然是「域计数必须闭合」「把验证层说成全 622 必须判红」。
+test('RC-302 判据③：只有冻结层（542 只）有值的量不许说成「全 622 都知道」', () => {
   const diagnosis = baselineDiagnosis();
   const speedIdx = gapIndexById(diagnosis, 'speed.validated_domain');
   assert.ok(speedIdx >= 0, '必须有一条 speed.validated_domain 来说明域上限');
   const real = diagnosis.gaps[speedIdx];
   raw('③ 原始速度域的实测值', {domain: real.domain, value: real.value, unverified: real.unverified});
-  assert.deepEqual(real.domain, {basis: 'validated_layer', metric: 'speed_tier / stats.spe', known: 48, unknown: 574, total: 622});
+  assert.deepEqual(real.domain, {basis: 'validated_layer', metric: 'speed_tier / stats.spe', known: 542, unknown: 80, total: 622});
   assert.equal(diagnosis.facts.pack_pet_entities, 622);
-  assert.equal(diagnosis.facts.validated_species, 48);
+  assert.equal(diagnosis.facts.validated_species, 542);
 
   // ③a 域计数：把验证层说成全量
   const overclaim = clone(diagnosis);
@@ -332,16 +353,34 @@ test('RC-302 判据⑩：全量实例上的分布可复跑（实测值；条数�
   // 2026-09-24：不再写死 80 —— 产物现在是「一人一只」（人类要求删掉重复个体），
   // 条数从 owned-pets.json 现读，判据只要求「分布覆盖了全部实例」。
   assert.equal(distribution.instances, OWNED_INSTANCE_COUNT);
-  assert.equal(distribution.speed.instances_with_validated_spe, OWNED_INSTANCE_COUNT);
-  assert.equal(distribution.speed.validated_species, 48);
+  // 2026-09-28 改钉（**旧值不删**：旧断言是 `instances_with_validated_spe === OWNED_INSTANCE_COUNT`
+  // 与 `validated_species === 48`）。两处都变了，各说清为什么：
+  //   · `validated_species` 48 → **542**：验证层换成冻结层（基线 12 + 抓包可玩层 530）。
+  //   · `instances_with_validated_spe` 48 → **41**：盒子里有 **7 只**（各 1 个体）的物种
+  //     **不在**新的冻结层里 —— `pet_000139 古啦多 / pet_000485 学院呱呱 / pet_000542 祭礼巨像 /
+  //     pet_000556 棋契陛下 / pet_000575 棋契陛下 / pet_000609 新月鹭 / pet_000613 智辉章脑`。
+  //     前 3 只被人类 2026-09-28 的剔除名单点名（技能池/技能石被灌坏），后 4 只抓包接口根本给不出来
+  //     ⇒ 旧可玩层撤下它们之后，它们只剩按需推算档（`SIMULATABLE_UNVERIFIED`），没有冻结速度档。
+  //     这条断言因此**不再是「全部实例」**，而是「41/48 有冻结速度档，7 只如实记 unknown」——
+  //     这是数据的实况，不是判据放宽。
+  // 2026-09-28 **再改钉一次**（**旧值不删**：这一对先写过 `=== OWNED_INSTANCE_COUNT`（48/48），
+  // 中间因旧层撤下 7 只写成 `41 / 7`，甲案之后盒子 = 可玩层镜像 ⇒ 每一只都有冻结速度档）：
+  assert.equal(distribution.speed.instances_with_validated_spe, 542);
+  assert.equal(distribution.speed.instances_without_validated_spe, 0);
+  assert.equal(distribution.speed.validated_species, 542);
   assert.equal(distribution.speed.knowledge_only_species, 622);
   assert.equal(distribution.coverage.attack_types.length, 18);
-  assert.equal(distribution.respond.learnset_variant_species['应对攻击'], 48);
+  // 2026-09-28 改钉（**旧值不删**：旧断言是 `=== 48`——当时有冻结学招表的物种就是 48）。
+  // 现在冻结学招表覆盖 542 只，判据本身没变：**有冻结学招表的每一只**都学得到「应对攻击」。
+  assert.equal(distribution.respond.learnset_variant_species['应对攻击'], 542);
+  assert.equal(distribution.respond.learnset_variant_species['应对攻击'],
+    distribution.respond.learnset_species_total);
   assert.ok(distribution.energy.moves_without_static_power > 0);
   assert.ok(distribution.pivot.learnset_species_with_tool > 0
     && distribution.pivot.learnset_species_with_tool < distribution.pivot.learnset_species_total);
   assert.equal(distribution.cost.candidate_universe_instances, OWNED_INSTANCE_COUNT);
-  assert.equal(distribution.cost.distinct_species, 48);
+  // 2026-09-28 改钉（**旧值不删**：`48`）。甲案 ⇒ 盒子里 542 个物种，分布覆盖全部实例。
+  assert.equal(distribution.cost.distinct_species, 542);
   // 分布必须可复跑
   assert.equal(JSON.stringify(buildGapDistribution(inputs)), JSON.stringify(distribution));
 });
@@ -375,13 +414,19 @@ test('RC-302 判据⑱（反证）：④ 的分离证据自己有牙 —— buil
   assert.equal(hits.real, true, '真实分布上分离证据必须成立（否则是把它改坏了）');
   assert.equal(hits.collapsed_build_equals_learnset, false, '把 build 侧写满成 learnset 侧（＝「learnset 有」说成「build 有」）必须红');
   assert.equal(hits.overshoot_build_gt_learnset, false, 'build 侧某一类超过 learnset 侧必须红');
-  assert.equal(hits.learnset_attack_not_48, false, 'learnset 侧「应对攻击」不是 48 必须红');
+  // 2026-09-28 改钉（**旧值不删**：旧消息是「learnset 侧『应对攻击』不是 48 必须红」）。
+  // 基准改成现算的学招表物种数（542），样本仍然是把「应对攻击」改小 1 ⇒ 必须红。
+  assert.equal(hits.learnset_attack_not_48, false,
+    'learnset 侧「应对攻击」不等于学招表物种数（542）必须红');
 });
 
 test('RC-302 判据⑪：RC-301 说「合同合法」而 RC-302 说「不可满足」——两个 RC 的边界', () => {
   const legalButUnsatisfiable = [
     {id: 'seven-required', patch: {must_include: ids.slice(0, 7)}},
-    {id: 'unowned-species', patch: {must_include: ['pet_000001']}},
+    // 2026-09-28 改钉（**旧值不删**：这里原来是 `must_include: ['pet_000001']`）——
+    // 甲案之后 pet_000001（喵喵）**在盒子里**（own-0001 就是它），所以它不再是「合法但不可满足」。
+    // 改成一个**真的不在盒子里**的物种：盒子只覆盖可玩层的 542 只，剩下的按需档物种没进盒子。
+    {id: 'unowned-species', patch: {must_include: [UNOWNED_SPECIES_ID]}},
     {id: 'churn-limited', patch: {selected: ids.slice(0, 4), must_include: ids.slice(4, 7), max_replacements: 0}},
   ];
   for (const sample of legalButUnsatisfiable) {
@@ -495,8 +540,12 @@ test('RC-302 判据⑮：cost 可满足性算术逐条可复算（含 max_replac
     {id: 'seven-required', patch: {must_include: ids.slice(0, 7)}, expectBlocking: ['cost.unsatisfiable.slots_exceeded']},
     {id: 'churn-zero', patch: {selected: ids.slice(0, 4), must_include: ids.slice(4, 7), max_replacements: 0},
       expectBlocking: ['cost.unsatisfiable.churn_limit']},
-    {id: 'unowned-species', patch: {must_include: ['pet_000001']}, expectBlocking: ['cost.unsatisfiable.required_not_owned']},
-    {id: 'unowned-allowed', patch: {must_include: ['pet_000001']}, policyOverride: {allow_unowned: true}, expectBlocking: []},
+    // 2026-09-28 改钉（**旧值不删**：这两行原来写死 `'pet_000001'`）—— 甲案之后 pet_000001（喵喵）
+    // 已经在盒子里（own-0001 就是它），所以它证明不了「要求了一只不属于我的精灵」。
+    // 换成 UNOWNED_SPECIES_ID（从图鉴里挑一只**不在**盒子 542 只里的物种）：判据一个字没改
+    // （要求一只不在盒子里的 ⇒ `cost.unsatisfiable.required_not_owned`；允许未拥有 ⇒ 不 blocking）。
+    {id: 'unowned-species', patch: {must_include: [UNOWNED_SPECIES_ID]}, expectBlocking: ['cost.unsatisfiable.required_not_owned']},
+    {id: 'unowned-allowed', patch: {must_include: [UNOWNED_SPECIES_ID]}, policyOverride: {allow_unowned: true}, expectBlocking: []},
   ];
   for (const row of cases) {
     const request = {...base(), ...row.patch};

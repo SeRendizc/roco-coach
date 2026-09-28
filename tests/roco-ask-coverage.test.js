@@ -798,8 +798,13 @@ test('⑲d 重名形态：本地列候选让玩家挑，不许替另一只形态
 // 模型答完之后**没过事实检查**，玩家拿到的是陪练模板「我在。」
 // —— 一个"名单里有几只"的事实，既不该问模型，也不该用状态回报来答。
 test('⑳ 名单计数：本地作答（持有一页要分开说），0 次模型调用', async () => {
-  const held = {pets: Array.from({length: 48}, (_, i) => ({id: `own-${i}`, name: `宠${i}`, types: ['虫系']})),
-    pool_summary: {total: 48, source: 'owned'}};
+  // 2026-09-28 改钉（**旧值不删**：这里原来是 `length: 48` / `total: 48`）。
+  // 人类 2026-09-28 逐字拍板「所有精灵实装，这样就不需要我的精灵了，直接全筛选」
+  // （`docs/roadmap/FEASIBILITY-547-ALL.md` §⑩）⇒ 名单规模从 48 变成 542（冻结层）；
+  // 夹具跟着换规模，好让「持有一页要分开说」这条判据在**新的规模**上继续被跑到。
+  // 判据本身没放宽：仍然是「本地作答、0 次模型调用、总数不许被说成一页的条数」。
+  const held = {pets: Array.from({length: 542}, (_, i) => ({id: `own-${i}`, name: `宠${i}`, types: ['虫系']})),
+    pool_summary: {total: 542, source: 'owned'}};
   const page = {pets: Array.from({length: 12}, (_, i) => ({id: `pet_${i}`, name: `图${i}`, types: ['虫系']})),
     pool_summary: {total: 622, page: 1, pages: 52, source: 'catalog'}};
   for (const q of ['我一共有多少只精灵？', '我有多少只伙伴？']) {
@@ -817,7 +822,7 @@ test('⑳ 名单计数：本地作答（持有一页要分开说），0 次模�
   };
   const owned = await answer(held);
   assert.equal(owned.agentStop, 'policy-fact-local');
-  assert.match(String(owned.text), /48 只/, `持有总数要报出来：${owned.text}`);
+  assert.match(String(owned.text), /542 只/, `持有总数要报出来：${owned.text}`);
   assert.doesNotMatch(String(owned.text), /我在。/, '不许用状态回报答事实问句');
   // 「是一页」时：这一页 12 只 + 总数 622 只都要说，且不许把 12 说成总数
   const paged = await answer(page);
@@ -831,9 +836,10 @@ test('⑳ 名单计数：本地作答（持有一页要分开说），0 次模�
   assert.equal(policyFor('我的精灵都有谁？', {profile: held}).reason, 'roster-list-ask');
   const listed = await answer(held, '我有哪些伙伴？');
   assert.equal(listed.agentStop, 'policy-fact-local');
-  assert.match(String(listed.text), /48 只/, `要报总数：${listed.text}`);
+  assert.match(String(listed.text), /542 只/, `要报总数：${listed.text}`);
   assert.match(String(listed.text), /宠0/, '要列出名单里的名字');
-  assert.match(String(listed.text), /还有 36 只没列出来/, '列不全时要说清还有多少没列');
+  // 542 − 12（一页枚举上限）= 530（改钉前的旧值是 48 − 12 = 36）。
+  assert.match(String(listed.text), /还有 530 只没列出来/, '列不全时要说清还有多少没列');
   assert.doesNotMatch(String(listed.text), /我在。/, '不许用状态回报答名单问句');
   // 反证：名单是**一页**时同样要分开说（这一页 12 只 / 总数 622 只）
   const listedPage = await answer(page, '我有哪些伙伴？');
@@ -917,7 +923,11 @@ test('㉒ 「X 是谁」走引擎图鉴，查不到也是结论（0 次模型调
           evidence_ids: ['ev:pets.json#pet_000012'], error_type: null, failure_class: null,
           result: {record: 'pet', pet_id: 'pet_000012', name: '铠甲虫', title: '铠甲虫',
             types: ['虫系'], stats: {hp: 132, atk: 95, def: 128, spa: 43, spd: 82, spe: 75},
-            stat_total: 555, feature_skill_id: 'skill_000057', learnset_summary: {native: 13, blood: 18, stones: 17, total: 48}}};
+            // 2026-09-28 改钉（**旧值不删**：这里原来是 `stones: 17, total: 48`）。
+            // 铠甲虫的可玩层学习表现在是抓包三桶：native 13 + blood 18 + machine(技能石) 16 = 47
+            // （`layer-playable-48/support-matrix.json#pets[pet_id=pet_000012].learnset`）。
+            // 这是**合成回执**，但这个数字现在与磁盘上的真实产物一致。
+            stat_total: 555, feature_skill_id: 'skill_000057', learnset_summary: {native: 13, blood: 18, stones: 16, total: 47}}};
       }
       return {ok: true, ruleset_id: 'roco-world-s4-2026-09-10', state_version: 0, coverage: 1,
         evidence_ids: ['ev:skills.json#skill_000057'], error_type: null, failure_class: null,
@@ -938,7 +948,7 @@ test('㉒ 「X 是谁」走引擎图鉴，查不到也是结论（0 次模型调
     assert.match(text, /虫系/, `属性要摆出来：${text}`);
     assert.match(text, /555/, '种族值合计');
     assert.match(text, /坚韧铠甲/, '特性技能按 id 查到的名字');
-    assert.match(text, /学习表 48 条/, '学习表条数');
+    assert.match(text, /学习表 47 条/, '学习表条数（2026-09-28 前是 48：旧层用的是 wiki 技能石桶）');
     assert.match(text, /own-0001，95 级，定位 坦克/, '你自己那只的等级与定位也要带上');
     assert.doesNotMatch(text, /铠甲虫（铠甲虫）/, 'title 与名字相同时不许重复写');
     assert.doesNotMatch(text, /特性「特性/, '页面给的机制行原文照搬，不许再包一层');
