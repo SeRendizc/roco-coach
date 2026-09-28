@@ -165,7 +165,12 @@ export function talentDisplayProblems(facts){
     problems.push(`资质那一栏没有摊成六维数值（只数出 ${JSON.stringify(facts?.statCount)} 个「生命 10」这样的值）`);
   }
   if (Number(facts?.objectObject) > 0) {
-    problems.push(`页面上出现了 ${facts.objectObject} 处 [object Object]`);
+    // ⚠ 2026-09-28：连红 8 次都只报总数，无法定位 ⇒ 把「长在哪个容器」一起写进这条问题里
+    //（原来那些字段挂在 check 的第二参数上，而这一支先 return 了这些问题，字段根本没被打印）。
+    problems.push(`页面上出现了 ${facts.objectObject} 处 [object Object]`
+      + `（按容器拆：pet=${facts.inPet} list=${facts.inList} compare=${facts.inCompare} dev=${facts.inDev}`
+      + `；pet-view 内叶子元素 ${facts.leakElements} 个 ${JSON.stringify(facts.leakWhere)}`
+      + `；资质原样「${facts.talentRaw}」）`);
   }
   return problems;
 }
