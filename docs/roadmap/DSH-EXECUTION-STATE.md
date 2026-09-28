@@ -12779,3 +12779,151 @@ objectObject: ((document.body.innerText||'').match(/\[object Object\]/g) ?? []).
 但它们在验收脚本里分散在四个地方、被四层不同的等待掩盖着，所以**一次只暴露一个**。
 修"搬走按钮"这类改动时，应当**一次搜完全部旧选择器**（`grep '\[data-individual="[^"]*"\] \.'`
 一类），而不是跟着红一条修一条 —— 这一轮我修了三轮才把同一件事修干净。
+
+**六、第 5 处过期选择器 + 一个**真的潜伏 bug**（都是"修完上一条才现形"的）**
+
+修完第 4 处之后再跑，验收又前进一大步（**判据 40/41、反证 21/21**），fatal 换成：
+
+```
+✖ 流程异常： Error: 找不到可点的元素：#pet-actions [data-remove-cancel="own-0002-b"]
+```
+
+`delete-pick` 那一步的现场证据说明**前面的修复全生效了**：`{"delTarget":"pet_000062",
+"extraId":"own-0002-b","extraRow":true}` —— 本机那一只是**真的被加出来**的
+（修 `extraOwnedCount` 之前不可能有），详情页也真的打开了。死在"点了「删掉这只」之后
+确认态没画出来"。
+
+**真因不是选择器，是页面里的一段死代码**：
+
+```js
+// src/client/box.js 里原来有 4 处这样的门
+if (state.view === 'pet') renderPetPage();
+```
+
+`state.view` 只在 `setView()` 里赋值，而全仓调过 `setView('list')` 与 `setView('compare')`，
+**从来没有 `setView('pet')`** —— 二级页是 `openPet()` 直接 `renderPetPage()` 进去的。
+⇒ 这 4 处**永远为假**，全是死代码。二级页上另外三个动作（刷新 / 回滚 / 再加一只）
+之所以没事，是因为它们的处理器写的是**无条件** `renderPetPage()`；只有"删除"这一段
+（我这一轮从 `#box-grid` 那个监听器里抄出来复用的）带着这道门，于是点下去什么都不发生。
+
+四个门的实际后果（逐一核过）：
+1. `handleRemoveClick`（新抽出来的）—— 二级页点删除**确认态画不出来**（就是上面那个 fatal）；
+2. `toggleCompare` 之后的重画 —— 二级页点「加入比较」**按钮文案不更新**
+   （这正是人类 ② 说「有点鸡肋」的一部分：点了没有任何反馈）；
+3. `setKind` 里"先把这一屏收回列表" —— 死；
+4. `resetFilters` 里同一句 —— 死，而它上面那段注释明写着「「重置筛选」**在页头（二级页上也点得到）**：
+   先把这一屏收回列表」，也就是**注释描述的行为从来没发生过**。
+
+改法：新增唯一事实源 `petViewVisible()`（读 DOM：`#pet-view` 此刻 `hidden === false`），
+四处全换成它。判据：`node --test tests/roco-box-*.test.js` 19/11/7/13 全绿；
+真机验收见下一节。
+
+**这一轮最值得记住的一条**：这三轮 fatal **一次只暴露一个**，而它们**同一个根因**
+（人类 ②③ 把动作从列表行搬进二级页）。真正的教训不是"要搜完旧选择器"（第五节已经写过），
+而是**"搬走一个按钮"要连着查三件事**：① 旧选择器；② 复用旧处理器时**抄过来的守卫条件还成不成立**；
+③ 那个守卫依赖的变量**到底有没有被赋过那个值**。第 ③ 件最容易被漏掉 —— 它不报错、不告警，
+只在某个分支上静默地什么都不做。
+
+**七、我自己引入的一次回归（如实记）：把死门改成活的，冲掉了标签切换**
+
+第六节那个 `petViewVisible()` 改法**一次改活了 4 处**。其中两处（`setKind` 切换图鉴/我的盒子、
+`resetFilters` 重置筛选）原来的写法是 `backToList()`，而 `backToList()` 在二级页那一路里会走
+`history.back()` —— **那是异步的**：popstate 回来时会从 URL 把 `kind` 读回来，**把刚切换的标签冲掉**。
+
+真机读数（第 5 次跑，`run-frozen5.log`）：
+
+```
+✖ [04-切标签] 真实鼠标点「全图鉴」后 kind=catalog，总数 622 —实际： kind=mine total=49 cards=24
+             点击命中={"tag":"BUTTON","id":"tab-catalog","cls":"tab","hit_target":true}
+✖ 流程异常： Error: 找不到可点的元素：#box-grid .individual[data-detail]
+[box-acceptance] 判据 7/9 通过；反证 1/1 命中          ← 只跑完 9 条就中断
+```
+
+**"点击命中 `tab-catalog`、但读到的还是 `kind=mine`"** 这一行就是证据：点击本身没问题，
+是切完之后又被 URL 拽回去了。而修改前这条是绿的 —— 所以这是**我引入的回归**，不是原有的。
+
+改法：这两处只需要「把这一屏收回列表」，不需要回退历史栈 ⇒ 换成
+`setView('list')`（同步，UI 立刻正确）+ `history.replaceState(null, '', 'box.html')`
+（不产生 popstate），紧接着的 `load({reset: true})` 按新条件取数。
+**Esc 那一路**（`keydown` 处理器）与 **compare 那一路**仍然保留 `backToList()` —— 那里就是要「退回去」。
+
+**教训（这一轮第三次踩同一类坑，值得单列）**：改一处"永远为假的门"时，
+不能只问**"本意是不是这样"**，还要问**"把它接通之后，它会触发的那个副作用在当前时机安不安全"**。
+`backToList()` 在"用户点返回"时是对的，在"用户切标签"时是错的 —— 同一个函数，两种时机。
+
+**八、真因：错不在 guard 的条件，而在**作用域**（`ReferenceError` 被"症状"掩盖了一小时）
+
+第七节我先把回归归因到 `backToList()` 的 `history.back()` 竞态，**归错了** ——
+换成 `setView` + `replaceState` 之后第 6 次跑**一模一样地红**。真正的证据在验收报告里，
+不在我自己推的机制里：
+
+```
+page_errors: ["ReferenceError: petViewVisible is not defined
+    at setKind (http://127.0.0.1:52256/src/client/box.js:943:3)
+    at HTMLButtonElement.<anonymous> (http://127.0.0.1:52256/src/client/box.js:970:41)",
+  "ReferenceError: petViewVisible is not defined
+    at HTMLButtonElement.resetFilters (http://127.0.0.1:52256/src/client/box.js:963:3)"]
+console_errors: []
+```
+
+**根因**：我这一轮新加的四段共用处理器（`petViewVisible` / `rerenderAfterAction` /
+`handleFavClick` / `handleRemoveClick`）是插在 `const grid = $('box-grid');` **之前**的，
+而那行在 **`wire()` 函数体内** ⇒ 这几段成了 `wire()` 的**局部函数**。`wire()` 里那两个监听器
+调得到（所以删除/收藏确实修好了、36 号也确实往前走了），但 **`setKind` / `resetFilters` /
+`toggleCompare` 是模块级函数**，一调就 `ReferenceError`。
+
+**为什么难查（这段值得背下来）**：
+1. `setKind` 第一行就 `state.kind = 'catalog'` 成功了，抛在后面的 `petViewVisible()` ⇒
+   `load()` 根本没发出去 ⇒ `renderMeta()` 没跑 ⇒ `document.body.dataset.boxKind` 还是 `'mine'`。
+   症状看起来是**"点了标签没反应"**，完全不像作用域问题。
+2. 这条异常只进 **`page_errors`**，`console_errors` 是**空的** —— 而验收 42 条判据里
+   **只有 22 号**读 `page_errors`。于是"页面上有个 ReferenceError"这件事**几乎不影响判据**，
+   只以一条莫名其妙的 04 号红表现出现。
+3. 我第一次归因（`history.back()` 竞态）**听起来非常合理**，而且改动之后**又红了一次**才被推翻。
+   ⇒ **归因要读现场数据，不要读自己推的机制**：报告里的 `page_errors` 一直都在，
+   我是在第 6 次跑完之后才去看它的。
+
+**修法**：把四段搬到**模块顶层**（`wire()` 之前）。
+**判据**：`tests/roco-box-redo.test.js` 新增 ㉒ —— 顶格 `^function <名字>(` 必须在，
+且缩进过的嵌套声明必须**不存在**（两条一正一反）。跑：12/12 绿。
+
+**九、这一轮的最终读数**
+
+| 量什么 | 命令 | 读数 |
+|---|---|---|
+| 盒子真机验收（**单独跑**） | `node scripts/roco/browser-box-acceptance.mjs` | **判据 42/42 通过 + 反证 22/22 命中、全部通过**（修前门禁里是 37/42、5 条红） |
+| 盒子判据（纯函数那一半） | `node --test tests/roco-box-*.test.js` | drawer **19/19**、redo **12/12**、individuals **7/7**、box **13/13** |
+| 两个真错的判据 | `node --test tests/roco-guard-wording.test.js` | **9/9**（修前 6 绿 3 红 —— ②③ 是防御说反、④ 是 rules 族漏词） |
+| 两只对比的解析 | `node --test tests/roco-compare-pets.test.js` | **8/8**（新增 ②b：修前实测红） |
+| agent 侧的既有判据 | `node --test tests/roco-ask-coverage.test.js tests/roco-plain-speak.test.js tests/roco-coverage-force.test.js tests/roco-rules-numbers.test.js tests/roco-codex-local.test.js tests/roco-term-lookup.test.js tests/roco-server-side-guard.test.js tests/roco-nurture-page.test.js` | 47/12/5/4/11/5/5/5 **全绿**（改 `runtime.js` 没顶红任何一条） |
+| 状态文档 | `node --test tests/evals/state-doc.test.js` | 7/7 绿（HEAD 行已跟到最新提交） |
+
+**⚠ 这一轮我犯的两次归因错误（都如实记在上面）**：先把 04 号红归因到 `backToList()` 的历史竞态
+（听起来很合理，改完**又红了一次**），真正的根因是**作用域**（`ReferenceError` 只进 `page_errors`，
+而 42 条判据里只有 22 号读它）。教训：**归因要读现场数据，不要读自己推的机制**。
+
+**⚠ 过程性污染（两处，都不是产品问题）**：
+1. 门禁 `bash-511` 的那一格 `box-acceptance`（87s、5 红）**跑的时候我正在改 `src/client/box.js`**
+   ⇒ 那一格只作诊断用，最终读数以上表**单独跑**的 42/42 为准；
+2. 这一轮我为拿干净读数跑了 6 次真机验收：`run-frozen3`（40/41，fatal 在 36 号）、
+   `run-frozen4`（被我自己杀掉）、`run-frozen5`/`run-frozen6`/`run-quiet`（04 号红，
+   是作用域 bug 的表现）、`run-final-clean`（**42/42 全绿**）。
+   中间那几次红**不是回归反复**，而是**同一条链上一个接一个暴露出来的不同层**
+   （旧选择器 → 死门 → 作用域），第五、六节记了每一层。
+
+**没做到 / 未验证（留给下一轮）**：
+1. `model-trajectories` ④ 那条**判据本身站不住**（要求同配置两次独立运行逐窗口全等，
+   实测差 13.5%）—— §C6.338 有三条方案，**仍待人类拍板**，这一轮没动；
+2. 门禁**没有重跑**：上述最终读数都是单独跑的。要拿"整条门禁绿"还得单独跑一次
+   `npm run verify:release`（红线只有上面那条 ④）；
+3. 多步（两次工具调用）**仍然没有被测过**：288 条任务里 0 条要求两次调用
+   （`max_tool_calls` 分布 `{0:12,1:48,2:228}` 只是上限），机制本身在
+   `runtime.js:2695-2741`/`:3481-3514` 且默认关。这一轮**只把结论写清楚，没有加任务**
+   （加任务会牵动 4 份产物 + SFT 切分 + 一条钉在产物上的判据，属于口径变更，需要单独一批做）；
+4. ~~真机探针没重跑~~ —— **已重跑：`node scripts/roco/probe-answer-speak.mjs` 干净 20/20**
+   （`reports/roco/probe-after-fixes.log`；服务先用新代码重启过，否则读的是旧模块）。
+   余下没做的仍然有：门禁整条没重跑；多步任务没加；盒子页那三处已知缺口（见下）；
+5. 盒子页还有三处**已知但没做**的：`#compare-bar` 在 `#box-list-view` 内 ⇒ 二级页上点完
+   「加入比较」看不到"已选 1/2"（要把它移出容器，会牵动判据）；选第三只时
+   `state.selected.shift()` **静默挤掉**第一只（界面无提示）；`mjs` 里筛选菜单真机 facts 的
+   `narrow` 是**写死的 null**，窄屏那两条分支真机从没跑过（判据存在但是空的）。

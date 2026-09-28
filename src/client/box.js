@@ -911,7 +911,7 @@ function toggleCompare(select) {
   }
   renderCards();
   renderCompareBar();
-  if (state.view === 'pet') renderPetPage();
+  if (petViewVisible()) renderPetPage();
 }
 
 // ── 接线 ────────────────────────────────────────────────────────────────────
@@ -933,7 +933,14 @@ function setKind(kind) {
   }
   $('flag-favourite').setAttribute('aria-pressed', 'false');
   if (state.view === 'compare') backToList();
-  if (state.view === 'pet') backToList();
+  // 2026-09-28 实测（真机 04 号）：二级页这一路原来写的是 `backToList()` —— 而 `backToList()`
+  // 在二级页上会走 `history.back()`，那是**异步**的：popstate 回来时会从 URL 把 `kind` 读回来，
+  // **把刚切换的标签冲掉**（实测现场：点击命中 `tab-catalog`，读到的还是 `kind=mine total=49`，
+  // 后面的步骤整条塌掉）。切换标签 / 重置筛选只需要「把这一屏收回列表」，不需要回退历史栈 ——
+  // 同步 `setView('list')` 立刻正确，再把地址改回盒子首页（`replaceState` 不产生 popstate），
+  // 紧接着的 `load({reset: true})` 会按新条件取数。
+  // ⚠ Esc 那一路（`keydown` 处理器）与 compare 那一路仍然走 `backToList()`。
+  if (petViewVisible()) { setView('list'); history.replaceState(null, '', 'box.html'); }
   renderCompareBar();
   void load({reset: true});
 }
@@ -946,9 +953,121 @@ function resetFilters() {
   $('flag-favourite').setAttribute('aria-pressed', 'false');
   // 「重置筛选」在页头（二级页上也点得到）：先把这一屏收回列表，再按新条件取数。
   if (state.view === 'compare') backToList();
-  if (state.view === 'pet') backToList();
+  // 2026-09-28 实测（真机 04 号）：二级页这一路原来写的是 `backToList()` —— 而 `backToList()`
+  // 在二级页上会走 `history.back()`，那是**异步**的：popstate 回来时会从 URL 把 `kind` 读回来，
+  // **把刚切换的标签冲掉**（实测现场：点击命中 `tab-catalog`，读到的还是 `kind=mine total=49`，
+  // 后面的步骤整条塌掉）。切换标签 / 重置筛选只需要「把这一屏收回列表」，不需要回退历史栈 ——
+  // 同步 `setView('list')` 立刻正确，再把地址改回盒子首页（`replaceState` 不产生 popstate），
+  // 紧接着的 `load({reset: true})` 会按新条件取数。
+  // ⚠ Esc 那一路（`keydown` 处理器）与 compare 那一路仍然走 `backToList()`。
+  if (petViewVisible()) { setView('list'); history.replaceState(null, '', 'box.html'); }
   renderCompareBar();
   void load({reset: true});
+}
+
+// ── 列表行与二级详情页**共用**的几个动作处理器 ────────────────────────────────
+//
+// ⚠ 2026-09-28 真机抓到的真错（排查了很久，记在这里）：这几段原来被插在 `wire()` **函数体内**
+// （`const grid = $('box-grid');` 之前），而函数声明只在自己的作用域里可见 —— `wire()` 内部那两个
+// 监听器调得到，但 `setKind` / `resetFilters` / `toggleCompare` 是**模块级**函数，一调就抛
+// `ReferenceError: petViewVisible is not defined`。
+// 它的表现极具误导性：`page_errors` 里才有这条异常（`console_errors` 是空的），而验收里
+// **只有 22 号判据**读 `page_errors` ⇒ 表面上看到的是"点了「全图鉴」没反应"（04 号：kind 永远是 mine），
+// 完全看不出是作用域问题。所以这几段一律放在**模块顶层**，并加判据钉住（`tests/roco-box-redo.test.js` ㉒）。
+/**
+ * 二级详情页**此刻是不是当前这一屏**（DOM 事实，唯一事实源）。
+ *
+ * ⚠ 2026-09-28 实测：页面里原来用 `state.view` 是否等于 `'pet'` 判这件事，而**它是永远假的** ——
+ * `state.view` 只在 `setView()` 里赋值，全仓调过 `'list'` 与 `'compare'`，**从来没有 `setView('pet')`**
+ * （二级页是 `openPet()` 直接 `renderPetPage()` 进去的）。于是挂着这道门的四处**全是死代码**，
+ * 其中一处有真实后果：在二级页上点「删掉这只」之后确认态画不出来（真机 36 号 fatal 的真因）。
+ * 其余三处（`toggleCompare` 之后重画、`setKind`/`resetFilters` 里"先把这一屏收回列表"）
+ * 同样是死的 —— `resetFilters` 那段注释明写着"二级页上也点得到"，实际点了不回去。
+ */
+function petViewVisible() {
+  const view = $('pet-view');
+  return Boolean(view) && view.hidden === false;
+}
+
+/**
+ * 动作之后重画：列表那一屏一定要重画；**二级页看得见的时候也要重画**。
+ *
+ * ⚠ 2026-09-28 实测（真机 36 号 fatal 的真因）：这两个处理器最初是从 `#box-grid` 那个监听器里
+ * 抄出来的，带着 `if (state.view === 'pet') renderPetPage();` 这道门 —— 而这道门**永远是假的**：
+ * `state.view` 只在 `setView()` 里赋值，全仓调过 `'list'` 与 `'compare'`，**从来没有 `setView('pet')`**
+ * （二级页是 `openPet()` 直接 `renderPetPage()` 进去的），所以 `state.view` 永远不是 `'pet'`。
+ * 二级页上另外三个动作（刷新 / 回滚 / 再加一只）之所以没事，是因为它们的处理器写的是
+ * **无条件** `renderPetPage()`。
+ * 这条死门在列表那一侧看不出来（那时本来也不该画二级页），一到二级页就现形：
+ * 点「删掉这只」之后确认态根本没画出来（判据读 `[data-remove-cancel]` 读到 null），整条流程 fatal。
+ * 改成按 **DOM 事实**判（`#pet-view` 此刻看不看得见），不再问那个永远不等于 `'pet'` 的变量。
+ */
+function rerenderAfterAction() {
+  renderCards();
+  if (petViewVisible()) renderPetPage();
+}
+
+/**
+ * 「收藏」星标：列表行与**二级详情页**共用同一份逻辑（人类 ⑧：「这收藏功能也没用啊？做出来吧！」）。
+ *
+ * 抽出来的原因（2026-09-28 实测的真 bug）：这段原来只挂在 `#box-grid` 的监听器上，
+ * 而 `#pet-actions` 里也画了同一个按钮（`petActionsHtml` 调 `favouriteButton`）
+ * ⇒ **二级详情页上那个星标点了没反应**。
+ */
+function handleFavClick(event) {
+  const favBtn = event.target.closest?.('[data-fav]');
+  if (!favBtn) return false;
+  event.preventDefault();
+  const on = toggleFavourite(favBtn.dataset.fav);
+  $('box-status').textContent = on ? '已经收藏这一只（记在你自己这台机器上）' : '已经取消收藏';
+  rerenderAfterAction();
+  return true;
+}
+
+/**
+ * 「删掉这只」的两步确认（人类 ⑩：「删除个体的功能一定要加二次确认」）：
+ * 第一次点只把这一处换成「确定删掉？+ 取消」，**再点一次**确定才真删。
+ * 不用浏览器原生 confirm —— 无头浏览器点不动它，判据也就写不出来。
+ *
+ * ⚠ 2026-09-28 实测的真 bug（真机验收 36 号抓的）：这段原来只挂在 `#box-grid` 的监听器上，
+ * 而 `#pet-actions` 里也画了「删掉这只」（`petActionsHtml` 调 `removeButton`）
+ * ⇒ **二级详情页上那个按钮是死的**：点下去什么都不发生，判据读到的 `data-remove-confirm`
+ * 永远是 null。详情页上的刷新/回滚/再加一只都有接线，唯独漏了删除。
+ */
+function handleRemoveClick(event) {
+  const cancelBtn = event.target.closest?.('[data-remove-cancel]');
+  if (cancelBtn) {
+    event.preventDefault();
+    state.confirmRemove = '';
+    rerenderAfterAction();
+    $('box-status').textContent = '没删，什么都没动。';
+    return true;
+  }
+  const confirmBtn = event.target.closest?.('[data-remove-confirm]');
+  if (confirmBtn) {
+    event.preventDefault();
+    const removed = removeIndividual(confirmBtn.dataset.removeConfirm);
+    state.confirmRemove = '';
+    $('box-status').textContent = removed.ok
+      ? '已经删掉那一只（它只在本机记录里）'
+      : `删不了：${removed.reason}`;
+    if (removed.ok && state.pet === confirmBtn.dataset.removeConfirm) {
+      state.pet = null;
+      backToList();
+      return true;
+    }
+    rerenderAfterAction();
+    return true;
+  }
+  const removeBtn = event.target.closest?.('[data-remove]');
+  if (removeBtn) {
+    event.preventDefault();
+    state.confirmRemove = removeBtn.dataset.remove;
+    rerenderAfterAction();
+    $('box-status').textContent = '再点一次「确定删掉」才会真的删掉；点「取消」就什么都不动。';
+    return true;
+  }
+  return false;
 }
 
 function wire() {
@@ -998,73 +1117,6 @@ function wire() {
     renderFilterMenus();
     void load({reset: true});
   });
-/**
- * 「收藏」星标：列表行与**二级详情页**共用同一份逻辑（人类 ⑧：「这收藏功能也没用啊？做出来吧！」）。
- *
- * 抽出来的原因（2026-09-28 实测的真 bug）：这段原来只挂在 `#box-grid` 的监听器上，
- * 而 `#pet-actions` 里也画了同一个按钮（`petActionsHtml` 调 `favouriteButton`）
- * ⇒ **二级详情页上那个星标点了没反应**。
- */
-function handleFavClick(event) {
-  const favBtn = event.target.closest?.('[data-fav]');
-  if (!favBtn) return false;
-  event.preventDefault();
-  const on = toggleFavourite(favBtn.dataset.fav);
-  $('box-status').textContent = on ? '已经收藏这一只（记在你自己这台机器上）' : '已经取消收藏';
-  renderCards();
-  if (state.view === 'pet') renderPetPage();
-  return true;
-}
-
-/**
- * 「删掉这只」的两步确认（人类 ⑩：「删除个体的功能一定要加二次确认」）：
- * 第一次点只把这一处换成「确定删掉？+ 取消」，**再点一次**确定才真删。
- * 不用浏览器原生 confirm —— 无头浏览器点不动它，判据也就写不出来。
- *
- * ⚠ 2026-09-28 实测的真 bug（真机验收 36 号抓的）：这段原来只挂在 `#box-grid` 的监听器上，
- * 而 `#pet-actions` 里也画了「删掉这只」（`petActionsHtml` 调 `removeButton`）
- * ⇒ **二级详情页上那个按钮是死的**：点下去什么都不发生，判据读到的 `data-remove-confirm`
- * 永远是 null。详情页上的刷新/回滚/再加一只都有接线，唯独漏了删除。
- */
-function handleRemoveClick(event) {
-  const cancelBtn = event.target.closest?.('[data-remove-cancel]');
-  if (cancelBtn) {
-    event.preventDefault();
-    state.confirmRemove = '';
-    renderCards();
-    if (state.view === 'pet') renderPetPage();
-    $('box-status').textContent = '没删，什么都没动。';
-    return true;
-  }
-  const confirmBtn = event.target.closest?.('[data-remove-confirm]');
-  if (confirmBtn) {
-    event.preventDefault();
-    const removed = removeIndividual(confirmBtn.dataset.removeConfirm);
-    state.confirmRemove = '';
-    $('box-status').textContent = removed.ok
-      ? '已经删掉那一只（它只在本机记录里）'
-      : `删不了：${removed.reason}`;
-    if (removed.ok && state.pet === confirmBtn.dataset.removeConfirm) {
-      state.pet = null;
-      backToList();
-      return true;
-    }
-    renderCards();
-    if (state.view === 'pet') renderPetPage();
-    return true;
-  }
-  const removeBtn = event.target.closest?.('[data-remove]');
-  if (removeBtn) {
-    event.preventDefault();
-    state.confirmRemove = removeBtn.dataset.remove;
-    renderCards();
-    if (state.view === 'pet') renderPetPage();
-    $('box-status').textContent = '再点一次「确定删掉」才会真的删掉；点「取消」就什么都不动。';
-    return true;
-  }
-  return false;
-}
-
   const grid = $('box-grid');
   grid.addEventListener('click', (event) => {
     // 列表行里只剩两件可点的事：收藏星标、以及（本机那只有的）删掉这只（两步确认）。
@@ -1213,7 +1265,7 @@ function handleRemoveClick(event) {
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
     if (state.view === 'compare') backToList();
-    if (state.view === 'pet') backToList();
+    if (petViewVisible()) backToList();
     for (const menu of document.querySelectorAll('details.fmenu[open]')) menu.open = false;
   });
 }

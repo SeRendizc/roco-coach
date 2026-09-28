@@ -1,0 +1,21 @@
+ok   雨天水系伤害加多少？  stop=policy-fact-local 正文命中=[]
+ok   火系克制什么属性？  stop=policy-fact-local 正文命中=[]
+ok   水系打火系有优势吗？  stop=policy-fact-local 正文命中=[]
+ok   我这几只里谁抗龙系？  stop=policy-fact-local 正文命中=[]
+ok   铠甲虫是谁？  stop=policy-fact-local 正文命中=[]
+ok   小翼龙带抓挠、震击合法吗？  stop=policy-fact-local 正文命中=[]
+ok   主动换宠还能出招吗？  stop=policy-fact-local 正文命中=[]
+ok   倒下补位免费吗？  stop=policy-fact-local 正文命中=[]
+ok   技能一共有多少种？  stop=policy-fact-local 正文命中=[]
+ok   加点每点加多少？  stop=policy-fact-local 正文命中=[] 退役检查=[]
+ok   我还差多少训练点满级？  stop=policy-fact-local 正文命中=[] 退役检查=[]
+ok   还有几个培养格？  stop=policy-fact-local 正文命中=[] 退役检查=[]
+ok   我的能量上限是多少？  stop=policy-fact-local 正文命中=[]
+ok   喵喵几级进化？  stop=policy-fact-local 正文命中=[] 进化检查=[]
+ok   喵喵的种族值是多少？  stop=policy-fact-local 正文命中=[] 图鉴检查=[]（回执 1 次）
+ok   寂灭骨龙的速度是多少？  stop=policy-fact-local 正文命中=[] 图鉴检查=[]（回执 1 次）
+ok   喵喵是什么属性？  stop=policy-fact-local 正文命中=[] 图鉴检查=[]（回执 2 次）
+ok   喵喵的叶绿光束威力多少？  stop=policy-fact-local 正文命中=[] 图鉴检查=[]（回执 1 次）
+ok   喵喵的技能表  stop=policy-fact-local 正文命中=[] 图鉴检查=[]（回执 1 次）
+ok   不存在的精灵名啊的种族值是多少？  stop=policy-fact-local 正文命中=[] 图鉴检查=[]（回执 1 次）
+报告：reports/roco/answer-speak-probe.json（干净 20/20；脏 0）

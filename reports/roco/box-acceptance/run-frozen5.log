@@ -1,0 +1,30 @@
+[box-acceptance] [diag boot] pet-view len=410 对象=12 整页=348
+[box-acceptance] ✔ [01-路由总数] 我的盒子 == 49 个个体（= owned-pets.json 的实例数），全图鉴 == 622 条记录 —实际： count-mine=49 count-catalog=622
+[box-acceptance] ✔ [02-默认视图] 默认进入「我的盒子」，总数 49（一人一只），每页 24 张卡 —实际： kind=mine total=49 cards=24
+[box-acceptance] ✔ [03-宽屏不溢出] 1440×900：scrollW == clientW —实际： clientW=1440 scrollW=1440 bodyScrollW=1440
+[box-acceptance] ✖ [04-切标签] 真实鼠标点「全图鉴」后 kind=catalog，总数 622，卡片里没有工程字段 —实际： kind=mine total=49 cards=24 点击命中={"tag":"BUTTON","id":"tab-catalog","cls":"tab","hit_target":true}
+[box-acceptance] ✔ [05-catalog全量] kind=catalog 的 total 必须 == 622 —实际： player.total=622
+[box-acceptance] ✔ [反证 05-catalog全量] 把 catalog 总数改成 48（迁移层全量）必须被同一条判据抓住 —实际命中： catalog 总数必须 == 622，实际 48
+[box-acceptance] ✔ [06-玩家层无工程话] 展开的玩家可见文本里不出现 pet_id / state_version / coverage / provenance / unknown_fields / 裸 JSON —实际： 扫过 2937 字；卡片首层「🔥 音速犬 🔥火系 定位：输出 支持：仅图鉴资料 性格「稳重」 · 天分 速度 7 / 生命 0」
+[box-acceptance] ✔ [07-键盘搜索] 真实键盘输入「喵喵」后结果数 0<total<622，且每张卡的名字都含搜索词 —实际： 输入框实际值="喵喵" total=2 每张卡都含喵=true；样例「🌿 喵喵 🌿草系」
+[box-acceptance] ✔ [08-系别筛选] 真实鼠标点「系别=草系」后每张卡都含草系，且总数等于路由给的筛选后总数 —实际： 页面 total=84 路由 total=84 每张卡含草系=true；命中={"tag":"BUTTON","id":null,"cls":"filter-chip","hit_target":true}
+[box-acceptance] ✖ 流程异常： Error: 找不到可点的元素：#box-grid .individual[data-detail]
+    at mouseClick (file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-box-acceptance.mjs:460:19)
+    at async main (file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-box-acceptance.mjs:638:5)
+    at async file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-box-acceptance.mjs:2108:14
+[box-acceptance] ────────────────────────────────────────────────────────────────────────────
+[box-acceptance] ✔ 01-路由总数 我的盒子 == 49 个个体（= owned-pets.json 的实例数），全图鉴 == 622 条记录 → count-mine=49 count-catalog=622
+[box-acceptance] ✔ 02-默认视图 默认进入「我的盒子」，总数 49（一人一只），每页 24 张卡 → kind=mine total=49 cards=24
+[box-acceptance] ✔ 03-宽屏不溢出 1440×900：scrollW == clientW → clientW=1440 scrollW=1440 bodyScrollW=1440
+[box-acceptance] ✖ 04-切标签 真实鼠标点「全图鉴」后 kind=catalog，总数 622，卡片里没有工程字段 → kind=mine total=49 cards=24 点击命中={"tag":"BUTTON","id":"tab-catalog","cls":"tab","hit_target":true}
+[box-acceptance] ✔ 05-catalog全量 kind=catalog 的 total 必须 == 622 → player.total=622
+[box-acceptance] ✔ 06-玩家层无工程话 展开的玩家可见文本里不出现 pet_id / state_version / coverage / provenance / unknown_fields / 裸 JSON → 扫过 2937 字；卡片首层「🔥 音速犬 🔥火系 定位：输出 支持：仅图鉴资料 性格「稳重」 · 天分 速度 7 / 生命 0」
+[box-acceptance] ✔ 07-键盘搜索 真实键盘输入「喵喵」后结果数 0<total<622，且每张卡的名字都含搜索词 → 输入框实际值="喵喵" total=2 每张卡都含喵=true；样例「🌿 喵喵 🌿草系」
+[box-acceptance] ✔ 08-系别筛选 真实鼠标点「系别=草系」后每张卡都含草系，且总数等于路由给的筛选后总数 → 页面 total=84 路由 total=84 每张卡含草系=true；命中={"tag":"BUTTON","id":null,"cls":"filter-chip","hit_target":true}
+[box-acceptance] ✖ fatal 整个流程必须跑完 → 异常：Error: 找不到可点的元素：#box-grid .individual[data-detail]
+    at mouseClick (file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-box-acceptance.mjs:46
+[box-acceptance] ✔ 05-catalog全量 [反证] 把 catalog 总数改成 48（迁移层全量）必须被同一条判据抓住 → catalog 总数必须 == 622，实际 48
+[box-acceptance] 截图 3 张 → reports/roco/box-acceptance/
+[box-acceptance] 判据 7/9 通过；反证 1/1 命中
+[box-acceptance] 报告 → reports/roco/box-acceptance/browser-box-acceptance.json
+[box-acceptance] 有 2 条不通过

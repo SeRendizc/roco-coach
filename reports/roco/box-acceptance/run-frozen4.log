@@ -1,0 +1,27 @@
+[box-acceptance] [diag boot] pet-view len=410 对象=12 整页=348
+[box-acceptance] ✔ [01-路由总数] 我的盒子 == 49 个个体（= owned-pets.json 的实例数），全图鉴 == 622 条记录 —实际： count-mine=49 count-catalog=622
+[box-acceptance] ✔ [02-默认视图] 默认进入「我的盒子」，总数 49（一人一只），每页 24 张卡 —实际： kind=mine total=49 cards=24
+[box-acceptance] ✔ [03-宽屏不溢出] 1440×900：scrollW == clientW —实际： clientW=1440 scrollW=1440 bodyScrollW=1440
+[box-acceptance] ✔ [04-切标签] 真实鼠标点「全图鉴」后 kind=catalog，总数 622，卡片里没有工程字段 —实际： kind=catalog total=622 cards=24 点击命中={"tag":"BUTTON","id":"tab-catalog","cls":"tab","hit_target":true}
+[box-acceptance] ✔ [05-catalog全量] kind=catalog 的 total 必须 == 622 —实际： player.total=622
+[box-acceptance] ✔ [反证 05-catalog全量] 把 catalog 总数改成 48（迁移层全量）必须被同一条判据抓住 —实际命中： catalog 总数必须 == 622，实际 48
+[box-acceptance] ✔ [06-玩家层无工程话] 展开的玩家可见文本里不出现 pet_id / state_version / coverage / provenance / unknown_fields / 裸 JSON —实际： 扫过 912 字；卡片首层「🌿 喵喵 🌿草系」
+[box-acceptance] ✔ [07-键盘搜索] 真实键盘输入「喵喵」后结果数 0<total<622，且每张卡的名字都含搜索词 —实际： 输入框实际值="喵喵" total=2 每张卡都含喵=true；样例「🌿 喵喵 🌿草系」
+[box-acceptance] ✔ [08-系别筛选] 真实鼠标点「系别=草系」后每张卡都含草系，且总数等于路由给的筛选后总数 —实际： 页面 total=84 路由 total=84 每张卡含草系=true；命中={"tag":"BUTTON","id":null,"cls":"filter-chip","hit_target":true}
+[box-acceptance] ✔ [27-掷点来源那一句不上屏] 人类 2026-09-28 决定不要「掷点生成、不是官方概率」这句 ⇒ 真浏览器上不许再有 `[data-rolled="yes"]` 那一行，也不许出现「掷点生成」字样（函数与单测那一层仍保留这句，只是不上屏） —实际： [data-rolled] 0 处；「掷点生成」0 处
+[box-acceptance] ✔ [09-个体详情] 个体详情**二级页**（地址 `?pet=`）里有等级 / 性格 / 资质 / 特长 / 血脉 / 天分档位 / 四个有序技能（五栏标签逐条对得上），天分档位的取值落在四个档名里（读不出来时照实说没有、并带上说明），并且「效果未校准」与「游戏数据里没有这一项」都说了 —实际： 二级页=true view=pet 地址 pet=own-0002 traits=5 标签=["性格","资质","特长","血脉","天分档位"] 天分档位=「一般般的天分」（命中档名=true；读不出来但带了说明=false） moves=4 缺词=[] 标题=音速犬 · 详情
+[box-acceptance] ✔ [10-详情也不说工程话] 个体详情二级页（玩家点得到的）同样不出现工程字段 —实际： 扫过 883 字
+[box-acceptance] [diag before-10b] pet-view len=3901 对象=74 整页=84
+[box-acceptance] ✔ [10b-资质要摊成六维数值（own-0001）] 真鼠标打开 own-0001 的详情：资质那一栏是「生命 10 / 物攻 3 / …」这样的六维数值，整页不出现 [object Object] —实际： 铠甲虫 · 详情：资质 =「生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9 养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。」（数出 6 个数值；[object Object] 0 处）｜pet-view 内命中元素 15 个 ["BUTTON.nav-btn primary@pet-back html=<button class=\"nav-btn
+[box-acceptance] ✔ [反证 10b-资质要摊成六维数值（own-0001）] 把「资质」印成 [object Object]、或者一个数值都没有 —— 两种坏样本都必须被同一条判据抓住 —实际命中： 资质那一栏没有摊成六维数值（只数出 0 个「生命 10」这样的值） | 页面上出现了 2 处 [object Object]（二级页可见文字里 undefined 处）｜命中行：undefined｜资质原样「undefined」
+[box-acceptance] ✔ [11-两个体比较] 选两只同种个体后进**第二级页**（地址 ?a=&b=）逐字段比较：路由给的每一栏都画出来、相同 / 不同 / 未知 三种状态都出现，未知行都给了原因，对象值（资质那种六维表）摊成数值而不是 [object Object] —实际： 已选=2 比较入口可用=true 二级页=true 地址 a=own-0001 b=own-0049 列表收起=true 返回入口="← 返回精灵盒子" 字段行=9（路由给 9 栏） 状态=["same","different","unknown"] 文本=["相同","不同","未知"] 未知行=2 [object Object]=0 原因「为什么是未知：两边都没有登记这一项的取值，所以这一栏标
+[box-acceptance] ✔ [12-比较也不说工程话] 比较二级页里不出现工程字段（未知只说「为什么未知」） —实际： 铠甲虫：这两只有 4 栏不同、2 栏未知。 相同 3 不同 4 未知 2
+[box-acceptance] ✔ [11b-比较二级页刷新可复现] 刷新 `?a=&b=` 那一屏：地址还是这两只、逐字段的行一栏不少地还在（同一屏复现），返回入口 ≥44px 还摸得到 —实际： 刷新后 view=compare 地址 a=own-0001 b=own-0049 字段行=9（刷新前 9）状态=["different","same","unknown"]（刷新前 ["different","same","unknown"]） 返回入口=true（高 ≥44：true）
+[box-acceptance] ✔ [反证 11b-比较二级页刷新可复现] 「刷新后什么都没了」的样本（没有两只 / 一行都没有 / 没有返回入口）必须被同一条判据抓住 —实际命中： 没有停在比较二级页上（现在 "list"） | 地址里没有带齐两只（a=null b=null） | 逐字段的行太少（0 行）——「内容也啥啥没有」说的就是这个 | 二级页上没有返回盒子的入口
+[box-acceptance] ✔ [11c-比较二级页的返回入口] 真鼠标点「返回精灵盒子」：回到盒子首层（列表与卡片都在，比较那一屏收起） —实际： 列表=shown 卡片=22 比较页收起=true 落在=box.html
+[box-acceptance] ✔ [11c2-比较二级页前进后退可复现] 浏览器后退回到 `?a=&b=` 那一屏（同一屏、字段行一栏不少），再前进回到盒子首层 —实际： 后退：地址 a=own-0001 b=own-0049 字段行=9（期望 9）；前进回列表=true
+[box-acceptance] ✔ [13-不同种拒绝] compare 两个不同种必须 HTTP 400 + ok:false，并给出「不是同一种」的原因 —实际： HTTP 400 error=「这两只不是同一种精灵（pet_000012 / pet_000062），不能逐字段比较：逐字段比较的前提是同一物种的不同个体。」
+[box-acceptance] ✔ [反证 13-不同种拒绝] 把「接受了不同种比较」的样本过同一条判据必须报错 —实际命中： 不同种比较必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true | 必须给出「不是同一种」的原因，实际 error=undefined
+[box-acceptance] ✔ [11d-比不了就说清（不同种）] 把两只不同种的地址直接打开（服务端 400）：二级页停在比较页上、一行字段都不画，用玩家话写清「不是同一种」，返回入口还在，文案里不出现个体编号 —实际： 原因「铠甲虫 / 音速犬：这两只不是同一种精灵，逐字段比较只对同种的不同个体成立。换一只同种的再来；也可以点上面的按钮把它们直接带去配队。」
+[box-acceptance] ✔ [反证 11d-比不了就说清（不同种）] 白屏 / 没有原因 / 没有返回入口 / 文案里带编号 —— 四种坏样本都必须被同一条判据抓住 —实际命中： 没有说清为什么比不了（实际「」） | 比不了的时候也要有返回盒子的入口（否则是死路） | 玩家读到的文案里出现编号形状 ["pet_000012"]（工程话漏到玩家眼前）
+[box-acceptance] ✔ [11e-比不了就说清（少带一只）] 地址上只有一只（缺 id）：二级页也要如实说清「要两只才有得比」，不许白屏 —实际： 原因「这一页要一次带上两只伙伴才有得比：现在地址上只有一只。回盒子里重新选两只再来。」

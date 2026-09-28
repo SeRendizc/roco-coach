@@ -239,3 +239,29 @@ test('⑧ 删掉要两步：第一次不删、有取消、再点确定才删（�
   // 二次确认的样式也在（点得到）
   assert.match(BOX_CSS, /\.remove-btn/, '确认按钮要有样式');
 });
+
+/**
+ * ㉒ 共用的动作处理器必须在**模块顶层**定义。
+ *
+ * 2026-09-28 真机抓到的真错（排查了很久，值得单钉一条）：`box.js` 里
+ * `petViewVisible` / `rerenderAfterAction` / `handleFavClick` / `handleRemoveClick`
+ * 这四段一度被插在 `wire()` **函数体内**。函数声明只在自己的作用域里可见 ⇒ `wire()` 里那两个
+ * 监听器调得到，而 **`setKind` / `resetFilters` / `toggleCompare` 是模块级函数**，一调就抛
+ * `ReferenceError: petViewVisible is not defined`（真机 `page_errors` 原文，
+ * `at setKind (http://127.0.0.1:52256/src/client/box.js:943:3)`）。
+ *
+ * 为什么难查：这条异常只进 `page_errors`（`console_errors` 是空的），而验收 42 条判据里
+ * **只有 22 号**读 `page_errors` ⇒ 表面症状是「点了『全图鉴』标签没反应、kind 永远是 mine」
+ * （04 号红），看起来像事件没绑上或 URL 竞态，完全不像作用域问题。
+ *
+ * 判据：顶格的 `function <名字>(`（`^` 在 `m` 模式下 = 行首，嵌套的一定带缩进）。
+ */
+test('㉒ 四个共用动作处理器必须在模块顶层（真机 page_error 抓到的作用域错）', () => {
+  for (const name of ['petViewVisible', 'rerenderAfterAction', 'handleFavClick', 'handleRemoveClick']) {
+    assert.match(BOX_JS, new RegExp(`^function ${name}\\(`, 'm'),
+      `${name} 必须在模块顶层定义：放在 wire() 体内时，模块级的 setKind/resetFilters/toggleCompare 调它会抛 ReferenceError`);
+    // 反证：缩进过的同名声明就是嵌套的写法，必须被抓住
+    assert.doesNotMatch(BOX_JS, new RegExp(`^\\s+function ${name}\\(`, 'm'),
+      `${name} 不许出现在嵌套作用域里（缩进的 function 声明）`);
+  }
+});
