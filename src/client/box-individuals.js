@@ -57,7 +57,14 @@ function normalizeStored(one) {
 /** 从一张卡造个体记录；已有记录的复用（刷新次数不能被页面重载重置）。 */
 function individualFor(all, card) {
   const hit = all[card.select];
-  if (hit && typeof hit === 'object') return normalizeStored(hit);
+  if (hit && typeof hit === 'object') {
+    const clean = normalizeStored(hit);
+    // ⚠ 2026-09-28：归一之后**写回**，别只归一内存里那一份。
+    // 否则磁盘上（localStorage）那条一直是 `{value:null}` 的脏形状 —— 而验收/别的代码会**直接读它**
+    // （`localStorage.getItem('roco.box.individuals.v1')`），于是"修了却还红"（实测 10b/32 各 84/85 处）。
+    if (JSON.stringify(clean) !== JSON.stringify(hit)) all[card.select] = clean;
+    return clean;
+  }
   const made = individualFromInstance({
     instance_id: card.select, species_id: card.group, species_name: card.name, level: card.level,
     nature: {value: null}, talent: {value: null},
