@@ -1,0 +1,96 @@
+五分钟链路（RC-801 ②③）：预算 300000ms · 分步预算之和 300000ms
+判据自检：合成基线 19/19 条绿
+✔ [反证 cp-total-over-budget] — 总耗时 301000ms 超过预算 300000ms
+✔ [反证 cp-step-missing] — 只量到 9/10 步的时间（缺：fill-team）
+✔ [反证 cp-sum-exceeds-total] — 分步耗时之和 150000ms 大于总耗时 60000ms（计时账目自相矛盾）
+✔ [反证 cp-step-over-budget] — 「继续打到局末（引擎报出结算）」用了 240000ms，超过这一步的预算 60000ms
+✔ [反证 cp-hint-was-asked] — 提示冒出来之前脚本点过小芽/提示按钮 —— 那不是「主动提示」
+✔ [反证 cp-hint-late] — 提示在开局后 90000ms 才出现，超过 45000ms
+✔ [反证 cp-hint-no-evidence] — 提示没有「依据：」出处（读到的是 我觉得这样打比较好）
+✔ [反证 cp-tradeoff-empty] — 展开后的正文只有 0 字，读不出取舍 | 展开后正文是空的
+✔ [反证 cp-tradeoff-same-as-hint] — 展开后的正文与浮条一行字**逐字相同**（等于没有展开取舍）
+✔ [反证 cp-result-not-from-engine] — 结算结果不是从引擎回执读到的（可能是页面自己写的）
+✔ [反证 cp-lesson-missing] — 教学卡的「下一局练一件事」是空的
+✔ [反证 cp-lesson-turn-beyond] — 转折回合 20 大于这一局的总回合 12（自相矛盾）
+✔ [反证 cp-lesson-no-entry] — 局末「✦ 小芽」点下去小芽没开（这一局没有复盘出口）
+✔ [反证 cp-narrow-overflow] — 局末复盘卡右边越出视口（right=412 > 390）
+✔ [反证 cp-narrow-hidden] — 展开取舍正文在窄屏下不可见
+✔ [反证 cp-narrow-body-overflow] — 展开取舍正文右边越出视口（right=402 > 390）
+✔ [反证 cp-clock-dead] — 真睡了 1200ms，计时只量到 0ms（计时器是死的或没在测这一步）
+✔ [反证 cp-console-error] — 页面报错 1 条：TypeError: x is not a function @ /roco.js:1
+服务（in-process-offline）：http://127.0.0.1:62236 · model=deepseek-flash provider=local rag=shadow started_at=2026-09-28T08:45:26.266Z
+① 真键鼠走链路：
+  ✔ enter-box 281ms — 盒子就绪，卡片 22 张
+  ✖ compare-two 1ms — 比两只时脚本自己出错：点不到 #flag-locked（元素不存在）
+  ✖ lock-handoff 20234ms — 点了「带上这两只去配队」但没有落到产品页
+  ✖ fill-team 7ms — 补队时脚本自己出错：工作台的 shadow root 读不到（候选池不在）
+  ✖ start-battle 2ms — 开局时脚本自己出错：点不到 #start-standard-pvp（元素不存在）
+  ✖ play-to-hint 2ms — 第 null 回合引擎没有给合法动作（也没得换人）
+  ✖ open-tradeoff 0ms — 展开取舍时脚本自己出错：主动提示没出现，没有可展开的取舍
+  ✖ play-to-end 2ms — 第 null 回合引擎没有给合法动作（也没得换人）
+  ✖ lesson 6066ms — 局末教学时脚本自己出错：点不到 #battle-result-xiaoya（元素不存在）
+  ✖ narrow-check 714ms — 视口 390px · 复盘卡 [undefined,undefined] 可见=undefined · 浮条这一刻 已经收了（正常：局面一走就收，它的窄屏读数在第 ⑦ 步量的） · 文档横向溢出 0px（只记不判：战斗屏本身在窄屏下的溢出不属于这一步）
+  ✔ clock-probe 睡 1200ms / 量到 1201ms
+② 判据：
+✔ [step-enter-box] — 281ms（预算 10000ms）· 盒子就绪，卡片 22 张
+✖ [step-compare-two] — 1ms（预算 15000ms）· 比两只时脚本自己出错：点不到 #flag-locked（元素不存在）
+    · 「compare-two」没走到位：比两只时脚本自己出错：点不到 #flag-locked（元素不存在）
+✖ [step-lock-handoff] — 20234ms（预算 15000ms）· 点了「带上这两只去配队」但没有落到产品页
+    · 「lock-handoff」没走到位：点了「带上这两只去配队」但没有落到产品页
+✖ [step-fill-team] — 7ms（预算 60000ms）· 补队时脚本自己出错：工作台的 shadow root 读不到（候选池不在）
+    · 「fill-team」没走到位：补队时脚本自己出错：工作台的 shadow root 读不到（候选池不在）
+✖ [step-start-battle] — 2ms（预算 25000ms）· 开局时脚本自己出错：点不到 #start-standard-pvp（元素不存在）
+    · 「start-battle」没走到位：开局时脚本自己出错：点不到 #start-standard-pvp（元素不存在）
+✖ [step-play-to-hint] — 2ms（预算 60000ms）· 第 null 回合引擎没有给合法动作（也没得换人）
+    · 「play-to-hint」没走到位：第 null 回合引擎没有给合法动作（也没得换人）
+✖ [step-open-tradeoff] — 0ms（预算 20000ms）· 展开取舍时脚本自己出错：主动提示没出现，没有可展开的取舍
+    · 「open-tradeoff」没走到位：展开取舍时脚本自己出错：主动提示没出现，没有可展开的取舍
+✖ [step-play-to-end] — 2ms（预算 60000ms）· 第 null 回合引擎没有给合法动作（也没得换人）
+    · 「play-to-end」没走到位：第 null 回合引擎没有给合法动作（也没得换人）
+✖ [step-lesson] — 6066ms（预算 25000ms）· 局末教学时脚本自己出错：点不到 #battle-result-xiaoya（元素不存在）
+    · 「lesson」没走到位：局末教学时脚本自己出错：点不到 #battle-result-xiaoya（元素不存在）
+✖ [step-narrow-check] — 714ms（预算 10000ms）· 视口 390px · 复盘卡 [undefined,undefined] 可见=undefined · 浮条这一刻 已经收了（正常：局面一走就收，它的窄屏读数在第 ⑦ 步量的） · 文档横向溢出 0px（只记不判：战斗屏本身在窄屏下的溢出不
+    · 「narrow-check」没走到位：视口 390px · 复盘卡 [undefined,undefined] 可见=undefined · 浮条这一刻 已经收了（正常：局面一走就收，它的窄屏读数在第 ⑦ 步量的） · 文档横向溢出 0px（只记不判：战斗屏本身在窄屏下的溢出不属于这一步）
+✔ [five-minute-total] — 总 27319ms（预算 300000ms）· 分步之和 27309ms · 分步预算之和 300000ms
+✖ [no-step-over-budget] — enter-box=281/10000 compare-two=1/15000 lock-handoff=20234/15000 fill-team=7/60000 start-battle=2/25000 play-to-hint=2/60000 open-tradeoff=0/20000 play-to-end=2/60000 lesson=6066/25000 narrow-check=714/10000
+    · 「锁定 + 带上这两只去配队（交接 URL）」用了 20234ms，超过这一步的预算 15000ms
+✖ [hint-automatic] — visible=false auto=null 开局后 —ms · 第 — 回合 ·
+    · 整条链路走完，主动提示一次都没冒出来
+    · 提示冒出来之前脚本点过小芽/提示按钮 —— 那不是「主动提示」
+✖ [tradeoff-expanded] — opened=false 正文 0 字 · 与浮条不同=false ·
+    · #hint-details 点下去正文没展开（#hint-body 仍然 hidden）
+    · 展开后的正文只有 0 字，读不出取舍
+    · 展开后正文是空的
+    · 展开后的正文与浮条一行字**逐字相同**（等于没有展开取舍）
+✖ [battle-ended-by-engine] — 结果 —（引擎回执=false）· — 回合 ·
+    · 这一局没开起来
+    · 结算结果不是从引擎回执读到的（可能是页面自己写的）
+    · 引擎没有给出结算结果（这一局没打到局末）
+    · 引擎回执里的回合数不是正整数（null）
+    · 局末统计是空的（回合/倒下只数读不出来）
+✖ [lesson-end-to-end] — shown=false 转折第 — 回合 · 小芽入口=false ·
+    · body[data-roco-lesson] 不是 shown（教学卡没出来）
+    · 教学卡的「这一局的问题是」是空的
+    · 教学卡的「下一局练一件事」是空的
+    · 复盘的「依据：」栏读不到出处（）
+    · 局末「✦ 小芽」点下去小芽没开（这一局没有复盘出口）
+✖ [narrow-fits] — 视口 390px · 复盘卡 — · 展开正文 — · 文档溢出 0px
+    · 没有量到展开取舍正文在 390×844 下的框（第 ⑦ 步没量）
+    · 没有量到局末复盘卡在窄屏下的框
+✔ [clock-live] — 睡 1200ms / 量到 1201ms
+✔ [console-clean] — 0 条
+
+分步耗时（真键鼠）：
+ 1. 进盒子（页面就绪）：281ms / 10000ms
+ 2. 比两只（勾选 → 比较栏可用）：1ms / 15000ms
+ 3. 锁定 + 带上这两只去配队（交接 URL）：20234ms / 15000ms
+ 4. 补到六只（候选池真鼠标点满）：7ms / 60000ms
+ 5. 开一局（标准 PVP · 六宠）：2ms / 25000ms
+ 6. 打到主动提示自己冒出来（出现即止）：2ms / 60000ms
+ 7. 展开取舍（#hint-details → 正文）：0ms / 20000ms
+ 8. 继续打到局末（引擎报出结算）：2ms / 60000ms
+ 9. 局末教学（#lesson-card 内容 + 小芽入口）：6066ms / 25000ms
+10. 窄屏复查（390×844：复盘卡与展开正文都落在视口里）：714ms / 10000ms
+总耗时 27319ms / 预算 300000ms
+报告：reports/roco/five-minute-chain.json
+五分钟链路：判据 4/19 通过；反证 19/19 命中

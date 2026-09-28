@@ -1,0 +1,374 @@
+{
+ "arm": "sft-v8",
+ "summary": {
+  "tasks": 288,
+  "passed": 267,
+  "pass_rate": 0.9271,
+  "stopped": {
+   "complete": 254,
+   "receipt-budget": 12,
+   "invalid-arguments": 10,
+   "policy": 12
+  },
+  "latency": {
+   "p50_ms": 660,
+   "p95_ms": 8000
+  },
+  "by_category": {
+   "rules_lookup": {
+    "total": 72,
+    "passed": 64,
+    "pass_rate": 0.8889,
+    "p50_ms": 2010,
+    "p95_ms": 8001
+   },
+   "roster_constraint": {
+    "total": 24,
+    "passed": 11,
+    "pass_rate": 0.4583,
+    "p50_ms": 3228,
+    "p95_ms": 8001
+   },
+   "continue_stop": {
+    "total": 36,
+    "passed": 36,
+    "pass_rate": 1,
+    "p50_ms": 3,
+    "p95_ms": 3961
+   },
+   "tool_failure": {
+    "total": 36,
+    "passed": 36,
+    "pass_rate": 1,
+    "p50_ms": 3552,
+    "p95_ms": 8001
+   },
+   "stale_state": {
+    "total": 36,
+    "passed": 36,
+    "pass_rate": 1,
+    "p50_ms": 468,
+    "p95_ms": 5690
+   },
+   "evidence_conflict": {
+    "total": 36,
+    "passed": 36,
+    "pass_rate": 1,
+    "p50_ms": 419,
+    "p95_ms": 684
+   },
+   "silence": {
+    "total": 12,
+    "passed": 12,
+    "pass_rate": 1,
+    "p50_ms": 0,
+    "p95_ms": 0
+   },
+   "brief_explain": {
+    "total": 36,
+    "passed": 36,
+    "pass_rate": 1,
+    "p50_ms": 410,
+    "p95_ms": 734
+   }
+  },
+  "by_split": {
+   "family": {
+    "held_out": {
+     "total": 96,
+     "passed": 89,
+     "pass_rate": 0.9271
+    },
+    "seen": {
+     "total": 192,
+     "passed": 178,
+     "pass_rate": 0.9271
+    },
+    "by_value": {
+     "A组三人-无锁定": {
+      "total": 96,
+      "passed": 89,
+      "held_out": true,
+      "pass_rate": 0.9271
+     },
+     "A组三人-锁定寂灭骨龙": {
+      "total": 96,
+      "passed": 88,
+      "held_out": false,
+      "pass_rate": 0.9167
+     },
+     "混编三人-含B组": {
+      "total": 96,
+      "passed": 90,
+      "held_out": false,
+      "pass_rate": 0.9375
+     }
+    }
+   },
+   "mechanism": {
+    "held_out": {
+     "total": 81,
+     "passed": 77,
+     "pass_rate": 0.9506
+    },
+    "seen": {
+     "total": 207,
+     "passed": 190,
+     "pass_rate": 0.9179
+    },
+    "by_value": {
+     "图鉴字段": {
+      "total": 12,
+      "passed": 12,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "技能静态威力": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "属性相性": {
+      "total": 12,
+      "passed": 10,
+      "held_out": true,
+      "pass_rate": 0.8333
+     },
+     "学习表": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "应对机制": {
+      "total": 12,
+      "passed": 10,
+      "held_out": false,
+      "pass_rate": 0.8333
+     },
+     "版本指纹": {
+      "total": 12,
+      "passed": 8,
+      "held_out": false,
+      "pass_rate": 0.6667
+     },
+     "阵容评分": {
+      "total": 12,
+      "passed": 10,
+      "held_out": true,
+      "pass_rate": 0.8333
+     },
+     "换人对比": {
+      "total": 12,
+      "passed": 1,
+      "held_out": false,
+      "pass_rate": 0.0833
+     },
+     "单一事实": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "回看记录": {
+      "total": 12,
+      "passed": 12,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "阵容诊断": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "条件化威力": {
+      "total": 12,
+      "passed": 12,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "推演": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "复盘": {
+      "total": 24,
+      "passed": 24,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "轮次推进": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "面板变化": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "建议失效": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "跨来源数值": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "同名形态": {
+      "total": 12,
+      "passed": 12,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "强度口径": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "回合已提交": {
+      "total": 3,
+      "passed": 3,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "偏好设置": {
+      "total": 3,
+      "passed": 3,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "局面状态": {
+      "total": 3,
+      "passed": 3,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "拒绝": {
+      "total": 3,
+      "passed": 3,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "行动解释": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "能量机制": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     }
+    }
+   },
+   "template": {
+    "held_out": {
+     "total": 30,
+     "passed": 30,
+     "pass_rate": 1
+    },
+    "seen": {
+     "total": 258,
+     "passed": 237,
+     "pass_rate": 0.9186
+    },
+    "by_value": {
+     "直问": {
+      "total": 60,
+      "passed": 55,
+      "held_out": false,
+      "pass_rate": 0.9167
+     },
+     "口语": {
+      "total": 60,
+      "passed": 55,
+      "held_out": false,
+      "pass_rate": 0.9167
+     },
+     "追问": {
+      "total": 51,
+      "passed": 46,
+      "held_out": false,
+      "pass_rate": 0.902
+     },
+     "背景": {
+      "total": 60,
+      "passed": 54,
+      "held_out": false,
+      "pass_rate": 0.9
+     },
+     "委托": {
+      "total": 9,
+      "passed": 9,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "封闭": {
+      "total": 9,
+      "passed": 9,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "确认": {
+      "total": 9,
+      "passed": 9,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "质疑": {
+      "total": 9,
+      "passed": 9,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "对比": {
+      "total": 9,
+      "passed": 9,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "si-submitted": {
+      "total": 3,
+      "passed": 3,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "si-quiet": {
+      "total": 3,
+      "passed": 3,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "si-noaction": {
+      "total": 3,
+      "passed": 3,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "si-refuse": {
+      "total": 3,
+      "passed": 3,
+      "held_out": false,
+      "pass_rate": 1
+     }
+    }
+   }
+  }
+ },
+ "comparison": null,
+ "written_to": "reports/roco/shadow-replay-sft-v8.json"
+}
