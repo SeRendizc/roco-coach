@@ -150,6 +150,28 @@ async function getJson(path) {
 }
 
 const avatarOf = (types) => TYPE_AVATAR[(types ?? [])[0]] ?? TYPE_FALLBACK;
+
+/**
+ * 头像：**有立绘就画立绘，没有就照旧画系别 emoji**。
+ *
+ * 2026-09-28（人类逐字：「突然想到，我抓包出来的地方是不是有精灵立绘？你把迪莫的实装一下我看看」）：
+ * 抓包回执里 `image_list` 的 `key='pet'` 就是官方立绘，已由 `scripts/roco/fetch-capture-art.mjs`
+ * 逐张入库。**服务端说了算**：卡片带回执里的 `art === true` 时这里才画 `<img>` ——
+ * 页面不自己去猜哪一只有图（猜错就是一排 404 的空框）。
+ * `alt` 留空 + `aria-hidden`：名字就在旁边写着，读屏再念一遍图是噪音。
+ * `loading="lazy"`：一页 24 张 1024×1024 的 PNG，不懒加载会一次性拉几十兆。
+ */
+const avatarHtml = (card, {big = false} = {}) => {
+  const [emoji, color] = avatarOf(card?.types);
+  const cls = big ? 'avatar big' : 'avatar';
+  if (card?.art === true) {
+    const id = encodeURIComponent(String(card.group ?? card.select ?? ''));
+    return `<span class="${cls} avatar-art" style="border-color:${color}">`
+      + `<img src="/api/roco/sprite?id=${id}&v=default" alt="" aria-hidden="true" loading="lazy" `
+      + `decoding="async"></span>`;
+  }
+  return `<span class="${cls}" style="border-color:${color}" aria-hidden="true">${emoji}</span>`;
+};
 // 2026-09-28（人类指着截图）：「双属性两个属性中间加隔断（eg 毒系｜地系）」——
 // 此前两个系别的胶囊紧挨着，读起来是「毒系地系」一坨。现在中间插一个竖线分隔符。
 const typeChips = (types) => (types ?? []).map((t, index) => {
@@ -196,7 +218,8 @@ function renderFilterMenus() {
 //   · 同种多只时**不再重复名字与系别**（组头已经写过一遍），只画能区分它们的那些东西。
 function cardHtml(card, {compact = false} = {}) {
   const mine = state.kind === 'mine';
-  const [emoji, color] = avatarOf(card.types);
+  // 2026-09-28：`emoji/color` 这两个局部量在这里已经没人用了（头像统一走 `avatarHtml`），
+  // 留着会让下一个人以为卡片还在自己拼头像。旧写法留档：const [emoji, color] = avatarOf(card.types);
   const picked = state.selected.some((row) => row.select === card.select);
   const tags = [];
   if (card.form_label) tags.push({text: card.form_label, cls: 'tag-form'});
@@ -224,7 +247,7 @@ function cardHtml(card, {compact = false} = {}) {
    data-locked="${card.locked === true ? 'true' : 'false'}"
    data-status="${picked ? 'picked' : 'idle'}">
    <button class="card-face" aria-label="看 ${escapeAttr(card.name)} 的详情">
-    ${compact ? '' : `<span class="avatar" style="border-color:${color}" aria-hidden="true">${emoji}</span>`}
+    ${compact ? '' : avatarHtml(card)}
     ${compact ? '' : `<span class="card-name">${escapeAttr(card.name)}</span>`}
     ${compact ? '' : `<span class="card-types">${typeChips(card.types)}</span>`}
     ${tags.length ? `<span class="card-tags">${tags.map((t) => `<span class="tag ${t.cls ?? ''}">${escapeAttr(t.text)}</span>`).join('')}</span>` : ''}
@@ -588,7 +611,7 @@ function renderPetPage() {
   const types = player?.types ?? card.types ?? [];
   $('pet-title').textContent = `${name} · 详情`;
   $('pet-head').innerHTML = `<div class="detail-head">
-   <span class="avatar big" aria-hidden="true" style="border-color:${avatarOf(types)[1]}">${avatarOf(types)[0]}</span>
+   ${avatarHtml({...card, art: card.art ?? state.petData?.art, group: card.group ?? state.petData?.group, types}, {big: true})}
    <div><h3>${escapeAttr(name)}</h3>
     <span class="card-types">${typeChips(types)}</span>
     <span class="card-tags">${[card.role_label ? `定位：${card.role_label}` : null,

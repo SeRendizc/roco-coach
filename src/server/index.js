@@ -658,6 +658,31 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
       if(!key&&byName)key=(man.find((r)=>r?.name===byName)||{}).asset_key||'';
 
       const known=new Set((Array.isArray(man)?man:[]).map((r)=>String(r?.asset_key||'')));
+      // ── 2026-09-28 新增回落：**抓包立绘** ─────────────────────────────────────
+      // 人类逐字：「突然想到，我抓包出来的地方是不是有精灵立绘？你把迪莫的实装一下我看看」。
+      // 实测：抓包回执 `result.pet_detail.image_list` 里 `key='pet'` 那一条就是**官方立绘**
+      // （`https://heyboxbj.max-c.com/game/roco_kingdom/pet/image/<抓包id>.png`），
+      // 已由 `scripts/roco/fetch-capture-art.mjs` 逐张入库到 `data/roco/assets/capture-pets/`。
+      // ⚠ 它**不进**上面那 48 槽的策展清单：那一份有槽位审计与 `verify-pet-sprites.mjs` 门禁，
+      // 塞第 49 条会把审计与门禁一起弄坏。所以走这一条**按 pet_id 查的回落**，
+      // 只有 `v=default`（抓包里只有一张静态图，没有 action 那一态，**不假装有两态**）。
+      // 许可 UNKNOWN / REFERENCE_ONLY —— 与仓里其它抓包产物同一条纪律，见那份 manifest 的出处字段。
+      if((!key||!known.has(key))&&byId&&variant==='default'){
+        try{
+          const capPath=join(REPO_ROOT,'data','roco','assets','capture-pets','manifest.json');
+          const capMan=JSON.parse(readFileSync(capPath,'utf8'));
+          const hit=capMan?.entries?.[String(byId)];
+          if(hit?.file){
+            const buf=readFileSync(join(REPO_ROOT,'data','roco','assets','capture-pets',String(hit.file)));
+            res.writeHead(200,{'Content-Type':'image/png','Cache-Control':'public, max-age=3600',
+              'Content-Length':buf.length,
+              'X-Content-Type-Options':'nosniff',
+              'X-Roco-Sprite-Source':'capture-2026-09-27',
+              'X-Roco-Sprite-Licence':'UNKNOWN/REFERENCE_ONLY'});
+            return res.end(buf);
+          }
+        }catch{ /* 没有这张抓包立绘：照旧走下面的 404，不编一张图出来 */ }
+      }
       if(!key){ return json(res,404,{ok:false,error:'清单里没有这只精灵的立绘'}); }
       if(!known.has(key)||!['default','action'].includes(variant)){
         return json(res,400,{ok:false,error:'key 或 v 不合法'});

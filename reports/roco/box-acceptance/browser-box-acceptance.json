@@ -1,7 +1,7 @@
 {
  "generated_by": "scripts/roco/browser-box-acceptance.mjs",
  "page": "box.html",
- "judged_at": "2026-09-28T14:26:38.404Z",
+ "judged_at": "2026-09-28T15:11:56.677Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|licence|pack_id|ruleset_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "screenshots": [
   "reports/roco/box-acceptance/box-01-mine-1440x900.png",
@@ -12,7 +12,8 @@
   "reports/roco/box-acceptance/box-08-handoff-roco-1440x900.png",
   "reports/roco/box-acceptance/box-09-lock-handoff-1440x900.png",
   "reports/roco/box-acceptance/box-10-rollback-1440x900.png",
-  "reports/roco/box-acceptance/box-11-loadout-1440x900.png"
+  "reports/roco/box-acceptance/box-11-loadout-1440x900.png",
+  "reports/roco/box-acceptance/box-12-capture-art-1440x900.png"
  ],
  "viewport_metrics": [
   {
@@ -83,7 +84,7 @@
    "id": "06-玩家层无工程话",
    "judge": "展开的玩家可见文本里不出现 pet_id / state_version / coverage / provenance / unknown_fields / 裸 JSON",
    "ok": true,
-   "actual": "扫过 905 字；卡片首层「🌿 喵喵 🌿草系 定位：回复」"
+   "actual": "扫过 903 字；卡片首层「🌿 喵喵 🌿草系 定位：回复」"
   },
   {
    "id": "07-键盘搜索",
@@ -167,7 +168,7 @@
    "id": "17-玩家层载荷",
    "judge": "玩家层载荷里没有工程键（pet_id / species_id / unknown_fields / provenance…），也没有 id 形状的展示值",
    "ok": true,
-   "actual": "扫过 13649 字节"
+   "actual": "扫过 13936 字节"
   },
   {
    "id": "18-窄屏不溢出",
@@ -282,6 +283,12 @@
    "judge": "人类 2026-09-28：「换技能还是没实装是吧？实装一下」⇒ 在二级页真鼠标换掉一个技能并保存后，**开局那一页（配队工坊）开局时交给服务端的那份记录**里必须正好是玩家挑的这四个，而且保存后要说清这一点",
    "ok": true,
    "actual": "这一只 own-0001（pet_000001）换掉一个技能后存下 [\"skill_000273\",\"skill_000286\",\"skill_000340\",\"skill_000624\"]；共用记录里 [\"pet_000001\"]"
+  },
+  {
+   "id": "41-官方立绘：有图的画图、没图的照旧 emoji",
+   "judge": "人类 2026-09-28：「我抓包出来的地方是不是有精灵立绘？你把迪莫的实装一下我看看」⇒ 带 `art=true` 的卡必须在**屏幕上真的画出那张立绘**（懒加载也要加载完：naturalWidth > 0），而没有立绘的卡照旧画系别 emoji —— **不许留空框**",
+   "ok": true,
+   "actual": "这一页 24 张卡：带立绘 1 张、屏幕上 1 个 img （都加载出来了：1024×1024）；其余 23 个照旧画 emoji"
   },
   {
    "id": "22-控制台干净",
@@ -472,6 +479,13 @@
    "ok": true,
    "hit": "存下来的与玩家挑的不一致：挑了 [\"skill_000273\",\"skill_000286\",\"skill_000340\",\"skill_000624\"]，存的是 [\"skill_000624\",\"skill_000340\",\"skill_000286\",\"skill_000273\"]",
    "actual": "{\"stored\":\"顺序或成员与 picks 不一致\"}"
+  },
+  {
+   "id": "41-官方立绘：有图的画图、没图的照旧 emoji",
+   "judge": "① 有 art=true 却不画图 ② 图画了但没加载出来（naturalWidth=0）③ 没图的卡留了空框 —— 三种坏样本都要被同一条判据抓住",
+   "ok": true,
+   "hit": "带 art=true 的卡有 1 张，屏幕上却只有 0 个立绘 img | 1 张立绘没加载出来（naturalWidth/Height 是 0）：[{\"src\":\"x\",\"w\":0,\"h\":0}] | 没立绘的卡应当照旧画 emoji：期望 23 个，实际 0",
+   "actual": "不画图=[\"带 art=true 的卡有 1 张，屏幕上却只有 0 个立绘 img\"]；图没加载=[\"1 张立绘没加载出来（naturalWidth/Height 是 0）：[{\\\"src\\\":\\\"x\\\",\\\"w\\\":0,\\\"h\\\":0}]\"]；留空框=[\"没立绘的卡应当照旧画 emoji：期望 23 个，实际 0\"]"
   }
  ],
  "console_errors": [],
@@ -844,6 +858,22 @@
     ],
     "status": "已保存：引擎确认这四个都学得到（它能学 51 个）：第 1 个 休息回复、第 2 个 防御、第 3 个 仙人掌刺击、第 4 个 腐化。开局那一页（配队工坊）会直接带上这四个。",
     "honest": true
+   }
+  },
+  {
+   "at": "capture-art",
+   "facts": {
+    "withArt": 1,
+    "cards": 24,
+    "imgs": 1,
+    "loaded": [
+     {
+      "src": "/api/roco/sprite?id=pet_000004&v=default",
+      "w": 1024,
+      "h": 1024
+     }
+    ],
+    "plainEmoji": 23
    }
   }
  ],

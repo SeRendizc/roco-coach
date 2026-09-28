@@ -422,6 +422,16 @@ export function loadBoxIndex(){
  // （`layer.role` / `layer.types` / `layer.stats` / `layer.size|values`，逐处数过），所以换源是安全的。
  // 旧写法留档：const layer=new Map((roster.pets??[]).map((p)=>[p.pet_id,p]));
  const layer=new Map([...(matrix.pets??[]),...(matrixLayer.pets??[])].map((p)=>[p.pet_id,p]));
+ // 2026-09-28（人类逐字：「我抓包出来的地方是不是有精灵立绘？你把迪莫的实装一下我看看」）：
+ // 抓包回执 `result.pet_detail.image_list` 里 `key='pet'` 就是官方立绘，已由
+ // `scripts/roco/fetch-capture-art.mjs` 逐张入库。这里只读那份清单的**键**（哪些 pet_id 有图），
+ // 页面据此决定画 `<img>` 还是照旧画系别 emoji —— **页面不自己猜**（猜错就是一排 404 的空框）。
+ // 读不到就当没有：整条立绘路径是**可选增强**，不影响盒子任何一条既有判据。
+ let captureArt=new Set();
+ try{
+  const doc=JSON.parse(readFileSync(join(BOX_ROOT,'data','roco','assets','capture-pets','manifest.json'),'utf8'));
+  captureArt=new Set(Object.keys(doc?.entries??{}));
+ }catch{ captureArt=new Set(); }
  // 四个技能在两份数据里**字段名不同**，这里统一成 `moveset`：
  //   · 迁移层 `roster-48.json` → `moveset`（数组，直接可用）；
  //   · 两份 support-matrix → `candidate_moveset.skills`（同样是数组，530 条**全都有**，实测 530/530）。
@@ -466,7 +476,7 @@ export function loadBoxIndex(){
  const supportOrder=Object.keys(BOX_SUPPORT_LABELS);
  const supports=supportOrder.filter((s)=>[...support.values()].some((x)=>x.level===s));
 
- boxIndexCache={pack,roster,owned,catalog,catalogById,layer,support,skills,instances,instanceById,
+ boxIndexCache={pack,roster,owned,catalog,catalogById,layer,support,skills,instances,instanceById,captureArt,
   instancesBySpecies,types,roles,supports,
   coverage:{
    catalog_pets:catalog.length,
@@ -605,6 +615,7 @@ function boxCatalogCard(index,e){
   role_label:layer?.role?(BOX_ROLE_LABELS[layer.role]??layer.role):null,
   support_label:sup?(BOX_SUPPORT_LABELS[sup.level]??sup.level):null,
   has_moveset:Boolean(layer),
+  art:index.captureArt.has(e.id),
   has_metrics:Boolean(layer?.stats),
   // 机制首层：全图鉴 622 只都能取到逐字冻结 desc（查不到就是「机制资料待确认」）。
   mechanism:rosterMechanism(mechanismIndex().get(e.id)),
@@ -646,6 +657,7 @@ function boxMineCard(index,i){
   role_label:layer?.role?(BOX_ROLE_LABELS[layer.role]??layer.role):null,
   support_label:sup?(BOX_SUPPORT_LABELS[sup.level]??sup.level):null,
   has_moveset:Array.isArray(i.skills)&&i.skills.length>0,
+  art:index.captureArt.has(i.species_id),
   has_metrics:Boolean(i.base_stats),
   effects_calibrated:false,
   // 机制首层按**物种**取（同种个体共享特性文字），与卡片首层「体系/定位」并列。
@@ -1742,6 +1754,10 @@ function boxDetailMode(index,id){
    kind:'detail',entity:'instance',
    name:instance.species_name??null,
    group:instance.species_id,
+   // 二级页那个大头像要知道有没有官方立绘（人类 2026-09-28：「你把迪莫的实装一下我看看」）。
+   // ⚠ 必须放在 **player** 上：地址直达 `?pet=` 时页面拿不到列表卡（`state.petCard` 是空的），
+   // 只能靠这份回执（验收 25 踩过同一个坑）。
+   art:index.captureArt.has(String(instance.species_id??'')),
    level:Number.isFinite(instance.level)?instance.level:null,
    badges:[...(instance.favourite===true?['收藏']:[]),...(instance.locked===true?['锁定']:[])],
    traits:[...['nature','talent','specialty','bloodline'].map((field)=>({

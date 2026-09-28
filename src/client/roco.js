@@ -2490,11 +2490,21 @@ function renderB3Sprites(view) {
       fx.className = 'b3-fx';
       box.appendChild(fx);
     }
-    const want = b3SpriteUrl(pet, box.dataset.b3Variant === 'action' ? 'action' : 'default');
+    // ⚠ 2026-09-28（人类逐字：「舍弃动作立绘、保留动效」）：**永远只要 default 那一张**。
+    // 原来这里会按 `data-b3-variant` 去要 `v=action`，而抓包立绘**没有动作态** ⇒ 404 ⇒
+    // 下面的 `onerror` 把 `<img>` 删掉 ⇒ **立绘在出招后消失**（人类实测：「我刚刚使用光刃后
+    // 立绘就消失了」）。动作那一路整个撤掉；出手的「谁先动」由**动效**（`.b3-attack` 前冲 +
+    // `data-b3-variant=action` 这个**纯标记**）表达，不再靠换图。
+    // 旧写法留档：b3SpriteUrl(pet, box.dataset.b3Variant === 'action' ? 'action' : 'default')
+    const want = b3SpriteUrl(pet, 'default');
     if (img.dataset.src !== want) { img.dataset.src = want; img.src = want; }
     box.dataset.b3PetId = String(pet.pet_id ?? '');
     box.dataset.b3VariantNow = box.dataset.b3Variant === 'action' ? 'action' : 'default';
-    img.onerror = () => { box.dataset.b3Sprite = 'none'; img.remove(); };
+    // ⚠ 2026-09-28：原来这里是 `img.remove()` —— 一次瞬时错误（例如换图那一拍 404）
+    // 就把立绘**永久**从这一局里抹掉，而代码里没有任何地方会把它加回来。
+    // 现在只标记、不删元素：真的没图就留空（与原来的口径一致：不画占位、不猜），
+    // 但下一次渲染还画得回来。
+    img.onerror = () => { box.dataset.b3Sprite = 'none'; };
     img.onload = () => { box.dataset.b3Sprite = 'ok'; };
     box.dataset.b3Side = side;
   };
@@ -2529,30 +2539,33 @@ const B3_FX_LEAD = 450;      // 「出手」→「受击」的间隔（ms）：�
 const B3_FX_GAP_MIN = 220;   // 间隔压缩下限（ms）：再快人眼分不出先后（也守住 ≥200ms 的可见性判据）
 
 /**
- * 出招时切**动作立绘**，收招回落（人类 2026-09-24：「我看 action 的立绘没用上」）。
+ * 出招/受击的**动效标记**：把这一侧的 `data-b3-variant` 标成 `action`（或别的拍子），
+ * `ms` 毫秒后回落成 `default`。
  *
- * 之前只有 `renderB3Sprites()` 里读 `box.dataset.b3Variant` 这一行，**没有任何地方写它** ——
- * 也就是说动作立绘这条路是死的（默认立绘永远显示）。这里在出手/受击的动效窗口里
- * 把对应那一侧的立绘换成 `action`，`ms` 毫秒后回落，并重新渲染一次保证图片真的换回来。
+ * ⚠ 2026-09-28 改钉（人类逐字：「**舍弃动作立绘、保留动效**」）：
+ * 这个函数原来会**真的把 `<img>` 换成动作立绘**（`v=action`）。但抓包立绘只有一张静态图、
+ * 没有动作态 ⇒ 动作 URL 404 ⇒ 渲染那侧的 `onerror` 把 `<img>` 从 DOM 里删掉，
+ * 900ms 后这里再想换回来时**那个元素已经没了** ⇒ **立绘在出招后消失**
+ * （人类实测原话：「我刚刚使用光刃后立绘就消失了」）。
+ * 现在它**只写标记、不碰 `img.src`**：
+ *   · 「谁先动」这件事仍然看得见 —— 动效走 `.b3-attack` 前冲 + 下面的飘字时间线；
+ *   · `data-b3-variant=action` 这个**线索**保留（战斗反馈验收把三种线索并列当作出手证据，
+ *     `.b3-attack` / action 立绘 / `data-b3-variant=action` —— 去掉图不会让那条判据失去意义，
+ *     因为另外两条线索与动效都还在）；
+ *   · 立绘从此**只加载一次**（default），不再有 404、也不再被删掉。
+ * 旧实现留档：它会在 `if (img.dataset.src !== url) { img.dataset.src = url; img.src = url; }`
+ * 换上动作图，并在 setTimeout 里换回 `default`。
  */
 function b3SwapVariant(cardSel, variant, ms = 900) {
   const card = document.querySelector(cardSel);
   const box = card?.querySelector('[data-b3-spritebox]') || card?.querySelector('.b3-free');
-  const img = box?.querySelector('img.b3-sprite');
-  if (!box || !img) return;
-  const view = state.view;
-  const pet = cardSel.includes('foe') ? view?.opponent?.field : view?.self?.pets?.[view?.self?.active ?? 0];
-  if (!pet?.name) return;
-  const url = b3SpriteUrl(pet, variant);
+  if (!box) return;
   box.dataset.b3Variant = variant;
   box.dataset.b3VariantNow = variant;
-  if (img.dataset.src !== url) { img.dataset.src = url; img.src = url; }
   clearTimeout(box._b3VariantTimer);
   box._b3VariantTimer = setTimeout(() => {
     box.dataset.b3Variant = 'default';
     box.dataset.b3VariantNow = 'default';
-    const back = b3SpriteUrl(pet, 'default');
-    if (img.dataset.src !== back) { img.dataset.src = back; img.src = back; }
   }, ms);
 }
 

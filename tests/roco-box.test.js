@@ -117,9 +117,14 @@ test('路由契约：kind=catalog 是**全量 622**，不是 48 只迁移层', a
   // 卡片首层的「机制」必须是可核对原文，不是前端模板句；它只带 line/status/name/tags，
   // 出处原文与 unverified[] 留在详情层）。
   const card = json.player.cards[0];
+  // ⚠ 2026-09-28 改钉（人类逐字：「突然想到，我抓包出来的地方是不是有精灵立绘？你把迪莫的实装一下我看看」）：
+  // 卡片首层新增一个 **`art`**（这只精灵有没有**抓包来的官方立绘**；页面据此决定画 `<img>` 还是画系别 emoji）。
+  // 判据的意图一字未变：**卡片首层只放玩家该看到的那几样**，多一个键就要在这里显式登记。
+  // 旧键表留档：['alias','form_label','has_metrics','has_moveset','mechanism','name','role_label','select','support_label','types']
   assert.deepEqual(Object.keys(card).sort(),
-    ['alias', 'form_label', 'has_metrics', 'has_moveset', 'mechanism', 'name', 'role_label', 'select', 'support_label', 'types'].sort(),
+    ['alias', 'art', 'form_label', 'has_metrics', 'has_moveset', 'mechanism', 'name', 'role_label', 'select', 'support_label', 'types'].sort(),
     `卡片首层的键变了：${show(Object.keys(card))}`);
+  assert.equal(typeof card.art, 'boolean', '`art` 必须是布尔（页面只认 true 才画图，不许给字符串当判据）');
   assert.deepEqual(Object.keys(card.mechanism).sort(), ['line', 'name', 'status', 'tags'].sort(),
     `机制字段只允许这四个玩家键：${show(Object.keys(card.mechanism))}`);
   assert.equal(card.mechanism.status, 'FROZEN_DESC', '全图鉴 622 只都该解析到冻结 desc');

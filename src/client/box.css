@@ -79,6 +79,12 @@ button{min-width:44px}
 .avatar{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;
  border:2px solid var(--line);border-radius:10px;font-size:19px;background:#101a26}
 .avatar.big{width:46px;height:46px;font-size:26px}
+/* 2026-09-28（人类：「你把迪莫的实装一下我看看」）：有官方立绘时头像画图。
+   图是 1024×1024 的透明底 PNG，缩进 34/46 的方框里。
+   `object-fit:contain` + 一点内边距：立绘四周本来就有留白，贴边裁会切到耳朵与尾巴。 */
+.avatar-art{padding:1px;overflow:hidden}
+.avatar-art img{width:100%;height:100%;object-fit:contain;display:block}
+.avatar.big.avatar-art{padding:2px}
 .card-name{font-size:15px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
 .card-types{display:flex;flex-wrap:wrap;gap:4px}
 .card-tags{display:flex;flex-wrap:wrap;gap:4px}

@@ -2052,6 +2052,63 @@ async function main() {
         false, '盒子里一行个体都没有 —— 打开不了二级页，换技能无从量起');
     }
 
+    // ── ⑤ 官方立绘：有图的画图，没图的照旧画 emoji ──────────────────────────────
+    //
+    // 人类 2026-09-28 逐字：「突然想到，我抓包出来的地方是不是有精灵立绘？
+    // 你把迪莫的实装一下我看看」。
+    // 抓包回执 `result.pet_detail.image_list` 里 `key='pet'` 就是官方立绘，
+    // 已由 `scripts/roco/fetch-capture-art.mjs` 逐张入库（许可 UNKNOWN / REFERENCE_ONLY，
+    // 与仓里其它抓包产物同一条纪律）。这一条量的是**屏幕上真的出现了那张图**：
+    // 不是"请求发出去了"，也不是"卡片上有个 art=true 的字段"。
+    const artProblems = (facts) => {
+      const bad = [];
+      if (!Number(facts?.withArt)) { bad.push('这一页没有一张卡带 art=true（这条判据会变空）'); return bad; }
+      if (Number(facts?.imgs) !== Number(facts.withArt)) {
+        bad.push(`带 art=true 的卡有 ${facts.withArt} 张，屏幕上却只有 ${facts.imgs} 个立绘 img`);
+      }
+      const dead = (facts.loaded ?? []).filter((one) => !(Number(one.w) > 0 && Number(one.h) > 0));
+      if (dead.length) bad.push(`${dead.length} 张立绘没加载出来（naturalWidth/Height 是 0）：${JSON.stringify(dead.slice(0, 2))}`);
+      // 没图的那些**不许**留一个空框：它们的头像里必须还有 emoji 文本
+      if (Number(facts.plainEmoji) !== Number(facts.cards) - Number(facts.withArt)) {
+        bad.push(`没立绘的卡应当照旧画 emoji：期望 ${Number(facts.cards) - Number(facts.withArt)} 个，实际 ${facts.plainEmoji}`);
+      }
+      return bad;
+    };
+    await cdp.send('Page.navigate', {url: base + 'box.html'});
+    await sleep(1400);
+    await mouseClick('#tab-mine');
+    await waitFor(`document.body.dataset.boxKind==='mine'`);
+    await waitForSafe(`document.querySelectorAll('#box-grid .card').length>0`, {tries: 60, ms: 200});
+    await sleep(1200);   // 图是懒加载的，等它真的解码完再量 naturalWidth
+    const artFacts = JSON.parse(await safeJs(`(async()=>{
+      const route=await (await fetch('/api/roco/box?kind=mine&limit=24&offset=0')).json();
+      const withArt=(route?.player?.cards??[]).filter((c)=>c.art===true).length;
+      const cards=[...document.querySelectorAll('#box-grid .card')];
+      const imgs=[...document.querySelectorAll('#box-grid .avatar-art img')];
+      await Promise.all(imgs.map((i)=>i.complete?null:new Promise((r)=>{i.onload=r;i.onerror=r;})));
+      return JSON.stringify({withArt, cards:cards.length, imgs:imgs.length,
+        loaded:imgs.map((i)=>({src:i.getAttribute('src'),w:i.naturalWidth,h:i.naturalHeight})),
+        plainEmoji:[...document.querySelectorAll('#box-grid .avatar:not(.avatar-art)')].length});})()`) ?? '{}');
+    steps.push({at: 'capture-art', facts: artFacts});
+    check('41-官方立绘：有图的画图、没图的照旧 emoji',
+      '人类 2026-09-28：「我抓包出来的地方是不是有精灵立绘？你把迪莫的实装一下我看看」⇒ '
+      + '带 `art=true` 的卡必须在**屏幕上真的画出那张立绘**（懒加载也要加载完：naturalWidth > 0），'
+      + '而没有立绘的卡照旧画系别 emoji —— **不许留空框**',
+      artProblems(artFacts).length === 0,
+      artProblems(artFacts).join(' | ')
+        || `这一页 ${artFacts.cards} 张卡：带立绘 ${artFacts.withArt} 张、屏幕上 ${artFacts.imgs} 个 img `
+          + `（都加载出来了：${(artFacts.loaded ?? []).map((o) => o.w + '×' + o.h).join('、')}）；`
+          + `其余 ${artFacts.plainEmoji} 个照旧画 emoji`);
+    counter('41-官方立绘：有图的画图、没图的照旧 emoji',
+      '① 有 art=true 却不画图 ② 图画了但没加载出来（naturalWidth=0）③ 没图的卡留了空框'
+      + ' —— 三种坏样本都要被同一条判据抓住',
+      [[{...artFacts, imgs: 0}], [{...artFacts, loaded: [{src: 'x', w: 0, h: 0}]}], [{...artFacts, plainEmoji: 0}]]
+        .map(([bad]) => artProblems(bad)).flat(),
+      `不画图=${JSON.stringify(artProblems({...artFacts, imgs: 0}))}；`
+        + `图没加载=${JSON.stringify(artProblems({...artFacts, loaded: [{src: 'x', w: 0, h: 0}]}))}；`
+        + `留空框=${JSON.stringify(artProblems({...artFacts, plainEmoji: 0}))}`);
+    shots.push(await shoot('box-12-capture-art-1440x900'));
+
     check('22-控制台干净', '整轮下来没有 console.error，也没有未捕获异常',
       consoleErrors.length === 0 && pageErrors.length === 0,
       `consoleErrors=${JSON.stringify(consoleErrors.slice(0, 2))} pageErrors=${JSON.stringify(pageErrors.slice(0, 2))}`);

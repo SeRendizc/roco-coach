@@ -1,0 +1,26 @@
+{
+ "schema_version": 1,
+ "generated_by": "scripts/roco/fetch-capture-art.mjs",
+ "licence": "UNKNOWN",
+ "redistribution": "REFERENCE_ONLY",
+ "why": "抓包回执 result.pet_detail.image_list 里 key=pet 的那一条（官方立绘 URL）。许可 UNKNOWN / REFERENCE_ONLY：不声称官方授权，只把抓下来的那一张原样存住、逐张可追。与 data/roco/assets/pets/ 那 48 张**策展立绘**分开两处 —— 那一份有槽位审计与门禁，不许往里塞第 49 条。",
+ "entries": {
+  "pet_000004": {
+   "pet_id": "pet_000004",
+   "capture_id": "3004",
+   "name": "迪莫",
+   "title": "迪莫",
+   "file": "pet_000004-迪莫.png",
+   "bytes": 430997,
+   "sha256": "f257ec5bb98f5ff6df7efe1ca3e9f852469e13622d9f18dcf8895bd1a821662c",
+   "source_url": "https://heyboxbj.max-c.com/game/roco_kingdom/pet/image/3004.png",
+   "capture_file": "data/roco/raw/hke-2026-09-27/raw/pet-3004-1790537081.json",
+   "capture_file_sha256": "77d4316da78e97bfec6b60ab7c3c1b3f9043d16d788ef71b2fdb82b482245a92",
+   "licence": "UNKNOWN",
+   "redistribution": "REFERENCE_ONLY",
+   "fetched_at": "2026-09-28T15:07:51.035Z"
+  }
+ },
+ "count": 1,
+ "generated_at": "2026-09-28T15:07:51.035Z"
+}

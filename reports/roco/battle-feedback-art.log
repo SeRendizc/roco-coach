@@ -1,0 +1,36 @@
+[battle-feedback] ✔ [基线] feedbackProblems(健康合成基线) = []
+[battle-feedback] ✔ [反证 R1] 出手方线索与受击方线索同一时间戳（Δ=0）→ 必须报「同时」 — 判出：[J3 有先后] 出手与受击**同时**发生（同一帧齐发，判据要求 ≥ 100ms）（实际值：1/1 对线索 |Δ| < 100ms；最小 |Δ|=0ms（出手方 self t=100ms ↔ 受击方 foe -30 t=100ms）；缺：出手方线索先出现，受击方线索至少晚 100ms）
+[battle-feedback] ✔ [反证 R2] 受击方线索早于出手方线索 → 必须报「顺序」反了 — 判出：[J3 有先后] 只有出手方线索，没有受击方的线索/浮字（配不出任何一对）（实际值：1 拍出手（首个 t=200ms side=self）在各自窗口里都配不到对面侧的 `.b3-hit` 或伤害浮字；受击方 cue 1 条、浮字 1 条；缺：受击方随后要出现 `.b3-hit` 或伤害浮字） | [J3 有先后] 顺序反了：受击方线索比出手方线索**更早**出现（实际值：2 条受击线索早于它的出手线索；例：受击方 foe t=60ms（-30） 早于出手方 self t=200ms（差 140ms）；缺：出手方线索
+[battle-feedback] ✔ [反证 R3] 浮字存在但每帧 elementFromPoint 都命中 .b3-sprite（复刻当前 bug） — 判出：[J2 真的在最上层] 被压住：浮字「-30」的 6 帧可量采样里，elementFromPoint 命中的都不是它自己（实际值：实际命中 class：["b3-sprite"]（如 "img"）；补充探针：没取到；缺：把飘字层抬到立绘之上（`.b3-fx` 的 z-index 要高过 `.b3-sprite`），并让 `.b3-float` 可被命中）
+[battle-feedback] ✔ [反证 R4] 浮字数为 0（只有动画没有数字）→ 必须报「没有数字」 — 判出：[J1 数字存在] 没有数字：这一次行动里一个 `.b3-float` 都没有（只有动作动画，没有伤害/治疗数字）（实际值：浮字 0 个；时间线 4 条（cue 4 条 / float 0 条）；缺：行动里至少 1 个带阿拉伯数字的浮字） | [J2 真的在最上层] 量不到任何浮字（「量不到不算量到」）（实际值：浮字 0 个，没有任何一帧可核；缺：先有浮字，才谈得上它在不在最上层）
+[battle-feedback] ✔ [反证 R5] 浮字结束时没被移除（越攒越多）→ 必须报残留 — 判出：[J4 不残留] 越攒越多：3500ms 采样结束时 `.b3-wrap .b3-float` 还剩 1 个（浮字必须被移除）（实际值：结束时计数 1；其中没被移除的：["-30"]；缺：每个浮字在动画结束后从 DOM 里删掉）
+[battle-feedback] ✔ [反证 R6] 浮字加进去 10ms 就被删（人眼看不见）→ 必须报看不清 — 判出：[J4 不残留] 看不清：1 个浮字存活 < 300ms（加进去就被删了）（实际值：「-30」10ms；缺：每个浮字至少活 300ms）
+[battle-feedback] ✔ [反证 R7] elementFromPoint 命中 .b3-spritebox（另一种被压住）→ 必须报被压住 — 判出：[J2 真的在最上层] 被压住：浮字「-30」的 6 帧可量采样里，elementFromPoint 命中的都不是它自己（实际值：实际命中 class：["b3-spritebox b3-free"]（如 "div"）；补充探针：没取到；缺：把飘字层抬到立绘之上（`.b3-fx` 的 z-index 要高过 `.b3-sprite`），并让 `.b3-float` 可被命中）
+[battle-feedback] ✔ [反证 R8] 时间线里没有任何出手方线索 → 必须报没有出手方线索 — 判出：[J3 有先后] 没有出手方线索：时间线里没有 `.b3-attack` / action 立绘 / data-b3-variant=action（实际值：cue 1 条，其中出手方 0 条；受击方 cue 1 条、浮字 1 条；缺：出手方必须先有动作线索，才谈得上「出手 → 受击」的先后）
+[battle-feedback] ✔ [反证 R10] 星不够的格子却「可点 / 没灰置 / ⭐ 仍是金色」→ 必须报 — 健康输入判空=true；坏输入判出：[星不够的格子「翅刃」仍标成合法] | [星不够的格子「翅刃」没有灰置] | [星不够的格子「翅刃」仍可点] | [星不够的格子「翅刃」的 ⭐ 没有标红]
+[battle-feedback] ✔ [反证 R11] 背包屏「写死样例数字 / 删掉该显示的数字」→ 必须报 — 健康输入判空=true；写死样例判出：[背包屏出现**没有登记出处**的数字 2 处：「5」、「9」]；删掉数字判出：[该显示的数字没显示：剩余次数（引擎实数 view.self.magic.uses_left） = 2、每局次数（已登记 per_battle_uses） = 2、冷却回合（已登记 cooldown_turns） = 3]
+[battle-feedback] ✔ [反证 R12] 立绘框底边写死 rgb(36,52,68) / rect 全 0 → J8 必须报 — 健康输入判空=true；回退底边判出：[我方立绘框底边接缝：框底那一行（y=89）还有一条硬横线] | [我方立绘框底边接缝：跨框底那一步还没压平（框底比卡片底色亮/暗一档）]；rect 全 0 判出：[我方立绘框底边接缝**量不到** —— 读不到就不算验过：立绘框 rect 为 0 / 不存在（rect={"x":0,"y":0,"w":0,"h":0,"bottom":0,"right":0}；原因：合成反证：rect 全 0（元素在但量不到））]
+[battle-feedback] ✔ [反证 R13] 自由动作「占了一手 / 没技能可点 / 冷却不对 / 量不到」→ J9 必须报 — 健康输入判空=true；回合前进判出：[用掉背包物品之后回合变了：1 → 2（人类口径：**不占行动** ⇒ 必须不变）]；坏形态判出：[用掉背包物品之后一个可点技能格都没有（玩家这一回合被吃掉了）] | [冷却不是登记值：实测 1，登记 3]；量不到判出：[自由动作**量不到** —— 读不到就不算验过：合成：真鼠标点不到那一格]
+[battle-feedback] ✔ [反证 R14] 生命心「无 mana 硬写 4 颗 / 与引擎错开 1 / 量不到」→ J10 必须报 — 健康输入判空=true；硬写 4 颗判出：[抽掉 mana 后：引擎没给 mana（null），我方的心形计数却显示着（hidden=false 可见=true 原文「♥♥♥♥」）—— **绝不硬写 4 颗**] | [抽掉 mana 后：引擎没给 mana（null），对手的心形计数却显示着（hidden=false 可见=true 原文「♥♥♥♥」）—— **绝不硬写 4 颗**]；错开 1 判出：[力竭掉心后：对手的实心数 4 ≠ 引擎 view.mana.opponent 3] | [掉心后 DOM 的实心数 4 ≠ 引擎同一时刻给的 3（必须逐位一致）] | [掉心前后 DOM 的实心数不是 -1：4 → 4]；量不到判出：[生命心常显**量不到** —— 读不到就不算验过：合成：真鼠标推不到一次力竭]
+[battle-feedback] ✔ [反证 R9-层叠复刻] 真浏览器实测：now → "b3-sprite"（hitIsFloat=false，paintOrderProbe="b3-sprite"）；zOnly → "b3-sprite"（探针 "b3-float b3-float--hit"）；fixed → "b3-float b3-float--hit"（hitIsFloat=true）
+[roco] 对手候选（我的可用物种）: 536 pet_000007,pet_000008,pet_000009,pet_000010,pet_000011,pet_000012,pet_000013,pet_000014
+[battle-feedback] 进战斗：真鼠标点「开一局（标准 PVP · 六宠）」（盒子六只 own 个体经 ?team= 交接；6 只）（开局=true，合法技能=4，可点格=4，回合=1）
+[battle-feedback] ✔ 立绘框接缝实测：我方 rect={"x":295,"y":251,"w":404,"h":465,"bottom":716,"right":699} borderJump=0.6 stepAcrossBottom=0；对手 rect={"x":741,"y":251,"w":404,"h":465,"bottom":716,"right":1145} borderJump=0.6 stepAcrossBottom=1.1；截图="battle-feedback/04-spritebox-seam.png"
+[battle-feedback] ✔ 背包屏实测：原文「愿力强化 2 / 2 候选 · 还没核对过：说明未登记。 每局 2 次 · 冷却 3 回合 · 不占行动 首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做」；引擎 view.self.magic={uses_left:2,cooldown:0,swapped:0}；已登记 per_battle_uses=2/cooldown_turns=3
+[battle-feedback] ✔ 自由动作实测：turn 1 → 1（state_version 0 → 1）；uses_left 2 → 1、cooldown=3（登记 3）、可点技能格=4；再出一手技能后 turn=2
+[battle-feedback] ✔ 生命心实测：入口="真鼠标点「开一局（标准 PVP · 六宠）」（盒子六只 own 个体经 ?team= 交接；6 只）"；开局后引擎 view.mana={"self":4,"opponent":4,"pool":4} → DOM 我方「♥♥♥♥」（hidden=false） / 对手「♥♥♥♥」（hidden=false）；力竭（第 2 步，引擎事件「我方的精灵力竭，失去 1 点魔力（剩余 3 点）（力竭扣魔力未实机核实，本条为候选口径）。」）：引擎 {"self":4,"opponent":4,"pool":4} → {"self":3,"opponent":4,"pool":4}；DOM 我方「♥♥♥♥」→「♥♥♥♡」、对手「♥♥♥♥」→「♥♥♥♥」；抽掉 mana 的探针：self.hidden=true foe.hidden=true 页面心形字符=0（已还原=true）
+[battle-feedback] ✔ J1 数字存在 — 浮字 2 个，其中含阿拉伯数字 2 个：["防御 70%@foe","-3@foe"]
+[battle-feedback] ✔ J10 生命心 ♥ 常显（= 魔力：实心数 == view.mana.{self,opponent}、总数 == view.mana.pool；力竭掉心 -1 且与引擎逐位一致；拿不到 mana 必须 hidden） — 开局后（turn=2）：引擎 {"self":4,"opponent":4,"pool":4} / DOM self="♥♥♥♥"(4实心/4总，hidden=false) foe="♥♥♥♥"(4实心/4总，hidden=false)；力竭掉心（第 2 步 / turn 3→3，引擎事件 "我方的精灵力竭，失去 1 点魔力（剩余 3 点）（力竭扣魔力未实机核实，本条为候选口径）。"）：引擎 {"self":3,"opponent":4
+[battle-feedback] ✔ J2 真的在最上层 — 2 个浮字逐帧 elementFromPoint：「防御 70%」40/40 帧命中自身（命中 ["b3-float b3-float--shield"]）／探针 "b3-float b3-float--shield"；「-3」40/40 帧命中自身（命中 ["b3-float b3-float--weak"]）／探针 "b3-float b3-float--weak"；总采样帧 132
+[battle-feedback] ✔ J3 有先后 — 出手线索 2 条 → 合并成 1 拍（首个 side=self t=7597.2ms）；受击方 cue 1 条、浮字 2 条；配对 1 对，判据要求 ≥ 100ms：出手→受击 +450ms（其中 出手→.b3-hit +450ms、出手→伤害浮字 +450ms「-3」）
+[battle-feedback] ✔ J4 不残留 — 结束时剩 0 个浮字；2 个浮字的存活时长：["防御 70%=1200.4ms","-3=1200.7ms"]
+[battle-feedback] ✔ J5 前置 — ready="yes" 战斗区=true 开局=true 合法技能=4 可点格=4 点击被接住=true 未捕获异常=0 console.error=0 入口="真鼠标点「开一局（标准 PVP · 六宠）」（盒子六只 own 个体经 ?team= 交接；6 只）" 技能={"slot":0,"label":"甩水","category":"攻击","damage":null,"engineCategory":"攻击","choice_b
+[battle-feedback] ✔ J6 星不够的格子（灰置 + 红⭐ + 不可点） — 第 7 回合触发：2 个 short=yes 格 ["水炮(费5/色rgb(255, 154, 154)/legal=no)","多维击打(费4/色rgb(255, 154, 154)/legal=no)"]；允许的红：rgb(255, 154, 154)
+[battle-feedback] ✔ J7 背包屏数字可追溯（引擎实数 / 已登记证据）+ 该显示的必须显示 — 面板原文「愿力强化 2 / 2 候选 · 还没核对过：说明未登记。 每局 2 次 · 冷却 3 回合 · 不占行动 首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做」；引擎实数 uses_left=2/cooldown=0/swapped=0；已登记 per_battle_uses=2/cooldown_turns=3；问题 0 条
+[battle-feedback] ✔ J8 立绘框底边接缝（框底那一行跳变 ≤ 6 + 跨框底一步 |Δ亮度| ≤ 3） — 我方 rect={"x":295,"y":251,"w":404,"h":465,"bottom":716,"right":699} → borderJump=0.6（阈值 ≤ 6，框底 y=715 均色 #111c26） stepAcrossBottom=0（阈值 ≤ 3） 框内最大行跳变=0.9；对手 rect={"x":741,"y":251,"w":404,"h":465,"bottom":716,"right":1145} →
+[battle-feedback] ✔ J9 自由动作不占行动（背包物品用掉后回合不变、技能仍可点、次数-1、冷却=登记值；再出技能才 +1） — 用愿力强化前 turn=1 state_version=0 uses_left=2 cooldown=0；用掉之后 turn=1 state_version=1 uses_left=1 cooldown=3 可点技能格=4；再出一手技能后 turn=2（已登记 cooldown_turns=3）；问题 0 条
+[battle-feedback] 
+[battle-feedback] 
+[battle-feedback] 判据 10/10 通过（红 0、读不懂 0）；反证 15/15 命中
+[battle-feedback] 报告：reports/roco/battle-feedback.json
+[battle-feedback] 10/10 条通过
