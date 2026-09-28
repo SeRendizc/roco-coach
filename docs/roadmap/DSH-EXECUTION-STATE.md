@@ -13033,3 +13033,22 @@ console_errors: []
 `failed: ["unit"]` —— 这一轮的 `latest.json` 仍是 `["unit", "five-minute-chain"]`（红在修复之前）。
 交接文档第 79 行已由 `tmp/sync-gate-line.mjs` 同步成那一次的真实读数；
 **再跑一次门禁后必须再同步一次**（判据会逐个点名去 `failed` 里核对，写多了会红）。
+
+**十六、`data-locked` 加完之后的重跑（确认没副作用）**
+
+| 量什么 | 读数 |
+|---|---|
+| 盒子真机验收（单独跑） | **判据 42/42 通过 + 反证 22/22 命中、全部通过**（`reports/roco/box-acceptance/run-after-lockfix.log`） |
+| 五分钟链路（单独跑） | **判据 19/19 通过 + 反证 19/19 命中**（`reports/roco/five-min-after-lockfix.log`） |
+| 盒子四套单测 + 两条文档判据 | redo 12/12、drawer 19/19、box 13/13、individuals 7/7、handoff-doc 1/1、state-doc 7/7 |
+
+⇒ 给卡片加 `data-locked` 是**加性**的，没有顶红任何既有判据；`five-minute-chain` 那条红确实是
+"判据读中文文案"造成的，换成读结构化数据之后两边都对上了。
+
+**这一轮的提交（第 92 轮全部）**：`dcf512a`（四个真 bug + 四处过期判据）、`13e3bfc`（五处过期选择器 +
+四处死门 + 作用域 bug，盒子验收 37/42 → **42/42**）、`3129f46` / `3215366` / `7ef7072`（台账）、
+`8b3891a` / `147c3d2` / `91c95a9`（12 份遗留产物）、`c6d16d4`（门禁抓到的回归 + `data-locked`）。
+
+**最后一次干净门禁（`bash-525`，`reports/roco/verify-release-round92b.log`）在跑** ——
+`five-minute-chain` 修好之后预期收敛到 `failed: ["unit"]`（只剩那条待拍板的 ④）。
+它跑完会自动改写交接文档第 79 行（`tmp/sync-gate-line.mjs` 已接在任务里）。
