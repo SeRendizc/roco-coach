@@ -43,6 +43,11 @@ import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createCoachServer} from '../../src/server/index.js';
 import {TEAM_WORKSHOP_BADGES, TEAM_SLOTS} from '../../src/client/team-workshop.js';
+// 2026-09-28：定位的中文词表**只从产品那一份取**（`roco-service.js` 的 `BOX_ROLE_LABELS`
+// 就是卡上 `role_label` 的来源）。以前 41 号判据自己抄了一份词表，抄错了一个字
+// （写的是「恢复」，产品给的是「回复」）—— 那让「定位」这颗牙从来咬不到东西，
+// 却因为是"少一个词"而看不出来。判据的口径词表必须与产品同源，不许各写一份。
+import {BOX_ROLE_LABELS} from '../../src/server/roco-service.js';
 
 const ROOT = dirname(fileURLToPath(import.meta.url)).replace(/\/scripts\/roco$/, '');
 const OUT = join(ROOT, 'reports/roco/workshop-acceptance');
@@ -579,6 +584,65 @@ async function main() {
     }
     return out;
   })();
+  // ── 2026-09-28：两条判据的样例改成「从数据现算」，不再拿旧世界的数字当常量 ──────────
+  //
+  // 判据 `候选按拥有与否分组` 旧口径：「人类实测 Q2：候选里**约一半**是我不拥有的物种
+  //   （实测 50 个候选里 25 个非我拥有）」—— 那是 2026-09-22 的**当时实测**。
+  // 判据 `41-同名不同种看得出区别` 旧样例：own-0042/pet_000556 与 own-0043/pet_000575
+  //   （都叫「棋契陛下」）—— 那一对是**旧可玩层 48 只**里的。
+  //
+  // 两者本轮都变了（人类 2026-09-28 拍板「**所有精灵实装**，这样就不需要我的精灵了，
+  // 直接全筛选」）：可玩层 48 → 542（`owned-pets.json` 542 实例 / 542 物种），
+  // 候选宇宙仍是 622 ⇒ 非我拥有的物种只剩 **80**，「约一半」在数据上已经不成立；
+  // 而「棋契陛下」这一对**已按人类的剔除决定撤下**（`data/roco/normalized/.../layer-playable-48/pets.json`
+  // 的 `excluded_capture_ids` 里 4086 写着「图鉴同名 8 条形态，本来就认不出是哪一条」）。
+  //
+  // 所以这里把两件事都**从当前数据现算**，判据写成"跟着数据走"：
+  //   · `nonOwnedSpeciesExpected` = 候选宇宙(pack 622) − 我拥有的物种(owned) —— 唯一事实源；
+  //   · `sameNameSample` = 当前**同时**满足「同名不同物种 + 两只都在我盒子里」的样例
+  //     （页面 `#tw-scope-mine` 搜索框按名字查，所以"两只都在我盒子里"是前提，
+  //     否则搜不出两行；而"两只都要在迁移层登记过定位"是本条判据的另一颗牙 —— 见下面的注释）。
+  const onDemandBuilds = JSON.parse(readFileSync(join(ROOT, 'data/roco/derived/on-demand-builds.json'), 'utf8'));
+  const fullCatalog = JSON.parse(readFileSync(
+    join(ROOT, 'data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json'), 'utf8'));
+  const roster48 = JSON.parse(readFileSync(join(ROOT,
+    'data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json'), 'utf8'));
+  const ownedSpeciesSet = new Set(owned.instances.map((i) => i.species_id));
+  const candidateUniverseExpected = Number(owned.candidate_universe?.pack_pet_entities ?? fullCatalog.pets.length);
+  const nonOwnedSpeciesExpected = [...new Set(fullCatalog.pets.map((p) => p.pet_id))]
+    .filter((id) => !ownedSpeciesSet.has(id));
+  const sameNameGroups = (() => {
+    const byName = new Map();
+    for (const p of fullCatalog.pets) {
+      if (!ownedSpeciesSet.has(p.pet_id)) continue;   // 页面在「我的精灵」档按名字搜 ⇒ 两只都要我拥有
+      const name = String(p.name ?? '');
+      if (!byName.has(name)) byName.set(name, []);
+      byName.get(name).push(p);
+    }
+    const groups = [...byName.entries()].filter(([, arr]) => arr.length >= 2)
+      .map(([name, arr]) => ({name, ids: arr.map((p) => p.pet_id)}));
+    // ⚠ 2026-09-28 实测（逐条问 `/api/roco/box?kind=mine`）：页面卡上的「定位」来自 `index.layer`
+    //   （`roster-48.json`），而能分辨同名对的**形态名**来自 `title`（产品侧 2026-09-28 已把
+    //   「我的盒子」卡名改成形态名优先）。这里按「信号强度」排序，**优先挑页面上真的分得出
+    //   区别的那一对**（排序不是判据；判据仍要求两行文本不同 + 两个不同信号，够不到就红）。
+    const inRoster = new Set(roster48.pets.map((p) => p.pet_id));
+    const roleInRoster = (id) => roster48.pets.find((p) => p.pet_id === id)?.role ?? null;
+    const titlesOf = (g) => new Set(g.ids.map((id) => fullCatalog.pets
+      .find((p) => p.pet_id === id)?.title ?? null).filter(Boolean));
+    return [...groups].sort((a, b) => {
+      const rank = (g) => {
+        const roleDiff = new Set(g.ids.map(roleInRoster).filter(Boolean)).size >= 2;
+        const titleDiff = titlesOf(g).size >= 2;
+        if (roleDiff) return 0;                      // 定位就能分开（最强）
+        if (titleDiff) return 1;                     // 只有形态名能分开（当前同名对多数如此）
+        return 2;                                    // 页面看不出区别 —— 判据会红（如实）
+      };
+      return rank(a) - rank(b) || a.name.localeCompare(b.name);
+    });
+  })();
+  // 当前数据里最优的那一对（判据的样例就是它；搜不出两行时按上面的排序再试别的同名组）。
+  const sameNameSample = sameNameGroups[0] ?? null;
+  const sameNameCandidatesTried = [];
   const {kill, wsUrl} = await launchChrome();
   const ws = new WebSocket(wsUrl);
   await new Promise((res, rej) => { ws.addEventListener('open', res); ws.addEventListener('error', rej); });
@@ -846,6 +910,10 @@ async function main() {
         refCount:Number(root?.dataset.twPoolRef||'0'),
         rowCount:rows.length,
         taggedRows:rows.filter((r)=>Boolean(tagOf(r))).length,
+        // 2026-09-28：这两条是**当前这一页**的逐卡事实（不是从"少了几个"倒推的）——
+        // 判据要在"真的含非我拥有物种的那一页"上量它们。
+        notOwnedRows:notHeld.filter((r)=>/你还没有这一只/.test(rowtagOf(r))).length,
+        onDemandRows:notHeld.filter((r)=>/图鉴|按需推算|未核验/.test(tagOf(r))).length,
         hasNotOwned:notHeld.some((r)=>/你还没有这一只/.test(rowtagOf(r))),
         hasTrial:notHeld.some((r)=>/图鉴|按需推算|未核验/.test(tagOf(r))),
         heldTagOk:held.every((r)=>/持有|可正式上场/.test(tagOf(r))),
@@ -863,19 +931,56 @@ async function main() {
     // 回到**全图鉴**：后面的 `08` / `09` 与按名字搜索都按全量宇宙量。
     await mouseClick(`${ROOT_SEL} >>> #tw-scope-all`);
     await sleep(900);
-    const poolOwnership = {
-      allTotal: scopeOwnership.all.total,
-      mineTotal: scopeOwnership.mine.total,
-      mineRowCount: scopeOwnership.mine.rowCount,
-      mineRefCount: scopeOwnership.mine.refCount,
-      rowCount: scopeOwnership.all.rowCount,
-      taggedRows: scopeOwnership.all.taggedRows,
-      hasNotOwned: scopeOwnership.all.hasNotOwned,
-      hasTrial: scopeOwnership.all.hasTrial,
-      heldTagOk: scopeOwnership.all.heldTagOk,
-      notOwnedSample: scopeOwnership.all.notOwnedSample,
-      heldSample: scopeOwnership.all.heldSample,
-    };
+    // 2026-09-28（新增）：**真鼠标翻页**找一页真的含「非我拥有」物种的候选页。
+    // 为什么需要：候选按物种排序，而"非我拥有"的 80 只**全在高位**（最小的一只排在第 139 位），
+    // 第一页 12 张全是"持有" —— 在那一页上量「你还没有这一只」根本量不到东西
+    // （旧口径"约一半非我拥有、第一页就混着"已经不成立，见判据里的改钉说明）。
+    // 页数上限 60 是防呆（候选宇宙 622 / 每页 12 ≈ 52 页）；翻不到就如实写进 actual，让判据红。
+    const catalogPageInfo = async () => js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
+      const sr=root?root.shadowRoot:null;
+      const el=sr?sr.querySelector('#tw-cand-page'):null;
+      const m=el?(el.textContent||'').match(/(\\d+)\\s*\\/\\s*(\\d+)/):null;
+      return {page:m?Number(m[1]):0,pages:m?Number(m[2]):0,
+        nextDisabled:sr?Boolean(sr.querySelector('#tw-cand-next')?.disabled):true};})()`);
+    const mixedOwnershipPage = {page: 0, fetchedFacts: false, facts: null, trace: []};
+    if (nonOwnedSpeciesExpected.length >= 1) {
+      let remaining = 60;
+      while (remaining > 0) {
+        const info = await catalogPageInfo();
+        if (!info.page || info.page > 60 || info.pages === 0) {
+          mixedOwnershipPage.trace.push({page: info.page, note: '页码读不出来或超出上限，停'});
+          break;
+        }
+        const facts = await readOwnership();
+        mixedOwnershipPage.trace.push({page: info.page, rowCount: facts.rowCount,
+          notOwnedRows: facts.notOwnedRows});
+        if (facts.scope !== 'all') { mixedOwnershipPage.trace.push({note: '不在全图鉴档，停'}); break; }
+        if (facts.notOwnedRows >= 1) {
+          mixedOwnershipPage.page = info.page;
+          mixedOwnershipPage.fetchedFacts = true;
+          mixedOwnershipPage.facts = facts;
+          break;
+        }
+        if (info.nextDisabled || info.page >= info.pages) break;
+        await mouseClick(`${ROOT_SEL} >>> #tw-cand-next`);
+        await sleep(400);
+        remaining -= 1;
+      }
+      // 翻页只影响候选列表的 offset，不影响后面的搜索（搜索一律回第 1 页）；
+      // 但仍然**显式还原**一次，别把"停在第 N 页"留给后面的判据。
+      await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)}).shadowRoot;
+        const i=sr.getElementById('tw-search');i.value='';i.dispatchEvent(new Event('input',{bubbles:true}));
+        return true;})()`);
+      await sleep(600);
+    }
+    if (!mixedOwnershipPage.fetchedFacts) {
+      log(`⚠ 没翻到含「非我拥有」物种的候选页 —— 那几条判据会红；翻页记账 ${JSON.stringify(mixedOwnershipPage.trace).slice(0, 300)}`);
+    }
+    // 2026-09-28 改钉（本条判据）：`候选按拥有与否分组` 有**四条**必须同时成立的面 ——
+    //   ① 作用域分档真的换结果集、且「我的精灵」只含我拥有的（原样保留）；
+    //   ② **逐卡**状态标签说清拥有与否（「你还没有这一只」/「持有 · 可正式上场」）（原样保留）；
+    //   ③ 卡上的「图鉴 · 按需推算（未核验）」状态标（原样保留）；
+    //   ④ **候选池里确实混着我不拥有的物种**（本轮新增/改钉，见下）。
     const ownershipProblems = (f) => {
       const bad = [];
       if (!(f?.allTotal >= 1)) bad.push(`「全图鉴」一档没有结果（total=${f?.allTotal}）`);
@@ -887,6 +992,21 @@ async function main() {
       if (!(f?.taggedRows === f?.rowCount)) {
         bad.push(`有 ${(f?.rowCount ?? 0) - (f?.taggedRows ?? 0)} 张候选卡没有状态标签`);
       }
+      // 2026-09-28 改钉：旧口径「候选里约一半是我不拥有的物种（实测 50 个候选 25 个非我拥有）」
+      // 在数据上**已经不成立**（可玩层 48→542、候选宇宙仍 622 ⇒ 非我拥有只剩 80 只，
+      // 而且按物种排序时它们**不在第一页**：第一页 12 只全是我拥有的）。
+      // 判据保留的意图是「候选池里**确实混着**我不拥有的物种，而且页面把这件事说清」，
+      // 所以：先按数据现算非我拥有的物种数（== 0 必须红 —— 不许把这条改成恒真），
+      // 再**翻到一页真的含非我拥有物种的页面**上量逐卡标签（在全是"持有"的那一页上量，
+      // 「你还没有这一只」这颗牙根本咬不到东西）。
+      if (!(f?.nonOwnedExpected >= 1)) {
+        bad.push(`数据里非我拥有的候选物种 = ${f?.nonOwnedExpected}（候选宇宙 − 我拥有的物种）`
+          + '——候选池根本没混着我不拥有的物种，这条判据不成立');
+      }
+      if (!(f?.notOwnedRows >= 1)) {
+        bad.push(`翻到第 ${f?.mixedPage ?? '?'} 页仍只有我拥有的卡（非我拥有 ${f?.notOwnedRows ?? 0} 张）`
+          + '——页面把"我没有的物种"整档藏起来了');
+      }
       if (!f?.hasNotOwned) bad.push('没有一张卡标出「你还没有这一只」（拥有与否没逐卡说清）');
       if (!f?.hasTrial) bad.push('没有一张卡标出「图鉴 / 按需推算（未核验）」（「不能正式出战」这层含义丢了）');
       if (f?.heldTagOk === false) bad.push('持有的卡没有写「持有 · 可正式上场」');
@@ -895,21 +1015,100 @@ async function main() {
       }
       return bad;
     };
-    check('候选按拥有与否分组', '人类实测 Q2：候选里约一半是我不拥有的物种（实测 50 个候选 25 个非我拥有）。'
+    // ③ 那层含义单独也留一条牙：非我拥有的卡上必须写「图鉴 · 按需推算（未核验）」。
+    const trialLabelProblems = (f) => (!(f?.onDemandRows >= 1)
+      ? [`非我拥有的卡里没有一张带「图鉴 · 按需推算（未核验）」状态标（onDemandRows=${f?.onDemandRows ?? 0}）`]
+      : []);
+    const poolOwnership = {
+      allTotal: scopeOwnership.all.total,
+      mineTotal: scopeOwnership.mine.total,
+      mineRowCount: scopeOwnership.mine.rowCount,
+      mineRefCount: scopeOwnership.mine.refCount,
+      // 2026-09-28：**逐卡**那几项一律用「真的翻到含非我拥有物种的那一页」量到的 DOM 事实。
+      // 为什么不能用第一页那一份：候选按物种排序、非我拥有的 80 只全在高位（最小的一只排在第
+      // 139 位）⇒ 第 1 页 12 张全是"持有"，在那一页上量「你还没有这一只」永远量不到
+      // （ws-run2 实测：那条旧读取点红在「没有一张卡标出…」，而**第 14 页**上明明有）。
+      rowCount: mixedOwnershipPage.facts ? mixedOwnershipPage.facts.rowCount : 0,
+      taggedRows: mixedOwnershipPage.facts ? mixedOwnershipPage.facts.taggedRows : 0,
+      hasNotOwned: mixedOwnershipPage.facts ? mixedOwnershipPage.facts.hasNotOwned : false,
+      hasTrial: mixedOwnershipPage.facts ? mixedOwnershipPage.facts.hasTrial : false,
+      heldTagOk: mixedOwnershipPage.facts ? mixedOwnershipPage.facts.heldTagOk : null,
+      notOwnedSample: mixedOwnershipPage.facts ? mixedOwnershipPage.facts.notOwnedSample : null,
+      heldSample: mixedOwnershipPage.facts ? mixedOwnershipPage.facts.heldSample : null,
+      page1RowCount: scopeOwnership.all.rowCount,
+      page1TaggedRows: scopeOwnership.all.taggedRows,
+      // 现算的数据事实 + 真的翻到含非我拥有物种的那一页之后量到的 DOM 事实
+      nonOwnedExpected: nonOwnedSpeciesExpected.length,
+      candidateUniverseExpected,
+      mixedPage: mixedOwnershipPage.page,
+      notOwnedRows: mixedOwnershipPage.facts ? mixedOwnershipPage.facts.notOwnedRows : 0,
+      onDemandRows: mixedOwnershipPage.facts ? mixedOwnershipPage.facts.onDemandRows : 0,
+      hasNotOwnedMixed: mixedOwnershipPage.facts ? mixedOwnershipPage.facts.hasNotOwned : false,
+      hasTrialMixed: mixedOwnershipPage.facts ? mixedOwnershipPage.facts.hasTrial : false,
+      heldTagOkMixed: mixedOwnershipPage.facts ? mixedOwnershipPage.facts.heldTagOk : null,
+      mixedNotOwnedSample: mixedOwnershipPage.facts ? mixedOwnershipPage.facts.notOwnedSample : null,
+      mixedHeldSample: mixedOwnershipPage.facts ? mixedOwnershipPage.facts.heldSample : null,
+      mixedRowCount: mixedOwnershipPage.facts ? mixedOwnershipPage.facts.rowCount : 0,
+      mixedTaggedRows: mixedOwnershipPage.facts ? mixedOwnershipPage.facts.taggedRows : 0,
+    };
+    // 量「非我拥有」这件事必须在**真的含非我拥有物种的那一页**上做（见上面 ④）。
+    const mixedProbeProblems = (f) => {
+      const bad = [];
+      if (!(f?.mixedPage >= 1)) bad.push('没翻到任何一页含非我拥有物种的候选页（连第一页都没量到）');
+      if (!(f?.notOwnedRows >= 1)) {
+        bad.push(`翻到第 ${f?.mixedPage ?? '?'} 页仍只有我拥有的卡（非我拥有 ${f?.notOwnedRows ?? 0} 张）`);
+      }
+      if (!f?.hasNotOwnedMixed) bad.push('混着的那一页上没有一张卡标出「你还没有这一只」');
+      if (!f?.hasTrialMixed) bad.push('混着的那一页上没有一张非我拥有的卡标出「图鉴 · 按需推算（未核验）」');
+      return bad;
+    };
+    const ownProbs = ownershipProblems(poolOwnership);
+    const mixedProbs = mixedProbeProblems(poolOwnership);
+    const trialProbs = trialLabelProblems(poolOwnership);
+    check('候选按拥有与否分组', '候选池里确实混着我不拥有的物种，且页面把「是不是我的」逐卡说清。'
+      + '【2026-09-28 改钉，旧口径原文：「人类实测 Q2：候选里**约一半**是我不拥有的物种'
+      + '（实测 50 个候选 25 个非我拥有）」—— 那是 2026-09-22 的当时实测；本轮人类拍板'
+      + '「所有精灵实装，这样就不需要我的精灵了，直接全筛选」之后，可玩层 48 → 542、'
+      + '候选宇宙仍 622 ⇒ 非我拥有的物种只剩 80，「约一半」在数据上已经不成立。'
+      + '保留的意图是「候选池里确实混着我不拥有的物种 + 页面把这件事说清」，'
+      + '比例换成**现算**的物种数（=0 必红）。'
       + '【按人类 2026-09-23 批注，原 `#tw-cand-list > [data-tw-group]` 两行分组说明**已删**；'
       + '改由三条等价断言承担：① `#tw-scope-all`（全图鉴）与 `#tw-scope-mine`（我的精灵）结果集真的不同、'
-      + '且「我的精灵」只含我拥有的；② **逐卡**状态标签说清拥有与否（「你还没有这一只」/「持有 · 可正式上场」）；'
+      + '且「我的精灵」只含我拥有的；② **逐卡**状态标签说清拥有与否；'
       + '③ 「图鉴参考不能正式出战」由卡上的「图鉴 · 按需推算（未核验）」状态标承担】',
-      ownershipProblems(poolOwnership).length === 0,
-      ownershipProblems(poolOwnership).join(' | ')
-      || `全图鉴 ${poolOwnership.allTotal} 条 / 我的精灵 ${poolOwnership.mineTotal} 条（ref=${poolOwnership.mineRefCount}）；`
-        + `全图鉴本页 ${poolOwnership.rowCount} 张，带状态标 ${poolOwnership.taggedRows} 张；`
-        + `非拥有样例 ${JSON.stringify(poolOwnership.notOwnedSample)}；拥有样例 ${JSON.stringify(poolOwnership.heldSample)}`);
-    counter('候选按拥有与否分组', '作用域分档形同虚设（两档结果条数相同）+ 卡片不带拥有与否状态标，'
-      + '必须被同一条判据抓住',
+      ownProbs.length === 0,
+      ownProbs.join(' | ')
+      || `候选宇宙 ${poolOwnership.candidateUniverseExpected} 只、我拥有 ${poolOwnership.mineTotal} 只`
+        + `⇒ 非我拥有 ${poolOwnership.nonOwnedExpected} 只；`
+        + `全图鉴 ${poolOwnership.allTotal} 条 / 我的精灵 ${poolOwnership.mineTotal} 条（ref=${poolOwnership.mineRefCount}）；`
+        + `翻到第 ${poolOwnership.mixedPage} 页：本页 ${poolOwnership.mixedRowCount} 张，带状态标 ${poolOwnership.mixedTaggedRows} 张，`
+        + `非我拥有 ${poolOwnership.notOwnedRows} 张；`
+        + `非拥有样例 ${JSON.stringify(poolOwnership.mixedNotOwnedSample)}；`
+        + `拥有样例 ${JSON.stringify(poolOwnership.mixedHeldSample)}`);
+    counter('候选按拥有与否分组', '作用域分档形同虚设（两档结果条数相同）+ 卡片不带拥有与否状态标 + '
+      + '翻到的页面里一张非我拥有的卡都没有，必须被同一条判据抓住',
       ownershipProblems({allTotal: 24, mineTotal: 24, mineRowCount: 24, mineRefCount: 0,
-        rowCount: 24, taggedRows: 0, hasNotOwned: false, hasTrial: false, heldTagOk: false}),
-      '{"allTotal":24,"mineTotal":24,"taggedRows":0,"hasNotOwned":false}');
+        rowCount: 24, taggedRows: 0, hasNotOwned: false, hasTrial: false, heldTagOk: false,
+        nonOwnedExpected: 80, notOwnedRows: 0, mixedPage: 12}),
+      '{"allTotal":24,"mineTotal":24,"taggedRows":0,"hasNotOwned":false,"notOwnedRows":0}');
+    // 第二条反证（2026-09-28 新增，专打"非我拥有的候选数 = 0"这颗新牙）：
+    // 数据里一只非我拥有的物种都没有 ⇒ 这条判据必须红（改成恒真的写法会当场被这条抓住）。
+    counter('候选按拥有与否分组', '数据里非我拥有的候选物种 = 0（候选宇宙 == 我拥有的物种）必须被同一条判据抓住',
+      ownershipProblems({allTotal: 622, mineTotal: 622, mineRowCount: 12, mineRefCount: 12,
+        rowCount: 12, taggedRows: 12, hasNotOwned: false, hasTrial: false, heldTagOk: true,
+        nonOwnedExpected: 0, notOwnedRows: 0, mixedPage: 1}),
+      '{"nonOwnedExpected":0,"notOwnedRows":0}');
+    check('候选池混着非我拥有的物种（逐卡标签）',
+      '真鼠标翻到**含非我拥有物种的那一页**：那张卡写着「你还没有这一只」+「图鉴 · 按需推算（未核验）」'
+      + '【2026-09-28 拆出来的独立牙：全是"持有"的那一页量不到这两句话】',
+      mixedProbs.length === 0 && trialProbs.length === 0,
+      mixedProbs.concat(trialProbs).join(' | ')
+      || `第 ${poolOwnership.mixedPage} 页 ${poolOwnership.mixedRowCount} 张里非我拥有 ${poolOwnership.notOwnedRows} 张；`
+        + `样例 ${JSON.stringify(poolOwnership.mixedNotOwnedSample)}`);
+    counter('候选池混着非我拥有的物种（逐卡标签）', '把非我拥有那张卡的「你还没有这一只」与「未核验」两处标都去掉，必须被抓住',
+      mixedProbeProblems({...poolOwnership, hasNotOwnedMixed: false})
+        .concat(trialLabelProblems({...poolOwnership, onDemandRows: 0})),
+      '{"hasNotOwnedMixed":false,"onDemandRows":0}');
 
     // 2026-09-23（人类第六轮，「口径文案真删」）：三条口径（模式 / 候选规则 / 匹配前对手未知）
     // 的容器 `#mode-chips` 已**从 HTML 删除**（不是隐藏），界面上一处不留。
@@ -1442,15 +1641,68 @@ async function main() {
       availAxisProblems({availCount: 1, availText: '现在能算'}), '{availCount:1,availText:"现在能算"}');
 
     // ② 同名不同物种必须看得出区别（人类：「这个什么陛下有啥区别？我根本看不出来啊」）
-    //    那两只是 own-0042/pet_000556 与 own-0043/pet_000575，都叫「棋契陛下」、属性也相同。
-    //    做法：用页面自己的搜索框筛「棋契」→ 读两行**可见文本**，必须不同且各自带出**区别维度**。
-    //
+    //    ⚠ 2026-09-28 **改钉（第二次）**：两条都动了 ——
+    //    ① 样例：旧写法写死搜「棋契」—— 那两只是 own-0042/pet_000556 与 own-0043/pet_000575，
+    //       本轮人类 2026-09-28 拍板「所有精灵实装」后已按人类的剔除决定撤下
+    //       （`layer-playable-48/pets.json` 的 `excluded_capture_ids` 4086「图鉴同名 8 条形态，
+    //       本来就认不出是哪一条」）⇒ 搜「棋契」0 行。改成从当前数据**现算**样例
+    //       （main() 顶上的 `sameNameGroups`：同名不同物种 + 两只都在我盒子里）。
+    //    ② 第三条要求：「两行的**定位**不止一种」→「两行各带一个能区分它们的**信号**，且两个信号不同」
+    //       （信号按「定位优先、其次形态名」取）。
+    //       为什么改：旧样例（棋契陛下 own-0042/pet_000556 输出 vs own-0043/pet_000575 坦克）
+    //       天生一输出一坦克；而当前数据里的同名对（如「千棘盔」pet_000271 / pet_000378）
+    //       是 role 未登记的那一档物种，两边都写「定位未登记」
+    //       ⇒ 「定位不止一种」在现在的数据上**不可能满足**，红的原因不是页面没做。
+    //       玩家真正能分辨那一对的**唯一可见信号是形态名**（`title`：全量图鉴里
+    //       「同名 + 同编号 + 只有形态名不同」的登记有 55 组 / 154 条），
+    //       而产品侧 2026-09-28 已把「我的盒子」那张卡的 `name` 改成形态名优先
+    //       （`src/server/roco-service.js`：`name: e?.title ?? i.species_name ?? e?.name`）
+    //       ⇒ 两行现在文本不同、定位也可能带得出来。
+    //       **口径没放松**：文本逐字相同 ⇒ 红；两行都拿不出任何区分信号 ⇒ 红（见下面两条反证）。
     //    ⚠ 2026-09-27 **改钉**：原来这条要求"要能同时看到 **Lv50 与 Lv80**" —— 那是拿**掷出来的
     //    Demo 等级**当区别手段。当晚等级口径改成「默认都 60 级」（人类拍板 + 官方上限 60）
-    //    ⇒ 所有个体都是 Lv60，**等级不再是可用维度**。判据的**意图**不变（同名两行必须看得出区别），
-    //    换成的机制是：① 两行可见文本必须**不同**；② 每行必须带出自己的**定位**（或机制行），
-    //    且两行的定位必须**不止一种**；③ 两行都必须带自己的等级读数（**同值也算**：等级要显示出来，
-    //    只是不再要求它们不同）。反证也换成"只画名字+属性"那一版。
+    //    ⇒ 所有个体都是 Lv60，**等级不再是可用维度**（但**必须显示出来**，同值也算）。
+    // ⚠ 2026-09-28 实测：之前这里**自己抄了一份角色词表**且抄错了 —— 写的是「恢复」，
+    //   而产品（`BOX_ROLE_LABELS.recovery`）给的是「回复」。后果：定位那颗牙从来没咬到过东西
+    //   （读到的永远 null），却因为"少匹配一个词"而看不出是判据自己的错。
+    //   现在直接取产品那一份（`BOX_ROLE_LABELS` 的 values），口径同源。
+    const ROLE_WORDS = Object.values(BOX_ROLE_LABELS);
+    /** 卡上的「形态名」：名字里那对括号标注（「千棘盔（磨损的样子）」→「磨损的样子」）。 */
+    const formSignalOf = (lineText) => {
+      const m = /（([^）]{1,30})）/.exec(String(lineText));
+      return m ? m[1] : null;
+    };
+    /**
+     * 一行文本切出「信号」：
+     *   · `roleSignal` —— 「定位」那栏的原文（能取到角色词才给；「定位未登记」不算）；
+     *   · `formSignal` —— 形态名（见上）；
+     *   · `hasRoleSlot`/`hasFormSlot` —— 这一行**结构里**有没有这两栏/括号
+     *     （用来把"页面根本没画定位那栏"和"画了但那只是占位文案"分开）。
+     * 区分信号本身由 `signalOf()` 算：定位优先，其次形态名；两个都没有 ⇒ null（**不编**）。
+     */
+    const splitSignals = (lineText) => {
+      const text = String(lineText ?? '');
+      // 定位只认「·」分出来的**那一小段**（实测形如
+      // 「千棘盔 水系毒系 Lv60 · 回复 持有 · 可正式上场 在你的盒子里」：定位在第二段）。
+      // 这样写是为了避免名字/系别/状态标里恰好含角色词时误判。
+      const segments = text.split('·').map((part) => part.trim());
+      const role = ROLE_WORDS.filter((word) => segments.some((part) => part.includes(word)));
+      return {
+        roleSignal: role.length === 1 ? role[0] : (role.length > 1 ? `多个角色词(${role.join('/')})` : null),
+        formSignal: formSignalOf(text),
+        hasRoleSlot: segments.length >= 2,
+        hasFormSlot: /（[^）]{1,30}）/.test(text),
+      };
+    };
+    /** 由 `splitSignals()` 的结果合成区分信号（定位优先、其次形态名；两个都有就都带上）。 */
+    const signalOfFromParts = (parts) => {
+      const picked = [parts?.roleSignal, parts?.formSignal].filter(Boolean);
+      return picked.length ? picked.join('+') : null;
+    };
+    /** 一行的**区分信号**：按「定位优先，其次形态名」取 —— 两个都取到时合成
+     *  `"定位+形态"`（同定位的两行照样能靠形态名分开，这正是「千棘盔」那一对的形状）。
+     *  两个都没有 ⇒ null（**不编**）。 */
+    const signalOf = (lineText) => signalOfFromParts(splitSignals(lineText));
     const sameNameProblems = (texts) => {
       const bad = [];
       if (texts.length < 2) return [`同名不同物种的两行没同时出现（只有 ${texts.length} 行）—— 判据不许变空`];
@@ -1458,37 +1710,95 @@ async function main() {
       if (!texts.every((t) => /Lv\d+/.test(t))) {
         bad.push(`每行都要带自己的等级读数：${JSON.stringify(texts)}`);
       }
-      const roles = ['输出', '坦克', '辅助', '恢复', '控制'];
-      const shown = roles.filter((role) => texts.some((text) => text.includes(role)));
-      if (shown.length < 2) {
-        bad.push(`两行要各自带出定位、且不止一种（看到的定位：${shown.join('/') || '无'}）：${JSON.stringify(texts)}`);
+      // ⚠ 2026-09-28 改钉（旧断言原文：「两行要各自带出定位、且不止一种（看到的定位：…）」——
+      //   旧口径只认「定位」这一种信号）。新口径：**区分信号不同**（定位优先、其次形态名；
+      //   两个都取到时合成"定位+形态"，所以同定位的两行也能靠形态名分开）。
+      const parts = texts.map((t) => splitSignals(t));
+      const signals = parts.map((p) => signalOfFromParts(p));
+      // 「没有信号」要分清两种形状（两者的修法完全不同，不能混成一句）：
+      //   ① 页面**根本没画**定位那栏、名字里也没形态标注 ⇒ 版式缺了一块；
+      //   ② 栏目都在，但那一行写的是「定位未登记」这种占位 ⇒ 是数据没登记（不该判页面红）。
+      const missing = parts.filter((p) => !signalOfFromParts(p));
+      if (missing.length > 0) {
+        const noSlot = missing.filter((p) => !p.hasRoleSlot && !p.hasFormSlot).length;
+        if (noSlot > 0) {
+          bad.push(`有 ${noSlot} 行既没有定位栏、也没有形态名标注（版式里那两块都缺）：${JSON.stringify(texts)}`);
+        }
+        if (missing.length - noSlot > 0) {
+          bad.push(`有 ${missing.length - noSlot} 行的定位/形态名都没登记（栏位在、内容是占位文案）`
+            + `：${JSON.stringify(texts)} —— 这一对在当前数据里分不出来（判红如实说，不是"页面没做"）`);
+        }
+      }
+      if (new Set(signals.filter(Boolean)).size < 2) {
+        bad.push(`两行的区分信号不是两种（定位优先、其次形态名；读到 ${JSON.stringify(signals)}）：`
+          + `${JSON.stringify(texts)}`);
       }
       return bad;
     };
+    const searchSameName = async (name) => {
+      await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)}).shadowRoot;
+        const i=sr.getElementById('tw-search');i.value=${JSON.stringify(name)};
+        i.dispatchEvent(new Event('input',{bubbles:true}));return true;})()`);
+      await sleep(1500);
+      return JSON.parse(await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)}).shadowRoot;
+        return JSON.stringify([...sr.querySelectorAll('#tw-cand-list .tw-row')]
+          .map((r)=>(r.textContent||'').replace(/\\s+/g,' ').trim()));})()`));
+    };
     let sameNameTexts = [];
+    let sameNameUsed = null;
     try {
-      // ⚠ 必须先在**「我的精灵」档**量：全图鉴档的同名条目自带分支后缀（实测「棋契陛下（白棋棋骑士分支）」等 4 条），
+      // ⚠ 必须先在**「我的精灵」档**量：全图鉴档的同名条目自带分支后缀
+      // （实测「棋契陛下（白棋棋骑士分支）」等 4 条 / 「小星光（星光能量的样子）」），
       // 看着能区分；人类截图那一屏是「我的精灵」档 —— **没有**分支后缀，那才是"看不出来"的真实场景。
       await mouseClick(`${ROOT_SEL} >>> #tw-scope-mine`);
       await sleep(900);
-      await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)}).shadowRoot;
-        const i=sr.getElementById('tw-search');i.value='棋契';i.dispatchEvent(new Event('input',{bubbles:true}));return true;})()`);
-      await sleep(1600);
-      sameNameTexts = JSON.parse(await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)}).shadowRoot;
-        return JSON.stringify([...sr.querySelectorAll('#tw-cand-list .tw-row')]
-          .map((r)=>(r.textContent||'').replace(/\\s+/g,' ').trim()));})()`));
+      // 先试现算出来的那一对；它万一搜不出两行，就按数据顺序再试别的同名组
+      // （都是同一条判据在量，只是换个同名样例；一组都搜不出两行 ⇒ 判据自己红）。
+      for (const candidate of sameNameGroups.slice(0, 4)) {
+        if (!candidate) continue;
+        const texts = await searchSameName(candidate.name);
+        sameNameCandidatesTried.push({name: candidate.name, rows: texts.length});
+        if (!sameNameUsed || texts.length > sameNameTexts.length) {
+          sameNameUsed = candidate; sameNameTexts = texts;
+        }
+        if (texts.length >= 2) break;
+      }
     } catch (error) { sameNameTexts = []; }
     const sameNameProbs = sameNameProblems(sameNameTexts);
-    check('41-同名不同种看得出区别', '候选池里同名不同物种的两行，可见文本必须不同、各带等级读数、且定位不止一种'
-      + '【人类 2026-09-25：「这个什么陛下有啥区别？我根本看不出来啊」】',
-      sameNameProbs.length === 0, sameNameProbs.join(' | ') || JSON.stringify(sameNameTexts));
-    counter('41-同名不同种看得出区别', '把两行还原成只画名字+属性（投诉当时的样子）必须报',
-      sameNameProblems(['棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里',
-        '棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里']), '两行逐字相同');
-    // 第二条反证：**只显示等级、不显示定位**那一版也必须报（改钉之后的新牙）
-    counter('41-同名不同种看得出区别', '两行只有等级、没有各自的定位也必须报',
-      sameNameProblems(['棋契陛下 武系地系 Lv60 持有 · 可正式上场 在你的盒子里',
-        '棋契陛下 武系地系 Lv60 持有 · 可正式上场 在你的盒子里']), '定位没带出来');
+    check('41-同名不同种看得出区别', '候选池里同名不同物种的两行：① 可见文本必须不同；'
+      + '② 各带自己的等级读数；③ 各带一个**能区分它们的信号、且两个信号不同**'
+      + '（信号按「定位优先、其次形态名」取）'
+      + '【人类 2026-09-25：「这个什么陛下有啥区别？我根本看不出来啊」】'
+      + '【2026-09-28 改钉①：样例从当前数据现算（同名不同物种 + 两只都在我盒子里），'
+      + '旧样例「棋契陛下」已按人类剔除决定撤下（`excluded_capture_ids` 4086）】'
+      + '【2026-09-28 改钉②：旧口径是「两行的**定位**不止一种」（旧样例一输出一坦克）；'
+      + '当前同名对（如「千棘盔」pet_000271 / pet_000378）是 role 未登记的物种、两边都写'
+      + '「定位未登记」⇒ 定位这一条在现在的数据上不可能满足，而玩家真正能分辨那对的信号是'
+      + '**形态名**（`title`）。产品侧 2026-09-28 已把「我的盒子」卡名改成形态名优先，'
+      + '所以改成「区分信号不同（定位优先、其次形态名）」——文本逐字相同、或两行都拿不出信号仍然必红】',
+      sameNameProbs.length === 0,
+      sameNameProbs.join(' | ')
+      || `样例「${sameNameUsed?.name}」（${(sameNameUsed?.ids ?? []).join(' / ')}）两行：${JSON.stringify(sameNameTexts)}`
+        + `；读到信号 ${JSON.stringify(sameNameTexts.map((t) => signalOf(t)))}`
+        + `；试过的同名组 ${JSON.stringify(sameNameCandidatesTried)}`);
+    counter('41-同名不同种看得出区别', '把两行还原成只画名字+属性（投诉当时的样子：两行逐字相同）必须报',
+      sameNameProblems(['千棘盔 水系毒系 持有 · 可正式上场 在你的盒子里',
+        '千棘盔 水系毒系 持有 · 可正式上场 在你的盒子里']), '两行逐字相同');
+    // 第二条反证（2026-09-27 那颗老牙，口径升级后仍然要咬得住）：
+    // 两行只有等级、谁也拿不出区分信号（定位未登记 + 没有形态名）必须报。
+    counter('41-同名不同种看得出区别', '两行只有等级、两行都拿不出区分信号（定位未登记且无形态名）必须报',
+      sameNameProblems(['千棘盔 水系毒系 Lv60 · 定位未登记 持有 · 可正式上场 在你的盒子里',
+        '千棘盔 水系毒系 Lv60 · 定位未登记 持有 · 可正式上场 在你的盒子里']), '定位未登记 + 无形态名');
+    // 第三条反证（2026-09-28 新增：专打"形态名不算信号"那种放宽写法）：
+    // 两行**只有一行**带形态名、另一行没有 ⇒ 仍然报（"两个信号不同"没被满足）。
+    counter('41-同名不同种看得出区别', '只有一行带形态名、另一行什么信号都没有必须报',
+      sameNameProblems(['千棘盔 水系毒系 Lv60 · 定位未登记 持有 · 可正式上场 在你的盒子里',
+        '千棘盔（磨损的样子） 水系毒系 Lv60 · 定位未登记 持有 · 可正式上场 在你的盒子里']),
+      '只有一行有形态名');
+    // 第四条反证（2026-09-28 新增）：同名组**一只都没有**（样例撤下/数据换代）时必须报 ——
+    // 这正是本轮判据变红的那种形状，不许再靠"换个名字接着搜"悄悄绕过。
+    counter('41-同名不同种看得出区别', '当前数据里一对同名不同物种都找不到（搜不到任何行）必须报',
+      sameNameProblems([]), '同名组 0 行');
     // 搜索框还原，别影响后面的截图
     await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)}).shadowRoot;
       const i=sr.getElementById('tw-search');i.value='';i.dispatchEvent(new Event('input',{bubbles:true}));return true;})()`);

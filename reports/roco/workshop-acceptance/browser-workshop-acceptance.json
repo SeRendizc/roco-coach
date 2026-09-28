@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-28T10:28:29.172Z",
+ "judged_at": "2026-09-28T13:56:05.940Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -57,9 +57,15 @@
   },
   {
    "id": "候选按拥有与否分组",
-   "judge": "人类实测 Q2：候选里约一半是我不拥有的物种（实测 50 个候选 25 个非我拥有）。【按人类 2026-09-23 批注，原 `#tw-cand-list > [data-tw-group]` 两行分组说明**已删**；改由三条等价断言承担：① `#tw-scope-all`（全图鉴）与 `#tw-scope-mine`（我的精灵）结果集真的不同、且「我的精灵」只含我拥有的；② **逐卡**状态标签说清拥有与否（「你还没有这一只」/「持有 · 可正式上场」）；③ 「图鉴参考不能正式出战」由卡上的「图鉴 · 按需推算（未核验）」状态标承担】",
+   "judge": "候选池里确实混着我不拥有的物种，且页面把「是不是我的」逐卡说清。【2026-09-28 改钉，旧口径原文：「人类实测 Q2：候选里**约一半**是我不拥有的物种（实测 50 个候选 25 个非我拥有）」—— 那是 2026-09-22 的当时实测；本轮人类拍板「所有精灵实装，这样就不需要我的精灵了，直接全筛选」之后，可玩层 48 → 542、候选宇宙仍 622 ⇒ 非我拥有的物种只剩 80，「约一半」在数据上已经不成立。保留的意图是「候选池里确实混着我不拥有的物种 + 页面把这件事说清」，比例换成**现算**的物种数（=0 必红）。【按人类 2026-09-23 批注，原 `#tw-cand-list > [data-tw-group]` 两行分组说明**已删**；改由三条等价断言承担：① `#tw-scope-all`（全图鉴）与 `#tw-scope-mine`（我的精灵）结果集真的不同、且「我的精灵」只含我拥有的；② **逐卡**状态标签说清拥有与否；③ 「图鉴参考不能正式出战」由卡上的「图鉴 · 按需推算（未核验）」状态标承担】",
    "ok": true,
-   "actual": "全图鉴 622 条 / 我的精灵 48 条（ref=0）；全图鉴本页 10 张，带状态标 10 张；非拥有样例 {\"name\":\"喵喵\",\"status\":\"on_demand\",\"tag\":\"图鉴 · 按需推算（未核验）\",\"rowtag\":\"你还没有这一只\"}；拥有样例 null"
+   "actual": "候选宇宙 622 只、我拥有 542 只⇒ 非我拥有 80 只；全图鉴 622 条 / 我的精灵 542 条（ref=0）；翻到第 14 页：本页 10 张，带状态标 10 张，非我拥有 1 张；非拥有样例 {\"name\":\"古啦多\",\"status\":\"on_demand\",\"tag\":\"图鉴 · 按需推算（未核验）\",\"rowtag\":\"你还没有这一只\"}；拥有样例 {\"name\":\"小灵菇\",\"status\":\"held\",\"tag\":\"持有 · 可正式上场\",\"rowtag\":\"在你的盒子里\"}"
+  },
+  {
+   "id": "候选池混着非我拥有的物种（逐卡标签）",
+   "judge": "真鼠标翻到**含非我拥有物种的那一页**：那张卡写着「你还没有这一只」+「图鉴 · 按需推算（未核验）」【2026-09-28 拆出来的独立牙：全是\"持有\"的那一页量不到这两句话】",
+   "ok": true,
+   "actual": "第 14 页 10 张里非我拥有 1 张；样例 {\"name\":\"古啦多\",\"status\":\"on_demand\",\"tag\":\"图鉴 · 按需推算（未核验）\",\"rowtag\":\"你还没有这一只\"}"
   },
   {
    "id": "03-徽记与候选池",
@@ -83,13 +89,13 @@
    "id": "06-初判先于完整载荷",
    "judge": "页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms）",
    "ok": true,
-   "actual": "；fetches=first|full rendered_after_first=yes first_ms=82 full_ms=22 stage=full full_state=ok"
+   "actual": "；fetches=first|full rendered_after_first=yes first_ms=120 full_ms=27 stage=full full_state=ok"
   },
   {
    "id": "07-分段元数据在 dataset",
    "judge": "分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），可见文本里一个工程词都没有",
    "ok": true,
-   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=18 withheld=\"\""
+   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=23 withheld=\"\""
   },
   {
    "id": "08-候选含图鉴物种",
@@ -101,7 +107,7 @@
    "id": "09-范围分档开关",
    "judge": "真实鼠标点「我的精灵」→ 候选池真的重新取数（结果集从全量收窄）且模块回到 ok；再点「全图鉴」回到原结果集与 ok。【原 `#tw-favourite`（只看收藏）已按人类 2026-09-23 删除，由范围分档 `#tw-scope-mine` / `#tw-scope-all` 承担（同样是「收窄候选范围」这一类操作）】",
    "ok": true,
-   "actual": "点「我的精灵」后 state=ok（selected=0，total 622→48）；点回「全图鉴」后 state=ok（total=622）；命中={\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON#tw-scope-mine.tw-btn<DIV.tw-cand-tools.tw-scope-row<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"} / {\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON#tw-scope-all.tw-btn<DIV.tw-cand-tools.tw-scope-row<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"}"
+   "actual": "点「我的精灵」后 state=ok（selected=0，total 622→542）；点回「全图鉴」后 state=ok（total=622）；命中={\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON#tw-scope-mine.tw-btn<DIV.tw-cand-tools.tw-scope-row<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"} / {\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON#tw-scope-all.tw-btn<DIV.tw-cand-tools.tw-scope-row<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"}"
   },
   {
    "id": "10-图鉴物种照实拒绝",
@@ -113,7 +119,7 @@
    "id": "11-错误态可恢复",
    "judge": "错误态下再点一只有效的候选：模块回到 ok，刚被拒的那一只没有偷偷留在队伍里",
    "ok": true,
-   "actual": "加点={\"added\":true,\"probe\":{\"rows\":2,\"match\":1,\"species\":\"pet_000012\"},\"beforeCount\":0,\"after\":1,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"} state=ok selected=1"
+   "actual": "加点={\"added\":true,\"probe\":{\"rows\":3,\"match\":1,\"species\":\"pet_000001\"},\"beforeCount\":0,\"after\":1,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"} state=ok selected=1"
   },
   {
    "id": "12-真实键鼠选到第 2 只",
@@ -143,13 +149,13 @@
    "id": "16-评估随阵容变化",
    "judge": "从 2 只加到 5 只之后：下一只候选换了人、缺口清单还在、仍然恰好三个候选",
    "ok": true,
-   "actual": "2 只时候选=[\"棋契陛下\",\"伊兰亚龙\",\"海豹船长\"]；5 只时=[\"画间沉铁兽\",\"棋契陛下\",\"海豹船长\"]"
+   "actual": "2 只时候选=[\"迷迷箱怪\",\"量风碗\",\"离心舞者\"]；5 只时=[\"离心舞者\",\"测风蝉\",\"厉毒小萝\"]"
   },
   {
    "id": "17-连续选入六只",
    "judge": "连续用真实键鼠加人：六个槽位全部填满（selected == 6），填进去的是六个**不同**的个体",
    "ok": true,
-   "actual": "selected=6 填了 6/6 槽；加点记录=[{\"name\":\"铠甲虫\",\"added\":false,\"probe\":{\"rows\":3,\"match\":1,\"species\":\"pet_000012\"},\"beforeCount\":1,\"after\":1,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"},{\"name\":\"音速犬\",\"added\":true,\"probe\":{\"rows\":3,\"match\":1,\"species\":\"pet_000062\"},\"beforeCount\":1,\"after\":2,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"},{\"name\":\"仪式巨像\",\"added\":true,\"probe\":{\"rows\":4,\"match\":1,\"species\":\"pet_000100\"},\"beforeCount\":2,\"after\":3,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"},{\"name\":\"雪影娃娃\",\"added\":true,\"probe\":{\"rows\":6,\"match\":1,\"species\":\"pet_000112\"},\"beforeCount\":3,\"after\":4,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"},{\"name\":\"皇家狮鹫（崖间地的样子）\",\"added\":true,\"probe\":{\"rows\":6,\"match\":1,\"species\":\"pet_000118\"},\"beforeCount\":4,\"after\":5,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"},{\"name\":\"化蝶（平常的样子）\",\"added\":true,\"probe\":{\"rows\":7,\"match\":1,\"species\":\"pet_000124\"},\"beforeCount\":5,\"after\":6,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"}]"
+   "actual": "selected=6 填了 6/6 槽；加点记录=[{\"name\":\"喵喵\",\"added\":false,\"probe\":{\"rows\":4,\"match\":1,\"species\":\"pet_000001\"},\"beforeCount\":1,\"after\":1,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"},{\"name\":\"水蓝蓝\",\"added\":true,\"probe\":{\"rows\":3,\"match\":1,\"species\":\"pet_000002\"},\"beforeCount\":1,\"after\":2,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"},{\"name\":\"火花\",\"added\":true,\"probe\":{\"rows\":4,\"match\":1,\"species\":\"pet_000003\"},\"beforeCount\":2,\"after\":3,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"},{\"name\":\"迪莫\",\"added\":true,\"probe\":{\"rows\":9,\"match\":1,\"species\":\"pet_000004\"},\"beforeCount\":3,\"after\":4,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"},{\"name\":\"水灵\",\"added\":true,\"probe\":{\"rows\":6,\"match\":1,\"species\":\"pet_000005\"},\"beforeCount\":4,\"after\":5,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"},{\"name\":\"火神\",\"added\":true,\"probe\":{\"rows\":7,\"match\":1,\"species\":\"pet_000006\"},\"beforeCount\":5,\"after\":6,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"}]"
   },
   {
    "id": "18-满六只五轴",
@@ -161,19 +167,19 @@
    "id": "19-最大短板与替换建议",
    "judge": "完整诊断里有主短板（缺口/未知清单）与**一个**最小替换：换出/换入各一只，并说清是结构理由",
    "ok": true,
-   "actual": "缺口=0 未知=6 替换显示=true 换出=雪影娃娃 换入=动力猿"
+   "actual": "缺口=0 未知=6 替换显示=true 换出=喵喵 换入=深渊罗隐"
   },
   {
    "id": "20-玩家层载荷",
    "judge": "路由的 player 段里没有工程键，也没有 id 形状的展示值",
    "ok": true,
-   "actual": "扫过 9125 字节"
+   "actual": "扫过 8731 字节"
   },
   {
    "id": "37-配招那一行有四个技能名",
    "judge": "每只已选精灵下面那行要么是你选的、要么是引擎规范配招，**不能是空的**（空的等于换招要从零挑四个）【审计高 6】",
    "ok": true,
-   "actual": "配招行 6 条；示例「换招 引擎规范配招：啃咬、防御、翅刃、风隐」"
+   "actual": "配招行 6 条；示例「换招 引擎规范配招：抓挠、防御、仙人掌刺击、腐化」"
   },
   {
    "id": "39-「最怕的体系」写出体系名",
@@ -209,31 +215,31 @@
    "id": "40-能算的轴给真值",
    "judge": "能算的轴必须写出真值（含数字），且不可算的那些一个数字都不许给",
    "ok": true,
-   "actual": "能算 5 个：「环境价值\n       \n       现在能算\n      偏高\n      \n      这一方面的高低是按阵容结构推出来的（对手分布是假设的），不是实测对局数据。\n      原始数值与说明\n        0.75735 · 相对分」"
+   "actual": "能算 5 个：「环境价值\n       \n       现在能算\n      偏高\n      \n      这一方面的高低是按阵容结构推出来的（对手分布是假设的），不是实测对局数据。\n      原始数值与说明\n        0.811706 · 相对」"
   },
   {
    "id": "41-同名不同种看得出区别",
-   "judge": "候选池里同名不同物种的两行，可见文本必须不同、各带等级读数、且定位不止一种【人类 2026-09-25：「这个什么陛下有啥区别？我根本看不出来啊」】",
+   "judge": "候选池里同名不同物种的两行：① 可见文本必须不同；② 各带自己的等级读数；③ 各带一个**能区分它们的信号、且两个信号不同**（信号按「定位优先、其次形态名」取）【人类 2026-09-25：「这个什么陛下有啥区别？我根本看不出来啊」】【2026-09-28 改钉①：样例从当前数据现算（同名不同物种 + 两只都在我盒子里），旧样例「棋契陛下」已按人类剔除决定撤下（`excluded_capture_ids` 4086）】【2026-09-28 改钉②：旧口径是「两行的**定位**不止一种」（旧样例一输出一坦克）；当前同名对（如「千棘盔」pet_000271 / pet_000378）是 role 未登记的物种、两边都写「定位未登记」⇒ 定位这一条在现在的数据上不可能满足，而玩家真正能分辨那对的信号是**形态名**（`title`）。产品侧 2026-09-28 已把「我的盒子」卡名改成形态名优先，所以改成「区分信号不同（定位优先、其次形态名）」——文本逐字相同、或两行都拿不出信号仍然必红】",
    "ok": true,
-   "actual": "[\"棋契陛下 武系地系 Lv60 · 输出 持有 · 可正式上场 在你的盒子里\",\"棋契陛下 武系地系 Lv60 · 坦克 持有 · 可正式上场 在你的盒子里\"]"
+   "actual": "样例「千棘盔」（pet_000271 / pet_000378）两行：[\"千棘盔 水系毒系 Lv60 · 回复 持有 · 可正式上场 在你的盒子里\",\"千棘盔（磨损的样子） 水系毒系 Lv60 · 回复 持有 · 可正式上场 在你的盒子里\"]；读到信号 [\"回复\",\"回复+磨损的样子\"]；试过的同名组 [{\"name\":\"千棘盔\",\"rows\":2}]"
   },
   {
    "id": "21-机制行上卡",
    "judge": "六个槽位里每一只的**冻结机制原文**都逐字渲染在卡的首层（小字、不截断），枚举原文（FROZEN_DESC / MECHANISM_UNCONFIRMED）一个都不出现在可见文本里",
    "ok": true,
-   "actual": "；机制行节点=6 已填槽位=6 待确认=0；卡上样例「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」"
+   "actual": "；机制行节点=6 已填槽位=6 待确认=0；卡上样例「特性「氧循环」：使用草系技能后，回复10%生命。」"
   },
   {
    "id": "22-玩家层无工程话",
    "judge": "模块的可见文本里不出现 pet_id / instance_id / state_version / coverage / provenance / unknown_fields / ranker_status / ruleset，也不出现裸 JSON",
    "ok": true,
-   "actual": "扫过 3685 字（豁免机制原文 4 处）；样例「 阵容评估 收起 › 阵容评估 六只满编 · 六个方面 这六只的五个方面现在都能算。其中四个方面要先假设\"对手会用什么体系\"（现在各体系按同等权重，换成本赛季实测数据会更准）；这里…」"
+   "actual": "扫过 3481 字（豁免机制原文 8 处）；样例「 阵容评估 收起 › 阵容评估 六只满编 · 六个方面 这六只的五个方面现在都能算。其中四个方面要先假设\"对手会用什么体系\"（现在各体系按同等权重，换成本赛季实测数据会更准）；这里…」"
   },
   {
    "id": "23-无胜率与百分数",
    "judge": "可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法（可核对的冻结机制原文除外）",
    "ok": true,
-   "actual": "扫过 3685 字无命中（豁免机制原文 2 条）"
+   "actual": "扫过 3481 字无命中（豁免机制原文 3 条）"
   },
   {
    "id": "24-未知写在玩家层",
@@ -317,7 +323,7 @@
    "id": "31-移动端顺序",
    "judge": "390×844：常规流里的区块顺序固定为「队伍槽位 → 候选池」（→ 若「当前评估」「小芽短提示」还在流里，必须依次排在后面）；「当前评估」改由左侧悬浮抽屉承担（真鼠标点 `#tw-eval-toggle` 能打开、面板可见且有内容）。【2026-09-23 版式演变：`.tw-coach`（✦ 小芽 · 阵容阶段）按人类批注删除；`.tw-eval` 由人类要求改成 `#tw-eval-drawer` 固定抽屉（不在常规流）。「当前评估」这条口径由抽屉可达性这条等价断言守】",
    "ok": true,
-   "actual": "顺序=[\"tw-team\",\"tw-cand\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":150},{\"cls\":\"tw-cand\",\"top\":456}]；阵容评估抽屉：存在=true 内容 4854 字节，点开后 data-open=\"yes\" 面板可见=true 面板尺寸={\"w\":300,\"h\":287} 切换按钮={\"w\":44,\"h\":132}"
+   "actual": "顺序=[\"tw-team\",\"tw-cand\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":150},{\"cls\":\"tw-cand\",\"top\":456}]；阵容评估抽屉：存在=true 内容 4865 字节，点开后 data-open=\"yes\" 面板可见=true 面板尺寸={\"w\":300,\"h\":287} 切换按钮={\"w\":44,\"h\":132}"
   },
   {
    "id": "31b-窄屏候选区有可见高度",
@@ -329,7 +335,7 @@
    "id": "32-窄屏候选区",
    "judge": "390×844：选到第 2 只后仍然不横向溢出，三个候选与缺口清单都在",
    "ok": true,
-   "actual": "clientW=390 scrollW=390 selected=2 next=3 缺口=9；加人过程=[{\"name\":\"铠甲虫\",\"added\":true,\"probe\":{\"rows\":1,\"match\":1,\"species\":\"pet_000012\"},\"beforeCount\":0,\"after\":1,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"},{\"name\":\"音速犬\",\"added\":true,\"probe\":{\"rows\":2,\"match\":1,\"species\":\"pet_000062\"},\"beforeCount\":1,\"after\":2,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"}]"
+   "actual": "clientW=390 scrollW=390 selected=2 next=3 缺口=9；加人过程=[{\"name\":\"喵喵\",\"added\":true,\"probe\":{\"rows\":2,\"match\":1,\"species\":\"pet_000001\"},\"beforeCount\":0,\"after\":1,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"},{\"name\":\"水蓝蓝\",\"added\":true,\"probe\":{\"rows\":2,\"match\":1,\"species\":\"pet_000002\"},\"beforeCount\":1,\"after\":2,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"}]"
   },
   {
    "id": "34-标准 PVP 开局按钮",
@@ -347,7 +353,7 @@
    "id": "36-候选规则下的 Coach 取舍",
    "judge": "v3 候选规则下：并列比较 ≥2 条且逐条都是引擎给的合法动作、未来 2—3 回合 ≥2 条、如实标置信/未核验、不出现胜率或百分数。【按人类 2026-09-23 版式，读取点 `#hint-body` 不变；`#plan`「让小芽看一眼」与 `#xy-settings` 折叠**已删**，改由弹出式小芽窗口（真鼠标点 `#coach-entry`，面板里读 `#model-list`）＋同一条 `requestPlan({reason:'manual',explicit:true})` 路径触发】",
    "ok": true,
-   "actual": "并列 3 条（[\"防御\",\"啃咬\",\"换上第4位\"]）；未来 5 条；规则配置 mobile_s4_candidate_v3；诊断（浮条 hidden=false / 有 plan=true / 取舍区 1265 字节 / 状态「」/ 点击命中 小芽入口 BUTTON#coach-entry.nav-btn.xy<DIV#roco-nav.header-actions<HEADER.topbar<MAIN<BODY<HTML< / 面板（弹窗打开=true，模型格 3 个：DeepSeek● 未连 / Qwen3.5-4B● 未连 / Qwen3.8-27B● 未连；记忆入口「查看记忆」） / 看一眼（原 `#plan` 已删，走同一条 requestPlan({reason:'manual',explicit:true}) 路径））"
+   "actual": "并列 3 条（[\"抓挠\",\"防御\",\"换上第6位\"]）；未来 5 条；规则配置 mobile_s4_candidate_v3；诊断（浮条 hidden=false / 有 plan=true / 取舍区 1258 字节 / 状态「」/ 点击命中 小芽入口 BUTTON#coach-entry.nav-btn.xy<DIV#roco-nav.header-actions<HEADER.topbar<MAIN<BODY<HTML< / 面板（弹窗打开=true，模型格 3 个：DeepSeek● 未连 / Qwen3.5-4B● 未连 / Qwen3.8-27B● 未连；记忆入口「查看记忆」） / 看一眼（原 `#plan` 已删，走同一条 requestPlan({reason:'manual',explicit:true}) 路径））"
   },
   {
    "id": "33-控制台干净",
@@ -366,10 +372,24 @@
   },
   {
    "id": "候选按拥有与否分组",
-   "judge": "作用域分档形同虚设（两档结果条数相同）+ 卡片不带拥有与否状态标，必须被同一条判据抓住",
+   "judge": "作用域分档形同虚设（两档结果条数相同）+ 卡片不带拥有与否状态标 + 翻到的页面里一张非我拥有的卡都没有，必须被同一条判据抓住",
    "ok": true,
-   "hit": "「全图鉴」与「我的精灵」结果条数相同（24）——作用域分档没真的换结果集 | 有 24 张候选卡没有状态标签 | 没有一张卡标出「你还没有这一只」（拥有与否没逐卡说清） | 没有一张卡标出「图鉴 / 按需推算（未核验）」（「不能正式出战」这层含义丢了） | 持有的卡没有写「持有 · 可正式上场」",
-   "actual": "{\"allTotal\":24,\"mineTotal\":24,\"taggedRows\":0,\"hasNotOwned\":false}"
+   "hit": "「全图鉴」与「我的精灵」结果条数相同（24）——作用域分档没真的换结果集 | 有 24 张候选卡没有状态标签 | 翻到第 12 页仍只有我拥有的卡（非我拥有 0 张）——页面把\"我没有的物种\"整档藏起来了 | 没有一张卡标出「你还没有这一只」（拥有与否没逐卡说清） | 没有一张卡标出「图鉴 / 按需推算（未核验）」（「不能正式出战」这层含义丢了） | 持有的卡没有写「持有 · 可正式上场」",
+   "actual": "{\"allTotal\":24,\"mineTotal\":24,\"taggedRows\":0,\"hasNotOwned\":false,\"notOwnedRows\":0}"
+  },
+  {
+   "id": "候选按拥有与否分组",
+   "judge": "数据里非我拥有的候选物种 = 0（候选宇宙 == 我拥有的物种）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "「全图鉴」与「我的精灵」结果条数相同（622）——作用域分档没真的换结果集 | 数据里非我拥有的候选物种 = 0（候选宇宙 − 我拥有的物种）——候选池根本没混着我不拥有的物种，这条判据不成立 | 翻到第 1 页仍只有我拥有的卡（非我拥有 0 张）——页面把\"我没有的物种\"整档藏起来了 | 没有一张卡标出「你还没有这一只」（拥有与否没逐卡说清） | 没有一张卡标出「图鉴 / 按需推算（未核验）」（「不能正式出战」这层含义丢了） | 「我的精灵」一档里混进了非持有的卡（rows=12 ref=12）",
+   "actual": "{\"nonOwnedExpected\":0,\"notOwnedRows\":0}"
+  },
+  {
+   "id": "候选池混着非我拥有的物种（逐卡标签）",
+   "judge": "把非我拥有那张卡的「你还没有这一只」与「未核验」两处标都去掉，必须被抓住",
+   "ok": true,
+   "hit": "混着的那一页上没有一张卡标出「你还没有这一只」 | 非我拥有的卡里没有一张带「图鉴 · 按需推算（未核验）」状态标（onDemandRows=0）",
+   "actual": "{\"hasNotOwnedMixed\":false,\"onDemandRows\":0}"
   },
   {
    "id": "03-候选规则徽记",
@@ -520,24 +540,38 @@
   },
   {
    "id": "41-同名不同种看得出区别",
-   "judge": "把两行还原成只画名字+属性（投诉当时的样子）必须报",
+   "judge": "把两行还原成只画名字+属性（投诉当时的样子：两行逐字相同）必须报",
    "ok": true,
-   "hit": "同名两行的可见文本完全相同：「棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里」 | 每行都要带自己的等级读数：[\"棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里\",\"棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里\"] | 两行要各自带出定位、且不止一种（看到的定位：无）：[\"棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里\",\"棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里\"]",
+   "hit": "同名两行的可见文本完全相同：「千棘盔 水系毒系 持有 · 可正式上场 在你的盒子里」 | 每行都要带自己的等级读数：[\"千棘盔 水系毒系 持有 · 可正式上场 在你的盒子里\",\"千棘盔 水系毒系 持有 · 可正式上场 在你的盒子里\"] | 有 2 行的定位/形态名都没登记（栏位在、内容是占位文案）：[\"千棘盔 水系毒系 持有 · 可正式上场 在你的盒子里\",\"千棘盔 水系毒系 持有 · 可正式上场 在你的盒子里\"] —— 这一对在当前数据里分不出来（判红如实说，不是\"页面没做\"） | 两行的区分信号不是两种（定位优先、其次形态名；读到 [null,null]）：[\"千棘盔 水系毒系 持有 · 可正式上场 在你的盒子里\",\"千棘盔 水系毒系 持有 · 可正式上场 在你的盒子里\"]",
    "actual": "两行逐字相同"
   },
   {
    "id": "41-同名不同种看得出区别",
-   "judge": "两行只有等级、没有各自的定位也必须报",
+   "judge": "两行只有等级、两行都拿不出区分信号（定位未登记且无形态名）必须报",
    "ok": true,
-   "hit": "同名两行的可见文本完全相同：「棋契陛下 武系地系 Lv60 持有 · 可正式上场 在你的盒子里」 | 两行要各自带出定位、且不止一种（看到的定位：无）：[\"棋契陛下 武系地系 Lv60 持有 · 可正式上场 在你的盒子里\",\"棋契陛下 武系地系 Lv60 持有 · 可正式上场 在你的盒子里\"]",
-   "actual": "定位没带出来"
+   "hit": "同名两行的可见文本完全相同：「千棘盔 水系毒系 Lv60 · 定位未登记 持有 · 可正式上场 在你的盒子里」 | 有 2 行的定位/形态名都没登记（栏位在、内容是占位文案）：[\"千棘盔 水系毒系 Lv60 · 定位未登记 持有 · 可正式上场 在你的盒子里\",\"千棘盔 水系毒系 Lv60 · 定位未登记 持有 · 可正式上场 在你的盒子里\"] —— 这一对在当前数据里分不出来（判红如实说，不是\"页面没做\"） | 两行的区分信号不是两种（定位优先、其次形态名；读到 [null,null]）：[\"千棘盔 水系毒系 Lv60 · 定位未登记 持有 · 可正式上场 在你的盒子里\",\"千棘盔 水系毒系 Lv60 · 定位未登记 持有 · 可正式上场 在你的盒子里\"]",
+   "actual": "定位未登记 + 无形态名"
+  },
+  {
+   "id": "41-同名不同种看得出区别",
+   "judge": "只有一行带形态名、另一行什么信号都没有必须报",
+   "ok": true,
+   "hit": "有 1 行的定位/形态名都没登记（栏位在、内容是占位文案）：[\"千棘盔 水系毒系 Lv60 · 定位未登记 持有 · 可正式上场 在你的盒子里\",\"千棘盔（磨损的样子） 水系毒系 Lv60 · 定位未登记 持有 · 可正式上场 在你的盒子里\"] —— 这一对在当前数据里分不出来（判红如实说，不是\"页面没做\"） | 两行的区分信号不是两种（定位优先、其次形态名；读到 [null,\"磨损的样子\"]）：[\"千棘盔 水系毒系 Lv60 · 定位未登记 持有 · 可正式上场 在你的盒子里\",\"千棘盔（磨损的样子） 水系毒系 Lv60 · 定位未登记 持有 · 可正式上场 在你的盒子里\"]",
+   "actual": "只有一行有形态名"
+  },
+  {
+   "id": "41-同名不同种看得出区别",
+   "judge": "当前数据里一对同名不同物种都找不到（搜不到任何行）必须报",
+   "ok": true,
+   "hit": "同名不同物种的两行没同时出现（只有 0 行）—— 判据不许变空",
+   "actual": "同名组 0 行"
   },
   {
    "id": "21-机制行上卡",
    "judge": "把机制行从卡上抹掉（渲染结果少一行）必须被同一条判据抓住",
    "ok": true,
-   "hit": "冻结机制原文没有渲染到卡上：「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」",
-   "actual": "expected=[\"特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。\"] rendered=[\"特性「专注力」：入场首回合，获得物攻+100%。\"]"
+   "hit": "冻结机制原文没有渲染到卡上：「特性「氧循环」：使用草系技能后，回复10%生命。」",
+   "actual": "expected=[\"特性「氧循环」：使用草系技能后，回复10%生命。\"] rendered=[\"特性「浸润」：使用水系技能后，全技能能耗-1。\"]"
   },
   {
    "id": "21-机制枚举不上面",
@@ -667,14 +701,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "82",
-    "fullMs": "22",
+    "firstMs": "120",
+    "fullMs": "27",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "18"
+    "elapsedMs": "23"
    },
    "dom": {
     "slotNodes": 6,
@@ -692,9 +726,9 @@
     "mechanismNodes": 3,
     "pendingNodes": 0,
     "mechanismLines": [
+     "特性「盲拧」：回合开始时，技能顺序打乱，4号位的技能能耗-4。",
      "特性「向心力」：1号和2号位技能获得传动1和威力+30。",
-     "特性「机械变式」：若回合内自己携带的技能位置发生变化，该技能能耗永久-1。",
-     "特性「虚假宝箱」：自己力竭时，敌方获得攻防+20%。"
+     "特性「机械变式」：若回合内自己携带的技能位置发生变化，该技能能耗永久-1。"
     ],
     "hasModeBadge": false,
     "hasCandidateBadge": false,
@@ -724,14 +758,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "30",
+    "firstMs": "39",
     "fullMs": "27",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "21"
+    "elapsedMs": "22"
    },
    "dom": {
     "slotNodes": 6,
@@ -749,11 +783,11 @@
     "mechanismNodes": 5,
     "pendingNodes": 0,
     "mechanismLines": [
-     "特性「御驾亲征」：棋契陛下大幅提升种族资质，力竭时扣除4魔力。",
-     "特性「嫉妒」：蓄力状态下，可以使用任一携带技能。",
-     "特性「身经百练」：己方精灵每应对1次，自己入场时水系和武系技能威力+20%。",
-     "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。",
-     "特性「专注力」：入场首回合，获得物攻+100%。"
+     "特性「虚假宝箱」：自己力竭时，敌方获得攻防+20%。",
+     "特性「风速仪」：携带的技能每累计传动8，自己获得1层风起印记。",
+     "特性「和弦共振」：双方场上每有1种不同的印记，自己获得魔攻+50%。",
+     "特性「氧循环」：使用草系技能后，回复10%生命。",
+     "特性「浸润」：使用水系技能后，全技能能耗-1。"
     ],
     "hasModeBadge": false,
     "hasCandidateBadge": false,
@@ -761,20 +795,20 @@
     "hasFullUniverse": false,
     "mentionsLegacySlots": false,
     "nextNames": [
-     "棋契陛下",
-     "伊兰亚龙",
-     "海豹船长"
+     "迷迷箱怪",
+     "量风碗",
+     "离心舞者"
     ],
     "shadowPresent": true
    },
    "addResults": [
     {
-     "name": "铠甲虫",
+     "name": "喵喵",
      "added": false,
      "probe": {
-      "rows": 3,
+      "rows": 4,
       "match": 1,
-      "species": "pet_000012"
+      "species": "pet_000001"
      },
      "beforeCount": 1,
      "after": 1,
@@ -788,12 +822,12 @@
      "topAfter": "ok"
     },
     {
-     "name": "音速犬",
+     "name": "水蓝蓝",
      "added": true,
      "probe": {
       "rows": 3,
       "match": 1,
-      "species": "pet_000062"
+      "species": "pet_000002"
      },
      "beforeCount": 1,
      "after": 2,
@@ -807,12 +841,12 @@
      "topAfter": "ok"
     },
     {
-     "name": "仪式巨像",
+     "name": "火花",
      "added": true,
      "probe": {
       "rows": 4,
       "match": 1,
-      "species": "pet_000100"
+      "species": "pet_000003"
      },
      "beforeCount": 2,
      "after": 3,
@@ -820,18 +854,18 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "SPAN",
-      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
      },
      "topAfter": "ok"
     },
     {
-     "name": "雪影娃娃",
+     "name": "迪莫",
      "added": true,
      "probe": {
-      "rows": 6,
+      "rows": 9,
       "match": 1,
-      "species": "pet_000112"
+      "species": "pet_000004"
      },
      "beforeCount": 3,
      "after": 4,
@@ -839,18 +873,18 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "SPAN",
-      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
      },
      "topAfter": "ok"
     },
     {
-     "name": "皇家狮鹫（崖间地的样子）",
+     "name": "水灵",
      "added": true,
      "probe": {
       "rows": 6,
       "match": 1,
-      "species": "pet_000118"
+      "species": "pet_000005"
      },
      "beforeCount": 4,
      "after": 5,
@@ -858,18 +892,18 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "SPAN",
-      "shadowPath": "SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
      },
      "topAfter": "ok"
     },
     {
-     "name": "化蝶（平常的样子）",
+     "name": "火神",
      "added": true,
      "probe": {
       "rows": 7,
       "match": 1,
-      "species": "pet_000124"
+      "species": "pet_000006"
      },
      "beforeCount": 5,
      "after": 6,
@@ -877,8 +911,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "SPAN",
-      "shadowPath": "SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
      },
      "topAfter": "ok"
     }
@@ -893,7 +927,7 @@
     "slots": "6",
     "filled": "5",
     "next": "3",
-    "nextLabels": "强度|偏好保留|候选参考",
+    "nextLabels": "强度|稳定|候选参考",
     "axes": "",
     "axesAvailable": "",
     "poolTotal": "1",
@@ -903,14 +937,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "25",
-    "fullMs": "17",
+    "firstMs": "33",
+    "fullMs": "23",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "11"
+    "elapsedMs": "16"
    },
    "dom": {
     "slotNodes": 6,
@@ -928,14 +962,14 @@
     "mechanismNodes": 8,
     "pendingNodes": 0,
     "mechanismLines": [
-     "特性「变形活画」：行动时，敌方每有1层增益，本次行动技能威力+10%，速度+5。",
-     "特性「御驾亲征」：棋契陛下大幅提升种族资质，力竭时扣除4魔力。",
-     "特性「身经百练」：己方精灵每应对1次，自己入场时水系和武系技能威力+20%。",
-     "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。",
-     "特性「专注力」：入场首回合，获得物攻+100%。",
-     "特性「观星」：敌方每有1层星陨印记，自己的地系技能威力+20%。",
-     "特性「捉迷藏」：使敌方获得冻结时，也会使其获得全技能能耗+1。",
-     "特性「乘风连击」：使用翼系技能后，获得连击数+1。"
+     "特性「和弦共振」：双方场上每有1种不同的印记，自己获得魔攻+50%。",
+     "特性「风速仪」：携带的技能每累计传动8，自己获得1层风起印记。",
+     "特性「侵蚀」：敌方每有1层中毒效果，自己获得连击数+1。",
+     "特性「氧循环」：使用草系技能后，回复10%生命。",
+     "特性「浸润」：使用水系技能后，全技能能耗-1。",
+     "特性「助燃」：使用火系技能后，获得双攻+20%。",
+     "特性「最好的伙伴」：造成克制伤害后，获得攻防速+20%，并回复2能量。",
+     "特性「浸润」：使用水系技能后，全技能能耗-1。"
     ],
     "hasModeBadge": false,
     "hasCandidateBadge": false,
@@ -943,20 +977,20 @@
     "hasFullUniverse": false,
     "mentionsLegacySlots": false,
     "nextNames": [
-     "画间沉铁兽",
-     "棋契陛下",
-     "海豹船长"
+     "离心舞者",
+     "测风蝉",
+     "厉毒小萝"
     ],
     "shadowPresent": true
    },
    "addResults": [
     {
-     "name": "铠甲虫",
+     "name": "喵喵",
      "added": false,
      "probe": {
-      "rows": 3,
+      "rows": 4,
       "match": 1,
-      "species": "pet_000012"
+      "species": "pet_000001"
      },
      "beforeCount": 1,
      "after": 1,
@@ -970,12 +1004,12 @@
      "topAfter": "ok"
     },
     {
-     "name": "音速犬",
+     "name": "水蓝蓝",
      "added": true,
      "probe": {
       "rows": 3,
       "match": 1,
-      "species": "pet_000062"
+      "species": "pet_000002"
      },
      "beforeCount": 1,
      "after": 2,
@@ -989,12 +1023,12 @@
      "topAfter": "ok"
     },
     {
-     "name": "仪式巨像",
+     "name": "火花",
      "added": true,
      "probe": {
       "rows": 4,
       "match": 1,
-      "species": "pet_000100"
+      "species": "pet_000003"
      },
      "beforeCount": 2,
      "after": 3,
@@ -1002,18 +1036,18 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "SPAN",
-      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
      },
      "topAfter": "ok"
     },
     {
-     "name": "雪影娃娃",
+     "name": "迪莫",
      "added": true,
      "probe": {
-      "rows": 6,
+      "rows": 9,
       "match": 1,
-      "species": "pet_000112"
+      "species": "pet_000004"
      },
      "beforeCount": 3,
      "after": 4,
@@ -1021,18 +1055,18 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "SPAN",
-      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
      },
      "topAfter": "ok"
     },
     {
-     "name": "皇家狮鹫（崖间地的样子）",
+     "name": "水灵",
      "added": true,
      "probe": {
       "rows": 6,
       "match": 1,
-      "species": "pet_000118"
+      "species": "pet_000005"
      },
      "beforeCount": 4,
      "after": 5,
@@ -1040,18 +1074,18 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "SPAN",
-      "shadowPath": "SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
      },
      "topAfter": "ok"
     },
     {
-     "name": "化蝶（平常的样子）",
+     "name": "火神",
      "added": true,
      "probe": {
       "rows": 7,
       "match": 1,
-      "species": "pet_000124"
+      "species": "pet_000006"
      },
      "beforeCount": 5,
      "after": 6,
@@ -1059,8 +1093,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "SPAN",
-      "shadowPath": "SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
      },
      "topAfter": "ok"
     }
@@ -1085,8 +1119,8 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "22",
-    "fullMs": "22",
+    "firstMs": "17",
+    "fullMs": "21",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
@@ -1110,12 +1144,12 @@
     "mechanismNodes": 6,
     "pendingNodes": 0,
     "mechanismLines": [
-     "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。",
-     "特性「专注力」：入场首回合，获得物攻+100%。",
-     "特性「观星」：敌方每有1层星陨印记，自己的地系技能威力+20%。",
-     "特性「捉迷藏」：使敌方获得冻结时，也会使其获得全技能能耗+1。",
-     "特性「乘风连击」：使用翼系技能后，获得连击数+1。",
-     "特性「化茧」：受到致命伤害时，获得1层萌化，并免疫此次伤害。"
+     "特性「氧循环」：使用草系技能后，回复10%生命。",
+     "特性「浸润」：使用水系技能后，全技能能耗-1。",
+     "特性「助燃」：使用火系技能后，获得双攻+20%。",
+     "特性「最好的伙伴」：造成克制伤害后，获得攻防速+20%，并回复2能量。",
+     "特性「浸润」：使用水系技能后，全技能能耗-1。",
+     "特性「助燃」：使用火系技能后，获得双攻+20%。"
     ],
     "hasModeBadge": false,
     "hasCandidateBadge": false,
@@ -1127,12 +1161,12 @@
    },
    "addResults": [
     {
-     "name": "铠甲虫",
+     "name": "喵喵",
      "added": false,
      "probe": {
-      "rows": 3,
+      "rows": 4,
       "match": 1,
-      "species": "pet_000012"
+      "species": "pet_000001"
      },
      "beforeCount": 1,
      "after": 1,
@@ -1146,12 +1180,12 @@
      "topAfter": "ok"
     },
     {
-     "name": "音速犬",
+     "name": "水蓝蓝",
      "added": true,
      "probe": {
       "rows": 3,
       "match": 1,
-      "species": "pet_000062"
+      "species": "pet_000002"
      },
      "beforeCount": 1,
      "after": 2,
@@ -1165,12 +1199,12 @@
      "topAfter": "ok"
     },
     {
-     "name": "仪式巨像",
+     "name": "火花",
      "added": true,
      "probe": {
       "rows": 4,
       "match": 1,
-      "species": "pet_000100"
+      "species": "pet_000003"
      },
      "beforeCount": 2,
      "after": 3,
@@ -1178,18 +1212,18 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "SPAN",
-      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
      },
      "topAfter": "ok"
     },
     {
-     "name": "雪影娃娃",
+     "name": "迪莫",
      "added": true,
      "probe": {
-      "rows": 6,
+      "rows": 9,
       "match": 1,
-      "species": "pet_000112"
+      "species": "pet_000004"
      },
      "beforeCount": 3,
      "after": 4,
@@ -1197,18 +1231,18 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "SPAN",
-      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
      },
      "topAfter": "ok"
     },
     {
-     "name": "皇家狮鹫（崖间地的样子）",
+     "name": "水灵",
      "added": true,
      "probe": {
       "rows": 6,
       "match": 1,
-      "species": "pet_000118"
+      "species": "pet_000005"
      },
      "beforeCount": 4,
      "after": 5,
@@ -1216,18 +1250,18 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "SPAN",
-      "shadowPath": "SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
      },
      "topAfter": "ok"
     },
     {
-     "name": "化蝶（平常的样子）",
+     "name": "火神",
      "added": true,
      "probe": {
       "rows": 7,
       "match": 1,
-      "species": "pet_000124"
+      "species": "pet_000006"
      },
      "beforeCount": 5,
      "after": 6,
@@ -1235,8 +1269,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "SPAN",
-      "shadowPath": "SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
      },
      "topAfter": "ok"
     }
@@ -1274,14 +1308,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "32",
-    "fullMs": "24",
+    "firstMs": "40",
+    "fullMs": "26",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "18"
+    "elapsedMs": "21"
    },
    "dom": {
     "slotNodes": 6,
@@ -1299,11 +1333,11 @@
     "mechanismNodes": 5,
     "pendingNodes": 0,
     "mechanismLines": [
-     "特性「御驾亲征」：棋契陛下大幅提升种族资质，力竭时扣除4魔力。",
-     "特性「嫉妒」：蓄力状态下，可以使用任一携带技能。",
-     "特性「身经百练」：己方精灵每应对1次，自己入场时水系和武系技能威力+20%。",
-     "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。",
-     "特性「专注力」：入场首回合，获得物攻+100%。"
+     "特性「虚假宝箱」：自己力竭时，敌方获得攻防+20%。",
+     "特性「风速仪」：携带的技能每累计传动8，自己获得1层风起印记。",
+     "特性「和弦共振」：双方场上每有1种不同的印记，自己获得魔攻+50%。",
+     "特性「氧循环」：使用草系技能后，回复10%生命。",
+     "特性「浸润」：使用水系技能后，全技能能耗-1。"
     ],
     "hasModeBadge": false,
     "hasCandidateBadge": false,
@@ -1311,9 +1345,9 @@
     "hasFullUniverse": false,
     "mentionsLegacySlots": false,
     "nextNames": [
-     "棋契陛下",
-     "伊兰亚龙",
-     "海豹船长"
+     "迷迷箱怪",
+     "量风碗",
+     "离心舞者"
     ],
     "shadowPresent": true
    },
@@ -1325,12 +1359,12 @@
    },
    "adds": [
     {
-     "name": "铠甲虫",
+     "name": "喵喵",
      "added": true,
      "probe": {
-      "rows": 1,
+      "rows": 2,
       "match": 1,
-      "species": "pet_000012"
+      "species": "pet_000001"
      },
      "beforeCount": 0,
      "after": 1,
@@ -1338,18 +1372,18 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     },
     {
-     "name": "音速犬",
+     "name": "水蓝蓝",
      "added": true,
      "probe": {
       "rows": 2,
       "match": 1,
-      "species": "pet_000062"
+      "species": "pet_000002"
      },
      "beforeCount": 1,
      "after": 2,

@@ -362,7 +362,7 @@ async function main() {
 
   // ── P0-1 翻页：真实鼠标点四页再回来 ──────────────────────────────────────
   const poolState = async () => js(`(()=>{const d=window.rocoDemo.state.pool;
-    return {page:d.page,pages:d.pages,total:d.total,offset:(d.page-1)*d.pageSize,
+    return {page:d.page,pages:d.pages,total:d.total,pageSize:d.pageSize,offset:(d.page-1)*d.pageSize,
       label:document.getElementById('pool-page').textContent,
       nextDisabled:document.getElementById('page-next').disabled,
       prevDisabled:document.getElementById('page-prev').disabled,
@@ -374,17 +374,37 @@ async function main() {
   const firstHooks = await pageHooks();
   const seen = [first.ids];
   const walk = [{page: 1, ...first, hooks: firstHooks}];
-  for (let page = 2; page <= 4; page += 1) {
+  // 2026-09-28（D1-label 改钉的配套）：四页改成「一路点到**真的最后一页**」。
+  // 为什么：改钉后要断言的「最后一页 next.disabled」只有真的站在最后一页上才算验过 ——
+  // 沿用旧的「只点 3 次」就永远停在半路，那条断言会变成读一个中间页的 disabled（假绿）。
+  // 页数从**服务端真实回执**算（不是写死 4，也不依赖页面上还没渲染出来的钩子）；
+  // ⚠ 必须带分页参数：`/api/roco/roster` 只在**带 offset/limit** 时才回 `total`
+  //   （无参回执只有 `count/usable_count`，实测 `total === undefined` ⇒ 页数会算成 NaN）。
+  // 上限 200 页是防呆：口径再变也不会把套件挂住（下一页 disabled 时会自然跳出）。
+  const rosterTotal = (await serverOf('/api/roco/roster?offset=0&limit=1')).total;
+  const expectedPages = Math.max(1, Math.ceil(Number(rosterTotal) / first.pageSize));
+  if (!Number.isFinite(expectedPages) || expectedPages < 1) {
+    throw new Error(`服务端名单页数算不出来（total=${JSON.stringify(rosterTotal)}）—— `
+      + '`/api/roco/roster?offset=0&limit=1` 必须回 total，否则翻页判据没有事实源');
+  }
+  // 每一跳都等「页码真的前进了」再量（比固定 sleep 快，也不会在服务端稍慢时扑空）。
+  for (let page = 2; page <= Math.min(expectedPages, 200); page += 1) {
     await mouseClick('#page-next');
-    await sleep(700);
+    const arrived = await waitFor(
+      `Number((window.rocoDemo.state.pool||{}).page||0) >= ${page}`, 40, 75);
+    await sleep(arrived ? 120 : 500);
     const now = await poolState();
     seen.push(now.ids);
     walk.push({page, ...now, hooks: await pageHooks()});
+    if (now.nextDisabled) break;   // 真的到底了（最后一页），后面的页不存在
   }
-  const fourPagesDistinct = new Set(seen.map((ids) => ids.join(','))).size === 4;
+  const fourPagesDistinct = new Set(seen.slice(0, 4).map((ids) => ids.join(','))).size === 4;
+  // 口径不变：这一条量的是**前四页**（各 12 只、四批互不重合）。walk 现在会走到最后一页，
+  // 所以这里显式只看前四页 —— 否则「每页 12 只」会被最后一页的零头（542=45×12+2）判红。
+  const firstFour = seen.slice(0, 4);
   check('D1-pages', '真实鼠标连点三次「下一页」：四页各 12 只、四批互不重合',
-    first.ids.length === 12 && seen.every((ids) => ids.length === 12) && fourPagesDistinct,
-    `四页各 ${seen.map((ids) => ids.length).join('/')} 只；互不重合=${fourPagesDistinct}`);
+    first.ids.length === 12 && firstFour.every((ids) => ids.length === 12) && fourPagesDistinct,
+    `四页各 ${firstFour.map((ids) => ids.length).join('/')} 只；互不重合=${fourPagesDistinct}`);
 
   // 与服务端逐页对齐：页面第 n 页的 pet_id 顺序 === `?offset=(n-1)*12&limit=12` 的结果
   const alignReport = [];
@@ -398,14 +418,86 @@ async function main() {
     alignReport.every((r) => r.match),
     alignReport.map((r) => `第${r.page}页 offset=${r.offset} ${r.match ? '一致' : '不一致'}`).join('；'));
 
-  check('D1-label', '页码文案与真实页码/页数一致，且第 4 页「下一页」disabled',
-    walk[3].label === '4 / 4' && walk[3].nextDisabled === true && walk[0].prevDisabled === true,
-    `第 4 页文案「${walk[3].label}」next.disabled=${walk[3].nextDisabled}；第 1 页 prev.disabled=${walk[0].prevDisabled}`);
-  check('D1-hooks', '验收钩子 data-roco-pool-offset 随翻页真的变（0 → 12 → 24 → 36）',
-    walk.map((r) => r.hooks.offset).join(',') === '0,12,24,36',
-    `翻四页的 offset 钩子：${walk.map((r) => r.hooks.offset).join(',')}`);
+  // ── 2026-09-28 改钉（D1-label）────────────────────────────────────────────
+  // 旧断言（原文，钉在 2026-09-27 的 48 只世界）：
+  //     walk[3].label === '4 / 4' && walk[3].nextDisabled === true && walk[0].prevDisabled === true
+  //     （判据名：「页码文案与真实页码/页数一致，且第 4 页「下一页」disabled」）
+  // 改钉依据：人类 2026-09-28 拍板「**所有精灵实装**，这样就不需要我的精灵了，直接全筛选」
+  //   → 可玩层 48 → 542 只（`data/roco/owned/owned-pets.json` 542 实例 / 542 物种），
+  //   `/api/roco/roster` 的 total 从 48 变成 542 ⇒ 每页 12 只 = **46 页**，不是 4 页。
+  //   实测（改钉前）：`第 4 页文案「4 / 46」next.disabled=false` —— 判据红，
+  //   而页面本身是对的（第 4 页本来就不是最后一页）。
+  // 旧断言错在哪：把「48 只 = 4 页」这个**当时的巧合**写进了判据 —— 「4 / 4」正是「页面
+  //   第 4 页 = 真实最后一页」在旧数据下的样子。它量的其实是「页码文案与真实页数一致 +
+  //   最后一页不能再往后翻」，那个意图一个字都没变，只是不能再把「最后一页」写死成第 4 页。
+  // 新断言 = 同一意图的两个可核验面：
+  //   ① 文案 `${page} / ${pages}` 与**服务端算出来的真实页数**逐字一致（expectedPages）；
+  //   ② **真的走到最后一页**（walk 末项）再断言 next.disabled === true、label === `${lastPage} / ${lastPage}`；
+  //   ③ 第 1 页 prev.disabled 照旧（这条与页数无关，原样保留）。
+  // 反证（同一条判据，见下）：把最后一页的 label 改成「最后一页不是它」必须被抓住。
+  const last = walk[walk.length - 1];
+  const expectedLastLabel = `${expectedPages} / ${expectedPages}`;
+  const labelProblems = (facts) => {
+    const bad = [];
+    if (!facts.walkedToEnd) {
+      bad.push(`没走到最后一页（真实 ${expectedPages} 页，只走到第 ${facts.reachedPage} 页）—— 判据不许在半路上量`);
+    }
+    if (facts.label !== expectedLastLabel) {
+      bad.push(`末页文案「${facts.label}」与服务端真实页数文案「${expectedLastLabel}」不一致`);
+    }
+    if (facts.nextDisabled !== true) bad.push('最后一页的「下一页」没有 disabled');
+    if (facts.firstPrevDisabled !== true) bad.push('第 1 页的「上一页」没有 disabled');
+    return bad;
+  };
+  const labelFacts = {
+    page: last.page, reachedPage: last.page, walkedToEnd: walk.length === expectedPages,
+    label: last.label, nextDisabled: last.nextDisabled, firstPrevDisabled: walk[0].prevDisabled,
+  };
+  check('D1-label', '页码文案与真实页数一致，且走到**真的最后一页**时「下一页」disabled'
+    + '（末页文案 === `${服务端真实页数} / ${服务端真实页数}`）',
+    labelProblems(labelFacts).length === 0,
+    labelProblems(labelFacts).join(' | ')
+    || `真实 ${expectedPages} 页（total=${rosterTotal}），走到第 ${last.page} 页；末页文案「${last.label}」`
+      + ` next.disabled=${last.nextDisabled}；第 1 页 prev.disabled=${walk[0].prevDisabled}`);
+  counter('D1-label', '把末页文案改成与服务端真实页数不符（比如又写回旧的「4 / 4」）必须被同一条判据抓住',
+    labelProblems({...labelFacts, label: `${last.page} / 4`, nextDisabled: false}),
+    `{"label":"${last.page} / 4","nextDisabled":false}`);
+  // 钩子口径（纯函数：判据与反证共用同一份，反证才真的能命中）。
+  const hooksProblems = (rows, pages) => {
+    const bad = [];
+    const firstFourOffsets = rows.slice(0, 4).map((r) => r.hooks.offset).join(',');
+    if (firstFourOffsets !== '0,12,24,36') bad.push(`前四页 offset 钩子不是 0,12,24,36（实际 ${firstFourOffsets}）`);
+    const end = rows[rows.length - 1];
+    if (end.hooks.page !== String(end.page)) bad.push(`末页 page 钩子「${end.hooks.page}」与实际第 ${end.page} 页不一致`);
+    if (end.hooks.offset !== String((pages - 1) * 12)) {
+      bad.push(`末页 offset 钩子「${end.hooks.offset}」≠ 最后一页应有的 ${(pages - 1) * 12}`);
+    }
+    if (end.hooks.pages !== String(pages)) bad.push(`末页 pages 钩子「${end.hooks.pages}」≠ 真实 ${pages} 页`);
+    return bad;
+  };
+  const hooksProbs = hooksProblems(walk, expectedPages);
+  check('D1-hooks', '验收钩子 data-roco-pool-offset 随翻页真的变（0 → 12 → 24 → 36）'
+    + '，且**末页**的 offset/page/pages 钩子 = 服务端真实页数算出来的那一页',
+    hooksProbs.length === 0,
+    hooksProbs.join(' | ')
+    || `前四页 offset 钩子 ${walk.slice(0, 4).map((r) => r.hooks.offset).join(',')}；`
+      + `末页钩子 offset=${last.hooks.offset} page=${last.hooks.page} pages=${last.hooks.pages}`
+      + `（服务端最后一页 offset=${(expectedPages - 1) * 12}，真实 ${expectedPages} 页）`);
+  counter('D1-hooks', '末页的 offset 钩子没跟着翻页走（退回第 1 页的 0）必须被同一条判据抓住',
+    hooksProblems([...walk.slice(0, -1), {...last, hooks: {...last.hooks, offset: '0'}}], expectedPages),
+    '末页 offset 钩子改成 0');
 
   // 回上一页：回到第 3 页，且卡片集合与来时逐张相同
+  // 2026-09-28（D1-label 改钉的配套）：walk 现在会走到最后一页（46 页），不能再从那里点「上一页」——
+  // 那量到的会是「45 页」（实测红：`回到第 45 页`），而这一条判据量的是「上一页回到 3」这件事本身。
+  // 口径一个字没改：**先站到第 4 页，再点「上一页」**，必须回到第 3 页、卡片逐张相同。
+  // 回到第 4 页要按真实页码点回去（不是直接改数据），所以这一步也是真鼠标走的。
+  while (true) {
+    const now = await poolState();
+    if (now.page <= 4) break;
+    await mouseClick('#page-prev');
+    await sleep(Math.min(700, 180));
+  }
   await mouseClick('#page-prev');
   await sleep(700);
   const back = await poolState();
@@ -1176,11 +1268,31 @@ async function main() {
   }
   await setViewport(1440, 900);
 
+  // ── 2026-09-28：按需推算的样例**从数据现挑**（不再写死 `幽星光`）────────────────
+  // 旧写法（原文，钉在 2026-09-27）：真键盘搜「幽星光」→ 断言卡上 support=SIMULATABLE_UNVERIFIED。
+  // 为什么必须改：人类 2026-09-28 拍板「**所有精灵实装**，这样就不需要我的精灵了，直接全筛选」
+  //   → 可玩层 48 → 542 只（`data/roco/owned/owned-pets.json` 542 实例 / 542 物种），
+  //   `pet_000296`（幽星光）**这一轮进了可玩层**，它的配招档因此从 `SIMULATABLE_UNVERIFIED`
+  //   变成 `FULL_VERIFIED`。实测（改钉前）：卡 `{"pet":"pet_000296","name":"幽星光",
+  //   "support":"FULL_VERIFIED"}`，问题「没标出配招来源档」——判据红，而卡**如实**标了它是已核验的。
+  // 判据的意图一个字没变：**按需推算的卡必须如实标「未核验」（不冒充已核验）**。
+  //   变的只是"哪一只是按需推算的"——那是数据事实，所以从**唯一事实源**现读：
+  //   `data/roco/derived/on-demand-builds.json` 的 `builds[*].support`（每条 build 的 support 字段），
+  //   `summary` 只是它的汇总（本文件不拿汇总当判据，只用它核对总数）。
+  const onDemandBuilds = JSON.parse(readFileSync(join(ROOT, 'data/roco/derived/on-demand-builds.json'), 'utf8'));
+  const onDemandAll = Object.values(onDemandBuilds.builds ?? {});
+  const onDemandSample = onDemandAll.find((b) => b.support === 'SIMULATABLE_UNVERIFIED') ?? null;
+  if (!onDemandSample) {
+    // fail closed：这一档在数据里一只都没有，判据就**不该**能绿 —— 如实把理由写进 actual。
+    log('⚠ on-demand-builds.json 里没有任何 SIMULATABLE_UNVERIFIED 的条目，'
+      + 'RC502-按需推算的卡如实标记 会红（判据不许空转）');
+  }
+
   const scopeState = async () => js(`(()=>{const d=document.body.dataset;
     const rows=window.rocoDemo.state.pool.rows||[];
     return {scope:d.rocoPoolScope,total:Number(d.rocoPoolTotal||'0'),pages:Number(d.rocoPoolPages||'0'),
       checked:document.getElementById('pool-support-all').checked,
-      hasLeader:rows.some((p)=>p.name==='幽星光'),
+      hasLeader:rows.some((p)=>p.name===${JSON.stringify(onDemandSample?.name ?? null)}),
       supports:[...new Set(rows.map((p)=>p.build_support||''))].sort()};})()`);
   const frozenScope = await scopeState();
   check('RC502-默认视野冻结', '默认（开关没勾）：候选宇宙仍是冻结已核验的那一批，没有按需推算的精灵',
@@ -1196,29 +1308,39 @@ async function main() {
     allScope.scope === 'all' && allScope.checked === true && allScope.total > 600,
     `scope=${allScope.scope} total=${allScope.total} pages=${allScope.pages}（默认时 ${frozenScope.total} 只）`);
 
-  // 真键盘搜「幽星光」：它**不在**冻结 48 只里（配招是按需推算的），只有全量视野才找得到。
+  // 真键盘搜样例名：它**不在**冻结可玩层里（配招是按需推算的），只有全量视野才找得到；
+  // 「它是谁」由 on-demand-builds.json 现读（见上），不是写死的名字。
   // 等那张卡真的出现再量（搜索是异步的，睡固定时间会偶发扑空）。
-  await typeText('#pool-search', '幽星光');
-  await waitFor(`[...document.querySelectorAll('#roster .nm')].some((el)=>el.textContent.trim()==='幽星光')`, 60, 150);
+  await typeText('#pool-search', onDemandSample?.name ?? '');
+  await waitFor(`[...document.querySelectorAll('#roster .nm')]
+    .some((el)=>el.textContent.trim()===${JSON.stringify(onDemandSample?.name ?? null)})`, 60, 150);
   const leaderCard = await js(`(()=>{const b=document.querySelector('#roster button[data-pet]');
     if(!b)return null;const r=b.getBoundingClientRect();
     return {pet:b.dataset.pet,name:(b.querySelector('.nm')||{}).textContent||'',
       support:b.dataset.buildSupport,
       unverified:(b.querySelector('.card-unverified')||{}).textContent||'',
       w:Math.round(r.width),h:Math.round(r.height)};})()`);
-  const cardUnverifiedProblems = (c) => {
+  // 口径与旧断言一致：名字对得上 + 卡上标着「按需推算」这一档 + 写着「未核验」。
+  // `expectedName` 由数据现读 —— 判据不许拿"当下哪一只是按需推算"当常量。
+  const cardUnverifiedProblems = (c, expectedName = onDemandSample?.name ?? null) => {
     const bad = [];
+    if (expectedName === null) bad.push('数据里没有任何 SIMULATABLE_UNVERIFIED 的条目（on-demand-builds.json），判据无处可验 ⇒ 红');
     if (c === null) bad.push('找不到这张卡');
     else {
-      if (c.name !== '幽星光') bad.push(`卡上的名字不是幽星光（${c.name}）`);
+      if (c.name !== expectedName) bad.push(`卡上的名字不是 ${expectedName}（${c.name}）`);
       if (c.support !== 'SIMULATABLE_UNVERIFIED') bad.push(`没标出配招来源档（${c.support}）`);
       if (!/未核验/.test(c.unverified)) bad.push('卡上没写「未核验」');
     }
     return bad;
   };
-  check('RC502-按需推算的卡如实标记', '全量视野里这只按需推算的精灵，卡上写着「按需推算的配招 · 未核验」（不冒充已核验）',
+  check('RC502-按需推算的卡如实标记',
+    `全量视野里「${onDemandSample?.name ?? '(数据里没有这一档，见 actual)'}」这只按需推算的精灵，`
+    + '卡上写着「按需推算的配招 · 未核验」（不冒充已核验）'
+    + '【样例从 `data/roco/derived/on-demand-builds.json` 的 `builds[*].support` 现读：'
+    + '旧样例「幽星光」本轮进了可玩层 ⇒ 已核验，不能再当"按需推算"的例子】',
     cardUnverifiedProblems(leaderCard).length === 0,
-    `卡 ${JSON.stringify(leaderCard)}；问题 ${cardUnverifiedProblems(leaderCard).join(' | ') || '无'}`);
+    `卡 ${JSON.stringify(leaderCard)}；问题 ${cardUnverifiedProblems(leaderCard).join(' | ') || '无'}；`
+    + `样例来自 on-demand-builds.json（support=${onDemandSample?.support ?? '—'}，共 ${onDemandAll.length} 条）`);
   counter('RC502-按需推算的卡如实标记', '把「未核验」标记去掉（卡上不写配招来源）必须被同一条判据抓住',
     cardUnverifiedProblems({...leaderCard, unverified: ''}), '{"unverified":""}');
 
@@ -1262,8 +1384,126 @@ async function main() {
     return waitFor(`[...document.querySelectorAll('#roster .nm')]
       .some((el)=>el.textContent.trim()===${JSON.stringify(name)})`, 60, 150);
   };
+  // ── 2026-09-28 改钉（RC502-印记）：让「我方首发」真的**给得出**印记 ─────────────────
+  // 改钉前的读法：从**全量视野第一页**按顺序点满双方各 3 只（默认名单前三位给对手，
+  //   阵容池补位接着往下点），印记那一手由**首发那只**出。旧世界（48 只层）里首位恰好
+  //   在 `view.legal` 里有一手「说明含『星陨印记』」的动作，所以判据是绿的。
+  // 本轮为什么红（**两个原因，必须分清**）：
+  //   ① 人类 2026-09-28 拍板「所有精灵实装」→ 候选宇宙 622 只全进池（可玩层 542），
+  //      全量视野第一页变成 pet_000001 起 ⇒ 首发那只的合法动作里压根没有带印记的技能。
+  //      实测：`目标 {"found":false,"skillId":null,"clickable":false}` —— 这是"探针没指向"。
+  //   ② 老探针的判据本身也太松：它按「说明里含『星陨印记』」找那一手 —— 而"含这四个字"
+  //      **不等于"给得出印记"**：`多维击打`（"敌方每有1层星陨印记，本次技能连击数+1"）、
+  //      `观星`（"敌方每有1层星陨印记，自己的地系技能威力+20%"）都含这四个字，但**一层都不给**。
+  //      实测（run4）：选中的「水灵」就是这样一只 —— 它的 `多维击打` 命中老条件，
+  //      引擎却不发印记 ⇒ 判据红在"引擎这一手没给印记"，而那**不是**印记没画。
+  //      ⇒ 老判据能绿，是**旧世界首发那只恰好真的给印记**导致的巧合，不是它验对了两件事。
+  // 新口径（判据意图一个字不变：真鼠标打出一手**给得出印记**的技能 → 对手卡上逐条画出印记）：
+  //   ① 「给得出印记」按**引擎自己的解析规则**认，不按关键词：
+  //      `roco/src/roco_env/parse.py` 的 `_FOE_MARK = /敌方获得\s*(\d+)\s*层\s*([\u4e00-\u9fa5]+?印记)/`
+  //      —— 说明里必须**逐字写着"敌方获得 N 层 X印记"**，那一手才真的给印记（N 层、X 印记）。
+  //   ② 印记手从**服务端全量回执**里现挑（每只带 `moveset[].desc`，不写死 pet_id）：
+  //      取候选顺序里第一只满足「配招里真有这样一手」且**当前不是对手的**精灵。
+  //      ⚠ 只认服务端那一次回执，**不认** `data/roco/derived/on-demand-builds.json`：
+  //        实测（run5）两者对「月牙雪熊 pet_000358」的配招**不一致** ——
+  //        产物文件说它带 `星链`（说明写"敌方获得2层星陨印记"），服务端回执给的却是
+  //        `冰雹/双星/丢冰块/暴风雪`（一层印记都不给）⇒ 拿产物文件去挑，挑出来的是假阳性，
+  //        判据会红在"引擎这一手没给印记"——那**不是**印记没画。对局用的是服务端那一份。
+  //   ③ **能被引擎真的打出来**这一层由对局自己给答案：说明能解析的技能才出现在
+  //      `view.legal` 里（`_apply_status_effects` fail-closed：`parsed.unparsed` 非空 ⇒
+  //      整手不生效、也不列成合法动作）。所以这里不预先猜"哪一手引擎支持"，
+  //      只认「说明里真的写着给印记」+ **对局里真的打出来了**（打不出来就判红，见下）。
+  //   ④ 页面**一页 12 只、搜索只在第 1 页里过滤**（`poolQueryOf()`：`limit=pool.pageSize`）——
+  //      目标不在第 1 页时必须**真鼠标翻页**过去再按 pet_id 点它（翻页按钮与 D1 那段同一个）。
+  //   ⑤ 点满三只之后在「开局前站位调整」那一段把它换到第 0 位（引擎开局固定 `side.active = 0`）。
+  //   ⑥ 找不到/点不动就如实写进 actual 并让下面那条判据自己红（不静默换一个别的场景）。
+  const markGrantPattern = /敌方获得\s*(\d+)\s*层\s*([\u4e00-\u9fa5]+?印记)/;
+  const markAll = await serverOf('/api/roco/roster?offset=0&limit=700&support=all');
+  const markGrantOf = (pet) => (pet.moveset ?? []).map((m) => {
+    const grant = markGrantPattern.exec(String(m.desc ?? ''));
+    return grant ? {skillId: m.skill_id ?? null, skillName: m.name ?? null,
+      mark: grant[2], layers: Number(grant[1]),
+      energy: Number.isFinite(Number(m.energy)) ? Number(m.energy) : null} : null;
+  }).filter(Boolean);
+  const markCapable = (markAll.pets ?? []).map((p) => ({pet: p, grants: markGrantOf(p)}))
+    .filter((row) => row.grants.length);
+  // 对手已经被页面分掉了哪三只（`loadRoster()` 把名单前三位给对手）：卡是 blocked 就点不动，
+  // 所以选印记手时要避开它们 —— 从页面状态现读，不猜。
+  const markEnemyIds = await js(`(()=>window.rocoDemo.state.pick.enemy.slice())()`);
+  const markEnemyNames = new Set((markEnemyIds ?? []).map((id) => markAll.pets
+    .find((p) => p.pet_id === id)?.name).filter(Boolean));
+  // 挑一只**最可能真的打得出印记**的：① 那一手越便宜越好（开局能量买得起才进 legal）；
+  // ② 候选顺序在前（页面翻页少点几下）。两条都是"局面事实"，不是判据口径。
+  const markHeroRow = [...markCapable]
+    .filter((row) => !markEnemyNames.has(row.pet.name))
+    .sort((a, b) => (Math.min(...a.grants.map((g) => g.energy ?? 99))
+        - Math.min(...b.grants.map((g) => g.energy ?? 99)))
+      || (Number(a.pet.pet_id.slice(4)) - Number(b.pet.pet_id.slice(4))))[0] ?? null;
+  const markHero = markHeroRow?.pet ?? null;
+  // 挑那一手里最便宜的一手（同上：贵的那手开局买不起，会一直不在 legal 里）。
+  const markHeroGrant = markHeroRow
+    ? [...markHeroRow.grants].sort((a, b) => (a.energy ?? 99) - (b.energy ?? 99))[0] : null;
+  let markHeroPick = null;
+  let markHeroNote = markHero
+    ? `服务端回执里说明写着给印记的共 ${markCapable.length} 只，选中「${markHero.name}」`
+      + `（${markHero.pet_id}，${markHero.build_support}，那一手「${markHeroGrant.skillName}」`
+      + ` ⭐${markHeroGrant.energy} → ${markHeroGrant.layers} 层${markHeroGrant.mark}）`
+    : `服务端回执里说明写着给印记的一只都没有（候选 ${markAll.pets?.length ?? 0} 只里 0 只）`;
+  if (markHero) {
+    const petIds = (markAll.pets ?? []).map((p) => p.pet_id);
+    const heroIndex = petIds.indexOf(markHero.pet_id);
+    const heroPage = Math.floor(heroIndex / 12) + 1;   // 页面每页 12 只（pool.pageSize）
+    const foundInOnePage = async () => js(`(()=>{const b=[...document.querySelectorAll('#roster button[data-pet]')]
+      .find((x)=>x.dataset.pet===${JSON.stringify(markHero.pet_id)});
+      if(!b)return null;
+      return {pet:b.dataset.pet,name:((b.querySelector('.nm')||{}).textContent||'').trim(),
+        blocked:b.classList.contains('blocked'),chosen:b.classList.contains('chosen')};})()`);
+    const tryPickCard = async (card) => {
+      if (card && card.name === markHero.name && !card.blocked) {
+        await mouseClick(`#roster button[data-pet="${markHero.pet_id}"]`);
+        await sleep(250);
+        markHeroPick = markHero.pet_id;
+        return true;
+      }
+      return false;
+    };
+    await clearSearch();
+    // ① 先试搜索（全量视野下搜索走服务端 `limit=700`，任意一页的精灵都该搜得到）
+    const heroShown = await searchFor(markHero.name);
+    const searchedCard = heroShown ? await foundInOnePage() : null;
+    markHeroNote += `；搜索「${markHero.name}」${heroShown ? '命中' : '没命中'}`
+      + `${searchedCard ? `（卡 ${JSON.stringify(searchedCard)}）` : ''}`;
+    if (!(await tryPickCard(searchedCard))) {
+      // ② 搜索没拿到 —— 真鼠标翻到它所在那一页，再按 pet_id 精确点
+      await clearSearch();
+      const marks = [];
+      for (let guard = 0; guard < 80; guard += 1) {
+        const now = await poolState();
+        marks.push(now.page);
+        if (now.page >= heroPage || now.nextDisabled) break;
+        await mouseClick('#page-next');
+        await waitFor(`Number((window.rocoDemo.state.pool||{}).page||0) > ${now.page}`, 40, 75);
+        await sleep(120);
+      }
+      const onPage = await poolState();
+      const pagedCard = await foundInOnePage();
+      markHeroNote += `；翻页兜底落到第 ${onPage.page} 页（翻页轨迹 ${marks.join('→')}）`
+        + `卡 ${JSON.stringify(pagedCard)}`;
+      if (await tryPickCard(pagedCard)) markHeroNote += '；已点进我方（翻页路径）';
+    } else {
+      markHeroNote += '；已点进我方（搜索路径）';
+    }
+    if (!markHeroPick) markHeroNote += '；点不动/找不到它（下面的印记判据会如实红）';
+    await clearSearch();
+  }
+  if (!(markHeroPick && markHeroPick === markHero?.pet_id)) {
+    log(`⚠ 印记场景没搭起来：${markHeroNote}`);
+  }
+
   // 我方第二位选一只**带「应对攻击」防御**的（术语 1016 的冷却只在那种防御上生效）。
-  // 为什么是一张候选名单而不是写死一只：默认对手是名单前三位（实测铠甲虫/音速犬/仪式巨像），
+  // 2026-09-28：印记手在上面那段已经点进我方（这里接着点第 2/3 位），再点满对手三只 ——
+  // 顺序与旧写法一致（旧写法是"按顺序点满双方各 3 只"，只是首发不再靠顺序碰运气）。
+  // 为什么是一张候选名单而不是写死一只：默认对手是名单前三位（实测喵喵/水蓝蓝/火花），
   // 写死的那只很可能已经被分给对手 → 卡是 blocked，点不动。这里一只只试，跳过被占的。
   const DEFENDER_CANDIDATES = ['雪影娃娃', '皇家狮鹫', '化蝶', '朔夜伊芙', '多多', '花魁蜂后', '雪蛮人', '雪巨人'];
   let defenderCard = null;
@@ -1293,16 +1533,39 @@ async function main() {
   }
   const filled = await js(`(()=>{const d=window.rocoDemo;
     return {player:d.state.pick.player.length,enemy:d.state.pick.enemy.length,side:d.state.pick.side};})()`);
+  // 2026-09-28（RC502-印记改钉的收尾）：把印记手放到我方**第 0 位**。
+  // 为什么必须显式做：引擎开局固定 `side.active = 0`（`roco/src/roco_env/env.py:254`），
+  // 而"首发那一手"是**我方第 0 位**出的 —— 印记场景要验的是"打出一手带印记的技能"，
+  // 首发不是印记手的话，`view.legal` 里压根没有那一手（实测目标 found=false），
+  // 那验的就变成"这一手不存在"，不是"印记没画"。
+  // 但排序不能在点完首发之前做：`RC502-全量视野的精灵能真的选上` 钉的是
+  // 「刚点的那张卡进我方**第 0 位**」，所以顺序是「按顺序点满 → 开局前调整站位」。
+  // 与 roco.js 自己的口径一致：`togglePick()` 是"加入/移出"、后点的不插队（`list.push`），
+  // 站位本来就是这一层的数据（页面没有换位按钮）——所以这里直接改数据层，
+  // 并且把改了什么写进下面的 actual（改不动就如实说，不假装）。
+  const reorder = await js(`(()=>{const d=window.rocoDemo;const list=d.state.pick.player;
+    const want=${JSON.stringify(markHeroPick)};
+    const at=list.indexOf(want);
+    if(at<=0)return JSON.stringify({moved:false,list:list.slice(),reason:at<0?'印记手不在我方':'本来就在第 0 位'});
+    list.splice(at,1);list.unshift(want);
+    return JSON.stringify({moved:true,list:list.slice()});})()`).then(JSON.parse);
+  markHeroNote += `；开局前站位调整 ${JSON.stringify(reorder)}`;
   const ready = await js(`(()=>{const d=window.rocoDemo;
     const b=document.getElementById('start-battle');
     const nameOf=(id)=>{const row=(d.state.roster||[]).concat(d.state.pool.rows||[])
       .find((p)=>p.pet_id===id);return row?row.name:id;};
     return {player:d.state.pick.player.length,enemy:d.state.pick.enemy.length,startDisabled:b.disabled,
+      playerIds:d.state.pick.player.slice(),
       names:d.state.pick.player.map(nameOf),foes:d.state.pick.enemy.map(nameOf)};})()`);
-  check('RC502-全量视野组队开局', '全量视野下真鼠标点满双方各 3 只并开局（这条能力本身能点通）',
-    filled.player === 3 && ready.enemy === 3 && ready.startDisabled === false && defenderCard !== null,
-    `我方 ${filled.player}（${JSON.stringify(ready.names)}）／对手 ${ready.enemy}（${JSON.stringify(ready.foes)}）；`
-    + `防御手=${defenderName ?? '(没选到)'}；开局按钮 disabled=${ready.startDisabled}；`
+  check('RC502-全量视野组队开局', '全量视野下真鼠标点满双方各 3 只，印记手站上第 0 位（首发）后开局（这条能力本身能点通）',
+    filled.player === 3 && ready.enemy === 3 && ready.startDisabled === false && defenderCard !== null
+    // 首发是印记手：按 **pet_id** 比（`ready.names` 只是 page 名册能查到的名字，
+    // 印记手不在当前页时会是 id —— 名字对不上不代表站位不对；id 由我们自己摆的，最确定）。
+    && (markHeroPick === null || ready.playerIds[0] === markHeroPick),
+    `我方 ${filled.player}（${JSON.stringify(ready.playerIds)} = ${JSON.stringify(ready.names)}）／`
+    + `对手 ${ready.enemy}（${JSON.stringify(ready.foes)}）；`
+    + `防御手=${defenderName ?? '(没选到)'}；印记手=${markHeroPick ? `${markHero.name}(${markHeroPick})` : '(没选到)'}`
+    + ` 站位调整 ${JSON.stringify(reorder)}；开局按钮 disabled=${ready.startDisabled}；`
     + `试过的防御手 ${JSON.stringify(defenderTried)}`);
 
   await mouseClick('#start-battle');
@@ -1364,46 +1627,75 @@ async function main() {
     `对手卡增益区 ${JSON.stringify(battleStart.foeBuffArea)}；`
     + `对手增益/状态在公开视图里 ${battleStart.foeBuffArea && battleStart.foeBuffArea.ghost > 0 ? '没有 → 只留 ghost 占位' : '被写出来了'}`);
 
-  // 真鼠标点「错乱」（描述里带 星陨印记 的那一招）→ 对面获得 3 层印记。
+  // 真鼠标打出一手**给得出印记**的技能（那一手由引擎自己的规则认）→ 对面获得印记。
   //
   // 2026-09-23（v3h）：找那一招的办法从「扫旧行动坞按钮的 `.act-desc`」改成
   // 「在**引擎自己的动作表**里找 `skill_id`，再去 v3h 技能格上按同一个 `skill_id` 点它」——
   // v3h 技能格上不再有说明层（人类规格把说明移出战斗主视线），但找法与点法仍在公开数据上。
-  const markTarget = await js(`(()=>{const d=window.rocoDemo;const v=d.state.view;
-    // 那一招的说明**引擎就写在动作里**（legal[].skill.desc）—— 与旧行动坞 actionCardHtml
-    // 渲染 .act-desc 用的是同一个字段；名单里的 moveset 只作为兜底（全量视野选进来的那只
-    // 可能已经不在当前页的 pool.rows 里）。
-    const roster=(d.state.roster||[]).concat((d.state.pool&&d.state.pool.rows)||[]);
-    const rosterDesc=(id)=>{for(const row of roster){for(const m of (row.moveset||[])){
-      if(m.skill_id===id)return String(m.desc||'');}}return '';};
+  //
+  // 2026-09-28 改钉（与上面"印记手"那一段配套）：两条口径都收紧了 ——
+  //   ① 「那一手」不再按关键词「星陨印记」找，而是按**引擎的解析规则**：
+  //      说明里逐字有「敌方获得 N 层 X印记」才算给印记（`parse.py` 的 `_FOE_MARK`）；
+  //   ② 合法动作里**这一回合没有那一手**时不许直接判红 —— 贵的技能（星链 3 星 / 错乱 2 星）
+  //      开局那点能量买不起，那一手根本不会出现在 `view.legal` 里（实测：首回合 legal 只有
+  //      「防御 / 冰锥」）。判据量的是「打出一手带印记的技能 → 印记画在对手卡上」，
+  //      所以先**像玩家一样攒星/过手**（不够就点合法动作推进回合，最多 8 手），
+  //      真的打出来之后再量卡上的印记；一次都没拿到才判红（并且把每一手看到的名字写进 actual）。
+  const findMarkTarget = () => js(`(()=>{const d=window.rocoDemo;const v=d.state.view;
     const legal=(v&&v.legal)||[];
-    const descOf=(a)=>{const sid=a.skill_id!==undefined&&a.skill_id!==null?a.skill_id:(a.skill&&a.skill.skill_id);
-      return String((a.skill&&a.skill.desc)||rosterDesc(sid)||'');};
-    const act=legal.find((a)=>a.kind==='skill'&&descOf(a).includes('星陨印记'));
-    if(!act)return JSON.stringify({found:false,skillId:null,clickable:false});
-    const sid=act.skill_id!==undefined&&act.skill_id!==null?act.skill_id:(act.skill&&act.skill.skill_id);
-    const idx=legal.indexOf(act);
     // 两种动作信号都认（页面自己的两套写法）：
     //   ① 按身份 data-b3-skill-id（名单行找得到时写的就是它）；
     //   ② 按 view.legal 下标 data-b3-action（按需推算的精灵走「回落到引擎合法技能」那条路时，
     //      格子上只有下标 —— 点击处理器本身也是「先按身份、退不到再按下标」解析的）。
     const slots=[...document.querySelectorAll('.b3-wrap [data-b3-skill-slot]')];
-    const slot=slots.find((s)=>s.dataset.b3ActionKind==='skill'
-      &&((sid!==undefined&&sid!==null&&s.dataset.b3SkillId===String(sid))
-        ||s.dataset.b3Action===String(idx)));
-    if(!slot)return JSON.stringify({found:true,skillId:sid,index:idx,clickable:false,
-      slots:slots.map((s)=>s.dataset.b3SkillId??('#'+s.dataset.b3Action))});
-    slot.dataset.rc502='mark';
-    return JSON.stringify({found:true,skillId:sid,index:idx,clickable:true});})()`).then(JSON.parse);
-  let markDrivenBy = 'v3h 技能格（真鼠标）';
+    const tries=[];
+    for(const a of legal){
+      if(a.kind!=='skill')continue;
+      const desc=String((a.skill&&a.skill.desc)||'');
+      const g=/敌方获得\\s*(\\d+)\\s*层\\s*([\\u4e00-\\u9fa5]+?印记)/.exec(desc);
+      if(!g)continue;
+      const sid=a.skill_id!==undefined&&a.skill_id!==null?a.skill_id:(a.skill&&a.skill.skill_id);
+      const idx=legal.indexOf(a);
+      const slot=slots.find((s)=>s.dataset.b3ActionKind==='skill'
+        &&((sid!==undefined&&sid!==null&&s.dataset.b3SkillId===String(sid))
+          ||s.dataset.b3Action===String(idx)));
+      if(!slot){tries.push({sid:sid,index:idx,clickable:false});continue;}
+      slot.dataset.rc502='mark';
+      return JSON.stringify({found:true,skillId:sid,index:idx,clickable:true,
+        mark:g[2],layers:Number(g[1]),desc:desc.slice(0,60),
+        legalNames:legal.map((x)=>(x.skill&&x.skill.name)||x.kind),turns:0,trace:[]});
+    }
+    return JSON.stringify({found:false,skillId:null,clickable:false,legalNames:legal.map((x)=>(x.skill&&x.skill.name)||x.kind),
+      unclickable:tries});})()`).then(JSON.parse);
+  let markTarget = await findMarkTarget();
+  let markDrivenBy = markTarget.clickable ? 'v3h 技能格（真鼠标）' : '（还没打出来）';
+  const markTrace = [];
+  for (let hand = 0; hand < 8 && !markTarget.clickable; hand += 1) {
+    if (markTarget.found && !markTarget.clickable) break;   // 引擎给了这一手、格子上点不到 → 判红不解
+    markTrace.push({hand, legal: markTarget.legalNames});
+    // 这一回合买不起那一手：**点一个合法动作把回合推进**（等价于玩家先出一手别的）。
+    const auto = await js(`(()=>{const d=window.rocoDemo;
+      if(typeof d.autoTurn!=='function')return 'no-autoTurn';
+      try{const r=d.autoTurn();return r&&typeof r.then==='function'?'started':'started';}
+      catch(error){return 'error:'+String(error&&error.message||error);}})()`);
+    if (auto !== 'started') { markTrace.push({hand, auto}); break; }
+    await waitFor(`(()=>{const v=window.rocoDemo.state.view;
+      return Boolean(v&&v.turn>${Number(markTarget.turns ?? 0) + 1});})()`, 40, 250).catch(() => false);
+    await sleep(400);
+    markTarget = await findMarkTarget();
+    if (markTarget.found && markTarget.clickable) {
+      markTarget.trace = markTrace;
+      markDrivenBy = `v3h 技能格（真鼠标，第 ${hand + 1} 手才凑够能量/时机）`;
+    }
+  }
   if (markTarget.clickable) {
     await mouseClick('.b3-wrap [data-b3-skill-slot][data-rc502="mark"]');
   } else {
-    // 格子不可点（见下面的 problems：这是缺陷，**判红不解**）。为了把「对手卡上到底画没画印记」
+    // 这一手没打出来（见下面的 problems：这是缺陷，**判红不解**）。为了把「对手卡上到底画没画印记」
     // 这件事也取到证据，这里再用**页面自己的** playAction 走同一条动作路径兜一次，
     // 并把兜底这件事写清楚 —— 它不会让这一条变绿。
-    markDrivenBy = 'playAction 兜底（v3h 技能格不可点 → 这一条仍然判红）';
-    await js(`(()=>{const d=window.rocoDemo;const act=(d.state.view.legal||[])[${markTarget.index}];
+    markDrivenBy = 'playAction 兜底（技能格点不到 → 这一条仍然判红）';
+    await js(`(()=>{const d=window.rocoDemo;const act=(d.state.view.legal||[])[${markTarget.index ?? 0}];
       if(act)d.playAction(act);return true;})()`);
   }
   if (markTarget.found) {
@@ -1426,6 +1718,12 @@ async function main() {
   const engineMarks = markFacts.engine ? Object.entries(markFacts.engine) : [];
   // 口径未放松：引擎给了印记 → 对手卡上必须**逐条**把 名字 + 层数 画出来（名字与层数逐字一致）。
   // 找到的「印记芯片」按 `data-b3-buff-kind="mark"` 认（v3h 设计稿给三类占位：status / buff / mark）。
+  //
+  // 2026-09-28 改钉：除了「引擎给的每一条都要画出来」，再加一条**来源**向的核查 ——
+  //   打出去的那一手在说明里声明的印记（名字 + 层数）必须真的出现在对手卡上。
+  //   层数用「≥ 声明值」而不是「===」：像「星链」（2 连击，每次使敌方获得 1 层星陨印记）
+  //   这种多段技能，引擎累加出来的层数**大于**说明里那一句的 N 是正常结算，不是错。
+  //   反过来说：引擎给了印记而这个声明没落地，或者多画了一条引擎没给的印记 —— 都判红。
   const markProblems = ({engine, buffArea, target}) => {
     const entries = engine ? Object.entries(engine) : [];
     const bad = [];
@@ -1444,6 +1742,17 @@ async function main() {
       if (!markText.includes(name)) bad.push(`印记芯片里没有「${name}」`);
       if (!markText.includes(String(layers))) bad.push(`印记芯片里没有层数 ${layers}`);
     }
+    if (target && target.found === true && target.mark) {
+      if (!markText.includes(target.mark)) {
+        bad.push(`这一手说明里声明的「${target.mark}」没画在对手卡上（芯片原文：${markText || '（空）'}）`);
+      }
+      const declared = Number(target.layers);
+      const shown = Number(new RegExp(`${target.mark}\\s*[×x]?\\s*(\\d+)`).exec(markText)?.[1]
+        ?? new RegExp(`(\\d+)\\s*层?\\s*${target.mark}`).exec(markText)?.[1] ?? NaN);
+      if (Number.isFinite(declared) && (!Number.isFinite(shown) || shown < declared)) {
+        bad.push(`这一手声明的层数 ${declared} 没画出来（芯片里读到 ${Number.isFinite(shown) ? shown : '无'} 层）`);
+      }
+    }
     return bad;
   };
   check('RC502-印记逐条画在对手卡上', '真鼠标打出一手带印记的技能：对面卡上出现印记，名字与层数与引擎逐字一致。'
@@ -1451,9 +1760,13 @@ async function main() {
     + '`[data-b3-foe-card] [data-b3-foe-buffs]` 里 `data-b3-buff-kind="mark"` 的那一格承担】',
     markProblems(markFacts).length === 0,
     `引擎 ${JSON.stringify(markFacts.engine)}；这一手由「${markFacts.drivenBy}」驱动；目标 ${JSON.stringify(markFacts.target)}；`
-    + `对手卡事实区 ${JSON.stringify(markFacts.buffArea)}；问题 ${markProblems(markFacts).join(' | ') || '无'}`);
+    + `对手卡事实区 ${JSON.stringify(markFacts.buffArea)}；印记手场景：${markHeroNote}；`
+    + `逐手记账 ${JSON.stringify(markTrace)}；`
+    + `问题 ${markProblems(markFacts).join(' | ') || '无'}`);
   counter('RC502-印记逐条画在对手卡上', '把印记那一格删掉（页面少画一格）必须被同一条判据抓住',
-    markProblems({...markFacts, buffArea: {...markFacts.buffArea, nonGhost: []}}), 'nonGhost=[]');
+    markProblems({...markFacts,
+      buffArea: markFacts.buffArea ? {...markFacts.buffArea, nonGhost: []} : markFacts.buffArea}),
+    'nonGhost=[]');
 
   // 真鼠标点「防御」→ 自己卡上出现防御冷却（术语 1016）。
   //
