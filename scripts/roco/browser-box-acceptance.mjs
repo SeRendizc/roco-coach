@@ -738,7 +738,7 @@ async function main() {
           labels:rows.map((r)=>r.label), hasTalentRow:Boolean(talent),
           value:String(talent?.value??''),
           statCount:(String(talent?.value??'').match(/生命\\s*\\d+|物攻\\s*\\d+|物防\\s*\\d+|魔攻\\s*\\d+|魔防\\s*\\d+|速度\\s*\\d+/g)??[]).length,
-          objectObject:[].slice.call(document.querySelectorAll('#pet-view *')).filter(function(el){return el.children.length===0&&/\[object Object\]/.test(el.textContent||'');}).length,
+          objectObject:[].slice.call(document.querySelectorAll('.trait, .metric, .cmp-value, .moveset li, #pet-body *')).filter(function(el){return el.children.length===0&&/\[object Object\]/.test(el.textContent||'');}).length,
           // ⚠ 2026-09-28 按**容器拆开**统计：连红 8 次只报总数，无法定位。
           inPet:(function(){var v=document.getElementById('pet-view');return v?((v.innerText||'').match(/\[object Object\]/g)||[]).length:-1;})(),
           inList:(function(){var v=document.getElementById('box-list-view');return v?((v.innerText||'').match(/\[object Object\]/g)||[]).length:-1;})(),
@@ -750,9 +750,12 @@ async function main() {
           storeOne:String((JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}')['own-0001']||{}).nature),
           // 与判据**同一把尺子**：只看二级页那一屏的可见文字
           petVisibleObject:(function(){var v=document.getElementById('pet-view');return v?((v.innerText||'').match(/\[object Object\]/g)||[]).length:0;})(),
-          petLeakOuter:[].slice.call(document.querySelectorAll('#pet-view *'))
+          petLeakOuter:[].slice.call(document.querySelectorAll('.trait, .metric, .cmp-value, .moveset li, #pet-body *'))
             .filter(function(el){return /\[object Object\]/.test(el.textContent||'');})
-            .slice(0,8).map(function(el){return el.tagName+'.'+String(el.className).slice(0,16)+'#'+(el.id||'')+' :: '+String(el.textContent).trim().slice(0,110);})});})()`));
+            .slice(0,10).map(function(el){
+              var m=(el.textContent||'').match(/.{0,40}\[object Object\].{0,40}/);
+              return el.tagName+'.'+String(el.className).slice(0,16)+'#'+(el.id||'')
+                +' kids='+el.children.length+' 片段=「'+String(m?m[0]:'').trim()+'」';})});})()`));
       steps.push({at: 'detail-own-0001', facts: talentFacts});
       const talentProblems = talentDisplayProblems(talentFacts);
       check('10b-资质要摊成六维数值（own-0001）',
