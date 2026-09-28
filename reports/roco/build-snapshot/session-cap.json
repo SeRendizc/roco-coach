@@ -1,0 +1,116 @@
+{
+ "generated": "2026-09-28T19:04:41.797Z",
+ "command": "node reports/roco/build-snapshot/judge-session-cap.mjs",
+ "source_evidence": {
+  "store": {
+   "line": 493
+  },
+  "cap": {
+   "line": 508
+  },
+  "ttl": {
+   "line": 509
+  },
+  "touch": {
+   "line": 513
+  },
+  "reclaim": {
+   "line": 518
+  },
+  "bootstrap_miss": {
+   "line": 712
+  },
+  "consumer_csrf": {
+   "line": 900
+  },
+  "clear_on_close": {
+   "line": 1117
+  }
+ },
+ "facts": {
+  "created100": {
+   "ok": 100,
+   "first": 1,
+   "last": 100
+  },
+  "hotSession": {
+   "status": 200,
+   "gotCookie": false,
+   "i": 1,
+   "sameCsrf": true,
+   "postStatus": 200
+  },
+  "session101": {
+   "status": 200,
+   "gotCookie": true,
+   "postStatus": 200
+  },
+  "evictedSession": {
+   "i": 2,
+   "status": 403
+  },
+  "liveCount": 100,
+  "totalCookies": 121,
+  "distinctCookies": 121,
+  "deadIndices": [
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22
+  ],
+  "deadStatuses": [
+   403
+  ]
+ },
+ "problems": [],
+ "counterproof_facts": {
+  "created100": {
+   "ok": 100,
+   "first": 1,
+   "last": 100
+  },
+  "hotSession": {
+   "status": 200,
+   "gotCookie": false,
+   "i": 1,
+   "sameCsrf": true,
+   "postStatus": 200
+  },
+  "session101": {
+   "status": 429,
+   "gotCookie": false,
+   "postStatus": null
+  },
+  "evictedSession": {
+   "i": 2,
+   "status": 200
+  },
+  "liveCount": 100,
+  "totalCookies": 100,
+  "distinctCookies": 100,
+  "deadIndices": [],
+  "deadStatuses": []
+ },
+ "counterproof_problems": [
+  "第 101 个新会话必须仍能拿到会话（200 + 新 cookie），实际 HTTP 429、没有 Set-Cookie（429 = 表满且没有出口 —— 只能重启，那是 task-15 要修的缺陷）",
+  "第 101 个会话拿到了却用不了（POST 应当 200，实际 null）",
+  "被淘汰的那一个下一次请求应当是 **403「会话已失效」**（可分辨、可刷新恢复），实际 200"
+ ]
+}

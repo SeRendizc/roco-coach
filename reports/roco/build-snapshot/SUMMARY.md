@@ -154,3 +154,21 @@ node reports/roco/build-snapshot/browser-box-deeplink-proof.mjs # D1–D4 + 5 �
 改后：立绘 `id=pet_000112` **256×256**、四个技能 4 个；`?pet=own-0300`（不在第 1 页）拿回
 Lv.60 + 四技能 + 培养三栏；立绘 404 的物种**退回系别 emoji、不留空框**。
 来源改成"**这一只自己的 `?detail=` 回执为准，页面那一行只作补充**"。
+
+---
+
+# task-15：会话表满了必须有出口（2026-09-29）
+
+批次记录：[`BATCH-08-会话表.md`](../../../docs/roco/review-2026-09-28/BATCH-08-会话表.md)
+
+```sh
+node reports/roco/build-snapshot/judge-session-cap.mjs   # 正向 5 条 + 摘掉回收逻辑的必红反证
+node --test tests/server.test.js                         # 同一份判据在单测里再跑一遍
+```
+
+读数（`session-cap.json`）：连建 100 → 100/100；**第 101 个 HTTP 200 + 新 cookie，带它 POST 200**；
+刚用过的那一个 200（没发新 cookie、csrf 不变）；**最久没用过的得到 403**；推满 121 个后逐个探活 ⇒ **恰好 100 个活着**（上限仍生效）。
+反证：把 `reclaimSessions(now,1);` 摘掉并换回旧的 429 ⇒ 判据当场红（`实际 HTTP 429…只能重启`）。
+
+⚠ **8765 上仍是旧代码**（进程内存里是旧实现，改完没重启）；验证全部在独立实例上做。
+⚠ 探针复用 `tmp/browser-profile/` 时**必须每轮 `localStorage.clear()`**，否则上一轮的本机记录会污染读数。

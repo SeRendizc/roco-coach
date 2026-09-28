@@ -491,6 +491,40 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
  const {publicKey,privateKey}=generateKeyPairSync('rsa',{modulusLength:2048});
  const spki=publicKey.export({type:'spki',format:'der'}).toString('base64');
  const sessions=new Map();let credential='',model='deepseek-flash',verified=false,generation=0,inflight=false;
+ // ── 会话层：上限 + TTL + **主动淘汰**（task-15）────────────────────────────────
+ //
+ // 事实经过（Lead 复现 + 我在独立实例上量过，读数见 `reports/roco/build-snapshot/session-cap.json`）：
+ //   原来只有「上限 100 + 只在 `expires<now` 时清理（TTL 8h）」——
+ //   而**每个无 cookie 的新浏览器会话都会新建一条**（16 个浏览器脚本 + 探针全用临时 profile，
+ //   每跑一轮烧 1–2 格）⇒ 六到十轮就满 ⇒ 之后**所有新会话一律 429**，唯一出路是重启主服务。
+ //   更阴的是后果链：429 ⇒ 小芽读不到能力状态（`tools=unknown`）⇒ 问话根本不发 `/api/coach`
+ //   ⇒ 屏幕上**看起来像**"产品没发请求" ⇒ 探针会把它误判成产品回归。
+ //
+ // 修法（Lead 拍板方案 A）：**上限与 TTL 一个字都不动**，只给它一个**出口** ——
+ //   · `sessions` 的 Map 插入序当 LRU：**命中就 delete+set 挪到队尾** ⇒ **队头 = 最久没用过**；
+ //   · 要新建会话时先 `reclaimSessions()`：① 清过期的 ② 仍然不够就从**队头**淘汰。
+ //   本机单用户场景下，队头那条几乎必然是**已经关掉的临时探针**（它建完就再没回来过）。
+ //   ⚠ 上限**不许删**：它是进程内存的护栏；这一版只是让"满了"不再等于"只能重启"。
+ const SESSION_CAP=100;                 // 内存护栏（数值不变，没有依据可考 —— 见提交说明）
+ const SESSION_TTL_MS=8*3600000;        // 8 小时（数值不变；Cookie 的 Max-Age=28800 同源）
+ /** 从 Cookie 里取会话 id（**只有这一处**解析 —— 原来 bootstrap 与 POST 各写了一遍同一段正则）。 */
+ const sessionIdOf=(req)=>req.headers.cookie?.match(/(?:^|;\s*)coach_session=([a-f0-9]{48})(?:;|$)/)?.[1];
+ /** 一次"使用"：把这个会话挪到 Map 队尾（于是队头永远是最久没用过的那个）。 */
+ const touchSession=(id,s)=>{sessions.delete(id);sessions.set(id,s);return s;};
+ /**
+  * 给新会话腾位置：① 清过期的；② 仍然不够就从队头淘汰最久没用过的。
+  * 返回这次淘汰了几条（判据/排障可读；正常路径下 0 或 1）。
+  */
+ const reclaimSessions=(now=Date.now(),need=1)=>{
+  let dropped=0;
+  for(const [id,s]of sessions)if(s.expires<now){sessions.delete(id);dropped+=1;}
+  while(sessions.size+need>SESSION_CAP){
+   const oldest=sessions.keys().next().value;
+   if(oldest===undefined)break;          // 表是空的 ⇒ `size+need>CAP` 不可能成立，防御性退出
+   sessions.delete(oldest);dropped+=1;
+  }
+  return dropped;
+ };
  // 回答缓存（进程内存；`/api/disconnect` 与换模型都会清空 —— 见下面两处 `answerCache.reset`）。
  const answerCache=createAnswerCache();
  // 同局去重：key → 正在飞的那次 runCoach 的 Promise。**只有 key 相同才合并**（不同消息照旧 429）。
@@ -667,9 +701,21 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
    if(req.headers.origin&&req.headers.origin!==origin||req.headers['sec-fetch-site']==='cross-site')throw fail(403,'不允许跨站访问');
    const path=new URL(req.url,origin).pathname;
    if(path==='/api/bootstrap'&&req.method==='GET'){
-    const now=Date.now();for(const [id,s]of sessions)if(s.expires<now)sessions.delete(id);
-    let sid=req.headers.cookie?.match(/(?:^|;\s*)coach_session=([a-f0-9]{48})(?:;|$)/)?.[1],s=sessions.get(sid);
-    if(!s){if(sessions.size>=100)throw fail(429,'本机会话过多，请重启服务');sid=randomBytes(24).toString('hex');s={csrf:randomBytes(24).toString('hex'),expires:now+8*3600000};sessions.set(sid,s);res.setHeader('Set-Cookie',`coach_session=${sid}; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800`);}
+    const now=Date.now();
+    let sid=sessionIdOf(req),s=sessions.get(sid);
+    if(s){
+     // 命中就挪到队尾：它刚刚被用过，**不该**成为下一次被淘汰的那一个。
+     touchSession(sid,s);
+    }else{
+     // ⚠ 2026-09-29（task-15）：这里原来直接 `if(sessions.size>=100) throw fail(429,'本机会话过多，请重启服务')`
+     // —— 那让"满了"变成**死路**（只能重启）。现在先回收再建：过期的清掉、仍然不够就淘汰最久没用过的。
+     reclaimSessions(now,1);
+     // 上限是护栏：回收之后**必须**有空位。走不到这一句才是正常的；真走到了说明回收逻辑被改坏了，
+     // 所以这句话说的是"内部不变量被破坏"，**不是**"本机开的页面太多"（那是我改之前的语义，已经不对了）。
+     if(sessions.size>=SESSION_CAP)throw fail(500,'会话表回收后仍然没有空位（回收逻辑必须保证空位）：这是内部不变量被破坏，不是本机会话过多');
+     sid=randomBytes(24).toString('hex');s={csrf:randomBytes(24).toString('hex'),expires:now+SESSION_TTL_MS};sessions.set(sid,s);
+     res.setHeader('Set-Cookie',`coach_session=${sid}; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800`);
+    }
     s.nonce=randomBytes(16).toString('hex');s.nonceExpires=now+300000;
     return json(res,200,{...status(),capabilities:await capabilities(),csrf:s.csrf,nonce:s.nonce,publicKey:spki,
      server:{started_at:STARTED_AT,assets:publicAssets.size,asset_refreshes:assetRefreshes,
@@ -850,8 +896,11 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
     }
     if(req.method!=='POST')throw fail(405,'仅支持 POST');
     if(req.headers.origin!==origin||!req.headers['content-type']?.startsWith('application/json'))throw fail(403,'请求来源或类型不正确');
-    const sid=req.headers.cookie?.match(/(?:^|;\s*)coach_session=([a-f0-9]{48})(?:;|$)/)?.[1],s=sessions.get(sid);
+    const sid=sessionIdOf(req),s=sessions.get(sid);
     if(!s||s.expires<Date.now()||!equal(req.headers['x-coach-csrf'],s.csrf))throw fail(403,'会话已失效，请刷新页面');
+    // ⭐ 2026-09-29（task-15）：这一下也是一次"使用" —— 挪到队尾。否则一个**正在用**的页面会因为
+    // "建得早"而被当成最久没用过的那个淘汰掉（那正是"不许打断已有会话"要防的事）。
+    touchSession(sid,s);
     const b=await body(req);
     if(path==='/api/connect'){
      if(typeof b.encryptedKey!=='string'||b.encryptedKey.length>500||typeof b.model!=='string'||!/^deepseek-[a-zA-Z0-9._-]{1,70}$/.test(b.model))throw fail(400,'配置格式无效');

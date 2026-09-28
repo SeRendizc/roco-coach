@@ -413,3 +413,73 @@ test('R8②：被信号杀死的引擎必须能被**重新拉起**（真机复�
   assert.match(src, /if \(!alive && this\.child\) \{[\s\S]{0,120}this\.child = null;[\s\S]{0,60}this\.baseUrl = null;/,
     '判死之后要清掉 child 与 baseUrl（否则下方启动逻辑以为还占着端口）');
 });
+
+/**
+ * task-15：**会话表满了必须有出口**（原来只有"上限 100 + 8h TTL"，满了就是 429「请重启服务」）。
+ *
+ * 事实经过（Lead 复现 + `reports/roco/build-snapshot/judge-session-cap.mjs` 在独立实例上量过）：
+ *   每个无 cookie 的新浏览器会话都会新建一条，而 16 个浏览器脚本 + 探针全用**临时 profile**
+ *   ⇒ 每跑一轮烧 1–2 格 ⇒ 六到十轮就满 ⇒ 之后所有新会话一律 429，唯一出路是重启主服务。
+ *   最阴的是后果链：429 ⇒ 小芽读不到能力状态 ⇒ 问话根本不发 `/api/coach` ⇒ 屏幕上看起来像
+ *   "产品没发请求"（探针会误判成 P0-01 那种回归）。
+ *
+ * 修法（Lead 拍板方案 A）：上限与 TTL **不动**，只给它一个出口 ——
+ *   `sessions` 的 Map 插入序当 LRU（命中就 delete+set 挪队尾）⇒ 队头 = 最久没用过；
+ *   新建之前先 `reclaimSessions()`：① 清过期的 ② 仍然不够就淘汰队头。
+ *
+ * 判据（纯函数在 `reports/roco/build-snapshot/judge-session-cap.mjs` 里，脚本与单测**同一份**）：
+ *   ① 连建 100 全成功；② 第 101 个仍拿到会话且能 POST；③ **刚用过的**不被打断（且没发新 cookie）；
+ *   ④ 最久没用过的被淘汰 ⇒ 下一次请求是 **403**（不是 429、不是静默失败）；⑤ 上限仍然生效（活着 == 100）。
+ */
+test('task-15：会话表满了仍有出口（LRU 淘汰）；旧行为必须被同一套判据判红', async (t) => {
+  const {sessionCapProblems} = await import(
+    '../reports/roco/build-snapshot/judge-session-cap.mjs');
+  const x = await setup(t, ok);
+  const created = [];
+  const bootstrapWith = async (cookie = null) => {
+    const res = await fetch(x.base + '/api/bootstrap', {headers: cookie ? {Cookie: cookie} : {}});
+    let body = null;
+    try { body = await res.json(); } catch { /* 空体 */ }
+    const setCookie = res.headers.get('set-cookie');
+    return {status: res.status, body, cookie: setCookie ? setCookie.split(';')[0] : null};
+  };
+  /** 这个会话还活着吗：`/api/disconnect` 是不需要别的东西的 POST ⇒ 200 活着 / 403 没了。 */
+  const aliveWith = async (cookie, csrf) => (await fetch(x.base + '/api/disconnect', {method: 'POST',
+    headers: {Origin: x.base, Cookie: cookie, 'Content-Type': 'application/json', 'X-Coach-CSRF': csrf},
+    body: '{}'})).status;
+  for (let i = 0; i < 100; i += 1) {
+    const one = await bootstrapWith();
+    if (one.status !== 200) break;
+    created.push({i: i + 1, cookie: one.cookie, csrf: one.body?.csrf ?? null});
+  }
+  const facts = {created100: {ok: created.length}};
+  // 先 touch 第 1 个 ⇒ 从此**最久没用过的是第 2 个**（顺序很要紧，见判据注释）
+  const hot = await bootstrapWith(created[0].cookie);
+  facts.hotSession = {status: hot.status, gotCookie: Boolean(hot.cookie),
+    postStatus: hot.body?.csrf ? await aliveWith(created[0].cookie, hot.body.csrf) : null};
+  const over = await bootstrapWith();
+  if (over.cookie) created.push({i: 101, cookie: over.cookie, csrf: over.body?.csrf ?? null});
+  facts.session101 = {status: over.status, gotCookie: Boolean(over.cookie),
+    postStatus: over.cookie ? await aliveWith(over.cookie, over.body?.csrf) : null};
+  facts.evictedSession = {i: 2, status: await aliveWith(created[1].cookie, created[1].csrf)};
+  while (created.length < 121) {
+    const one = await bootstrapWith();
+    if (one.status !== 200) break;
+    created.push({i: created.length + 1, cookie: one.cookie, csrf: one.body?.csrf ?? null});
+  }
+  let live = 0;
+  for (const one of created) if (await aliveWith(one.cookie, one.csrf) === 200) live += 1;
+  facts.liveCount = live;
+  assert.deepEqual(sessionCapProblems(facts), [],
+    `会话层的行为不对：${JSON.stringify(facts)}`);
+  // 必红反证：把**旧行为**（表满 → 429「请重启服务」、没有出口）喂给同一条判据，必须报出来。
+  const oldFacts = {...facts, session101: {status: 429, gotCookie: false, postStatus: null},
+    liveCount: 100};
+  const oldProblems = sessionCapProblems(oldFacts);
+  assert.ok(oldProblems.length >= 1 && /第 101 个/.test(oldProblems.join(' ')),
+    `旧行为（429 + 表满）必须被同一套判据判红，实际：${JSON.stringify(oldProblems)}`);
+  // 反向控制：**只**把"被淘汰的那个得到 429（而不是 403）"这一个事实喂进去 ⇒ 也必须报
+  //（这一条就是 Lead 要的"两种形状不许混"的机器保证）。
+  const mixedShape = sessionCapProblems({...facts, evictedSession: {i: 2, status: 429}});
+  assert.ok(mixedShape.some((one) => /403/.test(one)), `被淘汰的会话得到 429 必须判红：${JSON.stringify(mixedShape)}`);
+});
