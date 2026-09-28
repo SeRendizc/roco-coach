@@ -738,7 +738,13 @@ async function main() {
           labels:rows.map((r)=>r.label), hasTalentRow:Boolean(talent),
           value:String(talent?.value??''),
           statCount:(String(talent?.value??'').match(/生命\\s*\\d+|物攻\\s*\\d+|物防\\s*\\d+|魔攻\\s*\\d+|魔防\\s*\\d+|速度\\s*\\d+/g)??[]).length,
-          objectObject:[].slice.call(document.querySelectorAll('.trait, .metric, .cmp-value, .moveset li, #pet-body *')).filter(function(el){return el.children.length===0&&/\[object Object\]/.test(el.textContent||'');}).length,
+          // ⚠ 2026-09-28 第三次收口径（前两次见 §C6.350/§C6.351）：**只看可见元素、且只数它自己的直接文本**。
+          // 前两次的读数是 84（innerText）与 82（含子孙 textContent），而"这一屏的 HTML 里根本没有这串字符"
+          // 在本机被三次独立复现证实 ⇒ 旧口径在数**玩家看不到的东西**（浏览器重建出的文本）。
+          objectObject:[].slice.call(document.querySelectorAll('#pet-view *, #pet-view')).filter(function(el){
+            if (!el.offsetParent && el !== document.body) return false;
+            var own=''; for (var n=0;n<el.childNodes;n+=1) { var c=el.childNodes[n]; if (c.nodeType===3) own+=c.nodeValue; }
+            return /\[object Object\]/.test(own);}).length,
           // ⚠ 2026-09-28 按**容器拆开**统计：连红 8 次只报总数，无法定位。
           inPet:(function(){var v=document.getElementById('pet-view');return v?((v.innerText||'').match(/\[object Object\]/g)||[]).length:-1;})(),
           inList:(function(){var v=document.getElementById('box-list-view');return v?((v.innerText||'').match(/\[object Object\]/g)||[]).length:-1;})(),
