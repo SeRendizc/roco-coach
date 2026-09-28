@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `23e98ef`（第 96 轮；这一轮从 `59a318c` 推了 6 笔上来 —— §C6.356 的 547 拍板、盒子页四条批注收口、换技能进对局）。台账声明落后一两笔是正常的，**落后 >12 笔判红**。头部这段口径照旧：
+| HEAD | `711ed49`（第 96 轮收尾；这一轮从 `59a318c` 推了 11 笔上来 —— 547 拍板、盒子四条批注收口、换技能进对局、甲案 542 扩容、扩容连坐红清零）。台账声明落后一两笔是正常的，**落后 >12 笔判红**。头部这段口径照旧：
 | 工作区 | **2026-09-23 接手轮的未提交改动**（第 140 轮又加了一层）：`src/client/{roco.html,roco.css,roco.js,team-workshop.js,battle-v3.css}`（战斗页顶栏/结算浮层/小芽重叠/首页槽位/愿力冲击高亮）、`src/server/{index.js,roco-service.js}`（立绘按物种 id 解析、视图带 loadouts/magic）、`roco/src/roco_env/*`（PVP 魔法动作类、每只 10 星）、`roco/tests/test_pvp_magic.py`、`data/roco/{battle-modes.json,evidence/*}`、`data/roco/rulesets/*`、**`data/roco/assets/pets/*`（96 张立绘重新对齐，见 §C6.63）**、`scripts/roco/{build-pvp-magic.mjs,build-rule-configs.mjs,build-pet-sprite-audit.mjs,verify-pet-sprites.mjs}`、`data/roco/derived/pet-sprite-audit.json`、`docs/roco/PET-SPRITES.md` |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **27 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / trajectories-model / sft-split / model-manifest / provenance / rag-eval / game-data-pack / reconciliation / **sprite-identity（第 140 轮新增）** / state-doc / guard-selftest / browser-acceptance / demo-acceptance / mobile-sweep / box-acceptance / workshop-acceptance / loadout-acceptance / **five-minute-chain（第 22 轮新增：RC-801 ②③ 五分钟链路 + 时间预算）** / roco-ux-acceptance / battle-feedback / **coverage-axes（第 29 轮新增：三套支持口径不许混 + 账本不许落后于引擎）** / retained-assets），产物 `reports/roco/verification/latest.json`；`last-green.json` 记的是**最近一次全绿**（套件数从 23 → 26 → 27 之后以产物为准）。**判据条数以产物为准**（demo-acceptance 当前 **129 通过 / 0 失败**（第 27 轮 +6：RC-802 四类逐类判据 + 一条反证 + 一条磁盘对账）、roco-ux-acceptance **39/39 + 反证 4/4**、workshop-acceptance 43/43、five-minute-chain **19/19 判据 + 19/19 反证**），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `，所以历史断点里的那一行必须写成 `| HEAD（…当时…） |` |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -13439,3 +13439,36 @@ console_errors: []
    一个是**冻结档口径**（真正能出战的只数），碰巧都是 542 ⇒ 已在 `INTERVIEW-DRILL.md` 那一行
    写明「别并列着说」。同时保留了带日期的历史小节（`32 组同种`、`56/80`、`46 个技能引用` 等）
    —— 那是那两轮的实测记录，**不按 542 重算**。
+
+##### 十、这一轮的收尾读数：门禁从 **8 个红套件 → 1 个**（那 1 个是 pre-existing）
+
+`npm run verify:release`：**27 个套件 / 26 绿 / 1 红**；`unit` 套件 **1758 条 / 1757 通过 / 1 红**。
+逐条变化与**归因**（全部用 worktree 做过归因实验，不是猜）：
+
+| 套件 | 第一次跑 | 现在 | 怎么解决 / 归因 |
+|---|---|---|---|
+| `env`（Python 规则引擎，636 条） | 8 failures + 14 errors | **0 / 0** | 三类根因分开修（探针技能被移出默认配招 / 探针指向已撤下的精灵 / 产物过期），**全是改钉，断言一条没删**（五个文件 `assert*` 条数逐个不变：132/27/11/22/25） |
+| `trajectories` | `replay 6912 / failed 615` | **failed 0** | 走官方 `--fix` 重钉回执摘要。⚠ **推翻了旧结论**：它一直被记成"legacy 不许重跑"，而 worktree 实测**扩容前是全绿的** ⇒ 是本轮打红的 |
+| `trajectories-model` | `replay 1752 / failed 2` | **failed 0** | 同上（顺带修掉 `--fix` 守卫的一处**误报**：指纹已一致时不该再比 `ok`） |
+| `workshop-acceptance` | 50/52 | **53/53 + 反证 45/45** | 两条按新分布改钉（"约一半非我拥有"在 622/542 下不成立；同名对样例已撤下） |
+| `roco-ux-acceptance` | 36/39 | **39/39 + 反证 8/8** | 三条改钉（"48 只 = 4 页"写死；按需推算样例进了可玩层；印记探针按关键词找太松） |
+| `five-minute-chain` | 8 个分步全挂 | **绿** | 病根同「盒子默认页签」：`.card` 在两个页签里都有，而抽屉只长在「我的盒子」上 ⇒ 挑出的是**图鉴卡片的物种 id** |
+| `retained-assets` | 3 条资产有问题 | **绿** | 它是**下游连带**（读的就是上面那些套件的产物），不是独立问题 |
+| `unit` | 5 红 | **1 红** | 4 条是**产物过期**（改轨迹 jsonl 与 `team-compare` 文案之后没重生成）⇒ 按各自官方路径重生成后全绿；剩 **1 条是 pre-existing** |
+
+**那 1 条 pre-existing，如实记**：`tests/evals/roco/model-trajectories.test.js` 的
+「两条独立代码路径必须给出同一组数字（轨迹生成器 vs 影子回放）」。
+归因实验：拿到扩容前那个提交上跑 ⇒ **也是红的**（39 处不一致，且是另一批 key）；现在是 **51 处**
+（`rl-learn-*@camp-locked-*` 这一批 `ours=false / theirs=true`）。
+⇒ 它是**本来就红**的，规则集换了之后"哪几个窗口不一致"跟着变了而已。
+**真正修它要判定两条链里哪一条判错了** —— 那是单独一轮的事，本轮不糊过去。
+
+**这一轮的净效果（人类点名的五条 + 顺带挖出来的真缺口）**：
+① 同种多只 **0 组**、铠甲虫恰好 **1 只**；② 天分档位认得出（「了不起的天分」，前面不再加前缀）；
+③ 多属性：**补了真机判据 40**（恶魔叮 `["恶系","翼系"]` + 1 个隔断，四种坏样本全部命中）；
+④ **换技能真的进得了对局**（两份互不相识的记录合成一把钥匙，真机判据 39）；
+⑤ 默认落「全部精灵」622 + 全筛选，可玩层与盒子 **542**。
+顺带挖出并修掉的：**494 只精灵的「定位」从来没被读出来**（盒子索引的 `layer` 只从 `roster-48` 建）、
+**同名形态在「我的盒子」上丢了形态名**（55 组 / 154 条登记受影响）、**军师速度轴只声明 48 只**、
+**两处给玩家看的错数**（400 文案里写死的「那 48 只」）、
+**一份署了假名的过期报告**（`generated_by` 指着一个不存在的 `--report` 开关）。
