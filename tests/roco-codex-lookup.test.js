@@ -152,3 +152,35 @@ test('⑤ 运行时补 state_version：不补的话 query_rules 连合同校验�
   assert.equal(TOOL_CONTRACTS.query_rules.arguments.state_version !== undefined, true,
     '前提：query_rules 的合同里 state_version 是必填项');
 });
+
+test('⑦ 我们自己的用词必须自己能听懂：物攻/物防/魔防（2026-09-27 真机补）', () => {
+  // 现场：正文里写的是「物攻 88」，可玩家照着念「音速犬的物攻是多少？」时字段表里没有「物攻」
+  // ⇒ 回答退化成「这条我没依据」。自己的用词自己认不出来，是这一族最容易漏的一类。
+  for (const [question, name] of [['音速犬的物攻是多少？', '音速犬'], ['铠甲虫的物防', '铠甲虫'],
+    ['喵喵的魔防是多少', '喵喵']]) {
+    assert.equal(codexFactAsk(question), true, `该认出来：${question}`);
+    assert.deepEqual(codexTarget(question), {kind: 'pet', name}, `该按精灵查：${question}`);
+  }
+  // 反证：既有那一档一条都不许被吃掉（「防御能减伤多少」问的是规则，不是某只的六维）
+  assert.equal(codexTarget('防御能减伤多少？'), null);
+  assert.deepEqual(codexTarget('喵喵的种族值是多少？'), {kind: 'pet', name: '喵喵'});
+});
+
+test('⑥ 「<精灵>的<招式>的<字段>」要取**招式名**，而「喵喵的属性」仍是**精灵**字段（2026-09-27）', () => {
+  // 真机实测：问「喵喵的叶绿光束的类别」，`codexTarget` 把整段「喵喵的叶绿光束」当成了技能名
+  // （`SKILL_FIELD_ASK` 要求字段后跟"是多少"这类词，而这句话以字段结尾；且招式名与字段之间还有
+  //  一个「的」）⇒ 引擎回"未知技能名：喵喵的叶绿光束"。现在由**两个「的」**的那条模式接住。
+  assert.deepEqual(codexTarget('喵喵的叶绿光束的类别'), {kind: 'skill', name: '叶绿光束'});
+  assert.deepEqual(codexTarget('喵喵的叶绿光束的类别是什么'), {kind: 'skill', name: '叶绿光束'});
+  assert.deepEqual(codexTarget('喵喵的叶绿光束的属性'), {kind: 'skill', name: '叶绿光束'});
+  // ⚠ 反证（这条判据的第一版就是这么错的）：把"招式与字段之间可选一个的"直接塞进原模式，
+  // 「喵喵的属性」会从**精灵**字段变成技能查询 —— 属性是两边都有的那一格，最容易被吞。
+  assert.deepEqual(codexTarget('喵喵的属性'), {kind: 'pet', name: '喵喵'},
+    '只有**一个**「的」时问的是精灵自己的属性，不许当成技能');
+  assert.deepEqual(codexTarget('喵喵的种族值是多少？'), {kind: 'pet', name: '喵喵'});
+  // 反证：既有那两档一条都不许变
+  assert.deepEqual(codexTarget('喵喵的叶绿光束威力多少'), {kind: 'skill', name: '叶绿光束'});
+  assert.deepEqual(codexTarget('音速犬的翅刃威力是多少'), {kind: 'skill', name: '翅刃'});
+  assert.equal(codexTarget('威力最高的技能是哪个？'), null, '「哪个技能威力最高」不是查某一招');
+  assert.equal(codexTarget('喵喵学得到的技能里，哪个威力最高？'), null, '同上');
+});

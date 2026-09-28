@@ -1,7 +1,10 @@
 // 个体层：把 `owned-pets.json` 的实例读成"可培养的个体"，并给出**可复现**的刷新。
 //
-// 人类 2026-09-26 的口径（逐条落在这里，改口径就改这一处）：
-//   · 拥有的精灵**默认 100 级**（PvP 面板要有意义）；
+// 人类口径（逐条落在这里，改口径就改这一处）：
+//   · 拥有的精灵**默认 60 级** —— ⚠ 2026-09-27 **改钉**：9-26 说的是"默认 100 级"，
+//     但当晚人类拍了「pvp 没有的话就默认都 60 级别吧」，且查证到**官方：等级上限 60 级**
+//     （配置表 `ATTR_GLOBAL_CONFIG` 的等级项也只在 60 以内自洽）。所以默认档改成 60，
+//     100 级那条留在这里当历史记录（改钉不删）。
 //   · 天分（个体值）与性格**没有真实数值的一律归零并标注** —— 不许编；
 //   · 同一只精灵**可以有多个个体**（可重复拥有），性格/天分不同 ⇒ 配队复杂度；
 //   · 洛手没有加点 ⇒ 用**刷新**代替：`刷新性格` 与 `刷新天分` **分开**，每个个体**各 3 次**；
@@ -93,7 +96,7 @@ export function rollNatureAndTalent(instanceId) {
   return {nature, talent};
 }
 
-export function individualFromInstance(instance, {level = 100} = {}) {
+export function individualFromInstance(instance, {level = 60} = {}) {
   if (!instance || typeof instance !== 'object') throw new Error('individualFromInstance 需要一条实例');
   const id = String(instance.instance_id ?? instance.id ?? '');
   if (!id) throw new Error('实例缺少 instance_id');
@@ -106,7 +109,8 @@ export function individualFromInstance(instance, {level = 100} = {}) {
     species_id: String(instance.species_id ?? ''),
     species_name: instance.species_name ?? null,
     level: Number.isFinite(Number(instance.level)) && level === null ? Number(instance.level) : level,
-    level_source: 'default-100（人类口径 2026-09-26：拥有的精灵都默认 100 级）',
+    level_source: `default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。`
+      + '9-26 曾按 100 级，已改钉）',
     nature: nature ?? rolled?.nature ?? null,
     nature_source: nature ? 'dataset'
       : 'rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）',
@@ -119,7 +123,7 @@ export function individualFromInstance(instance, {level = 100} = {}) {
   };
 }
 
-export function individualsFromDataset(dataset, {level = 100} = {}) {
+export function individualsFromDataset(dataset, {level = 60} = {}) {
   const rows = Array.isArray(dataset?.instances) ? dataset.instances : [];
   const list = rows.map((row) => individualFromInstance(row, {level}));
   // 同一只精灵允许出现多次 —— 这里只校验 id 唯一（同种不同个体是正常情况）。

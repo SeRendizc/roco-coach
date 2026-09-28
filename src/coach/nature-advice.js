@@ -7,7 +7,7 @@
 // 数字来源只有一个：`talent.js`（它自己从 `data/roco/systems/natures.json` 读规则）。
 // 种族值来源：归一化图鉴 `data/roco/normalized/<ruleset>/full-catalog.json` 的 `stats`
 //（与图鉴问答用的是同一份快照；读不到就是 null，不许用别处的数顶）。
-import {STAT_KEYS, STAT_NAMES, panelOf, natureOf, natures} from './talent.js';
+import {STAT_KEYS, STAT_NAMES, panelOf, natureOf, natures, natureFactor} from './talent.js';
 import {PET_NAME_ROWS} from './pet-names-data.js';
 import {processEnv} from './env.js';
 
@@ -34,8 +34,18 @@ export async function raceOf(idOrName) {
   const key = String(idOrName ?? '').trim();
   if (!key) return null;
   const rows = await catalog();
-  const hit = rows.find((row) => row.pet_id === key || row.id === key)
-    ?? rows.find((row) => row.name === key);
+  // ⚠ 2026-09-27 补：按**名字**查时，同名多形态（钻石蜗 6 种、鸭吉吉国王 6 种…）**不许挑第一只** ——
+  // 那与我们在图鉴问句里的口径不一致（那边是"不替你挑一只"）。这里如实回 `ambiguous` + 候选，
+  // 由调用方去说清楚（面板/性格建议都适用）。
+  const byId = rows.find((row) => row.pet_id === key || row.id === key) ?? null;
+  if (!byId) {
+    const byName = rows.filter((row) => row.name === key);
+    if (byName.length > 1) {
+      return {ambiguous: true, name: key,
+        matches: byName.map((row) => ({pet_id: row.pet_id, name: row.name, title: row.title ?? null}))};
+    }
+  }
+  const hit = byId ?? rows.find((row) => row.name === key);
   if (!hit || !hit.stats) return null;
   const race = {};
   for (const stat of STAT_KEYS) {
@@ -52,18 +62,22 @@ const pct = (factor) => `${factor > 1 ? '+' : ''}${Math.round((factor - 1) * 100
  * 一条性格对这只精灵做了什么：**换来什么 + 牺牲什么**，两边都给面板差值。
  * 这是"说法层"的最小单位，`adviceFor` 与答案层都用它。
  */
-export function explainNature({race, talent = null, nature}) {
+export function explainNature({race, talent = null, nature, breakthrough = 0}) {
   const row = natureOf(nature);
   if (!row) return null;
-  const neutral = panelOf({race, talent, nature: null}).panel;
-  const withNature = panelOf({race, talent, nature: row.name}).panel;
+  // ⚠ 2026-09-27 **改钉**：长处那一侧的系数**随突破长**（初始 +10%、每突破 +2%、满 +20%），
+  // 所以这里**现算**（`natureFactor`），不再写死 +20%。缺省零突破（我们没有每只的突破段数）。
+  const neutral = panelOf({race, talent, nature: null, breakthrough}).panel;
+  const withNature = panelOf({race, talent, nature: row.name, breakthrough}).panel;
   const gain = {stat: row.up, from: neutral[row.up], to: withNature[row.up], delta: withNature[row.up] - neutral[row.up]};
   const cost = {stat: row.down, from: neutral[row.down], to: withNature[row.down], delta: withNature[row.down] - neutral[row.down]};
   return {
     nature: row.name, gain, cost,
     // 说法层：句子结构固定、数字现算 —— 不许出现"某某精灵就该用某某性格"这种硬编码结论。
-    text: `「${row.name}」把${STAT_NAMES[row.up]}抬 ${pct(1.2)}（${gain.from} → ${gain.to}），`
-      + `代价是${STAT_NAMES[row.down]}掉 ${pct(0.9)}（${cost.from} → ${cost.to}）。`,
+    text: `「${row.name}」把${STAT_NAMES[row.up]}抬 `
+      + `${pct(natureFactor(row.name, row.up, {breakthrough}).factor)}（${gain.from} → ${gain.to}），`
+      + `代价是${STAT_NAMES[row.down]}掉 `
+      + `${pct(natureFactor(row.name, row.down, {breakthrough}).factor)}（${cost.from} → ${cost.to}）。`,
   };
 }
 
@@ -150,6 +164,21 @@ export function wantedStats(text) {
 /**
  * 这类问句归不归本地事实（`localFactAsk` 用）。**只认这三种形状**，其余一律放行给别的路。
  */
+/**
+ * 「X 的面板是多少」——**人类点名的四层里"能算出来的那一部分"**。
+ *
+ * 用途：让玩家问得出"这只 60 级面板多少"。数字只来自数据层：
+ *   · 种族值 → L1 图鉴层（`full-catalog.json`，已按人类拍板采用抓包值）；
+ *   · 天分/性格 → 上下文里带了就用（页面送来的个体），没带就**按天分 0 + 中性性格**算并**说清**；
+ *   · 等级 → **60**（人类口径 + 官方上限），零突破下界（我们没有每只的突破段数）。
+ */
+export function panelAsk(message = '') {
+  const text = String(message ?? '');
+  if (!text.trim()) return false;
+  if (!/面板|实战数值|数值面板|面板数值/.test(text)) return false;
+  return Boolean(petMentionedIn(text));
+}
+
 export function natureTalentAsk(message = '') {
   const text = String(message ?? '');
   if (!text.trim()) return false;
@@ -171,12 +200,88 @@ export function natureIn(text) {
   return null;
 }
 
-const sourceLine = '（性格加成来自游戏性格表：长处 +20%、短处 −10%；面板按种族值 + 天分现算）';
+// 出处那一行必须与**算出来的档位**一致（2026-09-27：正文写 +10% 而这里的出处还写着 +20%，
+// 就等于自相矛盾）。缺省是零突破下界。
+const sourceLine = '（性格加成来自游戏性格表：长处**初始 +10%**、每突破一次再 +2%、满突破 +20%，'
+  + '短处固定 −10%；这里按**零突破**算，面板按种族值 + 天分现算 —— 60 级口径）';
 
 /**
  * 本地成句。返回 `{text, evidence}`（成句成功）或 `null`（这一问我答不了，交回上层）。
  * **不编**：没有种族值就直说查不到；两个个体凑不齐就直说看到几个。
  */
+/**
+ * 面板问句的**本地成句**（0 次模型调用）：逐项列出来，并把"哪些是假设"讲清。
+ *
+ * `individual` 是页面送来的那一个个体（有 `talent` / `nature` 就用；没有就按 0 / 中性并标注）。
+ */
+export async function panelLocalAnswer(message, {individual = null} = {}) {
+  if (!panelAsk(message)) return null;
+  const mentioned = petMentionedIn(message);
+  const name = mentioned?.name ?? String(message).trim();
+  const layer = await raceOf(name);
+  if (layer?.ambiguous) {
+    const shown = layer.matches.slice(0, 6)
+      .map((one) => `${one.title ?? one.name}（${one.pet_id}）`).join('、');
+    return {text: `「${layer.name}」这个名字对应 ${layer.matches.length} 只不同形态，面板逐只不同，`
+      + `所以不能拿一只替另一只算：${shown}${layer.matches.length > 6 ? ' 等' : ''}。`
+      + '说一个 pet_id（或者说清是哪一只），我再给这一只的面板。',
+    evidence: [`raceOf('${layer.name}') → ambiguous，候选 ${layer.matches.length} 只`], trace: []};
+  }
+  if (!layer) {
+    return {text: `「${name}」的种族值我这边查不到（图鉴层里没有这只）—— 没有种族值就不算面板，也不拿别的数来凑。`
+      + '换个写法（用图鉴里的全名）再问一次。',
+    evidence: [`raceOf('${name}') = null（图鉴层 ${'full-catalog.json'}）`], trace: []};
+  }
+  const talent = individual?.talent && typeof individual.talent === 'object' ? individual.talent : null;
+  const nature = typeof individual?.nature === 'string' && individual.nature ? individual.nature : null;
+  const panel = panelOf({race: layer.race, talent, nature, scope: 'pvp', level: 60, breakthrough: 0}).panel;
+  const order = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'].filter((stat) => panel[stat] !== undefined);
+  if (!order.length) {
+    return {text: `「${layer.name}」的面板这一项都算不出来：图鉴层的种族值缺项。`,
+      evidence: ['panelOf 一项都没算出来 ⇒ 不回数字'], trace: []};
+  }
+  const line = order.map((stat) => `${STAT_NAMES[stat]} ${panel[stat]}`).join(' / ');
+  // ⚠ 用了这一只的天分/性格时，**必须说清这一份本身是哪来的**：数据集里那两项是 null，
+  // 值由个体层**种子化掷点**生成（示例数据），不是玩家存档里的真值。不说＝把建模值当实测值用。
+  const rolled = (source) => typeof source === 'string' && source.includes('rolled');
+  const talentNote = talent
+    ? (rolled(individual?.talent_source) ? '天分用你这一只的（**这一份是建模掷点，不是游戏里的真值**）' : '天分用你这一只的')
+    : '**天分按 0 计**（没拿到这只的天分 ⇒ 面板偏低）';
+  const natureNote = nature
+    ? `性格「${nature}」${rolled(individual?.nature_source) ? '（同样是建模掷点）' : ''}`
+    : '**性格按中性**（没拿到这只的性格）';
+  const assumptions = [
+    '**60 级**（默认档；等级上限就是 60）',
+    talentNote,
+    natureNote,
+    '**零突破**（没有每只的突破段数；满突破那一档是 +20% 而不是 +10%）',
+  ];
+  return {
+    text: `${layer.name}（${(layer.types ?? []).join('|') || '属性未登记'}）的面板：${line}。`
+      + `按 ${assumptions.join('、')} 算的 —— 面板 = 种族值 + 天分 + 性格（等级公式），`
+      + '换一只或补上天分性格，我再算一遍。',
+    evidence: [`种族值：图鉴层 ${layer.pet_id}（抓包采用后的值）`, `面板：panelOf(level=60, scope=pvp, 零突破)`,
+      `假设：${assumptions.join('；')}`],
+    trace: [],
+  };
+}
+
+/**
+ * 这份上下文里"这一只的个体"（带天分/性格）。页面送来的名单在 `/api/coach` 上已经被
+ * `attachIndividualsToContext` 补过字段 ⇒ 这里直接读；**读不到就 null**（答案层按 0/中性算并标注）。
+ */
+export function individualIn(context, name) {
+  const rows = Array.isArray(context?.profile?.pets) ? context.profile.pets : [];
+  if (!rows.length || !name) return null;
+  const hit = rows.find((row) => row?.name === name
+    || row?.species_name === name);
+  if (!hit) return null;
+  const talent = hit.talent && typeof hit.talent === 'object' && !('value' in hit.talent) ? hit.talent : null;
+  const nature = typeof hit.nature === 'string' && hit.nature.trim() ? hit.nature.trim() : null;
+  if (!talent && !nature) return null;
+  return {talent, nature, talent_source: hit.talent_source ?? null, nature_source: hit.nature_source ?? null};
+}
+
 export async function natureLocalAnswer({message = '', context = null} = {}) {
   const text = String(message);
   if (!natureTalentAsk(text)) return null;
@@ -196,7 +301,21 @@ export async function natureLocalAnswer({message = '', context = null} = {}) {
         evidence: [`context.profile.pets 里同名个体 ${same.length} 个；比较需要 ≥2`],
       };
     }
+    // ⚠ 2026-09-27 真机抓到的错（同名 **≠** 同种）：名单里那两只「棋契陛下」其实是
+    // **两个不同物种**（pet_000556 与 pet_000575）—— 而这一支要回答的是"**同一只**的两个个体差在哪"，
+    // `compareIndividuals` 自己的注释也写着"同种才有意义"（它按一个 `race` 给两边算面板）。
+    // 拿两个物种套同一份种族值比出来的表**没有意义**，所以这一档必须 **fail closed**。
+    const species = new Set(same.map((one) => String(one.species_id ?? one.id ?? '')).filter(Boolean));
+    if (species.size > 1) {
+      const listed = same.map((one) => `${one.name}（${one.species_id ?? one.id ?? '无物种 id'}）`).join('、');
+      return {text: `「${mentioned.name}」在你的名单里有两行，但它们**不是同一个物种**：${listed}。`
+        + '我说的是"**同一只**的两个个体差在哪"（同种、两份天分/性格），拿两个物种套同一份种族值比出来的表没有意义 —— '
+        + '所以这一问我先不比。想比的话：把同一只的两个个体都放进名单（同名**且同种**），我再逐项给你比。',
+      evidence: [`同名两行的物种 id：${[...species].join(' / ')} ⇒ 不同种，拒绝按"两个个体"比`]};
+    }
     const row = await raceOf(mentioned.pet_id);
+    // 两个个体各自的 `talent`/`nature`（页面补过字段）—— `compareIndividuals` 本来就按传入的个体算，
+    // 这里**不用改它**，只要保证传进去的是"补过字段的那两行"（原来传的就是 same[0]/same[1]，✓）。
     const result = compareIndividuals({race: row?.race, a: same[0], b: same[1]});
     if (!result.ok) return {text: `${result.reason}`, evidence: ['compareIndividuals 拒绝：缺输入']};
     const lines = [result.text];
@@ -213,9 +332,14 @@ export async function natureLocalAnswer({message = '', context = null} = {}) {
       return {text: `要说清「为什么用${asked}」，得先知道是哪一只 —— 你说个名字（例如「皇家狮鹫为什么用开朗」），我按它的种族值算给你。`,
         evidence: ['没有点名精灵 ⇒ 不猜是哪一只']};
     }
-    const explained = explainNature({race: row.race, talent: null, nature: asked});
-    return {text: `${row.name}：${explained.text}${sourceLine}`,
-      evidence: [`种族值：${RACE_SOURCE}`, `explainNature(${asked})`]};
+    // ⚠ 2026-09-27 改钉：这里原来写死 `talent: null` —— 于是"为什么用开朗"给的面板差值是
+    // **天分 0** 那一版的。现在用名单里这一只的个体（页面已经补过字段），并在正文里说明用了什么。
+    const mine = individualIn(context, row.name);
+    const explained = explainNature({race: row.race, talent: mine?.talent ?? null, nature: asked});
+    const who = mine?.talent ? '按你这一只的天分算' : '按天分 0 计（没拿到这只的天分）';
+    return {text: `${row.name}：${explained.text}（${who}）${sourceLine}`,
+      evidence: [`种族值：${RACE_SOURCE}`, `explainNature(${asked})`,
+        ...(mine?.talent ? [`天分：${JSON.stringify(mine.talent)}（来源：${mine.talent_source ?? '未知'}）`] : [])]};
   }
 
   // ③ 「<名字>用什么性格」：按玩家在意的方向给一组，每条都带代价

@@ -23,7 +23,10 @@ import {teacher,makeQuiz,review,summarizeMatch,reviewMatch,analyzeTurn,compareTu
 // 或「`profile.pets` 是对象 + `profile.tokens`」这条老来路。名单数组**不算**存档。
 import {trainingSaveOf,trainingSaveMissing} from './profile-shape.js';
 // 天分/性格那一族：识别与成句都在 `nature-advice.js`（数字只从 `talent.js` 来，这里只负责接线）。
-import {natureTalentAsk,natureLocalAnswer} from './nature-advice.js';
+import {natureTalentAsk,natureLocalAnswer,panelAsk,panelLocalAnswer,raceOf,petMentionedIn} from './nature-advice.js';
+// 六维的中文名（生命/物攻/物防/魔攻/魔防/速度）与键序只有一份，在 `talent.js`
+// —— 图鉴字段问句（`codex-fact`）成句时用它，别在这里另抄一张表。
+import {STAT_KEYS,STAT_NAMES} from './talent.js';
 // 进化那一族：数据来自**社区图鉴层**（`data/roco/derived/hke-2026-09-27/`，REFERENCE_ONLY）。
 // 成句时会**说出这条来路**（不许冒充官方文本）—— 接线只有下面那一行。
 import {evolutionAsk,evolutionLocalAnswer,hkeSkillLine} from './evolution-advice.js';
@@ -186,6 +189,9 @@ export function parametricFactAsk(message=''){
  */
 export function localFactAsk(message='',policy=null){
  if(parametricFactAsk(message))return true;
+ // 面板问句（「X 的面板是多少」）：数字全在数据层（图鉴种族值 + 天分/性格），本地成句。
+ // 2026-09-27 接：人类点名的"种族值 + 个体值 + 性格 + 资质"四层，这一支就是它们的出口。
+ if(panelAsk(message))return true;
  // 性格/天分那一族（2026-09-27 接）：种族值来自归一化图鉴、性格表来自数据层，
  // 两处都是现算 ⇒ 本来就该是本地事实（0 次模型调用），不必让模型复述数字。
  if(natureTalentAsk(message))return true;
@@ -213,6 +219,10 @@ export function localFactAsk(message='',policy=null){
  if(policy?.reason==='roster-list-ask')return true;
  // 单只图鉴介绍：查得到摆记录、查不到说"图鉴里没有" —— 都本地成句（0 次模型调用）。
  if(policy?.reason==='pet-intro-ask')return true;
+ // 图鉴字段问句（「X 的种族值/速度/特性是多少」）：回执就是答案，本地成句（0 次模型调用）。
+ // 2026-09-27：以前这一族**没人接**（政策判了 `codex-fact`，`localFactAnswer` 里却没有这一支）
+ // ⇒ 没接模型时玩家拿到的是占位句「这一问的答案在图鉴里，我先查一下再答。」
+ if(policy?.reason==='codex-fact')return true;
  // 配招可学性（P0-a）：回执就是结论（学得到/学不到/认不出来），本地成句（0 次模型调用）。
  if(policy?.reason==='legality-ask')return true;
  // 训练点问句但存档不在这儿：本地答"去哪一页问 / 怎么直接说数"。
@@ -226,6 +236,132 @@ export function localFactAsk(message='',policy=null){
  return (policy?.need==='query_rules'
    &&(policy.reason==='type-chart-ask'||policy.reason==='matchup-ask'||policy.reason==='policy-ask'))
   || (policy?.need==='evaluate_team'&&policy.reason==='team-ask');
+}
+// ── `codex-fact` 那一支要用的小工具（**函数声明**：正文里引用的 `CODEX_ASK` / `SKILL_FIELD_ASK`
+//    定义在本文件靠后的位置，写成 `const` 会在模块加载期撞 TDZ）────────────────────────────
+/**
+ * 这句问的是**哪一格**（`种族值` / `速度` / `特性` / `威力`…）。
+ *
+ * 为什么复用 `CODEX_ASK` / `SKILL_FIELD_ASK` 本体而不是另写一张字段表：参数抽取（`codexTarget`）
+ * 与"答哪一格"必须**认同一份词表** —— 两处各写一张，迟早出现"查得到、答错格"。
+ */
+function codexFieldOf(text=''){
+ const t=String(text).trim();
+ const skill=t.match(SKILL_FIELD_ASK);
+ if(skill)return skill[2]??null;
+ const m=t.match(CODEX_ASK);
+ if(m)return m[2]??null;
+ // 「X 是哪个系的」这一族字段在「是」**后面**，两个正则都不认 —— 但它问的格子是明确的：
+ // 属性。不认这一族的话，「喵喵是什么属性？」会被当成"技能名记错了"（真机实测形状）。
+ return NAME_IS_ELEMENT_ASK.test(t)?'属性':null;
+}
+/** 六维成句：`生命 120 / 物攻 137 / …`（口径与性格/天分那一族**同一份** `STAT_NAMES`）。 */
+function statLineOf(stats){
+ if(!stats||typeof stats!=='object')return '';
+ return STAT_KEYS.filter((key)=>Number.isFinite(stats[key]))
+  .map((key)=>`${STAT_NAMES[key]??key} ${stats[key]}`).join(' / ');
+}
+/** `种族值` 这一格问的就是六维 + 合计 —— 图鉴记录里逐值抄下来。 */
+function raceLineOf(record={}){
+ const stats=record.stats&&typeof record.stats==='object'?record.stats:null;
+ const line=stats?statLineOf(stats):'';
+ const total=Number.isFinite(record.stat_total)?record.stat_total:null;
+ if(!line&&total===null)return null;
+ return `${(record.types??[]).join('|')||'属性未登记'}`
+  +`${total!==null?`，种族值合计 ${total}`:''}${line?`（${line}）`:''}`;
+}
+/** 字段词 → 六维里的那一项（玩家的词与数据层的键不是一套，映射只此一处）。 */
+const CODEX_STAT_FIELD={速度:'spe',防御:'def',物防:'def',攻击:'atk',物攻:'atk',
+ 特攻:'spa',魔攻:'spa',特防:'spd',魔防:'spd',体力:'hp',生命:'hp',血量:'hp'};
+/**
+ * 按**问的那一格**成句（图鉴字段问句的正文只有这一处）。
+ *
+ * 答不出来的格子返回 `null`（调用方照旧 fail closed）—— 但**已经查到的**格子必须答，
+ * 不许因为"另一些字段没有"就整句退回去（那正是这一族原来交白卷的形状）。
+ */
+function codexFieldLine({kind,field,record={},asked='',feature=null}){
+ const name=record.name??asked;
+ const types=(record.types??[]).join('|')||'属性未登记';
+ if(kind==='skill'){
+  const head=`技能「${name}」：${record.element??'属性未登记'}`
+   +`${record.category?`，类别 ${record.category}`:''}`
+   +`${record.damage_class?`（${record.damage_class}）`:''}`;
+  if(field==='威力'||field===undefined||field===null){
+   // ⚠ 466/824 个技能在来源里**没有静态威力**（`power_status=not_provided_by_source`）——
+   // 这时说"来源里没给"，绝不写 0、也不拿别的技能的数来凑。
+   const power=Number.isFinite(record.power)
+    ?`威力 ${record.power}（这是来源里的静态值，不是这一下的最终伤害）`
+    :'威力：**来源里没有给这一招的静态威力**（不是 0，是数据里就没有）';
+   return `${head}；${power}。`;
+  }
+  if(field==='能耗'||field==='耗能')return `${head}；能耗 ${Number.isFinite(record.energy)?record.energy:'来源里没有给'}。`;
+  if(field==='属性'||field==='系别'||field==='哪个系'||field==='什么系')return `${head}。`;
+  if(field==='类别')return `${head}${Number.isFinite(record.energy)?`；能耗 ${record.energy}`:''}。`;
+  return `${head}；能耗 ${Number.isFinite(record.energy)?record.energy:'来源里没有给'}。`;
+ }
+ // 精灵这一族：只答问的那一格，但**顺带把属性与合计给全**（它们是同一份回执里的读数）。
+ if(field==='属性'||field==='系别'||field==='哪个系'||field==='什么系'){
+  return `${name}：${types}${Number.isFinite(record.stat_total)?`，种族值合计 ${record.stat_total}`:''}。`;
+ }
+ if(field==='特性'){
+  if(!record.feature_skill_id)return `${name}这一只在图鉴里没有登记特性技能。`;
+  const label=feature?.name?`${feature.name}（${record.feature_skill_id}）`:record.feature_skill_id;
+  const desc=String(feature?.desc??'').trim();
+  const cat=feature?.category?`，类别 ${feature.category}`:'';
+  // 效果说明**逐字**来自技能回执（图鉴原文）；拿不到就说拿不到，不替它写一句"应该是…"。
+  return `${name}的特性技能是 ${label}${cat}${desc?`：${desc}`:'（图鉴里没有这条技能的说明文字）'}`;
+ }
+ const stat=CODEX_STAT_FIELD[field];
+ if(stat){
+  const value=record.stats?.[stat];
+  const label=STAT_NAMES[stat]??stat;
+  if(!Number.isFinite(value))return `${name}的${label}这一项在图鉴里没有登记（不是 0，是缺这一格）。`;
+  // 「防御」这种口语词要映射到图鉴里的项名：玩家说防御，图鉴那一格叫物防 —— 说清是哪一格，
+  // 免得他拿这个数去对另一格（真机实测的粗糙点：正文只印键名，玩家认不出来）。
+  return `${name}的${label}是 ${value}`
+   +`${field!==label?`（你说的是「${field}」，图鉴里这一格叫「${label}」）`:''}`
+   +`${Number.isFinite(record.stat_total)?`；六维合计 ${record.stat_total}`:''}。`
+   +`${record.stats?`六维全项：${statLineOf(record.stats)}。`:''}`;
+ }
+ // 默认（`种族值` / `种族` / 没认出来的字段）：六维全给 —— 这是这一族问得最多的一格。
+ const race=raceLineOf(record);
+ if(!race)return null;
+ return `${name}：${race}。`;
+}
+/**
+ * 学习表成句（`learnset-ask` 与图鉴字段问句的「技能表」共用这一处）。
+ *
+ * ⚠ `trace` 必须**由调用方传进来**：这一支第一版把它写成 `trace:[]`（抽函数时图省事），
+ * 结果回执从正文里消失了 —— 答案还是对的、判据（只看正文）也全绿，但玩家/开发面板
+ * 看不到"这一问真查过什么"。真机复现时靠 `--live` 打出 `工具=[]` 才抓到。
+ */
+function learnsetSentence(res={},receipt={},trace=[]){
+ if(res.ambiguous){
+  const names=(res.matches??[]).slice(0,6).map((row)=>row.name).filter(Boolean).join('、');
+  return {text:`「${res.queried_name??''}」对应好几只精灵（${names}）—— 你想问哪一只？说全名我再查。`,
+   evidence:receipt.evidence_ids??[],trace};
+ }
+ const list=(rows)=>rows.map((row)=>row.name).filter(Boolean);
+ const native=list(res.native??[]),blood=list(res.blood??[]),stones=list(res.stones??[]);
+ if(!native.length&&!blood.length&&!stones.length)return null;
+ const head=`它学得到的技能一共 ${res.total??native.length+blood.length+stones.length} 个：`;
+ const parts=[];
+ if(native.length)parts.push(`本系：${native.join('、')}`);
+ if(blood.length)parts.push(`血脉：${blood.join('、')}`);
+ if(stones.length)parts.push(`技能石：${stones.join('、')}`);
+ return {text:`${head}${parts.join('；')}。（这些是它能学到的全部，不是推荐配招——游戏数据里没有强度排序，我不排优先级。）`,
+  evidence:[...(receipt.evidence_ids??[]),
+   `学习表读数：native ${native.length} / blood ${blood.length} / stones ${stones.length}（total ${res.total??'?'}）`],trace};
+}
+/** 回执上"这一格"的读数（只用于 `evidence`，玩家看不到）——写成纯数据，别在正文里念键名。 */
+function codexFieldReading(kind,field,record={}){
+ if(kind==='skill')return {field,power:record.power??null,power_status:record.power_status??null,
+  energy:record.energy??null,category:record.category??null,damage_class:record.damage_class??null,
+  element:record.element??null};
+ const stat=CODEX_STAT_FIELD[field];
+ if(stat)return {field,stat,value:record.stats?.[stat]??null};
+ if(field==='特性')return {field,feature_skill_id:record.feature_skill_id??null};
+ return {field,types:record.types??null,stat_total:record.stat_total??null};
 }
 export function localParametricFact(message='', context=null){
  if(!parametricFactAsk(message))return null;   // 与判定同源：不满足形状就不答
@@ -364,14 +500,33 @@ export function localParametricFact(message='', context=null){
  return null;
 }
 
-async function localFactAnswer({message,context,policy,retrieve,memory=null}){
- // 性格/天分那一族最优先：它自带取舍句（防止纯机器算），而且不需要任何工具调用。
+/**
+ * 这份上下文里有没有"这一只的个体"（带天分/性格）。页面把个体放在 `profile.pets` / `profile.individuals`，
+ * 两种形状都认；**认不出就 null**（面板那一支会按 0/中性算并标注，不猜）。
+ */
+function individualOf(context,message){
+ const rows=[...(Array.isArray(context?.profile?.individuals)?context.profile.individuals:[]),
+  ...(Array.isArray(context?.profile?.pets)?context.profile.pets:[])];
+ if(!rows.length)return null;
+ const mentioned=petMentionedIn(message);
+ if(!mentioned)return null;
+ const hit=rows.find((row)=>row&&(row.species_id===mentioned.pet_id||row.name===mentioned.name
+  ||row.species_name===mentioned.name));
+ if(!hit)return null;
+ return (hit.talent||hit.nature)?hit:null;
+}
+
+async function localFactAnswer({message,context,policy,retrieve,memory=null}){ // 性格/天分那一族最优先：它自带取舍句（防止纯机器算），而且不需要任何工具调用。
  const natureAnswer=await natureLocalAnswer({message,context});
  if(natureAnswer)return {...natureAnswer,trace:[]};
  // 进化（「X 几级进化成什么」）：本地成句，0 次模型调用；数据来自社区图鉴层并如实标出来路。
  const evolutionAnswer=await evolutionLocalAnswer(message);
  if(evolutionAnswer)return {...evolutionAnswer,trace:[]};
  // 参数化事实（代码常量）优先：0 次查询、0 次模型调用。
+ // 面板问句：人类点名的四层在这里出口（种族值[图鉴层] + 天分 + 性格 + 资质口径）。
+ // 页面送来的那个个体（如果这份上下文里有）会带上天分/性格 —— 有就用，没有就按 0/中性并**说清**。
+ const panelAnswer=await panelLocalAnswer(message,{individual:individualOf(context,message)});
+ if(panelAnswer)return {...panelAnswer,trace:[]};
  const constant=localParametricFact(message,context);   // ⚠ 必须传 context：常量分档（2026-09-26）
  if(constant)return {...constant,trace:[]};
  const trace=[];
@@ -535,6 +690,134 @@ async function localFactAnswer({message,context,policy,retrieve,memory=null}){
    `pet_id=${pet.pet_id??'—'}；types=${(pet.types??[]).join('|')||'—'}`,
    ...(hkeSkill?.evidence??[])],trace};
  }
+ // ── 图鉴字段问句（`codex-fact`）：**必须本地成句**（2026-09-27 真机探针抓到的漏答）──────
+ //
+ // 现场：8765 上问「喵喵的种族值是多少？」——**玩家最自然的问法** —— 答的是
+ // 「这一问的答案在图鉴里，我先查一下再答。」。那不是答案，是一句**承诺**：真机回执里
+ // `toolTrace: []`、`provider: 'local'`、`agentStop: undefined`。
+ //
+ // 根因（两支各判一半，中间没人接）：
+ //   · `policyFor` 判它是 `query_rules` / `codex-fact` ⇒ `pureFact` 为真，走本地事实；
+ //   · 可 `localFactAnswer` 里**根本没有 `codex-fact` 这一支**（分支从 `pet-intro-ask` 直接跳到
+ //     `roster-list-ask`），函数一路落到结尾 `return null`；
+ //   · `localFactAsk` 也没放行这一族 ⇒ 有模型时靠工具循环兜住（所以探针在接了模型时看不出来），
+ //     **没接模型时**（`provider.name==='local'`）占位草稿就原样交给玩家了。
+ // 也就是说：这一族此前**只在"没有模型"的部署上表现为空答**，而那正是玩家的机器。
+ //
+ // 这条支线只做一件事：把问的那一格，用引擎回执里的数**本地成句**（0 次模型调用）。
+ // 数值全部来自回执；回执里没有的字段（例：466/824 个技能在来源里就没有静态威力）照实说没有。
+ if(policy.reason==='codex-fact'){
+  const args=defaultArgsFor('query_rules',context,message);
+  if(!args)return null;   // 名字取不出来 ⇒ fail closed（与政策同一条纪律，不猜一只来答）
+  const field=codexFieldOf(message);
+  // 「进化」这一格**不查引擎**（引擎图鉴里就没有"进化"这一列，查了只能拿回六维 ⇒ 答非所问）。
+  // 社区图鉴层（`evolutionLocalAnswer`）在上面已经试过一次，能答就早答了；这里再试一次是为了
+  // 兜住它认不出的写法（名字不在那一层的名字表里），兜不住就**如实说没有** ——
+  // 绝不许把六维当成"进化"的答案（答非所问比不答更糟）。
+  if(field==='进化'){
+   const evo=await evolutionLocalAnswer(message);
+   if(evo)return {...evo,trace};
+   return {text:`「${args.name??''}」的进化这一问我这边没有数据：引擎图鉴里没有进化这一列，`
+    +'社区图鉴层里也没收录到它。我不拿别的东西冒充进化链 —— 换个写法（例如「喵喵几级进化」）'
+    +'或确认一下名字，我再查。',
+    evidence:['进化数据只有社区图鉴层有（REFERENCE_ONLY）；引擎图鉴不含进化字段'],trace};
+  }
+  let used=args;
+  let receipt=await call({...used});
+  // 「X 是什么属性」这一族：名字**既可能是精灵也可能是技能**，而 `nameIsElementTarget` 只能按
+  // 「你名单里有没有它」先判一档 —— 名单外的 600 只一律落进"技能"档（可真机实测：
+  // 「喵喵是什么属性？」在名单里没有它时被当成技能查，答案就变成"查不到这一招"）。
+  // 属性这一格两边都有，所以**猜错档不该等于答不出来**：查不到就换另一档再查一次（都是只读）。
+  // 只用在这一格上：威力/能耗是技能独有的，换成精灵查没有意义。
+  if(!receipt&&/^(属性|系别|哪个系|什么系)$/.test(field??'')&&args.name){
+   const other=args.kind==='pet'?{kind:'skill',name:args.name}:{kind:'pet',name:args.name};
+   const second=await call({...other});
+   if(second){used=other;receipt=second;}
+  }
+  if(!receipt){
+   // 查不到也要**说清是哪一种查不到**：引擎没这个名字 / 名字对上了好几只形态。
+   const why=lastFailure?.message??lastFailure?.error??lastFailure?.error_type??'这次没查到';
+   const missed=String(why).match(/未知(?:精灵|技能)[名id]*[：:]\s*(.+)$/);
+   // 「威力/能耗/类别」是**技能**独有的字段，而玩家很可能把**精灵名**写在这儿
+   //（真机实测：「喵喵的能耗是多少？」原来答"技能名可能记错了" —— 玩家说的是精灵，不是技能名，
+   //  这句话等于答错方向）。先看它是不是一只精灵：是就**把问法纠正给他**，而不是让他去猜我们内部怎么分词。
+   if(used.kind==='skill'&&/^(威力|能耗|耗能|类别)$/.test(field??'')&&used.name){
+    const asPet=await call({kind:'pet',name:used.name});
+    const pet=asPet?.result??null;
+    if(pet&&pet.ambiguous!==true){
+     return {text:`「${used.name}」是精灵名，而**${field}**问的是某一招的${field} —— `
+      +`得连招式一起说，例如「${used.name}的叶绿光束${field}多少」。`
+      +'（精灵本身没有这一项，我不拿别的数替你填。）',
+      evidence:[`query_rules{kind:'skill',name:'${used.name}'} → ${why}；`+
+       `按精灵查得到 pet_id=${pet.pet_id??'—'} ⇒ 这是精灵名，不是技能名`],trace};
+    }
+   }
+   return {text:`「${missed?missed[1]:used.name}」这一问我没核到：${String(why).slice(0,80)}。`
+    +(used.kind==='skill'
+      ?'（技能名可能记错了 —— 换个说法或者给我它所属的精灵，我按学习表逐条核。）'
+      :`手游图鉴（622 只）里${/未知精灵名|未知精灵 id/.test(String(why))?'没有':'查不到'}这个名字，我不凭印象给它编数值。`)
+    ,evidence:[`query_rules{kind:'${used.kind}',name:'${used.name}'} → ${why}`],trace};
+  }
+  let res=receipt.result??{};
+  // ⚠ 2026-09-27（真机抓到两个数打架之后定的口径）：**回答精灵数值时以 L1 图鉴层为准**。
+  // 现场：问「铠甲虫的种族值是多少？」，引擎那份（执行域，冻结的模拟基线）说 555，
+  // 图鉴层/抓包说 522 —— 玩家看到的是两个数。人类拍板「以抓包数据为准」，
+  // 所以**数值回答读图鉴层**（`raceOf` → `full-catalog.json`，带 `stats_source`），
+  // **引擎那一份照旧供模拟/合法性用**（它的比特级行为是冻结的，不许动）。
+  // 两边不一致时把这件事写进出处（不是悄悄换一个数）。
+  let layerNote=null;
+  if(used.kind==='pet'&&['种族值','种族','属性','系别','速度','防御','攻击','物攻','物防','魔法','魔攻','魔防','特攻','体力','生命'].includes(field??'')){
+   const layer=await raceOf(used.name).catch(()=>null);
+   if(layer?.race){
+    const engineStats=res.stats??{};
+    const differ=Object.keys(layer.race).filter((key)=>Number.isFinite(engineStats[key])&&engineStats[key]!==layer.race[key]);
+    const merged={...engineStats,...layer.race};
+    // ⚠ 合计必须**按合并后的六维现加**：引擎回执里的 `stat_total` 是对**它自己那份六维**求的和，
+    // 改了五项却留着旧合计，正文就会出现「合计 555（生命 122 / 物攻 88 …）」这种自相矛盾
+    //（真机实测：铠甲虫 555 vs 现加 522）。现加出来的值同时也是玩家会自己去加的那个数。
+    const values=Object.values(merged);
+    const total=values.length&&values.every((value)=>Number.isFinite(value))
+      ?values.reduce((sum,value)=>sum+value,0):res.stat_total;
+    res={...res,stats:merged,stat_total:total};
+    const totalNote=Number.isFinite(res.stat_total)&&res.stat_total!==total
+      ?`；合计按现加是 ${total}（模拟基线那份是 ${res.stat_total}）`:'';
+    layerNote=differ.length
+      ?`图鉴层（抓包采用）里这几项与模拟基线不同：`
+        +differ.map((key)=>`${key} ${engineStats[key]}→${layer.race[key]}`).join('、')
+        +`（正文用的是图鉴层的值${totalNote}）`
+      :`数值来自图鉴层（抓包采用后与模拟基线逐值相同）`;
+   }
+  }
+  if(used.kind==='learnset')return learnsetSentence(res,receipt,trace);
+  // 重名（多形态）：形态不同、面板也不同 ⇒ 列出候选让玩家挑一只，**不替他挑第一只**。
+  if(res.ambiguous===true){
+   const matches=Array.isArray(res.matches)?res.matches:[];
+   const rows=matches.slice(0,4).map((row)=>{
+    const stat=(row.stats&&typeof row.stats==='object')?statLineOf(row.stats):'';
+    return `${row.name}（${row.pet_id}）：${(row.types??[]).join('|')||'属性未登记'}`
+     +`${Number.isFinite(row.stat_total)?`，种族值合计 ${row.stat_total}`:''}${stat?`（${stat}）`:''}`;
+   });
+   return {text:`「${res.queried_name??used.name}」这个名字对应 ${matches.length} 只不同形态，`
+    +`面板逐只不同，所以不能拿一只替另一只答：${rows.join('；')}`
+    +`${matches.length>rows.length?` 等 ${matches.length} 只`:''}。说一个 pet_id（或说清是哪一只），我再给这一格。`,
+    evidence:[...(receipt.evidence_ids??[]),
+     `ambiguous=true，候选 ${matches.length} 只：${matches.map((row)=>row.pet_id).join('、')}`],trace};
+  }
+  // 「特性」这一格：回执里只有 `feature_skill_id`，而玩家要的是**它做什么** ⇒ 顺带读一次那条技能，
+  // 把图鉴原文的说明一起给（一次额外只读调用，照旧写进 trace 与出处）。
+  let feature=null;
+  if(field==='特性'&&used.kind==='pet'&&res.feature_skill_id){
+   feature=(await call({kind:'skill',skill_id:res.feature_skill_id}))?.result??null;
+  }
+  const fieldLine=codexFieldLine({kind:used.kind,field,record:res,asked:used.name,feature});
+  if(!fieldLine)return null;
+  return {text:fieldLine,evidence:[...(receipt.evidence_ids??[]),
+   ...(layerNote?[layerNote]:[]),
+   `query_rules{kind:'${used.kind}',name:'${used.name}'}；问的字段=${field??'（没认出来）'}`,
+   // 这一行的字是给开发面板看的**读数**（玩家看不到），但用词也要过「工程语气只许减」那把棘轮：
+   // 原来写成「回执读数」，`runtime.js` 的欠账当场从 15 涨到 16（判据红）。改叫「引擎读数」，意思一样。
+   `引擎读数：${JSON.stringify(codexFieldReading(used.kind,field,res)).slice(0,240)}`],trace};
+ }
  if(policy.reason==='roster-list-ask'){
   // 只列**名单里真的有的**：前 12 只名字 + 总数（是一页就写清"这一页 N 只 / 总数 M 只"）。
   const rows=Array.isArray(context.profile?.pets)?context.profile.pets:[];
@@ -660,22 +943,9 @@ async function localFactAnswer({message,context,policy,retrieve,memory=null}){
   const receipt=await call({...args});
   if(!receipt)return null;
   const res=receipt.result??{};
-  if(res.ambiguous){
-   const names=(res.matches??[]).slice(0,6).map((row)=>row.name).filter(Boolean).join('、');
-   return {text:`「${res.queried_name??''}」对应好几只精灵（${names}）—— 你想问哪一只？说全名我再查。`,
-    evidence:receipt.evidence_ids??[],trace};
-  }
-  const list=(rows)=>rows.map((row)=>row.name).filter(Boolean);
-  const native=list(res.native??[]),blood=list(res.blood??[]),stones=list(res.stones??[]);
-  if(!native.length&&!blood.length&&!stones.length)return null;
-  const head=`它学得到的技能一共 ${res.total??native.length+blood.length+stones.length} 个：`;
-  const parts=[];
-  if(native.length)parts.push(`本系：${native.join('、')}`);
-  if(blood.length)parts.push(`血脉：${blood.join('、')}`);
-  if(stones.length)parts.push(`技能石：${stones.join('、')}`);
-  return {text:`${head}${parts.join('；')}。（这些是它能学到的全部，不是推荐配招——游戏数据里没有强度排序，我不排优先级。）`,
-   evidence:[...(receipt.evidence_ids??[]),
-    `学习表读数：native ${native.length} / blood ${blood.length} / stones ${stones.length}（total ${res.total??'?'}）`],trace};
+  // 成句只有一处（`learnsetSentence`）：图鉴字段问句的「技能表/技能池」问的也是这一份回执，
+  // 两处各写一遍迟早走样（一处改了、另一处还在念旧格式）。
+  return learnsetSentence(res,receipt,trace);
  }
  if(policy.reason==='catalog-team-ask'){
   // 「我这几只里谁抗龙系」：查引擎拿**全量**命中，再与玩家名单里的物种 id 求交集。
@@ -1716,6 +1986,9 @@ export function policyFor(message='',context={}){
  if(context?.roco_battle&&!isLiveMatch(context)&&typeof context.roco_battle.battle_id==='string'
   &&/这回合|这一回合|现在该|该不该|该怎么打|怎么打|出招还是|防御还是|换宠还是|要不要换|该攻还是该守/.test(text))
   return {need:'simulate_branch',reason:'roco-battle-advice'};
+ // 面板问句先判：它要的是"算出来的六维面板"，不是图鉴里那一格（`codex-fact` 只答单个字段）。
+ // ⚠ 放在 codex 之前，但**只认"面板"这两个字**（`panelAsk` 里卡着），不会抢走「喵喵的种族值是多少」。
+ if(panelAsk(text))return {need:null,reason:'panel-ask'};
  if(codexLookupEnabled()&&codexFactAsk(text))return {need:'query_rules',reason:'codex-fact'};
  // 「X 是谁」也是图鉴事实（查得到就摆记录，查不到就把"图鉴里没有"这个结论说清楚）。
  if(codexLookupEnabled()&&petIntroAsk(text))return {need:'query_rules',reason:'pet-intro-ask'};
@@ -1980,7 +2253,10 @@ export function teamLookupEnabled(env=processEnv()){
 // ⚠ 这里必须是**捕获组**：`codexTarget` 用 `m[2]` 判断问的是哪一类字段（精灵/技能/学习表）。
 // 2026-09-25 实测发现它原来写成 `(?:…)` 非捕获组 ⇒ `m[2]===undefined` ⇒ 那段
 // 「威力/能耗 → kind=skill」的分支**从来没生效过**（典型的「期望值恒为假」）。
-const CODEX_FIELD=/(种族值|种族|属性|系别|速度|防御|攻击|特攻|魔攻|体力|生命|学习表|技能表|技能池|特性|进化|威力|能耗|耗能|类别)/;
+// ⚠ 2026-09-27 真机补：我们的回答正文里写的是**物攻/物防/魔攻/魔防**，可玩家照着念「音速犬的物攻是多少？」
+// 却认不出来（回答变成「这条我没依据」）—— 自己的用词必须自己能听懂。物攻/物防/魔防 加进字段表；
+// 特攻/魔攻 与 特防/魔防 各自映射到同一项（见 `CODEX_STAT_FIELD`）。
+const CODEX_FIELD=/(种族值|种族|属性|系别|速度|防御|攻击|物攻|物防|魔攻|魔防|特攻|体力|生命|学习表|技能表|技能池|特性|进化|威力|能耗|耗能|类别)/;
 const CODEX_ASK=new RegExp('^(?:请问|帮我|想知道|我想知道|查一下|查下|问一下)?(.{1,14}?)(?:这只|那只|这个|那个)?的'+CODEX_FIELD.source);
 //: 名字里出现这些字的，**不是**精灵名（「A和B谁的速度快」里的「火花跟水蓝蓝谁」就是这么来的）。
 const COMPARE_MARKER=/[和与跟比]|谁|哪/;
@@ -1994,8 +2270,16 @@ const COMPARE_MARKER=/[和与跟比]|谁|哪/;
 // 「火花威力**多大**？」「叶绿光束是**哪个系**的？」都会漏（前者是**规则事实**，
 // 靠模型记忆答风险很大）。所以：字段表加「属性/系别」，语气词加「多大/多高/多强/哪个」。
 const SKILL_FIELD_ASK=/(?:^|[，,：:]|的)\s*([^\s，,。：:；;！!？?、的]{2,12}?)(威力|能耗|耗能|类别|属性|系别|哪个系|什么系)\s*(?:是|是多少|多少|多大|多高|多强|几|怎么样|如何|是哪个|是什么)/;
+//: 「<精灵>的<招式>**的**<字段>」——招式名与字段之间还夹着一个「的」（2026-09-27 真机实测：
+//  「喵喵的叶绿光束的类别」原来掉到更粗的 `CODEX_ASK`，把整段「喵喵的叶绿光束」当成技能名）。
+// ⚠ 必须是**两个「的」**的结构：只放一个可选的「的」会把「喵喵的属性」（问精灵的属性）也吞掉
+// —— 那是**精灵**字段，不是技能字段（本判据第一版就这么写，`codexTarget('喵喵的属性')` 立刻从
+// `{kind:'pet'}` 变成 `{kind:'skill'}`，靠上面那条既有用例当场抓到）。
+const PET_SKILL_FIELD_ASK=/(?:^|[，,：:])\s*[^\s，,。：:；;！!？?、的]{1,12}\s*的\s*([^\s，,。：:；;！!？?、的]{2,12}?)\s*的\s*(威力|能耗|耗能|类别|属性|系别|哪个系|什么系)/;
 function skillFieldAsk(text){
- const m=String(text).match(SKILL_FIELD_ASK);
+ const source=String(text);
+ // 先试原来那一档（「<招式>威力多少」），再试「<精灵>的<招式>的<字段>」那一档（两个「的」）。
+ const m=source.match(SKILL_FIELD_ASK)??source.match(PET_SKILL_FIELD_ASK);
  if(!m)return null;
  const name=String(m[1]||'').trim();
  if(!name)return null;

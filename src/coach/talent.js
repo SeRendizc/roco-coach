@@ -63,15 +63,38 @@ export function natureOf(name) {
 /**
  * 性格对某一项的系数。**未知性格一律返回 1（中性）并把这件事记在 `unknown` 里** ——
  * 不许把"没填性格"当成"性格是加这一项的"（那是编数据的一种）。
+ *
+ * ⚠ 2026-09-27 **改钉**：长处这一侧不再写死 +20%，而是按**突破次数**算：
+ *   提升初始 **+10%**，每突破一次 **+2%**，满突破 **+20%**；降低**固定 −10%**。
+ *   人类当天的口径正是这个（「一个加 10%，一个减 10%，可不变化幅度就是 20%？」），
+ *   台账 `EV-NATURE-BALANCE-PVP` 与反编译注释（`UMG_PetCharacter_PopUp_C._lua:103-104`）逐字一致。
+ * `breakthrough` 缺省 **0**（我们没有"每只的突破次数"这个数据 ⇒ 给下界，不许猜）。
+ * PVP（闪耀大赛）归一化到**满突破**，调用方传 `breakthrough: 5`（见 `pvpPanelOf`）。
  */
-export function natureFactor(name, stat) {
+export const NATURE_BREAKTHROUGH = Object.freeze({max: 5, levels: [20, 30, 40, 50, 60],
+  source: '游戏导出配置表 BREAK_NUMBER_CONF 的 require_level=20/30/40/50/60 + 反编译注释逐字'
+    + '「提升初始 +10%，每突破一次 +2%，满突破 +20%；降低固定 −10%」',
+  note: '突破＝星级，同一根 0→5 轴；每次突破还抬等级上限与天分上限（那两层本仓未建）'});
+
+export function natureFactor(name, stat, {breakthrough = 0} = {}) {
   const row = natureOf(name);
   if (!row) return {factor: 1, known: false, reason: name ? `认不出性格「${name}」` : '这一只还没填性格'};
   if (!STAT_KEYS.includes(stat)) throw new Error(`没有这一项：${stat}`);
-  const {up, down, neutral} = naturesData().modifier;
-  if (row.up === stat) return {factor: 1 + up, known: true, reason: `${row.name}：${STAT_NAMES[stat]}是长处（+${Math.round(up * 100)}%）`};
-  if (row.down === stat) return {factor: 1 + down, known: true, reason: `${row.name}：${STAT_NAMES[stat]}是短处（${Math.round(down * 100)}%）`};
-  return {factor: neutral, known: true, reason: `${row.name}：${STAT_NAMES[stat]}不受影响`};
+  const steps = Math.max(0, Math.min(NATURE_BREAKTHROUGH.max, Math.trunc(breakthrough) || 0));
+  const up = Math.min(NATURE_PVE_FLOOR.up + NATURE_PVE_FLOOR.perBreakthrough * steps,
+    NATURE_PVE_FLOOR.cap);
+  const {down, neutral} = naturesData().modifier;
+  if (row.up === stat) {
+    return {factor: 1 + up, known: true, breakthrough: steps,
+      reason: `${row.name}：${STAT_NAMES[stat]}是长处（+${Math.round(up * 100)}%`
+        + `${steps ? `，已算 ${steps} 次突破` : '，零突破'}）`};
+  }
+  if (row.down === stat) {
+    // 减益**固定**：随成长上升的只有增益那一侧（这条是本次查证最硬的一条）。
+    return {factor: 1 + down, known: true, breakthrough: steps,
+      reason: `${row.name}：${STAT_NAMES[stat]}是短处（${Math.round(down * 100)}%，不随突破变化）`};
+  }
+  return {factor: neutral, known: true, breakthrough: steps, reason: `${row.name}：${STAT_NAMES[stat]}不受影响`};
 }
 
 /**
@@ -120,6 +143,43 @@ export function natureFloorFactor(name, stat) {
 // 7-8-9-10 分别会在战斗中增加 42-48-54-60 的面板值」——按上式，个体值 10 对生命只加 8.5，
 // 对别项只加 5.5，**对不上 60**。所以 `TALENT_PVP_STEP` 只作为"待核对的另一条口径"存在，
 // 面板换算**只用公式那条**；两者之间的关系在被证实前不许合并（判据里钉着这个冲突必须还在）。
+/**
+ * **等级公式**（2026-09-27 从游戏导出配置表拿到的那一条）。
+ *
+ * 来源（两条互相印证）：
+ *   · `DATAMINE`：配置表 `ATTR_GLOBAL_CONFIG` —— 非生命 `race_constant=100`、`talent_constant=50`、
+ *     `race_add_level=50`；生命 `race_constant=200`、`talent_constant=100`、`race_add_level=25`；
+ *   · 官方公众号《洛个明白》逐字「精灵最高能升到 **60 级** 哦~但精灵的等级上限会被魔法等级限制」。
+ *
+ * 两条公式（L = 等级，个体值按 **0–10** 的 UI 刻度直接代入，内部 ×6 是单位换算不是额外加成）：
+ *   其他(L) = round( (round((种族值 + 3×个体值) × (L + 50) / 100) + 10) × 性格 ) + 50
+ *   生命(L) = round( (round((种族值 + 3×个体值) × (L + 25) / 50) + 70) × 性格 ) + 100
+ *
+ * **L=60 时它会退化成社区那两行 PVP 公式**（`(60+50)/100 = 1.1`、`(60+25)/50 = 1.7`）——
+ * 这就是"公式里的 1.1 是 60 级的指纹"那句话的意思，`tests/roco-talent-nature.test.js` 钉着这个等价。
+ *
+ * ⚠ **取整顺序敏感**：先 round 内层、再加 10/70、再乘性格、再 round、最后 +50/+100。
+ * 判例：噼啪鸟（速度种族值 145）必须这样算才得 **294**，换个顺序得 293。
+ *
+ * **实测校验（用我们自己的抓包数据算，不是抄别人的结论）**：wiki「PVP 一速榜」公布的
+ * 火神 273 / 落陨星兔 273 / 圣羽翼王 267 / 彩蝶鲨 267 / 电企鹅 267 / 神谕鲨 267 /
+ * 音速犬 260 / 黑羽夫人 260 / 噼啪鸟 294 —— **9/9 全中**（满级 60、满突破性格 1.2、个体值 10、+50）。
+ */
+export const LEVEL_FORMULA = Object.freeze({
+  cap: 60,
+  // ⚠ 两条的 `race`/`talent` 系数是**同一个** (1 / 3)：等级项在括号内，随等级放大。
+  // 区别只在括号外：生命 (L+25)/50 + 70 + 100，其他 (L+50)/100 + 10 + 50。
+  // 曾经把生命的 race/talent 写成 2/6（把"每级增量是别人的两倍"错当成"括号内系数两倍"）——
+  // 那会让 120 种族值的生命在 60 级算出 622（正确是 425）。判据里钉着这条。
+  hp: {race: 1, talent: 3, level: 25, base: 70, add: 100, divisor: 50},
+  other: {race: 1, talent: 3, level: 50, base: 10, add: 50, divisor: 100},
+  default_level: 60,
+  source: '游戏导出配置表 ATTR_GLOBAL_CONFIG（经 rocom.aoe.top 托管）+ 官方公众号《洛个明白》「最高 60 级」',
+  confidence: 'DATAMINE + OFFICIAL（等级上限官号逐字；系数来自配置表，且 L=60 退化式与社区实测 9/9 吻合）',
+  constants_note: '末尾的 +50/+100 与配置表 GROW_LEVEL_CONF（成长等级满 50 级：生命 +100、其它每项 +50）'
+    + '逐值相等 —— 两种读法（"PVP 归一化的努力值 50" vs "成长等级满级加成"）都能对上这一项，见台账冲突清单。',
+});
+
 export const PANEL_FORMULA = {
   hp: {race: 1.7, talent: 0.85, base: 70, add: 100},
   other: {race: 1.1, talent: 0.55, base: 10, add: 50},
@@ -139,7 +199,12 @@ export const TALENT_PVP_STEP = {
   // 于是本仓现在的默认取**每点 +6（PVP）**这一套：它自洽（7→42 … 10→60 逐点线性），
   // 而公式那套（0.85/0.55）**保留**在 PANEL_FORMULA 里作为"升级成长口径"，两条都带出处、都能算，界面上可并列。
   external_support: 'TapTap 二测攻略（资质=种族值+天分；天分一级单项最高 10；另有隐藏个体值）',
-  decision: 'PVP 面板默认用"每点 +6"；升级/成长口径仍用 PANEL_FORMULA（0.85/0.55）。两条都留，不互相覆盖。',
+  decision: '2026-09-27 查证后**改钉**：面板换算只用等级公式（`LEVEL_FORMULA`，天分在括号内按 +3×资质）。'
+    + '「每点 +6」与前述公式**冲突**（它解释不了 PVP 一速榜 9/9 的实测），因此**不再参与任何面板换算**；'
+    + '这条记录只作为历史口径保留（改钉不删），出处见 external_support。',
+  resolved_by: '2026-09-27 外部查证：配置表 ATTR_GLOBAL_CONFIG 的 talent_constant 在括号内（1/3），'
+    + '笔记里的「×6」是 UI 0–10 → 内部 0–60 的**单位换算**，不是 PVP 额外加成；'
+    + '9/9 实测（`tests/roco-panel-level.test.js` ①）只支持等级公式那一条。',
 };
 export const TALENT_RANGE = {min: 0, max: 10, note: '六项各自 0–10；「了不起天分」= 六项资质里随机三项加 7–10（笔记 §精灵性格与资质）'};
 
@@ -153,33 +218,35 @@ export const TALENT_RANGE = {min: 0, max: 10, note: '六项各自 0–10；「�
  *   · `sources` 是这一次实际用到的来源，供答案层交代出处。
  */
 /**
- * **PVP 面板**：种族值那部分走 `PANEL_FORMULA`，天分那部分走"每点 +6"（`TALENT_PVP_STEP`）。
+ * **PVP 面板**＝满级 60 + 满突破那一条（闪耀大赛把练度拉平的那一档）。
  *
- * 为什么这样拼：两条口径各自的自洽域不同 —— 公式那条含性格系数（0.9/1/1.2，与 PVP 的 ±20/10% 吻和）
- * 但天分系数只有 0.85/0.55；而"每点 +6"那条在 7/8/9/10 上逐点线性、且与「一级单项最高 10」的取值域吻合。
- * 所以：**性格与种族值按公式，天分按 +6**，并把两条都写进 `sources` 让人能核。
+ * ⚠ 2026-09-27 **改钉，这一条以前是错的**：旧实现是「种族值/性格按老公式 + 天分**另加**每点 +6」，
+ * 而天分在公式里**已经在括号内**（`+3×个体值`）⇒ 那一版把天分算了两遍（10 点天分在速度上会多算 60）。
+ * 现在直接落到等级公式的 L=60 分支上；`TALENT_PVP_STEP`（每点 +6）作为**已登记的另一条口径**保留，
+ * 但**不再参与面板换算** —— 它解释不了 9/9 的实测（见 `LEVEL_FORMULA` 的校验说明）。
  */
-export function pvpPanelOf({race = null, talent = null, nature = null} = {}) {
-  const base = panelOf({race, talent: null, nature, scope: 'pvp'});
-  if (!Object.keys(base.panel).length) return base;
-  const panel = {...base.panel};
-  const unknown = [...base.unknown.filter((row) => !row.includes('还没填天分'))];
-  for (const stat of STAT_KEYS) {
-    const value = Number(talent?.[stat]);
-    if (!Number.isFinite(value) || value <= 0) continue;
-    panel[stat] = (panel[stat] ?? 0) + value * TALENT_PVP_STEP.perPoint;
-    if (value > 10) unknown.push(`${STAT_NAMES[stat]} 的天分值 ${value} 超过"一级单项最高 10"（外部攻略口径）`);
-  }
-  return {panel, unknown: [...new Set(unknown)],
-    sources: [...base.sources, TALENT_PVP_STEP.source]};
+export function pvpPanelOf({race = null, talent = null, nature = null, breakthrough = null} = {}) {
+  // PVP 归一化那一档的**定义**就是满级 + 满突破（实测 9/9 要求性格系数 1.2）——
+  // 所以这里显式给满突破，而不是靠 `panelOf` 的缺省。
+  return panelOf({race, talent, nature, scope: 'pvp', level: LEVEL_FORMULA.cap,
+    breakthrough: Number.isInteger(breakthrough) ? breakthrough : NATURE_BREAKTHROUGH.max});
 }
 
-export function panelOf({race = null, talent = null, nature = null, scope = 'pvp'} = {}) {
+export function panelOf({race = null, talent = null, nature = null, scope = 'pvp',
+  level = LEVEL_FORMULA.default_level, breakthrough = null} = {}) {
   const unknown = [];
-  const sources = [PANEL_FORMULA.source];
-  if (scope !== 'pvp') {
-    // 非 PVP 档的性格加成随突破次数走，本仓没有突破数据 ⇒ 只给公式那一半，性格按 unknown。
-    unknown.push('非 PVP 档的性格加成要看突破次数（每突破 +2%），本仓没有这个数据 ⇒ 这一档只给中性面板');
+  const sources = [LEVEL_FORMULA.source, NATURE_BREAKTHROUGH.source];
+  // 突破次数：调用方给了就按它算；没给 ⇒ PVP 归一化档按**满突破 5**（闪耀大赛把练度拉平，
+  // 性格修正 1.2 是那一档的实测值），其他档按 **0**（我们没有每只的突破次数，只给下界并标注）。
+  // ⚠ 缺省**永远是零突破下界**（我们没有"每只的突破次数"这个数据）：PVP 归一化那一档
+  // 由 `pvpPanelOf` 显式传满突破 5（那是它的定义），`panelOf` 自己不替玩家假设练度。
+  const steps = Number.isInteger(breakthrough) ? Math.max(0, Math.min(NATURE_BREAKTHROUGH.max, breakthrough)) : 0;
+  if (!Number.isInteger(breakthrough)) {
+    unknown.push('不知道这只突破到第几段 ⇒ 性格增益按**零突破下界**算（初始 +10%、每突破 +2%、满 +20%）');
+  }
+  if (!Number.isFinite(level) || level < 1 || level > LEVEL_FORMULA.cap) {
+    unknown.push(`等级 ${level} 不在 1–${LEVEL_FORMULA.cap} 之内 ⇒ 这一份面板不算（等级上限 60 是官方口径）`);
+    return {panel: {}, unknown, sources};
   }
   if (!race || typeof race !== 'object') {
     return {panel: {}, unknown: [...unknown, '没有种族值 ⇒ 面板算不出来（不拿 0 顶）'], sources};
@@ -200,11 +267,12 @@ export function panelOf({race = null, talent = null, nature = null, scope = 'pvp
     const raceValue = numOrNull(race[stat]);
     if (raceValue === null) { unknown.push(`种族值缺「${STAT_NAMES[stat]}」⇒ 这一项不算`); continue; }
     const talentValue = numOrNull(talent?.[stat]) ?? 0;
-    const shape = stat === 'hp' ? PANEL_FORMULA.hp : PANEL_FORMULA.other;
-    const nf = scope === 'pvp' ? natureFactor(nature, stat) : {factor: 1, known: false, reason: '非 PVP 档性格加成未知'};
+    const shape = stat === 'hp' ? LEVEL_FORMULA.hp : LEVEL_FORMULA.other;
+    const nf = natureFactor(nature, stat, {breakthrough: steps});
     if (!nf.known) unknown.push(`性格：${nf.reason}`);
-    const raw = (shape.race * raceValue + shape.talent * talentValue + shape.base) * nf.factor + shape.add;
-    panel[stat] = Math.round(raw);
+    // 取整顺序**照判例来**：先 round 内层 → 加常数 → 乘性格 → round → 加末尾常数。
+    const scaled = (shape.race * raceValue + shape.talent * talentValue) * (level + shape.level) / shape.divisor;
+    panel[stat] = Math.round((Math.round(scaled) + shape.base) * nf.factor) + shape.add;
   }
   return {panel, unknown: [...new Set(unknown)], sources};
 }

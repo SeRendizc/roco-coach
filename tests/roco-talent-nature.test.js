@@ -51,10 +51,17 @@ test('③ 修正系数：长处 1.2、短处 0.9、不受影响 1.0；**未知�
   const {modifier} = raw;
   assert.equal(modifier.up, 0.2, '长处 +20% 来自台账 EV-NATURE-BALANCE-PVP');
   assert.equal(modifier.down, -0.1, '短处 −10% 同上');
-  assert.equal(natureFactor('开朗', 'spe').factor, 1.2, '开朗的长处是速度');
-  assert.equal(natureFactor('开朗', 'spa').factor, 0.9, '开朗的短处是魔攻');
+  // ⚠ 2026-09-27 **改钉**（人类拍板 + 查证）：长处那一侧**随突破长**，缺省是**零突破**：
+  //   初始 +10%、每突破 +2%、满突破 +20%；短处**恒 −10%**。
+  //   人类原话：「一个加 10%，一个减 10%，可不变化幅度就是 20%？」——
+  //   即"20%"说的是**幅度**（−10% 到 +10% 的跨度），不是"长处 +20%"。
+  //   反编译注释逐字：「降低固定 −10%；提升初始 +10%，每突破一次再 +2%，满突破 +20%」。
+  assert.equal(natureFactor('开朗', 'spe').factor, 1.1, '开朗的长处是速度（零突破 +10%）');
+  assert.equal(natureFactor('开朗', 'spe', {breakthrough: 5}).factor, 1.2, '满突破才是 +20%');
+  assert.equal(natureFactor('开朗', 'spa').factor, 0.9, '开朗的短处是魔攻（−10%，零突破）');
+  assert.equal(natureFactor('开朗', 'spa', {breakthrough: 5}).factor, 0.9, '减益不随突破变化');
   assert.equal(natureFactor('开朗', 'hp').factor, 1.0, '生命不受开朗影响');
-  assert.equal(natureFactor('胆小', 'spe').factor, 1.2, '胆小的长处也是速度（短处是物攻）');
+  assert.equal(natureFactor('胆小', 'spe').factor, 1.1, '胆小的长处也是速度（短处是物攻）');
   assert.equal(natureFactor('胆小', 'atk').factor, 0.9);
   // 反证：没填性格 ≠ 加成。它必须回到中性并且**明说不知道**。
   const blank = natureFactor('', 'spe');
@@ -69,24 +76,34 @@ test('③ 修正系数：长处 1.2、短处 0.9、不受影响 1.0；**未知�
   }
 });
 
-test('④ 面板公式：按笔记逐字实现的算例（手算三例，含性格加成）', () => {
-  // 例一：开朗音速犬、天分全 0 ⇒ 速度 (1.1*120 + 0 + 10)*1.2 + 50 = 145.2 + ... 手算：142*1.2=170.4 → +50 = 220.4 → 220
-  const kai = panelOf({race: RACE, talent: null, nature: '开朗'});
-  assert.equal(kai.panel.spe, Math.round((1.1 * 120 + 10) * 1.2 + 50), '速度：长处 +20%');
-  assert.equal(kai.panel.spa, Math.round((1.1 * 38 + 10) * 0.9 + 50), '魔攻：短处 −10%');
-  assert.equal(kai.panel.hp, Math.round((1.7 * 85 + 70) * 1 + 100), '生命不受性格影响');
-  // 例二：天分逐项加满 10 ⇒ 生命多 8.5、其他多 5.5（这是公式说的，不许替换成 TALENT_PVP_STEP 那套）
-  const full = panelOf({race: RACE, talent: {hp: 10, atk: 10, spa: 10, def: 10, spd: 10, spe: 10}, nature: '开朗'});
-  // 逐项按公式现算期望值（不写死魔数）：生命那一项每点 0.85、别项每点 0.55。
-  // ⚠ 这里**必须**是公式那套，不许被 TALENT_PVP_STEP 的「每点 6」顶掉（判据 ⑥ 钉着这个冲突）。
-  const expectHp = (iv) => Math.round((1.7 * 85 + 0.85 * iv + 70) * 1 + 100);
-  assert.equal(full.panel.hp - kai.panel.hp, expectHp(10) - expectHp(0),
-    `生命：个体值 10 点的净增（公式：0.85*10 = 8.5，不是 60）`);
-  assert.equal(full.panel.spe - kai.panel.spe, Math.round((1.1 * 120 + 5.5 + 10) * 1.2 + 50) - kai.panel.spe);
-  // 例三：性格换成正中和的（生命↑物攻↓ 的沉默）看速度不变
-  const silent = panelOf({race: RACE, talent: null, nature: '沉默'});
-  assert.equal(silent.panel.spe, kai.panel.spe - Math.round((1.1 * 120 + 10) * 1.2 + 50) + Math.round((1.1 * 120 + 10) * 1 + 50),
-    '沉默不加速度 ⇒ 速度按中性算');
+test('④ 面板公式：等级公式的算例（手算，含性格与突破档）', () => {
+  // ⚠ 2026-09-27 **改钉**：面板不再走"笔记那两行 + 天分每点 0.55/0.85"，
+  // 而是走**等级公式**（`LEVEL_FORMULA`，配置表口径），L=60 时与老两行最多差 1（判据见
+  // `tests/roco-panel-level.test.js` ③）。天分在括号内按 `+3×资质`（= 老式 0.55×资质×6）。
+  const level60 = (race, talent, nature, breakthrough = 0) =>
+    panelOf({race, talent, nature, scope: 'pvp', level: 60, breakthrough}).panel;
+  const zero = {hp: 0, atk: 0, spa: 0, def: 0, spd: 0, spe: 0};
+  const kai = level60(RACE, zero, '开朗');
+  // 手算：速度 (120+0)*1.1 = 132 → +10 = 142 → ×1.1（零突破开朗）= 156.2 → round 156 → +50 = 206
+  assert.equal(kai.spe, 206, `开朗零突破速度：${kai.spe}`);
+  // 短处：魔攻 38 → 41.8 → round 42 → +10 = 52 → ×0.9 = 46.8 → 47 → +50 = 97
+  assert.equal(kai.spa, 97, `开朗短处魔攻：${kai.spa}`);
+  // 生命不受性格影响：(85+0)*1.7 = 144.5 → round 145 → +70 = 215 → +100 = 315
+  assert.equal(kai.hp, 315, `生命：${kai.hp}`);
+  // 满突破那一档：速度 142*1.2 = 170.4 → 170 → +50 = 220（PVP 归一化＝满突破，实测 9/9 那一档）
+  assert.equal(level60(RACE, zero, '开朗', 5).spe, 220, '满突破 +20% 那一档');
+  assert.equal(pvpPanelOf({race: RACE, talent: zero, nature: '开朗'}).panel.spe, 220,
+    'pvpPanelOf 的定义就是满级 + 满突破');
+  // 天分 10 点的净增：速度每点 3×1.1 = 3.3（零突破性格系数 1.1）⇒ 10 点 = 36.3 的取整结果
+  const full = level60(RACE, {hp: 10, atk: 10, spa: 10, def: 10, spd: 10, spe: 10}, '开朗');
+  const expectSpe = (iv) => Math.round((Math.round((120 + 3 * iv) * 1.1) + 10) * 1.1) + 50;
+  assert.equal(full.spe, expectSpe(10), '速度按等级公式现算');
+  assert.notEqual(full.spe - kai.spe, 60, '天分 10 点**不是** +60（那是"每点 +6"那条旧口径，已判定不参与面板）');
+  const expectHp = (iv) => Math.round((Math.round((85 + 3 * iv) * 1.7) + 70) * 1) + 100;
+  assert.equal(full.hp - kai.hp, expectHp(10) - expectHp(0), '生命按等级公式现算');
+  // 性格换成正中和的（沉默）看速度不变（而不是把它当成长处）
+  const silent = level60(RACE, zero, '沉默');
+  assert.equal(silent.spe, Math.round((Math.round(132) + 10) * 1) + 50, '沉默不加速度 ⇒ 速度按中性算');
 });
 
 test('⑤ 缺输入不许拿 0 冒充：种族值缺 ⇒ 不算；天分缺 ⇒ 计入 0 但必须说出来', () => {
@@ -101,23 +118,25 @@ test('⑤ 缺输入不许拿 0 冒充：种族值缺 ⇒ 不算；天分缺 ⇒ 
   assert.ok(partial.unknown.some((row) => row.includes('魔攻')), '缺哪一项要说出来');
 });
 
-test('⑥ 未解决的口径冲突必须留着（不许悄悄合并两条来源）', () => {
-  assert.equal(TALENT_PVP_STEP.table[10], 60, '笔记原文：个体值 10 ⇒ +60 面板');
-  // 改钉（2026-09-26，人类：「你冲突自己查资料呀」）：查证之后**两条口径都留着**，
-  // 但把"用哪条"写死成口径的一部分 —— 判据的意图没变：不许把两条来源悄悄合并成一条。
-  assert.ok(TALENT_PVP_STEP.external_support.includes('TapTap'), '外部查证要写清出处');
-  assert.match(TALENT_PVP_STEP.decision, /PVP 面板默认用/, '要写清哪条是 PVP 默认');
-  assert.match(TALENT_PVP_STEP.decision, /保留|都留/, '另一条口径必须保留');
-  // 把差别量化：公式给的是 8.5 / 5.5，那一套给的是 60 —— 差着一个数量级，所以不许混用
-  const formulaStep = {hp: PANEL_FORMULA.hp.talent * 10, other: PANEL_FORMULA.other.talent * 10};
-  assert.equal(formulaStep.hp, 8.5);
-  assert.equal(formulaStep.other, 5.5);
-  assert.notEqual(formulaStep.other, TALENT_PVP_STEP.table[10], '两条口径的结果必须仍然对不上');
-  // 两条路都算得出来，且 PVP 那条**更大**（+6/点 vs 0.55/点）—— 这是我们选择它的理由，可核对
+test('⑥ 天分只许进面板**一次**（2026-09-27 查证：×6 是单位换算，"每点 +6"不再参与面板）', () => {
+  // 改钉记录：这一天之前，本仓把两条口径**拼**在一起用（种族/性格走老公式 + 天分另加"每点 +6"），
+  // 结果是天分被算了两遍。查证的结论是：
+  //   · 配置表 `ATTR_GLOBAL_CONFIG` 的 `talent_constant` 是**括号内**的（生命 100→3×、其他 50→3×）；
+  //   · 笔记里那句「个体值 pvp 中自动乘六倍」讲的是 **UI 0–10 → 内部 0–60 的单位换算**，
+  //     不是"PVP 额外再加六倍"；
+  //   · 「7-8-9-10 → +42/48/54/60」那条**解释不了**已实测的 9/9（见 `roco-panel-level` ①），
+  //     所以它只作为**历史记录**保留（`TALENT_PVP_STEP`），**不再参与任何面板换算**。
+  assert.equal(TALENT_PVP_STEP.table[10], 60, '历史记录照旧留着（改钉不删）');
+  assert.ok(TALENT_PVP_STEP.external_support.includes('TapTap'), '外部查证出处照旧留着');
+  assert.match(TALENT_PVP_STEP.decision, /不再参与.*面板|不参与.*面板/, '要写明它已退出面板换算');
+  // 行为判据：面板只按等级公式算 —— 换成"每点 +6"那套必须对不上
   const race = {hp: 100, atk: 100, spa: 100, def: 100, spd: 100, spe: 100};
   const talent = {hp: 0, atk: 0, spa: 0, def: 0, spd: 0, spe: 10};
-  assert.ok(pvpPanelOf({race, talent}).panel.spe > panelOf({race, talent}).panel.spe,
-    'PVP 口径（每点 +6）必须比成长口径（每点 0.55）把速度抬得更高');
+  const got = pvpPanelOf({race, talent}).panel.spe;
+  const formulaOnly = Math.round((Math.round((100 + 30) * 1.1) + 10) * 1) + 50;
+  assert.equal(got, formulaOnly, `天分 10 点只许进一次：${got}`);
+  assert.notEqual(got, Math.round((Math.round(100 * 1.1) + 10) * 1) + 50 + 60,
+    '旧口径（再加 +6/点）必须与现在的算法对不上');
   assert.equal(TALENT_RANGE.max, 10, '六项范围 0–10');
 });
 
@@ -130,7 +149,12 @@ test('⑦ 性格候选只做"算出来排序"，不替玩家拍板（防止纯�
   assert.deepEqual(top.sort(), ['热情', '胆小', '开朗', '急躁', '莽撞'].sort(), `速度并列第一的应是这五个：${top}`);
   assert.equal(rows.length, 30, '默认把 30 条都算一遍（limit=30）');
   const slow = natureCandidates({race: RACE, stats: ['spe'], limit: 1})[0];
-  assert.ok(slow.panel.spe >= 220, `最快的性格速度不该低于中性：${slow.panel.spe}`);
+  // ⚠ 2026-09-27 改钉：候选表算的是**零突破下界**（我们不知道玩家的突破段数），
+  // 所以最快的性格速度是 206；满突破那一档（PVP 归一化）才是 220。两个数都要说得出来。
+  assert.equal(slow.panel.spe, 206, `零突破下界下最快的性格速度：${slow.panel.spe}`);
+  assert.ok(slow.panel.spe >= 206, '同一指标下最快的性格不该低于任何中性口径');
+  assert.equal(pvpPanelOf({race: RACE, talent: null, nature: slow.nature}).panel.spe, 220,
+    '同一只换到满突破（PVP 归一化）那一档是 220');
 });
 
 test('⑧ 非 PVP 那一档只给**零突破下界**（人述 10%↔20% 的两句按台账引文可以同时为真）', () => {
@@ -148,9 +172,12 @@ test('⑧ 非 PVP 那一档只给**零突破下界**（人述 10%↔20% 的两�
   assert.match(up.reason, /每突破 \+2%|满突破 \+20%/, `要把成长那条说出来：${up.reason}`);
   assert.equal(natureFloorFactor('开朗', 'spa').factor, 0.9, '短处仍是 −10%');
   assert.equal(natureFloorFactor('开朗', 'hp').factor, 1, '不受影响');
-  // 与 PVP 档的关系：长处下界 ≤ PVP，短处相同（判据钉住两者的相对关系，防以后有人把两档合并）
-  assert.ok(natureFloorFactor('开朗', 'spe').factor < natureFactor('开朗', 'spe').factor,
-    '非 PVP 下界必须低于 PVP 的 +20%');
+  // 与 PVP 档的关系（2026-09-27 改钉）：`natureFactor` 的缺省**就是零突破**，
+  // 所以下界函数与它在零突破下**相等**；两档的差别在**满突破**那一侧（PVP 归一化到 +20%）。
+  assert.equal(natureFloorFactor('开朗', 'spe').factor, natureFactor('开朗', 'spe').factor,
+    '零突破下两者相同（同一把尺子）');
+  assert.ok(natureFactor('开朗', 'spe', {breakthrough: 5}).factor > natureFloorFactor('开朗', 'spe').factor,
+    '满突破（PVP 归一化）必须高于零突破下界');
   assert.equal(natureFloorFactor('开朗', 'spa').factor, natureFactor('开朗', 'spa').factor,
     '短处在两档里都是 −10%');
   assert.equal(natureFloorFactor('不存在的性格', 'spe').known, false, '认不出就 known:false');

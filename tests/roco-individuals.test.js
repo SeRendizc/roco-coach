@@ -1,7 +1,8 @@
 /**
  * 判据：个体层（一只精灵多个个体 + 刷新）。
  *
- * 人类 2026-09-26 的口径：默认 100 级；缺的数值归零并标注；性格刷新与天分刷新**分开**、各 3 次；
+ * 人类口径：**默认 60 级**（2026-09-27 改钉：9-26 曾说 100 级，当晚改成「默认都 60 级」，
+ * 且官方等级上限就是 60）；缺的数值归零并标注；性格刷新与天分刷新**分开**、各 3 次；
  * 刷新可复现并留历史；同种可重复拥有。掷点规则本仓没有官方概率 ⇒ 两条规则都必须标着"建模的、非实测"。
  */
 import test from 'node:test';
@@ -19,10 +20,21 @@ const dataset = JSON.parse(readFileSync(new URL('../data/roco/owned/owned-pets.j
 const list = individualsFromDataset(dataset);
 const one = list[0];
 
-test('① 拥有精灵默认 100 级；天分/性格缺数值一律归零并标注（不许当实测）', () => {
+test('① 拥有精灵默认 **60** 级（2026-09-27 改钉）；天分/性格缺数值一律归零并标注（不许当实测）', () => {
   assert.equal(list.length, dataset.instances.length, '一条实例一个个体');
-  assert.ok(list.every((row) => row.level === 100), '全部 100 级（人类口径）');
-  assert.ok(list.every((row) => row.level_source.includes('default-100')), '级数来源要标注');
+  // 改钉（2026-09-27，人类：「pvp 没有的话就默认都 60 级别吧」+ 官方「等级上限 60」）：
+  // 9-26 的"默认 100 级"作废；这里同时钉住**新的默认**与**来路标记**（标记里要写明是 60 的口径）。
+  assert.ok(list.every((row) => row.level === 60), '全部 60 级（人类口径）');
+  assert.ok(list.every((row) => row.level_source.includes('default-60')), '级数来源要标注');
+  assert.ok(list.every((row) => !row.level_source.includes('default-100')),
+    '旧的 100 级口径不许再出现在来源标记里（改钉要说清，不是悄悄换数）');
+  // 数据集这一侧也要守上限：**等级上限 60**（官方），所以示例个体里不许出现 Lv.61+。
+  // 原来那一串 Demo 等级是 `[50…100]`，页面上真的显示过 Lv.95/Lv.100 —— 游戏里不可能存在。
+  const datasetLevels = dataset.instances.map((row) => row.level);
+  assert.ok(datasetLevels.every((level) => Number.isInteger(level) && level >= 1 && level <= 60),
+    `数据集里的等级必须落在 1–60（实际出现 ${[...new Set(datasetLevels)].sort((a, b) => a - b).join('/')}）`);
+  // 建模的示例个体一律 60（人类 2026-09-27：「默认都 60 级别吧」）
+  assert.ok(new Set(datasetLevels).size === 1 && datasetLevels[0] === 60, '示例个体一律 60 级');
   // 改钉（2026-09-26，人类：「性格天分是随机的啊」）：原版抓到时**随机生成**性格与天分 ⇒
   // 数据集里没有这两项时，正确做法是**种子化掷一份**（不是留空、也不是记 0），并标明是掷出来的。
   assert.ok(list.every((row) => typeof row.nature === 'string' && row.nature.length >= 2), '每只都要有性格');
@@ -47,7 +59,7 @@ test('① 拥有精灵默认 100 级；天分/性格缺数值一律归零并标�
 
 test('② 面板算得出来，但"天分按 0 计"这件事必须写在 unknown 里', () => {
   const race = {hp: 85, atk: 116, def: 101, spa: 38, spd: 82, spe: 120};
-  const withRace = individualFromInstance({...dataset.instances[0]}, {level: 100});
+  const withRace = individualFromInstance({...dataset.instances[0]}, {level: 60});
   // 改钉（2026-09-26）：天分现在是**掷出来的**，所以这里给一份明确的天分来验"面板算得出来"。
   const result = panelOfIndividual({...withRace, talent: {hp: 0, atk: 0, spa: 0, def: 0, spd: 0, spe: 0}}, race);
   assert.equal(Object.keys(result.panel).length, 6, '六项都算得出来');
@@ -124,16 +136,24 @@ test('⑥ 刷新返回新对象，原个体一个字段都不许动', () => {
 });
 
 test('⑦ 抽屉形状：同种多只归一组，count 对，best 稳定', () => {
-  const twin = duplicateIndividual(one, {individual_id: `${one.individual_id}-b`});
+  // ⚠ 2026-09-28：真实数据集里现在**已经有一对**同种（人类批准的那只演示个体）——
+  // 夹具必须挑一个"原本只有一只"的物种，否则 count 会变成 3（实测就是这么红的）。
+  const solo = list.find((row) => list.filter((other) => other.species_id === row.species_id).length === 1) ?? one;
+  const twin = duplicateIndividual(solo, {individual_id: `${solo.individual_id}-b`});
   const groups = groupBySpecies([...list, twin]);
-  assert.equal(groups.length, list.length, '同种多一只不会多出一组');
-  const group = groups.find((row) => row.species_id === one.species_id);
+  // ⚠ 2026-09-28 改钉：原来写 `groups.length === list.length`（实例数=物种数）。
+  // 人类批准一对同种演示个体之后，实例比物种多 1 ⇒ 断言改成**不变量本身**：
+  // 组的数量 == **不同物种**的数量（"同种多一只不会多出一组"说的就是这个）。
+  assert.equal(groups.length, new Set(list.map((row) => row.species_id)).size, '同种多一只不会多出一组');
+  const group = groups.find((row) => row.species_id === solo.species_id);
   assert.equal(group.count, 2, '这一组里有两个个体');
   assert.deepEqual(group.individuals.map((row) => row.individual_id).sort(),
-    [one.individual_id, twin.individual_id].sort());
+    [solo.individual_id, twin.individual_id].sort());   // ⚠ 用 solo（原来写成 one，夹具换了之后就错位）
   assert.equal(typeof group.best, 'string', '要给出默认展示哪一个（best）');
   // best 稳定：同样输入两次得到同一个 best
-  assert.equal(groupBySpecies([...list, twin]).find((row) => row.species_id === one.species_id).best, group.best);
+  // ⚠ 同样要跟着夹具走：原来是 `one.species_id`（自己那一组），换成 solo 之后要一起改，
+  // 否则比的根本不是同一组（实测：own-0001 vs own-0002 直接红）。
+  assert.equal(groupBySpecies([...list, twin]).find((row) => row.species_id === solo.species_id).best, group.best);
 });
 
 test('⑧ 可重复拥有：新个体 id 不同、刷新次数重置、两个体互不影响', () => {

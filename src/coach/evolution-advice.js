@@ -17,6 +17,12 @@ export const HKE_SOURCE = '小黑盒社区图鉴接口快照（社区数据，�
 const layerPath = () => processEnv().ROCO_HKE_LAYER
   || new URL('../../data/roco/derived/hke-2026-09-27/pets.json', import.meta.url);
 
+const stripZw = (text) => String(text ?? '').replace(/[\u200b\u200c\u200d\ufeff]/g, '').trim();
+
+/** id 别名表的位置（同样可由环境变量改，便于判据用夹具跑）。 */
+const aliasPath = () => processEnv().ROCO_HKE_ALIASES
+  || new URL('../../data/roco/derived/hke-2026-09-27/id-aliases.json', import.meta.url);
+
 let layerPromise = null;
 /** 懒读一次、缓存在闭包里（**服务端**；浏览器里这段不会执行）。 */
 function layer() {
@@ -34,7 +40,59 @@ export function resetHkeLayerForTest() {
   layerPromise = null;
 }
 
-const stripZw = (text) => String(text ?? '').replace(/[\u200b\u200c\u200d\ufeff]/g, '').trim();
+/**
+ * **id 别名表**（2026-09-27 人类拍板：「按照抓包数据来吧」⇒ 首领形态以抓包的 **4xxx 为主键**，
+ * 册子的 5xxx 降为**别名**）。产物由 `scripts/roco/build-id-aliases.mjs` 生成。
+ *
+ * ⚠ 配对不是干净的 1:1：25 个抓包 id 里有 **7 个**对上了册子好几条同名记录 ⇒ 那些进 `ambiguous`，
+ * **不许挑一条**（挑一条就是替另一条形态作答）。这里只做解析，不改任何数值。
+ */
+let aliasPromise = null;
+function aliases() {
+  if (!aliasPromise) {
+    aliasPromise = import('node:fs').then(({readFileSync, existsSync}) => {
+      const path = aliasPath();
+      if (!existsSync(path)) return {primary: 'capture', resolved: [], ambiguous: []};
+      return JSON.parse(readFileSync(path, 'utf8'));
+    });
+  }
+  return aliasPromise;
+}
+
+export function resetIdAliasesForTest() {
+  aliasPromise = null;
+}
+
+/**
+ * 解析一个编号/名字到"同一只"：返回
+ *   `{primaryId, aliasIds, catalogPetId, name, ambiguous:false}` 或
+ *   `{ambiguous:true, candidates, reason}`（对待定桶，调用方必须 fail closed）。
+ * 找不到就 `null`（不猜）。
+ */
+export async function idAliasOf(needle) {
+  const key = stripZw(needle);
+  if (!key) return null;
+  const doc = await aliases();
+  const numeric = /^\d+$/.test(key) ? Number(key) : null;
+  const wanted = key.toLowerCase();
+  for (const row of doc.groups ?? []) {
+    const byId = numeric !== null
+      && (row.capture_id === numeric || (row.catalog_game_ids ?? []).includes(numeric));
+    const byName = numeric === null && stripZw(row.name).toLowerCase() === wanted;
+    if (!byId && !byName) continue;
+    return {
+      // 主键口径：抓包（4xxx）是主键，册子的 5xxx 是别名（人类 2026-09-27 拍板）。
+      primaryId: row.capture_id,
+      aliasIds: [...(row.catalog_game_ids ?? [])],
+      catalogPetIds: [...(row.catalog_pet_ids ?? [])],
+      name: row.name,
+      // `one_to_one: false` ⇒ 同名多形态：**按名字作答时仍要说清"请给 pet_id"**，别名表不替它们挑。
+      oneToOne: row.one_to_one === true,
+      statsIdentical: row.stats_identical ?? null,
+    };
+  }
+  return null;
+}
 
 /** 按编号 / 名字取一只（名字做零宽字符归一；找不到就 null）。 */
 export async function hkePetOf(needle) {
@@ -42,6 +100,9 @@ export async function hkePetOf(needle) {
   if (!key) return null;
   const pets = await layer();
   if (/^\d+$/.test(key) && pets[key]) return pets[key];
+  // 册子的 5xxx（别名）也认：人类拍板"以抓包的 4xxx 为主键"，所以拿别名来问要落到同一条。
+  const alias = await idAliasOf(key).catch(() => null);
+  if (alias && pets[String(alias.primaryId)]) return pets[String(alias.primaryId)];
   const wanted = key.toLowerCase();
   for (const one of Object.values(pets)) {
     if (stripZw(one?.name).toLowerCase() === wanted) return one;

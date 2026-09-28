@@ -71,7 +71,9 @@ test('④ 防止纯机器算：每条建议都必须带"代价"，只报数不�
   assert.equal(advice.ok, true);
   assert.equal(advice.rows.length, 6);
   for (const row of advice.rows) {
-    assert.match(row.text, /抬 \+20%/, `要说清换来了什么：${row.text}`);
+    // ⚠ 2026-09-27 改钉：长处那一侧随突破长（初始 +10%、每突破 +2%、满 +20%），
+    // 这里算的是**零突破下界** ⇒ 正文写 +10%。出处行里会把整条阶梯写出来。
+    assert.match(row.text, /抬 \+10%/, `要说清换来了什么：${row.text}`);
     assert.match(row.text, /代价是/, `必须说清牺牲了什么：${row.text}`);
     assert.match(row.text, /\d+ → \d+/, `两边都要给面板数字：${row.text}`);
     assert.ok(row.gain.delta !== 0, '变化不能是 0');
@@ -170,7 +172,8 @@ test('⑩ 端到端：本地成句、0 次规划器调用，答案必须带取�
   const advice = await ask('皇家狮鹫想抢速度，用什么性格？');
   assert.match(String(advice.agentStop), /^policy-fact/, `要走本地事实：${advice.agentStop}`);
   assert.equal(plan, 0, '本地事实不许调规划器');
-  assert.match(String(advice.text), /速度抬 \+20%/, `要说清换来了什么：${advice.text}`);
+  assert.match(String(advice.text), /速度抬 \+10%/, `要说清换来了什么（零突破下界）：${advice.text}`);
+  assert.match(String(advice.text), /满突破 \+20%|初始 \+10%/, '出处行要把突破阶梯说出来');
   assert.match(String(advice.text), /代价是/, '必须带代价（防止纯机器算）');
   assert.match(String(advice.text), /\d+ → \d+/, '要给面板数字');
   assert.match(String(advice.text), /开朗|胆小|急躁|热情|莽撞/, '要给出这一方向上的性格');
@@ -185,7 +188,7 @@ test('⑩ 端到端：本地成句、0 次规划器调用，答案必须带取�
 
   // 反证一：查不到的精灵 ⇒ 如实说，不许编
   const unknown = await ask('不存在的精灵用什么性格好？');
-  assert.ok(!/抬 \+20%/.test(String(unknown.text)), '查不到就不该给建议');
+  assert.ok(!/抬 \+\d+%/.test(String(unknown.text)), '查不到就不该给建议');
   // 反证二：只有一个个体时不许"比一比"
   const one = await ask('皇家狮鹫这两个个体差在哪？');
   assert.match(String(one.text), /看到 1 个个体|至少要有两个/, `凑不齐要如实说：${one.text}`);
@@ -213,3 +216,25 @@ test('⑪ 浏览器安全：数据用生成常量，模块里不许静态 import
   assert.match(names, /自动生成，\*\*不要手改\*\*/);
 });
 
+test('⑫ 同名**不同种**不许当成"两个个体"比（真机抓到的错）', async () => {
+  // 现场：名单里两只「棋契陛下」是**两个不同物种**（pet_000556 / pet_000575），
+  // 而这一支回答的是"**同一只**的两个个体差在哪"。`compareIndividuals` 按一个 race 给两边算面板
+  // ⇒ 拿两个物种套同一份种族值比出来的表没有意义。这一档必须 fail closed 并把原因说清。
+  const context = {profile: {pets: [
+    {name: '棋契陛下', species_id: 'pet_000556', talent: {hp: 10, atk: 3, def: 1, spa: 7, spd: 3, spe: 10}, nature: '开朗'},
+    {name: '棋契陛下', species_id: 'pet_000575', talent: {hp: 1, atk: 10, def: 7, spa: 3, spd: 10, spe: 1}, nature: '固执'},
+  ]}};
+  const answer = await natureLocalAnswer({message: '棋契陛下这两个个体差在哪？', context});
+  assert.ok(answer, '这一句要认出来（否则会掉到别的分支）');
+  assert.match(String(answer.text), /不是同一个物种/, String(answer.text));
+  assert.match(String(answer.text), /pet_000556/, '要把两个物种 id 摆出来');
+  assert.match(String(answer.text), /pet_000575/);
+  assert.doesNotMatch(String(answer.text), /第一个个体在/, '不许给出那种"比过了"的表');
+  // 反证：**同种**的两个个体要照旧比得出来（不能因为上面这条把功能关掉）
+  const sameSpecies = {profile: {pets: [
+    {name: '喵喵', species_id: 'pet_000001', talent: {hp: 10, atk: 3, def: 1, spa: 7, spd: 3, spe: 10}, nature: '开朗'},
+    {name: '喵喵', species_id: 'pet_000001', talent: {hp: 1, atk: 10, def: 7, spa: 3, spd: 10, spe: 1}, nature: '固执'},
+  ]}};
+  const ok = await natureLocalAnswer({message: '喵喵这两个个体差在哪？', context: sameSpecies});
+  assert.match(String(ok.text), /第一个个体在/, `同种要照旧比：${ok?.text}`);
+});

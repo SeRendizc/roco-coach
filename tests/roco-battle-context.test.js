@@ -247,7 +247,14 @@ test('⑧ 结构性：客户端快照真的带编号、服务端真的注入读�
   assert.match(client, /battle_id: state\.battleId/, '快照要把编号带给教练');
   const server = readFileSync(join(ROOT, 'src/server/index.js'), 'utf8');
   assert.match(server, /const rocoPreview=async\(battleId\)/, '服务端要注入按编号取估值的读口');
-  assert.match(server, /const coachedContext=\{\.\.\.b\.context,rocoPreview\}/, '注入要真的合成这次上下文');
+  // ⚠ 2026-09-27 改钉：这一行现在还顺带把**个体层**（每只的天分/性格）补进上下文
+  //（`attachIndividualsToContext`，只补字段不改判断），所以形状从 `{...b.context,rocoPreview}`
+  // 变成 `{...attachIndividualsToContext(b.context),rocoPreview}`。
+  // **判据的意图一个字没变**：注入必须真的合成"这一次请求的上下文"，而不是挂在别的对象上 ——
+  // 所以这里改成允许前面套一层补字段的调用，但**要求 `b.context` 仍然是基底**。
+  assert.match(server, /const coachedContext=\{\.\.\.(?:attachIndividualsToContext\(b\.context\)|b\.context),rocoPreview\}/,
+    '注入要真的合成这次上下文（可以套补字段，但基底必须是 b.context）');
+  assert.match(server, /attachIndividualsToContext\(b\.context\)/, '个体层要接在这一条链上');
   assert.match(server, /context:coachedContext/, 'runCoach 要拿到注入了读口的那一份');
   const toolbox = readFileSync(join(ROOT, 'src/coach/toolbox.js'), 'utf8');
   assert.match(toolbox, /context\.rocoPreview\(battleId\)/, '工具要真的调用它');

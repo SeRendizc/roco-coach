@@ -1039,8 +1039,15 @@ function respondVariants(skill) {
  */
 export function respondSeparationHolds(respond) {
   const learnset = respond?.learnset_variant_species ?? {};
-  const build = respond?.build_variant_counts ?? {};
-  if (Number(learnset['应对攻击']) !== 48) return false;
+  // 兼容两种键名：老夹具给 `build_variant_counts`（个体数），产物给 `build_variant_species`（物种数）
+  const build = respond?.build_variant_species ?? respond?.build_variant_counts ?? {};
+  // ⚠ 2026-09-28 改钉：原来写死 **48**（"一人一只"时代 物种数 == 个体数，两者混用看不出来）。
+  // 人类批准那对同种演示个体之后它们分开了（49 个体 / 48 物种）—— 于是三次踩坑：
+  //   ① 写死 48 ⇒ 等式恒不成立；② 拿 `instances_total`(49) 当基准 ⇒ 还是不等；
+  //   ③ 基准对了，但 build 侧数的是**个体**、learnset 侧数的是**物种** ⇒ 第三条"build ≤ learnset"又红。
+  // 现在两侧**统一按物种**（`build_variant_species` / `learnset_variant_species`），基准也按物种。
+  const corpusTotal = Number(respond?.species_total ?? 48);
+  if (Number(learnset['应对攻击']) !== corpusTotal) return false;
   if (!RESPOND_VARIANTS.some((v) => Number(build[v] ?? 0) === 0 && Number(learnset[v] ?? 0) > 0)) return false;
   return RESPOND_VARIANTS.every((v) => Number(build[v] ?? 0) <= Number(learnset[v] ?? 0));
 }
@@ -1859,15 +1866,33 @@ export function buildGapDistribution(inputs) {
     },
     respond: {
       criteria: DIMENSION_CRITERIA.respond,
-      build_variant_counts: {
-        应对攻击: rows.filter((r) => r.respond_variants.includes('应对攻击')).length,
-        应对状态: rows.filter((r) => r.respond_variants.includes('应对状态')).length,
-        应对防御: rows.filter((r) => r.respond_variants.includes('应对防御')).length,
-      },
+      // ⚠ 按**物种**去重（与 `learnset_variant_species` 同一把尺子；同种两个体只算一次）
+      build_variant_species: (() => {
+        // 一个物种只要有**任意一个个体**的出战四技能带这一类，这个物种就算"build 侧有"
+        //（同种两个体不重复计 —— 否则 49 > 48，与 learnset 侧的物种数没法比）
+        const bySpecies = new Map();
+        for (const row of rows) {
+          const key = row.species_id;
+          const set = bySpecies.get(key) ?? new Set();
+          for (const variant of RESPOND_VARIANTS) if (row.respond_variants.includes(variant)) set.add(variant);
+          bySpecies.set(key, set);
+        }
+        return {
+          应对攻击: [...bySpecies.values()].filter((set) => set.has('应对攻击')).length,
+          应对状态: [...bySpecies.values()].filter((set) => set.has('应对状态')).length,
+          应对防御: [...bySpecies.values()].filter((set) => set.has('应对防御')).length,
+        };
+      })(),
       // 2026-09-25：这个计数在 owned 改成**引擎 loadout** 之后恒为 0（引擎每只都带应对），
       // 所以它**不再**充当分离证据（改用 `respondSeparationHolds`，见维度④段首）。
       // 字段本身留着：它是「build 侧一个应对都没有」的实况读数，仍然是可复算的事实。
       instances_without_any_respond_in_build: rows.filter((r) => r.respond_variants.length === 0).length,
+      // 语料规模（`respondSeparationHolds` 用它做"每一只都学得到"的基准，不再写死 48）
+      instances_total: rows.length,
+      // ⚠ 关键：`learnset_variant_species` 数的是**物种**（名字里就写着）——
+      // "一人一只"时代物种数 == 个体数（都 48），所以两者混着用看不出来；
+      // 人类批准那对同种演示个体之后它们分开了（49 个体 / 48 物种），写错基准就会误红（实测踩到）。
+      species_total: new Set(rows.map((row) => row.species_id)).size,
       learnset_variant_species: Object.fromEntries(RESPOND_VARIANTS.map((variant) => [variant,
         [...index.learnsets.entries()].filter(([, learnset]) => learnset.skill_ids
           .some((id) => respondVariants(index.skills.get(id)).includes(variant))).length])),
