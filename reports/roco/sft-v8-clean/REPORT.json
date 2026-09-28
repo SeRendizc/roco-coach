@@ -1,0 +1,100 @@
+{
+ "artifact": "sft-dataset-clean",
+ "why": "把输入的 tools 列表对齐到共享契约 TOOL_CONTRACTS，并清掉随工具退役而失效的目标（Codex 4B 前置第 1/2 项）",
+ "input_dir": "reports/roco/sft-v8",
+ "contract_tools": [
+  "read_state",
+  "search_rules",
+  "compare_actions",
+  "simulate_branch",
+  "read_match",
+  "read_evidence",
+  "read_last_turn",
+  "query_rules",
+  "evaluate_team",
+  "compare_team_change",
+  "plan_actions",
+  "summarize_battle"
+ ],
+ "local_plan_tools": [
+  "read_state",
+  "search_rules",
+  "compare_actions",
+  "simulate_branch",
+  "read_match",
+  "read_evidence",
+  "read_last_turn",
+  "query_rules",
+  "evaluate_team",
+  "compare_team_change",
+  "plan_actions",
+  "summarize_battle"
+ ],
+ "contract_matches_local_plan": true,
+ "families": [
+  {
+   "id": "retired-training-slots",
+   "question": "它还有几个培养格能用？",
+   "retarget": {
+    "stop": true
+   },
+   "why": "「培养格」是 2026-09-27 人类裁决退役的功能（toolbox.js:149「加点不要了」）；`grep -rn \"培养格|训练点\" data/roco/ roco/` ⇒ 0 命中 ⇒ 没有任何工具或数据源能答。"
+  },
+  {
+   "id": "retired-training-points",
+   "question": "我还有多少训练点？",
+   "retarget": {
+    "stop": true
+   },
+   "why": "同上：训练点随加点一起退役，规则集与语料里都没有这条，任何工具都答不出来。"
+  },
+  {
+   "id": "level-already-in-focus-detail",
+   "question": "它满级了吗？",
+   "retarget": {
+    "stop": true
+   },
+   "why": "等级**已经在焦点资料里**：`src/coach/runtime.js:361` 的 `wantsLevel` 路径直接读 `detail.level`（`:300` 也会把它写进「（Lv.N）」），而 `MAX_LEVEL` 是从 `src/game/progression.js` 导入的 ⇒ **答得出来，不需要再调工具**。标成 `read_state` 是错的：那读的是**对局状态**，而这个问题问的是**盒子里这一只**的等级。"
+  },
+  {
+   "id": "retired-training-allocation-rule",
+   "question": "培养格是怎么分配的？",
+   "retarget": {
+    "stop": true
+   },
+   "why": "它**看起来**该走 `query_rules`，但去核了规则源：规则集 / 知识卡 / 百科语料里「培养格」「训练点」**0 命中** ⇒ 标成 `query_rules` 等于把模型送去一个答不出来的工具，比诚实的 stop 更糟。**核过之后**才归到这一族。"
+  }
+ ],
+ "splits": {
+  "train": {
+   "rows": 2403,
+   "tools_rewritten": 1008,
+   "tools_entries_dropped": 1008,
+   "retargeted": 128,
+   "by_family": {
+    "retired-training-slots": 64,
+    "retired-training-points": 64
+   }
+  },
+  "valid": {
+   "rows": 362,
+   "tools_rewritten": 56,
+   "tools_entries_dropped": 56,
+   "retargeted": 8,
+   "by_family": {
+    "level-already-in-focus-detail": 8
+   }
+  },
+  "test": {
+   "rows": 107,
+   "tools_rewritten": 56,
+   "tools_entries_dropped": 56,
+   "retargeted": 8,
+   "by_family": {
+    "retired-training-allocation-rule": 8
+   }
+  }
+ },
+ "refused": [],
+ "refused_total": 0
+}
