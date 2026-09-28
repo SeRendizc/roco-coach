@@ -1,14 +1,14 @@
 {
  "schema": "roco-rc402-on-demand-builds/v1",
  "rc": "RC-402",
- "generated_by": "scripts/roco/build-on-demand-builds.mjs --report",
- "why": "冻结 learnsets.json 只覆盖 48 只，另外 574 只「选得到、上不了场」；全量图鉴每只都带 learnable_skills（622/622、8787 条引用全部可解析），本产物把它编成确定、可复核、可替换的四个技能。",
+ "generated_by": "（手工维护，不是脚本产物 —— 见 _maintenance）",
+ "why": "冻结层覆盖不到全部精灵：现在**冻结已核验 542 只**、**按需推算 80 只**（2026-09-28 前是 48 + 574）。全量图鉴每只都带 learnable_skills（622/622、8787 条引用全部可解析），本产物把它编成确定、可复核、可替换的四个技能，并**明确标成未核验**。",
  "coverage": {
   "catalog_pets": 622,
   "built": 622,
   "skipped": 0,
-  "full_verified": 48,
-  "simulatable_unverified": 574,
+  "full_verified": 542,
+  "simulatable_unverified": 80,
   "compiled_matches_frozen": 0
  },
  "skill_reference_audit": {
@@ -35,7 +35,7 @@
  },
  "engine_consumption": {
   "ruleset_pets": 622,
-  "note": "data.py 以叠加方式载入；冻结 48 只一个字节都没动（build_support=FULL_VERIFIED），推算的 574 只标 SIMULATABLE_UNVERIFIED"
+  "note": "data.py 以叠加方式载入；冻结 542 只一个字节都没动（build_support=FULL_VERIFIED），推算的 80 只标 SIMULATABLE_UNVERIFIED（2026-09-28 前是 48 / 574）。"
  },
  "reproduction": [
   "node scripts/roco/build-on-demand-builds.mjs --check",
@@ -48,5 +48,19 @@
   "这份学招表是否是该物种的全部可学技能（有无等级/道具前置）仓库里没有证据",
   "按需推算的配招**没有**实机核验；页面与训练数据生成器必须按 build_support 分档",
   "静态种族值来自全量图鉴的登记值，等级/性格换算公式仍未校准（与 RC-203 同一条边界）"
- ]
+ ],
+ "_maintenance": {
+  "handwritten": true,
+  "why": "这份文件是 2026-09-22 手写的 RC-402 报告（含大段说明文字），**不是**脚本产物：原来 `generated_by` 写的是 scripts/roco/build-on-demand-builds.mjs --report，而那个脚本**从来没有 --report 这个开关** —— 那是个假署名（谁按它去重生成都会扑空，2026-09-28 就是这么发现的）。同一天改掉署名并更新过期数字。",
+  "old_values": {
+   "full_verified": 48,
+   "simulatable_unverified": 574
+  },
+  "authoritative_source": "data/roco/derived/on-demand-builds.json#summary（542 / 80，脚本每次写都更新）",
+  "how_to_verify": [
+   "node scripts/roco/build-on-demand-builds.mjs --json",
+   "node scripts/roco/build-on-demand-builds.mjs --check"
+  ],
+  "unchanged_fields": "skill_reference_audit 与 learnable_pool_sizes 是**全量图鉴**派生的（622 只 × 4 槽 = 2488、各池大小分布），本轮扩容不动图鉴 ⇒ 逐值不变。"
+ }
 }
