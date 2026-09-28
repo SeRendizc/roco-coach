@@ -17,6 +17,12 @@
 //   ④ **没有真实环境分布就绝不给胜率或伪精确强度数字**：玩家可见文本里不许出现
 //      「数字 + %」或「胜率/概率 + 数字」；算不出来的轴必须写「现在算不出来」并点名缺什么，
 //      不许补 0。
+//      ⚠ 2026-09-29（task-14）**改钉**：`PSEUDO_PRECISION` 一个字没改，改的是**豁免口径** ——
+//      ①「可核对的冻结机制原文」（`sourcedMechanismLines`，交叉核对产物）照旧豁免；
+//      ② 新增「**交代了来源**的假设值」（`sourcedAssumptionLines`：同一句里既有数字+%、
+//        又写明「假设的权重 / 各体系等权 / 不是实测出场率」）也豁免 —— 那是如实交代来源的正确写法，
+//        原来被当成伪精确（22/23 连红）；③ 挂上"假设"两个字的**胜率/概率**仍然红（禁语优先）。
+//      判据只会更严不会更松：新增的两条**反向控制**证明"该放行的放行、该红的还红"。
 //   ⑤ 两档（1440×900 / 390×844）都没有横向溢出（`clientW == scrollW`），
 //      390px 下模块里每个可点元素 ≥44px，且**常规流**里的区块顺序是
 //      「队伍槽位 → 候选池」（→ 若「当前评估」「小芽短提示」还在流里，必须依次排在后面）。
@@ -72,8 +78,33 @@ export const FORBIDDEN_PLAYER = /pet_id|species_id|instance_id|state_version|cov
  *
  * 刻意**不**把「胜率」这个词本身当违规：页面有一句「不给胜率」的口径说明。
  * 判据抓的是「把胜率当结论报出来」（带数字）与「数字 + %」。反证样本是「胜率 58%」。
+ *
+ * ⚠ 2026-09-29 改钉说明（task-14）：这个正则**一个字都没改**。
+ * 「有来源交代的假设值」（例如「这类占 14%（各体系等权）——这是假设的权重，不是实测出场率」）
+ * 走的是**豁免那一套**（`sourcedAssumptionLines` + `exemptSourcedLines`，与冻结机制原文同一条路），
+ * 而**不是**放宽这里 —— 没有来源交代的 `\d+%` 照样要红（反向控制见 22/23 号那两条）。
  */
 export const PSEUDO_PRECISION = /\d+(?:\.\d+)?\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\d/;
+
+/**
+ * 「这一句里同时交代了来源」的**闭集短语**（只有服务端自己标的假设才配这几句）。
+ *
+ * 为什么要有它：`f30126a`（P0-04）把那一句改成
+ * 「撞上「翼王飞翼」这类最吃亏（赛前假设这类占 **14%**（各体系等权）——**这是假设的权重，不是实测出场率**）」
+ * —— 那是**如实交代来源**的正确写法，却被 `PSEUDO_PRECISION` 当成伪精确（22/23 连红）。
+ * 与机制原文那条一样：**先把可核对的来源句换成占位符，再拿同一个正则扫**，正则不动。
+ *
+ * 三条硬边界（都在 `sourcedAssumptionLines` 里落实）：
+ *   ① 来源短语必须在**同一句**里（跨句不算）；
+ *   ② 句子里出现「胜率 / 概率 / 百分比 / 强度分 + 数字」的**一律不豁免** —— 那几个词是禁语，
+ *      挂上「假设」两个字也不能算交代来源（否则「本队胜率 58%（假设）」就被放过了）；
+ *   ③ 没有来源短语 ⇒ 不豁免（反向控制：`这套阵容胜率 58%` 必须仍然红）。
+ */
+export const SOURCED_ASSUMPTION_PHRASES = Object.freeze([
+  '假设的权重', '各体系等权', '按同等权重', '赛前假设', '不是实测', '不是实测出场率',
+  '这是假设', '假设的对手分布', '没有实测数据',
+]);
+
 
 /** 旧口径：把六槽退回「已选 3 只固定栏 / 固定 60 池」。 */
 export const LEGACY_SLOT_COPY = /已选\s*3\s*只|固定队伍栏|固定\s*60\s*池|标准\s*PVP\s*3v3|搜索名字（48 只）/;
@@ -377,13 +408,45 @@ export function exemptSourcedLines(text, sourcedLines = []) {
   return {text: scanned, exempted};
 }
 
+/**
+ * 「**交代了来源**的假设值」那些句子（task-14）。
+ *
+ * 与 `sourcedMechanismLines` 同一条做法、同一个出口：它产出**一串可替换的句子**，
+ * 交给 `exemptSourcedLines` 换成占位符，`PSEUDO_PRECISION` 一个字符都不用改。
+ * 区别只在"来源"是什么：机制原文的来源是**冻结产物交叉核对**；这里是**句子里写明了这是假设**。
+ *
+ * 只豁免**同时满足**这三条的句子（缺一不豁免，宁可红着让人来改文案）：
+ *   · 句子里有 `数字 + %`；
+ *   · 同一句里有 `SOURCED_ASSUMPTION_PHRASES` 里的来源短语；
+ *   · 同一句里**没有**「胜率 / 概率 / 百分比 / 强度分 + 数字」——那几个词是禁语，挂"假设"也不行。
+ */
+export function sourcedAssumptionLines(text) {
+  const out = [];
+  // 按句切：句号 / 分号 / 换行 / 感叹问号（中文全角与半角都算）。
+  for (const sentence of String(text ?? '').split(/(?<=[。；！？!?\n])/)) {
+    if (!/\d+(?:\.\d+)?\s*%/.test(sentence)) continue;
+    if (!SOURCED_ASSUMPTION_PHRASES.some((phrase) => sentence.includes(phrase))) continue;
+    if (/(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\d/.test(sentence)) continue;   // ② 禁语优先
+    const trimmed = sentence.trim();
+    if (trimmed) out.push(trimmed);
+  }
+  return [...new Set(out)];
+}
+
+/** 两条来源豁免合起来用（机制原文 + 交代了来源的假设值）——**唯一的出口**，别再各写一份。 */
+export function exemptAllSourced(text, {sourcedLines = []} = {}) {
+  return exemptSourcedLines(text, [...sourcedLines, ...sourcedAssumptionLines(text)]);
+}
+
 /** 玩家可见文本：不许工程词、不许伪精确、必须有玩家可读的未知说明。 */
 export function playerCopyProblems(text, {sourcedLines = []} = {}) {
   const problems = [];
   // 冻结效果原文里的百分数（例如特性「图书守卫者」的「双攻+100%」）不是伪精确强度：
   // 做法是把**已核对过的原文**换成占位符再扫，而**不是**放宽正则——
   // 手写一个「这套阵容胜率 58%」照样会被抓到（反证见 tests/roco-workshop.test.js）。
-  const {text: scanned, exempted} = exemptSourcedLines(text, sourcedLines);
+  // ⚠ 2026-09-29（task-14）：同上，**交代了来源的假设值**（「…占 14%（各体系等权）——这是假设的权重，
+  // 不是实测出场率」）也走这一条豁免出口；没有来源交代的百分数仍然照红。
+  const {text: scanned, exempted} = exemptAllSourced(text, {sourcedLines});
   const hit = scanned.match(FORBIDDEN_PLAYER);
   if (hit) problems.push(`玩家可见文本里出现工程词「${hit[0]}」`);
   const pseudo = scanned.match(PSEUDO_PRECISION);
@@ -849,6 +912,23 @@ async function main() {
   const counter = (id, judge, problems, actual) => {
     counterproofs.push({id, judge, ok: problems.length > 0, hit: problems.join(' | ') || '（没命中——判据是空的！）', actual: String(actual)});
     log(problems.length ? '✔' : '✖', `[反证 ${id}]`, judge, '—实际命中：', (problems.join(' | ') || '（没命中）').slice(0, 240));
+  };
+  /**
+   * **反向控制**（task-14 加）：证明判据**不是什么都抓** —— 喂"应当放行"的样本，必须一条都不报。
+   *
+   * 为什么与 `counter` 分开写：`counter` 断言"必须命中"，这一条断言"必须不命中"。
+   * 两者是一对：只有一条的话，判据可以靠"永远报错"或"永远不报"骗过验收。
+   * `samples` 是若干份**应当无话可说**的样本；只要有一份被报出来，这条就红
+   *（样本里若混了"本来就该红"的（例如胜率 58% 挂"假设"），用 `mustHit` 单独点出来）。
+   */
+  const control = (id, judge, {samples = [], mustHit = [], problemsOf = playerCopyProblems} = {}, actual = '') => {
+    const leaked = samples.map((text) => problemsOf(text)).filter((problems) => problems.length);
+    const missed = mustHit.map((text) => problemsOf(text)).filter((problems) => !problems.length);
+    const problems = [...leaked.flat(), ...missed.map(() => '应当命中的样本没被命中')];
+    counterproofs.push({id, judge, ok: problems.length === 0,
+      hit: problems.join(' | ') || '（两份样本都按预期：该空的空、该响的响）', actual: String(actual)});
+    log(problems.length ? '✖' : '✔', `[反证 ${id}]`, judge,
+      '—实际：', (problems.join(' | ') || '按预期（该空的空、该响的响）').slice(0, 240));
   };
 
   try {
@@ -1563,21 +1643,59 @@ async function main() {
         .find((t)=>t.includes('最怕的体系'));
       return JSON.stringify({found:Boolean(hit),text:(hit??'').slice(0,160)});})()`));
     // 判据只依赖正文（纯函数）：有名字 + 有占比说法
+    //
+    // ⚠ 2026-09-29 改钉（task-14；`f30126a` 是按 P0-04 改的文案，判据没跟着改，于是 39 号连红）：
+    // 旧断言（**留档**）：
+    //   if (!/大约每 \d+ 局遇到 1 次|环境里占多少没有数据/.test(body)) bad.push('没有说这类体系在环境里占多少');
+    // 它当时认的是「大约每 N 局遇到 1 次」——而 `f30126a` 正是把那种说法**当成伪观测频率**改掉的：
+    // 现在写的是「赛前假设这类占 14%（各体系等权）——这是假设的权重，不是实测出场率」。
+    // 所以这一条**改钉不删、而且把旧文案反过来**：旧说法（"大约每 N 局遇到 1 次"）现在**要判红**，
+    //  因为它把**假设的**权重说成了观测频率（那正是 P0-04 点名的那件事）。
+    // 新口径两条都要：
+    //   ① 有占比说法：要么给出「这类占 X%」并**交代来源**（假设的权重 / 各体系等权 / 不是实测），
+    //      要么如实写「环境里占多少没有数据」；
+    //   ② 不许退回旧说法。
+    const OLD_FREQUENCY_CLAIM = /大约每 \d+ 局遇到 1 次/;
     const archetypeProblems = (text) => {
       const body = String(text ?? '');
       const bad = [];
       if (!/撞上「[^」]+」这类/.test(body)) bad.push('没有写出体系名（只剩含糊说法或分数）');
-      if (!/大约每 \d+ 局遇到 1 次|环境里占多少没有数据/.test(body)) bad.push('没有说这类体系在环境里占多少');
+      if (OLD_FREQUENCY_CLAIM.test(body)) {
+        bad.push('把**假设的**权重说成了观测频率（「大约每 N 局遇到 1 次」）—— P0-04 明确不许');
+      }
+      const shareWithSource = /这类占\s*\d+(?:\.\d+)?\s*%/.test(body)
+        && SOURCED_ASSUMPTION_PHRASES.some((phrase) => body.includes(phrase));
+      const honestUnknown = /环境里占多少没有数据/.test(body);
+      if (!shareWithSource && !honestUnknown) {
+        bad.push('没有说这类体系在环境里占多少（要给「这类占 X%」并交代来源，或如实说没有数据）');
+      }
       return bad;
     };
     const archetypeBad = archetypeProblems(archetypeCell.text);
-    check('39-「最怕的体系」写出体系名', '这一栏要有**名字**（「撞上「X」这类」）而不是只剩分数或含糊的「某类体系」'
-      + '【§C6.303 改了取数没验渲染】',
+    check('39-「最怕的体系」写出体系名', '这一栏要有**名字**（「撞上「X」这类」）而不是只剩分数或含糊的「某类体系」；'
+      + '占比要么给「这类占 X%」并**交代来源**（假设的权重 / 各体系等权 / 不是实测），要么如实说没有数据；'
+      + '**不许**把假设的权重说成观测频率【§C6.303 改了取数没验渲染；2026-09-29 task-14 改钉】',
       archetypeCell.found && archetypeBad.length === 0,
       `命中=${archetypeCell.found} 示例「${archetypeCell.text}」${archetypeBad.length ? ' · ' + archetypeBad.join('；') : ''}`);
-    counter('39-「最怕的体系」写出体系名', '把名字去掉（只剩「撞上某类体系时」）喂同一条判据必须报',
+    counter('39-「最怕的体系」写出体系名', '喂**旧文案**（「大约每 5 局遇到 1 次」）给同一条判据必须红 —— 证明它不是"什么都认"',
       archetypeProblems('撞上某类体系时最吃亏（这类在环境里大约每 5 局遇到 1 次）'),
-      '样本：撞上某类体系时…（无名字）');
+      '样本：撞上某类体系时…（旧文案：假设的权重说成观测频率）');
+    control('39-反向控制：新文案不许被判红',
+      '「撞上「X」这类最吃亏（赛前假设这类占 14%（各体系等权）——这是假设的权重，不是实测出场率）」'
+      + '与如实说「环境里占多少没有数据」两种写法都**不许**红（判据不许挑字眼）',
+      {problemsOf: archetypeProblems,
+        samples: [
+          '最怕的体系 撞上「翼王飞翼」这类最吃亏（赛前假设这类占 14%（各体系等权）——这是假设的权重，不是实测出场率）',
+          '最怕的体系 撞上「翼王飞翼」这类最吃亏（环境里占多少没有数据）',
+        ],
+        // 该红的三种（**一条都不许因为改钉被放过**）：
+        //   ① 旧文案（假设的权重说成观测频率）+ 没名字 ② 有名字但占比**没交代来源** ③ 只有名字、没有占比
+        mustHit: [
+          '撞上某类体系时最吃亏（这类在环境里大约每 5 局遇到 1 次）',
+          '撞上「翼王飞翼」这类最吃亏（这类占 14%）',
+          '撞上「翼王飞翼」这类最吃亏（原始数值 0.583333 · 相对分）',
+        ]},
+      '样本：新文案（带来源） / 如实说没有数据');
 
     const scrollProblems = wheelState ? drawerScrollProblems({...evalMetrics.panel, st: wheelState.st}) : ['滚轮取样失败'];
     check('36-评估抽屉滚得动', '评估抽屉内容超出面板高度时必须**滚得动**（真滚轮 → scrollTop > 0）'
@@ -1852,14 +1970,30 @@ async function main() {
     counter('22-玩家层无工程话', '往玩家区注入 pet_id / state_version 后同一条判据必须命中',
       playerCopyProblems('音速犬 pet_id=pet_000062 state_version=roco-workshop/v1'),
       '「音速犬 pet_id=pet_000062 state_version=roco-workshop/v1」');
-    const pseudoNow = exemptSourcedLines(playerNow, sourcedLines).text.match(PSEUDO_PRECISION);
-    check('23-无胜率与百分数', '可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法（可核对的冻结机制原文除外）',
-      pseudoNow === null, pseudoNow ? `命中「${pseudoNow[0]}」` : `扫过 ${playerNow.length} 字无命中（豁免机制原文 ${sourcedLines.length} 条）`);
+    // ⚠ 2026-09-29（task-14）：这一条与 22 号走**同一个豁免出口**（`exemptAllSourced`）——
+    // 原来这里只用机制原文那一份，于是「交代了来源的假设值」被当成伪精确（22/23 连红）。
+    const pseudoNow = exemptAllSourced(playerNow, {sourcedLines}).text.match(PSEUDO_PRECISION);
+    check('23-无胜率与百分数', '可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法'
+      + '（可核对的冻结机制原文、以及**交代了来源**的假设值除外）',
+      pseudoNow === null, pseudoNow ? `命中「${pseudoNow[0]}」`
+        : `扫过 ${playerNow.length} 字无命中（豁免机制原文 ${sourcedLines.length} 条、假设值 ${sourcedAssumptionLines(playerNow).length} 条）`);
     counter('23-无胜率与百分数', '把「胜率 58%」写进可见文本必须被同一条判据抓住',
       playerCopyProblems('这套阵容胜率 58%'), '「这套阵容胜率 58%」');
     counter('23-无胜率与百分数（假机制绕过）', '把「胜率 62%」塞进 mechanism.line（核不回产物）必须照样被抓住',
       playerCopyProblems('（机制原文）胜率 62%', {sourcedLines: sourcedMechanismLines({next_candidates: [{mechanism: {line: '胜率 62%'}}]})}),
       '{"next_candidates":[{"mechanism":{"line":"胜率 62%"}}]}');
+    // ⚠ 2026-09-29 **新增（反向控制，task-14 要求"交代了来源的 ⇒ 必须不红"）**：
+    // 豁免那一套最容易变成空转 —— 上面几条证明"没来源的会红"，这一条证明"有来源的不会误红"。
+    control('23-反向控制：交代了来源的假设值不许被判成伪精确',
+      '同一句话里有数字+%、有来源短语（各体系等权 / 这是假设的权重 / 不是实测出场率）⇒ 不许红；'
+      + '而挂上「假设」两个字的**胜率**仍然要红（禁语优先）',
+      {
+        // ⚠ 样本都补一句「未知」——`playerCopyProblems` 还管"必须有未知说明"，
+        // 不补的话这一条会因为**另一个维度**红，就测不到伪精确这一件事了。
+        samples: ['撞上「翼王飞翼」这类最吃亏（赛前假设这类占 14%（各体系等权）——这是假设的权重，不是实测出场率）。（未知项另有说明）'],
+        mustHit: ['这套阵容胜率 58%（这是假设的权重）。（未知项另有说明）'],
+      },
+      '样本：占 14%…各体系等权（应空） / 胜率 58%（这是假设的权重）（应命中）');
     check('24-未知写在玩家层', '「这一页现在还不知道什么」与「现在算不出来」的说明在可见文本里（不是只放在属性里）',
       sixDom.unknownNodes >= 4 && /现在算不出来/.test(playerNow) && /未核实|未知/.test(playerNow),
       `未知条目=${sixDom.unknownNodes}；含「现在算不出来」=${/现在算不出来/.test(playerNow)}`);
