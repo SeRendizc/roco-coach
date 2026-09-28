@@ -1,7 +1,7 @@
 {
  "all_ok": true,
  "schema": "roco-ux-acceptance/v1",
- "generated_at": "2026-09-28T14:10:42.045Z",
+ "generated_at": "2026-09-28T14:29:32.017Z",
  "fault_injected": false,
  "counterproofs_all_hit": true,
  "viewports": [

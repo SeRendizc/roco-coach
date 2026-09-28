@@ -3,7 +3,7 @@
 > node scripts/roco/verify-release.mjs
 
 … env
-  ✔ env（35s）
+  ✔ env（34s）
 … unit
   ✖ unit（210s）
 … bridge
@@ -33,11 +33,11 @@
 … state-doc
   ✔ state-doc（0s）
 … guard-selftest
-  ✔ guard-selftest（58s）
+  ✔ guard-selftest（57s）
 … browser-acceptance
   ✔ browser-acceptance（20s）
 … demo-acceptance
-  ✔ demo-acceptance（155s）
+  ✔ demo-acceptance（153s）
 … mobile-sweep
   ✔ mobile-sweep（16s）
 … box-acceptance
@@ -55,12 +55,11 @@
 … coverage-axes
   ✔ coverage-axes（0s）
 … retained-assets
-  ✖ retained-assets（0s）
+  ✔ retained-assets（0s）
 {
  "verdict": "failed",
  "failed": [
-  "unit",
-  "retained-assets"
+  "unit"
  ],
  "ran": [
   "env",

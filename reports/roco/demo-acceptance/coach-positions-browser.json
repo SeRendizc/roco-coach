@@ -22,7 +22,7 @@
    "advances_planned": 5,
    "pass": "A",
    "battle_inputs": {
-    "battle_id_digest": 3266727440,
+    "battle_id_digest": 2318535899,
     "seed": 20260921,
     "self_count": 3,
     "self_digest": 2815986771,
@@ -127,7 +127,7 @@
     "reason": "critical-risk"
    },
    "probe": {
-    "hint_wait_ms": 260,
+    "hint_wait_ms": 246,
     "plan_tries": 1,
     "plan_missing": false,
     "hint_plan_missing": false,
@@ -147,7 +147,7 @@
     "detail_budget": null,
     "advice_present": true
    },
-   "hint_wait_ms": 260,
+   "hint_wait_ms": 246,
    "plan_tries": 1,
    "kind": "ko-now",
    "advice_contract": {
@@ -181,7 +181,7 @@
    "advances_planned": 3,
    "pass": "A",
    "battle_inputs": {
-    "battle_id_digest": 3539262934,
+    "battle_id_digest": 2965658286,
     "seed": 20260921,
     "self_count": 3,
     "self_digest": 3734316182,
@@ -287,7 +287,7 @@
     "reason": "moderate-risk"
    },
    "probe": {
-    "hint_wait_ms": 260,
+    "hint_wait_ms": 261,
     "plan_tries": 1,
     "plan_missing": false,
     "hint_plan_missing": false,
@@ -307,7 +307,7 @@
     "detail_budget": null,
     "advice_present": true
    },
-   "hint_wait_ms": 260,
+   "hint_wait_ms": 261,
    "plan_tries": 1,
    "kind": "ko-now",
    "advice_contract": {
@@ -341,7 +341,7 @@
    "advances_planned": 3,
    "pass": "A",
    "battle_inputs": {
-    "battle_id_digest": 689902101,
+    "battle_id_digest": 3515827568,
     "seed": 20260921,
     "self_count": 3,
     "self_digest": 2815986771,
@@ -448,7 +448,7 @@
     "reason": "moderate-risk"
    },
    "probe": {
-    "hint_wait_ms": 261,
+    "hint_wait_ms": 263,
     "plan_tries": 1,
     "plan_missing": false,
     "hint_plan_missing": false,
@@ -468,7 +468,7 @@
     "detail_budget": null,
     "advice_present": true
    },
-   "hint_wait_ms": 261,
+   "hint_wait_ms": 263,
    "plan_tries": 1,
    "kind": "energy-short",
    "advice_contract": {
@@ -502,7 +502,7 @@
    "advances_planned": 5,
    "pass": "A",
    "battle_inputs": {
-    "battle_id_digest": 2281837592,
+    "battle_id_digest": 2073883168,
     "seed": 20260921,
     "self_count": 3,
     "self_digest": 571014840,
@@ -609,7 +609,7 @@
     "reason": "moderate-risk"
    },
    "probe": {
-    "hint_wait_ms": 267,
+    "hint_wait_ms": 266,
     "plan_tries": 1,
     "plan_missing": false,
     "hint_plan_missing": false,
@@ -629,7 +629,7 @@
     "detail_budget": null,
     "advice_present": true
    },
-   "hint_wait_ms": 267,
+   "hint_wait_ms": 266,
    "plan_tries": 1,
    "kind": "type-resisted",
    "advice_contract": {
@@ -663,7 +663,7 @@
    "advances_planned": 5,
    "pass": "A",
    "battle_inputs": {
-    "battle_id_digest": 2319599496,
+    "battle_id_digest": 3199685386,
     "seed": 20260921,
     "self_count": 3,
     "self_digest": 2698774032,
@@ -769,7 +769,7 @@
     "reason": "moderate-risk"
    },
    "probe": {
-    "hint_wait_ms": 269,
+    "hint_wait_ms": 266,
     "plan_tries": 1,
     "plan_missing": false,
     "hint_plan_missing": false,
@@ -789,7 +789,7 @@
     "detail_budget": null,
     "advice_present": true
    },
-   "hint_wait_ms": 269,
+   "hint_wait_ms": 266,
    "plan_tries": 1,
    "kind": "type-favoured",
    "advice_contract": {
@@ -823,7 +823,7 @@
    "advances_planned": 7,
    "pass": "A",
    "battle_inputs": {
-    "battle_id_digest": 2676606107,
+    "battle_id_digest": 2914164590,
     "seed": 20260921,
     "self_count": 3,
     "self_digest": 2698774032,
@@ -929,7 +929,7 @@
     "reason": "moderate-risk"
    },
    "probe": {
-    "hint_wait_ms": 276,
+    "hint_wait_ms": 264,
     "plan_tries": 1,
     "plan_missing": false,
     "hint_plan_missing": false,
@@ -949,7 +949,7 @@
     "detail_budget": null,
     "advice_present": true
    },
-   "hint_wait_ms": 276,
+   "hint_wait_ms": 264,
    "plan_tries": 1,
    "kind": "foe-energy-high",
    "advice_contract": {
@@ -983,7 +983,7 @@
    "advances_planned": 9,
    "pass": "A",
    "battle_inputs": {
-    "battle_id_digest": 1223915433,
+    "battle_id_digest": 3529605246,
     "seed": 20260921,
     "self_count": 3,
     "self_digest": 2815986771,
@@ -1133,7 +1133,7 @@
    "advances_planned": 9,
    "pass": "A",
    "battle_inputs": {
-    "battle_id_digest": 3744969466,
+    "battle_id_digest": 2215288202,
     "seed": 20260921,
     "self_count": 3,
     "self_digest": 2172955071,
@@ -1238,7 +1238,7 @@
     "reason": "critical-risk"
    },
    "probe": {
-    "hint_wait_ms": 269,
+    "hint_wait_ms": 265,
     "plan_tries": 1,
     "plan_missing": false,
     "hint_plan_missing": false,
@@ -1258,7 +1258,7 @@
     "detail_budget": null,
     "advice_present": true
    },
-   "hint_wait_ms": 269,
+   "hint_wait_ms": 265,
    "plan_tries": 1,
    "kind": "switch-low-hp",
    "advice_contract": {
@@ -1292,7 +1292,7 @@
    "advances_planned": 6,
    "pass": "A",
    "battle_inputs": {
-    "battle_id_digest": 1617062841,
+    "battle_id_digest": 3454222375,
     "seed": 20260921,
     "self_count": 3,
     "self_digest": 3490643769,
@@ -1399,7 +1399,7 @@
     "reason": "critical-risk"
    },
    "probe": {
-    "hint_wait_ms": 261,
+    "hint_wait_ms": 259,
     "plan_tries": 1,
     "plan_missing": false,
     "hint_plan_missing": false,
@@ -1419,7 +1419,7 @@
     "detail_budget": null,
     "advice_present": true
    },
-   "hint_wait_ms": 261,
+   "hint_wait_ms": 259,
    "plan_tries": 1,
    "kind": "foe-low-hp",
    "advice_contract": {
@@ -1453,7 +1453,7 @@
    "advances_planned": 5,
    "pass": "A",
    "battle_inputs": {
-    "battle_id_digest": 1618971539,
+    "battle_id_digest": 807229496,
     "seed": 20260921,
     "self_count": 3,
     "self_digest": 2831230366,
@@ -1558,7 +1558,7 @@
     "reason": "moderate-risk"
    },
    "probe": {
-    "hint_wait_ms": 258,
+    "hint_wait_ms": 256,
     "plan_tries": 1,
     "plan_missing": false,
     "hint_plan_missing": false,
@@ -1578,7 +1578,7 @@
     "detail_budget": null,
     "advice_present": true
    },
-   "hint_wait_ms": 258,
+   "hint_wait_ms": 256,
    "plan_tries": 1,
    "kind": "speed-decides",
    "advice_contract": {
@@ -1612,7 +1612,7 @@
    "advances_planned": 6,
    "pass": "A",
    "battle_inputs": {
-    "battle_id_digest": 4227320523,
+    "battle_id_digest": 2942761961,
     "seed": 20260921,
     "self_count": 3,
     "self_digest": 4033283323,
@@ -1719,7 +1719,7 @@
     "reason": "moderate-risk"
    },
    "probe": {
-    "hint_wait_ms": 269,
+    "hint_wait_ms": 264,
     "plan_tries": 1,
     "plan_missing": false,
     "hint_plan_missing": false,
@@ -1739,7 +1739,7 @@
     "detail_budget": null,
     "advice_present": true
    },
-   "hint_wait_ms": 269,
+   "hint_wait_ms": 264,
    "plan_tries": 1,
    "kind": "speed-decides",
    "advice_contract": {
@@ -1773,7 +1773,7 @@
    "advances_planned": 0,
    "pass": "A",
    "battle_inputs": {
-    "battle_id_digest": 2951096834,
+    "battle_id_digest": 4161500663,
     "seed": 20260921,
     "self_count": 3,
     "self_digest": 571014840,
@@ -1880,7 +1880,7 @@
     "reason": "below-threshold"
    },
    "probe": {
-    "hint_wait_ms": 266,
+    "hint_wait_ms": 261,
     "plan_tries": 1,
     "plan_missing": false,
     "hint_plan_missing": true,
@@ -1898,12 +1898,12 @@
     "detail_budget": null,
     "advice_present": false
    },
-   "hint_wait_ms": 266,
+   "hint_wait_ms": 261,
    "plan_tries": 1,
    "kind": null,
    "advice_contract": null,
    "spoken": false,
-   "silent_reason": "门控判定 silent（reason=below-threshold）；建议层没有一条成立的局面事实：coachAdvice 返回 null；plan-present（采样时 state.plan 在）；会话 hints=0／上次开口=never／冷却=never；等待落定 266ms／plan 请求 1 次；决策原文 gate=null/reason=below-threshold/value=0.6/floor=1.2/decisive=false/budget=null",
+   "silent_reason": "门控判定 silent（reason=below-threshold）；建议层没有一条成立的局面事实：coachAdvice 返回 null；plan-present（采样时 state.plan 在）；会话 hints=0／上次开口=never／冷却=never；等待落定 261ms／plan 请求 1 次；决策原文 gate=null/reason=below-threshold/value=0.6/floor=1.2/decisive=false/budget=null",
    "silent_with_advice": false,
    "node_recompute": {
     "kind": null,
@@ -1937,7 +1937,7 @@
      "gate": null,
      "reason": "below-threshold"
     },
-    "reason": "门控判定 silent（reason=below-threshold）；建议层没有一条成立的局面事实：coachAdvice 返回 null；plan-present（采样时 state.plan 在）；会话 hints=0／上次开口=never／冷却=never；等待落定 266ms／plan 请求 1 次；决策原文 gate=null/reason=below-threshold/value=0.6/floor=1.2/decisive=false/budget=null"
+    "reason": "门控判定 silent（reason=below-threshold）；建议层没有一条成立的局面事实：coachAdvice 返回 null；plan-present（采样时 state.plan 在）；会话 hints=0／上次开口=never／冷却=never；等待落定 261ms／plan 请求 1 次；决策原文 gate=null/reason=below-threshold/value=0.6/floor=1.2/decisive=false/budget=null"
    }
   ],
   "distinct_kinds": 9,
