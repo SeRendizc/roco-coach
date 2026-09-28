@@ -19,7 +19,7 @@
     "frozen": {
       "dir": "data/roco/normalized/roco-world-s4-2026-09-10",
       "catalog_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-      "catalog_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+      "catalog_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
       "catalog_count": 622,
       "skills_path": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
       "skills_sha256": "9d01a6476a529be750973b4b3e8eb939112773f6a8b685e15e67516092e278e4",
@@ -1630,6 +1630,6 @@
       }
     ]
   },
-  "generated_at": "2026-09-21T14:54:03.677Z",
+  "generated_at": "2026-09-28T03:45:00.186Z",
   "generated_by": "scripts/roco/reconcile-catalog.mjs"
 }

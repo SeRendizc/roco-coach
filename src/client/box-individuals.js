@@ -30,7 +30,7 @@ function individualFor(all, card) {
   const made = individualFromInstance({
     instance_id: card.select, species_id: card.group, species_name: card.name, level: card.level,
     nature: {value: null}, talent: {value: null},
-  }, {level: 100});
+  }, {level: 60});
   all[card.select] = made;
   return made;
 }

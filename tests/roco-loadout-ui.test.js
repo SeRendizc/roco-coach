@@ -31,11 +31,27 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SERVER_SRC = readFileSync(join(ROOT, 'src', 'server', 'index.js'), 'utf8');
 const CLIENT_SRC = readFileSync(join(ROOT, 'src', 'client', 'roco.js'), 'utf8');
 const WORKSHOP_SRC = readFileSync(join(ROOT, 'src', 'client', 'team-workshop.js'), 'utf8');
-/** 拿六个持有实例（`?team=` 用的就是这种 id）。 */
+/**
+ * 拿六个持有实例（`?team=` 用的就是这种 id）。
+ *
+ * ⚠ 2026-09-28 改钉：必须取**六个不同物种**的个体 —— 人类批准的那对同种演示个体
+ * （`own-0001`/`own-0049`，都是 `pet_000012`）现在是盒子里的前两张卡，
+ * 直接 `slice(0,6)` 会把同一物种塞两个槽位，服务端照规矩 400
+ * （`DUPLICATE_SPECIES_IN_TEAM`：同种多只个体是**不同练度的选择**，不是两个队员）。
+ * 所以要按**物种**去重之后再取 —— 这也是产品真实的口径。
+ */
 async function ownedSix(service) {
   // `box` 的参数按**查询串**语义收：`limit` 必须是字符串（数字会被判"必须是非负整数"）。
-  const box = await service.box({kind: 'mine', limit: '6'});
-  return (box?.player?.cards ?? []).map((row) => row.select).filter(Boolean).slice(0, 6);
+  const box = await service.box({kind: 'mine', limit: '60'});
+  const seen = new Set();
+  const picked = [];
+  for (const row of box?.player?.cards ?? []) {
+    if (!row?.select || seen.has(row.group)) continue;
+    seen.add(row.group);
+    picked.push(row.select);
+    if (picked.length >= 6) break;
+  }
+  return picked;
 }
 
 test('① 公开层**不带**工程键，物种由页面按名字唯一匹配解析（两层分界的口径）', async () => {
@@ -151,11 +167,19 @@ test('⑥ 每个技能都对准那只精灵：按**持有实例**查，池子按
   // 而不是页面按名字猜；池子必须**按只给**（不同精灵的数量不同）；换招的键用**引擎回的 pet_id**。
   const service = createRocoService();
   try {
-    const box = await service.box({kind: 'mine', limit: '6'});
-    const cards = box?.player?.cards ?? [];
-    assert.ok(cards.length >= 2, `盒子里至少要有两只：${JSON.stringify(cards.map((c) => c.name))}`);
+    const box = await service.box({kind: 'mine', limit: '60'});
+    const all = box?.player?.cards ?? [];
+    assert.ok(all.length >= 2, `盒子里至少要有两只：${JSON.stringify(all.map((c) => c.name))}`);
+    // ⚠ 2026-09-28：按**物种**去重后再取三只 —— 人类批准的那对同种演示个体是前两张卡，
+    // 取前三只会出现"同一种两只"，而这一条判据要验的是"**不同精灵**的可学池按只给、能区分开"。
+    const seenSpecies = new Set();
+    const cards = all.filter((card) => {
+      if (seenSpecies.has(card.group)) return false;
+      seenSpecies.add(card.group);
+      return true;
+    }).slice(0, 3);
     const seen = [];
-    for (const card of cards.slice(0, 3)) {
+    for (const card of cards) {
       const options = await service.loadoutOptions({pet: card.select});
       assert.equal(options?.ok, true, `${card.name} 的学习表必须读得到`);
       assert.match(String(options.pet_id ?? ''), /^pet_\d+$/,

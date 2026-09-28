@@ -357,7 +357,15 @@ test('⑦ Partial-team 边界：k=0 / k=6 / k>6 / 重复 id / 非法 id 都有�
   assert.equal(full.available, true, 'k=6 必须仍然算（不是 unknown）');
   assert.equal(full.remaining_slots, 0, 'k=6 时剩余槽位是 0');
   assert.equal(full.parts.pool_fillable_slots.value, 0, 'k=6 时没有槽位可补，可补只数必须是 0');
-  assert.equal(full.parts.pool_fillable_slots.pool_size, pool.length, '候选池规模仍要如实报告');
+  // ⚠ 2026-09-28 改钉：原来断言 `pool_size === pool.length`（候选池条数）。那时"一人一只"，
+  // 池里每条都是不同物种，两者相等。人类批准那对同种演示个体之后，池里会出现**同物种的另一只**
+  // （本次夹具里 `own-0001` 在队里、`own-0049` 在池里） —— 而排序器按**物种**算可补位规模
+  // （同一物种在队伍里只能占一个槽位 ⇒ 该物种不能再补）⇒ 池规模 = **池里"物种不在队里"的条数**。
+  // 这里就把这个不变量写出来（不再依赖"一人一只"那个前提）。
+  const teamSpecies = new Set(TEAMS[0].members.map((m) => ownedById.get(String(m).replace('instance:', ''))?.species_id));
+  const fillable = pool.filter((row) => !teamSpecies.has(ownedById.get(row.instance_id)?.species_id));
+  assert.equal(full.parts.pool_fillable_slots.pool_size, fillable.length,
+    `候选池可补位规模 = 池里物种不在队里的条数：${fillable.length}（池 ${pool.length} 条）`);
   assert.ok(Number.isFinite(full.score), 'k=6 的结构分必须是个数');
   assert.equal(full.uncertainty.fillability_ratio, 1, 'k=6 时「池子够不够填」是 1（没有槽位）');
   assert.equal(full.uncertainty.score_band.low, full.uncertainty.score_band.high,
@@ -578,9 +586,12 @@ test('⑬ 产物 reports/roco/rc602/team-ranker.json 与 buildRc602Report() 一�
   assert.equal(report.schema, RC602_REPORT_VERSION, '产物 schema 必须对上');
   assert.equal(report.ranker_id, RANKER_ID, '产物必须点名排序器');
   assert.equal(report.ranker_version, RANKER_VERSION, '产物必须点名版本');
-  assert.equal(report.corpus.owned_instances, 48, `冻结个体必须是 48，实际 ${report.corpus.owned_instances}`);
-  assert.equal(report.pairwise_instances.pairs_total, 1128, 'C(48,2) 必须是 1128');
-  assert.equal(report.pairwise_instances.pairs_available + report.pairwise_instances.pairs_unavailable, 1128,
+  // ⚠ 2026-09-28 改钉：48 → **49**（人类批准的那对同种演示个体；`own-0049`）。
+  // 这里仍然写死数字（不是"随便多少都行"）：数字再变一次就要有人来解释。
+  assert.equal(report.corpus.owned_instances, 49, `冻结个体必须是 49，实际 ${report.corpus.owned_instances}`);
+  // ⚠ 2026-09-28 改钉：48 → **49** 只冻结个体 ⇒ C(49,2) = **1176**（人类批准的那对演示个体多一只）。
+  assert.equal(report.pairwise_instances.pairs_total, 1176, 'C(49,2) 必须是 1176');
+  assert.equal(report.pairwise_instances.pairs_available + report.pairwise_instances.pairs_unavailable, 1176,
     '可算 + 不可算必须等于总对数');
   assert.equal(report.pairwise_instances.key_speed_lines.available, 0, '关键速度线必须如实报 0 可算');
   assert.equal(report.weights_audit.ok, true, '产物里的权重审计必须通过');
@@ -685,7 +696,7 @@ test('⑯ 在线模块不读盘、不联网、不起进程、不调引擎；反�
 // ─────────────────────────────────────────────────────────────────────────
 // 附：全量成对实测（真实测量）
 // ─────────────────────────────────────────────────────────────────────────
-test('⑰ 全量成对实测：1128 对逐对调一遍，可算/unknown 逐条计数', () => {
+test('⑰ 全量成对实测：1176 对逐对调一遍，可算/unknown 逐条计数', () => {
   const latencies = [];
   let available = 0;
   const reasons = {};
@@ -703,9 +714,9 @@ test('⑰ 全量成对实测：1128 对逐对调一遍，可算/unknown 逐条�
   }
   const sorted = [...latencies].sort((a, b) => a - b);
   const pick = (q) => Number(sorted[Math.min(sorted.length - 1, Math.ceil(q * sorted.length) - 1)].toFixed(3));
-  assert.equal(latencies.length, 1128, '必须真的跑满 1128 对');
-  assert.equal(available + Object.values(reasons).reduce((a, b) => a + b, 0), 1128, '每对都要有结论');
+  assert.equal(latencies.length, 1176, '必须真的跑满 1176 对');
+  assert.equal(available + Object.values(reasons).reduce((a, b) => a + b, 0), 1176, '每对都要有结论');
   assert.ok(pick(0.95) < 50, `单对 P95 必须远低于 50ms，实际 ${pick(0.95)}ms`);
-  log(`1128 对：可算 ${available}、不可算 ${1128 - available}；`
+  log(`1176 对：可算 ${available}、不可算 ${1176 - available}；`
     + `P50=${pick(0.5)}ms P95=${pick(0.95)}ms max=${Number(Math.max(...latencies).toFixed(3))}ms`);
 });

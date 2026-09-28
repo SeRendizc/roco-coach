@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-27T21:08:18.629Z",
+ "judged_at": "2026-09-28T04:15:42.158Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -83,13 +83,13 @@
    "id": "06-初判先于完整载荷",
    "judge": "页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms）",
    "ok": true,
-   "actual": "；fetches=first|full rendered_after_first=yes first_ms=88 full_ms=24 stage=full full_state=ok"
+   "actual": "；fetches=first|full rendered_after_first=yes first_ms=86 full_ms=26 stage=full full_state=ok"
   },
   {
    "id": "07-分段元数据在 dataset",
    "judge": "分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），可见文本里一个工程词都没有",
    "ok": true,
-   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=20 withheld=\"\""
+   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=22 withheld=\"\""
   },
   {
    "id": "08-候选含图鉴物种",
@@ -213,9 +213,9 @@
   },
   {
    "id": "41-同名不同种看得出区别",
-   "judge": "候选池里同名不同物种的两行，可见文本必须不同且各含自己的等级与定位【人类 2026-09-25：「这个什么陛下有啥区别？我根本看不出来啊」】",
+   "judge": "候选池里同名不同物种的两行，可见文本必须不同、各带等级读数、且定位不止一种【人类 2026-09-25：「这个什么陛下有啥区别？我根本看不出来啊」】",
    "ok": true,
-   "actual": "[\"棋契陛下 武系地系 Lv50 · 输出 持有 · 可正式上场 在你的盒子里\",\"棋契陛下 武系地系 Lv80 · 坦克 持有 · 可正式上场 在你的盒子里\"]"
+   "actual": "[\"棋契陛下 武系地系 Lv60 · 输出 持有 · 可正式上场 在你的盒子里\",\"棋契陛下 武系地系 Lv60 · 坦克 持有 · 可正式上场 在你的盒子里\"]"
   },
   {
    "id": "21-机制行上卡",
@@ -227,13 +227,13 @@
    "id": "22-玩家层无工程话",
    "judge": "模块的可见文本里不出现 pet_id / instance_id / state_version / coverage / provenance / unknown_fields / ranker_status / ruleset，也不出现裸 JSON",
    "ok": true,
-   "actual": "扫过 3686 字（豁免机制原文 4 处）；样例「 阵容评估 收起 › 阵容评估 六只满编 · 六个方面 这六只的五个方面现在都能算。其中四个方面要先假设\"对手会用什么体系\"（现在各体系按同等权重，换成本赛季实测数据会更准）；这里…」"
+   "actual": "扫过 3685 字（豁免机制原文 4 处）；样例「 阵容评估 收起 › 阵容评估 六只满编 · 六个方面 这六只的五个方面现在都能算。其中四个方面要先假设\"对手会用什么体系\"（现在各体系按同等权重，换成本赛季实测数据会更准）；这里…」"
   },
   {
    "id": "23-无胜率与百分数",
    "judge": "可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法（可核对的冻结机制原文除外）",
    "ok": true,
-   "actual": "扫过 3686 字无命中（豁免机制原文 2 条）"
+   "actual": "扫过 3685 字无命中（豁免机制原文 2 条）"
   },
   {
    "id": "24-未知写在玩家层",
@@ -522,8 +522,15 @@
    "id": "41-同名不同种看得出区别",
    "judge": "把两行还原成只画名字+属性（投诉当时的样子）必须报",
    "ok": true,
-   "hit": "同名两行的可见文本完全相同：「棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里」 | 两行必须各带自己的等级（要能同时看到 Lv50 与 Lv80）：[\"棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里\",\"棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里\"] | 两行必须各带自己的定位（要能同时看到「输出」与「坦克」）：[\"棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里\",\"棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里\"]",
+   "hit": "同名两行的可见文本完全相同：「棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里」 | 每行都要带自己的等级读数：[\"棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里\",\"棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里\"] | 两行要各自带出定位、且不止一种（看到的定位：无）：[\"棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里\",\"棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里\"]",
    "actual": "两行逐字相同"
+  },
+  {
+   "id": "41-同名不同种看得出区别",
+   "judge": "两行只有等级、没有各自的定位也必须报",
+   "ok": true,
+   "hit": "同名两行的可见文本完全相同：「棋契陛下 武系地系 Lv60 持有 · 可正式上场 在你的盒子里」 | 两行要各自带出定位、且不止一种（看到的定位：无）：[\"棋契陛下 武系地系 Lv60 持有 · 可正式上场 在你的盒子里\",\"棋契陛下 武系地系 Lv60 持有 · 可正式上场 在你的盒子里\"]",
+   "actual": "定位没带出来"
   },
   {
    "id": "21-机制行上卡",
@@ -660,14 +667,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "88",
-    "fullMs": "24",
+    "firstMs": "86",
+    "fullMs": "26",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "20"
+    "elapsedMs": "22"
    },
    "dom": {
     "slotNodes": 6,
@@ -717,14 +724,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "24",
-    "fullMs": "20",
+    "firstMs": "35",
+    "fullMs": "22",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "15"
+    "elapsedMs": "17"
    },
    "dom": {
     "slotNodes": 6,
@@ -896,14 +903,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "16",
-    "fullMs": "13",
+    "firstMs": "24",
+    "fullMs": "16",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "8"
+    "elapsedMs": "10"
    },
    "dom": {
     "slotNodes": 6,
@@ -1078,14 +1085,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "13",
-    "fullMs": "16",
+    "firstMs": "21",
+    "fullMs": "20",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "9"
+    "elapsedMs": "12"
    },
    "dom": {
     "slotNodes": 6,
@@ -1267,8 +1274,8 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "20",
-    "fullMs": "20",
+    "firstMs": "24",
+    "fullMs": "21",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",

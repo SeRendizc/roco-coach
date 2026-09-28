@@ -21,6 +21,8 @@
 // 用法：`node --test tests/roco-owned-pets.test.js`
 
 import {test} from 'node:test';
+// 同种两只「掷点后是否真的不同」要按个体层算（数据集里那两项是 null）。
+import {individualFromInstance} from '../src/coach/individuals.js';
 import assert from 'node:assert/strict';
 import {existsSync, readFileSync} from 'node:fs';
 
@@ -84,7 +86,7 @@ const sample = (overrides = {}) => ({
 // 0. 真产物：80 个实例全部合规
 // ─────────────────────────────────────────────────────────────────────────
 
-test('真产物：80 个 owned 实例过全部 16 组判据', () => {
+test('真产物：owned 实例过全部 16 组判据（2026-09-28 起是 49 个：48 物种 + 1 只演示用的同种第二只）', () => {
   const result = judge(dataset);
   log('[实际] 实例 =', result.facts.instances, '；species =', result.facts.species,
     '；battle_builds =', result.facts.battleBuilds);
@@ -93,8 +95,15 @@ test('真产物：80 个 owned 实例过全部 16 组判据', () => {
   assert.deepEqual(result.problems, [], '真产物必须过全部判据');
   assert.equal(result.checks.length, CHECK_NAMES.length);
   for (const check of result.checks) assert.ok(check.ok, `${check.check} 应当通过`);
-  assert.equal(result.facts.instances, INSTANCE_TARGET);
-  assert.equal(result.facts.battleBuilds, INSTANCE_TARGET);
+  // ⚠ 2026-09-28 改钉：实例数从 48 变 **49** —— 人类批准加了一对同种演示个体（`own-0049`）。
+  // 这里不写死数字，而是断言"物种数 == 下限，且多出来的那**一只**必须是显式标注的演示个体"：
+  // 这样它既守住了"不许灌水"，也不会在人类再批一对时假装没变。
+  assert.equal(result.facts.instances, result.facts.species + 1,
+    `实例数应当是物种数 + 1（那一只是演示同种第二只），实际 ${result.facts.instances}/${result.facts.species}`);
+  const demos = dataset.instances.filter((one) => one.synthetic_demo === true);
+  assert.equal(demos.length, 1, `显式标注的演示个体必须恰好 1 只，实际 ${demos.length}`);
+  assert.ok(result.facts.instances >= INSTANCE_TARGET, '实例数不得低于下限');
+  assert.equal(result.facts.battleBuilds, result.facts.instances, '每只实例都要有一条 battle_build');
   assert.equal(result.facts.provenanceMismatches, 0);
   assert.equal(result.facts.pointerMismatches, 0);
   assert.equal(result.facts.licenceRefUnresolved, 0);
@@ -163,9 +172,12 @@ test('真产物：四个技能逐个都在该 species 的学习表池（native �
   }
   log('[实际] 逐个核对的技能引用 =', checked, `（native ${origins.native} / blood ${origins.blood} / stones ${origins.stones}）`);
   assert.equal(checked, dataset.instances.length * 4);
-  // 差异**不许消失**：这 46 个非 native 引用是「引擎真的会装上血统/石系技能」的证据，
+  // 差异**不许消失**：这些非 native 引用是「引擎真的会装上血统/石系技能」的证据，
   // 谁把它们悄悄删掉（或把口径偷偷改回 native-only）都要在这里留下痕迹。
-  assert.equal(outsideNative, 46, '非 native（blood/stones）技能引用数变了 —— 请连同口径一起复核');
+  // ⚠ 2026-09-28 改钉：**46 → 47**。演示个体 `own-0049` 复用的是 own-0001 的那四个技能，
+  // 其中**一个是非 native（血脉/技能石）** ⇒ 非 native 引用多 1 条。判定依据就是上面那句
+  // "引擎真的会装上血统/石系技能"，多出来的这 1 条同样是**真实引用**（不是注水）。
+  assert.equal(outsideNative, 47, '非 native（blood/stones）技能引用数变了 —— 请连同口径一起复核');
 });
 
 test('真产物：BattleBuild.ordered_skills **逐位**等于引擎 loadout（C20；2026-09-25 人类「配招这个你得修好」）', () => {
@@ -430,10 +442,21 @@ test('反证⑤⑦ species_id 不存在 / 实例降到 79 个 ⇒ 红', () => {
   resign(bad2);
   const problems2 = judge(bad2).problems;
   log('[实际] 少一个实例 rc =', problems2.length ? 1 : 0, '；原文 =', showCheck(problems2, 'species_universe'));
-  // 2026-09-24：实例数=物种数=48（人类要求删掉重复个体），少一个是 47 —— 判据断言「点名了实际条数」，
-  // 不再写死 79。
-  assert.ok(problems2.some((p) => p.includes('[species_universe]')
-    && p.includes(String(INSTANCE_TARGET - 1))), `少一个实例必须被点到数：${showCheck(problems2, 'species_universe')}`);
+  // 2026-09-24：实例数=物种数（人类要求删掉重复个体）；2026-09-28 人类批准加**一对**同种演示个体
+  // ⇒ 现在是 49 个实例 / 48 个物种。判据断言「点名了**实际条数**」（`bad2.instances.length`），
+  // 既不写死 79 也不写死 48 —— 数字再变一次也不会假装没变。
+  // ⚠ 2026-09-28 改钉：掉 1 个已经不够（49→48 仍等于下限）⇒ 这里与 R07 一样掉 **2** 个，
+  // 断言"点名了实际条数"（不写死数字）。意图不变：宇宙缩水必须被抓到。
+  const bad3 = clone();
+  for (let i = 0; i < 2; i += 1) {
+    const gone = bad3.instances.pop();
+    bad3.battle_builds = bad3.battle_builds.filter((b) => b.owned_pet_instance_id !== gone.instance_id);
+  }
+  resign(bad3);
+  const problems3 = judge(bad3).problems;
+  assert.ok(problems3.some((p) => p.includes('[species_universe]')
+    && p.includes(String(bad3.instances.length))),
+  `少两个实例必须被点到数（实际 ${bad3.instances.length}）：${showCheck(problems3, 'species_universe')}`);
 });
 
 test('反证⑥⑪ nature.effect 填数值 / 长出公式字段 ⇒ 红', () => {
@@ -538,4 +561,34 @@ test('RC-203 报告：存在、可解析、逐条给出判据文本与实际值�
   // 报告必须与磁盘产物一致（否则「报告」就成了另一份事实）。
   assert.equal(report.artifact.sha256, sha256Hex(datasetText));
   assert.equal(report.artifact.dataset_hash, dataset.dataset_hash);
+});
+
+test('⑬ 人类批准的那**一对**同种个体：只许一只、必须标注、掷点后真的不同', () => {
+  // 由来：2026-09-24 人类说过「重复的删掉」（当时 80 只里有 32 只是演示造的第二个个体 ⇒ 编数据）。
+  // 2026-09-28 他说「同种你可以做一对测试一下」⇒ 放宽到**一对**，但必须可追、可退、不灌水。
+  const demos = dataset.instances.filter((one) => one.synthetic_demo === true);
+  assert.equal(demos.length, 1, `显式标注的演示个体必须恰好 1 只（实际 ${demos.length}）`);
+  const demo = demos[0];
+  // 同种成对：它与**同一物种**的另一只构成唯一那一组
+  const sameSpecies = dataset.instances.filter((one) => one.species_id === demo.species_id);
+  assert.equal(sameSpecies.length, 2, '演示个体必须与另一只同种（成一对）');
+  assert.equal(new Set(dataset.instances.map((one) => one.species_id)).size,
+    dataset.instances.length - 1, '全部实例里只许多出这一只（物种数 = 实例数 − 1）');
+  // provenance：出处是**人类决定**那份 JSON，且 pointer 能解析到那一条
+  const entry = (demo.provenance ?? []).find((row) => row.source_scope === 'human_decision');
+  assert.ok(entry, '演示个体必须有一条 human_decision 出处');
+  assert.equal(entry.artifact_path, 'data/roco/human-decisions.json');
+  const decisions = JSON.parse(readFileSync('data/roco/human-decisions.json', 'utf8'));
+  const hit = entry.pointer.split('.').reduce((node, key) => (node ?? {})[key], decisions);
+  assert.ok(hit, `出处 pointer ${entry.pointer} 解析不到（人类决定那份 JSON 里没有这一条）`);
+  assert.match(String(hit.verbatim ?? ''), /同种你可以做一对测试一下/, '要把人类原话留着');
+  assert.match(String(hit.rollback ?? ''), /MAX_SAME_SPECIES_GROUPS/, '要写清怎么退场');
+  // 掷点后两只**真的不同**（否则"能不能比出高低"这件事没被验到）
+  const rolls = sameSpecies.map((one) => {
+    const row = individualFromInstance(one, {level: one.level ?? 60});
+    return `${row.nature}|${JSON.stringify(row.talent)}`;
+  });
+  assert.notEqual(rolls[0], rolls[1], '同种两只掷出来的性格/天分必须不同');
+  assert.equal(dataset.counts.same_species_groups, 1);
+  assert.equal(dataset.counts.same_species_groups_with_difference, 1);
 });

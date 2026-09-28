@@ -6,10 +6,10 @@
   "clock_fields": [],
   "artifact": {
     "path": "data/roco/owned/owned-pets.json",
-    "sha256": "ce095ae1c8cd4f615e27873c7b4e1889cbcf051ee8ac880fe5c0d2c6b68488a0",
-    "dataset_hash": "6ef39855bfc7f6ce02ef2bed8bd85bbefcd69e749b8ef54b471b100890ebc382",
-    "instances": 48,
-    "battle_builds": 48
+    "sha256": "bad392e7622d6ba2ec5705d4d9e41af870f3b9896ad9fc650691f677cda5825a",
+    "dataset_hash": "dcb536159f0ed607f10fe42c97dcd77514a56d0452dbc800b682a6ddaef15678",
+    "instances": 49,
+    "battle_builds": 49
   },
   "schema": {
     "path": "data/roco/owned/schema.json"
@@ -48,7 +48,7 @@
       "check": "species_universe",
       "text": "实例数 == 物种数 == 48",
       "expected": ">= 48",
-      "actual": "48",
+      "actual": "49",
       "ok": true,
       "problems": []
     },
@@ -73,9 +73,9 @@
     {
       "id": "C07",
       "check": "species_universe",
-      "text": "同种多实例组数 == 0（一人一只：人类 2026-09-24「重复的删掉」）",
-      "expected": "== 0",
-      "actual": "0（同种组）",
+      "text": "同种多实例组数 == 1（一人一只：人类 2026-09-24「重复的删掉」）",
+      "expected": "== 1",
+      "actual": "1（同种组）",
       "ok": true,
       "problems": []
     },
@@ -84,7 +84,7 @@
       "check": "learnset_membership",
       "text": "四个技能逐个属于该 species 的学习表池（native ∪ blood ∪ stones —— **与引擎 `Ruleset.is_learnable` 同口径**；native 技能的习得等级 <= 实例等级），且都在 skills.json 里。【2026-09-25 口径对齐：配招改成逐位等于引擎 loadout 之后，只认 native_skills 会把引擎真的会装上的血统/石系技能判成违规；差异**没有消失**，单独记在 `skillsOutsideNative` / `nativeOnlyBuilds` 里】",
       "expected": "0 违规",
-      "actual": "违规 0 条，引用技能 76 个；其中非 native（blood/stones）46 个技能、四技能全 native 的 9 只",
+      "actual": "违规 0 条，引用技能 76 个；其中非 native（blood/stones）47 个技能、四技能全 native 的 9 只",
       "ok": true,
       "problems": []
     },
@@ -93,7 +93,7 @@
       "check": "canonical_loadout",
       "text": "BattleBuild.ordered_skills **逐位等于引擎 loadout**（support-matrix.json 基线 12 + layer-playable-48/support-matrix.json 叠加层 36 的 candidate_moveset，合并规则同 data.py:515-535）—— 这是「owned 的四技能 = 实战真正装上的四技能」的唯一判据（2026-09-25 人类「配招这个你得修好」）",
       "expected": "0 违规",
-      "actual": "逐位相同 48/48，违规 0 条",
+      "actual": "逐位相同 49/49，违规 0 条",
       "ok": true,
       "problems": []
     },
@@ -138,7 +138,7 @@
       "check": "provenance_on_disk",
       "text": "provenance 的 artifact_path 存在且 artifact_sha256 与磁盘一致、pointer 可解析",
       "expected": "0 失配",
-      "actual": "条目 196，sha 失配 0，pointer 失配 0",
+      "actual": "条目 201，sha 失配 0，pointer 失配 0",
       "ok": true,
       "problems": []
     },
@@ -165,7 +165,7 @@
       "check": "battle_builds",
       "text": "BattleBuild 与 OwnedPet 一一对应，derived_stats=null，derived_stats_confidence=UNKNOWN",
       "expected": "0 违规",
-      "actual": "battle_builds=48，违规 0 条",
+      "actual": "battle_builds=49，违规 0 条",
       "ok": true,
       "problems": []
     },
@@ -198,13 +198,13 @@
     }
   ],
   "counts": {
-    "instances": 48,
+    "instances": 49,
     "species": 48,
     "species_in_layer_playable_48": 36,
     "species_outside_layer_playable_48": 12,
-    "same_species_groups": 0,
-    "same_species_groups_with_difference": 0,
-    "battle_builds": 48,
+    "same_species_groups": 1,
+    "same_species_groups_with_difference": 1,
+    "battle_builds": 49,
     "skills_referenced": 76
   },
   "candidate_universe": {
@@ -332,10 +332,27 @@
     }
   },
   "same_species_groups": {
-    "expected_max": 0,
-    "count": 0,
-    "with_difference": 0,
-    "groups": []
+    "expected_max": 1,
+    "count": 1,
+    "with_difference": 1,
+    "groups": [
+      {
+        "species_id": "pet_000012",
+        "species_name": "铠甲虫",
+        "instances": [
+          "own-0001",
+          "own-0049"
+        ],
+        "different_fields": [],
+        "unknown_fields": [
+          "nature",
+          "talent",
+          "specialty",
+          "bloodline"
+        ],
+        "differs_after_roll": true
+      }
+    ]
   },
   "skips": {
     "counts": {
@@ -3818,49 +3835,49 @@
     {
       "field": "nature",
       "value": null,
-      "instances_affected": 48,
+      "instances_affected": 49,
       "why": "冻结目录里没有任何性格取值枚举；仓库里唯一一张性格加成表（data/roco/raw/extracted/NRC_AI/src/pokemon_nature_table.py）来自 REFERENCE_ONLY 的交叉核验来源，且标的是另一款游戏（页游），不得进入可分发产物",
       "where_it_would_be_resolved": "需要一条可分发来源给出性格取值与面板换算，并过 microcase"
     },
     {
       "field": "talent",
       "value": null,
-      "instances_affected": 48,
+      "instances_affected": 49,
       "why": "冻结目录里没有任何「个体资质」取值枚举（字段存在 ≠ 换算已知，见 10 号文档 §13）",
       "where_it_would_be_resolved": "同上"
     },
     {
       "field": "specialty",
       "value": null,
-      "instances_affected": 48,
+      "instances_affected": 49,
       "why": "冻结目录里没有任何「特长」取值枚举；快照只说「一般般的天分无法获得特长」，没有取值表",
       "where_it_would_be_resolved": "同上"
     },
     {
       "field": "bloodline.value",
       "value": null,
-      "instances_affected": 36,
+      "instances_affected": 37,
       "why": "layer-playable-48 的 36 只 overlay 在 learnsets.json 里 blood 是 null（blood_status=not_provided_by_source）；只有主 learnsets.json 的 12 只 baseline 带真实血脉名。无名可标就标 UNKNOWN，不拿 18 条无名的 skill_id 编一个「血脉」出来",
       "where_it_would_be_resolved": "需要一份逐条给出 blood 字段的可分发 learnset 导入"
     },
     {
       "field": "bloodline.effect",
       "value": "UNKNOWN",
-      "instances_affected": 48,
+      "instances_affected": 49,
       "why": "标签（blood_skills[].blood）有真实出处，但「血脉怎么参与结算」没有校准",
       "where_it_would_be_resolved": "需要血脉结算的 microcase"
     },
     {
       "field": "panel_stats",
       "value": null,
-      "instances_affected": 48,
+      "instances_affected": 49,
       "why": "等级换算后的面板值需要未校准的公式；本产物只给冻结目录的静态种族值 base_stats（带 pointer）",
       "where_it_would_be_resolved": "面板换算公式校准后由 RC-403 支持分级接管"
     },
     {
       "field": "battle_builds[].derived_stats",
       "value": null,
-      "instances_affected": 48,
+      "instances_affected": 49,
       "why": "与 panel_stats 同因：公式未校准，所以不给数（fail closed，而不是给个估数）",
       "where_it_would_be_resolved": "同上"
     }

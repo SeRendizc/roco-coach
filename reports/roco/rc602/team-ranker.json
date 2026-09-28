@@ -2,7 +2,7 @@
   "schema": "roco-rc602-team-ranker-report/v1",
   "generated_by": "scripts/roco/build-rc602-report.mjs",
   "ruleset_id": "roco-world-s4-2026-09-10",
-  "dataset_hash": "6ef39855bfc7f6ce02ef2bed8bd85bbefcd69e749b8ef54b471b100890ebc382",
+  "dataset_hash": "dcb536159f0ed607f10fe42c97dcd77514a56d0452dbc800b682a6ddaef15678",
   "ranker_id": "roco-rule-pairwise-ranker",
   "ranker_version": "rc602/1",
   "ranker_status": {
@@ -43,7 +43,7 @@
     "milliseconds": "毫秒（实测墙钟，只用于延迟报告）"
   },
   "corpus": {
-    "owned_instances": 48,
+    "owned_instances": 49,
     "owned_species": 48,
     "catalog_species": 622,
     "validated_species": 48,
@@ -75,60 +75,60 @@
   },
   "pairwise_instances": {
     "criterion": "对 48 个冻结个体取全部 C(48,2) = 1128 对，逐对调 pairwiseFeatures()；可算 = 六个维度全部算得出（available:true）",
-    "pairs_total": 1128,
-    "pairs_available": 1128,
+    "pairs_total": 1176,
+    "pairs_available": 1176,
     "pairs_unavailable": 0,
     "unknown_reason_distribution": {},
     "latency_ms": {
       "unit": "毫秒（实测墙钟，只用于延迟报告）",
-      "samples": 1128,
+      "samples": 1176,
       "p50": 0.016,
-      "p95": 0.033,
+      "p95": 0.041,
       "min": 0.011,
-      "max": 0.541,
-      "total": 23.162
+      "max": 1.225,
+      "total": 29.124
     },
     "per_axis_availability": {
       "type_coverage": {
         "source": "teamFeatures().coverage",
-        "available": 1128,
+        "available": 1176,
         "unavailable": 0,
         "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）"
       },
       "weakness_exposure": {
         "source": "teamFeatures().synergy",
-        "available": 1128,
+        "available": 1176,
         "unavailable": 0,
         "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）"
       },
       "speed_layers": {
         "source": "teamFeatures().speed",
-        "available": 1128,
+        "available": 1176,
         "unavailable": 0,
         "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）"
       },
       "respond_coverage": {
         "source": "teamFeatures().respond",
-        "available": 1128,
+        "available": 1176,
         "unavailable": 0,
         "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）"
       },
       "energy_curve": {
         "source": "teamFeatures().energy",
-        "available": 1128,
+        "available": 1176,
         "unavailable": 0,
         "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）"
       },
       "pivot_sustain": {
         "source": "teamFeatures().pivot",
-        "available": 1128,
+        "available": 1176,
         "unavailable": 0,
         "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）"
       }
     },
     "key_speed_lines": {
       "available": 0,
-      "unavailable": 1128,
+      "unavailable": 1176,
       "required": "panel_stats（等级换算后的面板值）",
       "unknown_reason": "关键速度线要真实面板值（等级/性格/资质/特长/血脉换算后）才能判先手关系；冻结数据里 48 个实例的 `panel_stats` 一律 null、养成效果 `effect=UNKNOWN`（见 owned-pets.json 的 growth_attribute_policy），**现在算不出来**；这里只给速度档位层次（`speed_layers`），不给先手结论"
     }
@@ -231,10 +231,10 @@
     "latency_ms": {
       "unit": "毫秒（实测墙钟，只用于延迟报告）",
       "samples": 28,
-      "p50": 0.078,
-      "p95": 0.1,
-      "min": 0.063,
-      "max": 0.107
+      "p50": 0.083,
+      "p95": 0.123,
+      "min": 0.071,
+      "max": 0.192
     },
     "sample_pairing": {
       "team_a": "rc602-team-01",
@@ -754,22 +754,22 @@
     "latency_ms": {
       "unit": "毫秒（实测墙钟，只用于延迟报告）",
       "samples": 5,
-      "p50": 0.329,
-      "p95": 0.342,
-      "min": 0.296,
-      "max": 0.342
+      "p50": 0.347,
+      "p95": 0.935,
+      "min": 0.34,
+      "max": 0.935
     }
   },
   "partial_completion_value": {
     "criterion": "k ∈ [1,6] 才算；所有金额都是可复算的计数或占比；uncertainty 只描述候选池规模与 unknown 占比",
-    "candidate_pool_size": 42,
+    "candidate_pool_size": 43,
     "latency_ms": {
       "unit": "毫秒（实测墙钟，只用于延迟报告）",
       "samples": 6,
-      "p50": 0.058,
-      "p95": 0.083,
-      "min": 0.056,
-      "max": 0.083
+      "p50": 0.085,
+      "p95": 0.38,
+      "min": 0.067,
+      "max": 0.38
     },
     "rows": [
       {
@@ -838,12 +838,12 @@
             "pool_size": 42,
             "pool_fully_known": 42,
             "pool_unknown": 0,
-            "raw_pool_size": 42
+            "raw_pool_size": 43
           }
         },
         "uncertainty": {
           "available_pool_size": 42,
-          "raw_candidate_count": 42,
+          "raw_candidate_count": 43,
           "pool_unknown_members": 0,
           "pool_unknown_ratio": 0,
           "pool_fully_known_ratio": 1,
@@ -923,12 +923,12 @@
             "pool_size": 42,
             "pool_fully_known": 42,
             "pool_unknown": 0,
-            "raw_pool_size": 42
+            "raw_pool_size": 43
           }
         },
         "uncertainty": {
           "available_pool_size": 42,
-          "raw_candidate_count": 42,
+          "raw_candidate_count": 43,
           "pool_unknown_members": 0,
           "pool_unknown_ratio": 0,
           "pool_fully_known_ratio": 1,
@@ -1003,12 +1003,12 @@
             "pool_size": 42,
             "pool_fully_known": 42,
             "pool_unknown": 0,
-            "raw_pool_size": 42
+            "raw_pool_size": 43
           }
         },
         "uncertainty": {
           "available_pool_size": 42,
-          "raw_candidate_count": 42,
+          "raw_candidate_count": 43,
           "pool_unknown_members": 0,
           "pool_unknown_ratio": 0,
           "pool_fully_known_ratio": 1,
@@ -1082,12 +1082,12 @@
             "pool_size": 42,
             "pool_fully_known": 42,
             "pool_unknown": 0,
-            "raw_pool_size": 42
+            "raw_pool_size": 43
           }
         },
         "uncertainty": {
           "available_pool_size": 42,
-          "raw_candidate_count": 42,
+          "raw_candidate_count": 43,
           "pool_unknown_members": 0,
           "pool_unknown_ratio": 0,
           "pool_fully_known_ratio": 1,
@@ -1162,12 +1162,12 @@
             "pool_size": 42,
             "pool_fully_known": 42,
             "pool_unknown": 0,
-            "raw_pool_size": 42
+            "raw_pool_size": 43
           }
         },
         "uncertainty": {
           "available_pool_size": 42,
-          "raw_candidate_count": 42,
+          "raw_candidate_count": 43,
           "pool_unknown_members": 0,
           "pool_unknown_ratio": 0,
           "pool_fully_known_ratio": 1,
@@ -1243,12 +1243,12 @@
             "pool_size": 42,
             "pool_fully_known": 42,
             "pool_unknown": 0,
-            "raw_pool_size": 42
+            "raw_pool_size": 43
           }
         },
         "uncertainty": {
           "available_pool_size": 42,
-          "raw_candidate_count": 42,
+          "raw_candidate_count": 43,
           "pool_unknown_members": 0,
           "pool_unknown_ratio": 0,
           "pool_fully_known_ratio": 1,

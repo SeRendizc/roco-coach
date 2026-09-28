@@ -1,51 +1,14 @@
 {
  "generated_by": "scripts/roco/shoot-layout.mjs",
  "base_pages": [
-  "index"
+  "index",
+  "box",
+  "roco",
+  "workshop"
  ],
  "viewports": [
+  "1440x900",
   "390x844"
  ],
- "shots": [
-  {
-   "page": "index",
-   "viewport": "390x844",
-   "file": "index-390x844.png",
-   "height": 2833,
-   "element": null,
-   "measure": [
-    {
-     "sel": "#cultivation",
-     "count": 1,
-     "avgH": 352,
-     "maxH": 352,
-     "maxW": 336,
-     "lines": 25,
-     "overflowX": false
-    },
-    {
-     "sel": ".skill-grid",
-     "count": 0
-    },
-    {
-     "sel": ".loadout",
-     "count": 1,
-     "avgH": 172,
-     "maxH": 172,
-     "maxW": 336,
-     "lines": 12,
-     "overflowX": false
-    },
-    {
-     "sel": ".camp-grid",
-     "count": 2,
-     "avgH": 1311,
-     "maxH": 2622,
-     "maxW": 366,
-     "lines": 187,
-     "overflowX": false
-    }
-   ]
-  }
- ]
+ "shots": []
 }

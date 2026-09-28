@@ -54,6 +54,18 @@ const ASKS = [
   {q: '我的能量上限是多少？'},
   // 2026-09-27 新接入：进化链（数据来自社区图鉴层，答案里必须标出来路）
   {q: '喵喵几级进化？', evolution: true},
+  // 2026-09-27 真机抓到的漏答：图鉴字段问句（`codex-fact`）**没接模型时**答的是占位句
+  // 「这一问的答案在图鉴里，我先查一下再答。」——`policyFor` 判了它，`localFactAnswer` 里却
+  // **没有这一支**。下面这几条是"真机那一档"的常驻判据：必须有回执、正文必须含回执里的数、
+  // 不许再出现占位句（正文里带 `*` 的是加粗标记，判据不看排版）。
+  {q: '喵喵的种族值是多少？', codex: {must: /种族值合计 \d+/}},
+  {q: '寂灭骨龙的速度是多少？', codex: {must: /速度是 \d+/}},
+  // 属性这一族：名字不在名单里时会被判成"技能"档 ⇒ 必须换另一档再查一次（回执 ≥2 次）
+  {q: '喵喵是什么属性？', codex: {must: /草系/, minTools: 2}},
+  {q: '喵喵的叶绿光束威力多少？', codex: {must: /威力 \d+/}},
+  {q: '喵喵的技能表', codex: {must: /学得到的技能一共 \d+ 个/}},
+  // fail closed 那一档：查不到就如实说查不到，**一个数都不许有**（图鉴规模 622 例外）
+  {q: '不存在的精灵名啊的种族值是多少？', codex: {must: /没核到|查不到/, noNumbers: true}},
 ];
 /** 退役问句的判据：直说没有加点 + 不报旧数（与 `tests/roco-nurture-page.test.js` ⑤ 同一口径）。 */
 const RETIRED_LEAK = /训练点 ?\d|培养格|满级还差|还差 \d+ ?格|\+12 生命|\+4 攻击|\+3 速度/;
@@ -89,6 +101,12 @@ for (const ask of LIST) {
         memory: freshMemory(), conversation: []}),
     });
     const data = await response.json();
+    if (onlyArg && process.argv.includes('--dump')) {
+      console.error(`      原始：${JSON.stringify({agentStop: data.agentStop, provider: data.provider,
+        toolTrace: (data.toolTrace ?? []).map((t) => ({tool: t?.tool, ok: t?.result?.ok ?? null})),
+        validation: data.validation ? {valid: data.validation.valid, reasons: data.validation.reasons} : null,
+        fallbackReason: data.fallbackReason ?? null}).slice(0, 700)}`);
+    }
     const text = String(data.text ?? data.error ?? '');
     const evidence = (data.evidence ?? []).join('\n');
     const hits = speakHits(text);
@@ -102,10 +120,19 @@ for (const ask of LIST) {
       : [...(/进化成/.test(text) ? [] : ['正文没说进化成谁']),
         ...(/Lv\.\d+/.test(text) ? [] : ['正文没给进化等级']),
         ...(/社区|非官方/.test(text) ? [] : ['正文没标出来路'])];
+    // 图鉴字段问句（2026-09-27）：真机这一档的判据 —— 占位句、回执、正文里的数。
+    const tools = Array.isArray(data.toolTrace) ? data.toolTrace : [];
+    const codexProblems = !ask.codex ? []
+      : [...(/我先查一下再答/.test(text) ? ['正文还是那句占位承诺（没真答）'] : []),
+        ...(tools.length >= (ask.codex.minTools ?? 1) ? []
+          : [`回执只有 ${tools.length} 次（至少 ${ask.codex.minTools ?? 1} 次）`]),
+        ...(ask.codex.must.test(text) ? [] : [`正文没给出应有的读数（要匹配 ${ask.codex.must}）`]),
+        ...(ask.codex.noNumbers && /\d/.test(text.replace(/622/g, '图鉴规模'))
+          ? ['查不到时正文里出现了数值（可能是在编）'] : [])];
     record = {...record, retired: ask.retired === true, retiredProblems, evolution: ask.evolution === true,
-      evolutionProblems,
+      evolutionProblems, codex: ask.codex ? true : undefined, codexProblems,
       status: response.status, agentStop: data.agentStop ?? null,
-      provider: data.provider ?? null, text: text.slice(0, 300),
+      provider: data.provider ?? null, tools: tools.length, text: text.slice(0, 300),
       hard: hits.hard, soft: hits.soft, latin,
       // 依据区**允许**留文件名/编号（规范第三节的例外）——这里只记账，不判红。
       evidence_latin: (evidence.match(LATIN_LEAK) ?? []).length};
@@ -114,19 +141,21 @@ for (const ask of LIST) {
   }
   rows.push(record);
   const bad = (record.hard?.length ?? 0) + (record.soft?.length ?? 0) + (record.latin?.length ?? 0)
-    + (record.retiredProblems?.length ?? 0) + (record.evolutionProblems?.length ?? 0);
+    + (record.retiredProblems?.length ?? 0) + (record.evolutionProblems?.length ?? 0)
+    + (record.codexProblems?.length ?? 0);
   if (!asJson) {
     console.error(`${bad ? 'FAIL' : 'ok  '} ${question}  stop=${record.agentStop} `
       + `正文命中=${JSON.stringify([...(record.hard ?? []), ...(record.soft ?? []), ...(record.latin ?? [])])}`
       + (record.retired ? ` 退役检查=${JSON.stringify(record.retiredProblems)}` : '')
-      + (record.evolution ? ` 进化检查=${JSON.stringify(record.evolutionProblems)}` : ''));
-    if (bad || onlyArg) console.error(`      正文：${record.text}${record.retired || record.evolution ? '' : ''}`);
+      + (record.evolution ? ` 进化检查=${JSON.stringify(record.evolutionProblems)}` : '')
+      + (record.codex ? ` 图鉴检查=${JSON.stringify(record.codexProblems)}（回执 ${record.tools} 次）` : ''));
+    if (bad || onlyArg) console.error(`      正文：${record.text}`);
   }
 }
 
 const dirty = rows.filter((row) => (row.hard?.length ?? 0) + (row.soft?.length ?? 0)
   + (row.latin?.length ?? 0) + (row.retiredProblems?.length ?? 0)
-  + (row.evolutionProblems?.length ?? 0) > 0);
+  + (row.evolutionProblems?.length ?? 0) + (row.codexProblems?.length ?? 0) > 0);
 const report = {
   schema: 'roco-answer-speak-probe/v1',
   generated_at: new Date().toISOString(),
@@ -138,6 +167,8 @@ const report = {
     '只问事实类问句（本地路径、0 次模型调用）：模型正文的文风不在这一支的范围内',
     '依据区（`evidence`）按规范第三节的例外**允许**保留文件名与编号，这里只记账（`evidence_latin`）',
     '它对的是"正在跑的那个进程"：旧进程会给出旧答案（这正是它的用处 —— 真机复现）',
+    '图鉴那 6 条（`codex`）判的也是"没接模型"这一档：这一族走本地事实、0 次模型调用，'
+      + '所以它既能验占位句有没有回来，也能验正文里的数是不是真从回执来（`tools` 记了查了几次）',
   ],
 };
 if (onlyArg) { console.error('（--ask 模式：不写产物）'); process.exitCode = 0; }

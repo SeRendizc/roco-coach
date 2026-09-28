@@ -124,12 +124,16 @@ test('路由契约：kind=mine 的条数 = owned-pets.json 的实例数（一人
   assert.equal(status, 200);
   assert.equal(json.mode, 'mine');
   assert.equal(json.player.total, OWNED.instances.length, 'mine 总数必须等于 owned-pets.json 的实例数');
-  // 2026-09-24（人类纠正）：不再有同种多实例 → 实例数 == 物种数，且**不许**再出现 80。
+  // 2026-09-24（人类纠正）：「重复的删掉」⇒ 不许再出现 80 那批灌水个体。
+  // ⚠ 2026-09-28 改钉：人类批准**一对**同种个体（`own-0049`，见 `data/roco/human-decisions.json`）
+  // ⇒ 实例数 = 物种数 + **至多 1**，而且多出来的那只**必须**标着 `synthetic_demo: true`。
   const instanceSpecies = new Set(OWNED.instances.map((i) => i.species_id));
-  assert.equal(OWNED.instances.length, instanceSpecies.size,
-    `一人一只：实例数 ${OWNED.instances.length} 应当等于物种数 ${instanceSpecies.size}（重复个体要删掉）`);
-  assert.equal(json.player.total, instanceSpecies.size,
-    `我的盒子应当是 ${instanceSpecies.size} 个个体，实际 ${json.player.total}`);
+  const demos = OWNED.instances.filter((i) => i.synthetic_demo === true);
+  assert.equal(OWNED.instances.length, instanceSpecies.size + demos.length,
+    `实例数 ${OWNED.instances.length} 应当等于物种数 ${instanceSpecies.size} + 显式标注的演示个体 ${demos.length}`);
+  assert.ok(demos.length <= 1, `演示个体至多 1 只（实际 ${demos.length}）—— 人类只批了一对`);
+  assert.equal(json.player.total, OWNED.instances.length,
+    `我的盒子应当是 ${OWNED.instances.length} 个个体，实际 ${json.player.total}`);
   // 逐页取回来，条数之和必须等于总数（分页不是装饰）
   let seen = 0;
   for (let offset = 0; offset < 200; offset += 24) {
@@ -213,11 +217,17 @@ test('路由契约：产物里没有同种两只 → compare 一律拒绝（同�
   for (const instance of OWNED.instances) {
     groups.set(instance.species_id, [...(groups.get(instance.species_id) ?? []), instance.instance_id]);
   }
-  const pairs = [...groups.entries()].filter(([, list]) => list.length === 2);
-  assert.deepEqual(pairs, [],
-    '一人一只：owned-pets.json 里不该再有同种两只（人类 2026-09-24「重复的删掉」）');
-  // 任意两个个体（必然跨物种）都必须被拒
-  const [first, second] = OWNED.instances;
+  const pairs = [...groups.entries()].filter(([, list]) => list.length >= 2);
+  // ⚠ 2026-09-28 改钉：人类批准的那一对在里面（`synthetic_demo`）——所以"一对都不许有"改成
+  // 「**至多一组**，且那一组的第二只必须是显式标注的演示个体」（灌水个体仍然不许）。
+  assert.ok(pairs.length <= 1, `同种成对的组至多 1 组（实际 ${pairs.length}）`);
+  for (const [, ids] of pairs) {
+    const extras = ids.filter((id) => OWNED.instances.find((i) => i.instance_id === id)?.synthetic_demo === true);
+    assert.equal(extras.length, 1, `那一对里必须恰好一只是标注过的演示个体（实际 ${extras.length}）`);
+  }
+  // 跨物种的两个个体必须被拒 —— ⚠ 前两只现在是**同种**（那一对），所以这里显式挑不同物种的两只
+  const first = OWNED.instances[0];
+  const second = OWNED.instances.find((i) => i.species_id !== first.species_id);
   const {status, json} = await box(`compare=${first.instance_id},${second.instance_id}`);
   assert.equal(status, 400, '不同物种不许比较，实际给了 ' + status);
   assert.ok(String(json.error ?? '').length > 0, '拒绝要写清原因');

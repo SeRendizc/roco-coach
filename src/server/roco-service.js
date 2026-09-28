@@ -20,6 +20,8 @@
 // 停服务会带走 Python 子进程（RocoClient 自己会 kill 它的 child）。
 
 import {readFileSync} from 'node:fs';
+// 同种多实例的卡片要能分辨 ⇒ 卡片上带出这一只的性格/天分（值由个体层掷出）。
+import {individualFromInstance} from '../coach/individuals.js';
 import {fileURLToPath} from 'node:url';
 import {dirname,join} from 'node:path';
 import {RocoClient,RULESET_ID} from '../coach/roco-client.js';
@@ -420,8 +422,14 @@ export function loadBoxIndex(){
  // ④ 技能表：把四个技能 id 换成玩家读得懂的那几栏。
  const skills=new Map(Object.entries(skillsDoc.skills??{}));
 
- // ⑤ 我的盒子：80 个 owned 实例，按 instance_id 排序（顺序稳定，翻页与截图才对得上）。
- const instances=[...(owned.instances??[])].sort((a,b)=>boxIdAsc(a.instance_id??'',b.instance_id??''));
+ // ⑤ 我的盒子：owned 实例**按物种分组、组内按 instance_id**（顺序稳定，翻页与截图才对得上）。
+ // ⚠ 2026-09-28 改钉：原来只按 instance_id 排 —— 而页面是**每页 24 张、按页内物种归组**的
+ // ⇒ 同种的两只只要跨页就**永远归不到一组**（实测：人类批准的那一对 own-0001/own-0049 分居第 1/3 页，
+ // 页面显示「1 个个体」、比较按钮点不到第二个）。按物种排之后同种两只必然相邻、落在同一页，
+ // 归组与"选两只比较"才真的可用。组内仍按 instance_id，保证顺序确定。
+ const instances=[...(owned.instances??[])].sort((a,b)=>
+  String(a.species_id??'').localeCompare(String(b.species_id??''))
+  ||boxIdAsc(a.instance_id??'',b.instance_id??''));
  const instanceById=new Map(instances.map((i)=>[i.instance_id,i]));
  const instancesBySpecies=new Map();
  for(const i of instances){
@@ -608,8 +616,36 @@ function boxMineCard(index,i){
   effects_calibrated:false,
   // 机制首层按**物种**取（同种个体共享特性文字），与卡片首层「体系/定位」并列。
   mechanism:rosterMechanism(mechanismIndex().get(i.species_id)),
+  // ⚠ 2026-09-28：**同种多实例**（人类批准的那一对演示个体，或将来真的抓到两只同种）时，
+  // 卡片只画名字/系别/等级/定位的话，两只**长得一模一样** —— 那正是 2026-09-24 人类投诉的
+  // 「重复的删掉」（「我的精灵」里同名两张一样的卡）。所以这一档补一个**个体标记**：
+  // 性格 + 天分最高的那两项（值来自个体层——数据集里那两项是 null，得掷出来）。
+  ...sameSpeciesLabel(index,i),
  };
 }
+
+/** 同种多实例时给卡片加一条个体标记；同种只有一只时**不出现**（不打扰正常那一路）。 */
+function sameSpeciesLabel(index,i){
+ const group=index.instancesBySpecies?.get(i.species_id)??[];
+ if(group.length<2)return {};
+ try{
+  const row=individualFromInstance(i,{level:Number.isFinite(i.level)?i.level:60});
+  const talent=row?.talent??null;
+  const top=talent?Object.entries(talent).filter(([,v])=>Number.isFinite(v))
+   .sort((a,b)=>b[1]-a[1]||STAT_ORDER.indexOf(a[0])-STAT_ORDER.indexOf(b[0])).slice(0,2):[];
+  const order={hp:'生命',atk:'物攻',def:'物防',spa:'魔攻',spd:'魔防',spe:'速度'};
+  const talentText=top.map(([k,v])=>`${order[k]??k} ${v}`).join(' / ');
+  return {
+   same_species_count:group.length,
+   individual_label:[row?.nature?`性格「${row.nature}」`:null,talentText?`天分 ${talentText}`:null]
+    .filter(Boolean).join(' · ')||null,
+  };
+ }catch{
+  // 个体层读不出来就**不加标记**（宁可两张卡难分辨，也不要编一个标签出来）
+  return {same_species_count:group.length};
+ }
+}
+const STAT_ORDER=Object.freeze(['hp','atk','def','spa','spd','spe']);
 
 /** 工程层的个体投影。 */
 function boxMineCardDev(i){

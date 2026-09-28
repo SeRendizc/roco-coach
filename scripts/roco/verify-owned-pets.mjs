@@ -38,6 +38,8 @@
 //   node scripts/roco/verify-owned-pets.mjs --selftest --json
 
 import {createHash} from 'node:crypto';
+// 「同种两个体差在哪」要按**个体层掷出来的值**算（数据集里这两项是 null）。
+import {individualFromInstance} from '../../src/coach/individuals.js';
 import {existsSync, readFileSync, statSync} from 'node:fs';
 import {dirname, join} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
@@ -508,13 +510,28 @@ export function runChecks(dataset, {root = ROOT, schema = null, caches = null} =
         }
         if (!deepEqual(av, bv)) differing.push(field);
       }
-      if (differing.length > 0) withDifference += 1;
+      // ⚠ 2026-09-28：数据集里 `nature.value` / `talent.value` 是 **null**（静态数据没有这两项），
+      // 所以上面这个循环对它们只会记 `unknowns`。而"两个个体到底能不能比出高低"取决于
+      // **个体层掷出来的值**（`individualFromInstance` 按 instance_id 种子化掷点）——
+      // 那一层才是页面与教练实际用的。所以判定要并上掷点后的比较（与生成器同一把尺子）。
+      const rolled = [first, other].map((one) => {
+        try {
+          const row = individualFromInstance(one, {level: one?.level ?? 60});
+          return `${row.nature}|${JSON.stringify(row.talent)}`;
+        } catch {
+          return null;
+        }
+      });
+      const rolledDiffer = rolled[0] !== null && rolled[1] !== null && rolled[0] !== rolled[1];
+      if (differing.length > 0 || rolledDiffer) withDifference += 1;
       sameSpeciesGroups.push({
         species_id: speciesId,
         species_name: first?.species_name ?? null,
         instances: [first?.instance_id, other?.instance_id],
         different_fields: differing,
         unknown_fields: unknowns,
+        // 掷点后的差异（上面那条判定的依据；数据集字段全 null 时它是唯一说得清"差在哪"的东西）
+        differs_after_roll: rolledDiffer,
       });
     }
   }
@@ -1009,11 +1026,17 @@ export const SELFTEST_MUTATIONS = Object.freeze([
   },
   {
     id: 'R07',
-    title: '实例降到 79 个',
+    // ⚠ 2026-09-28 改钉：原来只掉 1 个（80→79；后来 48→47 也够红）。现在有 **49** 个实例
+    // （48 物种 + 1 只人类批准的演示同种第二只）⇒ 掉 1 个还剩 48、**刚好卡在下限上**，
+    // 这条反证就**没有牙**了（实测被测试自己抓到：「R07 没有让 species_universe 翻红」）。
+    // 掉 2 个才真的低于下限 —— 意图没变：**宇宙缩水必须被抓到**。
+    title: '实例掉到 47 个（低于 48 的下限）',
     expect: 'species_universe',
     apply: (dataset) => {
-      const dropped = dataset.instances.pop();
-      dataset.battle_builds = dataset.battle_builds.filter((build) => build.owned_pet_instance_id !== dropped.instance_id);
+      for (let i = 0; i < 2; i += 1) {
+        const dropped = dataset.instances.pop();
+        dataset.battle_builds = dataset.battle_builds.filter((build) => build.owned_pet_instance_id !== dropped.instance_id);
+      }
     },
   },
   {

@@ -2,10 +2,20 @@
  "generated_by": "scripts/roco/verify-agent-trajectories.mjs",
  "trajectory_set": "agent-trajectories-v1",
  "trajectories": "/Users/serendizc/Developer/roco-coach/tests/evals/agent-trajectories-v1.jsonl",
- "model_identity": null,
+ "model_identity": {
+  "model": "/Users/serendizc/Developer/roco-coach/.models/mlx/Qwen3.5-4B-4bit",
+  "adapter": "/Users/serendizc/Developer/roco-coach/.models/adapters/qwen35-4b-tool-v3",
+  "adapter_sha256": "e09a52f23e1a1b7e4253b6ccd58ba7da0b2f04c4bc6a9db455aef857355267a8",
+  "gateway_reachable": true,
+  "ready": true,
+  "adapter_file": "adapters.safetensors",
+  "adapter_basename": "qwen35-4b-tool-v3",
+  "identity_digest": "c374212998cbb2195c157773e014d536587cd496f5e3a76f2d5ad2f892062661",
+  "prompt_digest": "a5cb0fbcc53fbecd356b86f921030dac1954d737dfa1af731b452b2f04a6654d"
+ },
  "format": "roco-agent-trajectory-v1",
  "counts": {
-  "rows": 6048,
+  "rows": 6912,
   "tasks": 288,
   "arms": [
    "replay",
@@ -14,7 +24,8 @@
    "stop_now",
    "no_rules",
    "drop_args",
-   "blind"
+   "blind",
+   "local_4b"
   ]
  },
  "producer": {
@@ -30,8 +41,8 @@
   "first_mismatches": []
  },
  "structural": {
-  "total": 6048,
-  "passed": 6048,
+  "total": 6912,
+  "passed": 6912,
   "failed": 0,
   "by_arm": {
    "replay": {
@@ -59,6 +70,10 @@
     "passed": 864
    },
    "blind": {
+    "total": 864,
+    "passed": 864
+   },
+   "local_4b": {
     "total": 864,
     "passed": 864
    }
@@ -66,8 +81,8 @@
   "first_failures": []
  },
  "replay": {
-  "total": 6048,
-  "passed": 6048,
+  "total": 6912,
+  "passed": 6912,
   "failed": 0,
   "by_arm": {
    "replay": {
@@ -95,6 +110,10 @@
     "passed": 864
    },
    "blind": {
+    "total": 864,
+    "passed": 864
+   },
+   "local_4b": {
     "total": 864,
     "passed": 864
    }
@@ -111,28 +130,28 @@
    "passed": 864
   },
   "negative": {
-   "total": 17760,
-   "passed": 17760
+   "total": 19544,
+   "passed": 19544
   },
   "per_criterion": {
    "tool": {
-    "total": 2832,
-    "caught": 2832,
+    "total": 2912,
+    "caught": 2912,
     "example": "删掉应当调用的工具"
    },
    "args_must_match": {
-    "total": 1416,
-    "caught": 1416,
+    "total": 1456,
+    "caught": 1456,
     "example": "清空参数"
    },
    "max_tool_calls": {
-    "total": 5232,
-    "caught": 5232,
+    "total": 5848,
+    "caught": 5848,
     "example": "超出工具调用次数上限"
    },
    "must_not_fabricate": {
-    "total": 3864,
-    "caught": 3864,
+    "total": 4336,
+    "caught": 4336,
     "example": "正文里塞数字型结论"
    },
    "must_keep_locked": {
@@ -141,33 +160,33 @@
     "example": "把锁定的伙伴换掉"
    },
    "must_not_claim_winrate": {
-    "total": 1116,
-    "caught": 1116,
+    "total": 1224,
+    "caught": 1224,
     "example": "把分数说成胜率"
    },
    "must_mention_limitation": {
-    "total": 648,
-    "caught": 648,
+    "total": 756,
+    "caught": 756,
     "example": "抹掉限制说明"
    },
    "must_not_use_stale": {
-    "total": 648,
-    "caught": 648,
+    "total": 756,
+    "caught": 756,
     "example": "拿旧状态版本重算"
    },
    "must_surface_conflict": {
-    "total": 756,
-    "caught": 756,
+    "total": 864,
+    "caught": 864,
     "example": "不提冲突"
    },
    "must_not_speak": {
-    "total": 252,
-    "caught": 252,
+    "total": 288,
+    "caught": 288,
     "example": "该沉默时开口"
    },
    "max_reply_chars": {
-    "total": 756,
-    "caught": 756,
+    "total": 864,
+    "caught": 864,
     "example": "正文超长"
    }
   },
@@ -205,6 +224,11 @@
    "blind": {
     "total": 864,
     "passed": 840,
+    "control": false
+   },
+   "local_4b": {
+    "total": 864,
+    "passed": 616,
     "control": false
    }
   },

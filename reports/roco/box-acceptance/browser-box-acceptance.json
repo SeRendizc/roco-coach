@@ -1,13 +1,14 @@
 {
  "generated_by": "scripts/roco/browser-box-acceptance.mjs",
  "page": "box.html",
- "judged_at": "2026-09-27T21:07:15.996Z",
+ "judged_at": "2026-09-28T04:14:39.204Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|licence|pack_id|ruleset_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "screenshots": [
   "reports/roco/box-acceptance/box-01-mine-1440x900.png",
   "reports/roco/box-acceptance/box-02-catalog-1440x900.png",
   "reports/roco/box-acceptance/box-03-search-1440x900.png",
   "reports/roco/box-acceptance/box-04-detail-1440x900.png",
+  "reports/roco/box-acceptance/box-05-compare-1440x900.png",
   "reports/roco/box-acceptance/box-06-mine-390x844.png",
   "reports/roco/box-acceptance/box-08-handoff-roco-1440x900.png",
   "reports/roco/box-acceptance/box-09-lock-handoff-1440x900.png",
@@ -52,15 +53,15 @@
  "checks": [
   {
    "id": "01-路由总数",
-   "judge": "我的盒子 == 48 个个体（= owned-pets.json 的实例数），全图鉴 == 622 条记录",
+   "judge": "我的盒子 == 49 个个体（= owned-pets.json 的实例数），全图鉴 == 622 条记录",
    "ok": true,
-   "actual": "count-mine=48 count-catalog=622"
+   "actual": "count-mine=49 count-catalog=622"
   },
   {
    "id": "02-默认视图",
-   "judge": "默认进入「我的盒子」，总数 48（一人一只），每页 24 张卡",
+   "judge": "默认进入「我的盒子」，总数 49（一人一只），每页 24 张卡",
    "ok": true,
-   "actual": "kind=mine total=48 cards=24"
+   "actual": "kind=mine total=49 cards=24"
   },
   {
    "id": "03-宽屏不溢出",
@@ -102,31 +103,31 @@
    "id": "27-掷点来源写在页面上",
    "judge": "这一句必须出现在页面上：说明性格与天分是掷点生成的、不是官方概率【审计 ⑤】",
    "ok": true,
-   "actual": "命中 24 条；示例「性格与天分是掷点生成的（原版随机；这里是模拟掷点，不是官方概率）」"
+   "actual": "命中 22 条；示例「性格与天分是掷点生成的（原版随机；这里是模拟掷点，不是官方概率）」"
   },
   {
    "id": "09-个体详情",
    "judge": "详情抽屉里有等级 / 性格 / 资质 / 特长 / 血脉 / 四个有序技能，并且「效果未校准」与「游戏数据里没有这一项」都说了",
    "ok": true,
-   "actual": "traits=4 moves=4 缺词=[] 标题=铠甲虫 · 详情"
+   "actual": "traits=4 moves=4 缺词=[] 标题=音速犬 · 详情"
   },
   {
    "id": "10-详情也不说工程话",
    "judge": "详情抽屉（玩家点得到的）同样不出现工程字段",
    "ok": true,
-   "actual": "扫过 654 字"
+   "actual": "扫过 623 字"
   },
   {
    "id": "11-两个体比较",
-   "judge": "产物里每个物种只有一个个体（人类要求删掉重复）→ 同种比较在本产物上**不可达**，能力改由 tests/roco-box.test.js 的显式夹具验",
+   "judge": "选两只同种个体后逐字段比较：相同 / 不同 / 未知 三种状态都出现，未知行都给了原因",
    "ok": true,
-   "actual": "我的盒子 48 个个体 / 48 个物种；同种对 0 组"
+   "actual": "已选=2 比较按钮可用=true 字段行=8 状态=[\"same\",\"unknown\",\"different\"] 文本=[\"相同\",\"未知\",\"不同\"] 未知行=4 原因「为什么是未知：两边都没有登记这一项的取值，所以这一栏标「未知」而不是「不同」。另外，养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。」"
   },
   {
    "id": "12-比较也不说工程话",
-   "judge": "（随 11 不可达）比较面板在本产物上打不开，改由单元判据扫它的文案",
+   "judge": "比较面板里不出现工程字段（未知只说「为什么未知」）",
    "ok": true,
-   "actual": "（登记为不可达：没有同种对）"
+   "actual": "铠甲虫：这两只有 1 栏不同、4 栏未知。 相同 3 不同 1 未知 4"
   },
   {
    "id": "13-不同种拒绝",
@@ -138,7 +139,7 @@
    "id": "14-工程信息在抽屉里",
    "judge": "开发者抽屉默认收起；展开后能真的看到 provenance / unknown_fields / state_version / coverage / 许可",
    "ok": true,
-   "actual": "默认收起=true 展开=true 长度=4685 provenance=true unknown_fields=true state_version=true coverage=true licence=true；样例「 版本：state_version=rc205.1 · ruleset_id=roco-world-s4-2026-09-10 · pack_id=roco-game-data-pack-v2 数据集哈希：6ef39855bfc7f6ce02ef2bed8bd85bbefcd69e749b8ef54b471b10089」"
+   "actual": "默认收起=true 展开=true 长度=7594 provenance=true unknown_fields=true state_version=true coverage=true licence=true；样例「 版本：state_version=rc205.1 · ruleset_id=roco-world-s4-2026-09-10 · pack_id=roco-game-data-pack-v2 数据集哈希：dcb536159f0ed607f10fe42c97dcd77514a56d0452dbc800b682a6dda」"
   },
   {
    "id": "15-判据可恢复",
@@ -156,7 +157,7 @@
    "id": "17-玩家层载荷",
    "judge": "玩家层载荷里没有工程键（pet_id / species_id / unknown_fields / provenance…），也没有 id 形状的展示值",
    "ok": true,
-   "actual": "扫过 12535 字节"
+   "actual": "扫过 12749 字节"
   },
   {
    "id": "18-窄屏不溢出",
@@ -168,7 +169,7 @@
    "id": "19-触控目标",
    "judge": "390×844：页面上每个可见可点元素（按钮 / summary / 输入框）都 ≥44×44",
    "ok": true,
-   "actual": "量了 189 个元素；不达标的：[]"
+   "actual": "量了 188 个元素；不达标的：[]"
   },
   {
    "id": "20-窄屏可读",
@@ -186,13 +187,13 @@
    "id": "23-带去配队的入口",
    "judge": "比完两只之后「带上这两只去配队」可用（触控目标 ≥44px）",
    "ok": true,
-   "actual": "按钮 {\"disabled\":false,\"w\":138,\"h\":44}；选中的个体 [\"own-0001\",\"own-0002\"]"
+   "actual": "按钮 {\"disabled\":false,\"w\":138,\"h\":44}；选中的个体 [\"own-0001\",\"own-0049\"]"
   },
   {
    "id": "24-盒子→配队交接",
    "judge": "真鼠标点「带上这两只去配队」：跳到产品页，六槽工作台按 URL 带过去的个体预填（同物种最多一只，故同种两只只带一只），开局按钮与交接钩子读到的规模三者一致，且如实说「还差几只」",
    "ok": true,
-   "actual": "（带过来 2 只；URL \"own-0001,own-0002\"；工作台 selected=2 handoff=2 按钮规模=2；文案「正式开局要六只持有个体（当前 2）；试玩要有六只理论阵容物种（当前 0）。」）"
+   "actual": "（带过来 2 只；URL \"own-0001\"；工作台 selected=1 handoff=1 按钮规模=1；文案「正式开局要六只持有个体（当前 1）；试玩要有六只理论阵容物种（当前 0）。」）"
   },
   {
    "id": "25-锁定随交接走：按钮上写清带了几只锁定",
@@ -210,19 +211,19 @@
    "id": "28-刷新→回滚→重刷（真机）",
    "judge": "真鼠标点：刷新后账+1/次数-1且说清落点；回滚后数值逐值回到刷之前、**次数不动**、按钮消失（只退一步）；重刷换一个落点、说清换掉了谁、按钮回来（不是回一次）",
    "ok": true,
-   "actual": "个体 own-0001：0级/3次 → 1级/2次「上一次刷天分（第 1 级）：+10 加到「物防」」 → 回滚 0级/2次 (按钮=false) → 重刷「上一次刷天分（第 2 级）：+10 加到「魔防」—— 这次是回滚之后重刷的，换掉了原来的「物防」。」"
+   "actual": "个体 own-0002：0级/3次 → 1级/2次「上一次刷天分（第 1 级）：+10 加到「魔攻」」 → 回滚 0级/2次 (按钮=false) → 重刷「上一次刷天分（第 2 级）：+10 加到「生命」—— 这次是回滚之后重刷的，换掉了原来的「魔攻」。」"
   },
   {
    "id": "29-再养一只同种→比大小",
    "judge": "真鼠标：加一只同种 ⇒ 两只都能选进比较栏、提示说\"同种\"；点比较之后**不许静默失败** —— 要如实说清本机新养的个体还没进服务器名单",
    "ok": true,
-   "actual": "own-0001 + own-0001-b：选中 2 只，比较栏 hidden=false，点比较后提示「这一只（铠甲虫）是本机「再养一只同种」加出来的，还没进服务器名单，所以现在不能和名单里的个体逐字段比较 ——两只都在名单里才能比。它的性格与天分在这一行里看得到」；这一行画出来的是 {\"drawer\":true,\"count\":\"2\",\"rows\":[\"own-0001\",\"own-0001\",\"own-0001\",\"own-0001-b\",\"own-0001-b\",\"own-0001-b\"],\"toggles\":[\"own-0001\",\"own-0001-b\"],\"html\":\"<button cla =\\\"drawer-head\\\" data- pecie =\\\"pet_000012\\\" aria-expanded=\\\"true\\\">\\n   < pan cla =\\\"drawer-name\\\">铠甲虫</ pan>\\n   < pan cla =\\\"drawer-type \\\">< pan cla =\\\"chip\\\">虫系</ pan></ pan>\\n   < pan cla =\\\"drawer-count\\\">2 个个体</ pan>\\n  </button><div cla =\\\"drawer-body\\\"><div cla =\\\"individual\\\" data-individual=\\\"own-0001\\\" data-level- ource=\\\"default-100\\\">\\n   < pan cla =\\\"individual-card\\\"><article cla =\\\"card\\\" data- elect=\\\"own-0001\\\" data-group=\\\"pet_000012\\\" data- tatu =\\\"idle\\\">\\n   <button cla =\\\"card-face\\\" data-detail=\\\"o\"}"
+   "actual": "own-0001 + own-0001-b：选中 2 只，比较栏 hidden=false，点比较后提示「这一只（铠甲虫）是本机「再养一只同种」加出来的，还没进服务器名单，所以现在不能和名单里的个体逐字段比较 ——两只都在名单里才能比。它的性格与天分在这一行里看得到」；这一行画出来的是 {\"drawer\":true,\"count\":\"3\",\"rows\":[\"own-0001\",\"own-0001\",\"own-0001\",\"own-0049\",\"own-0049\",\"own-0049\",\"own-0001-b\",\"own-0001-b\",\"own-0001-b\"],\"toggles\":[\"own-0001\",\"own-0049\",\"own-0001-b\"],\"html\":\"<button cla =\\\"drawer-head\\\" data- pecie =\\\"pet_000012\\\" aria-expanded=\\\"true\\\">\\n   < pan cla =\\\"drawer-name\\\">铠甲虫</ pan>\\n   < pan cla =\\\"drawer-type \\\">< pan cla =\\\"chip\\\">虫系</ pan></ pan>\\n   < pan cla =\\\"drawer-count\\\">3 个个体</ pan>\\n  </button><div cla =\\\"drawer-body\\\"><div cla =\\\"individual\\\" data-individual=\\\"own-0001\\\" data-level- ource=\\\"default-100\\\">\\n   < pan cla =\\\"individual-card\\\"><article cla =\\\"card\\\" data- elect=\\\"own-0001\\\" data-group=\\\"pet_000012\\\" data- tatu =\\\"idle\\\">\\n   <button cla =\\\"card-face\\\" data-detail=\\\"o\"}"
   },
   {
    "id": "30-性格：刷新→回滚→重刷（真机）",
    "judge": "真鼠标点：刷性格（次数-1、说清换成哪条）→ 回滚（性格逐值回到刷之前、次数不动、按钮消失）→ 重刷（换另一条、说清撤掉了哪条、按钮回来）",
    "ok": true,
-   "actual": "个体 own-0001：「稳重」/3次 → 「踏实」/2次 → 回滚「稳重」/2次 (按钮=false) → 重刷「害羞」"
+   "actual": "个体 own-0002：「稳重」/3次 → 「专注」/2次 → 回滚「稳重」/2次 (按钮=false) → 重刷「冷静」"
   },
   {
    "id": "22-控制台干净",
@@ -278,7 +279,7 @@
    "id": "24-盒子→配队交接",
    "judge": "把交接数量改成 0（没预填）必须被同一条判据抓住",
    "ok": true,
-   "hit": "URL 带了 2 只，工作台认了 0 | 交接钩子 data-tw-handoff=null | 开局按钮读到的队伍规模是 0",
+   "hit": "URL 带了 1 只，工作台认了 0 | 交接钩子 data-tw-handoff=null | 开局按钮读到的队伍规模是 0",
    "actual": "{\"selected\":\"0\"}"
   },
   {
@@ -299,7 +300,7 @@
    "id": "28-刷新→回滚→重刷（真机）",
    "judge": "回滚没还原数值、没还次数、重刷落点没换 —— 三种坏数据都必须被同一条判据抓住",
    "ok": true,
-   "hit": "回滚之后账上应当回到 0 级，实际 1 | 回滚不动次数（应当还是 2，实际 3） | 回滚之后天分数值必须逐值回到刷之前：{\"hp\":10,\"spa\":7,\"spe\":10,\"atk\":3,\"spd\":3,\"def\":1} → {\"hp\":10,\"spa\":7,\"spe\":10,\"atk\":3,\"spd\":3,\"def\":11} | 回滚之后那个按钮必须消失（没有可撤的了） | 回滚之后那一行小字要消失（账上已经没有刷新），实际「上一次刷天分（第 1 级）：+10 加到「物防」」 | 回滚之后重刷必须换一个落点，两次都是「物防」 | 重刷那一次要说明这是回滚之后重刷的，实际「上一次刷天分（第 1 级）：+10 加到「物防」」",
+   "hit": "回滚之后账上应当回到 0 级，实际 1 | 回滚不动次数（应当还是 2，实际 3） | 回滚之后天分数值必须逐值回到刷之前：{\"spe\":7,\"spa\":7,\"atk\":10,\"hp\":1,\"spd\":0,\"def\":3} → {\"spe\":7,\"spa\":17,\"atk\":10,\"hp\":1,\"spd\":0,\"def\":3} | 回滚之后那个按钮必须消失（没有可撤的了） | 回滚之后那一行小字要消失（账上已经没有刷新），实际「上一次刷天分（第 1 级）：+10 加到「魔攻」」 | 回滚之后重刷必须换一个落点，两次都是「魔攻」 | 重刷那一次要说明这是回滚之后重刷的，实际「上一次刷天分（第 1 级）：+10 加到「魔攻」」",
    "actual": "{\"afterUndo\":{\"left\":\"次数被改动了\",\"talent\":\"未还原\"},\"afterReroll\":{\"note\":\"同一个落点\"}}"
   },
   {
@@ -313,7 +314,7 @@
    "id": "30-性格：刷新→回滚→重刷（真机）",
    "judge": "性格回滚没还原 / 次数被改动 / 重刷没换一条 —— 三种坏数据都必须被同一条判据抓住",
    "ok": true,
-   "hit": "回滚之后性格必须回到刷之前那一条（应当 稳重，实际 踏实） | 回滚之后那个按钮必须消失（只退一步） | 回滚之后重刷必须换一条性格，两次都是「踏实」 | 重刷那一次要说明这是回滚之后重刷的，实际「上一次刷性格：换成了「踏实」」",
+   "hit": "回滚之后性格必须回到刷之前那一条（应当 稳重，实际 专注） | 回滚之后那个按钮必须消失（只退一步） | 回滚之后重刷必须换一条性格，两次都是「专注」 | 重刷那一次要说明这是回滚之后重刷的，实际「上一次刷性格：换成了「专注」」",
    "actual": "{\"afterUndo\":{\"nature\":\"未还原\",\"left\":\"次数被改动\"},\"afterReroll\":{\"note\":\"同一条性格\"}}"
   }
  ],
@@ -325,14 +326,14 @@
    "facts": {
     "ready": "yes",
     "kind": "mine",
-    "total": "48",
+    "total": "49",
     "page": "1",
     "cards": "24",
     "selected": "0",
     "compare": null,
     "filterType": "all",
     "error": null,
-    "mineCount": "48",
+    "mineCount": "49",
     "catalogCount": "622"
    }
   },
@@ -348,7 +349,7 @@
     "compare": null,
     "filterType": "all",
     "error": null,
-    "mineCount": "48",
+    "mineCount": "49",
     "catalogCount": "622"
    },
    "tabClick": {
@@ -377,7 +378,7 @@
     "compare": null,
     "filterType": "all",
     "error": null,
-    "mineCount": "48",
+    "mineCount": "49",
     "catalogCount": "622"
    }
   },
@@ -393,7 +394,7 @@
     "compare": null,
     "filterType": "草系",
     "error": null,
-    "mineCount": "48",
+    "mineCount": "49",
     "catalogCount": "622"
    },
    "chipClick": {
@@ -411,64 +412,140 @@
   },
   {
    "at": "detail",
-   "select": "own-0001",
+   "select": "own-0002",
    "facts": {
     "hidden": false,
     "entity": "instance",
-    "title": "铠甲虫 · 详情",
+    "title": "音速犬 · 详情",
     "traits": 4,
     "moves": 4
    },
-   "text": "◇ 铠甲虫 Lv.95 收藏 个体 性格 游戏数据里没有这一项 养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。 资质 游戏数据里没有这一项 养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。 特长 游戏数据里没有这一项 养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。 血脉 游戏数据里没有这一项 养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。 四个技能（按顺序） 第 1 个 啃咬 虫系 · 攻击 · 耗能 0 · 威力 40 造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。 第 2 个 防御 普通系 · 防御 · 耗能 1 · 威力 游戏数据里没有这一项 减伤70%，应对攻击。 第 3 个 翅刃 虫系 · 攻击 · 耗能 3 · 威力 85 造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。 第 4 个 风隐 翼"
+   "text": "◇ 音速犬 Lv.60 个体 性格 游戏数据里没有这一项 养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。 资质 游戏数据里没有这一项 养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。 特长 游戏数据里没有这一项 养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。 血脉 水 养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。 四个技能（按顺序） 第 1 个 火苗 火系 · 攻击 · 耗能 0 · 威力 30 造成物伤，自己回复1能量。 第 2 个 防御 普通系 · 防御 · 耗能 1 · 威力 游戏数据里没有这一项 减伤70%，应对攻击。 第 3 个 火云车 火系 · 攻击 · 耗能 5 · 威力 140 对敌方精灵造成物理伤害。 第 4 个 焚烧烙印 火系 · 状态 · 耗能 3 · 威力 游戏数据里没有这一项 驱散双方所有印记，每驱散"
   },
   {
-   "at": "compare-unreachable",
-   "pairs": 0,
-   "speciesCount": 48
+   "at": "compare-reset",
+   "fresh": {
+    "kind": "mine",
+    "search": "",
+    "pressed": 3,
+    "cards": 22
+   }
+  },
+  {
+   "at": "compare-filter",
+   "pairName": "铠甲虫",
+   "visibleLines": 24,
+   "probe": {
+    "input": "",
+    "cards": 24,
+    "pressed": 3,
+    "gridText": "\n   铠甲虫\n   虫系\n   2 个个体\n  \n   \n   \n    🐛\n    铠甲虫\n    🐛虫系\n    定位：坦克支持：仅图鉴资料Lv.60",
+    "selects": [
+     "own-0001",
+     "own-0049",
+     "own-0002",
+     "own-0003",
+     "own-0004",
+     "own-0005"
+    ]
+   }
+  },
+  {
+   "at": "compare-pick",
+   "pair": [
+    "own-0001",
+    "own-0049"
+   ],
+   "names": [
+    "铠甲虫",
+    "铠甲虫"
+   ]
+  },
+  {
+   "at": "compare",
+   "facts": {
+    "ready": "yes",
+    "kind": "mine",
+    "total": "49",
+    "page": "1",
+    "cards": "24",
+    "selected": "2",
+    "compare": null,
+    "filterType": "all",
+    "error": null,
+    "mineCount": "49",
+    "catalogCount": "622"
+   },
+   "panel": {
+    "rows": 8,
+    "labels": [
+     "等级",
+     "性格",
+     "资质",
+     "特长",
+     "血脉",
+     "四个技能（按顺序）",
+     "收藏",
+     "锁定"
+    ],
+    "statuses": [
+     "same",
+     "unknown",
+     "different"
+    ],
+    "statusTexts": [
+     "相同",
+     "未知",
+     "不同"
+    ],
+    "unknownReasons": 4,
+    "reasonText": "为什么是未知：两边都没有登记这一项的取值，所以这一栏标「未知」而不是「不同」。另外，养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。",
+    "summary": "铠甲虫：这两只有 1 栏不同、4 栏未知。 相同 3 不同 1 未知 4"
+   }
   },
   {
    "at": "rollback",
-   "id": "own-0001",
+   "id": "own-0002",
    "before": {
     "boosts": 0,
     "left": 3,
     "talent": {
-     "hp": 10,
+     "spe": 7,
      "spa": 7,
-     "spe": 10,
-     "atk": 3,
-     "spd": 3,
-     "def": 1
+     "atk": 10,
+     "hp": 1,
+     "spd": 0,
+     "def": 3
     },
     "note": "",
     "undoButton": false,
-    "status": "我的盒子 48 个个体"
+    "status": "我的盒子 49 个个体"
    },
    "afterRefresh": {
     "boosts": 1,
     "left": 2,
     "talent": {
-     "hp": 10,
-     "spa": 7,
-     "spe": 10,
-     "atk": 3,
-     "spd": 3,
-     "def": 11
+     "spe": 7,
+     "spa": 17,
+     "atk": 10,
+     "hp": 1,
+     "spd": 0,
+     "def": 3
     },
-    "note": "上一次刷天分（第 1 级）：+10 加到「物防」",
+    "note": "上一次刷天分（第 1 级）：+10 加到「魔攻」",
     "undoButton": true,
-    "status": "上一次刷天分（第 1 级）：+10 加到「物防」（结果就在这一行）"
+    "status": "上一次刷天分（第 1 级）：+10 加到「魔攻」（结果就在这一行）"
    },
    "afterUndo": {
     "boosts": 0,
     "left": 2,
     "talent": {
-     "hp": 10,
+     "spe": 7,
      "spa": 7,
-     "spe": 10,
-     "atk": 3,
-     "spd": 3,
-     "def": 1
+     "atk": 10,
+     "hp": 1,
+     "spd": 0,
+     "def": 3
     },
     "note": "",
     "undoButton": false,
@@ -478,16 +555,16 @@
     "boosts": 1,
     "left": 1,
     "talent": {
-     "hp": 10,
+     "spe": 7,
      "spa": 7,
-     "spe": 10,
-     "atk": 3,
-     "spd": 13,
-     "def": 1
+     "atk": 10,
+     "hp": 11,
+     "spd": 0,
+     "def": 3
     },
-    "note": "上一次刷天分（第 2 级）：+10 加到「魔防」—— 这次是回滚之后重刷的，换掉了原来的「物防」。",
+    "note": "上一次刷天分（第 2 级）：+10 加到「生命」—— 这次是回滚之后重刷的，换掉了原来的「魔攻」。",
     "undoButton": true,
-    "status": "上一次刷天分（第 2 级）：+10 加到「魔防」—— 这次是回滚之后重刷的，换掉了原来的「物防」。（结果就在这一行）"
+    "status": "上一次刷天分（第 2 级）：+10 加到「生命」—— 这次是回滚之后重刷的，换掉了原来的「魔攻」。（结果就在这一行）"
    }
   },
   {
@@ -496,27 +573,33 @@
    "pick": {
     "ids": [
      "own-0001",
+     "own-0049",
      "own-0001-b"
     ],
     "baseId": "own-0001",
-    "extraId": "own-0001-b"
+    "extraId": "own-0001-b",
+    "serverIds": 49
    },
    "rows": {
     "drawer": true,
-    "count": "2",
+    "count": "3",
     "rows": [
      "own-0001",
      "own-0001",
      "own-0001",
+     "own-0049",
+     "own-0049",
+     "own-0049",
      "own-0001-b",
      "own-0001-b",
      "own-0001-b"
     ],
     "toggles": [
      "own-0001",
+     "own-0049",
      "own-0001-b"
     ],
-    "html": "<button cla =\"drawer-head\" data- pecie =\"pet_000012\" aria-expanded=\"true\">\n   < pan cla =\"drawer-name\">铠甲虫</ pan>\n   < pan cla =\"drawer-type \">< pan cla =\"chip\">虫系</ pan></ pan>\n   < pan cla =\"drawer-count\">2 个个体</ pan>\n  </button><div cla =\"drawer-body\"><div cla =\"individual\" data-individual=\"own-0001\" data-level- ource=\"default-100\">\n   < pan cla =\"individual-card\"><article cla =\"card\" data- elect=\"own-0001\" data-group=\"pet_000012\" data- tatu =\"idle\">\n   <button cla =\"card-face\" data-detail=\"o"
+    "html": "<button cla =\"drawer-head\" data- pecie =\"pet_000012\" aria-expanded=\"true\">\n   < pan cla =\"drawer-name\">铠甲虫</ pan>\n   < pan cla =\"drawer-type \">< pan cla =\"chip\">虫系</ pan></ pan>\n   < pan cla =\"drawer-count\">3 个个体</ pan>\n  </button><div cla =\"drawer-body\"><div cla =\"individual\" data-individual=\"own-0001\" data-level- ource=\"default-100\">\n   < pan cla =\"individual-card\"><article cla =\"card\" data- elect=\"own-0001\" data-group=\"pet_000012\" data- tatu =\"idle\">\n   <button cla =\"card-face\" data-detail=\"o"
    }
   },
   {
@@ -526,52 +609,82 @@
    "added": true,
    "rows": {
     "drawer": true,
-    "count": "2",
+    "count": "3",
     "rows": [
      "own-0001",
      "own-0001",
      "own-0001",
+     "own-0049",
+     "own-0049",
+     "own-0049",
      "own-0001-b",
      "own-0001-b",
      "own-0001-b"
     ],
     "toggles": [
      "own-0001",
+     "own-0049",
      "own-0001-b"
     ],
-    "html": "<button cla =\"drawer-head\" data- pecie =\"pet_000012\" aria-expanded=\"true\">\n   < pan cla =\"drawer-name\">铠甲虫</ pan>\n   < pan cla =\"drawer-type \">< pan cla =\"chip\">虫系</ pan></ pan>\n   < pan cla =\"drawer-count\">2 个个体</ pan>\n  </button><div cla =\"drawer-body\"><div cla =\"individual\" data-individual=\"own-0001\" data-level- ource=\"default-100\">\n   < pan cla =\"individual-card\"><article cla =\"card\" data- elect=\"own-0001\" data-group=\"pet_000012\" data- tatu =\"idle\">\n   <button cla =\"card-face\" data-detail=\"o"
+    "html": "<button cla =\"drawer-head\" data- pecie =\"pet_000012\" aria-expanded=\"true\">\n   < pan cla =\"drawer-name\">铠甲虫</ pan>\n   < pan cla =\"drawer-type \">< pan cla =\"chip\">虫系</ pan></ pan>\n   < pan cla =\"drawer-count\">3 个个体</ pan>\n  </button><div cla =\"drawer-body\"><div cla =\"individual\" data-individual=\"own-0001\" data-level- ource=\"default-100\">\n   < pan cla =\"individual-card\"><article cla =\"card\" data- elect=\"own-0001\" data-group=\"pet_000012\" data- tatu =\"idle\">\n   <button cla =\"card-face\" data-detail=\"o"
    },
    "selected": "2",
    "barHidden": false,
    "hintAfterPick": "已选两只同种伙伴（铠甲虫）：点「比较这两只」逐字段看相同 / 不同 / 未知。",
    "panelHidden": true,
-   "hintAfterCompare": "这一只（铠甲虫）是本机「再养一只同种」加出来的，还没进服务器名单，所以现在不能和名单里的个体逐字段比较 ——两只都在名单里才能比。它的性格与天分在这一行里看得到，也能单独培养。"
+   "hintAfterCompare": "这一只（铠甲虫）是本机「再养一只同种」加出来的，还没进服务器名单，所以现在不能和名单里的个体逐字段比较 ——两只都在名单里才能比。它的性格与天分在这一行里看得到，也能单独培养。",
+   "diag": {
+    "go": false,
+    "selected": "2",
+    "picked": [
+     "own-0001",
+     "own-0001-b"
+    ],
+    "rows": [
+     {
+      "id": "own-0001",
+      "picked": true
+     },
+     {
+      "id": "own-0049",
+      "picked": false
+     },
+     {
+      "id": "own-0001-b",
+      "picked": true
+     },
+     {
+      "id": "own-0002",
+      "picked": false
+     }
+    ]
+   }
   },
   {
    "at": "rollback-nature",
-   "id": "own-0001",
+   "id": "own-0002",
    "before": {
     "nature": "稳重",
     "left": 3,
-    "note": "上一次刷天分（第 2 级）：+10 加到「魔防」—— 这次是回滚之后重刷的，换掉了原来的「物防」。",
+    "note": "上一次刷天分（第 2 级）：+10 加到「生命」—— 这次是回滚之后重刷的，换掉了原来的「魔攻」。",
     "undoButton": true
    },
    "afterRefresh": {
-    "nature": "踏实",
+    "nature": "专注",
     "left": 2,
-    "note": "上一次刷性格：换成了「踏实」",
+    "note": "上一次刷性格：换成了「专注」",
     "undoButton": true
    },
    "afterUndo": {
     "nature": "稳重",
     "left": 2,
-    "note": "上一次刷天分（第 2 级）：+10 加到「魔防」—— 这次是回滚之后重刷的，换掉了原来的「物防」。",
+    "note": "上一次刷天分（第 2 级）：+10 加到「生命」—— 这次是回滚之后重刷的，换掉了原来的「魔攻」。",
     "undoButton": false
    },
    "afterReroll": {
-    "nature": "害羞",
+    "nature": "冷静",
     "left": 1,
-    "note": "上一次刷性格：换成了「害羞」—— 这次是回滚之后重刷的，原来的「踏实」已经撤掉。",
+    "note": "上一次刷性格：换成了「冷静」—— 这次是回滚之后重刷的，原来的「专注」已经撤掉。",
     "undoButton": true
    }
   }

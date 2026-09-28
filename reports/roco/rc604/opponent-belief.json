@@ -948,14 +948,6 @@
             "note": "落在速度层 slow 内"
           },
           {
-            "key": "pet_000220",
-            "numerator": 1,
-            "denominator": 146,
-            "value": 0.006849315068,
-            "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
-          },
-          {
             "key": "pet_000224",
             "numerator": 1,
             "denominator": 146,
@@ -1413,6 +1405,14 @@
           },
           {
             "key": "pet_000459",
+            "numerator": 1,
+            "denominator": 146,
+            "value": 0.006849315068,
+            "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
+            "note": "落在速度层 slow 内"
+          },
+          {
+            "key": "pet_000462",
             "numerator": 1,
             "denominator": 146,
             "value": 0.006849315068,

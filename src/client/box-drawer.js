@@ -105,7 +105,8 @@ function undoButton(individual) {
 export function individualHtml(card, individual, {picked = false, cardHtml = defaultCardHtml} = {}) {
   const traits = traitChips(individual).map((chip) =>
     `<span class="trait" data-state="${chip.state}">${esc(chip.label)}</span>`).join('');
-  // 级数：本人要求「拥有的精灵都默认 100 级」⇒ 页面按 100 显示，并留下来源标记（开发者抽屉里能看到）。
+  // 级数：**默认 60 级**（人类 2026-09-27 拍板；等级上限 60 是官方口径）——
+  // 9-26 曾按 100 显示，2026-09-27 改钉；页面上仍保留"级数来源"标记（开发者抽屉里能看到）。
   // ⚠ 抽屉**不许弄丢**原来的两个动作：看详情（`data-detail`）与加入比较（`data-cmp`）——
   // 但**也不要自己再画一遍**：卡片本体是页面注入的 `cardHtml`（里面已经有一个「加入比较」），
   // 抽屉再画一个就会出现**每行两个按钮、点第二个把刚选的取消**（审计 2026-09-27 实测 24 个体 48 个按钮）。

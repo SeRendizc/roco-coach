@@ -34,7 +34,7 @@
     ]
   },
   "data_basis": {
-    "owned_instances": 48,
+    "owned_instances": 49,
     "owned_species": 48,
     "pack_pet_entities": 622,
     "validated_species": 48,
@@ -191,8 +191,8 @@
       "criteria": "没有静态威力的技能数如实登记，不写任何伤害数值",
       "direction": "把 not_provided_by_source 当已知威力用 ⇒ 红",
       "actual": {
-        "moves_total": 192,
-        "moves_without_static_power": 78
+        "moves_total": 196,
+        "moves_without_static_power": 80
       },
       "ok": true
     },
@@ -202,12 +202,14 @@
       "direction": "把 learnset 有说成 build 有 ⇒ 红",
       "actual": {
         "criteria": "从冻结 `learnsets.json`（native_skills + blood_skills + skill_stones）里取出学招池，用 `skills[].desc` 的词条判定应对种类：`应对攻击` / `应对状态` / `应对防御`（三者互不替代）；再单独统计这四个技能（build）里有没有带任一种应对。只报「描述里出现了这个应对词条」，不报它能不能挡住什么（效果原语未实现）。",
-        "build_variant_counts": {
+        "build_variant_species": {
           "应对攻击": 48,
           "应对状态": 13,
           "应对防御": 0
         },
         "instances_without_any_respond_in_build": 0,
+        "instances_total": 49,
+        "species_total": 48,
         "learnset_variant_species": {
           "应对攻击": 48,
           "应对状态": 34,
@@ -233,7 +235,7 @@
       "criteria": "队内互补只输出可复算计数（弱点数 / 能接的队友数 / 同弱点堆叠数），不输出职能或体系标签",
       "direction": "出现 T0/强势/必带 之类标签 ⇒ 红",
       "actual": {
-        "weakness_total": 186,
+        "weakness_total": 188,
         "shared_weakness_over_box": {
           "光系": 8,
           "冰系": 11,
@@ -245,9 +247,9 @@
           "武系": 14,
           "毒系": 4,
           "水系": 11,
-          "火系": 18,
+          "火系": 19,
           "电系": 12,
-          "翼系": 14,
+          "翼系": 15,
           "草系": 13,
           "萌系": 12,
           "虫系": 9,
@@ -605,10 +607,11 @@
     "own-0045",
     "own-0046",
     "own-0047",
-    "own-0048"
+    "own-0048",
+    "own-0049"
   ],
   "distribution": {
-    "instances": 48,
+    "instances": 49,
     "coverage": {
       "criteria": "对每个**已登记攻击系别** T（types.json 的 18 个单系），把成员的属性组合按 `types.join(\"|\")` 拼成防御键去查 `types.json#types[key]`：`weak[]` 命中 T ⇒ 取该项倍率，`resist[]` 命中 T ⇒ 取该项倍率，两处都没有 ⇒ 中性 1。「队伍能接 T」= 存在成员倍率 < 1（有抗性）。没有任何成员 < 1 ⇒ 出一条 coverage 缺口；倍率用整数标度（×4：0.25→1 / 0.5→2 / 1→4 / 2→8 / 3→12）比较，不做浮点运算。",
       "attack_types": [
@@ -852,7 +855,8 @@
             "own-0040",
             "own-0041",
             "own-0044",
-            "own-0045"
+            "own-0045",
+            "own-0049"
           ],
           "weak_instances": [
             "own-0007",
@@ -870,7 +874,7 @@
             "own-0042",
             "own-0043"
           ],
-          "resist_count": 11,
+          "resist_count": 12,
           "weak_count": 14
         },
         {
@@ -967,10 +971,11 @@
             "own-0041",
             "own-0044",
             "own-0046",
-            "own-0047"
+            "own-0047",
+            "own-0049"
           ],
           "resist_count": 15,
-          "weak_count": 18
+          "weak_count": 19
         },
         {
           "attack_type": "电系",
@@ -1039,10 +1044,11 @@
             "own-0035",
             "own-0038",
             "own-0041",
-            "own-0044"
+            "own-0044",
+            "own-0049"
           ],
           "resist_count": 13,
-          "weak_count": 14
+          "weak_count": 15
         },
         {
           "attack_type": "草系",
@@ -1063,7 +1069,8 @@
             "own-0041",
             "own-0044",
             "own-0046",
-            "own-0047"
+            "own-0047",
+            "own-0049"
           ],
           "weak_instances": [
             "own-0003",
@@ -1080,7 +1087,7 @@
             "own-0043",
             "own-0048"
           ],
-          "resist_count": 17,
+          "resist_count": 18,
           "weak_count": 13
         },
         {
@@ -1172,11 +1179,11 @@
     },
     "speed": {
       "criteria": "速度取**冻结迁移层** `roster-48.json#pets[].stats.spe`（48 只有值）与同一行的 `speed_tier` 标注；队伍内已知成员按 speed_tier 统计梯度。没有冻结迁移层速度档的精灵一律 unknown，不拿 full-catalog 的 knowledge_only 值冒充已知；任何「谁先动」的推断都只算工程假设（台账 turn_order.priority），速度平手是 UNKNOWN。",
-      "instances_with_validated_spe": 48,
+      "instances_with_validated_spe": 49,
       "instances_without_validated_spe": 0,
       "speed_tier_histogram": {
         "51-70": 9,
-        "71-90": 13,
+        "71-90": 14,
         "91-110": 13,
         "<=50": 5,
         ">=111": 8
@@ -1194,7 +1201,7 @@
         "69": 1,
         "70": 2,
         "72": 1,
-        "75": 3,
+        "75": 4,
         "76": 1,
         "80": 1,
         "81": 1,
@@ -1216,11 +1223,11 @@
     },
     "energy": {
       "criteria": "能耗取成员**具体 build** 的四个技能（`owned.instances[].skills`，有序四个）在 `skills.json` 的 `energy`；统计 min / max / 合计 / 0 费技能数，以及与**本次请求所用规则配置** （`data/roco/rulesets/*.json` 的 `energy.max.value`，本模块不写死任何能量数字）相比超限的技能数。威力按 fail-closed 处理：`power_status !== \"static_value_present\"` 的技能不写任何伤害数值。「这招第一回合付不付得起」依赖入场初始能量与回能，二者是占位/工程假设 ⇒ 只报结构，不报可用性。",
-      "instances_with_build": 48,
+      "instances_with_build": 49,
       "energy_sum_histogram": {
         "3": 1,
         "4": 2,
-        "5": 7,
+        "5": 8,
         "6": 5,
         "7": 10,
         "8": 13,
@@ -1229,7 +1236,7 @@
         "14": 1
       },
       "zero_cost_moves_histogram": {
-        "1": 44,
+        "1": 45,
         "2": 4
       },
       "instances_without_zero_cost_move": 0,
@@ -1259,18 +1266,20 @@
         }
       ],
       "max_move_energy": 10,
-      "moves_without_static_power": 78,
-      "moves_with_static_power": 114,
-      "moves_total": 192
+      "moves_without_static_power": 80,
+      "moves_with_static_power": 116,
+      "moves_total": 196
     },
     "respond": {
       "criteria": "从冻结 `learnsets.json`（native_skills + blood_skills + skill_stones）里取出学招池，用 `skills[].desc` 的词条判定应对种类：`应对攻击` / `应对状态` / `应对防御`（三者互不替代）；再单独统计这四个技能（build）里有没有带任一种应对。只报「描述里出现了这个应对词条」，不报它能不能挡住什么（效果原语未实现）。",
-      "build_variant_counts": {
+      "build_variant_species": {
         "应对攻击": 48,
         "应对状态": 13,
         "应对防御": 0
       },
       "instances_without_any_respond_in_build": 0,
+      "instances_total": 49,
+      "species_total": 48,
       "learnset_variant_species": {
         "应对攻击": 48,
         "应对状态": 34,
@@ -1285,10 +1294,10 @@
     },
     "synergy": {
       "criteria": "对每个类型已知的成员 m，取其弱点集合（types.json 里倍率 > 1 的 T），数**其余成员**里能接 T 的个数（倍率 < 1）= answers(m,T)；同时数同样弱 T 的成员个数 = shared(m,T)。answers(m,T) === 0 ⇒ 出一条 synergy 缺口（shared ≥ 2 时升级一档）；shared(T) ≥ 3 时另出一条「同一弱点堆叠」。全部是可复算计数，不使用任何社区职能/榜单标签。",
-      "weakness_total": 186,
+      "weakness_total": 188,
       "weaknesses_per_instance_histogram": {
         "1": 4,
-        "2": 8,
+        "2": 9,
         "3": 6,
         "4": 13,
         "5": 8,
@@ -1297,7 +1306,7 @@
       },
       "resistances_per_instance_histogram": {
         "1": 2,
-        "2": 7,
+        "2": 8,
         "3": 14,
         "4": 6,
         "5": 5,
@@ -1317,9 +1326,9 @@
         "武系": 14,
         "毒系": 4,
         "水系": 11,
-        "火系": 18,
+        "火系": 19,
         "电系": 12,
-        "翼系": 14,
+        "翼系": 15,
         "草系": 13,
         "萌系": 12,
         "虫系": 9,
@@ -1328,7 +1337,7 @@
     },
     "cost": {
       "criteria": "把请求里的硬约束折成可满足性算术：required = locked ∪ must_include（必须留在队里）；replaceable = selected 里不在 required 的条目；槽位不够（|required| > team_size）、必须换掉的只数超过 max_replacements、候选池（owned，或 favourites_only 时只算收藏）凑不满剩余槽位、required 里出现 owned 里没有的物种 ⇒ 任一成立即 `blocking` + `ok:false`（fail closed）。",
-      "candidate_universe_instances": 48,
+      "candidate_universe_instances": 49,
       "favourite_instances": 19,
       "distinct_species": 48
     }
@@ -1471,7 +1480,7 @@
               "source_file": "data/roco/owned/owned-pets.json",
               "pointer": "instances",
               "field": "count",
-              "value": 48,
+              "value": 49,
               "note": "owned 实例总数"
             }
           ],
@@ -22270,7 +22279,7 @@
               "source_file": "data/roco/owned/owned-pets.json",
               "pointer": "instances",
               "field": "count",
-              "value": 48,
+              "value": 49,
               "note": "候选宇宙大小（owned 实例）"
             },
             {
@@ -24244,7 +24253,7 @@
               "source_file": "data/roco/owned/owned-pets.json",
               "pointer": "instances",
               "field": "count",
-              "value": 48,
+              "value": 49,
               "note": "候选宇宙大小（owned 实例）"
             },
             {
@@ -24341,7 +24350,7 @@
               "source_file": "data/roco/owned/owned-pets.json",
               "pointer": "instances",
               "field": "count",
-              "value": 48,
+              "value": 49,
               "note": "owned 实例总数"
             }
           ],
@@ -24595,7 +24604,7 @@
               "source_file": "data/roco/owned/owned-pets.json",
               "pointer": "instances",
               "field": "count",
-              "value": 48,
+              "value": 49,
               "note": "候选宇宙大小（owned 实例）"
             },
             {

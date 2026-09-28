@@ -6,6 +6,7 @@ import {readFileSync, existsSync, statSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {dirname,join,relative,resolve} from 'node:path';
 import {generateKeyPairSync,privateDecrypt,constants,randomBytes,timingSafeEqual} from 'node:crypto';
+import {attachIndividualsToContext} from '../coach/individuals-context.js';
 import {runCoach,localProvider,fitModelMessages} from '../coach/runtime.js';
 import {localModelMode,LocalModel,wrapWithLocalModel,createLocalPlan,localModelPathFromEnv,LOCAL_MODEL_PATH_ENV,LOCAL_MODEL_PATH_ALIASES} from '../coach/local-model.js';
 // RC-901（2026-09-25）：云端只在「值这个钱」时才发 —— 三条可判定条件在**纯函数**里（判据在 test:unit）。
@@ -816,7 +817,10 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
          risk:r.risk??null,coverage:r.coverage??null,note:r.note??null};
        }catch(error){return {missing:true,reason:String(error?.message??error)};}
       };
-      const coachedContext={...b.context,rocoPreview};
+      // 2026-09-27：把**个体层**（每只的天分/性格）补进上下文 —— 只补字段、不改判断。
+      // 页面名单里只有 `own-XXXX` 与等级，天分性格在个体数据集里；不补的话玩家问自己那只
+      // 永远拿到"天分按 0 / 性格按中性"那一版（面板、性格建议、个体比较都会受影响）。
+      const coachedContext={...attachIndividualsToContext(b.context),rocoPreview};
       const answer=await runCoach({message:b.message,role:b.role,context:coachedContext,memory:b.memory,conversation:historyForModel(b.conversation),provider});
       const payload={...answer,usage,tokenAudit,stateToken:b.stateToken,
         ...(_mode==='off'?{}:{modelRoute:{...modelRoute,task:_task,localProbe:_localProbe,localCooling:_localCooling}})};

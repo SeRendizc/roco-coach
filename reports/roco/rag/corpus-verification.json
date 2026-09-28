@@ -1,7 +1,7 @@
 {
  "schema": "roco-rules-corpus-verification/v1",
  "generated_by": "scripts/roco/verify-rules-corpus.mjs",
- "generated_at": "2026-09-25T15:36:22.770Z",
+ "generated_at": "2026-09-28T03:45:00.643Z",
  "scope": "语料本身对不对（检索器对不对由 eval-rag-retrieval.mjs 的 13 组判据负责）",
  "inputs": {
   "ledger": "data/roco/evidence/rule-evidence-ledger.json",
@@ -348,7 +348,7 @@
       "evidence_ledger_path": "data/roco/evidence/rule-evidence-ledger.json",
       "evidence_ledger_sha256": "267e9b4eeb85342947c7168587650b610c1aa63172a4823772ab8f629bdb0bd8",
       "reconciliation_report_path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "reconciliation_report_sha256": "bca1bf352a1327b0d32c83c225079c1e4999a792d267fa6e3dc9470d4580c125",
+      "reconciliation_report_sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
       "sources_path": "data/roco/sources.yaml",
       "sources_sha256": "30b69933778cff771e2780deac88b1e6cdaef62093ad80b8978643946fc2af79",
       "note": "数据层（L1 图鉴）不依赖战斗规则；这条绑定声明的是「消费这些数值时该按哪套 ruleset 配置模拟」，以及本包所依据的对账报告/证据台账的**指纹**（换一份报告，指纹就变）。"

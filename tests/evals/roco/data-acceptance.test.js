@@ -69,6 +69,22 @@ test('M1: 每条记录都带 ruleset / game / 来源 / 许可 / 核验状态（�
   }
 });
 
+/** 抓包六维（`pets.csv`，与 `full-catalog.json` 用的是**同一份**、同一个 sha256 钉住的 CSV）。 */
+const CAPTURE_STATS = (() => {
+  const path = 'data/roco/raw/hke-2026-09-27/pets.csv';
+  if (!existsSync(path)) return {};
+  const [head, ...lines] = readFileSync(path, 'utf8').trim().split('\n');
+  const index = Object.fromEntries(head.split(',').map((name, i) => [name, i]));
+  const out = {};
+  for (const line of lines) {
+    const cells = line.split(',');
+    out[Number(cells[index.id])] = {hp: Number(cells[index.hp]), atk: Number(cells[index.phy_atk]),
+      def: Number(cells[index.phy_def]), spa: Number(cells[index.spe_atk]),
+      spd: Number(cells[index.spe_def]), spe: Number(cells[index.speed])};
+  }
+  return out;
+})();
+
 test('M1: 规范化精灵与原始 Lua 逐字段一致（独立重新解析对拍）', { skip: !hasRaw && '快照未解压' }, () => {
   const { root: catalog } = parseLuaTable(readFileSync(`${RAW}/Catalog.lua`, 'utf8'), { file: 'Catalog.lua' });
   const pets = readJson(`${NORM}/pets.json`).pets;
@@ -93,9 +109,26 @@ test('M1: 规范化精灵与原始 Lua 逐字段一致（独立重新解析对�
     // 属性：顺序必须按 Lua 的 1/2 键
     const expectTypes = Object.keys(raw.types).sort((a, b) => Number(a) - Number(b)).map((k) => raw.types[k]);
     assert.deepEqual(normalized.types, expectTypes, `${t.name} 属性一致`);
-    // 六维种族值逐项一致
+    // 六维种族值逐项一致 —— ⚠ 2026-09-27 **改钉**：人类拍板「以抓包为准」之后，
+    // 这一层里**改过的**那几只（标了 `stats_source: 'capture-2026-09-27'`）六维要跟**抓包 CSV** 一致
+    // （那是同一份 sha256 钉住的另一份具名数据），**没标的照旧逐项等于 Lua**。
+    // 这不是放宽：数值仍然必须等于**某一份有出处的数据**，而且改过的必须留着旧值（`stats_previous`）。
+    const overridden = normalized.stats_source === 'capture-2026-09-27';
     for (const k of ['hp', 'atk', 'def', 'spa', 'spd', 'spe']) {
-      assert.equal(normalized.stats[k], raw.stats[k], `${t.name}.${k} 一致`);
+      if (!overridden) {
+        assert.equal(normalized.stats[k], raw.stats[k], `${t.name}.${k} 一致（未采用抓包的那只）`);
+        continue;
+      }
+      assert.equal(normalized.stats[k], CAPTURE_STATS[normalized.game_id]?.[k],
+        `${t.name}.${k} 必须等于抓包值（采用了抓包的那只）`);
+      // 改钉不删：改过的项必须在 `stats_previous` 里留着，并且**旧值就是 Lua 里那个数**；
+      // 没改的项不许凭空出现旧值（否则那不是"改过"，是账本造假）。
+      if (normalized.stats_previous?.[k] !== undefined) {
+        assert.equal(normalized.stats_previous[k], raw.stats[k],
+          `${t.name}.${k} 的旧值必须就是 Lua 里那个数（改钉不删）`);
+      } else {
+        assert.equal(normalized.stats[k], raw.stats[k], `${t.name}.${k} 没改过就必须与 Lua 一致`);
+      }
     }
     assert.equal(normalized.game_id, raw.game_id);
     assert.equal(normalized.learnset_id, raw.learnset_id);

@@ -63,7 +63,16 @@ export const INSTANCE_TARGET = 48;
 export const MIN_SPECIES = 40;
 export const MIN_OUTSIDE_LAYER = 12;
 /** 同种多实例组数上限：**0**（人类要求删掉重复个体）。判据从「至少 N 组」改成「恰好 0 组」。 */
-export const MAX_SAME_SPECIES_GROUPS = 0;
+/**
+ * 同种多实例组的**上限**。
+ *
+ * 2026-09-24（人类实测纠正）：「重复的删掉」→ 当时把 80 只砍成 48（一人一只），上限设 0。
+ * 2026-09-28（人类）：「**同种你可以做一对测试一下**」→ 放宽到 **1 组**，但**必须显式标注**
+ * （`synthetic_demo: true` + provenance 写明"游戏里不存在、为验证同种两个体比较而造"）：
+ *   · 只许这一对，不许借机把实例数灌回去（那是 09-24 被点名的那件事）；
+ *   · 页面上两只**必须看得出区别**（性格/天分上卡）—— 否则又会变成"同名两张一样的卡"。
+ */
+export const MAX_SAME_SPECIES_GROUPS = 1;
 
 /** 养成属性的面板换算公式**未校准**：这是全仓唯一一处「效果」措辞。 */
 export const GROWTH_EFFECT_REASON = '面板换算公式未校准（见 10 号文档 §13）';
@@ -490,7 +499,9 @@ const OWNED_PET = {
     species_id: {type: 'string', pattern: '^pet_[0-9]{6}$'},
     species_name: {type: 'string', minLength: 1},
     species_tier: {type: 'string', enum: ['baseline', 'overlay']},
-    level: {type: 'integer', minimum: 1, maximum: 100},
+    // ⚠ 2026-09-27 改钉：上限从 100 收到 **60**（官方等级上限；原来写 100 时示例数据里出现过 Lv.95/Lv.100，
+    // 那在游戏里不可能存在）。下限仍是 1。
+    level: {type: 'integer', minimum: 1, maximum: 60},
     nature: GROWTH_ATTRIBUTE,
     talent: GROWTH_ATTRIBUTE,
     specialty: GROWTH_ATTRIBUTE,
@@ -502,6 +513,8 @@ const OWNED_PET = {
     source: {type: 'string', const: SOURCE_MODE},
     favourite: {type: 'boolean'},
     locked: {type: 'boolean'},
+    // 演示用的第二个个体（同种成对）：**必须显式为 true** 才允许同种两组 —— 见 MAX_SAME_SPECIES_GROUPS。
+    synthetic_demo: {type: 'boolean'},
     provenance: {type: 'array', items: PROVENANCE_ENTRY, minItems: 1},
     licence_ref: {type: 'string', minLength: 1},
     unknown_fields: {type: 'array', items: {type: 'string'}},

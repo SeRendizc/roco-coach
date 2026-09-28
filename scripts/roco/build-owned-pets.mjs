@@ -74,12 +74,19 @@ import {
   sha256Hex,
 } from './owned-pets-lib.mjs';
 import {CHECK_NAMES, SELFTEST_MUTATIONS, criteriaReport, runChecks, runSelftest} from './verify-owned-pets.mjs';
+// 「同种两个体差在哪」要按**个体层掷出来的值**算（数据集里 nature/talent 是 null，见下面那一段）。
+// 走的是与页面**同一个**解析器，免得"产物说没差异、页面上两只明明不同"。
+import {individualFromInstance} from '../../src/coach/individuals.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const ROOT = join(HERE, '..', '..');
 
 /** 等级取值：Demo 值，不是从冻结目录里查出来的游戏常量（那里面没有等级上限证据）。 */
-const LEVELS = Object.freeze([50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]);
+// ⚠ 2026-09-27 **改钉**：原来是一串 Demo 等级 `[50…100]`，但**等级上限是 60**（官方口径 + 人类
+// 「pvp 没有的话就默认都 60 级别吧」）⇒ 60 以上的等级在游戏里**不可能存在**，页面上还显示着 Lv.95/100。
+// 这些个体本来就是**建模的示例数据**（不是玩家存档）⇒ 一律取 **60**（默认档）。旧的取值留在这里当记录。
+const LEVELS = Object.freeze([60]);
+const LEVELS_PREVIOUS_RECORD = Object.freeze([50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]);
 const GENERATOR = 'scripts/roco/build-owned-pets.mjs';
 
 // ── 读盘小工具（只读，不改任何输入） ────────────────────────────────────────
@@ -333,7 +340,8 @@ export function buildOwnedPets({root = ROOT} = {}) {
       serial += 1;
       const instanceId = `own-${String(serial).padStart(4, '0')}`;
 
-      // 等级：Demo 值；同一 species 的两个个体**等级必定不同**（这样「同种不同个体」不靠运气）。
+      // 等级：**一律 60**（人类 2026-09-27 口径 + 官方上限 60）。原来靠"同种两个体等级不同"来区分个体 ——
+      // 那条 Demo 设计随上限 60 一起作废：个体之间的区别现在由**性格与天分**承担（那两层本来就有）。
       let level = LEVELS[Math.floor(rng() * LEVELS.length) % LEVELS.length];
       if (previousLevel !== null && level === previousLevel) {
         level = LEVELS[(LEVELS.indexOf(level) + 1 + Math.floor(rng() * (LEVELS.length - 1))) % LEVELS.length];
@@ -460,6 +468,62 @@ export function buildOwnedPets({root = ROOT} = {}) {
     }
   }
 
+  // ── 演示用的**同种第二个个体**（人类 2026-09-28：「同种你可以做一对测试一下」）──────────
+  // 为什么需要它：`compareOwnedPets()` / 教练的"两个个体差在哪"要**同种**才有意义，
+  // 而 09-24 把实例砍成"一人一只"之后，真实数据里根本没有同种对 ⇒ 那条路只能靠判据夹具验，
+  // 真机上永远验不到（§C6.331 就是这么抓出"同名不同种当成两个个体比"那个错的）。
+  // 所以补**一对**，并且：
+  //   · 只有这一对（`MAX_SAME_SPECIES_GROUPS = 1`）；
+  //   · `synthetic_demo: true` + provenance 写明**游戏里不存在**（不冒充真实存档）；
+  //   · 性格/天分是**按新 instance_id 掷出来的**（与第一只不同）⇒ 两只真的可比。
+  // 出处指向**人类决定的记录**（`data/roco/human-decisions.json`）—— 它是 JSON，
+  // 所以 provenance 的 pointer 能真解析到那一条（台账是 markdown，pointer 解析不了，踩过）。
+  const DECISIONS_PATH = 'data/roco/human-decisions.json';
+  const decisionsSha = (() => {
+    try {
+      return createHash('sha256').update(readFileSync(join(root, DECISIONS_PATH))).digest('hex');
+    } catch {
+      return null;
+    }
+  })();
+  if (!decisionsSha) throw new Error(`读不到 ${DECISIONS_PATH}：合成个体那条 provenance 的出处就没了`);
+  const demoSource = instances[0];
+  const demo = {
+    ...deepClone(demoSource),
+    instance_id: 'own-0049',
+    level: LEVELS[0],                                   // 60：与其它个体同档（人类 2026-09-27 口径）
+    synthetic_demo: true,
+    favourite: false,
+    locked: false,
+    provenance: [
+      ...(Array.isArray(demoSource.provenance) ? deepClone(demoSource.provenance) : []),
+      {
+        // 这一条的"出处"就是**人类的决定本身**：台账里那一节 + 它的 sha256（现算）。
+        source_id: 'HUMAN-2026-09-28',
+        source_scope: 'human_decision',
+        artifact_path: DECISIONS_PATH,
+        artifact_sha256: decisionsSha,
+        // pointer 走**点号路径**（校验器 `resolvePointer` 的语法）—— 必须真的解析到那一条
+        pointer: 'decisions.2026-09-28-same-species-demo-pair',
+        note: '演示用的**同种第二个个体**：人类 2026-09-28 批准；**游戏里并不存在这一只**，'
+          + '只为让"同种两个个体比较"在真机上可验（性格/天分按新 instance_id 独立掷出）。'
+          + '若哪天不需要它了：删掉这一段 + own-0049，并把 MAX_SAME_SPECIES_GROUPS 调回 0。',
+      },
+    ],
+  };
+  demo.unknown_fields = expectedInstanceUnknownFields(demo);
+  demo.build_hash = instanceBuildHash(demo);
+  instances.push(demo);
+  battleBuilds.push({
+    ...deepClone(battleBuilds[0]),
+    build_id: 'build-own-0049',
+    owned_pet_instance_id: 'own-0049',
+    build_hash: '',
+  });
+  const demoTail = battleBuilds[battleBuilds.length - 1];
+  demoTail.unknown_fields = expectedBattleBuildUnknownFields(demoTail);
+  demoTail.build_hash = battleBuildHash(demoTail);
+
   const counts = {
     instances: instances.length,
     species: new Set(instances.map((i) => i.species_id)).size,
@@ -478,9 +542,19 @@ export function buildOwnedPets({root = ROOT} = {}) {
   for (const group of bySpecies.values()) {
     if (group.length < 2) continue;
     counts.same_species_groups += 1;
-    // 复用同一个比较器：判据与产物用同一份逻辑，免得两处说法不一致。
+    // ⚠ 两个口径都要：
+    //   · `compareOwnedPets` 比的是**数据集原始字段** —— 而数据集里 `nature.value`/`talent.value`
+    //     是 null（静态数据没有这两项），所以它恒判"无差异"，那是**数据集层面**的实话；
+    //   · 真正决定"这两个个体能不能比出高低"的是**个体层掷出来的值**（`individualFromInstance`
+    //     按 instance_id 种子化掷点）⇒ 用它算这一项。
     const comparison = compareOwnedPets(group[0], group[1]);
-    if (comparison.differs_in_at_least_one_attribute) counts.same_species_groups_with_difference += 1;
+    const rolled = group.slice(0, 2).map((one) => {
+      const row = individualFromInstance(one, {level: one.level ?? 60});
+      return `${row.nature}|${JSON.stringify(row.talent)}`;
+    });
+    if (rolled[0] !== rolled[1] || comparison.differs_in_at_least_one_attribute) {
+      counts.same_species_groups_with_difference += 1;
+    }
   }
 
   const dataset = {

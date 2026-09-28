@@ -1442,17 +1442,26 @@ async function main() {
       availAxisProblems({availCount: 1, availText: '现在能算'}), '{availCount:1,availText:"现在能算"}');
 
     // ② 同名不同物种必须看得出区别（人类：「这个什么陛下有啥区别？我根本看不出来啊」）
-    //    实测那两只是 own-0042/pet_000556(Lv50·输出) 与 own-0043/pet_000575(Lv80·坦克)，都叫「棋契陛下」、属性也相同。
-    //    做法：用页面自己的搜索框筛「棋契」→ 读两行**可见文本**，必须不同且各含自己的等级与定位。
+    //    那两只是 own-0042/pet_000556 与 own-0043/pet_000575，都叫「棋契陛下」、属性也相同。
+    //    做法：用页面自己的搜索框筛「棋契」→ 读两行**可见文本**，必须不同且各自带出**区别维度**。
+    //
+    //    ⚠ 2026-09-27 **改钉**：原来这条要求"要能同时看到 **Lv50 与 Lv80**" —— 那是拿**掷出来的
+    //    Demo 等级**当区别手段。当晚等级口径改成「默认都 60 级」（人类拍板 + 官方上限 60）
+    //    ⇒ 所有个体都是 Lv60，**等级不再是可用维度**。判据的**意图**不变（同名两行必须看得出区别），
+    //    换成的机制是：① 两行可见文本必须**不同**；② 每行必须带出自己的**定位**（或机制行），
+    //    且两行的定位必须**不止一种**；③ 两行都必须带自己的等级读数（**同值也算**：等级要显示出来，
+    //    只是不再要求它们不同）。反证也换成"只画名字+属性"那一版。
     const sameNameProblems = (texts) => {
       const bad = [];
       if (texts.length < 2) return [`同名不同物种的两行没同时出现（只有 ${texts.length} 行）—— 判据不许变空`];
       if (new Set(texts).size !== texts.length) bad.push(`同名两行的可见文本完全相同：「${texts[0]}」`);
-      if (!texts.some((t) => /Lv50/.test(t)) || !texts.some((t) => /Lv80/.test(t))) {
-        bad.push(`两行必须各带自己的等级（要能同时看到 Lv50 与 Lv80）：${JSON.stringify(texts)}`);
+      if (!texts.every((t) => /Lv\d+/.test(t))) {
+        bad.push(`每行都要带自己的等级读数：${JSON.stringify(texts)}`);
       }
-      if (!texts.some((t) => /输出/.test(t)) || !texts.some((t) => /坦克/.test(t))) {
-        bad.push(`两行必须各带自己的定位（要能同时看到「输出」与「坦克」）：${JSON.stringify(texts)}`);
+      const roles = ['输出', '坦克', '辅助', '恢复', '控制'];
+      const shown = roles.filter((role) => texts.some((text) => text.includes(role)));
+      if (shown.length < 2) {
+        bad.push(`两行要各自带出定位、且不止一种（看到的定位：${shown.join('/') || '无'}）：${JSON.stringify(texts)}`);
       }
       return bad;
     };
@@ -1470,12 +1479,16 @@ async function main() {
           .map((r)=>(r.textContent||'').replace(/\\s+/g,' ').trim()));})()`));
     } catch (error) { sameNameTexts = []; }
     const sameNameProbs = sameNameProblems(sameNameTexts);
-    check('41-同名不同种看得出区别', '候选池里同名不同物种的两行，可见文本必须不同且各含自己的等级与定位'
+    check('41-同名不同种看得出区别', '候选池里同名不同物种的两行，可见文本必须不同、各带等级读数、且定位不止一种'
       + '【人类 2026-09-25：「这个什么陛下有啥区别？我根本看不出来啊」】',
       sameNameProbs.length === 0, sameNameProbs.join(' | ') || JSON.stringify(sameNameTexts));
     counter('41-同名不同种看得出区别', '把两行还原成只画名字+属性（投诉当时的样子）必须报',
       sameNameProblems(['棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里',
         '棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里']), '两行逐字相同');
+    // 第二条反证：**只显示等级、不显示定位**那一版也必须报（改钉之后的新牙）
+    counter('41-同名不同种看得出区别', '两行只有等级、没有各自的定位也必须报',
+      sameNameProblems(['棋契陛下 武系地系 Lv60 持有 · 可正式上场 在你的盒子里',
+        '棋契陛下 武系地系 Lv60 持有 · 可正式上场 在你的盒子里']), '定位没带出来');
     // 搜索框还原，别影响后面的截图
     await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)}).shadowRoot;
       const i=sr.getElementById('tw-search');i.value='';i.dispatchEvent(new Event('input',{bubbles:true}));return true;})()`);

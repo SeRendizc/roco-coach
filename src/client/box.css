@@ -231,3 +231,12 @@ button{min-width:44px}
   #box-grid[data-grouped="yes"] .refresh-btn{min-height:44px}
   #box-grid[data-grouped="yes"] .individual-card .cmp-toggle{min-height:44px}
 }
+
+/* 同种多实例的个体标记（性格/天分）：只在**同种有两只以上**时出现 —— 让两张同名卡看得出区别
+   （人类 2026-09-24：「这个什么陛下有啥区别？我根本看不出来啊」；2026-09-28 批准造了一对同种演示个体）。 */
+.tag-individual {
+  background: rgba(78, 188, 115, 0.16);
+  border-color: rgba(78, 188, 115, 0.5);
+  color: #d8f5e2;
+  font-variant-numeric: tabular-nums;
+}

@@ -5,7 +5,7 @@
   "candidate_universe": {
     "definition": "pack.json 的 pet 实体（600+ 候选宇宙）∪ owned 实例；**不是**写死的白名单",
     "catalog_pet_entities": 622,
-    "owned_instances": 48,
+    "owned_instances": 49,
     "owned_species": 48,
     "species_with_frozen_learnset": 48,
     "registered_attack_types": 18,
@@ -280,7 +280,7 @@
       "criteria": "候选宇宙来自注入的 owned + pack（`facts.candidate_universe`），不是硬编码白名单：审计要求 `universe_size` 与注入数据一致，且 `pool_size` 可以为任意值（测试把注入池换成更小的/更大的子集，输出必须跟着变）——否则 `WHITELIST_FIXED_POOL`（红）。",
       "actual": {
         "universe_size": 622,
-        "owned_instances": 48,
+        "owned_instances": 49,
         "catalog_namespaces_in_top_teams": [
           "catalog_species",
           "owned_instance"
@@ -4203,7 +4203,7 @@
       "recall_limits": {
         "min": 20,
         "max": 50,
-        "eligible_after_policy": 620
+        "eligible_after_policy": 621
       },
       "shortfall_reason": null,
       "overflow_reason": null,
@@ -8115,7 +8115,7 @@
       "recall_limits": {
         "min": 20,
         "max": 50,
-        "eligible_after_policy": 617
+        "eligible_after_policy": 618
       },
       "shortfall_reason": null,
       "overflow_reason": null,
@@ -16048,7 +16048,7 @@
       "recall_limits": {
         "min": 20,
         "max": 50,
-        "eligible_after_policy": 620
+        "eligible_after_policy": 621
       },
       "shortfall_reason": null,
       "overflow_reason": null,
@@ -19927,7 +19927,7 @@
       "recall_limits": {
         "min": 20,
         "max": 50,
-        "eligible_after_policy": 617
+        "eligible_after_policy": 618
       },
       "shortfall_reason": null,
       "overflow_reason": null,
@@ -23932,7 +23932,7 @@
       "recall_limits": {
         "min": 20,
         "max": 50,
-        "eligible_after_policy": 616
+        "eligible_after_policy": 617
       },
       "shortfall_reason": null,
       "overflow_reason": null,

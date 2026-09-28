@@ -389,6 +389,22 @@ async function main() {
     await sleep(250);
 
     // ── ⑥ 两个同种个体比较（真实鼠标选两只 → 比较）───────────────────
+    // ⚠ 2026-09-28：上面那几步给页面留下了两样**状态残留**，而这一段以前是"不可达"分支、
+    // 从来没人跑到过（人类批准那一对演示个体之后它才真的跑起来，于是当场红了两次）：
+    //   ① 档位停在 **catalog**（`#tab-catalog`）⇒ 网格里没有 `own-XXXX`；
+    //   ② **筛选也留着**（实测 `locked=true` 会把结果清空 ⇒ 输入「铠甲虫」后网格 0 张卡）。
+    // 所以这里**重新导航一次**（等价于点开页面），把档位/筛选/搜索全部复位，再切到「我的精灵」。
+    await cdp.send('Page.navigate', {url: base + 'box.html'});
+    await sleep(1200);                                  // 导航是异步的：不等就点，点到的是**旧页面**
+    await waitFor('document.querySelectorAll("#box-grid .card").length>0');
+    await sleep(300);
+    // 复位之后先核一遍"档位与筛选都干净"（不干净就当场说清，而不是等点到空网格再猜）
+    const fresh = JSON.parse(await js(`(()=>{const chips=[...document.querySelectorAll('.filter-chip')];
+      return JSON.stringify({kind:document.querySelector('#tab-mine')?.classList.contains('selected')?'mine':'?',
+        search:document.getElementById('box-search')?.value??null,
+        pressed:chips.filter((c)=>c.getAttribute('aria-pressed')==='true').map((c)=>({f:c.dataset.f,v:c.dataset.v})).length,
+        cards:document.querySelectorAll('#box-grid .card').length});})()`));
+    steps.push({at: 'compare-reset', fresh});
     const mineRoute = await (await fetch(`${base}api/roco/box?kind=mine&limit=60&offset=0`)).json();
     const groupCounts = new Map();
     for (const card of mineRoute.player.cards) groupCounts.set(card.group, [...(groupCounts.get(card.group) ?? []), card.select]);
@@ -411,6 +427,37 @@ async function main() {
       steps.push({at: 'compare-unreachable', pairs: pairs.length, speciesCount});
     } else {
     const [aSel, bSel] = pair;
+    // ⚠ 2026-09-28：人类批准了一对同种演示个体（`own-0049`，见 `data/roco/human-decisions.json`），
+    // 它是**第 49 条** —— 而盒子每页 48 张 ⇒ 第二只在第一页**根本没渲染**，直接点会以
+    // "fatal 找不到元素"红掉（这一条判据就是被这个抓到的）。所以先用页面自己的搜索框把这一种筛出来，
+    // 两张卡同时出现再点。**判据的意图一个字没变**：同种两只必须能真的走完比较流程。
+    const pairName = mineRoute.player.cards.find((c) => c.select === aSel)?.name ?? '';
+    if (pairName) {
+      // ⚠ 搜索框这里只**清空**、不输入：盒子页会持久化搜索词，而 `typeText` 是追加式输入
+      // （一个字符一个 dispatchKeyEvent）⇒ 上一次留的词 + 这次的词会粘成「喵喵铠甲虫」、查不到东西
+      // （实测踩到两次）。这一对在第一页（own-0001 是第一行），清掉搜索就看得见。
+      await js(`(()=>{const el=document.getElementById('box-search');if(!el)return false;
+        el.value='';el.dispatchEvent(new Event('input',{bubbles:true}));return true;})()`);
+      await sleep(500);
+      // ⚠ 同种两只在「我的精灵」里是**归成一行**的（抽屉：`.species-drawer` + `.drawer-head`），
+      // 默认**收起** ⇒ 直接找 `.card[data-select]` 是找不到的（实测：网格里 0 张卡，只有一行
+      // 「铠甲虫 · 虫系 · 2 个个体」）。所以先点开那一行，两张卡才会出现（卡上的「加入比较」也才有）。
+      const pairSpecies = mineRoute.player.cards.find((c) => c.select === aSel)?.group ?? '';
+      if (pairSpecies) {
+        await mouseClick(`.species-drawer[data-species="${pairSpecies}"] .drawer-head`);
+        await sleep(500);
+      }
+      const visible = await cardsText();
+      // 诊断留痕：搜索框实际值 / 网格里到底有几张卡 / 各卡的 data-select（点不到时一眼看出是哪一步错的）
+      const probe = JSON.parse(await js(`(()=>{const el=document.getElementById('box-search');
+        const cards=[...document.querySelectorAll('#box-grid .card')];
+        const pressed=[...document.querySelectorAll('.filter-chip')].filter((c)=>c.getAttribute('aria-pressed')==='true').length;
+        const grid=document.getElementById('box-grid');
+        return JSON.stringify({input:el?el.value:null,cards:cards.length,pressed,
+          gridText:String(grid?.textContent??'').replace(/\s+/g,' ').slice(0,80),
+          selects:cards.slice(0,6).map((c)=>c.dataset.select)});})()`));
+      steps.push({at: 'compare-filter', pairName, visibleLines: visible.split('\n').filter(Boolean).length, probe});
+    }
     steps.push({at: 'compare-pick', pair, names: mineRoute.player.cards.filter((c) => pair.includes(c.select)).map((c) => c.name)});
     await mouseClick(`#box-grid .card[data-select="${aSel}"] .cmp-toggle`);
     await mouseClick(`#box-grid .card[data-select="${bSel}"] .cmp-toggle`);
@@ -559,8 +606,38 @@ async function main() {
     await waitFor(`document.body.dataset.boxKind==='mine'`);
     await sleep(400);
     await js(`document.getElementById('detail-drawer').hidden = true; document.getElementById('compare-close')?.click();`);
-    const twoForCompare = JSON.parse(await js(`JSON.stringify(
-      [...document.querySelectorAll('#box-grid .card .cmp-toggle')].slice(0, 2).map((b) => b.dataset.cmp))`));
+    // ⚠ 2026-09-28 改钉：原来取"页面前两张卡的加入比较" —— 那时候**每个物种只有 1 个个体**，
+    // 抽屉会把每个组直接摊开，所以前两张卡必然在网格里。人类批准一对同种个体之后，
+    // 「铠甲虫」那一组默认**收起** ⇒ 前两张卡变成了**跨物种**（比较按钮对跨物种是禁用的），
+    // 这一步就点不出可比较的一对（实测：`compare-go` 一直 disabled、选中个体 0 只）。
+    // 现在直接用**那一对同种个体**（与上面第 ⑥ 组同一对，来源仍是页面自己的数据）：
+    const pairRoute = await (await fetch(`${base}api/roco/box?kind=mine&limit=60&offset=0`)).json();
+    const bySpecies = new Map();
+    for (const card of pairRoute.player.cards) {
+      bySpecies.set(card.group, [...(bySpecies.get(card.group) ?? []), card.select]);
+    }
+    const handoffPair = [...bySpecies.values()].find((list) => list.length === 2) ?? [];
+    if (handoffPair.length === 2) {
+      const name = pairRoute.player.cards.find((c) => c.select === handoffPair[0])?.name ?? '';
+      const species = pairRoute.player.cards.find((c) => c.select === handoffPair[0])?.group ?? '';
+      // 用**与第 ⑥ 组一模一样**的步骤（那一套已经实测能点到）：重新导航把档位/筛选/搜索全部复位，
+      // 再切「我的精灵」、搜这一种、展开那一行。这里踩过一次"把步骤写短一点"的坑（点不到 own-0001），
+      // 所以宁可重复这四步，也不另辟一条没验过的路。
+      await cdp.send('Page.navigate', {url: base + 'box.html'});
+      await sleep(1200);
+      await waitFor('document.querySelectorAll("#box-grid .card").length>0');
+      await sleep(300);
+      await mouseClick('#tab-mine');
+      await sleep(500);
+      // ⚠ 不碰搜索框：盒子页会把"搜索词 + 筛选"**持久化**（实测重载后 `pressed:3`、搜索框里还留着
+      // 上一次的词），而 `typeText` 是追加式输入 ⇒ 会变成「铠甲虫铠甲虫」、网格 0 张卡。
+      // 这一对在**第一页**（own-0001 是第一行），所以直接展开那一行就够，不必搜。
+      const row = await js(`(()=>{const el=document.querySelector('.species-drawer[data-species="${species}"] .drawer-head');
+        return el?'yes':'no';})()`);
+      if (row === 'yes') { await mouseClick(`.species-drawer[data-species="${species}"] .drawer-head`); await sleep(500); }
+      else { steps.push({at: 'handoff-pair-row-missing', species, name}); }
+    }
+    const twoForCompare = handoffPair;
     for (const sel of twoForCompare) await mouseClick(`#box-grid .card[data-select="${sel}"] .cmp-toggle`);
     await waitFor(`document.getElementById('compare-go')?.disabled===false`);
     await mouseClick('#compare-go');
@@ -879,12 +956,22 @@ async function main() {
     } else {
       await mouseClick(`[data-add="${addTarget}"]`);
       await sleep(700);
+      // ⚠ 2026-09-28 改钉：原来 `extra = ids.find((id)=>id!==base)` —— 那时候本地库里**只有**
+      // 「再养一只同种」加出来的那只，所以"另一只"必然是它。人类批准一对同种演示个体之后，
+      // 页面把服务端那两只也写进了同一个本地库（抽屉要画「3 个个体」）⇒ "另一只"会挑到
+      // **服务端名单里**的 own-0049，于是比较**真的成功**，这条判据要验的"本机个体比不了"
+      // 反而验不到（实测：面板真的出来了）。
+      // 现在按**判据的意图**挑：extra 必须是**不在服务器名单里**的那一只（`own-XXXX` 且不在 API 列表里）。
+      // ⚠ 上限就是 60（`limit=200` 会 400 ⇒ `.player` 是 undefined，实测踩到）
+      const serverIds = ((await (await fetch(`${base}api/roco/box?kind=mine&limit=60&offset=0`)).json())
+        .player?.cards ?? []).map((c) => c.select);
       const pick = JSON.parse(await js(`(()=>{
+        const serverIds=${JSON.stringify(serverIds)};
         const store=JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}');
         const ids=Object.keys(store).filter((id)=>store[id]&&store[id].species_id===${JSON.stringify(addTarget)});
-        const base=ids.find((id)=>!/-(b|c|d|e|f)$/.test(id))||ids[0]||null;
-        const extra=ids.find((id)=>id!==base)||null;
-        return JSON.stringify({ids, baseId:base, extraId:extra});})()`));
+        const base=ids.find((id)=>serverIds.includes(id))||ids.find((id)=>!/-(b|c|d|e|f)$/.test(id))||ids[0]||null;
+        const extra=ids.find((id)=>id!==base&&!serverIds.includes(id))||null;
+        return JSON.stringify({ids, baseId:base, extraId:extra, serverIds:serverIds.length});})()`));
       const facts = {baseId: pick.baseId, extraId: pick.extraId, added: Boolean(pick.extraId)};
       // 排障/证据：这一行里**画出来**的个体是哪些、比较按钮有几个（判据红了要能一眼看出红在哪）
       facts.rows = JSON.parse(await js(`(()=>{const sec=document.querySelector('.species-drawer[data-species="${addTarget}"]');
@@ -906,6 +993,13 @@ async function main() {
         await sleep(600);
         facts.panelHidden = await js(`document.getElementById('compare-panel')?.hidden`);
         facts.hintAfterCompare = await js(`document.getElementById('compare-hint')?.textContent ?? ''`);
+        // 诊断（点完比较之后到底发生了什么）：按钮禁用状态 / 选中了几只 / 抽屉里那两行的选择状态
+        facts.diag = JSON.parse(await js(`(()=>{const cards=[...document.querySelectorAll('.individual[data-individual]')];
+          return JSON.stringify({go:document.getElementById('compare-go')?.disabled,
+            selected:document.body.dataset.boxSelected,
+            picked:[...document.querySelectorAll('.card.picked')].map((el)=>el.dataset.select),
+            rows:cards.slice(0,4).map((el)=>({id:el.dataset.individual??el.dataset.individual,
+              picked:el.querySelector('.card')?.classList.contains('picked')??null}))});})()`));
       }
       steps.push({at: 'add-then-compare', ...facts});
       const problems = rerollProblems(facts);

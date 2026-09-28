@@ -113,6 +113,8 @@ function cardHtml(card) {
   if (card.role_label) tags.push({text: `定位：${card.role_label}`});
   if (card.support_label) tags.push({text: `支持：${card.support_label}`});
   if (mine && card.level !== null && card.level !== undefined) tags.push({text: `Lv.${card.level}`});
+  // 同种多实例时把这一只的**性格/天分**画出来（否则两只同名卡长得一模一样，人类 09-24 投诉过）。
+  if (mine && card.individual_label) tags.push({text: card.individual_label, cls: 'tag-individual'});
   for (const badge of card.badges ?? []) tags.push({text: badge, cls: 'tag-badge'});
   return `<article class="card${picked ? ' picked' : ''}" data-select="${escapeAttr(card.select)}"
    data-group="${escapeAttr(card.group ?? '')}" data-status="${picked ? 'picked' : 'idle'}">
