@@ -73,7 +73,16 @@ test('② 来路写清：REFERENCE_ONLY / 许可 UNKNOWN / 不是官方文本；
   //        且改过的每一只都在同一条记录上留着旧值（`stats_previous`，改钉不删）。
   //   · 2026-09-27 下半场补：**执行域**（`pets.json` / `layer-playable-48/pets.json`）也按同一份 CSV 采用了
   //     （真机实测那 5 只两个数打架），所以"允许带标签出现"的文件从 1 个变成 3 个 —— 见 ⑥。
-  const ADOPTED = new Set(['full-catalog.json', 'pets.json', 'layer-playable-48/pets.json']);
+  // 2026-09-28 改钉（人类 2026-09-28 拍板「所有精灵实装」+「就用现在抓包得到的数据」）：
+  // 可玩层三份**全部**改成抓包派生（原来只有 `pets.json` 是），所以 `learnsets.json` 与
+  // `support-matrix.json` 现在也**带来源标注**——它们不再是"混进来的痕迹"，而是**批准采用的层**。
+  // 判据的意图一字未变：**在允许清单里的只许"带标签地采用"**（下面紧接着就核原始形状字段
+  // `xiaoheihe|base_race_params|sum_race` 一个都不许有），清单外的一律不许出现抓包痕迹。
+  // 旧值（改之前长这样）：const ADOPTED = new Set(['full-catalog.json', 'pets.json', 'layer-playable-48/pets.json']);
+  /** 抓包的**原始形状**字段名：一个都不许真的成为键（值里出现出处指针不算）。 */
+const RAW_SHAPE_KEYS = new Set(['base_race_params', 'sum_race']);
+const ADOPTED = new Set(['full-catalog.json', 'pets.json', 'layer-playable-48/pets.json',
+    'layer-playable-48/learnsets.json', 'layer-playable-48/support-matrix.json']);
   const normalizedDir = join(ROOT, 'data/roco/normalized');
   for (const ruleset of readdirSync(normalizedDir)) {
     const dir = join(normalizedDir, ruleset);
@@ -85,10 +94,28 @@ test('② 来路写清：REFERENCE_ONLY / 许可 UNKNOWN / 不是官方文本；
         assert.ok(!/hke-2026-09-27|xiaoheihe/.test(text), `${ruleset}/${rel} 里混进了社区抓包的痕迹`);
         continue;
       }
-      // 采用了抓包的那三份：只许出现**带标签**的采用（原始形状的字段一律不许）
-      assert.ok(!/xiaoheihe|base_race_params|sum_race/.test(text),
-        `${ruleset}/${rel} 里出现了抓包**原始形状**的字段（只许采用六维与来源标注）`);
+      // 采用了抓包的那几份：只许出现**带标签**的采用（原始形状的字段一律不许）。
+      // ⚠ 2026-09-28 改钉：这里原来是一条文本级正则 `/xiaoheihe|base_race_params|sum_race/`。
+      // 本层换成抓包派生之后，每个实例都带一条**出处指针**，形如
+      //   `data/roco/raw/hke-2026-09-27/raw/pet-3001-….json#result.pet_detail.base_race_params`
+      // ⇒ 那个词出现在**指针字符串**里（这正是人类要的"逐条带来源、可逐条追"），
+      // 不是把抓包的原始字段搬进了层。正则分不清这两件事，所以改成**结构判据**：
+      // 不许有真的叫这两个名字的**键**（值里出现指针不算）。判据的意图一字未变
+      // ——"原始形状的字段一个都不许进来"——而且比原来更准（原来会被一句注释误伤）。
+      // 旧写法留档：assert.ok(!/xiaoheihe|base_race_params|sum_race/.test(text), ...);
+      assert.ok(!/xiaoheihe/.test(text), `${ruleset}/${rel} 里出现了抓包社区来源的痕迹（xiaoheihe）`);
       const doc = JSON.parse(text);
+      const rawShapeKeys = [];
+      (function walk(node, at) {
+        if (Array.isArray(node)) { node.forEach((value, i) => walk(value, `${at}[${i}]`)); return; }
+        if (!node || typeof node !== 'object') return;
+        for (const [key, value] of Object.entries(node)) {
+          if (RAW_SHAPE_KEYS.has(key)) rawShapeKeys.push(`${at}.${key}`);
+          walk(value, `${at}.${key}`);
+        }
+      })(doc, rel);
+      assert.deepEqual(rawShapeKeys, [],
+        `${ruleset}/${rel} 里出现了抓包原始形状的**字段**：${rawShapeKeys.slice(0, 3).join('、')}`);
       const override = doc.capture_override ?? doc.provenance?.stats_override;
       const marked = Object.values(doc.pets ?? {}).filter((pet) => pet.stats_source === 'capture-2026-09-27');
       const fromCapture = Object.values(doc.pets ?? {}).filter((pet) => pet.stats_source?.startsWith?.('capture'));
@@ -137,13 +164,27 @@ test('⑥ 执行域与检索层的分歧：**只有那 5 只**，且"回答用�
   //      与微案例清单都跟着变。**执行域的六维是模拟基线的一部分，动它就动了那条冻结契约。**
   //      ⇒ 于是**撤回**执行域的采用，改成：**回答数值读图鉴层，模拟照旧读执行域**。
   // 所以这条判据现在钉三件事：分歧只有 5 只、逐值登记、且 `runtime.js` 里确实写着"数值读图鉴层"。
-  const KNOWN_DIVERGENCE = {
-    3013: {pet_id: 'pet_000012', file: 'layer-playable-48', stat: 'atk', engine: 95, catalog: 88},
-    3071: {pet_id: 'pet_000062', file: 'pets.json', stat: 'atk', engine: 116, catalog: 128},
-    3407: {pet_id: 'pet_000328', file: 'layer-playable-48', stat: 'def', engine: 113, catalog: 122},
-    3591: {pet_id: 'pet_000456', file: 'layer-playable-48', stat: 'atk', engine: 86, catalog: 78},
-    3593: {pet_id: 'pet_000458', file: 'layer-playable-48', stat: 'atk', engine: 143, catalog: 130},
-  };
+  // ── 2026-09-28 改钉（判据的意图一字未变：**执行域与检索层的每一处分歧都必须登记在案**，
+  //    而且"回答数值读图鉴层"这句必须写死在代码里）────────────────────────────────
+  // 本轮把可玩层换成**纯抓包**建的 530 只之后，旧口径「分歧只有那 5 只」（3013/3071/3407/3591/3593，
+  // 每只一个字段）在数据上已经不成立：
+  //   · 其中 4 只（3013 铠甲虫 / 3407 / 3591 / 3593）的**层内六维直接就是抓包值**
+  //     ⇒ 执行域与检索层在这 4 只上**不再分歧**（这是好事，不是放宽判据）；
+  //   · 只剩基线 `pets.json` 里的 3071（`pet_000062`）仍有分歧，而且是**2 个字段**
+  //     （atk 116/128、spa 38/46）。
+  // 所以登记表从「5 只 × 1 字段」改成**逐字段一行**（同一只精灵可以有多行）。
+  // 旧值逐行留档（2026-09-27 两轮改钉时登记的，改钉不删）：
+  //   const KNOWN_DIVERGENCE = {
+  //     3013: {pet_id: 'pet_000012', file: 'layer-playable-48', stat: 'atk', engine: 95, catalog: 88},
+  //     3071: {pet_id: 'pet_000062', file: 'pets.json', stat: 'atk', engine: 116, catalog: 128},
+  //     3407: {pet_id: 'pet_000328', file: 'layer-playable-48', stat: 'def', engine: 113, catalog: 122},
+  //     3591: {pet_id: 'pet_000456', file: 'layer-playable-48', stat: 'atk', engine: 86, catalog: 78},
+  //     3593: {pet_id: 'pet_000458', file: 'layer-playable-48', stat: 'atk', engine: 143, catalog: 130},
+  //   };
+  const KNOWN_DIVERGENCE = [
+    {game_id: 3071, pet_id: 'pet_000062', file: 'pets.json', stat: 'atk', engine: 116, catalog: 128},
+    {game_id: 3071, pet_id: 'pet_000062', file: 'pets.json', stat: 'spa', engine: 38, catalog: 46},
+  ];
   const ruleset = 'roco-world-s4-2026-09-10';
   const base = JSON.parse(readFileSync(join(ROOT, 'data/roco/normalized', ruleset, 'pets.json'), 'utf8'));
   const layer = JSON.parse(readFileSync(join(ROOT, 'data/roco/normalized', ruleset,
@@ -158,14 +199,14 @@ test('⑥ 执行域与检索层的分歧：**只有那 5 只**，且"回答用�
       assert.equal(pet.stats_previous, undefined, `${rel} ${petId} 还留着 stats_previous（采用已撤回）`);
     }
   }
-  for (const [gameId, row] of Object.entries(KNOWN_DIVERGENCE)) {
+  for (const row of KNOWN_DIVERGENCE) {
     const stats = (row.file === 'pets.json' ? base.pets : layer.pets)[row.pet_id].stats;
     assert.equal(stats[row.stat], row.engine,
-      `${row.pet_id}（game_id ${gameId}）执行域的 ${row.stat} 变了：现在 ${stats[row.stat]}，登记的是 ${row.engine}`);
-    const pet = byGameId.get(Number(gameId));
+      `${row.pet_id}（game_id ${row.game_id}）执行域的 ${row.stat} 变了：现在 ${stats[row.stat]}，登记的是 ${row.engine}`);
+    const pet = byGameId.get(Number(row.game_id));
     assert.equal(pet.stats[row.stat], row.catalog,
-      `检索层 ${gameId} 的 ${row.stat} 应是抓包值 ${row.catalog}，实际 ${pet.stats[row.stat]}`);
-    assert.equal(pet.stats_previous?.[row.stat], row.engine, `检索层 ${gameId} 应留着旧值（改钉不删）`);
+      `检索层 ${row.game_id} 的 ${row.stat} 应是抓包值 ${row.catalog}，实际 ${pet.stats[row.stat]}`);
+    assert.equal(pet.stats_previous?.[row.stat], row.engine, `检索层 ${row.game_id} 应留着旧值（改钉不删）`);
   }
   // 分歧只许这 5 只
   const drifting = [];
@@ -178,7 +219,11 @@ test('⑥ 执行域与检索层的分歧：**只有那 5 只**，且"回答用�
       }
     }
   }
-  const unexpected = drifting.filter((row) => !(Number(row.split('/')[0]) in KNOWN_DIVERGENCE));
+  // 没登记过的漂移一条都不许有（登记表里登记过的那些逐条在上面核过了）
+  const unexpected = drifting.filter((row) => {
+    const [gameId, , key] = row.split('/');
+    return !KNOWN_DIVERGENCE.some((r) => Number(gameId) === r.game_id && key === r.stat);
+  });
   assert.deepEqual(unexpected, [], `执行域与抓包之间还有没登记的漂移：${unexpected.join('、')}`);
   // 「回答用哪一份」必须写死在代码里（不然这 5 只又会两个数打架）
   const runtime = readFileSync(join(ROOT, 'src', 'coach', 'runtime.js'), 'utf8');

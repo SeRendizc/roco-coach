@@ -148,22 +148,40 @@ from roco_env.schema import ACTION_SKILL
 RS = rdata.load_ruleset()
 OVERRIDES = [{"path": "turn_order.speed_tie", "value": "random_seeded",
               "confidence": "ENGINE_HYPOTHESIS", "reason": "同速平手未核验", "microcase_id": "MC-E05"}]
+# ── 2026-09-28 改钉（换夹具载体；**判据与断言一条都没动，也没有放宽**）──────────────────
+# 事实依据：本轮把可玩层 layer-playable-48/ 从旧 36 只换成**纯抓包**的 530 只（合并冻结 542）。
+# 人类 2026-09-28 逐字：「就用现在抓包得到的数据吧，别的不找不要了，问题数据也不要了。」
+# ⇒ 下面三只**已按决定撤下**，它们原来的配招新层学不到，reset() 直接报「队伍不合法」：
+#   · pet_000172 闪电环 —— **仍在层里且仍是 FULL_VERIFIED**，但它身上没有「惊雷」（skill_000605）：
+#     native_skills(16)/blood_skills(18) 与上一版逐字相同，只有 skill_stones 19→17，
+#     少掉的正是惊雷 —— 而新层那一条自带 skill_stones_source: capture.skill_list.machine +
+#     skill_stones_gap: capture_machine_is_strict_subset_of_wiki_skill_stones
+#     ⇒ 旧的可学池来自**已撤下的 wiki 技能石来源**。换成 pet_000286 雷鸣小子（电系，会惊雷）。
+#   · pet_000613 智辉章脑（不在抓包里）→ pet_000005 水灵（水系，会落雨）。
+#   · pet_000575 棋契陛下（不在抓包里）→ pet_000436 棋祈督（**同为武系地系**，会沙涌）。
+# 旧值逐行留档（改之前长这样）：
+#     "pet_000172": ["skill_000605", "skill_000434", "skill_000497", "skill_000259"],
+#     "pet_000613": ["skill_000427", "skill_000358", "skill_000418", "skill_000420"],
+#     "pet_000575": ["skill_000507", "skill_000247", "skill_000249", "skill_000250"],
+#     TEAM_A = ["pet_000417", "pet_000046", "pet_000112", "pet_000172", "pet_000308", "pet_000002"]
+#     TEAM_B = ["pet_000100", "pet_000240", "pet_000285", "pet_000287", "pet_000613", "pet_000575"]
+# 三个天气手与两个免疫靶一字未动；Python 侧同一处改钉见 roco/tests/test_weather_pvp.py（两处必须同步）。
 LOADOUTS = {
     "pet_000417": ["skill_000427", "skill_000419", "skill_000421", "skill_000305"],
     "pet_000046": ["skill_000507", "skill_000497", "skill_000498", "skill_000502"],
     "pet_000112": ["skill_000555", "skill_000306", "skill_000316", "skill_000458"],
-    "pet_000172": ["skill_000605", "skill_000434", "skill_000497", "skill_000259"],
+    "pet_000286": ["skill_000605", "skill_000580", "skill_000581", "skill_000585"],
     "pet_000308": ["skill_000419", "skill_000420", "skill_000421", "skill_000265"],
     "pet_000002": ["skill_000418", "skill_000420", "skill_000421", "skill_000303"],
     "pet_000100": ["skill_000507", "skill_000306", "skill_000458", "skill_000498"],
     "pet_000240": ["skill_000555", "skill_000247", "skill_000256", "skill_000266"],
     "pet_000285": ["skill_000605", "skill_000580", "skill_000581", "skill_000585"],
     "pet_000287": ["skill_000605", "skill_000580", "skill_000581", "skill_000585"],
-    "pet_000613": ["skill_000427", "skill_000358", "skill_000418", "skill_000420"],
-    "pet_000575": ["skill_000507", "skill_000247", "skill_000249", "skill_000250"],
+    "pet_000005": ["skill_000427", "skill_000418", "skill_000420", "skill_000421"],
+    "pet_000436": ["skill_000507", "skill_000247", "skill_000249", "skill_000250"],
 }
-TEAM_A = ["pet_000417", "pet_000046", "pet_000112", "pet_000172", "pet_000308", "pet_000002"]
-TEAM_B = ["pet_000100", "pet_000240", "pet_000285", "pet_000287", "pet_000613", "pet_000575"]
+TEAM_A = ["pet_000417", "pet_000046", "pet_000112", "pet_000286", "pet_000308", "pet_000002"]
+TEAM_B = ["pet_000100", "pet_000240", "pet_000285", "pet_000287", "pet_000005", "pet_000436"]
 
 def battle(config_id):
     rc.clear_cache()
