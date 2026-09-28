@@ -7,7 +7,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {groupCards, traitChips, individualHtml, drawerHtml, drawerListHtml, rollNote, formatTraitValue} from '../src/client/box-drawer.js';
+import {groupCards, traitChips, individualHtml, drawerHtml, drawerListHtml, rollNote, formatTraitValue,
+  refreshButton, undoButton, addButton} from '../src/client/box-drawer.js';
 import {REFRESH_LIMIT, refresh, undoLastRefresh, canUndo, individualsFromDataset} from '../src/coach/individuals.js';
 import {readFileSync as readJson} from 'node:fs';
 const dataset = JSON.parse(readJson(new URL('../data/roco/owned/owned-pets.json', import.meta.url), 'utf8'));
@@ -63,17 +64,27 @@ test('③ 缺数值一律标"待导出"（不许显示成 0 或空白）', () =>
 });
 
 test('④ 两个刷新按钮分开、各带剩余次数；用完禁用', () => {
-  const fresh = individualHtml(ONE[0], {individual_id: 'own-0001', refreshes: {nature: 3, talent: 3}});
+  // 2026-09-28 改钉（人类 ③：「刷新性格、天分、再加一只啥的这个太大了，而且没有提供有效信息，
+  // 是不是最好放二级页面去？」）：这两个按钮**从列表行搬到二级详情页**了，
+  // 所以判据改成直接钉生成它的那个函数（`refreshButton`，页面在 `#pet-actions` 里画它）。
+  // 判据的意思一个字没改：两个动作分开、各带剩余次数、用完禁用。
+  const fresh = refreshButton('nature', {individual_id: 'own-0001', refreshes: {nature: 3, talent: 3}}, '刷新性格')
+    + refreshButton('talent', {individual_id: 'own-0001', refreshes: {nature: 3, talent: 3}}, '刷新天分');
   assert.match(fresh, /data-refresh="nature"/);
   assert.match(fresh, /data-refresh="talent"/);
   assert.match(fresh, /刷新性格（还剩 3 次）/);
   assert.match(fresh, /刷新天分（还剩 3 次）/);
   assert.doesNotMatch(fresh, /disabled/, '还有次数时不许禁用');
-  const used = individualHtml(ONE[0], {individual_id: 'own-0001', refreshes: {nature: 0, talent: 2}});
+  const used = refreshButton('nature', {individual_id: 'own-0001', refreshes: {nature: 0, talent: 2}}, '刷新性格')
+    + refreshButton('talent', {individual_id: 'own-0001', refreshes: {nature: 0, talent: 2}}, '刷新天分');
   assert.match(used, /刷新性格（还剩 0 次）/, '用完要如实显示 0 次');
   assert.match(used, /data-refresh="nature"[^>]*disabled/, '用完要禁用按钮');
   assert.match(used, /刷新天分（还剩 2 次）/, '另一个计数不受影响');
   assert.equal(REFRESH_LIMIT, 3, '每人各 3 次（人类口径）');
+  // 接线的意思也要留着：页面必须真的把这些按钮画出来（不是函数孤零零地存在）
+  const box = readFileSync(new URL('../src/client/box.js', import.meta.url), 'utf8');
+  assert.match(box, /refreshButton\('nature'/, 'box.js 要在二级详情页上画「刷新性格」');
+  assert.match(box, /refreshButton\('talent'/, 'box.js 要在二级详情页上画「刷新天分」');
 });
 
 test('⑤ 级数**只从数据读**（默认 60）；缺就读不到，不许再写死', () => {
@@ -138,9 +149,11 @@ test('⑨ 抽屉不许弄丢原来的两个动作：看详情与加入比较（�
 });
 
 test('⑩ 回滚按钮：只有能回滚时才出现，并且带得动 coach 的判断', () => {
-  const none = individualHtml(ONE[0], {individual_id: 'own-0001', refreshes: {nature: 3, talent: 3}});
+  // 2026-09-28 改钉（人类 ③）：回滚按钮也随刷新按钮一起搬进二级详情页 ⇒ 判据钉生成它的
+  // `undoButton()`（意思没变：没刷过不许出现、刷过要能退、说清撤的是哪一次）。
+  const none = undoButton({individual_id: 'own-0001', refreshes: {nature: 3, talent: 3}});
   assert.doesNotMatch(none, /data-undo/, '没刷过就不该出现回滚按钮（免得点了没反应）');
-  const after = individualHtml(ONE[0], {individual_id: 'own-0001', refreshes: {nature: 3, talent: 2},
+  const after = undoButton({individual_id: 'own-0001', refreshes: {nature: 3, talent: 2},
     history: [{kind: 'talent', used: 1, before: {hp: 0}, after: {hp: 10}, remaining: 2}]});
   assert.match(after, /data-undo="own-0001"/, '刷过之后要能回滚');
   assert.match(after, /回滚上一次/);
@@ -154,10 +167,13 @@ test('⑩ 回滚按钮：只有能回滚时才出现，并且带得动 coach 的
 });
 
 // ── ⑪ 「再养一只同种」：让"多个体"在真机上真的走得通（审计 §C6.288 H2）──────────────
-test('⑪ 抽屉里有「再养一只同种」：加出来的个体要进抽屉、这一行要变成"收起"', () => {
-  const single = drawerHtml(groupCards(ONE)[0], {individuals: {}});
-  assert.match(single, /data-add="pet_000012"/, '每个种类都要能再养一只（否则多个体永远不可达）');
-  assert.match(single, /再养一只同种/);
+test('⑪ 「再养一只同种」：按钮生成器还在、加出来的个体要进抽屉、这一行要变成"收起"', () => {
+  // 2026-09-28 改钉（人类 ③：这一类大动作搬进二级详情页）：抽屉的行里**不再画**这个按钮，
+  // 但能力一点没少 —— 判据钉 `addButton()`（详情页用它）与"加出来的个体照样进抽屉"。
+  assert.match(addButton('pet_000012'), /data-add="pet_000012"/, '每个种类都要能再养一只（否则多个体永远不可达）');
+  assert.match(addButton('pet_000012'), /再养一只同种/);
+  assert.doesNotMatch(drawerHtml(groupCards(ONE)[0], {individuals: {}}), /data-add=/,
+    '列表行里不该再有这个按钮（人类：太大、放二级页去）');
   // 同一个种类多出一个（本机记录里的）个体之后：卡片数变 2、这一行应当**收起来**
   const locals = [{individual_id: 'own-0001-b', species_id: 'pet_000012', nature: '开朗'}];
   const grouped = groupCards([...ONE, {select: 'own-0001-b', group: 'pet_000012', name: '铠甲虫', types: ['虫系']}]);
@@ -169,7 +185,9 @@ test('⑪ 抽屉里有「再养一只同种」：加出来的个体要进抽屉�
   const opened = drawerHtml({...grouped[0], expanded: true},
     {individuals: {'own-0001-b': locals[0]}, extras: {pet_000012: locals}});
   assert.match(opened, /own-0001-b/, '点开之后额外个体要画进抽屉里');
-  assert.match(collapsed, /data-add=/, '收起状态下也要能再养一只');
+  // 2026-09-28 改钉：按钮在二级详情页上（`addButton`），收起/摊开都不影响它 —— 收起时不留按钮
+  assert.doesNotMatch(collapsed, /data-add=/, '收起状态下也不在行里画按钮（它已经搬到二级页）');
+  assert.match(addButton('pet_000012'), /data-add=/, '二级页那个按钮照旧存在');
   const box = readFileSync(new URL('../src/client/box.js', import.meta.url), 'utf8');
   assert.match(box, /data-add/, 'box.js 要监听 data-add');
   // ⚠ 2026-09-27（真机 29 号抓到）：这一条原来是 `assert.match(box, /localIndividualsOf/)` ——
@@ -244,15 +262,21 @@ test('⑬ 回滚按钮只认 `canUndo()`：真的能退才出现（真机 28 号
   // "账上有没有一次刷新"。现在只认 `canUndo()`（最近一条记录必须是刷新 —— 也就是"一次只退一步"）。
   const one = individualsFromDataset(dataset)[0];
   const fresh = refresh(one, 'talent', {at: 'B1'});
-  assert.match(individualHtml(CARD, fresh), /data-undo=/, '刷过一次、没退过 ⇒ 按钮要在');
+  // 2026-09-28 机械修复 + 改钉：签名是 `individualHtml(card, individual, opts)`，
+  // 这一条原来把个体当**第一格**传了进去，于是"按钮在不在"读的其实是 `<div class="individual">`
+  // 那一整块里有没有别处冒出来的按钮 —— 按钮搬到二级详情页之后就露馅了。
+  // 现在直接钉生成按钮的 `undoButton()`，判据的意图一个字没改（只认 `canUndo()`）。
+  assert.match(undoButton(fresh), /data-undo=/, '刷过一次、没退过 ⇒ 按钮要在');
+  assert.doesNotMatch(individualHtml(CARD, fresh), /data-undo=/,
+    '列表行里没有回滚按钮（它搬去二级详情页了）');
   const undone = undoLastRefresh(fresh, {at: 'B2'});
-  assert.doesNotMatch(individualHtml(CARD, undone), /data-undo=/,
+  assert.doesNotMatch(undoButton(undone), /data-undo=/,
     '刚退过一步 ⇒ 按钮要消失（再退就是退回两步之前）');
   const again = refresh(undone, 'talent', {at: 'B3'});
   assert.equal(canUndo(again), true, '（前提）中间又刷过一次 ⇒ 又能退一步（人类：「不是回一次」）');
-  assert.match(individualHtml(CARD, again), /data-undo=/, '这时按钮必须回来（否则玩家没法退新刷的那一步）');
+  assert.match(undoButton(again), /data-undo=/, '这时按钮必须回来（否则玩家没法退新刷的那一步）');
   // 反证：判据不是"永远有按钮" —— 没刷过的个体一个按钮都不许有
-  assert.doesNotMatch(individualHtml(CARD, one), /data-undo=/, '没刷过 ⇒ 不许有回滚按钮');
+  assert.doesNotMatch(undoButton(one), /data-undo=/, '没刷过 ⇒ 不许有回滚按钮');
 });
 
 test('⑭ 组头要有信息（人类 2026-09-28：「左上角的铠甲虫为啥没信息？」）', () => {
@@ -294,16 +318,19 @@ test('⑯ 到了"同种一对"上限，「再养一只」按钮就禁用（不�
   const cards = [CARD('own-0001', 'pet_000012', '铠甲虫')];
   const group = groupCards(cards)[0];
   group.expanded = true;
-  const withExtra = drawerHtml(group, {
-    individuals: {'own-0001': {individual_id: 'own-0001', level: 60}},
-    extras: {pet_000012: [{individual_id: 'own-0001-b'}]},
-  });
+  // 2026-09-28 改钉（人类 ③）：这个按钮搬进二级详情页 ⇒ 判据钉 `addButton(species, {extraCount})`，
+  // 页面按 `localIndividualsOf()` 的条数把 extraCount 传进来（唯一事实源还是本机记录）。
+  const withExtra = addButton('pet_000012', {extraCount: 1});
   assert.match(withExtra, /data-add="pet_000012"[^>]*(disabled|aria-disabled="true")/,
     `已有一只本机的 ⇒ 按钮要禁用：${withExtra.slice(0, 240)}`);
   assert.match(withExtra, /同种最多一对|已有一只本机的/, '禁用也要说清原因（点不动比点了没反应好）');
   // 反证：还没有本机那只时按钮是可点的
-  const clean = drawerHtml(group, {individuals: {'own-0001': {individual_id: 'own-0001', level: 60}}});
-  assert.doesNotMatch(clean, /data-add="pet_000012"[^>]*disabled/, '还没加过 ⇒ 按钮必须可点');
+  assert.doesNotMatch(addButton('pet_000012', {extraCount: 0}), /data-add="pet_000012"[^>]*disabled/,
+    '还没加过 ⇒ 按钮必须可点');
+  // 接线：页面真的把"本机已有一只"这件事读出来传下去了（读的是唯一事实源 localIndividualsOf）
+  const box = readFileSync(new URL('../src/client/box.js', import.meta.url), 'utf8');
+  assert.match(box, /addButton\(species, \{extraCount: localIndividualsOf\(species\)\.length\}\)/,
+    'box.js 要按本机记录里已有的只数决定按钮能不能点');
 });
 
 test('⑰ 资质是**六维表**，页面要摊成一行数值（不许印 [object Object]）', () => {

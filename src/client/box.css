@@ -191,45 +191,48 @@ button{min-width:44px}
  background:#2a1c18;color:#ffd7c2;font-size:13px;line-height:1.6}
 .boot-fallback code{background:#3a2a22;padding:1px 5px;border-radius:5px}
 
-/* 我的盒子：按种类收进抽屉（2026-09-27，人类口径：一个种类一行、点开才是个体）。
-   样式只做"看得清"这一件事：种类头一行、个体在它下面缩进一格。 */
+/* ── 「我的盒子」抽屉版：一行一个**种类**，种类下面才是各个个体 ───────────────
+   2026-09-28（人类 ④⑤）：行里只留信息（等级 / 性格 / 天分 / 收藏星标 + 需要时的一次删除），
+   刷新、回滚、再养一只、加入比较全部搬进二级详情页（`#pet-view`），所以这里没有再给
+   `.refresh-btn` 留版位 —— 列表因此从"竖着挤成一坨"瘦回一行。 */
 .species-drawer { border: 1px solid var(--line, #2a3442); border-radius: 10px; margin: 0 0 8px; }
 .drawer-head { display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 12px;
   background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .drawer-name { font-weight: 600; }
 .drawer-count { margin-left: auto; opacity: .75; font-size: 12px; }
+.drawer-summary { flex-basis: 100%; font-size: 12px; opacity: .78; }
 .drawer-body { padding: 4px 12px 10px 24px; display: grid; gap: 6px; }
+.drawer-body.collapsed { padding: 0; }
 .individual { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; }
-.individual-name { background: none; border: 0; color: inherit; font: inherit; cursor: pointer;
-  text-decoration: underline dotted; }
 .individual-level { opacity: .8; }
-.individual-traits { display: inline-flex; gap: 6px; }
+.individual-traits { display: inline-flex; gap: 6px; flex-wrap: wrap; }
 .trait { border: 1px solid var(--line, #2a3442); border-radius: 999px; padding: 1px 8px; font-size: 12px; }
 .trait[data-state="absent"] { opacity: .6; border-style: dashed; }
-.individual-actions { margin-left: auto; display: inline-flex; gap: 6px; }
-.refresh-btn { font-size: 12px; padding: 2px 8px; }
-.refresh-btn[disabled] { opacity: .5; cursor: not-allowed; }
-/* 「再养一只同种」：抽屉底部的加号按钮（2026-09-26，让"多个体"在真机上真的走得通）。 */
-.add-btn { margin-top: 6px; opacity: .9; }
-.drawer-body.collapsed { padding-bottom: 10px; }
+.individual-actions { margin-left: auto; display: inline-flex; gap: 6px; align-items: center; }
+.remove-confirm { display: inline-flex; align-items: center; gap: 6px; }
+.remove-ask { font-size: 12px; color: #ffd7c2; }
 
-/* ── 「我的盒子」抽屉版的**版式重排**（2026-09-27，人类：「培养页面丑死了，竖着挤在一坨」）─────
-   改前实测（1440×900，`scripts/roco/shoot-layout.mjs --measure`）：
-     抽屉宽 **158px**、`.individual` 一行 **544px 高（≈41 行字）**、其中卡片本体 276px、
-     掷点说明 86px（7 行）、三个按钮 85px（7 行，竖着摞）。
-   根因：`.box-grid` 的列宽是 `minmax(158px,1fr)`（那是给"一张卡"用的），
-   抽屉里要塞下"种类头 + 个体行 + 说明 + 三个按钮"，158px 根本放不下 ⇒ 全部竖着挤。
-   改法（**只作用于抽屉版**，`data-grouped="yes"`；平铺的图鉴页一个像素都不动）：
-     ① 列宽加到 330px ⇒ 1440 下 4 列而不是 6 列；
-     ② 个体行改成两列网格：左卡片 / 右等级，下面整行放"性格天分 + 说明 + 动作"；
-     ③ 三件动作横排（窄屏自动换行），按钮给足触控高度；
-     ④ 掷点说明限两行（全文在 `title` 里，鼠标停一下能看全）。 */
+/* ── 收藏星标（人类 ⑥：「这收藏功能也没用啊？做出来吧！」）─────────────────────
+   次要控件：桌面 28px 高、窄屏 44px（手指）；`aria-pressed` 是状态，`.on` 只管好看。 */
+.fav-btn { display: inline-flex; align-items: center; gap: 4px; min-height: 28px; min-width: 28px;
+  height: 28px; padding: 0 9px; border-radius: 999px; font-size: 12px; line-height: 1;
+  background: #121e2c; border: 1px solid var(--line); color: #b4c3d1; }
+.fav-btn .fav-text { font-size: 12px; }
+.fav-btn.on { background: #4a4030; border-color: #8a7440; color: #f0dda8; }
+.remove-btn, .remove-cancel { min-height: 28px; height: 28px; min-width: 28px; padding: 0 10px; font-size: 12px; }
+.remove-btn.danger { background: #5a2a24; border-color: #a4553f; color: #ffd7c2; }
+
+/* 一个个体的那一行（抽屉版重排）：左卡片 / 右等级，下面整行放性格天分与动作。
+   2026-09-27（人类：「培养页面丑死了，竖着挤在一坨」）：改前实测抽屉宽 158px、一行 544px 高。
+   改法只作用于抽屉版（`data-grouped="yes"`）：列宽 330px ⇒ 1440 下 4 列；行内两列网格。 */
 #box-grid[data-grouped="yes"]{grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;align-items:start}
 #box-grid[data-grouped="yes"] .species-drawer{margin:0}
 #box-grid[data-grouped="yes"] .drawer-body{padding:2px 12px 10px 14px;gap:8px}
 #box-grid[data-grouped="yes"] .individual{
   display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px 10px;
-  padding:8px 10px;border:1px solid var(--line,#2a3442);border-radius:10px;background:#141f2c}
+  padding:8px 10px;border:1px solid var(--line,#2a3442);border-radius:10px;background:#141f2c;
+  cursor:pointer}
+#box-grid[data-grouped="yes"] .individual:hover{border-color:#4a6076}
 #box-grid[data-grouped="yes"] .individual-card{grid-column:1;min-width:0}
 #box-grid[data-grouped="yes"] .individual-level{grid-column:2;justify-self:end;font-size:12px;opacity:.8;white-space:nowrap}
 #box-grid[data-grouped="yes"] .individual-traits{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px}
@@ -238,21 +241,41 @@ button{min-width:44px}
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 #box-grid[data-grouped="yes"] .individual-actions{
   grid-column:1/-1;margin:0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-#box-grid[data-grouped="yes"] .refresh-btn{min-height:36px;padding:6px 12px;font-size:12.5px}
-#box-grid[data-grouped="yes"] .add-btn{width:100%;min-height:40px}
-/* 卡片本体：抽屉里横着排（头像 34px + 名字 + 系别 + 标签 + 两个动作），别竖着摞 */
+/* 卡片本体：抽屉里横着排（头像 + 名字 + 系别 + 标签 + 收藏），别竖着摞 */
 #box-grid[data-grouped="yes"] .individual-card .card{
   flex-direction:row;align-items:center;flex-wrap:wrap;gap:6px 8px;padding:0;border:0;background:none}
 #box-grid[data-grouped="yes"] .individual-card .card-face{
   flex-direction:row;align-items:center;flex-wrap:wrap;gap:6px 8px;min-height:0}
 #box-grid[data-grouped="yes"] .individual-card .card-name{font-size:14px}
-/* 抽屉里的「加入比较」也是同一个 chip（2026-09-28：次要动作，24px 高就够，不给它 36/44 了） */
-#box-grid[data-grouped="yes"] .individual-card .cmp-toggle{width:auto;min-height:24px;height:24px;padding:0 8px}
+/* ⚠ 人类 ④「第一排和第二排信息冗余」：组里**多个体**时组头已经写过名字与系别 ⇒
+   每一行不再重复画它们（`multi=yes` 由页面传进来），只留区分它们必需的东西。 */
+#box-grid[data-grouped="yes"] .individual[data-multi="yes"] .individual-card .avatar,
+#box-grid[data-grouped="yes"] .individual[data-multi="yes"] .individual-card .card-name,
+#box-grid[data-grouped="yes"] .individual[data-multi="yes"] .individual-card .card-types{display:none}
+#box-grid[data-grouped="yes"] .individual[data-multi="yes"] .individual-card{display:none}
 @media(max-width:560px){
   #box-grid[data-grouped="yes"]{grid-template-columns:minmax(0,1fr)}
-  #box-grid[data-grouped="yes"] .refresh-btn{min-height:44px}
-  #box-grid[data-grouped="yes"] .individual-card .cmp-toggle{min-height:24px;height:24px}
+  #box-grid[data-grouped="yes"] .fav-btn{min-height:44px;height:44px;padding:0 12px}
+  #box-grid[data-grouped="yes"] .remove-btn,
+  #box-grid[data-grouped="yes"] .remove-cancel{min-height:44px;height:44px}
 }
+
+/* ── 二级详情页（`?pet=<个体>`）────────────────────────────────────────────
+   2026-09-28（人类 ②③）：「没有个按钮能弹出个二级页面展示完整六维属性」
+   「刷新性格、天分、再加一只啥的这个太大了…是不是最好放二级页面去？」
+   与比较二级页同一套：返回入口 + 正文；动作排一行，窄屏自动换行。 */
+.pet-view{margin-bottom:12px}
+.pet-view-head{justify-content:flex-start;gap:12px;flex-wrap:wrap}
+#pet-back{height:auto;min-height:44px}
+.pet-lead{margin:0 0 10px;line-height:1.6}
+.pet-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
+.pet-actions .refresh-btn,
+.pet-actions .remove-btn,
+.pet-actions .remove-cancel{min-height:44px;padding:8px 14px;font-size:13px}
+.pet-actions .fav-btn{min-height:44px;height:44px;padding:0 14px;font-size:13px}
+.pet-actions .cmp-toggle{min-height:44px;height:auto;padding:8px 14px;font-size:13px}
+#pet-view .detail-head{margin-bottom:6px}
+#pet-view .traits{margin-bottom:6px}
 
 /* 同种多实例的个体标记（性格/天分）：只在**同种有两只以上**时出现 —— 让两张同名卡看得出区别
    （人类 2026-09-24：「这个什么陛下有啥区别？我根本看不出来啊」；2026-09-28 批准造了一对同种演示个体）。 */

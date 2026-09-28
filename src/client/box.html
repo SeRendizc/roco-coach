@@ -57,14 +57,16 @@
   <summary>支持等级：<span id="label-support">全部</span></summary>
   <div class="fmenu-body" id="filter-support" role="group" aria-label="按支持等级筛选"></div>
  </details>
- <div class="flags" id="mine-flags" role="group" aria-label="按收藏与锁定筛选">
+ <div class="flags" id="mine-flags" role="group" aria-label="按收藏筛选">
   <button id="flag-favourite" aria-pressed="false">只看收藏</button>
-  <button id="flag-locked" aria-pressed="false">只看锁定</button>
  </div>
  <span class="muted" id="box-count">正在读取…</span>
 </section>
 
-<!-- ── 卡片网格：首层只有头像符号、名字、系别与（有的话）定位 / 支持等级 ───────── -->
+<!-- ── 卡片网格：一行是**一个种类**（我的盒子）或一个图鉴条目 ─────────────────────
+     2026-09-28（人类 ④⑤）：「第一排和第二配信息显示冗余」「这个选单不知道自己瘦回去吗？
+     全部重在一起」⇒ 行里只留信息（等级 / 性格 / 天分 / 收藏星标），
+     动作（看详情 / 加入比较 / 刷新 / 回滚 / 再养一只 / 删掉）全部搬进二级详情页（`#pet-view`）。 -->
 <section class="panel box-main">
  <div id="box-grid" class="box-grid"></div>
  <p class="muted box-empty" id="box-empty" hidden>没有符合条件的伙伴：换个系别、清掉搜索词再试。</p>
@@ -75,18 +77,22 @@
  </div>
 </section>
 
-<!-- ── 比选栏（首层）：选两只**同种**个体，再进第二级页逐字段看「相同 / 不同 / 未知」──
-     这一条留在首层：选人、清空，以及「比完去配队」那两件交接动作都在这里。 -->
+<!-- ── 比选栏（首层）：在二级详情页上选两只**同种**个体，回到这里点「比较这两只」，
+      再进比较二级页逐字段看「相同 / 不同 / 未知」。清空与「比完去配队」也在这里。 -->
 <section class="panel compare-bar" id="compare-bar" hidden>
- <p id="compare-hint" role="status" aria-live="polite">选两只同种伙伴，就能逐字段比较。</p>
+ <p id="compare-hint" role="status" aria-live="polite">在伙伴自己那一页点「加入比较」，选两只同种的，就能逐字段比较。</p>
  <div class="compare-actions">
   <button id="compare-go" class="primary" disabled>比较这两只</button>
   <!-- RC-801 的第一步交接：比完就该去配队，而不是让玩家回产品页再按名字找一遍。
        带上的是**选中的个体 id**（`own-XXXX`），产品页的六槽工作台直接按它们预填。 -->
   <button id="compare-to-team" disabled>带上这两只去配队</button>
-  <!-- A2：**选其中一只并锁定**。锁定与选人是两条信息：URL 里分开带（`?team=` / `?lock=`），
-       服务端也分开校验（RC-301 规则⑨：锁一个没入选的实例整条请求被拒）。 -->
-  <button id="compare-lock-team" disabled>锁定这一只去配队</button>
+  <!-- ⚠ 2026-09-28（人类 ⑦：「锁定功能直接删了的了」）：页面上**不再有**「锁定这一只去配队」
+       这个入口，也没有「只看锁定」那一档筛选。
+       但 `?lock=` 这条参数与它背后的服务端校验（RC-301 规则⑨：锁一个没入选的实例整条请求被拒）
+       **继续留着**：交接那一段还在用它，别的判据（真机 26 号：从盒子带过去的锁定到工坊必须真的锁上）
+       也还在跑 —— 删了会顶红那些判据。所以只删页面入口，参数与规则一个字不动。
+       玩家侧仍然可能带上锁定：数据里本来就有锁定标记（`locked`），交接时照旧跟着 URL 走，
+       「带上这两只去配队」也会照旧说清"含锁定 N 只"。 -->
   <button id="compare-clear">清空选择</button>
  </div>
 </section>
@@ -112,17 +118,25 @@
  <div id="compare-body"></div>
 </section>
 
-</main>
-
-<!-- ── 个体详情抽屉：等级 / 性格 / 资质 / 特长 / 血脉 / 四个有序技能 ───────────────
-     这里同样只有玩家语言：没有取值的栏目就说「本仓库没有这一项」，不编数字。 -->
-<aside class="drawer" id="detail-drawer" hidden aria-labelledby="detail-title">
- <div class="drawer-head">
-  <h2 id="detail-title">个体详情</h2>
-  <button id="detail-close">关闭</button>
+<!-- ── 第二级视图：个体详情页（地址 `?pet=<这一只自己的编号>`）──────────────────────
+     2026-09-28（人类 ②③）：「没有个按钮能弹出个二级页面展示完整六维属性」「刷新性格、天分、
+     再加一只啥的这个太大了，而且没有提供有效信息，是不是最好放二级页面去？」⇒ 这一屏就是二级页：
+     完整六维（生命/物攻/物防/魔攻/魔防/速度）、性格、天分档位与最高两项、等级、资质六维、
+     四个技能，以及刷新 / 回滚 / 再养一只 / 删掉（两步确认）这些动作。
+     地址带这一只：刷新、前进后退、书签都能回到同一屏（做法与上面那一屏一模一样）。 -->
+<section class="panel pet-view" id="pet-view" hidden aria-labelledby="pet-title">
+ <div class="section-title pet-view-head">
+  <button class="nav-btn primary" id="pet-back">← 返回精灵盒子</button>
+  <h2 id="pet-title">这一只的详情</h2>
  </div>
- <div id="detail-body" class="drawer-body"></div>
-</aside>
+ <p class="muted pet-lead">六维、性格、天分、资质都照游戏数据写；游戏数据里没有的栏目照实说明，不猜。</p>
+ <p class="cmp-trouble" id="pet-note" role="status" aria-live="polite" hidden></p>
+ <div id="pet-head"></div>
+ <div class="pet-actions" id="pet-actions"></div>
+ <div id="pet-body"></div>
+</section>
+
+</main>
 
 <script type="module" src="/src/client/box.js"></script>
 </body></html>

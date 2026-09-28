@@ -107,7 +107,13 @@ export function rollNote(individual) {
   return rolled ? '性格与天分是掷点生成的（原版随机；这里是模拟掷点，不是官方概率）' : null;
 }
 
-function refreshButton(kind, individual, label) {
+/**
+ * 「刷新性格 / 刷新天分」——**只在二级详情页上画**（人类 2026-09-28：「刷新性格、天分、再加一只啥的
+ * 这个太大了，而且没有提供有效信息，是不是最好放二级页面去？」）。
+ *
+ * 按钮上必须写清**还剩几次**（数据里已经有次数，见 `coach/individuals.js` 的 `refreshes`）。
+ */
+export function refreshButton(kind, individual, label) {
   const left = Number(individual?.refreshes?.[kind] ?? REFRESH_LIMIT);
   const done = left <= 0;
   return `<button class="refresh-btn" data-refresh="${esc(kind)}" data-individual="${esc(individual?.individual_id)}"`
@@ -127,13 +133,70 @@ function defaultCardHtml(card) {
   return `<button class="card-face" data-detail="${esc(card?.select)}">${esc(card?.name ?? '未登记')}</button>`;
 }
 
+/** 把行里那一串小胶囊印出来（性格 / 天分档位 / 最长的那两项天分）。 */
+function chipSpan(label, state) {
+  return `<span class="trait" data-state="${state}">${esc(label)}</span>`;
+}
+
+/**
+ * 列表行里保留什么：**少而有用**（人类 2026-09-28 指着截图：「另外第一排和第二配信息显示冗余；
+ * 另外这个选单不知道自己瘦回去吗？全部重在一起」）。
+ *
+ * 一行只留：等级、性格、天分档位、**天分最高的两项**；多只同种时再加一个"第几只"用来区分。
+ * 「加入比较」以及刷新/回滚/再养一只/删掉这些动作**不在列表行里**（人类 ②③：搬进二级详情页）。
+ *
+ * ⚠ 天分档位按**掷出来的那一份**读（扣掉玩家自己加的级），与 `traitChips` 同一口径：
+ * 名单里那两只的档位不能被后来的加成顶上去。
+ */
+export function individualRowChips(individual, {select = '', multi = false} = {}) {
+  const chips = [];
+  const nature = individual?.nature ?? null;
+  chips.push(nature ? chipSpan(`性格 ${nature}`, 'known') : chipSpan('性格 待导出', 'absent'));
+  const base = individual?.talent && typeof individual.talent === 'object' ? {...individual.talent} : null;
+  for (const boost of Array.isArray(individual?.talent_boosts) ? individual.talent_boosts : []) {
+    if (base && boost?.stat && Number.isFinite(Number(base[boost.stat]))) {
+      base[boost.stat] = Number(base[boost.stat]) - Number(boost.delta ?? 0);
+    }
+  }
+  const tier = base ? talentTierOf({talent: base, nature}) : null;
+  const hasValue = base ? Object.values(base).some((value) => Number(value) > 0) : false;
+  chips.push(tier?.label
+    ? chipSpan(`天分 ${tier.label}`, 'known')
+    : chipSpan(hasValue ? '天分 认不出档位' : '天分 待导出', hasValue ? 'known' : 'absent'));
+  const talent = individual?.talent && typeof individual.talent === 'object' ? individual.talent : {};
+  const top = STAT_ORDER
+    .map(([key, label], index) => ({key, label, value: Number(talent[key]), index}))
+    .filter((row) => Number.isFinite(row.value) && row.value > 0)
+    .sort((a, b) => b.value - a.value || a.index - b.index)
+    .slice(0, 2);
+  if (top.length) chips.push(chipSpan(`天分最高 ${top.map((row) => `${row.label} ${row.value}`).join(' / ')}`, 'known'));
+  // 「第几只」只给**同种多只**用：只有一个个体时它没有信息量。认的是本机新加的那只的**后缀**。
+  // 页面靠 `select` 取详情；第几只只写玩家看得懂的那一点点（不把整串编号印出来）。
+  const id = String(select || individual?.individual_id || '');
+  const suffix = id.match(/-(b|c|d|e|f)$/)?.[1] ?? '';
+  if (multi && suffix) chips.push(chipSpan(`第 ${suffix.toUpperCase()} 只`, 'known'));
+  return chips.join('');
+}
+
+/**
+ * 「＋ 再养一只同种」——**只在二级详情页上画**（人类 2026-09-28：这一类大动作搬去二级页）。
+ * 本机**至多加 1 只**（人类口径：同种最多一对）⇒ 已经有本机那只就把按钮关掉并说清原因。
+ */
+export function addButton(speciesId, {extraCount = 0} = {}) {
+  return extraCount
+    ? `<button class="refresh-btn add-btn" data-add="${esc(speciesId)}" disabled aria-disabled="true"`
+      + ` title="这一种已经有两只了（同种最多一对）；要再加先删掉本机那只">＋ 再养一只同种（已有一只本机的）</button>`
+    : `<button class="refresh-btn add-btn" data-add="${esc(speciesId)}">＋ 再养一只同种</button>`;
+}
+
 /**
  * 回滚按钮：只有**真的能退**时才出现（没刷过、或刚退过一步，都不显示）。
+ * 与刷新一样，只画在二级详情页上。
  *
  * ⚠ 判据只有 `canUndo()` 一个事实源（2026-09-27 真机验收 28 号抓到过"按钮又冒出来但点了没用"）。
  * 规则按人类口述：**一次只退一步**（退过之后要先再刷一次才能再退）、**次数不消耗也不返还**。
  */
-function undoButton(individual) {
+export function undoButton(individual) {
   const rows = Array.isArray(individual?.history) ? individual.history : [];
   const last = rows[rows.length - 1];
   if (!last || (last.kind !== 'nature' && last.kind !== 'talent') || !canUndo(individual)) return '';
@@ -148,42 +211,80 @@ function undoButton(individual) {
  * 判定标准是**编号后缀**（`-b`…`-f`，`addIndividualFor` 只发得出这种），不是"看起来像不像"：
  * 名单里（抓包/导出）的个体绝不给删除按钮 —— 它在本机记录里没有对应条目，点了也只会被拒。
  * 去掉这个限制就等于允许"页面上的删除按钮点不动"，那正是人类截图里骂的那件事。
+ *
+ * ⚠ 2026-09-28（人类：「删除个体的功能一定要加二次确认」）：点一次**不删**，只把这一行换成
+ * 「确定删掉？＋ 取消」；再点「确定删掉」才真删。**不用**浏览器原生 `confirm()` ——
+ * 无头浏览器点不动它，判据也就写不出来。
  */
-function removeButton(individual) {
+export function removeButton(individual, {confirming = false} = {}) {
   const id = String(individual?.individual_id ?? '');
   if (!/-(?:b|c|d|e|f)$/.test(id)) return '';
-  return `<button class="refresh-btn remove-btn" data-remove="${esc(id)}"`
-    + ` title="这一只只在本机记录里（抓包数据不受影响），删了就没了">删掉这只</button>`;
+  if (!confirming) {
+    return `<button class="refresh-btn remove-btn" data-remove="${esc(id)}"`
+      + ` title="这一只只在本机记录里（抓包数据不受影响），删了就没了">删掉这只</button>`;
+  }
+  return `<span class="remove-confirm" data-remove-confirm-for="${esc(id)}">`
+    + `<span class="remove-ask">确定删掉？</span>`
+    + `<button class="refresh-btn remove-btn danger" data-remove-confirm="${esc(id)}">确定删掉</button>`
+    + `<button class="refresh-btn remove-cancel" data-remove-cancel="${esc(id)}">取消</button></span>`;
 }
 
-/** 一个个体的那一行：卡片本体 + 性格天分 + 两个刷新按钮（各 3 次，分开计数）。 */
-export function individualHtml(card, individual, {picked = false, cardHtml = defaultCardHtml} = {}) {
-  const traits = traitChips(individual).map((chip) =>
-    `<span class="trait" data-state="${chip.state}">${esc(chip.label)}</span>`).join('');
-  // 级数：**默认 60 级**（人类 2026-09-27 拍板；等级上限 60 是官方口径）——
-  // 9-26 曾按 100 显示，2026-09-27 改钉；页面上仍保留"级数来源"标记（开发者抽屉里能看到）。
-  // ⚠ 抽屉**不许弄丢**原来的两个动作：看详情（`data-detail`）与加入比较（`data-cmp`）——
-  // 但**也不要自己再画一遍**：卡片本体是页面注入的 `cardHtml`（里面已经有一个「加入比较」），
-  // 抽屉再画一个就会出现**每行两个按钮、点第二个把刚选的取消**（审计 2026-09-27 实测 24 个体 48 个按钮）。
-  // 所以这里只画"这一行额外的东西"（级数、性格/天分、刷新、回滚），动作留给卡片本体。
+/**
+ * 收藏（星标）：**真的存下来**（人类 2026-09-28：「这收藏功能也没用啊？做出来吧！」）。
+ *
+ * 存哪儿、为什么：存在**玩家这台浏览器**里（`localStorage`，键 `roco.box.favourites.v1`）。
+ * 原因是盒子这一页**只能读**——服务端的收藏标记来自抓包产物 `owned-pets.json`，这一页没有写接口，
+ * 而本任务又只允许改页面这几个文件（不能加写库路由、也不能改产物）。所以"点了立刻生效 + 刷新还在"
+ * 这件事由本机记录来保证；`data-fav` / `aria-pressed` 是同一份状态的两个说法。
+ */
+export function favouriteButton(individual, {favourite = false} = {}) {
+  const id = String(individual?.individual_id ?? '');
+  if (!id) return '';
+  return `<button class="fav-btn${favourite ? ' on' : ''}" data-fav="${esc(id)}"`
+    + ` aria-pressed="${favourite ? 'true' : 'false'}"`
+    + ` title="${favourite ? '取消收藏（只记在你自己这台机器上）' : '收藏这一只（只记在你自己这台机器上）'}">`
+    + `<span aria-hidden="true">${favourite ? '★' : '☆'}</span>`
+    + `<span class="fav-text">${favourite ? '已收藏' : '收藏'}</span></button>`;
+}
+
+/**
+ * 一个个体的那一行：**列表里只留信息，动作不在这里**。
+ *
+ * 2026-09-28（人类逐字）：「另外第一排和第二配信息显示冗余；另外这个选单不知道自己瘦回去吗？
+ * 全部重在一起」「另外「加入比较」功能我觉得有点鸡肋」「刷新性格、天分、再加一只啥的这个太大了…
+ * 是不是最好放二级页面去？」⇒ 这一行现在只有：
+ *   · 等级（**只从数据读**，缺就写「—」，不写死任何级数）
+ *   · 性格 / 天分档位 / 天分最高的两项（`individualRowChips`）
+ *   · 「本机加的」标记、收藏星标、以及只给本机那只能用的一次删除入口
+ * 看详情、加入比较、刷新、回滚、再养一只都在**二级详情页**（`box.js` 的 `#pet-view`）。
+ *
+ * ⚠ 行本身带着 `data-detail`（点它 = 打开这一只的二级详情页）。原来那个动作挂在卡片本体的
+ * `<button data-detail>` 上；多只同种时行里**不再重复画名字与系别**（人类 ④），所以整行就是入口。
+ */
+export function individualHtml(card, individual, {cardHtml = defaultCardHtml, favourite = false,
+  confirming = false, multi = false} = {}) {
   const select = card?.select ?? individual?.individual_id ?? '';
   // ⚠ 2026-09-28 改钉（人类指着截图问「不是60级吗？lv100哪儿来的？」）：这里原来**硬编码 Lv.100**
   // —— 等级在 9-27 就统一成 60 了，抽屉这一行忘了跟着改。现在只从数据里读（缺就写"—"），
   // 不再写死任何级数（`data-level-source` 也照实带出来，开发者抽屉里能看到是哪一档）。
   const level = Number.isFinite(Number(individual?.level)) && Number(individual?.level) > 0
     ? Number(individual.level) : null;
-  return `<div class="individual" data-individual="${esc(select)}" `
-    + `data-level-source="${esc(individual?.level_source ?? 'unknown')}">
-   <span class="individual-card">${cardHtml(card)}</span>
+  // 卡片本体由页面注入；**同种多只**时页面会把它画成紧凑版（不重复名字/系别），这里只管套壳。
+  const face = cardHtml(card);
+  const cardBox = face
+    ? `<span class="individual-card${multi ? ' multi' : ''}">${face}</span>`
+    : '';
+  return `<div class="individual" data-individual="${esc(select)}" data-detail="${esc(select)}"
+   data-multi="${multi ? 'yes' : 'no'}"
+   data-level-source="${esc(individual?.level_source ?? 'unknown')}">
+   ${cardBox}
    ${card?.extra === true ? '<span class="trait" data-state="local">本机加的</span>' : ''}
-   <span class="individual-level">${level === null ? '—' : `Lv.${level}`}</span>
-   <span class="individual-traits">${traits}</span>
+   ${level === null ? '' : `<span class="individual-level">Lv.${level}</span>`}
+   <span class="individual-traits">${individualRowChips(individual, {select, multi})}</span>
    ${lastRefreshNote(individual) ? `<span class="individual-note" data-refresh-note="yes">${esc(lastRefreshNote(individual))}</span>` : ''}
-   ${removeButton(individual)}
    <span class="individual-actions">
-    ${refreshButton('nature', individual, '刷新性格')}
-    ${refreshButton('talent', individual, '刷新天分')}
-    ${undoButton(individual)}
+    ${favouriteButton(individual, {favourite})}
+    ${removeButton(individual, {confirming})}
    </span>
   </div>`;
 }
@@ -217,8 +318,12 @@ export function groupSummary(rows, individuals = {}) {
 /**
  * 一个种类的一行（抽屉）。**收起时不渲染个体**（免得 622 只全铺开）；
  * 只有一个个体时直接摊开 —— 那一步"点开"没有意义。
+ *
+ * 2026-09-28：三件大动作（刷新性格 / 刷新天分 / ＋再养一只同种 / 回滚 / 删掉）**都不在这里**了，
+ * 全部搬进二级详情页（人类③）。列表这一层只剩「信息」与一个收藏星标。
  */
-export function drawerHtml(group, {individuals = {}, picked = () => false, cardHtml = defaultCardHtml, extras = {}} = {}) {
+export function drawerHtml(group, {individuals = {}, cardHtml = defaultCardHtml, extras = {},
+  favourites = null, confirmRemove = ''} = {}) {
   // 同种可能不止一张卡（「再养一只」加出来的个体在本机记录里，不在服务器那页卡里）——
   // 它们也要出现在抽屉里，否则"多个体"看不出来。`extras` 由页面传进来（默认空）。
   const extraRows = (extras[group.species_id] ?? []).map((individual) => ({select: individual.individual_id,
@@ -235,24 +340,23 @@ export function drawerHtml(group, {individuals = {}, picked = () => false, cardH
    <span class="drawer-count">${count} 个个体</span>
    ${summary ? `<span class="drawer-summary" data-summary="yes">${esc(summary)}</span>` : ''}
   </button>`;
-  // ⚠ 2026-09-28：本机**至多加 1 只**（人类口径：同种最多一对）⇒ 已经加过就**把按钮关掉**，
-  // 免得玩家连点堆出一排同名卡（他的原话：「点一下再养一只莫名其妙出现然后又多一只还删不掉」）。
-  const extraCount = (extras[group.species_id] ?? []).length;
-  const addBtn = extraCount
-    ? `<button class="refresh-btn add-btn" data-add="${esc(group.species_id)}" disabled aria-disabled="true"`
-      + ` title="这一种已经有两只了（同种最多一对）；要再加先删掉本机那只">＋ 再养一只同种（已有一只本机的）</button>`
-    : `<button class="refresh-btn add-btn" data-add="${esc(group.species_id)}">＋ 再养一只同种</button>`;
+  const isFav = (id) => (typeof favourites === 'function' ? Boolean(favourites(id)) : false);
+  // 人类 ④：组头已经把名字与系别写了一遍 ⇒ 组里**多个体**时，每行只画"区分它们必需的东西"，
+  // 不再重复名字与系别（`multi` 传给 `individualHtml`，页面注入的卡片本体据此画成紧凑版）。
+  const multi = count > 1;
   const body = group.expanded
-    ? `<div class="drawer-body">${rows.map((card) =>
-      individualHtml(card, individuals[card.select] ?? {individual_id: card.select},
-        {picked: Boolean(picked(card.select)), cardHtml})).join('')}${addBtn}</div>`
-    : `<div class="drawer-body collapsed">${addBtn}</div>`;
+    ? `<div class="drawer-body">${rows.map((card) => individualHtml(card,
+      individuals[card.select] ?? {individual_id: card.select},
+      {cardHtml, multi, favourite: isFav(card.select), confirming: confirmRemove === card.select})).join('')}</div>`
+    : '<div class="drawer-body collapsed"></div>';
   return `<section class="species-drawer" data-species="${esc(group.species_id)}" `
     + `data-count="${count}">${head}${body}</section>`;
 }
 
 /** 整页：把卡片列表翻成抽屉列表。 */
-export function drawerListHtml(cards, {individuals = {}, open = null, picked = () => false, cardHtml = defaultCardHtml, extras = {}} = {}) {
+export function drawerListHtml(cards, {individuals = {}, open = null, cardHtml = defaultCardHtml,
+  extras = {}, favourites = null, confirmRemove = ''} = {}) {
   const groups = groupCards(cards, {open});
-  return {groups, html: groups.map((group) => drawerHtml(group, {individuals, picked, cardHtml, extras})).join('')};
+  return {groups, html: groups.map((group) =>
+    drawerHtml(group, {individuals, cardHtml, extras, favourites, confirmRemove})).join('')};
 }
