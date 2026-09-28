@@ -15,11 +15,15 @@
  *   ⑤ 立绘这一层活没活（`/api/roco/sprite?id=pet_000004` 返回 200 + image/png）
  *
  * 退出码（给脚本与监工用）：
- *   0 = 全绿；2 = **降级**（服务与数据都好，但模型没连上）；1 = **坏了**（HTTP/数据/引擎/立绘 有硬伤）。
+ *   0 = 全绿；2 = **降级**（服务与数据都好，但模型**明确**没连上）；
+ *   1 = **坏了**（HTTP/数据/引擎/立绘 有硬伤，**或者模型连接状态未知**）。
+ *   ⚠「未知」归到「坏了」而不是「降级」：不知道连接在不在时，**不许对外宣称健康**（Codex 第二轮）。
  *   ⇒ 「降级」与「坏了」分开，是因为 Codex 要的正是这个区分：只报 200 会把"模型没连上"藏起来。
  *
  * 用法：node scripts/roco/healthcheck.mjs [--json]
  */
+
+import {classifyModels} from './serve-lib.mjs';
 
 const BASE = process.env.ROCO_BASE || 'http://127.0.0.1:8765';
 
@@ -57,18 +61,31 @@ async function main() {
   add('engine', engine === true ? 'ok' : (engine === false ? 'fail' : 'warn'),
     engine === null ? '状态接口没给 available（形状变了？）' : `引擎 available=${engine}`);
 
-  // ④ 模型（Codex 点名的那一条）
+  // ④ 模型（Codex 第一轮点名的那一条；第二轮又补了一条：**未知也算非健康**）
+  //
+  // ⚠ 2026-09-29 第二轮修正（Codex 逐字）：
+  // 「`/api/models` 失败或形状异常时，healthcheck 目前 **warn 却最终可返回 healthy**，
+  //   serve 可能把**未知**误当**没连接**而放行重启；请将**连接未知设为非健康**并拒绝重启。」
+  // 所以这里不再有 warn 档：**取不到 / 形状不对 / connected 不是布尔** ⇒ 一律 `fail`。
+  // 语义上也对：我们**不知道**连接在不在，就不能对外宣称健康。
   const models = await getJson('/api/models');
   const list = Array.isArray(models.body?.models) ? models.body.models : [];
-  const cloud = list.find((m) => /cloud|deepseek/i.test(String(m?.id ?? ''))) ?? null;
-  const local = list.filter((m) => m !== cloud);
-  if (!list.length) add('model', 'warn', '`/api/models` 没给模型清单');
-  else {
-    add('model', cloud?.connected === true && cloud?.verified === true ? 'ok' : 'degraded',
-      cloud
-        ? `云端 ${cloud.id}：connected=${cloud.connected} verified=${cloud.verified}｜reason=${JSON.stringify(cloud.reason ?? null)}`
-        : '清单里没有云端模型');
-    for (const m of local) add('model.local', 'info', `${m.id}：connected=${m.connected}｜reason=${JSON.stringify(m.reason ?? null)}`);
+  const classified = classifyModels(models.body);
+  if (!models.ok) {
+    add('model', 'fail', `\`/api/models\` 取不到（${models.error ?? `HTTP ${models.http}`}）⇒ **连接状态未知**，按非健康处理`);
+  } else if (classified.state === 'unknown') {
+    add('model', 'fail', `模型连接状态**未知**：${classified.why} ⇒ 按非健康处理（不许当成"没连接"）`);
+  } else if (classified.state === 'connected') {
+    add('model', classified.verified === true ? 'ok' : 'degraded',
+      `云端 ${classified.cloudId}：connected=true verified=${classified.verified}`
+      + (classified.verified === true ? '' : '（**未验证**：连上了但还没验证过，仍按降级报）'));
+  } else {
+    add('model', 'degraded',
+      `云端 ${classified.cloudId}：connected=false｜reason=${JSON.stringify(classified.reason)}`);
+  }
+  for (const m of list) {
+    if (m === (list.find((x) => /cloud|deepseek/i.test(String(x?.id ?? ''))) ?? null)) continue;
+    add('model.local', 'info', `${m.id}：connected=${m.connected}｜reason=${JSON.stringify(m.reason ?? null)}`);
   }
 
   // ⑤ 立绘
