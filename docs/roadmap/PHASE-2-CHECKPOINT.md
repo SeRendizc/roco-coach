@@ -7,7 +7,7 @@
 
 ## 0. 一分钟版
 
-- **版本**：HEAD `af1406f`
+- **版本**：HEAD `ce0332c`
 - **A / P0-01**：✅ 已交付入库（`06b6c51` 客户端+文档、`3c3cfa9` 服务端 `capabilities`）
 - **B / 迪莫 6×4 + 深链**：⏳ 交付文档已出（`BATCH-06-迪莫6x4与深链.md`），`dimo-6x4.json` **11 条判据 0 红**；
   **批次未提交**（在飞文件里混着 `src/coach/runtime.js`，属 A 的域 —— 不冒混提的险）
@@ -48,6 +48,20 @@ train-serve-template 3/3 · evidence-view 3/3 · workshop 40/40 · box 14/14
 四块读数（六槽焦点 10/10 行带个体 id、默认图鉴点卡进详情、手机四屏不溢出、小芽 5 问 5 个不同正文）
 + **5 条精确缺口**；Lead 修掉 ④-a（`.xy-entry strong` 命中正文加粗 ⇒ 一句话拆 6 行），
 **真机复验 3→0**。
+
+### 2.5 丙（`task-12`，`ce0332c`）—— 产品页**第二套小芽**也接上服务端真资料
+
+`art-finish` 报「工作台页没有小芽实例」，Lead 查到底是**同页两个实现**：
+`box.html` 走 `mountXiaoya`，`roco.html` 走自己的 `#coach-entry` + `#companion-card` ——
+**P0-01 在这一套上根本没生效**（实测问系别克制时 `/api/coach` **0 次**、答「请配置密钥」）。
+
+Lead 拍板走**丙**（低风险半边），A 实施：焦点走**共享模块**（`import {createFocusProvider, focusFromClick}`
+from `xiaoya.js`，**无第二份逻辑**）/ 断线档**照样发 `/api/coach`** / chip 拆成两件事说。
+**真机 2/5 → 6/6**（`/api/coach` 0 次 → 200）；两条必红反证响度实测（红 ②；红 ②③④，③＝「一次都没有」）。
+Lead 独立复核 **113/113**。
+
+⚠ Lead 上一轮说错的一点（A 纠正、已认）：我讲「乙必须把焦点逻辑**写第二遍**」——
+共享模块可以直接 import，**我把乙的代价写重了**。
 
 ### 2.4 Lead 自己
 - **4B 前置第 2 项**（`fbc29bd`）：清掉 **144 条**随工具退役失效的目标（`inspect_training`），
@@ -116,7 +130,8 @@ text:     造成99999伤害，必胜      ← 却是模型那段**没过事实�
 |---|---|---|
 | `task-11` 影子回放 `passed` 口径 | battle-smoke | 第一步定位已交（推翻了我），Lead 批「先对齐口径、再用噪声底改钉」，等他第二步 |
 | `task-12` D①-a 走**丙** | coach-context | 已拍板：共享模块接焦点 + 修 `!configured → offline` + chip 改真（改钉不删）；**两条 task-7 残留红并入同批** |
-| B（task-8）批次 | build-snapshot | 交付文档与读数已出，**未提交**（在飞文件混着 A 的 `runtime.js`） |
+| B（task-8）批次 | build-snapshot | 交付文档与读数已出（**6×4 十一条 0 红、深链四条 0 红**），**未提交**（三个文件仍在飞：`box.js`/`team-workshop.js`/`roco-workshop.test.js`） |
+| `task-13` **甲**（`xiaoya.js` 成唯一实现、退役 `#companion-card`） | coach-context | 🆕 Lead 拍板已派；**顺序写死**：先宿主动局上下文口 → 搬迁 → 记忆键迁移 → 最后才退役 |
 
 **两条 task-7 残留红**（已路由给 A）：
 `roco-agent-stops`（新 `stopped` 值 `server-data-unavailable` 没登记进 `AGENT_STOPS`）、
