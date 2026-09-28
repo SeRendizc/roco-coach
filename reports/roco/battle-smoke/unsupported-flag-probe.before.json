@@ -1,0 +1,275 @@
+{
+ "schema_version": 1,
+ "artifact": "unsupported-flag-probe",
+ "base": "http://127.0.0.1:8765",
+ "question": "开局的 battle view 里，每个 action 有没有带「这一手有未实现效果」的字段？",
+ "battle_new_ok": true,
+ "view_top_keys": [
+  "assumptions",
+  "battle_result",
+  "cpu_legal_count",
+  "events",
+  "legal",
+  "loadout_note",
+  "loadout_origin",
+  "mana",
+  "mode_id",
+  "needs_replacement",
+  "opponent",
+  "phase",
+  "ruleset_config_id",
+  "ruleset_id",
+  "schema_version",
+  "self",
+  "state_version",
+  "strategy",
+  "turn",
+  "unsupported_count",
+  "unverified_notes",
+  "unverified_overrides"
+ ],
+ "action_count": 12,
+ "action_keys": [
+  "item_id",
+  "kind",
+  "label",
+  "magic_id",
+  "skill",
+  "skill_id",
+  "skill_name",
+  "target_index"
+ ],
+ "action_skill_subkeys": [
+  "category",
+  "damage_class",
+  "desc",
+  "effect_support",
+  "element",
+  "energy",
+  "is_trait",
+  "name",
+  "power",
+  "power_status"
+ ],
+ "dedicated_marker_keys": [],
+ "actions_with_any_marker": 4,
+ "action_marks": [
+  {
+   "action_index": 0,
+   "skill_id": "skill_000246",
+   "marks": [
+    {
+     "path": "skill.effect_support",
+     "value": "unsupported"
+    }
+   ]
+  },
+  {
+   "action_index": 1,
+   "skill_id": "skill_000286",
+   "marks": [
+    {
+     "path": "skill.effect_support",
+     "value": "unsupported"
+    }
+   ]
+  },
+  {
+   "action_index": 2,
+   "skill_id": "skill_000340",
+   "marks": [
+    {
+     "path": "skill.effect_support",
+     "value": "unsupported"
+    }
+   ]
+  },
+  {
+   "action_index": 3,
+   "skill_id": "skill_000624",
+   "marks": [
+    {
+     "path": "skill.effect_support",
+     "value": "unsupported"
+    }
+   ]
+  },
+  {
+   "action_index": 4,
+   "skill_id": null,
+   "marks": []
+  },
+  {
+   "action_index": 5,
+   "skill_id": null,
+   "marks": []
+  },
+  {
+   "action_index": 6,
+   "skill_id": null,
+   "marks": []
+  },
+  {
+   "action_index": 7,
+   "skill_id": null,
+   "marks": []
+  },
+  {
+   "action_index": 8,
+   "skill_id": null,
+   "marks": []
+  },
+  {
+   "action_index": 9,
+   "skill_id": null,
+   "marks": []
+  },
+  {
+   "action_index": 10,
+   "skill_id": null,
+   "marks": []
+  },
+  {
+   "action_index": 11,
+   "skill_id": null,
+   "marks": []
+  }
+ ],
+ "engine_runtime_registry": {
+  "note": "同一份回执里引擎的**逐手登记**（`state.unsupported`）。注意它是**用完之后**才有的运行时记录，不是「点之前」的静态属性。",
+  "unsupported_seen_count": 0,
+  "unsupported_seen_sample": [],
+  "has_unsupported_seen_key": false
+ },
+ "self_skills_rows": [
+  {
+   "skill_id": "skill_000246",
+   "keys": [
+    "category",
+    "damage_class",
+    "desc",
+    "element",
+    "energy",
+    "is_trait",
+    "name",
+    "power",
+    "power_status",
+    "skill_id"
+   ],
+   "effect_support": null
+  },
+  {
+   "skill_id": "skill_000286",
+   "keys": [
+    "category",
+    "damage_class",
+    "desc",
+    "element",
+    "energy",
+    "is_trait",
+    "name",
+    "power",
+    "power_status",
+    "skill_id"
+   ],
+   "effect_support": null
+  },
+  {
+   "skill_id": "skill_000340",
+   "keys": [
+    "category",
+    "damage_class",
+    "desc",
+    "element",
+    "energy",
+    "is_trait",
+    "name",
+    "power",
+    "power_status",
+    "skill_id"
+   ],
+   "effect_support": null
+  },
+  {
+   "skill_id": "skill_000359",
+   "keys": [
+    "category",
+    "damage_class",
+    "desc",
+    "element",
+    "energy",
+    "is_trait",
+    "name",
+    "power",
+    "power_status",
+    "skill_id"
+   ],
+   "effect_support": null
+  },
+  {
+   "skill_id": "skill_000368",
+   "keys": [
+    "category",
+    "damage_class",
+    "desc",
+    "element",
+    "energy",
+    "is_trait",
+    "name",
+    "power",
+    "power_status",
+    "skill_id"
+   ],
+   "effect_support": null
+  },
+  {
+   "skill_id": "skill_000378",
+   "keys": [
+    "category",
+    "damage_class",
+    "desc",
+    "element",
+    "energy",
+    "is_trait",
+    "name",
+    "power",
+    "power_status",
+    "skill_id"
+   ],
+   "effect_support": null
+  },
+  {
+   "skill_id": "skill_000392",
+   "keys": [
+    "category",
+    "damage_class",
+    "desc",
+    "element",
+    "energy",
+    "is_trait",
+    "name",
+    "power",
+    "power_status",
+    "skill_id"
+   ],
+   "effect_support": null
+  },
+  {
+   "skill_id": "skill_000418",
+   "keys": [
+    "category",
+    "damage_class",
+    "desc",
+    "element",
+    "energy",
+    "is_trait",
+    "name",
+    "power",
+    "power_status",
+    "skill_id"
+   ],
+   "effect_support": null
+  }
+ ],
+ "verdict": "没有：action 对象只有 item_id、kind、label、magic_id、skill、skill_id、skill_name、target_index —— 没有**任何**「这一手结算不了」的字段。唯一沾边的是 `skill.effect_support`，而它对**全部 824 条技能**都是 `unsupported`（数据侧口径），分辨不出「硬门」这种具体哪一手会白搭。"
+}

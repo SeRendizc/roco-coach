@@ -1123,6 +1123,9 @@ function skillSlots(view, legalSkills) {
     return {
       move, action, cost, enough,
       legal: action !== null,
+      // task-6：引擎说「这一手还算不出来」时，回执上会带 `support`（服务端只读引擎档位写的）。
+      // 这里**只往下传**，不改可点性 —— 引擎说它合法，界面就让它可点。
+      support: action?.support ?? null,
       damage: sampleDamageOf(sample),
       damageReason: previewReason,
       damageVerified: sample ? sample.formula_verified === true : false,
@@ -1136,6 +1139,10 @@ function skillSlots(view, legalSkills) {
 /** 一格技能卡（合法可点 / 灰置不可点，同一套信息层级）。 */
 function skillSlotHtml(slot, actions, disabled) {
   const {move, action, cost, enough, damage, reason} = slot;
+  // task-6：玩家在**点之前**能看到的一行事实（文案由服务端按引擎档位给出）。
+  // 只是警示 —— **不**改 `disabled`、**不**删这一手：那等于替引擎做决定。
+  const supportNote = typeof slot.support?.note === 'string' && slot.support.note.trim()
+    ? slot.support.note.trim() : null;
   const short = enough === false ? 'yes' : 'no';
   const index = action ? actions.indexOf(action) : -1;
   const clickable = action !== null && !disabled;
@@ -1159,6 +1166,9 @@ function skillSlotHtml(slot, actions, disabled) {
       <span class="skill-meta">${escapeHtml([move.element, categoryCn(move.category)].filter(Boolean).join(' · '))}</span>
       <span class="skill-dmg flat" data-roco-damage-chip="yes">${
         damage !== null ? `预计 ${damage}${slot.damageVerified ? '' : '（未核验）'}` : '预计伤害：算不出'}</span>
+      ${supportNote ? `<small class="act-none skill-support" data-roco-skill-support="yes" `
+        + `data-roco-support-tier="${escapeAttr(String(slot.support?.tier ?? ''))}" `
+        + `style="color:#ffb4b4">${escapeHtml(supportNote)}</small>` : ''}
       ${reason ? `<small class="act-none" data-roco-skill-reason="yes">${escapeHtml(reason)}</small>` : ''}
     </button>
     <details class="skill-detail"><summary>详情</summary>
@@ -2057,6 +2067,25 @@ function renderB3Panels(view) {
       magicTag.textContent = '愿力强化换上';
       slot.querySelector('.b3-slot-row')?.appendChild(magicTag);
     } else if (!isMagicNew && magicTag) magicTag.remove();
+    // task-6：引擎说「这一手还算不出来」时，格子里加一行**事实**（玩家点之前就看得见）。
+    // 这一格是玩家真正点的那一个（`data-b3-action` 就写在这里），所以标记必须落在这里。
+    // 纪律：**不**加 `disabled`、**不**动 `data-b3-action` —— 引擎说它合法，界面就让它可点。
+    const supportNote = typeof act?.support?.note === 'string' ? act.support.note.trim() : '';
+    let supportEl = slot.querySelector('[data-b3-skill-support]');
+    if (supportNote) {
+      if (!supportEl) {
+        supportEl = document.createElement('div');
+        supportEl.className = 'b3-support';
+        supportEl.dataset.b3SkillSupport = 'yes';
+        // 行内样式：这一轮只许动 `roco.js`，样式落在元素上（与 `typeColor` 那几处同一手法）
+        supportEl.style.cssText = 'font-size:11.5px;line-height:1.35;color:#ffb4b4;margin-top:2px;';
+        slot.appendChild(supportEl);
+      }
+      supportEl.textContent = supportNote;
+      supportEl.dataset.b3SupportTier = String(act.support.tier ?? '');
+    } else if (supportEl) {
+      supportEl.remove();   // 局面变了（换人/换招）就撤掉 —— 格子是复用的，不撤会留下旧标记
+    }
     // 注意：这里**没有** `disabled` 这个参数（它是 renderActions 的）—— 第一版引用了它，
     // 直接让整个 render 抛错、战斗面板再也显示不出来。用「对局是否结束」代替。
     if (act && !view?.battle_result) {

@@ -1,7 +1,7 @@
 {
  "schema_version": 1,
  "artifact": "battle-smoke-summary",
- "generated_at": "2026-09-29T00:47:45+0800",
+ "generated_at": "2026-09-29T01:02:44+0800",
  "ruleset_id": "roco-world-s4-2026-09-10",
  "scope": "data/roco/owned/owned-pets.json 的全部实例（= 当前已拥有清单）",
  "commands": [

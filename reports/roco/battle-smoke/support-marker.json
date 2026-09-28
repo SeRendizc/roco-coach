@@ -1,0 +1,122 @@
+{
+ "schema_version": 1,
+ "artifact": "battle-smoke-support-marker",
+ "generated_at": "2026-09-28T17:02:45.029Z",
+ "selftest": [
+  {
+   "id": "base-case",
+   "desc": "正常回执：判据必须是绿的",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "id": "cp-marker-stripped",
+   "desc": "把标记摘掉 ⇒ 判据必须红（否则这条判据是空的）",
+   "problems": [
+    "技能 skill_000671 引擎说它还不会结算，但回执里没有标记（support.note 缺失）"
+   ],
+   "ok": true
+  },
+  {
+   "id": "cp-engineering-word",
+   "desc": "标记里塞一个工程词（UnsupportedEffect）⇒ 判据必须红",
+   "problems": [
+    "技能 skill_000671 的标记里有工程词「UnsupportedEffect」：UnsupportedEffect：这招有一部分引擎还不会算"
+   ],
+   "ok": true
+  },
+  {
+   "id": "cp-skill-id-leak",
+   "desc": "标记里塞一个技能 id ⇒ 判据必须红（玩家不该看到 skill_000671）",
+   "problems": [
+    "技能 skill_000671 的标记里有工程词「skill_」：这招有一部分引擎还不会算（skill_000671）"
+   ],
+   "ok": true
+  },
+  {
+   "id": "cp-greyed-out",
+   "desc": "把被标的那一手变成不可点 ⇒ 判据必须红（标记不许替引擎做决定）",
+   "problems": [
+    "技能 skill_000671 被标记之后变成不可点了（标记不许替引擎做决定）"
+   ],
+   "ok": true
+  },
+  {
+   "id": "cp-advice-not-fact",
+   "desc": "把标记改写成建议（「别用这一手」）⇒ 判据必须红",
+   "problems": [
+    "技能 skill_000671 的标记读起来像建议而不是事实：别用这一手：这招有一部分引擎还不会算"
+   ],
+   "ok": true
+  }
+ ],
+ "selftest_ok": true,
+ "engineered_words": [
+  "UnsupportedEffect",
+  "unsupported",
+  "skill_",
+  "pet_",
+  "legal_actions",
+  "payload",
+  "token",
+  "provider",
+  "epoch",
+  "fallback",
+  "effect_support",
+  "parse",
+  "效果原语",
+  "未识别机制",
+  "机制词",
+  "support_tier",
+  "SIMULATABLE",
+  "PARTIAL"
+ ],
+ "base": "http://127.0.0.1:51255",
+ "base_kind": "in-process（`createCoachServer`，与演示页同一份代码）",
+ "hard_gate": {
+  "instance_id": "own-0047",
+  "species_id": "pet_000047",
+  "name": "板板壳",
+  "skill_id": "skill_000671",
+  "loadout": [
+   "skill_000671",
+   "skill_000673",
+   "skill_000286",
+   "skill_000317"
+  ]
+ },
+ "step1_reading": {
+  "battle_new_ok": true,
+  "action_count": 12,
+  "action_keys": [
+   "item_id",
+   "kind",
+   "label",
+   "magic_id",
+   "skill",
+   "skill_id",
+   "skill_name",
+   "support",
+   "target_index"
+  ],
+  "dedicated_marker_keys_before": [],
+  "actions_with_marker": 1,
+  "marked": [
+   {
+    "skill_id": "skill_000671",
+    "skill_name": "硬门",
+    "tier": "PARTIAL",
+    "note": "这招有一部分效果引擎还不会算"
+   }
+  ],
+  "reading": "有：action 上带 `support`（1 个动作命中）。来源是引擎的逐技能档位，不是前端名单。"
+ },
+ "judgement": {
+  "must_mark_skill_ids": [
+   "skill_000671"
+  ],
+  "problems": [],
+  "ok": true
+ },
+ "ok": true
+}

@@ -1,0 +1,408 @@
+{
+ "schema_version": 1,
+ "artifact": "battle-smoke-support-marker-browser",
+ "generated_at": "2026-09-28T17:00:13.460Z",
+ "base": "http://127.0.0.1:50844",
+ "base_kind": "in-process（`createCoachServer`）",
+ "why": "真机验的是：一场里有「硬门」的局，技能按钮上**点之前**就能看到那行标记，而且那一手**仍然可点**（标记不许替引擎做决定）。",
+ "steps": [
+  {
+   "id": "pick-six",
+   "ok": true,
+   "note": "选了 6 只（第一只是「板板壳」），六槽 filled=6",
+   "slots": [
+    {
+     "state": "filled",
+     "text": "喵喵 移除 草系 持有 · 可正式上场 有具体构建（算得出高低） 特性「氧循环」"
+    },
+    {
+     "state": "filled",
+     "text": "水蓝蓝 移除 水系 持有 · 可正式上场 有具体构建（算得出高低） 特性「浸润」"
+    },
+    {
+     "state": "filled",
+     "text": "火花 移除 火系 持有 · 可正式上场 有具体构建（算得出高低） 特性「助燃」："
+    },
+    {
+     "state": "filled",
+     "text": "迪莫 移除 光系 持有 · 可正式上场 有具体构建（算得出高低） 特性「最好的伙"
+    },
+    {
+     "state": "filled",
+     "text": "水灵 移除 水系 持有 · 可正式上场 有具体构建（算得出高低） 特性「浸润」："
+    },
+    {
+     "state": "filled",
+     "text": "板板壳 移除 水系 持有 · 可正式上场 有具体构建（算得出高低） 特性「缩壳」"
+    }
+   ]
+  },
+  {
+   "id": "swap-in-hard-gate",
+   "ok": true,
+   "note": "四个技能 = skill_000435、skill_000286、skill_000272、skill_000671；工作台显示「换招\n      你选的：硬门、肥皂泡、防御、魔法增效」",
+   "swapped": {
+    "picks": [
+     "skill_000435",
+     "skill_000286",
+     "skill_000272",
+     "skill_000671"
+    ],
+    "total": 45,
+    "row": "换招\n      你选的：硬门、肥皂泡、防御、魔法增效"
+   }
+  },
+  {
+   "id": "marker-visible-before-click",
+   "ok": true,
+   "note": "「硬门」那一格上的标记：「这招有一部分效果引擎还不会算」（档位 PARTIAL）；整屏被标出来的格子 1 个",
+   "started": {
+    "error": null,
+    "legal": [
+     {
+      "kind": "skill",
+      "skill_id": "skill_000272",
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "skill",
+      "skill_id": "skill_000286",
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "skill",
+      "skill_id": "skill_000435",
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "skill",
+      "skill_id": "skill_000671",
+      "hasSupport": true,
+      "tier": "PARTIAL"
+     },
+     {
+      "kind": "charge",
+      "skill_id": null,
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "switch",
+      "skill_id": null,
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "switch",
+      "skill_id": null,
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "switch",
+      "skill_id": null,
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "switch",
+      "skill_id": null,
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "switch",
+      "skill_id": null,
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "magic",
+      "skill_id": null,
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "surrender",
+      "skill_id": null,
+      "hasSupport": false,
+      "tier": null
+     }
+    ],
+    "gateCellPresent": true,
+    "gateCellClickable": true,
+    "gateActionIndex": "3",
+    "gateMarked": true,
+    "gateNote": "这招有一部分效果引擎还不会算",
+    "gateTier": "PARTIAL",
+    "anyMarkedCount": 1,
+    "markedCells": [
+     {
+      "cell": "skill_000671",
+      "text": "这招有一部分效果引擎还不会算"
+     }
+    ],
+    "dockMarkerText": null,
+    "dockText": "技能 1 / 4 可用 🌟 0 气波 武系 · 攻击 预计伤害：算不出 引擎这一手没给这一招（可能被规则/状态挡住） 详情 对敌方精灵造成魔法伤害。 引擎这一手没有给出伤害样本 ",
+    "turn": "第 1 回合",
+    "groups": "skill:4,charge:1,switch:5,surrender:1,magic:1,item:0,escape:0"
+   }
+  },
+  {
+   "id": "marked-skill-still-clickable",
+   "ok": true,
+   "note": "「硬门」那一格在=true、仍然可点=true（data-b3-action=3）",
+   "started": {
+    "error": null,
+    "legal": [
+     {
+      "kind": "skill",
+      "skill_id": "skill_000272",
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "skill",
+      "skill_id": "skill_000286",
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "skill",
+      "skill_id": "skill_000435",
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "skill",
+      "skill_id": "skill_000671",
+      "hasSupport": true,
+      "tier": "PARTIAL"
+     },
+     {
+      "kind": "charge",
+      "skill_id": null,
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "switch",
+      "skill_id": null,
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "switch",
+      "skill_id": null,
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "switch",
+      "skill_id": null,
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "switch",
+      "skill_id": null,
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "switch",
+      "skill_id": null,
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "magic",
+      "skill_id": null,
+      "hasSupport": false,
+      "tier": null
+     },
+     {
+      "kind": "surrender",
+      "skill_id": null,
+      "hasSupport": false,
+      "tier": null
+     }
+    ],
+    "gateCellPresent": true,
+    "gateCellClickable": true,
+    "gateActionIndex": "3",
+    "gateMarked": true,
+    "gateNote": "这招有一部分效果引擎还不会算",
+    "gateTier": "PARTIAL",
+    "anyMarkedCount": 1,
+    "markedCells": [
+     {
+      "cell": "skill_000671",
+      "text": "这招有一部分效果引擎还不会算"
+     }
+    ],
+    "dockMarkerText": null,
+    "dockText": "技能 1 / 4 可用 🌟 0 气波 武系 · 攻击 预计伤害：算不出 引擎这一手没给这一招（可能被规则/状态挡住） 详情 对敌方精灵造成魔法伤害。 引擎这一手没有给出伤害样本 ",
+    "turn": "第 1 回合",
+    "groups": "skill:4,charge:1,switch:5,surrender:1,magic:1,item:0,escape:0"
+   }
+  },
+  {
+   "id": "no-console-exception",
+   "ok": true,
+   "note": "页面异常 0 条",
+   "consoleErrors": []
+  }
+ ],
+ "steps_ok": 5,
+ "steps_total": 5,
+ "ok": true,
+ "screenshot": "docs/roco/review-2026-09-28/shots/battle/browser-04-skill-support-marker-1440x900.png",
+ "extra": {
+  "base": "http://127.0.0.1:50844",
+  "png": "/Users/serendizc/Developer/roco-coach/docs/roco/review-2026-09-28/shots/battle/browser-04-skill-support-marker-1440x900.png",
+  "picked": {
+   "chosen": [
+    "own-0047",
+    "own-0001",
+    "own-0002",
+    "own-0003",
+    "own-0004",
+    "own-0005"
+   ],
+   "slots": [
+    {
+     "state": "filled",
+     "text": "喵喵 移除 草系 持有 · 可正式上场 有具体构建（算得出高低） 特性「氧循环」"
+    },
+    {
+     "state": "filled",
+     "text": "水蓝蓝 移除 水系 持有 · 可正式上场 有具体构建（算得出高低） 特性「浸润」"
+    },
+    {
+     "state": "filled",
+     "text": "火花 移除 火系 持有 · 可正式上场 有具体构建（算得出高低） 特性「助燃」："
+    },
+    {
+     "state": "filled",
+     "text": "迪莫 移除 光系 持有 · 可正式上场 有具体构建（算得出高低） 特性「最好的伙"
+    },
+    {
+     "state": "filled",
+     "text": "水灵 移除 水系 持有 · 可正式上场 有具体构建（算得出高低） 特性「浸润」："
+    },
+    {
+     "state": "filled",
+     "text": "板板壳 移除 水系 持有 · 可正式上场 有具体构建（算得出高低） 特性「缩壳」"
+    }
+   ]
+  },
+  "swapped": {
+   "picks": [
+    "skill_000435",
+    "skill_000286",
+    "skill_000272",
+    "skill_000671"
+   ],
+   "total": 45,
+   "row": "换招\n      你选的：硬门、肥皂泡、防御、魔法增效"
+  },
+  "started": {
+   "error": null,
+   "legal": [
+    {
+     "kind": "skill",
+     "skill_id": "skill_000272",
+     "hasSupport": false,
+     "tier": null
+    },
+    {
+     "kind": "skill",
+     "skill_id": "skill_000286",
+     "hasSupport": false,
+     "tier": null
+    },
+    {
+     "kind": "skill",
+     "skill_id": "skill_000435",
+     "hasSupport": false,
+     "tier": null
+    },
+    {
+     "kind": "skill",
+     "skill_id": "skill_000671",
+     "hasSupport": true,
+     "tier": "PARTIAL"
+    },
+    {
+     "kind": "charge",
+     "skill_id": null,
+     "hasSupport": false,
+     "tier": null
+    },
+    {
+     "kind": "switch",
+     "skill_id": null,
+     "hasSupport": false,
+     "tier": null
+    },
+    {
+     "kind": "switch",
+     "skill_id": null,
+     "hasSupport": false,
+     "tier": null
+    },
+    {
+     "kind": "switch",
+     "skill_id": null,
+     "hasSupport": false,
+     "tier": null
+    },
+    {
+     "kind": "switch",
+     "skill_id": null,
+     "hasSupport": false,
+     "tier": null
+    },
+    {
+     "kind": "switch",
+     "skill_id": null,
+     "hasSupport": false,
+     "tier": null
+    },
+    {
+     "kind": "magic",
+     "skill_id": null,
+     "hasSupport": false,
+     "tier": null
+    },
+    {
+     "kind": "surrender",
+     "skill_id": null,
+     "hasSupport": false,
+     "tier": null
+    }
+   ],
+   "gateCellPresent": true,
+   "gateCellClickable": true,
+   "gateActionIndex": "3",
+   "gateMarked": true,
+   "gateNote": "这招有一部分效果引擎还不会算",
+   "gateTier": "PARTIAL",
+   "anyMarkedCount": 1,
+   "markedCells": [
+    {
+     "cell": "skill_000671",
+     "text": "这招有一部分效果引擎还不会算"
+    }
+   ],
+   "dockMarkerText": null,
+   "dockText": "技能 1 / 4 可用 🌟 0 气波 武系 · 攻击 预计伤害：算不出 引擎这一手没给这一招（可能被规则/状态挡住） 详情 对敌方精灵造成魔法伤害。 引擎这一手没有给出伤害样本 ",
+   "turn": "第 1 回合",
+   "groups": "skill:4,charge:1,switch:5,surrender:1,magic:1,item:0,escape:0"
+  }
+ }
+}

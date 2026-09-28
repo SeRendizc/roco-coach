@@ -2134,6 +2134,73 @@ function sampleEnemyPool(){
  return samplePoolCache;
 }
 
+// ── task-6：「这一手引擎会不会结算」——玩家在**点之前**就该知道的**事实** ──────────
+/**
+ * 为什么要这一层（Lead 2026-09-29 定的口径）：`legal_actions` 只管「能耗上付不付得起」，
+ * 而「硬门」那类技能的**决定性效果**（描述里读不出减伤比例）引擎算不出来 ——
+ * 它仍然是合法动作，点下去白搭一手。口径是**不动引擎语义**、也不许前端硬编名单，
+ * 所以这里**只读**引擎已有的逐技能档位（唯一分类器 `coverage.classify_skill`，
+ * 经 `RocoClient.skillTier()` → `POST /rules/query {kind:'skill', with_tier:true}` 拿）。
+ * 键名与档位字符串全部来自引擎；服务端只做「档位 → 一句人话」的转写，不新造判据。
+ */
+const SKILL_SUPPORT_CACHE=new Map();   // skill_id -> {tier,note} | null（技能档位是静态属性，缓存即可）
+const SKILL_SUPPORT_SETTLED=new Set(['SIMULATABLE_UNVERIFIED','FULL_VERIFIED']);
+//: 引擎内部说法不许进玩家文案（`support_unparsed` 命中这些片段时，退回一句通用说法）
+const SUPPORT_INTERNAL=/(未识别机制|机制词|原语|effect_support|unsupported|parse|coverage|认领)/i;
+
+function plainSupportClause(segments){
+ for(const raw of (Array.isArray(segments)?segments:[])){
+  let s=String(raw??'').trim();
+  if(!s)continue;
+  s=s.replace(/（[^）]*）/g,'').replace(/\([^)]*\)/g,'').trim();   // 去掉内部注解
+  s=s.replace(/^[\u4e00-\u9fa5]{1,2}：/,'').trim();               // 去掉「变：」「每：」这类前置词
+  if(!s||SUPPORT_INTERNAL.test(s))continue;                      // 内部说法：不进玩家文案
+  const head=(s.split('、')[0]||s).trim();
+  if(!head)continue;
+  return [...head].length>22?`${[...head].slice(0,22).join('')}…`:head.replace(/[。；;]$/,'');
+ }
+ return null;
+}
+
+/** 引擎的档位记录 → 玩家能读的一句**事实**（不是建议）。引擎说「会结算」的手返回 null。 */
+function skillSupportFact(record){
+ const tier=String(record?.support_tier??'');
+ if(!tier||SKILL_SUPPORT_SETTLED.has(tier))return null;
+ if(tier==='KNOWLEDGE_ONLY')return {tier,note:'这招的效果引擎还不会算，点了不会生效'};
+ if(tier==='REFUSED')return {tier,note:'这招的效果缺少依据，引擎不会结算'};
+ const clause=plainSupportClause(record?.support_unparsed);
+ return {tier,note:clause?`这招有一部分引擎还不会算：${clause}`:'这招有一部分效果引擎还不会算'};
+}
+
+async function skillSupportOf(skillId){
+ if(SKILL_SUPPORT_CACHE.has(skillId))return SKILL_SUPPORT_CACHE.get(skillId);
+ let info=null;
+ try{
+  const out=unwrap(await client.skillTier(skillId));
+  if(out.ok&&out.result)info=skillSupportFact(out.result);
+ }catch{ info=null; }        // 读不到就不标：不猜、也不因此挡住这一手
+ SKILL_SUPPORT_CACHE.set(skillId,info);
+ return info;
+}
+
+/**
+ * 给 `view.legal` 里每个**技能动作**挂 `support`（只挂在引擎说「还算不出来」的那些上）。
+ * 纪律：**不**改 `kind` / **不**删动作 / **不**置灰 —— 引擎说它合法，界面就让它可点，
+ * 只是把「引擎算不算得出来」这个事实摆出来。显示事实，不给建议（建议是教练层的活）。
+ */
+async function attachSkillSupport(view){
+ const actions=Array.isArray(view?.legal)?view.legal:[];
+ const ids=[...new Set(actions.filter((a)=>a?.kind==='skill'&&a.skill_id).map((a)=>a.skill_id))];
+ if(!ids.length)return view;
+ await Promise.all(ids.map((sid)=>skillSupportOf(sid).catch(()=>null)));
+ for(const a of actions){
+  if(a?.kind!=='skill'||!a.skill_id)continue;
+  const info=SKILL_SUPPORT_CACHE.get(a.skill_id);
+  if(info)a.support=info;
+ }
+ return view;
+}
+
  async function startBattle(body={}){
   const up=await ensure();
   if(!up.ok)return {ok:false,status:503,error:`规则服务不可用：${up.error}`};
@@ -2246,6 +2313,8 @@ function sampleEnemyPool(){
   sessions.set(id,{state:out.result.state,strategy,seed,turn:out.result.turn,
    mode_id:modeId,ruleset_config_id:rulesetConfigId});
   const base=publicView(out.result,{modeId,rulesetConfigId});
+  // task-6：把「这一手引擎会不会结算」标在动作上（**只读**引擎已有的逐技能档位）。
+  await attachSkillSupport(base);
   // 换了招就得让玩家看得出**哪几只生效了**：技能本身以引擎回执的 `loadouts` 为准
   // （不重复写一份），这里只标来源是「你选的」还是「引擎规范配招」。
   const loadoutOrigin={};
@@ -2317,7 +2386,9 @@ function sampleEnemyPool(){
   session.state=out.result.state;
   session.turn=out.result.turn;
   counters.advances+=1;
-  return {ok:true,battle_id:body.battle_id,view:publicView(out.result)};
+  const view=publicView(out.result);
+  await attachSkillSupport(view);
+  return {ok:true,battle_id:body.battle_id,view};
  }
 
  /**
@@ -2351,7 +2422,9 @@ function sampleEnemyPool(){
   session.state=out.result.state;
   session.turn=out.result.turn;      // 自由动作**不**改回合数（照抄引擎回执，不自己加）
   counters.freeActions=(counters.freeActions??0)+1;
-  return {ok:true,battle_id:body.battle_id,view:publicView(out.result)};
+  const view=publicView(out.result);
+  await attachSkillSupport(view);
+  return {ok:true,battle_id:body.battle_id,view};
  }
 
  /**
@@ -2832,5 +2905,7 @@ function sampleEnemyPool(){
  }
 
  return {status,startBattle,advanceBattle,freeAction,planBattle,roster,box,workshop,loadoutOptions,shadowPlan,ensure,stop,publicView,
+  // task-6：把「档位 → 人话」的纯函数也交出去，判据脚本可以不启服务地复核它
+  skillSupportFact,
   _sessions:sessions,_client:()=>client};
 }

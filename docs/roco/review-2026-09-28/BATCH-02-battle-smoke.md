@@ -224,6 +224,117 @@
 
 ---
 
+### 3.5 task-6：机制没实现的那一手，在玩家花掉之前看得出来
+
+`legal_actions` 只管「能耗上付不付得起」；「硬门」`skill_000671` 那种**决定性效果**
+（描述里读不出减伤比例）引擎算不出来，它**仍然是合法动作** —— 点下去白搭一手。
+Lead 2026-09-29 定的口径：**不动引擎语义**（那会让引擎发明一条新规则，连带影响
+planner / opponents / regression），把事实标在界面上。
+
+#### 3.5.1 第一步：先量「回执里有没有」
+
+`scripts/roco/battle-smoke-unsupported-flag.py` 量的是**开局的 battle view 回执**：
+
+| 项 | 改前（`unsupported-flag-probe.before.json`） | 改后 |
+| --- | --- | --- |
+| `view.legal[]` 的键 | `item_id / kind / label / magic_id / skill / skill_id / skill_name / target_index` | 多一个 **`support`** |
+| 有没有「这一手结算不了」的专门字段 | **没有**（`dedicated_marker_keys: []`） | 有：`support.tier` + `support.note` |
+| 唯一沾边的 | `skill.effect_support`，对**全部 824 条技能**都是 `unsupported` ⇒ 分辨不出哪一手会白搭 | 同上（这一条仍在，只是不再被当成判据） |
+| 同一份回执里的 `unsupported_seen` | 0 条（它是**用完之后**才有的运行时记录，管不了「点之前」） | 同 |
+
+⇒ 结论是「**回执里没有**」，于是按 Lead 的口径在**服务层只读地补上**。
+
+#### 3.5.2 来源：引擎**已有的**逐技能档位，不是新造判据
+
+服务层调的是既有只读接口 `RocoClient.skillTier()` → `POST /rules/query
+{kind:'skill', with_tier:true}` → 引擎**唯一分类器** `coverage.classify_skill`。实测全库分布：
+
+| 档位 | 条数 | 含义 |
+| --- | --- | --- |
+| `SIMULATABLE_UNVERIFIED` | 290 | 引擎会结算（**不标**） |
+| `PARTIAL` | 313 | 读出了一部分，还有未认领片段（**标出来**） |
+| `KNOWLEDGE_ONLY` | 12 | 只有资料，引擎不结算（**标出来**） |
+
+服务端只做「档位 → 一句人话」的转写（`skillSupportFact`），**不新造判据、不硬编名单**；
+技能档位是静态属性，进程内按 `skill_id` 缓存，每回合只对当前场上的技能查一次。
+
+#### 3.5.3 第二步：改了什么
+
+- `src/server/roco-service.js`：`attachSkillSupport(view)` 在 `startBattle` / `advanceBattle` /
+  `freeAction` 组装 view 之后，给**每个技能动作**挂 `support:{tier,note}`（只挂在引擎说
+  「还算不出来」的那些上）。**不改 `kind`、不删动作、不置灰**。
+- `src/client/roco.js`：两条渲染路径都加了一行警示 —— 玩家真正点的那一格（b3 技能格，
+  `data-b3-skill-support="yes"`）与旧的行动坞（`data-roco-skill-support="yes"`）。
+  **不加 `disabled`**：引擎说它合法，界面就让它可点。
+
+文案示例（都是**事实**，不是建议）：`这招有一部分引擎还不会算：每回合随机变成自己未携带的技能`、
+`这招有一部分效果引擎还不会算`、`这招的效果引擎还不会算，点了不会生效`。
+工程词（`UnsupportedEffect` / `skill_` / `效果原语` / `未识别机制` …）由服务端**过滤**，
+命中就退回一句通用说法。
+
+#### 3.5.4 判据 + 必红反证
+
+`scripts/roco/battle-smoke-support-marker.mjs`（判据是**导出的纯函数**，可单独 import）：
+
+| 判据 | 咬什么 |
+| --- | --- |
+| ① 该标的必须标 | 引擎说「还算不出来」的那一手，回执里必须有 `support.note` |
+| ② 文案不许有工程词 | `note` 里出现 `UnsupportedEffect`/`skill_000671`/`效果原语`… 即红 |
+| ③ 不许变成建议 | `note` 以「别用/不要用/建议/推荐」开头即红 |
+| ④ 不许替引擎做决定 | 标记过的动作带 `disabled` 即红；档位是「会结算」却被标也红 |
+
+必红反证 **5 条**（每条都把判据该咬的东西摘掉/弄脏）：摘掉标记、塞工程词、塞技能 id、
+把那一手变灰、改写成建议 —— 判据必须报错。读数：**自检 + 反证 6/6 过**
+（`support-marker.json` 的 `selftest`）。
+
+#### 3.5.5 真机截图
+
+`scripts/roco/battle-smoke-support-marker-browser.mjs`（真 Chrome + 真鼠标，**自起进程内服务**，
+不重启 8765）：六槽选「板板壳」→ 该槽「换招」里把**硬门**选进四个技能 →
+`#start-standard-pvp` → 那一格上出现红字标记，且 `data-b3-action=3` ⇒ **仍然可点**。
+读数 **5/5 步过**（`support-marker-browser.json`）。
+
+截图：`docs/roco/review-2026-09-28/shots/battle/browser-04-skill-support-marker-1440x900.png`
+（**不放 `reports/roco/**`**：那里的 PNG 被 `.gitignore` 吃掉）。
+
+#### 3.5.6 回归读数
+
+| 套件 | 读数 |
+| --- | --- |
+| `node --test tests/roco-page-ux.test.js tests/roco-battle-context.test.js tests/roco-standard-pvp-battle.test.js tests/evals/player-copy.test.js tests/evals/structure-contract.test.js` | **92/92 过** |
+| `node --test tests/roco-battle-panel-static.test.js tests/roco-team-serving.test.js` | **19/19 过** |
+| `node scripts/roco/battle-smoke.mjs` | **7/7 OK**（+support-marker 步，112s） |
+| `npm run test:unit`（全量） | 5 红。**逐条做了基线对照**（`git archive b592e36` 到 `/tmp` 后用同一份 `node_modules` 跑）：4 条在基线**就已经红**（`roco-experience` 系别配色、`model-trajectories` 双路径一致、`roco-team-cards-layout` 两个视口）⇒ **不是本轮引入**；第 5 条 `tests/server.test.js` R8① **是我 task-5 引入的**，见 3.5.7 |
+
+#### 3.5.7 **我（task-5）留下的一个测试红：要 Lead 在 `tests/` 里改一行**
+
+`npm run test:unit` 里 `tests/server.test.js` 的「R8①」红了：
+
+```
+assert.equal((src.match(/unavailable'?503/g) ?? []).length, 2, '开局与出招两处都要把 unavailable 映成 503');
+actual: 3   expected: 2
+```
+
+- **归因**：task-5 按 Lead 的口径把 `advanceBattle` 的「一律 400」也改成
+  `unavailable→503 / unsupported_effect→422`，于是源码里这个模式从 **2 处变成 3 处**（`grep -o` 实测 = 3）。
+- **代码是对的**（那正是 task-5 要求的行为，也与 `startBattle`/`freeAction` 对齐）；**是这条计数判据的期望值过期了**。
+- 基线对照：`git archive b592e36`（task-5 之前）跑 `tests/server.test.js` **不红** ⇒ 确认是本轮引入的红。
+- **修法**（在 `tests/**`，我这一轮的写域外，**没有动**）：把那句的 `2` 改成 `3`，并把注释放成
+  「开局 / 出招 / 自由动作三处」。task-5 当时的回归清单只要求 `test:env` + `structure-contract`，
+  **是我漏跑了 Node 全量**，这条由我负责报出来。
+
+#### 3.5.8 顺带发现（**未改**，报 Lead）
+
+旧行动坞 `#actions`（`skillSlots`）**按名册的冻结配招画四格，不看引擎这一局的实时配招**
+（`view.self.loadouts`）。实测：把「硬门」换进配招后，那一坞画的是
+`气波/防御/后发制人/复写`，其中 3 格 `legal=no`，而真正合法的 4 手**一格都没有**。
+本页玩家实际点的是 b3 那一套（已按实时配招对齐），所以不影响本次交付；
+但两套渲染器的口径不一致本身是个缺陷 —— 与 2026-09-23 在另一个面板修过的
+「引擎实时配招是权威」是同一类。**没有动它**：那超出 task-6 的范围，且要先确认这一坞
+在当前版式里到底还可见不可见。
+
+---
+
 ## 4. 浏览器入口（只验「那几个按钮真的点得动」）
 
 浏览器只做入口那一段（逐只全量在引擎侧与 HTTP 入口侧，见上）。
@@ -254,6 +365,8 @@ python3 scripts/roco/battle-smoke-summary.py           # ③ 合成清单 + 人�
 python3 scripts/roco/battle-smoke-repro.py             # ④ 打不完的局逐手复现（带 traceback）
 python3 scripts/roco/battle-smoke-repro-negative-cost.py   # ⑤ 绞轮自足复现：修后必须 settled + 原因可读
 python3 scripts/roco/battle-smoke-negative-cost-scan.py    # ⑥ 负能耗入口全扫 + 残留 unsupported 探针
+node scripts/roco/battle-smoke-support-marker.mjs           # ⑦ task-6 读数 + 判据 + 必红反证（自起进程内服务）
+node scripts/roco/battle-smoke-support-marker-browser.mjs   # ⑦ 真机截图（先抢浏览器锁）
 node scripts/roco/battle-smoke-browser.mjs --base=http://127.0.0.1:8765 --shots  # 先抢锁
 ```
 
@@ -265,6 +378,9 @@ node scripts/roco/battle-smoke-browser.mjs --base=http://127.0.0.1:8765 --shots 
 - `reports/roco/battle-smoke/negative-energy-cost-repro.json`（绞轮缺口自足复现）
 - `reports/roco/battle-smoke/repro-failures.json`（trace 逐手复现，含活对象状态）
 - `reports/roco/battle-smoke/negative-cost-scan.json`（负能耗入口全扫 + 残留 unsupported 探针）
+- `reports/roco/battle-smoke/support-marker.json`（task-6：step1 读数 + 判据 + 6 条自检/反证）
+- `reports/roco/battle-smoke/support-marker-browser.json`（task-6：真机 5/5 步）
+- `reports/roco/battle-smoke/unsupported-flag-probe.before.json`（**改前**的 step1 读数：回执里没有这个字段）
 - `reports/roco/battle-smoke/negative-energy-cost-repro.before.json`（**修前**快照：第 6 回合炸局）
 - `reports/roco/battle-smoke/test-env-baseline.log` / `test-env-after.log`（改前/改后 636 条 Python 套件）
 - `reports/roco/battle-smoke/browser-entry.json` + `docs/roco/review-2026-09-28/shots/battle/*.png`

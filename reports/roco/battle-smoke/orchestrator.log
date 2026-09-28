@@ -6,23 +6,23 @@ $ python3 scripts/roco/battle-smoke-engine.py
 [engine] 75/542 可玩 75 用时 5s
 [engine] 100/542 可玩 100 用时 7s
 [engine] 125/542 可玩 125 用时 8s
-[engine] 150/542 可玩 150 用时 11s
+[engine] 150/542 可玩 150 用时 10s
 [engine] 175/542 可玩 175 用时 12s
 [engine] 200/542 可玩 200 用时 14s
-[engine] 225/542 可玩 225 用时 17s
-[engine] 250/542 可玩 250 用时 18s
-[engine] 275/542 可玩 275 用时 20s
+[engine] 225/542 可玩 225 用时 16s
+[engine] 250/542 可玩 250 用时 17s
+[engine] 275/542 可玩 275 用时 19s
 [engine] 300/542 可玩 300 用时 21s
-[engine] 325/542 可玩 325 用时 23s
-[engine] 350/542 可玩 350 用时 25s
-[engine] 375/542 可玩 375 用时 26s
-[engine] 400/542 可玩 400 用时 28s
-[engine] 425/542 可玩 425 用时 31s
-[engine] 450/542 可玩 450 用时 33s
-[engine] 475/542 可玩 475 用时 35s
-[engine] 500/542 可玩 500 用时 37s
-[engine] 525/542 可玩 525 用时 39s
-[engine] 542/542 可玩 542 用时 40s
+[engine] 325/542 可玩 325 用时 22s
+[engine] 350/542 可玩 350 用时 24s
+[engine] 375/542 可玩 375 用时 25s
+[engine] 400/542 可玩 400 用时 27s
+[engine] 425/542 可玩 425 用时 30s
+[engine] 450/542 可玩 450 用时 32s
+[engine] 475/542 可玩 475 用时 33s
+[engine] 500/542 可玩 500 用时 35s
+[engine] 525/542 可玩 525 用时 38s
+[engine] 542/542 可玩 542 用时 39s
 {"total": 542, "playable": 542, "blocked": 0, "settled": 542, "all_four_used": 536, "used_at_least_one": 542, "all_four_used_on_requested_loadout": 536, "loadout_replaced": 0, "switch_out_ok": 542, "switch_in_ok": 542, "took_damage": 542, "target_fainted": 542, "any_unsupported_seen": 485}
 → /Users/serendizc/Developer/roco-coach/reports/roco/battle-smoke/engine-sweep.json
 
@@ -32,7 +32,7 @@ $ node scripts/roco/battle-smoke-entry.mjs --base=http://127.0.0.1:8765 --settle
 [entry] 50/542 入口可玩 50 用时 0s
 [entry] 75/542 入口可玩 75 用时 0s
 [entry] 100/542 入口可玩 100 用时 0s
-[entry] 125/542 入口可玩 125 用时 1s
+[entry] 125/542 入口可玩 125 用时 0s
 [entry] 150/542 入口可玩 150 用时 1s
 [entry] 175/542 入口可玩 175 用时 1s
 [entry] 200/542 入口可玩 200 用时 1s
@@ -40,15 +40,15 @@ $ node scripts/roco/battle-smoke-entry.mjs --base=http://127.0.0.1:8765 --settle
 [entry] 250/542 入口可玩 250 用时 1s
 [entry] 275/542 入口可玩 275 用时 1s
 [entry] 300/542 入口可玩 300 用时 1s
-[entry] 325/542 入口可玩 325 用时 2s
-[entry] 350/542 入口可玩 350 用时 2s
-[entry] 375/542 入口可玩 375 用时 2s
+[entry] 325/542 入口可玩 325 用时 1s
+[entry] 350/542 入口可玩 350 用时 1s
+[entry] 375/542 入口可玩 375 用时 1s
 [entry] 400/542 入口可玩 400 用时 2s
 [entry] 425/542 入口可玩 425 用时 2s
 [entry] 450/542 入口可玩 450 用时 2s
 [entry] 475/542 入口可玩 475 用时 2s
 [entry] 500/542 入口可玩 500 用时 2s
-[entry] 525/542 入口可玩 525 用时 3s
+[entry] 525/542 入口可玩 525 用时 2s
 {
  "counts": {
   "total": 542,
@@ -63,7 +63,7 @@ $ node scripts/roco/battle-smoke-entry.mjs --base=http://127.0.0.1:8765 --settle
  },
  "combos_ok": 12,
  "combos_total": 12,
- "elapsed_s": 75
+ "elapsed_s": 72
 }
 → /Users/serendizc/Developer/roco-coach/reports/roco/battle-smoke/entry-sweep.json
 
@@ -91,13 +91,21 @@ $ python3 scripts/roco/battle-smoke-negative-cost-scan.py
   SKIP skill_000105 规则集的学习表里**没有任何物种**学得到这条技能（`is_learnable` 全 False）⇒ 它不可能出现在任何配招里，够不到这条入口
 → /Users/serendizc/Developer/roco-coach/reports/roco/battle-smoke/negative-cost-scan.json
 
+=== ⑦ 机制没实现的那一手有没有被标出来（读数 + 判据 + 必红反证） ===
+$ node scripts/roco/battle-smoke-support-marker.mjs
+[marker] 判据自检 + 必红反证：6/6 过
+[marker] step1：动作键 item_id/kind/label/magic_id/skill/skill_id/skill_name/support/target_index
+[marker] step1：带标记的动作 1 个 → [{"skill_id":"skill_000671","note":"这招有一部分效果引擎还不会算"}]
+[marker] 真回执判据：绿
+→ /Users/serendizc/Developer/roco-coach/reports/roco/battle-smoke/support-marker.json
+
 === 汇总 ===
-  OK   engine-sweep（40.7s）
-  OK   entry-sweep（75.2s）
+  OK   engine-sweep（39.1s）
+  OK   entry-sweep（71.7s）
   OK   summary（0.1s）
   OK   repro-trace（0.2s）
   OK   repro-negative-cost（0.3s）
   OK   negative-cost-scan（0.2s）
-总耗时 116.6s
+  OK   support-marker（0.6s）
+总耗时 112.1s
 产物目录：reports/roco/battle-smoke/
-orchestrator_exit=0

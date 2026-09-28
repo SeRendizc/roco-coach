@@ -1,7 +1,7 @@
 {
  "schema_version": 1,
  "artifact": "battle-smoke-browser",
- "generated_at": "2026-09-28T16:32:25.120Z",
+ "generated_at": "2026-09-28T16:56:01.828Z",
  "base": "http://127.0.0.1:8765",
  "why": "浏览器只验入口：选宠 → 组成合法六只 → 开一局 → 点得动技能。逐只全量在引擎侧与 HTTP 入口侧。",
  "steps": [

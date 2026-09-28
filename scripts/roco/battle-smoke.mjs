@@ -83,6 +83,11 @@ if (!has('skip-repro')) {
   steps.push({name: 'negative-cost-scan',
     ...run('⑥ 负能耗入口全扫（ramp / 能耗修正 / 组合）+ 残留 unsupported 探针', 'python3',
       [join('scripts', 'roco', 'battle-smoke-negative-cost-scan.py')])});
+  // ⑦ task-6：「这一手引擎会不会结算」有没有标在回执上 + 判据 + 必红反证。
+  //    自起进程内服务，**不打扰在跑的 8765**；真机截图那一条要抢浏览器锁，不放进这里。
+  steps.push({name: 'support-marker',
+    ...run('⑦ 机制没实现的那一手有没有被标出来（读数 + 判据 + 必红反证）', 'node',
+      [join('scripts', 'roco', 'battle-smoke-support-marker.mjs')])});
 }
 
 const failed = steps.filter((s) => !s.ok);

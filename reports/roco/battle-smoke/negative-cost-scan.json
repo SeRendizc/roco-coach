@@ -1,7 +1,7 @@
 {
  "schema_version": 1,
  "artifact": "battle-smoke-negative-cost-scan",
- "generated_at": "2026-09-29T00:47:45+0800",
+ "generated_at": "2026-09-29T01:02:44+0800",
  "ruleset_id": "roco-world-s4-2026-09-10",
  "ruleset_config_id": "mobile_s4_candidate_v3",
  "why": "修绞轮最怕「只堵这一只」。入口是一**类**：有效能耗 = 基础 + ramp + 能耗修正 + 每层中毒 + 天气，任一项把总数压到 <0 都走同一条路。这里按机制逐类当场打一遍。",
