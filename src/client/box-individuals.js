@@ -193,7 +193,17 @@ export function removeIndividual(individualId) {
 export function localIndividualById(individualId) {
   const all = loadAll();
   const one = all?.[individualId];
-  return one && typeof one === 'object' ? one : null;
+  if (!one || typeof one !== 'object') return null;
+  // ⚠ 2026-09-28（验收 10b/32 连红四次才定位到这一处）：详情页读的是**这一个**入口
+  // （`individualOf` → `localIndividualById`），它原来直接返回磁盘上那份 ⇒ 旧库里
+  // `nature:{value:null}` 这种脏形状绕过 `individualFor` 的归一，一路印成 `[object Object]`。
+  // 现在**所有读入口都归一**（归一后写回，见 `individualFor` 的注释）。
+  const clean = normalizeStored(one);
+  if (JSON.stringify(clean) !== JSON.stringify(one)) {
+    all[individualId] = clean;
+    saveAll(all);
+  }
+  return clean;
 }
 
 /**
