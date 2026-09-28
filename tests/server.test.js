@@ -375,9 +375,25 @@ test('R7①：被合并的那条请求在首个请求失败时**也要返回**�
 test('R8①：引擎不可用要报 503（不是 400），且玩家文案里不许出现内部地址（审计高 5）', async () => {
   const {readFileSync: read} = await import('node:fs');
   const src = read(new URL('../src/server/roco-service.js', import.meta.url), 'utf8');
-  // ① 不可用 → 503（两处：开局与出招）
-  assert.equal((src.match(/unavailable'\?503/g) ?? []).length, 2,
-    '开局与出招两处都要把 unavailable 映成 503');
+  // ① 不可用 → 503（**三处**：开局 / 出招 / 自由动作）
+  //
+  // ⚠ 2026-09-29 改钉（旧断言留档）：
+  //   旧：assert.equal((src.match(/unavailable'\?503/g) ?? []).length, 2, '开局与出招两处都要把 unavailable 映成 503');
+  //   为什么改：`task-5`（绞轮负能耗）按 Codex 的口径把 `advanceBattle` 从「一律 400」改成
+  //   `unavailable→503 / unsupported_effect→422`，与 `startBattle` / `freeAction` **对齐**
+  //   ⇒ 源码里这个模式从 2 处变 3 处。**代码是对的，是期望值过期了**（改的人自己报出来的，
+  //   还附了基线对照：`git archive b592e36` 到 /tmp 同 node_modules 跑，确认另 4 条是基线就红）。
+  //   **判据的意图一字未变**：不可用必须映成 503、不许混进 400。
+  assert.equal((src.match(/unavailable'\?503/g) ?? []).length, 3,
+    '开局 / 出招 / 自由动作三处都要把 unavailable 映成 503');
+  // 而且**要分别落在三个函数体里** —— 只数总数挡不住「某一个函数里写了两遍、另一个根本没写」。
+  for (const [fn, next] of [['startBattle', 'advanceBattle'], ['advanceBattle', 'freeAction'], ['freeAction', null]]) {
+    const from = src.indexOf(`async function ${fn}(`);
+    assert.ok(from > 0, `源码里找不到 ${fn}()（它被改名或删了？）`);
+    const to = next ? src.indexOf(`async function ${next}(`) : src.length;
+    assert.ok(to > from, `找不到 ${next}() 的位置，无法切出 ${fn}() 的函数体`);
+    assert.match(src.slice(from, to), /unavailable'\?503/, `${fn}() 里要把 unavailable 映成 503`);
+  }
   // ② 内部 URL 不许进正文
   // 真机复验（2026-09-27）：第一版只剥 http://…，而同一句末尾还会再出现一次裸的
   // 127.0.0.1:54800 ⇒ 判据钉「源码里既有 127 的替换、又出现『对局引擎』这个替身」。
