@@ -621,6 +621,11 @@ function boxCatalogCard(index,e){
   support_label:sup?(BOX_SUPPORT_LABELS[sup.level]??sup.level):null,
   has_moveset:Boolean(layer),
   art:index.captureArt.has(e.id),
+  // ⚠ 2026-09-29 修（人类报的 A3：「pvp选精灵看不到等级？」）：目录卡原来**根本没有 `level`**
+  // ⇒ 「全图鉴」那一档的候选行每一行都是 `Lv—`（连玩家**已经拥有**的那些也是），
+  // 而 `kind=mine` 的卡一直有 `level`（60）—— 同一只精灵在两个页签里等级一有一无。
+  // 现在：这一物种**在盒子里有实例**时，带上那只实例的等级；没有就 `null`（页面照实说"未登记"，不编）。
+  level:index.instancesBySpecies.get(e.id)?.[0]?.level ?? null,
   has_metrics:Boolean(layer?.stats),
   // 机制首层：全图鉴 622 只都能取到逐字冻结 desc（查不到就是「机制资料待确认」）。
   mechanism:rosterMechanism(mechanismIndex().get(e.id)),

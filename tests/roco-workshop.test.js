@@ -835,8 +835,12 @@ test('同名不同物种的候选行必须看得出区别：各行含自己的�
   const [a, b] = SAME_NAME_CARDS;
   const metaA = poolRowMetaText(a), metaB = poolRowMetaText(b);
   assert.notEqual(metaA, metaB, `两行的区分文本不许相同（实际都是「${metaA}」）`);
-  assert.ok(/Lv50/.test(metaA) && /输出/.test(metaA), `第一行要写出自己的等级与定位，实际「${metaA}」`);
-  assert.ok(/Lv80/.test(metaB) && /坦克/.test(metaB), `第二行要写出自己的等级与定位，实际「${metaB}」`);
+  // ⚠ 2026-09-29 改钉（人类 A3：「pvp选精灵看不到等级？」）：等级写法从 `Lv50` 改成 **`Lv.50`** ——
+  // 与**盒子页**卡片上一直用的 `Lv.60` 统一（同一份数据在两个页面上不该有两种写法）。
+  // 判据的**意图一字未变**：每一行要写出**自己的**等级与定位。
+  // 旧断言留档：assert.ok(/Lv50/.test(metaA) && /输出/.test(metaA), …); assert.ok(/Lv80/.test(metaB) && /坦克/.test(metaB), …);
+  assert.ok(/Lv\.50/.test(metaA) && /输出/.test(metaA), `第一行要写出自己的等级与定位，实际「${metaA}」`);
+  assert.ok(/Lv\.80/.test(metaB) && /坦克/.test(metaB), `第二行要写出自己的等级与定位，实际「${metaB}」`);
 });
 
 test('必红反证：去掉「等级 + 定位」之后，这两行**确实**一模一样（判据量的正是它）', () => {
@@ -1015,4 +1019,22 @@ test('环境权重按来源分档：假设的权重不许说成「每 N 局遇�
   // 反证：把两种来源的文案对调，必须被上面三条断言抓住
   const swapped = axisValueText({...base, value: arche, distribution_kind: 'measured'});
   assert.notEqual(swapped, assumed, '实测与假设的文案必须不同（否则分档没生效）');
+});
+
+// ── 候选行必须说得出等级（2026-09-29，人类报的 A3：「pvp选精灵看不到等级？」）──────────────
+//
+// 事实经过：`poolRowMetaText()` 在缺等级时印 **`Lv—`** —— 那既不是等级、也没说清为什么没有。
+// 而真因是**服务端的目录卡根本没有 `level` 字段**（`kind=mine` 的卡一直有 60），
+// 所以「全图鉴」那一档**每一行**都是 `Lv—`，连玩家已经拥有的也是。
+// 现在：有数就说数；是你拥有的但没数 ⇒「等级未登记」；图鉴里你没有 ⇒「未持有」。**三种都不编。**
+test('候选行的等级三种说法：Lv.60 / 等级未登记 / 未持有（不许再出现光秃秃的 Lv—）', async () => {
+  const {poolRowMetaText} = await import('../src/client/team-workshop.js');
+  assert.match(poolRowMetaText({level: 60, select: 'own-0001', role_label: '回复'}), /^Lv\.60 · 回复$/);
+  assert.match(poolRowMetaText({level: null, select: 'own-0001'}), /^等级未登记 · 定位未登记$/);
+  assert.match(poolRowMetaText({level: null, select: 'pet_000277'}), /^未持有 · 定位未登记$/);
+  assert.match(poolRowMetaText({level: 0, select: 'own-0001'}), /^等级未登记/, '0 不是等级（Lv.0 是编的）');
+  for (const card of [{level: 60, select: 'own-0001'}, {level: null, select: 'own-0001'},
+    {level: null, select: 'pet_000277'}, {}]) {
+    assert.doesNotMatch(poolRowMetaText(card), /Lv—|Lv-/, `不许再出现 Lv—：${poolRowMetaText(card)}`);
+  }
 });

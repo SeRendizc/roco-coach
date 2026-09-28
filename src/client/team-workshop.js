@@ -106,8 +106,19 @@ export const poolCardKey = (card) =>
  * （`own-0042/pet_000556` 与 `own-0043/pet_000575` 都叫「棋契陛下」，属性也相同），
  * 候选行原来只画名字/属性/支持等级 ⇒ 两行看起来一模一样。接口回执里本来就有 `level` 与 `role_label`
  * （实测 50/输出 与 80/坦克），所以**零新接口**就能区分。 */
-export const poolRowMetaText = (card) =>
-  `Lv${(card?.level ?? null) === null ? '—' : String(card.level)} · ${card?.role_label ?? '定位未登记'}`;
+export const poolRowMetaText = (card) => {
+  // ⚠ 2026-09-29 改（人类报的 A3：「pvp选精灵看不到等级？」；Codex P1-03 也点名 Team 要「explicit level normalization」）：
+  // 原来缺等级时印的是 **`Lv—`** —— 那既不是等级、也不说清为什么没有，读起来像"这只没有等级"。
+  // 现在分三种，**都不编**：
+  //   · 有数（服务端给了这一物种在盒子里的等级，通常 60）⇒ `Lv.60`；
+  //   · 没有数但**是你拥有的**（`data-tw-kind` 那一路拿不到时按 `select` 形状判）⇒ `等级未登记`；
+  //   · 图鉴里你**没有**这一只 ⇒ `未持有`（本来就没有等级可言）。
+  const raw = card?.level;
+  const level = Number.isFinite(Number(raw)) && Number(raw) > 0 ? `Lv.${Number(raw)}` : null;
+  const owned = /^own-\d+$/.test(String(card?.select ?? '')) || card?.held === true;
+  const levelText = level ?? (owned ? '等级未登记' : '未持有');
+  return `${levelText} · ${card?.role_label ?? '定位未登记'}`;
+};
 
 /**
  * 按 `poolCardKey` 去重（保序）：**按物种去重、保留首次出现的那一只**。键为空的条目丢弃（原行为不变）。 */
