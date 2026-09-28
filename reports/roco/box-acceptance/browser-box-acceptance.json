@@ -1,7 +1,7 @@
 {
  "generated_by": "scripts/roco/browser-box-acceptance.mjs",
  "page": "box.html",
- "judged_at": "2026-09-28T15:11:56.677Z",
+ "judged_at": "2026-09-28T16:13:38.551Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|licence|pack_id|ruleset_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "screenshots": [
   "reports/roco/box-acceptance/box-01-mine-1440x900.png",
@@ -84,13 +84,13 @@
    "id": "06-玩家层无工程话",
    "judge": "展开的玩家可见文本里不出现 pet_id / state_version / coverage / provenance / unknown_fields / 裸 JSON",
    "ok": true,
-   "actual": "扫过 903 字；卡片首层「🌿 喵喵 🌿草系 定位：回复」"
+   "actual": "扫过 834 字；卡片首层「喵喵 🌿草系 定位：回复」"
   },
   {
    "id": "07-键盘搜索",
    "judge": "真实键盘输入「喵喵」后结果数 0<total<622，且每张卡的名字都含搜索词",
    "ok": true,
-   "actual": "输入框实际值=\"喵喵\" total=2 每张卡都含喵=true；样例「🌿 喵喵 🌿草系 定位：回复」"
+   "actual": "输入框实际值=\"喵喵\" total=2 每张卡都含喵=true；样例「喵喵 🌿草系 定位：回复」"
   },
   {
    "id": "08-系别筛选",
@@ -114,7 +114,7 @@
    "id": "10-详情也不说工程话",
    "judge": "个体详情二级页（玩家点得到的）同样不出现工程字段",
    "ok": true,
-   "actual": "扫过 880 字"
+   "actual": "扫过 877 字"
   },
   {
    "id": "10b-资质要摊成六维数值（own-0001）",
@@ -168,7 +168,7 @@
    "id": "17-玩家层载荷",
    "judge": "玩家层载荷里没有工程键（pet_id / species_id / unknown_fields / provenance…），也没有 id 形状的展示值",
    "ok": true,
-   "actual": "扫过 13936 字节"
+   "actual": "扫过 13913 字节"
   },
   {
    "id": "18-窄屏不溢出",
@@ -288,7 +288,7 @@
    "id": "41-官方立绘：有图的画图、没图的照旧 emoji",
    "judge": "人类 2026-09-28：「我抓包出来的地方是不是有精灵立绘？你把迪莫的实装一下我看看」⇒ 带 `art=true` 的卡必须在**屏幕上真的画出那张立绘**（懒加载也要加载完：naturalWidth > 0），而没有立绘的卡照旧画系别 emoji —— **不许留空框**",
    "ok": true,
-   "actual": "这一页 24 张卡：带立绘 1 张、屏幕上 1 个 img （都加载出来了：1024×1024）；其余 23 个照旧画 emoji"
+   "actual": "这一页 24 张卡：带立绘 24 张、屏幕上 24 个 img （都加载出来了：256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、384×512、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256）；其余 0 个照旧画 emoji"
   },
   {
    "id": "22-控制台干净",
@@ -484,8 +484,8 @@
    "id": "41-官方立绘：有图的画图、没图的照旧 emoji",
    "judge": "① 有 art=true 却不画图 ② 图画了但没加载出来（naturalWidth=0）③ 没图的卡留了空框 —— 三种坏样本都要被同一条判据抓住",
    "ok": true,
-   "hit": "带 art=true 的卡有 1 张，屏幕上却只有 0 个立绘 img | 1 张立绘没加载出来（naturalWidth/Height 是 0）：[{\"src\":\"x\",\"w\":0,\"h\":0}] | 没立绘的卡应当照旧画 emoji：期望 23 个，实际 0",
-   "actual": "不画图=[\"带 art=true 的卡有 1 张，屏幕上却只有 0 个立绘 img\"]；图没加载=[\"1 张立绘没加载出来（naturalWidth/Height 是 0）：[{\\\"src\\\":\\\"x\\\",\\\"w\\\":0,\\\"h\\\":0}]\"]；留空框=[\"没立绘的卡应当照旧画 emoji：期望 23 个，实际 0\"]"
+   "hit": "带 art=true 的卡有 24 张，屏幕上却只有 0 个立绘 img | 1 张立绘没加载出来（naturalWidth/Height 是 0）：[{\"src\":\"x\",\"w\":0,\"h\":0}]",
+   "actual": "不画图=[\"带 art=true 的卡有 24 张，屏幕上却只有 0 个立绘 img\"]；图没加载=[\"1 张立绘没加载出来（naturalWidth/Height 是 0）：[{\\\"src\\\":\\\"x\\\",\\\"w\\\":0,\\\"h\\\":0}]\"]；留空框=[]"
   }
  ],
  "console_errors": [],
@@ -600,7 +600,7 @@
     },
     "moves": 4
    },
-   "text": "← 返回精灵盒子 喵喵 · 详情 🌿 喵喵 🌿草系 定位：回复 刷新性格（还剩 3 次） 刷新天分（还剩 3 次） 带上它去配队 ★ 已收藏 换技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 抓挠 现在带着的 系别 普通系 · 类别 攻击 · 耗能 0 · 威力 35 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 游戏数据里没有这一项 第 3 个 仙人掌刺击 现在带着的 系别 草系 · 类别 攻击 · 耗能 6 · 威力 150 第 4 个 腐化 现在带着的 系别 毒系 · 类别 状态 · 耗能 1 · 威力 游戏数据里没有这一项 看它能学什么 等级 等级Lv.60 性格与资质 性格 稳重 资质 生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9 天分档位 相当好的天分 六维（6"
+   "text": "← 返回精灵盒子 喵喵 · 详情 喵喵 🌿草系 定位：回复 刷新性格（还剩 3 次） 刷新天分（还剩 3 次） 带上它去配队 ★ 已收藏 换技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 抓挠 现在带着的 系别 普通系 · 类别 攻击 · 耗能 0 · 威力 35 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 游戏数据里没有这一项 第 3 个 仙人掌刺击 现在带着的 系别 草系 · 类别 攻击 · 耗能 6 · 威力 150 第 4 个 腐化 现在带着的 系别 毒系 · 类别 状态 · 耗能 1 · 威力 游戏数据里没有这一项 看它能学什么 等级 等级Lv.60 性格与资质 性格 稳重 资质 生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9 天分档位 相当好的天分 六维（60 级"
   },
   {
    "at": "detail-own-0001",
@@ -863,17 +863,132 @@
   {
    "at": "capture-art",
    "facts": {
-    "withArt": 1,
+    "withArt": 24,
     "cards": 24,
-    "imgs": 1,
+    "imgs": 24,
     "loaded": [
      {
+      "src": "/api/roco/sprite?id=pet_000001&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000002&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000003&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
       "src": "/api/roco/sprite?id=pet_000004&v=default",
-      "w": 1024,
-      "h": 1024
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000005&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000006&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000007&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000008&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000009&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000010&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000011&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000012&v=default",
+      "w": 384,
+      "h": 512
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000013&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000014&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000015&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000016&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000017&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000018&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000019&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000020&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000021&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000022&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000023&v=default",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "src": "/api/roco/sprite?id=pet_000024&v=default",
+      "w": 256,
+      "h": 256
      }
     ],
-    "plainEmoji": 23
+    "plainEmoji": 0
    }
   }
  ],

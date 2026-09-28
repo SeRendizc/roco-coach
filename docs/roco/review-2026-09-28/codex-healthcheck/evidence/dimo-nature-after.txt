@@ -1,0 +1,98 @@
+- main:
+  - heading "小芽 · 精灵盒子 全部精灵 / 我的盒子" [level=1]
+  - link "← 返回首页":
+    - /url: /
+  - link "⚔ 开始 PVP":
+    - /url: /roco.html
+  - generic: 上一次刷性格：换成了「沉默」（结果就在这一页上）
+  - button "重置筛选"
+  - generic "关于这一页（来源与快照） ▾"
+  - button "小芽":
+    - generic: ✦
+    - text: 小芽
+  - text: ▾ ▾ ▾
+  - region "迪莫 · 详情":
+    - button "← 返回精灵盒子"
+    - heading "迪莫 · 详情" [level=2]
+    - status: 上一次刷性格：换成了「沉默」
+    - heading "迪莫" [level=3]
+    - generic: ✨光系
+    - generic: 定位：辅助
+    - button "刷新性格（还剩 2 次）"
+    - button "刷新天分（还剩 2 次）"
+    - button "回滚上一次"
+    - button "带上它去配队"
+    - button "收藏":
+      - generic: ☆
+      - generic: 收藏
+    - heading "换技能" [level=4]
+    - paragraph: 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。
+    - list:
+      - generic: 第 1 个
+      - generic: 光刃
+      - generic: 现在带着的
+      - generic: 系别 光系 · 类别 攻击 · 耗能 4 · 威力 120
+      - generic: 第 2 个
+      - generic: 防御
+      - generic: 现在带着的
+      - generic: 系别 普通系 · 类别 防御 · 耗能 1 · 威力 游戏数据里没有这一项
+      - generic: 第 3 个
+      - generic: 棘突
+      - generic: 现在带着的
+      - generic: 系别 草系 · 类别 攻击 · 耗能 3 · 威力 100
+      - generic: 第 4 个
+      - generic: 抽枝
+      - generic: 现在带着的
+      - generic: 系别 草系 · 类别 攻击 · 耗能 4 · 威力 90
+    - button "看它能学什么"
+    - heading "等级" [level=4]
+    - generic: 等级Lv.60
+    - heading "性格与资质" [level=4]
+    - generic: 性格 专注
+    - generic: 资质 生命 0 / 物攻 7 / 物防 10 / 魔攻 0 / 魔防 7 / 速度 0
+    - generic: 天分档位 相当好的天分
+    - heading "六维（60 级）" [level=4]
+    - generic: 生命
+    - text: "401"
+    - emphasis: 种族 120
+    - generic: 物攻
+    - text: "263"
+    - emphasis:
+      - text: 种族 80
+      - emphasis: "+7"
+    - generic: 物防
+    - text: "374"
+    - emphasis:
+      - text: 种族 105
+      - emphasis: "+10"
+    - generic: 魔攻
+    - text: "148"
+    - emphasis: 种族 80
+    - generic: 魔防
+    - text: "314"
+    - emphasis:
+      - text: 种族 105
+      - emphasis: "+7"
+    - generic: 速度
+    - text: "161"
+    - emphasis: 种族 92
+    - paragraph: 主数是按 60 级公式换算的面板值（默认 5 星 · 零突破）；下面一行是它的两个输入：种族值，以及这一只的天分（黄色）。这是给你看的换算值，引擎对战里用的不是这一份。没有种族值的精灵只给种族值本身，不编面板。
+    - heading "四个技能（按顺序）" [level=4]
+    - list:
+      - generic: 第 1 个
+      - text: 光刃
+      - generic: 光系 · 攻击 · 耗能 4 · 威力 120
+      - generic: 对敌方精灵造成物理伤害。
+      - generic: 第 2 个
+      - text: 防御
+      - generic: 普通系 · 防御 · 耗能 1 · 威力 游戏数据里没有这一项
+      - generic: 减伤70%，应对攻击。
+      - generic: 第 3 个
+      - text: 棘突
+      - generic: 草系 · 攻击 · 耗能 3 · 威力 100
+      - generic: 对敌方精灵造成魔法伤害。
+      - generic: 第 4 个
+      - text: 抽枝
+      - generic: 草系 · 攻击 · 耗能 4 · 威力 90
+      - generic: 造成物伤，应对状态：自己回复50%生命和5能量。
+    - paragraph: 等级换算后的面板数值：这个数值游戏数据里没有——换算公式还没校准，所以盒子里只给迁移层登记过的种族值，不给伪精确的成品数值。

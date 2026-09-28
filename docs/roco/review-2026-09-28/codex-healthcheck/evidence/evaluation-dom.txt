@@ -1,0 +1,242 @@
+- main:
+  - heading "小芽 · 洛克王国：世界 训练场" [level=1]
+  - link "← 返回首页":
+    - /url: /
+  - button "⚔ 开始 PVP"
+  - button "打开小芽":
+    - generic: ✦
+    - text: 小芽
+  - text: ▾
+  - list:
+    - strong: 选满六只
+    - generic: 在工作台里点候选；选满了就能开一局，小芽会在该说话时自己出来
+  - button "跳过"
+  - region "六槽阵容工作台":
+    - complementary:
+      - button "收起 ›"
+      - heading "阵容评估" [level=3]
+      - generic: 六只满编 · 六个方面
+      - paragraph: 这六只的五个方面现在都能算。其中四个方面要先假设"对手会用什么体系"（现在各体系按同等权重，换成本赛季实测数据会更准）；这里给的高低是按阵容结构算出来的排序，不是实测数据，也不预测输赢。
+      - button "✦ 让小芽说人话"
+      - paragraph: 这一页的数字是按阵容结构算出来的排序（不是胜率）。 点一下让小芽用三句话讲讲它读到什么。
+      - list:
+        - generic: 环境价值
+        - generic: 现在能算
+        - paragraph: 偏高
+        - paragraph: 这一方面的高低是按阵容结构推出来的（对手分布是假设的），不是实测对局数据。
+        - generic "原始数值与说明 ▸"
+        - generic: 最怕的体系
+        - generic: 现在能算
+        - paragraph: 撞上「翼王飞翼」这类最吃亏（这类在环境里大约每 7 局遇到 1 次）
+        - paragraph: 这一方面的高低是按阵容结构推出来的（对手分布是假设的），不是实测对局数据。
+        - generic "原始数值与说明 ▸"
+        - generic: 对局离散度
+        - generic: 现在能算
+        - paragraph: 偏低
+        - paragraph: 这一方面的高低是按阵容结构推出来的（对手分布是假设的），不是实测对局数据。
+        - generic "原始数值与说明 ▸"
+        - generic: 操作容错
+        - generic: 现在能算
+        - paragraph: 中等
+        - paragraph: 这一方面的高低是按阵容结构推出来的（对手分布是假设的），不是实测对局数据。
+        - generic "原始数值与说明 ▸"
+        - generic: 覆盖置信
+        - generic: 现在能算
+        - paragraph: 偏高
+        - paragraph: 这一轴的依据还没到「已核验」：它说的是我们自己知道多少，不是这支队伍有多强。
+        - generic "原始数值与说明 ▸"
+      - heading "一个最小替换" [level=4]
+      - paragraph: 把「喵喵」换成「深渊罗隐」
+      - paragraph: 换出的是队里「一个人扛下最多没人能接的弱点」的那只，换进来的这只声明能接住队里现在没人接的系别。 它能接住的系别：幽系 / 普通系 / 毒系 / 翼系。 这一只没有具体构建数据：换它不会改善覆盖置信，所以这里不把它算成收益。 这个替换只有结构理由：它补的是「队里没人接的系别」，不是「换它更强」——版本对手分布还没有，所以这里不说谁更强。
+      - heading "这一页现在还不知道什么" [level=3]
+      - generic: 6 条
+      - list:
+        - generic: 六只是否必须选满
+        - generic: 未核实
+        - generic: 待实机录制确认；这一页按六个槽位做，但不假装「必须选满」是官方规则。
+        - generic: 魔力点数与力竭的准确语义
+        - generic: 候选规则
+        - generic: 多份社区资料一致，但不是官方说法；本页不做与魔力相关的推算。
+        - generic: 能量上限与聚能回复量
+        - generic: 候选规则
+        - generic: 规则配置里有登记值，但它的证据等级仍是候选规则。
+        - generic: 同速时的先后判定
+        - generic: 未知
+        - generic: 系统按 fail closed 处理：不猜先后，也不因此给结论。
+        - generic: 对手分布（谁在环境里、各占多少）
+        - generic: 未知
+        - generic: 没有真实对局数据，所以「对环境的价值」这类判断现在算不出来——不补 0、不补胜率。
+        - generic: 版本强度排序器
+        - generic: 未产出
+        - generic: 还没跑过离线对战统计，所以这里的排序只是按公开权重算的，不代表真实对局里的期望。
+      - paragraph: 这一页不输出胜率、概率或任何伪精确百分数：能算的算，算不出的就写「现在算不出来」并点名缺什么。
+    - region "队伍":
+      - heading "队伍" [level=3]
+      - generic: 六个槽位都满了
+      - list:
+        - generic: 喵喵
+        - button "把这一只从队伍里移除": 移除
+        - generic: 草系
+        - text: 持有 · 可正式上场
+        - generic: 有具体构建（算得出高低）
+        - generic: 特性「氧循环」：使用草系技能后，回复10%生命。
+        - generic: 机制线索：回能 · 回血 · 异常 · 印记 · 应对
+        - button "换招"
+        - generic "引擎规范配招：抓挠、防御、仙人掌刺击、腐化"
+        - generic "详情（技能 / 机制原文 / 来源）"
+        - generic: 水蓝蓝
+        - button "把这一只从队伍里移除": 移除
+        - generic: 水系
+        - text: 持有 · 可正式上场
+        - generic: 有具体构建（算得出高低）
+        - generic: 特性「浸润」：使用水系技能后，全技能能耗-1。
+        - generic: 机制线索：回能 · 离场 · 强化 · 驱散 · 天气 · 印记 · 应对
+        - button "换招"
+        - generic "引擎规范配招：甩水、防御、水炮、多维击打"
+        - generic "详情（技能 / 机制原文 / 来源）"
+        - generic: 火花
+        - button "把这一只从队伍里移除": 移除
+        - generic: 火系
+        - text: 持有 · 可正式上场
+        - generic: 有具体构建（算得出高低）
+        - generic: 特性「助燃」：使用火系技能后，获得双攻+20%。
+        - generic: 机制线索：应对 · 回能 · 强化 · 驱散
+        - button "换招"
+        - generic "引擎规范配招：火苗、防御、火云车、龙之利爪"
+        - generic "详情（技能 / 机制原文 / 来源）"
+        - generic: 迪莫
+        - button "把这一只从队伍里移除": 移除
+        - generic: 光系
+        - text: 持有 · 可正式上场
+        - generic: 有具体构建（算得出高低）
+        - generic: 特性「最好的伙伴」：造成克制伤害后，获得攻防速+20%，并回复2能量。
+        - generic: 机制线索：迸发 · 应对
+        - button "换招"
+        - generic "引擎规范配招：光刃、防御、棘突、抽枝"
+        - generic "详情（技能 / 机制原文 / 来源）"
+        - generic: 水灵
+        - button "把这一只从队伍里移除": 移除
+        - generic: 水系
+        - text: 持有 · 可正式上场
+        - generic: 有具体构建（算得出高低）
+        - generic: 特性「浸润」：使用水系技能后，全技能能耗-1。
+        - generic: 机制线索：回能 · 离场 · 强化 · 驱散 · 天气 · 印记 · 应对
+        - button "换招"
+        - generic "引擎规范配招：甩水、防御、水炮、多维击打"
+        - generic "详情（技能 / 机制原文 / 来源）"
+        - generic: 火神
+        - generic: 锁定
+        - button "把这一只从队伍里移除": 移除
+        - generic: 火系
+        - text: 持有 · 可正式上场
+        - generic: 有具体构建（算得出高低）
+        - generic: 特性「助燃」：使用火系技能后，获得双攻+20%。
+        - generic: 机制线索：应对 · 回能 · 强化 · 驱散
+        - button "换招"
+        - generic "引擎规范配招：火苗、防御、火云车、龙之利爪"
+        - generic "详情（技能 / 机制原文 / 来源）"
+      - text: ▸ + + + + + +
+      - button "清空阵容"
+    - region "候选池":
+      - heading "候选池" [level=3]
+      - paragraph
+      - button "全图鉴" [pressed]
+      - button "我的精灵"
+      - combobox "按属性筛选":
+        - option "属性" [selected]
+        - option "普通系"
+        - option "火系"
+        - option "水系"
+        - option "武系"
+        - option "翼系"
+        - option "冰系"
+        - option "龙系"
+        - option "幽系"
+        - option "萌系"
+        - option "虫系"
+        - option "幻系"
+        - option "草系"
+        - option "地系"
+        - option "毒系"
+        - option "光系"
+        - option "恶系"
+        - option "机械系"
+        - option "电系"
+      - combobox "按定位筛选":
+        - option "定位" [selected]
+        - option "输出"
+        - option "坦克"
+        - option "回复"
+        - option "控制"
+        - option "辅助"
+      - searchbox "搜索候选"
+      - button "重置"
+      - status: 622 条 · 本页 10
+      - button "上一页" [disabled]
+      - generic: 1 / 63
+      - button "下一页"
+      - group "从全图鉴挑一只":
+        - button "喵喵 草系 Lv— · 回复 持有 · 可正式上场 在你的盒子里":
+          - generic: 喵喵
+          - generic: 草系
+          - generic: Lv— · 回复
+          - generic: 持有 · 可正式上场
+          - generic: 在你的盒子里
+        - button "水蓝蓝 水系 Lv— · 辅助 持有 · 可正式上场 在你的盒子里":
+          - generic: 水蓝蓝
+          - generic: 水系
+          - generic: Lv— · 辅助
+          - generic: 持有 · 可正式上场
+          - generic: 在你的盒子里
+        - button "火花 火系 Lv— · 回复 持有 · 可正式上场 在你的盒子里":
+          - generic: 火花
+          - generic: 火系
+          - generic: Lv— · 回复
+          - generic: 持有 · 可正式上场
+          - generic: 在你的盒子里
+        - button "迪莫 光系 Lv— · 辅助 持有 · 可正式上场 在你的盒子里":
+          - generic: 迪莫
+          - generic: 光系
+          - generic: Lv— · 辅助
+          - generic: 持有 · 可正式上场
+          - generic: 在你的盒子里
+        - button "水灵 水系 Lv— · 坦克 持有 · 可正式上场 在你的盒子里":
+          - generic: 水灵
+          - generic: 水系
+          - generic: Lv— · 坦克
+          - generic: 持有 · 可正式上场
+          - generic: 在你的盒子里
+        - button "火神 火系 Lv— · 输出 持有 · 可正式上场 在你的盒子里":
+          - generic: 火神
+          - generic: 火系
+          - generic: Lv— · 输出
+          - generic: 持有 · 可正式上场
+          - generic: 在你的盒子里
+        - button "魔力猫 草系 Lv— · 坦克 持有 · 可正式上场 在你的盒子里":
+          - generic: 魔力猫
+          - generic: 草系
+          - generic: Lv— · 坦克
+          - generic: 持有 · 可正式上场
+          - generic: 在你的盒子里
+        - button "草头鸭 草系 Lv— · 回复 持有 · 可正式上场 在你的盒子里":
+          - generic: 草头鸭
+          - generic: 草系
+          - generic: Lv— · 回复
+          - generic: 持有 · 可正式上场
+          - generic: 在你的盒子里
+        - button "恶魔叮 恶系 翼系 Lv— · 回复 持有 · 可正式上场 在你的盒子里":
+          - generic: 恶魔叮
+          - generic: 恶系
+          - generic: 翼系
+          - generic: Lv— · 回复
+          - generic: 持有 · 可正式上场
+          - generic: 在你的盒子里
+        - button "恶魔狼 恶系 Lv— · 回复 持有 · 可正式上场 在你的盒子里":
+          - generic: 恶魔狼
+          - generic: 恶系
+          - generic: Lv— · 回复
+          - generic: 持有 · 可正式上场
+          - generic: 在你的盒子里
+  - button "开一局（标准 PVP · 六宠）"
+  - generic: 只要选满六只开局
+  - text: ▾ ▾

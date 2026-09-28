@@ -432,6 +432,11 @@ export function loadBoxIndex(){
   const doc=JSON.parse(readFileSync(join(BOX_ROOT,'data','roco','assets','capture-pets','manifest.json'),'utf8'));
   captureArt=new Set(Object.keys(doc?.entries??{}));
  }catch{ captureArt=new Set(); }
+ // 2026-09-29：**策展那 48 张也算「有立绘」**。它们由服务端那条老路径按 roster-48 的槽位解析
+ // （`/api/roco/sprite?id=…` → `slotOfPetId` → `asset_key`），抓包里没有的那 12 只基线精灵
+ // 正好落在这一档里。**这不是借图**：那是它们自己的图，只是来源与抓包不同。
+ // 缺资源的那些（既没抓包图、也不在策展 48 里）仍然 `art:false` ⇒ 页面画系别 emoji 占位。
+ for(const one of (roster.pets??[])) if(one?.pet_id) captureArt.add(String(one.pet_id));
  // 四个技能在两份数据里**字段名不同**，这里统一成 `moveset`：
  //   · 迁移层 `roster-48.json` → `moveset`（数组，直接可用）；
  //   · 两份 support-matrix → `candidate_moveset.skills`（同样是数组，530 条**全都有**，实测 530/530）。

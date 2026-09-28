@@ -1,0 +1,7 @@
+# 抓包立绘的**原件**（1024×1024 PNG，约 240MB）不进仓库：
+# 它是「存储」，不是页面加载目标（Codex 计划 P1-03 的原话）。
+# 需要的机器上跑 `node scripts/roco/fetch-capture-art.mjs --all` 就能按 manifest 里的
+# source_url + sha256 逐张重新取回；页面用的是 thumb/ 里那套 256px 预览（那套进仓库）。
+originals/
+# sips 的临时文件
+thumb/.tmp-*.png

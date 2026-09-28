@@ -667,17 +667,30 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
       // 塞第 49 条会把审计与门禁一起弄坏。所以走这一条**按 pet_id 查的回落**，
       // 只有 `v=default`（抓包里只有一张静态图，没有 action 那一态，**不假装有两态**）。
       // 许可 UNKNOWN / REFERENCE_ONLY —— 与仓里其它抓包产物同一条纪律，见那份 manifest 的出处字段。
+      //
+      // ⚠ 2026-09-29（Codex 计划 P1-03 的资产管线要求）：
+      //   · **默认发缩略图**（`thumb/<pet_id>.png`，实测 256px ≈ 45–71 KB），
+      //     而不是 1024×1024 的原件（≈ 370–580 KB）—— 一页 24 张的差别是 ~1.3 MB vs ~11 MB；
+      //   · 原件仍在 `originals/`（gitignore），要原图时显式 `&full=1`；
+      //   · 缩略图缺失时**退到原件**，两个都没有才 404（缺资源显示明确占位，不偷偷借另一只图）。
       if((!key||!known.has(key))&&byId&&variant==='default'){
         try{
-          const capPath=join(REPO_ROOT,'data','roco','assets','capture-pets','manifest.json');
-          const capMan=JSON.parse(readFileSync(capPath,'utf8'));
+          const capRoot=join(REPO_ROOT,'data','roco','assets','capture-pets');
+          const capMan=JSON.parse(readFileSync(join(capRoot,'manifest.json'),'utf8'));
           const hit=capMan?.entries?.[String(byId)];
-          if(hit?.file){
-            const buf=readFileSync(join(REPO_ROOT,'data','roco','assets','capture-pets',String(hit.file)));
-            res.writeHead(200,{'Content-Type':'image/png','Cache-Control':'public, max-age=3600',
+          const wantFull=new URL(req.url,origin).searchParams.get('full')==='1';
+          const rel=wantFull
+            ? (hit?.original_file?join('originals',String(hit.original_file)):null)
+            : (hit?.thumb_file?join('thumb',String(hit.thumb_file)):null);
+          const fallback=hit?.original_file?join('originals',String(hit.original_file)):null;
+          const filePath=rel?join(capRoot,rel):(fallback?join(capRoot,fallback):null);
+          if(filePath&&existsSync(filePath)){
+            const buf=readFileSync(filePath);
+            res.writeHead(200,{'Content-Type':'image/png','Cache-Control':'public, max-age=86400',
               'Content-Length':buf.length,
               'X-Content-Type-Options':'nosniff',
               'X-Roco-Sprite-Source':'capture-2026-09-27',
+              'X-Roco-Sprite-Variant':wantFull?'original':'thumb',
               'X-Roco-Sprite-Licence':'UNKNOWN/REFERENCE_ONLY'});
             return res.end(buf);
           }

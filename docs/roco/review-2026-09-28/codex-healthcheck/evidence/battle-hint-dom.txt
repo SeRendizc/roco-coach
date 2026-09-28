@@ -1,0 +1,84 @@
+- main:
+  - heading "小芽 · 洛克王国：世界 训练场" [level=1]
+  - button "打开小芽":
+    - generic: ✦
+    - text: 小芽
+  - text: ▾ ▸ ▸ ▸ ▸ ▸ ▸ + + + + + + ▾
+  - generic "我方存活": ●●●●●○
+  - generic: ♥♥♥♡
+  - generic: PVP · AI模拟
+  - generic: 第 3 回合
+  - generic: ♥♥♥♥
+  - generic "对手存活": ●●●●●●
+  - generic: ⭐ 4
+  - generic: 喵喵
+  - generic: 🌿
+  - generic: 草系
+  - generic: 332/332
+  - generic: ⭐ 10
+  - generic: 水蓝蓝
+  - generic: 💧
+  - generic: 水系
+  - generic: 348/348
+  - generic: ⭐ 10
+  - generic: 火花
+  - generic: 🔥
+  - generic: 火系
+  - generic: 340/340
+  - generic: ⭐ 10
+  - generic: 水灵
+  - generic: 💧
+  - generic: 水系
+  - generic: 434/434
+  - generic: ⭐ 10
+  - generic: 火神
+  - generic: 🔥
+  - generic: 火系
+  - generic: 420/420
+  - generic: 迪莫
+  - generic: ✨
+  - generic: 光系
+  - generic: 60 级
+  - generic: ⭐ 6
+  - generic: 生命 0 / 425
+  - generic: 0%
+  - generic: 60 级
+  - generic: 🌿
+  - generic: 草系
+  - generic: 魔力猫
+  - generic: 67%
+  - generic: 生命 271 / 405
+  - generic: ⭐ 4
+  - heading "战报" [level=4]
+  - generic: 第 3 回合（最新）
+  - paragraph: 第 3 回合开始。
+  - paragraph: 我方的「光刃」命中，造成约 80 点伤害（伤害公式未核验，这是引擎估值），属性抗性。
+  - paragraph: 对方的「抓挠」命中，造成约 10 点伤害（伤害公式未核验，这是引擎估值）。
+  - paragraph: 我方的精灵倒下了。
+  - paragraph: 我方的精灵力竭，失去 1 点魔力（剩余 3 点）（力竭扣魔力未实机核实，本条为候选口径）。
+  - paragraph: 对方用「抓挠」获得 1 点能量（回能时序未核验，按出手时立即回能处理）。
+  - paragraph: 对方的抓挠有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。
+  - generic: 第 2 回合
+  - paragraph: 第 2 回合开始。
+  - paragraph: 我方换上第 4 位精灵。
+  - paragraph: 对方的「仙人掌刺击」命中，造成约 415 点伤害（伤害公式未核验，这是引擎估值），属性克制。
+  - generic: 第 1 回合
+  - paragraph: 第 1 回合开始。
+  - paragraph: 对方使用防御，本回合减伤约 70%，并作出应对。
+  - paragraph: 我方的「仙人掌刺击」命中，造成约 54 点伤害（伤害公式未核验，这是引擎估值）。
+  - button "聚能 ♥ 3 / 4":
+    - generic: 聚能
+    - generic: ♥ 3 / 4
+  - tablist:
+    - tab "技能" [disabled]
+    - tab "更换"
+    - tab "物品" [disabled]
+    - tab "逃跑"
+  - text: ▾
+- status: 建议已给出
+- status:
+  - strong: ✦ 小芽
+  - paragraph: 这一手值得留到局后看一眼。现在先按你的判断走。
+  - button "本场不再主动提醒": ×
+  - generic: 依据：cooldown
+  - button "展开取舍"

@@ -76,6 +76,27 @@ export const ROLE_CN = {attacker: '输出', tank: '坦克', recovery: '回复', 
  *
  * 判据在 `tests/roco-workshop.test.js`：同名不同物种**不许**被合并、同物种多只**必须**被合并。
  */
+/**
+ * 候选行/槽位上的小头像。
+ *
+ * 2026-09-29（Codex 计划 P1-03 资产管线 + 人类「列表/详情/配队/对战共用同一套映射」）：
+ * 候选池走的就是 `/api/roco/box`，所以 `card.art` 和盒子页是**同一个字段、同一条判定**：
+ *   · `art === true` ⇒ 画 `/api/roco/sprite?id=<物种id>&v=default`（服务端默认发 256px 缩略图）；
+ *   · 否则画一个**明确的空占位**（虚线框 + 首字），**不偷偷借另一只精灵的图**。
+ * `loading="lazy"`：候选池一页 24 行、每行一张图，不懒加载会一次性拉完整页。
+ */
+function twArtHtml(card, {size = 28} = {}) {
+  const petId = String(card?.group ?? card?.select ?? '');
+  if (card?.art === true && petId) {
+    return `<span class="tw-art" style="width:${size}px;height:${size}px">`
+      + `<img src="/api/roco/sprite?id=${encodeURIComponent(petId)}&v=default" alt="" `
+      + `aria-hidden="true" loading="lazy" decoding="async"></span>`;
+  }
+  const head = String(card?.name ?? '').trim().slice(0, 1) || '?';
+  return `<span class="tw-art tw-art-none" style="width:${size}px;height:${size}px" `
+    + `title="这只还没有立绘（不借用别的精灵的图）">${escapeHtml(head)}</span>`;
+}
+
 export const poolCardKey = (card) =>
   String(card?.species_id ?? card?.group ?? card?.pet_id ?? card?.name ?? '').trim();
 
@@ -160,6 +181,12 @@ const STYLE = `
  height:100%;min-height:0;grid-template-rows:minmax(0,1fr)}   /* 行吃满 → 两框纵向铺满 */
 .tw-cand,.tw-team{display:flex;flex-direction:column;min-height:0;height:100%;align-self:stretch}
 .tw-cand-list{flex:1 1 auto;min-height:0;overflow:auto;grid-auto-rows:44px;gap:4px;align-content:stretch}
+/* 2026-09-29：候选行的小头像（Codex P1-03 资产管线）。有立绘画图、没有画一个明确的空占位。
+   44px 的行高里放 28px 的图，圆角与盒子页的头像一致（7px vs 10px 是按尺寸缩过的比例）。 */
+.tw-art{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;border-radius:7px;
+ border:1px solid #2b3d4f;background:#101a26;overflow:hidden;font-size:12px;color:#7d8fa3;line-height:1}
+.tw-art img{width:100%;height:100%;object-fit:contain;display:block}
+.tw-art-none{border-style:dashed}
 .tw-cand-list>*{height:44px;min-height:44px;max-height:44px;overflow:hidden}   /* 人类：两种档位行高**一致**、不许变高 */   /* 一屏下也要有可用高度（实测曾被挤到 60px） */
 .tw-team{grid-column:1;grid-row:1;width:100%}
 
@@ -896,7 +923,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
             : '<span class="tw-state-tag tw-state-trial">图鉴 · 按需推算（未核验）</span>');
         return `<article class="tw-slot on" role="listitem" data-tw-slot="${slot.index}"
           data-tw-state="filled" data-tw-fieldable="${held || sameNameHeld ? 'yes' : 'no'}">
-         <div class="tw-row"><span class="tw-who">${escapeHtml(slot.name ?? NO_ITEM)}</span>
+         <div class="tw-row">${twArtHtml({group: species, art: state.artBySpecies?.get?.(String(species ?? '')) === true}, {size: 32})}<span class="tw-who">${escapeHtml(slot.name ?? NO_ITEM)}</span>
           ${slot.locked ? '<span class="tw-lock">锁定</span>' : ''}
           <button class="tw-slot-remove" data-tw-remove-slot="${slot.index - 1}"
             aria-label="把这一只从队伍里移除">移除</button></div>
@@ -957,7 +984,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       return `<article class="tw-slot on" role="listitem" data-tw-analysis-slot="${slot.index}"
         data-tw-state="filled" data-tw-status="${escapeAttr(slot.status ?? '')}"
         data-tw-can-battle="${slot.can_field === true ? 'field' : (slot.can_trial === true ? 'trial' : 'no')}">
-       <div class="tw-row"><span class="tw-who">${escapeHtml(slot.name ?? NO_ITEM)}</span>
+       <div class="tw-row">${twArtHtml({group: species, art: state.artBySpecies?.get?.(String(species ?? '')) === true}, {size: 32})}<span class="tw-who">${escapeHtml(slot.name ?? NO_ITEM)}</span>
         <span class="tw-lock">${canBattle}</span>
         <button class="tw-slot-remove" data-tw-remove-analysis="${slot.index - 1}"
           aria-label="把这一只从理论阵容里移除">移除</button></div>
@@ -1131,6 +1158,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
           data-tw-instance="${escapeAttr(card.variants[0].select)}"
           data-tw-owned="${escapeAttr(card.variants[0].select)}"
           data-tw-status="held" data-tw-kind="mine" data-tw-variants="${card.variants.length}">
+         ${twArtHtml(card.variants[0])}
          <span class="tw-name">${escapeHtml(card.name ?? NO_ITEM)}${count}</span>
          <span class="tw-types">${teamSlugs(card.types)}</span>
          <span class="tw-row-meta" data-tw-row-meta="yes">${escapeHtml(poolRowMetaText(card.variants[0]))}</span>
@@ -1162,6 +1190,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
         data-tw-owned="${escapeAttr(instanceId)}"
         data-tw-status="${held ? 'held' : 'on_demand'}"
         data-tw-kind="${isMine ? 'mine' : 'catalog'}">
+       ${twArtHtml(card)}
        <span class="tw-name">${who}</span>
        <span class="tw-types">${teamSlugs(card.types)}</span>
        <span class="tw-row-meta" data-tw-row-meta="yes">${escapeHtml(poolRowMetaText(card))}</span>
@@ -1195,6 +1224,9 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     rootEl.dataset.twPoolRows = String(rows.length);
   }
 
+  /** 物种 id → 有没有立绘。池子每拉一趟就更新（见 loadPool 里的注释）。 */
+  state.artBySpecies = state.artBySpecies instanceof Map ? state.artBySpecies : new Map();
+
   async function loadPool({reset = false} = {}) {
     if (reset) state.pool.offset = 0;
     const seq = (state.poolSeq += 1);
@@ -1220,6 +1252,13 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
         if (!page.ok) throw new Error(page.error || '图鉴读取失败');
         total = Number(page.player.total) || 0;
         const cards = Array.isArray(page.player.cards) ? page.player.cards : [];
+        // 2026-09-29：顺手记下「这一只有没有立绘」。候选池与六槽**共用同一套映射**
+        // （Codex 计划 P1-03：列表/详情/候选池/六只队伍/对战同一套映射），
+        // 而这份数据本来就在这一趟回执里（`/api/roco/box` 的 `art`），不再多发一次请求。
+        for (const one of cards) {
+          const key = String(one?.group ?? one?.select ?? '');
+          if (key) state.artBySpecies.set(key, one.art === true);
+        }
         all.push(...cards);
         if (cards.length < PAGE || all.length >= total) break;
       }
