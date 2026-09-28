@@ -48,6 +48,31 @@ skills.json 里没有的 .... 0 个（skills.json 共 821 个技能名）
 
 ---
 
+## 1.5 交接前我**已经把"能不能直接生成"验了一半**（照着实测接着做）
+
+拿现有 48 条里**能对上的 30 条**（`layer-playable-48/learnsets.json` 的 `pet_id` → `full-catalog.json` 的
+`capture_id` → 抓包 `pet_detail.id`）逐条比对"layer 的 `native_skills`"与"抓包 `skill_list` 三桶"：
+
+```
+可对照的 layer 条目 ...... 30 / 36（另 6 条在抓包里找不到对应 capture_id，先点名）
+native 技能全在抓包三桶里 . 28 / 30
+native 技能全在 level 桶里  28 / 30（⇒ 抓包的 level 桶 ≈ 现有 native_skills 的来源）
+```
+
+**两个例外（逐条查过，别重复发现）**：
+
+| 宠物 | 现象 | 已查到的细节 |
+|---|---|---|
+| `pet_000137` 多多（`capture_id` 3151，`matched_by: game_id`） | layer 的 17 条 native 里，抓包缺 **1 条：`毒液渗透`** | 抓包该只 `level` 16 条 / `machine` 19 条 / `blood` 18 条；其余 16 条全对得上 |
+| `pet_000542` 祭礼巨像（`capture_id` 4084，`matched_by: lord_name`；`game_id 5009` 是首领形态） | layer 的 16 条 native 与抓包**三桶 48 条全部零重叠**（`level 13 / machine 17 / blood 18`） | 抓包文件 `data/roco/raw/hke-2026-09-27/raw/pet-4084-1790537286.json`，名字对得上（`祭礼巨像`，地系/幻系，`sum_race 622`） |
+
+⇒ **这两条正是"难度"要回答的地方**：是抓包那一侧错/来自不同版本，还是 layer 那一侧另有来源（`generated_from` 字段）？
+**先查清这两条再谈 547 只全量**，因为"一条错法"会在 547 只里放大。
+
+另外 **6/36 条 layer 条目在抓包里找不到 `capture_id`** —— 把它们的 `pet_id` + 名字点名，说清是"抓包没抓"还是"映射没写"。
+
+---
+
 ## 2. 要回答的问题（逐条给数字）
 
 1. **48 → 547 的构建缺口到底是什么？** 把那 48 条的 `learnsets.json` 是**从哪来的**查清楚
