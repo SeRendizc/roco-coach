@@ -532,6 +532,14 @@ function renderPetPage() {
   // 这一屏也带着"这一只是谁"（`data-individual`）：刷新/回滚那几件事与列表那一行共用同一个落点，
   // 免得到处各写一套选择器（真机验收 28/30 号读的就是它）。
   $('pet-view').dataset.individual = select;
+  // 排障/验收用的钩子：这一页上「资质」那一栏原样印出来是什么（真机 10b 就是读它判的）。
+  // 只读标记，不改变任何渲染 —— 没有这一栏时写空串（不编值）。
+  {
+    const talentRow = [...document.querySelectorAll('#pet-body .trait')]
+      .find((el) => String(el.querySelector('b')?.textContent ?? '').trim() === '资质');
+    $('pet-view').dataset.talentRaw = talentRow
+      ? String([...talentRow.querySelectorAll('span')].map((s) => s.textContent).join(' ')).trim() : '';
+  }
   // ⚠ 2026-09-28 真机抓到（验收 10b：整页 **84 处** `[object Object]`）：
   // 服务端详情页把「天分」那一栏的 `value` 直接给成**六维对象**（`{hp: 10, …}`，见 `boxGrowthPlayer`），
   // 而 `fmtValue` 只认数值/数组/字符串 ⇒ 对象被原样 String() 成 `[object Object]`。

@@ -721,7 +721,11 @@ async function main() {
           labels:rows.map((r)=>r.label), hasTalentRow:Boolean(talent),
           value:String(talent?.value??''),
           statCount:(String(talent?.value??'').match(/生命\\s*\\d+|物攻\\s*\\d+|物防\\s*\\d+|魔攻\\s*\\d+|魔防\\s*\\d+|速度\\s*\\d+/g)??[]).length,
-          objectObject:(page.match(/\[object Object\]/g)??[]).length});})()`));
+          objectObject:(page.match(/\[object Object\]/g)??[]).length,
+          leakElements:[].slice.call(document.querySelectorAll('#pet-view *')).filter(function(el){return el.children.length===0&&/\[object Object\]/.test(el.textContent||'');}).length,
+          leakWhere:[].slice.call(document.querySelectorAll('#pet-view *')).filter(function(el){return el.children.length===0&&/\[object Object\]/.test(el.textContent||'');}).slice(0,5).map(function(el){var p=el.closest('[id]');return el.tagName+'.'+String(el.className).slice(0,20)+'@'+(p?p.id:'?')+': '+String(el.textContent).trim().slice(0,44);}),
+          talentRaw:String(document.getElementById('pet-view') ? (document.getElementById('pet-view').dataset.talentRaw||'') : ''),
+          storeOne:String((JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}')['own-0001']||{}).nature)});})()`));
       steps.push({at: 'detail-own-0001', facts: talentFacts});
       const talentProblems = talentDisplayProblems(talentFacts);
       check('10b-资质要摊成六维数值（own-0001）',
@@ -729,7 +733,9 @@ async function main() {
         talentProblems.length === 0,
         talentProblems.join(' | ')
           || `${talentFacts.title}：资质 =「${talentFacts.value}」（数出 ${talentFacts.statCount} 个数值；`
-            + `[object Object] ${talentFacts.objectObject} 处）`);
+            + `[object Object] ${talentFacts.objectObject} 处）`
+            + `｜pet-view 内命中元素 ${talentFacts.leakElements} 个 ${JSON.stringify(talentFacts.leakWhere)}`
+            + `｜资质原样「${talentFacts.talentRaw}」｜本机记录 nature=${JSON.stringify(talentFacts.storeOne)}`);
       counter('10b-资质要摊成六维数值（own-0001）',
         '把「资质」印成 [object Object]、或者一个数值都没有 —— 两种坏样本都必须被同一条判据抓住',
         talentDisplayProblems({hasTalentRow: true, statCount: 0, objectObject: 2}),
