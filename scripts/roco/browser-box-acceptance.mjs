@@ -753,9 +753,9 @@ async function main() {
           petLeakOuter:[].slice.call(document.querySelectorAll('.trait, .metric, .cmp-value, .moveset li, #pet-body *'))
             .filter(function(el){return /\[object Object\]/.test(el.textContent||'');})
             .slice(0,10).map(function(el){
-              var m=(el.textContent||'').match(/.{0,40}\[object Object\].{0,40}/);
+              var txt=String(el.textContent||'').replace(/\s+/g,' ');
               return el.tagName+'.'+String(el.className).slice(0,16)+'#'+(el.id||'')
-                +' kids='+el.children.length+' 片段=「'+String(m?m[0]:'').trim()+'」';})});})()`));
+                +' kids='+el.children.length+' 文字=「'+txt.slice(0,90)+'」';})});})()`));
       steps.push({at: 'detail-own-0001', facts: talentFacts});
       const talentProblems = talentDisplayProblems(talentFacts);
       check('10b-资质要摊成六维数值（own-0001）',
