@@ -6,10 +6,11 @@
 > 纪律：**每一个结论后面都挂一个可核对的数字或文件路径**；本文出现的数字全部来自本次实测
 > （命令与输出都在文里），没有估算、没有百分比、没有"大约几天"。
 >
-> 配套三份明细（都是只读侦察的产物）：
+> 配套**四份**明细（都是只读侦察的产物）：
 > - `docs/roadmap/FEASIBILITY-547-A-BUILD-CHAIN.md` —— 现有 48 条是怎么造出来的、能不能改吃抓包
 > - `docs/roadmap/FEASIBILITY-547-B-NUMBER-RECONCILE.md` —— 547/540/622/574 四个数逐条对账
 > - `docs/roadmap/FEASIBILITY-547-C-EXCEPTIONS.md` —— 三个例外（缺 1 条技能 / 零重叠 / 找不到 id）的定性
+> - `docs/roadmap/FEASIBILITY-547-D-MACHINE-VS-STONES.md` —— 技能石那一桶为什么不能直接用抓包
 
 ---
 
