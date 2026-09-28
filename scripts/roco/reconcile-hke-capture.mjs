@@ -154,7 +154,8 @@ export function reconcile(catalog, capture) {
     by_direction: tally(statDiffs, signOf),
     by_release: tally(statDiffs, (row) => catalog[row.id]?.release?.version ?? '—'),
     note: '69 条不是一个统一变换：既有"仓内整体更高"（39）也有"抓包整体更高"（10）与"有高有低"（20）⇒ '
-      + '要逐只决定以谁为准（抓包是 2026-09-27 的实况接口，通常更新；但改数据层前要人类点头）。',
+      + '~~要逐只决定以谁为准~~ —— **2026-09-27 人类已拍板：以抓包为准**（「按照抓包数据来吧」/「以具体数据为准吧」），'
+      + '这 69 只已按抓包改钉进 `full-catalog.json`（旧值逐只留在 `stats_previous`）。',
   };
   return {
     stat_diff_shape: statDiffShape,
@@ -195,7 +196,12 @@ function toMarkdown(result, plan, captureDir) {
   const lines = [];
   lines.push('# 小黑盒抓包 ↔ 仓内 622 图鉴：逐只对账');
   lines.push('');
-  lines.push(`> 抓包目录：\`${captureDir}\`（外部数据，按 \`REFERENCE_ONLY\` 处理，**不并入 normalized/**）`);
+  lines.push(`> 抓包目录：\`${captureDir}\`（外部数据，按 \`REFERENCE_ONLY\` 处理）`);
+  lines.push('>');
+  lines.push('> **2026-09-27 人类拍板后**：抓包的**六维**已采用进 L1 检索层（`full-catalog.json`），'
+   + '采用方式与旧值见该文件的 `provenance.stats_override` 与逐只 `stats_previous`；'
+   + '**执行域（引擎那两个 pet 文件）未动**，5 只已知分歧见 `tests/roco-hke-layer.test.js` ⑥。'
+   + '**不再补抓**下面那些区间（人类：「不要那些剩下没找到的了」）。');
   lines.push('> 生成：`node scripts/roco/reconcile-hke-capture.mjs`（判据 `tests/roco-hke-reconcile.test.js`）');
   lines.push('');
   lines.push('| 项 | 值 |');
@@ -211,7 +217,7 @@ function toMarkdown(result, plan, captureDir) {
   lines.push(`| ↳ 落在"未请求即跳过"的区间里 | ${c.missing_skipped_range} |`);
   lines.push(`| ↳ 从未请求过 | ${c.missing_never_requested} |`);
   lines.push('');
-  lines.push('## 下一轮抓这些（按区间）');
+  lines.push('## ~~下一轮抓这些（按区间）~~ —— 2026-09-27 人类拍板：**不再补抓**');
   lines.push('');
   lines.push('| 区间 | 条数 | 怎么抓 |');
   lines.push('|---|---:|---|');
@@ -258,7 +264,9 @@ function main(argv) {
     same_name_other_id: result.same_name_other_id, truly_only_capture: result.truly_only_capture,
     stat_diffs: result.stat_diffs, missing_ids: result.missing_ids,
     notes: [
-      '抓包来源是小黑盒社区 API（`/game/roco_kingdom/pet/detail`），许可 UNKNOWN、REFERENCE_ONLY，**不并入 normalized/**',
+      '抓包来源是小黑盒社区 API（`/game/roco_kingdom/pet/detail`），许可 UNKNOWN、REFERENCE_ONLY；'
+      + '2026-09-27 人类拍板后，**六维**按"以抓包为准"采用进 L1 检索层（带 `stats_source` 与旧值 `stats_previous`），'
+      + '抓包**派生层**（`data/roco/derived/hke-*`）仍不并入 `normalized/**`',
       '抓包的 `sum_race` 不可信（对方清单：547 里 521 条与实际六维之和不符）⇒ 本对账只比六维，不比总和',
       '同名不同 id 的那批是**首领/特殊形态**：本仓用 5xxx、抓包用 4xxx —— 同一只、两套 id 空间，需要人类定主键口径',
     ]};
@@ -270,7 +278,7 @@ function main(argv) {
     process.stdout.write(`抓包 ${result.counts.capture} / 仓内 ${result.counts.catalog}：id 对得上 ${result.counts.both}`
       + `（六维不一致 ${result.counts.stat_diffs}）、抓包独有 ${result.counts.only_capture}`
       + `（同名不同 id ${result.counts.capture_same_name_other_id}）、仓内独有 ${result.counts.only_catalog}\n`);
-    process.stdout.write(`下一轮抓：${plan.map((r) => `${r.from}-${r.to}(${r.count})`).join('、')}\n`);
+    process.stdout.write(`（2026-09-27 人类拍板不再补抓）待抓区间：${plan.map((r) => `${r.from}-${r.to}(${r.count})`).join('、')}\n`);
     process.stdout.write(`报告：reports/roco/hke-reconcile.md / .json\n`);
   }
   return 0;

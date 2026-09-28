@@ -13,7 +13,7 @@
  "derived_from": {
   "catalog": {
    "path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-   "sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab"
+   "sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880"
   },
   "skills": {
    "path": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
@@ -21,7 +21,7 @@
   },
   "frozen_learnsets": {
    "path": "data/roco/owned/owned-pets.json#battle_builds",
-   "sha256": "ce095ae1c8cd4f615e27873c7b4e1889cbcf051ee8ac880fe5c0d2c6b68488a0",
+   "sha256": "bad392e7622d6ba2ec5705d4d9e41af870f3b9896ad9fc650691f677cda5825a",
    "count": 48
   }
  },
@@ -3118,11 +3118,11 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 76,
-    "def": 103,
-    "hp": 105,
-    "spa": 35,
-    "spd": 65,
+    "atk": 71,
+    "def": 97,
+    "hp": 98,
+    "spa": 31,
+    "spd": 61,
     "spe": 60
    },
    "stats_pointer": "full-catalog.json#pets[pet_000035].stats",
@@ -5437,10 +5437,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 92,
+    "atk": 103,
     "def": 81,
     "hp": 68,
-    "spa": 31,
+    "spa": 37,
     "spd": 66,
     "spe": 96
    },
@@ -6128,11 +6128,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 39,
-    "def": 37,
-    "hp": 47,
-    "spa": 49,
-    "spd": 64,
+    "atk": 49,
+    "def": 43,
+    "hp": 56,
+    "spa": 60,
+    "spd": 73,
     "spe": 72
    },
    "stats_pointer": "full-catalog.json#pets[pet_000069].stats",
@@ -6219,11 +6219,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 52,
-    "def": 49,
-    "hp": 63,
-    "spa": 65,
-    "spd": 85,
+    "atk": 65,
+    "def": 58,
+    "hp": 75,
+    "spa": 80,
+    "spd": 97,
     "spe": 96
    },
    "stats_pointer": "full-catalog.json#pets[pet_000070].stats",
@@ -6310,11 +6310,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 65,
-    "def": 61,
-    "hp": 78,
-    "spa": 81,
-    "spd": 106,
+    "atk": 82,
+    "def": 72,
+    "hp": 94,
+    "spa": 100,
+    "spd": 121,
     "spe": 120
    },
    "stats_pointer": "full-catalog.json#pets[pet_000071].stats",
@@ -6401,10 +6401,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 25,
+    "atk": 28,
     "def": 60,
-    "hp": 82,
-    "spa": 65,
+    "hp": 67,
+    "spa": 73,
     "spd": 76,
     "spe": 54
    },
@@ -6490,11 +6490,11 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 34,
+    "atk": 38,
     "def": 80,
-    "hp": 109,
-    "spa": 86,
-    "spd": 102,
+    "hp": 90,
+    "spa": 98,
+    "spd": 101,
     "spe": 72
    },
    "stats_pointer": "full-catalog.json#pets[pet_000073].stats",
@@ -7197,10 +7197,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 47,
-    "def": 66,
+    "atk": 70,
+    "def": 81,
     "hp": 63,
-    "spa": 8,
+    "spa": 29,
     "spd": 56,
     "spe": 39
    },
@@ -7285,10 +7285,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 63,
-    "def": 88,
+    "atk": 94,
+    "def": 108,
     "hp": 84,
-    "spa": 11,
+    "spa": 39,
     "spd": 74,
     "spe": 52
    },
@@ -7373,10 +7373,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 79,
-    "def": 110,
+    "atk": 117,
+    "def": 135,
     "hp": 105,
-    "spa": 13,
+    "spa": 49,
     "spd": 93,
     "spe": 65
    },
@@ -8184,11 +8184,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 86,
-    "def": 101,
-    "hp": 78,
-    "spa": 33,
-    "spd": 95,
+    "atk": 81,
+    "def": 95,
+    "hp": 72,
+    "spa": 29,
+    "spd": 90,
     "spe": 42
    },
    "stats_pointer": "full-catalog.json#pets[pet_000092].stats",
@@ -8274,11 +8274,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 115,
-    "def": 134,
-    "hp": 104,
-    "spa": 43,
-    "spd": 127,
+    "atk": 108,
+    "def": 127,
+    "hp": 96,
+    "spa": 39,
+    "spd": 120,
     "spe": 56
    },
    "stats_pointer": "full-catalog.json#pets[pet_000093].stats",
@@ -8364,11 +8364,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 144,
-    "def": 168,
-    "hp": 130,
-    "spa": 54,
-    "spd": 159,
+    "atk": 135,
+    "def": 159,
+    "hp": 120,
+    "spa": 49,
+    "spd": 150,
     "spe": 70
    },
    "stats_pointer": "full-catalog.json#pets[pet_000094].stats",
@@ -11073,11 +11073,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 43,
-    "def": 54,
-    "hp": 79,
-    "spa": 46,
-    "spd": 60,
+    "atk": 40,
+    "def": 50,
+    "hp": 73,
+    "spa": 43,
+    "spd": 57,
     "spe": 60
    },
    "stats_pointer": "full-catalog.json#pets[pet_000125].stats",
@@ -11164,11 +11164,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 58,
-    "def": 72,
-    "hp": 105,
-    "spa": 62,
-    "spd": 80,
+    "atk": 53,
+    "def": 67,
+    "hp": 97,
+    "spa": 57,
+    "spd": 75,
     "spe": 80
    },
    "stats_pointer": "full-catalog.json#pets[pet_000126].stats",
@@ -11255,11 +11255,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 72,
-    "def": 89,
-    "hp": 132,
-    "spa": 77,
-    "spd": 100,
+    "atk": 67,
+    "def": 84,
+    "hp": 122,
+    "spa": 72,
+    "spd": 94,
     "spe": 100
    },
    "stats_pointer": "full-catalog.json#pets[pet_000127].stats",
@@ -12702,11 +12702,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 44,
-    "def": 62,
-    "hp": 61,
-    "spa": 45,
-    "spd": 54,
+    "atk": 51,
+    "def": 65,
+    "hp": 48,
+    "spa": 57,
+    "spd": 57,
     "spe": 63
    },
    "stats_pointer": "full-catalog.json#pets[pet_000144].stats",
@@ -12792,11 +12792,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 59,
-    "def": 83,
-    "hp": 81,
-    "spa": 59,
-    "spd": 72,
+    "atk": 68,
+    "def": 87,
+    "hp": 63,
+    "spa": 76,
+    "spd": 77,
     "spe": 84
    },
    "stats_pointer": "full-catalog.json#pets[pet_000145].stats",
@@ -17021,10 +17021,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 30,
+    "atk": 26,
     "def": 70,
-    "hp": 97,
-    "spa": 93,
+    "hp": 113,
+    "spa": 81,
     "spd": 80,
     "spe": 76
    },
@@ -17109,10 +17109,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 37,
+    "atk": 32,
     "def": 88,
-    "hp": 122,
-    "spa": 116,
+    "hp": 108,
+    "spa": 102,
     "spd": 100,
     "spe": 95
    },
@@ -17739,10 +17739,10 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 109,
+    "atk": 106,
     "def": 89,
     "hp": 74,
-    "spa": 104,
+    "spa": 101,
     "spd": 76,
     "spe": 76
    },
@@ -17829,10 +17829,10 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 136,
+    "atk": 132,
     "def": 111,
     "hp": 92,
-    "spa": 130,
+    "spa": 126,
     "spd": 95,
     "spe": 95
    },
@@ -19313,12 +19313,12 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 65,
-    "def": 66,
-    "hp": 94,
-    "spa": 18,
-    "spd": 55,
-    "spe": 68
+    "atk": 86,
+    "def": 52,
+    "hp": 82,
+    "spa": 27,
+    "spd": 41,
+    "spe": 80
    },
    "stats_pointer": "full-catalog.json#pets[pet_000220].stats",
    "feature_skill_id": "skill_000178",
@@ -19401,12 +19401,12 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 81,
-    "def": 82,
-    "hp": 117,
-    "spa": 23,
-    "spd": 68,
-    "spe": 85
+    "atk": 107,
+    "def": 65,
+    "hp": 103,
+    "spa": 34,
+    "spd": 51,
+    "spe": 100
    },
    "stats_pointer": "full-catalog.json#pets[pet_000221].stats",
    "feature_skill_id": "skill_000178",
@@ -23341,11 +23341,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 62,
-    "def": 60,
-    "hp": 79,
-    "spa": 61,
-    "spd": 76,
+    "atk": 60,
+    "def": 58,
+    "hp": 76,
+    "spa": 59,
+    "spd": 74,
     "spe": 33
    },
    "stats_pointer": "full-catalog.json#pets[pet_000266].stats",
@@ -23431,11 +23431,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 82,
-    "def": 80,
-    "hp": 105,
-    "spa": 81,
-    "spd": 101,
+    "atk": 79,
+    "def": 78,
+    "hp": 101,
+    "spa": 78,
+    "spd": 98,
     "spe": 44
    },
    "stats_pointer": "full-catalog.json#pets[pet_000267].stats",
@@ -23522,11 +23522,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 103,
-    "def": 100,
-    "hp": 132,
-    "spa": 101,
-    "spd": 127,
+    "atk": 99,
+    "def": 97,
+    "hp": 126,
+    "spa": 98,
+    "spd": 123,
     "spe": 55
    },
    "stats_pointer": "full-catalog.json#pets[pet_000268].stats",
@@ -24152,10 +24152,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 66,
+    "atk": 59,
     "def": 67,
     "hp": 62,
-    "spa": 24,
+    "spa": 19,
     "spd": 62,
     "spe": 75
    },
@@ -24240,10 +24240,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 88,
+    "atk": 78,
     "def": 89,
     "hp": 83,
-    "spa": 32,
+    "spa": 26,
     "spd": 82,
     "spe": 100
    },
@@ -24683,10 +24683,10 @@
    "learnable_pool_size": 15,
    "stats": {
     "atk": 62,
-    "def": 58,
-    "hp": 80,
+    "def": 51,
+    "hp": 68,
     "spa": 59,
-    "spd": 66,
+    "spd": 59,
     "spe": 45
    },
    "stats_pointer": "full-catalog.json#pets[pet_000281].stats",
@@ -24774,10 +24774,10 @@
    "learnable_pool_size": 15,
    "stats": {
     "atk": 82,
-    "def": 77,
-    "hp": 107,
+    "def": 68,
+    "hp": 91,
     "spa": 78,
-    "spd": 88,
+    "spd": 78,
     "spe": 60
    },
    "stats_pointer": "full-catalog.json#pets[pet_000282].stats",
@@ -24865,10 +24865,10 @@
    "learnable_pool_size": 15,
    "stats": {
     "atk": 103,
-    "def": 96,
-    "hp": 134,
+    "def": 85,
+    "hp": 113,
     "spa": 98,
-    "spd": 110,
+    "spd": 98,
     "spe": 75
    },
    "stats_pointer": "full-catalog.json#pets[pet_000283].stats",
@@ -24955,10 +24955,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 42,
+    "atk": 47,
     "def": 100,
-    "hp": 137,
-    "spa": 108,
+    "hp": 112,
+    "spa": 122,
     "spd": 127,
     "spe": 90
    },
@@ -25308,10 +25308,10 @@
    "learnable_pool_size": 13,
    "stats": {
     "atk": 46,
-    "def": 72,
+    "def": 65,
     "hp": 55,
     "spa": 12,
-    "spd": 58,
+    "spd": 47,
     "spe": 72
    },
    "stats_pointer": "full-catalog.json#pets[pet_000288].stats",
@@ -25395,11 +25395,11 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 62,
-    "def": 96,
-    "hp": 74,
+    "atk": 61,
+    "def": 86,
+    "hp": 73,
     "spa": 16,
-    "spd": 78,
+    "spd": 63,
     "spe": 96
    },
    "stats_pointer": "full-catalog.json#pets[pet_000289].stats",
@@ -25484,10 +25484,10 @@
    "learnable_pool_size": 13,
    "stats": {
     "atk": 77,
-    "def": 120,
+    "def": 108,
     "hp": 92,
     "spa": 20,
-    "spd": 97,
+    "spd": 79,
     "spe": 120
    },
    "stats_pointer": "full-catalog.json#pets[pet_000290].stats",
@@ -25571,10 +25571,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 60,
+    "atk": 47,
     "def": 65,
     "hp": 57,
-    "spa": 16,
+    "spa": 8,
     "spd": 57,
     "spe": 75
    },
@@ -25660,10 +25660,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 80,
+    "atk": 62,
     "def": 87,
     "hp": 76,
-    "spa": 21,
+    "spa": 11,
     "spd": 76,
     "spe": 100
    },
@@ -25749,10 +25749,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 100,
+    "atk": 78,
     "def": 109,
     "hp": 95,
-    "spa": 27,
+    "spa": 14,
     "spd": 95,
     "spe": 125
    },
@@ -26279,10 +26279,10 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 73,
+    "atk": 85,
     "def": 103,
-    "hp": 102,
-    "spa": 74,
+    "hp": 79,
+    "spa": 95,
     "spd": 90,
     "spe": 105
    },
@@ -28784,11 +28784,11 @@
    "learnable_pool_size": 14,
    "stats": {
     "atk": 99,
-    "def": 90,
+    "def": 98,
     "hp": 73,
     "spa": 38,
-    "spd": 68,
-    "spe": 84
+    "spd": 74,
+    "spe": 72
    },
    "stats_pointer": "full-catalog.json#pets[pet_000327].stats",
    "feature_skill_id": "skill_000128",
@@ -30432,10 +30432,10 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 85,
+    "atk": 76,
     "def": 72,
     "hp": 64,
-    "spa": 76,
+    "spa": 85,
     "spd": 96,
     "spe": 100
    },
@@ -30523,10 +30523,10 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 107,
+    "atk": 95,
     "def": 90,
     "hp": 80,
-    "spa": 95,
+    "spa": 107,
     "spd": 120,
     "spe": 125
    },
@@ -40283,11 +40283,11 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 115,
-    "def": 93,
+    "atk": 104,
+    "def": 85,
     "hp": 91,
-    "spa": 48,
-    "spd": 70,
+    "spa": 41,
+    "spd": 63,
     "spe": 88
    },
    "stats_pointer": "full-catalog.json#pets[pet_000457].stats",
@@ -40714,12 +40714,12 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 67,
+    "atk": 66,
     "def": 62,
-    "hp": 50,
+    "hp": 63,
     "spa": 62,
     "spd": 62,
-    "spe": 78
+    "spe": 63
    },
    "stats_pointer": "full-catalog.json#pets[pet_000462].stats",
    "feature_skill_id": "skill_000146",
@@ -40805,12 +40805,12 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 89,
+    "atk": 88,
     "def": 83,
-    "hp": 67,
+    "hp": 84,
     "spa": 83,
     "spd": 83,
-    "spe": 104
+    "spe": 84
    },
    "stats_pointer": "full-catalog.json#pets[pet_000463].stats",
    "feature_skill_id": "skill_000146",
@@ -40896,12 +40896,12 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 112,
+    "atk": 110,
     "def": 103,
-    "hp": 83,
+    "hp": 105,
     "spa": 104,
     "spd": 103,
-    "spe": 130
+    "spe": 105
    },
    "stats_pointer": "full-catalog.json#pets[pet_000464].stats",
    "feature_skill_id": "skill_000146",
@@ -40987,10 +40987,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 37,
+    "atk": 31,
     "def": 53,
     "hp": 82,
-    "spa": 76,
+    "spa": 66,
     "spd": 78,
     "spe": 48
    },
@@ -41076,10 +41076,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 50,
+    "atk": 41,
     "def": 70,
     "hp": 110,
-    "spa": 101,
+    "spa": 89,
     "spd": 104,
     "spe": 64
    },
@@ -41165,10 +41165,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 62,
+    "atk": 51,
     "def": 88,
     "hp": 137,
-    "spa": 126,
+    "spa": 111,
     "spd": 130,
     "spe": 80
    },
@@ -42759,12 +42759,12 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 73,
-    "def": 103,
-    "hp": 92,
-    "spa": 73,
-    "spd": 103,
-    "spe": 80
+    "atk": 87,
+    "def": 102,
+    "hp": 93,
+    "spa": 87,
+    "spd": 102,
+    "spe": 76
    },
    "stats_pointer": "full-catalog.json#pets[pet_000486].stats",
    "feature_skill_id": "skill_000170",
@@ -42850,12 +42850,12 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 92,
+    "atk": 108,
     "def": 128,
     "hp": 116,
-    "spa": 92,
+    "spa": 108,
     "spd": 128,
-    "spe": 100
+    "spe": 95
    },
    "stats_pointer": "full-catalog.json#pets[pet_000487].stats",
    "feature_skill_id": "skill_000170",
@@ -42941,10 +42941,10 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 76,
+    "atk": 87,
     "def": 86,
-    "hp": 97,
-    "spa": 83,
+    "hp": 89,
+    "spa": 94,
     "spd": 98,
     "spe": 84
    },
@@ -43032,10 +43032,10 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 96,
+    "atk": 109,
     "def": 108,
-    "hp": 121,
-    "spa": 104,
+    "hp": 111,
+    "spa": 118,
     "spd": 123,
     "spe": 105
    },
@@ -43123,11 +43123,11 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 44,
-    "def": 59,
-    "hp": 76,
-    "spa": 103,
-    "spd": 89,
+    "atk": 35,
+    "def": 50,
+    "hp": 61,
+    "spa": 89,
+    "spd": 78,
     "spe": 76
    },
    "stats_pointer": "full-catalog.json#pets[pet_000490].stats",
@@ -43212,11 +43212,11 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 55,
-    "def": 73,
-    "hp": 95,
-    "spa": 129,
-    "spd": 111,
+    "atk": 44,
+    "def": 62,
+    "hp": 76,
+    "spa": 111,
+    "spd": 97,
     "spe": 95
    },
    "stats_pointer": "full-catalog.json#pets[pet_000491].stats",
@@ -43481,11 +43481,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 77,
-    "def": 97,
-    "hp": 103,
-    "spa": 77,
-    "spd": 97,
+    "atk": 70,
+    "def": 90,
+    "hp": 93,
+    "spa": 70,
+    "spd": 90,
     "spe": 44
    },
    "stats_pointer": "full-catalog.json#pets[pet_000494].stats",
@@ -43572,11 +43572,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 96,
-    "def": 121,
-    "hp": 128,
-    "spa": 96,
-    "spd": 121,
+    "atk": 88,
+    "def": 112,
+    "hp": 116,
+    "spa": 88,
+    "spd": 112,
     "spe": 55
    },
    "stats_pointer": "full-catalog.json#pets[pet_000495].stats",
@@ -43841,10 +43841,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 43,
+    "atk": 34,
     "def": 68,
-    "hp": 102,
-    "spa": 110,
+    "hp": 92,
+    "spa": 96,
     "spd": 85,
     "spe": 88
    },
@@ -43930,10 +43930,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 54,
+    "atk": 43,
     "def": 84,
-    "hp": 128,
-    "spa": 138,
+    "hp": 115,
+    "spa": 120,
     "spd": 106,
     "spe": 110
    },
@@ -44018,11 +44018,11 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 85,
-    "def": 122,
+    "atk": 86,
+    "def": 139,
     "hp": 104,
     "spa": 56,
-    "spd": 45,
+    "spd": 64,
     "spe": 64
    },
    "stats_pointer": "full-catalog.json#pets[pet_000500].stats",
@@ -44107,10 +44107,10 @@
    "learnable_pool_size": 13,
    "stats": {
     "atk": 107,
-    "def": 153,
+    "def": 173,
     "hp": 130,
     "spa": 70,
-    "spd": 56,
+    "spd": 80,
     "spe": 80
    },
    "stats_pointer": "full-catalog.json#pets[pet_000501].stats",
@@ -46679,11 +46679,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 79,
-    "def": 88,
-    "hp": 92,
-    "spa": 80,
-    "spd": 88,
+    "atk": 74,
+    "def": 84,
+    "hp": 86,
+    "spa": 76,
+    "spd": 84,
     "spe": 60
    },
    "stats_pointer": "full-catalog.json#pets[pet_000530].stats",
@@ -46770,11 +46770,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 99,
-    "def": 110,
-    "hp": 115,
-    "spa": 100,
-    "spd": 110,
+    "atk": 93,
+    "def": 105,
+    "hp": 107,
+    "spa": 95,
+    "spd": 105,
     "spe": 75
    },
    "stats_pointer": "full-catalog.json#pets[pet_000531].stats",
@@ -47577,11 +47577,11 @@
    ],
    "learnable_pool_size": 15,
    "stats": {
-    "atk": 148,
-    "def": 173,
-    "hp": 136,
-    "spa": 57,
-    "spd": 163,
+    "atk": 139,
+    "def": 164,
+    "hp": 125,
+    "spa": 52,
+    "spd": 154,
     "spe": 70
    },
    "stats_pointer": "full-catalog.json#pets[pet_000541].stats",
@@ -48407,10 +48407,10 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 116,
+    "atk": 128,
     "def": 101,
     "hp": 85,
-    "spa": 38,
+    "spa": 46,
     "spd": 82,
     "spe": 120
    },
@@ -48586,12 +48586,12 @@
    ],
    "learnable_pool_size": 13,
    "stats": {
-    "atk": 81,
-    "def": 125,
+    "atk": 79,
+    "def": 108,
     "hp": 92,
     "spa": 21,
-    "spd": 101,
-    "spe": 125
+    "spd": 79,
+    "spe": 120
    },
    "stats_pointer": "full-catalog.json#pets[pet_000553].stats",
    "feature_skill_id": "skill_000223",

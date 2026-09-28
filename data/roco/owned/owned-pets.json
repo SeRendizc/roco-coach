@@ -16,13 +16,13 @@
     "panel_stats"
   ],
   "counts": {
-    "instances": 48,
+    "instances": 49,
     "species": 48,
     "species_in_layer_playable_48": 36,
     "species_outside_layer_playable_48": 12,
-    "same_species_groups": 0,
-    "same_species_groups_with_difference": 0,
-    "battle_builds": 48,
+    "same_species_groups": 1,
+    "same_species_groups_with_difference": 1,
+    "battle_builds": 49,
     "skills_referenced": 76
   },
   "candidate_universe": {
@@ -85,7 +85,7 @@
       "source_id": "wiki-rocom-snapshot",
       "source_scope": "frozen_l1",
       "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-      "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+      "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
       "pointer": "pets",
       "note": "622 只的静态种族值 / 名字 / learnable_skills"
     },
@@ -109,7 +109,7 @@
       "source_id": "wiki-rocom-snapshot",
       "source_scope": "frozen_l1",
       "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-      "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+      "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
       "pointer": "source_registry",
       "note": "来源台账与许可（licence_ref 的解析依据）"
     }
@@ -120,7 +120,7 @@
       "species_id": "pet_000012",
       "species_name": "铠甲虫",
       "species_tier": "overlay",
-      "level": 95,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -163,11 +163,11 @@
         "pointer": "pets[17].candidate_moveset.skills"
       },
       "base_stats": {
-        "hp": 132,
-        "atk": 95,
-        "def": 128,
-        "spa": 43,
-        "spd": 82,
+        "hp": 122,
+        "atk": 88,
+        "def": 121,
+        "spa": 39,
+        "spd": 77,
         "spe": 75
       },
       "panel_stats": null,
@@ -195,7 +195,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[11].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -208,14 +208,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "715344fb2aec879472111dbe6a9b47f99f322751fa049724737a799823fa5f60"
+      "build_hash": "cc84d4251d06894a6ed8cdfd3c15a53cb4569aaa8a9ac8e75b1543cbf11cad6d"
     },
     {
       "instance_id": "own-0002",
       "species_id": "pet_000062",
       "species_name": "音速犬",
       "species_tier": "baseline",
-      "level": 100,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -259,9 +259,9 @@
       },
       "base_stats": {
         "hp": 85,
-        "atk": 116,
+        "atk": 128,
         "def": 101,
-        "spa": 38,
+        "spa": 46,
         "spd": 82,
         "spe": 120
       },
@@ -290,7 +290,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[61].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -302,14 +302,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "257679027b6d547f9711d7fa04cd644d6a846b983791de365879bc16e9e6c0da"
+      "build_hash": "069b6dd03e5a7f42e669d37300c541b65ddb5af6ad3b179672f6b6c8c201974b"
     },
     {
       "instance_id": "own-0003",
       "species_id": "pet_000100",
       "species_name": "仪式巨像",
       "species_tier": "overlay",
-      "level": 65,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -384,7 +384,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[99].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -397,14 +397,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "d02defd91d83dbdbdeaa1abb60e53298de40767466034a25b6473d922d7b3213"
+      "build_hash": "fb091a9269b64ad68aaf83f1df7f64e46a78a02893e3e9a33544002d66a0202b"
     },
     {
       "instance_id": "own-0004",
       "species_id": "pet_000112",
       "species_name": "雪影娃娃",
       "species_tier": "baseline",
-      "level": 85,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -479,7 +479,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[111].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -491,14 +491,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "e38b3bfc277246d1f63c2e0e0704487f83cca1ac8cf77f57ee670dff704893a7"
+      "build_hash": "7bed62731551575cef753a14dfe8a7e0ccc793aa0952be8ec05c756d85d4b8b6"
     },
     {
       "instance_id": "own-0005",
       "species_id": "pet_000118",
       "species_name": "皇家狮鹫",
       "species_tier": "overlay",
-      "level": 70,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -573,7 +573,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[117].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -586,14 +586,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "bfdb3e157986cd69dcad00d60ef55bcaa89b963b4a3417b6f94b097f6996deee"
+      "build_hash": "86441c7a5e89756d830fa5aed9bbf0d42e9a864c3e50514df7f43f79b56374ca"
     },
     {
       "instance_id": "own-0006",
       "species_id": "pet_000124",
       "species_name": "化蝶",
       "species_tier": "baseline",
-      "level": 55,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -668,7 +668,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[123].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -680,7 +680,7 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "377c28cc5ebaf194bfc362bc85fb6033bc0b07549e8d2c7863aff9ad0d59f294"
+      "build_hash": "15d871b6d49bfbac4bd5cef067525a283e8cc764125611c9f46a54fcbfb0431b"
     },
     {
       "instance_id": "own-0007",
@@ -762,7 +762,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[129].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -775,14 +775,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "b408edc69a989dbc751b85f6967a442d70ed51e8d13ed93cb694de24631811d6"
+      "build_hash": "40da69ad3753426978067abc04dc5960de39988330ffc340b1c54aa80ebbd080"
     },
     {
       "instance_id": "own-0008",
       "species_id": "pet_000137",
       "species_name": "多多",
       "species_tier": "overlay",
-      "level": 85,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -857,7 +857,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[136].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -870,14 +870,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "cea4d79c57cf1ff1f59dafb9f9208ffe41477ce90fbebf3d0fb206e82b9819a6"
+      "build_hash": "6f29fac038309bd005478698c37d0a1647562b9a61b3b748bcda0327bd0b9917"
     },
     {
       "instance_id": "own-0009",
       "species_id": "pet_000139",
       "species_name": "古啦多",
       "species_tier": "overlay",
-      "level": 55,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -952,7 +952,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[138].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -965,14 +965,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "9256fe7e8b8e3b9216d8a5df059790dade69bed11b04363fae95e7085ca67971"
+      "build_hash": "981ced947e43242e791075bfe4d8bf57a9dff23dad1530d2b1f173a5118d88e8"
     },
     {
       "instance_id": "own-0010",
       "species_id": "pet_000143",
       "species_name": "花魁蜂后",
       "species_tier": "overlay",
-      "level": 95,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -1047,7 +1047,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[142].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -1060,14 +1060,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "660fa9e00edb6aa54a7dee62fbcc358658dcf48ab963f3bd6d824fda626877e8"
+      "build_hash": "13e397136959288e7a5cef85b45dbcf534f4146e126c55f623df1f6c81d41250"
     },
     {
       "instance_id": "own-0011",
       "species_id": "pet_000152",
       "species_name": "雪蛮人",
       "species_tier": "overlay",
-      "level": 100,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -1142,7 +1142,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[151].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -1155,14 +1155,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "c74ac69df16d9baaa1b6ec2f58c4f3ebad4fb0b6097f8418d724a7ab7685622c"
+      "build_hash": "87848dfa5218351d0f73996a931041763c7b1edac9f375451816e31966ae35e8"
     },
     {
       "instance_id": "own-0012",
       "species_id": "pet_000153",
       "species_name": "雪巨人",
       "species_tier": "overlay",
-      "level": 55,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -1237,7 +1237,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[152].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -1250,14 +1250,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "e1185e018ec0315d8f3d45283c203936e82c463f92b850324ceeb265c3cbf1a1"
+      "build_hash": "9f361fdcf7b60700e52a433f50060f8a4d4fb8b1e9354350ff090ecff7c14849"
     },
     {
       "instance_id": "own-0013",
       "species_id": "pet_000162",
       "species_name": "瑰眼仔",
       "species_tier": "overlay",
-      "level": 50,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -1332,7 +1332,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[161].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -1345,14 +1345,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "5150c208c2bf1e0bc8f25311f8d8e055869521c3fe504d6022f6c96d48ff1b46"
+      "build_hash": "02fe19b20a65cf404f692c893a3b9035d023ad4a82d58a9793f26463a43e34af"
     },
     {
       "instance_id": "own-0014",
       "species_id": "pet_000163",
       "species_name": "耳翎瑰魅",
       "species_tier": "overlay",
-      "level": 85,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -1427,7 +1427,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[162].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -1440,14 +1440,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "d8105b702f5f799b55b06cf33e9c0d302f206942a479f54c7b006f13801cc843"
+      "build_hash": "025e8d114334297bfa92cee19fe4148b3bcde90e0a42f3ec84ccde0231a2b3e8"
     },
     {
       "instance_id": "own-0015",
       "species_id": "pet_000167",
       "species_name": "电咩咩",
       "species_tier": "overlay",
-      "level": 75,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -1522,7 +1522,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[166].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -1535,14 +1535,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "6bc1cc05469c4d94b44214abc6bb18d7272aa9593ad31e1e15da4edbc6db4527"
+      "build_hash": "f0dee1358b2ff05d9cd2ccbb30a597d577583c5cd5d07e978e07fbf4f904535d"
     },
     {
       "instance_id": "own-0016",
       "species_id": "pet_000172",
       "species_name": "闪电环",
       "species_tier": "overlay",
-      "level": 50,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -1617,7 +1617,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[171].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -1630,7 +1630,7 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "eb16acb5044a18672837716aaf7c29d85e692f3e2943d0a687167b28cbdee724"
+      "build_hash": "c7cde2ed5044c720f0525f37a7fdeba918454fb52780176fc79144897327f13b"
     },
     {
       "instance_id": "own-0017",
@@ -1712,7 +1712,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[189].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -1724,14 +1724,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "ef1c57d10891c7a1028250dd53ac48b76a6213e9ca2655c67fabc97c94bded6b"
+      "build_hash": "7b6e823e893df9cfbfd5ede2cf7ae9b08587e59b5e6a71d091ae195753a47489"
     },
     {
       "instance_id": "own-0018",
       "species_id": "pet_000218",
       "species_name": "呼呼猪",
       "species_tier": "overlay",
-      "level": 95,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -1806,7 +1806,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[217].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -1819,14 +1819,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "f399b668eb9990730359a09c42101a11f1c389aa540b975e58c6ccf3e2aadf53"
+      "build_hash": "1d00f8cdd489f7dbbd0f08e7175eba9c78ed2544a479bf407005ef358f23034f"
     },
     {
       "instance_id": "own-0019",
       "species_id": "pet_000219",
       "species_name": "獠牙猪",
       "species_tier": "overlay",
-      "level": 80,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -1901,7 +1901,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[218].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -1914,14 +1914,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "0d92f3057518ebcd34e82a993c18389dba8f3fe484a457fe3f47a55b55f81cc0"
+      "build_hash": "edae546b1a4d7e9a219198905eb5514905ea0ba61df25da75d45b71cea4350a2"
     },
     {
       "instance_id": "own-0020",
       "species_id": "pet_000225",
       "species_name": "寂灭骨龙",
       "species_tier": "baseline",
-      "level": 80,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -1996,7 +1996,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[224].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -2008,14 +2008,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "d06f9e65bbd51df1ee0d641d2919ffb3380658db2320a7bcc66f1e63d2c1f184"
+      "build_hash": "71255884bf524f19528984670cc4a3a91c44638579b9727be3bbe7c6bb10ea11"
     },
     {
       "instance_id": "own-0021",
       "species_id": "pet_000240",
       "species_name": "丢丢",
       "species_tier": "overlay",
-      "level": 80,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -2090,7 +2090,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[239].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -2103,14 +2103,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "7fe5508404c9dfd3d1e026575b9480721b23b5101bd8da53c0c6e0b71b70076f"
+      "build_hash": "0479a9d4a2d1c7b22fe17b66b84cdfa78a50c6258a0b74ae1657745d1b138a43"
     },
     {
       "instance_id": "own-0022",
       "species_id": "pet_000243",
       "species_name": "卡卡虫",
       "species_tier": "overlay",
-      "level": 65,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -2185,7 +2185,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[242].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -2198,14 +2198,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "1ee1b22f4d0431ac720afb32b8455557b22cdf9ec6400c84b50aac709bb7be01"
+      "build_hash": "526e6990599477a37872b04dc88405c173d5a32fa741a5acbd807082966a23e3"
     },
     {
       "instance_id": "own-0023",
       "species_id": "pet_000248",
       "species_name": "蹦蹦种子",
       "species_tier": "overlay",
-      "level": 100,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -2280,7 +2280,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[247].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -2293,14 +2293,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "3cf217fa5463cb751292ebd1e9dee5939ba10c4b4d88b543ce4a3f52b87f0d3e"
+      "build_hash": "4c12f7092972d503bbdafcd5169b7c5259e67cc397b686e034aa7b31875b52be"
     },
     {
       "instance_id": "own-0024",
       "species_id": "pet_000308",
       "species_name": "深蓝鲸",
       "species_tier": "overlay",
-      "level": 80,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -2375,7 +2375,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[307].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -2388,7 +2388,7 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "2cff65ba269bc28ca144a7206a0020053cc86201c4acf381608805695916c6e7"
+      "build_hash": "ea6a29283f03e9019e0c2a5829cad93c4d25446373dbfb8e2962b5cad93d74d2"
     },
     {
       "instance_id": "own-0025",
@@ -2440,10 +2440,10 @@
       "base_stats": {
         "hp": 92,
         "atk": 124,
-        "def": 113,
+        "def": 122,
         "spa": 48,
-        "spd": 85,
-        "spe": 105
+        "spd": 92,
+        "spe": 90
       },
       "panel_stats": null,
       "source": "repo_generator_fixed_seed",
@@ -2470,7 +2470,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[327].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -2483,14 +2483,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "8cdf1871f4ec79db2a81c3571b3105e06306fd0a6a9c8890dad94ecc4d4ee0cc"
+      "build_hash": "ca024c87f6d69f6a23c8209f4fe6dda26e1b446a6b30a61104b42594852666ee"
     },
     {
       "instance_id": "own-0026",
       "species_id": "pet_000330",
       "species_name": "权杖-V",
       "species_tier": "overlay",
-      "level": 80,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -2565,7 +2565,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[329].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -2578,14 +2578,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "be674d7e50efc90daf0ab9892571f38db8e25f8d6f09a23a9688b2fd01621210"
+      "build_hash": "db5df5cc4446b2a5039f564ec5403c146cb2470de31b3bbf773fee506e3192ec"
     },
     {
       "instance_id": "own-0027",
       "species_id": "pet_000417",
       "species_name": "圆号鱼",
       "species_tier": "baseline",
-      "level": 65,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -2660,7 +2660,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[416].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -2672,14 +2672,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "00a772c671f75d1b3c79101d9f9a20faa8411951ddf5ca22c254191cf5344025"
+      "build_hash": "5bad16f1bb33235c782d781f0428b3be1a0203c2116b1066bd0a82ff60b3f703"
     },
     {
       "instance_id": "own-0028",
       "species_id": "pet_000445",
       "species_name": "黑猫巫师",
       "species_tier": "baseline",
-      "level": 55,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -2754,7 +2754,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[444].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -2766,14 +2766,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "fd6bb99e924ee055b4f08f9cd941651e198d2a8205e7fa69342d6f634b81530f"
+      "build_hash": "36eb3c5ac6f3cce4bbdfde57b3f95204896f9cac7062bdec5c85b63664f9bd22"
     },
     {
       "instance_id": "own-0029",
       "species_id": "pet_000448",
       "species_name": "爆焰喷喷",
       "species_tier": "overlay",
-      "level": 95,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -2848,7 +2848,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[447].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -2861,14 +2861,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "2ec90399e0ef35de8e1fdd63e807338c4023d9d7934388ec666efa7d83c9ba53"
+      "build_hash": "5772ab1383ee0691c1c579f39d1c822140c1f51f545f4c9b27de1a640f74dcd4"
     },
     {
       "instance_id": "own-0030",
       "species_id": "pet_000450",
       "species_name": "混乱鱿彩",
       "species_tier": "overlay",
-      "level": 50,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -2943,7 +2943,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[449].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -2956,14 +2956,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "77dc1985109d8a2709a104e50d5b91e530e885d560884594c6665f4c55fe403a"
+      "build_hash": "ff4893b42040c8aae256affe1fbf810fed80ca96b10f3dc52f4f5d813eb27a9f"
     },
     {
       "instance_id": "own-0031",
       "species_id": "pet_000451",
       "species_name": "秩序鱿墨",
       "species_tier": "baseline",
-      "level": 75,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -3038,7 +3038,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[450].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -3050,14 +3050,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "3f95a25bc2d3bd3aa869f55ac06a754f129ca1ded9b782c2c2193f1d09d30395"
+      "build_hash": "d7a28c39c6a3f1d3c7a72be631e50fa9b3d07bb014da022e768faa1c37cf18f1"
     },
     {
       "instance_id": "own-0032",
       "species_id": "pet_000456",
       "species_name": "十字蝌蚪",
       "species_tier": "overlay",
-      "level": 80,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -3101,10 +3101,10 @@
       },
       "base_stats": {
         "hp": 68,
-        "atk": 86,
-        "def": 70,
-        "spa": 36,
-        "spd": 52,
+        "atk": 78,
+        "def": 63,
+        "spa": 31,
+        "spd": 47,
         "spe": 66
       },
       "panel_stats": null,
@@ -3132,7 +3132,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[455].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -3145,7 +3145,7 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "5c376c22da3da17f9451726659bc9b2f7261af8bad22929530f57b55ec2aea97"
+      "build_hash": "4e794c8c5dba981b5849590ce2a91ca6431912feaf752f21455069365fa832de"
     },
     {
       "instance_id": "own-0033",
@@ -3196,10 +3196,10 @@
       },
       "base_stats": {
         "hp": 113,
-        "atk": 143,
-        "def": 116,
-        "spa": 60,
-        "spd": 87,
+        "atk": 130,
+        "def": 106,
+        "spa": 51,
+        "spd": 78,
         "spe": 110
       },
       "panel_stats": null,
@@ -3227,7 +3227,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[457].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -3240,14 +3240,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "43248f335bc631f8cf8f5345c91d5770e89d0798bc1f41f88ca4a020101f68f3"
+      "build_hash": "7abcd8df94387ed8be8898191a8dab9b6f52d9285b0edf01f8bef780e2f7e768"
     },
     {
       "instance_id": "own-0034",
       "species_id": "pet_000473",
       "species_name": "画间法师手",
       "species_tier": "overlay",
-      "level": 85,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -3322,7 +3322,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[472].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -3335,14 +3335,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "fb1dbfb090539c968c17ab49dce4cc97e99121af0eca550145dd187b12ea700c"
+      "build_hash": "aa871f778bf6ea42967c323823934dcfc43a959be0eec15008cc270000102158"
     },
     {
       "instance_id": "own-0035",
       "species_id": "pet_000474",
       "species_name": "画间沉铁兽",
       "species_tier": "baseline",
-      "level": 70,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -3417,7 +3417,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[473].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -3429,14 +3429,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "92dbfbd41afa220faeb6b9a5f3d57e135a0bf5f00404f077e6c561afaa36afea"
+      "build_hash": "c2236cf594b40fb1170ddd511fa55e84eefd6205f1a53d8f986b1dbd23f1ed8f"
     },
     {
       "instance_id": "own-0036",
       "species_id": "pet_000479",
       "species_name": "嗜光嗡嗡",
       "species_tier": "overlay",
-      "level": 80,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -3511,7 +3511,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[478].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -3524,14 +3524,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "9b170f0bec0e44f42624cdb338b7ec4ff18d4bcca2dad3ae04a2330ae9c551e0"
+      "build_hash": "623648dddf403579a3e84ac4fff38ee8302a809b5caab36199f940f64e2de39a"
     },
     {
       "instance_id": "own-0037",
       "species_id": "pet_000484",
       "species_name": "迷迷箱怪",
       "species_tier": "overlay",
-      "level": 100,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -3606,7 +3606,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[483].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -3619,14 +3619,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "576cf3b79c31a5ed1e99a2b96f6dfd0bfb84824906cda151fd3020e833b72ab4"
+      "build_hash": "6375346f5f9593a7637fe6192e1f91b65151ce9708a10e39d5f637fb92c0e7b5"
     },
     {
       "instance_id": "own-0038",
       "species_id": "pet_000485",
       "species_name": "学院呱呱",
       "species_tier": "overlay",
-      "level": 85,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -3701,7 +3701,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[484].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -3714,14 +3714,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "ddade707f8efbf23eeda6d4dd222af244dc676d6d7fca657ef71d34ddc1d76f0"
+      "build_hash": "31a26ab11b4235faff524d2850757bcd13d46f9ef62ded0b7df87bcb2dfae5b9"
     },
     {
       "instance_id": "own-0039",
       "species_id": "pet_000542",
       "species_name": "祭礼巨像",
       "species_tier": "overlay",
-      "level": 70,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -3796,7 +3796,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[540].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -3809,14 +3809,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "7d4daeb06d76719d99d0c6468d4d4292e7a4438179d802c6c9151712617b82b4"
+      "build_hash": "1727a7450880bbb0b767d5e75a31890e1aa1f69288bc2d460268838775de69a1"
     },
     {
       "instance_id": "own-0040",
       "species_id": "pet_000545",
       "species_name": "千棘海针",
       "species_tier": "overlay",
-      "level": 55,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -3891,7 +3891,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[543].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -3904,14 +3904,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "9ed453c1fc4c1ea370c84a0ef86fb91845513af7e96be410d81b386d3134b8a7"
+      "build_hash": "66022d43b0c6b7d2315e1d383a9a3ee7463a2fb93edf28a006a5413cb7a59e6b"
     },
     {
       "instance_id": "own-0041",
       "species_id": "pet_000548",
       "species_name": "女王蜂",
       "species_tier": "overlay",
-      "level": 90,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -3986,7 +3986,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[546].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -3999,14 +3999,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "01dbae6ab5be5389205c5b29b21df755ba3a56473858f6145d350d57539481e8"
+      "build_hash": "e9e337e3ddb660cdb94c6492f615e9117d39c861a6e198a2b1c1c5d0364d8058"
     },
     {
       "instance_id": "own-0042",
       "species_id": "pet_000556",
       "species_name": "棋契陛下",
       "species_tier": "overlay",
-      "level": 50,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -4081,7 +4081,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[554].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -4094,14 +4094,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "852474b1045fa619ae9a36e4b11edb049ad33653848f7054280bbcb7f75e366b"
+      "build_hash": "9a557afa18406f603e9151c59a8f7f39b47e715d86db2822310a94b549cadc84"
     },
     {
       "instance_id": "own-0043",
       "species_id": "pet_000575",
       "species_name": "棋契陛下",
       "species_tier": "overlay",
-      "level": 80,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -4176,7 +4176,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[573].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -4189,14 +4189,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "a41638b1442d41fee3380720bef138e7b700daa9e6021ef539c36382a025b84a"
+      "build_hash": "1b3baa8a247621c9b806d4fa424f5820c2395e6ca818d721b1ac9e5ad459d81e"
     },
     {
       "instance_id": "own-0044",
       "species_id": "pet_000601",
       "species_name": "圣凯布米龙",
       "species_tier": "baseline",
-      "level": 70,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -4271,7 +4271,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[599].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -4283,14 +4283,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "1443991b55bd70b8d4ca4e6e3277f907d71570a9bdedb3effe88c986ac80de78"
+      "build_hash": "cb7f77a0cee46b914a2e31e1357a1dbcfee2eae13078f13d47cb3c7ac1dbddf7"
     },
     {
       "instance_id": "own-0045",
       "species_id": "pet_000608",
       "species_name": "银月狼王",
       "species_tier": "baseline",
-      "level": 55,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -4365,7 +4365,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[606].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -4377,14 +4377,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "c3e40152edd92a91bdfa40c425628db2de6ac46620a1bc428ef68b9cc30d8763"
+      "build_hash": "17a7263eda3fc1165a44fdfe49e4eae9ee3eeab497cb1a41efebd9dadd4a9355"
     },
     {
       "instance_id": "own-0046",
       "species_id": "pet_000609",
       "species_name": "新月鹭",
       "species_tier": "overlay",
-      "level": 65,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -4459,7 +4459,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[607].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -4472,14 +4472,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "79fc520f6733337e16584a95d4c8b79c18aba663b039cd1ba3c9cf8786e71f81"
+      "build_hash": "0af242baf2ee05ff4660ec99a0c9d1f8aeb5cbad21674a8348495e186cdf85e7"
     },
     {
       "instance_id": "own-0047",
       "species_id": "pet_000611",
       "species_name": "月使鹭纳",
       "species_tier": "baseline",
-      "level": 65,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -4554,7 +4554,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[609].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -4566,14 +4566,14 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "89bf79d2adb76f23036d4e7f6863eb26f78f4e33333b061e4ce81101b9b75d78"
+      "build_hash": "1232179c45f8dcfbbfdc427a311b56731898241d12cce5e8fb00b91cd950a978"
     },
     {
       "instance_id": "own-0048",
       "species_id": "pet_000613",
       "species_name": "智辉章脑",
       "species_tier": "overlay",
-      "level": 65,
+      "level": 60,
       "nature": {
         "value": null,
         "value_source": null,
@@ -4648,7 +4648,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
           "pointer": "pets[611].stats",
           "note": "静态种族值出处（不是等级换算后的面板值）"
         }
@@ -4661,7 +4661,111 @@
         "specialty",
         "talent"
       ],
-      "build_hash": "6c7d54415e6589c9179204d9ce2820ecad8309fc54264124d2155dd8baf26736"
+      "build_hash": "b3c85641b3e1f8c268c4e412fdde471a7fb9100d4f39091a5a25a608ddc477df"
+    },
+    {
+      "instance_id": "own-0049",
+      "species_id": "pet_000012",
+      "species_name": "铠甲虫",
+      "species_tier": "overlay",
+      "level": 60,
+      "nature": {
+        "value": null,
+        "value_source": null,
+        "effect": "UNKNOWN",
+        "effect_reason": "面板换算公式未校准（见 10 号文档 §13）",
+        "microcase_id": null
+      },
+      "talent": {
+        "value": null,
+        "value_source": null,
+        "effect": "UNKNOWN",
+        "effect_reason": "面板换算公式未校准（见 10 号文档 §13）",
+        "microcase_id": null
+      },
+      "specialty": {
+        "value": null,
+        "value_source": null,
+        "effect": "UNKNOWN",
+        "effect_reason": "面板换算公式未校准（见 10 号文档 §13）",
+        "microcase_id": null
+      },
+      "bloodline": {
+        "value": null,
+        "value_source": null,
+        "effect": "UNKNOWN",
+        "effect_reason": "面板换算公式未校准（见 10 号文档 §13）",
+        "microcase_id": null,
+        "value_pointer": "learnsets.pet_000012.blood_skills[].blood",
+        "blood_skill_id": null
+      },
+      "skills": [
+        "skill_000632",
+        "skill_000286",
+        "skill_000650",
+        "skill_000704"
+      ],
+      "skills_source": {
+        "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/support-matrix.json",
+        "artifact_sha256": "b9a58b7230dd75cba112fae6c181224b854f57eabf77324f8b4d184dbf8a526e",
+        "pointer": "pets[17].candidate_moveset.skills"
+      },
+      "base_stats": {
+        "hp": 122,
+        "atk": 88,
+        "def": 121,
+        "spa": 39,
+        "spd": 77,
+        "spe": 75
+      },
+      "panel_stats": null,
+      "source": "repo_generator_fixed_seed",
+      "favourite": false,
+      "locked": false,
+      "provenance": [
+        {
+          "source_id": "wiki-rocom-snapshot",
+          "source_scope": "frozen_l1",
+          "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/support-matrix.json",
+          "artifact_sha256": "b9a58b7230dd75cba112fae6c181224b854f57eabf77324f8b4d184dbf8a526e",
+          "pointer": "pets[17].candidate_moveset.skills",
+          "note": "规范四技能的**选择**出处（引擎 loadout；confidence=ENGINE_HYPOTHESIS，台账 23 条里没有配招主题 ⇒ 这一份是工程启发式，不是游戏真实配招）"
+        },
+        {
+          "source_id": "wiki-rocom-snapshot",
+          "source_scope": "frozen_l1",
+          "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
+          "artifact_sha256": "939b586256fd45ef2bfa0ffea11e0d3c870bd462e0fd38ceb88e819a87c18cae",
+          "pointer": "learnsets.pet_000012",
+          "note": "四个技能的**合法性**出处（该物种学习表：native + blood + stones —— 与引擎 `Ruleset.is_learnable` 的 `all_skill_ids` 同一口径）"
+        },
+        {
+          "source_id": "wiki-rocom-snapshot",
+          "source_scope": "frozen_l1",
+          "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
+          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
+          "pointer": "pets[11].stats",
+          "note": "静态种族值出处（不是等级换算后的面板值）"
+        },
+        {
+          "source_id": "HUMAN-2026-09-28",
+          "source_scope": "human_decision",
+          "artifact_path": "data/roco/human-decisions.json",
+          "artifact_sha256": "463ab0dc64e2c0f9cf111b8f2ae20604b0fd416394953fb8441b7e2770405fef",
+          "pointer": "decisions.2026-09-28-same-species-demo-pair",
+          "note": "演示用的**同种第二个个体**：人类 2026-09-28 批准；**游戏里并不存在这一只**，只为让\"同种两个个体比较\"在真机上可验（性格/天分按新 instance_id 独立掷出）。若哪天不需要它了：删掉这一段 + own-0049，并把 MAX_SAME_SPECIES_GROUPS 调回 0。"
+        }
+      ],
+      "licence_ref": "wiki-rocom-snapshot",
+      "unknown_fields": [
+        "bloodline",
+        "nature",
+        "panel_stats",
+        "specialty",
+        "talent"
+      ],
+      "build_hash": "409b8e217894d54ccd4f66e3e5304517bf24cb246e2dc9821e94ee8e8d3c1c89",
+      "synthetic_demo": true
     }
   ],
   "battle_builds": [
@@ -4675,7 +4779,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[11].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -4702,7 +4806,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "04a3d272b298742f5290a6f6f9252cc85a6cc0a0d06cced4d22f6c1eb6767f6d"
+      "build_hash": "ea21ec0fd6581c0975a6dbe51d495edc4ed0f4af6584138ac5171b0dcf7cf566"
     },
     {
       "build_id": "build-own-0002",
@@ -4714,7 +4818,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[61].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -4740,7 +4844,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "a7d1d47c508843525a3a235ba908bc9a095da2a6492a62709b3e7bfd3ce5e6f9"
+      "build_hash": "912af0c582cf636cae2ce1b065a31ea8419a9b3a50f65df18c2c31b6f757c67a"
     },
     {
       "build_id": "build-own-0003",
@@ -4752,7 +4856,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[99].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -4779,7 +4883,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "488fe1406406f08aff13cbf14a41a636f8af4e1e1902c524b375b373d1772a39"
+      "build_hash": "43aa23d4f4b146105d7bc1e0ebe89792cd413f8f7db1306acd9bb1fe3bcf2406"
     },
     {
       "build_id": "build-own-0004",
@@ -4791,7 +4895,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[111].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -4817,7 +4921,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "22ec30e3afdb9c3014ff4a4c292635151999aebc27f012a15b689f559e90197d"
+      "build_hash": "dd222fb5790c702b75b21c7ab360281ed5544f165b7af06e395f8caf2162ad28"
     },
     {
       "build_id": "build-own-0005",
@@ -4829,7 +4933,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[117].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -4856,7 +4960,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "a228397741e2030f19d7827e27278be2bea2f0d718649da7ba4808b3e3a8fcb5"
+      "build_hash": "51a8b1b4e38fa0a074edb673c092339ec1c8900ba96a36c61c98ac8b222591e4"
     },
     {
       "build_id": "build-own-0006",
@@ -4868,7 +4972,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[123].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -4894,7 +4998,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "69d68bd3942fed42d559dd8a371eab10823aebf33e8a467a310240254ab6dea5"
+      "build_hash": "ecdc990d118062b76d3b315a60f72e7dfc8e4936e2e141a58703de83bdc7ffe2"
     },
     {
       "build_id": "build-own-0007",
@@ -4906,7 +5010,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[129].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -4933,7 +5037,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "9627a88bb5322f2ff9296ab5ae37e272795fde29673fa9e40172fc7fb7ddb157"
+      "build_hash": "5e30d8b0d4dd84ddb033c2703818d6c77e6f1e8169dd339c8e4c65768f626ec6"
     },
     {
       "build_id": "build-own-0008",
@@ -4945,7 +5049,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[136].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -4972,7 +5076,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "7f0d6333243afd83bf0702e66a382ffa4d010eecac437277153c9b8880cb078e"
+      "build_hash": "08402012b23323379c2058405c831b26a626996680bd24a02812c599a8215495"
     },
     {
       "build_id": "build-own-0009",
@@ -4984,7 +5088,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[138].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5011,7 +5115,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "6f3e3e3c0a180ee698fc6cfe117c50cfd0d34e77cea1e1ee4a1112cd474a03b7"
+      "build_hash": "f7f13f56fdf75d5e7f01b7ec76d020af93ef40aafa1e74dc9b86bc9fef4fccfe"
     },
     {
       "build_id": "build-own-0010",
@@ -5023,7 +5127,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[142].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5050,7 +5154,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "80439ad3c021935df6357d960961e83bff9ff8063e636e0577ad4b96a736ee4f"
+      "build_hash": "37ff132f4e4454445bcb90450738e2cf47ea22bb0555abdca7e93b7805eb33cb"
     },
     {
       "build_id": "build-own-0011",
@@ -5062,7 +5166,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[151].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5089,7 +5193,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "b52b35d9880ce8f805312cb24443ea602ce6fac34eefd99c382a766f410c0b2d"
+      "build_hash": "e2285ed013f7bf10e235afcef62625f6275a1aa244133cb3beeb3ead9981f9db"
     },
     {
       "build_id": "build-own-0012",
@@ -5101,7 +5205,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[152].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5128,7 +5232,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "3c75f5eb6b0bd48ae95a1d25faf36359ba60969a927b0676a2a35fb06605cdaf"
+      "build_hash": "bb022edd809b74a40b1b1084ae05e087b3023d121549f5ecd9131f36ee1a852a"
     },
     {
       "build_id": "build-own-0013",
@@ -5140,7 +5244,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[161].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5167,7 +5271,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "b7fccdc352b6915901938e461ea5fe4734a91d39456599b731bc0f8316acf7de"
+      "build_hash": "d833ddb31baeb4fafa6d8aa50ca5bf04cf4f5ce857d84ef1484a90bf373ef616"
     },
     {
       "build_id": "build-own-0014",
@@ -5179,7 +5283,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[162].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5206,7 +5310,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "8346887f4e90cb14f8debf4fbf094c8a0850655890f06cf3836b6a8c9585e30f"
+      "build_hash": "94171d1b9072b95131383d021521c2d367756f69346ae4a929f3d4301a3cd109"
     },
     {
       "build_id": "build-own-0015",
@@ -5218,7 +5322,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[166].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5245,7 +5349,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "e4ba2924348976e48edc0ed17ed2e0fa44350b9e909a1c0d1e299fbbad82c561"
+      "build_hash": "d94c7ed29fa09864094291996f074fb15c663e7c4bed1a02816f141fb25cc2f3"
     },
     {
       "build_id": "build-own-0016",
@@ -5257,7 +5361,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[171].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5284,7 +5388,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "0262aac1fecf3c940a98efdec39d7aaa71668ea8aa97a94c50e85bc1b7674845"
+      "build_hash": "8048f8415c9de87c29f842eb47cf9d1e4e93970e4cc6b32db2efbd458e966bc3"
     },
     {
       "build_id": "build-own-0017",
@@ -5296,7 +5400,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[189].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5322,7 +5426,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "594f2733797be96541f15bf5d783caca62f0ccffe7efa3f737b4a71a4c57b5ba"
+      "build_hash": "3c882c51bca486bd0e747462d9fe87ab79d9b18265e9f87f73678c3def882095"
     },
     {
       "build_id": "build-own-0018",
@@ -5334,7 +5438,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[217].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5361,7 +5465,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "712f60dfc929737c8a16b87514f8f11a117704b407db75da57e0c7cf4ccbd6a4"
+      "build_hash": "b03ef730877a4d6180a31d1f5c97032082574981e985582798ccefc9b0f96c70"
     },
     {
       "build_id": "build-own-0019",
@@ -5373,7 +5477,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[218].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5400,7 +5504,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "bdeca648a7f1c911d70bb69b14a7b0d39340a3dbe963cc1991d8857e7b870a8a"
+      "build_hash": "906c5e65b78ba8464905c8f848ba03aee15b286ef01c348dbe286c8153be3780"
     },
     {
       "build_id": "build-own-0020",
@@ -5412,7 +5516,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[224].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5438,7 +5542,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "382ae6b7e0c2fb4ee508a9bece086b27f7be55e84ddc7d72ce4d507260bb06db"
+      "build_hash": "cf7a245e7c3fdd06f504e1f1ea6bf2e8530a3633516d69ca1de397fd9900749b"
     },
     {
       "build_id": "build-own-0021",
@@ -5450,7 +5554,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[239].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5477,7 +5581,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "b642dc90215bc198f402f84930c7135d7a95fd9993bda8d2ea4dd01f625369f9"
+      "build_hash": "6ca42079cb72890162b1b723a0e43ad22d1d5a7de9e645b88da9f1deb36b3690"
     },
     {
       "build_id": "build-own-0022",
@@ -5489,7 +5593,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[242].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5516,7 +5620,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "1737723f4140bdd560fb98b6c57c48fb8b9d3b9350ddf2806530081fd6536b6b"
+      "build_hash": "effae7a4583f1c5d1de23e0e25bd52beba370e165bc61d2bc302d2f7e210e79e"
     },
     {
       "build_id": "build-own-0023",
@@ -5528,7 +5632,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[247].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5555,7 +5659,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "6c8b219cddf2b803a8c7db58ab2ebbe1cbb7ef4e6cd189dd5a3571d3386768bc"
+      "build_hash": "7edf327e38804f5dd21285645b0b25095f3f490dcbf72e0354c38b7d38dedb07"
     },
     {
       "build_id": "build-own-0024",
@@ -5567,7 +5671,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[307].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5594,7 +5698,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "ba463b3d0c7932d77bad66ed740783b674290a91863e492247f6651b13642685"
+      "build_hash": "9767b2704cda66830a8f1a75e5d32166f1678d7a61d0f313d06a0f2897b8608a"
     },
     {
       "build_id": "build-own-0025",
@@ -5606,7 +5710,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[327].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5633,7 +5737,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "b68c1a30d309b27303f60d490c45a2d188ad9895a0c601e55edd273eb06e842c"
+      "build_hash": "b8f90b8047d8276c3b80311a8d6fd744bc24d9c72698a9004bd995f35c3759b9"
     },
     {
       "build_id": "build-own-0026",
@@ -5645,7 +5749,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[329].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5672,7 +5776,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "ac2413a1b15e607cc6a902002a9cd74ac73010d5aea439d1b6d8dd20db3efd4a"
+      "build_hash": "c29ec114336aa039dd6d4a6c9ea7af07fc8e8cd5a0565b2ea2c2478fa7bc7cdc"
     },
     {
       "build_id": "build-own-0027",
@@ -5684,7 +5788,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[416].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5710,7 +5814,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "f966a5ac51057799ef032a40b86854588aa757c5c8d4343a375dc4a93f793cb2"
+      "build_hash": "d2280522c64343f93d8a9b7b48cdb0f39ddd721d13fb3929231e22072b3352ee"
     },
     {
       "build_id": "build-own-0028",
@@ -5722,7 +5826,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[444].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5748,7 +5852,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "555f0320c216def6007a26b7a1b9360e23c3ce67ceaf6d2e513edf285b087065"
+      "build_hash": "70b114111ca83b67e786fc8d03b7ea0dd005cec6e6e65efb97818aae7c3deacb"
     },
     {
       "build_id": "build-own-0029",
@@ -5760,7 +5864,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[447].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5787,7 +5891,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "6759217c2f79d6b8c8613a8417e99797bedc3d6c1804b5c1c313eb866f4621fe"
+      "build_hash": "5d139f2f53e969afd1d49b433cebd9ff337829d01df4fbd7883fe9f68ad4da83"
     },
     {
       "build_id": "build-own-0030",
@@ -5799,7 +5903,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[449].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5826,7 +5930,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "95ec3f39384bba013604513aca8e748ca08d69486520d276a26949e85aad27f8"
+      "build_hash": "ac7ed6d0c025dae3e56e2466e3d9ec8b27a816b4ca6976cb755a7f85bfe9e3cc"
     },
     {
       "build_id": "build-own-0031",
@@ -5838,7 +5942,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[450].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5864,7 +5968,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "fb4e1393a7661d187274fe145b1fb87b24883c34a2d9d54c4db7aefbe9ce741b"
+      "build_hash": "8e6d12904ddceb60c6033792e7b93ab84a4a33522e07a8fe45177d300061ea7a"
     },
     {
       "build_id": "build-own-0032",
@@ -5876,7 +5980,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[455].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5903,7 +6007,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "89997fa744a256021f3280183549248ed7bda9bb16b6d0dd1e0d16d86dab5e76"
+      "build_hash": "debbf11515c96b989571ff2c46c273e29f53dd074b74ca5f0d9bee656bc73596"
     },
     {
       "build_id": "build-own-0033",
@@ -5915,7 +6019,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[457].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5942,7 +6046,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "0a8c42fc4e136e50b46705d02f2ea693c6a3add8d0ecfab4fc2ca9ef8bf0d262"
+      "build_hash": "4903d22a5f9fffd64e9ce88e326bcf8e27a89e1dd91e97fda9be33ecf180d551"
     },
     {
       "build_id": "build-own-0034",
@@ -5954,7 +6058,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[472].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5981,7 +6085,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "829ab775163aaab8df08f85e7df7ca92a39564b05d7226d7295946566239ad4f"
+      "build_hash": "1786e0dff3c291b7d5c9dcee4a86ffa639620f17d8cb34caeb1621e923c73838"
     },
     {
       "build_id": "build-own-0035",
@@ -5993,7 +6097,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[473].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6019,7 +6123,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "37441f7a3d607b5d848ca7bafb0a982bfcfc1047f20468a4186a59ca912e510d"
+      "build_hash": "ca0a58cd294d89cc65efa4e6fabfa1de5aaf494cfd7386e21ee82e9b0f471403"
     },
     {
       "build_id": "build-own-0036",
@@ -6031,7 +6135,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[478].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6058,7 +6162,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "e943aeae925f9059a7606fee3c523b76291f12c06814a3514158ac87a8866ad5"
+      "build_hash": "4536a12e3d35a231a46b2584aac762718f6d57572446df438e09c8168848690d"
     },
     {
       "build_id": "build-own-0037",
@@ -6070,7 +6174,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[483].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6097,7 +6201,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "3fa0b4a6fcb0e5ea577645b85cf2a4b35f1b69d16f3fa6fc66ba8d604f9215e5"
+      "build_hash": "734dfa3b7a736a2d828fe53e2a705a5a0a4847e0ccd64752119ecc0d1d1f2983"
     },
     {
       "build_id": "build-own-0038",
@@ -6109,7 +6213,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[484].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6136,7 +6240,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "ec263193fa02f08e3e866c892b8983fc40605fccd5634b6a8530d74f00ef664c"
+      "build_hash": "3dd246e822a8a438e131b9081c7c0f4961693ab844558e14bfed9480ce02760b"
     },
     {
       "build_id": "build-own-0039",
@@ -6148,7 +6252,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[540].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6175,7 +6279,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "dc4a0a4ffb6dd00178d260b2fa8ca54430c84f2b87d32fc63c38e892b1ed1ff0"
+      "build_hash": "2e349f874fbf298dffaa9dc1e49aef2776b8eb1ae1f3d7d7ce7a316fd3c0e58e"
     },
     {
       "build_id": "build-own-0040",
@@ -6187,7 +6291,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[543].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6214,7 +6318,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "638157e69c3d7b28a8219480e05655297ae84d6c92a6698d539899c7238c45cc"
+      "build_hash": "31c42a4d1e43c713736ec0e94106bd845612851a272bb8cb74ccee2b513096b8"
     },
     {
       "build_id": "build-own-0041",
@@ -6226,7 +6330,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[546].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6253,7 +6357,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "6f1367f8e10163c7bcf942e24fa64a6e431d1cf40812545cdd466859b7f98578"
+      "build_hash": "a60169d14698d5602c8b84d389d4802285fd1ff082bec349d867c6529263e036"
     },
     {
       "build_id": "build-own-0042",
@@ -6265,7 +6369,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[554].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6292,7 +6396,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "540bfec511c59f0bc801f07d54a42454e7c7cd6d9a335b3bf0216e8e3433866c"
+      "build_hash": "77d2416495d386e81cea60e1617c352cf25f5c1d368c4933407d20a7d567065b"
     },
     {
       "build_id": "build-own-0043",
@@ -6304,7 +6408,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[573].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6331,7 +6435,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "9dad0b8ad6bc8f8d81d67c66cf0e6fc6e3fc9077e9d6fa3e1ca564db5478f62d"
+      "build_hash": "9d14b85de840233a2749e6bc33db8afd6ec35808ae8705fbadedc2793405b287"
     },
     {
       "build_id": "build-own-0044",
@@ -6343,7 +6447,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[599].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6369,7 +6473,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "25cc77fca817bf3de580033cf60f5a574d284e41f2679a63f427b30a9758187f"
+      "build_hash": "f7891f587f731ce88111c426ba1e6312a951f604e222a5b083e3edbb73a4378c"
     },
     {
       "build_id": "build-own-0045",
@@ -6381,7 +6485,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[606].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6407,7 +6511,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "69f589c6bbe2a2c0c51e308e9fad21240ab45aecdb0d61d073f0114275b79d22"
+      "build_hash": "62cd2c453e8f540a0a09e93ca518f1e25f7cf24946e4706bb8528b138af77c37"
     },
     {
       "build_id": "build-own-0046",
@@ -6419,7 +6523,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[607].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6446,7 +6550,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "65e65daa2d0997cdb68c0207ce09f09872ac68ad25cfe5d5d8d2b4682cb643e6"
+      "build_hash": "86fe32fa00bba07680ae90a9f4760048eed3b41d4eff2cc20dce75233aa5d763"
     },
     {
       "build_id": "build-own-0047",
@@ -6458,7 +6562,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[609].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6484,7 +6588,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "491fda4bc6c5f95421c3e61cdab6859eff42086015371f776666189d73a3c04b"
+      "build_hash": "db60c4db34a62099c5f4a7500065c90630795b5fdc047014e27a584942f19a25"
     },
     {
       "build_id": "build-own-0048",
@@ -6496,7 +6600,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
           "pointer": "sections.distributable.entities[611].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6523,8 +6627,47 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "8a77e03b2bc15c0f7cd24258ff26525c720035a5872aadc8032ab7918df0e3f8"
+      "build_hash": "a4be8c2052c0d82085f5d8103bb6a543eea37ab3d5e5ec1d3cf3927f7cdec285"
+    },
+    {
+      "build_id": "build-own-0049",
+      "owned_pet_instance_id": "own-0049",
+      "species_id": "pet_000012",
+      "effective_form": "BASE",
+      "form_sources": [
+        {
+          "source_id": "wiki-rocom-snapshot",
+          "source_scope": "frozen_l1",
+          "artifact_path": "data/roco/game-data-pack/v2/pack.json",
+          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "pointer": "sections.distributable.entities[11].form_axis.axis",
+          "note": "出战形态轴出处"
+        }
+      ],
+      "ordered_skills": [
+        "skill_000632",
+        "skill_000286",
+        "skill_000650",
+        "skill_000704"
+      ],
+      "effective_bloodline": {
+        "value": null,
+        "value_source": null,
+        "effect": "UNKNOWN",
+        "effect_reason": "面板换算公式未校准（见 10 号文档 §13）",
+        "microcase_id": null,
+        "value_pointer": "learnsets.pet_000012.blood_skills[].blood",
+        "blood_skill_id": null
+      },
+      "derived_stats": null,
+      "derived_stats_confidence": "UNKNOWN",
+      "ruleset_id": "roco-world-s4-2026-09-10",
+      "unknown_fields": [
+        "derived_stats",
+        "effective_bloodline"
+      ],
+      "build_hash": "15bf060a54b2678d3c18b3b3dcf0721bc9f6881ff4de974f72bb39d7d1e0c0f2"
     }
   ],
-  "dataset_hash": "6ef39855bfc7f6ce02ef2bed8bd85bbefcd69e749b8ef54b471b100890ebc382"
+  "dataset_hash": "dcb536159f0ed607f10fe42c97dcd77514a56d0452dbc800b682a6ddaef15678"
 }

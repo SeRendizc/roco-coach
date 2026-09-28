@@ -7,7 +7,7 @@
  "derived_from": {
   "catalog": {
    "path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-   "sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab"
+   "sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880"
   },
   "skills": {
    "path": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
@@ -15,7 +15,7 @@
   },
   "pack": {
    "path": "data/roco/game-data-pack/v2/pack.json",
-   "sha256": "629eef2731464808dc3f4bca55e73c4a69ce1598d1cc0689bb3a70a679164505"
+   "sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d"
   }
  },
  "summary": {

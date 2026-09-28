@@ -1,0 +1,21 @@
+{
+  "schema": "roco-human-decisions/v1",
+  "why": "人类拍板过的**例外**（正常口径走数据层/判据，不走这里）。每一条都要能回答三个问题：他原话是什么、允许了什么、怎么退场。产物里需要引用'人类决定'当出处时（provenance 的 pointer 必须能在 JSON 里解析），就指到这里。",
+  "decisions": {
+    "2026-09-27-capture-as-source-of-truth": {
+      "at": "2026-09-27",
+      "verbatim": "精灵就用现在抓出来的数据做吧，不要那些剩下没找到的了；按照抓包数据来吧；以具体数据为准吧",
+      "allows": "图鉴层六维以小黑盒抓包为准（522 只按 game_id + 18 只按首领同名 1:1 采用）；旧值逐只留在 stats_previous；执行域（引擎那两个 pet 文件）不动",
+      "rollback": "node scripts/roco/build-full-catalog.mjs --no-capture（逐字节还原成只有社群快照的那一版）",
+      "ledger": "§C6.325 / §C6.325b–e"
+    },
+    "2026-09-28-same-species-demo-pair": {
+      "at": "2026-09-28",
+      "verbatim": "同种你可以做一对测试一下",
+      "allows": "在 owned-pets.json 里造**一对**同种个体（own-0049 = 与 own-0001 同种），用于在真机上验证'同种两个个体比较'；必须显式标注 synthetic_demo: true（游戏里不存在这一只）",
+      "limits": "只许一对（MAX_SAME_SPECIES_GROUPS = 1）；不许借机把实例数灌回去（2026-09-24 人类：「重复的删掉」）；页面上两只必须看得出区别",
+      "rollback": "删掉 instances 里的 own-0049 + 它的 synthetic_demo provenance，把 MAX_SAME_SPECIES_GROUPS 调回 0，重跑 npm run roco:build-owned（见 build-owned-pets.mjs 的 HELP）",
+      "ledger": "§C6.333"
+    }
+  }
+}

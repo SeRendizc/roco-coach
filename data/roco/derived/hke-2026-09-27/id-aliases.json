@@ -1,0 +1,385 @@
+{
+ "schema": "roco-id-aliases/v1",
+ "generated_by": "scripts/roco/build-id-aliases.mjs",
+ "ruleset_id": "roco-world-s4-2026-09-10",
+ "primary": "capture",
+ "alias_of_primary": "catalog",
+ "human_ruling": "2026-09-27 人类：「按照抓包数据来吧」（对「首领形态按哪个当主键」的回答）",
+ "source": {
+  "capture": {
+   "path": "data/roco/raw/hke-2026-09-27/pets.csv",
+   "license": "UNKNOWN",
+   "redistribution": "REFERENCE_ONLY",
+   "note": "社区接口抓包，不是官方文本"
+  },
+  "catalog": {
+   "path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
+   "note": "社群快照导入的图鉴层（六维已按人类拍板采用抓包值）"
+  }
+ },
+ "counts": {
+  "capture_ids": 25,
+  "groups": 25,
+  "one_to_one": 18,
+  "multi_form": 7,
+  "catalog_forms_matched": 50
+ },
+ "groups": [
+  {
+   "capture_id": 4005,
+   "name": "圣水守护",
+   "catalog_game_ids": [
+    5010
+   ],
+   "catalog_pet_ids": [
+    "pet_000543"
+   ],
+   "one_to_one": true,
+   "stats_identical": true
+  },
+  {
+   "capture_id": 4006,
+   "name": "烈火战神",
+   "catalog_game_ids": [
+    5017
+   ],
+   "catalog_pet_ids": [
+    "pet_000550"
+   ],
+   "one_to_one": true,
+   "stats_identical": true
+  },
+  {
+   "capture_id": 4007,
+   "name": "叶冕魔力猫",
+   "catalog_game_ids": [
+    5003
+   ],
+   "catalog_pet_ids": [
+    "pet_000536"
+   ],
+   "one_to_one": true,
+   "stats_identical": true
+  },
+  {
+   "capture_id": 4011,
+   "name": "恶魔狼王",
+   "catalog_game_ids": [
+    5016
+   ],
+   "catalog_pet_ids": [
+    "pet_000549"
+   ],
+   "one_to_one": true,
+   "stats_identical": true
+  },
+  {
+   "capture_id": 4012,
+   "name": "鸭吉吉国王",
+   "catalog_game_ids": [
+    5006,
+    5036,
+    5037,
+    5038,
+    5039,
+    5052
+   ],
+   "catalog_pet_ids": [
+    "pet_000539",
+    "pet_000569",
+    "pet_000570",
+    "pet_000571",
+    "pet_000572",
+    "pet_000585"
+   ],
+   "one_to_one": false,
+   "stats_identical": null
+  },
+  {
+   "capture_id": 4019,
+   "name": "蹦蹦果",
+   "catalog_game_ids": [
+    5004,
+    5033,
+    5034,
+    5035
+   ],
+   "catalog_pet_ids": [
+    "pet_000537",
+    "pet_000566",
+    "pet_000567",
+    "pet_000568"
+   ],
+   "one_to_one": false,
+   "stats_identical": null
+  },
+  {
+   "capture_id": 4020,
+   "name": "千棘海针",
+   "catalog_game_ids": [
+    5012,
+    5029
+   ],
+   "catalog_pet_ids": [
+    "pet_000545",
+    "pet_000562"
+   ],
+   "one_to_one": false,
+   "stats_identical": null
+  },
+  {
+   "capture_id": 4021,
+   "name": "女王蜂",
+   "catalog_game_ids": [
+    5015
+   ],
+   "catalog_pet_ids": [
+    "pet_000548"
+   ],
+   "one_to_one": true,
+   "stats_identical": true
+  },
+  {
+   "capture_id": 4022,
+   "name": "奇丽果",
+   "catalog_game_ids": [
+    5005
+   ],
+   "catalog_pet_ids": [
+    "pet_000538"
+   ],
+   "one_to_one": true,
+   "stats_identical": true
+  },
+  {
+   "capture_id": 4064,
+   "name": "幻影荆棘",
+   "catalog_game_ids": [
+    5019
+   ],
+   "catalog_pet_ids": [
+    "pet_000552"
+   ],
+   "one_to_one": true,
+   "stats_identical": true
+  },
+  {
+   "capture_id": 4072,
+   "name": "迷嶂布莱克",
+   "catalog_game_ids": [
+    5008
+   ],
+   "catalog_pet_ids": [
+    "pet_000541"
+   ],
+   "one_to_one": true,
+   "stats_identical": true
+  },
+  {
+   "capture_id": 4073,
+   "name": "神谕鲨",
+   "catalog_game_ids": [
+    5011
+   ],
+   "catalog_pet_ids": [
+    "pet_000544"
+   ],
+   "one_to_one": true,
+   "stats_identical": true
+  },
+  {
+   "capture_id": 4074,
+   "name": "霜翼领主",
+   "catalog_game_ids": [
+    5014,
+    5030,
+    5031,
+    5032
+   ],
+   "catalog_pet_ids": [
+    "pet_000547",
+    "pet_000563",
+    "pet_000564",
+    "pet_000565"
+   ],
+   "one_to_one": false,
+   "stats_identical": null
+  },
+  {
+   "capture_id": 4078,
+   "name": "风暴战犬",
+   "catalog_game_ids": [
+    5018
+   ],
+   "catalog_pet_ids": [
+    "pet_000551"
+   ],
+   "one_to_one": true,
+   "stats_identical": true
+  },
+  {
+   "capture_id": 4079,
+   "name": "钻石蜗",
+   "catalog_game_ids": [
+    5001,
+    5047,
+    5048,
+    5049,
+    5050,
+    5051
+   ],
+   "catalog_pet_ids": [
+    "pet_000534",
+    "pet_000580",
+    "pet_000581",
+    "pet_000582",
+    "pet_000583",
+    "pet_000584"
+   ],
+   "one_to_one": false,
+   "stats_identical": null
+  },
+  {
+   "capture_id": 4083,
+   "name": "黑猫密探",
+   "catalog_game_ids": [
+    5007
+   ],
+   "catalog_pet_ids": [
+    "pet_000540"
+   ],
+   "one_to_one": true,
+   "stats_identical": true
+  },
+  {
+   "capture_id": 4084,
+   "name": "祭礼巨像",
+   "catalog_game_ids": [
+    5009
+   ],
+   "catalog_pet_ids": [
+    "pet_000542"
+   ],
+   "one_to_one": true,
+   "stats_identical": true
+  },
+  {
+   "capture_id": 4085,
+   "name": "雪影冰灵",
+   "catalog_game_ids": [
+    5013
+   ],
+   "catalog_pet_ids": [
+    "pet_000546"
+   ],
+   "one_to_one": true,
+   "stats_identical": true
+  },
+  {
+   "capture_id": 4086,
+   "name": "棋契陛下",
+   "catalog_game_ids": [
+    5023,
+    5040,
+    5041,
+    5042,
+    5043,
+    5044,
+    5045,
+    5046
+   ],
+   "catalog_pet_ids": [
+    "pet_000556",
+    "pet_000573",
+    "pet_000574",
+    "pet_000575",
+    "pet_000576",
+    "pet_000577",
+    "pet_000578",
+    "pet_000579"
+   ],
+   "one_to_one": false,
+   "stats_identical": null
+  },
+  {
+   "capture_id": 4087,
+   "name": "奇梦咪",
+   "catalog_game_ids": [
+    5024
+   ],
+   "catalog_pet_ids": [
+    "pet_000557"
+   ],
+   "one_to_one": true,
+   "stats_identical": true
+  },
+  {
+   "capture_id": 4088,
+   "name": "波普鹿",
+   "catalog_game_ids": [
+    5020
+   ],
+   "catalog_pet_ids": [
+    "pet_000553"
+   ],
+   "one_to_one": true,
+   "stats_identical": true
+  },
+  {
+   "capture_id": 4089,
+   "name": "圣剑骑士",
+   "catalog_game_ids": [
+    5021
+   ],
+   "catalog_pet_ids": [
+    "pet_000554"
+   ],
+   "one_to_one": true,
+   "stats_identical": true
+  },
+  {
+   "capture_id": 4090,
+   "name": "伊兰龙",
+   "catalog_game_ids": [
+    5022
+   ],
+   "catalog_pet_ids": [
+    "pet_000555"
+   ],
+   "one_to_one": true,
+   "stats_identical": true
+  },
+  {
+   "capture_id": 4101,
+   "name": "暮风隐者",
+   "catalog_game_ids": [
+    5056,
+    5062
+   ],
+   "catalog_pet_ids": [
+    "pet_000589",
+    "pet_000594"
+   ],
+   "one_to_one": false,
+   "stats_identical": null
+  },
+  {
+   "capture_id": 4102,
+   "name": "淤泥乌泽",
+   "catalog_game_ids": [
+    5057
+   ],
+   "catalog_pet_ids": [
+    "pet_000590"
+   ],
+   "one_to_one": true,
+   "stats_identical": true
+  }
+ ],
+ "notes": [
+  "**别名只解决\"这两个 id 是同一只\"**：采用哪一份六维由数据层决定（`full-catalog.json` 的 stats_source 说了算）。",
+  "`one_to_one: false` 的组（7 个）说明**一个抓包 id 对应册子里好几条同形态记录** ——按名字作答时仍要按老规矩说清\"同名多形态、请给 pet_id\"，别名表不替它们挑。",
+  "按**册子 id** 也能解析回同一个组：抓包那边一个名字只有一个 id，所以这个方向是确定的。",
+  "主键口径 `primary: capture`（4xxx）写死在这里，判据钉着；要翻过来得改这一行 + 判据 + 台账。"
+ ]
+}

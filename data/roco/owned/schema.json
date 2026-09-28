@@ -241,7 +241,7 @@
               "level": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 100
+                "maximum": 60
               },
               "nature": {
                 "type": "object",
@@ -465,6 +465,9 @@
                 "type": "boolean"
               },
               "locked": {
+                "type": "boolean"
+              },
+              "synthetic_demo": {
                 "type": "boolean"
               },
               "provenance": {
@@ -730,7 +733,7 @@
         "level": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 100
+          "maximum": 60
         },
         "nature": {
           "type": "object",
@@ -954,6 +957,9 @@
           "type": "boolean"
         },
         "locked": {
+          "type": "boolean"
+        },
+        "synthetic_demo": {
           "type": "boolean"
         },
         "provenance": {
@@ -1387,7 +1393,7 @@
     "instance_target": 48,
     "min_species": 40,
     "min_outside_layer_playable_48": 12,
-    "max_same_species_groups": 0,
+    "max_same_species_groups": 1,
     "seed": 20301
   }
 }
