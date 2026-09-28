@@ -17,7 +17,7 @@ import {decideOpponentAction,DIFFICULTY_BRIEFING,OPPONENT_TIMEOUT_MS} from './op
 import {createRocoService} from './roco-service.js';
 import {productionPlannerSystem} from '../coach/planner-prompt.js';
 // RC-205：诊断面如实报出 RAG 模式（默认 shadow）——见 status()。
-import {ragMode,LOCAL_PLAN_TOOLS} from '../coach/toolbox.js';
+import {ragMode,LOCAL_PLAN_TOOLS,rocoToolsStatus} from '../coach/toolbox.js';
 // 营地/宠物 PVE 教练的游戏规则表：能量上限这类数字**只在那里写一次**（RC-101 的结构判据）。
 // 说明：手游《洛克王国：世界》那条链路的上限住在 `data/roco/rulesets/*.json`，是另一套引擎。
 import {RULES} from '../game/engine.js';
@@ -573,6 +573,76 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
 // 2026-09-25：诊断面加 `started_at` / `assets` —— 页面的「你这一页是重启前的旧代码」
 // 探测器就靠这两个数比对（`/api/bootstrap` 早就带了 `server.started_at`，但那个端点会建会话；
 // `/api/status` 是纯只读，页面每隔一会儿问一次不会多出会话）。
+// ── 能力状态：**与模型状态分开**（Codex P0-01 第 2 条）────────────────────────
+//
+// 「云端模型没连」≠「游戏数据不可用」。前者只影响**自由文本生成**，后者是**规则/资料查询**
+// 在不在。修前 `/api/bootstrap` 只有一个 `configured`（那是模型），页面上也只有一句话
+//（「未连接模型：小芽只给规则事实」）—— 玩家读到的意思是"没配 key ⇒ 什么都查不了"，
+// 而事实是：不配 key 也能查天气/相性/图鉴（服务端的确定性执行那条路）。
+//
+// 三条各自独立，谁也不许顶替谁：
+//   · `serverReady` —— 这个进程活着（能写出这一份回执就是活着）；
+//   · `toolsReady`  —— **资料工具**（规则服务：规则/图鉴/相性表/学习表）连没连上；
+//   · `modelReady`  —— **云端模型**能不能生成自由文本（要 key + 验证通过）。
+// `null` = 还不知道（不画绿点）。探针只做**被动**检查，不在这里主动拉引擎：
+// `/api/bootstrap` 是每次开页面都要打的路径，主动拉起会把首屏拖住（引擎是惰性启动的）。
+// ⚠ 只缓存**规则服务那一半**（它会读引擎/发健康检查）。工具桥那一半
+//（`rocoToolsStatus()`）是**纯内存读**、零成本，必须**每次都现读** ——
+// 否则会出现"刚问完一句真资料，状态还是三秒前那个 `clientReady:false`"（真机实测踩到）。
+let serviceToolsCache={at:0,value:null};
+const CAPABILITY_TTL_MS=3000;
+async function serviceTools(){
+ const now=Date.now();
+ if(serviceToolsCache.value&&now-serviceToolsCache.at<CAPABILITY_TTL_MS)return serviceToolsCache.value;
+ let tools=null;
+ try{tools=await rocoService.status();}
+ catch(error){tools={available:false,last_error:String(error?.message??error)};}
+ serviceToolsCache={at:now,value:tools};
+ return tools;
+}
+async function capabilities(){
+ const tools=await serviceTools();
+ // ⚠ 还有**第二**个引擎：`/api/coach` 的资料工具走的是 `coach/toolbox.js` 那条桥
+ //（`getRocoClient()` → `coach/roco-client.js`），它与 `rocoService` **不是一个实例、不是一个进程**。
+ // 只读 `rocoService.status()` 会把"工具其实已经能跑"报成不可用（真机实测：小芽答出了相性表，
+ // 而 `/api/roco/status` 仍是 available:false）。两边取并：任一在，就是 `true`。
+ const bridge=rocoToolsStatus();
+ // ⚠ `toolsReady` 是**三态**，不是布尔（本仓健康探针踩过的那条：引擎是**惰性启动**的，
+ // 第一次查询才拉起来 ⇒ "刚打开页面"那一刻被动探针一定是 false，而几秒后就能用 ——
+ // 把"还没拉起来"报成"不可用"就是**假红灯**，与"假绿灯"一样是撒谎）：
+ //   true  = 现在就在（被动探针说是）；
+ //   null  = **还没被拉起来过**（这一个进程里一次都没用过）—— 不知道，不许说成坏；
+ //   false = 用过、现在却不在（那才是真的连不上，`toolsError` 带上原因）。
+ const alive=tools?.available===true||bridge.engineAlive===true;
+ const everUsed=Number(tools?.counters?.sessions??0)>0||Number(tools?.counters?.advances??0)>0
+  ||bridge.clientReady===true;
+ const toolsReady=alive?true:(everUsed?false:null);
+ const modelReady=Boolean(credential)&&verified;
+ const value={
+  serverReady:true,
+  toolsReady,
+  modelReady,
+  rulesetId:tools?.ruleset_id??null,
+  // 缺哪一项：逐项点名（页面照这几条各说各的后果，不合并成一句"不可用"）。
+  missing:[
+   ...(toolsReady===true?[]:[toolsReady===null
+    ?'规则服务还没被拉起来（它是第一次查询才启动的：没启动过 ≠ 坏了）'
+    :'本机规则服务（规则 / 图鉴 / 相性表）没连上']),
+   ...(modelReady?[]:(credential?['云端模型密钥在，但还没验证通过']:['云端模型没配（只影响自由发挥的文字）'])),
+  ],
+  toolsError:toolsReady===true?null:(tools?.last_error??null),
+  // 工具桥在这个运行时里到底能不能加载（浏览器里恒 false —— 这一位进 `body[data-xy-capability]` 的排障面）。
+  // ⚠ 只报状态，不报**本机绝对路径**（`moduleUrl` 是 `file:///Users/…` —— 排障自己看，
+  // 没有理由让它出现在 HTTP 回执里）。
+  toolsBridge:{loadable:bridge.browserLoadable,clientReady:bridge.clientReady,engineAlive:bridge.engineAlive,
+   builds:bridge.builds??null},
+  note:'toolsReady 只管资料查询；modelReady 只管自由文本生成。没配密钥不影响资料查询。',
+ };
+ return value;
+}
+// ⚠ `status()` 保持**同步纯函数**：诊断面（POST /api/status）与页面（GET /api/bootstrap）
+// 各自在自己的回执里 `await capabilities()` 挂上去 —— `capabilities()` 要探规则服务，
+// 而 `status()` 的调用方有的在同一帧里要立刻拿到进程事实（启动时刻 / 资源数）。
 const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,provider:credential?'deepseek':'local',rag_mode:ragMode(),started_at:STARTED_AT,assets:publicAssets.size});
  async function complete(messages,maxTokens=320,callTimeout=timeoutMs,signal){
   const currentKey=credential,currentModel=model,epoch=generation;
@@ -601,7 +671,7 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
     let sid=req.headers.cookie?.match(/(?:^|;\s*)coach_session=([a-f0-9]{48})(?:;|$)/)?.[1],s=sessions.get(sid);
     if(!s){if(sessions.size>=100)throw fail(429,'本机会话过多，请重启服务');sid=randomBytes(24).toString('hex');s={csrf:randomBytes(24).toString('hex'),expires:now+8*3600000};sessions.set(sid,s);res.setHeader('Set-Cookie',`coach_session=${sid}; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800`);}
     s.nonce=randomBytes(16).toString('hex');s.nonceExpires=now+300000;
-    return json(res,200,{...status(),csrf:s.csrf,nonce:s.nonce,publicKey:spki,
+    return json(res,200,{...status(),capabilities:await capabilities(),csrf:s.csrf,nonce:s.nonce,publicKey:spki,
      server:{started_at:STARTED_AT,assets:publicAssets.size,asset_refreshes:assetRefreshes,
       asset_refreshable:false,note:'静态资源清单来自磁盘的模块图；miss 时会自愈重算一次'}});
    }
@@ -793,15 +863,15 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
      credential=payload.key;model=b.model;verified=false;generation++;
      // 换凭据/换模型 ⇒ 旧缓存作废（key 里带 model，但换 key 不体现在 key 里）。
      answerCache.clear();inflightByKey.clear();
-     return json(res,200,status());
+     return json(res,200,{...status(),capabilities:await capabilities()});
     }
     if(path==='/api/disconnect'){credential='';verified=false;generation++;
      // 断开要连缓存一起清：key 里有模型名与提示摘要，但**没有凭据身份** ——
      // 不清的话，换个 key/换个会话再来同一句会命中上一个人那一轮的答案。
-     answerCache.clear();inflightByKey.clear();return json(res,200,status());}
+     answerCache.clear();inflightByKey.clear();return json(res,200,{...status(),capabilities:await capabilities()});}
     if(path==='/api/verify'){
      if(inflight)throw fail(429,'已有请求进行中，请稍后再试');inflight=true;
-     try{const result=await complete([{role:'user',content:'仅回复：连接成功'}],24);return json(res,200,{...status(),usage:result.usage});}finally{inflight=false;}
+     try{const result=await complete([{role:'user',content:'仅回复：连接成功'}],24);return json(res,200,{...status(),capabilities:await capabilities(),usage:result.usage});}finally{inflight=false;}
     }
     if(path==='/api/coach'){
      validateChat(b);const cancelled=new AbortController();res.once('close',()=>{if(!res.writableEnded)cancelled.abort();});
