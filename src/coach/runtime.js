@@ -2257,7 +2257,7 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  // 浏览器侧在「模型正文没过事实守卫」时要用它降级 —— 修前那个降级是浏览器自己再跑一遍 `runCoach`，
  // 而浏览器里资料工具跑不起来（P0-01 的根因），降级出来的东西与洛手无关。这里由服务端直接给出。
  return {...packet,...(judgment?{judgment}:{}),activity,activityLine:activityLine(activity),text:finalText,localText:scrubbedText,memory:next,route,provider:rejected?'local-fallback':localFallback?'local-fallback':useModel?provider.name:'local',verified:!useModel,localOnly:deterministic,receiptConsistency:finalConsistency,validation,
- ...(serverFailure?{agentStop:'server-data-unavailable',taskFailure:serverFailure}:{}),...(answerCorrection?{answerCorrection:correctionUsage}:{}),fallbackReason:localFallback?`本地模型这一轮没用上（${localFallback.code??'unknown'}），显示的是引擎算出来的那份结论`:rejected?(tooLong?'模型输出过长，显示已核验的本局分析':!modelConsistency.consistent?'那份回答和引擎的记录对不上，换成我核过的这一份':rejectedReason==='unlabeled-unknown'?'模型回答只交了一句「不知道」，显示已核验的本局分析':'模型回答里有未经登记的数字或引用，显示已核验的本局分析'):undefined};
+ ...(serverFailure?{agentStop:'policy-server-data-unavailable',taskFailure:serverFailure}:{}),...(answerCorrection?{answerCorrection:correctionUsage}:{}),fallbackReason:localFallback?`本地模型这一轮没用上（${localFallback.code??'unknown'}），显示的是引擎算出来的那份结论`:rejected?(tooLong?'模型输出过长，显示已核验的本局分析':!modelConsistency.consistent?'那份回答和引擎的记录对不上，换成我核过的这一份':rejectedReason==='unlabeled-unknown'?'模型回答只交了一句「不知道」，显示已核验的本局分析':'模型回答里有未经登记的数字或引用，显示已核验的本局分析'):undefined};
 }
 
 /**
@@ -2289,6 +2289,16 @@ export const AGENT_STOPS=Object.freeze([
  // 事实查全了、但这一问还含**取舍/推荐**（「选哪只更合适」「为什么」）⇒ 事实留作证据、
  // 由模型在回执上作答（2026-09-25 P2 实测：这一族原来被短路成"只回名单、不给判断"）。
  'policy-fact-then-model',
+ // 服务端的**资料工具**这一轮没跑起来（Codex P0-01 第 4 条；2026-09-29 登记）：
+ // 这一问要查规则/图鉴，而那份资料不可用（引擎没起 / 桥不可用 / 规则集没登记 …）。
+ // 这时**不许**退成陪练/军师那两句与本作无关的模板，交的是「缺的是哪一项」的失败
+ // （`taskFailure` 里带 `missing` / `tool` / `error_type` / `alternatives`）。
+ // 为什么单列一个值而不是复用 `policy-tool-failed`：那一个是"工具调了但失败"的笼统归因，
+ // 而这一条要能让轨迹回放区分出**"整条资料通路不可用"**（跨域回落就是从这里出去的）。
+ // ⚠ 前缀必须是 `policy-`：`tests/roco-agent-stops.test.js` ③ 要求每个值都落进
+ // `policy-*` / `planner-*` / 循环边界 / `complete` 四组之一 —— 而它确实是**代码决定**的门控
+ // （发现资料工具没跑起来 ⇒ 拒绝跨域回落，改交「缺哪一项」）。
+ 'policy-server-data-unavailable',
 ]);
 
 // Bounded tool loop: planner may choose a different tool after inspecting receipts.

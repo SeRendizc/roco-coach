@@ -47,13 +47,34 @@ async function executeCoach(payload,signal){
   if(data?.dedupFailed===true||data?.ok===false){throw Error(data.error||'服务端这一轮没有拿到答案');}
   const validation=checkGroundedAnswer(data);
   // 陪练的档位约束与事实检查走同一条降级路径：模型把 R1 写成安慰、或用问句追问时，
-  // 回退到**服务端已经算好的**本机版本（`data.localText`），而不是把越界的话展示给玩家。
+  // 回退到**引擎/工具算出来的那一份**（服务端的 `data.localText`），而不是把越界的话展示给玩家。
+  //
+  // ⚠ 2026-09-29 修回归（Lead 在已提交状态里抓到，玩家可见）：
+  //   上一版这里写的是 `text: data.localText ?? data.text` —— **`localText` 缺席时就会把模型那段
+  //   没过守卫的正文原样端出去**，而回执还标着 `local-fallback`（看着像"本机算的"）。
+  //   实测（`tests/evals/agent.test.js` 的打桩：`{provider:'deepseek',text:'造成99999伤害，必胜'}`）：
+  //   守卫判它不合格，兜底却把「99999」漏给了玩家。**守卫拦下来的东西不许从兜底漏出去。**
+  //   现在：`localText` 缺席就**回到确定性那一份**（本机 `runCoach`，与修前同一条路）；
+  //   连它都拿不到时，交一句如实的话，绝不放模型原文。
+  const deterministicText=async()=>{
+   if(typeof data.localText==='string'&&data.localText.trim())return {text:data.localText,from:'server'};
+   try{
+    const local=await runCoach(payload);
+    if(typeof local?.text==='string'&&local.text.trim())return {text:local.text,from:'local-run'};
+   }catch{/* 见下面：拿不到就交一句实话 */}
+   return {text:'这一轮的回答没有通过事实核对，我也没能算出替代结论 —— 先不给你结论，等我重算一次。',from:'none'};
+  };
   const restraint=data.route==='companion'?companionRestraint(data,payload):{valid:true,reasons:[]};
-  if(data.provider==='deepseek'&&!validation.valid){data={...data,provider:'local-fallback',validation,
-    text:data.localText??data.text,fallbackReason:'模型回答未通过事实检查，显示本局规则分析'};}
-  else if(data.provider==='deepseek'&&!restraint.valid){data={...data,provider:'local-fallback',restraint,
-    restraintCodes:restraint.reasons,text:data.localText??data.text,
-    fallbackReason:'模型这次说得不太合适，已换成本局规则结论（具体原因记在日志里，不往界面上抛内部代码）'};}
+  if(data.provider==='deepseek'&&!validation.valid){
+   const safe=await deterministicText();
+   data={...data,provider:'local-fallback',validation,text:safe.text,deterministicFrom:safe.from,
+    fallbackReason:'模型回答未通过事实检查，显示本局规则分析'};
+  }else if(data.provider==='deepseek'&&!restraint.valid){
+   const safe=await deterministicText();
+   data={...data,provider:'local-fallback',restraint,restraintCodes:restraint.reasons,text:safe.text,
+    deterministicFrom:safe.from,
+    fallbackReason:'模型这次说得不太合适，已换成本局规则结论（具体原因记在日志里，不往界面上抛内部代码）'};
+  }
   else if(!restraint.valid)data={...data,restraint};
   data.memory={...data.memory,journal:payload.memory.journal||[],reflections:payload.memory.reflections||{},watches:payload.memory.watches||[],quizCount:payload.memory.quizCount||0,goal:data.memory?.goal||payload.memory.goal||null};data.memory.dialogue=(data.memory.dialogue||[]).map(m=>m.role==='user'&&m.content===payload.message?{...m,content:originalMessage}:m);
   return {...data,execution:'server',stateToken:payload.stateToken??data.stateToken,contextAudit:assembled.audit};

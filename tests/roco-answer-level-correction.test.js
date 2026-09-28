@@ -186,12 +186,27 @@ test('③ 干净路径（一次就过）与"回到改前"逐字节相同：sha25
   assert.equal(Object.hasOwn(answer, 'correction'), false, '没有改写就不许有更正记录');
   assert.equal(Object.hasOwn(before.answer, 'correction'), false);
   // 键表：纠正路径新加的字段（answerCorrection / attempts / correction / toolCorrections）一个都不许出现。
+  //
+  // ⚠ 2026-09-29 **改钉**（task-7 的加性字段 `localText`；Lead 复核后要求"改钉不删"）。
+  // 旧键表（原文留档，别再改回来）：
+  //   ['actions','activity','activityLine','agentStop','conversation','evidence','fallbackReason',
+  //    'interfaceContext','knowledge','latestEvents','localOnly','memory','method','playerMessage',
+  //    'provider','publicState','receiptConsistency','route','taskState','text','toolPolicy',
+  //    'toolTrace','validation','verified']            // 24 个键，无 localText
+  // 为什么加：Codex P0-01 第 1 条要求"没有模型密钥也要走服务端真资料"，而浏览器侧那条降级
+  // （模型正文没过事实守卫时怎么办）原来靠**浏览器自己再跑一遍 `runCoach`** —— 浏览器里资料工具
+  // 跑不起来（正是 P0-01 的根因）。所以服务端把**引擎/工具算出来的那一份正文**随回执一起给出：
+  // `localText`（= `scrubbedText`），与 `text`（可能是模型说的）分开。**加性、干净路径不变**：
+  // 它只是把"已经算好的那一句"多带一份，不改任何既有键的值（上面那串逐字段对照仍然全部相等）。
+  // 判据的**意图一个字没松**：纠正路径的字段（answerCorrection/attempts/correction/toolCorrections）
+  // 仍然一个都不许出现 —— 新增键是**显式登记**在这里的，不是"随便加键"。
   assert.deepEqual(Object.keys(answer).sort(), [
     'actions', 'activity', 'activityLine', 'agentStop', 'conversation', 'evidence', 'fallbackReason',
-    'interfaceContext', 'knowledge', 'latestEvents', 'localOnly', 'memory', 'method', 'playerMessage',
+    'interfaceContext', 'knowledge', 'latestEvents', 'localOnly', 'localText', 'memory', 'method',
+    'playerMessage',
     'provider', 'publicState', 'receiptConsistency', 'route', 'taskState', 'text', 'toolPolicy',
     'toolTrace', 'validation', 'verified',
-  ], '干净路径的键表必须与改前一致（多一个键就是行为变了）');
+  ], '干净路径的键表必须与改前一致（多一个键就是行为变了）—— 要加键就把新键显式登记进这张表，别放宽断言');
   const shape = JSON.stringify({
     text: answer.text, provider: answer.provider, route: answer.route, verified: answer.verified,
     localOnly: answer.localOnly, receiptConsistency: answer.receiptConsistency, validation: answer.validation,
@@ -209,10 +224,13 @@ test('③ 干净路径（一次就过）与"回到改前"逐字节相同：sha25
     + '"corrected":false,"answerCorrected":false,"fallback":false,"fallbackReason":null,"steps":0,"fallbackNote":null},'
     + '"agentStop":"policy-no-tool","toolPolicy":{"need":null,"reason":"state-in-packet"},"toolTrace":[],'
     + '"keys":["actions","activity","activityLine","agentStop","conversation","evidence","fallbackReason",'
-    + '"interfaceContext","knowledge","latestEvents","localOnly","memory","method","playerMessage","provider",'
-    + '"publicState","receiptConsistency","route","taskState","text","toolPolicy","toolTrace","validation","verified"]}',
+    + '"interfaceContext","knowledge","latestEvents","localOnly","localText","memory","method","playerMessage",'
+    + '"provider","publicState","receiptConsistency","route","taskState","text","toolPolicy","toolTrace",'
+    + '"validation","verified"]}',
     '干净路径的逐字节回归钉（改前/改后同一段脚本必须得到同一串）');
-  assert.equal(sha256(shape), 'ded3257c227f1db21579e8496b341bc0c491b27bcee919662c2ca486fe5562df',
+  // ⚠ 同一个改钉：串里多了 `localText` 这个键（值本身不受影响），所以这一串的哈希也跟着换了。
+  // 旧哈希留档：ded3257c227f1db21579e8496b341bc0c491b27bcee919662c2ca486fe5562df（无 localText 那版）。
+  assert.equal(sha256(shape), '4a3222a437139f6efbae68d74a7ffb3b81d3dd14675590f953c1fa757f7dacce',
     '干净路径的 sha256：与上面那串逐字节对照，任何一个字节变了都会红');
   assert.equal(Object.hasOwn(answer, 'answerCorrection'), false, '没改写就不许多出记账字段');
   assert.equal(Object.hasOwn(answer.validation, 'attempts'), false, '一次就过也不许写 attempts');
