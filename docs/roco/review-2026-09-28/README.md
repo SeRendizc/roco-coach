@@ -260,31 +260,43 @@
   39 处不一致（另一批 key）；现在是 51 处（`rl-learn-*@camp-locked-*` 这一批 `ours=false / theirs=true`）。
 - ⇒ **本来就红**，规则集换了之后"哪几个窗口不一致"跟着变了而已。
 
-**2026-09-29 定位（Codex 要求"先定位是否真的伪精确而非否定句误判，勿删断言过关"）—— 已定位，结论是反向的：**
+**2026-09-29 定位（Codex 要求"先定位是否真的伪精确而非否定句误判，勿删断言过关"）**
 
-先把问题说清：这**不是**"伪精确"，**也不是**"否定句误判"。判据比的是
-`(case_id, world)` 逐窗口的 **pass/fail**，不一致的形状是 `ours=false / theirs=true`，
-**全部集中在 `rl-learn-*@camp-*`**。
+> ⚠ **本节的第一个结论是错的，已被推翻并改正。** 先把错的那版留档，再写复核后的结论 ——
+> 出错的是 Lead（我自己读错了产物字段），不是别人。
 
-取一条实证 `rl-learn-f1-01@camp-locked-1`（「我锁定寂灭骨龙，海豹船长学得到哪些技能？」）：
+**~~第一版结论（错）~~**：我写了「影子回放的 `passed` 判得太松」，理由是
+「**132 条 `passed: true` 却一次工具调用都没有**」。**这条是误读。**
 
-| 路径 | 读数 |
+**复核（`battle-smoke` 逐条重量，脚本 `scripts/roco/shadow-replay-judge-audit.mjs`，产物 `reports/roco/shadow-replay-judge-audit.json`）**：
+
+| 我的"证据" | 重量之后的读数 |
 |---|---|
-| **生成器**（`agent-trajectories-model-v1.jsonl`） | `passed: **false**`；violations = 「没有调用应当调用的工具 `query_rules`」+「`query_rules` 的参数里没有同时满足 `{"kind":"learnset","pet_id":"pet_000190"}` 的一次调用」；`stopped: complete` |
-| **影子回放**（`shadow-replay-sft-v8.json`） | `passed: **true**`；`stopped: "receipt-budget"` |
+| ① 生成器没调工具 ⇒ `false` 对 | 成立，但**推不出**影子判松：影子里**明确调了** `query_rules(kind=learnset, pet_id=pet_000190)`、参数匹配（`ok:true`）⇒ 它的 `passed:true` 是**这一次真的做对了** |
+| ② 283/288 全过"可疑" | 过得多**不是**判松的证据（见下面 D 的噪声底） |
+| ③ **132 条零调用却过** | **误读**：这 132 条的 `expect.tool` **全部是 `null`** ⇒ 该窗口**本来就不要求调用**，零调用判过是**对的**。288 条里 `expect.tool` 非 null 的有 **96** 条，其中「零调用却过」= **0** 条。（我大概是看到 `Object.keys(expect)` 里有 `tool` 键、没注意它的值是 `null`。） |
 
-**判哪条链错了 —— 是影子回放那一侧判得太松**，三条证据：
+**真正的问题（复核结论，**反向**）**：
 
-1. 该窗口的期望是**必须调 `query_rules(kind=learnset, pet_id=pet_000190)`**，而生成器那份**真的没调**（violations 逐字写出来了）⇒ 生成器的 `false` **是对的**；
-2. 影子回放**整份 288 条里 283 条判 `passed: true`** —— 一个评测集几乎全过，本身就可疑；
-3. 其中 **132 条「`passed: true` 却一次工具调用都没有、`violations` 也空」**
-   （类别分布：`continue_stop` 31 / `brief_explain` 31 / `evidence_conflict` 25 / `stale_state` 21 / `tool_failure` 12 / `silence` 12）
-   ⇒ 它的 `passed` **没有真正校验"该调的工具调了没"**。
+- **A. 两条链用的是同一把尺子**（不是各写一套）：影子 `shadow-replay.mjs:132` 与生成器
+  `build-agent-trajectories.mjs:258` 调的都是 `agent-trajectories.mjs` 的 `checkTask`；
+  两份产物的 `model_identity` / `adapter_sha256` / `prompt_digest` **逐字相同**。
+- **B. 51 个不匹配窗口：影子那一侧 51/51 都满足了本窗口期望**（逐条查 `trace`），
+  「影子判过但没满足工具期望」的窗口数 = **0**。
+- **C. 噪声底（关键）**：同一把尺子、**同一 arm `sft-v8`**、同一批 288 窗口，**两次运行就差 16 条** ——
+  `shadow-replay-v8-2026-09-28.log` → **267/288**；`shadow-replay-v8-round96.log` → **283/288**。
+  ⇒ **翻面率 ≈ 5.6%。这条判据要的是「两次独立模型运行的逐窗口结果逐条相同」—— 而它自己两次都一样不了。**
+  **所以毛病不在影子回放，在这条判据的标准本身不成立。**
+- **D. 附带（另一处未对齐）**：生成器产物 1752 条里 `trace` 级 `chosen_by` 分布是 `{"local_4b":420}`，
+  **没有任何 `"policy"`** ⇒ 那份跑的时候 `--policy-first` 没生效。
+  而影子回放传的是 `limit: armLimit('baseline')` 且**没有** `policyFirst`，生成器传的是 `armLimit(arm)`
+  —— 两份产物的**口径本来就没对齐**，逐窗口比之前应该先对齐。
 
-⇒ **处置**：**不放松本判据、不删断言**（Codex 明确要求）。要修的是
-`shadow-replay` 那一链的 `passed` 口径（让它也校验逐条期望），修完这条判据自然会绿。
-**本轮只做定位，没有改任何一条链** —— 改它要动 `scripts/roco/shadow-replay*`，属另一件工作，
-且**归属未定**（本轮四路都在别的写域），已记在这里等排期。
+**处置（Lead 定，`task-11` 执行）**：**两条都做，有先后** ——
+① **先对齐口径**（同 arm 限额、同 `policyFirst`）各重跑一次；
+② **再用噪声底改钉**这条判据（旧断言原文留注释 + 日期 + 依据）：
+不一致窗口数 **≤ 同 arm 自比的翻面数 + 余量**，或改比**汇总通过率 / 逐类分布**而不是逐窗口布尔。
+**不许**删断言、**不许**重新生成产物来对齐数字。
 
 ### B6 几条"记在案但没做"的
 
