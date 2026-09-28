@@ -806,7 +806,7 @@ export function coverageConfidence(team, gapsByTeam) {
   const confidence = CONFIDENCE_LEVELS.find((level) => CONFIDENCE_RANK[level] === rank) ?? 'ENGINE_HYPOTHESIS';
 
   const unverified = [
-    '未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown',
+    '未核实：全量 622 只的 build 覆盖 —— 冻结迁移层 542 只（RC-302 的域上限；2026-09-28 前是 48 只），其余只能是 unknown',
   ];
   if (unknownDimensions.length > 0) {
     unverified.push(`未核实：${unknownDimensions.join(' / ')} 维度里有被台账标 UNKNOWN 的量`

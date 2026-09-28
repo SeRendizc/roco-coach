@@ -43,10 +43,11 @@ belief.red_lines                     // 4 条「这份权重不能用来做什�
 - **分母**：候选宇宙大小。认两种输入形状：
   - RC-303 的 `buildCandidateIndex()` 产物（`universeSpecies` + `featureFor()`）——报告与测试走这条；
   - 朴素对象 `{pets: [{species_id, types, speed}], owned: [...]}` —— 小夹具走这条（判据①用它证明分母随数据变）。
-  去重口径是**物种**：owned 的 48 个物种**全部**落在 pack 的 622 里 ⇒ 本仓实测并集 = 622。
+  去重口径是**物种**：owned 的 **542** 个物种**全部**落在 pack 的 622 里 ⇒ 本仓实测并集 = 622
+  （2026-09-28 前 owned 是 48 个物种；人类这一轮拍板「所有精灵实装」后盒子扩到 542 只，**并集仍是 622**，没变）。
   这个数字不是常量：判据①换一份 3 条的 catalog，要求 `universe_size` 与 1/N 跟着变。
 - **`available:false` 的唯一情形**：数不出候选（没注入 catalog / catalog 里一条都没有）⇒
-  `unknown_reason = CATALOG_MISSING`。**不写死 48 / 600 / 622 来「凑出」一个 1/N。**
+  `unknown_reason = CATALOG_MISSING`。**不写死某个只数（48 / 542 / 600 / 622 都只是举例）来「凑出」一个 1/N。**
 - `confidence: ENGINE_HYPOTHESIS`（分母来自数据，但「等权」本身是工程口径）。
 
 ### 2.2 `revealedConditioned({catalog, publicFacts})` —— 公开事实条件化

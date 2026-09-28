@@ -141,6 +141,17 @@ energy   1        = 6/6      speed   0.5      = 3/6      pivot   0 = 0/6
 cost     1        = 6/6
 ```
 
+> **⚠ 口径注（2026-09-28 补，旧读数不删）**：上面这段是 **2026-09-28 之前**那一次跑的读数，
+> 当时冻结层是 **48 只**。人类这一轮拍板「所有精灵实装」后冻结档扩到 **542 只**
+> （可玩层 530 + 基线 12），上游报告 `reports/roco/flagship-upgrade/rc-304-team-compare.json`
+> **已经跟着重生成**：六支队的 `dimension_unknown_counts` 现在是
+> `{coverage: 4~10, energy: 1, pivot: 1, respond: 1, speed: 2, synergy: 1}`，
+> `rc304-six-a` 的 `coverage_confidence` 也变成 **0.809524**（上面那段里是 0.848485 的配对读数）。
+> 所以「`pivot = 0/6`」**不再是当前读数**（现在每队的 `pivot` 未知数是 1）——
+> 旧值留在原地存档，当前读数一律以报告 JSON 为准。
+> ⚠ 报告内部仍有一句写死「冻结迁移层只有 48 只（RC-302 的域上限）」，那是
+> `src/coach/team-compare.mjs` 里的输出文案，本轮**没有**动 `src/**`。
+
 `pivot = 0/6` 是真的：冻结层里这 48 只的**具体配招**都没有换入/离场手段
 （`pivot.tool_coverage.value.members_with_tool_in_build = []`）——所以两个以 `pivot` 为判据的体系
 （`wing_king_flyer` / `sandstorm_weather`）相对分偏低。这不是模型偏好，是可复算的计数。
@@ -312,8 +323,10 @@ minimalReplacement({team, metaPrior, candidates, gapsByTeam})
   matchup bank 的产物，本模块只是消费者；对照样例是**构造**的，每条来源都标 `measured: false`。
 - **不能拿它判「哪个候选更好」**：非 measured 档下 `minimalReplacement` 只给结构理由；
   多方案排序是另一个任务（也是 RC-305 之后的取舍呈现）。
-- **不能超出 48 只冻结层**：`build_data` 的口径是冻结迁移层的具体配招，
-  622 只图鉴精灵的配招合法性仍未校验；覆盖置信低时必须 fail closed。
+- **不能超出冻结层的覆盖**（2026-09-28 改口径）：`build_data` 的口径是冻结层的具体配招。
+  冻结档现在是 **542 只**（2026-09-28 前是 48 只），另有 **80 只**走 RC-402 的按需编译
+  （`SIMULATABLE_UNVERIFIED`、无实机核验）；覆盖置信低时必须 fail closed，
+  不许把 622 只都当成「配招合法性已校验」。
 - **不覆盖 13 号文档 §4 的 CVaR / robustness**：那一格需要「不利对局尾部是否崩溃」的
   尾部收益分布，本 RC 落的是另外五个口径；报告 `does_not_do` 里写明，不用它冒充已实现。
 

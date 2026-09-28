@@ -245,11 +245,31 @@ tests/roco-team-ranker.test.js
 
 ---
 
-## 9. 实测数字（48 个冻结个体，`reports/roco/rc602/team-ranker.json`）
+## 9. 实测数字（**542** 个冻结个体，`reports/roco/rc602/team-ranker.json`）
+
+> **⚠ 口径注 / 改钉说明（2026-09-28 补）**
+>
+> 人类 2026-09-28 拍板「所有精灵实装」之后，冻结档从 48 只扩到 **542 只**（可玩层 530 + 基线 12），
+> `reports/roco/rc602/team-ranker.json` 随之**重跑过**：它的 `corpus` 现在是
+> `owned_instances: 542 / owned_species: 542 / catalog_species: 622 / validated_species: 542 /
+> species_with_frozen_learnset: 542 / registered_attack_types: 18 / registered_type_combo_rows: 120`。
+> 报告里跟着变的还有：`pairwise_instances.pairs_total = 146611`（= C(542,2)，可算 146611 / unknown 0）、
+> `pairwise_six_pet` 现在是 **90 支队 / 4005 对**、`ranking` 是 **90 队 ranked 90 / unranked 0**
+> （Top-3 = `rc602-team-86` 0.9448 / `team-83` 0.9327 / `team-89` 0.8983）、
+> `partial_completion_value.candidate_pool_size = 536`（六档 0.5185 → 0.5555 → 0.7408 → 0.7778 → 0.7778 → 0.8889）。
+>
+> **下面那张表除「语料」一行外，都是 2026-09-28 之前那次在 48 只语料上跑出来的读数**（1128 对 / 28 对 /
+> 候选池 42 / Top-3 = team-07·08·01）。按「改钉不删」纪律，这些旧读数**留在原地**，
+> 但**不能**再当成当前读数引用；当前读数以报告 JSON 为准。
+>
+> ⚠ **报告里仍有多处写着「48」的字符串**（`generated_note`、`pairwise_instances.criterion`、
+> `pairwise_six_pet.criterion`、`not_computable[].why` 等）。成因不在本文：这些句子是
+> `src/coach/team-ranker.mjs` 里写死的输出文案（第 76 / 482 / 677 行等），本轮**没有**跟着扩。
+> 本文只改文档，**没有**动 `src/**` —— 这一处已知不一致需要另开一轮修。
 
 | 项 | 实测 |
 | --- | --- |
-| 语料 | 48 个 owned 实例 / 48 个物种 / 图鉴 622 物种 / 冻结学招表 48 / 攻击系别 18 / 相性表 120 行（18 单 + 102 组合） |
+| 语料 | **542** 个 owned 实例 / **542** 个物种 / 图鉴 622 物种 / 冻结学招表 **542** / 攻击系别 18 / 相性表 120 行（18 单 + 102 组合）——2026-09-28 前是 48 / 48 / 622 / 48 |
 | 全部 C(48,2) 成对特征 | **1128 对，可算 1128、unknown 0**；P50 **0.023 ms**、P95 **0.065 ms**、max 0.835 ms、总 37.15 ms |
 | 每维可算性（1128 对） | 六维各 1128/1128 可算 |
 | 关键速度线 | **0/1128 可算**（原因：缺面板值 `panel_stats`） |

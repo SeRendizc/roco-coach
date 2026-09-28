@@ -2482,12 +2482,15 @@ function sampleEnemyPool(){
    if(typeof raw!=='string')invalid.push(`${key} 必须是字符串`);
    else params[key]=raw;
   }
-  // RC-502：候选宇宙口径。**默认视野不变**（冻结已核验的 48 只，练习局/迁移夹具）；
+  // RC-502：候选宇宙口径。**默认视野不变**（冻结已核验的那一档；2026-09-28 扩到 542 只，
+  // 见人类「所有精灵实装」）；
   // 显式要 `support=all` 才给全量 622（配队与检索口径）。取值只有 `all` 一个，
   // 别的取值一律 400 —— 与引擎侧同一条纪律，**不静默当默认**。
   if(!(query?.support===undefined||query?.support===null||query?.support==='')){
    if(query.support!=='all')return {ok:false,status:400,
-     error:`support 只能是 all（实际 ${JSON.stringify(query.support)}）：默认名单只给冻结已核验的那 48 只`};
+     // 2026-09-28：这句话里原来写死「那 48 只」—— 扩容之后就成了给玩家看的错数。
+     // 改成一档的说法（**不写死数字**，免得下次再漂）；具体只数以回执里的 total 为准。
+     error:`support 只能是 all（实际 ${JSON.stringify(query.support)}）：默认名单只给冻结已核验的那一档（要全量请传 support=all）`};
    params.support='all';
   }
   if(invalid.length)return {ok:false,status:400,error:invalid.join('；')};

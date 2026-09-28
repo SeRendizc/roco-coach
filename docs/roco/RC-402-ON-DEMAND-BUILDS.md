@@ -5,12 +5,22 @@
 > 检查：`node scripts/roco/verify-on-demand-builds.mjs`
 > 守卫：`tests/roco-on-demand-builds.test.js`（9 条）+ `roco/tests/test_on_demand_builds.py`（8 条）
 > 报告：`reports/roco/rc402/on-demand-builds.json`
+> ⚠ **这份报告是 2026-09-22 的快照，口径已过期**（里面仍写 48 已核验 / 574 按需推算）。
+> 现在的事实看产物自己的 `summary`：`data/roco/derived/on-demand-builds.json#summary` = **542 / 80**。
+> 报告属 `reports/**`，本轮**没有**动它 —— 引用时请以产物为准。
+
+> **2026-09-28 口径改钉（旧值一个都没删）**：人类逐字拍板「就用现在抓包得到的数据吧，别的不找不要了，
+> 问题数据也不要了。**所有精灵实装**，这样就不需要我的精灵了，直接全筛选」⇒ 可玩层 48 → **530 只**
+> （纯抓包派生），合并基线 12 只后**冻结那一档变成 542 只**，按需推算那一档 **574 → 80 只**；图鉴 622 不变。
+> 本文正文的推导与纪律没变，只是两档的**条数**换了；逐项实测见
+> `docs/roadmap/ALL-PETS-PLAYABLE-LAYER-2026-09-28.md`。⚠ 叠加层目录名**仍叫** `layer-playable-48/`
+> （引擎 `data.py:22` 的 `LAYER_DIRNAME` 写死，没改）——那里的「48」是名字，不是数量。
 
 ## 它解决的是什么
 
 RC-203 只给「冻结 `learnsets.json` 里真的有 `native_skills`」的精灵编配招：全量 622 只里
-**只有 48 只**过得了那一关，另外 **574 只**在引擎的 `is_learnable()` 那里「学不到任何技能」——
-**选得到、上不了场**。
+**只有 48 只**（2026-09-28 起是 **542 只**）过得了那一关，另外 **574 只**（2026-09-28 起是 **80 只**）
+在引擎的 `is_learnable()` 那里「学不到任何技能」——**选得到、上不了场**。
 
 而数据其实一直在：全量图鉴 `full-catalog.json` 每只都带 `learnable_skills`（实测 **622/622**，
 共 **8787 条引用，全部**能在冻结 `skills.json` 里解析）。所以这不是数据缺失，是**没人把它编成配招**。
@@ -20,11 +30,11 @@ RC-203 只给「冻结 `learnsets.json` 里真的有 `native_skills`」的精灵
 | # | 纪律 | 机器判据 |
 |---|---|---|
 | ① | **不许发明技能**：每个技能必须同时「在该物种的 `learnable_skills` 里」且「能在 `skills.json` 解析」 | `skill_not_in_pool` / `skill_unresolved` / `skill_is_trait` |
-| ② | **不许冒充已核验**：冻结那 48 只标 `FULL_VERIFIED` 且带 `frozen_build` 供对账；推算的一律 `SIMULATABLE_UNVERIFIED` 且 `frozen_build=null` | `support_level` / `frozen_missing` / `unverified_with_frozen` |
+| ② | **不许冒充已核验**：冻结那 **542 只**（2026-09-28 前是 48 只）标 `FULL_VERIFIED` 且带 `frozen_build` 供对账；推算的一律 `SIMULATABLE_UNVERIFIED` 且 `frozen_build=null` | `support_level` / `frozen_missing` / `unverified_with_frozen` |
 | ③ | **不许声称最优**：选择规则是一条工程启发式，逐只带出 `selection_rule_id` 与 `unknowns[]` | `selection_rule_confidence` |
 
-**覆盖账目**：622 = 48 已核验 + 574 按需推算，跳过 0；同一只**不许**既编出来又登记跳过
-（`coverage_overlap`）。
+**覆盖账目**：622 = **542** 已核验 + **80** 按需推算，跳过 0（2026-09-28 前是 48 + 574）；
+同一只**不许**既编出来又登记跳过（`coverage_overlap`）。
 
 ## 选择规则（ENGINE_HYPOTHESIS，不是游戏规则）
 
@@ -46,8 +56,9 @@ RC-203 只给「冻结 `learnsets.json` 里真的有 `native_skills`」的精灵
 - 记 `build_support[pid] = SIMULATABLE_UNVERIFIED`。
 
 已经存在的物种**一个字节都不动**（`pid in pets` 直接跳过），冻结配招与冻结学会表逐位不变。
-`Ruleset.build_support_of(pid)` 是唯一的读法；`/api/roco/roster` 的默认名单仍是**已核验 48 只**
-（练习局/迁移夹具口径，逐位不变），`?support=all` 才返回全量 622（配队与检索口径）——
+`Ruleset.build_support_of(pid)` 是唯一的读法；`/api/roco/roster` 的默认名单是**已核验 542 只**
+（2026-09-28 前是 48 只：引擎在 `support` 缺省时滤掉 `SIMULATABLE_UNVERIFIED` 那一档，
+所以默认 = 622 − 80 = **542**），`?support=all` 才返回全量 622（配队与检索口径）——
 **这不是白名单**：引擎两种都收，只是名单的默认视野保持在已核验那一档。
 每只的 `evidence_ids` 也按档走：冻结的指 `pets.json#…`，推算的指 `on-demand-builds.json#…`
 （写到冻结文件里就是**编出处**）。
@@ -57,7 +68,7 @@ RC-203 只给「冻结 `learnsets.json` 里真的有 `native_skills`」的精灵
 RC-105 给引擎加了 `ACTION_CHARGE`（聚能），但对手策略 `greedy_damage` 把它归进了「换人」那一支：
 `_switch_target()` 对聚能返回 `None` → 得分 0 → **一旦当前能量付不起任何技能，双方就无限换人**。
 实测：200 回合、无人力竭、魔力一直 4/4 —— 六宠标准 PVP 打不完（而这恰好只在按需推算的队伍上
-暴露：冻结那 48 只的规范配招便宜得多）。
+暴露：冻结那 **542 只**（2026-09-28 前是 48 只）的规范配招便宜得多）。
 
 修法：给聚能**自己的分支**（11 分），并在有聚能可选时把换人的上限压到 9 分
 （换人不推进局面，聚能至少换来下回合的一次输出；没有聚能的 legacy/v2 保持原上限，逐位不变）。
@@ -67,7 +78,7 @@ RC-105 给引擎加了 `ACTION_CHARGE`（聚能），但对手策略 `greedy_dam
 
 | 项 | 值 |
 |---|---|
-| 图鉴精灵 | 622（48 已核验 + 574 按需推算，跳过 0） |
+| 图鉴精灵 | 622（**542** 已核验 + **80** 按需推算，跳过 0；2026-09-28 前是 48 + 574） |
 | 技能槽位 | 2488（622 × 4），其中「来源没给威力」1 个（照实写 `null`） |
 | 可学池大小 | 8 ～ 21（最小的两只仍有 8 个技能可选） |
 | 六宠对局（图鉴队，seed 11/12/13） | 26 / 26 / 26 回合，终局魔力 0:1 / 1:0 / 0:1 —— **全部打到归零判负** |

@@ -13398,3 +13398,44 @@ console_errors: []
 4. **两条现在还是绿的探针仍骑在按需推算的精灵上**（`test_foe_switch_condition` 的「当头棒喝」载体
    `pet_000546 雪影冰灵`，其抓包行 `4085` 就在人类剔除名单里）：核过上一版的按需配招**一模一样**
    ⇒ **本轮之前就有、不在那 22 条里**，本轮不动它。记在这里，谁要收口就是单独一轮。
+
+##### 九、扩容之后**文档与代码文案里的「48」**（口径清一遍，旧值一个都没删）
+
+扩容把「48 只」这个数从**数据**里换掉了，但**文字**里还到处是它 —— 其中两处是**给玩家看的**：
+
+| 位置 | 原来 | 现在 |
+|---|---|---|
+| `src/server/roco-service.js:2490` | 400 文案「support 只能是 all（…）：默认名单只给冻结已核验的那 **48** 只」 | 改成**不写死数字**：「…默认名单只给冻结已核验的**那一档**（要全量请传 support=all）」 |
+| `roco/src/roco_env/service.py:919` | 同一句（Python 侧） | 同一句改法（**两处必须同步**，判据就是照这条纪律写的） |
+| `src/coach/team-ranker.mjs:76/482/677` | 「冻结数据里 **48** 个实例的 panel_stats 一律 null」 | **542** —— ⚠ 这三句会**写进** `reports/roco/rc602/team-ranker.json`，所以报告要跟着重生成 |
+| `src/coach/team-compare.mjs:809` | 「冻结迁移层只有 **48** 只」 | **542**（并注明 2026-09-28 前是 48） |
+| `src/client/roco.js:168/3524` | 注释里的 48 / 574 | 542 / 80 |
+
+两处错误文案之所以改成**不写死数字**：它们本来就是因为"写死了 48"才变成给玩家看的错数 ——
+只把 48 换成 542 会留下一颗同样的雷。具体只数以回执里的 `total` 为准。
+
+**文档口径清理**（13 个文件，全部 `docs/**`，旧值一律留档）：`INTERVIEW-DRILL.md`（面试用，
+三个数里两个过期）、`ARCHITECTURE-ONE-PAGER.md`（L2「48 只」+ 那条「500 多只为什么只做 48 只？」
+的问答改成「**已经做了**」，另修一处**事实错误**：L3 的路径 `data/roco/derived/owned-pets.json`
+根本不存在，真实路径是 `data/roco/owned/owned-pets.json`）、`PITFALLS-AND-STORIES.md`、
+`roadmap/FEASIBILITY-547-ALL.md`（顶部标注已被采纳执行）、`roco/COVERAGE-AXES.md` 与
+`roco/GAME-ADAPTER.md`（**历史实测，数字一字未改**，只加口径注说明"那是旧 48 名单上的读数，
+不能当全量读数"）、`roco/OWNED-PETS.md`、`roco/RC-402-ON-DEMAND-BUILDS.md`、
+`roco/RC-602-TEAM-RANKER.md`、`roco/RC-604-OPPONENT-BELIEF.md`、`roco/TEAM-COMPARE.md`、
+`roco/COVERAGE-LAYERS.md`、`roco/ui-mockup-six-slot.html`。
+
+**顺手挖出来、并按我的裁决处理的四件事**（都是文档子代理列出来问我的，结论记在这里）：
+1. **`team-ranker` 没跟着扩**（真缺口，已另开一轮）：它的速度轴**只读 `roster-48.json`**（48 条），
+   而实测**层里 530 条全带 `speed_tier` 与 `stats.spe`**、基线 12 条也有 ⇒ **没有任何数据缺口**
+   逼它只用 48 只，纯粹是没跟着扩 ⇒ 542 只里有 494 只在速度轴上是 unknown。
+   （同类模块 `src/coach/team-gaps.js` 早就扩过了，可以照它做。）
+2. **立绘只有 48 槽**（`data/roco/assets/pets/manifest.json` = 48 槽 / 96 张 PNG）⇒
+   **542 只里只有 48 只有立绘、494 只没有**。这是**资产缺口**、不是文档错，已如实写进
+   `docs/roco/PET-SPRITES.md` 顶部（含页面表现：没有立绘的走头像兜底，不白屏也不编一张画）。
+3. **`reports/roco/rc402/on-demand-builds.json` 是过期产物**（仍是 48/574，mtime 09-22，
+   没随这次扩容重生成）—— 文档里已加警示指向 `data/roco/derived/on-demand-builds.json#summary`，
+   产物本身待重生成。
+4. **面试提纲里两个「542」不是同一个数**：一个是**可行性口径**（547 个抓包 id 里脚本能生成多少）、
+   一个是**冻结档口径**（真正能出战的只数），碰巧都是 542 ⇒ 已在 `INTERVIEW-DRILL.md` 那一行
+   写明「别并列着说」。同时保留了带日期的历史小节（`32 组同种`、`56/80`、`46 个技能引用` 等）
+   —— 那是那两轮的实测记录，**不按 542 重算**。

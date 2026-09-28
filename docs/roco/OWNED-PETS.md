@@ -11,8 +11,24 @@
 | 文件 | 是什么 | 谁写的 |
 |---|---|---|
 | `data/roco/owned/schema.json` | OwnedPet / BattleBuild 的**自描述契约**（字段类型 / 必填 / 可空 / 来源要求） | `scripts/roco/build-owned-pets.mjs` |
-| `data/roco/owned/owned-pets.json` | 80 个 Demo owned 实例 + 80 条 BattleBuild（固定 seed） | 同上 |
+| `data/roco/owned/owned-pets.json` | **542** 个 owned 实例 + **542** 条 BattleBuild（固定 seed）——2026-09-28 前是 80 | 同上 |
 | `reports/roco/flagship-upgrade/rc-203-owned-pets.json` | 机器可读报告：逐条判据的实际值、逐只点名、跳过原因、复现命令 | 同上（`verify-owned-pets.mjs` 的判据） |
+
+> ## ⚠ 口径注（2026-09-28 补，旧值一个都没删）
+>
+> 人类逐字拍板「就用现在抓包得到的数据吧，别的不找不要了，问题数据也不要了。**所有精灵实装**，
+> 这样就不需要我的精灵了，直接全筛选」，并在两份口径里选了**甲案**：**盒子 = 可玩层镜像**。
+> 于是 `data/roco/owned/owned-pets.json` 现在是 **542 实例 / 542 物种 / 0 组同种**
+> （`counts`：`species_in_layer_playable_48 = 530`、`species_outside_layer_playable_48 = 12`），
+> 跳过 **80** 只（`skips.no_frozen_learnset`）。生成期常量也跟着改钉：
+> `INSTANCE_TARGET` **80 → 48 → 542**、`MIN_SPECIES` **40 → 542**（旧值都留在 `owned-pets-lib.mjs` 的注释里），
+> `MIN_OUTSIDE_LAYER = 12` 与 `MAX_SAME_SPECIES_GROUPS = 0` 一字未动。
+>
+> **本文里凡是 `48` / `574` / `80` / `32 组同种` / `56/80` / `48/48` 的数字，都是 2026-09-28 前的口径或
+> 那一轮的实测读数**（带日期的两节「2026-09-24」「2026-09-25」是历史记录，按纪律不删不改）。
+> 当前口径以 `data/roco/owned/owned-pets.json#counts`、`#skips` 与 `owned-pets-lib.mjs` 的常量为准；
+> 完整改钉清单见 `docs/roadmap/ALL-PETS-PLAYABLE-LAYER-2026-09-28.md` §⑦。
+> 下面 §2 与「不能证明什么」两处是本轮**逐值核过后**改的，其余小节仍是历史文本。
 
 ---
 
@@ -38,29 +54,33 @@ L1 回答「这是什么」，**不回答**「我这只怎么样」。同一个�
 
 ---
 
-## 2. 「600+ 是候选宇宙，48 只只是迁移夹具」
+## 2. 「600+ 是候选宇宙，可玩层 542 只才是出战边界」
 
 这句话在本任务里不是口号，是被**判据**钉住的：
 
-- 候选宇宙的起点是 `pack.json` 的 **622** 条 pet 实体，不是一份写死的 48 只名单；
-- 但**技能只能来自 learnsets**。冻结目录里只有 **48** 只精灵有 `learnsets.json` 条目：
-  - `learnsets.json`（主目录）**12 只**——文档里叫 baseline；
-  - `layer-playable-48/learnsets.json` **36 只**——overlay；
-  - 合计 48。上游快照里其实有 312 份 learnset，其余那些**没有导入冻结目录**。
-- 于是产物是：**从 622 只出发 → 574 只因「没有冻结 learnset」被跳过 → 在 48 只里生成 80 个实例**。
+- 候选宇宙的起点是 `pack.json` 的 **622** 条 pet 实体，不是一份写死的名单；
+- 但**技能只能来自 learnsets**。冻结目录里现在有 **542** 只精灵有 `learnsets.json` 条目
+  （2026-09-28 前是 **48** 只 = 12 基线 + 36 overlay）：
+  - `learnsets.json`（主目录）**12 只**——文档里叫 baseline（没变）；
+  - `layer-playable-48/learnsets.json` **530 只**——overlay（2026-09-28 前是 36 只）；
+  - 合计 **542**。上游快照里其实有 312 份 learnset，其余那些**没有导入冻结目录**。
+  - ⚠ 目录名**仍叫** `layer-playable-48/`（引擎 `roco/src/roco_env/data.py:22` 的 `LAYER_DIRNAME`
+    写死，**没改**）——那里的「48」是**名字**，不是数量。
+- 于是产物是：**从 622 只出发 → 80 只因「没有冻结 learnset」被跳过 → 在 542 只里生成 542 个实例**
+  （2026-09-28 前是 574 被跳过 / 在 48 只里生成 80 个）。
   跳过的每一只都在报告的 `skips.species[]` 里逐只点名，不是一句「大概没数据」。
 
-判据要求：
+判据要求（常量在 `scripts/roco/owned-pets-lib.mjs`，判据文本在 `verify-owned-pets.mjs`）：
 
 | 判据 | 下界 | 实际 |
 |---|---|---|
-| 实例数 | ≥ 80 | 80 |
-| 不同 `species_id` 数 | ≥ 40 | 48 |
-| **不在 `layer-playable-48` 里的 species 数** | **≥ 12** | **12** |
-| 同种不同个体组数（每组至少一项个体属性不同） | ≥ 20 | 32 |
+| 实例数 | `== 542`（`INSTANCE_TARGET`；2026-09-28 前是 80） | 542 |
+| 不同 `species_id` 数 | `>= 542`（`MIN_SPECIES`；2026-09-28 前是 40） | 542 |
+| **不在 `layer-playable-48` 里的 species 数** | `>= 12`（`MIN_OUTSIDE_LAYER`，**一字未动**） | **12** |
+| 同种多实例组数 | `== 0`（`MAX_SAME_SPECIES_GROUPS`；2026-09-24 前是「≥ 20」） | 0 |
 
 「不在 `layer-playable-48` 里」按**目录字面**算：`layer-playable-48/` 目录
-（`pets.json` / `learnsets.json` / `support-matrix.json` 的 pet 集合，36 只 overlay）里
+（`pets.json` / `learnsets.json` / `support-matrix.json` 的 pet 集合，现在是 **530 只** overlay）里
 没有、而主 `learnsets.json` 里有的那 12 只，就是 baseline 层。逐只点名：
 
 ```text
@@ -70,12 +90,12 @@ pet_000445 黑猫巫师    pet_000451 秩序鱿墨    pet_000474 画间沉铁兽
 pet_000601 圣凯布米龙  pet_000608 银月狼王    pet_000611 月使鹭纳
 ```
 
-> **需要知道的紧张点（写在报告里，不藏着）**：`roster-48.json`（48 条）把 baseline 12 只
-> **也算进去**（doc 里叫「48 只 = 12 基线 + 36 overlay」）。有冻结 learnset 的 48 只
-> **恰好等于** roster-48 的 48 只，所以若把 roster-48 当成「48 层」，
-> 池外 species 数是 **0**。本仓按任务文本点名的 **`layer-playable-48` 目录** 做判据
-> （实际值 12），并在报告的 `outside_layer_playable_48.alternative_reading` 里
-> 把另一个口径的数一并给出——两个口径都摆在明面上，由读者判断，
+> **需要知道的紧张点（写在报告里，不藏着）**：`roster-48.json`（48 条）是 **M1 时期的选择登记层**，
+> 它的 48 只**全部落在**现在这 542 只里（报告 `buildability_ceiling.roster_48_subset_of_buildable`
+> = `{roster_48_species: 48, buildable_species: 542}`）——**它已经不再是出战的边界**。
+> 本仓按任务文本点名的 **`layer-playable-48` 目录** 做判据（实际值 12），并在报告的
+> `outside_layer_playable_48.alternative_reading` 里把另一个口径的数一并给出
+> （按 roster-48 算，池外是 **501** 只）——两个口径都摆在明面上，由读者判断，
 > 而不是挑一个对自己有利的算法。
 
 ---
@@ -198,10 +218,11 @@ BattleBuild 级的 `unknown_fields` 恒为 `["derived_stats"]`（overlay 个体�
 
 ## 6. 已知缺口（如实）
 
-1. **技能的覆盖面受冻结目录限制**：只有 48 只精灵有 `learnsets.json`，
-   574 只被跳过。上游快照里明明有 312 份 learnset，但没有导入冻结目录，
-   本产物 fail closed，不给它们配技能。「全量 600+ 都能出战」要等导入或
-   等 RC-402/RC-403 的按需编译，不是这一条能解决的。
+1. **技能的覆盖面受冻结目录限制**（2026-09-28 改钉后的现状）：现在有 **542** 只精灵有冻结 `learnsets.json`
+   条目，**80** 只（pack 里有、冻结目录里没有）被跳过（2026-09-28 前是 48 / 574）。
+   上游快照里明明有 312 份 learnset，但没有导入冻结目录，本产物 fail closed，不给它们配技能。
+   「全量 600+ 都能出战」这条路现在由 RC-402 的按需编译兜住（**542 已核验 + 80 按需推算 = 622**），
+   其中按需那一档**没有**实机核验，引用时必须带 `build_support` 的分档。
 2. **`nature` / `talent` / `specialty` 全部是 `null`**，`bloodline` 有 56/80 个实例是 `null`
    （全部 overlay 个体）。也就是说 80 个实例里，能拿来做个体差异比较的只有
    `level` 与 `skills`。这是数据现实，不是生成器的选择。
@@ -216,16 +237,21 @@ BattleBuild 级的 `unknown_fields` 恒为 `["derived_stats"]`（overlay 个体�
 
 ## 这批实例**不能**证明什么（如实）
 
-- **它能证明的**：80 个 owned 实例、48 个 species、32 组同种不同个体、每个实例四个**有序**且**真实可学**的技能，
+- **它能证明的**：**542** 个 owned 实例、**542** 个 species、每个实例四个**有序**且**真实可学**的技能，
   全部可复跑（`--check` 逐字节相同）、带逐实体 provenance 与 licence_ref、养成效果一律标 UNKNOWN。
-- **它不能证明的**：**「600+ 都能出战」**。冻结目录只导入了 **48 份 learnset**（12 基线 + 36 overlay），
-  上游快照另有 264 份未导入，所以 622 个候选里有 **574 只**在 `no_frozen_learnset` 上 fail closed 跳过。
-  可出战的子集**恰好等于** `roster-48.json` 的 48 只 —— 换句话说，**48 是「冻结 learnset 覆盖」的上限，
-  不是我们设的白名单**，但它现在确实是边界。要突破它需要导入其余 learnset，或走 RC-402 的按需能力编译。
+  （2026-09-28 前是「80 个实例、48 个 species、32 组同种不同个体」——那条「同种比较」的断言现在
+  由 `MAX_SAME_SPECIES_GROUPS = 0` 取代，比较能力本身仍在 `compareOwnedPets()` 里，用显式夹具验。）
+- **它不能证明的**：**「这 622 只都经过核验」**。冻结目录导入了 **542** 份 learnset（12 基线 + 530 overlay），
+  剩下 **80 只**在 `no_frozen_learnset` 上 fail closed 跳过（报告 `buildability_ceiling`：
+  `candidate_universe_species: 622`、`species_with_frozen_learnset: 542`、`candidates_without_frozen_learnset: 80`、
+  `buildable_subset_size: 542`、`buildable_subset_equals_frozen_layer: true`）。
+  可出战的子集**等于「冻结 learnset 覆盖」的上限**，**不是**我们设的白名单。
+  另 80 只走 RC-402 的按需能力编译，带 `SIMULATABLE_UNVERIFIED`、**没有**实机核验。
 - **一个容易误读的数**：报告里「不在 `layer-playable-48` 目录的 species = 12」。那 12 只是**基线层**的 12 只，
-  它们本来就在 `roster-48.json` 的 48 只**之内**；按 roster-48 口径，池外是 **0**。
-  所以这个数**不能**当作「候选宇宙不止 48 只」的证据（报告的 `outside_layer_playable_48.alternative_reading`
-  与 `buildability_ceiling` 两段都写明了这一点）。
+  它们**就在**可出战的 542 只**之内**；按 `roster-48.json` 那个旧口径算，池外是 **501** 只
+  （报告 `outside_layer_playable_48.alternative_reading`）。所以这个 12 **不能**当作
+  「候选宇宙不止 542 只」的证据（报告的 `outside_layer_playable_48` 与 `buildability_ceiling`
+  两段都写明了这一点）。
 - **个体属性**：`nature` / `talent` / `specialty` 的 `value` 恒为 `null`，`bloodline.value` 有 56/80 为 `null`，
   `panel_stats` / `derived_stats` 全为 `null` —— 因此**能用来做个体比较的只有 `level` 与技能组合**，
   阵容评估**不得**把养成属性当已知加成。

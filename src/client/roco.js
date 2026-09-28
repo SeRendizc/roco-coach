@@ -165,7 +165,7 @@ const on = (id, event, handler) => { const el = $(id); if (el) el.addEventListen
 
 /**
  * `pet_id → 名字`（RC-502）。名字的**唯一**来源是服务端回执：
- *   · 名单那一次（`/api/roco/roster`，默认 48 只）——`state.roster` 与 `state.petNames`；
+ *   · 名单那一次（`/api/roco/roster`，默认给冻结已核验那一档：2026-09-28 扩到 542 只）——`state.roster` 与 `state.petNames`；
  *   · 阵容池每一页（勾了「包含按需推算的精灵」之后会有全量视野里的名字）。
  * 查不到就**原样回 id**，绝不编一个名字出来 —— 屏幕上出现 `pet_000296` 就是
  * 「这一只还没从服务端读到」，那是可见、可排查的信号。
@@ -3521,7 +3521,8 @@ function wirePickControls() {
   // 2026-09-23 死代码清理：旧的「清除筛选」（`#filter-reset`）已按人类要求从 roco.html
   // 整块删除 —— 它是工坊 `#team-workshop >>> #tw-filter-reset`（「重置」）的重复件，
   // 判据 `D1-filter-clear` 的读取点也已迁到工坊那一个。这里不再有落点可绑。
-  // 候选宇宙开关（RC-502）：勾上 = 向服务端要 `support=all`（冻结已核验 48 + 按需推算 574）。
+  // 候选宇宙开关（RC-502）：勾上 = 向服务端要 `support=all`（冻结已核验 542 + 按需推算 80；
+  // 2026-09-28 前是 48 + 574）。
   // 换视野等同于换结果集，所以**回到第 1 页**——与「筛选一变就回第 1 页」同一条道理。
   const scope = $('pool-support-all');
   if (scope) {

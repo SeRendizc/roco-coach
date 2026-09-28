@@ -907,7 +907,8 @@ class RocoService:
         offset = query.get("offset", 0)
         type_filter = query.get("type")
         role_filter = query.get("role")
-        # RC-402：名单的**默认视野**是冻结已核验的那 48 只（练习局/迁移夹具口径，逐位不变）；
+        # RC-402：名单的**默认视野**是冻结已核验的那一档（练习局/迁移夹具口径，逐位不变；
+        # 2026-09-28 扩到 542 只，见人类「所有精灵实装」）；
         # `support=all` 时给全量 622（配队与检索口径）。这不是白名单——引擎两种都收，
         # 只是这一份名单默认只列已核验档；非法取值一律 400，不静默当默认。
         support_filter = query.get("support")
@@ -916,7 +917,10 @@ class RocoService:
         elif support_filter == "all":
             include_on_demand = True
         else:
-            return _bad_request(f"support 只能是 all（实际 {support_filter!r}）：默认名单只给冻结已核验的那 48 只")
+            # 2026-09-28：这句话里原来写死「那 48 只」—— 扩容之后就成了给玩家看的错数。
+            # 改成一档的说法（**不写死数字**，免得下次再漂）；具体只数以回执里的 total 为准。
+            return _bad_request(f"support 只能是 all（实际 {support_filter!r}）："
+                               "默认名单只给冻结已核验的那一档（要全量请传 support=all）")
 
         if type_filter is not None and (not isinstance(type_filter, str) or not type_filter.strip()):
             return _bad_request("type 必须是非空字符串（例如 草系）")
