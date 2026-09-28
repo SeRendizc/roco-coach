@@ -259,7 +259,32 @@
 - **归因实验**（用 `git worktree` 开扩容前那个提交跑同一个文件）：**也是红的**，
   39 处不一致（另一批 key）；现在是 51 处（`rl-learn-*@camp-locked-*` 这一批 `ours=false / theirs=true`）。
 - ⇒ **本来就红**，规则集换了之后"哪几个窗口不一致"跟着变了而已。
-- **真正修它要判定两条链里哪一条判错了** —— 本轮没做，也没假装做过。
+
+**2026-09-29 定位（Codex 要求"先定位是否真的伪精确而非否定句误判，勿删断言过关"）—— 已定位，结论是反向的：**
+
+先把问题说清：这**不是**"伪精确"，**也不是**"否定句误判"。判据比的是
+`(case_id, world)` 逐窗口的 **pass/fail**，不一致的形状是 `ours=false / theirs=true`，
+**全部集中在 `rl-learn-*@camp-*`**。
+
+取一条实证 `rl-learn-f1-01@camp-locked-1`（「我锁定寂灭骨龙，海豹船长学得到哪些技能？」）：
+
+| 路径 | 读数 |
+|---|---|
+| **生成器**（`agent-trajectories-model-v1.jsonl`） | `passed: **false**`；violations = 「没有调用应当调用的工具 `query_rules`」+「`query_rules` 的参数里没有同时满足 `{"kind":"learnset","pet_id":"pet_000190"}` 的一次调用」；`stopped: complete` |
+| **影子回放**（`shadow-replay-sft-v8.json`） | `passed: **true**`；`stopped: "receipt-budget"` |
+
+**判哪条链错了 —— 是影子回放那一侧判得太松**，三条证据：
+
+1. 该窗口的期望是**必须调 `query_rules(kind=learnset, pet_id=pet_000190)`**，而生成器那份**真的没调**（violations 逐字写出来了）⇒ 生成器的 `false` **是对的**；
+2. 影子回放**整份 288 条里 283 条判 `passed: true`** —— 一个评测集几乎全过，本身就可疑；
+3. 其中 **132 条「`passed: true` 却一次工具调用都没有、`violations` 也空」**
+   （类别分布：`continue_stop` 31 / `brief_explain` 31 / `evidence_conflict` 25 / `stale_state` 21 / `tool_failure` 12 / `silence` 12）
+   ⇒ 它的 `passed` **没有真正校验"该调的工具调了没"**。
+
+⇒ **处置**：**不放松本判据、不删断言**（Codex 明确要求）。要修的是
+`shadow-replay` 那一链的 `passed` 口径（让它也校验逐条期望），修完这条判据自然会绿。
+**本轮只做定位，没有改任何一条链** —— 改它要动 `scripts/roco/shadow-replay*`，属另一件工作，
+且**归属未定**（本轮四路都在别的写域），已记在这里等排期。
 
 ### B6 几条"记在案但没做"的
 
