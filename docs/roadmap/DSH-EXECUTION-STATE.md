@@ -12949,3 +12949,21 @@ console_errors: []
 |---|---|
 | `dcf512a` | 一个说反的规则、两个点不动的按钮、一个永远禁用的按钮 + 4 处过期判据 |
 | `13e3bfc` | 5 处过期选择器 + 4 处死门 + 一个作用域 bug —— 真机验收从 37/42 到 **42/42** |
+
+**十二、产物引用审计（objective ③「把工作区遗留产物补提交」的收尾）**
+
+做法：把台账 / 交接文档 / `docs/roco/*.md` 里出现的 `reports/roco/**.{log,json,jsonl}` 路径
+全部抓出来（**87 条**），逐条核对"文件在不在"与"入库没入库"：
+
+- **引用了但不存在的：0 条**（没有悬空引用）；
+- 引用了但**一直没提交**的：4 条 ⇒ 处理如下
+
+| 路径 | 处理 |
+|---|---|
+| `reports/roco/five-min-round4.log` | **已补提交**（`8b3891a`） |
+| `reports/roco/verify-release-final.log` | **已补提交**（`8b3891a`） |
+| `reports/roco/notify-log.jsonl` | **故意不入库** —— 被 `.gitignore` 忽略（临时通知日志，不是证据） |
+| `reports/roco/verification/failures/demo-acceptance-….log` | **故意不入库** —— 所在的 `verification/failures/` 整个目录被 `.gitignore` 忽略 |
+
+⇒ 结论：**遗留产物已经清干净**；剩下两条不是遗漏，是 `.gitignore` 的口径，
+下次看到它们"没入库"不必再查一遍。
