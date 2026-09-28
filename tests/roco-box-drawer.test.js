@@ -7,7 +7,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {groupCards, traitChips, individualHtml, drawerHtml, drawerListHtml, rollNote} from '../src/client/box-drawer.js';
+import {groupCards, traitChips, individualHtml, drawerHtml, drawerListHtml, rollNote, formatTraitValue} from '../src/client/box-drawer.js';
 import {REFRESH_LIMIT, refresh, undoLastRefresh, canUndo, individualsFromDataset} from '../src/coach/individuals.js';
 import {readFileSync as readJson} from 'node:fs';
 const dataset = JSON.parse(readJson(new URL('../data/roco/owned/owned-pets.json', import.meta.url), 'utf8'));
@@ -46,12 +46,18 @@ test('③ 缺数值一律标"待导出"（不许显示成 0 或空白）', () =>
   // 反证：有数值时不许还写"待导出"
   // 改钉（2026-09-26，人类口述口径）：天分刷新是「一/二/三级各 +10 到没加过的属性」⇒
   // 页面按"已加成几级"说，不再数"有几项非 0"。
+  // ⚠ 2026-09-28 再改钉（人类 ⑤ 给了四档口径）：这一行**先说档名**（「天分 相当好的天分」），
+  // 有加成时再加一条「天分 已加成 N/3 级」。所以"加成到第几级"现在是**第二条**，不是第一条。
   const known = traitChips({individual_id: 'x', nature: '开朗',
     talent: {hp: 0, atk: 10, spa: 0, def: 0, spd: 0, spe: 10},
     talent_boosts: [{tier: 1, stat: 'atk', delta: 10}, {tier: 2, stat: 'spe', delta: 10}]});
   assert.ok(known.every((row) => row.state === 'known'));
   assert.ok(known[0].label.includes('开朗'));
-  assert.ok(known[1].label.includes('2/3'), `天分要说出加成到第几级：${known[1].label}`);
+  assert.ok(known[1].label.includes('天分'), `第二条要说天分档位：${known[1].label}`);
+  assert.ok(known[2].label.includes('2/3'), `天分要说出加成到第几级：${known[2].label}`);
+  // 档位是**扣掉加成之后**读的：base = {atk:10-10, spe:10-10, 其余 0} ⇒ 一条都没激活 ⇒ 认不出
+  // （这一条正是"加成不许把档位顶上去"的反证）
+  assert.ok(known[1].label.includes('认不出'), `加成扣掉后一条都不激活 ⇒ 如实说认不出：${known[1].label}`);
   const html = individualHtml(ONE[0], {individual_id: 'own-0001', nature: null, talent: null});
   assert.match(html, /data-state="absent"/);
 });
@@ -70,10 +76,18 @@ test('④ 两个刷新按钮分开、各带剩余次数；用完禁用', () => {
   assert.equal(REFRESH_LIMIT, 3, '每人各 3 次（人类口径）');
 });
 
-test('⑤ 级数按本人口径显示 100，并留下来源标记', () => {
-  const html = individualHtml(ONE[0], {individual_id: 'own-0001'});
-  assert.match(html, /Lv\.100/, '拥有精灵默认 100 级（人类口径）');
-  assert.match(html, /data-level-source="default-100"/, '要能追到"为什么是 100"');
+test('⑤ 级数**只从数据读**（默认 60）；缺就读不到，不许再写死', () => {
+  // ⚠ 2026-09-28 改钉：这一条原来断言**硬编码 Lv.100**。两级口径都变过：
+  //   人类 2026-09-27「pvp 没有的话就默认都 60 级别吧」+ 官方「等级上限 60」⇒ 默认 60；
+  //   2026-09-28 他指着截图问「不是 60 级吗？**lv100 哪儿来的**？」⇒ 抽屉那一行的 Lv.100 是残留。
+  // 现在：**从 individual.level 读**（有就画 `Lv.<n>`，没有就画 `—`），并把来源标记照实带出来。
+  const withLevel = individualHtml(ONE[0], {individual_id: 'own-0001', level: 60,
+    level_source: 'default-60（人类 2026-09-27 口径）'});
+  assert.match(withLevel, /Lv\.60/, '有等级就按数据画');
+  assert.match(withLevel, /data-level-source="default-60/, '来源标记要照实带出来');
+  assert.doesNotMatch(withLevel, /Lv\.100/, '不许再出现写死的 100');
+  const noLevel = individualHtml(ONE[0], {individual_id: 'own-0001'});
+  assert.doesNotMatch(noLevel, /Lv\.\d+/, `没有等级数据就不许编一个级数：${noLevel.slice(0, 120)}`);
 });
 
 test('⑥ 转义：名字/属性里的尖括号与引号不许注入', () => {
@@ -194,6 +208,10 @@ test('⑫ box.js 调用的本地函数必须有定义（防"删了定义、单�
   }
   const called = new Set([...src.matchAll(/(?<![.\w$])([a-z][\w$]*)\s*\(/g)].map((m) => m[1]));
   const builtins = new Set(['if', 'for', 'while', 'switch', 'catch', 'return', 'typeof', 'await', 'function',
+    // ⚠ 2026-09-28：`async` 是**关键字**不是本地函数（页面里 `ids.map(async (id) => …)` 这种写法
+    // 会被上面那个"小写开头 + 左括号"的粗糙正则抓成一次调用）。加进白名单，**不是放松判据** ——
+    // 它要抓的是"引用了不存在的本地函数"，关键字从来不在这个范围内。
+    'async',
     'Number', 'String', 'Boolean', 'Array', 'Object', 'JSON', 'Set', 'Map', 'Math', 'Date', 'fetch',
     'setTimeout', 'clearTimeout', 'parseInt', 'encodeURIComponent', 'decodeURIComponent', 'isNaN']);
   const missing = [...called].filter((name) => !defined.has(name) && !imported.has(name)
@@ -208,10 +226,12 @@ test('⑫ 掷点来源要写在页面上；数据集里真有的**不许**写（
   const rolled = {individual_id: 'x', nature: null, talent: null,
     nature_source: 'rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点）',
     talent_source: 'rolled（原版随机生成；种子化掷点：随机三项 7–10、其余 0–6 —— 分布是建模的，非官方概率）'};
-  assert.match(String(rollNote(rolled)), /不是官方概率/, '掷点必须说清"不是官方概率"');
+  // ⚠ 2026-09-28 改钉：人类看着这行小字说「这有啥用？？？？**不要**！」⇒ **画面上不再出现**
+  // （函数本身保留，判据与开发者抽屉仍可读它的文案；`data-rolled` 那个落点一并撤掉）。
+  assert.match(String(rollNote(rolled)), /不是官方概率/, '函数里的口径照旧（这是我们自己的诚实边界）');
   const html = individualHtml(ONE[0], rolled);
-  assert.match(html, /data-rolled="yes"/, '这句话要真的画在行里');
-  assert.match(html, /掷点生成/, '要说"掷点生成"');
+  assert.doesNotMatch(html, /data-rolled/, '这一行**不许**再画到玩家眼前（人类明确说不要）');
+  assert.doesNotMatch(html, /掷点生成/, `画面上不许出现"掷点生成"：${html.slice(0, 160)}`);
   // 反证：数据集里真有的不许写这句（否则玩家会以为实测数据也是掷的）
   const real = {individual_id: 'y', nature: '开朗', talent: {hp: 10},
     nature_source: 'dataset', talent_source: 'dataset'};
@@ -233,4 +253,112 @@ test('⑬ 回滚按钮只认 `canUndo()`：真的能退才出现（真机 28 号
   assert.match(individualHtml(CARD, again), /data-undo=/, '这时按钮必须回来（否则玩家没法退新刷的那一步）');
   // 反证：判据不是"永远有按钮" —— 没刷过的个体一个按钮都不许有
   assert.doesNotMatch(individualHtml(CARD, one), /data-undo=/, '没刷过 ⇒ 不许有回滚按钮');
+});
+
+test('⑭ 组头要有信息（人类 2026-09-28：「左上角的铠甲虫为啥没信息？」）', () => {
+  const cards = [CARD('own-0001', 'pet_000012', '铠甲虫'), CARD('own-0049', 'pet_000012', '铠甲虫')];
+  const group = groupCards(cards)[0];
+  const individuals = {
+    'own-0001': {individual_id: 'own-0001', level: 60, nature: '稳重', talent: {hp: 10, spd: 3, spe: 10}},
+    'own-0049': {individual_id: 'own-0049', level: 60, nature: '忧郁', talent: {spa: 10, def: 9}},
+  };
+  const html = drawerHtml(group, {individuals});
+  assert.match(html, /data-summary="yes"/, `组头要带摘要：${html.slice(0, 200)}`);
+  // 摘要要写"这一种里**最好那只**"的性格/天分（天分总和：own-0001 = 23 > own-0049 = 19）
+  assert.match(html, /性格 稳重/, '摘要要给性格');
+  assert.match(html, /天分 生命 10 \/ 速度 10/, '摘要要给天分最高的两项（按天分总和挑的那只）');
+  assert.match(html, /Lv\.60/, '摘要里也要有等级');
+  // 反证：一个值都没有时**不许编**摘要（宁可没有）
+  const blank = drawerHtml(group, {individuals: {}});
+  assert.doesNotMatch(blank, /性格 |天分 /, `没有数据就不许编摘要：${blank.slice(0, 200)}`);
+});
+
+test('⑮ 本机加的个体：行里带「本机加的」+ 只有它能「删掉这只」', () => {
+  const cards = [CARD('own-0001', 'pet_000012', '铠甲虫')];
+  const group = groupCards(cards)[0];
+  group.expanded = true;
+  const html = drawerHtml(group, {
+    individuals: {'own-0001': {individual_id: 'own-0001', level: 60}},
+    extras: {pet_000012: [{individual_id: 'own-0001-b', nature: '开朗', talent: {spe: 10}}]},
+  });
+  assert.match(html, /data-individual="own-0001-b"/, '本机那只必须在抽屉里画出来');
+  assert.match(html, /本机加的/, '要标出来它是本机加的（人类：「莫名其妙出现」）');
+  assert.match(html, /data-remove="own-0001-b"/, '本机那只必须能删（人类：「还删不掉」）');
+  assert.doesNotMatch(html, /data-remove="own-0001"/, '名单里的那只不许给"删掉"按钮（它不在本机记录里）');
+  // 反证：没有本机个体时既没有标记也没有删除按钮
+  const clean = drawerHtml(group, {individuals: {'own-0001': {individual_id: 'own-0001', level: 60}}});
+  assert.doesNotMatch(clean, /data-remove|本机加的/, '名单里的个体不该出现这些');
+});
+
+test('⑯ 到了"同种一对"上限，「再养一只」按钮就禁用（不许连点堆一排）', () => {
+  const cards = [CARD('own-0001', 'pet_000012', '铠甲虫')];
+  const group = groupCards(cards)[0];
+  group.expanded = true;
+  const withExtra = drawerHtml(group, {
+    individuals: {'own-0001': {individual_id: 'own-0001', level: 60}},
+    extras: {pet_000012: [{individual_id: 'own-0001-b'}]},
+  });
+  assert.match(withExtra, /data-add="pet_000012"[^>]*(disabled|aria-disabled="true")/,
+    `已有一只本机的 ⇒ 按钮要禁用：${withExtra.slice(0, 240)}`);
+  assert.match(withExtra, /同种最多一对|已有一只本机的/, '禁用也要说清原因（点不动比点了没反应好）');
+  // 反证：还没有本机那只时按钮是可点的
+  const clean = drawerHtml(group, {individuals: {'own-0001': {individual_id: 'own-0001', level: 60}}});
+  assert.doesNotMatch(clean, /data-add="pet_000012"[^>]*disabled/, '还没加过 ⇒ 按钮必须可点');
+});
+
+test('⑰ 资质是**六维表**，页面要摊成一行数值（不许印 [object Object]）', () => {
+  // 人类 2026-09-28 指着「我的精灵」的详情/比较：「要显示真实个体数据」（当时那一栏只会写
+  // 「游戏数据里没有这一项」）。查下来的真相是**接口早就有数**（`traits` 里 `资质` = `{hp,atk,…}`），
+  // 是页面把对象直接 `String()` 了 ⇒ 印出 `[object Object]`。这条钉住"摊开"的规则。
+  const real = {hp: 10, spa: 7, spe: 10, atk: 3, spd: 3, def: 1};   // 抓包 own-0001 的真实资质
+  assert.equal(formatTraitValue(real), '生命 10 / 物攻 3 / 物防 1 / 魔攻 7 / 魔防 3 / 速度 10',
+    '六维要按固定顺序摊成一行（顺序与 roco-service 的 BOX_STAT_FIELDS 同一套）');
+  assert.doesNotMatch(String(formatTraitValue(real)), /\[object /, '绝不许可印出 [object Object]');
+  // 缺的维度不写（不补 0 —— 补 0 就是编数据）
+  assert.equal(formatTraitValue({spe: 10}), '速度 10');
+  // 一个数都没有 ⇒ 空串（由调用方写成"没有这一项"），不是 "{}" 也不是 0
+  assert.equal(formatTraitValue({}), '');
+  assert.equal(formatTraitValue(null), '');
+  assert.equal(formatTraitValue(undefined), '');
+  // 字符串/数组照旧
+  assert.equal(formatTraitValue('稳重'), '稳重');
+  assert.equal(formatTraitValue(['啃咬', '防御']), '啃咬、防御');
+  assert.equal(formatTraitValue([]), '');
+  // 反证：真的接上了吗 —— box.js 的详情那一行必须走 fmtValue（原来写的是 escapeAttr(t.value)）
+  const boxSrc = readFileSync(new URL('../src/client/box.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(boxSrc, /escapeAttr\(\s*t\.value\s*\)/,
+    '详情那一栏不许再直接把对象丢给 escapeAttr（那正是 [object Object] 的来源）');
+  assert.match(boxSrc, /import\s*\{[^}]*formatTraitValue[^}]*\}\s*from\s*'\.\/box-drawer\.js'/,
+    'box.js 要从 box-drawer.js 取这一个函数（不许自己再写一套六维顺序）');
+});
+
+test('⑱ 天分档位要写在行里，而且**按没加成过的那一份**读（人类 ⑤）', () => {
+  // 人类逐字：「天分分为：一般般的天分（激活一条个体值），还不错的天分（激活两条个体值），
+  // 相当好的天分（激活三条个体值），了不起的天分（激活三条个体值，性格加成和天分三个加成
+  // 正好有重合好像就是了不起）」。
+  const amazing = traitChips({individual_id: 'x', nature: '开朗',
+    talent: {hp: 0, atk: 9, spa: 0, def: 7, spd: 0, spe: 10}});   // 三条激活 + 性格长处=速度
+  assert.ok(amazing.some((row) => row.label === '天分 了不起的天分'),
+    `三条且与性格长处重合 ⇒ 了不起：${amazing.map((r) => r.label)}`);
+  const great = traitChips({individual_id: 'x', nature: '开朗',
+    talent: {hp: 0, atk: 9, spa: 0, def: 7, spd: 8, spe: 0}});     // 三条激活、性格长处不在里面
+  assert.ok(great.some((row) => row.label === '天分 相当好的天分'),
+    `三条但不重合 ⇒ 相当好：${great.map((r) => r.label)}`);
+  const plain = traitChips({individual_id: 'x', nature: '开朗', talent: {hp: 0, atk: 9, spa: 0, def: 0, spd: 0, spe: 0}});
+  assert.ok(plain.some((row) => row.label === '天分 一般般的天分'), '一条 ⇒ 一般般');
+  const good = traitChips({individual_id: 'x', nature: '开朗', talent: {hp: 0, atk: 9, spa: 6, def: 0, spd: 0, spe: 0}});
+  assert.ok(good.some((row) => row.label === '天分 还不错的天分'), '两条 ⇒ 还不错');
+  // 反证：加成**不许把档位顶上去** —— 基础只有一条（一般般），加成 +10 到另外两项之后
+  // 页面上仍是「一般般的天分」，另外多一条「已加成 2/3 级」。
+  const boosted = traitChips({individual_id: 'x', nature: '开朗',
+    talent: {hp: 10, atk: 9, spa: 10, def: 0, spd: 0, spe: 0},
+    talent_boosts: [{tier: 1, stat: 'hp', delta: 10}, {tier: 2, stat: 'spa', delta: 10}]});
+  assert.ok(boosted.some((row) => row.label === '天分 一般般的天分'),
+    `加成扣掉后仍是一般般：${boosted.map((r) => r.label)}`);
+  assert.ok(boosted.some((row) => row.label.includes('已加成 2/3 级')), '加成另外说一条');
+  // 认不出来的时候如实说（激活 4 条），不许硬套一个档名
+  const tooMany = traitChips({individual_id: 'x', nature: '开朗',
+    talent: {hp: 1, atk: 9, spa: 6, def: 3, spd: 0, spe: 0}});
+  assert.ok(tooMany.some((row) => row.label === '天分 认不出档位'),
+    `4 条以上要说认不出：${tooMany.map((r) => r.label)}`);
 });

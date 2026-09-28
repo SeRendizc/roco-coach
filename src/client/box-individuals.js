@@ -106,11 +106,16 @@ export function undoIndividual(individualId, {at = null} = {}) {
 export function addIndividualFor(card, {suffix = null} = {}) {
   const all = loadAll();
   const base = individualFor(all, card);
-  // 新编号：同种第二只默认叫 `<原编号>-b`，再往后 `-c`、`-d`…（同种最多 6 只，够用且不泛滥）
+  // ⚠ 2026-09-28 改钉（人类：「点一下再养一只莫名其妙出现然后**又多一只**还删不掉」）：
+  // 原来每次点都再加一只（`-b`→`-c`…最多 6 只）⇒ 连点几下就堆一排同名卡。
+  // 人类对"同种多只"的口径是**一对**（2026-09-28 批准演示对时就是这么说的）⇒ 本机**至多加 1 只**：
+  // 已经有 `-b` 就**不再加**，并告诉玩家要加先删掉本机那只。
   const used = new Set(Object.keys(all).filter((id) => id.startsWith(base.individual_id)));
-  const letters = ['b', 'c', 'd', 'e', 'f'];
+  const letters = ['b'];
   const pick = suffix ?? letters.find((letter) => !used.has(`${base.individual_id}-${letter}`));
-  if (!pick) return {ok: false, reason: '这一种已经有 6 个个体了，先删掉几个再来'};
+  if (!pick) {
+    return {ok: false, reason: '这一种已经有两只了（同种最多一对）；要再加，先删掉本机那一只'};
+  }
   const id = `${base.individual_id}-${pick}`;
   try {
     all[id] = duplicateIndividual(base, {individual_id: id, at: new Date().toISOString()});
@@ -119,6 +124,25 @@ export function addIndividualFor(card, {suffix = null} = {}) {
   }
   saveAll(all);
   return {ok: true, individual: all[id], individual_id: id};
+}
+
+/**
+ * **删掉**一个本机个体（人类 2026-09-28：「点一下再养一只莫名其妙出现然后又多一只**还删不掉**」）。
+ *
+ * 只许删**本机加出来的**那些（`<原编号>-b/-c/…`）：服务端名单里那只删不掉（它不在本机记录里，
+ * 说"删掉了"就是骗人）。删不动就**如实说为什么**（`{ok:false, reason}`），页面照原样显示。
+ */
+export function removeIndividual(individualId) {
+  const id = String(individualId ?? '').trim();
+  if (!id) return {ok: false, reason: '没有编号 ⇒ 不知道删哪一只'};
+  if (!/-(?:b|c|d|e|f)$/.test(id)) {
+    return {ok: false, reason: '这只是名单里的个体（不是本机加的）⇒ 不能在这里删'};
+  }
+  const all = loadAll();
+  if (!Object.hasOwn(all, id)) return {ok: false, reason: '本机记录里没有这一只（可能已经删过了）'};
+  delete all[id];
+  saveAll(all);
+  return {ok: true, individual_id: id};
 }
 
 /**

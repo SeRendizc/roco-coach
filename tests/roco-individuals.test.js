@@ -12,9 +12,9 @@ import {
   individualsFromDataset, individualFromInstance, groupBySpecies, panelOfIndividual,
   refresh, duplicateIndividual, seedOf, rngFrom, rollNature, rollTalentStat, boostedStatsOf,
   canUndo, undoLastRefresh, lastRefreshOf, rollbackAdvice, lastRefreshNote, undoUsed,
-  REFRESH_LIMIT, ROLL_RULES, TALENT_STEP, TALENT_TIERS,
+  REFRESH_LIMIT, ROLL_RULES, TALENT_STEP, TALENT_REFRESH_LEVELS,
 } from '../src/coach/individuals.js';
-import {STAT_KEYS} from '../src/coach/talent.js';
+import {STAT_KEYS, talentTierOf} from '../src/coach/talent.js';
 
 const dataset = JSON.parse(readFileSync(new URL('../data/roco/owned/owned-pets.json', import.meta.url), 'utf8'));
 const list = individualsFromDataset(dataset);
@@ -41,12 +41,26 @@ test('① 拥有精灵默认 **60** 级（2026-09-27 改钉）；天分/性格�
   assert.ok(list.every((row) => row.nature_source.includes('rolled')), '性格要标明是掷出来的');
   assert.ok(list.every((row) => row.talent_source.includes('rolled')), '天分要标明是掷出来的');
   assert.ok(list.every((row) => Object.values(row.talent).some((value) => value > 0)), '天分要有非零项');
-  // 分布是**建模的**：随机三项 7–10、其余 0–6（与「了不起天分」的描述一致）——这一条要能被核对
+  // 分布是**建模的** —— ⚠ 2026-09-28 **改钉**：人类 ⑤ 给了四档口径
+  // 「一般般（激活一条）/还不错（两条）/相当好（三条）/了不起（三条且性格加成与那三条重合）」，
+  // 而旧口径「随机三项 7–10、其余 0–6」实测让 49 只**全部**激活 4–6 条 ⇒ 四档一只都套不上
+  // （`talentTierOf` 只能如实回"认不出"，档位功能等于死掉）。现在改成：
+  // **先掷激活 1–3 条（等概率，建模的）**，激活的那几条给 7–10、**其余恰好 0**。
+  // 旧断言（`high.length === 3` 恰好三项 ≥7）作废但不删，原因记在这里。
   for (const row of list) {
     const high = STAT_KEYS.filter((stat) => row.talent[stat] >= 7);
-    assert.equal(high.length, 3, `${row.individual_id} 应当恰好三项 ≥7：${JSON.stringify(row.talent)}`);
+    const positive = STAT_KEYS.filter((stat) => row.talent[stat] > 0);
+    assert.ok(high.length >= 1 && high.length <= 3,
+      `${row.individual_id} 激活的高项应当是 1–3 条：${JSON.stringify(row.talent)}`);
+    assert.equal(positive.length, high.length,
+      `${row.individual_id} 没被激活的项必须是**恰好 0**（0 与 1–6 的"给一点"是两回事）：${JSON.stringify(row.talent)}`);
     assert.ok(high.every((stat) => row.talent[stat] <= 10), '天分单项不超过 10（一级口径）');
   }
+  // 反证：这四档**每只都读得出来**（档位不是摆设）——实测 49/49，见台账 §C6.334e
+  assert.ok(list.every((row) => {
+    const tier = talentTierOf({talent: row.talent, nature: row.nature});
+    return tier.tier !== null;
+  }), `每只都要能读出档位：${JSON.stringify(list.map((row) => talentTierOf({talent: row.talent, nature: row.nature}).reason).slice(0, 3))}`);
   // 可复现：重新读一遍数据，同一只掷到的性格与天分必须一样
   const again = individualsFromDataset(dataset);
   assert.deepEqual(again.map((row) => [row.nature, row.talent]),
@@ -160,8 +174,20 @@ test('⑧ 可重复拥有：新个体 id 不同、刷新次数重置、两个体
   const twin = duplicateIndividual(one, {individual_id: `${one.individual_id}-b`, at: 'T'});
   assert.notEqual(twin.individual_id, one.individual_id);
   assert.deepEqual(twin.refreshes, {nature: REFRESH_LIMIT, talent: REFRESH_LIMIT});
-  assert.equal(twin.nature, null, '新个体没有性格数据 ⇒ null');
-  assert.ok(twin.talent_source.includes('zeroed'));
+  // ⚠ 2026-09-28 改钉（人类指着截图：新加的那一行写着「性格 待导出 / 天分 待导出」，
+  // 而别的行都有值 ——「点一下再养一只莫名其妙出现」）。**旧口径**：复制出来的个体 nature=null、
+  // talent 全 0、来源标 `zeroed`，界面只能写"待导出"。**新口径**：按新编号种子化掷一份
+  // （与其它个体同一套 `rollNatureAndTalent`），来源照实标 `rolled（…）`，并且**必须说清是掷点**。
+  // 旧断言（nature === null / talent_source 含 zeroed）作废但不删，原因与逐字原话记在上面。
+  assert.ok(twin.nature, '复制出来的个体要有性格（否则界面又只有"待导出"）');
+  assert.match(twin.nature_source, /rolled/, '性格来源必须写明是掷点');
+  assert.match(twin.talent_source, /rolled/, '天分来源必须写明是掷点');
+  assert.match(twin.talent_source, /建模的|非官方概率/, '掷点分布要标"建模的、非官方概率"（不许当成官方概率）');
+  assert.ok(Object.values(twin.talent).some((value) => Number(value) > 0), '天分不能是整排 0');
+  // 同一编号必须掷出同一份（可复现：换机器/重载页面结果一致）
+  const twinAgain = duplicateIndividual(one, {individual_id: `${one.individual_id}-b`, at: 'T'});
+  assert.deepEqual(twinAgain.talent, twin.talent, '同一个新编号要掷出同一份（种子化，可复现）');
+  assert.equal(twinAgain.nature, twin.nature, '性格也要可复现');
   assert.equal(twin.history[0].kind, 'duplicate', '留下"这是复制出来的"这条记录');
   const refreshed = refresh(twin, 'nature', {at: 'T'});
   assert.equal(one.refreshes.nature, REFRESH_LIMIT, '刷副本不许影响本体');
@@ -184,7 +210,7 @@ test('⑨ 掷点规则的诚实边界必须在：两条都标"建模的、非实
   assert.match(rolled.nature_source, /rolled/, '性格要标明是掷出来的');
   assert.match(rolled.talent_source, /建模的|非官方概率/, '天分分布要标明是建模的（不是官方概率）');
   assert.equal(TALENT_STEP, 10, '每级 +10（人类口径）');
-  assert.equal(TALENT_TIERS, 3, '一/二/三级（人类口径）');
+  assert.equal(TALENT_REFRESH_LEVELS, 3, '一/二/三级（人类口径）');
   assert.equal(REFRESH_LIMIT, 3, '次数上限与级数一致');
   // 反证：掷点确实用了这两条规则，而不是"随便返回一个"
   const nature = rollNature(seedOf('x', 'nature', 1, ''));
@@ -198,10 +224,10 @@ test('⑨ 掷点规则的诚实边界必须在：两条都标"建模的、非实
   // 改钉（2026-09-26）：初始天分现在是**掷出来的**（原版随机）⇒ 这里要比"加了多少"，
   // 不是比"加完等于 10"。判据的意图没变：每级 +10、三项不重复。
   const before = {...one.talent};
-  for (let tier = 1; tier <= TALENT_TIERS; tier += 1) one = refresh(one, 'talent', {at: `T${tier}`});
+  for (let tier = 1; tier <= TALENT_REFRESH_LEVELS; tier += 1) one = refresh(one, 'talent', {at: `T${tier}`});
   const boosted = boostedStatsOf(one);
-  assert.equal(boosted.length, TALENT_TIERS, '三级共加三项');
-  assert.equal(new Set(boosted).size, TALENT_TIERS, '三项互不重复（人类口径）');
+  assert.equal(boosted.length, TALENT_REFRESH_LEVELS, '三级共加三项');
+  assert.equal(new Set(boosted).size, TALENT_REFRESH_LEVELS, '三项互不重复（人类口径）');
   for (const stat2 of boosted) {
     assert.equal(one.talent[stat2] - before[stat2], TALENT_STEP, `${stat2} 应当正好 +${TALENT_STEP}`);
   }

@@ -22,11 +22,11 @@ const $ = (id) => document.getElementById(id);
 import {mountXiaoya} from './xiaoya.js';
 import {mountStalePageBanner} from './stale-page.js';
 // 「我的盒子」按种类收进抽屉（人类 2026-09-26）：纯函数在 `box-drawer.js`，这里只做状态与事件。
-import {drawerListHtml} from './box-drawer.js';
+import {drawerListHtml, formatTraitValue} from './box-drawer.js';
 // 个体状态（性格/天分/刷新次数）在 `box-individuals.js`：它要碰 localStorage 与服务器字段名，
 // 而这一页的玩家区代码里不许出现工程词（判据：tests/roco-box.test.js 的玩家层那一条）。
 import {individualsForRows, refreshIndividual, undoIndividual, addIndividualFor, localIndividualsOf,
-  localCardById, localIndividualsGrouped} from './box-individuals.js';
+  localCardById, localIndividualsGrouped, removeIndividual} from './box-individuals.js';
 // 刷新之后「落在哪一项」那句话只有一处（`lastRefreshNote`）——页面只负责显示。
 import {lastRefreshNote} from '../coach/individuals.js';
 
@@ -54,6 +54,8 @@ const state = {
   selected: [],        // [{select, group, name}]，最多两只
   lastDev: null,
   totals: {mine: null, catalog: null},
+  view: 'list',        // 'list' = 首层列表；'compare' = 第二级页（地址 `?a=&b=`）
+  compareGroups: {},   // 比较页上两只各属于哪个物种（回执/详情里给的）：交接去重要用
 };
 
 // ── 小工具 ──────────────────────────────────────────────────────────────────
@@ -75,10 +77,11 @@ const typeChips = (types) => (types ?? []).map((t) => {
   return `<span class="type" style="background:${color}">${emoji}${escapeAttr(t)}</span>`;
 }).join('');
 
+// 六维对象的印法在 `box-drawer.js`（`formatTraitValue`）—— 那一层已经有"缺的如实标注"的口径，
+// 这里不再写第二套（两套一定会漂）。`fmtValue` 只负责转义与"没有这一项"的兜底。
 const fmtValue = (value) => {
-  if (value === null || value === undefined) return NO_ITEM;
-  if (Array.isArray(value)) return value.length ? value.map((v) => escapeAttr(v)).join('、') : NO_ITEM;
-  return escapeAttr(value);
+  const text = formatTraitValue(value);
+  return text === '' ? NO_ITEM : escapeAttr(text);
 };
 
 // ── 筛选菜单 ────────────────────────────────────────────────────────────────
@@ -300,7 +303,7 @@ function detailHtml(player) {
     return head
       + `<h4>个体</h4><div class="traits">${(player.traits ?? []).map((t) => `<div class="trait">
         <b>${escapeAttr(t.label)}</b>
-        <span class="${t.value === null ? 'missing' : ''}">${t.value === null ? NO_ITEM : escapeAttr(t.value)}</span>
+        <span class="${t.value === null ? 'missing' : ''}">${fmtValue(t.value)}</span>
         <span class="trait-effect">${escapeAttr(t.effect_label ?? '')}</span>
        </div>`).join('')}</div>`
       + `<h4>四个技能（按顺序）</h4><ol class="moveset">${(player.skills ?? []).map((s) => `<li>
@@ -342,7 +345,55 @@ function closeDetail() {
   $('detail-drawer').hidden = true;
 }
 
-// ── 两个个体比较 ────────────────────────────────────────────────────────────
+// ── 个体比较：首层选人，结果在**第二级页**（`?a=<个体>&b=<个体>`）──────────────
+//
+// 2026-09-28（人类：「比较页面也莫名其妙，加在下面你觉得很好看？为啥不做成二级页面，
+// 内容也啥啥没有」）：比较结果原来画在列表下面的一块里，现在改成独立的一屏
+// （`#compare-view`），首层列表整块收起 —— 结果不再压在列表底下。
+//
+// 为什么做在这一页里、而不新开一个页面文件：静态资源是按**声明过的页面外壳**推导的
+// （`src/server/index.js` 的 publicAssets + import 图），只往短路径表里加一行不够 ——
+// 新页面还会 404；而比较要用的选人状态、物种去重、交接参数本来全在这一页里。
+// 地址 `box.html?a=<个体>&b=<个体>` 是真地址：刷新 / 前进后退 / 书签都回到同一屏。
+
+/** 地址上的两只（外加可选的 lock=：交接时锁定要跟着走）。 */
+function compareParams() {
+  const query = new URLSearchParams(window.location.search);
+  const list = (key) => (query.get(key) ?? '').split(',').map((one) => one.trim()).filter(Boolean);
+  const [a = ''] = list('a');
+  const [b = ''] = list('b');
+  return {a, b, lock: list('lock')};
+}
+
+function compareUrl(a, b, lockIds = []) {
+  const query = new URLSearchParams();
+  query.set('a', a);
+  query.set('b', b);
+  if (lockIds.length) query.set('lock', lockIds.join(','));
+  return `box.html?${query.toString()}`;
+}
+
+/** 首层 / 第二级页的切换：只换这一屏，不重载（选人与筛选都留着）。 */
+function setView(view) {
+  state.view = view;
+  $('compare-view').hidden = view !== 'compare';
+  $('box-list-view').hidden = view === 'compare';
+  document.body.dataset.boxView = view;
+}
+
+/** 把地址上的两只放回选中状态：卡片上的「已选」与去配队的入口都靠它。 */
+function selectFromUrl({a, b, lock}) {
+  const locked = new Set(lock);
+  const build = (select) => {
+    const row = state.rows.find((one) => one.select === select) ?? localCardById(select) ?? {};
+    return {select, group: row.group ?? state.compareGroups[select] ?? '', name: row.name ?? '',
+      locked: row.locked === true || locked.has(select), localOnly: row.localOnly === true};
+  };
+  state.selected = [a, b].filter(Boolean).slice(0, 2).map(build);
+  // 首层那些卡片也要跟着变「已选」（那一屏收起了，但还在 DOM 里）：回到列表时状态是对的。
+  renderCards();
+}
+
 function renderCompareBar() {
   const selected = state.selected;
   const bar = $('compare-bar');
@@ -350,14 +401,17 @@ function renderCompareBar() {
   $('compare-go').disabled = !sameGroup;
   // 「带上这两只去配队」要对**任意两只**可用（不要求同种）：配队看的是六只互补，
   // 不是同种个体的差异。同种比较那条判据（`compare-go`）仍然只对同种开放。
-  const toTeam = $('compare-to-team');
-  if (toTeam) {
-    toTeam.disabled = selected.length === 0;
-    // RC-801：按钮上**写清这一趟带走了什么**（含几只锁定）。玩家不用点进去才发现锁定没带上。
-    const lockedCount = selected.filter((row) => row?.locked === true).length;
-    toTeam.textContent = lockedCount
-      ? `带上这两只去配队（含锁定 ${lockedCount} 只）`
-      : '带上这两只去配队';
+  // 2026-09-28：首层那一个与比较页上那一个（`#compare-view-to-team`）**只有这一处在写**文案与
+  // 可用状态（含锁定几只），免得两个入口各说各的。
+  const lockedCount = selected.filter((row) => row?.locked === true).length;
+  const teamLabel = lockedCount
+    ? `带上这两只去配队（含锁定 ${lockedCount} 只）`
+    : '带上这两只去配队';
+  for (const id of ['compare-to-team', 'compare-view-to-team']) {
+    const button = $(id);
+    if (!button) continue;
+    button.disabled = selected.length === 0;
+    button.textContent = teamLabel;
   }
   // 「锁定这一只」只在**恰好选了一只**时可用：锁的是那一只，语义必须明确。
   const lockTeam = $('compare-lock-team');
@@ -400,17 +454,90 @@ function renderCompare(player) {
      <span class="cmp-status s-different">不同 ${player.counts.different}</span>
      <span class="cmp-status s-unknown">未知 ${player.counts.unknown}</span>
     </div></div>${rows}`;
-  $('compare-panel').hidden = false;
+  $('compare-note').hidden = true;
+  $('compare-view-actions').hidden = false;
   document.body.dataset.boxCompare = 'shown';
   document.body.dataset.boxCompareUnknown = String(player.counts.unknown);
-  $('compare-panel').scrollIntoView({block: 'nearest'});
 }
 
+/** 比不了的时候：原因写在二级页上（不许白屏，也不许把工程原话/编号丢给玩家）。 */
+function showCompareTrouble(note) {
+  const box = $('compare-note');
+  box.textContent = note;
+  box.hidden = false;
+  $('compare-body').innerHTML = '';
+  $('compare-view-actions').hidden = true;
+  document.body.dataset.boxCompare = 'blocked';
+  document.body.dataset.boxCompareUnknown = '';
+}
+
+/** 读两只的名字：只在**比不了**那一路上用（成功那一路的名字来自结果本身）。 */
+async function namesFor(ids) {
+  const out = {};
+  await Promise.all(ids.map(async (id) => {
+    try {
+      const data = await getJson(`/api/roco/box?detail=${encodeURIComponent(id)}`);
+      if (!data.ok) return;
+      out[id] = data.player.name ?? '';
+      if (data.player.group) state.compareGroups[id] = data.player.group;
+    } catch { /* 名字读不到就不写名字：下面那句话照样说得清为什么比不了 */ }
+  }));
+  return out;
+}
+
+/** 打开（或刷新）第二级页：地址里带两只，内容用 `compare=<a>,<b>` 的现成结果逐行画。 */
+async function renderComparePage() {
+  const {a, b, lock} = compareParams();
+  setView('compare');
+  selectFromUrl({a, b, lock});
+  renderCompareBar();
+  window.scrollTo(0, 0);
+  document.body.dataset.boxCompareIds = `${a},${b}`;
+  if (!a || !b) {
+    showCompareTrouble('这一页要一次带上两只伙伴才有得比：现在地址上只有一只。'
+      + '回盒子里重新选两只再来。');
+    return;
+  }
+  $('compare-view-actions').hidden = false;
+  $('compare-note').hidden = true;
+  $('compare-body').innerHTML = '<p class="muted">正在读这两只的差别…</p>';
+  try {
+    const data = await getJson(`/api/roco/box?compare=${encodeURIComponent(a)},${encodeURIComponent(b)}`);
+    if (!data.ok) {
+      throw Object.assign(new Error(data.error || '这两只比不了'), {status: Number(data.status) || 0});
+    }
+    state.lastDev = data.dev;
+    state.compareGroups[a] = data.player.group ?? state.compareGroups[a] ?? '';
+    state.compareGroups[b] = data.player.group ?? state.compareGroups[b] ?? '';
+    renderCompare(data.player);
+    renderDev();
+  } catch (error) {
+    const status = Number(error?.status) || 0;
+    const message = String(error?.message ?? '');
+    const names = await namesFor([a, b]);
+    const pair = [names[a], names[b]].filter(Boolean).join(' / ');
+    if (message.includes('不是同一种')) {
+      showCompareTrouble(`${pair ? `${pair}：` : ''}这两只不是同一种精灵，逐字段比较只对同种的不同个体成立。`
+        + '换一只同种的再来；也可以点上面的按钮把它们直接带去配队。');
+    } else if (status === 404) {
+      showCompareTrouble('这两只里有一只已经不在名单里了（可能被删掉或者换过）。'
+        + '回盒子里重新选两只再来。');
+    } else if (status === 400) {
+      showCompareTrouble('地址上这两只的编号认不出来（要盒子里那两只自己的编号）。'
+        + '回盒子里重新选两只再来。');
+    } else {
+      showCompareTrouble('这两只的差别这会儿读不出来：本机这边没给出结果。'
+        + '回盒子里重新选两只，或者过一会儿再试。');
+    }
+  }
+}
+
+/** 点「比较这两只」：进第二级页 —— 地址带上两只（锁定的那几只也一起带）。 */
 async function compareSelected() {
   const [a, b] = state.selected;
-  if (!a || !b || a.group !== b.group) return;
+  if (!a || !b || (a.group && b.group && a.group !== b.group)) return;
   // 2026-09-27（审计 ③）：本机新养的个体服务端不认识（比较那条路按 owned 名单解析）。
-  // 与其发一个必然失败的请求、或者**静默什么都不做**，不如照实说清"为什么现在比不了"。
+  // 与其进到一个必然读不出来的页面，不如在首层照实说清"为什么现在比不了"。
   const localOnly = [a, b].filter((row) => row.localOnly === true);
   if (localOnly.length) {
     $('compare-hint').textContent = `这一只（${localOnly.map((row) => row.name || row.select).join('、')}）`
@@ -418,15 +545,17 @@ async function compareSelected() {
       + '两只都在名单里才能比。它的性格与天分在这一行里看得到，也能单独培养。';
     return;
   }
-  try {
-    const data = await getJson(`/api/roco/box?compare=${encodeURIComponent(a.select)},${encodeURIComponent(b.select)}`);
-    if (!data.ok) throw new Error(data.error || '这两只比不了');
-    state.lastDev = data.dev;
-    renderCompare(data.player);
-    renderDev();
-  } catch (error) {
-    $('compare-hint').textContent = `比较失败：${error.message}`;
-  }
+  const lockIds = state.selected.filter((row) => row.locked === true).map((row) => row.select);
+  history.pushState({boxCompare: true}, '', compareUrl(a.select, b.select, lockIds));
+  await renderComparePage();
+}
+
+/** 从第二级页回首层：历史里有上一屏就退回去（选人还在），没有就直接换回列表地址。 */
+function backToList() {
+  if (history.state?.boxCompare === true) { history.back(); return; }
+  history.replaceState(null, '', 'box.html');
+  setView('list');
+  window.scrollTo(0, 0);
 }
 
 function toggleCompare(select) {
@@ -470,7 +599,7 @@ function setKind(kind) {
   }
   $('flag-favourite').setAttribute('aria-pressed', 'false');
   $('flag-locked').setAttribute('aria-pressed', 'false');
-  $('compare-panel').hidden = true;
+  if (state.view === 'compare') backToList();
   closeDetail();
   renderCompareBar();
   void load({reset: true});
@@ -483,7 +612,8 @@ function resetFilters() {
   $('box-search').value = '';
   $('flag-favourite').setAttribute('aria-pressed', 'false');
   $('flag-locked').setAttribute('aria-pressed', 'false');
-  $('compare-panel').hidden = true;
+  // 「重置筛选」在页头（二级页上也点得到）：先把这一屏收回列表，再按新条件取数。
+  if (state.view === 'compare') backToList();
   renderCompareBar();
   void load({reset: true});
 }
@@ -529,6 +659,17 @@ function wire() {
       state.openDrawers = openNow;
       renderCards();
       $('box-status').textContent = '又养了一只同种（它们的天分和性格各自不同，在下面这一行里）';
+      return;
+    }
+    // 删掉本机加出来的那一只（人类 2026-09-28：「多一只还删不掉」）。
+    const removeBtn = event.target.closest?.('[data-remove]');
+    if (removeBtn) {
+      event.preventDefault();
+      const removed = removeIndividual(removeBtn.dataset.remove);
+      $('box-status').textContent = removed.ok
+        ? '已经删掉那一只（它只在本机记录里）'
+        : `删不了：${removed.reason}`;
+      if (removed.ok) renderCards();
       return;
     }
     const undoBtn = event.target.closest?.('[data-undo]');
@@ -585,25 +726,31 @@ function wire() {
   $('box-reset').addEventListener('click', resetFilters);
   $('detail-close').addEventListener('click', closeDetail);
   $('compare-go').addEventListener('click', () => void compareSelected());
-  // RC-801：把选中的个体**带去产品页的六槽工作台**（`?team=own-…,own-…`）。
-  // 只带 id，不带任何结论 —— 配队口径仍然由产品页那一套（RC-301…305）现算。
-  // A2：把**这一只**带过去并锁定（`?team=own-X&lock=own-X`）。
+  // A2：把**这一只**带过去并锁定（`?team=own-X&lock=own-X`）。只在首层用得上
+  // （恰好选了一只时可用）：比较页上永远是两只，锁定单只的语义在那里不成立。
   $('compare-lock-team').addEventListener('click', () => {
     const ids = state.selected.map((row) => row.select).filter(Boolean);
     if (ids.length !== 1) return;
     const id = ids[0];
     window.location.href = `roco.html?team=${encodeURIComponent(id)}&lock=${encodeURIComponent(id)}`;
   });
-  $('compare-to-team').addEventListener('click', () => {
+  // RC-801：把选中的个体**带去产品页的六槽工作台**（`?team=own-…,own-…`）。
+  // 只带 id，不带任何结论 —— 配队口径仍然由产品页那一套（RC-301…305）现算。
+  // 2026-09-28：首层与比较页上各有一个入口，两个都走这一个处理。
+  const goToTeam = () => {
     // A3（2026-09-22）：队伍**同物种最多一只**。盒子的比较流程天生会同种两只
     // （比较的就是同种不同练度），所以交接时按物种去重：**每个物种只带一只**过去，
     // 另一只是「比较候选」，不是队员。服务端也会拦（DUPLICATE_SPECIES_IN_TEAM），
     // 这里先按规则做对，别让玩家点了按钮才吃到 400。
+    // 二级页上没有列表那一页的卡片（`state.rows` 是空的）：物种从比较结果里带过来的
+    // `state.compareGroups` 读 —— 去重规则不许因为换了一屏就失效。
+    const speciesOf = (id) => state.rows?.find?.((row) => row.select === id)?.group
+      ?? state.compareGroups[id] ?? id;
     const picked = state.selected.map((row) => row.select).filter(Boolean);
     const seen = new Set();
     const ids = [];
     for (const id of picked) {
-      const species = state.rows?.find?.((row) => row.select === id)?.group ?? id;
+      const species = speciesOf(id);
       if (seen.has(species)) continue;
       seen.add(species);
       ids.push(id);
@@ -614,22 +761,37 @@ function wire() {
     // （而"锁定"正是配队里最贵的一个约束：它决定了贪心补位能不能动这一只）。
     // 这里只读**已有的事实**（owned 数据的 `locked` 标记），不新增写入路径；
     // 参数形状与工坊一致（`?lock=own-…,own-…`，认不出的 id 由下游按形状丢掉）。
-    const locked = ids.filter((id) => state.rows?.find?.((row) => row.select === id)?.locked === true);
+    const locked = ids.filter((id) => state.selected.find((row) => row.select === id)?.locked === true
+      || state.rows?.find?.((row) => row.select === id)?.locked === true);
     const query = `team=${encodeURIComponent(ids.join(','))}`
       + (locked.length ? `&lock=${encodeURIComponent(locked.join(','))}` : '');
     window.location.href = `roco.html?${query}`;
-  });
+  };
+  $('compare-to-team').addEventListener('click', goToTeam);
+  $('compare-view-to-team')?.addEventListener('click', goToTeam);
   $('compare-clear').addEventListener('click', () => {
     state.selected = [];
-    $('compare-panel').hidden = true;
+    if (state.view === 'compare') {
+      // 在二级页上清空：这一屏已经没有要比的两只了，收回首层（地址也回到列表地址）。
+      state.selected = [];
+      backToList();
+      renderCompareBar();
+      return;
+    }
     renderCards();
     renderCompareBar();
   });
-  $('compare-close').addEventListener('click', () => { $('compare-panel').hidden = true; });
+  // 浏览器前进/后退：地址上有两只就停在比较页上（同一屏），没有就回首层。
+  window.addEventListener('popstate', () => {
+    const {a, b} = compareParams();
+    if (a || b) { void renderComparePage(); return; }
+    setView('list');
+    window.scrollTo(0, 0);
+  });
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
     closeDetail();
-    $('compare-panel').hidden = true;
+    if (state.view === 'compare') backToList();
     for (const menu of document.querySelectorAll('details.fmenu[open]')) menu.open = false;
   });
 }
@@ -644,9 +806,14 @@ async function boot() {
   // 右上角小芽 + 弹出式小芽（人类 2026-09-25 纠偏①）：注入到页头 .header-actions 的最右端。
   mountXiaoya({mode: 'popup'});
   wire();
+  setView('list');
   renderCompareBar();
   await loadTotals();
   await load({reset: true});
+  // 2026-09-28：直接打开 `?a=&b=` 的地址（刷新 / 前进后退 / 书签）就停在比较页上，
+  // 结果从同一份 `compare=<a>,<b>` 现读 —— 同一屏每次都在，不靠上一屏的记忆。
+  const {a, b} = compareParams();
+  if (a || b) await renderComparePage();
 }
 
 void boot();

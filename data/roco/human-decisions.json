@@ -16,6 +16,22 @@
       "limits": "只许一对（MAX_SAME_SPECIES_GROUPS = 1）；不许借机把实例数灌回去（2026-09-24 人类：「重复的删掉」）；页面上两只必须看得出区别",
       "rollback": "删掉 instances 里的 own-0049 + 它的 synthetic_demo provenance，把 MAX_SAME_SPECIES_GROUPS 调回 0，重跑 npm run roco:build-owned（见 build-owned-pets.mjs 的 HELP）",
       "ledger": "§C6.333"
+    },
+    "2026-09-28-talent-tiers-and-five-star-talent-scale": {
+      "at": "2026-09-28",
+      "verbatim": "天分分为：一般般的天分（激活一条个体值），还不错的天分（激活两条个体值），相当好的天分（激活三条个体值），了不起的天分（激活三条个体值，性格加成和天分三个加成正好有重合好像就是了不起）；另外升星系统虽然不做，但是还是默认做成5星，然后个体值都突破，比如原来是+10，五星是+60",
+      "allows": "① 天分档位按激活几条资质读（src/coach/talent.js 的 TALENT_TIERS / talentTierOf），档位不换算成任何加成；② 面板与详情里的资质按**默认 5 星**读：0–10 的资质 ×6 成内部 0–60 刻度（STAR_BREAKTHROUGH / talentAtFiveStar），等级公式的资质系数同步换成每个内部点（3÷6=0.5）⇒ 面板数值与改动前**逐值相同**",
+      "limits": "① 升星**抬种族值**那一层仍然不做（650→1000 / 500→850 的压缩曲线本仓未建）；② ×6 只能进一次 —— 直接塞进 3×资质 会把噼啪鸟速度算成 492（实测钉住的是 294）；③ 1–4 星的资质上限本仓没有数据 ⇒ 不插值，传了就如实说、不算面板；④ 档位掷点分布（激活 1–3 条等概率）是**建模的**，不是官方概率，界面上要照实标",
+      "rollback": "面板：panelOf/pvpPanelOf 传 {stars:0} 即回到零突破那一档；掷点：src/coach/individuals.js 的 rollNatureAndTalent 里把 active 固定回 3 并把其余改写回 0–6（改钉记录见 tests/roco-individuals.test.js ①）",
+      "ledger": "§C6.334c / §C6.334e"
+    },
+    "2026-09-28-box-nine-annotations": {
+      "at": "2026-09-28",
+      "verbatim": "盒子左上角铠甲虫组头没信息；＋再养一只同种堆叠出多只且删不掉；「我的精灵」详情/比较要显示真实个体数据；「加入比较」按钮太大；删掉「性格与天分是掷点生成的」这句；Lv.100 是错的（应 60）",
+      "allows": "盒子页九条批注的落地：组头摘要、同种最多一对 + 可删本机那只、详情/比较走个体层真值、资质六维摊开显示（formatTraitValue）、抽屉级数只从数据读、掷点说明不上屏",
+      "limits": "详情里「特长 / 血脉」两栏游戏数据确实没有 ⇒ 继续标「未知」，不猜；own-0049 是演示个体（见 2026-09-28-same-species-demo-pair）",
+      "rollback": "各条都有对应判据（tests/roco-box-drawer.test.js ③⑤⑫⑭⑮⑯⑰⑱、tests/roco-box.test.js 的详情/比较断言），改回即红",
+      "ledger": "§C6.334 – §C6.334d"
     }
   }
 }

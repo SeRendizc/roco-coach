@@ -22,6 +22,9 @@
 import {readFileSync} from 'node:fs';
 // 同种多实例的卡片要能分辨 ⇒ 卡片上带出这一只的性格/天分（值由个体层掷出）。
 import {individualFromInstance} from '../coach/individuals.js';
+// 天分**档位**（人类 2026-09-28 ⑤：「一般般/还不错/相当好/了不起」）——
+// 这一层只给"读法"，档位名来自他的口述，本仓没有"这一档 +x%"这种数（见 talent.js 的 TALENT_TIERS）。
+import {talentTierOf} from '../coach/talent.js';
 import {fileURLToPath} from 'node:url';
 import {dirname,join} from 'node:path';
 import {RocoClient,RULESET_ID} from '../coach/roco-client.js';
@@ -627,7 +630,10 @@ function boxMineCard(index,i){
 /** 同种多实例时给卡片加一条个体标记；同种只有一只时**不出现**（不打扰正常那一路）。 */
 function sameSpeciesLabel(index,i){
  const group=index.instancesBySpecies?.get(i.species_id)??[];
- if(group.length<2)return {};
+ // ⚠ 2026-09-28 改钉（人类：「更何况这还是**我的精灵**」「天分描述按我上面说的来」）：
+ // 个体标记**不再只在"同种多只"时出现** —— 每张卡都该看得出这一只的性格/天分，
+ // 否则页面上只有那一对同种有标记、别的都光秃秃（他的截图里正是这样）。
+ // `same_species_count` 仍然只在同种多只时给（那是"归组"用的信号，别的卡不需要）。
  try{
   const row=individualFromInstance(i,{level:Number.isFinite(i.level)?i.level:60});
   const talent=row?.talent??null;
@@ -636,7 +642,7 @@ function sameSpeciesLabel(index,i){
   const order={hp:'生命',atk:'物攻',def:'物防',spa:'魔攻',spd:'魔防',spe:'速度'};
   const talentText=top.map(([k,v])=>`${order[k]??k} ${v}`).join(' / ');
   return {
-   same_species_count:group.length,
+   ...(group.length>1?{same_species_count:group.length}:{}),
    individual_label:[row?.nature?`性格「${row.nature}」`:null,talentText?`天分 ${talentText}`:null]
     .filter(Boolean).join(' · ')||null,
   };
@@ -655,6 +661,35 @@ function boxMineCardDev(i){
   provenance:Array.isArray(i.provenance)?i.provenance:[],
   unknown_fields:Array.isArray(i.unknown_fields)?[...i.unknown_fields]:[],
   build_hash:i.build_hash??null};
+}
+
+/**
+ * **把个体层的值补进一条实例**（2026-09-28，人类：「更何况这还是**我的精灵**」「不是所有技能啥的
+ * 都准备好了吗？？为啥还是只能图鉴查询？」）。
+ *
+ * 数据集里 `nature.value` / `talent.value` 是 **null**（静态图鉴没有这两项），真正的值由个体层
+ * 按 instance_id **种子化掷出来** —— 页面画卡片用的是它，而**详情抽屉与比较页原来读的是原始字段**
+ * ⇒ 同一只精灵在卡片上有性格、点开却写「游戏数据里没有这一项」（人类截图里的就是这个）。
+ *
+ * 这一层只补 `level` / `nature` / `talent` 三项（个体层真正给得出的），**特长/血脉仍留 null**
+ * （游戏数据里确实没有 ⇒ 照实标未知，不编）。
+ */
+function withIndividualGrowth(instance){
+ if(!instance)return instance;
+ try{
+  const row=individualFromInstance(instance,{level:Number.isFinite(instance.level)?instance.level:60});
+  // 天分档位（人类 2026-09-28 ⑤）按**掷出来的那一份**读，不按玩家后来加成过的：
+  // 档位说的是"这只抓到时是什么天分"，`talent_boosts` 是玩家自己加的级，两者不能混。
+  const tier=talentTierOf({talent:row.talent,nature:row.nature});
+  return {...instance,
+   level:Number.isFinite(row.level)?row.level:instance.level,
+   nature:{...(instance.nature??{}),value:row.nature??null,value_source:row.nature_source??null},
+   talent:{...(instance.talent??{}),value:row.talent??null,value_source:row.talent_source??null},
+   talent_tier:{tier:tier.tier,label:tier.label,activated:tier.activated,count:tier.count,
+    nature_overlap:tier.nature_overlap,reason:tier.reason}};
+ }catch{
+  return instance;   // 个体层读不出来就**原样返回**（宁可显示"未知"，也不编一个值）
+ }
 }
 
 /** 成长属性（性格/资质/特长/血脉）在玩家层的读法：有值就给值，没值就说「游戏数据里没有这一项」。 */
@@ -1664,8 +1699,12 @@ function boxDetailMode(index,id){
     moveset_available:Boolean(numbers&&numbers.moveset.length)}),
   };
  }
- const instance=index.instanceById.get(id)??null;
- if(!instance)return null;
+ const rawInstance=index.instanceById.get(id)??null;
+ if(!rawInstance)return null;
+ // ⚠ 2026-09-28：详情也走个体层 —— 否则卡片上写着「性格 稳重」，点开详情却是「游戏数据里没有这一项」
+ // （人类截图里就是这么问的：「为啥还是只能图鉴查询？更何况这还是我的精灵」）。
+ // 注意用**新名字**：上面那行是 `const`，就地赋值会直接抛（本仓踩过同类坑）。
+ const instance=withIndividualGrowth(rawInstance);
  return {
   mode:'detail',
   player:{
@@ -1674,10 +1713,19 @@ function boxDetailMode(index,id){
    group:instance.species_id,
    level:Number.isFinite(instance.level)?instance.level:null,
    badges:[...(instance.favourite===true?['收藏']:[]),...(instance.locked===true?['锁定']:[])],
-   traits:['nature','talent','specialty','bloodline'].map((field)=>({
+   traits:[...['nature','talent','specialty','bloodline'].map((field)=>({
     label:BOX_FIELD_LABELS[field],
     ...boxGrowthPlayer(instance[field]),
    })),
+   // 人类 2026-09-28 ⑤：档位名要看得见（「一般般/还不错/相当好/了不起」）。
+   // 读不出来（激活 4 条以上、或三条却没有性格判重合）就把原因原样写在这一栏 —— 不许猜一个档名。
+   ...(instance.talent_tier?[{
+    label:'天分档位',
+    value:instance.talent_tier.label??null,
+    status:instance.talent_tier.label?'known':'unknown',
+    reason:instance.talent_tier.label?null:instance.talent_tier.reason,
+    effect_label:BOX_EFFECT_REASON,
+   }]:[])],
    skills:boxSkillsPlayer(index,instance.skills),
    metrics:instance.base_stats?BOX_STAT_FIELDS.filter(([key])=>Number.isFinite(instance.base_stats[key]))
     .map(([key,label])=>({label,value:instance.base_stats[key]})):null,
@@ -1710,8 +1758,9 @@ function boxCompareFieldValue(index,field,value){
 
 function boxCompareMode(index,ids){
  const [aId,bId]=ids;
- const a=index.instanceById.get(aId)??null;
- const b=index.instanceById.get(bId)??null;
+ // ⚠ 2026-09-28：走个体层（见 `withIndividualGrowth`）—— 否则比较页的性格/资质两栏永远是「未知」
+ const a=withIndividualGrowth(index.instanceById.get(aId)??null);
+ const b=withIndividualGrowth(index.instanceById.get(bId)??null);
  if(!a||!b)return {missing:[a?null:aId,b?null:bId].filter(Boolean)};
  // 不同种必须拒绝：判据在 `scripts/roco/owned-pets-lib.mjs` 里，这里只做转译，不另写一遍。
  let compared;
@@ -1749,6 +1798,24 @@ function boxCompareMode(index,ids){
   }
   return entry;
  });
+ // 人类 2026-09-28 ⑤ 的档位（一般般/还不错/相当好/了不起）：`compareOwnedPets` 那边不认识这一栏，
+ // 所以**在这里补一行**（值取自个体层读出来的 `talent_tier`）。两只都一样就是「相同」，
+ // 读不出来（4 条以上/缺性格）就如实「未知」并写清为什么 —— 不猜、不四舍五入成"相当好"。
+ const tierA=a.talent_tier??null, tierB=b.talent_tier??null;
+ if(tierA||tierB){
+  const nameOf=(row)=>row?.label??null;
+  const both=Boolean(nameOf(tierA)&&nameOf(tierB));
+  const status=!both?'unknown':(nameOf(tierA)===nameOf(tierB)?'same':'different');
+  fields.push({
+   field:'talent_tier',label:'天分档位',
+   status,status_label:BOX_STATUS_LABELS[status]??status,
+   a:nameOf(tierA),b:nameOf(tierB),
+   reason:status==='unknown'
+    ?`${[nameOf(tierA)?null:'这只（A）',nameOf(tierB)?null:'这只（B）'].filter(Boolean).join('、')}`
+      +`读不出档位：${tierA?.reason??tierB?.reason??''}`
+    :null,
+  });
+ }
  const counts={same:0,different:0,unknown:0};
  for(const f of fields)counts[f.status]+=1;
  return {compared,player:{

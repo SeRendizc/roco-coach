@@ -6,10 +6,14 @@
  *
  * 两条硬约束写在这里，验收脚本会量：
  *   ① 390px 无横向溢出：所有可能变长的东西（名字、系别、原始 JSON）都要能换行；
- *   ② 触控目标 ≥44px：页面上每一个可点元素（按钮 / summary / 输入框 / 卡片）都到线。
+ *   ② 触控目标 ≥44px：**主要动作**（按钮 / summary / 输入框 / 卡片）都到线。
+ *      2026-09-28 改钉（人类：「然后就是那个**加入比较为啥那么大**，有那么重要？」）：
+ *      卡片上的「加入比较」是**次要动作**，按 chip 尺寸做（≤28px 高、字号 ≤12px），
+ *      所以它不跟 44px 这条线，但也**不许做成点不到** —— 下限 24×24（`.cmp-toggle`，见下）。
+ *      触控那一条判据（browser-box-acceptance 19）同步改成「主要动作 44 / 次要控件 24」。
  */
 
-/* ── 触控目标：页面上每一个可点元素都到 44px 这条线 ─────────────────────── */
+/* ── 触控目标：主要动作都到 44px 这条线；次要控件（.cmp-toggle）见下面的 24px 下限 ── */
 button,summary,input{min-height:44px}
 button{min-width:44px}
 
@@ -82,18 +86,35 @@ button{min-width:44px}
 .tag-form{background:#4a3f6b;color:#e2dcff}
 .tag-badge{background:#4a4030;color:#f0dda8}
 .card-key{font-size:11.5px;color:#b4c3d1}
-.cmp-toggle{min-height:44px;font-size:12.5px;padding:6px 8px;width:100%}
-.card.picked .cmp-toggle{background:var(--accent);color:#152c24;border-color:var(--accent);font-weight:600}
+/* 「加入比较」：**次要动作**，做成一个 chip —— 2026-09-28（人类：「加入比较为啥那么大，
+   有那么重要？」）。改前实测：和技能/等级那些标签一样大（宽 100%、高 44px，整张卡最抢眼的一行）。
+   改后：高 24px、字号 11.5px、内边距 2/8、低调描边；下限 24×24（摸得到），
+   选择器与无障碍钩子一个不动：`data-cmp="<个体 id>"` + `aria-pressed`。 */
+.cmp-toggle{width:auto;align-self:flex-start;min-height:24px;min-width:24px;height:24px;
+ font-size:11.5px;line-height:1;padding:0 8px;border-radius:999px;font-weight:400;
+ background:#121e2c;border:1px solid var(--line);color:#b4c3d1;opacity:.92}
+.cmp-toggle:hover:not(:disabled){background:#1b2938;border-color:#5d7791;color:#dbe5ef}
+.card.picked .cmp-toggle{background:#22402f;color:#bfeac3;border-color:#4e8f68;font-weight:600;opacity:1}
 .box-empty{margin:12px 0 0}
 .pager{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:12px;font-size:13px;color:var(--muted)}
 .pager button{min-height:44px;min-width:44px;font-size:13px}
 
-/* ── 比较条与比较面板 ──────────────────────────────────────────────────── */
+/* ── 比选栏（首层）与比较二级页 ────────────────────────────────────────── */
 .compare-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
 #compare-hint{margin:0;font-size:13px;line-height:1.6;flex:1 1 240px}
 .compare-actions{display:flex;gap:8px;flex-wrap:wrap}
 .compare-actions button{min-height:44px;min-width:44px}
-.compare-panel{margin-bottom:12px}
+/* 第二级视图（个体比较页）：列表整块收起（`#box-list-view[hidden]`），这一屏自己占满。
+   2026-09-28：人类说「比较页面也莫名其妙，加在下面你觉得很好看？为啥不做成二级页面，
+   内容也啥啥没有」⇒ 这一屏有返回入口、有那一句话的来龙去脉（每一行为什么都写出来）。 */
+.compare-view{margin-bottom:12px}
+.compare-view-head{justify-content:flex-start;gap:12px;flex-wrap:wrap}
+#compare-back{height:auto;min-height:44px}
+.compare-lead{margin:0 0 10px;line-height:1.6}
+#compare-view-actions{margin:0 0 10px}
+/* 比不了的时候（不同种 / 少带一只 / 名单里找不到）：把原因写在这里，不留白屏。 */
+.cmp-trouble{margin:0 0 10px;padding:10px 12px;border:1px solid #7a4a3a;border-radius:10px;
+ background:#2a1c18;color:#ffd7c2;font-size:13px;line-height:1.65;overflow-wrap:anywhere}
 .cmp-summary p{margin:0 0 8px;font-size:13.5px;line-height:1.6}
 .cmp-counts{display:flex;gap:8px;flex-wrap:wrap}
 .cmp-status{font-size:12px;border-radius:6px;padding:2px 9px;display:inline-flex;align-items:center}
@@ -225,11 +246,12 @@ button{min-width:44px}
 #box-grid[data-grouped="yes"] .individual-card .card-face{
   flex-direction:row;align-items:center;flex-wrap:wrap;gap:6px 8px;min-height:0}
 #box-grid[data-grouped="yes"] .individual-card .card-name{font-size:14px}
-#box-grid[data-grouped="yes"] .individual-card .cmp-toggle{width:auto;min-height:36px;padding:4px 10px}
+/* 抽屉里的「加入比较」也是同一个 chip（2026-09-28：次要动作，24px 高就够，不给它 36/44 了） */
+#box-grid[data-grouped="yes"] .individual-card .cmp-toggle{width:auto;min-height:24px;height:24px;padding:0 8px}
 @media(max-width:560px){
   #box-grid[data-grouped="yes"]{grid-template-columns:minmax(0,1fr)}
   #box-grid[data-grouped="yes"] .refresh-btn{min-height:44px}
-  #box-grid[data-grouped="yes"] .individual-card .cmp-toggle{min-height:44px}
+  #box-grid[data-grouped="yes"] .individual-card .cmp-toggle{min-height:24px;height:24px}
 }
 
 /* 同种多实例的个体标记（性格/天分）：只在**同种有两只以上**时出现 —— 让两张同名卡看得出区别

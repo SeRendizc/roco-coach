@@ -187,8 +187,18 @@ test('路由契约：detail 有面板/配招就给，没有就如实说没有（
   const instance = await box('detail=own-0001');
   assert.equal(instance.status, 200);
   assert.equal(instance.json.player.entity, 'instance');
-  assert.equal(instance.json.player.traits.length, 4, '四项个体属性一栏都不能少');
-  assert.deepEqual(instance.json.player.traits.map((t) => t.label), ['性格', '资质', '特长', '血脉']);
+  assert.equal(instance.json.player.traits.length, 5, '四项个体属性 + 天分档位（人类 2026-09-28 ⑤）一栏都不能少');
+  assert.deepEqual(instance.json.player.traits.map((t) => t.label), ['性格', '资质', '特长', '血脉', '天分档位']);
+  // ⚠ 2026-09-28（人类 ⑤）：档位名必须是**他那四个名字之一**，而且是**当场算的**（不是写死的）。
+  // 读不出来时这一栏如实 unknown + 原因 —— 不许硬套一个档名。
+  const tierTrait = instance.json.player.traits.find((t) => t.label === '天分档位');
+  assert.ok(['一般般的天分', '还不错的天分', '相当好的天分', '了不起的天分'].includes(tierTrait.value),
+    `天分档位只能是他那四个名字：${show(tierTrait)}`);
+  assert.equal(tierTrait.status, 'known');
+  // 反证：资质那一栏是**六维对象**（页面靠它印数值）—— 不是 null、也不是一句话
+  const talentTrait = instance.json.player.traits.find((t) => t.label === '资质');
+  assert.equal(typeof talentTrait.value, 'object', `资质要给六维表：${show(talentTrait)}`);
+  assert.ok(Object.values(talentTrait.value).some((v) => Number(v) > 0), '资质至少有一条被激活');
   assert.equal(instance.json.player.skills.length, 4, '四个技能是有序的四个');
   assert.deepEqual(instance.json.player.skills.map((s) => s.order), [1, 2, 3, 4], '技能顺序必须写出来');
   assert.equal(instance.json.player.panel.available, false, '面板数值在本仓库不可得');

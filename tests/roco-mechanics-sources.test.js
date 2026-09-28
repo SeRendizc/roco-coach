@@ -28,7 +28,7 @@ const readDoc = () => readFileSync(DOC_PATH, 'utf8');
 /** 文档必须点到的仓内实现位置（少一个 = 对照表没落到代码上）。 */
 export const REQUIRED_REPO_PATHS = [
   'src/coach/talent.js',                          // 性格表读取 + 面板换算（PANEL_FORMULA / TALENT_PVP_STEP / pvpPanelOf）
-  'src/coach/individuals.js',                     // 天分三级各 +10（TALENT_STEP / TALENT_TIERS / refresh）
+  'src/coach/individuals.js',                     // 天分三级各 +10（TALENT_STEP / TALENT_REFRESH_LEVELS / refresh）
   'src/coach/natures-data.js',                    // 30 条性格的浏览器镜像（NATURES_MODIFIER）
   'src/coach/nature-advice.js',                   // 种族值读取 + 说法层（RACE_SOURCE / explainNature）
   'data/roco/systems/natures.json',               // 性格规则与百分比的唯一落盘处
@@ -165,7 +165,7 @@ test('② 正文档：点到本仓实现位置，且这些文件真的存在', (
   const doc = readDoc();
   assert.deepEqual(auditRepoPaths(doc), []);
   // 逐条再明确一次（这条是"实现位置"本身，不许只挂在 URL 上）
-  for (const path of ['PANEL_FORMULA', 'TALENT_PVP_STEP', 'pvpPanelOf', 'TALENT_STEP', 'TALENT_TIERS', 'RACE_SOURCE']) {
+  for (const path of ['PANEL_FORMULA', 'TALENT_PVP_STEP', 'pvpPanelOf', 'TALENT_STEP', 'TALENT_REFRESH_LEVELS', 'RACE_SOURCE']) {
     assert.match(doc, new RegExp(path), `必须点到 ${path}`);
   }
 });

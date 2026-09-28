@@ -208,9 +208,177 @@ export const TALENT_PVP_STEP = {
 };
 export const TALENT_RANGE = {min: 0, max: 10, note: '六项各自 0–10；「了不起天分」= 六项资质里随机三项加 7–10（笔记 §精灵性格与资质）'};
 
+// ── 天分的四个档位（人类 2026-09-28 的口述口径）──────────────────────────────
+//
+// 人类原话（逐字，见每档的 `source`）：
+//   「天分分为：一般般的天分（激活一条个体值），还不错的天分（激活两条个体值），
+//     相当好的天分（激活三条个体值），了不起的天分（激活三条个体值，性格加成和天分三个加成
+//     正好有重合好像就是了不起）」
+//
+// ⚠ 这一层**只加"读法"**：不动 `rollNatureAndTalent` 的掷点分布（那在 `individuals.js`）、
+//   不动任何既有面板函数的返回形状，也**不把档位换算成加成** —— 档位是人类给的**名字**，
+//   本仓没有"这一档 +x%"这个数（查不到就写查不到，不许编一个百分比出来）。
+// ⚠ 名字撞车提醒：`src/coach/individuals.js` 里另有一个 `TALENT_TIERS = 3`（刷新天分的**次数**档：
+//   一级/二级/三级各加一项，见 `docs/roco/TALENT-NATURE.md`）。两个同名不同物 ——
+//   这里的 `TALENT_TIERS` 是"激活几条资质"的**四档名**，引用时看清是从哪个模块来的。
+const TALENT_TIER_SOURCE_20260928 = '人类 2026-09-28 口述（逐字）：「天分分为：一般般的天分（激活一条个体值），'
+  + '还不错的天分（激活两条个体值），相当好的天分（激活三条个体值），了不起的天分（激活三条个体值，'
+  + '性格加成和天分三个加成正好有重合好像就是了不起）」';
+
+/** 四档：`activated` = 六项资质里**恰好**有几项 > 0；后两档的差别只在"性格长处项是否与那三条重合"。 */
+export const TALENT_TIERS = Object.freeze([
+  Object.freeze({
+    key: 'plain', tier: '一般般的天分', label: '一般般的天分',
+    activated: 1, requires_nature_overlap: false,
+    text: '一般般的天分：六项资质里只有一条被激活。',
+    source: TALENT_TIER_SOURCE_20260928,
+  }),
+  Object.freeze({
+    key: 'good', tier: '还不错的天分', label: '还不错的天分',
+    activated: 2, requires_nature_overlap: false,
+    text: '还不错的天分：六项资质里有两条被激活。',
+    source: TALENT_TIER_SOURCE_20260928,
+  }),
+  Object.freeze({
+    key: 'great', tier: '相当好的天分', label: '相当好的天分',
+    activated: 3, requires_nature_overlap: false,
+    text: '相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。',
+    // ⚠ 人类只给了「三条」与「三条 + 性格重合」两档 ⇒「三条且**不**重合」是按他这两档的
+    // **排除法**读出来的（他本人没逐字说过这一句）。写清楚，免得以后被当成官方文本。
+    source: `${TALENT_TIER_SOURCE_20260928}；⚠「三条但不重合」是按他两档的排除法读出来的，本人没逐字说这句`,
+  }),
+  Object.freeze({
+    key: 'amazing', tier: '了不起的天分', label: '了不起的天分',
+    activated: 3, requires_nature_overlap: true,
+    text: '了不起的天分：六项资质里有三条被激活，而且性格加成的那一条正好是其中一条。',
+    // ⚠ 他原话里带着「好像」⇒ 这一档按他的口述办，但别当成官方文本。
+    source: `${TALENT_TIER_SOURCE_20260928}；⚠ 他原话里有「好像就是了不起」，是口述口径、不是官方文本`,
+  }),
+]);
+
+/**
+ * 按人类那四档读一只的天分。**判不出来就说判不出来**（不猜）：
+ *   · 天分没填 / 缺项 / 六项全 0 ⇒ `{tier: null, reason}`，reason 里写清缺什么；
+ *   · 激活了 4 条以上 ⇒ 那四档只覆盖 1/2/3 条 ⇒ 也返回 null 并说明；
+ *   · 恰好 3 条但**性格没填或认不出** ⇒ 分不出「相当好的天分」与「了不起的天分」
+ *     （这两档的**唯一**差别就是性格长处项在不在那三条里）⇒ 返回 null 并说明缺性格。
+ *
+ * 返回 `{tier, label, key, text, activated, count, nature_overlap, nature_up, reason}`：
+ *   · `tier` / `label` 是人类原话里的档名；`key` 只是机器用的稳定 id；
+ *   · `activated` 是**被激活那几项的键**（按 `STAT_KEYS` 顺序）；
+ *   · `nature_overlap` 用 `natureOf(nature).up`（性格的**长处**项）判；性格缺/认不出时是 `null`
+ *     —— 那时**不猜**（`null` = 查不到，不是 `false`）。
+ */
+export function talentTierOf({talent = null, nature = null} = {}) {
+  const blank = (reason, activated = [], natureOverlap = null) => ({tier: null, label: null, key: null,
+    text: null, activated, count: activated.length, nature_overlap: natureOverlap, nature_up: null, reason});
+  if (!talent || typeof talent !== 'object' || Array.isArray(talent)) {
+    return blank('没填天分（六项资质）⇒ 认不出档位（四档里最少的「一般般的天分」也要激活一条）');
+  }
+  const missing = [];
+  const activated = [];
+  for (const stat of STAT_KEYS) {
+    const value = talent[stat];
+    if (value === null || value === undefined || (typeof value === 'string' && !value.trim())) {
+      missing.push(STAT_NAMES[stat]);
+      continue;
+    }
+    const n = Number(value);
+    if (!Number.isFinite(n)) { missing.push(`${STAT_NAMES[stat]}（不是数字：${JSON.stringify(value)}）`); continue; }
+    if (n > 0) activated.push(stat);
+  }
+  if (missing.length) {
+    return blank(`天分缺项：${missing.join('、')} ⇒ 认不出档位（缺的那几项不知道有没有被激活）`, activated);
+  }
+  if (!activated.length) return blank('六项资质都是 0：一条都没被激活 ⇒ 那四档里没有这一档');
+  const names = activated.map((stat) => STAT_NAMES[stat]).join('、');
+  if (activated.length > 3) {
+    return blank(`激活了 ${activated.length} 条（${names}）⇒ 人类那四档只覆盖 1/2/3 条，认不出档位`, activated);
+  }
+  const natureRow = natureOf(nature);
+  const overlap = natureRow ? activated.includes(natureRow.up) : null;
+  const hit = (row) => ({tier: row.tier, label: row.label, key: row.key, text: row.text,
+    activated: [...activated], count: activated.length,
+    nature_overlap: overlap, nature_up: natureRow?.up ?? null,
+    reason: `${row.text}（被激活的是：${names}${natureRow ? `；性格长处是${STAT_NAMES[natureRow.up]}` : ''}）`});
+  if (activated.length < 3) {
+    // 前两档**不看性格**（重合与否改变不了档名）⇒ 性格缺也照样认得出，但要把这件事说清
+    return {...hit(TALENT_TIERS[activated.length - 1]),
+      reason: `${TALENT_TIERS[activated.length - 1].text}（被激活的是：${names}）`
+        + (natureRow ? `；性格长处是${STAT_NAMES[natureRow.up]}（这两档不看它）`
+          : '；性格没填/认不出 —— 这两档不看性格，所以档位照样认得出')};
+  }
+  if (!natureRow) {
+    return blank(`${typeof nature === 'string' && nature.trim() ? `认不出性格「${nature.trim()}」` : '这一只还没填性格'}`
+      + ` ⇒ 分不出「相当好的天分」还是「了不起的天分」：这两档的唯一差别就是性格长处项在不在被激活的`
+      + `那三条（${names}）里`, activated);
+  }
+  return hit(overlap ? TALENT_TIERS[3] : TALENT_TIERS[2]);
+}
+
+// ── 默认 5 星：资质从"原来是 +10"到"五星 +60"（人类 2026-09-28 口述）────────────
+//
+// 人类原话（逐字，见 `STAR_BREAKTHROUGH.source`）：
+//   「另外升星系统虽然不做，但是还是默认做成5星，然后个体值都突破，比如原来是+10，五星是+60」
+//
+// ⚠ 这个 ×6 **不是新加成**，它正是 `LEVEL_FORMULA` 括号里那个系数的**单位换算**：
+//   · 公式吃的是"内部刻度"的资质；`LEVEL_FORMULA.talent = 3` 是**每个 0–10 点**（玩家填进来的那一档）的系数，
+//     换成"每个内部点"就是 `3 ÷ 6 = 0.5`；
+//   · 社区那两行老公式（`PANEL_FORMULA`）的 0.55 / 0.85 正是 L=60 下的**每个内部点**系数
+//     （0.55 ÷ 1.1 = 0.5、0.85 ÷ 1.7 = 0.5 —— 判据 `tests/roco-talent-nature.test.js` ⑪ 钉着这个等式）；
+//   · 所以"5 星 ⇒ 资质按 ×6 计入"与现有公式**不冲突**，前提是**同时**把系数换成"每个内部点"那一条。
+//     若把 ×6 直接塞进 `3 × 资质`（系数不动），天分那一项会被算成 6 倍（噼啪鸟速度 294 → 492）——
+//     那才是双重放大，判据 ⑪ 里钉着这条反证。
+export const STAR_BREAKTHROUGH = Object.freeze({
+  stars: 5,                                                        // 默认档：满突破 = 5 星
+  multiplier: 6,                                                   // 0–10（原来/一星） → 0–60（五星内部刻度）
+  entry_scale: {min: TALENT_RANGE.min, max: TALENT_RANGE.max},     // 0–10：调用方传进来的那一档
+  internal_scale: {min: 0, max: TALENT_RANGE.max * 6},             // 0–60：等级公式真正吃的刻度
+  zero_star: {stars: 0, scale: {min: 0, max: TALENT_RANGE.max},    // 0 星（零突破）：内部刻度就是 0–10 本身
+    note: '这一档的每点系数在 L=60 下正是老公式 `PANEL_FORMULA` 的 0.55 / 0.85'},
+  text: '默认按 5 星算：资质（0–10）先 ×6 换成内部刻度（0–60），再进等级公式。',
+  source: '人类 2026-09-28 批注逐字：「另外升星系统虽然不做，但是还是默认做成5星，然后个体值都突破，'
+    + '比如原来是+10，五星是+60」',
+  external_support: `${TALENT_PVP_STEP.external_support}；原文还有「天分值一级的时候单一属性最高为 10，`
+    + '随着突破会往上增加」⇒ 0–10 就是"一级/零突破"那一档的内部刻度，与「+10 → +60」一致',
+  note: '与 `LEVEL_FORMULA` 的关系：括号里的 `3 × 资质(0–10)` ≡ 内部刻度的 `0.5 × 资质(0–60)`（3 ÷ 6 = 0.5）'
+    + '⇒ 那条公式本来就按**满突破的内部刻度**在算，本仓此前的默认值就是 5 星口径（实测 9/9 那一档）。'
+    + '这一层只是把它写成显式开关（`panelOf({stars})`），并让"原来那一档"（`stars: 0`）可以复算；'
+    + '1–4 星的资质上限本仓没有数据 ⇒ 不插值（传了就如实说、不算面板）。',
+});
+
+/**
+ * 把玩家填的 0–10 资质换成内部 0–60 刻度（六项各 ×`STAR_BREAKTHROUGH.multiplier`，默认 6）。
+ * **缺项保持缺项**：null / undefined / 空串 / 认不出的非数字原样带过去，绝不把 null 变成 0
+ * （`Number(null) === 0` 正是本仓栽过的那一跤，见 `panelOf` 里的 `numOrNull`）；
+ * 数字串（`'10'`）先按 `Number()` 转成数再 ×6，与 `panelOf` 的口径一致。
+ * 返回**新对象**，不改调用方传进来的那一份；不是对象（没填）就照旧返回它。
+ */
+export function talentAtFiveStar(talent) {
+  if (!talent || typeof talent !== 'object' || Array.isArray(talent)) return talent ?? null;
+  const out = {};
+  for (const [stat, value] of Object.entries(talent)) {
+    if (value === null || value === undefined || (typeof value === 'string' && !value.trim())) {
+      out[stat] = value;
+      continue;
+    }
+    const n = Number(value);
+    out[stat] = Number.isFinite(n) ? n * STAR_BREAKTHROUGH.multiplier : value;
+  }
+  return out;
+}
+
 /**
  * 算面板。`race` 是种族值（归一化图鉴 full-catalog.json 里每只的 stats），
  * `talent` 是个体值（天分，缺省 0 并标注），`nature` 是性格名。
+ *
+ * ⭐ 2026-09-28 追加 `stars`（缺省 **5**，人类口径「默认做成 5 星、个体值都突破」）：
+ *   · `stars: 5`（缺省）＝把 0–10 的资质按 `talentAtFiveStar` ×6 换成**内部 0–60 刻度**再进公式，
+ *     同时公式系数用"每个内部点"那一条（`LEVEL_FORMULA.talent ÷ 6` = 0.5）——
+ *     与改动前的 `3 × 资质(0–10)` **逐值相同**（老数不许动：噼啪鸟速度 294、实测 9/9 那一档）；
+ *   · `stars: 0` ＝"原来那一档"（零突破/一星：内部刻度就是 0–10 本身，不 ×6）⇒ 面板更低，
+ *     它在 L=60 下就是老公式 `PANEL_FORMULA` 的 0.55 / 0.85 每点；
+ *   · 1–4 星：资质上限本仓没有数据 ⇒ **不插值**，如实说、不算面板（`panel: {}`）。
  *
  * 返回 `{panel, unknown[], sources[]}`：
  *   · 算得出的项进 `panel`；算不出的项**不出现**（不是 0）—— 0 会被下游当成真值；
@@ -225,17 +393,20 @@ export const TALENT_RANGE = {min: 0, max: 10, note: '六项各自 0–10；「�
  * 现在直接落到等级公式的 L=60 分支上；`TALENT_PVP_STEP`（每点 +6）作为**已登记的另一条口径**保留，
  * 但**不再参与面板换算** —— 它解释不了 9/9 的实测（见 `LEVEL_FORMULA` 的校验说明）。
  */
-export function pvpPanelOf({race = null, talent = null, nature = null, breakthrough = null} = {}) {
+export function pvpPanelOf({race = null, talent = null, nature = null, breakthrough = null,
+  stars = STAR_BREAKTHROUGH.stars} = {}) {
   // PVP 归一化那一档的**定义**就是满级 + 满突破（实测 9/9 要求性格系数 1.2）——
   // 所以这里显式给满突破，而不是靠 `panelOf` 的缺省。
-  return panelOf({race, talent, nature, scope: 'pvp', level: LEVEL_FORMULA.cap,
+  // `stars` 只影响**资质那一项**的刻度（默认 5 星/满突破 = 人类 2026-09-28 的口径），
+  // 与上面那条性格突破次数是两根独立的轴，别混。
+  return panelOf({race, talent, nature, scope: 'pvp', level: LEVEL_FORMULA.cap, stars,
     breakthrough: Number.isInteger(breakthrough) ? breakthrough : NATURE_BREAKTHROUGH.max});
 }
 
 export function panelOf({race = null, talent = null, nature = null, scope = 'pvp',
-  level = LEVEL_FORMULA.default_level, breakthrough = null} = {}) {
+  level = LEVEL_FORMULA.default_level, breakthrough = null, stars = STAR_BREAKTHROUGH.stars} = {}) {
   const unknown = [];
-  const sources = [LEVEL_FORMULA.source, NATURE_BREAKTHROUGH.source];
+  const sources = [LEVEL_FORMULA.source, NATURE_BREAKTHROUGH.source, STAR_BREAKTHROUGH.source];
   // 突破次数：调用方给了就按它算；没给 ⇒ PVP 归一化档按**满突破 5**（闪耀大赛把练度拉平，
   // 性格修正 1.2 是那一档的实测值），其他档按 **0**（我们没有每只的突破次数，只给下界并标注）。
   // ⚠ 缺省**永远是零突破下界**（我们没有"每只的突破次数"这个数据）：PVP 归一化那一档
@@ -244,6 +415,21 @@ export function panelOf({race = null, talent = null, nature = null, scope = 'pvp
   if (!Number.isInteger(breakthrough)) {
     unknown.push('不知道这只突破到第几段 ⇒ 性格增益按**零突破下界**算（初始 +10%、每突破 +2%、满 +20%）');
   }
+  // ⭐ 星级（人类 2026-09-28）：只认**两个有数据的锚点** ——
+  //   5（缺省，满突破）：资质 0–10 是"原来/一星"那一档 ⇒ 先 `talentAtFiveStar` ×6 换成内部 0–60 刻度；
+  //   0（零突破/一星）：内部刻度就是 0–10 本身 ⇒ 原样进公式（＝老公式在 L=60 下 0.55/0.85 每点的读数）。
+  // 中间 1–4 星的天分上限我们没有数据（TapTap 只说"随着突破会往上增加"）⇒ **不插值**，这一份面板不算。
+  if (stars !== 0 && stars !== STAR_BREAKTHROUGH.stars) {
+    unknown.push(`星级只认 0（零突破：资质按 0–10 本身）与 ${STAR_BREAKTHROUGH.stars}（默认，满突破：`
+      + `资质 ×6 到内部 0–60）两个锚点，传的是 ${JSON.stringify(stars)}；1–4 星的资质上限本仓没有数据`
+      + ' ⇒ 不许插值，这一份面板不算');
+    return {panel: {}, unknown, sources};
+  }
+  const atFiveStar = stars === STAR_BREAKTHROUGH.stars;
+  // 公式吃的是**内部刻度**的资质，所以系数一律用"每个内部点"那一条：`LEVEL_FORMULA.talent ÷ 6`（= 0.5）。
+  // 5 星时先 ×6（`talentAtFiveStar`）⇒ 0.5 × 6 = 3 = 旧实现的 `3 × 资质(0–10)`，**逐值相同**；
+  // 0 星时不换（内部就是 0–10）⇒ 资质只贡献一半，那才是"原来那一档"。
+  const scaledTalent = atFiveStar ? talentAtFiveStar(talent) : talent;
   if (!Number.isFinite(level) || level < 1 || level > LEVEL_FORMULA.cap) {
     unknown.push(`等级 ${level} 不在 1–${LEVEL_FORMULA.cap} 之内 ⇒ 这一份面板不算（等级上限 60 是官方口径）`);
     return {panel: {}, unknown, sources};
@@ -266,12 +452,16 @@ export function panelOf({race = null, talent = null, nature = null, scope = 'pvp
   for (const stat of STAT_KEYS) {
     const raceValue = numOrNull(race[stat]);
     if (raceValue === null) { unknown.push(`种族值缺「${STAT_NAMES[stat]}」⇒ 这一项不算`); continue; }
-    const talentValue = numOrNull(talent?.[stat]) ?? 0;
+    const talentValue = numOrNull(scaledTalent?.[stat]) ?? 0;
     const shape = stat === 'hp' ? LEVEL_FORMULA.hp : LEVEL_FORMULA.other;
     const nf = natureFactor(nature, stat, {breakthrough: steps});
     if (!nf.known) unknown.push(`性格：${nf.reason}`);
     // 取整顺序**照判例来**：先 round 内层 → 加常数 → 乘性格 → round → 加末尾常数。
-    const scaled = (shape.race * raceValue + shape.talent * talentValue) * (level + shape.level) / shape.divisor;
+    // 资质那一项的系数：`LEVEL_FORMULA.talent ÷ STAR_BREAKTHROUGH.multiplier`（3 ÷ 6 = 0.5，每个**内部点**）
+    // × 上面 `scaledTalent` 给出的内部刻度资质 ⇒ 5 星（×6）与旧的 `3 × 资质(0–10)` 逐值相同。
+    const scaled = (shape.race * raceValue
+      + (shape.talent / STAR_BREAKTHROUGH.multiplier) * talentValue)
+      * (level + shape.level) / shape.divisor;
     panel[stat] = Math.round((Math.round(scaled) + shape.base) * nf.factor) + shape.add;
   }
   return {panel, unknown: [...new Set(unknown)], sources};

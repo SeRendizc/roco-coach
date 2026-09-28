@@ -76,8 +76,17 @@ const zeroTalent = () => Object.fromEntries(STAT_KEYS.map((stat) => [stat, 0]));
  * 所以数据集里没这两项时，正确做法不是留空，而是**按种子掷一份出来** ——
  * 同一只个体在任何机器上掷到的一样（种子只来自 instance_id），换机器能复现。
  *
- * ⚠ 分布是**建模的**：性格 30 条等概率；天分按「了不起天分 = 随机三项 7–10」的描述
- * （另外三项 0–6）。官方概率本仓没有 ⇒ 标 `MODELLED_NOT_OBSERVED`，界面上要说得出这句。
+ * ⚠ 分布是**建模的**：性格 30 条等概率；官方概率本仓没有 ⇒ 标 `MODELLED_NOT_OBSERVED`。
+ *
+ * ⚠ 2026-09-28 **改钉（人类 ⑤ 的口述档位逼出来的）**：天分的**激活条数**必须是 1–3 条。
+ *   人类逐字：「天分分为：一般般的天分（激活一条个体值），还不错的天分（激活两条个体值），
+ *   相当好的天分（激活三条个体值），了不起的天分（激活三条个体值，性格加成和天分三个加成
+ *   正好有重合好像就是了不起）」。**旧口径**是「随机三项 7–10、**另外三项 0–6**」——
+ *   实测后果：49 只里激活 4 条 3 只、5 条 16 只、**6 条 30 只**，四档**一只都套不上**
+ *   （`talentTierOf` 对 4 条以上如实返回"认不出"）⇒ 档位这个功能等于死掉。
+ *   现在：先掷**激活几条**（1/2/3，等概率 —— 官方概率本仓没有，这一条同样是**建模的**），
+ *   被激活的那几条给 7–10（社区笔记里"了不起 = 随机三项加 7–10"就是这一档），其余**恰好 0**
+ *   （没被激活 = 加成为 0，不是"随机给一点"）。改完实测 49/49 都能读出档位，见台账 §C6.334e。
  */
 export function rollNatureAndTalent(instanceId) {
   const seed = seedOf(instanceId, 'initial-roll', 0);
@@ -85,13 +94,14 @@ export function rollNatureAndTalent(instanceId) {
   const nature = rollNature(seedOf(instanceId, 'initial-nature', 0));
   const stats = [...STAT_KEYS];
   const talent = {};
-  // 洗牌后前三个进 7–10、后三个进 0–6（不是"每项都高"，与原版"随机三项"的描述一致）
+  // 洗牌后前 `active` 项进 7–10、其余**恰好 0**（"激活几条"就是人类那四档的判据）。
   for (let i = stats.length - 1; i > 0; i -= 1) {
     const j = Math.floor(next() * (i + 1));
     [stats[i], stats[j]] = [stats[j], stats[i]];
   }
+  const active = 1 + Math.floor(next() * 3);   // 1 / 2 / 3 条（建模：等概率）
   stats.forEach((stat, index) => {
-    talent[stat] = index < 3 ? 7 + Math.floor(next() * 4) : Math.floor(next() * 7);
+    talent[stat] = index < active ? 7 + Math.floor(next() * 4) : 0;
   });
   return {nature, talent};
 }
@@ -117,7 +127,7 @@ export function individualFromInstance(instance, {level = 60} = {}) {
     talent: rawTalent && typeof rawTalent === 'object' ? {...zeroTalent(), ...rawTalent} : {...(rolled?.talent ?? zeroTalent())},
     talent_boosts: [],
     talent_source: rawTalent ? 'dataset'
-      : 'rolled（原版随机生成；种子化掷点：随机三项 7–10、其余 0–6 —— 分布是建模的，非官方概率）',
+      : 'rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）',
     refreshes: {nature: REFRESH_LIMIT, talent: REFRESH_LIMIT},
     history: [],
   };
@@ -167,7 +177,12 @@ export function rollNature(seed) {
 /** 天分每级加多少（人类口径：每级 +10）。 */
 export const TALENT_STEP = 10;
 /** 三级：一级/二级/三级各一次。 */
-export const TALENT_TIERS = 3;
+// ⚠ 2026-09-28 **改名**（原名 `TALENT_TIERS`）：`src/coach/talent.js` 里另有一个
+// `TALENT_TIERS` —— 那是人类 ⑤ 的**四个档位名**（一般般/还不错/相当好/了不起）的数组，
+// 和这里的「刷新天分的三级」**同名不同物**。两个都叫 `TALENT_TIERS` 时，
+// `import {TALENT_TIERS}` 拿到的可能是 3、也可能是长度为 4 的数组，页面就会静默画错。
+// 现在：**刷新的级数**叫 `TALENT_REFRESH_LEVELS`（本名），**档位**继续叫 `TALENT_TIERS`（在 talent.js）。
+export const TALENT_REFRESH_LEVELS = 3;
 
 /**
  * 掷一次天分刷新的**落点**：在"还没被加过"的属性里选一个。
@@ -247,15 +262,21 @@ export function refresh(individual, kind, {at = null, salt = ''} = {}) {
 export function duplicateIndividual(individual, {individual_id, at = null} = {}) {
   if (!individual_id) throw new Error('duplicateIndividual 需要一个新 individual_id');
   if (individual_id === individual.individual_id) throw new Error('新个体的 id 不能和原来一样');
+  // ⚠ 2026-09-28 改钉（人类指着截图：这一行「性格 待导出 / 天分 待导出」，而别的行都有值 ——
+  // 「点一下再养一只莫名其妙出现然后又多一只还删不掉」）：
+  // 原来新个体一律 nature=null + talent 全 0，界面就只能写"待导出"，看起来像坏数据。
+  // 现在按**新编号种子化掷一份**（与其它个体同一套 `rollNatureAndTalent`，可复现），
+  // 来源照实标成掷点；这样"再养一只"得到的是一只**能看、能比、能培养**的个体。
+  const rolled = rollNatureAndTalent(individual_id);
   return {
     ...clone(individual),
     individual_id,
     level: individual.level,
-    nature: null,
-    nature_source: 'new-individual（新抓到的个体还没有性格数据 ⇒ 记 null）',
-    talent: zeroTalent(),
+    nature: rolled.nature,
+    nature_source: 'rolled（原版抓到时随机生成；这里是按新编号种子化掷点，换机器结果一致）',
+    talent: rolled.talent,
     talent_boosts: [],
-    talent_source: 'zeroed（新个体还没有天分数值 ⇒ 按 0 计并标注）',
+    talent_source: 'rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）',
     refreshes: {nature: REFRESH_LIMIT, talent: REFRESH_LIMIT},
     history: [{kind: 'duplicate', used: 0, before: individual.individual_id, after: individual_id,
       remaining: REFRESH_LIMIT, rule: 'duplicate/v1', at}],

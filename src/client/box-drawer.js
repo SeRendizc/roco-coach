@@ -8,6 +8,8 @@
 // 这里只做"数据 → HTML 字符串"的翻译；刷新动作由 `individuals.js` 提供（种子化、可复现），
 // 状态落在调用方（浏览器里是 localStorage）。
 import {REFRESH_LIMIT, lastRefreshNote, canUndo} from '../coach/individuals.js';
+// 天分档位（人类 2026-09-28 ⑤ 的四档名）—— 读法在 `coach/talent.js`，页面不另写一套判据。
+import {talentTierOf} from '../coach/talent.js';
 
 /** 服务器给的一行（`/api/roco/box` 的 card）：`select` 是个体编号、`group` 是种类编号。 */
 export function groupCards(cards, {open = null} = {}) {
@@ -34,6 +36,32 @@ export function groupCards(cards, {open = null} = {}) {
 const esc = (value) => String(value ?? '').replace(/[&<>"']/g,
   (ch) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[ch]));
 
+/** 六维的显示顺序与说法（与 `src/server/roco-service.js` 的 `BOX_STAT_FIELDS` 同一套）。 */
+export const STAT_ORDER = Object.freeze([['hp', '生命'], ['atk', '物攻'], ['def', '物防'],
+  ['spa', '魔攻'], ['spd', '魔防'], ['spe', '速度']]);
+
+/**
+ * 详情/比较里**一栏的值**怎么印成一行字。返回值**未转义**（由调用方 `esc`）。
+ *
+ * ⚠ 2026-09-28 加钉（人类：「我的精灵」详情/比较要显示真实个体数据 ——
+ * 当时页面上那一栏写着「游戏数据里没有这一项」）：接口里「资质」的值是**一张六维表**
+ * （`{hp,atk,def,spa,spd,spe}`），不是字符串。原来这里的对象直接 `String(value)`，
+ * 页面就印出 `[object Object]` —— 数据早就有了，只是页面看不懂。
+ * 现在按六维顺序摊成「生命 10 / 物攻 3 / …」：**缺的维度不写**（不补 0），
+ * 一个数都没有就如实算「没有」（返回 `''`，由调用方显示"待导出/没有这一项"）。
+ */
+export function formatTraitValue(value) {
+  if (value === null || value === undefined) return '';
+  if (Array.isArray(value)) return value.length ? value.map((item) => String(item)).join('、') : '';
+  if (typeof value === 'object') {
+    return STAT_ORDER
+      .filter(([key]) => Number.isFinite(Number(value[key])))
+      .map(([key, label]) => `${label} ${Number(value[key])}`)
+      .join(' / ');
+  }
+  return String(value);
+}
+
 /** 天分/性格的展示：**没有数值就写"待导出"**，不许显示成 0 或空白（本人要求：缺的标注）。 */
 export function traitChips(individual) {
   const chips = [];
@@ -45,20 +73,33 @@ export function traitChips(individual) {
   const boosts = Array.isArray(individual?.talent_boosts) ? individual.talent_boosts : [];
   const talent = individual?.talent ?? null;
   const hasValue = talent ? Object.values(talent).some((value) => Number(value) > 0) : false;
-  chips.push(boosts.length
-    ? {label: `天分 已加成 ${boosts.length}/3 级`, state: 'known'}
+  // ⚠ 2026-09-28（人类 ⑤）：「天分分为：一般般的天分（激活一条个体值），还不错的天分（激活两条个体值），
+  // 相当好的天分（激活三条个体值），了不起的天分（激活三条个体值，性格加成和天分三个加成正好有重合）」
+  // ⇒ 行里要能看见**档名**，不是"有数值"这种废话。
+  // 档位按**掷出来的那一份**读：把玩家自己加的级（`talent_boosts`）扣掉再读 ——
+  // 档位说的是"这只抓到时是什么天分"，加成是后来的事（加成过的三项不能把档位顶上去）。
+  const base = talent ? {...talent} : null;
+  if (base) {
+    for (const boost of boosts) {
+      const stat = boost?.stat;
+      if (stat && Number.isFinite(Number(base[stat]))) base[stat] = Number(base[stat]) - Number(boost.delta ?? 0);
+    }
+  }
+  const tier = base ? talentTierOf({talent: base, nature}) : null;
+  chips.push(tier?.label
+    ? {label: `天分 ${tier.label}`, state: 'known'}
     : hasValue
-      ? {label: '天分 有数值', state: 'known'}
+      ? {label: '天分 认不出档位', state: 'known'}
       : {label: '天分 待导出', state: 'absent'});
+  if (boosts.length) chips.push({label: `天分 已加成 ${boosts.length}/3 级`, state: 'known'});
   return chips;
 }
 
 /**
- * 这一只的性格/天分是**掷出来的**（原版就是随机生成），还是数据集里真有的？
- *
- * 2026-09-27（审计 §C6.288 ⑤）：页面原来直接显示掷出来的值，而唯一说明"这是模拟掷点、非官方概率"
- * 的 `nature_source`/`talent_source` **客户端一次都没读** —— 玩家会把掷点当成实测数据。
- * 这里把它变成玩家看得见的一行小字（掷出来的才显示；数据集里真有的不显示）。
+ * ⚠ 2026-09-28 **改钉**：这一行小字**不再上屏**。人类指着它说：
+ * 「『性格与天分是掷点生成的（原版随机；这里是模拟掷点，不是官方概率）』这有啥用？？？？**不要**！」
+ * 他的口径是：这是**我的精灵**，页面上该显示的是这只的性格/天分本身，而不是我们内部的生成方式。
+ * 函数保留（判据与开发者抽屉仍可读），但**画面上不出现**。
  */
 export function rollNote(individual) {
   const rolled = [individual?.nature_source, individual?.talent_source]
@@ -101,6 +142,20 @@ function undoButton(individual) {
     + ` title="撤销上一次刷新（${esc(label)}）：只退这一步，退掉的次数不还；再刷一次之后可以再退">回滚上一次</button>`;
 }
 
+/**
+ * 「删掉这只」——**只给本机加的那只**（人类 2026-09-28：「＋再养一只同种」点出来一堆，还删不掉）。
+ *
+ * 判定标准是**编号后缀**（`-b`…`-f`，`addIndividualFor` 只发得出这种），不是"看起来像不像"：
+ * 名单里（抓包/导出）的个体绝不给删除按钮 —— 它在本机记录里没有对应条目，点了也只会被拒。
+ * 去掉这个限制就等于允许"页面上的删除按钮点不动"，那正是人类截图里骂的那件事。
+ */
+function removeButton(individual) {
+  const id = String(individual?.individual_id ?? '');
+  if (!/-(?:b|c|d|e|f)$/.test(id)) return '';
+  return `<button class="refresh-btn remove-btn" data-remove="${esc(id)}"`
+    + ` title="这一只只在本机记录里（抓包数据不受影响），删了就没了">删掉这只</button>`;
+}
+
 /** 一个个体的那一行：卡片本体 + 性格天分 + 两个刷新按钮（各 3 次，分开计数）。 */
 export function individualHtml(card, individual, {picked = false, cardHtml = defaultCardHtml} = {}) {
   const traits = traitChips(individual).map((chip) =>
@@ -112,19 +167,51 @@ export function individualHtml(card, individual, {picked = false, cardHtml = def
   // 抽屉再画一个就会出现**每行两个按钮、点第二个把刚选的取消**（审计 2026-09-27 实测 24 个体 48 个按钮）。
   // 所以这里只画"这一行额外的东西"（级数、性格/天分、刷新、回滚），动作留给卡片本体。
   const select = card?.select ?? individual?.individual_id ?? '';
+  // ⚠ 2026-09-28 改钉（人类指着截图问「不是60级吗？lv100哪儿来的？」）：这里原来**硬编码 Lv.100**
+  // —— 等级在 9-27 就统一成 60 了，抽屉这一行忘了跟着改。现在只从数据里读（缺就写"—"），
+  // 不再写死任何级数（`data-level-source` 也照实带出来，开发者抽屉里能看到是哪一档）。
+  const level = Number.isFinite(Number(individual?.level)) && Number(individual?.level) > 0
+    ? Number(individual.level) : null;
   return `<div class="individual" data-individual="${esc(select)}" `
-    + `data-level-source="default-100">
+    + `data-level-source="${esc(individual?.level_source ?? 'unknown')}">
    <span class="individual-card">${cardHtml(card)}</span>
-   <span class="individual-level">Lv.100</span>
+   ${card?.extra === true ? '<span class="trait" data-state="local">本机加的</span>' : ''}
+   <span class="individual-level">${level === null ? '—' : `Lv.${level}`}</span>
    <span class="individual-traits">${traits}</span>
-   ${rollNote(individual) ? `<span class="individual-note" data-rolled="yes">${esc(rollNote(individual))}</span>` : ''}
    ${lastRefreshNote(individual) ? `<span class="individual-note" data-refresh-note="yes">${esc(lastRefreshNote(individual))}</span>` : ''}
+   ${removeButton(individual)}
    <span class="individual-actions">
     ${refreshButton('nature', individual, '刷新性格')}
     ${refreshButton('talent', individual, '刷新天分')}
     ${undoButton(individual)}
    </span>
   </div>`;
+}
+
+/**
+ * 组头上那一行**摘要**（人类 2026-09-28 指着截图问「左上角的铠甲虫为啥没信息？」）。
+ *
+ * 收起状态下一行只写「名字 · 属性 · N 个个体」，点开之前看不出这一种练度如何。
+ * 这里补一句"这一种里最好的那只长什么样"：**性格 + 天分最高的两项**（按天分总和挑，平手按编号，
+ * 与抽屉的 `best` 同一口径 —— 确定性、不随渲染顺序变）。
+ */
+export function groupSummary(rows, individuals = {}) {
+  const scored = rows.map((card) => {
+    const one = individuals[card.select] ?? {};
+    const talent = one.talent && typeof one.talent === 'object' ? one.talent : {};
+    const total = Object.values(talent).reduce((sum, value) => sum + (Number(value) > 0 ? Number(value) : 0), 0);
+    const top = Object.entries(talent).filter(([, value]) => Number(value) > 0)
+      .sort((a, b) => b[1] - a[1]).slice(0, 2);
+    return {card, one, total, top};
+  }).sort((a, b) => b.total - a.total || String(a.card.select).localeCompare(String(b.card.select)));
+  const best = scored[0];
+  if (!best) return '';
+  const order = {hp: '生命', atk: '物攻', def: '物防', spa: '魔攻', spd: '魔防', spe: '速度'};
+  const bits = [];
+  if (best.one.nature) bits.push(`性格 ${best.one.nature}`);
+  if (best.top.length) bits.push(`天分 ${best.top.map(([key, value]) => `${order[key] ?? key} ${value}`).join(' / ')}`);
+  if (Number.isFinite(Number(best.one.level))) bits.push(`Lv.${Number(best.one.level)}`);
+  return bits.join(' · ');
 }
 
 /**
@@ -140,18 +227,26 @@ export function drawerHtml(group, {individuals = {}, picked = () => false, cardH
   // ⚠ 2026-09-27：头的「N 个个体」原来只数服务端那一页的卡片，加出来的个体不进这个数 ——
   // 于是"1 个个体"下面画着两行。数的是**画出来的行数**（`data-count` 同步）。
   const count = rows.length;
+  const summary = groupSummary(rows, individuals);
   const head = `<button class="drawer-head" data-species="${esc(group.species_id)}" `
     + `aria-expanded="${group.expanded ? 'true' : 'false'}">
    <span class="drawer-name">${esc(group.name)}</span>
    <span class="drawer-types">${(group.types ?? []).map((type) => `<span class="chip">${esc(type)}</span>`).join('')}</span>
    <span class="drawer-count">${count} 个个体</span>
+   ${summary ? `<span class="drawer-summary" data-summary="yes">${esc(summary)}</span>` : ''}
   </button>`;
+  // ⚠ 2026-09-28：本机**至多加 1 只**（人类口径：同种最多一对）⇒ 已经加过就**把按钮关掉**，
+  // 免得玩家连点堆出一排同名卡（他的原话：「点一下再养一只莫名其妙出现然后又多一只还删不掉」）。
+  const extraCount = (extras[group.species_id] ?? []).length;
+  const addBtn = extraCount
+    ? `<button class="refresh-btn add-btn" data-add="${esc(group.species_id)}" disabled aria-disabled="true"`
+      + ` title="这一种已经有两只了（同种最多一对）；要再加先删掉本机那只">＋ 再养一只同种（已有一只本机的）</button>`
+    : `<button class="refresh-btn add-btn" data-add="${esc(group.species_id)}">＋ 再养一只同种</button>`;
   const body = group.expanded
     ? `<div class="drawer-body">${rows.map((card) =>
       individualHtml(card, individuals[card.select] ?? {individual_id: card.select},
-        {picked: Boolean(picked(card.select)), cardHtml})).join('')}
-      <button class="refresh-btn add-btn" data-add="${esc(group.species_id)}">＋ 再养一只同种</button></div>`
-    : `<div class="drawer-body collapsed"><button class="refresh-btn add-btn" data-add="${esc(group.species_id)}">＋ 再养一只同种</button></div>`;
+        {picked: Boolean(picked(card.select)), cardHtml})).join('')}${addBtn}</div>`
+    : `<div class="drawer-body collapsed">${addBtn}</div>`;
   return `<section class="species-drawer" data-species="${esc(group.species_id)}" `
     + `data-count="${count}">${head}${body}</section>`;
 }

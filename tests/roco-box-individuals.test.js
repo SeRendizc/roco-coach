@@ -12,7 +12,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {individualsForRows, refreshIndividual, undoIndividual, addIndividualFor,
+import {individualsForRows, refreshIndividual, undoIndividual, addIndividualFor, removeIndividual,
   localIndividualsOf, localIndividualById, localIndividualsGrouped, resetIndividualsForTest}
   from '../src/client/box-individuals.js';
 
@@ -47,26 +47,31 @@ test('① 一页行 → 记录表：同一次调用里的记录会复用（刷�
   assert.equal(extra['own-0002'].refreshes.talent, 3, '别的个体不受影响');
 });
 
-test('② 再养一只同种：编号往后排、最多 6 只、两只互不影响', () => {
+test('② 再养一只同种：**同种至多一对**（本机最多加 1 只）、两只互不影响', () => {
+  // ⚠ 2026-09-28 改钉（人类：「点一下再养一只莫名其妙出现然后又**多一只**还删不掉」）：
+  // 原来每次点都再加一只（`-b`…`-f`，最多 6 只）⇒ 连点几下堆一排同名卡。
+  // 人类对"同种多只"的口径是**一对**（2026-09-28 批准演示对时就是这么说的）⇒ 本机**至多加 1 只**。
   withStorage();
   individualsForRows(ROWS);
-  const added = [];
-  for (let i = 0; i < 5; i += 1) {
-    const one = addIndividualFor(ROWS[0]);
-    assert.equal(one.ok, true, `第 ${i + 2} 只应当能加出来：${one.reason ?? ''}`);
-    added.push(one.individual_id);
-  }
-  assert.deepEqual(added, ['own-0001-b', 'own-0001-c', 'own-0001-d', 'own-0001-e', 'own-0001-f']);
-  const sixth = addIndividualFor(ROWS[0]);
-  assert.equal(sixth.ok, false, '第 7 只必须被拒（不泛滥）');
-  assert.match(sixth.reason, /6 个个体/, `理由要说清：${sixth.reason}`);
-  // 新个体：次数是全新的 3+3、天分归零并标注、性格记 null 并标注
+  const first = addIndividualFor(ROWS[0]);
+  assert.equal(first.ok, true, `第一只应当能加出来：${first.reason ?? ''}`);
+  assert.equal(first.individual_id, 'own-0001-b');
+  const second = addIndividualFor(ROWS[0]);
+  assert.equal(second.ok, false, '再点第二次必须被拒（同种最多一对）');
+  assert.match(second.reason, /两只|一对/, `理由要说清：${second.reason}`);
+  // 删掉之后可以再加（否则"拒了"就变成死路）
+  assert.equal(removeIndividual('own-0001-b').ok, true, '本机那只应当能删掉');
+  assert.equal(addIndividualFor(ROWS[0]).ok, true, '删掉之后应当又能加一只');
+  // 新个体：次数是全新的 3+3；性格/天分**按新编号掷出来**（不再是空壳）
   const fresh = localIndividualById('own-0001-b');
   assert.deepEqual(fresh.refreshes, {nature: 3, talent: 3});
-  assert.equal(fresh.nature, null);
-  assert.equal(fresh.nature_source, 'new-individual（新抓到的个体还没有性格数据 ⇒ 记 null）');
+  assert.ok(typeof fresh.nature === 'string' && fresh.nature.length >= 2, `新个体要有性格：${fresh.nature}`);
+  assert.match(String(fresh.nature_source), /rolled/, '来源要标成掷点');
+  assert.ok(Object.values(fresh.talent).some((value) => value > 0), '新个体要有天分');
   assert.deepEqual(fresh.talent_boosts, []);
   assert.equal(localIndividualById('own-0001').refreshes.talent, 3, '原来那只不受影响');
+  // 名单里的那只**删不掉**（它不在本机记录里，说"删掉了"就是骗人）
+  assert.equal(removeIndividual('own-0001').ok, false, '名单里的个体不许被"删掉"');
 });
 
 test('③ **形状**：`localIndividualsGrouped` 必须回普通对象（`extras[key]` 取得到）—— Map 会静默不画', () => {

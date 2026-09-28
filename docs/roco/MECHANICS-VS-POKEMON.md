@@ -33,7 +33,7 @@
 | --- | --- | --- | --- |
 | **1 种族值·定义** 人类：「种族值固定，这个你不用管」（③）。抓包每只给 `base_race_params` 六项（`hp_max_race`/`phy_attack_race`/`spe_attack_race`/`phy_defence_race`/`spe_defence_race`/`speed_race`） | 种族值（Base stats）＝**同种相同、异种不同**的固定值，每项取值范围 0–255（[52poke 种族值](https://wiki.52poke.com/wiki/%E7%A7%8D%E6%97%8F%E5%80%BC)） | `data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json` 的 `pets[].stats`（622 只，六项）；读它的唯一入口 `src/coach/nature-advice.js:16 RACE_SOURCE` + `raceOf()` | **一致** |
 | **2 种族值·量级** 人类举例 650 / 500（①）。本仓 622 只逐只累加：最小 214、中位 516、平均 514.6、最大 920（总和系本仓累加，非接口原值） | 每项 0–255；**总和（BST）**：最低 **175**（弱丁鱼单独的样子）、180（索侦虫/向日种子）；最高 **1125**（无极巨化的无极汰那）、次高 780（超级超梦X/Y、超级烈空坐）；400–600 占 **757/1261**（[pokemondb 全表](https://pokemondb.net/pokedex/all)、[弱丁鱼](https://pokemondb.net/pokedex/wishiwashi)、[无极汰那](https://pokemondb.net/pokedex/eternatus)） | `full-catalog.json` 的 `stats`；面板只吃这份（`src/coach/talent.js:141 panelOf` 的 `race` 入参） | **一致（量级同档；口径不同，见 §1）** |
-| **3 升星** 人类：「升星系统的前 5 星，都会增加种族值，以五星为例，100 血量，其他 5 项都是 50」「650…相当于 1000，500…有 850」（①）；PVE 要自己升星（②） | **宝可梦没有这一层**：种族值不随任何个体成长变化；养成的两条轴是**等级**与**努力值**（[52poke 能力](https://wiki.52poke.com/wiki/%E8%83%BD%E5%8A%9B)） | **完全没有**。`grep -rn "星级" src/` 零命中；`src/` 里唯一的"星"是能量 ⭐（`src/coach/runtime.js:256`、`src/coach/team-gaps.js:92`），与升星无关 | **缺** |
+| **3 升星** 人类：「升星系统的前 5 星，都会增加种族值，以五星为例，100 血量，其他 5 项都是 50」「650…相当于 1000，500…有 850」（①）；PVE 要自己升星（②）；2026-09-28：「**升星系统虽然不做**，但是还是默认做成5星，然后个体值都突破，比如原来是+10，五星是+60」 | **宝可梦没有这一层**：种族值不随任何个体成长变化；养成的两条轴是**等级**与**努力值**（[52poke 能力](https://wiki.52poke.com/wiki/%E8%83%BD%E5%8A%9B)） | **种族值那一层仍然完全没有**（`650→1000 / 500→850` 的压缩曲线本仓未建）。2026-09-28 只加了**资质刻度的 5 星口径**：`src/coach/talent.js` 的 `STAR_BREAKTHROUGH`（默认 `stars:5`，资质 0–10 ×6 成内部 0–60，系数同步换成"每个内部点"`3÷6=0.5` ⇒ 面板逐值不变），另有 `talentAtFiveStar()` | **部分（只有资质刻度）** |
 | **4 资质·结构** 人类：「相当于宝可梦的努力值和个体值的融合简化」「以三条固定数值增益的形式呈现」（①）「个体值最多就是 3 个 +10」（③） | 个体值（IV）每项 0–31、天生不可改（[pokemondb IVs](https://pokemondb.net/mechanics/hidden)；极限特训只提能力值不改个体值，[52poke 极限特训](https://wiki.52poke.com/wiki/%E6%9E%81%E9%99%90%E7%89%B9%E8%AE%AD)）；努力值（EV）总 510、单项 255（第六世代起 252）、每 4 点＝L100 一点能力（[pokemondb EVs](https://pokemondb.net/ev)、[52poke 基础点数](https://wiki.52poke.com/wiki/%E5%9F%BA%E7%A1%80%E7%82%B9%E6%95%B0)）；《Champions》另有一套简化：能力点数每项 0–32、总和 ≤66（[52poke 能力](https://wiki.52poke.com/wiki/%E8%83%BD%E5%8A%9B)） | 天分三级各 +10：`src/coach/individuals.js:164 TALENT_STEP=10`、`:166 TALENT_TIERS=3`、`:220` 加到一个**没加过**的项；范围 `src/coach/talent.js:108 TALENT_RANGE`（六项各 0–10） | **一致（三条 +10 的口述）** |
 | **5 资质·面板换算** 人类未给换算；桌面笔记另有一处「个体值 pvp 中自动乘六倍，7-8-9-10 分别增加 42-48-54-60」 | L100 化简：HP＝`2×种族值 + 个体值 + ⌊努力值/4⌋ + 110`；其他＝`(2×种族值 + 个体值 + ⌊努力值/4⌋ + 5) × 性格`（[52poke 能力](https://wiki.52poke.com/wiki/%E8%83%BD%E5%8A%9B)）。**注意系数是 2** | `src/coach/talent.js:93 TALENT_PVP_STEP`（每点 +6，PVP 默认）与 `:87 PANEL_FORMULA`（0.85/0.55，升级口径）**两条都留着、不合并**（`:83-86` 明写冲突） | **可能错（口径冲突未裁决）** |
 | **6 性格·条数与结构** 人类：「去掉了平衡类性格，新增增加血量的性格」（①） | 25 条性格，其中 **5 条中性**（勤奋/坦率/害羞/浮躁/认真；英文 Hardy/Docile/Bashful/Quirky/Serious），修正只作用于攻/防/特攻/特防/速**五项，不含 HP**：「宝可梦的一些性格会影响宝可梦除了ＨＰ以外的两项能力…另外还有5种性格（勤奋、坦率、害羞、浮躁、认真）不会影响宝可梦的能力」（[52poke 性格](https://wiki.52poke.com/wiki/%E6%80%A7%E6%A0%BC)、[pokemondb Natures](https://pokemondb.net/mechanics/natures)） | 30 条＝6 长处 × 5 短处、**无中性**、**含 5 个加生命**（沉默/平和/忧郁/粗心/踏实）：`data/roco/systems/natures.json`、浏览器镜像 `src/coach/natures-data.js:6 NATURES_MODIFIER`、结构由 `src/coach/talent.js:33 validateNatures` 钉住 | **一致（人类口述 ⟷ 仓内）** |
@@ -133,7 +133,12 @@ L100 化简后：其他能力＝`(2×种族值 + 个体值 + ⌊努力值/4⌋ +
 用这个模型套本仓 622 只：极差比从 **4.30**（214↔920）压到 **2.25**（564↔1270）—— 方向与他的判断一致。
 
 **本仓现状（grep 证据，只读不改）**：
-- `grep -rn "星级" src/` → **零命中**（`src/` 下没有任何"星级"）；
+- `grep -rn "星级" src/` → **2026-09-28 起有 3 处命中，全部在 `src/coach/talent.js`**
+  （`:77` 突破＝星级那条口径注释、`:418`/`:423` 的 `STAR_BREAKTHROUGH` 星级闸），
+  **只用于"资质 0–10 ↔ 内部 0–60"这一个读数**（人类 2026-09-28：「升星系统虽然不做，但是还是默认做成5星，
+  然后个体值都突破，比如原来是+10，五星是+60」）；
+  ⚠ **他要的"升星抬种族值"那一层仍然没有**（`650 → 1000`、`500 → 850` 那条压缩曲线**本仓未建**）——
+  这两件事别混：现在有 `stars` 参数的只有 `panelOf`/`pvpPanelOf` 里**资质那一项**的刻度；
 - `grep -rniE "\bstar(s|_level|Level)?\b" src/` → 命中的全是**能量 ⭐**（`src/client/roco.js:1938-1939` 的 `⭐ ${pet.energy}`）与
   `src/coach/memory.js:251` 的段位里程碑正则（星耀），**没有一处是升星**；
 - `grep -rn "升星" --include=*.js --include=*.mjs src/` → **零命中**；"升星"只出现在文档/报告里
@@ -187,8 +192,8 @@ L100 化简后：其他能力＝`(2×种族值 + 个体值 + ⌊努力值/4⌋ +
 
 | 人类口述 | 本仓实现 | 一致 / 不同 |
 |---|---|---|
-| 「主要用于区分同类宝可梦之间的数值差距」 | 掷点按 `instance_id` 种子化、随机三项 7–10、其余 0–6（`src/coach/individuals.js:79-94 rollNatureAndTalent`）；同一个体可重复拥有（`duplicateIndividual`） | **一致**（同种之间的差就差在这层） |
-| 「三条固定数值增益」 | `TALENT_TIERS = 3`（`individuals.js:166`）、每级 `TALENT_STEP = 10`（`:164`）、加到一个**还没加过**的项（`:218-222`） | **一致**（3 × +10） |
+| 「主要用于区分同类宝可梦之间的数值差距」 | 掷点按 `instance_id` 种子化：**先掷激活 1–3 条**（等概率，`src/coach/individuals.js:74-107 rollNatureAndTalent`），激活的那几条 7–10、**其余恰好 0**；同一个体可重复拥有（`duplicateIndividual`） | **一致**（同种之间的差就差在这层）。⚠ 2026-09-28 改口径：旧写法是「随机三项 7–10、其余 0–6」，实测让 49 只**全部**激活 4–6 条 ⇒ 人类 ⑤ 的四档（激活 1/2/3 条）**一只都套不上**；改成 1–3 条之后 49/49 读得出档位（台账 §C6.334e） |
+| 「三条固定数值增益」 | `TALENT_REFRESH_LEVELS = 3`（`individuals.js:185`；**2026-09-28 由 `TALENT_TIERS` 改名** —— `talent.js` 里同名的那个是人类 ⑤ 的**四档档位名**数组，同名不同物会让 `import` 静默拿错）、每级 `TALENT_STEP = 10`（`:178`）、加到一个**还没加过**的项 | **一致**（3 × +10） |
 | 「最多就是 3 个 +10」 | 三次刷新分别落在三个**不重复**的项上；六项都加过就 `no-stat-left`（`:219`） | **一致**（"最多"这层语义对上了） |
 | 「资质＝努力值+个体值的融合简化」 | 本仓**只有一层** `talent`（六项各 0–10，`TALENT_RANGE`）；没有"天生值 vs 练出来"的区分 | **一致（合成一层）**，但**丢了"哪个是天生的、哪个是练出来的"这个区分** —— 见下面 ⚠ |
 | （人类没说谁来决定） | 洛手**没有加点**，用**刷新**代替：性格/天分各 3 次、可回滚一步（`REFRESH_LIMIT=3`、`undoLastRefresh`） | **与宝可梦不同**（宝可梦 EV 是玩家自由分配）。不是"错"，是洛手改过的地方 |

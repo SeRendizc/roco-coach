@@ -26,6 +26,12 @@
  </div>
 </header>
 
+<!-- ── 第一层：列表（标签 / 搜索筛选 / 卡片网格 / 分页 / 比选栏）─────────────────
+     2026-09-28（人类：「比较页面也莫名其妙，加在下面你觉得很好看？为啥不做成二级页面」）：
+     比较结果**不再画在列表下面**，改成下面那个第二级视图（`#compare-view`）。
+     这一个 div 是首层的壳：进比较页时整块 `hidden`，返回时原样回来。 -->
+<div id="box-list-view">
+
 <!-- ── 两个主标签：我的盒子 / 全图鉴 ─────────────────────────────────────────── -->
 <nav class="tabs" role="tablist" aria-label="精灵盒子的两个视图">
  <button class="tab selected" id="tab-mine" data-kind="mine" role="tab" aria-selected="true">
@@ -69,7 +75,8 @@
  </div>
 </section>
 
-<!-- ── 比较：先选两只**同种**个体，再逐字段看「相同 / 不同 / 未知」 ────────────── -->
+<!-- ── 比选栏（首层）：选两只**同种**个体，再进第二级页逐字段看「相同 / 不同 / 未知」──
+     这一条留在首层：选人、清空，以及「比完去配队」那两件交接动作都在这里。 -->
 <section class="panel compare-bar" id="compare-bar" hidden>
  <p id="compare-hint" role="status" aria-live="polite">选两只同种伙伴，就能逐字段比较。</p>
  <div class="compare-actions">
@@ -84,10 +91,23 @@
  </div>
 </section>
 
-<section class="panel compare-panel" id="compare-panel" hidden aria-labelledby="compare-title">
- <div class="section-title">
-  <h2 id="compare-title">逐字段比较</h2>
-  <button id="compare-close">收起</button>
+</div><!-- /#box-list-view -->
+
+<!-- ── 第二级视图：个体比较页（地址 `?a=<个体>&b=<个体>`）────────────────────────
+     2026-09-28（人类：「为啥不做成二级页面，内容也啥啥没有」）：
+     这一屏就是二级页 —— 逐字段的每一行都在这里，列表整块收起（不是压在列表下面）。
+     地址带两只：刷新、前进后退、书签都能回到同一屏；比不了的时候（不同种 / 少带一只 /
+     名单里找不到）也停在这一屏上，把原因写在 `#compare-note` 里，不留白屏。 -->
+<section class="panel compare-view" id="compare-view" hidden aria-labelledby="compare-title">
+ <div class="section-title compare-view-head">
+  <a class="nav-btn primary" id="compare-back" href="/box.html">← 返回精灵盒子</a>
+  <h2 id="compare-title">个体比较</h2>
+ </div>
+ <p class="muted compare-lead">同一物种的两只伙伴，一项一项看「相同 / 不同 / 未知」；未知的那几条会写清为什么。</p>
+ <!-- 比不了的时候原因写在这里（纯文本，不渲染记号） -->
+ <p class="cmp-trouble" id="compare-note" role="status" aria-live="polite" hidden></p>
+ <div class="compare-actions" id="compare-view-actions">
+  <button id="compare-view-to-team" disabled>带上这两只去配队</button>
  </div>
  <div id="compare-body"></div>
 </section>
