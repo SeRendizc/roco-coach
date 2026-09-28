@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `85f517b`（第 98 轮收尾；从 `0572026` 起推了 P0-05 小芽 / A7 一处真值 / 六槽钩子 / 立绘官方优先与两档 / 绞轮负能耗 / 界面机制标记 / R8① 改钉）。台账声明落后一两笔是正常的，**落后台账声明落后一两笔是正常的，**落后 >12 笔判红**。头部这段口径照旧：
+| HEAD | `06b6c51`（阶段 2 第一波收口：C/D/A 入库、B 在跑、4B 前置四项有结论、B5 定位完成）。台账声明落后一两笔是正常的，**落后台账声明落后一两笔是正常的，**落后 >12 笔判红**。头部这段口径照旧：
 | 工作区 | **2026-09-23 接手轮的未提交改动**（第 140 轮又加了一层）：`src/client/{roco.html,roco.css,roco.js,team-workshop.js,battle-v3.css}`（战斗页顶栏/结算浮层/小芽重叠/首页槽位/愿力冲击高亮）、`src/server/{index.js,roco-service.js}`（立绘按物种 id 解析、视图带 loadouts/magic）、`roco/src/roco_env/*`（PVP 魔法动作类、每只 10 星）、`roco/tests/test_pvp_magic.py`、`data/roco/{battle-modes.json,evidence/*}`、`data/roco/rulesets/*`、**`data/roco/assets/pets/*`（96 张立绘重新对齐，见 §C6.63）**、`scripts/roco/{build-pvp-magic.mjs,build-rule-configs.mjs,build-pet-sprite-audit.mjs,verify-pet-sprites.mjs}`、`data/roco/derived/pet-sprite-audit.json`、`docs/roco/PET-SPRITES.md` |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **27 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / trajectories-model / sft-split / model-manifest / provenance / rag-eval / game-data-pack / reconciliation / **sprite-identity（第 140 轮新增）** / state-doc / guard-selftest / browser-acceptance / demo-acceptance / mobile-sweep / box-acceptance / workshop-acceptance / loadout-acceptance / **five-minute-chain（第 22 轮新增：RC-801 ②③ 五分钟链路 + 时间预算）** / roco-ux-acceptance / battle-feedback / **coverage-axes（第 29 轮新增：三套支持口径不许混 + 账本不许落后于引擎）** / retained-assets），产物 `reports/roco/verification/latest.json`；`last-green.json` 记的是**最近一次全绿**（套件数从 23 → 26 → 27 之后以产物为准）。**判据条数以产物为准**（demo-acceptance 当前 **129 通过 / 0 失败**（第 27 轮 +6：RC-802 四类逐类判据 + 一条反证 + 一条磁盘对账）、roco-ux-acceptance **39/39 + 反证 4/4**、workshop-acceptance 43/43、five-minute-chain **19/19 判据 + 19/19 反证**），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `，所以历史断点里的那一行必须写成 `| HEAD（…当时…） |` |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -13753,3 +13753,33 @@ Codex 第 5 条点的"前后矛盾"消掉。
 **未完成（如实）**：种子只覆盖 `query_rules` 与 `stop` 两类 —— 这批录制里其余工具的回执 `ok` **全是 0**，
 **这条来源给不出它们**，要覆盖得另找成功录制；Codex 第 4 项（训练/推理 `enable_thinking`、
 token 前缀、`mask_prompt` 答案区间一致）**未做**。**无训练、无下载、无切模型。**
+
+##### 十九、阶段 2 第一波收口（2026-09-29 凌晨，目标 goal-bc9cfda2）
+
+**当前版本 `06b6c51`**。四条分发里 **C、D 已收尾入库**，**A 已交付入库**，**B 在做**（6×4 + 深链）。
+
+**A / P0-01（`06b6c51`）**：`/api/coach` **0 次 → 200**（真机 + 网络取证）；断线档事实问由服务端真资料答出
+（天气 +75% / 火系克制表 / 喵喵种族值 370），不再退成与洛手无关的旧模板。
+**能力状态与模型状态分开**：`capabilities.{serverReady, toolsReady, modelReady, missing[]}`，
+`toolsReady` **三态**（`null` = 惰性没拉起过，**不许**报成坏）、取**两个引擎的并集**；
+**缺哪一项**点名到「本机规则服务没连上」；正文里不再出现 URL/加载器英文。
+读数：独立实例 **16/16**、掐断档 **4/4**、**red-proof 11/16（正好红 3 条）**、相关族 **238/238**；
+**8765 全程未重启**（`started_at` 前后一致）。同时收掉 D 组 **①-b/①-c**（槽位焦点 + 同步切换），
+并踩到一个**真机才会遇到**的坑：工作台挂在 **shadow DOM**，`event.target` 被重定向成宿主
+⇒ 改走 `composedPath()`。
+
+**C（`b6043da`）**：旧行动坞与 b3 **实时配招一致**（1/4 合法 → 4/4），并如实量出
+「那一坞当前版式下 `display:none`、rect 0×0」⇒ 用户可见后果是**两套口径**而非"点不到技能"。
+
+**D（`5416ee1`）**：四块独立验收（六槽焦点 / 默认图鉴 / 手机四屏 / 小芽层次），
+Lead 顺手修掉它挖出的 ④-a（`.xy-entry strong` 命中正文加粗 ⇒ 一句话被拆 6 行），
+**真机复验** `bodyBoldDisplayBlock` **3 → 0**。
+
+**Lead 自己**：4B 前置四项**全部有结论**（1、2 完成；3 降级为**待审候选**；4 **阻塞未对齐**）·
+**重点失败问句回归 3/3**（真机 + 网络取证）· **跨模块集成 6/6**（一份配招一个事实源）·
+**B5 定位**（不是伪精确、不是否定句，是**影子回放 `passed` 判太松**：132/288 零工具调用也算过）。
+
+**两条新任务卡**（都已写成可执行、写域明确、禁止"删断言/重生成产物对齐数字"）：
+`task-11` 影子回放 `passed` 口径；`task-12` **D①-a 的真相** —— 不是"工作台页没挂小芽"，
+而是**同页两个小芽实现**（`box.html` 走 `mountXiaoya`、`roco.html` 走 `#companion-card`），
+**不许硬塞第三套**，先出对照表与两方案报 Lead 拍板。
