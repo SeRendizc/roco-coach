@@ -12692,3 +12692,17 @@ objectObject: ((document.body.innerText||'').match(/\[object Object\]/g) ?? []).
 2. **门禁里 `box-acceptance` 那一格的红，不能直接读成"功能坏了"**；
 3. 想彻底解决它，得把这条链上**所有**"点完立刻读"改成**等显式信号**
    （目前只统一了二级页那 6 处等待 + `data-pet-rendered`，列表/比较/交接那几段还没做）。
+
+**三、门禁（`reports/roco/verify-release-final.log` 这一轮）**
+
+| 套件 | 结果 |
+|---|---|
+| `env` / `unit` / `bridge` / `toolbox-roco` / … / `guard-selftest` / `browser-acceptance` / `demo-acceptance` / `mobile-sweep` | ✔ |
+| `unit` | ✔（内部只剩 `model-trajectories ④` 一条，见上） |
+| `box-acceptance` | ✖ **87s** —— ⚠ 它跑的时候我正在改这个脚本（四处计数器统一）⇒ **这一格是旧读数，不作数** |
+| `five-minute-chain` | 待这份日志收尾（本轮已单独复跑 **19/19**） |
+| `workshop-acceptance` / `loadout-acceptance` / `roco-ux-acceptance` / `battle-feedback` / `coverage-axes` / `retained-assets` | 待收尾 |
+
+**⚠ 一条教训**：**不要在门禁跑着的时候改它正在跑的脚本** —— 这一格红就是这么来的（我改的是
+`box-acceptance.mjs`，而门禁此刻正在执行它）。下一轮：**门禁单独跑一次**（不并发做任何改动），
+再拿最终数字。
