@@ -51,3 +51,31 @@
 - 机制实机核验 0/542；图鉴 47 条无图；3 只继续策展；授权 UNKNOWN/REFERENCE_ONLY；
 - `test:unit` 基线红 4 条：`roco-experience`（系别配色）、`model-trajectories`（双路径一致）、
   `roco-team-cards-layout`（两个视口）—— **不是本轮引入**（队友做过 baseline 对照）。
+
+## 6. 在飞（阶段 2 进行中）—— 交接必读
+
+### 6.1 一条**已修但未提交**的实况故障（2026-09-29 凌晨）
+
+`src/client/team-workshop.js` 的 WIP 引用了 6 次 `SHARED_LOADOUT_SLOTS` 却**没导入**它
+⇒ `ReferenceError` 抛在 `renderTeam → legalityRowHtml` ⇒ **点候选项什么都不发生、六槽永远空**。
+（`art-finish` 在 D 组验收撞到，Lead 复核 + 真机实测。）
+
+**根因**：`loadout-store.js:26` 有定义，而 `team-workshop.js:288` 只导入了另外两个。
+
+**修复（已在工作区，8765 已生效）**：
+```js
+import {readSharedLoadouts, writeSharedLoadout, SHARED_LOADOUT_SLOTS} from './loadout-store.js';
+```
+真机复核：六槽 = `own-0001…own-0006`、全合法、互不相同 ✔。
+
+⚠ **为什么没提交**：这个文件里同时有 `build-snapshot`（task-8）的 **+459/-12 行 WIP**，
+我的改动**和他们的 WIP 在同一个 hunk 里**（`@@ -143,7 +285,12 @@`）⇒ 不能只提交我那一行。
+**整文件 `git add` 会把队友在飞的改动扫进提交** —— 这个错本轮已经在 `src/server/index.js` 上犯过一次，
+不再犯。⇒ **等 task-8 落地时一起提交**（提交时必须保住这一行 import）。
+
+### 6.2 一条**待判**的改钉请求（`coach-context` 提的）
+
+`tests/offline.test.js:158` 现在钉的是「无密钥时**不发** `/api/coach`」——
+而那正是 **P0-01 要根除的行为**：不发 `/api/coach` ⇒ 服务端资料工具用不上 ⇒ 事实问落到
+与洛手无关的模板。**意图（不花一个模型调用）要保留，钉子（不发请求）要换。**
+Lead 正在核"服务端无凭据时是否真的 0 次云端调用"，核完再定。
