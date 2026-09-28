@@ -25,12 +25,24 @@
 旧文字**改钉保留**在 `docs/roadmap/PROJECT-GOAL-CHECK.md` §2 的对照表里（不删）。
 「最近做了什么」那一节的待补清单在同一份文档。
 
+**⚠ 读下面这批老文档前先看这一条**：`docs/` 下绝大多数文档的最后一次提交都是 **2026-09-21 的那次大重构**
+（`2f6ba6e`，源码目录整体换过一次位），所以里面**只数**（"14 宠"）与**部分文件路径**已经过期。
+它们讲的**设计意图、边界、失败记录仍然有效**；但**凡是数字与路径，一律以下面两处为准**：
+
+| 想知道什么 | 只看这里 |
+|---|---|
+| 现在的真实状态（只数 / 判据 / 门禁 / 未提交） | **`npm run roco:status`** |
+| 逐轮发生了什么（含每轮"没做到"） | **`docs/roadmap/DSH-EXECUTION-STATE.md`** |
+| 这一周（2026-09-22 → 09-28）做了什么 | **`docs/INTERVIEW-GUIDE.md`** 的同名小节 + `docs/roadmap/PROJECT-GOAL-CHECK.md` |
+| 架构一页图 | [一页图](ARCHITECTURE-ONE-PAGER.md) |
+
 ## 优先阅读
 
 - [当前状态](IMPLEMENTATION-STATUS.md) ・ [逐项清单](CHECKLIST.md) ・ [演示与验收](DEMO-ACCEPTANCE.md)
 - [目录结构与约定](STRUCTURE.md) ← **新文件该放哪看这份**
 - [整体方案](COACH-PLAN.md) ・ [证据与权限](EVIDENCE-SCHEMA.md) ・ [实验报告](EXPERIMENTS.md)
 - [面试讲述](INTERVIEW-GUIDE.md) ・ [追问演练](INTERVIEW-DRILL.md) ・ [灵宝调研](LINGBAO-RESEARCH.md)
+- [架构一页图](ARCHITECTURE-ONE-PAGER.md) ・ [踩过的坑（面试用）](PITFALLS-AND-STORIES.md)
 - [四层口径（种族值 / 资质 / 天分 / 性格）](roco/PET-LAYERS.md) ・ [性格与天分](roco/TALENT-NATURE.md)
 - [547 只可行性评估](../roadmap/FEASIBILITY-547-ALL.md) ・ [对照最初目标核对](../roadmap/PROJECT-GOAL-CHECK.md)
 
