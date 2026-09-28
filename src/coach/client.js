@@ -150,6 +150,25 @@ export function startChatSession(store,now=Date.now()){
  const fresh=newChatSession(now);
  return trimChatStore({version:CHAT_STORE_VERSION,activeId:fresh.id,sessions:[fresh,...base.sessions]});
 }
+// 小芽页面上那个「新对话」按钮走这一条（2026-09-28，P0-05）：
+// 当前这段会话**本来就是空的**就直接用它，不另开一段 —— 否则连点几下会造出一串空会话，
+// 而 `trimChatStore` 上限是 8 条，撑到第 9 条就会按 `updatedAt` **把真的旧对话挤掉**。
+// 这不是洁癖：那是玩家数据被一个"看起来什么都没发生"的按钮弄丢。
+export function beginNewChatSession(store,now=Date.now()){
+ const base=trimChatStore(store);
+ const active=base.sessions.find(s=>s.id===base.activeId);
+ if(active&&!active.turns.length)return base;
+ return startChatSession(base,now);
+}
+// 「清空本次对话」：**只清当前这一段**会话的轮次 —— 别的会话、`xiaoya-memory-v1` 那份跨局账本
+// （事件/教训/目标/收藏/日志）一个字段都不动。与「新对话」一样，清对话 ≠ 清记忆。
+export function clearActiveChatSession(store,now=Date.now()){
+ const base=trimChatStore(store);
+ const active=base.sessions.find(s=>s.id===base.activeId);
+ if(!active)return startChatSession(base,now);
+ const sessions=base.sessions.map((s)=>(s.id===active.id?{...s,turns:[],title:'',updatedAt:now}:s));
+ return trimChatStore({version:CHAT_STORE_VERSION,activeId:active.id,sessions});
+}
 export function selectChatSession(store,id){
  const base=trimChatStore(store);
  return base.sessions.some(s=>s.id===id)?{version:CHAT_STORE_VERSION,activeId:id,sessions:base.sessions}:base;

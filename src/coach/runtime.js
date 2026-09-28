@@ -23,7 +23,8 @@ import {teacher,makeQuiz,review,summarizeMatch,reviewMatch,analyzeTurn,compareTu
 // 或「`profile.pets` 是对象 + `profile.tokens`」这条老来路。名单数组**不算**存档。
 import {trainingSaveOf,trainingSaveMissing} from './profile-shape.js';
 // 天分/性格那一族：识别与成句都在 `nature-advice.js`（数字只从 `talent.js` 来，这里只负责接线）。
-import {natureTalentAsk,natureLocalAnswer,panelAsk,panelLocalAnswer,raceOf,petMentionedIn} from './nature-advice.js';
+import {natureTalentAsk,natureLocalAnswer,panelAsk,panelLocalAnswer,raceOf,petMentionedIn,
+  adviceFor,explainNature,wantedStats,RACE_SOURCE} from './nature-advice.js';
 // 六维的中文名（生命/物攻/物防/魔攻/魔防/速度）与键序只有一份，在 `talent.js`
 // —— 图鉴字段问句（`codex-fact`）成句时用它，别在这里另抄一张表。
 import {STAT_KEYS,STAT_NAMES} from './talent.js';
@@ -180,6 +181,276 @@ export function parametricFactAsk(message=''){
  const head=playerQuestion(message).slice(0,60);
  return PARAMETRIC_FACT_ASK.test(head)&&FACT_QUESTION_SHAPE.test(head);
 }
+// ── 「我正在看的那一只」（P0-05）──────────────────────────────────────────────
+//
+// 人类原话：「小芽当前对象/资料通路同步修复」。可验收的形状是**逐字一致** ——
+// 在盒子详情页看哪一只，问它的性格 / 天分 / 四个技能，小芽答的必须与页面上那一栏相同。
+//
+// 这一支的取值**只有一份来源**：页面把 `/api/roco/box?detail=<个体 id>` 那份回执里
+// 页面上真的画出来的几项原样放进 `context.focusDetail`（`src/client/xiaoya.js` 的
+// `focusSnapshotFrom()`）。这里只**念**：不算、不换算、不补 0、不猜。
+// 所以「页面上写着什么」与「小芽说什么」不可能指向两份数据 —— 那正是修前那两条根因
+//（`:237` 取 `pets[0]`、`:66` 拉 `limit=48` 那份**没有培养细节**的名单）造成的裂缝。
+//
+// 为什么归本地事实（0 次模型调用）：这四格全是**读出来的值**，模型没有可补充的事实，
+// 只有措辞。让模型复述数字，是"读错一格就整句错"的问题上最不值得的赌。
+const FOCUS_FIELDS = /性格|资质|天分|技能|招式|配招|四个技能|4个技能|等级|面板|哪一只|哪只|在看谁|看的谁/;
+//: 指代"眼前这一只"的说法。**必须是指代**才认 —— 「这只/它/当前/正在看」都算，
+//: 只提"技能"两个字不算（那是图鉴/学习表那一族，各有各的路）。
+const FOCUS_DEIXIS = /这只|这一只|这是|它|当前|现在看|正在看|我看到的|页面上的|上面那一只|刚刚那只|这精灵/;
+//: 页面那一栏的六维顺序 —— 与 `box-drawer.js` 的 `STAT_ORDER` **同一张表**
+//:（hp/atk/def/spa/spd/spe）。⚠ 不许用 `talent.js` 的 `STAT_KEYS`：它的顺序是
+//: hp/atk/**spa**/def/…，印出来与页面上那一栏**逐字不一致**，验收要的正是逐字一致。
+const FOCUS_STAT_ORDER = Object.freeze([['hp', '生命'], ['atk', '物攻'], ['def', '物防'],
+  ['spa', '魔攻'], ['spd', '魔防'], ['spe', '速度']]);
+//: 页面 `box.js` 的 `NO_ITEM` 逐字同一条（缺项不许写 0、不许留白）。
+const FOCUS_NO_ITEM = '游戏数据里没有这一项';
+
+/** 这一问问的是不是**页面送来那一只**（`context.focusDetail`）。读不到焦点就一律 `false`。 */
+export function focusDetailOf(context) {
+  const focus = context?.focusDetail;
+  return focus && typeof focus === 'object' && !Array.isArray(focus) ? focus : null;
+}
+
+/**
+ * 这一问是不是在问"我正在看的那一只"。
+ *
+ * 三道闸门缺一不可：
+ *   ① 上下文里**真有**焦点（页面送来了 `focusDetail`）；
+ *   ② 问的是那几格之一（性格/资质/天分/技能/等级/面板）—— "它怎么培养"这类不归这一支；
+ *   ③ 指的是**眼前这一只**：要么用指代（这只/它/正在看…），要么点了名而那个名字
+ *      就是焦点这一只。点了**别的**名字就不许答 —— 那会把 A 的性格说成 B 的。
+ */
+export function focusAsk(message = '', context = null) {
+  const text = playerQuestion(message).trim();
+  if (!text) return false;
+  const detail = focusDetailOf(context);
+  if (!detail) return false;
+  if (!FOCUS_FIELDS.test(text)) return false;
+  const mentioned = petMentionedIn(text);
+  if (mentioned) return mentioned.name === detail.name;
+  return FOCUS_DEIXIS.test(text);
+}
+
+/**
+ * 这一问要的是**事实**还是要**建议**（Codex 监工第 5 条点名的意图分叉）。
+ *
+ * 为什么必须分：同一个焦点上「这只的性格是什么」（事实）与「这只适合什么性格？为什么」
+ *（建议）是**两件事**，用同一段"当前值复述"回答后者，玩家拿到的是**答非所问**——
+ * Codex 真机实测的那张截图（`xiaoya-advice-is-fact-dump.png`）拍的就是这个。
+ * 分叉口径：
+ *   · **事实问**：「是什么 / 多少 / 带哪四个」⇒ 只回那一件事，短答；
+ *   · **建议问**：含「适合 / 推荐 / 该用 / 为什么 / 怎么优化 / 该不该 …」⇒ 走有依据的建议路径，
+ *     给**建议 + 理由**，当前值只作为**依据**出现（不许当答案）。
+ */
+const FOCUS_ADVICE_ASK = /适合|推荐|该用|用什么|选哪|怎么选|怎么优化|优化|该不该|值不值|更合适|好不好|更好|为什么|凭什么|为啥|怎么养|如何养/;
+
+/** `'fact'` / `'advice'` / `null`（不是这一族）。 */
+export function focusIntent(message = '', context = null) {
+  if (!focusAsk(message, context)) return null;
+  return FOCUS_ADVICE_ASK.test(playerQuestion(message)) ? 'advice' : 'fact';
+}
+
+/** 六维对象 → 与页面上那一栏**逐字同一条**（`box-drawer.js` 的 `formatTraitValue`）。 */
+function focusTalentLine(talent) {
+  if (!talent || typeof talent !== 'object') return null;
+  const parts = FOCUS_STAT_ORDER
+    .filter(([key]) => Number.isFinite(Number(talent[key])))
+    .map(([key, label]) => `${label} ${Number(talent[key])}`);
+  return parts.length ? parts.join(' / ') : null;
+}
+
+/** 页面那一栏里某一项现在的样子：有值给值，没值给**它自己的原因**（不猜）。 */
+function focusTraitOf(detail, label) {
+  const row = (Array.isArray(detail?.traits) ? detail.traits : []).find((trait) => trait?.label === label);
+  if (!row) return null;
+  const known = row.value !== null && row.value !== undefined && row.value !== '';
+  return known ? {value: row.value, text: String(row.value)} : {value: null, text: row.reason ?? FOCUS_NO_ITEM};
+}
+
+/**
+ * 「我在看的那一只」的**本地事实回答**：逐字念页面上那一栏，而且**只念问到的那一格**。
+ *
+ * 返回 `{text, evidence, trace: []}`；不是这一族就返回 `null`（交回原来那条路）。
+ *
+ * ⚠ 三条硬纪律（Codex 监工 2026-09-29 点了前两条，每一条都有真机现场）：
+ *   ① **缺字段不许炸**：`traits` 空、只有部分键、`nature` 为 null、`skills` 空 ——
+ *      每一种都要**如实说"这一格现在读不到"**，既不编一个值，也不抛异常
+ *     （修前：`traits: []` ⇒ `nature` 为 null ⇒ 读 `nature.text` ⇒ TypeError，整条请求 500）；
+ *   ② **建议问不许退化成事实复述**：`focusIntent()==='advice'` 直接交回 `null`，
+ *      由 `focusAdviceAnswer()` 给建议 + 理由；
+ *   ③ **事实问短答**：问性格就只答性格那一格，不再把资质/技能整段倒出来
+ *     （那是玩家没问的东西，也是 Codex 实测里"答非所问"的观感来源）。
+ */
+export function focusFactAnswer(message = '', context = null) {
+  if (!focusAsk(message, context)) return null;
+  if (focusIntent(message, context) === 'advice') return null;   // 纪律②：建议问走建议路径
+  const detail = focusDetailOf(context);
+  const asked = playerQuestion(message);
+  // 对战那一档只有**物种级**公开信息（引擎公开视图不给个体 id，见公开视图合同）：
+  // 那就只说名字与系别，并且说清"培养细节这一档拿不到" —— 不许拿别的数据补。
+  if (detail.battle_only) {
+    return {text: `你现在场上的是${detail.name ?? '这一只'}`
+      + `${detail.species_id ? `（${detail.species_id}）` : ''}。`
+      + '对战里引擎只公开到**物种**这一层（不给个体编号），所以这一只的性格 / 资质 / 带的技能我这边读不到 ——'
+      + '要看这三格，点开「我的盒子」里那一只再问我。',
+    evidence: ['焦点来源：对战场上的公开视图（window.rocoDemo.state.view.self）'], trace: []};
+  }
+  const head = `${detail.name ?? '这一只'}`
+    + `${Number.isFinite(detail.level) ? `（Lv.${detail.level}）` : ''}`;
+  const scope = detail.live === false ? '你上一轮在盒子里看的那一只' : '你现在看的这一只';
+  // 「这是哪一只」：只问身份、没问那几格时就只报身份（不多嘴）。
+  const wantsIdentity = /哪一只|哪只|在看谁|看的谁/.test(asked);
+  const wantsNature = /性格/.test(asked);
+  const wantsTalent = /资质|天分/.test(asked);
+  const wantsSkills = /技能|招式|配招|四个技能|4个技能/.test(asked);
+  const wantsLevel = /等级/.test(asked);
+  const wantsPanel = /面板/.test(asked);
+  if (!wantsIdentity && !wantsNature && !wantsTalent && !wantsSkills && !wantsLevel && !wantsPanel) return null;
+  const evidence = [`焦点来源：${detail.source === 'battle' ? '对战公开视图' : `/api/roco/box?detail=${detail.instance_id ?? '（物种级）'}`}`
+    + `（与盒子详情页同一条取值${detail.cultivation_source === 'local-record' ? '，培养那几样读的是本机记录' : ''}）`,
+    ...(detail.live === false ? ['这一只是"最近看过"的那一只，不是当前屏；页面上没在看具体某一只时我按最近一次的记录说。'] : [])];
+  if (wantsIdentity && !wantsNature && !wantsTalent && !wantsSkills && !wantsLevel && !wantsPanel) {
+    return {text: `${scope}是${head}${detail.species_id ? `（${detail.species_id}）` : ''}。`,
+      evidence, trace: []};
+  }
+  // 每一格：有值念值，没值念**它自己的原因**（页面怎么写的就怎么说）。
+  //
+  // ⚠ 取值认**两种形状**：页面送来的快照（`focusSnapshotFrom` 已经把 `traits` 投影成
+  // `nature`/`talent`/`talent_tier` 三个顶层键）与**没投影过的原始 traits**。
+  // 只认顶层键的话，`traits` 里明明写着「性格 稳重」也会被念成"读不到" ——
+  // 那是另一种形式的编（把有的说成没有），与读错一样是骗玩家。
+  const natureRow = focusTraitOf(detail, '性格');
+  const nature = typeof detail.nature === 'string' && detail.nature
+    ? detail.nature : (typeof natureRow?.value === 'string' && natureRow.value ? natureRow.value : null);
+  const natureReason = detail.nature_reason
+    ?? (natureRow && natureRow.value === null ? natureRow.text : null);
+  const talentRow = focusTraitOf(detail, '资质');
+  const talent = focusTalentLine(detail.talent) ? detail.talent
+    : (talentRow?.value && typeof talentRow.value === 'object' ? talentRow.value : null);
+  const talentReason = detail.talent_reason
+    ?? (talentRow && talentRow.value === null ? talentRow.text : null);
+  const tierRow = focusTraitOf(detail, '天分档位');
+  const tier = typeof detail.talent_tier === 'string' && detail.talent_tier
+    ? detail.talent_tier : (typeof tierRow?.value === 'string' && tierRow.value ? tierRow.value : null);
+  const tierReason = detail.talent_tier_reason
+    ?? (tierRow && tierRow.value === null ? tierRow.text : null);
+  const missing = (what, reason) => `${what}现在读不到（页面上那一栏也是空的：${reason ?? FOCUS_NO_ITEM}）`;
+  const lines = [];
+  if (wantsNature) {
+    lines.push(nature ? `性格「${nature}」` : missing('这一只的性格', natureReason));
+  }
+  if (wantsTalent) {
+    const talentLine = focusTalentLine(talent);
+    if (talentLine) lines.push(`资质 ${talentLine}`);
+    else lines.push(missing('这一只的资质', talentReason));
+    if (tier) lines.push(`天分档位「${tier}」`);
+    else if (tierReason) lines.push(`天分档位现在认不出来（页面上写的是：${tierReason}）`);
+  }
+  if (wantsSkills) {
+    const skills = Array.isArray(detail.skills) ? detail.skills.filter((skill) => skill?.name) : [];
+    lines.push(skills.length
+      ? `带的 ${skills.length} 个技能（按页面上那一栏的顺序）：` + skills.map((skill, index) => {
+        const meta = [skill.element, skill.category,
+          Number.isFinite(skill.energy) ? `耗能 ${skill.energy}` : null,
+          `威力 ${skill.power_label ?? FOCUS_NO_ITEM}`].filter(Boolean).join(' · ');
+        return `${index + 1} ${skill.name}（${meta}）`;
+      }).join('、')
+      : missing('这一只带的技能', detail.skills_reason));
+  }
+  if (wantsLevel) lines.push(Number.isFinite(detail.level) ? `等级 Lv.${detail.level}` : missing('这一只的等级', null));
+  if (wantsPanel) {
+    // 面板**不由这一层另算一份**：那一栏的换算（60 级 / 零突破 / 性格与天分作输入）在页面上，
+    // 我这里再算一次就有两个来源 —— 玩家迟早会看到两个数（P0-02 那条同源纪律）。
+    lines.push('面板那一栏按 60 级公式算，输入就是上面这份性格与资质；'
+      + '页面上「六维（60 级）」写的就是它，我不另算一份（免得两边对不上）');
+  }
+  return {
+    text: `${scope}是${head}：${lines.join('；')}。`,
+    evidence, trace: [],
+  };
+}
+
+/**
+ * 「我在看的那一只」的**建议回答**（有依据的建议 + 理由，不是当前值复述）。
+ *
+ * 依据只有两条是**登记数据**，其余如实说没有：
+ *   · 种族值 —— 归一化图鉴快照（`full-catalog.json` 的 `stats`，`raceOf` 读的那一份）；
+ *   · 性格表 —— `data/roco/systems/natures.json`（长处初始 +10%、短处 −10%，这里按零突破算）。
+ * 资质 / 技能这两层的"加成效果"**没有登记数值**（页面上那句「养成效果未校准」说的就是这件事）
+ * ⇒ 这一支**不给**"哪种资质更好/该换哪个技能"的结论，并把这句限制写出来。
+ * 拿一句没依据的话当建议，比不说更糟 —— 这是这一支唯一不许让步的地方。
+ */
+export async function focusAdviceAnswer(message = '', context = null) {
+  if (focusIntent(message, context) !== 'advice') return null;
+  const detail = focusDetailOf(context);
+  const asked = playerQuestion(message);
+  const wantsNature = /性格/.test(asked) || !/资质|天分|技能|招式|等级/.test(asked);
+  const scope = detail.live === false ? '你上一轮在盒子里看的那一只' : '你现在看的这一只';
+  const head = `${detail.name ?? '这一只'}${Number.isFinite(detail.level) ? `（Lv.${detail.level}）` : ''}`;
+  const evidence = [];
+  if (detail.battle_only) {
+    return {text: `${scope}是${head}，但这一档只有**物种级**公开信息（引擎对局里不给个体编号），`
+      + '所以"练哪一项 / 用哪个性格"这种要看培养数据的建议我给不了 —— 点开「我的盒子」里那一只再问我。',
+    evidence: ['焦点来源：对战场上的公开视图（window.rocoDemo.state.view.self）'], trace: []};
+  }
+  // 种族值优先取**页面送来的那一份**（`detail.race`，来自盒子回执的 `metrics`，与页面上
+  // 「六维（60 级）」写着的「种族 N」逐字同一份数）。为什么不是先调 `raceOf()`：
+  // 它走 `import('node:fs')` 读归一化图鉴 —— **浏览器里那条路是断的**（真机实测：这一支整段
+  // 抛异常被上层吞掉，玩家拿到的是陪练那句「哪句不清楚，我再讲一遍」）。`raceOf` 只作为
+  // 服务端调用方（没有页面送来的 race）的退路，并且**必须**包在 try 里。
+  let race = detail.race && Object.keys(detail.race).length
+    ? {pet_id: detail.species_id ?? null, name: detail.name ?? null, race: detail.race} : null;
+  if (!race && detail.species_id) {
+    try { race = await raceOf(detail.species_id); }
+    catch { race = null; }                       // 浏览器里没有 node:fs ⇒ 如实降级，不抛
+  }
+  if (!race || race.ambiguous) {
+    return {text: `${scope}是${head}。要给出"练哪一项 / 用哪个性格"的建议，我得先拿到它的**种族值** ——`
+      + '这一只的种族值我这边查不到，所以建议我不编：'
+      + '（只说一句"用某某性格"而没有它的能力分布作依据，那就是猜。）',
+    evidence: [`raceOf(${detail.species_id ?? 'null'}) = ${race?.ambiguous ? 'ambiguous（同名多形态，不替你挑一只）' : 'null'}`],
+    trace: []};
+  }
+  evidence.push(detail.race
+    ? `种族值：页面「六维（60 级）」那一栏的「种族 N」（${race.pet_id ?? detail.name ?? '这一只'}）`
+    : `种族值：${RACE_SOURCE}（${race.pet_id}）`);
+  evidence.push('性格加成：游戏性格表（长处初始 +10%、短处固定 −10%；这里按**零突破**算）');
+  const parts = [];
+  if (wantsNature) {
+    const want = wantedStats(asked);
+    const raceRows = STAT_KEYS.map((stat) => [stat, Number(race.race?.[stat] ?? -1)]).sort((a, b) => b[1] - a[1]);
+    const top = raceRows[0];
+    const priority = want.length ? want : [top[0]];
+    const why = want.length
+      ? `你要的方向（${[...new Set(want.map((stat) => STAT_NAMES[stat]))].join('、')}）`
+      : `它种族值最高的是${STAT_NAMES[top[0]]} ${top[1]}`;
+    const advice = adviceFor({race: race.race, talent: detail.talent ?? null, priority, limit: 3});
+    if (advice.ok) {
+      parts.push(`**建议**（${why}；每条都带代价）：`
+        + advice.rows.map((row, index) => `${index + 1}. ${row.text}`).join(' '));
+      // 当前这一条也不当答案、只当依据：它到底换来了什么。
+      const current = detail.nature ? explainNature({race: race.race, talent: detail.talent ?? null, nature: detail.nature}) : null;
+      if (current) parts.push(`你现在带的「${current.nature}」实际做的是：${current.text}`);
+      else parts.push('你现在这一只还没有性格数据 ⇒ 当前这一条说不出来（不编一个）。');
+    } else {
+      parts.push(`这一只的性格建议算不出来：${advice.reason}`);
+    }
+  }
+  if (/资质|天分/.test(asked)) {
+    parts.push('**资质这一层我给不了"哪个更好"**：页面上对它只标了「是什么」，'
+      + '加成数值没有登记（那一栏的「养成效果未校准」就是这个意思）—— 拿没依据的话当建议比不说更糟。'
+      + '要动它，页面上有「刷新天分」（还剩几次也写在按钮上）。');
+  }
+  if (/技能|招式|配招/.test(asked)) {
+    parts.push('**技能这一层要按学习表核**：换招前用页面上的「看它能学什么」读一下这只的学习表，'
+      + '学不到的招我不推荐（那是编）。');
+  }
+  parts.push(`依据：${evidence.join('；')}。`);
+  return {text: `${scope}是${head}。\n\n${parts.join('\n\n')}\n\n换一只再问我，我按那一只重算。`,
+    evidence, trace: []};
+}
+
 /**
  * 这一问能不能由**本地单发**回答（0 次规划器、0 次模型正文）。
  *
@@ -187,7 +458,9 @@ export function parametricFactAsk(message=''){
  * 分开写死过一次（路由只认 `defaultArgsFor` 能构造出参数的那一类），
  * 结果是「对位问句」明明实现了却永远进不去 —— 判定与实现必须绑在一起。
  */
-export function localFactAsk(message='',policy=null){
+export function localFactAsk(message='',policy=null,context=null){
+ // 「我正在看的那一只」（P0-05）：页面送来焦点时，这四格是读出来的值，0 次模型调用。
+ if(focusAsk(message,context))return true;
  if(parametricFactAsk(message))return true;
  // 面板问句（「X 的面板是多少」）：数字全在数据层（图鉴种族值 + 天分/性格），本地成句。
  // 2026-09-27 接：人类点名的"种族值 + 个体值 + 性格 + 资质"四层，这一支就是它们的出口。
@@ -523,6 +796,16 @@ function individualOf(context,message){
 }
 
 async function localFactAnswer({message,context,policy,retrieve,memory=null}){ // 性格/天分那一族最优先：它自带取舍句（防止纯机器算），而且不需要任何工具调用。
+ // 「我正在看的那一只」（P0-05）排在**最前**：它答的是页面上那一栏的原文，
+ // 别的族（面板 / 性格建议）说的都是"按种族值算出来的"，两者不许互相顶。
+ // 意图分叉（Codex 监工第 5 条）：事实问短答、建议问给建议 + 理由 —— 两者不许互相冒充。
+ if(focusIntent(message,context)==='advice'){
+  const focusAdvice=await focusAdviceAnswer(message,context);
+  if(focusAdvice)return focusAdvice;
+ }else{
+  const focusAnswer=focusFactAnswer(message,context);
+  if(focusAnswer)return focusAnswer;
+ }
  const natureAnswer=await natureLocalAnswer({message,context});
  if(natureAnswer)return {...natureAnswer,trace:[]};
  // 进化（「X 几级进化成什么」）：本地成句，0 次模型调用；数据来自社区图鉴层并如实标出来路。
@@ -1595,7 +1878,7 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  const factPolicy=policyFor(message,context);
  const factArgs=factPolicy.need?withRuntimeStateVersion(factPolicy.need,defaultArgsFor(factPolicy.need,context,message),context):null;
  const pureFact=Boolean((factPolicy.need==='query_rules'&&factArgs&&validToolArgs(factPolicy.need,factArgs))
-  || localFactAsk(message,factPolicy));
+  || localFactAsk(message,factPolicy,context));
  let factAnswer=null;
  // 在 `pureFact` 块**之前**声明：`useModel`（块外）要用它；写成块内 `const` 会 TDZ
  // （真踩到：整条 `runCoach` 抛 ReferenceError，ask-coverage 一口气红了 12 条）。
