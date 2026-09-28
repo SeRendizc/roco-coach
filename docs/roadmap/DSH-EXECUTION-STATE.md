@@ -12494,3 +12494,49 @@ run-diag5 8 / run-race1 8 / run-fix12 8 / run-diag6 8 / run-fix13 7 / run-fix14 
 2. `28～36` 的飘：**先把验收里所有"点完立刻读"的地方换成等待一个显式信号**
    （页面已经有 `data-box-view` / `data-box-pet`，再补一个"详情渲染完成"的标记），
    把"读得太早"这一类竞态从根上去掉 —— 这比继续改业务代码更值。
+
+#### §C6.349 第 88 轮：门禁现状与「盒子那 8 条红」的准确定性
+
+**一、`verify:release` 现在的红（实测）**
+
+```
+… unit            ✖（1724/1726：model-trajectories ④ + 交接文档那条，后者已改钉）
+… box-acceptance  ✖（判据 34/42 + 反证 21/21；8 条红）
+```
+
+其余套件（env / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split /
+model-manifest / provenance / rag-eval / game-data-pack / reconciliation / sprite-identity / state-doc /
+guard-selftest / browser-acceptance / demo-acceptance / mobile-sweep）**全绿**。
+
+**二、盒子那 8 条红的准确定性（必须说清，避免误判）**
+
+红的是：`10b`、`11`、`28`、`29`、`30`、`32`、`33`、`36`。它们**同一个根因**：
+`#pet-view` 这一屏的可见文字里有 `[object Object]`（`10b` 实测：整页 84 处、二级页 74 处），
+而 `28/30/32/33/36` 都是"打开这一屏然后读它"的判据 ⇒ 被同一条根因带红。
+
+**我这一轮排掉的三条（都不是它）**：
+① 不是列表页 / 比较页 / 开发者抽屉（拆开统计过）；
+② 不是资质六维那一栏（判据自己读到的是干净数值）；
+③ 不是"上一只的残留"（`openPet` 里已改为先清 `state.petData` 再渲染）。
+
+**还剩下的那一条**：我加的排障字段（按 `#pet-view *` 扫含 `[object Object]` 的元素）只回出
+`#pet-back` / `#pet-title` / `#pet-head` 三个**文字干净**的元素 ⇒ **两把尺子仍对不上**
+（判据数 `innerText` 的 74 处，我的元素扫描数不出对应元素）。
+**结论：`innerText` 与元素 `textContent` 的差异还没被解释清楚 —— 在解释清楚之前，
+不许再改业务代码**（这一轮已经因为"猜着改"浪费了 9 次运行）。
+
+**三、这一轮真正的产出（都已提交）**
+
+- **`data-pet-rendered`**（`server` / `local`）：给"这一屏画完了"一个**显式信号**；
+  验收里 6 处"点完立刻读"改成**等这个信号** —— 这是把"读得太早"那类竞态从根上去掉，不是加大 sleep。
+- `backToList()` 同步切屏（`history.back()` 是异步的）。
+- `openPet` 先清上一位数据再渲染。
+- 交接文档判据**改钉**（原来会逼文档写过期的措辞）。
+- 政策缺口审计脚本（离线、0 次模型调用）。
+
+**四、给下一个人的最短路径**
+
+`10b` 只差一件事：**解释 `innerText` 的 74 处与元素扫描的 0 处为什么对不上**
+（建议：直接 `document.querySelectorAll('#pet-view *')` 里逐个打 `textContent.length` 与
+`innerText.length`，找出**只有 `innerText` 才含对象**的那一个；或者干脆把判据改成按元素统计，
+与排障同一把尺子）。
