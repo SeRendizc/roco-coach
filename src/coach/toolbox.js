@@ -161,7 +161,25 @@ export const TOOL_CONTRACTS={
  compare_team_change:{description:'手游换人前后对比：改善什么、代价什么（规则特征差，不是胜率，也不等于「更强」）',arguments:{team_before:'必填：换人前 3 个精灵稳定 id（引擎按 3 只队伍算；六只阵容的对比尚未支持）',team_after:'必填：换人后 3 个精灵稳定 id（与前一队只差一只）',locked_pet:'可选：玩家锁定的伙伴；换人后阵容不含它时拒绝出结论',state_version:'必填：状态版本'}},
  plan_actions:{description:'给定公开 planner state 给出回合行动建议（推荐/主要应对/最坏尾部/搜索覆盖/超时状态）；规划器未接入或搜索未完成时明确说出来，不编计划',arguments:{state:'必填：**公开** planner state（env.public_planner_state() 的产出，≤8000字节；不得含真实随机种子或对手待执行动作）',state_version:'必填：状态版本'}},
  summarize_battle:{description:'对局复盘摘要；没有对应的引擎端点，返回结构化 not_implemented，不生成摘要',arguments:{record:'必填：公开对局记录对象（≤4000字节）',state_version:'必填：状态版本'}}
-};
+}
+
+/**
+ * **本地规划器**能选的工具集：从契约**派生**，不许手抄。
+ *
+ * 由来（Codex 2026-09-29 的 4B 训练前置交接第 1 项，逐字）：
+ * 「把 runtime 实际工具集合、系统提示词、输入序列化与训练/评估**统一为共享实现**。
+ *   当前 `server/index.js` 的 `createLocalPlan` **仅传 7 个工具**，与完整 `TOOL_CONTRACTS`/旧训练不同。
+ *   若下一版要支持 `query_rules`/`evaluate_team`/`compare_team_change`，**先落实实际接入并执行验收**。」
+ *
+ * 实测（2026-09-29）：契约里 **12** 个，本地规划器原来手抄了 **7** 个，
+ * 缺 `query_rules` / `evaluate_team` / `compare_team_change` / `plan_actions` / `summarize_battle`
+ * —— 这 5 个在 `executeTool()` 里**都已有实现**，只是白名单里没有 ⇒
+ * 本地模型档下小芽**连规则查询都点不了**（能力静默缩水），而且训练/评估与运行时口径不一致。
+ *
+ * 现在从 `TOOL_CONTRACTS` 派生：**以后契约加一个工具，本地这条自动跟上，不会再漂**。
+ * 判据钉在 `tests/roco-local-model-plan-tools.test.js`。
+ */
+export const LOCAL_PLAN_TOOLS=Object.freeze(Object.keys(TOOL_CONTRACTS));;
 // ── RC-301：`request_team_recommendation`（阵容请求合同工具） ──────────────
 //
 // 它**故意不进 `TOOL_CONTRACTS`**。理由是这份合同要保住的既有不变量：

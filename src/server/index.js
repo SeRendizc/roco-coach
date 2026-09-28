@@ -17,7 +17,7 @@ import {decideOpponentAction,DIFFICULTY_BRIEFING,OPPONENT_TIMEOUT_MS} from './op
 import {createRocoService} from './roco-service.js';
 import {productionPlannerSystem} from '../coach/planner-prompt.js';
 // RC-205：诊断面如实报出 RAG 模式（默认 shadow）——见 status()。
-import {ragMode} from '../coach/toolbox.js';
+import {ragMode,LOCAL_PLAN_TOOLS} from '../coach/toolbox.js';
 // 营地/宠物 PVE 教练的游戏规则表：能量上限这类数字**只在那里写一次**（RC-101 的结构判据）。
 // 说明：手游《洛克王国：世界》那条链路的上限住在 `data/roco/rulesets/*.json`，是另一套引擎。
 import {RULES} from '../game/engine.js';
@@ -515,8 +515,16 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
    const mode=localModelMode();
    if(mode==='off'||!base)return base;
    const wrapped=wrapWithLocalModel(base,{model:localModel(),mode});
-   const localPlan=createLocalPlan({model:localModel(),tools:['read_state','search_rules','compare_actions',
-    'simulate_branch','read_match','read_evidence','read_last_turn']});
+   // ⚠ 2026-09-29 修（Codex 的 4B 训练前置交接第 1 项）：
+   // 这里原来**手抄**了 7 个工具名，而 `TOOL_CONTRACTS` 有 12 个 ⇒ 缺的 5 个
+   // （`query_rules` / `evaluate_team` / `compare_team_change` / `plan_actions` / `summarize_battle`）
+   // 在 `executeTool()` 里**其实都有实现**，只是本地这条白名单里没写 ⇒
+   // 本地模型档下小芽**点不了规则查询与阵容评估**（能力静默缩水），
+   // 而且训练/评估用的工具集与运行时不一致（Codex 要的正是「统一为共享实现」）。
+   // 现在从契约派生：契约加工具，本地这条自动跟上。
+   // 旧写法留档（改钉不删）：
+   //   tools:['read_state','search_rules','compare_actions','simulate_branch','read_match','read_evidence','read_last_turn']
+   const localPlan=createLocalPlan({model:localModel(),tools:[...LOCAL_PLAN_TOOLS]});
    // 只有 `on` 档才让本地模型**接管**工具选择（失败方向同样是「拿不准就停止查证」）。
    //
    // 第 38 轮修：原来无论哪一档都直接把 `wrapped.plan` 换成本地规划器。而
@@ -654,9 +662,6 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
           return at>=0?at+1:null;              // 名单里的**序**就是槽位（已核对：48/48 与 manifest 的 slot 同名）
         }catch{ return null; }
       })();
-      if(!key&&byId){ const slot=slotOfPetId; if(slot!==null)key=keyOfSlot.get(slot)||''; }
-      if(!key&&byName)key=(man.find((r)=>r?.name===byName)||{}).asset_key||'';
-
       const known=new Set((Array.isArray(man)?man:[]).map((r)=>String(r?.asset_key||'')));
       // ── 2026-09-28 新增回落：**抓包立绘** ─────────────────────────────────────
       // 人类逐字：「突然想到，我抓包出来的地方是不是有精灵立绘？你把迪莫的实装一下我看看」。
@@ -664,7 +669,7 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
       // （`https://heyboxbj.max-c.com/game/roco_kingdom/pet/image/<抓包id>.png`），
       // 已由 `scripts/roco/fetch-capture-art.mjs` 逐张入库到 `data/roco/assets/capture-pets/`。
       // ⚠ 它**不进**上面那 48 槽的策展清单：那一份有槽位审计与 `verify-pet-sprites.mjs` 门禁，
-      // 塞第 49 条会把审计与门禁一起弄坏。所以走这一条**按 pet_id 查的回落**，
+      // 塞第 49 条会把审计与门禁一起弄坏。所以走这一条**按 pet_id 查的**独立通路，
       // 只有 `v=default`（抓包里只有一张静态图，没有 action 那一态，**不假装有两态**）。
       // 许可 UNKNOWN / REFERENCE_ONLY —— 与仓里其它抓包产物同一条纪律，见那份 manifest 的出处字段。
       //
@@ -673,29 +678,58 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
       //     而不是 1024×1024 的原件（≈ 370–580 KB）—— 一页 24 张的差别是 ~1.3 MB vs ~11 MB；
       //   · 原件仍在 `originals/`（gitignore），要原图时显式 `&full=1`；
       //   · 缩略图缺失时**退到原件**，两个都没有才 404（缺资源显示明确占位，不偷偷借另一只图）。
-      if((!key||!known.has(key))&&byId&&variant==='default'){
+      //
+      // ── 2026-09-29（当天第二次改，人类逐字）：「我看以前我上了自制立绘的还是原来的，你都改成官方吧」──
+      // **解析顺序反过来：官方抓包图优先，没有才用策展（自制）图。**
+      // 旧顺序留档（2026-09-28 那一版，**不删**，依据在上面那段注释里）：
+      //   ① `if(!key&&byId){ const slot=slotOfPetId; if(slot!==null)key=keyOfSlot.get(slot)||''; }`
+      //      —— 先按 roster-48 的槽位把策展 key 定下来；
+      //   ② `if((!key||!known.has(key))&&byId&&variant==='default')` —— 只有"没定到 key /
+      //      key 不在策展清单里"才进抓包回落。
+      //   后果（实测，改前读数）：名单里 41 只（29 只有抓包图 + 12 只没有）一律显示自制图。
+      // 新口径的依据：抓包图是**官方**素材；策展那 48 张是自制/参考图，只该出现在
+      // "官方图根本不存在"的兜底位上（现在只有 3 只：银月狼王 / 圣凯布米龙 / 月使鹭纳）。
+      // 例外：调用方**显式传 `key=`** 时仍按老引用方式优先（那是"点名要这一张"，不是回落）；
+      // 显式传了但清单里没有的 key，仍然照旧往抓包图回落（老行为不变）。
+      //
+      // ── 2026-09-29（第三改，人类裁决）：「战斗用大比例」⇒ 一图两档 ────────────────────
+      // 抓包立绘现在有两档预览（`scripts/roco/fetch-capture-art.mjs`）：
+      //   · `thumb/<pet_id>.png`  256px ≈ 45 KB —— 列表 / 详情头像 / 候选池 / 六槽（**默认**）；
+      //   · `battle/<pet_id>.png` 512px ≈ 149 KB —— **战斗页**（显式 `&size=battle`）。
+      // 为什么默认不给 512：一页 24 张的差别是 ~1.2 MB vs ~3.6 MB，列表页没有理由付这个钱。
+      // 回落链：要的那档没有 → 另一档 → 原件 →（非抓包精灵则）策展图 → 404。**不编、不借别的精灵的图**。
+      const wantFull=new URL(req.url,origin).searchParams.get('full')==='1';
+      const wantBattle=new URL(req.url,origin).searchParams.get('size')==='battle';
+      const explicitKey=key!=='';
+      if(byId&&variant==='default'&&(!explicitKey||!known.has(key))){
         try{
           const capRoot=join(REPO_ROOT,'data','roco','assets','capture-pets');
           const capMan=JSON.parse(readFileSync(join(capRoot,'manifest.json'),'utf8'));
           const hit=capMan?.entries?.[String(byId)];
-          const wantFull=new URL(req.url,origin).searchParams.get('full')==='1';
-          const rel=wantFull
-            ? (hit?.original_file?join('originals',String(hit.original_file)):null)
-            : (hit?.thumb_file?join('thumb',String(hit.thumb_file)):null);
-          const fallback=hit?.original_file?join('originals',String(hit.original_file)):null;
-          const filePath=rel?join(capRoot,rel):(fallback?join(capRoot,fallback):null);
+          const big=hit?.battle_file?join('battle',String(hit.battle_file)):null;
+          const small=hit?.thumb_file?join('thumb',String(hit.thumb_file)):null;
+          const original=hit?.original_file?join('originals',String(hit.original_file)):null;
+          const wanted=wantFull?original:(wantBattle?(big??small):(small??big));
+          const fallback=original&&original!==wanted?original:null;
+          const rel=wanted??fallback;
+          const filePath=rel?join(capRoot,rel):null;
           if(filePath&&existsSync(filePath)){
             const buf=readFileSync(filePath);
+            const name=String(rel).split('/')[0];
+            const variantOut=wantFull?'original':(name==='battle'?'battle':(name==='thumb'?'thumb':'original'));
             res.writeHead(200,{'Content-Type':'image/png','Cache-Control':'public, max-age=86400',
               'Content-Length':buf.length,
               'X-Content-Type-Options':'nosniff',
               'X-Roco-Sprite-Source':'capture-2026-09-27',
-              'X-Roco-Sprite-Variant':wantFull?'original':'thumb',
+              'X-Roco-Sprite-Variant':variantOut,
               'X-Roco-Sprite-Licence':'UNKNOWN/REFERENCE_ONLY'});
             return res.end(buf);
           }
-        }catch{ /* 没有这张抓包立绘：照旧走下面的 404，不编一张图出来 */ }
+        }catch{ /* 没有这张抓包立绘：落到下面的策展图/404，不编一张图出来 */ }
       }
+      // 抓包图拿不到（或调用方点名了别的 key）才回到策展那 48 槽：槽位 → asset_key。
+      if(!key&&byId){ const slot=slotOfPetId; if(slot!==null)key=keyOfSlot.get(slot)||''; }
+      if(!key&&byName)key=(man.find((r)=>r?.name===byName)||{}).asset_key||'';
       if(!key){ return json(res,404,{ok:false,error:'清单里没有这只精灵的立绘'}); }
       if(!known.has(key)||!['default','action'].includes(variant)){
         return json(res,400,{ok:false,error:'key 或 v 不合法'});
