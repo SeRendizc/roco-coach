@@ -47,8 +47,8 @@
   ],
   "totals": {
    "trajectories": 1752,
-   "passed": 1240,
-   "engine_refused": 22,
+   "passed": 1695,
+   "engine_refused": 241,
    "cases": 288,
    "worlds": 23
   },
@@ -65,8 +65,8 @@
     "note": "本机 Qwen3.5-4B-4bit + LoRA 适配器：真模型自己选工具（需网关）",
     "limit": 3,
     "total": 1752,
-    "passed": 1240,
-    "pass_rate": 0.7078,
+    "passed": 1695,
+    "pass_rate": 0.9675,
     "per_category": {
      "brief_explain": {
       "total": 180,
@@ -82,11 +82,11 @@
      },
      "roster_constraint": {
       "total": 216,
-      "passed": 0
+      "passed": 174
      },
      "rules_lookup": {
       "total": 648,
-      "passed": 352
+      "passed": 633
      },
      "silence": {
       "total": 60,
@@ -102,10 +102,10 @@
      }
     },
     "stopped": {
-     "complete": 1636,
-     "receipt-budget": 28,
-     "policy": 60,
-     "invalid-arguments": 28
+     "complete": 1502,
+     "receipt-budget": 108,
+     "invalid-arguments": 82,
+     "policy": 60
     }
    }
   }

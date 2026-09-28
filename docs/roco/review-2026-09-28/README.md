@@ -298,6 +298,63 @@
 不一致窗口数 **≤ 同 arm 自比的翻面数 + 余量**，或改比**汇总通过率 / 逐类分布**而不是逐窗口布尔。
 **不许**删断言、**不许**重新生成产物来对齐数字。
 
+#### B5-复核之二（task-11 续，2026-09-29）：**我上一版「噪声底」的结论也是错的 —— 真因是存档产物过期**
+
+上一节我写「同一 arm 两次运行 267 vs 283 ⇒ 翻面率 5.6% ⇒ 这条判据的标准不成立」。**那段里
+「噪声底」那一条是错的**，原文留在上面不删，这里改正：
+
+| 我上一版的读数 | 实测之后 |
+|---|---|
+| 「同一 arm `sft-v8` 两次运行差 16 条 ⇒ 噪声底 5.6%」 | **错**。把**当前代码**按同一 arm、同一批 288 窗口、同一个 v8 适配器**重跑一遍**，逐窗口与存档产物**逐条相同：0/288**。这条链是**确定性**的（贪心解码），不是抽样。那两份历史日志（267 / 283）里**都没有 identity 栏**，所以「哪一次跑在别的 harness 上」现在回溯不了 —— 这本身是个取证缺口 |
+| 「所以要给判据加噪声底」 | **不需要**。真因在下面 |
+
+**真因（决定性实验）**：把**生成器自己的代码路径**（`scripts/roco/build-agent-trajectories.mjs
+--arms local_4b`，`ROCO_TRAJ_WORLDS=1`）今天重跑同一批 288 个窗口：
+
+| 对比 | 不匹配窗口 |
+|---|---|
+| 存档的生成器产物 vs 影子回放 | **51 / 288** |
+| **今天重跑生成器路径** vs 影子回放 | **0 / 288** |
+| 存档的生成器产物 vs 今天重跑 | **51 / 288**（同一批 key） |
+
+两边总通过数都是 **283/288**。⇒ **判定器没有判松**（两条链共用 `checkTask`）、**影子回放的
+`passed` 是对的**，**那条断言本身没有问题** —— 它指的是 `tests/evals/agent-trajectories-model-v1.jsonl`
+**这份产物过期了**（跑在模型 harness/planner 某次行为变化之前）。
+
+**处置**：**用当前代码重新生成那份产物**（`ROCO_TRAJ_WORLDS=9 --arms local_4b`，与旧产物同形），
+断言 `assert.equal(mismatched.length, 0)` **一个字都不用改**、也不删不弱化。
+复验命令：
+```bash
+ROCO_TRAJ_WORLDS=9 node scripts/roco/build-agent-trajectories.mjs --arms local_4b --quiet \
+  --out tests/evals/agent-trajectories-model-v1.jsonl        # 重新生成（1752 条，≈25 min）
+node scripts/roco/agent-metrics.mjs                          # 派生产物：它记着源产物的 sha256
+node --test tests/evals/roco/model-trajectories.test.js      # 6/6 过
+```
+
+**做完之后的读数（2026-09-29）**：
+
+| 项 | 读数 |
+| --- | --- |
+| `tests/evals/roco/model-trajectories.test.js` | **6 tests / 6 pass / 0 fail**（那条转绿，**断言原文一个字未改**，只在测试里加了 11 行注释写清这次的失败模式） |
+| 重新生成的产物 | `worlds_per_task 9`、1752 条、`totals.passed 1695`；影子那 288 个窗口上 **283/288，与影子回放逐条相同** |
+| 归档旧产物 vs 影子回放 | 51 个窗口不一致（`git show 5eff44a:tests/evals/agent-trajectories-model-v1.jsonl`） |
+| 生成器路径今天重跑 vs 影子回放 | **0 个不一致**（`reports/roco/shadow-replay-fresh-generator-probe.jsonl`） |
+| 同一 arm 重跑 vs 存档影子产物 | **0/288 翻面** ⇒ 确定性，**没有**噪声底这回事 |
+| 派生产物 | `reports/roco/agent-metrics.json` 按仓库自己的脚本重算（它把源产物的 sha256 记在 `sources` 里，源一变就必须跟着变）—— 这一条是机械的、不是改判据 |
+
+**另外记一条口径缺口（本轮没改，因为它不在 task-11 的写域）**：`--policy-first` 是「第一步该不该调工具
+交给代码政策」的开关，**两份产物的 header 里都没有记这个字段**。实测该产物 `trace[].chosen_by`
+全是 `local_4b`、没有一条 `policy` ⇒ 那一轮是**关着**跑的；而政策在 **918/1752** 个窗口上「有意见」，
+其中 **404 个**正好落在「零调用判失败」的 512 条里。⇒ 建议在生成器的产物 header 里补一个
+`policy_first` 字段（开关与口径一起存档），否则以后还会有人拿两个口径的产物互比。
+
+复验命令：
+
+```bash
+node scripts/roco/shadow-replay-judge-audit.mjs                     # 一条命令重出 A~F 全部读数
+node --test tests/evals/roco/model-trajectories.test.js             # 那条转绿、其余 5 条不变红
+```
+
 ### B6 几条"记在案但没做"的
 
 - `src/coach/team-candidates.mjs` 里三处 `?? FROZEN_PATHS.roster48` 是**不可达的兜底**

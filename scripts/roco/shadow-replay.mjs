@@ -86,6 +86,11 @@ async function pickFreePort() {
 // `gatewayAsk` 的实现见 `local-model-ask.mjs`（上面已重新导出）。
 
 /** 跑一条任务：同一个世界、同一个判定器，只换「谁在选工具」。 */
+//: 2026-09-29（task-11）：生成器有 `--policy-first`（默认关），影子回放**没有这个开关** ——
+//: 于是「第一步该不该调工具交给谁」这个变量在两份产物之间根本对不上、还看不出来。
+//: 现在两边同名同默认（默认关）；开关由 `main()` 从命令行读一次写在这里。
+let POLICY_FIRST = false;
+
 export async function replayTask({task, world, state, authority, arm, ask, client}) {
   const input = runInput(task, world, state);
   let callIndex = 0;
@@ -126,7 +131,10 @@ export async function replayTask({task, world, state, authority, arm, ask, clien
         ? localAgentPlanner(task, input.hints, {ask, system: LOCAL_TOOL_SYSTEM})
         : localModelPlanner(task, input.hints, {ask});
   const started = Date.now();
-  const run = await runArm({task, arm, input, planner, limit: armLimit('baseline')});
+  // 2026-09-29（task-11）：这里原来写死 `armLimit('baseline')` —— 生成器那边传的是
+  // `armLimit(arm)`。今天两者的值恰好都是 3（两个 arm 都没登记 limit），所以**行为没差**；
+  // 但写死一个别的 arm 的名字迟早会漂，而漂了之后两条链的对拍就再也说不清。
+  const run = await runArm({task, arm, input, planner, limit: armLimit(arm), policyFirst: POLICY_FIRST});
   const reply = finalAnswer(task, {trace: run.trace, stopped: run.stopped, hints: input.hints});
   const engineRefused = refusalsIn(run.trace).length > 0;
   const check = checkTask(task, {toolCalls: run.trace, reply, engineRefused});
@@ -300,10 +308,19 @@ export function identityMismatch(filename, identity) {
 
 async function main(argv) {
   const arg = (name, fallback = null) => {
+    // 2026-09-29（task-11 实测踩到）：只认 `--flag value` 的话，传 `--flag=value` 会**静默**用默认值 ——
+    // 我传 `--repeat=2` 就跑了一遍，`self_consistency` 静默为 null，差一点把它当成「没法量」。
+    // 两种写法都认。
+    const eq = argv.find((a) => a.startsWith(`${name}=`));
+    if (eq) return eq.slice(name.length + 1);
     const index = argv.indexOf(name);
     return index >= 0 ? argv[index + 1] : fallback;
   };
   const arm = arg('--arm', 'rule');
+  // 与生成器的 `--policy-first` 同名同默认（默认关）：第一步「该不该调工具」交给代码政策。
+  // 不把它做成显式开关，两份产物之间这个变量就永远对不上（2026-09-29 task-11 实测）。
+  POLICY_FIRST = argv.includes('--policy-first');
+  const repeat = Number(arg('--repeat', '1')) || 1;   // 同一把尺子跑几遍（量噪声底用）
   const limit = Number(arg('--limit', '0')) || 0;
   const gateway = arg('--gateway', `http://127.0.0.1:${process.env.ROCO_LOCAL_PORT || 8766}`);
   const write = !argv.includes('--check');
@@ -337,19 +354,48 @@ async function main(argv) {
   const port = await pickFreePort();
   const client = new RocoClient({port, rulesetId: RULESET_ID, timeoutMs: 20000, startTimeoutMs: 30000});
   const rows = [];
+  // 2026-09-29（task-11）：同一把尺子**跑几遍**，逐窗口比出「噪声底」。
+  // 为什么要它：`tests/evals/roco/model-trajectories.test.js` 那条判据拿「两条独立链的
+  // 逐窗口结果必须逐条相同」当标准，而模型抽样**本来就会翻面** —— 噪声底是这个标准唯一
+  // 站得住的参照物。第 2 遍起的结果进 `self_consistency`，不进 `rows`（`rows` 只留第 1 遍）。
+  const repeatRuns = [];
   try {
     await client.startService();
-    for (const task of tasks) {
-      const world = worldsFor(task, WORLDS_PER_TASK)[0];
-      if (!world) continue;
-      const base = worldState(world);
-      const state = {...base, source_conflict: sourceConflictFor(world, base)};
-      rows.push(await replayTask({task, world, state, authority: versionAuthority(world, state), arm, ask, client}));
+    for (let pass = 0; pass < repeat; pass += 1) {
+      const passRows = [];
+      for (const task of tasks) {
+        const world = worldsFor(task, WORLDS_PER_TASK)[0];
+        if (!world) continue;
+        const base = worldState(world);
+        const state = {...base, source_conflict: sourceConflictFor(world, base)};
+        passRows.push(await replayTask({task, world, state, authority: versionAuthority(world, state), arm, ask, client}));
+      }
+      repeatRuns.push(passRows);
+      if (pass === 0) rows.push(...passRows);
     }
   } finally {
     resetRocoTools();
     await client.stopService().catch(() => {});
   }
+  const selfConsistency = repeatRuns.length > 1
+    ? (() => {
+      const key = (row) => `${row.case_id}@${row.world}`;
+      const base = new Map(repeatRuns[0].map((row) => [key(row), row]));
+      const flipped = [];
+      for (const other of repeatRuns.slice(1)) {
+        for (const row of other) {
+          const first = base.get(key(row));
+          if (first && first.passed !== row.passed) {
+            flipped.push({key: key(row), pass0: first.passed, passN: row.passed});
+          }
+        }
+      }
+      return {runs: repeatRuns.length, of: repeatRuns[0].length, flipped_windows: flipped.length,
+        flipped_examples: flipped.slice(0, 5),
+        note: '同一 arm、同一批窗口、同一把尺子，连跑 ' + repeatRuns.length
+          + ' 遍之间**逐窗口翻面**的条数 —— 这就是「两条独立运行必须逐条相同」那个标准的噪声底。'};
+    })()
+    : null;
 
   const identity = arm === 'rule'
     ? {role: 'rule-arm', note: '规则臂不经过模型，没有模型身份'}
@@ -373,13 +419,18 @@ async function main(argv) {
     ? OUT.replace(/\.json$/, `-slice${limit}${arm === 'rule' ? '' : `-${arm}`}.json`)
     : OUT.replace(/\.json$/, arm === 'rule' ? '.json' : `-${arm}.json`));
   const report = buildShadowReport({arm, gateway, rows, compareWith, identity, outPath: write ? path : null});
+  if (selfConsistency) {
+    report.self_consistency = selfConsistency;
+    report.policy_first = POLICY_FIRST;
+  }
   if (write) {
     mkdirSync(dirname(path), {recursive: true});
     writeFileSync(path, `${JSON.stringify(report, null, 1)}\n`);
     report.written_to = path;
   }
   process.stdout.write(`${JSON.stringify({arm, summary: report.summary,
-    comparison: report.comparison || null, written_to: report.written_to || null}, null, 1)}\n`);
+    comparison: report.comparison || null, written_to: report.written_to || null,
+    policy_first: POLICY_FIRST, self_consistency: report.self_consistency || null}, null, 1)}\n`);
   return 0;
 }
 

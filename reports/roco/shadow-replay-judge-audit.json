@@ -1,0 +1,114 @@
+{
+ "schema_version": 1,
+ "artifact": "shadow-replay-judge-audit",
+ "generated_at": "2026-09-28T18:45:45.122Z",
+ "question": "影子回放的 passed 是不是判得太松？132 条零调用为什么能过？",
+ "sources": {
+  "shadow": "reports/roco/shadow-replay-sft-v8.json",
+  "generator": "tests/evals/agent-trajectories-model-v1.jsonl"
+ },
+ "A_same_judge": {
+  "shadow": "scripts/roco/shadow-replay.mjs:132 → checkTask(task, {toolCalls: run.trace, reply, engineRefused})",
+  "generator": "scripts/roco/build-agent-trajectories.mjs:258 → checkTask(task, {...})",
+  "note": "两条链调的是 `agent-trajectories.mjs` 里**同一个** checkTask（影子回放 import 的就是它）。",
+  "arms": {
+   "shadow": "sft-v8",
+   "shadow_rows": [
+    "sft-v8"
+   ],
+   "generator": [
+    "local_4b"
+   ]
+  },
+  "limits": {
+   "baseline": 3,
+   "local_4b": 3
+  },
+  "identities_equal": true,
+  "prompt_digest_equal": true,
+  "generator_declares_nondeterministic": true
+ },
+ "B_zero_call_passes": {
+  "count": 132,
+  "of": 288,
+  "expect_tool_value_distribution": {
+   "null": 132
+  },
+  "loose_ones": [],
+  "rows_requiring_a_tool": 96,
+  "requiring_tool_but_passed_with_no_call": 0,
+  "verdict": "这 132 条的 expect.tool **全部是 null**（本窗口不要求调用）⇒ 零调用判过是对的，不是判松。288 条里要求调用的有 96 条，「零调用却过」的 0 条。"
+ },
+ "C_mismatch_audit": {
+  "unmatched_windows": 0,
+  "mismatched_windows": 0,
+  "shapes": {},
+  "shadow_loose_among_mismatch": 0,
+  "examples": [],
+  "verdict": "全部 0 个不匹配窗口里，**影子那一侧都真的满足了本窗口的工具期望**（调了该调的工具、参数也对）⇒ 它的 `passed:true` 不是判松，是**这一次它真的做对了**。"
+ },
+ "D_noise_floor": {
+  "rerun_measurement": {
+   "artifact": "reports/roco/shadow-replay-sft-v8-aligned.json",
+   "runs": 2,
+   "of": 288,
+   "flipped_windows": 0,
+   "flipped_examples": [],
+   "note": "当前代码、同一 arm `sft-v8`、同一批 288 个窗口、同一个 v8 适配器，另跑一遍与存档产物逐窗口比。"
+  },
+  "historical_logs": {
+   "run_2026_09_28": {
+    "arm": "sft-v8",
+    "passed": 267,
+    "of": 288,
+    "pass_rate": 0.9271
+   },
+   "run_round96": {
+    "arm": "sft-v8",
+    "passed": 283,
+    "of": 288,
+    "pass_rate": 0.9826
+   }
+  },
+  "correction_of_my_own_first_reading": "我第一版把「两份历史日志 267 vs 283」当成噪声底（16 条 / 5.6%），**那是错的**：把当前代码重跑一遍，逐窗口翻面 **0/288** —— 这条链是确定性的（贪心解码），不是抽样噪声。267 那一次多半跑在另一个 harness/提示上（两份日志里都**没有** identity 栏，所以现在无法回溯是哪一版）——这恰恰说明「日志只留汇总、不留身份」是个取证缺口。",
+  "verdict": "重跑翻面 **0/288** ⇒ 「两条独立运行结果会随机翻面」这个前提**不成立**，不匹配窗口不是噪声，必须找出**系统性**原因。"
+ },
+ "E_policy_first": {
+  "question": "生成器产物 `agent-trajectories-model-v1.jsonl` 是不是在 `--policy-first` 生效下跑出来的？",
+  "chosen_by_distribution": {
+   "local_4b": 1044
+  },
+  "policy_entries": 0,
+  "reading": "**没有生效**：整份产物 `trace[].chosen_by` 全是 `local_4b`（模型自己选的），**没有任何一条是 `policy`**。而 `policyFirstChoice` 一旦命中就会把 `chosen_by` 写成 `policy`（`agent-trajectories.mjs:1027-1029`）⇒ 这份产物跑的时候 `--policy-first` 是关的。",
+  "generator_scale": {
+   "rows": 1752,
+   "tasks": 288,
+   "worlds_per_task": 9
+  },
+  "zero_call_failures_in_generator": 42,
+  "tool_violation_failures": 57,
+  "note": "2026-09-28 的注释说「288 个窗口单世界样本：判挂 56 条，56 条全部是零调用」——上面这两个数可以拿去核对它（注意本产物每条任务有 9 个世界，所以要按单世界口径数）。"
+ },
+ "F_stale_artifact": {
+  "archived_commit": "5eff44a",
+  "before_regeneration": {
+   "artifact_vs_shadow": 51,
+   "of": 288
+  },
+  "after_regeneration": {
+   "artifact_vs_shadow": 0,
+   "of": 288,
+   "artifact_rows": 1752,
+   "artifact_passed": 283,
+   "artifact_total_passed": 1695
+  },
+  "fresh_probe": {
+   "artifact": "reports/roco/shadow-replay-fresh-generator-probe.jsonl",
+   "rows": 288,
+   "fresh_vs_shadow": 0,
+   "fresh_passed": 283
+  },
+  "verdict": "生成器**自己的代码路径**今天重跑同一批窗口 ⇒ 与影子回放**逐条相同**；差异全部落在「归档的旧产物」与「今天重跑」之间 ⇒ **是那份产物过期，不是判定器松**。"
+ },
+ "conclusion": "**真因是归档的生成器产物过期，不是判定器判松。** 归档那一版（`git show 5eff44a:…`）与影子回放差 51 个窗口；把生成器**自己的代码路径**今天重跑同一批窗口，与影子回放差 0 个窗口；用当前代码重新生成整份产物之后，差的窗口数是 **0**（283/288 与影子一致）。⇒ `checkTask` 两条链共用、没有判松；影子回放的 `passed` 也是对的；那条断言 `mismatched.length === 0` **一个字都没改**，它绿是因为产物被重新生成了。"
+}
