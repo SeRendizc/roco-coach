@@ -528,3 +528,75 @@ test('⑬ 点完**立刻**就是焦点（不许滞后一拍）：状态里同步
   provider.notePicked({instanceId: '', scene: 'team-slot'});
   assert.equal(provider.getContext().focusInstanceId, 'own-0007');
 });
+
+test('⑭ 兜底不许把**没过守卫的模型正文**漏给玩家（值守卫拦下的东西不许从降级路出去）', async () => {
+  // 由来（Lead 在已提交状态里抓到的真回归，玩家可见）：`executeCoach` 的守卫降级原来写的是
+  // `text: data.localText ?? data.text` —— 服务端**没给 `localText`** 时就把模型那段
+  // 没过事实守卫的正文原样端出去，回执还标着 `local-fallback`（看着像"本机算的"）。
+  // 打桩实测：`{provider:'deepseek',text:'造成99999伤害，必胜'}` ⇒ 玩家看到「99999」。
+  //
+  // 这一份钉的是**同一件事在 `requestCoach` 那一层**：喂一段过不了守卫的模型正文、
+  // **且不给 `localText`** ⇒ 正文必须来自确定性那一份（本机 runCoach），绝不含假数值；
+  // 反证：把兜底改回 `data.localText ?? data.text` ⇒ 本用例立刻红（响度实测见交付）。
+  const {createGame} = await import('../src/game/engine.js');
+  const {newProfile} = await import('../src/game/progression.js');
+  const {freshMemory} = await import('../src/coach/memory.js');
+  const payload = {message: '这回合怎么打', role: 'auto',
+    context: buildContext(createGame(17), newProfile(), 'fox'), memory: freshMemory(), stateToken: 42};
+  const original = globalThis.fetch;
+  const stub = (coach) => {
+    globalThis.fetch = async (url) => ({ok: true, json: async () => (String(url).includes('bootstrap')
+      ? {csrf: 'test-only'} : coach)});
+  };
+  try {
+    // ① 模型正文没过守卫、且**没有** localText ⇒ 不许出现那段原文里的假数值
+    stub({provider: 'deepseek', text: '造成99999伤害，必胜', evidence: ['实际伤害38'], memory: freshMemory()});
+    const {requestCoach} = await import('../src/coach/client.js');
+    const a = await requestCoach(payload);
+    assert.equal(a.provider, 'local-fallback', '没过守卫必须如实标成本机兜底');
+    assert.equal(a.stateToken, 42, '状态令牌照旧带回来');
+    assert.ok(!String(a.text).includes('99999'), `守卫拦下的假数值不许漏出去：${a.text}`);
+    assert.ok(!String(a.text).includes('必胜'), '模型那段原文一个字都不许端出去');
+    assert.ok(String(a.text).trim().length > 0, '兜底也要给得出一句话');
+    // ② 服务端**给**了 localText ⇒ 用服务端算好的那一份（那是引擎/工具的确定性正文）
+    stub({provider: 'deepseek', text: '造成99999伤害，必胜', localText: '这一回合优先考虑「火花」。',
+      evidence: [], memory: freshMemory()});
+    const b = await requestCoach({...payload, message: '这回合怎么打（第二次）'});
+    assert.equal(b.provider, 'local-fallback');
+    assert.equal(b.text, '这一回合优先考虑「火花」。', '有 localText 就用它');
+    assert.equal(b.deterministicFrom, 'server', '要能看出这一份是从哪儿来的');
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+// ── task-12（丙，2026-09-29）：产品页（roco.html）必须用**同一份**焦点实现与同一份资料通路 ──
+//
+// 背景（art-finish D①-a 的真相比原描述严重）：工作台页上还有**第二个**小芽实现
+//（`#companion-card`，接线在 `roco.js`）。它当时：没密钥时 `/api/coach` **0 次**、
+// 答「我在。…请配置密钥」、没有焦点。Lead 拍板走"丙"——**不新起第三套**，只把**共享模块**接进去。
+test('⑮ 丙：产品页的焦点只用共享实现；断线档不许再退回"请配置密钥"', () => {
+  const roco = read('src/client/roco.js');
+  const html = read('src/client/roco.html');
+  // ① 焦点**只有一份实现**：import `xiaoya.js` 那两个导出，不许在本文件里重写一份。
+  assert.match(roco, /import \{createFocusProvider, focusFromClick\} from '\.\/xiaoya\.js'/,
+    'roco.js 要 import 共享的焦点 provider/解析函数');
+  assert.doesNotMatch(roco, /function focusFromClick\s*\(/, '解析函数不许有第二份');
+  assert.doesNotMatch(roco, /function createFocusProvider\s*\(/, 'provider 不许有第二份');
+  // ② 焦点要真的进上下文（否则"我看的那只"还是传不进去）
+  assert.match(roco, /context\.focusDetail = \{\.\.\.focus\.snapshot/,
+    '聚焦对象必须挂进 /api/coach 的上下文');
+  // ③ 落点：卡片里那一行（玩家看得见"正在看谁"）
+  assert.match(html, /id="companion-focus"/, '小芽面板里要有焦点那一行');
+  // ④ 断线档：不许再有"没配密钥就直接 return 离线模板"那一支（P0-01 的第二份实现）
+  // ⚠ 只看**代码行**（`\n\s*if`）：旧写法在文件里以注释留档（"旧写法原文留档，别再改回来"），
+  //   那一段当然会被同一个正则命中 —— 判据不能把留档当成代码。
+  assert.doesNotMatch(roco, /\n\s*if \(!configured\) \{/,
+    '没密钥也要先走服务端；离线模板只当请求失败后的兜底');
+  assert.match(roco, /if \(!configured\) document\.body\.dataset\.rocoCompanionBoundary/,
+    '这一档只记一个数据钩子，不再直接改屏');
+  // ⑤ 共享模块的入口要能被 import（`xiaoya.js` 必须导出这两个）
+  const xiaoya = read('src/client/xiaoya.js');
+  assert.match(xiaoya, /export function createFocusProvider/, '导出 provider');
+  assert.match(xiaoya, /export function focusFromClick/, '导出解析函数');
+});

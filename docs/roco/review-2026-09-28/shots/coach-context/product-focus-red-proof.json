@@ -1,0 +1,81 @@
+{
+  "base": "http://127.0.0.1:8765",
+  "mode": "red-proof",
+  "pid": 357,
+  "startedAt": "2026-09-28T18:20:31.884Z",
+  "checks": [
+    {
+      "name": "① 工作台第 1 格装着一个个体的 id（`data-tw-slot-instance`）",
+      "ok": true,
+      "detail": "第 1 格 = 迪莫（own-0004）"
+    },
+    {
+      "name": "② 问一句之后：屏幕上那句答复出的是**这一格那一只**的性格（与盒子详情页逐字一致）",
+      "ok": false,
+      "detail": "期望 性格「专注」（迪莫/own-0004）｜屏幕：「这条我没依据，换个说法或点名一只精灵。依据：你选的六只 · 你的名单」"
+    },
+    {
+      "name": "③ 这一问真的走了服务端（网络面板里有 `/api/coach`）",
+      "ok": true,
+      "detail": "POST /api/coach → 200"
+    },
+    {
+      "name": "④ 屏幕上没有\"请看别的/配置密钥\"这类绕开（没接模型也要答真资料）",
+      "ok": true,
+      "detail": "这条我没依据，换个说法或点名一只精灵。依据：你选的六只 · 你的名单"
+    },
+    {
+      "name": "⑤b `#model-chip` 与判据 `live-model-status` 同尺子自查（明说未连接 + 连接入口 + 高度 + 两件事分开）",
+      "ok": true,
+      "detail": "「资料查询：还没拉起来（第一次提问会拉起它）；云端模型：未连接 —— 不影响上面的资料查询」hook=offline h=26px tools=unknown"
+    },
+    {
+      "name": "⑤ 浏览器控制台没有报错",
+      "ok": true,
+      "detail": "console=0 pageerror=0"
+    }
+  ],
+  "shots": [
+    "docs/roco/review-2026-09-28/shots/coach-context/product-focus-red-proof-after-slot-click.png",
+    "docs/roco/review-2026-09-28/shots/coach-context/product-focus-red-proof-answer.png"
+  ],
+  "filled": "ok",
+  "expected": {
+    "instance": "own-0004",
+    "name": "迪莫",
+    "nature": "专注"
+  },
+  "opened": {
+    "impl": null,
+    "text": "",
+    "focusHint": null,
+    "hookCount": 1
+  },
+  "reply": {
+    "impl": "companion-card",
+    "text": "这条我没依据，换个说法或点名一只精灵。依据：你选的六只 · 你的名单",
+    "focusHint": null,
+    "hookCount": 1
+  },
+  "coachCalls": [
+    {
+      "url": "http://127.0.0.1:8765/api/coach",
+      "id": "381.521",
+      "status": 200
+    }
+  ],
+  "modelChip": {
+    "text": "资料查询：还没拉起来（第一次提问会拉起它）；云端模型：未连接 —— 不影响上面的资料查询",
+    "hook": "offline",
+    "href": "connect.html",
+    "h": 26,
+    "tools": "unknown",
+    "configured": "no"
+  },
+  "consoleErrors": [],
+  "pageErrors": [],
+  "verdict": "fail",
+  "failed": [
+    "② 问一句之后：屏幕上那句答复出的是**这一格那一只**的性格（与盒子详情页逐字一致）"
+  ]
+}

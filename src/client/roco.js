@@ -58,6 +58,10 @@ import {STANDARD_PVP_MODE_ID} from '../game/battle-modes.js';
 // `/api/roco/workshop`（RC-301 合同 → RC-302 七维缺口 → RC-303 候选 → RC-304 环境先验），
 // 页面层不重算、不另写第二套模板。挂载点见 roco.html 的 `#team-workshop`。
 import {mountTeamWorkshop} from './team-workshop.js';
+// task-12（丙）：**当前聚焦对象**这一层只有一份实现 —— `xiaoya.js` 导出的
+// `createFocusProvider()` / `focusFromClick()`（与 DOM 无关的纯模块，box 页那套小芽用的也是它）。
+// 这里只 import 来接线，**不**在本文件里重写焦点逻辑（重写就是第二份事实，迟早漂）。
+import {createFocusProvider, focusFromClick} from './xiaoya.js';
 import {mountStalePageBanner} from './stale-page.js';
 
 // ── 页面状态 ────────────────────────────────────────────────────────────────
@@ -2779,11 +2783,33 @@ function renderModelChip() {
   const chip = $('model-chip');
   if (!chip) return;
   const configured = session?.configured === true;
-  chip.textContent = configured ? '模型：已连接' : '模型：未连接（只给规则事实）';
+  // ── 丙③（task-12）：这一句原来写的是「模型：未连接（**只给规则事实**）」——
+  //    而"只给规则事实"不是"没连模型"的后果，是**另一件事**（资料查询在不在）。
+  //    两件事写在一句里，玩家读到的意思就是"没配密钥 ⇒ 什么都查不了"，而事实恰恰相反：
+  //    没密钥时服务端照样答得出规则/图鉴/相性表（`provider:'local'` 的确定性执行）。
+  //    现在与 `xiaoya.js` **同一口径**：资料查询 / 云端模型，各说各的后果，两行写在一处。
+  //    ⚠ 判据 `live-model-status` 读 `#model-chip` 与 `data-roco-model` ⇒ **改钉不删**（见 tests/roco-page-ux.test.js）。
+  const cap = session?.capabilities ?? null;
+  const tools = cap?.toolsReady === true ? 'ok' : cap?.toolsReady === false ? 'down' : 'unknown';
+  const toolsLine = tools === 'ok'
+    ? `资料查询：可用（本机规则服务已连${cap?.rulesetId ? `，规则集 ${cap.rulesetId}` : ''}）`
+    : tools === 'down'
+      ? `资料查询：不可用 —— 缺的是「${(cap?.missing ?? [])[0] ?? '本机规则服务'}」`
+      : '资料查询：还没拉起来（第一次提问会拉起它）';
+  // ⚠ 措辞里必须保留「未连接」这三个字：判据 `live-model-status`（`scripts/roco/browser-live-acceptance.mjs`）
+  //   要求「没连模型时**明说**」（`/未连接|没连|未连/`）+ `data-roco-model=offline` + 有连接入口 + 高度 ≥24。
+  //   我原来写成「没有连」——**不匹配**那条正则（`没连` 中间不许有"有"），会让那条判据红。
+  //   口径不变、只把词换回它认的那个：**两件事分开说**这件事是新的，「明说未连接」这件事一个字没丢。
+  const modelLine = configured
+    ? '云端模型：已连接 —— 自由发挥的文字由它生成'
+    : '云端模型：未连接 —— 不影响上面的资料查询';
+  chip.textContent = `${toolsLine}；${modelLine}`;
   chip.dataset.rocoModel = configured ? 'connected' : 'offline';
+  chip.dataset.rocoTools = tools;
   chip.title = configured
-    ? '小芽的问题会交给模型回答，并用本局只读证据核对；模型不可用时自动回落到规则事实。'
-    : '现在没有连接模型：小芽只能给规则事实与主动提示。点这里去连接模型，之后就能自由问答。';
+    ? '资料查询由本机规则服务提供（与密钥无关）；自由发挥的文字由云端模型生成，模型不可用时自动回落到引擎结论。'
+    : '两件事分开看：资料查询（规则/图鉴/相性表）由本机规则服务提供，**不需要密钥**；'
+      + '没配密钥只影响"自由发挥的文字"。点这里去连接模型。';
   document.body.dataset.rocoModelConfigured = configured ? 'yes' : 'no';
 }
 
@@ -4067,6 +4093,64 @@ function coachLineup() {
  * 也不拿一份别的存档去凑一个"有数字的答案"。等哪天有**真正拥有这份存档**的页面要接，再显式打开。
  */
 
+/**
+ * 这一页的**焦点 provider**（单例）：`xiaoya.js` 那一份共享实现，只在这里挂一次。
+ *
+ * 为什么放在这一层：工作台是 shadow DOM 模块，槽位钩子（`data-tw-slot-instance`）只有页面能看见；
+ * 而"我在看谁"这一层必须是**一份**实现（box 页与这里共用 `xiaoya.js` 的 provider/解析函数）。
+ */
+const rocoFocusProvider = createFocusProvider({});
+let rocoFocusWired = false;
+let rocoFocus = {instanceId: null, scene: null, source: null, name: null, snapshot: null, failure: null};
+
+/** 点了槽位/候选卡 ⇒ 焦点**立刻**切过去，并把那一行画出来（与 box 页同一套口径）。 */
+function wireRocoFocus() {
+  if (rocoFocusWired) return;
+  rocoFocusWired = true;
+  // ⚠ 必须传**事件**（不是 `event.target`）：工作台在 shadow DOM 里，target 会被重定向成宿主元素。
+  document.addEventListener('click', (event) => {
+    const picked = focusFromClick(event);
+    if (picked) rocoFocusProvider.notePicked(picked);
+  }, true);
+  rocoFocusProvider.subscribeContextChanged((context) => paintFocusLine(context));
+  paintFocusLine(rocoFocusProvider.getContext());
+}
+
+/** 焦点那一行：**如实**说在看的这一只（读不到就说读不到；最近看过就写"最近看过"）。 */
+function paintFocusLine(context = null) {
+  const el = $('companion-focus');
+  if (!el) return;
+  const snapshot = context?.visibleSnapshot ?? rocoFocus.snapshot ?? null;
+  const id = context?.focusInstanceId ?? null;
+  const live = context?.focusLive !== false;
+  if (id) {
+    const name = snapshot?.name ?? context?.focusName ?? id;
+    const bits = [name];
+    if (snapshot?.nature) bits.push(`性格 ${snapshot.nature}`);
+    if (snapshot?.skills?.length) bits.push(`${snapshot.skills.length} 个技能`);
+    el.textContent = `${live ? '正在看' : '最近看过'}：${bits.join(' · ')}`;
+    el.dataset.xyFocus = String(snapshot?.instance_id ?? id);
+    el.dataset.xyFocusLive = live ? 'yes' : 'no';
+  } else {
+    el.textContent = '没在看具体的某一只 —— 在下面点一格，我就知道你在看谁。';
+    el.dataset.xyFocus = '';
+    el.dataset.xyFocusLive = 'no';
+  }
+}
+
+/**
+ * 给小芽用的**焦点**：现算一次（点过槽位就用槽位的个体 id），把详情快照取回来。
+ * 取不到就 `snapshot: null` —— 由 `focusDetail` 那一层决定要不要带，绝不拿别的数据顶。
+ */
+async function focusForCompanion() {
+  wireRocoFocus();
+  try {
+    rocoFocus = await rocoFocusProvider.resolve();
+    paintFocusLine(rocoFocusProvider.getContext());
+  } catch { /* 焦点这一层永远不许把问话打断：取不到就当没有焦点 */ }
+  return rocoFocus;
+}
+
 function coachCampContext() {
   const rows = (state.pool.rows?.length ? state.pool.rows : state.roster).slice(0, 12);
   const lineup = coachLineup();
@@ -4280,20 +4364,17 @@ async function sayOnce(message) {
   delete document.body.dataset.rocoCompanionRoute;
   renderMemory();
   // ── 真 Agent（2026-09-22 人类 P0）：用户主动问就路由到 `/api/coach` ───────────────
-  // 离线模板是**立刻**给的兜底（不让玩家对着空气等），但只要模型可用，紧接着就用
-  // 真回答覆盖它，并把来源写进钩子（`data-roco-companion-source=model`）。
-  // 没有模型时**明说边界**，不装成自由聊天 —— 这正是用户点名的那条冲突。
-  if (!configured) {
-    $('say-reply').textContent = `${reply}`
-      + '（现在没接模型：我只能给规则事实与主动提示。想自由问答——规则、阵容、战术、复盘——'
-      + '请点右上角「小芽 → 设置 → 连接模型」配置密钥；配置后这里的每个问题都会走模型 + 只读证据。）';
-    document.body.dataset.rocoCompanionBoundary = 'no-model';
-    syncCompanionBodyVisibility();
-    // 2026-09-25：这条分支以前**在滚到底那行之前就 return**，于是长回复停在开头、尾巴看不见
-    //（人类投诉「消息也显示不完」的真因之一）。
-    sayScrollToBottom();
-    return {register, reason, reply, source: 'offline'};
-  }
+  // 离线模板是**立刻**给的兜底（不让玩家对着空气等），紧接着用服务端那一份真回答覆盖它。
+  //
+  // ⚠ 2026-09-29 **改钉**（Codex P0-01 / task-7，Lead 拍板走"丙"）。旧写法（原文留档，别再改回来）：
+  //     if (!configured) { $('say-reply').textContent = reply + '（现在没接模型：我只能给规则事实…请…配置密钥…）';
+  //       document.body.dataset.rocoCompanionBoundary = 'no-model'; …; return {…, source: 'offline'}; }
+  //   它把「**没配模型密钥**」与「**游戏资料不可用**」写成了同一件事 —— 而后者才是玩家真正会撞上的墙：
+  //   事实上没有密钥时**服务端照样查得到**规则/图鉴/相性表（`provider:'local'` 的确定性执行，
+  //   0 次云端调用）。于是产品页上问「火系克制什么属性？」只会拿到「请配置密钥」——
+  //   真机实测（清档、无密钥）：**`/api/coach` 一次都没发**，而 box 页那套小芽同一句话答的是真资料。
+  //   现在：**只有服务端这条请求真的失败时**才退回离线模板，并把原因如实写进 `fallbackReason`。
+  if (!configured) document.body.dataset.rocoCompanionBoundary = 'no-model-credential';
   try {
     // 打六宠对局时把**公开战况**与**引擎本回合的规划**一起送过去
     // （各自拿不到就不加那个字段：营地/三宠那两条老路一字不变）。
@@ -4302,6 +4383,11 @@ async function sayOnce(message) {
     const context = coachCampContext();
     if (rocoBattle) context.roco_battle = rocoBattle;
     if (rocoPlan) context.roco_plan = rocoPlan;
+    // 丙①（task-12）：**当前聚焦对象**走 `xiaoya.js` 那一份**共享**实现，这里只做接线
+    //（不许在本文件里再写一份焦点逻辑）。取到就把那一份培养快照挂进上下文，
+    // 于是「我在工作台点开哪一只」= 小芽嘴里的那一只（与盒子详情页同一份取值）。
+    const focus = await focusForCompanion();
+    if (focus?.snapshot) context.focusDetail = {...focus.snapshot, live: focus.live !== false};
     const data = await api('/api/coach', {
       message,
       role: 'companion',
@@ -4535,6 +4621,9 @@ async function askXiaoya(message) {
   const context = coachCampContext();
   const rocoBattle = coachRocoBattle();
   if (rocoBattle) context.roco_battle = rocoBattle;
+  // 与 `sayOnce()` 同一条口径：聚焦对象走共享 provider，不在这里另写一份。
+  const focus = await focusForCompanion();
+  if (focus?.snapshot) context.focusDetail = {...focus.snapshot, live: focus.live !== false};
   const data = await api('/api/coach', {
     message,
     role: 'companion',
@@ -4800,6 +4889,9 @@ async function boot() {
   renderModelChip();     // 会话到手后**按真实状态**落一次（首次渲染早于 bootstrap → 文案是旧的）
   applyOnboard();
   mountWorkshop();
+  // task-12 丙①：焦点接线（共享 provider）在**开局之前**就位 —— 玩家点第一格时那一行就得变，
+  // 不能等第一次提问才建（那正是 box 页踩过的"滞后一拍"）。
+  wireRocoFocus();
   updateStandardPvpBar();
   document.body.dataset.rocoReady = 'yes';
 }

@@ -56,6 +56,15 @@
     </details>
     <!-- 人类 2026-09-23（第三次要求）：这几条「工坊 / 候选规则 / 匹配前对手未知」**整块删掉**，
          不再渲染到任何地方；口径本身仍在规则配置与台账里（`state.mode` / body dataset 照旧写）。 -->
+    <!-- 焦点那一行（task-12 丙①）：**与 box 页那套小芽同一口径** —— 工作台上点第 N 格，
+         这里就说"正在看：<名字>"，并且 `data-xy-focus` 立刻是那一格的个体 id。
+         焦点逻辑只有一份实现（`xiaoya.js` 的 createFocusProvider/focusFromClick），这里只是落点。 -->
+    <!-- 样式就近写（`roco.css` 不在本任务写域）：一行、小字、只在有内容时占位。 -->
+    <style>
+     .companion-focus{font-size:12.5px;line-height:1.5;color:#9caebe;padding:4px 2px 6px;
+      border-bottom:1px solid rgba(255,255,255,.08);overflow-wrap:anywhere}
+    </style>
+    <div class="companion-focus" id="companion-focus" role="status">没在看具体的某一只 —— 在下面点一格，我就知道你在看谁。</div>
     <div class="companion-body" id="companion-body">
      <p id="companion-line" class="companion-line" hidden></p>
      <div id="say-reply" class="reply" hidden></div>

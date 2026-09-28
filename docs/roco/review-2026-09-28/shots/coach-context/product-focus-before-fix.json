@@ -1,0 +1,64 @@
+{
+  "base": "http://127.0.0.1:8765",
+  "mode": "normal",
+  "pid": 97764,
+  "startedAt": "2026-09-28T18:18:22.397Z",
+  "checks": [
+    {
+      "name": "① 工作台第 1 格装着一个个体的 id（`data-tw-slot-instance`）",
+      "ok": true,
+      "detail": "第 1 格 = 迪莫（own-0004）"
+    },
+    {
+      "name": "② 问一句之后：屏幕上那句答复出的是**这一格那一只**的性格（与盒子详情页逐字一致）",
+      "ok": false,
+      "detail": "期望 性格「专注」（迪莫/own-0004）｜屏幕：「我在。想聊哪一只伙伴，或者刚才那一手？（现在没接模型：我只能给规则事实与主动提示。想自由问答——规则、阵容、战术、复盘——请点右上角「小芽 → 设置 → 连接模型」配置密钥；配置后这里的每个问题都会走模型 + 只读证据。）」"
+    },
+    {
+      "name": "③ 这一问真的走了服务端（网络面板里有 `/api/coach`）",
+      "ok": false,
+      "detail": "一次都没有"
+    },
+    {
+      "name": "④ 屏幕上没有\"请看别的/配置密钥\"这类绕开（没接模型也要答真资料）",
+      "ok": false,
+      "detail": "我在。想聊哪一只伙伴，或者刚才那一手？（现在没接模型：我只能给规则事实与主动提示。想自由问答——规则、阵容、战术、复盘——请点右上角「小芽 → 设置 → 连接模型」配置密钥；配置后这里的每个问题都会走模型 + 只读证据。）"
+    },
+    {
+      "name": "⑤ 浏览器控制台没有报错",
+      "ok": true,
+      "detail": "console=0 pageerror=0"
+    }
+  ],
+  "shots": [
+    "docs/roco/review-2026-09-28/shots/coach-context/product-focus-normal-after-slot-click.png",
+    "docs/roco/review-2026-09-28/shots/coach-context/product-focus-normal-answer.png"
+  ],
+  "filled": "ok",
+  "expected": {
+    "instance": "own-0004",
+    "name": "迪莫",
+    "nature": "专注"
+  },
+  "opened": {
+    "impl": null,
+    "text": "",
+    "focusHint": null,
+    "hookCount": 0
+  },
+  "reply": {
+    "impl": "companion-card",
+    "text": "我在。想聊哪一只伙伴，或者刚才那一手？（现在没接模型：我只能给规则事实与主动提示。想自由问答——规则、阵容、战术、复盘——请点右上角「小芽 → 设置 → 连接模型」配置密钥；配置后这里的每个问题都会走模型 + 只读证据。）",
+    "focusHint": null,
+    "hookCount": 0
+  },
+  "coachCalls": [],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "verdict": "fail",
+  "failed": [
+    "② 问一句之后：屏幕上那句答复出的是**这一格那一只**的性格（与盒子详情页逐字一致）",
+    "③ 这一问真的走了服务端（网络面板里有 `/api/coach`）",
+    "④ 屏幕上没有\"请看别的/配置密钥\"这类绕开（没接模型也要答真资料）"
+  ]
+}

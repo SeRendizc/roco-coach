@@ -66,7 +66,7 @@ Lead 独立核过这个前提（`model-routing.js` 的 `cloudDecision()` 三条 
 ## 三、失败要说清**缺哪一项**（第 3 条）
 
 `runCoach` 现在会记账「这一轮里服务端的资料工具跑起来没有」，跑不起来时**不许**落到旧模板，
-改为交一份点名缺项的失败（`agentStop:'server-data-unavailable'` + 结构化 `taskFailure`）：
+改为交一份点名缺项的失败（`agentStop:'policy-server-data-unavailable'` + 结构化 `taskFailure`）：
 
 ```
 这条要查**服务端的资料**（规则与图鉴），但这份资料现在用不了。
@@ -182,3 +182,154 @@ node --test --test-concurrency=1 tests/offline.test.js tests/coach.test.js tests
   tests/roco-codex-local.test.js tests/roco-local-output-contract.test.js \
   tests/roco-tool-contract-drift.test.js                 # 238/238
 ```
+
+---
+
+# 附录（task-12）：产品页的**第二套小芽** —— 对照表与两方案（等 Lead 拍板）
+
+出处：`docs/roco/review-2026-09-28/BATCH-07-UI独立验收.md`（art-finish D①-a）。
+真机证据：`shots/coach-context/companion-vs-xiaoya.json`、
+`companion-01-fact-question.png`、`companion-02-after-reload.png`。
+
+## 一、真机实测（`roco.html`，清档后、无模型密钥）
+
+在 `#say-input` 里真键鼠问 **「火系克制什么属性？」**：
+
+```
+答：我在。想聊哪一只伙伴，或者刚才那一手？（现在没接模型：我只能给规则事实与主动提示。
+    想自由问答——规则、阵容、战术、复盘——请点右上角「小芽 → 设置 → 连接模型」配置密钥；
+    配置后这里的每个问题都会走模型 + 只读证据。）
+网络：/api/coach 0 次（这一段里除 bootstrap/roster 外没有任何 api 调用）
+```
+
+⇒ 本任务（P0-01）在**产品页的第二份实现上原样还在**：没密钥就不发服务端 ⇒ 事实问答不出来。
+它不只是"缺个焦点"。
+
+## 二、逐项对照（每一项都是量出来的）
+
+| 维度 | `#companion-card`（`roco.html`；`roco.js` 的 `mountCompanion`/`askXiaoya`） | `xiaoya.js`（`box.html` / `xiaoya.html`） |
+|---|---|---|
+| 没密钥时的事实问 | 「我在。…现在没接模型…请配置密钥」；**`/api/coach` 0 次** | 服务端确定性执行，答真资料；**1 次 → 200** |
+| 焦点（我在看谁） | **无**：`[data-xy-focus]` 计数 0、无 chip、不读 `data-tw-slot-instance` | 有：点第 N 格立刻 `data-xy-focus=own-XXXX` |
+| 能力状态 | 只有 `#model-chip`：「模型：未连接（只给规则事实）」——把两件事写成一句 | 两行分开 + `toolsReady` 三态 + `missing[]` |
+| 历史 | 单条 `#say-reply`：第二句**覆盖**第一句（`replyStillHasFirst=false`）；重载后空白 | 重载后 10+ 轮可见；「新对话」「清空本次对话」 |
+| 对话存档 | 无 | `xiaoya-chats-v1` |
+| 跨局记忆 | `roco-coach-memory-v1` | `xiaoya-memory-v1`（与 `app.js` 同键）→ **两个键、两套记忆** |
+| **对局上下文** | **有**：`coachRocoBattle()` + `coachRocoPlan()` → `roco_battle` / `roco_plan` | **没有**（`buildContext(null, …, 'meadow', …)`，`game` 写死 `null`） |
+| 记忆弹窗（查看/忘掉） | 有（`#memory-pop`） | 无 |
+| 三模型列表 / 连接入口 | 有（`#model-list`、`open-connect`）；判据 `live-model-status` 读 `#model-chip` | 无 |
+| 主动提示 / 语气档位 / activityLine | 有（roco.js 的介入链路） | 无 |
+
+## 三、两方案与代价
+
+**甲：`xiaoya.js` 成唯一实现，`#companion-card` 退役。**
+- 必做（否则是功能倒退）：① 给 `mountXiaoya` 一个**宿主动局上下文**的注入口
+  （`contextProvider`/`extraContext`，把 `roco_battle`/`roco_plan`/stage 传进来）；
+  ② `#model-chip` 与三模型列表要么搬进 xiaoya、要么改钉；③ 记忆弹窗的处置（搬或明确砍）；
+  ④ 主动提示/activityLine 的落点。
+- 另：`tests/roco-page-ux.test.js` 的 `#companion-card`/`#model-chip`/`$('coach-entry')…` 字面量**改钉不删**。
+- 代价：**中到大**（页面级重构 + 一个宿主上下文口 + 2–3 处入口搬迁）。收益：真正一套实现、
+  P0-01 全站生效、记忆/历史/焦点全站一致。风险：`roco.js` 是 battle-smoke 的写域，要协调窗口。
+
+**乙：保留 `#companion-card`，把焦点接进去。**
+- "焦点逻辑写第二遍"这一条**可以避免**：`createFocusProvider()` / `focusFromClick()` 已是导出的、
+  与 DOM 无关的模块，`roco.js` 只需 `import` + ≈10 行接线（不是第二份实现）。
+- 改不掉的部分：两套聊天 UI 并存；两套记忆继续分裂；**P0-01 要在 roco.js 那侧再修一次**
+  （`if (!configured) → offline` 那一支），否则那张卡永远只会回「请配置密钥」。
+- 代价：**小**；但与"唯一实现"纪律相悖，债留着。
+
+**建议（供拍板）**：先做乙的低风险半边（焦点走共享模块 + 修那一处断线档），
+让"点第 N 格 → 问一句 → 答的是那一格那只"**今天**在产品页成立；甲另立一条，与宿主上下文口和版式一起做。
+
+---
+
+# 丙案落地（task-12，Lead 拍板）—— 产品页也走服务端真资料 + 焦点走共享实现
+
+Lead 拍板走**丙**（乙的低风险半边）：**不新起第三套小芽**，只把共享模块接进 `#companion-card`。
+记忆弹窗 / 介入链路 / 三模型列表 / 两套记忆键合并 / `#companion-card` 退役 —— **全部留给甲**，本轮没碰。
+
+## 一、改了哪三处（就这三处）
+
+| # | 改动 | 文件 |
+|---|---|---|
+| 丙① | **焦点走共享实现**：`import {createFocusProvider, focusFromClick} from './xiaoya.js'`，本文件只接线（≈40 行，含一行焦点文字 `#companion-focus`）；`focusDetail` 同时挂进 `sayOnce()` 与 `askXiaoya()` 的上下文 | `roco.js` + `roco.html` |
+| 丙② | **断线档**：`if (!configured) { 改屏 + return offline }` → 只记一个数据钩子，**照样发 `/api/coach`**；离线模板降级为"请求失败后的兜底" | `roco.js` |
+| 丙③ | **chip 改真**：`模型：未连接（只给规则事实）` → `资料查询：…；云端模型：未连接 —— 不影响上面的资料查询`（与 `xiaoya.js` 同一口径）；`data-roco-tools` 新增钩子 | `roco.js` |
+
+口径纪律：焦点**只有一份实现**（`focusFromClick` / `createFocusProvider` 都在 `xiaoya.js`，
+`roco.js` 里没有第二份）—— 钉在 `tests/roco-xiaoya-context.test.js` ⑮。
+
+## 二、屏幕判据（量屏幕，不量属性）
+
+`reports/roco/xiaoya-context/browser-product-focus-acceptance.mjs`（**不预设**小芽是哪一套实现：
+甲看 `.xy-entry`、乙看 `#say-reply` 都认；两套都能跑）：
+
+真机 `roco.html` 工作台：装两只 → 真鼠标点第 1 格 → 开小芽 → 真键鼠问「这只是什么性格？」
+
+| 判据 | 修前（`product-focus-before-fix.json`） | 修后（`product-focus-normal.json`） |
+|---|---|---|
+| ② 屏幕上那句答复出的是**这一格那只**的性格（与盒子详情页逐字一致） | ✖ 「我在。想聊哪一只伙伴…（现在没接模型…请配置密钥）」 | ✔ 「你现在看的这一只是迪莫（Lv.60）：性格「专注」。」（第 1 格 = 迪莫 `own-0004`） |
+| ③ 这一问真的走了服务端 | ✖ **`/api/coach` 一次都没有** | ✔ **POST `/api/coach` → 200** |
+| ④ 屏幕上没有"请配置密钥"这类绕开 | ✖ 命中 | ✔ |
+| ⑤b `#model-chip` 与判据 `live-model-status` 同尺子自查 | — | ✔ 「资料查询：还没拉起来…；云端模型：未连接 —— 不影响上面的资料查询」hook=offline h=26px |
+| **合计** | **2/5** | **6/6** |
+
+截图：`product-focus-normal-after-slot-click.png`（点完那一格）、`product-focus-normal-answer.png`
+（**同框**：工作台六槽 + 小芽面板里的「正在看：迪莫 · 性格 专注 · 4 个技能」+ 问句 + 回答 + 依据）。
+
+## 三、必红反证（两条，响度都实测过）
+
+1. **把槽位钩子摘掉**（抹掉页面上所有 `data-tw-slot-instance`）：
+   `--red-proof` ⇒ **5/6，正好红 ②**（③④ 仍绿 —— 它们量的是另一件事）。
+2. **把断线档改回 `return offline`**（临时改回旧写法再跑，跑完逐字恢复）：
+   ⇒ **3/6，正好红 ②③④**，其中 ③ 的读数就是「**`/api/coach` 一次都没有**」、
+   ④ 是「请点右上角…配置密钥」原文。
+
+## 四、顺手修掉的一条**真回归**（Lead 在已提交状态里抓到，玩家可见）
+
+`executeCoach` 的守卫降级原来写 `text: data.localText ?? data.text` —— `localText` 缺席时
+**把模型那段没过守卫的正文原样端出去**，而 `provider` 还标着 `local-fallback`。
+实测（`tests/evals/agent.test.js` 打桩 `{provider:'deepseek',text:'造成99999伤害，必胜'}`）：
+守卫判它不合格，兜底却把「99999」漏给了玩家。
+
+修后：`localText` 缺席 ⇒ **回到确定性那一份**（本机 `runCoach`，与修前同一条路）；
+两条降级路都带 `deterministicFrom`（`server|local-run|none`）说清正文是哪来的；
+连确定性那份都拿不到时交一句如实的话，**绝不放模型原文**。
+
+- `node --test tests/evals/agent.test.js` ⇒ **38/38**（那条转绿，其余 37 条没动）。
+- **响度实测**：把兜底临时改回 `data.localText ?? data.text` ⇒ 那条**立刻红**（`assert(!a.text.includes('99999'))`），
+  恢复后 38/38。
+- 另在 `tests/roco-xiaoya-context.test.js` ⑭ 从 `requestCoach` 那一层再钉一遍（含"服务端给了 `localText` 就用它"）。
+
+## 五、两条"加东西没登记"的红（Lead 点的，已收）
+
+| 判据 | 读数 | 做法 |
+|---|---|---|
+| `tests/roco-agent-stops.test.js` | **5/5** | 新值改名登记为 `policy-server-data-unavailable`（前缀要落进 `policy-*` 那一组；含义写进 `AGENT_STOPS` 上方注释） |
+| `tests/roco-answer-level-correction.test.js` | **12/12** | **改钉不删**：旧键表（24 键，无 `localText`）与旧 sha256 留档在注释里；`localText` 显式登记进键表（25 键）+ 新哈希 |
+
+## 六、本轮读数汇总
+
+```
+node --test tests/roco-xiaoya-context.test.js                      # 22/22（含丙的结构钉 ⑮ 与守卫回归钉 ⑭）
+node --test tests/evals/agent.test.js                              # 38/38
+node --test tests/roco-agent-stops.test.js                         # 5/5
+node --test tests/roco-answer-level-correction.test.js             # 12/12
+node --test --test-concurrency=1 （page-ux / wiring / plain-speak / agent / xiaoya-context /
+  offline / agent-stops / answer-level-correction / local-output-contract）   # 151/151
+node reports/roco/xiaoya-context/browser-product-focus-acceptance.mjs          # 6/6（丙验收）
+node .../browser-product-focus-acceptance.mjs --red-proof                      # 5/6（红 ②）
+（反证二：临时改回 return offline ⇒ 3/6，红 ②③④；已逐字恢复）
+```
+
+## 七、未完成项（缺哪一项）
+
+1. **甲**（你另立那条）：记忆弹窗、介入链路/activityLine/语气档位、三模型列表、
+   两套记忆键（`roco-coach-memory-v1` / `xiaoya-memory-v1`）合并、`#companion-card` 退役、
+   以及 `mountXiaoya` 需要的**宿主动局上下文口**（`roco_battle`/`roco_plan`/stage）。
+   ⚠ 丙之后**两套聊天 UI 仍然并存**（这是甲的范围，我没顺手做）。
+2. `tests/roco-page-ux.test.js` 里**没有**关于 `#model-chip` 文案的钉子可改（36/36 一直绿）——
+   该文案真正的判据是 `scripts/roco/browser-live-acceptance.mjs` 的 `live-model-status`，
+   我**没改那条判据**，而是把产品文案写成它认的那个词（「未连接」）+ 在同尺子自查（⑤b）。
+3. 局中（对战中）焦点/资料这条组合路径本轮没量（工作台是在**选队**那一屏量的）——
+   `#companion-card` 的 `roco_battle` 仍然照旧带上，未受影响。

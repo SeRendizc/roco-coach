@@ -1,0 +1,472 @@
+{
+  "base": "http://127.0.0.1:8765",
+  "startedAt": "2026-09-28T18:13:25.180Z",
+  "shots": [
+    "docs/roco/review-2026-09-28/shots/coach-context/companion-01-fact-question.png",
+    "docs/roco/review-2026-09-28/shots/coach-context/companion-02-after-reload.png",
+    "docs/roco/review-2026-09-28/shots/coach-context"
+  ],
+  "steps": [
+    {
+      "name": "① 页面结构（清档后）",
+      "page": "roco.html",
+      "xiaoyaMounted": null,
+      "companionCard": true,
+      "companionHidden": true,
+      "sayInput": true,
+      "sayReply": "",
+      "modelChip": "模型：未连接（只给规则事实）",
+      "focusChip": null,
+      "focusCount": 0,
+      "xiaoyaLog": 0,
+      "entries": [
+        {
+          "id": "companion-line",
+          "hidden": true,
+          "text": ""
+        },
+        {
+          "id": "say-reply",
+          "hidden": true,
+          "text": ""
+        }
+      ]
+    },
+    {
+      "name": "② 打开 companion-card",
+      "page": "roco.html",
+      "xiaoyaMounted": null,
+      "companionCard": true,
+      "companionHidden": false,
+      "sayInput": true,
+      "sayReply": "",
+      "modelChip": "模型：未连接（只给规则事实）",
+      "focusChip": null,
+      "focusCount": 0,
+      "xiaoyaLog": 0,
+      "entries": [
+        {
+          "id": "companion-line",
+          "hidden": true,
+          "text": ""
+        },
+        {
+          "id": "say-reply",
+          "hidden": true,
+          "text": ""
+        }
+      ]
+    },
+    {
+      "name": "③ 问「火系克制什么属性？」",
+      "reply": "我在。想聊哪一只伙伴，或者刚才那一手？（现在没接模型：我只能给规则事实与主动提示。想自由问答——规则、阵容、战术、复盘——请点右上角「小芽 → 设置 → 连接模型」配置密钥；配置后这里的每个问题都会走模型 + 只读证据。）",
+      "focusChip": null,
+      "coachCalls": [],
+      "apiAfter": []
+    },
+    {
+      "name": "④ 连问第二句之后（历史）",
+      "reply": "我在。想聊哪一只伙伴，或者刚才那一手？（现在没接模型：我只能给规则事实与主动提示。想自由问答——规则、阵容、战术、复盘——请点右上角「小芽 → 设置 → 连接模型」配置密钥；配置后这里的每个问题都会走模型 + 只读证据。）",
+      "replyStillHasFirst": false,
+      "entries": [
+        {
+          "id": "companion-line",
+          "hidden": true,
+          "text": ""
+        },
+        {
+          "id": "say-reply",
+          "hidden": false,
+          "text": "我在。想聊哪一只伙伴，或者刚才那一手？（现在没接模型：我只能给规则事实与主动提示。想自由问答——规则、阵容、战术、复盘——请点右上角「小芽 → 设置 → 连接模型」配置密钥；配置后这里的每个问题都会走模型 + 只读证据。）"
+        }
+      ]
+    },
+    {
+      "name": "⑤ 重载之后（历史还在吗）",
+      "reply": "",
+      "entries": [
+        {
+          "id": "companion-line",
+          "hidden": true,
+          "text": ""
+        },
+        {
+          "id": "say-reply",
+          "hidden": true,
+          "text": ""
+        }
+      ]
+    },
+    {
+      "name": "⑥ 工作台槽位",
+      "note": "这一页此刻没有装着个体的槽位（开局前/空队伍）——如实记录"
+    },
+    {
+      "name": "⑦ 全部 /api 请求（本次会话）",
+      "list": [
+        "GET /api/bootstrap → 200",
+        "GET /api/models → 200",
+        "GET /api/models → 200",
+        "GET /api/roco/roster?limit=200&offset=0 → 200",
+        "GET /api/bootstrap → 200",
+        "GET /api/roco/roster?offset=0&limit=12 → 200",
+        "GET /api/bootstrap → 200",
+        "GET /api/roco/status → 200",
+        "GET /api/roco/box?kind=mine&limit=60&offset=0 → 200",
+        "GET /api/roco/box?kind=mine&limit=60&offset=60 → 200",
+        "GET /api/roco/box?kind=mine&limit=60&offset=120 → 200",
+        "GET /api/roco/box?kind=mine&limit=60&offset=180 → 200",
+        "GET /api/roco/box?kind=mine&limit=60&offset=240 → 200",
+        "GET /api/roco/box?kind=mine&limit=60&offset=300 → 200",
+        "GET /api/roco/box?kind=mine&limit=60&offset=360 → 200",
+        "GET /api/roco/box?kind=mine&limit=60&offset=420 → 200",
+        "GET /api/roco/box?kind=mine&limit=60&offset=480 → 200",
+        "GET /api/roco/box?kind=mine&limit=60&offset=540 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=0 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=60 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=120 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=180 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=240 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=300 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=360 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=420 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=480 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=540 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=600 → 200",
+        "GET /api/roco/sprite?id=pet_000001&v=default → 200",
+        "GET /api/roco/sprite?id=pet_000002&v=default → 200",
+        "GET /api/roco/sprite?id=pet_000003&v=default → 200",
+        "GET /api/roco/sprite?id=pet_000004&v=default → 200",
+        "GET /api/roco/sprite?id=pet_000005&v=default → 200",
+        "GET /api/roco/sprite?id=pet_000006&v=default → 200",
+        "GET /api/roco/sprite?id=pet_000007&v=default → 200",
+        "GET /api/roco/sprite?id=pet_000008&v=default → 200",
+        "GET /api/roco/sprite?id=pet_000009&v=default → 200",
+        "GET /api/roco/sprite?id=pet_000010&v=default → 200",
+        "GET /api/roco/sprite?id=pet_000011&v=default → 200",
+        "GET /api/roco/sprite?id=pet_000012&v=default → 200",
+        "GET /api/roco/workshop?stage=first → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=0 → 200",
+        "GET /api/roco/workshop? → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=60 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=120 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=180 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=240 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=300 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=360 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=420 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=480 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=540 → 200",
+        "GET /api/roco/box?kind=catalog&limit=60&offset=600 → 200",
+        "GET /api/roco/sprite?id=pet_000013&v=default → 200",
+        "GET /api/roco/sprite?id=pet_000014&v=default → 200",
+        "GET /api/roco/sprite?id=pet_000015&v=default → 200",
+        "GET /api/bootstrap → 200",
+        "GET /api/models → 200",
+        "GET /api/models → 200"
+      ]
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "url": "/api/bootstrap",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/models",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/models",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/roster?limit=200&offset=0",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/bootstrap",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/roster?offset=0&limit=12",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/bootstrap",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/status",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=mine&limit=60&offset=0",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=mine&limit=60&offset=60",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=mine&limit=60&offset=120",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=mine&limit=60&offset=180",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=mine&limit=60&offset=240",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=mine&limit=60&offset=300",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=mine&limit=60&offset=360",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=mine&limit=60&offset=420",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=mine&limit=60&offset=480",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=mine&limit=60&offset=540",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=0",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=60",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=120",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=180",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=240",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=300",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=360",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=420",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=480",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=540",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=600",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/sprite?id=pet_000001&v=default",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/sprite?id=pet_000002&v=default",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/sprite?id=pet_000003&v=default",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/sprite?id=pet_000004&v=default",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/sprite?id=pet_000005&v=default",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/sprite?id=pet_000006&v=default",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/sprite?id=pet_000007&v=default",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/sprite?id=pet_000008&v=default",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/sprite?id=pet_000009&v=default",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/sprite?id=pet_000010&v=default",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/sprite?id=pet_000011&v=default",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/sprite?id=pet_000012&v=default",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/workshop?stage=first",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=0",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/workshop?",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=60",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=120",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=180",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=240",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=300",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=360",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=420",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=480",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=540",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=600",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/sprite?id=pet_000013&v=default",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/sprite?id=pet_000014&v=default",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/roco/sprite?id=pet_000015&v=default",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/bootstrap",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/models",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/models",
+      "status": 200
+    }
+  ]
+}
