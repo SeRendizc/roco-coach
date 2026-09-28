@@ -1499,7 +1499,7 @@ async function main() {
       await sleep(200);
     }
     const rowFacts = async (id) => JSON.parse(await js(`(()=>{
-      const row=document.querySelector('#pet-view [data-individual="${id}"]');
+      const row=document.querySelector('#pet-view[data-individual="${id}"]');
       const store=JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}');
       const one=store[${JSON.stringify(id)}]||null;
       return JSON.stringify({
@@ -1640,10 +1640,21 @@ async function main() {
       if (pick.baseId && pick.extraId) {
         // 先记一次"点击之前这一行长什么样"（下面如果要抛"找不到元素"，账上至少知道为什么）
         steps.push({at: 'before-pick', addTarget, pick, rows: facts.rows});
-        await mouseClick(`[data-individual="${pick.baseId}"] .cmp-toggle`);
-        await sleep(200);
-        await mouseClick(`[data-individual="${pick.extraId}"] .cmp-toggle`);
-        await sleep(300);
+        // 2026-09-28 改钉（实测：这一条把整个流程 **fatal** 掉，后面 8 条判据一条都没跑到 ——
+        // 汇总只剩「判据 33/34、反证 14/14」，门禁那次是 42/21，差的就是这一段之后的）：
+        // `data-cmp`（「加入比较」）已随人类 ②③ 搬进**二级详情页**（`#pet-actions`），
+        // 列表行里**没有** `.cmp-toggle` 了 ⇒ 老写法 `[data-individual="…"] .cmp-toggle`
+        // 抛「找不到可点的元素」。现在按玩家真实路径走：
+        // 把那一行摊开 → 打开这一只的二级页 → 点那一页上的「加入比较」→ 返回列表（每只一趟）。
+        for (const id of [pick.baseId, pick.extraId]) {
+          await ensureRowVisible(addTarget, id);
+          await mouseClick(`#box-grid .individual[data-detail="${id}"]`);
+          await sleep(500);
+          await mouseClick(`#pet-actions [data-cmp="${id}"]`);
+          await sleep(250);
+          await mouseClick('#pet-back');
+          await sleep(450);
+        }
         facts.selected = await js(`document.body.dataset.boxSelected`);
         facts.barHidden = await js(`document.getElementById('compare-bar')?.hidden`);
         facts.hintAfterPick = await js(`document.getElementById('compare-hint')?.textContent ?? ''`);
@@ -1736,7 +1747,7 @@ async function main() {
       await sleep(200);
     }
     const natureFacts = async (id) => JSON.parse(await js(`(()=>{
-      const row=document.querySelector('#pet-view [data-individual="${id}"]');
+      const row=document.querySelector('#pet-view[data-individual="${id}"]');
       const store=JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}');
       const one=store[${JSON.stringify(id)}]||null;
       return JSON.stringify({nature:one?one.nature:null, left:one&&one.refreshes?one.refreshes.nature:0,
@@ -1861,7 +1872,11 @@ async function main() {
         + '⇒ 刷新性格 / 刷新天分 / ＋再养一只同种 / 回滚上一次 / 加入比较**只在二级详情页**上（按钮旁写清还剩几次），'
         + '列表那一屏里一个都不许有；「只看锁定」那个入口（人类⑦：「锁定功能直接删了的就删了」）页面上也不许再有',
         placementProblems.length === 0
-          && !String(placement.listHtml).includes('只看锁定')
+          // 2026-09-28 改钉：这里原来直接扫 `#box-list-view` 的 innerHTML，而 `box.html` 的**注释**
+          // 就落在这个容器里（`#box-list-view` 从 :33 到 :100）—— 注释里写着那一档筛选的中文名，
+          // 于是「页面上已经删干净了」反而被判红（实测 33 号红，而那个入口根本不存在）。
+          // 判据改成**先剥 HTML 注释再扫**：判的是玩家看得见的东西，不是源码里的说明。
+          && !String(placement.listHtml).replace(/<!--[\s\S]*?-->/g, '').includes('只看锁定')
           && (await js(`!document.getElementById('flag-locked')`)) === true,
         placementProblems.join(' | ')
           || `二级页上的入口：${(String(placement.petHtml).match(/data-refresh="\w+"|data-add=|data-cmp=|data-undo=/g) ?? []).join('、')}；`
@@ -1966,9 +1981,24 @@ async function main() {
     // ── ⑧ 删掉要两步（二次确认，不用浏览器原生 confirm）───────────────────
     await mouseClick('#box-reset');
     await sleep(1000);
-    const delTarget = await js(`document.querySelector('#box-grid [data-add]')?.dataset.add ?? ''`);
+    // 2026-09-28 改钉：`[data-add]` 已随人类 ②③ 搬进二级详情页（`#pet-actions`），列表那一屏
+    // **没有**它了 ⇒ 老选择器永远读到 null、这整段被跳过，报「页面上一个「＋再养一只同种」都没有」
+    // （实测 36 号就是这么红的）。种类改从列表行卡片上的 `data-group` 取（`cardHtml` 一直在写它），
+    // 不必先导航到二级页。
+    const delTarget = await js(`document.querySelector('#box-grid .card[data-group]')?.dataset.group ?? ''`);
     if (delTarget) {
-      await mouseClick(`[data-add="${delTarget}"]`);
+      // 2026-09-28 改钉：`[data-add]` 只在**二级详情页**上（人类 ②③ 把它从列表行搬走的），
+      // 列表页上根本没有它 ⇒ 老写法（裸的全局选择器直接点）抛「找不到可点的元素」，
+      // 把整条流程 fatal 掉（实测：这一次死在 36 号，后面 1 条判据没跑到）。
+      // 先打开这一种里任意一只的二级页，再点那一页上的「＋再养一只同种」。
+      const addOpenSelect = await js(`(()=>{const c=document.querySelector('#box-grid .card[data-group="${delTarget}"]');
+        return c?c.dataset.select:'';})()`);
+      if (addOpenSelect) {
+        await ensureRowVisible(delTarget, addOpenSelect);
+        await mouseClick(`#box-grid .individual[data-detail="${addOpenSelect}"]`);
+        await sleep(500);
+      }
+      await mouseClick(`#pet-actions [data-add="${delTarget}"]`);
       await sleep(900);
       const serverIdsForRemove = ((await (await fetch(`${base}api/roco/box?kind=mine&limit=60&offset=0`)).json())
         .player?.cards ?? []).map((c) => c.select);

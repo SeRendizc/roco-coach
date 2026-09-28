@@ -409,7 +409,13 @@ export function localParametricFact(message='', context=null){
   // 2026-09-26（审计点名）：正文里曾经印出「受到的伤害乘以 0.65」这种**无单位裸小数**。
   // 玩家只需要百分数；精确系数仍留在 evidence 里（守卫那一条不变）。
   return {text:`防御这一回合减伤 ${Math.round(RULES.guard.reduction*100)}%`
-   +`，消耗 ${RULES.guard.energy} 能量。`
+   // 2026-09-28 改钉（实测的真错）：这里原来写「**消耗** 2 能量」，方向说反了 ——
+   // `RULES.guard={reduction:.65,energy:2}` 里的 `energy` 是**回复量**：
+   // `src/game/engine.js:290` 是 `p.energy=Math.min(RULES.energy.max,p.energy+RULES.guard.energy)`（加），
+   // `src/game/engine.js:57` 的技能说明是「消耗0，…额外恢复 2 能量；不可连续使用」，
+   // 规则卡 `tactic:guard` 的 principle 同源。玩家照「消耗 2 能量」去算能量会算错。
+   // 措辞与 `engine.js:57` 逐字同源；数字仍只有 65 与 2（不引入新数字，`checkGroundedAnswer` 才不会判编造）。
+   +`，阻挡新异常，额外恢复 ${RULES.guard.energy} 能量；不可连续使用。`
    +src('防御减伤'),
    evidence:[`RULES.guard={reduction:${RULES.guard.reduction},energy:${RULES.guard.energy}}`,
     ...(guardCard?[`知识卡 tactic:guard：${guardCard.principle}`]:[])],
@@ -2600,7 +2606,15 @@ export function compareTarget(text='',context={}){
  if(!PET_ATTR.test(t))return null;
  const m=t.match(COMPARE_ASK);
  if(!m)return null;
- const names=[String(m[1]||'').trim(),String(m[2]||'').trim()];
+ // 2026-09-28 修的真错（`tests/roco-compare-pets.test.js` 的 ②b 钉着）：属性词写在「谁」**之前**时
+ // （「A 和 B 的物攻谁更高？」），第二组 `[^…]{1,14}?` 里的「的物攻」不含任何被排除的字符 ⇒ 被整段
+ // 吃进名字。实测（第一只在名单里时）：`compareTarget('寂灭骨龙和画间沉铁兽的物攻谁更高？', …)`
+ // 返回 `{kind:'pet',name:'画间沉铁兽的物攻'}` —— 这个参数发出去引擎只会 404，玩家看到「查不到这只」。
+ // 这里**不动正则**（改正则会牵动 ④ 那组「不误伤」判据），只在取出名字后剥掉**尾部**的「的+属性词」。
+ // 622 个精灵名里含「的」的是 **0 个**（`PET_NAME_ROWS` 实测）⇒ 剥尾不会误伤真名字。
+ const ATTRIBUTE_SUFFIX=/的\s*(?:速度|物攻|物防|特攻|特防|魔攻|魔防|生命|血量|体力|种族值|六维|面板|攻击力|防御力)\s*$/;
+ const cleanName=(name)=>String(name||'').replace(ATTRIBUTE_SUFFIX,'').trim();
+ const names=[cleanName(m[1]),cleanName(m[2])];
  if(names.some((name)=>!name||name.length>14||COMPARE_STOP.test(name)))return null;
  if(names[0]===names[1])return null;
  const rows=Array.isArray(context.profile?.lineup)?context.profile.lineup:[];
@@ -2712,7 +2726,15 @@ const FAMILY_SIGNALS=Object.freeze({
  state:/剩多少|还剩|还有多少|多少血|血量|生命值|几滴血|多少能量|能量够|够不够|够放|几瓶|几个药|道具|背包|合法|能出|可以出|有哪些技能|场上|后备|替补|换谁|谁还能上场|谁还能上|速度|先手|谁快|谁先|克制|被克|压制/,
  turn:/第\s*\d+\s*回合|上一回合|上个回合|前面那回合|那一下|当时发生了什么|最近的换宠记录/,
  match:/整局|全程|一共打了|总共|回顾整场|前面几回合/,
- rules:/战术|套路|打法|反例|条件|为什么不|怎么克制|规则|代价|恢复多少|免费|占不占|占用|查一下|查下|查查|搜一下|检索一下/,
+ // 2026-09-28 补词（从**规则卡自己的 keywords 里取**，不是凭口味挑的）：
+ //   · 「减伤」← 卡 `tactic:guard`（src/game/content.js，keywords「防御 破甲 重击 狮子 减伤」）
+ //   · 「回血」← 卡 `tactic:healing`（同处，keywords「回血 回复药 苔息 治疗 来得及」）
+ // 实测（未补之前）：`evidenceNeeds('防御能减伤多少？',{mode:'battle'})` 是
+ // `{families:[],reason:'state-in-packet'}` —— **0 个来源**，也就是小芽不查任何证据就答这句。
+ // 补之后这一句命中 `rules`；反证实测不受影响：「你好呀」/「我在。」仍是 0 族，
+ // 「第 3 回合如果我先防御会怎样？」仍是 `['turn','branch']`（没有被带成三族）。
+ // ⚠ 刻意**不**补「防御 / 重击 / 狮子」：那些是卡里的其它词，但「防御」会让上面那句反证当场变红。
+ rules:/战术|套路|打法|反例|条件|为什么不|怎么克制|规则|代价|恢复多少|免费|占不占|占用|查一下|查下|查查|搜一下|检索一下|减伤|回血/,
  branch:/(模拟|如果|假如|要是).{0,14}(换|打|防御|吃|攻击)|帮我比较|两种顺序|谁先出手|先后手|该不该防御|哪个更|哪一个/,
 });
 /**

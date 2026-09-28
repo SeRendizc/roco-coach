@@ -327,10 +327,18 @@ test('⑯ 到了"同种一对"上限，「再养一只」按钮就禁用（不�
   // 反证：还没有本机那只时按钮是可点的
   assert.doesNotMatch(addButton('pet_000012', {extraCount: 0}), /data-add="pet_000012"[^>]*disabled/,
     '还没加过 ⇒ 按钮必须可点');
-  // 接线：页面真的把"本机已有一只"这件事读出来传下去了（读的是唯一事实源 localIndividualsOf）
+  // 接线：页面真的把"本机已有一只"这件事读出来传下去了。
+  // 2026-09-28 改钉（真 bug）：原来钉的是 `localIndividualsOf(species).length` —— 而那个函数
+  // 把**服务端名单里那一页的个体也算进去**（`individualsForRows` 给每张卡都写一条本机记录）
+  // ⇒ 任何种类都 ≥1 ⇒ 按钮**永远**禁用，而且理由（"已有一只本机的"）对从没加过的玩家是假的。
+  // 唯一事实源换成 `state.extraRows`（box.js:342 `localRowsFor(page)` 造的那一份 = 真的本机多养的）。
   const box = readFileSync(new URL('../src/client/box.js', import.meta.url), 'utf8');
-  assert.match(box, /addButton\(species, \{extraCount: localIndividualsOf\(species\)\.length\}\)/,
-    'box.js 要按本机记录里已有的只数决定按钮能不能点');
+  assert.match(box, /addButton\(species, \{extraCount: extraOwnedCount\(species\)\}\)/,
+    'box.js 要按**本机多养出来的**只数决定按钮能不能点');
+  assert.match(box, /function extraOwnedCount\(species\) \{\s*return \(state\.extraRows \?\? \[\]\)\.filter\(\(row\) => row\.group === species\)\.length;/,
+    'extraOwnedCount 必须只数 state.extraRows（不许回到 localIndividualsOf）');
+  assert.doesNotMatch(box, /addButton\(species, \{extraCount: localIndividualsOf\(species\)\.length\}\)/,
+    '反证：不许再用会把服务端个体也算进来的那个函数');
 });
 
 test('⑰ 资质是**六维表**，页面要摊成一行数值（不许印 [object Object]）', () => {

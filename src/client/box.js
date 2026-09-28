@@ -27,7 +27,10 @@ import {drawerListHtml, formatTraitValue, refreshButton, addButton, undoButton, 
   favouriteButton} from './box-drawer.js';
 // 个体状态（性格/天分/刷新次数）在 `box-individuals.js`：它要碰 localStorage 与服务器字段名，
 // 而这一页的玩家区代码里不许出现工程词（判据：tests/roco-box.test.js 的玩家层那一条）。
-import {individualsForRows, refreshIndividual, undoIndividual, addIndividualFor, localIndividualsOf,
+// ⚠ 2026-09-28：这里原来还 import 了 `localIndividualsOf`。真 bug 修掉之后（见 `extraOwnedCount`）
+// 它在页面里**一次都没被调用**，只活在 import 那一行 —— 那正是 `box-individuals.js` 里点名的
+// 「只在 import 那一行出现」的假绿形状，所以直接删掉，别留着当摆设。
+import {individualsForRows, refreshIndividual, undoIndividual, addIndividualFor,
   localCardById, localIndividualsGrouped, removeIndividual} from './box-individuals.js';
 // 刷新之后「落在哪一项」那句话只有一处（`lastRefreshNote`）——页面只负责显示。
 import {lastRefreshNote} from '../coach/individuals.js';
@@ -174,7 +177,16 @@ function cardHtml(card, {compact = false} = {}) {
   // 同种多实例时把这一只的**性格/天分**画出来（否则两只同名卡长得一模一样，人类 09-24 投诉过）。
   // 紧凑行里不画它 —— 那一行自己已经把性格与天分写在旁边了。
   if (mine && !compact && card.individual_label) tags.push({text: card.individual_label, cls: 'tag-individual'});
-  for (const badge of card.badges ?? []) tags.push({text: badge, cls: 'tag-badge'});
+  // 2026-09-28（人类 ⑨：「锁定功能直接删」）：服务端卡片的 `badges` 里还带着「锁定」，
+  // 画出来就是一个玩家看得见、却已经没有任何入口能改的徽章 —— 页面上那个开关删了，
+  // 这里就得跟着不画（否则"删了"只删了一半）。「收藏」同理：行上已经有星标了，
+  // 再挂一个只读徽章等于同一件事说两遍（人类 ①：「信息显示冗余」）。
+  // ⚠ 只过滤**玩家这一层看的那两个词**，不动 `card.badges` 本身，也不动 `?lock=` / 工坊那条链
+  // （`tests/roco-workshop.test.js` 与验收 25/26 都读它，删数据层会顶红一片）。
+  const HIDDEN_BADGES = new Set(['锁定', '收藏']);
+  for (const badge of card.badges ?? []) {
+    if (!HIDDEN_BADGES.has(badge)) tags.push({text: badge, cls: 'tag-badge'});
+  }
   return `<article class="card${picked ? ' picked' : ''}${compact ? ' card-compact' : ''}"
    data-select="${escapeAttr(card.select)}" data-group="${escapeAttr(card.group ?? '')}"
    data-status="${picked ? 'picked' : 'idle'}">
@@ -467,6 +479,20 @@ function petBodyHtml(player, individual) {
 const STAT_LABELS = Object.freeze({hp: '生命', atk: '物攻', def: '物防', spa: '魔攻', spd: '魔防', spe: '速度'});
 
 /**
+ * 本机**多养出来**的同种只数（`state.extraRows` 是唯一事实源，box.js:342 `localRowsFor(page)`）。
+ *
+ * 2026-09-28 修的真 bug（子代理核查 + 我在 node 里实跑复现）：这里原来写的是
+ * 本机记录那条函数返回的条数（`box-individuals.js` 的 `localIndividualsOf`），而它把**服务端名单里那一页的个体也算进去**
+ * （`individualsForRows` 给每张卡都写一条本机记录）⇒ 任何种类都 ≥1 ⇒
+ * `addButton` 永远画成 disabled + 「＋ 再养一只同种（已有一只本机的）」。
+ * 也就是说**玩家永远加不了第二只**，而且按钮上的理由还是假的（他一只都没加过）。
+ * 判据实测（未修前）：`individualsForRows([own-0002])` 之后那条函数返回 **1**。
+ */
+function extraOwnedCount(species) {
+  return (state.extraRows ?? []).filter((row) => row.group === species).length;
+}
+
+/**
  * 二级详情页上的动作：刷新性格 / 刷新天分（各带剩余次数）、再养一只同种、回滚上一次、
  * 删掉这一只（**两步确认**）、收藏。全部从 `box-drawer.js` 取同一份文案。
  */
@@ -478,7 +504,7 @@ function petActionsHtml(select, individual, speciesArg = null) {
     + `${picked ? '已选入比较' : '加入比较'}</button>
    ${refreshButton('nature', individual, '刷新性格')}
    ${refreshButton('talent', individual, '刷新天分')}
-   ${addButton(species, {extraCount: localIndividualsOf(species).length})}
+   ${addButton(species, {extraCount: extraOwnedCount(species)})}
    ${undoButton(individual)}
    ${favouriteButton(individual, {favourite: isFavourite(select, card)})}
    ${removeButton(individual, {confirming: state.confirmRemove === select})}`;
@@ -972,58 +998,80 @@ function wire() {
     renderFilterMenus();
     void load({reset: true});
   });
+/**
+ * 「收藏」星标：列表行与**二级详情页**共用同一份逻辑（人类 ⑧：「这收藏功能也没用啊？做出来吧！」）。
+ *
+ * 抽出来的原因（2026-09-28 实测的真 bug）：这段原来只挂在 `#box-grid` 的监听器上，
+ * 而 `#pet-actions` 里也画了同一个按钮（`petActionsHtml` 调 `favouriteButton`）
+ * ⇒ **二级详情页上那个星标点了没反应**。
+ */
+function handleFavClick(event) {
+  const favBtn = event.target.closest?.('[data-fav]');
+  if (!favBtn) return false;
+  event.preventDefault();
+  const on = toggleFavourite(favBtn.dataset.fav);
+  $('box-status').textContent = on ? '已经收藏这一只（记在你自己这台机器上）' : '已经取消收藏';
+  renderCards();
+  if (state.view === 'pet') renderPetPage();
+  return true;
+}
+
+/**
+ * 「删掉这只」的两步确认（人类 ⑩：「删除个体的功能一定要加二次确认」）：
+ * 第一次点只把这一处换成「确定删掉？+ 取消」，**再点一次**确定才真删。
+ * 不用浏览器原生 confirm —— 无头浏览器点不动它，判据也就写不出来。
+ *
+ * ⚠ 2026-09-28 实测的真 bug（真机验收 36 号抓的）：这段原来只挂在 `#box-grid` 的监听器上，
+ * 而 `#pet-actions` 里也画了「删掉这只」（`petActionsHtml` 调 `removeButton`）
+ * ⇒ **二级详情页上那个按钮是死的**：点下去什么都不发生，判据读到的 `data-remove-confirm`
+ * 永远是 null。详情页上的刷新/回滚/再加一只都有接线，唯独漏了删除。
+ */
+function handleRemoveClick(event) {
+  const cancelBtn = event.target.closest?.('[data-remove-cancel]');
+  if (cancelBtn) {
+    event.preventDefault();
+    state.confirmRemove = '';
+    renderCards();
+    if (state.view === 'pet') renderPetPage();
+    $('box-status').textContent = '没删，什么都没动。';
+    return true;
+  }
+  const confirmBtn = event.target.closest?.('[data-remove-confirm]');
+  if (confirmBtn) {
+    event.preventDefault();
+    const removed = removeIndividual(confirmBtn.dataset.removeConfirm);
+    state.confirmRemove = '';
+    $('box-status').textContent = removed.ok
+      ? '已经删掉那一只（它只在本机记录里）'
+      : `删不了：${removed.reason}`;
+    if (removed.ok && state.pet === confirmBtn.dataset.removeConfirm) {
+      state.pet = null;
+      backToList();
+      return true;
+    }
+    renderCards();
+    if (state.view === 'pet') renderPetPage();
+    return true;
+  }
+  const removeBtn = event.target.closest?.('[data-remove]');
+  if (removeBtn) {
+    event.preventDefault();
+    state.confirmRemove = removeBtn.dataset.remove;
+    renderCards();
+    if (state.view === 'pet') renderPetPage();
+    $('box-status').textContent = '再点一次「确定删掉」才会真的删掉；点「取消」就什么都不动。';
+    return true;
+  }
+  return false;
+}
+
   const grid = $('box-grid');
   grid.addEventListener('click', (event) => {
     // 列表行里只剩两件可点的事：收藏星标、以及（本机那只有的）删掉这只（两步确认）。
     // 看详情 = 点这一行本身（`[data-detail]`）；刷新 / 回滚 / 再养一只都在二级详情页上。
-    const favBtn = event.target.closest?.('[data-fav]');
-    if (favBtn) {
-      event.preventDefault();
-      const on = toggleFavourite(favBtn.dataset.fav);
-      $('box-status').textContent = on ? '已经收藏这一只（记在你自己这台机器上）' : '已经取消收藏';
-      renderCards();
-      if (state.view === 'pet') renderPetPage();
-      return;
-    }
-    // 删掉本机加出来的那一只（人类 2026-09-28：「多一只还删不掉」）——
-    // ⚠ 人类 ⑧：「删除个体的功能一定要加二次确认」⇒ 第一次点只把这一处换成
-    // 「确定删掉？+ 取消」，**再点一次**确定才真删。不用浏览器原生 confirm（无头浏览器点不动）。
-    const cancelBtn = event.target.closest?.('[data-remove-cancel]');
-    if (cancelBtn) {
-      event.preventDefault();
-      state.confirmRemove = '';
-      renderCards();
-      if (state.view === 'pet') renderPetPage();
-      $('box-status').textContent = '没删，什么都没动。';
-      return;
-    }
-    const confirmBtn = event.target.closest?.('[data-remove-confirm]');
-    if (confirmBtn) {
-      event.preventDefault();
-      const removed = removeIndividual(confirmBtn.dataset.removeConfirm);
-      state.confirmRemove = '';
-      $('box-status').textContent = removed.ok
-        ? '已经删掉那一只（它只在本机记录里）'
-        : `删不了：${removed.reason}`;
-      if (removed.ok && state.pet === confirmBtn.dataset.removeConfirm) {
-        // 删掉的正是二级页上这一只 ⇒ 回列表（那一屏已经没有内容可看了）
-        state.pet = null;
-        backToList();
-        return;
-      }
-      renderCards();
-      if (state.view === 'pet') renderPetPage();
-      return;
-    }
-    const removeBtn = event.target.closest?.('[data-remove]');
-    if (removeBtn) {
-      event.preventDefault();
-      state.confirmRemove = removeBtn.dataset.remove;
-      renderCards();
-      if (state.view === 'pet') renderPetPage();
-      $('box-status').textContent = '再点一次「确定删掉」才会真的删掉；点「取消」就什么都不动。';
-      return;
-    }
+    // 收藏与「删掉这只」都抽成两屏共用的处理器（二级详情页上也要能用）。
+    if (handleFavClick(event)) return;
+    if (handleRemoveClick(event)) return;
     const head = event.target.closest?.('.drawer-head');
     if (head) { toggleDrawer(head.dataset.species); return; }
     const face = event.target.closest?.('[data-detail]');
@@ -1031,6 +1079,9 @@ function wire() {
   });
   // 二级详情页上的动作（它们从列表行搬过来的，见人类 ②③）。
   $('pet-view').addEventListener('click', (event) => {
+    // 二级页上也有星标与「删掉这只」（`petActionsHtml` 里都画了）——共用列表那一份逻辑。
+    if (handleFavClick(event)) return;
+    if (handleRemoveClick(event)) return;
     // 比较入口也在这一屏上：选两只**同种**个体 → 回列表那一栏点「比较这两只」。
     const cmp = event.target.closest?.('[data-cmp]');
     if (cmp) {

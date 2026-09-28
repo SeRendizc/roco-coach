@@ -332,7 +332,11 @@ export function drawerHtml(group, {individuals = {}, cardHtml = defaultCardHtml,
   // ⚠ 2026-09-27：头的「N 个个体」原来只数服务端那一页的卡片，加出来的个体不进这个数 ——
   // 于是"1 个个体"下面画着两行。数的是**画出来的行数**（`data-count` 同步）。
   const count = rows.length;
-  const summary = groupSummary(rows, individuals);
+  // 2026-09-28（人类 ⑥：「另外第一排和第二配信息显示冗余」）：组头摘要说的是
+  // **天分总和最高的那一只**（`groupSummary` 挑一只），而它挑中的那一行就在下面逐字写着
+  // 同样的「性格 … · 天分最高 … · Lv.60」—— 展开时这是同一件事说两遍。
+  // 收起时摘要仍然要画（否则收起来就什么都看不见了）；展开时交给行自己说。
+  const summary = group.expanded ? '' : groupSummary(rows, individuals);
   const head = `<button class="drawer-head" data-species="${esc(group.species_id)}" `
     + `aria-expanded="${group.expanded ? 'true' : 'false'}">
    <span class="drawer-name">${esc(group.name)}</span>

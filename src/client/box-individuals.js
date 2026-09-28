@@ -51,6 +51,22 @@ function normalizeStored(one) {
     for (const [key, value] of Object.entries(out.talent)) talent[key] = unwrap(value);
     out.talent = talent;
   }
+  // 2026-09-28 新增（人类：「我的精灵统一在 60 级，你给我把 60 删了保留 100 啥意思？数值也是 60 级的数值啊！」）：
+  // 等级也要归一。旧版 `individualFromInstance` 默认 `{level: 100}`、旧版行里还硬编码过 `Lv.100`，
+  // 于是**2026-09-28 之前写进 localStorage 的记录**带着 100 复活 —— 而 `individualFor` 命中旧记录是
+  // **原样返回**的，页面上就出现「Lv.100」与紧跟其后的「等级上限 60（官方口径）」并排，
+  // 正是他说的"同时出现 60 和 Lv.100"。闸门判据抓不到：验收在跑之前会先
+  // `localStorage.removeItem('roco.box.individuals.v1')`（browser-box-acceptance.mjs），
+  // 玩家自己浏览器里的旧记录**永远不会出现在判据里**（那是假绿）。
+  // 归一成 60，与 `individualFor` 里 `individualFromInstance(..., {level: 60})` 同源
+  // （这个文件里不引 box.js 的 `LEVEL_CAP`：它是页面层的常量，模块底不该反向依赖页面）。
+  if (Number(out.level) !== 60) {
+    out.level = 60;
+    // `level_source` 是开发者抽屉里那一行（`box-drawer.js` 的 `data-level-source`）。
+    // 不同步改它，属性里就还写着旧版那句话（实测旧串是「default-100（…默认 100 级）」）——
+    // 玩家看不见，但下一个读它的人会以为这一条的等级不是 60。改成如实说明这次迁移。
+    out.level_source = 'migrated-60（旧记录按 100 级档写的，已按 60 归一）';
+  }
   return out;
 }
 
