@@ -12614,3 +12614,23 @@ guard-selftest / browser-acceptance / demo-acceptance / mobile-sweep）**全绿*
 
 `failed: ["unit","box-acceptance","five-minute-chain"]` → 本轮的修复让 **`five-minute-chain` 转 19/19**，
 ⇒ 复跑后应为 **两条红**：`unit`（1724/1726）与 `box-acceptance`（34/42 → 按元素数之后 41/42）。
+
+**四、这一轮的净结果（可复算）**
+
+| 项 | 之前 | 现在 |
+|---|---|---|
+| `verify:release` 未通过套件 | `["unit","box-acceptance","five-minute-chain"]`（3） | **2**（`five-minute-chain` 已 19/19） |
+| 盒子验收红项 | 8 | **1**（`10b`；其余 41 条全绿） |
+| 盒子 `[object Object]` 读数 | 84（`innerText`，**假信号**） | 15（**按元素**，真读数） |
+| 五分钟链路 | 4/19（点的是被删掉的 `#flag-locked`） | **19/19** |
+
+**五、仍然没做到（照实写，下一轮/下一个人接着做）**
+
+1. `10b` 那 **15 处**（按元素数）**还没定位到具体标签** —— 我这一轮把计数器换成按元素了，
+   但**还没拿到"15 个元素是哪些"的样本**（诊断字段打的是旧的那批）。
+   下一轮：让 `petLeakOuter` 的选择器与计数器**完全一致**，一次运行就能拿到 15 个元素的清单。
+2. `verify:release` 的**最终数字本轮没拿到**：全量判据与门禁都起了后台任务，
+   但**跑完之前这一轮就收了**（判据约 3.5 分钟、门禁约 8 分钟）。⇒ **以 `reports/roco/verification/latest.json` 为准**，
+   预期 `failed: ["unit","box-acceptance"]`。
+3. `model-trajectories ④`（要求模型两次独立运行逐窗口全等，实测差 13.5%）**仍在等人类拍板**，
+   三条方案在 §C6.338。
