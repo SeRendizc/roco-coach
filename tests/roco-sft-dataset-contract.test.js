@@ -106,3 +106,67 @@ test('反证：把 `inspect_training` 塞回一个目标里 ⇒ 判据 ① 必�
   assert.ok(typeof target.tool === 'string' && !allowed.has(target.tool),
     '这个伪造目标必须被判为"不在契约里"——否则判据 ① 抓不到幽灵工具');
 });
+
+// ── 种子集（Codex 4B 前置第 3 项）──────────────────────────────────────────────
+//
+// 「先交 **50–100 条真实场景样本与执行回执**，再扩为新数据。meta 中保留
+//   `group_id/source/contract_version/reviewed`；**按原始战斗/队伍/模板族分割**，
+//   不能随机把改写同源案例分到 test。」
+// 并明确：「**ready 标记必须关联真实完成证据，不得为了让脚本通过虚填。**」
+const SEED = join(ROOT, 'reports', 'roco', 'sft-v9-seed');
+const readSeed = () => ['train', 'valid', 'test'].flatMap((split) =>
+  readFileSync(join(SEED, `${split}.jsonl`), 'utf8').split('\n').filter((l) => l.trim())
+    .map((l) => ({split, row: JSON.parse(l)})));
+
+test('种子集：50–100 条、每条带 meta 四键、reviewed 是**挣来的**', (t) => {
+  if (!existsSync(join(SEED, 'train.jsonl'))) { t.skip('还没跑过 build-sft-seed.mjs --write'); return; }
+  const rows = readSeed();
+  assert.ok(rows.length >= 50 && rows.length <= 100, `条数要在 50–100，实际 ${rows.length}`);
+  for (const {split, row} of rows) {
+    const meta = row.meta ?? {};
+    for (const key of ['group_id', 'source', 'contract_version', 'reviewed']) {
+      assert.ok(meta[key] !== undefined && meta[key] !== '' && meta[key] !== null,
+        `${split} 缺 meta.${key}：${JSON.stringify(meta).slice(0, 120)}`);
+    }
+    assert.equal(meta.reviewed, true, 'reviewed 必须是 true（且它对应 R1–R7 的真实回执核对）');
+    // reviewed 不许是空口：每条都得带得出**执行回执**或"0 次调用后停止"的真实记录
+    assert.ok(meta.receipt && typeof meta.receipt === 'object' && meta.receipt.ok === true,
+      `${split} 的 reviewed 没有回执支撑：${JSON.stringify(meta.receipt)}`);
+    // 目标必须是契约里的工具，或 stop
+    const target = JSON.parse(row.messages.find((m) => m.role === 'assistant').content);
+    if (target.tool) assert.ok(allowed.has(target.tool), `目标工具 ${target.tool} 不在契约里`);
+    else assert.equal(target.stop, true, '目标只能是工具调用或 stop');
+  }
+});
+
+test('种子集：**按族分割** —— 跨分片组重叠 0、同问句重叠 0，且 stop 与工具两类都有', (t) => {
+  if (!existsSync(join(SEED, 'train.jsonl'))) { t.skip('还没跑过 build-sft-seed.mjs --write'); return; }
+  const rows = readSeed();
+  const groups = {};
+  const prompts = {};
+  const kinds = {};
+  for (const split of ['train', 'valid', 'test']) { groups[split] = new Set(); prompts[split] = new Set(); }
+  for (const {split, row} of rows) {
+    groups[split].add(row.meta.group_id);
+    prompts[split].add(JSON.parse(row.messages.find((m) => m.role === 'user').content).message);
+    const target = JSON.parse(row.messages.find((m) => m.role === 'assistant').content);
+    const kind = target.stop ? 'stop' : target.tool;
+    kinds[kind] = (kinds[kind] ?? 0) + 1;
+  }
+  for (const [a, b] of [['train', 'valid'], ['train', 'test'], ['valid', 'test']]) {
+    const shared = [...groups[a]].filter((g) => groups[b].has(g));
+    assert.deepEqual(shared, [], `${a}/${b} 有同族案例被分到两边（Codex 明确禁止）：${shared.slice(0, 5)}`);
+    const dup = [...prompts[a]].filter((p) => prompts[b].has(p));
+    assert.deepEqual(dup, [], `${a}/${b} 有完全相同问句：${dup.slice(0, 3)}`);
+  }
+  // 两类都要有 —— 只按族名排序取前 N 条会灌成单一类（首版实测 52 条全是 query_rules）
+  assert.ok(kinds.stop > 0 && Object.keys(kinds).some((k) => k !== 'stop'),
+    `stop 与工具两类都要有，实际 ${JSON.stringify(kinds)}`);
+});
+
+test('种子集：Codex 的审计脚本在**严格档**下必须 errorCount 0（v8 在同档是 2875）', (t) => {
+  if (!existsSync(join(SEED, 'train.jsonl')) || !existsSync(AUDIT)) { t.skip('种子或审计脚本不在'); return; }
+  const raw = execFileSync(process.execPath, [AUDIT, SEED, '--new-data'], {cwd: ROOT, encoding: 'utf8'});
+  const report = JSON.parse(raw);
+  assert.equal(report.errorCount, 0, `严格档报错：${JSON.stringify(report.errors.slice(0, 5))}`);
+});

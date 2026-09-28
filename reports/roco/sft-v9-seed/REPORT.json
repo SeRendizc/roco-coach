@@ -1,0 +1,48 @@
+{
+ "artifact": "sft-v9-seed",
+ "why": "Codex 4B 前置第 3 项：先交 50–100 条**真实场景样本与执行回执**，meta 保留 group_id/source/contract_version/reviewed，并按族分割",
+ "source_file": "tests/evals/agent-trajectories-model-v1.jsonl",
+ "source_rows": 1752,
+ "contract_version": "tools:97a79a115da6",
+ "contract_tools": [
+  "read_state",
+  "search_rules",
+  "compare_actions",
+  "simulate_branch",
+  "read_match",
+  "read_evidence",
+  "read_last_turn",
+  "query_rules",
+  "evaluate_team",
+  "compare_team_change",
+  "plan_actions",
+  "summarize_battle"
+ ],
+ "review_criteria": [
+  "R1a 0 次调用（模型决定 stop）—— 这也是真实决策，必须能进种子",
+  "R1b 恰好一次工具调用",
+  "R2 该次调用的执行回执 ok===true（真实执行回执）",
+  "R3 工具名在 TOOL_CONTRACTS 里",
+  "R4 参数过产品自己的 validToolArgs",
+  "R5 有非空最终回答 reply",
+  "R6 录制里的 checks（若有）全部通过",
+  "R7 (问句,目标) 去重后只留一条"
+ ],
+ "reviewed_how": "R1–R7 每条都能对着**真实执行回执**核（receipt.ok / evidence_ids / validToolArgs / checks），不是人工盖章",
+ "candidates_after_review": 216,
+ "rejected": {
+  "R7 重复的(问句,目标)": 930,
+  "R6 checks 有未通过项": 512,
+  "R2 执行回执 ok!==true": 34,
+  "R5 没有最终回答": 60
+ },
+ "seeded": 90,
+ "per_split": {
+  "train": 51,
+  "valid": 20,
+  "test": 19
+ },
+ "group_overlap_across_splits": [],
+ "exact_prompt_overlap_across_splits": [],
+ "groups_used": 88
+}
