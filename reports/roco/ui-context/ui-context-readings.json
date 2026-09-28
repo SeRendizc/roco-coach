@@ -1,10 +1,10 @@
 {
  "base": "http://127.0.0.1:8765/",
- "started_at": "2026-09-28T17:58:56.266Z",
+ "started_at": "2026-09-28T18:05:58.060Z",
  "source_snapshot_before": {
-  "xiaoya_js": "05dd23d4865f",
+  "xiaoya_js": "893b3d9db5e7",
   "box_js": "73a5e027b472",
-  "team_workshop_js": "426441e88971"
+  "team_workshop_js": "09ba7708df55"
  },
  "steps": {
   "① 六槽焦点与默认图鉴行": {
@@ -469,9 +469,9 @@
   },
   "①b 焦点消费方合约探针（合成行，非产品路径）": {
    "chipAfterClickBeforeAsk": {
-    "text": "没在看具体的某一只 —— 问\"这只\"我会先请你点开一只。",
-    "focus": "",
-    "live": "no"
+    "text": "正在看：迪莫（正在读它的培养数据…）",
+    "focus": "own-0004",
+    "live": "yes"
    },
    "chipAfterAsk": {
     "text": "正在看：迪莫 · 性格 专注 · 4 个技能",
@@ -666,7 +666,7 @@
   },
   "④b 正文加粗的渲染": {
    "bodyBoldCount": 3,
-   "bodyBoldDisplayBlock": 3,
+   "bodyBoldDisplayBlock": 0,
    "roleLabelDisplay": "block",
    "sample": [
     "没有加点",
@@ -682,18 +682,10 @@
   "①d 未拥有的行 1 行、data-tw-instance 全为空 ✔",
   "①b 是用**合成行**在 xiaoya.html 上打的合约探针：它只证明\"点击监听 + 焦点 provider 这条合约通\"，不证明工作台页面上的真实集成（工作台在 roco.html 的 shadow root 里，而这页没有小芽实例 —— 见 ① 的 afterSlotClick 读数）。"
  ],
- "findings": {
-  "小芽回答里的加粗被拆成整行": {
-   "evidence": "正文里 3 个 <strong>，其中 3 个 computed display=block",
-   "where": "src/client/style.css:576 `.xy-entry strong{display:block}`（本意是角色名那一个）+ src/coach/experience.js:47 `markdown()` 把 `**x**` 变 `<strong>`",
-   "visible": "截图 ui-07：「这一版 / 没有加点 / ：培养就是改 / 性格 / 与 / 天分」被拆成 6 行",
-   "repro": "xiaoya.html 问「怎么培养迪莫？」→ 看小芽那一条的换行"
-  }
- },
  "source_snapshot_after": {
-  "xiaoya_js": "05dd23d4865f",
+  "xiaoya_js": "893b3d9db5e7",
   "box_js": "73a5e027b472",
-  "team_workshop_js": "426441e88971"
+  "team_workshop_js": "09ba7708df55"
  },
- "finished_at": "2026-09-28T17:59:19.479Z"
+ "finished_at": "2026-09-28T18:06:21.505Z"
 }
