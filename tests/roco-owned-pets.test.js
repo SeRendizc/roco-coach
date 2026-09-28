@@ -95,13 +95,14 @@ test('真产物：owned 实例过全部 16 组判据（2026-09-28 起是 49 个�
   assert.deepEqual(result.problems, [], '真产物必须过全部判据');
   assert.equal(result.checks.length, CHECK_NAMES.length);
   for (const check of result.checks) assert.ok(check.ok, `${check.check} 应当通过`);
-  // ⚠ 2026-09-28 改钉：实例数从 48 变 **49** —— 人类批准加了一对同种演示个体（`own-0049`）。
-  // 这里不写死数字，而是断言"物种数 == 下限，且多出来的那**一只**必须是显式标注的演示个体"：
-  // 这样它既守住了"不许灌水"，也不会在人类再批一对时假装没变。
-  assert.equal(result.facts.instances, result.facts.species + 1,
-    `实例数应当是物种数 + 1（那一只是演示同种第二只），实际 ${result.facts.instances}/${result.facts.species}`);
+  // ⚠ 2026-09-28 **第二次改钉**（人类：「重复精灵不要了，把铠甲虫还原回来」+「每种精灵只允许有一只」）：
+  // 上一版是 `instances == species + 1`（多出来的那一只是演示同种第二只 `own-0049`），
+  // 现在按 human-decisions 里写好的 rollback 把那一只回收了 ⇒ **回到 `instances == species`**。
+  // 判据仍然不写死数字（守住"不许灌水"这条原意）：**一个物种一只**，一只演示个体都不许有。
+  assert.equal(result.facts.instances, result.facts.species,
+    `实例数应当**等于**物种数（一个物种一只），实际 ${result.facts.instances}/${result.facts.species}`);
   const demos = dataset.instances.filter((one) => one.synthetic_demo === true);
-  assert.equal(demos.length, 1, `显式标注的演示个体必须恰好 1 只，实际 ${demos.length}`);
+  assert.equal(demos.length, 0, `演示个体必须为 0（那一对已回收），实际 ${demos.length}`);
   assert.ok(result.facts.instances >= INSTANCE_TARGET, '实例数不得低于下限');
   assert.equal(result.facts.battleBuilds, result.facts.instances, '每只实例都要有一条 battle_build');
   assert.equal(result.facts.provenanceMismatches, 0);
@@ -174,10 +175,11 @@ test('真产物：四个技能逐个都在该 species 的学习表池（native �
   assert.equal(checked, dataset.instances.length * 4);
   // 差异**不许消失**：这些非 native 引用是「引擎真的会装上血统/石系技能」的证据，
   // 谁把它们悄悄删掉（或把口径偷偷改回 native-only）都要在这里留下痕迹。
-  // ⚠ 2026-09-28 改钉：**46 → 47**。演示个体 `own-0049` 复用的是 own-0001 的那四个技能，
-  // 其中**一个是非 native（血脉/技能石）** ⇒ 非 native 引用多 1 条。判定依据就是上面那句
-  // "引擎真的会装上血统/石系技能"，多出来的这 1 条同样是**真实引用**（不是注水）。
-  assert.equal(outsideNative, 47, '非 native（blood/stones）技能引用数变了 —— 请连同口径一起复核');
+  // ⚠ 2026-09-28 **第二次改钉**：**47 → 46**。上一版多出来的那 1 条来自演示个体 `own-0049`
+  // （它复用 own-0001 的四个技能，其中一个是非 native）；那一只按 rollback 回收之后这 1 条就没了。
+  // 判据的原意一个字没变：这些非 native 引用是「引擎真的会装上血统/石系技能」的证据，
+  // 谁把它们悄悄删掉（或把口径偷偷改回 native-only）都要在这里留下痕迹。
+  assert.equal(outsideNative, 46, '非 native（blood/stones）技能引用数变了 —— 请连同口径一起复核');
 });
 
 test('真产物：BattleBuild.ordered_skills **逐位**等于引擎 loadout（C20；2026-09-25 人类「配招这个你得修好」）', () => {
@@ -563,32 +565,27 @@ test('RC-203 报告：存在、可解析、逐条给出判据文本与实际值�
   assert.equal(report.artifact.dataset_hash, dataset.dataset_hash);
 });
 
-test('⑬ 人类批准的那**一对**同种个体：只许一只、必须标注、掷点后真的不同', () => {
-  // 由来：2026-09-24 人类说过「重复的删掉」（当时 80 只里有 32 只是演示造的第二个个体 ⇒ 编数据）。
-  // 2026-09-28 他说「同种你可以做一对测试一下」⇒ 放宽到**一对**，但必须可追、可退、不灌水。
+test('⑬ 演示用的同种第二只**已经回收**（人类 2026-09-28：「重复精灵不要了」）', () => {
+  // 演变（改钉不删，记在这里）：
+  //   · 2026-09-24 人类：「重复的删掉」（当时 80 只里 32 只是演示造的第二个个体 ⇒ 编数据）；
+  //   · 2026-09-28 上午：「同种你可以做一对测试一下」⇒ 放宽到**一对**（own-0049，须显式标注）；
+  //   · 2026-09-28 晚些：先「加入比较不是删了吗？」，再「重复精灵不要了，把铠甲虫还原回来」
+  //     +「每种精灵只允许有一只」⇒ 那一对存在的唯一理由（同种比较）没了，按 human-decisions
+  //     里写好的 rollback 回收：删实例 + 把 MAX_SAME_SPECIES_GROUPS 调回 0。
+  // 判据换了方向，但**原意（不许灌水、不许有来历不明的第二只）一个字没改**：
+  // 现在钉的是「一只演示个体都不许有，且每个物种恰好一只」。
   const demos = dataset.instances.filter((one) => one.synthetic_demo === true);
-  assert.equal(demos.length, 1, `显式标注的演示个体必须恰好 1 只（实际 ${demos.length}）`);
-  const demo = demos[0];
-  // 同种成对：它与**同一物种**的另一只构成唯一那一组
-  const sameSpecies = dataset.instances.filter((one) => one.species_id === demo.species_id);
-  assert.equal(sameSpecies.length, 2, '演示个体必须与另一只同种（成一对）');
-  assert.equal(new Set(dataset.instances.map((one) => one.species_id)).size,
-    dataset.instances.length - 1, '全部实例里只许多出这一只（物种数 = 实例数 − 1）');
-  // provenance：出处是**人类决定**那份 JSON，且 pointer 能解析到那一条
-  const entry = (demo.provenance ?? []).find((row) => row.source_scope === 'human_decision');
-  assert.ok(entry, '演示个体必须有一条 human_decision 出处');
-  assert.equal(entry.artifact_path, 'data/roco/human-decisions.json');
-  const decisions = JSON.parse(readFileSync('data/roco/human-decisions.json', 'utf8'));
-  const hit = entry.pointer.split('.').reduce((node, key) => (node ?? {})[key], decisions);
-  assert.ok(hit, `出处 pointer ${entry.pointer} 解析不到（人类决定那份 JSON 里没有这一条）`);
-  assert.match(String(hit.verbatim ?? ''), /同种你可以做一对测试一下/, '要把人类原话留着');
-  assert.match(String(hit.rollback ?? ''), /MAX_SAME_SPECIES_GROUPS/, '要写清怎么退场');
-  // 掷点后两只**真的不同**（否则"能不能比出高低"这件事没被验到）
-  const rolls = sameSpecies.map((one) => {
-    const row = individualFromInstance(one, {level: one.level ?? 60});
-    return `${row.nature}|${JSON.stringify(row.talent)}`;
-  });
-  assert.notEqual(rolls[0], rolls[1], '同种两只掷出来的性格/天分必须不同');
-  assert.equal(dataset.counts.same_species_groups, 1);
-  assert.equal(dataset.counts.same_species_groups_with_difference, 1);
+  assert.equal(demos.length, 0, `演示个体必须为 0（rollback 之后），实际 ${demos.length}`);
+  const bySpecies = new Map();
+  for (const one of dataset.instances) {
+    bySpecies.set(one.species_id, (bySpecies.get(one.species_id) ?? 0) + 1);
+  }
+  const doubled = [...bySpecies.entries()].filter(([, n]) => n > 1);
+  assert.deepEqual(doubled, [],
+    `每个物种只许一只（人类：「每种精灵只允许有一只」），实际多只的：${JSON.stringify(doubled)}`);
+  // 回滚记录本身要在 human-decisions 里（可追、可退这条规矩不变）
+  const decisions = JSON.parse(readFileSync(
+    new URL('../data/roco/human-decisions.json', import.meta.url), 'utf8'));
+  const blob = JSON.stringify(decisions);
+  assert.match(blob, /remove-same-species-demo-pair/, '回收这件事本身要记进 human-decisions（可追、可退）');
 });

@@ -176,9 +176,11 @@ export function individualRowChips(individual, {select = '', multi = false} = {}
   }
   const tier = base ? talentTierOf({talent: base, nature}) : null;
   const hasValue = base ? Object.values(base).some((value) => Number(value) > 0) : false;
+  // 2026-09-28（人类：「就说 一般般的天分 不就好了？不需要前面加天分俩字」）：
+  // 档名本身就是「一般般的天分」这种完整说法 ⇒ **前面不再加「天分档位」**。
   chips.push(tier?.label
-    ? chipSpan(`天分档位 ${tier.label}`, 'known')
-    : chipSpan(hasValue ? '天分档位 认不出' : '天分 待导出', hasValue ? 'known' : 'absent'));
+    ? chipSpan(tier.label, 'known')
+    : chipSpan(hasValue ? '天分认不出' : '天分待导出', hasValue ? 'known' : 'absent'));
   const id = String(select || individual?.individual_id || '');
   const suffix = id.match(/-(b|c|d|e|f)$/)?.[1] ?? '';
   if (suffix) chips.push(chipSpan(`第 ${suffix.toUpperCase()} 只`, 'known'));
@@ -352,7 +354,8 @@ export function drawerHtml(group, {individuals = {}, cardHtml = defaultCardHtml,
   const head = `<button class="drawer-head" data-species="${esc(group.species_id)}" `
     + `aria-expanded="${group.expanded ? 'true' : 'false'}">
    <span class="drawer-name">${esc(group.name)}</span>
-   <span class="drawer-types">${(group.types ?? []).map((type) => `<span class="chip">${esc(type)}</span>`).join('')}</span>
+   <span class="drawer-types">${(group.types ?? []).map((type, index) => (index ? '<span class="type-sep">｜</span>' : '')
+     + `<span class="chip">${esc(type)}</span>`).join('')}</span>
    ${count > 1 ? `<span class="drawer-count">${count} 个个体</span>` : ''}
    ${summary ? `<span class="drawer-summary" data-summary="yes">${esc(summary)}</span>` : ''}
   </button>`;

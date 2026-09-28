@@ -468,61 +468,17 @@ export function buildOwnedPets({root = ROOT} = {}) {
     }
   }
 
-  // ── 演示用的**同种第二个个体**（人类 2026-09-28：「同种你可以做一对测试一下」）──────────
-  // 为什么需要它：`compareOwnedPets()` / 教练的"两个个体差在哪"要**同种**才有意义，
-  // 而 09-24 把实例砍成"一人一只"之后，真实数据里根本没有同种对 ⇒ 那条路只能靠判据夹具验，
-  // 真机上永远验不到（§C6.331 就是这么抓出"同名不同种当成两个个体比"那个错的）。
-  // 所以补**一对**，并且：
-  //   · 只有这一对（`MAX_SAME_SPECIES_GROUPS = 1`）；
-  //   · `synthetic_demo: true` + provenance 写明**游戏里不存在**（不冒充真实存档）；
-  //   · 性格/天分是**按新 instance_id 掷出来的**（与第一只不同）⇒ 两只真的可比。
-  // 出处指向**人类决定的记录**（`data/roco/human-decisions.json`）—— 它是 JSON，
-  // 所以 provenance 的 pointer 能真解析到那一条（台账是 markdown，pointer 解析不了，踩过）。
-  const DECISIONS_PATH = 'data/roco/human-decisions.json';
-  const decisionsSha = (() => {
-    try {
-      return createHash('sha256').update(readFileSync(join(root, DECISIONS_PATH))).digest('hex');
-    } catch {
-      return null;
-    }
-  })();
-  if (!decisionsSha) throw new Error(`读不到 ${DECISIONS_PATH}：合成个体那条 provenance 的出处就没了`);
-  const demoSource = instances[0];
-  const demo = {
-    ...deepClone(demoSource),
-    instance_id: 'own-0049',
-    level: LEVELS[0],                                   // 60：与其它个体同档（人类 2026-09-27 口径）
-    synthetic_demo: true,
-    favourite: false,
-    locked: false,
-    provenance: [
-      ...(Array.isArray(demoSource.provenance) ? deepClone(demoSource.provenance) : []),
-      {
-        // 这一条的"出处"就是**人类的决定本身**：台账里那一节 + 它的 sha256（现算）。
-        source_id: 'HUMAN-2026-09-28',
-        source_scope: 'human_decision',
-        artifact_path: DECISIONS_PATH,
-        artifact_sha256: decisionsSha,
-        // pointer 走**点号路径**（校验器 `resolvePointer` 的语法）—— 必须真的解析到那一条
-        pointer: 'decisions.2026-09-28-same-species-demo-pair',
-        note: '演示用的**同种第二个个体**：人类 2026-09-28 批准；**游戏里并不存在这一只**，'
-          + '只为让"同种两个个体比较"在真机上可验（性格/天分按新 instance_id 独立掷出）。'
-          + '若哪天不需要它了：删掉这一段 + own-0049，并把 MAX_SAME_SPECIES_GROUPS 调回 0。',
-      },
-    ],
-  };
-  demo.unknown_fields = expectedInstanceUnknownFields(demo);
-  demo.build_hash = instanceBuildHash(demo);
-  instances.push(demo);
-  battleBuilds.push({
-    ...deepClone(battleBuilds[0]),
-    build_id: 'build-own-0049',
-    owned_pet_instance_id: 'own-0049',
-    build_hash: '',
-  });
-  const demoTail = battleBuilds[battleBuilds.length - 1];
-  demoTail.unknown_fields = expectedBattleBuildUnknownFields(demoTail);
-  demoTail.build_hash = battleBuildHash(demoTail);
+  // ── 演示用的同种第二个个体：**2026-09-28 回收掉了** ─────────────────────────
+  //
+  // 当初为什么要它：`compareOwnedPets()` 那条路要**同种**才有意义，而"一人一只"之后
+  // 真实数据里没有同种对 ⇒ 只能靠判据夹具验、真机永远验不到（§C6.331 抓出的那个错）。
+  //
+  // 人类 2026-09-28 逐字（这一轮）：「**重复精灵不要了，把铠甲虫还原回来**」+「每种精灵只允许有一只」，
+  // 并且在此之前已经先说了「加入比较不是删了吗？」⇒ **它存在的理由（同种比较）整个没有了**。
+  // 于是按当初就在 `data/roco/human-decisions.json` 里写好的 rollback 执行：
+  //   删掉 own-0049 + 它的 synthetic_demo provenance，把 `MAX_SAME_SPECIES_GROUPS` 调回 0。
+  // ⚠ 这一段的删除本身也记进 human-decisions（`2026-09-28-remove-same-species-demo-pair`），
+  // 免得下一个人看到"没有同种对"又去造一对。
 
   const counts = {
     instances: instances.length,

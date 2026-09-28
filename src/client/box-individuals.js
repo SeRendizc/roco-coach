@@ -7,6 +7,7 @@
 // 诚实边界：性格/天分现在**没有真实数值**（小黑盒那份还没导出）⇒ 缺的一律 null，
 // 页面上显示"待导出"；刷新是玩家自己的动作，存在他自己的浏览器里。
 import {refresh, individualFromInstance, canUndo, undoLastRefresh, duplicateIndividual,
+  rollNatureAndTalent,
   undoUsed, lastHistoryOf} from '../coach/individuals.js';
 
 const STORE_KEY = 'roco.box.individuals.v1';
@@ -60,6 +61,23 @@ function normalizeStored(one) {
   // 玩家自己浏览器里的旧记录**永远不会出现在判据里**（那是假绿）。
   // 归一成 60，与 `individualFor` 里 `individualFromInstance(..., {level: 60})` 同源
   // （这个文件里不引 box.js 的 `LEVEL_CAP`：它是页面层的常量，模块底不该反向依赖页面）。
+  // 2026-09-28（人类指着截图：「天分为啥还是什么认不出？不是里面都能正常显示什么天分吗？」
+  // 「就说 一般般的天分 不就好了？」）：**天分为空的旧记录要补回来**。
+  // 根因查清了：不是算不出来 —— 拿同一份数据从种子化掷点算，四档都出得来；
+  // 是浏览器里那些**老记录**的天分是 `{value:null}` 那个年代的产物（`normalizeStored` 把它拆成 null），
+  // 六项全 null ⇒ `talentTierOf` 只能判「缺项 ⇒ 认不出」。
+  // 修法与等级那条同一套：**读的时候按这一只的编号把种子化那份补回去**（`rollNatureAndTalent`
+  // 与 `individualFromInstance` 用的是同一个来源），并**写回** localStorage，别只修内存里那一份。
+  // 判据：只要记录里一条天分都没激活（全 null 或全 0），就按掷点补 —— 掷点本来就是这一层的
+  // 既定口径（`talent_source` 会标 `rolled`），补完档位就算得出来。
+  const talentRow = out.talent && typeof out.talent === 'object' ? out.talent : null;
+  const activated = talentRow ? Object.values(talentRow).filter((v) => Number(v) > 0).length : 0;
+  if (!activated) {
+    const rolled = rollNatureAndTalent(String(out.individual_id ?? one.individual_id ?? ''));
+    out.talent = rolled.talent;
+    if (!out.nature) out.nature = rolled.nature;
+    out.talent_source = out.talent_source ?? 'rolled（原版随机生成；这里是按编号种子化补的，不是游戏里的真值）';
+  }
   if (Number(out.level) !== 60) {
     out.level = 60;
     // `level_source` 是开发者抽屉里那一行（`box-drawer.js` 的 `data-level-source`）。
@@ -87,6 +105,29 @@ function individualFor(all, card) {
   }, {level: 60});
   all[card.select] = made;
   return made;
+}
+
+/**
+ * 一次性清掉**已下线功能留下的产物**：`-b`/`-c`/… 后缀那些本机多出来的个体。
+ *
+ * 人类 2026-09-28：「重复精灵不要了，把铠甲虫还原回来」+「每种精灵只允许有一只」。
+ * `＋再养一只同种` 已经下线（按钮、监听、生成器都删了）⇒ 它造出来的记录既删不掉也加不回来，
+ * 留着只会让页面画出"第二只"（截图里铠甲虫显示「4 个个体」）。
+ *
+ * ⚠ 只删**带那个后缀**的：服务端那 49 只的记录（键是 `own-XXXX`）一个都不动 ——
+ * 它们存着性格/天分/刷新次数，删了就真丢了。
+ * 返回删掉的条数（调用方可以照实说一句；现在页面不显示它，判据与排障用得上）。
+ */
+export function pruneRetiredExtras() {
+  const all = loadAll();
+  const kept = {};
+  let removed = 0;
+  for (const [key, one] of Object.entries(all)) {
+    if (/-[b-f]$/.test(String(key))) { removed += 1; continue; }
+    kept[key] = one;
+  }
+  if (removed) saveAll(kept);
+  return removed;
 }
 
 /** 这一页的行 → 个体记录表（键是行上的 `select`）。 */

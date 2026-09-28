@@ -17,6 +17,14 @@
       "rollback": "删掉 instances 里的 own-0049 + 它的 synthetic_demo provenance，把 MAX_SAME_SPECIES_GROUPS 调回 0，重跑 npm run roco:build-owned（见 build-owned-pets.mjs 的 HELP）",
       "ledger": "§C6.333"
     },
+    "2026-09-28-remove-same-species-demo-pair": {
+      "at": "2026-09-28",
+      "verbatim": "重复精灵不要了，把铠甲虫还原回来",
+      "allows": "按 `2026-09-28-same-species-demo-pair` 自己写好的 rollback 执行：删掉 owned-pets 里的 own-0049 与它的 synthetic_demo provenance，把 MAX_SAME_SPECIES_GROUPS 调回 0 ⇒ 铠甲虫回到一只（个体总数 49 → 48）",
+      "why": "那一对存在的唯一理由是「同种两个个体比较」；人类先说「加入比较不是删了吗？」，这一轮又说「重复精灵不要了」⇒ 理由没了，演示数据也该回收",
+      "limits": "只回收这一只合成个体；**不碰**其它 48 只的真实记录（性格/天分/刷新次数都在本机与产物里）",
+      "ledger": "§C6.357"
+    },
     "2026-09-28-talent-tiers-and-five-star-talent-scale": {
       "at": "2026-09-28",
       "verbatim": "天分分为：一般般的天分（激活一条个体值），还不错的天分（激活两条个体值），相当好的天分（激活三条个体值），了不起的天分（激活三条个体值，性格加成和天分三个加成正好有重合好像就是了不起）；另外升星系统虽然不做，但是还是默认做成5星，然后个体值都突破，比如原来是+10，五星是+60",

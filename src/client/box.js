@@ -33,11 +33,16 @@ import {drawerListHtml, formatTraitValue, refreshButton, undoButton, removeButto
 //     后者是「＋再养一只同种」用的，而那个功能整个下线了（人类：「每种精灵只允许有一只」）。
 //   · 顺带删掉了那个「本机已有几只」的计数函数（它只为那个按钮服务）。
 import {individualsForRows, refreshIndividual, undoIndividual,
-  localCardById, localIndividualsGrouped, removeIndividual} from './box-individuals.js';
+  localCardById, localIndividualsGrouped, removeIndividual,
+  pruneRetiredExtras} from './box-individuals.js';
 // 60 级面板：**数字只有一个来源**（`coach/talent.js` 的 `panelOf`），这一层只负责把它画出来。
 // 本仓的 60 级公式是游戏导出配置表那一套（PVP 一速榜 9/9 实测），**不是**宝可梦那套 ——
 // 同一只音速犬宝可梦式算速度 153、这条算 331，混用会把数算飞。
 import {panelOfIndividual} from '../coach/individuals.js';
+// 换技能面板（2026-09-28 人类：「换技能还是没实装是吧？实装一下」）。
+// ⚠ 必须是**行首静态 import**：动态/条件引入收不进浏览器模块图 ⇒ 资源 404 ⇒ 整页白屏
+//（规则见 src/server/index.js 的模块图那段）。
+import {mountLoadout} from './box-loadout.js';
 // 刷新之后「落在哪一项」那句话只有一处（`lastRefreshNote`）——页面只负责显示。
 import {lastRefreshNote} from '../coach/individuals.js';
 
@@ -107,8 +112,7 @@ const state = {
   selected: [],        // [{select, group, name}]，最多两只（比较用）
   lastDev: null,
   totals: {mine: null, catalog: null},
-  view: 'list',        // 'list' = 首层列表；'compare' = 比较二级页；'pet' = 个体详情二级页
-  compareGroups: {},   // 比较页上两只各属于哪个物种（回执/详情里给的）：交接去重要用
+  view: 'list',        // 'list' = 首层列表；'pet' = 个体详情二级页（比较那两屏 2026-09-28 已拆）
   openDrawers: new Set(),   // 玩家手动点开过的种类（重画时不再收回去）
   pet: null,           // 二级详情页这一只的编号（地址 `?pet=`）
   petCard: null,       // 这一只在当前那页里的卡片（名字/系别/定位；列表页没有就用本机记录兜底）
@@ -329,21 +333,16 @@ function boxQuery(extra = {}) {
 }
 
 /**
- * 本机新养的个体（「＋ 再养一只同种」）**不在服务端那一页里**：把它们跟着**同种那一行**一起补进来，
- * 否则「只看收藏」会把它们漏掉（它们也是我的精灵），翻页时那一行也会少一只。
+ * 本机多出来的个体：**2026-09-28 起不再渲染**。
+ *
+ * 人类逐字：「重复精灵不要了，把铠甲虫还原回来」+「每种精灵只允许有一只」。
+ * 那些 `-b` 后缀的个体是**已经下线的「＋再养一只同种」留下的产物**：功能删了，产物也不该再画 ——
+ * 否则玩家看到一个删不掉、也加不出来的第二只（截图里铠甲虫就是「4 个个体」）。
+ * 本机记录**仍然保留**（它还存着性格/天分/刷新次数），只是不再当成额外的行画出来。
+ * 旧记录的一次性清理在 `box-individuals.js` 的 `pruneRetiredExtras()`。
  */
-function localRowsFor(serverRows) {
-  if (state.kind !== 'mine') return [];
-  return Object.values(localIndividualsGrouped(serverRows.map((row) => row.select)))
-    .flat()
-    .map((one) => {
-      // 名字/系别/归属都从**本机那张卡**现读（它的字段名在 `box-individuals.js` 那一层翻译好了）
-      const card = localCardById(one.individual_id) ?? {};
-      return {...card, select: one.individual_id, group: card.group ?? '',
-        name: card.name ?? '未登记', types: card.types ?? [],
-        level: Number.isFinite(Number(one.level)) ? Number(one.level) : null,
-        localOnly: true, extra: true};
-    });
+function localRowsFor() {
+  return [];
 }
 
 /** 「只看收藏」这一档：收藏是本机记的，所以过滤在页面里做。 */
@@ -567,7 +566,6 @@ function renderPetPage() {
   const list = $('box-list-view');
   if (list) list.hidden = true;
   $('pet-view').hidden = false;
-  $('compare-view').hidden = true;
   document.body.dataset.boxView = 'pet';
   document.body.dataset.boxPet = select;
   const player = state.petData;
@@ -588,6 +586,9 @@ function renderPetPage() {
     ${card.extra === true ? '<span class="card-tags"><span class="tag tag-badge">本机加的</span></span>' : ''}
    </div></div>`;
   $('pet-actions').innerHTML = petActionsHtml(select, individual);
+  // 换技能面板挂在动作区**后面（同级兄弟）**：`#pet-actions` 每次重画，挂它里面会被抹掉。
+  mountLoadout({select, species: state.petData?.group ?? card.group ?? state.petCard?.group ?? null,
+    skills: state.petData?.skills ?? [], request: getJson});
   // 刷新之后那句话（"上一次刷天分：+10 加到「魔攻」"）在这一屏上也要看得见：
   // 它是玩家确认"刚才那一下落在哪一项"的地方（列表那一行里不再画它了）。
   const note = $('pet-note');
@@ -696,81 +697,17 @@ async function openPet(select, {push = true} = {}) {
 // 新页面还会 404；而比较要用的选人状态、物种去重、交接参数本来全在这一页里。
 // 地址 `box.html?a=<个体>&b=<个体>` 是真地址：刷新 / 前进后退 / 书签都回到同一屏。
 
-/** 地址上的两只（外加可选的 lock=：交接时锁定要跟着走）。 */
-function compareParams() {
-  const query = new URLSearchParams(window.location.search);
-  const list = (key) => (query.get(key) ?? '').split(',').map((one) => one.trim()).filter(Boolean);
-  const [a = ''] = list('a');
-  const [b = ''] = list('b');
-  return {a, b, lock: list('lock')};
-}
 
-function compareUrl(a, b, lockIds = []) {
-  const query = new URLSearchParams();
-  query.set('a', a);
-  query.set('b', b);
-  if (lockIds.length) query.set('lock', lockIds.join(','));
-  return `box.html?${query.toString()}`;
-}
 
 /** 首层 / 两个第二级页的切换：只换这一屏，不重载（选人与筛选都留着）。 */
 function setView(view) {
   state.view = view;
-  $('compare-view').hidden = view !== 'compare';
   $('pet-view').hidden = view !== 'pet';
   $('box-list-view').hidden = view !== 'list';
   document.body.dataset.boxView = view;
 }
 
-/** 把地址上的两只放回选中状态：卡片上的「已选」与去配队的入口都靠它。 */
-function selectFromUrl({a, b, lock}) {
-  const locked = new Set(lock);
-  const build = (select) => {
-    const row = state.rows.find((one) => one.select === select) ?? localCardById(select) ?? {};
-    return {select, group: row.group ?? state.compareGroups[select] ?? '', name: row.name ?? '',
-      locked: row.locked === true || locked.has(select), localOnly: row.localOnly === true};
-  };
-  state.selected = [a, b].filter(Boolean).slice(0, 2).map(build);
-  // 首层那些卡片也要跟着变「已选」（那一屏收起了，但还在 DOM 里）：回到列表时状态是对的。
-  renderCards();
-}
 
-function renderCompareBar() {
-  const selected = state.selected;
-  const bar = $('compare-bar');
-  const sameGroup = selected.length === 2 && selected[0].group === selected[1].group;
-  $('compare-go').disabled = !sameGroup;
-  // 「带上这两只去配队」要对**任意两只**可用（不要求同种）：配队看的是六只互补，
-  // 不是同种个体的差异。同种比较那条判据（`compare-go`）仍然只对同种开放。
-  // 2026-09-28：首层那一个与比较页上那一个（`#compare-view-to-team`）**只有这一处在写**文案与
-  // 可用状态（含锁定几只），免得两个入口各说各的。
-  const lockedCount = selected.filter((row) => row?.locked === true).length;
-  const teamLabel = lockedCount
-    ? `带上这两只去配队（含锁定 ${lockedCount} 只）`
-    : '带上这两只去配队';
-  for (const id of ['compare-to-team', 'compare-view-to-team']) {
-    const button = $(id);
-    if (!button) continue;
-    button.disabled = selected.length === 0;
-    button.textContent = teamLabel;
-  }
-  // 「锁定这一只」只在**恰好选了一只**时可用：锁的是那一只，语义必须明确。
-  const lockTeam = $('compare-lock-team');
-  if (lockTeam) lockTeam.disabled = selected.length !== 1;
-  if (selected.length === 0) {
-    $('compare-hint').textContent = '选两只同种伙伴，就能逐字段比较。';
-  } else if (selected.length === 1) {
-    $('compare-hint').textContent = `已选 ${selected[0].name}：再选一只同种的伙伴。`;
-  } else if (sameGroup) {
-    $('compare-hint').textContent = `已选两只同种伙伴（${selected[0].name}）：点「比较这两只」逐字段看相同 / 不同 / 未知。`;
-  } else {
-    $('compare-hint').textContent = `这两只不是同一种精灵（${selected[0].name} / ${selected[1].name}）：`
-      + '逐字段比较只对同种的不同个体成立，换一只同种的再试。';
-  }
-  bar.hidden = state.kind !== 'mine';
-  document.body.dataset.boxSelected = String(selected.length);
-  document.body.dataset.boxSelectedGroup = sameGroup ? selected[0].group : '';
-}
 
 /**
  * 把服务端给的「生长属性」拆包成**值本身**：`{value: '稳重'}` → `'稳重'`、`{value: {hp: 10, …}}` → `{hp: 10, …}`。
@@ -792,45 +729,7 @@ function unwrapGrowth(player) {
   return out;
 }
 
-function renderCompare(player) {
-  const aName = player.a?.name ?? 'A';
-  const bName = player.b?.name ?? 'B';
-  const rows = player.fields.map((field) => `<div class="cmp-row" data-status="${field.status}"
-    data-field="${escapeAttr(field.field)}" data-label="${escapeAttr(field.label)}">
-    <div class="cmp-head">
-     <span class="cmp-label">${escapeAttr(field.label)}</span>
-     <span class="cmp-status s-${field.status}">${escapeAttr(field.status_label)}</span>
-    </div>
-    <div class="cmp-values">
-     <div class="cmp-side"><b>${escapeAttr(aName)}</b><span class="cmp-value">${fmtValue(field.a)}</span></div>
-     <div class="cmp-side"><b>${escapeAttr(bName)}</b><span class="cmp-value">${fmtValue(field.b)}</span></div>
-    </div>
-    ${field.reason ? `<p class="cmp-reason">为什么是未知：${escapeAttr(field.reason)}</p>` : ''}
-    ${field.note ? `<p class="cmp-note">${escapeAttr(field.note)}</p>` : ''}
-   </div>`).join('');
-  $('compare-body').innerHTML = `<div class="cmp-summary">
-    <p><b>${escapeAttr(player.name ?? '')}</b>：${escapeAttr(player.summary)}</p>
-    <div class="cmp-counts">
-     <span class="cmp-status s-same">相同 ${player.counts.same}</span>
-     <span class="cmp-status s-different">不同 ${player.counts.different}</span>
-     <span class="cmp-status s-unknown">未知 ${player.counts.unknown}</span>
-    </div></div>${rows}`;
-  $('compare-note').hidden = true;
-  $('compare-view-actions').hidden = false;
-  document.body.dataset.boxCompare = 'shown';
-  document.body.dataset.boxCompareUnknown = String(player.counts.unknown);
-}
 
-/** 比不了的时候：原因写在二级页上（不许白屏，也不许把工程原话/编号丢给玩家）。 */
-function showCompareTrouble(note) {
-  const box = $('compare-note');
-  box.textContent = note;
-  box.hidden = false;
-  $('compare-body').innerHTML = '';
-  $('compare-view-actions').hidden = true;
-  document.body.dataset.boxCompare = 'blocked';
-  document.body.dataset.boxCompareUnknown = '';
-}
 
 /** 读两只的名字：只在**比不了**那一路上用（成功那一路的名字来自结果本身）。 */
 async function namesFor(ids) {
@@ -840,87 +739,12 @@ async function namesFor(ids) {
       const data = await getJson(`/api/roco/box?detail=${encodeURIComponent(id)}`);
       if (!data.ok) return;
       out[id] = data.player.name ?? '';
-      if (data.player.group) state.compareGroups[id] = data.player.group;
     } catch { /* 名字读不到就不写名字：下面那句话照样说得清为什么比不了 */ }
   }));
   return out;
 }
 
-/** 打开（或刷新）比较二级页：地址里带两只，内容用 `compare=<a>,<b>` 的现成结果逐行画。 */
-async function renderComparePage() {
-  const {a, b, lock} = compareParams();
-  setView('compare');
-  selectFromUrl({a, b, lock});
-  renderCompareBar();
-  window.scrollTo(0, 0);
-  document.body.dataset.boxCompareIds = `${a},${b}`;
-  if (!a || !b) {
-    showCompareTrouble('这一页要一次带上两只伙伴才有得比：现在地址上只有一只。'
-      + '回盒子里重新选两只再来。');
-    return;
-  }
-  $('compare-view-actions').hidden = false;
-  $('compare-note').hidden = true;
-  $('compare-body').innerHTML = '<p class="muted">正在读这两只的差别…</p>';
-  try {
-    const data = await getJson(`/api/roco/box?compare=${encodeURIComponent(a)},${encodeURIComponent(b)}`);
-    if (!data.ok) {
-      throw Object.assign(new Error(data.error || '这两只比不了'), {status: Number(data.status) || 0});
-    }
-    state.lastDev = data.dev;
-    state.compareGroups[a] = data.player.group ?? state.compareGroups[a] ?? '';
-    state.compareGroups[b] = data.player.group ?? state.compareGroups[b] ?? '';
-    // ⚠ 2026-09-28 真机抓到（验收 11 号：整页 58 处 `[object Object]`）：
-    // 服务端的个体层把这两项包成 `{value: …, value_source: …}`（那是**它自己**的生长属性形状），
-    // 而这一屏按"值就是值"来印 ⇒ 印出来就是 `[object Object]`。
-    // 判据 11 号**同时**量了"两边都是 6 项数值"和"[object Object] 0 处"，所以它才抓到。
-    // 修法在这一层做**拆包**（服务端那一层是既有契约，动它要连带 14 处判据 + 语料形状，代价不对等）。
-    renderCompare(unwrapGrowth(data.player));
-    renderDev();
-  } catch (error) {
-    const status = Number(error?.status) || 0;
-    const message = String(error?.message ?? '');
-    const names = await namesFor([a, b]);
-    const pair = [names[a], names[b]].filter(Boolean).join(' / ');
-    if (message.includes('不是同一种')) {
-      showCompareTrouble(`${pair ? `${pair}：` : ''}这两只不是同一种精灵，逐字段比较只对同种的不同个体成立。`
-        + '换一只同种的再来；也可以点上面的按钮把它们直接带去配队。');
-    } else if (status === 404) {
-      showCompareTrouble('这两只里有一只已经不在名单里了（可能被删掉或者换过）。'
-        + '回盒子里重新选两只再来。');
-    } else if (status === 400) {
-      showCompareTrouble('地址上这两只的编号认不出来（要盒子里那两只自己的编号）。'
-        + '回盒子里重新选两只再来。');
-    } else {
-      showCompareTrouble('这两只的差别这会儿读不出来：本机这边没给出结果。'
-        + '回盒子里重新选两只，或者过一会儿再试。');
-    }
-  }
-}
 
-/** 点「比较这两只」：进比较二级页 —— 地址带上两只（带锁的那几只也一起带）。 */
-async function compareSelected() {
-  const [a, b] = state.selected;
-  if (!a || !b || (a.group && b.group && a.group !== b.group)) return;
-  // 2026-09-27（审计 ③）：本机新养的个体服务端不认识（比较那条路按 owned 名单解析）。
-  // 与其进到一个必然读不出来的页面，不如照实说清"为什么现在比不了"。
-  // 2026-09-28：比较入口现在在**二级详情页**上（列表行里那个「加入比较」已经拿掉），
-  // 所以这句话要说在**玩家看得见的那一屏**：先回到列表（选人那一栏就在那里），再写原因。
-  const localOnly = [a, b].filter((row) => row.localOnly === true);
-  if (localOnly.length) {
-    if (state.view !== 'list') {
-      history.pushState({boxList: true}, '', 'box.html');
-      setView('list');
-    }
-    $('compare-hint').textContent = `这一只（${localOnly.map((row) => row.name || row.select).join('、')}）`
-      + '是本机「再养一只同种」加出来的，还没进服务器名单，所以现在不能和名单里的个体逐字段比较 ——'
-      + '两只都在名单里才能比。它的性格与天分在它自己那一页上，也能单独培养。';
-    return;
-  }
-  const lockIds = state.selected.filter((row) => row.locked === true).map((row) => row.select);
-  history.pushState({boxCompare: true}, '', compareUrl(a.select, b.select, lockIds));
-  await renderComparePage();
-}
 
 /** 从二级页回首层：历史里有上一屏就退回去（选人还在），没有就直接换回列表地址。 */
 function backToList() {
@@ -935,32 +759,6 @@ function backToList() {
   history.replaceState(null, '', 'box.html');
 }
 
-/**
- * 选/取消选这一只去比较（原来挂在列表行的「加入比较」上，现在挂在二级详情页上）。
- *
- * ⚠ 列表那一屏不再有比较按钮，但**比较这条能力一点没少**：在二级页上选两只同种个体，
- * 回到列表那一栏点「比较这两只」就进比较页（人类②：「加入比较」太鸡肋 ⇒ 换个入口，
- * 不是把比较删掉）。
- */
-function toggleCompare(select) {
-  const at = state.selected.findIndex((row) => row.select === select);
-  if (at >= 0) state.selected.splice(at, 1);
-  else {
-    const found = state.rows.find((row) => row.select === select)
-      ?? state.extraRows.find((row) => row.select === select);
-    const card = found ?? localCardById(select) ?? {};
-    // `locked` 要一起带上：比选栏的按钮文案与交接参数都读它（原来只留 select/group/name，
-    // 于是"含锁定 N 只"永远不出现 —— 真机实测：工坊那边锁定确实带到了 2 只，按钮上却没说）。
-    // `localOnly` 也要带上：比大小那条路要认出"本机新养的个体"并如实说清为什么比不了
-    //（第一版没带 ⇒ 请求照发，服务端按 id 形状拒掉，玩家看到的是一句工程味的参数报错）。
-    state.selected.push({select, group: card.group ?? '', name: card.name ?? '', locked: card.locked === true,
-      localOnly: card.localOnly === true});
-    if (state.selected.length > 2) state.selected.shift();
-  }
-  renderCards();
-  renderCompareBar();
-  if (petViewVisible()) renderPetPage();
-}
 
 // ── 接线 ────────────────────────────────────────────────────────────────────
 function setKind(kind) {
@@ -980,16 +778,14 @@ function setKind(kind) {
     tab.setAttribute('aria-selected', active ? 'true' : 'false');
   }
   $('flag-favourite').setAttribute('aria-pressed', 'false');
-  if (state.view === 'compare') backToList();
   // 2026-09-28 实测（真机 04 号）：二级页这一路原来写的是 `backToList()` —— 而 `backToList()`
   // 在二级页上会走 `history.back()`，那是**异步**的：popstate 回来时会从 URL 把 `kind` 读回来，
   // **把刚切换的标签冲掉**（实测现场：点击命中 `tab-catalog`，读到的还是 `kind=mine total=49`，
   // 后面的步骤整条塌掉）。切换标签 / 重置筛选只需要「把这一屏收回列表」，不需要回退历史栈 ——
   // 同步 `setView('list')` 立刻正确，再把地址改回盒子首页（`replaceState` 不产生 popstate），
   // 紧接着的 `load({reset: true})` 会按新条件取数。
-  // ⚠ Esc 那一路（`keydown` 处理器）与 compare 那一路仍然走 `backToList()`。
+  // ⚠ Esc 那一路（`keydown` 处理器）仍然走 `backToList()`。
   if (petViewVisible()) { setView('list'); history.replaceState(null, '', 'box.html'); }
-  renderCompareBar();
   void load({reset: true});
 }
 
@@ -1000,16 +796,14 @@ function resetFilters() {
   $('box-search').value = '';
   $('flag-favourite').setAttribute('aria-pressed', 'false');
   // 「重置筛选」在页头（二级页上也点得到）：先把这一屏收回列表，再按新条件取数。
-  if (state.view === 'compare') backToList();
   // 2026-09-28 实测（真机 04 号）：二级页这一路原来写的是 `backToList()` —— 而 `backToList()`
   // 在二级页上会走 `history.back()`，那是**异步**的：popstate 回来时会从 URL 把 `kind` 读回来，
   // **把刚切换的标签冲掉**（实测现场：点击命中 `tab-catalog`，读到的还是 `kind=mine total=49`，
   // 后面的步骤整条塌掉）。切换标签 / 重置筛选只需要「把这一屏收回列表」，不需要回退历史栈 ——
   // 同步 `setView('list')` 立刻正确，再把地址改回盒子首页（`replaceState` 不产生 popstate），
   // 紧接着的 `load({reset: true})` 会按新条件取数。
-  // ⚠ Esc 那一路（`keydown` 处理器）与 compare 那一路仍然走 `backToList()`。
+  // ⚠ Esc 那一路（`keydown` 处理器）仍然走 `backToList()`。
   if (petViewVisible()) { setView('list'); history.replaceState(null, '', 'box.html'); }
-  renderCompareBar();
   void load({reset: true});
 }
 
@@ -1017,7 +811,7 @@ function resetFilters() {
 //
 // ⚠ 2026-09-28 真机抓到的真错（排查了很久，记在这里）：这几段原来被插在 `wire()` **函数体内**
 // （`const grid = $('box-grid');` 之前），而函数声明只在自己的作用域里可见 —— `wire()` 内部那两个
-// 监听器调得到，但 `setKind` / `resetFilters` / `toggleCompare` 是**模块级**函数，一调就抛
+// 监听器调得到，但 `setKind` / `resetFilters` 是**模块级**函数，一调就抛
 // `ReferenceError: petViewVisible is not defined`。
 // 它的表现极具误导性：`page_errors` 里才有这条异常（`console_errors` 是空的），而验收里
 // **只有 22 号判据**读 `page_errors` ⇒ 表面上看到的是"点了「全图鉴」没反应"（04 号：kind 永远是 mine），
@@ -1026,10 +820,10 @@ function resetFilters() {
  * 二级详情页**此刻是不是当前这一屏**（DOM 事实，唯一事实源）。
  *
  * ⚠ 2026-09-28 实测：页面里原来用 `state.view` 是否等于 `'pet'` 判这件事，而**它是永远假的** ——
- * `state.view` 只在 `setView()` 里赋值，全仓调过 `'list'` 与 `'compare'`，**从来没有 `setView('pet')`**
+ * `state.view` 只在 `setView()` 里赋值，而它**只会等于 `'list'`**（比较那两屏已拆），**从来没有 `setView('pet')`**
  * （二级页是 `openPet()` 直接 `renderPetPage()` 进去的）。于是挂着这道门的四处**全是死代码**，
  * 其中一处有真实后果：在二级页上点「删掉这只」之后确认态画不出来（真机 36 号 fatal 的真因）。
- * 其余三处（`toggleCompare` 之后重画、`setKind`/`resetFilters` 里"先把这一屏收回列表"）
+ * 其余两处（`setKind`/`resetFilters` 里"先把这一屏收回列表"）
  * 同样是死的 —— `resetFilters` 那段注释明写着"二级页上也点得到"，实际点了不回去。
  */
 function petViewVisible() {
@@ -1042,7 +836,7 @@ function petViewVisible() {
  *
  * ⚠ 2026-09-28 实测（真机 36 号 fatal 的真因）：这两个处理器最初是从 `#box-grid` 那个监听器里
  * 抄出来的，带着 `if (state.view === 'pet') renderPetPage();` 这道门 —— 而这道门**永远是假的**：
- * `state.view` 只在 `setView()` 里赋值，全仓调过 `'list'` 与 `'compare'`，**从来没有 `setView('pet')`**
+ * `state.view` 只在 `setView()` 里赋值，而它**只会等于 `'list'`**（比较那两屏已拆），**从来没有 `setView('pet')`**
  * （二级页是 `openPet()` 直接 `renderPetPage()` 进去的），所以 `state.view` 永远不是 `'pet'`。
  * 二级页上另外三个动作（刷新 / 回滚 / 再加一只）之所以没事，是因为它们的处理器写的是
  * **无条件** `renderPetPage()`。
@@ -1239,9 +1033,8 @@ function wire() {
   $('box-reset').addEventListener('click', resetFilters);
   // 二级详情页的返回入口（与比较页那个同一套做法：历史里有上一屏就退回去，没有就换回列表地址）。
   $('pet-back').addEventListener('click', () => backToList());
-  $('compare-go').addEventListener('click', () => void compareSelected());
   // ⚠ 2026-09-28（人类 ⑦「锁定功能直接删了的了」）：页面上原来那个「锁定这一只去配队」
-  // （`#compare-lock-team`）**已经删掉**，所以这里不再给它绑监听。
+  // （`#compare-lock-team`、以及整块比较 UI）**已经删掉**，所以这里不再给它绑监听。
   // `?lock=` 这条参数与背后的服务端校验**继续留着**（见 box.html 里那段说明与 `goToTeam`）。
   // RC-801：把选中的个体**带去产品页的六槽工作台**（`?team=own-…,own-…`）。
   // 只带 id，不带任何结论 —— 配队口径仍然由产品页那一套（RC-301…305）现算。
@@ -1253,8 +1046,11 @@ function wire() {
     // 这里先按规则做对，别让玩家点了按钮才吃到 400。
     // 二级页上没有列表那一页的卡片（`state.rows` 是空的）：物种从比较结果里带过来的
     // `state.compareGroups` 读 —— 去重规则不许因为换了一屏就失效。
+    // 2026-09-28：`state.compareGroups` 随比较那两屏一起拆了（不再有"从比较页带过来的物种"）。
+    // 现在入口只有二级详情页的「带上它去配队」，物种从**列表那一行**读；读不到就退回 id
+    //（`goToTeam` 的去重是按物种做的，退化成 id 只会让它更保守，不会误并两只）。
     const speciesOf = (id) => state.rows?.find?.((row) => row.select === id)?.group
-      ?? state.compareGroups[id] ?? id;
+      ?? state.petCard?.group ?? id;
     const picked = state.selected.map((row) => row.select).filter(Boolean);
     const seen = new Set();
     const ids = [];
@@ -1276,33 +1072,16 @@ function wire() {
       + (locked.length ? `&lock=${encodeURIComponent(locked.join(','))}` : '');
     window.location.href = `roco.html?${query}`;
   };
-  $('compare-to-team').addEventListener('click', goToTeam);
-  $('compare-view-to-team')?.addEventListener('click', goToTeam);
-  $('compare-clear').addEventListener('click', () => {
-    state.selected = [];
-    if (state.view === 'compare') {
-      // 在二级页上清空：这一屏已经没有要比的两只了，收回首层（地址也回到列表地址）。
-      state.selected = [];
-      backToList();
-      renderCompareBar();
-      return;
-    }
-    renderCards();
-    renderCompareBar();
-  });
   // 浏览器前进/后退：地址上带哪一屏就停在哪一屏（比较页 / 个体详情页），都没有就回首层。
   window.addEventListener('popstate', () => {
     const {pet} = petParams();
     if (pet) { void openPet(pet, {push: false}); return; }
-    const {a, b} = compareParams();
-    if (a || b) { void renderComparePage(); return; }
     state.pet = null;
     setView('list');
     window.scrollTo(0, 0);
   });
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
-    if (state.view === 'compare') backToList();
     if (petViewVisible()) backToList();
     for (const menu of document.querySelectorAll('details.fmenu[open]')) menu.open = false;
   });
@@ -1315,19 +1094,21 @@ function clearBootFallback() {
 
 async function boot() {
   clearBootFallback();
+  // 2026-09-28（人类：「重复精灵不要了，把铠甲虫还原回来」）：
+  // 一次性清掉**已经下线的功能**留下的产物（`-b`/`-c`/… 后缀那些本机多出来的个体）。
+  // 只删带那个后缀的；服务端那 49 只的记录（存着性格/天分/刷新次数）一个都不动。
+  const pruned = pruneRetiredExtras();
+  if (pruned) document.body.dataset.boxPrunedExtras = String(pruned);
   // 右上角小芽 + 弹出式小芽（人类 2026-09-25 纠偏①）：注入到页头 .header-actions 的最右端。
   mountXiaoya({mode: 'popup'});
   wire();
   setView('list');
-  renderCompareBar();
   await loadTotals();
   await load({reset: true});
   // 2026-09-28：直接打开带参数的地址（刷新 / 前进后退 / 书签）就停在那一屏上：
   // 比较页是 `?a=&b=`，个体详情页是 `?pet=` —— 内容都从接口现读，不靠上一屏的记忆。
   const {pet} = petParams();
   if (pet) { await openPet(pet, {push: false}); return; }
-  const {a, b} = compareParams();
-  if (a || b) await renderComparePage();
 }
 
 void boot();

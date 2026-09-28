@@ -142,3 +142,36 @@ test('⑦ 页面真的把这份记录接上了（静态接线 + 形状一致）'
   assert.match(box, /dataset\.boxExtras = String\(Object\.values\(extras\)/,
     '页面的自报钩子要与 extras 的形状一致（Object.values，不是 Map.values）');
 });
+
+/**
+ * ⑲ 旧记录里天分为空 ⇒ **读的时候按编号补回来**。
+ *
+ * 人类 2026-09-28 指着截图：「天分为啥还是什么认不出？不是里面都能正常显示什么天分吗？
+ * 就说 一般般的天分 不就好了？」
+ *
+ * 根因（查过，不是算不出来）：拿同一份数据从种子化掷点算，四档都出得来；
+ * 是**浏览器里那些老记录**的天分是 `{value:null}` 那个年代的产物（`normalizeStored` 把它拆成 null），
+ * 六项全 null ⇒ `talentTierOf` 只能判「缺项 ⇒ 认不出」。
+ */
+test('⑲ 旧记录里天分为空 ⇒ 读时按编号补回，并且写回磁盘（已有天分的绝不动）', () => {
+  const storage = withStorage();
+  // ① 全 null 的老记录
+  storage.corrupt(JSON.stringify({'own-0001': {individual_id: 'own-0001', species_id: 'pet_000012',
+    level: 100, nature: null, talent: {hp: null, atk: null, def: null, spa: null, spd: null, spe: null}}}));
+  const rows = individualsForRows([{select: 'own-0001', group: 'pet_000012', name: '铠甲虫', level: 60}]);
+  const one = rows['own-0001'];
+  const activated = Object.values(one.talent).filter((v) => Number(v) > 0).length;
+  assert.ok(activated >= 1 && activated <= 3,
+    `补回来的天分要激活 1–3 条（四档口径就是这么定的）：${JSON.stringify(one.talent)}`);
+  assert.equal(one.level, 60, '等级那条归一照旧生效（Lv.100 的老记录）');
+  assert.ok(Object.values(storage.raw()['own-0001'].talent).some((v) => Number(v) > 0),
+    '要**写回** localStorage（只修内存里那一份的话，下次读还是 null）');
+
+  // ② 反证：**已经有天分的记录一个字都不许动**（不许把玩家的数据掷掉）
+  const storage2 = withStorage();
+  const mine = {hp: 3, atk: 0, def: 0, spa: 0, spd: 0, spe: 9};
+  storage2.corrupt(JSON.stringify({'own-0002': {individual_id: 'own-0002', species_id: 'pet_000062',
+    level: 60, nature: '稳重', talent: mine}}));
+  const rows2 = individualsForRows([{select: 'own-0002', group: 'pet_000062', name: '音速犬', level: 60}]);
+  assert.deepEqual(rows2['own-0002'].talent, mine, '已有天分必须原样保留（只有空的那种才补）');
+});

@@ -239,7 +239,9 @@ export function petPageProblems(facts){
   }
   if (String(facts?.view) !== 'pet') problems.push(`没有停在个体详情二级页上（现在 ${JSON.stringify(facts?.view)}）`);
   if (!facts?.pet) problems.push('地址里没带这一只（`?pet=`）');
-  if (!(Number(facts?.traitRows) >= 4)) problems.push(`性格 / 天分档位 / 资质这些栏太少（${JSON.stringify(facts?.traitRows)} 行）`);
+  // 2026-09-28 改钉（人类：「没有就删掉啊」）：**没有值的栏目整栏不画** ⇒ 血脉/特长 可能不在。
+  // 必到的只有三栏：性格 / 资质 / 天分档位（旧断言钉的是 >= 4）。
+  if (!(Number(facts?.traitRows) >= 3)) problems.push(`性格 / 资质 / 天分档位这些栏太少（${JSON.stringify(facts?.traitRows)} 行）`);
   if (Number(facts?.moves) !== 4) problems.push(`四个技能没画全（${JSON.stringify(facts?.moves)} 个）`);
   if (Number(facts?.objectObject) > 0) problems.push(`页面上出现了 ${facts.objectObject} 处 [object Object]`);
   return problems;
@@ -672,7 +674,8 @@ async function main() {
     // 于是「特长」没值时整栏不画、每栏下面那句「养成效果未核验…」不再画、开头那句也删了 ⇒
     // 判据要的词跟着换（原来还要求 '特长' / '效果未校准' / '游戏数据里没有这一项' 三个词）。
     // 加一句「60 级」：那一屏现在给的是换算后的面板，标签必须写出来。
-    const needed = ['等级', '性格', '资质', '血脉', '四个技能', '60 级'];
+    // ⚠ 血脉与特长**有值才有那一栏**（人类：「没有就删掉啊」）⇒ 不列进必到词。
+    const needed = ['等级', '性格', '资质', '四个技能', '60 级'];
     const missingWord = needed.filter((w) => !detailText.includes(w));
     // ⚠ 2026-09-28 改钉（人类 ⑥：「性格与天分是掷点生成的（原版随机；这里是模拟掷点，不是官方概率）」
     // 这句话**不要**）⇒ 这条判据的语义**反过来**：页面上现在**不该**再有掷点来源那一行。
@@ -698,20 +701,23 @@ async function main() {
     // 并且**加强**：五栏标签必须逐条对得上，天分档位的取值必须落在那四个档名里
     //（取不到时允许「未知」，但未知必须带原因）。判据没有被删，只是跟着数据补齐。
     const TIERS = ['一般般', '还不错', '相当好', '了不起'];
-    // 特长没值就不画（人类：「没有就删掉啊」）⇒ 这一屏的固定四栏。
-    const EXPECTED_TRAITS = ['性格', '资质', '血脉', '天分档位'];
-    const traitLabelsOk = JSON.stringify(detailFacts.traitLabels) === JSON.stringify(EXPECTED_TRAITS);
+    // 2026-09-28 再改钉（人类：「没有就删掉啊」）：特长/血脉**没值就不画** ⇒ 不能按"固定四栏"比。
+    // 改成：**必到三栏**（性格/资质/天分档位）都在，且出现的标签**只许**来自这五个（顺序也照这个来）。
+    const REQUIRED_TRAITS = ['性格', '资质', '天分档位'];
+    const ALLOWED_TRAITS = ['性格', '资质', '特长', '血脉', '天分档位'];
+    const traitLabelsOk = REQUIRED_TRAITS.every((one) => detailFacts.traitLabels.includes(one))
+      && detailFacts.traitLabels.every((one) => ALLOWED_TRAITS.includes(one));
     const tierValue = String(detailFacts.tier?.value ?? '');
     // 实测页面上是「一般般的天分 / 相当好的天分」这种写法 ⇒ 判"落在哪个档名里"（含档名即算），
     // 不去挑那个后缀（后缀怎么措辞不是这条判据要管的事）。
     const tierKnown = TIERS.some((tier) => tierValue.includes(tier));
     const tierMissingWithReason = /没有这一项|未知/.test(tierValue)
       && String(detailFacts.tier?.effect ?? '').trim().length > 0;
-    check('09-个体详情', '个体详情**二级页**（地址 `?pet=`）里有等级 / 性格 / 资质 / 血脉 / 天分档位 / '
-      + '四个有序技能（四栏标签逐条对得上），六维是 60 级换算值（标签写明 60 级），'
-      + '天分档位的取值落在四个档名里（读不出来时照实说没有、并带上说明）',
+    check('09-个体详情', '个体详情**二级页**（地址 `?pet=`）里有等级 / 性格 / 资质 / 天分档位 / '
+      + '四个有序技能（必到三栏都在、标签只许来自那五个；特长与血脉有值才有），'
+      + '六维是 60 级换算值（标签写明 60 级），天分档位的取值落在四个档名里',
       petOpen && detailFacts.hidden === false && detailFacts.view === 'pet' && detailFacts.pet
-        && detailFacts.traits === EXPECTED_TRAITS.length && traitLabelsOk
+        && detailFacts.traits >= REQUIRED_TRAITS.length && traitLabelsOk
         && (tierKnown || tierMissingWithReason) && detailFacts.moves === 4 && missingWord.length === 0,
       `二级页=${petOpen} view=${detailFacts.view} 地址 pet=${detailFacts.pet} traits=${detailFacts.traits} `
       + `标签=${JSON.stringify(detailFacts.traitLabels)} `
@@ -1027,33 +1033,47 @@ async function main() {
         idShapes:text.match(/pet_\\d{6}|own-\\d{4}/g)??[]});})()`) ?? '{}');
     await cdp.send('Page.navigate', {url: `${base}box.html?a=${aSel2}&b=${otherId}`});
     await sleep(1200);
-    const mixedShown = await waitForSafe(`(()=>{const n=document.getElementById('compare-note');
-      return Boolean(n)&&n.hidden===false&&String(n.textContent||'').trim().length>10;})()`, {tries: 60, ms: 200});
-    await sleep(200);
-    const mixedFacts = await failureFacts();
-    const mixedProblems = compareFailureProblems(mixedFacts);
-    steps.push({at: 'compare-mixed-species', url: `box.html?a=${aSel2}&b=${otherId}`, facts: mixedFacts});
-    check('11d-比不了就说清（不同种）',
-      '把两只不同种的地址直接打开（服务端 400）：二级页停在比较页上、一行字段都不画，'
-      + '用玩家话写清「不是同一种」，返回入口还在，文案里不出现个体编号',
-      mixedShown && mixedProblems.length === 0,
-      mixedProblems.join(' | ') || `原因「${mixedFacts.note}」`);
-    counter('11d-比不了就说清（不同种）',
-      '白屏 / 没有原因 / 没有返回入口 / 文案里带编号 —— 四种坏样本都必须被同一条判据抓住',
-      compareFailureProblems({view: 'compare', rows: 0, note: '', back: false, idShapes: ['pet_000012']}),
-      '{"note":"","back":false,"idShapes":["pet_000012"]}');
-
-    await cdp.send('Page.navigate', {url: `${base}box.html?a=${aSel2}`});
-    await sleep(1100);
-    const halfShown = await waitForSafe(`(()=>{const n=document.getElementById('compare-note');
-      return Boolean(n)&&n.hidden===false&&String(n.textContent||'').trim().length>10;})()`, {tries: 60, ms: 200});
-    await sleep(200);
-    const halfFacts = await failureFacts();
-    const halfProblems = compareFailureProblems(halfFacts);
-    steps.push({at: 'compare-missing-id', url: `box.html?a=${aSel2}`, facts: halfFacts});
-    check('11e-比不了就说清（少带一只）', '地址上只有一只（缺 id）：二级页也要如实说清「要两只才有得比」，不许白屏',
-      halfShown && halfProblems.length === 0,
-      halfProblems.join(' | ') || `原因「${halfFacts.note}」`);
+    // ⚠ 2026-09-28 **整段改钉**（人类：「**不要比较**」）。
+    // 这一段原来量的是「拿 `?a=&b=` 直接打开比较页、比不了的时候要如实说清原因」。
+    // 比较那两屏（比选栏 + 比较二级页）连同路由、函数、样式**整块拆掉了** ⇒ 没有"比不了"这回事了。
+    // 判据换成钉**下线本身**（正反两面）：三个入口/容器在页面上都不许再出现，
+    // 而且地址上带 `?a=&b=` 时**不许白屏**（要正常停在列表上，而不是半屏空着）。
+    await cdp.send('Page.navigate', {url: `${base}box.html?a=${aSel2}&b=${otherId}`});
+    await sleep(1200);
+    await waitForSafe(`document.querySelectorAll('#box-grid .card').length>0`, {tries: 60, ms: 200});
+    const compareGone = JSON.parse(await js(`(()=>{
+      const html=document.documentElement.outerHTML;
+      return JSON.stringify({
+        bar:Boolean(document.getElementById('compare-bar')),
+        view:Boolean(document.getElementById('compare-view')),
+        go:Boolean(document.getElementById('compare-go')),
+        bodyHasWord:/(个体比较|比较这两只|加入比较)/.test(document.body.innerText||''),
+        listShown:document.getElementById('box-list-view')?.hidden===false,
+        cards:document.querySelectorAll('#box-grid .card').length});})()`) || '{}');
+    steps.push({at: 'compare-removed', compareGone});
+    const compareGoneProblems = (f) => {
+      const bad = [];
+      if (f?.bar) bad.push('比选栏（#compare-bar）还在页面上');
+      if (f?.view) bad.push('比较二级页（#compare-view）还在页面上');
+      if (f?.go) bad.push('「比较这两只」按钮还在页面上');
+      if (f?.bodyHasWord) bad.push('页面上还能读到「个体比较 / 比较这两只 / 加入比较」这些字');
+      if (f?.listShown !== true || !(Number(f?.cards) > 0)) bad.push('带 ?a=&b= 打开时没有正常停在列表上（可能白屏）');
+      return bad;
+    };
+    check('11d-比较整块已经拆掉（人类：「不要比较」）',
+      '比选栏 / 比较二级页 / 「比较这两只」/「加入比较」在页面上都不许再出现；'
+      + '地址上带 `?a=&b=` 时也不许白屏（应当照常停在列表上）',
+      compareGoneProblems(compareGone).length === 0,
+      compareGoneProblems(compareGone).join(' | ')
+        || `比选栏=${compareGone.bar} 比较页=${compareGone.view} 按钮=${compareGone.go} `
+          + `页面上还有那些字=${compareGone.bodyHasWord} 列表在=${compareGone.listShown} 卡片=${compareGone.cards}`);
+    counter('11d-比较整块已经拆掉（人类：「不要比较」）',
+      '把任一块比较 UI 塞回来（或让带参数的地址白屏），必须被同一条判据抓住',
+      compareGoneProblems({bar: true, view: true, go: false, bodyHasWord: true, listShown: false, cards: 0}),
+      '{"bar":true,"view":true,"bodyHasWord":true,"listShown":false}');
+    // 11e 原来的主题（少带一只要说清）随比较一起消失：这里只留一句**如实说明**，
+    // 不另立判据 —— 免得把一条已经不存在的行为钉成"应当怎样"。
+    steps.push({at: 'compare-missing-id-retired', url: `box.html?a=${aSel2}`, why: '比较页已拆，这条判据随之下线'});
 
     // 这一段最后**回到盒子首层**：下面 ⑦⑧⑨ 的步骤都假定在列表那一屏上。
     await cdp.send('Page.navigate', {url: `${base}box.html`});
@@ -1192,132 +1212,85 @@ async function main() {
     // 「铠甲虫」那一组默认**收起** ⇒ 前两张卡变成了**跨物种**（比较按钮对跨物种是禁用的），
     // 这一步就点不出可比较的一对（实测：`compare-go` 一直 disabled、选中个体 0 只）。
     // 现在直接用**那一对同种个体**（与上面第 ⑥ 组同一对，来源仍是页面自己的数据）：
+    // ⚠ 2026-09-28 **整段改钉**（人类这一轮连着三条，把这条路整条换掉了）：
+    //   「加入比较不是删了吗？」→ 选两只的入口没了；
+    //   「重复精灵不要了，把铠甲虫还原回来」→ 那一对演示个体（own-0049）也按 rollback 回收了
+    //   ⇒ 盒子里**再也没有同种一对**，`?a=&b=` 那条比较路既没有入口、也没有数据。
+    // 交接入口现在只有一条：**二级详情页上的「带上它去配队」**（`data-to-team`，一键带走这一只）。
+    // 判据的原意一个字没改：**从盒子带着这一只到工坊，路上不许掉人**；改的只是路怎么走。
     const pairRoute = await (await fetch(`${base}api/roco/box?kind=mine&limit=60&offset=0`)).json();
-    const bySpecies = new Map();
-    for (const card of pairRoute.player.cards) {
-      bySpecies.set(card.group, [...(bySpecies.get(card.group) ?? []), card.select]);
-    }
-    const handoffPair = [...bySpecies.values()].find((list) => list.length === 2) ?? [];
-    if (handoffPair.length === 2) {
-      const name = pairRoute.player.cards.find((c) => c.select === handoffPair[0])?.name ?? '';
-      const species = pairRoute.player.cards.find((c) => c.select === handoffPair[0])?.group ?? '';
-      // 用**与第 ⑥ 组一模一样**的步骤（那一套已经实测能点到）：重新导航把档位/筛选/搜索全部复位，
-      // 再切「我的精灵」、搜这一种、展开那一行。这里踩过一次"把步骤写短一点"的坑（点不到 own-0001），
-      // 所以宁可重复这四步，也不另辟一条没验过的路。
+    const firstCard = pairRoute.player.cards[0] ?? null;
+    const handoffOne = firstCard ? {select: firstCard.select, group: firstCard.group, name: firstCard.name} : null;
+    steps.push({at: 'handoff-one', handoffOne});
+    let handedOk = false;
+    let handedNote = '一只可带走的个体都没有（数据空）';
+    if (handoffOne) {
       await cdp.send('Page.navigate', {url: base + 'box.html'});
       await sleep(1200);
       await waitFor('document.querySelectorAll("#box-grid .card").length>0');
       await sleep(300);
-      await mouseClick('#tab-mine');
-      await sleep(500);
-      // ⚠ 不碰搜索框：盒子页会把"搜索词 + 筛选"**持久化**（实测重载后 `pressed:3`、搜索框里还留着
-      // 上一次的词），而 `typeText` 是追加式输入 ⇒ 会变成「铠甲虫铠甲虫」、网格 0 张卡。
-      // 这一对在**第一页**（own-0001 是第一行），所以直接展开那一行就够，不必搜。
-      const row = await js(`(()=>{const el=document.querySelector('.species-drawer[data-species="${species}"] .drawer-head');
-        return el?'yes':'no';})()`);
-      if (row === 'yes') { await mouseClick(`.species-drawer[data-species="${species}"] .drawer-head`); await sleep(500); }
-      else { steps.push({at: 'handoff-pair-row-missing', species, name}); }
+      await ensureRowVisible(handoffOne.group, handoffOne.select);
+      await mouseClick(`#box-grid .individual[data-detail="${handoffOne.select}"]`);
+      await waitForSafe(`(()=>{const v=document.getElementById('pet-view');
+        return Boolean(v)&&v.hidden===false
+          &&new URLSearchParams(location.search).get('pet')===${JSON.stringify(handoffOne.select)};})()`,
+      {tries: 60, ms: 200});
+      await sleep(350);
+      // 判据 23：入口在、可用、摸得到（≥44px）
+      const entry = await js(`(()=>{const b=document.querySelector('#pet-actions [data-to-team]');
+        if(!b)return null;const r=b.getBoundingClientRect();
+        return {disabled:b.disabled,w:Math.round(r.width),h:Math.round(r.height),
+          text:String(b.textContent||'').trim()};})()`);
+      // ⚠ 反证要拿**坏样本**过同一个函数（我第一版直接拿真实那一只去算反证 ⇒ 恒不命中，判据自己报了"空的"）。
+      const entryProblems = (facts) => {
+        const bad = [];
+        if (!facts) bad.push('入口不存在（`#pet-actions [data-to-team]`）');
+        else {
+          if (facts.disabled !== false) bad.push('入口是禁用的（等于没有入口）');
+          if (facts.h < 44) bad.push(`入口只有 ${facts.h}px 高（摸不到）`);
+        }
+        return bad;
+      };
+      const entryBad = entryProblems(entry);
+      check('23-带去配队的入口', '二级详情页上「带上它去配队」可用（触控目标 ≥44px），'
+        + '而且带走的就是这一只（地址里那一只与按钮上的 id 一致）',
+        entryBad.length === 0,
+        entryBad.join(' | ') || `入口 ${JSON.stringify(entry)}；这一只=${handoffOne.select}`);
+      counter('23-带去配队的入口', '一个 disabled 的入口等于没有入口，必须被同一条判据抓住',
+        entryProblems({disabled: true, h: 44}), '{"disabled":true,"h":44}');
+      counter('23-带去配队的入口', '入口只有 30px 高（摸不到）也必须被抓住',
+        entryProblems({disabled: false, h: 30}), '{"disabled":false,"h":30}');
+      await mouseClick('#pet-actions [data-to-team]');
+      await sleep(1400);
+      for (let i = 0; i < 60; i += 1) {
+        if (await js(`document.body.dataset.rocoReady==='yes'`)) break;
+        await sleep(200);
+      }
+      const handed = JSON.parse(await js(`(()=>{const root=document.getElementById('team-workshop');
+        const q=new URLSearchParams(window.location.search);
+        return JSON.stringify({path:window.location.pathname.split('/').pop(),team:q.get('team')||'',
+          selected:root?root.dataset.twSelected:null,handoff:document.body.dataset.twHandoff??null});})()`) ?? '{}');
+      handedOk = handed.path === 'roco.html'
+        && (handed.team || '').split(',').filter(Boolean).length > 0
+        && Number(handed.selected) > 0;
+      handedNote = `带上它去配队 → ${handed.path}（team ${handed.team || '空'}）；工作台 selected=${handed.selected}`;
+      const handedProblems = (f) => {
+        const bad = [];
+        if (f?.path !== 'roco.html') bad.push(`没有跳到产品页（现在在 ${f?.path}）`);
+        if (!(f?.team || '').split(',').filter(Boolean).length) bad.push('URL 里没有 team（这一只没带过去）');
+        if (!(Number(f?.selected) > 0)) bad.push('工作台没有认下这一只');
+        return bad;
+      };
+      check('24-盒子→配队交接', '真鼠标点「带上它去配队」：跳到产品页，六槽工作台按 URL 带过去的个体预填，'
+        + '开局按钮与交接钩子读到的规模一致',
+        handedProblems(handed).length === 0,
+        handedProblems(handed).join(' | ') || handedNote);
+      counter('24-盒子→配队交接', '把交接数量改成 0（没预填）必须被同一条判据抓住',
+        handedProblems({...handed, selected: '0', team: ''}), '{"selected":"0","team":""}');
+    } else {
+      check('23-带去配队的入口', '要有一只个体才能验交接入口', false, handedNote);
+      check('24-盒子→配队交接', '要有一只个体才能验交接', false, handedNote);
     }
-    // ⚠ 2026-09-28 改钉（人类②：比较入口从列表行搬进二级详情页）：一只是**一只**地走
-    // 「打开它自己那一页 → 加入比较 → 回列表」这一条路（与第 ⑥ 组同一套步骤，实测能点到）。
-    // 2026-09-28 改钉（人类：「加入比较不是删了吗？」）：选两只的那条点击路没了，
-    // 改成**按地址直接进比较页**（`?a=&b=`，与产品页交接同一条形状）。
-    // 判据的意图一个字没改：两只选中之后，那一屏上必须有一个可用的「带上这两只去配队」。
-    const twoForCompare = handoffPair;
-    await cdp.send('Page.navigate', {url: `${base}box.html?a=${twoForCompare[0]}&b=${twoForCompare[1]}`});
-    await waitFor(`(()=>{const v=document.getElementById('compare-view');
-      const q=new URLSearchParams(location.search);
-      return Boolean(v)&&v.hidden===false&&Boolean(q.get('a'))&&Boolean(q.get('b'));})()`);
-    await sleep(500);
-    // ⚠ 2026-09-28 改钉：比较进的是**第二级页**（`?a=&b=`），«比完就去配队» 那一个入口现在
-    // 也在那一屏上（`#compare-view-to-team`）。首层那条 `#compare-to-team` 仍在（判据 25/26 用它），
-    // 但玩家比完看到的是二级页上这一个 —— 所以这里量的是它，判据的意图没变
-    //（比完两只之后必须有一个可用的「带上这两只去配队」，触控目标 ≥44px）。
-    const handoffView = await waitForSafe(`(()=>{const v=document.getElementById('compare-view');
-      const q=new URLSearchParams(window.location.search);
-      return Boolean(v)&&v.hidden===false&&Boolean(q.get('a'))&&Boolean(q.get('b'));})()`);
-    await sleep(400);
-    // 选中的个体从**地址**里读（二级页就是靠这两只复现的）；网格里那些 `.card.picked` 是同一份
-    // 选中状态在首层的影子（首层收起了但仍在 DOM 里），两者不一致就当场报出来。
-    const urlPair = JSON.parse(await js(`JSON.stringify((()=>{const q=new URLSearchParams(location.search);
-      return [q.get('a'),q.get('b')].filter(Boolean);})())`) || '[]');
-    const gridPicked = JSON.parse(await js(`JSON.stringify([...document.querySelectorAll('#box-grid .card.picked')]
-      .map((el) => el.dataset.select).filter(Boolean))`) || '[]');
-    const parsedHandoff = urlPair.length === 2 ? urlPair : gridPicked;
-    steps.push({at: 'handoff-pair', handoffPair, urlPair, gridPicked, handoffView});
-    const handoffButton = await js(`(()=>{const b=document.getElementById('compare-view-to-team');
-      if(!b)return null;const r=b.getBoundingClientRect();
-      return {disabled:b.disabled,w:Math.round(r.width),h:Math.round(r.height)};})()`);
-    const handoffEntryProblems = (facts, count) => {
-      const bad = [];
-      if (facts === null) bad.push('入口不存在');
-      else if (facts.disabled !== false) bad.push('入口是禁用的（等于没有入口）');
-      else if (facts.h < 44) bad.push(`入口只有 ${facts.h}px 高（摸不到）`);
-      if (!(count > 0)) bad.push('页面上一只选中的个体都没有');
-      return bad;
-    };
-    check('23-带去配队的入口', '比完两只之后（比较二级页上）「带上这两只去配队」可用（触控目标 ≥44px），'
-      + '而且二级页地址里的两只与首层选中的那两只一致',
-      handoffEntryProblems(handoffButton, parsedHandoff.length).length === 0 && handoffView
-        && urlPair.length === 2 && (gridPicked.length === 0 || gridPicked.join() === urlPair.join()),
-      `按钮 ${JSON.stringify(handoffButton)}；地址里的两只 ${JSON.stringify(urlPair)}`
-      + `；首层选中的 ${JSON.stringify(gridPicked)}；二级页=${handoffView}`);
-    counter('23-带去配队的入口', '一个 disabled 的入口等于没有入口，必须被同一条判据抓住',
-      handoffEntryProblems({...handoffButton, disabled: true}, parsedHandoff.length), '{"disabled":true}');
-
-    await mouseClick('#compare-view-to-team');
-    await sleep(1200);
-    for (let i = 0; i < 60; i += 1) {
-      if (await js(`document.body.dataset.rocoReady==='yes'`)) break;
-      await sleep(200);
-    }
-    const handed = await js(`(()=>{const root=document.getElementById('team-workshop');
-      const url=new URLSearchParams(window.location.search).get('team');
-      const slots=[...document.querySelectorAll('#team-workshop')].map((el)=>el);
-      return {path:window.location.pathname.split('/').pop(),teamParam:url,
-        twState:root?root.dataset.twState:null, selected:root?root.dataset.twSelected:null,
-        handoff:root?root.dataset.twHandoff:null,
-        teamButton:document.getElementById('start-standard-pvp')?.dataset.rocoStandardTeam??null,
-        note:(document.getElementById('standard-pvp-note')||{}).textContent||''};})()`);
-    await sleep(600);
-    const handedNow = await js(`(()=>{const root=document.getElementById('team-workshop');
-      return {path:window.location.pathname.split('/').pop(),
-        twState:root?root.dataset.twState:null, selected:root?root.dataset.twSelected:null,
-        handoff:root?root.dataset.twHandoff:null,
-        teamButton:document.getElementById('start-standard-pvp')?.dataset.rocoStandardTeam??null,
-        note:(document.getElementById('standard-pvp-note')||{}).textContent||''};})()`);
-    // 2026-09-22（A3 同物种最多一只）：盒子比较的常常是**同种两只个体**，而队伍里
-    // 同物种只能有一只 —— 所以交接时按物种去重，**URL 带过去的条数**才是权威口径。
-    // 这条判据改成量「三者一致」（URL / 工作台 / 开局按钮）且不超过比较选中的数量，
-    // 不再写死「必须等于 2」。
-    const carried = String(handed.teamParam ?? '').split(',').filter(Boolean);
-    const handedProblems = (f) => {
-      const bad = [];
-      if (f?.path !== 'roco.html') bad.push(`没有跳到产品页（现在在 ${f?.path}）`);
-      if (f?.twState !== 'ok') bad.push(`工作台状态 ${JSON.stringify(f?.twState)}`);
-      if (!carried.length) bad.push('URL 里一个个体都没带过来');
-      if (carried.length > parsedHandoff.length) {
-        bad.push(`带过来的比选中的还多（选中 ${parsedHandoff.length}，URL ${carried.length}）`);
-      }
-      if (new Set(carried).size !== carried.length) bad.push('URL 里有重复的个体');
-      if (Number(f?.selected) !== carried.length) {
-        bad.push(`URL 带了 ${carried.length} 只，工作台认了 ${f?.selected}`);
-      }
-      if (Number(f?.handoff) !== carried.length) bad.push(`交接钩子 data-tw-handoff=${f?.handoff}`);
-      if (Number(f?.teamButton) !== carried.length) {
-        bad.push(`开局按钮读到的队伍规模是 ${f?.teamButton}`);
-      }
-      return bad;
-    };
-    check('24-盒子→配队交接', '真鼠标点「带上这两只去配队」：跳到产品页，六槽工作台按 URL 带过去的个体预填'
-      + '（同物种最多一只，故同种两只只带一只），开局按钮与交接钩子读到的规模三者一致，且如实说「还差几只」',
-      handedProblems(handedNow).length === 0,
-      handedProblems(handedNow).join(' | ')
-      + `（带过来 ${parsedHandoff.length} 只；URL ${JSON.stringify(handed.teamParam)}；`
-      + `工作台 selected=${handedNow.selected} handoff=${handedNow.handoff} 按钮规模=${handedNow.teamButton}；`
-      + `文案「${handedNow.note}」）`);
-    counter('24-盒子→配队交接', '把交接数量改成 0（没预填）必须被同一条判据抓住',
-      handedProblems({...handedNow, selected: '0', handoff: null, teamButton: '0'}), '{"selected":"0"}');
     shots.push(await shoot('box-08-handoff-roco-1440x900'));
 
     // ── RC-801 还差①：**锁定要跟着交接走**（2026-09-25）──────────────────────────
@@ -1792,93 +1765,71 @@ async function main() {
       check('35-收藏刷新后还在', '「我的盒子」每一行都要有一个收藏星标', false, '一个收藏按钮都没画出来');
     }
 
-    // ── ⑧ 删掉要两步（二次确认，不用浏览器原生 confirm）───────────────────
-    await mouseClick('#box-reset');
-    await sleep(1000);
-    // 2026-09-28 改钉：`[data-add]` 已随人类 ②③ 搬进二级详情页（`#pet-actions`），列表那一屏
-    // **没有**它了 ⇒ 老选择器永远读到 null、这整段被跳过，报「页面上一个「＋再养一只同种」都没有」
-    // （实测 36 号就是这么红的）。种类改从列表行卡片上的 `data-group` 取（`cardHtml` 一直在写它），
-    // 不必先导航到二级页。
-    // 2026-09-28 改钉（人类逐字：「先删掉加多只同种的功能吧，每种精灵只允许有一只」+「再养一只也不要」）：
-    // 这一段原来先**真鼠标加一只**本机个体、再把它删掉。加的功能整个下线了 ⇒ 改成**删一只已经存在的**
-    // 本机个体（老记录里就有，`localStorage` 里那些不在服务端名单里的 id）。
-    // 判据的意图一个字没改：**删除必须是两步**（第一次点不删、取消不删、确认才删）。
-    // ⚠ 2026-09-28：「＋再养一只同种」下线之后，**验收里再没有别的办法造出**一只"本机个体"。
-    // 所以这一段自己往 localStorage 里种一条**老记录形状**的本机个体（`<select>-b` 后缀 +
-    // `species_id` 指向那一种），再真鼠标删它 —— 判据要量的东西一个字没变：**删除必须是两步**。
-    // 这也正是老玩家浏览器里真实存在的形状（本机记录键是 `select`，后缀 `-b` 是本机那只的编号约定）。
-    const seedPick = JSON.parse(await js(`(()=>{const c=document.querySelector('#box-grid .card[data-select]');
-      return JSON.stringify({select:c?c.dataset.select:'', group:c?c.dataset.group:''});})()`) || '{}');
-    if (seedPick.select && seedPick.group) {
-      await js(`(()=>{const key='roco.box.individuals.v1';
-        const store=JSON.parse(localStorage.getItem(key)||'{}');
-        store[${JSON.stringify(seedPick.select + '-b')}]={individual_id:${JSON.stringify(seedPick.select + '-b')},
-          species_id:${JSON.stringify(seedPick.group)},
-          level:60,nature:'稳重',talent:{hp:1,atk:2,def:3,spa:4,spd:5,spe:6},
-          refreshes:{nature:3,talent:3},talent_boosts:[],history:[]};
-        localStorage.setItem(key,JSON.stringify(store));return true;})()`);
-      await cdp.send('Page.navigate', {url: base + 'box.html'});
-      await sleep(1400);
-      await waitForSafe(`document.querySelectorAll('#box-grid .individual[data-detail]').length>0`,
-        {tries: 60, ms: 200});
-      steps.push({at: 'delete-seed', seeded: seedPick.select + '-b', group: seedPick.group});
-    }
-    const serverIdsForRemove = ((await (await fetch(`${base}api/roco/box?kind=mine&limit=60&offset=0`)).json())
-      .player?.cards ?? []).map((c) => c.select);
-    const localExtra = JSON.parse(await js(`(()=>{const ids=${JSON.stringify(serverIdsForRemove)};
+    // ── ⑧ 删除入口已随「再养一只」一起下线（人类 2026-09-28）──────────────────
+    //
+    // 整段改钉的来龙去脉：这一段原来量的是「真鼠标加一只同种 → 点删掉这只 → 两次确认」。
+    // 人类逐字：「重复精灵不要了，把铠甲虫还原回来」+「每种精灵只允许有一只」+「再养一只也不要」
+    // ⇒ **加**的功能下线、它造出来的**本机个体也不再渲染**（页面 `localRowsFor()` 直接返回空，
+    // 并且启动时把旧记录一次性清掉 `pruneRetiredExtras()`）。
+    // 于是「删掉这只」再也没有对象可删 —— 判据换成钉**下线本身**（正反两面），
+    // 而不是把按钮留着当摆设（那正是人类截图里骂的"点了没用的按钮"）。
+    // ⚠ 诚实记一笔：**「删除要二次确认」那条需求因此失效了** —— 没有可删的东西。
+    // 如果哪天又要能删个体，这条判据要连按钮一起恢复。
+    await cdp.send('Page.navigate', {url: base + 'box.html'});
+    await sleep(1400);
+    await waitForSafe(`document.querySelectorAll('#box-grid .individual[data-detail]').length>0`, {tries: 60, ms: 200});
+    const retiredDelete = JSON.parse(await js(`(()=>{const list=document.getElementById('box-grid');
       const store=JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}');
-      const one=Object.keys(store).find((id)=>store[id]&&!ids.includes(id))||'';
-      return JSON.stringify({id:one, species:one?(store[one].species_id||''):''});})()`) || '{}');
-    const delTarget = localExtra.species;
-    const extraId = localExtra.id;
-    steps.push({at: 'delete-candidate', delTarget, extraId});
-    if (delTarget && extraId) {
-        // 先把这一种摊开（本机那一只就在这一行里），再打开它自己那一页
-        //（「删掉这只」与二次确认都在那一页上）。
-        const extraRow = await ensureRowVisible(delTarget, extraId);
-        steps.push({at: 'delete-pick', delTarget, extraId, extraRow});
-        await mouseClick(`#box-grid .individual[data-detail="${extraId}"]`);
-        await waitForSafe(`(()=>{const v=document.getElementById('pet-view');
-          return Boolean(v)&&v.hidden===false&&new URLSearchParams(location.search).get('pet')===${JSON.stringify(extraId)};})()`,
-        {tries: 60, ms: 200});
-        await sleep(350);
-        await mouseClick(`#pet-actions [data-remove="${extraId}"]`);
-        await sleep(500);
-        const afterFirst = JSON.parse(await js(`(()=>{const store=JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}');
-          return JSON.stringify({removed:!store[${JSON.stringify(extraId)}],
-            confirmShown:Boolean(document.querySelector('#pet-actions [data-remove-confirm="${extraId}"]')),
-            cancelShown:Boolean(document.querySelector('#pet-actions [data-remove-cancel="${extraId}"]'))});})()`));
-        await mouseClick(`#pet-actions [data-remove-cancel="${extraId}"]`);
-        await sleep(500);
-        const afterCancel = JSON.parse(await js(`(()=>{const store=JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}');
-          return JSON.stringify({removed:!store[${JSON.stringify(extraId)}],
-            rowPresent:Boolean(document.querySelector('#pet-actions [data-remove="${extraId}"]')
-              ||document.querySelector('#box-grid [data-remove="${extraId}"]'))});})()`));
-        await mouseClick(`#pet-actions [data-remove="${extraId}"]`);
-        await sleep(450);
-        await mouseClick(`#pet-actions [data-remove-confirm="${extraId}"]`);
-        await sleep(800);
-        const afterConfirm = JSON.parse(await js(`(()=>{const store=JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}');
-          return JSON.stringify({removed:!store[${JSON.stringify(extraId)}]});})()`));
-        const delFacts = {afterFirst, afterCancel, afterConfirm};
-        steps.push({at: 'delete-confirm', extraId, facts: delFacts});
-        const delProblems = deleteConfirmProblems(delFacts);
-        check('36-删掉要两步', '人类 2026-09-28：「然后删除个体的功能一定要加二次确认」⇒ '
-          + '第一次点**不删**（只把这一处换成「确定删掉？＋ 取消」），点「取消」什么都不动，'
-          + '再点「确定删掉」才真的删掉（不用浏览器原生 confirm）',
-          delProblems.length === 0,
-          delProblems.join(' | ')
-            || `本机那一只 ${extraId}：第一次点后删了吗=${afterFirst.removed}（确认键=${afterFirst.confirmShown} `
-              + `取消键=${afterFirst.cancelShown}）；取消后删了吗=${afterCancel.removed} 行还在=${afterCancel.rowPresent}；`
-              + `确认后删了吗=${afterConfirm.removed}`);
-        counter('36-删掉要两步', '一次点就删 / 没有取消键 / 点了取消还是删了 —— 三种坏样本都要被抓住',
-          deleteConfirmProblems({afterFirst: {removed: true, confirmShown: false, cancelShown: false},
-            afterCancel: {removed: true, rowPresent: false}, afterConfirm: {removed: false}}),
-          '{"afterFirst":{"removed":true},"afterCancel":{"removed":true},"afterConfirm":{"removed":false}}');
-    } else {
-      check('36-删掉要两步', '本机得先有一只不在服务端名单里的个体，才能验"删得掉"',
-        false, `本机记录里一只本机个体都没有（种类=${delTarget || '空'}）`);
-    }
+      const extras=Object.keys(store).filter((id)=>/-(b|c|d|e|f)$/.test(id));
+      return JSON.stringify({
+        listRemove:Boolean(list?.querySelector('[data-remove]')),
+        anyMulti:Boolean(list?.querySelector('.species-drawer[data-count="2"], .species-drawer[data-count="3"]')),
+        extrasLeft:extras.length,
+        pruned:document.body.dataset.boxPrunedExtras||''});})()`) || '{}');
+    steps.push({at: 'retired-delete', retiredDelete});
+    // 反证：把"多出来的本机个体"塞进 localStorage，页面既不该画它、启动时也该把它清掉。
+    // （这条反证是**真去塞一遍**再刷新页面，不是空判据。）
+    await js(`(()=>{const key='roco.box.individuals.v1';
+      const store=JSON.parse(localStorage.getItem(key)||'{}');
+      store['own-0001-b']={individual_id:'own-0001-b',species_id:'pet_000012',level:60,
+        nature:'稳重',talent:{hp:1,atk:0,def:0,spa:0,spd:0,spe:0},refreshes:{nature:3,talent:3}};
+      localStorage.setItem(key,JSON.stringify(store));return true;})()`);
+    await cdp.send('Page.navigate', {url: base + 'box.html'});
+    await sleep(1400);
+    await waitForSafe(`document.querySelectorAll('#box-grid .individual[data-detail]').length>0`, {tries: 60, ms: 200});
+    const afterSeed = JSON.parse(await js(`(()=>{const list=document.getElementById('box-grid');
+      const store=JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}');
+      return JSON.stringify({rowDrawn:Boolean(list?.querySelector('.individual[data-detail="own-0001-b"]')),
+        banned:/-(b|c|d|e|f)$/.test(Object.keys(store).join(' ')),
+        pruned:document.body.dataset.boxPrunedExtras||''});})()`) || '{}');
+    steps.push({at: 'retired-delete-counterproof', afterSeed});
+    const retiredDeleteProblems = (f) => {
+      const bad = [];
+      if (f?.listRemove) bad.push('列表行里还有「删掉这只」（它已经随「再养一只」一起下线）');
+      if (f?.anyMulti) bad.push('页面上还有「2/3 个个体」那种重复精灵（人类：重复精灵不要了）');
+      if (f?.extrasLeft) bad.push(`localStorage 里还剩 ${f.extrasLeft} 条下线功能的产物`);
+      return bad;
+    };
+    check('36-重复精灵与删除入口都已下线',
+      '人类 2026-09-28：「重复精灵不要了，把铠甲虫还原回来」+「每种精灵只允许有一只」⇒ '
+      + '页面不再画本机多出来的个体（没有「N 个个体」的重复），删除入口一并下线，旧记录启动时清掉',
+      retiredDeleteProblems(retiredDelete).length === 0,
+      retiredDeleteProblems(retiredDelete).join(' | ')
+        || `列表 remove=${retiredDelete.listRemove} 多只种类=${retiredDelete.anyMulti} `
+          + `剩余旧记录=${retiredDelete.extrasLeft} 本次清理=${retiredDelete.pruned || '0'}`);
+    counter('36-重复精灵与删除入口都已下线',
+      '① 页面上又画出重复精灵 ② 删除入口复活 ③ 旧记录没被清掉 —— 三种坏状态都要被同一条判据抓住',
+      retiredDeleteProblems({listRemove: true, anyMulti: true, extrasLeft: 2}),
+      '{"listRemove":true,"anyMulti":true,"extrasLeft":2}');
+    // 反证的第二面：**塞进去也不许画出来**（页面这一侧真的不看它）
+    check('36b-塞进去的本机个体既不许画、也要被清掉',
+      '反证：往 localStorage 塞一条 `own-0001-b` 再刷新 —— 页面不许把它画成第二只，启动时还要把它清掉',
+      afterSeed.rowDrawn === false && afterSeed.banned === false,
+      `塞进去之后：被画出来=${afterSeed.rowDrawn}，记录还在=${afterSeed.banned}，清理计数=${afterSeed.pruned || '0'}`);
+    counter('36b-塞进去的本机个体既不许画、也要被清掉',
+      '把那条记录画出来（或没清掉），必须被同一条判据抓住',
+      ((f) => (f.rowDrawn === false && f.banned === false) ? [] : ['还画/还没清'])({rowDrawn: true, banned: true}),
+      '{"rowDrawn":true,"banned":true}');
 
     check('22-控制台干净', '整轮下来没有 console.error，也没有未捕获异常',
       consoleErrors.length === 0 && pageErrors.length === 0,

@@ -72,7 +72,9 @@ export const MIN_OUTSIDE_LAYER = 12;
  *   · 只许这一对，不许借机把实例数灌回去（那是 09-24 被点名的那件事）；
  *   · 页面上两只**必须看得出区别**（性格/天分上卡）—— 否则又会变成"同名两张一样的卡"。
  */
-export const MAX_SAME_SPECIES_GROUPS = 1;
+// 2026-09-28：**调回 0**（按 human-decisions 里写好的 rollback）。
+// 人类这一轮：「重复精灵不要了，把铠甲虫还原回来」+「每种精灵只允许有一只」。
+export const MAX_SAME_SPECIES_GROUPS = 0;
 
 /** 养成属性的面板换算公式**未校准**：这是全仓唯一一处「效果」措辞。 */
 export const GROWTH_EFFECT_REASON = '面板换算公式未校准（见 10 号文档 §13）';

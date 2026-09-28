@@ -16,13 +16,13 @@
     "panel_stats"
   ],
   "counts": {
-    "instances": 49,
+    "instances": 48,
     "species": 48,
     "species_in_layer_playable_48": 36,
     "species_outside_layer_playable_48": 12,
-    "same_species_groups": 1,
-    "same_species_groups_with_difference": 1,
-    "battle_builds": 49,
+    "same_species_groups": 0,
+    "same_species_groups_with_difference": 0,
+    "battle_builds": 48,
     "skills_referenced": 76
   },
   "candidate_universe": {
@@ -4662,110 +4662,6 @@
         "talent"
       ],
       "build_hash": "b3c85641b3e1f8c268c4e412fdde471a7fb9100d4f39091a5a25a608ddc477df"
-    },
-    {
-      "instance_id": "own-0049",
-      "species_id": "pet_000012",
-      "species_name": "铠甲虫",
-      "species_tier": "overlay",
-      "level": 60,
-      "nature": {
-        "value": null,
-        "value_source": null,
-        "effect": "UNKNOWN",
-        "effect_reason": "面板换算公式未校准（见 10 号文档 §13）",
-        "microcase_id": null
-      },
-      "talent": {
-        "value": null,
-        "value_source": null,
-        "effect": "UNKNOWN",
-        "effect_reason": "面板换算公式未校准（见 10 号文档 §13）",
-        "microcase_id": null
-      },
-      "specialty": {
-        "value": null,
-        "value_source": null,
-        "effect": "UNKNOWN",
-        "effect_reason": "面板换算公式未校准（见 10 号文档 §13）",
-        "microcase_id": null
-      },
-      "bloodline": {
-        "value": null,
-        "value_source": null,
-        "effect": "UNKNOWN",
-        "effect_reason": "面板换算公式未校准（见 10 号文档 §13）",
-        "microcase_id": null,
-        "value_pointer": "learnsets.pet_000012.blood_skills[].blood",
-        "blood_skill_id": null
-      },
-      "skills": [
-        "skill_000632",
-        "skill_000286",
-        "skill_000650",
-        "skill_000704"
-      ],
-      "skills_source": {
-        "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/support-matrix.json",
-        "artifact_sha256": "b9a58b7230dd75cba112fae6c181224b854f57eabf77324f8b4d184dbf8a526e",
-        "pointer": "pets[17].candidate_moveset.skills"
-      },
-      "base_stats": {
-        "hp": 122,
-        "atk": 88,
-        "def": 121,
-        "spa": 39,
-        "spd": 77,
-        "spe": 75
-      },
-      "panel_stats": null,
-      "source": "repo_generator_fixed_seed",
-      "favourite": false,
-      "locked": false,
-      "provenance": [
-        {
-          "source_id": "wiki-rocom-snapshot",
-          "source_scope": "frozen_l1",
-          "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/support-matrix.json",
-          "artifact_sha256": "b9a58b7230dd75cba112fae6c181224b854f57eabf77324f8b4d184dbf8a526e",
-          "pointer": "pets[17].candidate_moveset.skills",
-          "note": "规范四技能的**选择**出处（引擎 loadout；confidence=ENGINE_HYPOTHESIS，台账 23 条里没有配招主题 ⇒ 这一份是工程启发式，不是游戏真实配招）"
-        },
-        {
-          "source_id": "wiki-rocom-snapshot",
-          "source_scope": "frozen_l1",
-          "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
-          "artifact_sha256": "939b586256fd45ef2bfa0ffea11e0d3c870bd462e0fd38ceb88e819a87c18cae",
-          "pointer": "learnsets.pet_000012",
-          "note": "四个技能的**合法性**出处（该物种学习表：native + blood + stones —— 与引擎 `Ruleset.is_learnable` 的 `all_skill_ids` 同一口径）"
-        },
-        {
-          "source_id": "wiki-rocom-snapshot",
-          "source_scope": "frozen_l1",
-          "artifact_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
-          "artifact_sha256": "cd1f34a7a78957d019ff090fd0f9e3a07048e9f0f5fc3dc5bd3e3ca7e5575880",
-          "pointer": "pets[11].stats",
-          "note": "静态种族值出处（不是等级换算后的面板值）"
-        },
-        {
-          "source_id": "HUMAN-2026-09-28",
-          "source_scope": "human_decision",
-          "artifact_path": "data/roco/human-decisions.json",
-          "artifact_sha256": "1989d0241362acbb2b7dd8622d8c8f5a377b79cc5ec61b8890d72acc48fb7c70",
-          "pointer": "decisions.2026-09-28-same-species-demo-pair",
-          "note": "演示用的**同种第二个个体**：人类 2026-09-28 批准；**游戏里并不存在这一只**，只为让\"同种两个个体比较\"在真机上可验（性格/天分按新 instance_id 独立掷出）。若哪天不需要它了：删掉这一段 + own-0049，并把 MAX_SAME_SPECIES_GROUPS 调回 0。"
-        }
-      ],
-      "licence_ref": "wiki-rocom-snapshot",
-      "unknown_fields": [
-        "bloodline",
-        "nature",
-        "panel_stats",
-        "specialty",
-        "talent"
-      ],
-      "build_hash": "85cd24c8f37278005401126884986526f26ffde54fc6b6b175b5d6489536b776",
-      "synthetic_demo": true
     }
   ],
   "battle_builds": [
@@ -6628,46 +6524,7 @@
         "effective_bloodline"
       ],
       "build_hash": "49cb886c767212b83e0e7c4ff577ec80bde137c7ca7cfdb5781c83a3f699a5ed"
-    },
-    {
-      "build_id": "build-own-0049",
-      "owned_pet_instance_id": "own-0049",
-      "species_id": "pet_000012",
-      "effective_form": "BASE",
-      "form_sources": [
-        {
-          "source_id": "wiki-rocom-snapshot",
-          "source_scope": "frozen_l1",
-          "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
-          "pointer": "sections.distributable.entities[11].form_axis.axis",
-          "note": "出战形态轴出处"
-        }
-      ],
-      "ordered_skills": [
-        "skill_000632",
-        "skill_000286",
-        "skill_000650",
-        "skill_000704"
-      ],
-      "effective_bloodline": {
-        "value": null,
-        "value_source": null,
-        "effect": "UNKNOWN",
-        "effect_reason": "面板换算公式未校准（见 10 号文档 §13）",
-        "microcase_id": null,
-        "value_pointer": "learnsets.pet_000012.blood_skills[].blood",
-        "blood_skill_id": null
-      },
-      "derived_stats": null,
-      "derived_stats_confidence": "UNKNOWN",
-      "ruleset_id": "roco-world-s4-2026-09-10",
-      "unknown_fields": [
-        "derived_stats",
-        "effective_bloodline"
-      ],
-      "build_hash": "283ca19e569b5edbf76943cf495fac5da747a7191192875c3b151a7ce1f58192"
     }
   ],
-  "dataset_hash": "23cf46728e34c065ae6f4b508823dd2fec7ee2a677625214d04417bfbe8f5782"
+  "dataset_hash": "b477e0f6ca7e89685181208d72e4a7626b301bcc9be691d07c87903ef0292340"
 }

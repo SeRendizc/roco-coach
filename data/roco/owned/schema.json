@@ -1393,7 +1393,7 @@
     "instance_target": 48,
     "min_species": 40,
     "min_outside_layer_playable_48": 12,
-    "max_same_species_groups": 1,
+    "max_same_species_groups": 0,
     "seed": 20301
   }
 }

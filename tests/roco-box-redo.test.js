@@ -76,7 +76,11 @@ test('① 列表行只写「性格是啥 + 天分是哪一档」，数值留二�
   const chips = individualRowChips({individual_id: 'own-0001', level: 60, nature: '稳重',
     talent: {hp: 10, atk: 0, def: 0, spa: 0, spd: 0, spe: 7}}, {select: 'own-0001'});
   assert.match(chips, /性格 稳重/, `性格要写出来：${chips}`);
-  assert.match(chips, /天分档位/, `天分是哪一档要写出来：${chips}`);
+  // 2026-09-28 再改钉（人类：「就说 一般般的天分 不就好了？不需要前面加天分俩字」）：
+  // 档名自己就是完整说法（「一般般的天分」/「还不错的天分」/「相当好的天分」/「了不起的天分」），
+  // **前面不再加「天分档位」**。所以这里钉的是"四档名之一"而不是那个前缀。
+  assert.match(chips, /(一般般|还不错|相当好|了不起)的天分/, `天分是哪一档要写出来：${chips}`);
+  assert.doesNotMatch(chips, /天分档位/, '档名前面不许再加「天分档位」');
   assert.doesNotMatch(chips, /天分最高/, '天分具体数值不在列表里（人类：详细点进二级页看）');
   assert.doesNotMatch(chips, /Lv\./, '等级不在这一串里（它在行里单独一格，只出现一次）');
   assert.doesNotMatch(chips, /第 .*只/, '单独一只时不该有「第几只」');
@@ -163,7 +167,12 @@ test('③ 锁定：页面上的入口删了，`?lock=` 与它背后的规则留�
   assert.doesNotMatch(BOX_JS, /flag-locked/, 'box.js 里不许再给「只看锁定」绑监听');
   // ⚠ 但参数与规则**留着**（服务端与别的判据还在用）—— 删了会顶红那些判据。
   assert.match(BOX_JS, /lock=/, '`?lock=` 这条参数要留着（交接时锁定跟着走）');
-  assert.match(BOX_HTML, /lock=/, 'box.html 里要把"入口删了、参数留着"这件事写清');
+  // 2026-09-28 改钉（人类：「不要比较」）：比选栏与比较二级页整块拆掉 ⇒ box.html 里那段
+  // 「入口删了、参数留着」的说明也跟着没了。这条判据的原意（**参数与规则要留着**）不变，
+  // 落点从 box.html 换到**真正实现它的地方**：`goToTeam` 里拼 `&lock=` 那一行（box.js）。
+  // 旧断言：`assert.match(BOX_HTML, /lock=/)`。
+  assert.match(BOX_JS, /&lock=\$\{encodeURIComponent\(locked\.join\(','\)\)\}/,
+    '交接时锁定要跟着 URL 走（`&lock=` 那一行还在）');
 });
 
 // ── ④ 第一排/第二排不重复 ────────────────────────────────────────────────────

@@ -9,11 +9,11 @@
  *   ② 触控目标 ≥44px：**主要动作**（按钮 / summary / 输入框 / 卡片）都到线。
  *      2026-09-28 改钉（人类：「然后就是那个**加入比较为啥那么大**，有那么重要？」）：
  *      卡片上的「加入比较」是**次要动作**，按 chip 尺寸做（≤28px 高、字号 ≤12px），
- *      所以它不跟 44px 这条线，但也**不许做成点不到** —— 下限 24×24（`.cmp-toggle`，见下）。
+ *      2026-09-28：比较整块拆掉之后，「次要控件」这一类在盒子里已经没有了（旧的 24px 下限随之作废）。
  *      触控那一条判据（browser-box-acceptance 19）同步改成「主要动作 44 / 次要控件 24」。
  */
 
-/* ── 触控目标：主要动作都到 44px 这条线；次要控件（.cmp-toggle）见下面的 24px 下限 ── */
+/* ── 触控目标：主要动作都到 44px 这条线 ── */
 button,summary,input{min-height:44px}
 button{min-width:44px}
 
@@ -90,46 +90,13 @@ button{min-width:44px}
    有那么重要？」）。改前实测：和技能/等级那些标签一样大（宽 100%、高 44px，整张卡最抢眼的一行）。
    改后：高 24px、字号 11.5px、内边距 2/8、低调描边；下限 24×24（摸得到），
    选择器与无障碍钩子一个不动：`data-cmp="<个体 id>"` + `aria-pressed`。 */
-.cmp-toggle{width:auto;align-self:flex-start;min-height:24px;min-width:24px;height:24px;
- font-size:11.5px;line-height:1;padding:0 8px;border-radius:999px;font-weight:400;
- background:#121e2c;border:1px solid var(--line);color:#b4c3d1;opacity:.92}
-.cmp-toggle:hover:not(:disabled){background:#1b2938;border-color:#5d7791;color:#dbe5ef}
-.card.picked .cmp-toggle{background:#22402f;color:#bfeac3;border-color:#4e8f68;font-weight:600;opacity:1}
+/* `.cmp-toggle`（「加入比较」的小按钮）随比较整块下线，样式一并删。 */
 .box-empty{margin:12px 0 0}
 .pager{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:12px;font-size:13px;color:var(--muted)}
 .pager button{min-height:44px;min-width:44px;font-size:13px}
 
-/* ── 比选栏（首层）与比较二级页 ────────────────────────────────────────── */
-.compare-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
-#compare-hint{margin:0;font-size:13px;line-height:1.6;flex:1 1 240px}
-.compare-actions{display:flex;gap:8px;flex-wrap:wrap}
-.compare-actions button{min-height:44px;min-width:44px}
-/* 第二级视图（个体比较页）：列表整块收起（`#box-list-view[hidden]`），这一屏自己占满。
-   2026-09-28：人类说「比较页面也莫名其妙，加在下面你觉得很好看？为啥不做成二级页面，
-   内容也啥啥没有」⇒ 这一屏有返回入口、有那一句话的来龙去脉（每一行为什么都写出来）。 */
-.compare-view{margin-bottom:12px}
-.compare-view-head{justify-content:flex-start;gap:12px;flex-wrap:wrap}
-#compare-back{height:auto;min-height:44px}
-.compare-lead{margin:0 0 10px;line-height:1.6}
-#compare-view-actions{margin:0 0 10px}
-/* 比不了的时候（不同种 / 少带一只 / 名单里找不到）：把原因写在这里，不留白屏。 */
-.cmp-trouble{margin:0 0 10px;padding:10px 12px;border:1px solid #7a4a3a;border-radius:10px;
- background:#2a1c18;color:#ffd7c2;font-size:13px;line-height:1.65;overflow-wrap:anywhere}
-.cmp-summary p{margin:0 0 8px;font-size:13.5px;line-height:1.6}
-.cmp-counts{display:flex;gap:8px;flex-wrap:wrap}
-.cmp-status{font-size:12px;border-radius:6px;padding:2px 9px;display:inline-flex;align-items:center}
-.s-same{background:#26453a;color:#bfeac3}
-.s-different{background:#4a3a2a;color:#f0d0a8}
-.s-unknown{background:#3a3a4a;color:#cfcfe6}
-.cmp-row{border-top:1px solid #2c3d50;padding:10px 0}
-.cmp-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
-.cmp-label{font-size:13.5px;font-weight:600}
-.cmp-values{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.cmp-side{background:#131f2c;border:1px solid #2c3d50;border-radius:8px;padding:7px 9px;min-width:0}
-.cmp-side b{display:block;font-size:11.5px;color:var(--muted);font-weight:500;margin-bottom:3px}
-.cmp-value{font-size:13px;overflow-wrap:anywhere}
-.cmp-reason,.cmp-note{margin:7px 0 0;font-size:12.5px;line-height:1.6;color:#e8ce88}
-.cmp-note{color:#b4c3d1}
+/* 2026-09-28（人类：「不要比较」）：比选栏与比较二级页整块拆掉，它们的样式一并删了。
+   `.cmp-toggle`（「加入比较」那个小按钮）也早一步下线 —— 这里是同一件事的收尾。 */
 
 /* ── 个体详情抽屉 ──────────────────────────────────────────────────────── */
 .drawer{position:fixed;right:12px;top:12px;bottom:12px;width:min(430px,calc(100vw - 24px));
