@@ -27,7 +27,7 @@
    已知：单元判据上一轮是 **1708/1711**，3 条红同源于派生产物过期，跑 `npm run roco:rebuild` 后**已逐文件复跑转绿**（`on-demand-builds` 10/10、`team-ranker` 16/16）—— 请重跑全量确认 **1711/1711**。
    已知唯一门禁红：**`trajectories-model`**（模型臂轨迹过期），修它要本地 4B 网关：
    `ROCO_TRAJ_WORLDS=9 node scripts/roco/build-agent-trajectories.mjs --arms local_4b --out tests/evals/agent-trajectories-model-v1.jsonl`（后台跑）。
-   ⚠ 上一轮的后台 `npm run roco:rebuild` **第 15 步可能还在跑**，跑完会在 `tests/evals/` 产生新产物 ⇒ `git status` 一眼、补一笔提交即可。
+   ✅ 上一轮的 `npm run roco:rebuild` **18/18 已跑完**（第 15 步 Agent 轨迹集 373s），`tests/evals/agent-trajectories-v1.jsonl` **逐字节不变**；交接前起的 `test:unit` 与 `verify:release` 两个后台任务的日志在 `reports/roco/unit-run-after-rebuild.log`、`reports/roco/verify-release-handoff.log`，先看那两个数字。
 
 2. **第一任务（人类亲口点的）**：「**能不能吧现有 500 多只全做出来，难度多大**」——
    **交付的是评估，不是开工**；一切按 `TASK-2026-09-28-ALL-547-FEASIBILITY.md` 走（那里已经有我先量好的数字：抓包 1,120 文件 / 547 pet id **全带技能池**、547 个技能名在 `skills.json` 里一个不缺、现有 48 条里能对上的 **28/30 直接命中抓包 level 桶**、2 个例外已点名）。**结论先给人类看，他点头才动数据**；评估阶段**只读**（改语料形状会顶红 14 处判据 + 2 套验收）。
