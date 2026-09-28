@@ -13052,3 +13052,24 @@ console_errors: []
 **最后一次干净门禁（`bash-525`，`reports/roco/verify-release-round92b.log`）在跑** ——
 `five-minute-chain` 修好之后预期收敛到 `failed: ["unit"]`（只剩那条待拍板的 ④）。
 它跑完会自动改写交接文档第 79 行（`tmp/sync-gate-line.mjs` 已接在任务里）。
+
+**十七、最后一次干净门禁（`bash-525`，`reports/roco/verify-release-round92b.log`）**
+
+**27 套里 26 套绿，`failed = ["unit"]`** —— 与预期一致：
+
+```
+✔ env(32s) ✔ bridge ✔ toolbox-roco ✔ plan-e2e ✔ trajectories ✔ trajectories-model ✔ sft-split
+✔ model-manifest ✔ provenance ✔ rag-eval ✔ game-data-pack ✔ reconciliation ✔ sprite-identity
+✔ state-doc ✔ guard-selftest(56s) ✔ browser-acceptance(21s) ✔ demo-acceptance(152s)
+✔ mobile-sweep ✔ box-acceptance(100s) ✔ workshop-acceptance(63s) ✔ loadout-acceptance(8s)
+✔ five-minute-chain(15s) ← 修好了 ✔ roco-ux-acceptance(42s) ✔ battle-feedback(18s)
+✔ coverage-axes ✔ retained-assets
+✖ unit(188s) ← 只剩那条判据本身站不住的 ④
+```
+
+⇒ **`five-minute-chain` 的回归确认修好**（上一轮门禁 ✖ 12s → 这一轮 ✔ 15s），
+`box-acceptance` 连续两次在门禁里 ✔ 100s。
+
+交接文档第 79 行已由 `tmp/sync-gate-line.mjs` **自动同步成 `未通过套件：[unit]`**
+（判据 `tests/roco-handoff-doc.test.js` 逐个点名核对 `latest.json` 的 `failed`，实测 1/1 绿；
+`state-doc` 7/7 绿）。
