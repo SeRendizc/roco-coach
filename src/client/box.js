@@ -38,7 +38,9 @@ import {individualsForRows, refreshIndividual, undoIndividual,
 // 60 级面板：**数字只有一个来源**（`coach/talent.js` 的 `panelOf`），这一层只负责把它画出来。
 // 本仓的 60 级公式是游戏导出配置表那一套（PVP 一速榜 9/9 实测），**不是**宝可梦那套 ——
 // 同一只音速犬宝可梦式算速度 153、这条算 331，混用会把数算飞。
-import {panelOfIndividual} from '../coach/individuals.js';
+// `cultivationOf` = 培养那四样（性格/六项资质/天分档位/刷新账）的**唯一投影**
+//（人类 2026-09-29 报的 A7：这一屏此前同时读了服务端回执与本机记录两份 ⇒ 刷新对屏幕无效）。
+import {panelOfIndividual, cultivationOf} from '../coach/individuals.js';
 // 换技能面板（2026-09-28 人类：「换技能还是没实装是吧？实装一下」）。
 // ⚠ 必须是**行首静态 import**：动态/条件引入收不进浏览器模块图 ⇒ 资源 404 ⇒ 整页白屏
 //（规则见 src/server/index.js 的模块图那段）。
@@ -131,7 +133,10 @@ const state = {
   openDrawers: new Set(),   // 玩家手动点开过的种类（重画时不再收回去）
   pet: null,           // 二级详情页这一只的编号（地址 `?pet=`）
   petCard: null,       // 这一只在当前那页里的卡片（名字/系别/定位；列表页没有就用本机记录兜底）
-  petData: null,       // 服务器给的这一只的详情（技能、六维、资质…）
+  petData: null,       // 服务器给的这一只的详情（技能、六维、物种事实…）
+  // ⭐ 2026-09-29 新增：这一屏**唯一**的一份快照（`buildSnapshotOf` 的产物）——
+  // 培养四样来自本机记录、物种事实来自上面那份回执。渲染只读它，不再两份各取一半。
+  petBuild: null,
   petNote: '',         // 取不到时给玩家的一句人话
   confirmRemove: '',   // 「删掉这只」按了一次、正等着二次确认的那一只
 };
@@ -502,11 +507,42 @@ const STAT_LABELS = Object.freeze({hp: '生命', atk: '物攻', def: '物防', s
 const STAT_KEY_OF_LABEL = Object.freeze(Object.fromEntries(
   Object.entries(STAT_LABELS).map(([key, label]) => [label, key])));
 
-/** 那一行假设清单（逐字，一处事实源）。人类最恨编数字 ⇒ 档位与"给谁看的"都写在屏上。 */
-const PANEL_NOTE = '主数是按 60 级公式换算的面板值（默认 5 星 · 零突破）；'
-  + '下面一行是它的两个输入：种族值，以及这一只的天分（黄色）。'
-  + '这是给你看的换算值，引擎对战里用的不是这一份。'
-  + '没有种族值的精灵只给种族值本身，不编面板。';
+/**
+ * 那一行假设清单（逐字，一处事实源）。人类最恨编数字 ⇒ 档位与"给谁看的"都写在屏上。
+ *
+ * ⚠ 2026-09-29 **改钉**（Codex 在 `box.html?pet=own-0004` 实测到的**前后矛盾**）：
+ * 这一屏原来同时画两句互相打架的话 ——
+ *   ① 「六维（60 级）」+ 一串换算出来的数字（读起来像**精确结论**）；
+ *   ② 末尾又画一句 `player.panel.reason`：「……换算公式还没校准，所以盒子里只给迁移层登记过的
+ *      种族值，**不给伪精确的成品数值**」。
+ * 两句一前一后读起来就是"既给了成品数值，又说没给"。现在合成**一句**：
+ * 说清这一栏是**推导值**、前提是哪三个（60 级 / 默认 5 星 / 零突破）、
+ * 引擎用的不是它、而且「培养好的数值有没有真的进到队伍/对战」这条链**未验证**。
+ * 服务端那句"不给成品数值"在**有推导值**时不再画（意思已经并进这一句）；
+ * 只有**算不出推导值**的时候才画它，用来说明"为什么这一栏没有数"。
+ * 旧文案留档（改钉不删）：
+ *   '主数是按 60 级公式换算的面板值（默认 5 星 · 零突破）；下面是它的两个输入：种族值，'
+ *   + '以及这一只的天分（黄色）。这是给你看的换算值，引擎对战里用的不是这一份。'
+ *   + '没有种族值的精灵只给种族值本身，不编面板。'
+ */
+const PANEL_NOTE = '这是推导值（估算），不是游戏里的成品数值：主数按 60 级公式换算，'
+  + '前提是「60 级 · 默认 5 星 · 零突破」这三条（这套换算还没校准，前提也没在游戏里核验过）。'
+  + '下面一行是它的两个输入：种族值（静态登记）与这一只的天分（黄色）。'
+  + '引擎对战里用的不是这一份 —— 「培养出来的数值有没有真的进到队伍/对战」这条链还没验证过，'
+  + '所以这一栏不能当结论用。';
+
+/**
+ * ⚠ 2026-09-29 新增：**图鉴那一档（物种页）**用的那一句。
+ *
+ * 为什么要有它：物种页（`?pet=pet_XXXXXX`）没有个体 —— 没有天分、没有性格，
+ * 60 级面板的两个输入缺一个半。此前那一屏照样把面板算出来印在「六维（60 级）」底下
+ * （天分是拿这个物种的编号现掷的）⇒ 那是**编了一个面板**。现在物种页不算面板，
+ * 主数就是种族值本身，标签与这句话都跟着改，别让玩家以为是换算值。
+ */
+const PANEL_NOTE_SPECIES = '主数是这一只的种族值（静态登记）。'
+  + '这一屏是图鉴里的物种，没有个体数据（天分、性格）⇒ 不换算 60 级面板，也不编一个出来。'
+  + '要看面板就打开「我的盒子」里属于你的那一只。'
+  + '（这套换算还没校准：那个成品数值游戏数据里没有，所以这里不给一个看起来精确的数。）';
 
 /** 服务端给的六维是 `[{label,value}]` ⇒ 按**名字**映射成 `{hp,atk,…}`（别按下标：两边的顺序不同）。 */
 function raceOfMetrics(metrics) {
@@ -518,55 +554,136 @@ function raceOfMetrics(metrics) {
   return out;
 }
 
-function panelGrid(rows, individual) {
-  const list = Array.isArray(rows) ? rows : [];
+// ── 一处真值：这一只的 BuildSnapshot（人类 2026-09-29 报的 A7 + Codex 体检 P0-02）──────────
+//
+// ⚠ 2026-09-29 **改钉**（人类逐字：「刷新天分没效果，刷新性格没试过但也要检查下」）：
+// 「性格与资质」那一栏原来读 `state.petData`（= `?detail=` 的**服务端回执**里的
+// `player.traits` 的 `性格` / `资质` / `天分档位`），而刷新/回滚写的是**本机记录**
+// ⇒ **屏幕上那两个数字不可能变**（变的只有「还剩 N 次」和下面那行小字），
+// 而状态行还写着「结果就在这一页上」—— 那句话在那一刻是**假的**。
+// 现在这一栏与 60 级面板一样从**本机记录**算（`coach/individuals.js` 的 `cultivationOf`），
+// 所以那句话**变成了真的**（`wire()` 里刷新那一支照着这句话钉了一条判据）。
+//
+// **哪一份是真值**：培养那四样（性格 / 六项资质 / 天分档位 / 60 级面板）一律以 **本机记录**
+// （`roco.box.individuals.v1`）为**唯一**来源，理由写在 `coach/individuals.js` 的 `cultivationOf`
+// 上面（三条，每条可复验）。服务端回执**仍然是真值**，但只管它独有的**物种冻结事实**：
+// 名字 / 系别 / 立绘 / 种族值 / 四个技能 / 特性简介。两者在这里拼成**一份** `petBuild`，
+// 这一屏只画这一份 ⇒ 同屏不再有两个来源（这就是 P0-02 说的 BuildSnapshot 的最小形态，
+// 也顺带满足"四技能与性格/资质被同一份快照带着走"：技能来自 `skills`、培养来自 `cultivation`，
+// 两者在同一个对象上，页面不再各自去取）。
+function buildSnapshotOf({select, card, player, individual}) {
+  const traits = Array.isArray(player?.traits) ? player.traits : [];
+  const byLabel = new Map(traits.map((trait) => [trait.label, trait]));
+  // 这一屏看的是「我的盒子」里的**个体**，还是图鉴里的**物种**？
+  // 只有个体有培养数据（性格/六项资质/天分档位/刷新次数）。图鉴那 622 条里的**物种**没有这一套
+  // ⇒ 那边一个新数字都不许出现，否则就是拿物种编性格（踩「不编数值」那条红线）。
+  // 判据：服务端回执自己标了 `entity`；回执读不到（本机新养的那只不在名单里）时按编号形状认。
+  const owned = player ? player.entity === 'instance' : String(select ?? '').startsWith('own-');
+  const grown = owned ? cultivationOf(individual) : null;
+  const race = raceOfMetrics(player?.metrics);
+  // 面板只在**有个体**的时候算：物种页没有天分/性格这两个输入，硬算就是编一个面板出来。
+  const converted = (grown && Object.keys(race).length)
+    ? panelOfIndividual({talent: grown.talent, nature: grown.nature}, race) : null;
+  return {
+    instanceId: select,
+    speciesId: player?.group ?? card?.group ?? null,
+    owned,
+    name: player?.name ?? card?.name ?? null,
+    level: grown?.level ?? (Number.isFinite(Number(player?.level)) ? Number(player.level) : null),
+    cultivation: grown,
+    // 服务端回执里这两栏是**游戏数据字段**（不是玩家培养出来的）：有值才画，没值整栏不画。
+    // 只有它们跟着回执走 —— 培养那三栏（性格/资质/天分档位）一律走 `cultivation`。
+    gameTraits: ['特长', '血脉'].map((label) => byLabel.get(label)).filter(Boolean),
+    raceList: Array.isArray(player?.metrics) ? player.metrics : [],
+    panel: converted?.panel ?? null,
+    skills: Array.isArray(player?.skills) ? player.skills : [],
+    metricsMissingReason: player?.metrics_missing_reason ?? null,
+    panelReason: player?.panel?.reason ?? null,
+    // 这一屏上培养那几样到底是哪儿来的（判据与排障读它；玩家看不见这个键）。
+    sources: {cultivation: owned ? 'local-record' : 'none', species: player ? 'server-detail' : 'none'},
+  };
+}
+
+/** 这一屏「性格与资质」画哪些行 —— 培养三栏走本机记录，游戏数据两栏走服务端回执。 */
+function petTraitsOf(build) {
+  const rows = new Map();
+  if (build.cultivation) {
+    rows.set('性格', {label: '性格', value: build.cultivation.nature,
+      reason: '这一只还没有性格 ⇒ 如实说没有，不编一个'});
+    rows.set('资质', {label: '资质', value: build.cultivation.talent,
+      reason: '这一只还没有六项资质 ⇒ 如实说没有，不编一个'});
+    rows.set('天分档位', {label: '天分档位', value: build.cultivation.tier?.label ?? null,
+      reason: build.cultivation.tier?.reason ?? '没有六项资质 ⇒ 认不出档位'});
+  }
+  for (const trait of build.gameTraits) if (!rows.has(trait.label)) rows.set(trait.label, trait);
+  return ['性格', '资质', '特长', '血脉', '天分档位'].map((label) => rows.get(label)).filter(Boolean);
+}
+
+/**
+ * 六维那一格：**主数是 60 级面板值**，下面一行摊开两个输入 —— `种族 101 +10`（天分那份黄色）。
+ *
+ * ⚠ 2026-09-29：这一格的**两个输入**（天分那一份黄色、以及主数用的天分）现在与「资质」那一栏
+ * 是**同一批数**（都来自本机记录的现值）—— 此前一个是服务端回执、一个是本机记录，
+ * 刷新之后同屏会写「资质 物防 0 / 六维 种族 49 **+10**」（真机截图
+ * `reports/roco/build-snapshot/a7-before-2-after-refresh-talent.png` 拍到的就是这一处）。
+ */
+function panelGrid(build) {
+  const list = build.raceList;
   if (!list.length) return '';
-  const race = raceOfMetrics(list);
-  // 缺种族值就**不编面板**（只有迁移层那几十只有种族值）：那一栏照旧只给种族值本身。
-  const converted = Object.keys(race).length
-    ? panelOfIndividual({talent: individual?.talent, nature: individual?.nature}, race) : null;
+  const talent = build.cultivation?.talent ?? null;
   return `<div class="metrics">${list.map((row) => {
     const key = STAT_KEY_OF_LABEL[row?.label] ?? null;
-    const iv = key && individual?.talent ? Number(individual.talent[key]) : NaN;
+    const iv = key && talent ? Number(talent[key]) : NaN;
     const plus = Number.isFinite(iv) && iv > 0 ? `<em class="metric-iv">+${iv}</em>` : '';
-    const shown = converted?.panel?.[key];
-    const main = Number.isFinite(Number(shown)) ? escapeAttr(shown) : escapeAttr(row?.value ?? '');
+    const shown = build.panel?.[key];
+    // ⚠ `Number(null) === 0`：缺的那一项以前会印成 `0`（等于编了一个数字）。这里只认真正的数字。
+    const main = shown !== null && shown !== undefined && Number.isFinite(Number(shown))
+      ? escapeAttr(shown) : escapeAttr(row?.value ?? '');
     const base = Number.isFinite(Number(row?.value)) ? escapeAttr(row.value) : '—';
     return `<span class="metric"><b>${escapeAttr(row?.label ?? '')}</b>${main}`
       + `<em class="metric-race">种族 ${base}${plus}</em></span>`;
   }).join('')}</div>`;
 }
 
-function petBodyHtml(player, individual) {
-  const byLabel = new Map((player.traits ?? []).map((trait) => [trait.label, trait]));
-  const order = ['性格', '资质', '特长', '血脉', '天分档位'];
+/**
+ * 二级详情页的正文。**只吃一份 `BuildSnapshot`**（见 `buildSnapshotOf`）——
+ * 页面不再自己去摸 `state` 里那两份数据，这是"一处真值"在渲染层的落点。
+ */
+function petBodyHtml(build) {
+  // 2026-09-29：这一屏原来**两条渲染路径**（有回执画一套、没回执另写一套 HTML），
+  // 现在只剩这一条 —— 本机新养的那只（服务端不认识）也走它，画法不会跟有回执时漂。
+  const level = build.level === null ? '—' : `Lv.${build.level}`;
   // 2026-09-28（人类：「没有就删掉啊」）：**没有值的栏目整栏不画** ——
   // 此前「特长 无」还要再挂一句未核验说明，等于拿两行废话占地方。
-  const traits = order
-    .map((label) => byLabel.get(label))
-    .filter((trait) => trait && trait.value !== null && trait.value !== undefined && trait.value !== '')
+  const traits = petTraitsOf(build)
+    .filter((trait) => trait.value !== null && trait.value !== undefined && trait.value !== '')
     .map((trait) => petTraitRow(trait.label, trait)).join('');
-  const level = Number.isFinite(Number(individual?.level)) && Number(individual.level) > 0
-    ? Number(individual.level) : (Number.isFinite(Number(player.level)) ? Number(player.level) : null);
-  // 天分六项：有值就写，全 0 或没有就照实说没有（不补 0）。
-  const talent = individual?.talent && typeof individual.talent === 'object' ? individual.talent : null;
-  // 2026-09-28（人类指着截图）：「等级 Lv.60 / 等级上限 60（官方口径）」那一栏 ——
-  // 「这里就写等级60就好，第二排删了，废话 有啥」⇒ 去掉上限那句（它是维护者的口径说明）。
-  // 天分六项与六维**合成一格**：种族值 + 个体值（个体值黄色），见 `panelGrid`。
   return `<h4>等级</h4><div class="traits">
-    <div class="trait"><b>等级</b><span>${level === null ? '—' : `Lv.${level}`}</span></div>
+    <div class="trait"><b>等级</b><span>${level}</span></div>
    </div>
    ${traits ? `<h4>性格与资质</h4><div class="traits" id="pet-traits">${traits}</div>` : ''}
-   <h4>六维（60 级）</h4>${panelGrid(player.metrics, individual)
-     || `<p class="missing">${escapeAttr(player.metrics_missing_reason ?? NO_ITEM)}</p>`}
-   <p class="metric-label">${escapeAttr(PANEL_NOTE)}</p>
-   <h4>四个技能（按顺序）</h4><ol class="moveset">${(player.skills ?? []).map((s) => `<li>
+   <h4>${build.panel ? '六维（60 级 · 估算）' : '六维（种族值）'}${build.panel ? ' <span class="tag tag-badge">推导值</span>' : ''}</h4>${panelGrid(build)
+     || `<p class="missing">${escapeAttr(build.metricsMissingReason ?? NO_ITEM)}</p>`}
+   <p class="metric-label">${escapeAttr(build.panel ? PANEL_NOTE : PANEL_NOTE_SPECIES)}</p>
+   <h4>四个技能（按顺序）</h4><ol class="moveset">${build.skills.map((s) => `<li>
      <span class="move-slot">第 ${s.order} 个</span>
      <b>${escapeAttr(s.name ?? NO_ITEM)}</b>
      <span class="move-meta">${escapeAttr(s.element ?? '')}${s.category ? ` · ${escapeAttr(s.category)}` : ''}${s.energy !== null ? ` · 耗能 ${s.energy}` : ''} · 威力 ${escapeAttr(s.power_label ?? NO_ITEM)}</span>
      <span class="move-desc">${escapeAttr(s.desc ?? '')}</span>
-    </li>`).join('')}</ol>
-   <p class="missing">${escapeAttr(player.panel?.reason ?? NO_ITEM)}</p>`;
+    </li>`).join('')}</ol>${panelReasonHtml(build)}`;
+}
+
+/**
+ * 末尾那句服务端说明要不要画 —— **只在算不出推导值的时候画**。
+ *
+ * ⚠ 2026-09-29（Codex 在 `own-0004` 上实测的前后矛盾）：`player.panel.reason` 那句
+ * 「……换算公式还没校准，所以盒子里只给迁移层登记过的种族值，不给伪精确的成品数值」
+ * 与上面那一栏换算出来的数字**同时出现**时，读起来是"既给了成品数值、又说没给"。
+ * 现在：有推导值就不画它（意思并进了 `PANEL_NOTE`）；没有推导值才画，用来说明为什么这一栏没有数。
+ */
+function panelReasonHtml(build) {
+  if (build.panel) return '';
+  return `<p class="missing">${escapeAttr(build.panelReason ?? NO_ITEM)}</p>`;
 }
 
 /** 六维的中文名（与 `box-drawer.js` 的 `STAT_ORDER` 同一套；这里只给天分那六格用）。 */
@@ -595,8 +712,9 @@ function petActionsHtml(select, individual) {
 }
 
 /**
- * 画这一只的二级详情页。`state.petData` 是服务器给的那一份（技能、六维、资质都在里面）；
- * 取不到时（本机新养的那只不在名单里）**照实说清**，不留白屏，也仍然把本机这一份画出来。
+ * 画这一只的二级详情页。**正文只画一份快照**（`buildSnapshotOf`）：
+ * 培养那四样来自本机记录，物种事实（名字/系别/种族值/四技能）来自服务端回执。
+ * 取不到回执时（本机新养的那只不在名单里）**照实说清**，不留白屏，画法仍是同一条路。
  */
 function renderPetPage() {
   const select = state.pet;
@@ -606,12 +724,19 @@ function renderPetPage() {
   $('pet-view').hidden = false;
   document.body.dataset.boxView = 'pet';
   document.body.dataset.boxPet = select;
-  const player = state.petData;
-  const name = player?.name ?? card.name ?? '这一只';
-  const types = player?.types ?? card.types ?? [];
+  // ⚠ 2026-09-28 真机抓到（验收 10b：整页 **84 处** `[object Object]`）：
+  // 服务端详情页把「天分」那一栏的 `value` 直接给成**六维对象**（`{hp: 10, …}`，见 `boxGrowthPlayer`），
+  // 而 `fmtValue` 只认数值/数组/字符串 ⇒ 对象被原样 String() 成 `[object Object]`。
+  // 与比较页同一个根因，所以用同一个拆包口径（`unwrapGrowth` 只拆 `{value}` 一层，不动别的形状）。
+  const player = state.petData ? unwrapGrowth(state.petData) : null;
+  // ⭐ **这一屏唯一的真值对象**：页面下面所有渲染都只读它（不再各自去摸 `state.petData` / 本机记录）。
+  const build = buildSnapshotOf({select, card, player, individual});
+  state.petBuild = build;
+  const name = build.name ?? '这一只';
+  const types = build.types;
   $('pet-title').textContent = `${name} · 详情`;
   $('pet-head').innerHTML = `<div class="detail-head">
-   ${avatarHtml({...card, art: card.art ?? state.petData?.art, group: card.group ?? state.petData?.group, types}, {big: true})}
+   ${avatarHtml({...card, art: card.art ?? state.petData?.art, group: card.group ?? build.speciesId, types}, {big: true})}
    <div><h3>${escapeAttr(name)}</h3>
     <span class="card-types">${typeChips(types)}</span>
     <span class="card-tags">${[card.role_label ? `定位：${card.role_label}` : null,
@@ -625,8 +750,9 @@ function renderPetPage() {
    </div></div>`;
   $('pet-actions').innerHTML = petActionsHtml(select, individual);
   // 换技能面板挂在动作区**后面（同级兄弟）**：`#pet-actions` 每次重画，挂它里面会被抹掉。
-  mountLoadout({select, species: state.petData?.group ?? card.group ?? state.petCard?.group ?? null,
-    skills: state.petData?.skills ?? [], request: getJson});
+  // ⚠ 2026-09-29：技能也从**同一份快照**取（此前直接读 `state.petData.skills`）——
+  // 这就是"四技能与性格/资质被同一份快照带着走"那一条的落点。
+  mountLoadout({select, species: build.speciesId, skills: build.skills, request: getJson});
   // 刷新之后那句话（"上一次刷天分：+10 加到「魔攻」"）在这一屏上也要看得见：
   // 它是玩家确认"刚才那一下落在哪一项"的地方（列表那一行里不再画它了）。
   const note = $('pet-note');
@@ -640,9 +766,7 @@ function renderPetPage() {
   if (lastNote) note.dataset.refreshNote = 'yes'; else delete note.dataset.refreshNote;
   const petView = $('pet-view');
   if (lastNote) petView.dataset.refreshNote = 'yes'; else delete petView.dataset.refreshNote;
-  // 这一屏也带着"这一只是谁"的钩子（`data-individual`）：刷新/回滚那几件事实在太多地方要读它，
-  // 让这一屏与列表那一行共用同一个落点，省得两处各写一套。
-  // 这一屏也带着"这一只是谁"（`data-individual`）：刷新/回滚那几件事与列表那一行共用同一个落点，
+  // 这一屏也带着"这一只是谁"的钩子（`data-individual`）：刷新/回滚那几件事与列表那一行共用同一个落点，
   // 免得到处各写一套选择器（真机验收 28/30 号读的就是它）。
   $('pet-view').dataset.individual = select;
   // ⚠ 2026-09-28：给"这一屏画完了"一个**显式信号**，供验收/自动化等待用。
@@ -650,30 +774,31 @@ function renderPetPage() {
   // ⇒ 读到中间那一帧是常事，表现为"时红时绿"。有了这个标记，验收可以等它，
   // 而不是靠 sleep 猜（`data-pet-rendered` = 服务端那份到了；`data-pet-select` = 画的是谁）。
   $('pet-view').dataset.petRendered = player ? 'server' : 'local';
+  // ⭐ 2026-09-29 新增：这一屏上「性格与资质」那几样到底是哪儿来的（判据/排障读它，玩家看不见）。
+  // 判据：`reports/roco/build-snapshot/browser-a7-refresh-proof.mjs` 的 C4 —— 它要的就是
+  // "屏幕上的数字 == 本机记录那一份"，而不是"屏幕上有没有出现某个词"。
+  $('pet-view').dataset.buildCultivation = build.sources.cultivation;
+  // ⭐ 2026-09-29 新增（Codex 监工要的那条跨模块判据的**页面那一半**）：
+  // `data-build-fingerprint` = 这一只**培养数据的内容指纹**（`cultivationFingerprint`，
+  // 与消费方算的是同一个函数）；`data-build-revision` = 只增不减的刷新计数。
+  // 有了这两个，跨模块验收才能判"同一只刷了一次之后，别的模块读到的是不是新的那一份"
+  // —— 只看 `snapshotId` 是判不出来的（它的值不随内容变）。
+  // 物种页（没有个体）两个都写空串：没有培养数据就不要给一个看起来像指纹的东西。
+  $('pet-view').dataset.buildFingerprint = build.cultivation?.fingerprint ?? '';
+  $('pet-view').dataset.buildRevision = build.cultivation?.revision ?? '';
+  $('pet-body').innerHTML = petBodyHtml(build);
   // 排障/验收用的钩子：这一页上「资质」那一栏原样印出来是什么（真机 10b 就是读它判的）。
   // 只读标记，不改变任何渲染 —— 没有这一栏时写空串（不编值）。
+  // ⚠ 2026-09-29 **改钉**：这一小段原来写在 `#pet-body.innerHTML = …` **之前**，
+  // 读到的是**上一次渲染**留下的 DOM（于是"刷新一次之后 `data-talent-raw` 还是旧值"，
+  // 一个量屏幕的钩子自己却慢一帧 —— 12b/10b 的排障字段就是这么被污染的）。
+  // 挪到渲染之后，读数与屏幕上这一刻一致；判据的语义一个字没改。
   {
     const talentRow = [...document.querySelectorAll('#pet-body .trait')]
       .find((el) => String(el.querySelector('b')?.textContent ?? '').trim() === '资质');
     $('pet-view').dataset.talentRaw = talentRow
       ? String([...talentRow.querySelectorAll('span')].map((s) => s.textContent).join(' ')).trim() : '';
   }
-  // ⚠ 2026-09-28 真机抓到（验收 10b：整页 **84 处** `[object Object]`）：
-  // 服务端详情页把「天分」那一栏的 `value` 直接给成**六维对象**（`{hp: 10, …}`，见 `boxGrowthPlayer`），
-  // 而 `fmtValue` 只认数值/数组/字符串 ⇒ 对象被原样 String() 成 `[object Object]`。
-  // 与比较页同一个根因，所以用同一个拆包口径（`unwrapGrowth` 只拆 `{value}` 一层，不动别的形状）。
-  $('pet-body').innerHTML = player
-    ? petBodyHtml(unwrapGrowth(player), individual)
-    : `<h4>基础</h4><div class="traits"><div class="trait"><b>等级</b>
-        <span>${Number.isFinite(Number(individual.level)) ? `Lv.${Number(individual.level)}` : '—'}</span>
-        <span class="trait-effect">等级上限 60（官方口径）</span></div></div>
-       <h4>性格与天分</h4><div class="traits" id="pet-traits">
-        <div class="trait"><b>性格</b><span>${escapeAttr(individual.nature ?? '待导出')}</span></div>
-        <div class="trait"><b>天分最高</b><span>${escapeAttr(Object.entries(individual.talent ?? {})
-          .filter(([, value]) => Number(value) > 0).sort((a, b) => b[1] - a[1]).slice(0, 3)
-          .map(([key, value]) => `${STAT_LABELS[key] ?? key} ${value}`).join(' / ') || NO_ITEM)}</span></div>
-       </div>
-       <p class="missing">${escapeAttr(state.petNote ?? NO_ITEM)}</p>`;
   window.scrollTo(0, 0);
 }
 
@@ -1046,6 +1171,9 @@ function wire() {
       if (!undone.ok) { $('box-status').textContent = undone.reason; return; }
       renderCards();
       renderPetPage();
+      // ⚠ 2026-09-29（A7 的第三条）：回滚之后「性格与资质」与「六维」要**逐值**回到刷新前。
+      // 这一条以前也是**假的**（那一栏读服务端回执，回滚只改本机记录）⇒ 回滚对屏幕同样无效。
+      // 现在两栏同源（本机记录）⇒ 回滚一定逐值还原；判据：`browser-a7-refresh-proof.mjs` 的 C3。
       $('box-status').textContent = '已经回滚上一次刷新（只退这一步；退掉的次数不还）';
       return;
     }
@@ -1060,6 +1188,15 @@ function wire() {
       renderPetPage();
       // 2026-09-27（§C6.313② 的收尾）：状态行要说出**落在哪一项**；回滚之后重刷还要说出
       // 「换掉了什么」（`lastRefreshNote` 那句话只有一处事实源）。
+      //
+      // ⚠ 2026-09-29 **改钉**（人类逐字：「刷新天分没效果」+ Codex 复检：「buttons do affect local
+      // computed panels; they are not wholly fake. Their semantics and propagation are broken.」）：
+      // 「（结果就在这一页上）」这句话**照旧留着**，但它此前是**假的** ——
+      // 点完刷新，变的只有「还剩 N 次」、这行小字、以及六维面板（面板读的是本机记录），
+      // 而「性格与资质」那一栏读的是服务端回执 ⇒ 屏幕上那两个数字一动不动。
+      // 现在那一栏也走本机记录（`buildSnapshotOf` / `cultivationOf`），这句话**变成了真的**；
+      // 判据不再量 localStorage，而是量屏幕：`reports/roco/build-snapshot/browser-a7-refresh-proof.mjs`
+      // 的 C1/C2（点之前/之后读 `#pet-body` 里「资质」与「六维」的**文字**，逐字符比对）。
       const note = lastRefreshNote(result.individual);
       const fallback = refreshBtn.dataset.refresh === 'nature'
         ? '性格刷新了一次（结果就在这一页上）' : '天分刷新了一次（结果就在这一页上）';

@@ -93,7 +93,12 @@ test('① 列表行只写「性格是啥 + 天分是哪一档」，数值留二�
   // 「详细」那一半二级页要接得住（否则就是删了没搬）
   const box = readFileSync(new URL('../src/client/box.js', import.meta.url), 'utf8');
   assert.match(box, /'性格', '资质', '特长', '血脉', '天分档位'/, '二级页要有「性格与资质」那一段');
-  assert.match(box, /六维（60 级）/, '二级页要有 60 级面板那一段');
+  // ⚠ 2026-09-29 改钉（Codex 在 `box.html?pet=own-0004` 实测到的**前后矛盾**）：
+  // 那一栏原来是 `六维（60 级）`，读起来像**精确结论**，而末尾又挂一句「不给伪精确的成品数值」。
+  // 现在标题写清它是估算：`六维（60 级 · 估算）` + 一个「推导值」徽标（见 ㉕）。
+  // 旧断言（改钉不删，留档）：assert.match(box, /六维（60 级）/, '二级页要有 60 级面板那一段');
+  assert.match(box, /六维（60 级 · 估算）/, '二级页要有 60 级面板那一段，而且标题要说清是估算');
+  assert.match(box, /六维（种族值）/, '物种页（没有个体）那一档要写「六维（种族值）」，不许冒充 60 级面板');
 });
 
 // ── ② 二级详情页：完整六维 ───────────────────────────────────────────────────
@@ -326,4 +331,133 @@ test('㉓ 锁定判定要同时认列表卡片与详情回执（地址直达时�
     '按钮文案不许退回"只认卡片"的旧写法');
   assert.doesNotMatch(BOX_JS, /locked: card\?\.locked === true/,
     '交接载荷不许退回"只认卡片"的旧写法');
+});
+
+/**
+ * ㉔ **一处真值**：二级详情页的「性格与资质」必须从 `buildSnapshotOf`（= 本机记录那一份）画，
+ * 不许再读 `?detail=` 服务端回执里的 `player.traits`。
+ *
+ * 人类 2026-09-29 报的 A7（逐字）：「**刷新天分没效果**，刷新性格没试过但也要检查下」。
+ * 根因不是按钮坏了 —— Codex 复检时把这一点纠正了（「buttons do affect local computed panels;
+ * they are not wholly fake. Their semantics and propagation are broken.」）：
+ *   · 「性格与资质」那一栏读的是**服务端回执**（`petBodyHtml(player, individual)` 里的
+ *     `player.traits`）—— 它是按 `instance_id` 现算的纯函数，刷新**不可能**改变它；
+ *   · 而 60 级面板（`panelGrid`）读的是**本机记录** ⇒ 刷新之后同屏出现
+ *     「资质 物防 0」与「六维 种族 49 **+10**」两套数（真机截图 `a7-before-2-*.png`）。
+ * 所以判据是三条：**只画一份快照**、**培养三栏不读回执**、**面板/资质/块三点同源**。
+ *
+ * ⚠ 判据量的是源码接线，**不等于**屏幕上真的会变 —— 屏幕那一半在
+ * `reports/roco/build-snapshot/browser-a7-refresh-proof.mjs` 的 C1–C4（真鼠标点、逐字符比屏幕文字）。
+ * 这里存在的意义：防止下一个人"顺手"把某一栏改回读回执（那正是这一轮的 bug）。
+ */
+test('㉔ A7 一处真值：性格/资质/天分档位与面板必须同源（都走 buildSnapshotOf）', () => {
+  assert.match(BOX_JS, /import \{panelOfIndividual, cultivationOf\} from '\.\.\/coach\/individuals\.js'/,
+    '培养快照的投影只有一处（coach/individuals.js 的 cultivationOf），页面 import 它');
+  assert.match(BOX_JS, /function buildSnapshotOf\(\{select, card, player, individual\}\)/,
+    '要有一个把"服务端物种事实 + 本机培养状态"拼成**一份**的函数');
+  assert.match(BOX_JS, /const build = buildSnapshotOf\(\{select, card, player, individual\}\)/,
+    'renderPetPage 每次重画都要现拼一份（刷新/回滚之后立刻是新值）');
+  assert.match(BOX_JS, /const grown = owned \? cultivationOf\(individual\) : null/,
+    '培养那四样来自本机记录（`cultivationOf`），物种事实才来自回执');
+  assert.match(BOX_JS, /\$\('pet-body'\)\.innerHTML = petBodyHtml\(build\)/,
+    '正文只画这一份快照（不许再出现 `petBodyHtml(unwrapGrowth(player), individual)` 那种两来源写法）');
+  assert.doesNotMatch(BOX_JS, /petBodyHtml\(unwrapGrowth\(player\)/,
+    '反证：按"回执一份、本机记录一份"两来源渲染的旧写法不许回来（那就是 A7）');
+
+  // 「性格与资质」那一段：培养三栏从快照取，回执只留「特长 / 血脉」这两栏游戏数据字段。
+  const fn = BOX_JS.slice(BOX_JS.indexOf('function petTraitsOf(build) {'));
+  const body = fn.slice(0, fn.indexOf('\n}'));
+  assert.match(body, /rows\.set\('性格', \{label: '性格', value: build\.cultivation\.nature/,
+    '「性格」要从快照的 cultivation 取（旧写法是 `player.traits`）');
+  assert.match(body, /rows\.set\('资质', \{label: '资质', value: build\.cultivation\.talent/,
+    '「资质」要从快照的 cultivation 取 —— 这一栏就是人类说的"没效果"那一栏');
+  assert.match(body, /rows\.set\('天分档位', \{label: '天分档位', value: build\.cultivation\.tier\?\.label/,
+    '「天分档位」也要同源（它与资质是同一份记录的两个投影）');
+  assert.match(body, /for \(const trait of build\.gameTraits\) if \(!rows\.has\(trait\.label\)\) rows\.set\(trait\.label, trait\)/,
+    '回执那两栏只能通过 `build.gameTraits` 进来（白名单在 buildSnapshotOf 里，见下一条）');
+  assert.doesNotMatch(body, /player\.traits/, '反证：培养那段不许再去读回执的 traits');
+  // 回执那一侧的**白名单**：只留「特长 / 血脉」这两栏游戏数据字段。
+  assert.match(BOX_JS, /gameTraits: \['特长', '血脉'\]\.map\(\(label\) => byLabel\.get\(label\)\)/,
+    '回执的 traits 里只许取「特长 / 血脉」—— 性格/资质/天分档位一律走本机记录');
+
+  // 六维面板：两个输入（天分、性格）与主数都从同一份快照来。
+  const grid = BOX_JS.slice(BOX_JS.indexOf('function panelGrid(build) {'));
+  const gridBody = grid.slice(0, grid.indexOf('\n}'));
+  assert.match(gridBody, /const talent = build\.cultivation\?\.talent \?\? null/,
+    '面板那一格的天分（黄色那几个数）要取自快照的现值 —— 与「资质」同一批数');
+  assert.doesNotMatch(gridBody, /panelOfIndividual\(/,
+    '面板不许在渲染函数里各算一遍：`buildSnapshotOf` 里算好的那一份才是这一屏的唯一来源');
+
+  // 判据/排障用的钩子：这一屏上培养那几样到底哪儿来的（`browser-a7-refresh-proof.mjs` 的 C4 读它）。
+  assert.match(BOX_JS, /\$\('pet-view'\)\.dataset\.buildCultivation = build\.sources\.cultivation/,
+    '要把"这一屏的培养数据来自哪儿"写在 data 钩子上（判据据此判同一屏有没有两个来源）');
+
+  // ⭐ 跨模块那一条（2026-09-29 Codex 监工）：页面要暴露**内容指纹**与**刷新计数**，
+  // 因为小芽那边只在 `snapshotId` 变化时重拉详情，而同一只刷过之后 `snapshotId` 不变。
+  // ⚠ 这两个字段必须在**同一屏**上（`#pet-view`），消费方与验收都读得到；
+  // 而且指纹只有一处实现（`coach/individuals.js` 的 `cultivationFingerprint`）——
+  // 谁都不许自己再拼一份（两份一定会漂，漂了就等于没有指纹）。
+  assert.match(BOX_JS, /\$\('pet-view'\)\.dataset\.buildFingerprint = build\.cultivation\?\.fingerprint \?\? ''/,
+    '页面要暴露 `data-build-fingerprint`（跨模块判"同一只数值变了没有"）');
+  assert.match(BOX_JS, /\$\('pet-view'\)\.dataset\.buildRevision = build\.cultivation\?\.revision \?\? ''/,
+    '页面要暴露 `data-build-revision`（只增不减，回滚也能认出来）');
+  const individuals = readFileSync(new URL('../src/coach/individuals.js', import.meta.url), 'utf8');
+  assert.match(individuals, /export function cultivationFingerprint\(individual\)/,
+    '指纹只有一处实现（`coach/individuals.js`），页面与消费方 import 同一个函数');
+  assert.match(individuals, /fingerprint: cultivationFingerprint\(individual\)/,
+    '`cultivationOf` 要把它带出来（页面不另算一遍）');
+  assert.match(individuals, /revision: `\$\{Number\(individual\?\.rolls\?\.nature \?\? 0\)\}\.\$\{Number\(individual\?\.rolls\?\.talent \?\? 0\)\}`/,
+    '`revision` 用 `rolls`（只增不减：回滚不退），不是用剩余次数（那会回满）');
+  assert.doesNotMatch(individuals, /rolls=n\$\{/,
+    '反证：`rolls` 不许混进**内容指纹** —— 回滚之后指纹必须逐字回到刷新前那一份（混进去就回不去了）');
+});
+
+
+/**
+ * ㉕ 「60 级面板」那一栏**不许前后矛盾**（Codex 2026-09-29 在 `box.html?pet=own-0004` 实测）。
+ *
+ * 原来的样子：同一屏上
+ *   ① 「六维（60 级）」+ 一串换算出来的数字（读起来像精确结论）；
+ *   ② 末尾 `<p class="missing">` 又画服务端那句「……换算公式还没校准，所以盒子里只给迁移层
+ *      登记过的种族值，**不给伪精确的成品数值**」。
+ * 两句一前一后就是打架，而且页面还明说引擎不是用这份数值 ⇒ 「培养 → 战斗贯通」这件事
+ * **仍然没有被证明**。修法（Lead 转达 Codex 的口径，二选一里的 a）：
+ *   · 标题写明「估算」+ 一个「推导值」徽标（视觉上与核验过的数值分开）；
+ *   · 那一栏下面**只剩一句**说明：说清前提（60 级 / 默认 5 星 / 零突破）、引擎用的不是它、
+ *     以及「培养出来的数值有没有真的进到队伍/对战」**未验证**；
+ *   · 服务端那句"不给成品数值"只在**算不出推导值**时才画（有数就不画它）。
+ *
+ * ⚠ 判据量的是源码接线 + 文案事实；**真机那一半**（同一屏同时看得见"这是估算/前提是什么"与数值）
+ * 在 `reports/roco/build-snapshot/browser-a7-refresh-proof.mjs` 的 C9 与
+ * `docs/roco/review-2026-09-28/shots/build-snapshot/a7-after-6-*.png`。
+ */
+test('㉕ 六维那一栏不许自相矛盾：标成估算 + 说清前提 + 服务端那句"不给成品数值"不许同时出现', () => {
+  // ① 标题与徽标
+  assert.match(BOX_JS, /六维（60 级 · 估算）/, '标题要写明这是估算，不许长得像精确结论');
+  assert.match(BOX_JS, /<span class="tag tag-badge">推导值<\/span>/,
+    '要有一个「推导值」徽标（复用页面已有的 tag-badge 样式，不新增 CSS）');
+  // ② 那一句说明：三个前提 + 引擎不用它 + 那条链未验证
+  const note = BOX_JS.slice(BOX_JS.indexOf('const PANEL_NOTE = '));
+  const noteBody = note.slice(0, note.indexOf(';\n'));
+  for (const word of ['推导值', '估算', '60 级', '默认 5 星', '零突破', '还没校准']) {
+    assert.ok(noteBody.includes(word), `前提那句里要有「${word}」：${noteBody}`);
+  }
+  assert.match(noteBody, /引擎对战里用的不是这一份/,
+    '要明说引擎用的不是这一份（否则又读成"培养已经贯通到战斗了"）');
+  assert.match(noteBody, /还没验证过/, '「培养 → 队伍/对战」这条链没实证，就写未验证（不许写成已贯通）');
+  // ⚠ 反证：那句说明里**不许**出现"成品数值已核验"这类相反的话
+  assert.doesNotMatch(noteBody, /已经校准|已核验|可以当结论/, '这一栏的话不许自相矛盾');
+  // ③ 服务端那句「不给伪精确的成品数值」只在**没有推导值**的时候画
+  const fn = BOX_JS.slice(BOX_JS.indexOf('function panelReasonHtml(build) {'));
+  const fnBody = fn.slice(0, fn.indexOf('\n}'));
+  assert.match(fnBody, /if \(build\.panel\) return '';/, '有推导值时不许再画那句"不给成品数值"');
+  assert.match(fnBody, /build\.panelReason/, '没有推导值时才画它，用来说明为什么这一栏没有数');
+  // 反证：旧写法（无条件把 panelReason 画成末尾一段）不许回来
+  assert.doesNotMatch(BOX_JS, /<\/ol>\s*<p class="missing">\$\{escapeAttr\(build\.panelReason/,
+    '反证：旧写法（末尾无条件画服务端那句）不许回来 —— 那就是 Codex 抓到的前后矛盾');
+  // ④ 物种页那一档（没有个体）：不许冒充 60 级面板，也不许给一个看起来精确的数
+  const species = BOX_JS.slice(BOX_JS.indexOf('const PANEL_NOTE_SPECIES = '));
+  const speciesBody = species.slice(0, species.indexOf(';\n'));
+  assert.match(speciesBody, /不换算 60 级面板/, '物种页要明说不换算面板');
+  assert.match(speciesBody, /不给一个看起来精确的数|不编一个出来/, '物种页不许编一个面板出来');
 });

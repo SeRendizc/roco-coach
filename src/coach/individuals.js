@@ -12,7 +12,7 @@
 //
 // ⚠ 掷点规则的**诚实边界**：官方概率本仓没有。所以两条掷点规则都标 `MODELLED_NOT_OBSERVED`，
 // 界面上必须能说出来"这是我们模拟器的掷点，不是官方概率"。拿到真分布（小黑盒/实机）就替换这一处。
-import {STAT_KEYS, STAT_NAMES, panelOf, natures} from './talent.js';
+import {STAT_KEYS, STAT_NAMES, panelOf, natures, talentTierOf} from './talent.js';
 
 export const REFRESH_LIMIT = 3;
 
@@ -166,6 +166,112 @@ export function groupBySpecies(list) {
 /** 单个个体的面板（数字只从 `talent.js` 来；缺输入会进 `unknown`）。 */
 export function panelOfIndividual(individual, race) {
   return panelOf({race, talent: individual.talent, nature: individual.nature, scope: 'pvp'});
+}
+
+/**
+ * **培养快照**（Codex 体检 P0-02 说的 `BuildSnapshot` 的**最小形态**）：把本机那一份个体记录
+ * 摊成"同一屏要画的那几样"，一处算、页面只画。
+ *
+ * ── 人类 2026-09-29 报的 A7（逐字：「刷新天分没效果，刷新性格没试过但也要检查下」）──────
+ * 根因不是按钮坏了，是**同一屏上有两份互不相干的培养数据**：
+ *   · 「性格与资质」那一栏读的是 `?detail=` **服务端回执**（`boxDetailMode` → `withIndividualGrowth`
+ *     → `individualFromInstance`）：它是按 `instance_id` 现算的**纯函数**，没有写路径，
+ *     刷新按钮**不可能**改变它；
+ *   · 刷新/回滚写的是**本机记录**（`roco.box.individuals.v1`）⇒ 变的只有「还剩 N 次」与那行小字；
+ *   · 而 60 级面板那一栏（`box.js` 的 `panelGrid`）读的又是**本机记录** ⇒ 同屏出现
+ *     「资质 物防 0」与「六维 物防 种族 49 **+10**」两套数（真机截图
+ *     `reports/roco/build-snapshot/a7-before-2-after-refresh-talent.png`）。
+ *
+ * ── 哪一份是真值 ──────────────────────────────────────────────────────────
+ * **本机记录**。三条理由（每条都可复验）：
+ *   ① **只有它记得玩家做过什么**：刷新/回滚的写路径就是它；服务端那份没有任何写路径
+ *      ⇒ 以服务端为真值等于宣布"刷新这两个按钮永远是假的"（那正是 A7）。
+ *   ② **没刷过的时候两份逐值相等**：服务端 `individualFromInstance(instance)` 与本机
+ *      `individualFromInstance({…, nature:{value:null}, talent:{value:null}})` 都落到
+ *      `rollNatureAndTalent(instance_id)` —— 同一个函数、同一个种子。实测 `own-0001`
+ *      两边都是 `稳重 / 生命7 物攻0 物防0 魔攻10 魔防0 速度9`
+ *      （`node --test tests/roco-box-individuals.test.js` 的 ⑳ 钉着这条等式）
+ *      ⇒ 把真值换成它，**不改变任何一只的初始显示**。
+ *   ③ **服务端那份连"刷过"都不知道**（它没有 `talent_boosts`）。
+ *
+ * ── 两个投影，一份记录（**不是**两个来源）────────────────────────────────
+ *   · `talent`     = **现值**（含玩家刷出来的 `talent_boosts`）—— 与 60 级面板的输入**同一批数**；
+ *   · `talentBase` = 把 `talent_boosts` 扣掉的那一份（"抓到时是什么天分"）—— **档位只认它**。
+ *     不扣的话：`rollTalentStat` 每次落在一个**当前是 0** 的项上 ⇒ 加满三级会把"激活条数"
+ *     顶到 4 条以上 ⇒ `talentTierOf` 只能如实返回"认不出"，档位这一栏就死了。
+ *     这条口径与列表行（`box-drawer.js` 的 `traitChips`）**同一套**，两边不许各写一份。
+ *
+ * 返回的是纯数据（不碰 DOM、不碰 localStorage）⇒ Node 判据可以直接钉它。
+ */
+export function cultivationOf(individual) {
+  const talent = individual?.talent && typeof individual.talent === 'object' && !Array.isArray(individual.talent)
+    ? {...individual.talent} : null;
+  const boosts = Array.isArray(individual?.talent_boosts) ? individual.talent_boosts : [];
+  const nature = individual?.nature ?? null;
+  let talentBase = null;
+  if (talent) {
+    talentBase = {...talent};
+    for (const boost of boosts) {
+      const stat = boost?.stat;
+      if (stat && Number.isFinite(Number(talentBase[stat]))) {
+        talentBase[stat] = Number(talentBase[stat]) - Number(boost.delta ?? 0);
+      }
+    }
+  }
+  return {
+    individual_id: individual?.individual_id ?? null,
+    level: Number.isFinite(Number(individual?.level)) ? Number(individual.level) : null,
+    nature,
+    nature_source: individual?.nature_source ?? null,
+    talent,
+    talentBase,
+    boosts: boosts.length,
+    // 刷过没有 = 账上有几条加成（`talent_boosts` 只增不减；回滚会把它删回去）
+    refreshed: boosts.length > 0,
+    // 档位认不出来时 `tier.label` 是 null、`tier.reason` 是那句实话（不猜档名）。
+    tier: talentBase ? talentTierOf({talent: talentBase, nature}) : null,
+    remaining: {...(individual?.refreshes ?? {})},
+    rolls: {...(individual?.rolls ?? {})},
+    // ⭐ 2026-09-29 新增（Codex 监工要的跨模块那一条，见下）：
+    // `fingerprint` = 这几样数值的**稳定序列化**；`revision` = 只增不减的刷新计数。
+    fingerprint: cultivationFingerprint(individual),
+    revision: `${Number(individual?.rolls?.nature ?? 0)}.${Number(individual?.rolls?.talent ?? 0)}`,
+  };
+}
+
+/**
+ * **这一只的培养数据指纹**（跨模块同一份口径，2026-09-29 Codex 监工加的那一条）。
+ *
+ * 为什么要有它：刷新性格/天分/回滚之后，**同一只**精灵的 `snapshotId` 与 `buildRevision`
+ * 可能都不变（快照 id 是按个体编号来的，不是按内容）⇒ 消费方（最先踩到的是小芽的
+ * `createFocusProvider`）会继续读旧的那一份，玩家就问不出"我刚刚刷完那一下"。
+ * 所以失效条件要从"只有 snapshotId"改成"snapshotId + **内容指纹**"。
+ *
+ * ⚠ 指纹只覆盖**培养那几样**（性格 / 六项资质现值 / 天分加成账），
+ * **不覆盖**物种事实（种族值、技能、立绘）—— 那些是冻数据，刷新改不了它们；
+ * 也**不覆盖**刷新计数 `rolls` —— 那是另一个字段（`cultivationOf().revision`）。
+ * 序列化是**顺序固定**的（六项按 `STAT_KEYS`、加成按账上的顺序）：
+ * 换机器、换进程、换一行代码的顺序都不会让它变，**只有玩家的动作会让它变**。
+ *
+ * 两个字段各有各的用处，别只留一个：
+ *   · `fingerprint`：**回滚会让它变回去**（内容真的变过；这也是"屏幕上的数字回到刷新前"的机器可读版本）；
+ *   · `revision`（由 `rolls` 算）：**只增不减**，回滚不动它 ——
+ *     于是"刷了一次又退回去"这种净效果为零的操作也能被认出来（光看指纹认不出来）。
+ *   ⇒ 消费方的失效条件应当是 **`snapshotId` + `fingerprint` + `revision` 三个一起看**。
+ */
+export function cultivationFingerprint(individual) {
+  if (!individual || typeof individual !== 'object') return '';
+  const talent = individual.talent && typeof individual.talent === 'object' && !Array.isArray(individual.talent)
+    ? individual.talent : {};
+  const six = STAT_KEYS.map((stat) => `${stat}${Number(talent[stat] ?? 0)}`).join('.');
+  const boosts = (Array.isArray(individual.talent_boosts) ? individual.talent_boosts : [])
+    .map((row) => `${Number(row?.tier ?? 0)}:${row?.stat ?? '?'}:${Number(row?.delta ?? 0)}`).join('.');
+  return [
+    `id=${individual.individual_id ?? '?'}`,
+    `nature=${individual.nature ?? '?'}`,
+    `talent=${six}`,
+    `boosts=${boosts || '-'}`,
+  ].join('|');
 }
 
 /** 掷一次性格（30 条等概率）。 */

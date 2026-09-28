@@ -121,9 +121,19 @@ test('路由契约：kind=catalog 是**全量 622**，不是 48 只迁移层', a
   // 卡片首层新增一个 **`art`**（这只精灵有没有**抓包来的官方立绘**；页面据此决定画 `<img>` 还是画系别 emoji）。
   // 判据的意图一字未变：**卡片首层只放玩家该看到的那几样**，多一个键就要在这里显式登记。
   // 旧键表留档：['alias','form_label','has_metrics','has_moveset','mechanism','name','role_label','select','support_label','types']
+  // ⚠ 2026-09-29 再改钉（人类报的 A3：「pvp选精灵看不到等级？」；改的是 `src/server/roco-service.js`
+  // 的 `boxCatalogCard`）：**「全图鉴」那一档的候选行也要有等级** —— 目录卡原来**根本没有 `level`**，
+  // 于是全图鉴里每一行都是 `Lv—`（连玩家**已经拥有**的那些也是），而 `kind=mine` 的卡一直有
+  // `level`（60）⇒ 同一只精灵在两个页签里等级一有一无。现在：这一物种在盒子里有实例时带那只的等级，
+  // 没有就 `null`（页面照实说，不编）。键表加一个 `level`，**意图不变**（多一个键照样要显式登记）。
   assert.deepEqual(Object.keys(card).sort(),
-    ['alias', 'art', 'form_label', 'has_metrics', 'has_moveset', 'mechanism', 'name', 'role_label', 'select', 'support_label', 'types'].sort(),
+    ['alias', 'art', 'form_label', 'has_metrics', 'has_moveset', 'level', 'mechanism', 'name',
+      'role_label', 'select', 'support_label', 'types'].sort(),
     `卡片首层的键变了：${show(Object.keys(card))}`);
+  // ⚠ 2026-09-29 新增（与上面那条同源）：`level` 只许是**真数字或 null**，
+  // 不许用字符串/`'Lv—'`/0 顶替（那正是 A3 里"带了一个等级读数"却是假象的老毛病）。
+  assert.ok(card.level === null || typeof card.level === 'number',
+    `卡上的 level 只能是数字或 null（没有就说没有），实际 ${show(card.level)}`);
   assert.equal(typeof card.art, 'boolean', '`art` 必须是布尔（页面只认 true 才画图，不许给字符串当判据）');
   assert.deepEqual(Object.keys(card.mechanism).sort(), ['line', 'name', 'status', 'tags'].sort(),
     `机制字段只允许这四个玩家键：${show(Object.keys(card.mechanism))}`);

@@ -1,0 +1,301 @@
+{
+ "tag": "before",
+ "pet": "own-0001",
+ "base": "http://127.0.0.1:8765/",
+ "command": "node reports/roco/build-snapshot/browser-a7-refresh-proof.mjs --tag before",
+ "checks": [
+  {
+   "id": "C1",
+   "what": "点「刷新天分」后屏幕上的「资质」数值必须变",
+   "problems": [
+    "屏幕上的「资质」没变（前后都是「生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9」）⇒ 刷新按钮对玩家是假的"
+   ]
+  },
+  {
+   "id": "C2",
+   "what": "同一次刷新后「六维（60 级）」那一栏必须跟着变（同一份数据）",
+   "problems": []
+  },
+  {
+   "id": "C3",
+   "what": "「回滚」之后屏幕逐值回到刷新前（资质/性格/档位/面板）",
+   "problems": []
+  },
+  {
+   "id": "C4",
+   "what": "屏幕上的性格与六项资质 == 本机记录那一份（同屏只有一个来源）",
+   "problems": [
+    "屏幕上「资质 生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9」与本机记录「生命 7 / 物攻 0 / 物防 10 / 魔攻 10 / 魔防 0 / 速度 9」不一致 ⇒ 同屏有两个来源"
+   ]
+  },
+  {
+   "id": "C5",
+   "what": "点「刷新性格」后屏幕上的「性格」必须变（人类：「刷新性格没试过但也要检查下」）",
+   "problems": [
+    "屏幕上的「性格」没变（前后都是「稳重」）"
+   ]
+  },
+  {
+   "id": "C6",
+   "what": "必红反证：同一条判据喂坏数据必须报错",
+   "problems": []
+  }
+ ],
+ "steps": {
+  "before": {
+   "traitsText": "性格 稳重 资质 生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9 天分档位 相当好的天分",
+   "nature": "稳重",
+   "talent": "生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9",
+   "tier": "相当好的天分",
+   "specialty": null,
+   "metricsText": "生命495种族 65+7物攻125种族 66物防120种族 49魔攻331种族 66+10魔防160种族 91速度275种族 33+9",
+   "metrics": [
+    {
+     "main": "495",
+     "race": "种族 65+7"
+    },
+    {
+     "main": "125",
+     "race": "种族 66"
+    },
+    {
+     "main": "120",
+     "race": "种族 49"
+    },
+    {
+     "main": "331",
+     "race": "种族 66+10"
+    },
+    {
+     "main": "160",
+     "race": "种族 91"
+    },
+    {
+     "main": "275",
+     "race": "种族 33+9"
+    }
+   ],
+   "buttons": [
+    "刷新性格（还剩 3 次）",
+    "刷新天分（还剩 3 次）"
+   ],
+   "status": "全图鉴 622 条记录",
+   "note": "",
+   "buildSource": "",
+   "store": {
+    "nature": "稳重",
+    "talent": {
+     "hp": 7,
+     "spa": 10,
+     "spe": 9,
+     "atk": 0,
+     "spd": 0,
+     "def": 0
+    },
+    "boosts": 0,
+    "left": {
+     "nature": 3,
+     "talent": 3
+    },
+    "rolls": null,
+    "tierProjection": null
+   },
+   "shot": "reports/roco/build-snapshot/a7-before-1-before-refresh.png"
+  },
+  "serverDetail": {
+   "nature": "稳重",
+   "talent": "hp7,atk0,def0,spa10,spd0,spe9",
+   "tier": "相当好的天分"
+  },
+  "afterTalent": {
+   "traitsText": "性格 稳重 资质 生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9 天分档位 相当好的天分",
+   "nature": "稳重",
+   "talent": "生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9",
+   "tier": "相当好的天分",
+   "specialty": null,
+   "metricsText": "生命495种族 65+7物攻125种族 66物防338种族 49+10魔攻331种族 66+10魔防160种族 91速度275种族 33+9",
+   "metrics": [
+    {
+     "main": "495",
+     "race": "种族 65+7"
+    },
+    {
+     "main": "125",
+     "race": "种族 66"
+    },
+    {
+     "main": "338",
+     "race": "种族 49+10"
+    },
+    {
+     "main": "331",
+     "race": "种族 66+10"
+    },
+    {
+     "main": "160",
+     "race": "种族 91"
+    },
+    {
+     "main": "275",
+     "race": "种族 33+9"
+    }
+   ],
+   "buttons": [
+    "刷新性格（还剩 3 次）",
+    "刷新天分（还剩 2 次）",
+    "回滚上一次"
+   ],
+   "status": "上一次刷天分（第 1 级）：+10 加到「物防」（结果就在这一页上）",
+   "note": "上一次刷天分（第 1 级）：+10 加到「物防」",
+   "buildSource": "",
+   "store": {
+    "nature": "稳重",
+    "talent": {
+     "hp": 7,
+     "spa": 10,
+     "spe": 9,
+     "atk": 0,
+     "spd": 0,
+     "def": 10
+    },
+    "boosts": 1,
+    "left": {
+     "nature": 3,
+     "talent": 2
+    },
+    "rolls": {
+     "talent": 1
+    },
+    "tierProjection": null
+   },
+   "shot": "reports/roco/build-snapshot/a7-before-2-after-refresh-talent.png"
+  },
+  "afterUndo": {
+   "traitsText": "性格 稳重 资质 生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9 天分档位 相当好的天分",
+   "nature": "稳重",
+   "talent": "生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9",
+   "tier": "相当好的天分",
+   "specialty": null,
+   "metricsText": "生命495种族 65+7物攻125种族 66物防120种族 49魔攻331种族 66+10魔防160种族 91速度275种族 33+9",
+   "metrics": [
+    {
+     "main": "495",
+     "race": "种族 65+7"
+    },
+    {
+     "main": "125",
+     "race": "种族 66"
+    },
+    {
+     "main": "120",
+     "race": "种族 49"
+    },
+    {
+     "main": "331",
+     "race": "种族 66+10"
+    },
+    {
+     "main": "160",
+     "race": "种族 91"
+    },
+    {
+     "main": "275",
+     "race": "种族 33+9"
+    }
+   ],
+   "buttons": [
+    "刷新性格（还剩 3 次）",
+    "刷新天分（还剩 2 次）"
+   ],
+   "status": "已经回滚上一次刷新（只退这一步；退掉的次数不还）",
+   "note": "",
+   "buildSource": "",
+   "store": {
+    "nature": "稳重",
+    "talent": {
+     "hp": 7,
+     "spa": 10,
+     "spe": 9,
+     "atk": 0,
+     "spd": 0,
+     "def": 0
+    },
+    "boosts": 0,
+    "left": {
+     "nature": 3,
+     "talent": 2
+    },
+    "rolls": {
+     "talent": 1
+    },
+    "tierProjection": null
+   },
+   "shot": "reports/roco/build-snapshot/a7-before-3-after-undo.png"
+  },
+  "afterNature": {
+   "traitsText": "性格 稳重 资质 生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9 天分档位 相当好的天分",
+   "nature": "稳重",
+   "talent": "生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9",
+   "tier": "相当好的天分",
+   "specialty": null,
+   "metricsText": "生命535种族 65+7物攻133种族 66物防114种族 49魔攻331种族 66+10魔防160种族 91速度253种族 33+9",
+   "metrics": [
+    {
+     "main": "535",
+     "race": "种族 65+7"
+    },
+    {
+     "main": "133",
+     "race": "种族 66"
+    },
+    {
+     "main": "114",
+     "race": "种族 49"
+    },
+    {
+     "main": "331",
+     "race": "种族 66+10"
+    },
+    {
+     "main": "160",
+     "race": "种族 91"
+    },
+    {
+     "main": "253",
+     "race": "种族 33+9"
+    }
+   ],
+   "buttons": [
+    "刷新性格（还剩 2 次）",
+    "刷新天分（还剩 2 次）",
+    "回滚上一次"
+   ],
+   "status": "上一次刷性格：换成了「踏实」（结果就在这一页上）",
+   "note": "上一次刷性格：换成了「踏实」",
+   "buildSource": "",
+   "store": {
+    "nature": "踏实",
+    "talent": {
+     "hp": 7,
+     "spa": 10,
+     "spe": 9,
+     "atk": 0,
+     "spd": 0,
+     "def": 0
+    },
+    "boosts": 0,
+    "left": {
+     "nature": 2,
+     "talent": 2
+    },
+    "rolls": {
+     "talent": 1,
+     "nature": 1
+    },
+    "tierProjection": null
+   },
+   "shot": "reports/roco/build-snapshot/a7-before-4-after-refresh-nature.png"
+  }
+ },
+ "pageErrors": []
+}

@@ -175,3 +175,130 @@ test('⑲ 旧记录里天分为空 ⇒ 读时按编号补回，并且写回磁�
   const rows2 = individualsForRows([{select: 'own-0002', group: 'pet_000062', name: '音速犬', level: 60}]);
   assert.deepEqual(rows2['own-0002'].talent, mine, '已有天分必须原样保留（只有空的那种才补）');
 });
+
+/**
+ * ⑳ **A7「刷新天分没效果」**：这一条量的是**培养快照 `cultivationOf` 里那几个数**。
+ *
+ * 人类 2026-09-29 逐字：「刷新天分没效果，刷新性格没试过但也要检查下」。
+ * 上一轮为什么没抓到：验收 28 号量的是 `localStorage` 的计数与那行小字（见
+ * `docs/roco/review-2026-09-28/README.md` §B4 表格第三行）—— **屏幕上的数字根本没进判据**。
+ * 这一条把它反过来：判"玩家在那一栏里会读到的那串数字"（`formatTraitValue` 与二级页用的是
+ * 同一个函数）随刷新而变、随回滚逐值还原。
+ *
+ * ⚠ 屏幕那一半（真机、真鼠标、真截图）在
+ * `reports/roco/build-snapshot/browser-a7-refresh-proof.mjs`；
+ * 这里钉的是**数据链路**，两边合起来才是一条完整的判据（纯函数绿 ≠ 屏幕上真的变了）。
+ */
+test('⑳ A7：培养快照随刷新当场变、随回滚逐值还原（且服务端那一份不变 ⇒ 它不能当真值）', async () => {
+  const {cultivationOf, panelOfIndividual, rollNatureAndTalent, individualFromInstance} =
+    await import('../src/coach/individuals.js');
+  const {formatTraitValue} = await import('../src/client/box-drawer.js');
+  withStorage();
+  const card = {select: 'own-0001', group: 'pet_000001', name: '喵喵', level: 60};
+  const initial = individualsForRows([card])['own-0001'];
+
+  // ① 真值理由②：**没刷过的时候，服务端那份与本机那份逐值相等**（都走 `rollNatureAndTalent(instance_id)`）。
+  //    服务端那条路就是 `roco-service.js` 的 `withIndividualGrowth` → `individualFromInstance(instance)`。
+  const serverSide = individualFromInstance({instance_id: 'own-0001', species_id: 'pet_000001',
+    species_name: '喵喵', level: 60, nature: {value: null}, talent: {value: null}});
+  assert.deepEqual(serverSide.talent, rollNatureAndTalent('own-0001').talent, '服务端那份 = 种子化掷点');
+  assert.deepEqual(cultivationOf(initial).talent, serverSide.talent,
+    '没刷过时两份必须逐值相等（否则"换真值"会改变玩家的初始显示）');
+  assert.equal(cultivationOf(initial).nature, serverSide.nature, '性格同理');
+
+  // ② 反证 A7 的根因：刷新本机记录之后，**服务端那一份一个字都不变** ——
+  //    所以"屏幕读服务端回执"= 刷新按钮对屏幕永远是假的（这就是上一轮那个 bug）。
+  const afterRefresh = refreshIndividual('talent', 'own-0001');
+  assert.equal(afterRefresh.ok, true, `刷一次天分应当成功：${afterRefresh.reason ?? ''}`);
+  assert.deepEqual(serverSide.talent, rollNatureAndTalent('own-0001').talent,
+    '服务端那份是按编号现算的纯函数 —— 刷新之后照样不变（这就是它不能当真值的理由①）');
+
+  // ③ 屏幕上那一栏（资质 = 玩家读到的六个数）必须变：恰好一项 +10，其余不动。
+  const before = cultivationOf(initial);
+  const after = cultivationOf(afterRefresh.individual);
+  assert.notDeepEqual(after.talent, before.talent, '刷新之后六项资质必须至少有一项变了');
+  const moved = Object.keys(before.talent ?? {}).filter((k) => after.talent[k] !== before.talent[k]);
+  assert.equal(moved.length, 1, `一次刷新只该动一项，实际动了 ${moved.length} 项：${moved.join('、')}`);
+  assert.equal(after.talent[moved[0]] - before.talent[moved[0]], 10, '天分每级 +10（人类口径）');
+  assert.notEqual(formatTraitValue(after.talent), formatTraitValue(before.talent),
+    '`formatTraitValue` 印出来的那串字（二级页用的就是它）必须变 —— 这才是玩家看得见的东西');
+  assert.match(formatTraitValue(before.talent), /^生命 \d+ \/ 物攻 \d+ \/ 物防 \d+ \/ 魔攻 \d+ \/ 魔防 \d+ \/ 速度 \d+$/,
+    `资质那一栏的印法（真机截图里逐字就是这个形状）：${formatTraitValue(before.talent)}`);
+
+  // ④ 同屏那份 60 级面板与资质**同一批数** ⇒ 资质变了，面板也必须变（至少一项）。
+  const race = {hp: 65, atk: 66, def: 49, spa: 66, spd: 91, spe: 33};
+  const panelBefore = panelOfIndividual({talent: before.talent, nature: before.nature}, race).panel;
+  const panelAfter = panelOfIndividual({talent: after.talent, nature: after.nature}, race).panel;
+  assert.notDeepEqual(panelAfter, panelBefore,
+    `资质变了面板却没变 ⇒ 同屏两套数（真机截图 a7-before-2-*.png 拍到过这一处）`);
+  assert.ok(Number(panelAfter[moved[0]]) > Number(panelBefore[moved[0]]),
+    `${moved[0]} 的天分涨了 10，面板那一项必须跟着涨：${panelBefore[moved[0]]} → ${panelAfter[moved[0]]}`);
+
+  // ⑤ 档位口径：**加成不算进档位**（档位说的是"抓到时是什么天分"）。
+  //    不这么算的话，`rollTalentStat` 每次都落在一个当前是 0 的项上 ⇒ 加满三级会把激活条数
+  //    顶到 4 条以上 ⇒ `talentTierOf` 只能返回"认不出"，档位这一栏就死了。
+  assert.deepEqual(after.talentBase, before.talentBase, '档位那一份（扣掉加成）刷新后应当不动');
+  assert.equal(after.tier?.label, before.tier?.label, '刷天分不该改档名（档名说的是抓到时那一份）');
+  assert.ok(after.tier?.label, `档位要认得出来：${JSON.stringify(after.tier)}`);
+
+  // ⑥ 回滚：屏幕（资质/性格/档位）必须**逐值**回到刷新前。
+  const undone = undoIndividual('own-0001');
+  assert.equal(undone.ok, true, `回滚应当成功：${undone.reason ?? ''}`);
+  const back = cultivationOf(undone.individual);
+  assert.deepEqual(back.talent, before.talent, '回滚之后六项资质必须逐值回到刷新前');
+  assert.equal(back.nature, before.nature, '回滚之后性格必须回得去');
+  assert.equal(formatTraitValue(back.talent), formatTraitValue(before.talent), '屏幕那一串字也要逐字回去');
+  assert.deepEqual(panelOfIndividual({talent: back.talent, nature: back.nature}, race).panel, panelBefore,
+    '回滚之后 60 级面板必须逐值回到刷新前');
+
+  // ⑦ ⭐ 跨模块那一条（2026-09-29 Codex 监工）：**内容指纹**与**只增不减的刷新计数**。
+  //    消费方（小芽的 focus provider）原来只看 `snapshotId`，而同一只刷过之后它不变
+  //    ⇒ 会继续读旧的那一份。所以这两个字段必须真的会动，而且语义要说清：
+  //      · 指纹：刷新会变、回滚会**变回去**（= "屏幕上的数字回到了刷新前"的机器可读版本）；
+  //      · 计数：只增不减，回滚不动它（净效果为零的操作也认得出）。
+  assert.notEqual(after.fingerprint, before.fingerprint, '刷新之后内容指纹必须变（否则消费方读旧的）');
+  assert.equal(back.fingerprint, before.fingerprint, '回滚之后指纹必须逐字回到刷新前那一份');
+  assert.notEqual(after.revision, before.revision, '刷新之后刷新计数必须往前走');
+  assert.equal(back.revision, after.revision, '刷新计数只增不减：回滚不许把它退回去');
+  // 反证：**同一批数值、不同的键顺序**必须给出同一个指纹（"稳定序列化"这条不是空话）
+  const shuffled = {individual_id: 'own-0001', nature: before.nature,
+    talent: Object.fromEntries(Object.entries(before.talent).reverse())};
+  assert.equal(cultivationOf(shuffled).fingerprint, before.fingerprint,
+    '键顺序不同但数值相同 ⇒ 指纹必须一样（否则每次读都"变了"，消费方会永远重拉）');
+  // 反证：数值真变了就一定要变（不然这条判据是空的）
+  assert.notEqual(cultivationOf({...shuffled, talent: {...shuffled.talent, hp: 99}}).fingerprint,
+    before.fingerprint, '一项数值变了指纹必须变');
+});
+
+/**
+ * ㉑ 培养快照的**形状**：缺字段/坏记录不抛，且性格/档位跟着**现值**走（不是抓到时那一份）。
+ *
+ * 为什么要单钉：`cultivationOf` 是"一处真值"的唯一投影 —— 它一抛，二级页整屏白；
+ * 它拿错性格，档位那一栏就会与屏幕上的性格对不上（同一屏两套数又回来了）。
+ */
+test('㉑ 培养快照：缺字段不抛；性格与档位跟着**现值**走（不是抓到时那一份）', async () => {
+  const {cultivationOf} = await import('../src/coach/individuals.js');
+  const {natureOf} = await import('../src/coach/talent.js');
+  // ① 空壳/半截记录一律不抛（老库里有的是这种）
+  for (const bad of [null, undefined, {}, {talent: null}, {talent: {}}, {talent: {hp: 3}}]) {
+    const snap = cultivationOf(bad);
+    assert.equal(typeof snap, 'object', `喂 ${JSON.stringify(bad)} 也要回一个对象，不许抛`);
+    assert.ok(snap.talent === null || typeof snap.talent === 'object');
+  }
+  // ② 性格刷新之后：档位里的 `nature_up` 必须等于**当前**性格的长处项
+  withStorage();
+  const card = {select: 'own-0001', group: 'pet_000001', name: '喵喵', level: 60};
+  individualsForRows([card]);
+  refreshIndividual('nature', 'own-0001');
+  const one = localIndividualById('own-0001');
+  const snap = cultivationOf(one);
+  assert.equal(snap.nature, one.nature, '快照里的性格就是记录里那一个（现值）');
+  assert.equal(natureOf(snap.nature)?.name, snap.nature, `掷出来的性格必须是 30 条里的一条：${snap.nature}`);
+  if (snap.tier?.nature_up) {
+    assert.equal(snap.tier.nature_up, natureOf(snap.nature).up,
+      '档位里的性格长处要跟着**现值**走（否则同屏两套数）');
+  }
+  // ③ 剩余次数与账一起带出来（页面按钮上那个「还剩 N 次」读的就是它）
+  assert.equal(snap.remaining.nature, 2, `刷过一次性格之后剩 2 次，实际 ${JSON.stringify(snap.remaining)}`);
+});
+
