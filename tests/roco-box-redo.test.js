@@ -67,18 +67,26 @@ test('① 反证：卡片上不再画等级（等级在每一行里只出现一�
   assert.doesNotMatch(blank, /Lv\.\d+/, '没有等级数据就不许编一个级数');
 });
 
-test('① 列表行只留信息：等级 / 性格 / 天分 / 收藏（不再重复卡片已有的东西）', () => {
+test('① 列表行只留信息：等级 / 收藏（性格与天分搬去二级详情页）', () => {
+  // 2026-09-28 改钉（人类指着截图逐字）：「这几行不是重复吗？而且也没想我说的那样写清楚是 XXX 的天分；
+  // 天分/性格加点啥的属性放详情页啊」。
+  // 旧断言钉的是「性格 稳重」与「天分最高 生命 10 / 速度 7」—— 那两条现在归**二级详情页**，
+  // 列表这一行对「单独一只」不画任何性格/天分 chip（同一件事不在两处说）。
   const chips = individualRowChips({individual_id: 'own-0001', level: 60, nature: '稳重',
     talent: {hp: 10, atk: 0, def: 0, spa: 0, spd: 0, spe: 7}}, {select: 'own-0001'});
-  assert.match(chips, /性格 稳重/);
-  assert.match(chips, /天分 /, '天分档位要在行里');
-  assert.match(chips, /天分最高 生命 10 \/ 速度 7/, `天分最高的两项要写出来：${chips}`);
-  assert.doesNotMatch(chips, /Lv\./, '等级不在这一串里（它在行里单独一格，只出现一次）');
-  // 多只同种时给一个区分用的"第几只"；单独一只时不给（没有信息量）
-  const multi = individualRowChips({individual_id: 'own-0001-b', nature: '开朗'}, {select: 'own-0001-b', multi: true});
-  assert.match(multi, /第 B 只/, `多只同种要能区分：${multi}`);
-  assert.doesNotMatch(individualRowChips({individual_id: 'own-0001', nature: '开朗'}, {select: 'own-0001'}),
-    /第 .*只/, '单独一只时不该有"第几只"');
+  assert.equal(chips, '', `单独一只时这一串必须是空的（性格/天分在二级页）：${chips}`);
+  // 多只同种时才画 —— 而且只画「区分它们必需的东西」：性格 + 天分档位 + 第几只（**不给具体数值**）
+  const multi = individualRowChips({individual_id: 'own-0001-b', nature: '开朗',
+    talent: {hp: 0, atk: 10, def: 0, spa: 0, spd: 0, spe: 10}}, {select: 'own-0001-b', multi: true});
+  assert.match(multi, /性格 开朗/, `多只同种要能区分：${multi}`);
+  assert.match(multi, /天分档位/, `多只同种要给出档位：${multi}`);
+  assert.match(multi, /第 B 只/, `多只同种要说清是第几只：${multi}`);
+  assert.doesNotMatch(multi, /天分最高/, '天分具体数值不在列表里（人类：放详情页）');
+  assert.doesNotMatch(multi, /Lv\./, '等级不在这一串里（它在行里单独一格，只出现一次）');
+  // 搬走的东西二级页要接得住（否则就是「删了但没搬」）
+  const box = readFileSync(new URL('../src/client/box.js', import.meta.url), 'utf8');
+  assert.match(box, /'性格', '资质', '特长', '血脉', '天分档位'/, '二级页要有「性格与资质」那一段');
+  assert.match(box, /天分六项/, '二级页要有「天分六项」');
 });
 
 // ── ② 二级详情页：完整六维 ───────────────────────────────────────────────────

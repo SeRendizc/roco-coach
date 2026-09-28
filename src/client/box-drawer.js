@@ -149,9 +149,22 @@ function chipSpan(label, state) {
  * 名单里那两只的档位不能被后来的加成顶上去。
  */
 export function individualRowChips(individual, {select = '', multi = false} = {}) {
+  // 2026-09-28（人类指着截图逐字）：「这几行不是重复吗？而且也没想我说的那样写清楚是 XXX 的天分；
+  // 天分/性格加点啥的属性放详情页啊」⇒ **列表行不再画性格与天分**。
+  //
+  // 删掉不等于信息没了：二级详情页（`?pet=`）里本来就有完整的一套 ——
+  // 「性格与资质」那一段（性格 / 资质 / 特长 / 血脉 / **天分档位**）+「天分六项」+「六维」。
+  // 列表这边删掉的是"同一件事在两处各说一遍"。
+  //
+  // 唯一还需要它的场合：**同种有多只**（比如本机多养的那只）。那时行里必须有一点东西
+  // 能把它们区分开，所以只留 性格 + 天分档位（不给具体数值 —— 数值去详情页看），
+  // 外加「第 N 只」这个编号。
+  if (!multi) return '';
   const chips = [];
   const nature = individual?.nature ?? null;
   chips.push(nature ? chipSpan(`性格 ${nature}`, 'known') : chipSpan('性格 待导出', 'absent'));
+  // 天分档位按**掷出来的那一份**读（扣掉玩家自己加的级），与详情页同一口径：
+  // 名单里那两只的档位不能被后来的加成顶上去。
   const base = individual?.talent && typeof individual.talent === 'object' ? {...individual.talent} : null;
   for (const boost of Array.isArray(individual?.talent_boosts) ? individual.talent_boosts : []) {
     if (base && boost?.stat && Number.isFinite(Number(base[boost.stat]))) {
@@ -161,22 +174,14 @@ export function individualRowChips(individual, {select = '', multi = false} = {}
   const tier = base ? talentTierOf({talent: base, nature}) : null;
   const hasValue = base ? Object.values(base).some((value) => Number(value) > 0) : false;
   chips.push(tier?.label
-    ? chipSpan(`天分 ${tier.label}`, 'known')
-    : chipSpan(hasValue ? '天分 认不出档位' : '天分 待导出', hasValue ? 'known' : 'absent'));
-  const talent = individual?.talent && typeof individual.talent === 'object' ? individual.talent : {};
-  const top = STAT_ORDER
-    .map(([key, label], index) => ({key, label, value: Number(talent[key]), index}))
-    .filter((row) => Number.isFinite(row.value) && row.value > 0)
-    .sort((a, b) => b.value - a.value || a.index - b.index)
-    .slice(0, 2);
-  if (top.length) chips.push(chipSpan(`天分最高 ${top.map((row) => `${row.label} ${row.value}`).join(' / ')}`, 'known'));
-  // 「第几只」只给**同种多只**用：只有一个个体时它没有信息量。认的是本机新加的那只的**后缀**。
-  // 页面靠 `select` 取详情；第几只只写玩家看得懂的那一点点（不把整串编号印出来）。
+    ? chipSpan(`天分档位 ${tier.label}`, 'known')
+    : chipSpan(hasValue ? '天分档位 认不出' : '天分 待导出', hasValue ? 'known' : 'absent'));
   const id = String(select || individual?.individual_id || '');
   const suffix = id.match(/-(b|c|d|e|f)$/)?.[1] ?? '';
-  if (multi && suffix) chips.push(chipSpan(`第 ${suffix.toUpperCase()} 只`, 'known'));
+  if (suffix) chips.push(chipSpan(`第 ${suffix.toUpperCase()} 只`, 'known'));
   return chips.join('');
 }
+
 
 /**
  * 「＋ 再养一只同种」——**只在二级详情页上画**（人类 2026-09-28：这一类大动作搬去二级页）。
@@ -269,6 +274,10 @@ export function individualHtml(card, individual, {cardHtml = defaultCardHtml, fa
   // 不再写死任何级数（`data-level-source` 也照实带出来，开发者抽屉里能看到是哪一档）。
   const level = Number.isFinite(Number(individual?.level)) && Number(individual?.level) > 0
     ? Number(individual.level) : null;
+  // 2026-09-28：性格/天分那一串在**单只**时是空的 —— 空容器**干脆不渲染**，
+  // 而不是渲染出来再靠 `:empty` 藏（实测 CSS 那条没能把它从网格里拿掉，它照样占一整行，
+  // 把「收藏」挤到第二行去）。空元素不入 DOM，网格里就只剩余下的项。
+  const chips = individualRowChips(individual, {select, multi});
   // 卡片本体由页面注入；**同种多只**时页面会把它画成紧凑版（不重复名字/系别），这里只管套壳。
   const face = cardHtml(card);
   const cardBox = face
@@ -280,7 +289,7 @@ export function individualHtml(card, individual, {cardHtml = defaultCardHtml, fa
    ${cardBox}
    ${card?.extra === true ? '<span class="trait" data-state="local">本机加的</span>' : ''}
    ${level === null ? '' : `<span class="individual-level">Lv.${level}</span>`}
-   <span class="individual-traits">${individualRowChips(individual, {select, multi})}</span>
+   ${chips ? `<span class="individual-traits">${chips}</span>` : ''}
    ${lastRefreshNote(individual) ? `<span class="individual-note" data-refresh-note="yes">${esc(lastRefreshNote(individual))}</span>` : ''}
    <span class="individual-actions">
     ${favouriteButton(individual, {favourite})}
@@ -341,7 +350,7 @@ export function drawerHtml(group, {individuals = {}, cardHtml = defaultCardHtml,
     + `aria-expanded="${group.expanded ? 'true' : 'false'}">
    <span class="drawer-name">${esc(group.name)}</span>
    <span class="drawer-types">${(group.types ?? []).map((type) => `<span class="chip">${esc(type)}</span>`).join('')}</span>
-   <span class="drawer-count">${count} 个个体</span>
+   ${count > 1 ? `<span class="drawer-count">${count} 个个体</span>` : ''}
    ${summary ? `<span class="drawer-summary" data-summary="yes">${esc(summary)}</span>` : ''}
   </button>`;
   const isFav = (id) => (typeof favourites === 'function' ? Boolean(favourites(id)) : false);

@@ -173,10 +173,14 @@ function cardHtml(card, {compact = false} = {}) {
   const tags = [];
   if (card.form_label) tags.push({text: card.form_label, cls: 'tag-form'});
   if (card.role_label) tags.push({text: `定位：${card.role_label}`});
-  if (card.support_label) tags.push({text: `支持：${card.support_label}`});
-  // 同种多实例时把这一只的**性格/天分**画出来（否则两只同名卡长得一模一样，人类 09-24 投诉过）。
-  // 紧凑行里不画它 —— 那一行自己已经把性格与天分写在旁边了。
-  if (mine && !compact && card.individual_label) tags.push({text: card.individual_label, cls: 'tag-individual'});
+  // 2026-09-28（人类指着截图逐字）：
+  //   · 「支持：仅图鉴资料」—— 列表里**每张卡都挂一遍**，读起来像"我自己的精灵不完整"
+  //     （人类：「啥玩意儿，"我的精灵"不应该完整的吗？？？」）。支持等级挪去二级详情页说，
+  //     那里有地方讲清"为什么只有图鉴资料"。
+  //   · `individual_label`（服务端给的「性格「稳重」 · 天分 速度 7 / 生命 0」）——
+  //     它与这一行下面那排 chips **逐字重复**（人类：「这几行不是重复吗？」）；
+  //     而同种多只时整张卡本来就被 CSS 藏掉（`.individual[data-multi="yes"] .individual-card`），
+  //     所以这个标签在两种情形下都没有用武之地 ⇒ 不再画。
   // 2026-09-28（人类 ⑨：「锁定功能直接删」）：服务端卡片的 `badges` 里还带着「锁定」，
   // 画出来就是一个玩家看得见、却已经没有任何入口能改的徽章 —— 页面上那个开关删了，
   // 这里就得跟着不画（否则"删了"只删了一半）。「收藏」同理：行上已经有星标了，

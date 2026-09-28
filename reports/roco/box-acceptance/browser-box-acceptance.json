@@ -1,7 +1,7 @@
 {
  "generated_by": "scripts/roco/browser-box-acceptance.mjs",
  "page": "box.html",
- "judged_at": "2026-09-28T10:18:59.024Z",
+ "judged_at": "2026-09-28T11:23:42.780Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|licence|pack_id|ruleset_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "screenshots": [
   "reports/roco/box-acceptance/box-01-mine-1440x900.png",
@@ -85,7 +85,7 @@
    "id": "06-玩家层无工程话",
    "judge": "展开的玩家可见文本里不出现 pet_id / state_version / coverage / provenance / unknown_fields / 裸 JSON",
    "ok": true,
-   "actual": "扫过 912 字；卡片首层「🌿 喵喵 🌿草系」"
+   "actual": "扫过 904 字；卡片首层「🌿 喵喵 🌿草系」"
   },
   {
    "id": "07-键盘搜索",
@@ -121,7 +121,7 @@
    "id": "10b-资质要摊成六维数值（own-0001）",
    "judge": "真鼠标打开 own-0001 的详情：资质那一栏是「生命 10 / 物攻 3 / …」这样的六维数值，整页不出现 [object Object]",
    "ok": true,
-   "actual": "铠甲虫 · 详情：资质 =「生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9 养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。」（数出 6 个数值；[object Object] 0 处）｜pet-view 内命中元素 15 个 [\"BUTTON.nav-btn primary@pet-back html=<button class=\\\"nav-btn primary\\\" id=\\\"pet-back\\\">← 返回精灵盒子</button>\",\"H2.@pet-title html=<h2 id=\\\"pet-title\\\">铠甲虫 · 详情</h2>\",\"BUTTON.refresh-btn@pet-actions html=<button class=\\\"refresh-btn\\\" data-refresh=\\\"nature\\\" data-individual=\\\"own-0001\\\">刷新性格（还剩 3 次）</button>\",\"BUTTON.refresh-btn@pet-actions html=<button class=\\\"refresh-btn\\\" data-refresh=\\\"talent\\\" data-individual=\\\"own-0001\\\">刷新天分（还剩 3 次）</button>\",\"BUTTON.refresh-btn add-btn@pet-actions html=<button class=\\\"refresh-btn add-btn\\\" data-add=\\\"pet_000012\\\">＋ 再养一只同种</button>\"]｜资质原样「」｜本机记录 nature=\"稳重\"｜按容器拆：pet=74 list=2053 compare=19 dev=0"
+   "actual": "铠甲虫 · 详情：资质 =「生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9 养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。」（数出 6 个数值；[object Object] 0 处）｜pet-view 内命中元素 15 个 [\"BUTTON.nav-btn primary@pet-back html=<button class=\\\"nav-btn primary\\\" id=\\\"pet-back\\\">← 返回精灵盒子</button>\",\"H2.@pet-title html=<h2 id=\\\"pet-title\\\">铠甲虫 · 详情</h2>\",\"BUTTON.refresh-btn@pet-actions html=<button class=\\\"refresh-btn\\\" data-refresh=\\\"nature\\\" data-individual=\\\"own-0001\\\">刷新性格（还剩 3 次）</button>\",\"BUTTON.refresh-btn@pet-actions html=<button class=\\\"refresh-btn\\\" data-refresh=\\\"talent\\\" data-individual=\\\"own-0001\\\">刷新天分（还剩 3 次）</button>\",\"BUTTON.refresh-btn add-btn@pet-actions html=<button class=\\\"refresh-btn add-btn\\\" data-add=\\\"pet_000012\\\">＋ 再养一只同种</button>\"]｜资质原样「」｜本机记录 nature=\"稳重\"｜按容器拆：pet=74 list=1708 compare=19 dev=0"
   },
   {
    "id": "11-两个体比较",
@@ -593,7 +593,7 @@
     "statCount": 6,
     "objectObject": 0,
     "inPet": 74,
-    "inList": 2053,
+    "inList": 1708,
     "inCompare": 19,
     "inDev": 0,
     "leakElements": 15,
@@ -609,15 +609,15 @@
     "petVisibleObject": 74,
     "petLeakOuter": [
      "SPAN.trait# kids=0 文字=「性格 稳重」",
-     "SPAN.trait# kids=0 文字=「天分 相当好的天分」",
-     "SPAN.trait# kids=0 文字=「天分最高 魔攻 10 / 速度 9」",
+     "SPAN.trait# kids=0 文字=「天分档位 相当好的天分」",
      "SPAN.trait# kids=0 文字=「性格 忧郁」",
-     "SPAN.trait# kids=0 文字=「天分 还不错的天分」",
-     "SPAN.trait# kids=0 文字=「天分最高 物防 10 / 魔攻 8」",
-     "SPAN.trait# kids=0 文字=「性格 稳重」",
-     "SPAN.trait# kids=0 文字=「天分 一般般的天分」",
-     "SPAN.trait# kids=0 文字=「天分最高 速度 7」",
-     "SPAN.trait# kids=0 文字=「性格 悠闲」"
+     "SPAN.trait# kids=0 文字=「天分档位 还不错的天分」",
+     "DIV.traits# kids=1 文字=「\n    等级Lv.60\n     等级上限 60（官方口径）\n   」",
+     "DIV.trait# kids=3 文字=「等级Lv.60\n     等级上限 60（官方口径）」",
+     "SPAN.trait-effect# kids=0 文字=「等级上限 60（官方口径）」",
+     "DIV.traits#pet-traits kids=5 文字=「\n   性格\n   稳重\n   养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。\n  \n   资质\n   生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔」",
+     "DIV.trait# kids=3 文字=「\n   性格\n   稳重\n   养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。\n  」",
+     "DIV.trait# kids=3 文字=「\n   资质\n   生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9\n   养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。\n  」"
     ]
    }
   },
@@ -638,7 +638,7 @@
     "input": "",
     "cards": 24,
     "pressed": 3,
-    "gridText": "\n   铠甲虫\n   虫系\n   2 个个体\n   \n  \n   \n   \n    🐛\n    铠甲虫\n    🐛虫系\n    定位：坦克支持：仅图鉴资料性",
+    "gridText": "\n   铠甲虫\n   虫系\n   2 个个体\n   \n  \n   \n   \n    🐛\n    铠甲虫\n    🐛虫系\n    定位：坦克\n   \n  \n ",
     "selects": [
      "own-0001",
      "own-0049",

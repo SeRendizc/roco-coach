@@ -59,8 +59,15 @@ test('③ 缺数值一律标"待导出"（不许显示成 0 或空白）', () =>
   // 档位是**扣掉加成之后**读的：base = {atk:10-10, spe:10-10, 其余 0} ⇒ 一条都没激活 ⇒ 认不出
   // （这一条正是"加成不许把档位顶上去"的反证）
   assert.ok(known[1].label.includes('认不出'), `加成扣掉后一条都不激活 ⇒ 如实说认不出：${known[1].label}`);
-  const html = individualHtml(ONE[0], {individual_id: 'own-0001', nature: null, talent: null});
+  // 2026-09-28 改钉（人类指着截图：「天分/性格加点啥的属性放详情页啊」）：单只那一行**不再画**
+  // 性格/天分 ⇒ 这条判据要问的场合改成「同种多只那一行」（只有那里还会画它们）。意图不变：
+  // 缺数值必须标「待导出」，不许显示成 0、也不许留空。
+  const html = individualHtml(ONE[0], {individual_id: 'own-0001', nature: null, talent: null},
+    {multi: true});
   assert.match(html, /data-state="absent"/);
+  // 反证：单独一只时那一串是空的（不是「忘了画」，是「按新口径不画」）
+  assert.doesNotMatch(individualHtml(ONE[0], {individual_id: 'own-0001', nature: null, talent: null}),
+    /data-state="absent"/, '单独一只时不该再有性格/天分 chip');
 });
 
 test('④ 两个刷新按钮分开、各带剩余次数；用完禁用', () => {
@@ -204,8 +211,11 @@ test('⑪ 「再养一只同种」：按钮生成器还在、加出来的个体�
   assert.ok((real.match(/data-individual=/g) ?? []).length >= 2, '两个个体都要画出来');
   assert.match(real, /own-0001-b/, '本机加出来的那一只必须在行里（真机 29 号就是在这里红的）');
   // 反证一：没有额外个体时不许说 2 个（否则这句数是硬编的）
-  assert.match(drawerHtml({...groupCards(ONE)[0], expanded: true}, {extras: {}}), /1 个个体/,
-    '没有额外个体时不许说两个');
+  // 2026-09-28 改钉（人类指着截图：「1 个个体」在只有一只时是纯噪音）：只有 1 只时**不画**这个计数。
+  // 旧断言钉的是 /1 个个体/（那时一律画）。反证的意图原样保留：那个数字是「画出来的行数」，不是硬编的。
+  const one = drawerHtml({...groupCards(ONE)[0], expanded: true}, {extras: {}});
+  assert.doesNotMatch(one, /个个体/, '只有 1 只时不该出现「N 个个体」');
+  assert.match(one, /data-count="1"/, '计数本身照旧带在 data-count 上（判据与 CSS 都读它）');
   // 反证二：两个卡片 + 同一只又被当 extras 传一遍 ⇒ 数出来的是"画出来的行数"（3），不是"卡片数"（2）
   assert.match(drawerHtml({...grouped[0], expanded: true},
     {individuals: {'own-0001-b': locals[0]}, extras: {pet_000012: locals}}), /data-count="3"/,

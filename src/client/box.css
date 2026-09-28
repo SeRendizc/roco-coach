@@ -222,6 +222,32 @@ button{min-width:44px}
 .remove-btn, .remove-cancel { min-height: 28px; height: 28px; min-width: 28px; padding: 0 10px; font-size: 12px; }
 .remove-btn.danger { background: #5a2a24; border-color: #a4553f; color: #ffd7c2; }
 
+/* 2026-09-28（人类指着截图：「这页面真丑」）：只有 1 个个体的种类**不再画两层盒子** ——
+   组里那一行去掉边框与底色，整个抽屉读起来就是"一行一只"（此前是 box 套 box，六张卡长得一模一样）。
+   多个体时保留内层边框：那时它确实是"一组里的几个个体"，边界有意义。 */
+.species-drawer[data-count="1"] .drawer-body{padding:2px 12px 10px}
+.species-drawer[data-count="1"] .individual{padding:0;border:0;background:none}
+.species-drawer[data-count="1"] .drawer-head{padding-bottom:4px}
+/* 行里只剩"头像 + 名字 + 系别 + 定位 + 等级 + 星标"时，让名字更显眼一点（信息层级） */
+.species-drawer[data-count="1"] .drawer-name{font-size:15px}
+/* ⚠ 2026-09-28（人类指着截图：「这几行不是重复吗？」的最后一块）：单只种类的**名字与系别
+   交给组头那一行说**（它就在正上方，而且必须留着 —— 它是收起/摊开的开关），行里不再重复写一遍。
+   行里保留头像（组头没有头像，它是这一行的视觉锚点）、定位、等级与星标。
+   多个体是另一条规则：整张卡片都藏掉（`.individual[data-multi="yes"] .individual-card`）。 */
+.species-drawer[data-count="1"] .individual .card-name,
+.species-drawer[data-count="1"] .individual .card-types{display:none}
+/* 系别跟名字挨着（不然它被挤到卡片最右边，跟名字脱开一大截） */
+.species-drawer[data-count="1"] .drawer-types{margin-right:auto}
+/* 单只种类的行压成**一行**：头像+定位 … 等级 ☆收藏（此前"收藏"单独占一整行，白占一块地方）。 */
+#box-grid[data-grouped="yes"] .species-drawer[data-count="1"] .individual{grid-template-columns:1fr auto auto}
+#box-grid[data-grouped="yes"] .species-drawer[data-count="1"] .individual-level{grid-column:2}
+#box-grid[data-grouped="yes"] .species-drawer[data-count="1"] .individual-actions{grid-column:3;margin:0}
+/* ⚠ 空的容器也要收掉：`.individual-traits`（性格/天分）与 `.individual-note`（刷新说明）
+   都带 `grid-column:1/-1` —— 单只种类那串是空的，但它**仍然是一个网格项**，会占掉一整行，
+   把「收藏」挤到第二行去（实测截图里就是这样）。`:empty` 只在真的没有子节点时命中。 */
+.species-drawer[data-count="1"] .individual-traits:empty,
+.species-drawer[data-count="1"] .individual-note:empty{display:none}
+
 /* 一个个体的那一行（抽屉版重排）：左卡片 / 右等级，下面整行放性格天分与动作。
    2026-09-27（人类：「培养页面丑死了，竖着挤在一坨」）：改前实测抽屉宽 158px、一行 544px 高。
    改法只作用于抽屉版（`data-grouped="yes"`）：列宽 330px ⇒ 1440 下 4 列；行内两列网格。 */
@@ -233,6 +259,8 @@ button{min-width:44px}
   padding:8px 10px;border:1px solid var(--line,#2a3442);border-radius:10px;background:#141f2c;
   cursor:pointer}
 #box-grid[data-grouped="yes"] .individual:hover{border-color:#4a6076}
+#box-grid[data-grouped="yes"] .species-drawer[data-count="1"] .individual{padding:0;border:0;background:none}
+#box-grid[data-grouped="yes"] .species-drawer[data-count="1"] .drawer-body{padding:0 12px 10px}
 #box-grid[data-grouped="yes"] .individual-card{grid-column:1;min-width:0}
 #box-grid[data-grouped="yes"] .individual-level{grid-column:2;justify-self:end;font-size:12px;opacity:.8;white-space:nowrap}
 #box-grid[data-grouped="yes"] .individual-traits{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px}
@@ -244,8 +272,12 @@ button{min-width:44px}
 /* 卡片本体：抽屉里横着排（头像 + 名字 + 系别 + 标签 + 收藏），别竖着摞 */
 #box-grid[data-grouped="yes"] .individual-card .card{
   flex-direction:row;align-items:center;flex-wrap:wrap;gap:6px 8px;padding:0;border:0;background:none}
+/* ⚠ 2026-09-28：`min-height` 从 0 改回 44px。原文是 0（那一格只当排版用），但去掉服务端那个
+   `individual_label` 标签之后，卡片这一格只剩一行高（真机 390px 实测 **28px**），
+   而它本身就是"点这一行打开详情"的主操作 ⇒ 掉到触摸下限以下，真机 19 号当场红。
+   44px 与页面其它主操作同一档（`box.css` 头部那条触控口径：主要 44 / 次要 24）。 */
 #box-grid[data-grouped="yes"] .individual-card .card-face{
-  flex-direction:row;align-items:center;flex-wrap:wrap;gap:6px 8px;min-height:0}
+  flex-direction:row;align-items:center;flex-wrap:wrap;gap:6px 8px;min-height:44px}
 #box-grid[data-grouped="yes"] .individual-card .card-name{font-size:14px}
 /* ⚠ 人类 ④「第一排和第二排信息冗余」：组里**多个体**时组头已经写过名字与系别 ⇒
    每一行不再重复画它们（`multi=yes` 由页面传进来），只留区分它们必需的东西。 */
