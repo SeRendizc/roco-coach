@@ -21,6 +21,9 @@
 import {createHash} from 'node:crypto';
 import {TOOL_CONTRACTS, validToolArgs, executeTool, configureRocoTools, resetRocoTools} from '../../src/coach/toolbox.js';
 import {policyFor, resolveEvidenceTurn, defaultArgsFor} from '../../src/coach/runtime.js';
+// 名册要用**真名字**（政策靠名字认得出"这确实是在问整队"）。名字表来自仓库里那份 622 条图鉴名单，
+// 不编、不猜：查不到的条目直接不进名册。
+import {PET_NAME_ROWS} from '../../src/coach/pet-names-data.js';
 
 export const FORMAT = 'roco-agent-trajectory-v1';
 
@@ -965,27 +968,74 @@ export function runInput(task, world, worldState) {
   };
 }
 
+const PET_NAME_BY_ID = new Map(PET_NAME_ROWS.map(([name, id]) => [id, name]));
+
+/**
+ * 「第一步交给代码政策」的那个选择（`runArm({policyFirst:true})` 用）。
+ *
+ * 口径**不是新写的**：它复用 `rulesBaselinePlanner` —— 那个规划器本身就是
+ * 「政策说该查什么就查什么、参数由代码按问题形状填」的确定性实现（`policyFor` + `hintTarget`）。
+ * 这里只做两件事：
+ *   ① 把轨迹世界里的队伍/锁定名册翻成政策认得的 `context.profile.lineup`
+ *      （不翻的话 `teamAsk` 会因为"没有名册"返回 null —— 那是 deny-by-default，不是 bug）；
+ *   ② 用同一个 `task` + 同一份 `hints` 造一个一次性规划器，只问第一步。
+ * 模型自己的选择不受影响：政策没意见（`stop:true`）时调用方仍走模型。
+ */
+async function policyFirstChoice(task, input) {
+  const hints = input.hints;
+  // 名册只用来让 `teamAsk` 认得出"这确实是在问整队"。**不编名字**：
+  // 拿不到名字的条目直接不进名册（政策于是返回 null ⇒ 交给模型），
+  // 这比塞一个假名字进去安全（假名字会让政策去评一套它并不认识的阵容）。
+  const lineup = Array.isArray(hints.team)
+    ? hints.team.map((id) => ({id, name: PET_NAME_BY_ID.get(id)})).filter((row) => row.name)
+    : [];
+  const context = {mode: hints.mode, profile: lineup.length ? {lineup} : {},
+    locked_pet: hints.locked_pet ?? null};
+  const need = policyFor(task.message, context).need;
+  if (!need) return null;   // 政策没意见 ⇒ 交给模型（返回 null，调用方不覆盖）
+  const choice = await rulesBaselinePlanner(task, hints)({receipts: []});
+  if (!choice || choice.stop === true) return null;
+  return choice;
+}
+
 /**
  * 一次运行：arm 在限次内调工具，最后给正文。
  *
  * 这里刻意**不**做「重试到成功」：arm 交出非法参数就是这一步结束，
  * 记录里如实写着 `stopped: 'invalid-arguments'`。把失败洗掉，
  * 轨迹集就只剩下漂亮的样例，训练和评测都会被它骗。
+ *
+ * ⭐ 2026-09-28 新增 `policyFirst`（人类 2026-09-28：「多琢磨下 agent/coach 功能」）：
+ *   **第一步「该不该调工具」交给代码政策，模型的判断从第二步起**。
+ *   凭据（本文件 `:1943` 的注释是上一轮写下的，不是我编的）：
+ *   「模型『选哪个工具』很准（90–100%），但『该不该调』只有 50%，所以把后者从模型手里拿走」。
+ *   实测现场（`agent-trajectories-model-v1.jsonl` 的 288 个窗口单世界样本）：判挂 56 条，
+ *   **56 条全部是"零调用"**（32 条该查规则、12 条该评阵容、12 条该比换人）——
+ *   也就是说这一步的损失几乎全在"该不该调"上，而不是"调哪个"上。
+ *   `chosen_by` 会如实记 `policy`（政策调的）还是 arm 名（模型调的），两种都留在轨迹里，
+ *   所以"政策救回来多少、模型自己又做对多少"可以分开数。
  */
-export async function runArm({task, arm, input, planner, limit = 3, plannerHints = null}) {
+export async function runArm({task, arm, input, planner, limit = 3, plannerHints = null, policyFirst = false}) {
   const trace = [];
   let stopped = 'complete';
   if (input.hints.expect_silence) {
     return {trace, stopped: 'policy', reply: ''};
   }
   for (let i = 0; i < limit; i += 1) {
-    let choice;
-    try {
-      const visible = ARMS[arm]?.blind ? blindHints(input.hints) : input.hints;
-      choice = await planner({message: input.message, screen: input.screen, tools: Object.keys(TOOL_CONTRACTS), hints: plannerHints || visible, receipts: trace, remaining: limit - i});
-    } catch (error) {
-      stopped = `planner-error:${String(error?.message || error).slice(0, 80)}`;
-      break;
+    let choice = null;
+    let chosenBy = arm;
+    if (i === 0 && policyFirst) {
+      const forced = await policyFirstChoice(task, input);
+      if (forced) { choice = forced; chosenBy = 'policy'; }
+    }
+    if (!choice) {
+      try {
+        const visible = ARMS[arm]?.blind ? blindHints(input.hints) : input.hints;
+        choice = await planner({message: input.message, screen: input.screen, tools: Object.keys(TOOL_CONTRACTS), hints: plannerHints || visible, receipts: trace, remaining: limit - i});
+      } catch (error) {
+        stopped = `planner-error:${String(error?.message || error).slice(0, 80)}`;
+        break;
+      }
     }
     if (!choice || choice.stop === true) { stopped = 'complete'; break; }
     const name = choice.tool;
@@ -1000,7 +1050,7 @@ export async function runArm({task, arm, input, planner, limit = 3, plannerHints
     } catch (error) {
       result = {ok: false, error_type: 'thrown', message: String(error?.message || error).slice(0, 200), result: null};
     }
-    trace.push({tool: name, args, result, chosenBy: choice.stale_attempt ? 'stale' : arm});
+    trace.push({tool: name, args, result, chosenBy: choice.stale_attempt ? 'stale' : chosenBy});
     if (JSON.stringify(result).length > 10000) { stopped = 'receipt-budget'; break; }
   }
   return {trace, stopped, reply: ''};

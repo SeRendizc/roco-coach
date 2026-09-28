@@ -40,13 +40,16 @@ const PYTHON_BIN = process.env.ROCO_PYTHON || 'python3';
 const WORLDS_PER_TASK = Number(process.env.ROCO_TRAJ_WORLDS || 3);
 
 function args(argv) {
-  const out = {arms: null, write: true, quiet: false, out: null, gateway: null};
+  const out = {arms: null, write: true, quiet: false, out: null, gateway: null, policyFirst: false};
   for (let i = 0; i < argv.length; i += 1) {
     if (argv[i] === '--check') out.write = false;
     else if (argv[i] === '--quiet') out.quiet = true;
     else if (argv[i] === '--out') out.out = String(argv[++i]);
     else if (argv[i] === '--gateway') out.gateway = String(argv[++i]);
     else if (argv[i] === '--arms') out.arms = String(argv[++i]).split(',').map((x) => x.trim()).filter(Boolean);
+    // 2026-09-28：第一步「该不该调工具」交给代码政策（见 `runArm` 的注释）。
+    // 这是一条**可关的**开关：默认行为一个字节都不变，开了之后 `chosen_by` 会如实标 `policy`。
+    else if (argv[i] === '--policy-first') out.policyFirst = true;
   }
   return out;
 }
@@ -175,6 +178,7 @@ function record(task, world, state, spec, run, reply) {
 
 async function main() {
   const options = args(process.argv.slice(2));
+  const policyFirst = Boolean(options.policyFirst);
   const arms = options.arms || ARM_NAMES.slice();
   for (const arm of arms) if (!ARMS[arm]) throw new Error(`未知 arm：${arm}`);
   const tasks = loadTasks();
@@ -250,7 +254,7 @@ async function main() {
         callIndex = 0;
         const spec = {arm, arm_kind: ARMS[arm].kind, mode: input.mode, screen: input.screen, authority: authority.authority};
         const planner = makePlanner(arm, task, input.hints, {ask});
-        const run = await runArm({task, arm, input, planner, limit: armLimit(arm)});
+        const run = await runArm({task, arm, input, planner, limit: armLimit(arm), policyFirst});
         const reply = finalAnswer(task, {trace: run.trace, stopped: run.stopped, arm, hints: input.hints});
         const engineRefused = refusalsIn(run.trace).length > 0;
         const check = checkWith(task, run.trace, reply, engineRefused);
