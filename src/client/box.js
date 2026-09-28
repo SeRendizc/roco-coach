@@ -23,15 +23,21 @@ import {mountXiaoya} from './xiaoya.js';
 import {mountStalePageBanner} from './stale-page.js';
 // 「我的盒子」按种类收进抽屉（人类 2026-09-26）：纯函数在 `box-drawer.js`，这里只做状态与事件。
 // 二级详情页上那几个动作按钮（刷新 / 回滚 / 再养一只 / 删掉两步确认）也从这一层取 —— 文案只有一处。
-import {drawerListHtml, formatTraitValue, refreshButton, addButton, undoButton, removeButton,
+import {drawerListHtml, formatTraitValue, refreshButton, undoButton, removeButton,
   favouriteButton} from './box-drawer.js';
 // 个体状态（性格/天分/刷新次数）在 `box-individuals.js`：它要碰 localStorage 与服务器字段名，
 // 而这一页的玩家区代码里不许出现工程词（判据：tests/roco-box.test.js 的玩家层那一条）。
-// ⚠ 2026-09-28：这里原来还 import 了 `localIndividualsOf`。真 bug 修掉之后（见 `extraOwnedCount`）
-// 它在页面里**一次都没被调用**，只活在 import 那一行 —— 那正是 `box-individuals.js` 里点名的
-// 「只在 import 那一行出现」的假绿形状，所以直接删掉，别留着当摆设。
-import {individualsForRows, refreshIndividual, undoIndividual, addIndividualFor,
+// ⚠ 2026-09-28 两次清理（都记在这里，免得下一个人以为漏了）：
+//   · 这里曾 import 过 `localIndividualsOf` 与 `addIndividualFor` —— 前者在真 bug 修掉之后
+//     **一次都没被调用**（只活在 import 那一行，正是 `box-individuals.js` 点名的假绿形状）；
+//     后者是「＋再养一只同种」用的，而那个功能整个下线了（人类：「每种精灵只允许有一只」）。
+//   · 顺带删掉了那个「本机已有几只」的计数函数（它只为那个按钮服务）。
+import {individualsForRows, refreshIndividual, undoIndividual,
   localCardById, localIndividualsGrouped, removeIndividual} from './box-individuals.js';
+// 60 级面板：**数字只有一个来源**（`coach/talent.js` 的 `panelOf`），这一层只负责把它画出来。
+// 本仓的 60 级公式是游戏导出配置表那一套（PVP 一速榜 9/9 实测），**不是**宝可梦那套 ——
+// 同一只音速犬宝可梦式算速度 153、这条算 331，混用会把数算飞。
+import {panelOfIndividual} from '../coach/individuals.js';
 // 刷新之后「落在哪一项」那句话只有一处（`lastRefreshNote`）——页面只负责显示。
 import {lastRefreshNote} from '../coach/individuals.js';
 
@@ -125,9 +131,12 @@ async function getJson(path) {
 }
 
 const avatarOf = (types) => TYPE_AVATAR[(types ?? [])[0]] ?? TYPE_FALLBACK;
-const typeChips = (types) => (types ?? []).map((t) => {
+// 2026-09-28（人类指着截图）：「双属性两个属性中间加隔断（eg 毒系｜地系）」——
+// 此前两个系别的胶囊紧挨着，读起来是「毒系地系」一坨。现在中间插一个竖线分隔符。
+const typeChips = (types) => (types ?? []).map((t, index) => {
   const [emoji, color] = TYPE_AVATAR[t] ?? TYPE_FALLBACK;
-  return `<span class="type" style="background:${color}">${emoji}${escapeAttr(t)}</span>`;
+  const sep = index ? '<span class="type-sep" aria-hidden="true">｜</span>' : '';
+  return `${sep}<span class="type" style="background:${color}">${emoji}${escapeAttr(t)}</span>`;
 }).join('');
 
 // 六维对象的印法在 `box-drawer.js`（`formatTraitValue`）—— 那一层已经有"缺的如实标注"的口径，
@@ -424,12 +433,6 @@ function petUrl(select) {
   return `box.html?${query.toString()}`;
 }
 
-/** 六维：接口给的是 `[{label,value}]`（生命/物攻/物防/魔攻/魔防/速度），一项一项画。 */
-function statsGrid(rows) {
-  if (!Array.isArray(rows) || !rows.length) return '';
-  return `<div class="metrics">${rows.map((row) =>
-    `<span class="metric"><b>${escapeAttr(row.label ?? NO_ITEM)}</b>${escapeAttr(row.value ?? NO_ITEM)}</span>`).join('')}</div>`;
-}
 
 /**
  * 二级详情页的正文。玩家语言，一个工程词都不出现；
@@ -438,79 +441,118 @@ function statsGrid(rows) {
  */
 function petTraitRow(label, trait) {
   const known = trait && trait.value !== null && trait.value !== undefined && trait.value !== '';
+  // 2026-09-28（人类指着截图：「这几个未校准都删掉，有啥用啊」）：每一栏下面那句
+  // 「养成效果未核验：这里的话只能说'是什么'，不说明'加多少'」**不再画** ——
+  // 它是给维护者看的免责声明，玩家读到的只是三行一模一样的废话。
+  // 口径本身没有消失：它写在 `src/coach/` 那一层的注释与台账里，需要的人去那里看。
   return `<div class="trait">
    <b>${escapeAttr(label)}</b>
    <span class="${known ? '' : 'missing'}">${known ? fmtValue(trait.value) : escapeAttr(trait?.reason ?? NO_ITEM)}</span>
-   ${trait?.effect_label ? `<span class="trait-effect">${escapeAttr(trait.effect_label)}</span>` : ''}
   </div>`;
+}
+
+/**
+ * 六维那一格：**主数是 60 级面板值**，下面一行摊开两个输入 —— `种族 101 +10`（天分那份黄色）。
+ *
+ * 人类 2026-09-28 的原话是「这里写成 一个区域，比如物防 种族值+个体值，个体值用黄色 eg 101 + 10」。
+ * ⚠ 但 `101 + 10` **不等于**面板值：60 级公式是「(种族 + 3×天分) × 1.1，取整后 +10，
+ * 再乘性格，最后 +50」（生命那条形状不同）。把 `101 + 10` 印成"等于面板"就是编数字。
+ * 所以这一格给的是**两个真数**：主数（换算结果）+ 输入（种族值、天分），谁都不冒充谁。
+ */
+// 六维的显示名（详情页各处共用一张表）。
+const STAT_LABELS = Object.freeze({hp: '生命', atk: '物攻', def: '物防', spa: '魔攻', spd: '魔防', spe: '速度'});
+
+const STAT_KEY_OF_LABEL = Object.freeze(Object.fromEntries(
+  Object.entries(STAT_LABELS).map(([key, label]) => [label, key])));
+
+/** 那一行假设清单（逐字，一处事实源）。人类最恨编数字 ⇒ 档位与"给谁看的"都写在屏上。 */
+const PANEL_NOTE = '主数是按 60 级公式换算的面板值（默认 5 星 · 零突破）；'
+  + '下面一行是它的两个输入：种族值，以及这一只的天分（黄色）。'
+  + '这是给你看的换算值，引擎对战里用的不是这一份。'
+  + '没有种族值的精灵只给种族值本身，不编面板。';
+
+/** 服务端给的六维是 `[{label,value}]` ⇒ 按**名字**映射成 `{hp,atk,…}`（别按下标：两边的顺序不同）。 */
+function raceOfMetrics(metrics) {
+  const out = {};
+  for (const row of Array.isArray(metrics) ? metrics : []) {
+    const key = STAT_KEY_OF_LABEL[row?.label] ?? null;
+    if (key && Number.isFinite(Number(row?.value))) out[key] = Number(row.value);
+  }
+  return out;
+}
+
+function panelGrid(rows, individual) {
+  const list = Array.isArray(rows) ? rows : [];
+  if (!list.length) return '';
+  const race = raceOfMetrics(list);
+  // 缺种族值就**不编面板**（只有迁移层那几十只有种族值）：那一栏照旧只给种族值本身。
+  const converted = Object.keys(race).length
+    ? panelOfIndividual({talent: individual?.talent, nature: individual?.nature}, race) : null;
+  return `<div class="metrics">${list.map((row) => {
+    const key = STAT_KEY_OF_LABEL[row?.label] ?? null;
+    const iv = key && individual?.talent ? Number(individual.talent[key]) : NaN;
+    const plus = Number.isFinite(iv) && iv > 0 ? `<em class="metric-iv">+${iv}</em>` : '';
+    const shown = converted?.panel?.[key];
+    const main = Number.isFinite(Number(shown)) ? escapeAttr(shown) : escapeAttr(row?.value ?? '');
+    const base = Number.isFinite(Number(row?.value)) ? escapeAttr(row.value) : '—';
+    return `<span class="metric"><b>${escapeAttr(row?.label ?? '')}</b>${main}`
+      + `<em class="metric-race">种族 ${base}${plus}</em></span>`;
+  }).join('')}</div>`;
 }
 
 function petBodyHtml(player, individual) {
   const byLabel = new Map((player.traits ?? []).map((trait) => [trait.label, trait]));
   const order = ['性格', '资质', '特长', '血脉', '天分档位'];
-  const traits = order.map((label) => petTraitRow(label, byLabel.get(label))).join('');
+  // 2026-09-28（人类：「没有就删掉啊」）：**没有值的栏目整栏不画** ——
+  // 此前「特长 无」还要再挂一句未核验说明，等于拿两行废话占地方。
+  const traits = order
+    .map((label) => byLabel.get(label))
+    .filter((trait) => trait && trait.value !== null && trait.value !== undefined && trait.value !== '')
+    .map((trait) => petTraitRow(trait.label, trait)).join('');
   const level = Number.isFinite(Number(individual?.level)) && Number(individual.level) > 0
     ? Number(individual.level) : (Number.isFinite(Number(player.level)) ? Number(player.level) : null);
   // 天分六项：有值就写，全 0 或没有就照实说没有（不补 0）。
   const talent = individual?.talent && typeof individual.talent === 'object' ? individual.talent : null;
-  const talentRows = talent
-    ? Object.entries(talent).filter(([, value]) => Number.isFinite(Number(value)))
-    : [];
-  return `<h4>基础</h4><div class="traits">
-    <div class="trait"><b>等级</b><span>${level === null ? '—' : `Lv.${level}`}</span>
-     <span class="trait-effect">等级上限 60（官方口径）</span></div>
+  // 2026-09-28（人类指着截图）：「等级 Lv.60 / 等级上限 60（官方口径）」那一栏 ——
+  // 「这里就写等级60就好，第二排删了，废话 有啥」⇒ 去掉上限那句（它是维护者的口径说明）。
+  // 天分六项与六维**合成一格**：种族值 + 个体值（个体值黄色），见 `panelGrid`。
+  return `<h4>等级</h4><div class="traits">
+    <div class="trait"><b>等级</b><span>${level === null ? '—' : `Lv.${level}`}</span></div>
    </div>
-   <h4>性格与资质</h4><div class="traits" id="pet-traits">${traits}</div>
-   <h4>天分六项</h4>${talentRows.length
-      ? `<div class="metrics">${talentRows.map(([key, value]) => {
-        const label = (STAT_LABELS[key] ?? key);
-        return `<span class="metric"><b>${escapeAttr(label)}</b>${escapeAttr(value)}</span>`;
-      }).join('')}</div>`
-      : `<p class="missing">${NO_ITEM}</p>`}
-   <h4>六维</h4>${statsGrid(player.metrics) || `<p class="missing">${escapeAttr(player.metrics_missing_reason ?? NO_ITEM)}</p>`}
-   <p class="metric-label">${escapeAttr(player.metrics_label ?? '种族值')}${player.metrics_total ? ` · 合计 ${player.metrics_total}` : ''}</p>
+   ${traits ? `<h4>性格与资质</h4><div class="traits" id="pet-traits">${traits}</div>` : ''}
+   <h4>六维（60 级）</h4>${panelGrid(player.metrics, individual)
+     || `<p class="missing">${escapeAttr(player.metrics_missing_reason ?? NO_ITEM)}</p>`}
+   <p class="metric-label">${escapeAttr(PANEL_NOTE)}</p>
    <h4>四个技能（按顺序）</h4><ol class="moveset">${(player.skills ?? []).map((s) => `<li>
      <span class="move-slot">第 ${s.order} 个</span>
      <b>${escapeAttr(s.name ?? NO_ITEM)}</b>
      <span class="move-meta">${escapeAttr(s.element ?? '')}${s.category ? ` · ${escapeAttr(s.category)}` : ''}${s.energy !== null ? ` · 耗能 ${s.energy}` : ''} · 威力 ${escapeAttr(s.power_label ?? NO_ITEM)}</span>
      <span class="move-desc">${escapeAttr(s.desc ?? '')}</span>
     </li>`).join('')}</ol>
-   <p class="missing">${escapeAttr(player.panel?.reason ?? NO_ITEM)}</p>
-   <p class="effect-note">${escapeAttr(player.effect_note ?? '')}</p>
-   <p class="muted">游戏数据里没有的栏目已经照实写「${NO_ITEM}」：更细的来源说明在右上角「关于这一页」抽屉里。</p>`;
+   <p class="missing">${escapeAttr(player.panel?.reason ?? NO_ITEM)}</p>`;
 }
 
 /** 六维的中文名（与 `box-drawer.js` 的 `STAT_ORDER` 同一套；这里只给天分那六格用）。 */
-const STAT_LABELS = Object.freeze({hp: '生命', atk: '物攻', def: '物防', spa: '魔攻', spd: '魔防', spe: '速度'});
 
-/**
- * 本机**多养出来**的同种只数（`state.extraRows` 是唯一事实源，box.js:342 `localRowsFor(page)`）。
- *
- * 2026-09-28 修的真 bug（子代理核查 + 我在 node 里实跑复现）：这里原来写的是
- * 本机记录那条函数返回的条数（`box-individuals.js` 的 `localIndividualsOf`），而它把**服务端名单里那一页的个体也算进去**
- * （`individualsForRows` 给每张卡都写一条本机记录）⇒ 任何种类都 ≥1 ⇒
- * `addButton` 永远画成 disabled + 「＋ 再养一只同种（已有一只本机的）」。
- * 也就是说**玩家永远加不了第二只**，而且按钮上的理由还是假的（他一只都没加过）。
- * 判据实测（未修前）：`individualsForRows([own-0002])` 之后那条函数返回 **1**。
- */
-function extraOwnedCount(species) {
-  return (state.extraRows ?? []).filter((row) => row.group === species).length;
-}
 
 /**
  * 二级详情页上的动作：刷新性格 / 刷新天分（各带剩余次数）、再养一只同种、回滚上一次、
  * 删掉这一只（**两步确认**）、收藏。全部从 `box-drawer.js` 取同一份文案。
  */
-function petActionsHtml(select, individual, speciesArg = null) {
+function petActionsHtml(select, individual) {
   const card = state.petCard ?? {};
-  const species = speciesArg ?? card.group ?? localCardById(select)?.group ?? '';
-  const picked = state.selected.some((row) => row.select === select);
-  return `<button class="cmp-toggle" data-cmp="${escapeAttr(select)}" aria-pressed="${picked ? 'true' : 'false'}">`
-    + `${picked ? '已选入比较' : '加入比较'}</button>
-   ${refreshButton('nature', individual, '刷新性格')}
+  // 2026-09-28（人类逐字）：「加入比较不是删了吗？再养一只也不要」⇒ 这两个按钮都下线。
+  //   · 「加入比较」：比较那套（选两只 → 比选栏 → 比较页）从此在页面上没有入口；
+  //   · 「＋再养一只同种」：下线（人类：「每种精灵只允许有一只」）。
+  // ⚠ 但「盒子 → 六槽工作台」那条交接链**不能跟着断**（RC-801 的核心路径，五分钟链第 ③ 步量的就是它）。
+  //   所以入口换成**一键带走这一只**：点一下就把这一只当队员送去工坊 —— 不再需要先选两只，
+  //   同种去重、锁定跟着走这些规则仍然全在 `goToTeam` 里（一个字没改）。
+  return `${refreshButton('nature', individual, '刷新性格')}
    ${refreshButton('talent', individual, '刷新天分')}
-   ${addButton(species, {extraCount: extraOwnedCount(species)})}
    ${undoButton(individual)}
+   <button class="pet-team-btn" data-to-team="${escapeAttr(select)}">带上它去配队`
+     // 锁定的要说清带了几只锁定（真机 25 号量的就是这句）：数据里 `locked` 是既成事实，这里只读它。
+     + `${card.locked === true ? '（含锁定 1 只）' : ''}</button>
    ${favouriteButton(individual, {favourite: isFavourite(select, card)})}
    ${removeButton(individual, {confirming: state.confirmRemove === select})}`;
 }
@@ -529,8 +571,6 @@ function renderPetPage() {
   document.body.dataset.boxView = 'pet';
   document.body.dataset.boxPet = select;
   const player = state.petData;
-  // 种类（`data-add` 要用它）：卡片里没有就问服务端详情要 —— 两处都没有才留空（不编）。
-  const speciesForActions = card.group ?? player?.group ?? localCardById(state.pet)?.group ?? '';
   const name = player?.name ?? card.name ?? '这一只';
   const types = player?.types ?? card.types ?? [];
   $('pet-title').textContent = `${name} · 详情`;
@@ -539,12 +579,15 @@ function renderPetPage() {
    <div><h3>${escapeAttr(name)}</h3>
     <span class="card-types">${typeChips(types)}</span>
     <span class="card-tags">${[card.role_label ? `定位：${card.role_label}` : null,
-      card.support_label ? `支持：${card.support_label}` : null,
+      // 2026-09-28（人类：「还有就是那个仅图鉴资料是错的啊你为啥不改」）：
+      // 「支持：xxx」这个标签**整个不画**了。它是引擎的收录档位（`BOX_SUPPORT_LABELS`），
+      // 不是这只精灵的属性；挂在自己家的精灵身上读起来像"你的精灵是残的"。
+      // 玩家要判断"能不能拿去打"，看的是「带上它去配队」能不能点、以及工坊那边的说法。
       card.form_label].filter(Boolean)
       .map((t) => `<span class="tag">${escapeAttr(t)}</span>`).join('')}</span>
     ${card.extra === true ? '<span class="card-tags"><span class="tag tag-badge">本机加的</span></span>' : ''}
    </div></div>`;
-  $('pet-actions').innerHTML = petActionsHtml(select, individual, speciesForActions);
+  $('pet-actions').innerHTML = petActionsHtml(select, individual);
   // 刷新之后那句话（"上一次刷天分：+10 加到「魔攻」"）在这一屏上也要看得见：
   // 它是玩家确认"刚才那一下落在哪一项"的地方（列表那一行里不再画它了）。
   const note = $('pet-note');
@@ -1139,27 +1182,17 @@ function wire() {
     // 二级页上也有星标与「删掉这只」（`petActionsHtml` 里都画了）——共用列表那一份逻辑。
     if (handleFavClick(event)) return;
     if (handleRemoveClick(event)) return;
-    // 比较入口也在这一屏上：选两只**同种**个体 → 回列表那一栏点「比较这两只」。
-    const cmp = event.target.closest?.('[data-cmp]');
-    if (cmp) {
+    // 2026-09-28（人类：「加入比较不是删了吗？再养一只也不要」）：这两个入口都下线了。
+    // 取而代之的是**一键带走这一只**（交接链不能断，见 `petActionsHtml` 顶上那段）。
+    const toTeam = event.target.closest?.('[data-to-team]');
+    if (toTeam) {
       event.preventDefault();
-      toggleCompare(cmp.dataset.cmp);
-      return;
-    }
-    const addBtn = event.target.closest?.('[data-add]');
-    if (addBtn) {
-      event.preventDefault();
-      const species = addBtn.dataset.add;
-      const card = state.rows.find((row) => row.group === species) ?? localCardById(state.pet) ?? {};
-      const added = addIndividualFor({...card, select: card.select ?? state.pet, group: species,
-        name: card.name ?? '这一种'});
-      if (!added.ok) { $('box-status').textContent = added.reason; return; }
-      // 本机那只加出来之后把这一种摊开（回列表时看得见），并说明它在哪儿
-      const openNow = state.openDrawers instanceof Set ? state.openDrawers : new Set();
-      openNow.add(species);
-      state.openDrawers = openNow;
-      $('box-status').textContent = '又养了一只同种（它只在你自己的记录里；回列表那一行能看见它）';
-      void load();
+      const pick = toTeam.dataset.toTeam;
+      const {card} = individualOf(pick);
+      // 交接读的是 `state.selected`：这里只放**这一只**进去，去重/锁定那套规则仍在 `goToTeam` 里。
+      state.selected = [{select: pick, group: card?.group ?? state.petCard?.group ?? '',
+        name: card?.name ?? '', locked: card?.locked === true, localOnly: card?.localOnly === true}];
+      goToTeam();
       return;
     }
     const undoBtn = event.target.closest?.('[data-undo]');

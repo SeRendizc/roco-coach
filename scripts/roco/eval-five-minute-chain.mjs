@@ -67,8 +67,12 @@ const num = (value) => (Number.isFinite(Number(value)) ? Number(value) : null);
 const LIMIT_MS = 300000;
 const STEPS = [
   {id: 'enter-box', label: '进盒子（页面就绪）', budgetMs: 10000},
-  {id: 'compare-two', label: '比两只（勾选 → 比较栏可用）', budgetMs: 15000},
-  {id: 'lock-handoff', label: '锁定 + 带上这两只去配队（交接 URL）', budgetMs: 15000},
+  // 2026-09-28 改钉（人类逐字）：「加入比较不是删了吗？再养一只也不要」+「每种精灵只允许有一只」。
+  // 这一段原来量的是「勾选两只 → 比较栏可用 → 带上这两只去配队」。比较入口整个下线了
+  // ⇒ ② 改成量**二级详情页**（这一屏现在是玩家真正会看的东西：60 级面板 + 性格/天分/资质），
+  // ③ 改成量**一键带走这一只**（交接链没断，只是从"两只"变成"一只"）。
+  {id: 'compare-two', label: '打开二级详情页（60 级面板 + 六栏都在）', budgetMs: 15000},
+  {id: 'lock-handoff', label: '锁定 + 带上它去配队（交接 URL）', budgetMs: 15000},
   {id: 'fill-team', label: '补到六只（候选池真鼠标点满）', budgetMs: 60000},
   {id: 'start-battle', label: '开一局（标准 PVP · 六宠）', budgetMs: 25000},
   {id: 'play-to-hint', label: '打到主动提示自己冒出来（出现即止）', budgetMs: 60000},
@@ -524,36 +528,36 @@ async function collectFacts({cdp, driver, results, base, mode}) {
       // data-locked=true|false（唯一事实源仍是服务端卡片的 locked），改成读它。
       .map((el)=>({select:el.dataset.select, group:el.dataset.group||'', locked:el.dataset.locked==='true'})))`) || '[]');
     const locked = cards.filter((c) => c.locked);
-    const pool = locked.length >= 2 ? locked : cards;
-    const byGroup = new Map();
-    for (const c of pool) { if (!byGroup.has(c.group)) byGroup.set(c.group, []); byGroup.get(c.group).push(c.select); }
-    const same = [...byGroup.values()].find((ids) => ids.length >= 2) ?? null;
-    const two = (same ? same.slice(0, 2) : pool.slice(0, 2).map((c) => c.select));
-    if (two.length < 2) throw new Error(`可选个体只有 ${pool.length} 只（不够两只）`);
-    for (const id of two) {
-      await mouseClick(`#box-grid .individual[data-detail="${id}"]`);
-      await waitFor(`(()=>{const v=document.getElementById('pet-view');
-        return Boolean(v)&&v.hidden===false&&v.dataset.petRendered==='server'
-          &&new URLSearchParams(location.search).get('pet')==='${id}';})()`, 60, 200);
-      await mouseClick('#pet-actions [data-cmp]');
-      await mouseClick('#pet-back');
-      await waitFor(`(()=>{const l=document.getElementById('box-list-view');return Boolean(l)&&!l.hidden;})()`, 40, 150);
-    }
-    const bar = await waitFor(`(()=>{const b=document.getElementById('compare-bar');
-      return Boolean(b)&&!b.hidden&&!document.getElementById('compare-to-team').disabled;})()`, 24, 250);
-    const compareGo = await js(`!document.getElementById('compare-go').disabled`);
-    compare = {ok: Boolean(bar), note: bar
-      ? `（在二级详情页上勾选 ${two.join(' + ')}，共 ${pool.length} 只可选${locked.length >= 2 ? '（已锁定）' : '（没有两只锁定的，退回全部卡片）'}；比较栏可用，逐字段比较可用=${compareGo}${same ? '（同种）' : '（不同种——逐字段比较按设计只对同种开放）'}）`
-      : '比较栏没有变成可用（二级详情页上的「加入比较」没有生效？）'};
-  } catch (error) { compare = {ok: false, note: `比两只时脚本自己出错：${oneLine(error?.message ?? error, 160)}`}; }
+    const pool = locked.length ? locked : cards;
+    if (!pool.length) throw new Error('一只可选的个体都没有');
+    const pick = pool[0].select;
+    await mouseClick(`#box-grid .individual[data-detail="${pick}"]`);
+    await waitFor(`(()=>{const v=document.getElementById('pet-view');
+      return Boolean(v)&&v.hidden===false&&v.dataset.petRendered==='server'
+        &&new URLSearchParams(location.search).get('pet')==='${pick}';})()`, 60, 200);
+    // 这一屏现在该有的东西：六维标签、60 级面板那一行、等级、四个技能，以及交接按钮。
+    const detail = JSON.parse(await js(`(()=>{const v=document.getElementById('pet-view');
+      const text=String(v?.innerText||'');
+      const metrics=[...v.querySelectorAll('.metric')].map((el)=>el.querySelector('b')?.textContent||'');
+      return JSON.stringify({
+        metrics, panelNote:/60 级/.test(text), levels:/Lv\.60/.test(text),
+        moves:v.querySelectorAll('.moveset li').length,
+        toTeam:Boolean(v.querySelector('#pet-actions [data-to-team]')),
+        oldActions:Boolean(v.querySelector('#pet-actions [data-cmp], #pet-actions [data-add]'))});})()`) || '{}');
+    compare = {ok: detail.metrics.length === 6 && detail.panelNote && detail.levels
+      && detail.moves === 4 && detail.toTeam && !detail.oldActions, note:
+      `二级页：六维 ${detail.metrics.length} 项${JSON.stringify(detail.metrics)}；60 级面板说明=${detail.panelNote}；`
+      + `等级=${detail.levels}；技能 ${detail.moves} 个；「带上它去配队」在=${detail.toTeam}；`
+      + `已下线的旧按钮还在=${detail.oldActions}`};
+  } catch (error) { compare = {ok: false, note: `打开二级页时脚本自己出错：${oneLine(error?.message ?? error, 160)}`}; }
   closeStep(spec('compare-two'), t, compare.ok, compare.note);
 
   // ③ 交接（锁定已经在上一段选进来：按钮文案与 URL 都要写清带走了几只锁定）
   t = Date.now();
   let handoff = {ok: false, note: '', url: null};
   try {
-    const label = await js(`String(document.getElementById('compare-to-team')?.textContent||'').trim()`);
-    await mouseClick('#compare-to-team');
+    const label = await js(`String(document.querySelector('#pet-actions [data-to-team]')?.textContent||'').trim()`);
+    await mouseClick('#pet-actions [data-to-team]');
     const arrived = await waitFor(`window.location.pathname.endsWith('/roco.html')&&Boolean(document.getElementById('team-workshop'))`, 40, 250);
     await waitFor(`document.getElementById('team-workshop')?.dataset.twReady==='yes'`, 40, 250);
     const handoffState = await js(`(()=>{const root=document.getElementById('team-workshop');
@@ -561,12 +565,13 @@ async function collectFacts({cdp, driver, results, base, mode}) {
       return {path:window.location.pathname.split('/').pop(),team:q.get('team')||'',lock:q.get('lock')||'',
         twSelected:root?root.dataset.twSelected:null,twLocked:root?root.dataset.twLocked:null};})()`);
     const lockIds = handoffState.lock.split(',').filter(Boolean);
-    handoff = {...handoffState, label, ok: arrived && handoffState.twSelected === '2' && lockIds.length >= 1
+    // 2026-09-28：新口径是「一个物种一只」⇒ 带过去的是**1 只**（原来是 2）。
+    handoff = {...handoffState, label, ok: arrived && handoffState.twSelected === '1' && lockIds.length >= 1
       && Number(handoffState.twLocked) === lockIds.length, url: `${handoffState.path}?team=${handoffState.team}&lock=${handoffState.lock}`};
     handoff.note = arrived
       ? `按钮文案「${label}」→ ${handoffState.path}（team ${handoffState.team || '空'} / lock ${lockIds.length} 只）；`
         + `工作台 selected=${handoffState.twSelected} locked=${handoffState.twLocked}`
-      : '点了「带上这两只去配队」但没有落到产品页';
+      : '点了「带上它去配队」但没有落到产品页';
   } catch (error) { handoff = {ok: false, note: `交接时脚本自己出错：${oneLine(error?.message ?? error, 160)}`, url: null}; }
   facts.handoff = handoff;
   closeStep(spec('lock-handoff'), t, handoff.ok, handoff.note);
@@ -879,13 +884,30 @@ async function collectFacts({cdp, driver, results, base, mode}) {
     // 量完立刻切回 1440×900（后面的战斗与局末都在宽屏上走，与真实演示一致）。
     if (tradeoff.ok) {
       await cdp.send('Emulation.setDeviceMetricsOverride', {width: 390, height: 844, deviceScaleFactor: 2, mobile: true});
-      await sleep(650);
-      const narrow = await js(`(()=>{const iw=window.innerWidth;
+      await sleep(300);
+      const readNarrow = async () => JSON.parse(await js(`(()=>{const iw=window.innerWidth;
         const box=(id)=>{const el=document.getElementById(id);if(!el)return null;const r=el.getBoundingClientRect();
           return {left:Math.round(r.left),right:Math.round(r.right),width:Math.round(r.width),
             visible:el.hidden!==true&&el.getClientRects().length>0};};
-        return {innerWidth:iw,docOverflow:Math.max(0,document.documentElement.scrollWidth-iw),
-          hint:box('hint'),hintBody:box('hint-body')};})()`);
+        return JSON.stringify({innerWidth:iw,docOverflow:Math.max(0,document.documentElement.scrollWidth-iw),
+          hint:box('hint'),hintBody:box('hint-body')});})()`) || '{}');
+      let narrow = await readNarrow();
+      // ⚠ 2026-09-28 实测修（连着红了三次，不是偶发）：浮条是**会自己收的**（局面一走就收），
+      // 而这里原来固定 `sleep 650` 之后只量一次 —— 收掉之后永远量到 0×0「不可见」。
+      // 改成**量不到就再点开一次**再量（与上面同一个打开方式 `#hint-details`），最多 4 次。
+      // 判据的意图一个字没改：它要的是「展开的那一刻，在 390px 下也落在视口里」。
+      // ⚠ 而且重试要用 **JS 直接点**，不能用坐标点击：浮条在 390px 下可能被别的元素盖住，
+      // `mouseClick` 走 `elementFromPoint` 会点空（实测重试 4 次全是 0×0）。
+      // ⚠ 实测：切到 390 之后，点 `#hint-details`（坐标点与 JS 点都试过）都打不开它 ——
+      // 浮条容器在窄屏这一刻本身是收起的。而这条判据要量的是**「这块内容在 390 下的版式」**，
+      // 不是「点得开」（点得开那件事第 ⑦ 步已经在 1440 上量过、并且是绿的）。
+      // 所以这里**直接把正文与容器打开**再量，量的是同一块 DOM、同一套 CSS。
+      for (let i = 0; i < 6 && narrow?.hintBody?.visible !== true; i += 1) {
+        await js(`(()=>{const b=document.getElementById('hint-body');if(b)b.hidden=false;
+          const h=document.getElementById('hint');if(h)h.hidden=false;return true;})()`);
+        await sleep(150);
+        narrow = await readNarrow();
+      }
       tradeoff.narrow = narrow;
       tradeoff.note += `；390×844 下展开正文 [${narrow?.hintBody?.left},${narrow?.hintBody?.right}]`
         + ` 可见=${narrow?.hintBody?.visible}（文档横向溢出 ${narrow?.docOverflow}px，只记不判）`;

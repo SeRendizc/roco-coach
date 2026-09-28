@@ -147,6 +147,14 @@ button{min-width:44px}
 .metric{background:#131f2c;border:1px solid #2c3d50;border-radius:7px;padding:5px 8px;font-size:12.5px}
 .metric b{display:block;font-size:11px;color:var(--muted);font-weight:500}
 .metric-label{font-size:12.5px;color:#b4c3d1;margin:6px 0 0}
+/* 2026-09-28（人类指着截图：「个体值用黄色 eg 101 + 10」）：六维那一格现在是
+   **种族值 + 个体值**，个体值用暖黄色标出来，一眼能看出"这一只比底子多了多少"。
+   没有个体值（0 或没掷过）时那一截根本不渲染（见 `panelGrid`），不会出现「+0」。 */
+.metric .metric-iv{font-style:normal;color:#f0c674;font-weight:600;margin-left:4px}
+/* 面板那一格下面那行输入（种族值与天分）：小一号、压暗，别跟主数抢注意力。 */
+.metric .metric-race{display:block;font-style:normal;font-size:11px;color:#8397ab;margin-top:2px}
+/* 双属性之间的分隔符（人类：「双属性两个属性中间加隔断（eg 毒系｜地系）」）。 */
+.type-sep{opacity:.5;margin:0 1px;font-size:12px}
 .traits{display:flex;flex-direction:column;gap:6px}
 .trait{background:#131f2c;border:1px solid #2c3d50;border-radius:8px;padding:7px 9px}
 .trait b{font-size:12px;color:var(--muted);font-weight:500;margin-right:8px}
@@ -301,6 +309,10 @@ button{min-width:44px}
 #pet-back{height:auto;min-height:44px}
 .pet-lead{margin:0 0 10px;line-height:1.6}
 .pet-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
+/* 人类 2026-09-28：「排成一横排不行吗？？？」⇒ 桌面宽度够时不许换行（窄屏照旧允许换行，
+   否则手指点不到）。`flex-wrap:wrap` 保留给窄屏，桌面靠 `flex-wrap:nowrap` 压成一行。 */
+@media(min-width:721px){.pet-actions{flex-wrap:nowrap;overflow-x:auto}}
+.pet-actions .pet-team-btn{min-height:44px;padding:8px 14px;font-size:13px}
 .pet-actions .refresh-btn,
 .pet-actions .remove-btn,
 .pet-actions .remove-cancel{min-height:44px;padding:8px 14px;font-size:13px}

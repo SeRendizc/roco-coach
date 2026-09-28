@@ -67,26 +67,29 @@ test('① 反证：卡片上不再画等级（等级在每一行里只出现一�
   assert.doesNotMatch(blank, /Lv\.\d+/, '没有等级数据就不许编一个级数');
 });
 
-test('① 列表行只留信息：等级 / 收藏（性格与天分搬去二级详情页）', () => {
-  // 2026-09-28 改钉（人类指着截图逐字）：「这几行不是重复吗？而且也没想我说的那样写清楚是 XXX 的天分；
-  // 天分/性格加点啥的属性放详情页啊」。
-  // 旧断言钉的是「性格 稳重」与「天分最高 生命 10 / 速度 7」—— 那两条现在归**二级详情页**，
-  // 列表这一行对「单独一只」不画任何性格/天分 chip（同一件事不在两处说）。
+test('① 列表行只写「性格是啥 + 天分是哪一档」，数值留二级页', () => {
+  // 2026-09-28 第三次改钉（人类逐字）：「另外还是体现一下性格和天赋，
+  // 只需要写性格是啥和天分是啥天分就行，详细点进二级页面看」。
+  // 演进轨迹（改钉不删，记在这里）：原先一行画「性格 + 档位 + 天分最高两项」
+  // → 上一版**全删**（我读成"搬走"）→ **现在只留前两样**：性格是什么、天分是哪一档。
+  // 「天分最高 X / Y」与一切具体数值继续不画 —— 那是人类说的「详细」那一半。
   const chips = individualRowChips({individual_id: 'own-0001', level: 60, nature: '稳重',
     talent: {hp: 10, atk: 0, def: 0, spa: 0, spd: 0, spe: 7}}, {select: 'own-0001'});
-  assert.equal(chips, '', `单独一只时这一串必须是空的（性格/天分在二级页）：${chips}`);
-  // 多只同种时才画 —— 而且只画「区分它们必需的东西」：性格 + 天分档位 + 第几只（**不给具体数值**）
+  assert.match(chips, /性格 稳重/, `性格要写出来：${chips}`);
+  assert.match(chips, /天分档位/, `天分是哪一档要写出来：${chips}`);
+  assert.doesNotMatch(chips, /天分最高/, '天分具体数值不在列表里（人类：详细点进二级页看）');
+  assert.doesNotMatch(chips, /Lv\./, '等级不在这一串里（它在行里单独一格，只出现一次）');
+  assert.doesNotMatch(chips, /第 .*只/, '单独一只时不该有「第几只」');
+  // 多只同种：多一个编号用来区分（其余口径一致）
   const multi = individualRowChips({individual_id: 'own-0001-b', nature: '开朗',
     talent: {hp: 0, atk: 10, def: 0, spa: 0, spd: 0, spe: 10}}, {select: 'own-0001-b', multi: true});
-  assert.match(multi, /性格 开朗/, `多只同种要能区分：${multi}`);
-  assert.match(multi, /天分档位/, `多只同种要给出档位：${multi}`);
+  assert.match(multi, /性格 开朗/);
   assert.match(multi, /第 B 只/, `多只同种要说清是第几只：${multi}`);
-  assert.doesNotMatch(multi, /天分最高/, '天分具体数值不在列表里（人类：放详情页）');
-  assert.doesNotMatch(multi, /Lv\./, '等级不在这一串里（它在行里单独一格，只出现一次）');
-  // 搬走的东西二级页要接得住（否则就是「删了但没搬」）
+  assert.doesNotMatch(multi, /天分最高/, '多个体也不画具体数值');
+  // 「详细」那一半二级页要接得住（否则就是删了没搬）
   const box = readFileSync(new URL('../src/client/box.js', import.meta.url), 'utf8');
   assert.match(box, /'性格', '资质', '特长', '血脉', '天分档位'/, '二级页要有「性格与资质」那一段');
-  assert.match(box, /天分六项/, '二级页要有「天分六项」');
+  assert.match(box, /六维（60 级）/, '二级页要有 60 级面板那一段');
 });
 
 // ── ② 二级详情页：完整六维 ───────────────────────────────────────────────────
@@ -117,32 +120,40 @@ test('② 二级详情页的入口与地址：同一页里切视图（不新开�
 
 // ── ③ 动作的落点：只在二级页上 ───────────────────────────────────────────────
 
-test('③ 刷新/再加一只/回滚/加入比较：只在二级详情页，列表行里一个不许有', () => {
-  const placement = JSON.parse(JSON.stringify({listHtml: '', petHtml: ''}));
-  // 反证一：列表里带着这些属性 ⇒ 必须报
+test('③ 刷新/回滚/带上它去配队：只在二级详情页；下线的两个不许复活', () => {
+  // 2026-09-28 改钉（人类逐字）：「加入比较不是删了吗？再养一只也不要」。
+  // 旧断言把 `data-add=` 与 `data-cmp=` 当成「二级页必须有的入口」—— 它们整个下线了，
+  // 所以判据换成新动作集，并且**反过来**钉「这两个不许复活」。
   const dirty = actionPlacementProblems({listHtml: '<button data-refresh="nature"></button>'
-    + '<button data-add="pet_1"></button><button data-cmp="own-0001"></button>',
+    + '<button data-undo="own-1"></button><button data-to-team="own-0001"></button>',
   petHtml: '<button data-refresh="nature"></button><button data-refresh="talent"></button>'
-    + '<button data-add="pet_1"></button><button data-cmp="own-0001"></button>还剩 3 次'});
+    + '<button data-undo="own-1"></button><button data-to-team="own-0001"></button>还剩 3 次'});
   assert.ok(dirty.some((one) => one.includes('列表行里还有')), `列表里这些属性要被抓住：${dirty.join(' | ')}`);
   // 反证二：二级页上少一个入口 ⇒ 也要报
   const missing = actionPlacementProblems({listHtml: '', petHtml: '<button data-refresh="nature"></button>'});
   assert.ok(missing.length >= 2, `二级页缺入口要报全：${missing.join(' | ')}`);
-  // 反证三：刷新按钮上没写"还剩几次" ⇒ 报（人类③：「并在按钮旁写清还剩几次」）
+  // 反证三：刷新按钮上没写「还剩几次」 ⇒ 报（人类③：「并在按钮旁写清还剩几次」）
   assert.ok(actionPlacementProblems({listHtml: '', petHtml: '<button data-refresh="nature"></button>'
-    + '<button data-refresh="talent"></button><button data-add="x"></button><button data-cmp="y"></button>'})
+    + '<button data-refresh="talent"></button><button data-undo="x"></button><button data-to-team="y"></button>'})
     .some((one) => one.includes('还剩几次')));
-  void placement;
+  // 反证四（新）：已经下线的两个入口**复活必须被抓**
+  const revived = actionPlacementProblems({listHtml: '',
+    petHtml: '<button data-refresh="nature"></button><button data-refresh="talent"></button>'
+      + '<button data-undo="x"></button><button data-to-team="y"></button>'
+      + '<button data-add="pet_1"></button><button data-cmp="own-0001"></button>还剩 3 次'});
+  assert.equal(revived.filter((one) => one.includes('已经下线')).length, 2,
+    `下线的两个入口复活必须被抓：${revived.join(' | ')}`);
   // 真页面这一侧：抽屉那一行确实不再画它们（判据与实现同源）
   const group = groupCards([CARD('own-0001', 'pet_000012', '铠甲虫')])[0];
   const row = drawerHtml(group, {individuals: {'own-0001': {individual_id: 'own-0001', level: 60}}});
-  for (const attr of ['data-refresh=', 'data-add=', 'data-undo=', 'data-cmp=']) {
+  for (const attr of ['data-refresh=', 'data-undo=', 'data-to-team=', 'data-add=', 'data-cmp=']) {
     assert.ok(!row.includes(attr), `列表那一屏不许再有 ${attr}：${row.slice(0, 200)}`);
   }
-  // 但二级页上要有（`box.js` 的 `#pet-actions` 里画的就是这几个生成器）
-  for (const call of ['refreshButton(', 'addButton(', 'undoButton(', 'removeButton(', 'favouriteButton(']) {
+  // 但二级页上要有（`box.js` 的 `#pet-actions` 里画的就是这几个）
+  for (const call of ['refreshButton(', 'undoButton(', 'removeButton(', 'favouriteButton(', 'data-to-team=']) {
     assert.ok(BOX_JS.includes(call), `box.js 要在二级详情页上画 ${call}`);
   }
+  assert.ok(!BOX_JS.includes('addButton('), 'box.js 不许再画「再养一只」');
 });
 
 test('③ 锁定：页面上的入口删了，`?lock=` 与它背后的规则留着', () => {

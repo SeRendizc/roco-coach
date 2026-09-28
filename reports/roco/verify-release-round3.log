@@ -37,3 +37,59 @@
 … browser-acceptance
   ✔ browser-acceptance（20s）
 … demo-acceptance
+  ✔ demo-acceptance（156s）
+… mobile-sweep
+  ✔ mobile-sweep（16s）
+… box-acceptance
+  ✖ box-acceptance（87s）
+… workshop-acceptance
+  ✔ workshop-acceptance（63s）
+… loadout-acceptance
+  ✔ loadout-acceptance（8s）
+… five-minute-chain
+  ✖ five-minute-chain（139s）
+… roco-ux-acceptance
+  ✔ roco-ux-acceptance（42s）
+… battle-feedback
+  ✔ battle-feedback（18s）
+… coverage-axes
+  ✔ coverage-axes（0s）
+… retained-assets
+  ✔ retained-assets（0s）
+{
+ "verdict": "failed",
+ "failed": [
+  "unit",
+  "box-acceptance",
+  "five-minute-chain"
+ ],
+ "ran": [
+  "env",
+  "unit",
+  "bridge",
+  "toolbox-roco",
+  "plan-e2e",
+  "trajectories",
+  "trajectories-model",
+  "sft-split",
+  "model-manifest",
+  "provenance",
+  "rag-eval",
+  "game-data-pack",
+  "reconciliation",
+  "sprite-identity",
+  "state-doc",
+  "guard-selftest",
+  "browser-acceptance",
+  "demo-acceptance",
+  "mobile-sweep",
+  "box-acceptance",
+  "workshop-acceptance",
+  "loadout-acceptance",
+  "five-minute-chain",
+  "roco-ux-acceptance",
+  "battle-feedback",
+  "coverage-axes",
+  "retained-assets"
+ ]
+}

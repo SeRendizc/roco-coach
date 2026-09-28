@@ -216,10 +216,25 @@ const clone = (individual) => ({
  */
 export function refresh(individual, kind, {at = null, salt = ''} = {}) {
   if (kind !== 'nature' && kind !== 'talent') throw new Error(`没有这种刷新：${kind}`);
-  if (!Number.isInteger(individual.refreshes?.[kind]) || individual.refreshes[kind] <= 0) {
-    throw Object.assign(new Error(`${kind === 'nature' ? '性格' : '天分'}刷新次数用完了`), {code: 'no-refresh-left'});
+  // 2026-09-28 改钉（人类逐字：「刷新上限达到后可继续刷新，回到 3 次」）：
+  // 次数用完**不再锁死** —— 用掉最后一次之后计数**回到 `REFRESH_LIMIT`**，可以接着刷。
+  // 于是「还剩 N 次」的含义变成"离下一次回满还有几次"，不再是"这辈子只剩几次"。
+  if (!Number.isInteger(individual.refreshes?.[kind])) {
+    // 老记录里没有这一格（或被写坏）就按满额起算，而不是把人挡在外面。
+    individual = {...individual, refreshes: {...(individual.refreshes ?? {}), [kind]: REFRESH_LIMIT}};
   }
-  const used = REFRESH_LIMIT - individual.refreshes[kind] + 1;             // 第几次
+  // `used`（这是第几次）**不能再按剩余次数推**：计数会回满，那样会算出重复的种子 ⇒ 刷出同一个落点。
+  //
+  // ⚠ 也不能数 `history` 里这一类的条数：**回滚会把那一条删掉**（`undoLastRefresh` 弹掉刷新行、
+  // 压进一条 `undo`），于是回滚之后重刷会退回 `used=1` ⇒ 只剩 `#undo` 那个盐在区分，
+  // 实测 200 只里有 6 只（含本机 own-0002）**重刷又刷回同一条** —— 那正是"回滚之后换个落点"
+  // 这条承诺被打破。所以用一个**回滚不动的持久计数** `rolls`（只增不减）。
+  //
+  // 老记录没有这一格：按老口径（`REFRESH_LIMIT - 剩余次数`）起算，与改动前逐字节一致。
+  const priorRolls = Number.isInteger(individual.rolls?.[kind])
+    ? individual.rolls[kind]
+    : Math.max(0, REFRESH_LIMIT - Number(individual.refreshes?.[kind] ?? REFRESH_LIMIT));
+  const used = priorRolls + 1;
   // 2026-09-27（审计 §C6.288 ④ 的两处矛盾之一）：**回滚过之后，同一次刷新要掷到不同的落点**。
   // 原来种子只由「个体 + 种类 + 第几次」决定 ⇒ 回滚再刷**必然回到同一个落点**，
   // 而教练文案却说「回滚换一个落点可能更值」——两者自相矛盾。
@@ -240,7 +255,11 @@ export function refresh(individual, kind, {at = null, salt = ''} = {}) {
     next.talent_boosts = [...(individual.talent_boosts ?? []),
       {tier: used, stat, delta: TALENT_STEP, at}];
   }
-  next.refreshes[kind] = individual.refreshes[kind] - 1;
+  // 用掉一次；**用掉最后一次时回满**（不是变成 0 然后锁死）。
+  next.refreshes[kind] = individual.refreshes[kind] > 1
+    ? individual.refreshes[kind] - 1 : REFRESH_LIMIT;
+  // 累计刷过几次（**回滚不退**）：它是 `used` 的唯一事实源，保证"回滚之后重刷换一个落点"成立。
+  next.rolls = {...(individual.rolls ?? {}), [kind]: used};
   // 2026-09-27（§C6.313② 的收尾）：这一级的**落点**要记在账上。
   // 原来只有 `before/after` 两个面板对象，`rollbackAdvice` 得回头去 `talent_boosts` 里按 tier 找，
   // 玩家问"这次换到了哪一项"时没人答得出来。现在：天分记 `stat`；回滚之后重刷再记 `replaced`

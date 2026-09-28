@@ -159,7 +159,10 @@ export function individualRowChips(individual, {select = '', multi = false} = {}
   // 唯一还需要它的场合：**同种有多只**（比如本机多养的那只）。那时行里必须有一点东西
   // 能把它们区分开，所以只留 性格 + 天分档位（不给具体数值 —— 数值去详情页看），
   // 外加「第 N 只」这个编号。
-  if (!multi) return '';
+  // 2026-09-28 第二次改钉（人类：「另外还是体现一下性格和天赋，只需要写性格是啥和天分是啥天分就行，
+  // 详细点进二级页面看」）：上一版把整串都删了 —— 删过头了。现在**每一只都画**，但只画两样：
+  // **性格是什么** + **天分是哪一档**，**不写具体数值**（数值与换算面板在二级页）。
+  // 「天分最高 X / Y」那一条继续不画：它正是人类说的「详细」那一半。
   const chips = [];
   const nature = individual?.nature ?? null;
   chips.push(nature ? chipSpan(`性格 ${nature}`, 'known') : chipSpan('性格 待导出', 'absent'));

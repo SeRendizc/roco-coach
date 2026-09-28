@@ -1,0 +1,43 @@
+[box-acceptance] [diag boot] pet-view len=341 对象=11 整页=71
+[box-acceptance] ✔ [01-路由总数] 我的盒子 == 49 个个体（= owned-pets.json 的实例数），全图鉴 == 622 条记录 —实际： count-mine=49 count-catalog=622
+[box-acceptance] ✔ [02-默认视图] 默认进入「我的盒子」，总数 49（一人一只），每页 24 张卡 —实际： kind=mine total=49 cards=24
+[box-acceptance] ✔ [03-宽屏不溢出] 1440×900：scrollW == clientW —实际： clientW=1440 scrollW=1440 bodyScrollW=1440
+[box-acceptance] ✔ [04-切标签] 真实鼠标点「全图鉴」后 kind=catalog，总数 622，卡片里没有工程字段 —实际： kind=catalog total=622 cards=24 点击命中={"tag":"BUTTON","id":"tab-catalog","cls":"tab","hit_target":true}
+[box-acceptance] ✔ [05-catalog全量] kind=catalog 的 total 必须 == 622 —实际： player.total=622
+[box-acceptance] ✔ [反证 05-catalog全量] 把 catalog 总数改成 48（迁移层全量）必须被同一条判据抓住 —实际命中： catalog 总数必须 == 622，实际 48
+[box-acceptance] ✔ [06-玩家层无工程话] 展开的玩家可见文本里不出现 pet_id / state_version / coverage / provenance / unknown_fields / 裸 JSON —实际： 扫过 873 字；卡片首层「🌿 喵喵 🌿草系」
+[box-acceptance] ✔ [07-键盘搜索] 真实键盘输入「喵喵」后结果数 0<total<622，且每张卡的名字都含搜索词 —实际： 输入框实际值="喵喵" total=2 每张卡都含喵=true；样例「🌿 喵喵 🌿草系」
+[box-acceptance] ✔ [08-系别筛选] 真实鼠标点「系别=草系」后每张卡都含草系，且总数等于路由给的筛选后总数 —实际： 页面 total=84 路由 total=84 每张卡含草系=true；命中={"tag":"BUTTON","id":null,"cls":"filter-chip","hit_target":true}
+[box-acceptance] ✔ [27-掷点来源那一句不上屏] 人类 2026-09-28 决定不要「掷点生成、不是官方概率」这句 ⇒ 真浏览器上不许再有 `[data-rolled="yes"]` 那一行，也不许出现「掷点生成」字样（函数与单测那一层仍保留这句，只是不上屏） —实际： [data-rolled] 0 处；「掷点生成」0 处
+[box-acceptance] ✖ [09-个体详情] 个体详情**二级页**（地址 `?pet=`）里有等级 / 性格 / 资质 / 特长 / 血脉 / 天分档位 / 四个有序技能（五栏标签逐条对得上），天分档位的取值落在四个档名里（读不出来时照实说没有、并带上说明），并且「效果未校准」与「游戏数据里没有这一项」都说了 —实际： 二级页=true view=pet 地址 pet=own-0002 traits=4 标签=["性格","资质","血脉","天分档位"] 天分档位=「一般般的天分」（命中档名=true；读不出来但带了说明=false） moves=4 缺词=["特长","效果未校准"] 标题=音速犬 · 详情
+[box-acceptance] ✔ [10-详情也不说工程话] 个体详情二级页（玩家点得到的）同样不出现工程字段 —实际： 扫过 640 字
+[box-acceptance] [diag before-10b] pet-view len=3128 对象=84 整页=94
+[box-acceptance] ✔ [10b-资质要摊成六维数值（own-0001）] 真鼠标打开 own-0001 的详情：资质那一栏是「生命 10 / 物攻 3 / …」这样的六维数值，整页不出现 [object Object] —实际： 铠甲虫 · 详情：资质 =「生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9」（数出 6 个数值；[object Object] 0 处）｜pet-view 内命中元素 18 个 ["BUTTON.nav-btn primary@pet-back html=<button class=\"nav-btn primary\" id=\"pet-back\">← 返回精
+[box-acceptance] ✔ [反证 10b-资质要摊成六维数值（own-0001）] 把「资质」印成 [object Object]、或者一个数值都没有 —— 两种坏样本都必须被同一条判据抓住 —实际命中： 资质那一栏没有摊成六维数值（只数出 0 个「生命 10」这样的值） | 页面上出现了 2 处 [object Object]（二级页可见文字里 undefined 处）｜命中行：undefined｜资质原样「undefined」
+[box-acceptance] ✖ 流程异常： Error: 找不到可点的元素：#pet-actions [data-cmp]
+    at mouseClick (file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-box-acceptance.mjs:468:19)
+    at async pickForCompare (file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-box-acceptance.mjs:885:7)
+    at async main (file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-box-acceptance.mjs:890:5)
+    at async file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-box-acceptance.mjs:2116:14
+[box-acceptance] ────────────────────────────────────────────────────────────────────────────
+[box-acceptance] ✔ 01-路由总数 我的盒子 == 49 个个体（= owned-pets.json 的实例数），全图鉴 == 622 条记录 → count-mine=49 count-catalog=622
+[box-acceptance] ✔ 02-默认视图 默认进入「我的盒子」，总数 49（一人一只），每页 24 张卡 → kind=mine total=49 cards=24
+[box-acceptance] ✔ 03-宽屏不溢出 1440×900：scrollW == clientW → clientW=1440 scrollW=1440 bodyScrollW=1440
+[box-acceptance] ✔ 04-切标签 真实鼠标点「全图鉴」后 kind=catalog，总数 622，卡片里没有工程字段 → kind=catalog total=622 cards=24 点击命中={"tag":"BUTTON","id":"tab-catalog","cls":"tab","hit_target":true}
+[box-acceptance] ✔ 05-catalog全量 kind=catalog 的 total 必须 == 622 → player.total=622
+[box-acceptance] ✔ 06-玩家层无工程话 展开的玩家可见文本里不出现 pet_id / state_version / coverage / provenance / unknown_fields / 裸 JSON → 扫过 873 字；卡片首层「🌿 喵喵 🌿草系」
+[box-acceptance] ✔ 07-键盘搜索 真实键盘输入「喵喵」后结果数 0<total<622，且每张卡的名字都含搜索词 → 输入框实际值="喵喵" total=2 每张卡都含喵=true；样例「🌿 喵喵 🌿草系」
+[box-acceptance] ✔ 08-系别筛选 真实鼠标点「系别=草系」后每张卡都含草系，且总数等于路由给的筛选后总数 → 页面 total=84 路由 total=84 每张卡含草系=true；命中={"tag":"BUTTON","id":null,"cls":"filter-chip","hit_target":true}
+[box-acceptance] ✔ 27-掷点来源那一句不上屏 人类 2026-09-28 决定不要「掷点生成、不是官方概率」这句 ⇒ 真浏览器上不许再有 `[data-rolled="yes"]` 那一行，也不许出现「掷点生成」字样（函数与单测那一层仍保留这句，只是不上屏） → [data-rolled] 0 处；「掷点生成」0 处
+[box-acceptance] ✖ 09-个体详情 个体详情**二级页**（地址 `?pet=`）里有等级 / 性格 / 资质 / 特长 / 血脉 / 天分档位 / 四个有序技能（五栏标签逐条对得上），天分档位的取值落在四个档名里（读不出来时照实说没有、并带上说明），并且「效果未校准」与「游戏数据里没有这一项」都说了 → 二级页=true view=pet 地址 pet=own-0002 traits=4 标签=["性格","资质","血脉","天分档位"] 天分档位=「一般般的天分」（命中档名=true；读不出来但带了说明=false） moves=4 缺词=["特长","效果未校准"] 标题=音速犬 · 详情
+[box-acceptance] ✔ 10-详情也不说工程话 个体详情二级页（玩家点得到的）同样不出现工程字段 → 扫过 640 字
+[box-acceptance] ✔ 10b-资质要摊成六维数值（own-0001） 真鼠标打开 own-0001 的详情：资质那一栏是「生命 10 / 物攻 3 / …」这样的六维数值，整页不出现 [object Object] → 铠甲虫 · 详情：资质 =「生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9」（数出 6 个数值；[object Object] 0 处）｜pet-view 内命中元素 18 个 ["BUTTON.nav-btn primary@pet-back html=<button class=\
+[box-acceptance] ✖ fatal 整个流程必须跑完 → 异常：Error: 找不到可点的元素：#pet-actions [data-cmp]
+    at mouseClick (file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-box-acceptance.mjs:468:19)
+    a
+[box-acceptance] ✔ 05-catalog全量 [反证] 把 catalog 总数改成 48（迁移层全量）必须被同一条判据抓住 → catalog 总数必须 == 622，实际 48
+[box-acceptance] ✔ 10b-资质要摊成六维数值（own-0001） [反证] 把「资质」印成 [object Object]、或者一个数值都没有 —— 两种坏样本都必须被同一条判据抓住 → 资质那一栏没有摊成六维数值（只数出 0 个「生命 10」这样的值） | 页面上出现了 2 处 [object Object]（二级页可见文字里 undefined 处）｜命中行：undefined｜资质原样「undefined」
+[box-acceptance] 截图 4 张 → reports/roco/box-acceptance/
+[box-acceptance] 判据 11/13 通过；反证 2/2 命中
+[box-acceptance] 报告 → reports/roco/box-acceptance/browser-box-acceptance.json
+[box-acceptance] 有 2 条不通过

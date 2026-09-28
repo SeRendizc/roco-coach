@@ -94,10 +94,19 @@ test('③ 两个刷新**分开计数**：各 3 次，用完就拒绝，刷一个
   assert.deepEqual(row.refreshes, {nature: 2, talent: 3}, '刷性格不许动天分次数');
   row = refresh(row, 'talent', {at: 'T2'});
   assert.deepEqual(row.refreshes, {nature: 2, talent: 2}, '刷天分不许动性格次数');
+  // 2026-09-28 改钉（人类逐字：「刷新上限达到后可继续刷新，回到 3 次」）：
+  // 旧断言是 `assert.equal(row.refreshes.nature, 0)` + `assert.throws(..., 'no-refresh-left')`
+  // —— 那条「用完就锁死」的规则**被人类改掉了**。现在用掉最后一次时计数**回满**，可以接着刷。
   row = refresh(row, 'nature', {at: 'T3'});
+  assert.equal(row.refreshes.nature, 1, '第 3 次之后还剩 1 次');
   row = refresh(row, 'nature', {at: 'T4'});
-  assert.equal(row.refreshes.nature, 0);
-  assert.throws(() => refresh(row, 'nature'), (error) => error.code === 'no-refresh-left', '第 4 次必须拒绝');
+  assert.equal(row.refreshes.nature, REFRESH_LIMIT, '用掉最后一次 ⇒ 计数回满，不是 0');
+  const more = refresh(row, 'nature', {at: 'T5'});
+  assert.equal(more.refreshes.nature, REFRESH_LIMIT - 1, '回满之后第 1 次：又变成还剩 2 次');
+  // ⚠ 而且**落点必须换**：计数回满会让「第几次」退化 —— 如果种子还按剩余次数推，
+  // 回满之后就会刷出和上一轮一模一样的结果。所以 `used` 改成数账本（单调递增）。
+  assert.equal(more.history.at(-1).used, row.history.at(-1).used + 1,
+    `第几次必须单调递增（回满不许让它退化）：${more.history.at(-1).used} vs ${row.history.at(-1).used}`);
   assert.equal(row.refreshes.talent, 2, '性格刷完了，天分那两次还在');
   assert.throws(() => refresh(row, 'unknown-kind'), /没有这种刷新/, '未知类型要拒绝');
 });
@@ -288,7 +297,9 @@ test('⑩ 回滚只撤一步、次数**不退**、留痕；连着退被拒；"�
   for (const tier of [1, 2, 3]) three = refresh(three, 'talent', {at: `T${tier}`});
   assert.equal(lastRefreshOf(three).used, 3, '最近那一步是第 3 级');
   three = undoLastRefresh(three, {at: 'U3'});
-  assert.equal(three.refreshes.talent, 0, '撤掉第 3 级，但那次刷新**不还**（还是 0 次）');
+  // 2026-09-28 改钉：计数不再是 0（人类改成「用掉最后一次就回满」）——
+  // 但这条判据真正要钉的东西**一个字没变**：回滚**不退次数**（它根本不动 `refreshes`）。
+  assert.equal(three.refreshes.talent, REFRESH_LIMIT, '撤掉第 3 级，但次数不回、也不额外扣');
   assert.equal(canUndo(three), false, '刚退过一步 ⇒ 现在不能退（否则就是退回两步之前）');
   assert.throws(() => undoLastRefresh(three, {at: 'U2'}), (error) => error.code === 'already-undone',
     '第二次回滚必须明确拒绝，理由写清"一次只能退一步"');
@@ -305,14 +316,17 @@ test('⑩ 回滚只撤一步、次数**不退**、留痕；连着退被拒；"�
   const twice = undoLastRefresh(budget, {at: 'B4'});
   assert.equal(twice.refreshes.talent, 1, '再退一次，次数同样不动');
   assert.equal(undoUsed(twice), 2, '同一只退过两次（中间刷过一次）—— 规则允许');
-  // 余量用完后：退可以退，但**刷不回来了**（这就是"不返还"的实际后果）
+  // 2026-09-28 改钉（人类逐字：「刷新上限达到后可继续刷新，回到 3 次」）：
+  // 旧断言是「三次用完 ⇒ refreshes=0，且退完之后**刷不回来了**（no-refresh-left）」。
+  // 那条规则被人类改掉了 ⇒「用完」不再是终局。这里改成钉新口径，同时保住原来的那半句意图：
+  // **回滚不退次数**（它不动 `refreshes`）。至于「想换落点只能再养一只」——「再养一只」整个下线了。
   let spent = individualsFromDataset(dataset)[4];
   for (const tier of [1, 2, 3]) spent = refresh(spent, 'talent', {at: `S${tier}`});
-  assert.equal(spent.refreshes.talent, 0, '三次用完');
+  assert.equal(spent.refreshes.talent, REFRESH_LIMIT, '一轮用完 ⇒ 计数回满（不是 0）');
   spent = undoLastRefresh(spent, {at: 'S4'});
-  assert.equal(spent.refreshes.talent, 0, '退掉第 3 次也不还');
-  assert.throws(() => refresh(spent, 'talent', {at: 'S5'}), (error) => error.code === 'no-refresh-left',
-    '次数不退 ⇒ 退完之后这一只就定格了（想再要别的落点只能再养一只）');
+  assert.equal(spent.refreshes.talent, REFRESH_LIMIT, '退掉第 3 次：不还，也不额外扣');
+  assert.equal(refresh(spent, 'talent', {at: 'S5'}).refreshes.talent, REFRESH_LIMIT - 1,
+    '用完一轮之后**照旧能接着刷**（这就是人类要的"可继续刷新"）');
 });
 
 // ── ⑪ 回滚与规则的四处矛盾（2026-09-27，审计 ④）────────────────────────────────────

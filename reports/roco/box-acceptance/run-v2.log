@@ -1,0 +1,11 @@
+[box-acceptance] ✖ 流程异常： Error: 页面没有进入就绪状态（data-box-ready 一直是别的值）
+    at main (file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-box-acceptance.mjs:544:23)
+    at async file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-box-acceptance.mjs:2116:14
+[box-acceptance] ────────────────────────────────────────────────────────────────────────────
+[box-acceptance] ✖ fatal 整个流程必须跑完 → 异常：Error: 页面没有进入就绪状态（data-box-ready 一直是别的值）
+    at main (file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-box-acceptance.mjs:544:23)
+    at asy
+[box-acceptance] 截图 0 张 → reports/roco/box-acceptance/
+[box-acceptance] 判据 0/1 通过；反证 0/0 命中
+[box-acceptance] 报告 → reports/roco/box-acceptance/browser-box-acceptance.json
+[box-acceptance] 有 1 条不通过

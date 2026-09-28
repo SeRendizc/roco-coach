@@ -59,15 +59,15 @@ test('③ 缺数值一律标"待导出"（不许显示成 0 或空白）', () =>
   // 档位是**扣掉加成之后**读的：base = {atk:10-10, spe:10-10, 其余 0} ⇒ 一条都没激活 ⇒ 认不出
   // （这一条正是"加成不许把档位顶上去"的反证）
   assert.ok(known[1].label.includes('认不出'), `加成扣掉后一条都不激活 ⇒ 如实说认不出：${known[1].label}`);
-  // 2026-09-28 改钉（人类指着截图：「天分/性格加点啥的属性放详情页啊」）：单只那一行**不再画**
-  // 性格/天分 ⇒ 这条判据要问的场合改成「同种多只那一行」（只有那里还会画它们）。意图不变：
-  // 缺数值必须标「待导出」，不许显示成 0、也不许留空。
-  const html = individualHtml(ONE[0], {individual_id: 'own-0001', nature: null, talent: null},
-    {multi: true});
+  // 2026-09-28 再改钉（人类：「只需要写性格是啥和天分是啥天分就行」）：单只那一行**又画回来了**
+  // （性格 + 天分档位）⇒ 这条判据恢复成问「列表行」（不必再借多个体那一行）。
+  // 意图一个字没变：**缺数值必须标「待导出」**，不许显示成 0、也不许留空。
+  const html = individualHtml(ONE[0], {individual_id: 'own-0001', nature: null, talent: null});
   assert.match(html, /data-state="absent"/);
-  // 反证：单独一只时那一串是空的（不是「忘了画」，是「按新口径不画」）
-  assert.doesNotMatch(individualHtml(ONE[0], {individual_id: 'own-0001', nature: null, talent: null}),
-    /data-state="absent"/, '单独一只时不该再有性格/天分 chip');
+  // 反证：有值的时候不许还说「待导出」（判据不是恒真）
+  const withValue = individualHtml(ONE[0], {individual_id: 'own-0001', nature: '稳重',
+    talent: {hp: 0, atk: 10, def: 0, spa: 0, spd: 0, spe: 0}});
+  assert.doesNotMatch(withValue, /data-state="absent"/, '有值就不该再写待导出');
 });
 
 test('④ 两个刷新按钮分开、各带剩余次数；用完禁用', () => {
@@ -137,22 +137,23 @@ test('⑧ 浏览器安全：这一层不许静态 import node:*（页面会静�
   assert.match(src, /from '\.\.\/coach\/individuals\.js'/, '刷新次数上限要从个体层取，不许再写一个 3');
 });
 
-test('⑨ 抽屉不许弄丢原来的两个动作：看详情与加入比较（少了它们点名字没反应）', () => {
+test('⑨ 抽屉不许弄丢「看详情」这个动作（点名字要能进二级页）', () => {
+  // 2026-09-28 改钉（人类逐字：「加入比较不是删了吗？再养一只也不要」）：
+  // 「加入比较」整个下线 ⇒ 这条判据不再钉「整行只许有一个」，改成钉「它不许复活」。
   const html = individualHtml(ONE[0], {individual_id: 'own-0001'});
   assert.match(html, /data-detail="own-0001"/, '看详情这个动作要在（默认卡片渲染器里）');
-  // 改钉（2026-09-27，审计实测）：抽屉**不再自己画**「加入比较」——卡片本体（页面注入的 cardHtml）
-  // 里已经有一个，再画一个就会出现"每行两个按钮、点第二个把刚选的取消"（24 个体 48 个按钮）。
-  assert.doesNotMatch(html, /data-cmp=/, '抽屉不许再画第二个「加入比较」');
-  const withCard = individualHtml(ONE[0], {individual_id: 'own-0001'},
-    {cardHtml: (card) => `<button data-cmp="${card.select}">加入比较</button>`});
-  assert.equal((withCard.match(/data-cmp=/g) ?? []).length, 1, '整行只许有一个「加入比较」（由卡片本体提供）');
-  assert.match(withCard, /data-cmp="own-0001"/, '卡片本体那个要在');
-  // 页面的事件处理读的就是这两个属性 —— 判据与实现同源：读一遍 box.js 确认它监听的是这两个
+  assert.doesNotMatch(html, /data-cmp=/, '抽屉不许画「加入比较」（它已经下线）');
+  const withCard = individualHtml(ONE[0], {individual_id: 'own-0001'}, {cardHtml: () => '<b>卡</b>'});
+  assert.doesNotMatch(withCard, /data-cmp=/, '页面注入的卡片里也不许再有「加入比较」');
+  // 页面的事件处理读的就是这几个属性 —— 判据与实现同源：读一遍 box.js 确认它监听的是这几个
   const box = readFileSync(new URL('../src/client/box.js', import.meta.url), 'utf8');
-  assert.match(box, /closest\?\.\('\[data-cmp\]'\)/, 'box.js 监听 data-cmp');
   assert.match(box, /closest\?\.\('\[data-detail\]'\)/, 'box.js 监听 data-detail');
   assert.match(box, /closest\?\.\('\[data-refresh\]'\)/, 'box.js 监听刷新按钮');
+  assert.match(box, /closest\?\.\('\[data-to-team\]'\)/, 'box.js 监听新的「带上它去配队」');
   assert.match(box, /closest\?\.\('\.drawer-head'\)/, 'box.js 监听抽屉头');
+  // 反证：已经下线的两个入口不许再有监听
+  assert.doesNotMatch(box, /closest\?\.\('\[data-cmp\]'\)/, '下线的「加入比较」不许再有监听');
+  assert.doesNotMatch(box, /closest\?\.\('\[data-add\]'\)/, '下线的「再养一只」不许再有监听');
 });
 
 test('⑩ 回滚按钮：只有能回滚时才出现，并且带得动 coach 的判断', () => {
@@ -324,31 +325,20 @@ test('⑮ 本机加的个体：行里带「本机加的」+ 只有它能「删�
   assert.doesNotMatch(clean, /data-remove|本机加的/, '名单里的个体不该出现这些');
 });
 
-test('⑯ 到了"同种一对"上限，「再养一只」按钮就禁用（不许连点堆一排）', () => {
-  const cards = [CARD('own-0001', 'pet_000012', '铠甲虫')];
-  const group = groupCards(cards)[0];
-  group.expanded = true;
-  // 2026-09-28 改钉（人类 ③）：这个按钮搬进二级详情页 ⇒ 判据钉 `addButton(species, {extraCount})`，
-  // 页面按 `localIndividualsOf()` 的条数把 extraCount 传进来（唯一事实源还是本机记录）。
-  const withExtra = addButton('pet_000012', {extraCount: 1});
-  assert.match(withExtra, /data-add="pet_000012"[^>]*(disabled|aria-disabled="true")/,
-    `已有一只本机的 ⇒ 按钮要禁用：${withExtra.slice(0, 240)}`);
-  assert.match(withExtra, /同种最多一对|已有一只本机的/, '禁用也要说清原因（点不动比点了没反应好）');
-  // 反证：还没有本机那只时按钮是可点的
-  assert.doesNotMatch(addButton('pet_000012', {extraCount: 0}), /data-add="pet_000012"[^>]*disabled/,
-    '还没加过 ⇒ 按钮必须可点');
-  // 接线：页面真的把"本机已有一只"这件事读出来传下去了。
-  // 2026-09-28 改钉（真 bug）：原来钉的是 `localIndividualsOf(species).length` —— 而那个函数
-  // 把**服务端名单里那一页的个体也算进去**（`individualsForRows` 给每张卡都写一条本机记录）
-  // ⇒ 任何种类都 ≥1 ⇒ 按钮**永远**禁用，而且理由（"已有一只本机的"）对从没加过的玩家是假的。
-  // 唯一事实源换成 `state.extraRows`（box.js:342 `localRowsFor(page)` 造的那一份 = 真的本机多养的）。
+test('⑯ 「＋再养一只同种」整个下线了（人类 2026-09-28：「每种精灵只允许有一只」）', () => {
+  // 2026-09-28 改钉（人类逐字：「先删掉加多只同种的功能吧，每种精灵只允许有一只」+「再养一只也不要」）。
+  // 旧判据钉的是「同种一对上限到了要禁用按钮」那条规则 —— 规则连同按钮一起下线。
+  // 判据改成钉**下线本身**（正反两面，免得哪天悄悄复活）。注意只钉**代码形状**，
+  // 不钉自然语言：注释里说明"这个功能下线了"是允许的、也应该留着。
   const box = readFileSync(new URL('../src/client/box.js', import.meta.url), 'utf8');
-  assert.match(box, /addButton\(species, \{extraCount: extraOwnedCount\(species\)\}\)/,
-    'box.js 要按**本机多养出来的**只数决定按钮能不能点');
-  assert.match(box, /function extraOwnedCount\(species\) \{\s*return \(state\.extraRows \?\? \[\]\)\.filter\(\(row\) => row\.group === species\)\.length;/,
-    'extraOwnedCount 必须只数 state.extraRows（不许回到 localIndividualsOf）');
-  assert.doesNotMatch(box, /addButton\(species, \{extraCount: localIndividualsOf\(species\)\.length\}\)/,
-    '反证：不许再用会把服务端个体也算进来的那个函数');
+  assert.doesNotMatch(box, /addButton\(/, 'box.js 不许再调「再养一只」的按钮生成器');
+  assert.doesNotMatch(box, /closest\?\.\('\[data-add\]'\)/, 'box.js 不许再有 data-add 的监听');
+  // ⚠ 判据钉的是**函数定义/调用**，不是这个词本身：注释里用自然语言说明它下线了是允许的。
+  assert.doesNotMatch(box, /function extraOwnedCount|extraOwnedCount\(/, '为它算只数的那个函数该一起没了');
+  // 反证：抽屉那一行也不许画它
+  const group = groupCards([CARD('own-0001', 'pet_000012', '铠甲虫')])[0];
+  const row = drawerHtml({...group, expanded: true}, {individuals: {'own-0001': {individual_id: 'own-0001'}}});
+  assert.doesNotMatch(row, /data-add=/, '列表行里不许有它');
 });
 
 test('⑰ 资质是**六维表**，页面要摊成一行数值（不许印 [object Object]）', () => {

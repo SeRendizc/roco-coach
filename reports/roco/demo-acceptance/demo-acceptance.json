@@ -31,7 +31,7 @@
     {
       "name": "整局内小芽至少自动出现一次（没有任何点击）",
       "ok": true,
-      "detail": "自动出现 3 次；自动推进 21 次；样例=它速度 75 快过你 60：别硬对拼，这一轮先换人躲一下 ｜ 对面「铠甲虫」只剩 4 血：这一轮先把它补掉，别让它换人喘口气"
+      "detail": "自动出现 3 次；自动推进 20 次；样例=它速度 75 快过你 60：别硬对拼，这一轮先换人躲一下 ｜ 对面「铠甲虫」只剩 4 血：这一轮先把它补掉，别让它换人喘口气"
     },
     {
       "name": "出现的建议都来自真实局面检测器（kind 已知，不是拼出来的句子）",
@@ -259,37 +259,37 @@
     {
       "name": "点一下能真的问到本机小模型（面板出现内容）",
       "ok": true,
-      "detail": "{\"hidden\":false,\"hasFn\":\"function\",\"battleId\":\"s2-7wy61ech\",\"panelExists\":true,\"err\":null,\"html\":\"\\n      <table class=\\\"shadow\\\">\\n        <tbody><tr><th>规则引擎（真值来源）</th><td>规则引擎这一步的行动建议：换上第2位</td></tr>\\n        <tr><th>本机小模型（只提议工具）</th><td>模型说：不用再查了<br>\\n          <span class=\\\"muted\\\">耗时 575 ms · "
+      "detail": "{\"hidden\":false,\"hasFn\":\"function\",\"battleId\":\"s2-f4q5i742\",\"panelExists\":true,\"err\":null,\"html\":\"\\n      <table class=\\\"shadow\\\">\\n        <tbody><tr><th>规则引擎（真值来源）</th><td>规则引擎这一步的行动建议：换上第2位</td></tr>\\n        <tr><th>本机小模型（只提议工具）</th><td>模型说：不用再查了<br>\\n          <span class=\\\"muted\\\">耗时 448 ms · "
     },
     {
       "name": "面板明确写出「规则引擎是真值来源 / 模型只提议工具」",
       "ok": true,
-      "detail": " 规则引擎（真值来源）规则引擎这一步的行动建议：换上第2位 本机小模型（只提议工具）模型说：不用再查了 耗时 575 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」"
+      "detail": " 规则引擎（真值来源）规则引擎这一步的行动建议：换上第2位 本机小模型（只提议工具）模型说：不用再查了 耗时 448 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」"
     },
     {
       "name": "面板不许暗示两边在同一维度上一致",
       "ok": true,
-      "detail": " 规则引擎（真值来源）规则引擎这一步的行动建议：换上第2位 本机小模型（只提议工具）模型说：不用再查了 耗时 575 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」"
+      "detail": " 规则引擎（真值来源）规则引擎这一步的行动建议：换上第2位 本机小模型（只提议工具）模型说：不用再查了 耗时 448 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」"
     },
     {
       "name": "RC-802 ruleset：规则快照逐字来自引擎公开视图",
       "ok": true,
-      "detail": "ruleset=「roco-world-s4-2026-09-10 · 本局状态版本 0」 注册表 12314 字节 耗时 575ms 摘要 a5cb0fbcc53f…"
+      "detail": "ruleset=「roco-world-s4-2026-09-10 · 本局状态版本 0」 注册表 12314 字节 耗时 448ms 摘要 a5cb0fbcc53f…"
     },
     {
       "name": "RC-802 support：模式注册表原文与摘要逐字来自 /api/roco/status",
       "ok": true,
-      "detail": "ruleset=「roco-world-s4-2026-09-10 · 本局状态版本 0」 注册表 12314 字节 耗时 575ms 摘要 a5cb0fbcc53f…"
+      "detail": "ruleset=「roco-world-s4-2026-09-10 · 本局状态版本 0」 注册表 12314 字节 耗时 448ms 摘要 a5cb0fbcc53f…"
     },
     {
       "name": "RC-802 latency：对照栏的耗时逐值来自 /api/roco/shadow 回执",
       "ok": true,
-      "detail": "ruleset=「roco-world-s4-2026-09-10 · 本局状态版本 0」 注册表 12314 字节 耗时 575ms 摘要 a5cb0fbcc53f…"
+      "detail": "ruleset=「roco-world-s4-2026-09-10 · 本局状态版本 0」 注册表 12314 字节 耗时 448ms 摘要 a5cb0fbcc53f…"
     },
     {
       "name": "RC-802 digest：对照栏的提示摘要逐值来自回执的 prompt_digest_pin",
       "ok": true,
-      "detail": "ruleset=「roco-world-s4-2026-09-10 · 本局状态版本 0」 注册表 12314 字节 耗时 575ms 摘要 a5cb0fbcc53f…"
+      "detail": "ruleset=「roco-world-s4-2026-09-10 · 本局状态版本 0」 注册表 12314 字节 耗时 448ms 摘要 a5cb0fbcc53f…"
     },
     {
       "name": "RC-802 反证：抽屉里的值换成写死样例，四条判据必须红",
@@ -314,7 +314,7 @@
     {
       "name": "局面矩阵：至少 10 个局面真的有气泡产出（实际 11/12）",
       "ok": true,
-      "detail": "开口 11 个、沉默 1 个；沉默原因 [{\"id\":\"12-peaceful-silent\",\"reason\":\"门控判定 silent（reason=below-threshold）；建议层没有一条成立的局面事实：coachAdvice 返回 null；plan-present（采样时 state.plan 在）；会话 hints=0／上次开口=never／冷却=never；等待落定 271ms／plan 请求 1 次；决策原文 gate=null/reason=below-threshold/value=0.6/floor=1.2/decisive=false/budget=null\"}]"
+      "detail": "开口 11 个、沉默 1 个；沉默原因 [{\"id\":\"12-peaceful-silent\",\"reason\":\"门控判定 silent（reason=below-threshold）；建议层没有一条成立的局面事实：coachAdvice 返回 null；plan-present（采样时 state.plan 在）；会话 hints=0／上次开口=never／冷却=never；等待落定 281ms／plan 请求 1 次；决策原文 gate=null/reason=below-threshold/value=0.6/floor=1.2/decisive=false/budget=null\"}]"
     },
     {
       "name": "局面矩阵：互不相同的 kind ≥ 8（实际 9 种；分支 count>=8）",
@@ -624,7 +624,7 @@
     {
       "name": "④ 陈旧规划必须整条丢弃并记账（构造竞态：规划属于旧版、回来时已推进）【原状态行 `#plan-status`「没有采用这份建议：局面已推进」已随人类 2026-09-23 删除 `#plan`/`.battle-tools` 一起消失；这一层含义现在由 `state.planStaleDiscards` 的版本对（plan_version / view_version）承担，措辞判据在 `#plan-status` 存在时仍然生效】",
       "ok": true,
-      "detail": "规划属于 state_version=31，回来时画面=38；plan 保留=false planAtVersion=null；丢弃账={\"plan_version\":31,\"view_version\":38,\"at\":1790570674612}；状态行（#plan-status 已删）「」"
+      "detail": "规划属于 state_version=31，回来时画面=38；plan 保留=false planAtVersion=null；丢弃账={\"plan_version\":31,\"view_version\":38,\"at\":1790591129440}；状态行（#plan-status 已删）「」"
     },
     {
       "name": "④ 丢弃之后仍按规则短提示开口，且浮条不许挂在被丢弃那一版上",
