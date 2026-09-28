@@ -12540,3 +12540,21 @@ guard-selftest / browser-acceptance / demo-acceptance / mobile-sweep）**全绿*
 （建议：直接 `document.querySelectorAll('#pet-view *')` 里逐个打 `textContent.length` 与
 `innerText.length`，找出**只有 `innerText` 才含对象**的那一个；或者干脆把判据改成按元素统计，
 与排障同一把尺子）。
+
+**五、再排掉一条（离线渲染实验，2026-09-28）**
+
+把 `petBodyHtml` 那一段的**真实印法**（`fmtValue` → `formatTraitValue` → `escapeAttr`）拆出来离线跑，
+喂**两种形状**的 `资质` 栏：
+
+| 输入 | 渲染结果 | `[object Object]` |
+|---|---|---:|
+| 服务端原样（`{value:{hp:7,…}, value_source}`） | 印成「游戏数据里没有这一项」 | **0** |
+| 拆包后（`{hp:7,atk:0,…}`） | 印成「生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 0」 | **0** |
+
+⇒ **`petBodyHtml` 本身不产生 `[object Object]`**（两种形状都不产生）。
+这条把嫌疑从"详情页正文"里彻底排除，**只剩"这一屏上别的元素"**。
+
+**下一步（一次就能定位，不用再猜）**：把判据的统计改成**按元素**（与排障同一把尺子）——
+`document.querySelectorAll('#pet-view *')` 里逐个算 `innerText` 长度与 `textContent`，
+找出**只有 `innerText` 才含对象**的那一个元素；或者更直接：把 `#pet-view` 的 `outerHTML`
+整个写进报告（哪怕 200KB），在文件里搜 `[object Object]` 的前后文。
