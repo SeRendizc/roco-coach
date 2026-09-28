@@ -738,7 +738,7 @@ async function main() {
           labels:rows.map((r)=>r.label), hasTalentRow:Boolean(talent),
           value:String(talent?.value??''),
           statCount:(String(talent?.value??'').match(/生命\\s*\\d+|物攻\\s*\\d+|物防\\s*\\d+|魔攻\\s*\\d+|魔防\\s*\\d+|速度\\s*\\d+/g)??[]).length,
-          objectObject:(page.match(/\[object Object\]/g)??[]).length,
+          objectObject:[].slice.call(document.querySelectorAll('#pet-view *')).filter(function(el){return el.children.length===0&&/\[object Object\]/.test(el.textContent||'');}).length,
           // ⚠ 2026-09-28 按**容器拆开**统计：连红 8 次只报总数，无法定位。
           inPet:(function(){var v=document.getElementById('pet-view');return v?((v.innerText||'').match(/\[object Object\]/g)||[]).length:-1;})(),
           inList:(function(){var v=document.getElementById('box-list-view');return v?((v.innerText||'').match(/\[object Object\]/g)||[]).length:-1;})(),
@@ -901,7 +901,7 @@ async function main() {
         back:Boolean(back), backText:(back?.textContent??'').trim(),
         gridHidden:document.getElementById('box-list-view')?.hidden===true,
         // 比较页上也会印「资质」那类对象值：这里顺手量一次 [object Object]（人类③ 的那条）。
-        objectObject:((document.body.innerText||'').match(/\[object Object\]/g)??[]).length,
+        objectObject:[].slice.call(view.querySelectorAll('*')).filter(function(el){return el.children.length===0&&/\[object Object\]/.test(el.textContent||'');}).length,
         view:(document.getElementById('compare-view')?.hidden===false)?'compare':'list'});})()`));
     steps.push({at: 'compare', facts: picked, page: cmp});
     const statusesOk = ['same', 'different', 'unknown'].every((s) => cmp.statuses.includes(s));
