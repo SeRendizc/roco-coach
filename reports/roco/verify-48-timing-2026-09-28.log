@@ -1,0 +1,4 @@
+✖ 叠加层与磁盘不一致（重新运行不带 --verify 即可刷新）
+  · data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/pets.json 与重新生成的结果不一致（75609 vs 82540 字节；sha256 666f5d3d7d30 vs 79fce430d0aa）
+  · data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json 与重新生成的结果不一致（220041 vs 220041 字节；sha256 939b586256fd vs beb10e377c10）
+  · data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/support-matrix.json 与重新生成的结果不一致（195439 vs 195439 字节；sha256 b9a58b7230dd vs 2eda270000cc）

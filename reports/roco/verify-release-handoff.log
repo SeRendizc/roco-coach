@@ -1,0 +1,39 @@
+
+> verify:release
+> node scripts/roco/verify-release.mjs
+
+… env
+  ✔ env（30s）
+… unit
+  ✖ unit（183s）
+… bridge
+  ✔ bridge（3s）
+… toolbox-roco
+  ✔ toolbox-roco（0s）
+… plan-e2e
+  ✔ plan-e2e（2s）
+… trajectories
+  ✔ trajectories（1s）
+… trajectories-model
+  ✖ trajectories-model（1s）
+… sft-split
+  ✔ sft-split（4s）
+… model-manifest
+  ✔ model-manifest（1s）
+… provenance
+  ✔ provenance（0s）
+… rag-eval
+  ✔ rag-eval（2s）
+… game-data-pack
+  ✔ game-data-pack（0s）
+… reconciliation
+  ✔ reconciliation（0s）
+… sprite-identity
+  ✔ sprite-identity（0s）
+… state-doc
+  ✔ state-doc（0s）
+… guard-selftest
+  ✔ guard-selftest（64s）
+… browser-acceptance
+  ✔ browser-acceptance（21s）
+… demo-acceptance

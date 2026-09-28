@@ -1,0 +1,93 @@
+
+> verify:release
+> node scripts/roco/verify-release.mjs
+
+… env
+  ✔ env（32s）
+… unit
+  ✖ unit（193s）
+… bridge
+  ✔ bridge（4s）
+… toolbox-roco
+  ✔ toolbox-roco（0s）
+… plan-e2e
+  ✔ plan-e2e（2s）
+… trajectories
+  ✔ trajectories（1s）
+… trajectories-model
+  ✔ trajectories-model（0s）
+… sft-split
+  ✔ sft-split（5s）
+… model-manifest
+  ✔ model-manifest（1s）
+… provenance
+  ✔ provenance（0s）
+… rag-eval
+  ✔ rag-eval（3s）
+… game-data-pack
+  ✔ game-data-pack（0s）
+… reconciliation
+  ✔ reconciliation（0s）
+… sprite-identity
+  ✔ sprite-identity（0s）
+… state-doc
+  ✔ state-doc（0s）
+… guard-selftest
+  ✔ guard-selftest（58s）
+… browser-acceptance
+  ✔ browser-acceptance（20s）
+… demo-acceptance
+  ✔ demo-acceptance（156s）
+… mobile-sweep
+  ✔ mobile-sweep（15s）
+… box-acceptance
+  ✔ box-acceptance（55s）
+… workshop-acceptance
+  ✔ workshop-acceptance（63s）
+… loadout-acceptance
+  ✔ loadout-acceptance（8s）
+… five-minute-chain
+  ✔ five-minute-chain（15s）
+… roco-ux-acceptance
+  ✔ roco-ux-acceptance（41s）
+… battle-feedback
+  ✔ battle-feedback（18s）
+… coverage-axes
+  ✔ coverage-axes（0s）
+… retained-assets
+  ✔ retained-assets（0s）
+{
+ "verdict": "failed",
+ "failed": [
+  "unit"
+ ],
+ "ran": [
+  "env",
+  "unit",
+  "bridge",
+  "toolbox-roco",
+  "plan-e2e",
+  "trajectories",
+  "trajectories-model",
+  "sft-split",
+  "model-manifest",
+  "provenance",
+  "rag-eval",
+  "game-data-pack",
+  "reconciliation",
+  "sprite-identity",
+  "state-doc",
+  "guard-selftest",
+  "browser-acceptance",
+  "demo-acceptance",
+  "mobile-sweep",
+  "box-acceptance",
+  "workshop-acceptance",
+  "loadout-acceptance",
+  "five-minute-chain",
+  "roco-ux-acceptance",
+  "battle-feedback",
+  "coverage-axes",
+  "retained-assets"
+ ]
+}
