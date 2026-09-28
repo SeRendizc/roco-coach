@@ -333,3 +333,204 @@ node .../browser-product-focus-acceptance.mjs --red-proof                      #
    我**没改那条判据**，而是把产品文案写成它认的那个词（「未连接」）+ 在同尺子自查（⑤b）。
 3. 局中（对战中）焦点/资料这条组合路径本轮没量（工作台是在**选队**那一屏量的）——
    `#companion-card` 的 `roco_battle` 仍然照旧带上，未受影响。
+
+---
+
+# 甲（task-13）进度：已落地两条 + 搬迁读数表（设计，未写代码）
+
+## 一、已落地（都有读数）
+
+| 项 | 内容 | 读数 |
+|---|---|---|
+| 甲① 宿主上下文口 | `mountXiaoya({contextProvider})` + 导出 `hostContextOf()`（规整 `{game,archive,stageId,extra}`，null/undefined 不并）/ `readHostContext()`（provider 抛异常记 `hostContextFailure`，不打断问话）；`ask()` 里替掉写死的 `buildContext(null, …, 'meadow', …)` | `roco-xiaoya-context` ⑯（含反证"摘掉口就没有战况"）；**局中真机 5/5**（`battle-context-normal.json`：请求体 `roco_battle=true turn=1`、`roco_plan=true`）｜**必红反证 4/5**（藏 `state.view` ⇒ 正好红 ③，`roco_battle=false`） |
+| 甲③ 记忆键合并 | `migrateLegacyMemory()`：读旧键 → 合并（新键优先、列表按 id 取并集）→ 写新键 → 旧键**只加标记、内容不删** → 幂等；`roco.js` 的 `MEMORY_KEY` 切到 `xiaoya-memory-v1`，`loadMemory()` 前先迁移 | 单测 ⑰（旧键有数据 ⇒ 新键读得到 / 旧键内容不删 / 幂等 / 无 storage 不炸）；`browser-adapter-acceptance` **13/13**（四个键一起清） |
+| 随之改钉的两处脚本 | `browser-product-wiring.mjs`（③/⑤ 两处读新键，旧键名与旧断言留注释）；`browser-adapter-acceptance.mjs:155`（清 `xiaoya-memory-v1` + 旧键 + 迁移标记 + onboard） | `product-wiring` 10/15：**⑤ Memory 已能读到新键**（journal=1）；其余红见下"既有缺陷" |
+| `tests/wiring.test.js:189` 改钉 | `buildContext(null, …)` → `buildContext(incoming.context.game, …)`；**旧断言原文留注释 + 日期 + 依据**，第二个参数仍必须 `activeProfile` | 12/12；相关九族 175/175 |
+
+### `browser-product-wiring.mjs` 那 5 条红的归因（**不是本次改动引入**）
+- **③ 陪练 / ⑤ Memory**：脚本的 `saySentence()` **从来没点 `#coach-entry`**（全文 grep 只有 `#say-input` /
+  `#say-form button`），而 `#companion-card` 默认 `hidden`（`roco.js:117` `coach:{open:false}`）
+  ⇒ 往隐藏输入框打字、点击落在 (0,0) ⇒ `sayOnce()` 没跑 ⇒ `data-rocoCompanion=null`、`stated` 为空。
+  **既有缺陷**；修它要动选择器，而**甲④ 退役之后这些选择器本来就要重指**（`#xiaoya-input`/`#xiaoya-send`），
+  所以留到退役那一步一起改，给"改前/改后"对照。
+- **④ 本机小模型两条**：环境（本机模型网关没起；脚本头部写明"不在线时如实记没跑成"）。
+
+## 二、搬迁读数表（**设计；没写代码**）
+
+### ① `#memory-pop`（查看/忘掉）→ xiaoya 的浮层
+- **搬前量什么**（真机）：点「查看记忆」⇒ `#memory-pop` 可见；`#memory-list li .mem-label` 的行数/文字（先说过「以后叫我老王」⇒ ≥1 行）；
+  点某一行的「忘掉」⇒ 该行消失、`memoryItems()` 少一条、`xiaoya-memory-v1` 里对应条目被删（**不是整键清空**）。
+- **搬后同样量**：同一组读数（id/class 若沿用，探针可以逐行对照）。
+- **反证**：把「忘掉」的接线摘掉 ⇒ 行数不变 ⇒ 判据必须红（响度=行数与删除结果同时红）。
+- **现有钉子**：`browser-product-wiring.mjs` 两处读 `#memory-list li .mem-label`（已在我写域）。
+
+### ② `#model-list` + `open-connect`
+- **搬前量什么**：打开面板后 `#model-list .model-cell` 的格数与文字（3 格）+ 点 `open-connect` 真的到 `connect.html`。
+- **搬后同样量**：同样三格（建议**沿用 `#model-list`/`.model-cell` 这套 id/class**，这样探针不用改）。
+- **现有钉子**：`scripts/roco/browser-workshop-acceptance.mjs:2260–2302` 读 `#model-list .model-cell`
+  —— **这个脚本不在我写域** ⇒ 走"沿用同一套 id/class"就不必动它；若你要我改它，给我写域。
+- `#model-chip`（`browser-live-acceptance.mjs` 的 `live-model-status` 读它）：沿用同一个 id，把状态写成**真**的
+  （丙已经把它改成"资料查询 / 云端模型"两段，且保留了判据要的「未连接」字样）。
+
+### ③ activityLine / 介入链路 / 语气档位
+- **activityLine**：它是**服务端字段**（判据在 `tests/roco-answer-level-correction.test.js`，不是 UI 元素）。
+  UI 侧要做的只是让 `xiaoya.js` 把它渲染出来（现在只有 `roco.js` 渲染成 `.say-basis`）。
+  量：真机读回答下方那一行的文字（与回执里的 `activityLine` 逐字相同）。
+- **介入链路（`#hint` 浮条 / 自动气泡）**：注意它**不在 `#companion-card` 里**，是页面级的战斗内机制
+  ⇒ 退役卡片**不应**动它。要量的是"退役后自动气泡仍然出现"（`data-roco-hint` / `data-rocoCompanionSeen` 钩子 + 真机截图）。
+- **语气档位（register）**：由服务端 `companion()` 决定；`xiaoya.js` 的 **page 模式**有 4 个 role 按钮，
+  **popup 模式没有** ⇒ 退役前要决定：popup 里也放 role 选择，或固定 `auto`（这会改玩家可见行为，**需要你拍板**）。
+
+### ④ 退役 `#companion-card`
+- **要改钉不删的钉子**：`tests/roco-page-ux.test.js` 里 `#companion-card` / `#model-chip` /
+  `$('coach-entry').addEventListener` 那几处字面量（**我写域内**）。
+- **探针侧**：`browser-live-acceptance.mjs`（`#model-chip`）、`browser-workshop-acceptance.mjs`（`#model-list`）、
+  `browser-product-wiring.mjs`（`#say-input`/`#say-reply`/`#memory-list`）—— **3 个脚本读旧面板的字面量**，
+  其中 2 个不在我写域。
+  ⇒ **代价最小的一条路**：xiaoya 的浮层里**沿用同一套 id/class**（`#model-list`/`.model-cell`/`#memory-list`），
+  并把 `#say-input`/`#say-reply` 作为**别名**保留（或让那 3 个脚本改指 `#xiaoya-*`，需写域）。
+- **必红反证**：退役后把 `mountXiaoya` 的装卸掉 ⇒ 产品页 `#coach-entry` 打不开任何面板 ⇒ 判据必须红（响度=面板不可见）。
+- **顺序**：①②③ 都搬完并各有"搬前/搬后"读数，**才**做 ④。
+
+## 三、当前未完成项（不含糊）
+1. 甲② 的 ①②③ 三处搬迁：**一行没动**（等读数表被认可以及窗口）。
+2. 甲④ 退役：**没动**（依赖 ①②③）。
+3. 语气档位在 popup 模式下怎么呈现：**需要 Lead 拍板**（会改玩家可见行为）。
+4. `browser-workshop-acceptance.mjs` 是否要改 `#model-list` 的读法：**需要 Lead 给写域或确认沿用 id**。
+
+## 四、`browser-product-wiring.mjs` 的 10/15：**三类红分开列**（混在一起就不可信）
+
+判据：**本次改动引入的红 = 0**。下面每条都给了可复验的读数。
+
+| 类别 | 条目 | 可复验读数 | 归因证据 |
+|---|---|---|---|
+| **脚本既有缺陷** | ③ 陪练（`data-rocoCompanion=null`） | 跑完脚本后读 `body.dataset.rocoCompanion` = `null`、`#say-reply` 为空 | 脚本 `saySentence()`（`:128-131`）只做 `typeText('#say-input')` + 点 `#say-form button`；**全文没有点击 `#coach-entry`**（grep 只有 `#say-input` / `#say-form button`）；而 `#companion-card` 默认 `hidden`（`roco.js:117` `coach:{open:false}`）⇒ `getBoundingClientRect()` 全 0、点击落在 (0,0) ⇒ `sayOnce()` 一次没跑 |
+| **脚本既有缺陷（下游）** | ⑤ Memory（`stated 0 条 []`） | `localStorage['xiaoya-memory-v1']` 里 `journal=["teach"]`（**新键确实被写进去了** —— 改钉生效）、`stated=[]` | `stated` 只由 ③ 那一步的 `rememberPreference()` 写；③ 没跑 ⇒ 必然空。**与改键无关**：改键前读旧键同样是空（同一条链没跑） |
+| **环境** | ④ 本机小模型 ×2（耗时 `null ms`） | 页面里 `typeof process === 'undefined'`、本机模型网关未起 | 脚本头部自述："依赖本机模型网关（不在线时第 ④ 项如实记「没跑成」）" |
+| **本次改动引入** | **无（0 条）** | — | 本次只改了：读的键名（③/⑤ 两处）、清档键集合、以及 `tests/wiring.test.js` 的断言格式；没有一条与 ③④ 的失败链有关 |
+
+**甲④ 要逐条对照修掉的**：③ 与 ⑤ 这两条 —— 退役 `#companion-card` 之后，`saySentence()` 的选择器要重指到
+**活着的那个 UI**（`#xiaoya-input`/`#xiaoya-send`，或沿用 `#say-input`/`#say-reply` 作别名），
+并且**先点开面板再打字**（`#coach-entry`）；改完给"改前/改后"两行读数（`data-rocoCompanion` / `stated` 条数）。
+
+## 五、甲②① 落地：`#memory-pop`（查看/忘掉）搬进 xiaoya —— 搬前/搬后读数
+
+实现（`src/client/xiaoya.js`，**不是第二份实现**）：沿用 `memoryItems` / `deleteMemoryItem` / `MEMORY_GROUPS`
+（`coach/memory.js`，与旧面板**同一批函数**）+ **同一套 id/class**（`#memory-list` / `.mem-kind` /
+`.mem-label` / `.mem-forget` / `data-forget`，Lead 批的"同一语义同一名字"）；入口沿用 `#open-memory`。
+`deleted:false` 时**不改页面、也不假装成功**（与旧面板逐字同一条口径）。
+面板换了主人 ⇒ 钩子换成 `body[data-xy-memory]`（`data-roco-memory` 属于旧面板，退役时一起消失；
+**没有做 `#say-input`/`#say-reply` 别名** —— Lead 明确不批，探针按"改钉不删"更新）。
+
+读数（`memory-migration-normal.json`，真键鼠；两次运行分别覆盖"旧面板开着/关着"）：
+
+| | 搬前（`#companion-card`，旧面板） | 搬后（`mountXiaoya({mode:'popup'})`，新主人） |
+|---|---|---|
+| 说一句 | 「以后叫我老王」→ `data-roco-companion=R1` | 「以后叫我老李」→ 回答里「怎么称呼你老李」 |
+| 查看记忆 | `#companion-modal #memory-list` 列出 `["称呼：老王"]` | `#xiaoya-pop #memory-list` 列出 `["称呼：老李"]`，`data-xy-memory=1` |
+| 点「忘掉」 | 行 1 → 0；存储 `stated` 1 → 0（键数 17 ⇒ **只删条目、不是整键清空**） | 行 1 → 0；存储 `stated` 1 → 0；命中测试 `top=mem-forget`、`insideXiaoyaPop=true` ⇒ **真鼠标打中** |
+| 同一份账本 | — | 两处读的都是 `xiaoya-memory-v1`（甲③ 合并后的那一个键） |
+
+**必红反证（响度实测）**：把 `forgetMemory()` 的接线摘掉（`if (id) return;`）再跑 ⇒ **5/6，正好红"搬后②"**
+（行 1 → 1、存储 1 → 1）；恢复后逐字相同、6/6。
+
+### 顺带量到的一条真发现（给甲④）
+两次运行对照出：**旧面板开着时，它的弹窗会盖住小芽浮层** —— 真鼠标点在小芽浮层的按钮上，
+`document.elementFromPoint` 返回的是 **`memory-pop`（旧面板的三级弹窗）**、`insideXiaoyaPop=false`；
+把旧面板关掉之后同一个点命中 `mem-forget`（`insideXiaoyaPop=true`），真鼠标可用。
+⇒ 过渡期"两套同时在屏"不只是观感问题，是**真的抢点击**；甲④ 退役旧面板本身就解决它，
+不需要为过渡期加 z-index 补丁。
+
+## 六、甲②② 落地：`#model-list` + `#open-connect` 搬进 xiaoya —— 搬前/搬后 + 命中测试
+
+实现（`src/client/xiaoya.js`）：同一个数据源 `/api/models`，**同一套 id/class**
+（`#model-list` / `.model-cell[data-model-id]` / `.mc-name` / `.mc-state` / `#open-connect`，放在
+`#xy-fold-status` 那个折叠里）；名字放不下**缩小字号**（不是省略号）、拿不到数据写「未知」不猜；
+`#open-connect` 与旧面板**逐字同一条行为**（`window.open('connect.html','roco-connect','width=520,height=680,noopener')`）。
+**这一块不写 `#model-chip`**（旧面板踩过的"一个读取点两个写入者"坑，判据见 ⑲）。
+钩子：面板换主人 ⇒ `body[data-xy-models]`。
+
+读数（`model-list-migration-normal.json`，真机 1600×1100）：
+
+| | 搬前（旧面板 `#companion-modal`） | 搬后（`#xiaoya-pop`） |
+|---|---|---|
+| 三格 | `DeepSeek ● 未连` / `Qwen3.5-4B ● 未连` / `Qwen3.8-27B ● 未连`（`data-roco-models=offline`） | **逐格逐字相同**（`data-xy-models=offline`） |
+| 命中测试 | — | `elementFromPoint` → `top=open-connect`、`inside=true`、`popZ=70` ⇒ **真鼠标打中的就是新浮层的按钮** |
+| 点「调试连接」 | 真鼠标 ⇒ `window.open` 实参 `["connect.html"]` | 真鼠标 ⇒ `window.open` 实参 `["connect.html"]` |
+| 走的路 | `real-mouse` | `real-mouse`（**没有降级**） |
+
+**必红反证（响度实测）**：把三格的接线摘掉（`renderModelList` 提前 `return`）⇒ **5/6，正好红"搬后①"**
+（格数 0、`data-xy-models=null`；命中测试与 `#open-connect` 那两条**仍然绿** —— 它们量的是别的东西）；
+恢复后逐字相同、6/6。
+
+### 探针里两条"如实记"的取舍
+1. **`window.open` 用间谍 + 新窗口 target 两条路一起量**：headless 下新窗口的 `Target.targetCreated`
+   在本次环境里没被观察到（`新窗口 target=false`），所以主判据用**间谍记录的 `window.open` 实参**
+   （`["connect.html"]`）—— 它正是"同一条行为"的那个行为，且**读数里写明了这一点**。
+2. 搬前/搬后的「点一下」都写成**走的是真鼠标还是 `element.click()`**（本次两次都是 `real-mouse`）。
+
+## 七、甲②③ 落地：activityLine + popup 的 role 选择 + `#model-chip` 归谁写
+
+**读数在独立实例上取的**（硬约束「不重启 8765」+ 主服务会话表满 ⇒ 新会话 429）：
+`--own-server` = 进程内 `createCoachServer` + `listen(0)`（本次 **`http://127.0.0.1:54074`**）
++ 自己的引擎子进程，`data/**` 只读；**主服务 8765 全程未被触碰**。
+
+| 判据 | 读数 |
+|---|---|
+| 搬后① popup 里有 4 个 role，默认「自动」 | ✔ `[auto(selected), companion, strategist, teacher]` |
+| 搬后② 点「军师」后**请求体** `role` 真的变 | ✔ `role=strategist`、HTTP 200、真鼠标 |
+| 搬后③ activityLine 与服务端给的**逐字**相同 | ✔ 服务端「依据：你的名单」= 屏幕 = `data-xy-activity` |
+| 搬后④ `#model-chip` 与判据 `live-model-status` 同尺子 | ✔ 「资料查询：可用…；云端模型：未连接…」hook=offline 入口=connect.html 高=69px |
+| ⑤ 控制台零报错 | ✔ |
+
+**必红反证（响度实测）**：摘掉 role 接线 + activityLine 不渲染 ⇒ **搬后② 红**（请求体 `role=auto` 恒为默认）、
+**搬后③ 红**（屏幕「(没有)」vs 服务端「依据：你的名单」），①④⑤ 仍绿；恢复后逐字相同。
+
+### 顺带修掉一条"甲④ 一退役就红"的真缺陷
+xiaoya 原来写「云端模型：**没有连**」，而 `live-model-status` 的正则是 `/未连接|没连|未连/` ——
+「没有连」**不匹配**。已改成「云端模型：**未连接**」（口径不变，只换它认的词）。
+⇒ 这条**只有在自己实例上**才量得出来（主服务 429 时读到的是"读不到"分支）。
+
+### `#model-chip` 归谁写（Lead 点名要答）：选 **(a′)**
+**不是"再放一个 chip"，而是把那块能力状态元素本身就叫 `#model-chip`**（同一语义 ⇒ 同一个名字，
+与 `#model-list` 同一条道理）；补上 `href="connect.html"`、`data-roco-model`（**只按真实状态写**）、高度 ≥24。
+⇒ `live-model-status` 一个字都不用改（不选 (b)：改判据不如让同一语义继续叫同一个名字）。
+读不到状态时写 `offline` + 明说「读不到连接状态：云端模型按「未连接」处理（不谎报已连接）」——
+`null` 会被读成"没连"，而"读不到"与"没连"是两件事（本次 429 就是活例子）。
+
+### 两条**弯路**（如实记，本身是读数）
+1. **`posts=0 而屏幕上有回答`** 这个形状，既可能是"产品没发请求"（P0-01 那个真 bug），
+   也可能是**会话建不起来**（`src/server/index.js:672`：会话表满 100 ⇒ 新会话一律 429）。
+   **只能靠 `curl /api/bootstrap` 分辨** —— 我先误判成"证据源不对/产品没发"，最后 curl 定位到 429。
+2. **搬前①"屏幕空"是探针读错元素**：截图（`activity-role-normal-card-before.png`）里那一行明明在屏上，
+   说明旧面板的 activityLine **不在 `#say-reply` 里**，是我按渲染代码想当然了。
+   ⇒ 「屏幕上有、探针读不到」必须分辨是产品没画还是探针看错地方。
+
+## 八、甲④-1 落地：产品页**只剩一套小芽**（`#companion-card` 退役）
+
+Lead 拍板拆成 ④-1（本步）/ ④-2（清死代码）。本步做的是"换实现"，不是"搬 UI"。
+
+| 改动 | 内容 |
+|---|---|
+| `roco.html` | **移除 `#companion-card` 整块**（2719 字节，含它自己的 `#memory-pop` / `#model-list` / `#model-chip`），原处留注释说明为什么退役、各能力搬到哪儿 |
+| `roco.js` | `mountRocoXiaoya()`：`mountXiaoya({mode:'popup', contextProvider})`（上下文口喂 `roco_battle`/`roco_plan`）；`#coach-entry` 改成开/关**浮层**，复用浮层真按钮的 handler（**不是第二套开关**）；旧面板 6 个画法加早退守卫 |
+| `rocoDemo` 出口（Lead 批的 (i)） | `companionVisibility()` / `renderCompanion()` / `openCompanion()` **同名同语义**转成浮层的**真实状态** ⇒ 三个验收脚本不用改 |
+| 替身（如实记） | roco.js 还有 ~30 处会写旧面板元素，逐个加守卫**漏一处就是一页全白** ⇒ 加 `RETIRED_COMPANION_IDS` + `retiredStub`（游离元素，写进去不抛错也**不上屏**）。**甲④-2 清死代码时一起删**；这不是第二份实现 |
+| 判据 | `tests/roco-xiaoya-context.test.js` ⑮③/⑱⑤ **改钉不删**（旧断言原文 + 日期 + 依据）："甲④ 之前旧面板不许删" → "甲④ 之后旧面板不许回来" |
+
+**读数（独立实例，`probe-retire-boot.mjs`）**
+```
+{"ready":"yes","view":"empty","companionCard":false,"modelChipCount":1,
+ "xiaoyaMounted":"yes","xiaoyaPop":true,"workshopApi":true,"bootFallback":false}
+addCandidate ok ｜ 装满六只后开局按钮 disabled=false ｜ 入口点一下 → companionVisibility()="visible"
+控制台/页面错误：（无）
+```
+⇒ Lead 加的两条硬指标都在：**`#companion-card` 不在页面里**、**`#model-chip` 只有 1 个**（过渡期是 2）；
+`companionVisibility()` 两态给**不同**的值（不是常量）。单测 111/111。
+
+**⚠ 未拿到的读数（不写成通过）**：in-battle（局中 `roco_battle` / 命中测试 / 自动气泡）——
+探针在"填六只 → 应用 → 开局"这一步开不出局；因此三个脚本
+（`browser-live-acceptance` / `browser-mobile-sweep` / `browser-roco-ux-acceptance`）也没跑。
+**但已分辨归属**：把 `roco.js`/`roco.html` **临时回退到 ④-1 之前**，同一探针 + 同一独立实例**一样开不出局**
+⇒ **与 ④-1 无关**，是探针×独立实例的交互（该探针此前只在 8765 上跑绿过，而 8765 被会话表 429 挡着）。
+回退备份：`/tmp/roco.pre41.js`、`/tmp/roco.html.pre41`（可逐字还原）。

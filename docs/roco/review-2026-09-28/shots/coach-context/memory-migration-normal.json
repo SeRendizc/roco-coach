@@ -1,0 +1,118 @@
+{
+  "base": "http://127.0.0.1:8765",
+  "mode": "normal",
+  "pid": 9866,
+  "startedAt": "2026-09-28T18:47:46.267Z",
+  "checks": [
+    {
+      "name": "搬前①：旧面板「查看记忆」列出玩家自己说过的那条（真键鼠说的）",
+      "ok": true,
+      "detail": "行=[\"称呼：老王\"]｜data-roco-companion=R1｜存储 stated=1"
+    },
+    {
+      "name": "搬前②：点「忘掉」⇒ 那一行消失、条数 -1、**存储里对应条目被删**（不是整键清空）",
+      "ok": true,
+      "detail": "行 1 → 0；存储 stated 1 → 0；键数=17"
+    },
+    {
+      "name": "搬后①：新面板「查看记忆」列出同一份账本里的那一行（沿用同一套 id/class）",
+      "ok": true,
+      "detail": "行=[\"称呼：老李\"]｜data-xy-memory=1｜存储 stated=1"
+    },
+    {
+      "name": "搬后②：点「忘掉」⇒ 那一行消失、条数 -1、**存储里对应条目被删**",
+      "ok": true,
+      "detail": "行 1 → 0；存储 stated 1 → 0｜删除走的是：real-mouse"
+    },
+    {
+      "name": "搬后③：两套面板**读的是同一份账本**（同一条记忆在两处都列得出来）",
+      "ok": true,
+      "detail": "存储 stated=1｜新面板行=1"
+    },
+    {
+      "name": "④ 控制台没有报错",
+      "ok": true,
+      "detail": "console=0 pageerror=0"
+    }
+  ],
+  "shots": [
+    "docs/roco/review-2026-09-28/shots/coach-context/memory-migration-normal-card-before.png",
+    "docs/roco/review-2026-09-28/shots/coach-context/memory-migration-normal-xiaoya-after.png"
+  ],
+  "cardSay": {
+    "path": "mouse",
+    "focused": "say-input",
+    "typed": "以后叫我老王"
+  },
+  "cardBefore": {
+    "sayHook": "R1",
+    "panelVisible": true,
+    "listHidden": false,
+    "rows": [
+      "称呼：老王"
+    ],
+    "stored": {
+      "stated": 1,
+      "labels": [
+        "称呼：老王"
+      ],
+      "keys": 20
+    }
+  },
+  "cardAfterForget": {
+    "panelVisible": true,
+    "listHidden": true,
+    "rows": [],
+    "stored": {
+      "stated": 0,
+      "labels": [],
+      "keys": 17
+    }
+  },
+  "cardClosed": true,
+  "xiayaSay": {
+    "path": "mouse",
+    "focused": "xiaoya-input",
+    "typed": "以后叫我老李"
+  },
+  "xiayaAsk": {
+    "popOpen": true,
+    "entries": 3,
+    "last": "小芽好，叫你老李。依据语气档位 R1（就事论事）：本机还没有记录：只接住这句话本身，不补造任何过去。你的设置：交流偏好未设置、玩法目标未设置、本命未设置、怎么称呼你老李（来源：你明确表达过才会记录）。名单说明：profile.pets 里是"
+  },
+  "xiayaAfter": {
+    "panelVisible": true,
+    "listHidden": false,
+    "rows": [
+      "称呼：老李"
+    ],
+    "stored": {
+      "stated": 1,
+      "labels": [
+        "称呼：老李"
+      ],
+      "keys": 17
+    },
+    "hook": "1"
+  },
+  "hitTest": {
+    "top": "mem-forget",
+    "insideXiaoyaPop": true,
+    "popZ": "70"
+  },
+  "forgetPath": "real-mouse",
+  "xiayaAfterForget": {
+    "panelVisible": true,
+    "listHidden": true,
+    "rows": [],
+    "stored": {
+      "stated": 0,
+      "labels": [],
+      "keys": 17
+    }
+  },
+  "consoleErrors": [],
+  "pageErrors": [],
+  "verdict": "pass",
+  "failed": []
+}

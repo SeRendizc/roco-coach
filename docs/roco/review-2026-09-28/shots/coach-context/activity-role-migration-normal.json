@@ -1,0 +1,119 @@
+{
+  "base": "http://127.0.0.1:54764",
+  "mode": "normal",
+  "pid": 13854,
+  "startedAt": "2026-09-28T19:05:44.867Z",
+  "checks": [
+    {
+      "name": "搬前①：旧面板把服务端给的那一行活动说明**逐字**画在回答下面（服务端没给就一条都不许有）",
+      "ok": false,
+      "detail": "服务端「依据：你的名单」｜屏幕「」｜请求体 role=companion｜走的是：real-mouse"
+    },
+    {
+      "name": "搬后①：popup 里有 4 个 role，且默认选中的是「自动」(auto)",
+      "ok": true,
+      "detail": "[{\"role\":\"auto\",\"label\":\"自动\",\"selected\":true},{\"role\":\"companion\",\"label\":\"陪练\",\"selected\":false},{\"role\":\"strategist\",\"label\":\"军师\",\"selected\":false},{\"role\":\"teacher\",\"label\":\"老师\",\"selected\":false}]"
+    },
+    {
+      "name": "搬后②（网络取证）：点「军师」之后发出去的 `/api/coach` 请求体里 `role` 真的是 `strategist`",
+      "ok": true,
+      "detail": "请求体 role=strategist｜HTTP 200｜点 role 走的是：real-mouse｜问一句走的是：real-mouse｜证据源：cdp (Network.enable maxPostDataSize=8MB)"
+    },
+    {
+      "name": "搬后③：xiaoya 的回答下面那一行**与服务端给的逐字相同**（屏幕 + 回执两路）",
+      "ok": true,
+      "detail": "服务端「依据：你的名单」｜屏幕「依据：你的名单」｜钩子「依据：你的名单」"
+    },
+    {
+      "name": "搬后④：`#model-chip` 由 xiaoya 那一块写，且与判据 `live-model-status` 同尺子（文字/钩子/入口/高度/明说）",
+      "ok": true,
+      "detail": "「资料查询：可用（本机规则服务已连，规则集 roco-world-s4-2026-09-10）；云端模型：未连接 —— 只影响自由发挥的文字，上面那些资料查询照常」hook=offline 入口=connect.html 高=69px｜同名元素 2 个（过渡期：旧面板那个还没退役）"
+    },
+    {
+      "name": "⑤ 控制台没有报错",
+      "ok": true,
+      "detail": "console=0 pageerror=0"
+    }
+  ],
+  "shots": [
+    "docs/roco/review-2026-09-28/shots/coach-context/activity-role-normal-card-before.png",
+    "docs/roco/review-2026-09-28/shots/coach-context/activity-role-normal-xiaoya-after.png"
+  ],
+  "cardScreen": {
+    "text": "",
+    "reply": "说一下你的队伍和对手，我按相性挑。依据：你的名单"
+  },
+  "cardEvidenceSource": "cdp (Network.enable maxPostDataSize=8MB)",
+  "cardBefore": {
+    "basis": {
+      "text": "",
+      "reply": "说一下你的队伍和对手，我按相性挑。依据：你的名单"
+    },
+    "askPath": "real-mouse",
+    "role": "companion",
+    "serverActivityLine": "依据：你的名单"
+  },
+  "capabilityBeforeAsk": "tools=ok;model=off;server=ok",
+  "roles": {
+    "present": true,
+    "buttons": [
+      {
+        "role": "auto",
+        "label": "自动",
+        "selected": true
+      },
+      {
+        "role": "companion",
+        "label": "陪练",
+        "selected": false
+      },
+      {
+        "role": "strategist",
+        "label": "军师",
+        "selected": false
+      },
+      {
+        "role": "teacher",
+        "label": "老师",
+        "selected": false
+      }
+    ]
+  },
+  "roleEvidenceSource": "cdp (Network.enable maxPostDataSize=8MB)",
+  "roleClick": {
+    "path": "real-mouse",
+    "hit": {
+      "top": "BUTTON",
+      "inside": true
+    }
+  },
+  "roleRequest": {
+    "role": "strategist",
+    "status": 200,
+    "askPath": "real-mouse",
+    "evidence": "cdp (Network.enable maxPostDataSize=8MB)",
+    "posts": 2
+  },
+  "activityLine": {
+    "basis": "依据：你的名单",
+    "hook": "依据：你的名单",
+    "entries": 3,
+    "requestMessage": "这一手该怎么打？\n回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释。游戏按回合结算，不按秒；不要编造技能冷却。道具名称只能使用回复药、净化药、能量果，不要把它们叫作解药或以太。双方同时决定，不能先看对手本回合出招再决定自己的行动。复盘中hpBefore是回合开始、hpAfter是结束，不能把行动前生命称作打完还剩。逐回合核对实际事件：行动取消不能说成打出了伤害，事前预测和事后结算必须分开。",
+    "serverActivityLine": "依据：你的名单",
+    "evidence": "cdp (Network.enable maxPostDataSize=8MB)"
+  },
+  "modelChipDuplicates": 2,
+  "modelChip": {
+    "text": "资料查询：可用（本机规则服务已连，规则集 roco-world-s4-2026-09-10）；云端模型：未连接 —— 只影响自由发挥的文字，上面那些资料查询照常",
+    "hook": "offline",
+    "href": "connect.html",
+    "h": 69,
+    "configured": "no"
+  },
+  "consoleErrors": [],
+  "pageErrors": [],
+  "verdict": "fail",
+  "failed": [
+    "搬前①：旧面板把服务端给的那一行活动说明**逐字**画在回答下面（服务端没给就一条都不许有）"
+  ]
+}

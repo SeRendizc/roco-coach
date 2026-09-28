@@ -1,0 +1,137 @@
+{
+  "base": "http://127.0.0.1:8765",
+  "mode": "normal",
+  "pid": 11731,
+  "startedAt": "2026-09-28T18:50:59.825Z",
+  "checks": [
+    {
+      "name": "搬前①：旧面板展开后有三格模型状态（名字 + 已连/未连/未知）",
+      "ok": true,
+      "detail": "[{\"id\":\"cloud-deepseek\",\"name\":\"DeepSeek\",\"state\":\"● 未连\"},{\"id\":\"local-qwen35-4b\",\"name\":\"Qwen3.5-4B\",\"state\":\"● 未连\"},{\"id\":\"local-qwen38-27b\",\"name\":\"Qwen3.8-27B\",\"state\":\"● 未连\"}]｜data-roco-models=offline"
+    },
+    {
+      "name": "搬前②：旧面板「调试连接」真的去开 `connect.html`（真鼠标点击 + `window.open` 实参）",
+      "ok": true,
+      "detail": "opened=true｜window.open 实参=[\"connect.html\"]｜新窗口 target=false｜走的是：real-mouse"
+    },
+    {
+      "name": "搬后①：新浮层里同样是三格，且逐格与旧面板一致（名字 + 状态）",
+      "ok": true,
+      "detail": "[{\"id\":\"cloud-deepseek\",\"name\":\"DeepSeek\",\"state\":\"● 未连\"},{\"id\":\"local-qwen35-4b\",\"name\":\"Qwen3.5-4B\",\"state\":\"● 未连\"},{\"id\":\"local-qwen38-27b\",\"name\":\"Qwen3.8-27B\",\"state\":\"● 未连\"}]｜data-xy-models=offline"
+    },
+    {
+      "name": "搬后②（命中测试）：真鼠标落点上命中的就是新浮层里的 `#open-connect`",
+      "ok": true,
+      "detail": "\"{\\\"top\\\":\\\"open-connect\\\",\\\"inside\\\":true,\\\"popZ\\\":\\\"70\\\",\\\"panelZ\\\":\\\"70\\\"}\""
+    },
+    {
+      "name": "搬后③：新浮层「调试连接」走的是**同一条行为**（真鼠标点击 + `window.open` 实参含 `connect.html`）",
+      "ok": true,
+      "detail": "window.open 实参=[\"connect.html\"]｜走的是：real-mouse"
+    },
+    {
+      "name": "④ 控制台没有报错",
+      "ok": true,
+      "detail": "console=0 pageerror=0"
+    }
+  ],
+  "shots": [
+    "docs/roco/review-2026-09-28/shots/coach-context/model-list-normal-card-before.png",
+    "docs/roco/review-2026-09-28/shots/coach-context/model-list-normal-xiaoya-after.png"
+  ],
+  "cardBefore": {
+    "boxPresent": true,
+    "cells": [
+      {
+        "id": "cloud-deepseek",
+        "name": "DeepSeek",
+        "state": "● 未连"
+      },
+      {
+        "id": "local-qwen35-4b",
+        "name": "Qwen3.5-4B",
+        "state": "● 未连"
+      },
+      {
+        "id": "local-qwen38-27b",
+        "name": "Qwen3.8-27B",
+        "state": "● 未连"
+      }
+    ],
+    "hook": "offline"
+  },
+  "hitTestCard": {
+    "top": "open-connect",
+    "inside": true,
+    "popZ": null,
+    "panelZ": "auto"
+  },
+  "cardOpenConnect": {
+    "opened": true,
+    "openedByTarget": false,
+    "openCalls": [
+      "connect.html"
+    ],
+    "path": "real-mouse",
+    "hit": {
+      "top": "open-connect",
+      "inside": true,
+      "popZ": null,
+      "panelZ": "auto"
+    }
+  },
+  "xiayaAfter": {
+    "boxPresent": true,
+    "cells": [
+      {
+        "id": "cloud-deepseek",
+        "name": "DeepSeek",
+        "state": "● 未连"
+      },
+      {
+        "id": "local-qwen35-4b",
+        "name": "Qwen3.5-4B",
+        "state": "● 未连"
+      },
+      {
+        "id": "local-qwen38-27b",
+        "name": "Qwen3.8-27B",
+        "state": "● 未连"
+      }
+    ],
+    "hook": "offline"
+  },
+  "xiayaOpenConnect": {
+    "opened": true,
+    "openCalls": [
+      "connect.html"
+    ],
+    "path": "real-mouse"
+  },
+  "targets": [
+    {
+      "type": "browser_ui",
+      "url": "chrome://omnibox-popup.top-chrome/omnibox_popup_aim.html"
+    },
+    {
+      "type": "page",
+      "url": "about:blank"
+    },
+    {
+      "type": "browser_ui",
+      "url": "chrome://omnibox-popup.top-chrome/"
+    },
+    {
+      "type": "background_page",
+      "url": "chrome-extension://nkeimhogjdpnpccoofpliimaahmaaome/background.html"
+    },
+    {
+      "type": "service_worker",
+      "url": "chrome-extension://fignfifoniblkonapihmkfakmlgkbkcf/service_worker.js"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "verdict": "pass",
+  "failed": []
+}

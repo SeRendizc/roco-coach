@@ -1,0 +1,68 @@
+{
+  "base": "http://127.0.0.1:8765",
+  "mode": "normal",
+  "pid": 7317,
+  "startedAt": "2026-09-28T18:40:28.681Z",
+  "checks": [
+    {
+      "name": "① 屏幕上有回答（局中那一屏给得出话）",
+      "ok": true,
+      "detail": "（companion-card）「说一下你的队伍和对手，我按相性挑。依据：本回合的规划（引擎算的） · 你选的六只 · 你的名单」"
+    },
+    {
+      "name": "② 这一问真的发到了服务端",
+      "ok": true,
+      "detail": "POST /api/coach → 200"
+    },
+    {
+      "name": "③ 请求体里带着**当前战况**（`context.roco_battle` 在位，turn 是当前回合）",
+      "ok": true,
+      "detail": "roco_battle=true turn=1（屏幕上第 1 回合）｜roco_plan=true｜stageId=null"
+    },
+    {
+      "name": "④ 回答与**当前局面**有关（点到场上名字，或者至少是\"看局面\"的话——不是空转/请配置密钥）",
+      "ok": true,
+      "detail": "命中方式：说的是局面里的话｜场上：喵喵、水蓝蓝、火花、迪莫、水灵、火神"
+    },
+    {
+      "name": "⑤ 浏览器控制台没有报错",
+      "ok": true,
+      "detail": "console=0 pageerror=0"
+    }
+  ],
+  "shots": [
+    "docs/roco/review-2026-09-28/shots/coach-context/battle-context-normal-answer.png"
+  ],
+  "filled": "ok",
+  "battle": {
+    "turn": 1,
+    "phase": "battle",
+    "self": [
+      "喵喵",
+      "水蓝蓝",
+      "火花",
+      "迪莫",
+      "水灵",
+      "火神"
+    ],
+    "active": 0,
+    "view": "ready"
+  },
+  "reply": {
+    "impl": "companion-card",
+    "text": "说一下你的队伍和对手，我按相性挑。依据：本回合的规划（引擎算的） · 你选的六只 · 你的名单"
+  },
+  "request": {
+    "url": "http://127.0.0.1:8765/api/coach",
+    "status": 200,
+    "hasRocoBattle": true,
+    "rocoBattleTurn": 1,
+    "hasRocoPlan": true,
+    "stageId": null,
+    "battleNull": true
+  },
+  "consoleErrors": [],
+  "pageErrors": [],
+  "verdict": "pass",
+  "failed": []
+}

@@ -1,0 +1,8 @@
+{
+  "base": "http://127.0.0.1:56455",
+  "state": "{\"ready\":\"yes\",\"view\":\"empty\",\"coach\":null,\"companionCard\":false,\"modelChipCount\":1,\"xiaoyaMounted\":\"yes\",\"xiaoyaPop\":true,\"startBtn\":true,\"startDisabled\":true,\"workshopApi\":true,\"bootFallback\":false}",
+  "filled": "ok",
+  "after": false,
+  "open": "{\"visibility\":\"visible\",\"popHidden\":false}",
+  "errs": []
+}

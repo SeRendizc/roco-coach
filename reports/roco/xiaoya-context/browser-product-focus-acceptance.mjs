@@ -48,7 +48,13 @@ class Cdp {
 }
 
 async function launchChrome() {
-  const profile = mkdtempSync(join(tmpdir(), 'roco-product-focus-'));
+  // reuse a PERSISTENT profile (no more temp dir per run): a brand-new cookie means a brand-new
+  // server session, and `src/server/index.js:672` rejects new sessions once 100 are alive (429).
+  // Repeated probe runs therefore wedge the whole team's browser acceptance (measured).
+  // Reusing one profile reuses one `coach_session`; override with `ROCO_PROFILE_DIR`.
+  const PROFILE_DIR = process.env.ROCO_PROFILE_DIR ?? join(ROOT, 'tmp/browser-profile');
+  mkdirSync(PROFILE_DIR, {recursive: true});
+  const profile = PROFILE_DIR;   // 原写法（每轮新建，已弃用）：mkdtempSync(join(tmpdir(), 'roco-product-focus-'))
   let chromeErr = '';
   const child = spawn(CHROME, ['--headless=new', '--no-sandbox', '--disable-gpu', '--no-first-run',
     '--disable-crash-reporter', `--user-data-dir=${profile}`, '--remote-debugging-port=0',
@@ -56,7 +62,7 @@ async function launchChrome() {
   child.stderr?.on('data', (d) => { chromeErr = (chromeErr + String(d)).slice(-600); });
   const kill = () => {
     try { child.kill('SIGKILL'); } catch {}
-    try { rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120}); } catch {}
+    // 不删 profile：删了 cookie 就没了，下一轮又变成新会话（见上面 429 那条）。
   };
   let port = null;
   for (let i = 0; i < 240 && !port; i += 1) {
