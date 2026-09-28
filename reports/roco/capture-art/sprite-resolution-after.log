@@ -1,0 +1,4 @@
+[verify-capture-art:server] http://127.0.0.1:8765/（范围 owned）实测 542 只：抓包图 539 + 策展图 3 + 明确没有 0
+[verify-capture-art:server] 默认档尺寸分布：{"256x256":539,"384x512":3}｜字节：抓包 27.5 MB（均 53419）、策展 1.5 MB（均 518118）
+[verify-capture-art:server] 战斗档（&size=battle）实测 539 只：尺寸 {"512x512":539}｜均 169320 字节｜Variant {"battle":539}
+[verify-capture-art:server] ✔ 官方优先 + 两档尺寸逐只通过（有抓包图的一律走抓包图；默认 256 / `size=battle` 512；响应字节与磁盘那张 sha256 一致）

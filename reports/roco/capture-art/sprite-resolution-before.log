@@ -1,0 +1,23 @@
+[verify-capture-art:server] http://127.0.0.1:8765/ 实测已拥有实例 542 只：抓包图 501 + 策展图 41
+[verify-capture-art:server] 尺寸分布：{"256x256":501,"384x512":41}｜字节：抓包 25.5 MB（均 53362）、策展 18.1 MB（均 462269）
+[verify-capture-art:server] ✖ 29 条不符：
+  - pet_000012：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-30-铠甲虫）
+  - pet_000100：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-45-仪式巨像）
+  - pet_000118：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-36-皇家狮鹫）
+  - pet_000130：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-34-朔夜伊芙）
+  - pet_000137：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-40-多多）
+  - pet_000143：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-26-花魁蜂后）
+  - pet_000152：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-29-雪蛮人）
+  - pet_000153：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-32-雪巨人）
+  - pet_000162：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-41-瑰眼仔）
+  - pet_000163：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-44-耳翎瑰魅）
+  - pet_000167：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-15-电咩咩）
+  - pet_000172：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-16-闪电环）
+  - pet_000218：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-20-呼呼猪）
+  - pet_000219：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-17-獠牙猪）
+  - pet_000240：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-21-丢丢）
+  - pet_000243：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-19-卡卡虫）
+  - pet_000248：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-25-蹦蹦种子）
+  - pet_000308：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-27-深蓝鲸）
+  - pet_000328：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-35-声波缇塔）
+  - pet_000330：解析到 **curated**，但官方优先口径要求 capture（走了策展 key=pet-14-权杖-V）

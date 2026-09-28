@@ -1,0 +1,142 @@
+{
+ "base": "http://127.0.0.1:8765/",
+ "problems": [],
+ "readings": {
+  "① 桌面列表·音速犬": {
+   "kind": "catalog",
+   "page": "3",
+   "cards": 24,
+   "imgs": 24,
+   "card": {
+    "name": "音速犬",
+    "select": "pet_000062",
+    "facts": {
+     "url": "/api/roco/sprite?id=pet_000062&v=default",
+     "source": "capture",
+     "key": null,
+     "bytes": 66611,
+     "sha256": "a31a45867787ae1044af01ce1bda659f761232c710dfef418f5e3c5cab6cedc9",
+     "w": 256,
+     "h": 256,
+     "natural": [
+      256,
+      256
+     ],
+     "shown": [
+      28,
+      28
+     ]
+    }
+   }
+  },
+  "② 桌面详情·雪影娃娃": {
+   "clicked": true,
+   "urlHasPet": true,
+   "petNav": "own-0112",
+   "title": "雪影娃娃 · 详情",
+   "types": [],
+   "facts": {
+    "url": "/api/roco/sprite?id=pet_000112&v=default",
+    "source": "capture",
+    "key": null,
+    "bytes": 69897,
+    "sha256": "08dd8d8189529690863f548f4bf27a8f9cc3046be2f168d11d603032aa503b35",
+    "w": 256,
+    "h": 256,
+    "natural": [
+     256,
+     256
+    ],
+    "shown": [
+     38,
+     38
+    ]
+   }
+  },
+  "③ 手机 390×844": {
+   "page": "1",
+   "cards": 24,
+   "imgs": 24,
+   "scrollWidth": 390,
+   "innerWidth": 390,
+   "pending": 0,
+   "worstOverflow": {
+    "overRight": -99,
+    "overLeft": -12,
+    "overTop": -12,
+    "overBottom": -90.89
+   }
+  },
+  "④ 同名形态·千棘盔": [
+   {
+    "name": "千棘盔",
+    "pet": "/api/roco/sprite?id=pet_000271&v=default",
+    "source": "capture",
+    "sha256": "07dbd59af6078b04",
+    "natural": [
+     256,
+     256
+    ],
+    "capture_id": "3332"
+   },
+   {
+    "name": "千棘盔（磨损的样子）",
+    "pet": "/api/roco/sprite?id=pet_000378&v=default",
+    "source": "capture",
+    "sha256": "74f13265e93cf019",
+    "natural": [
+     256,
+     256
+    ],
+    "capture_id": "3477"
+   }
+  ],
+  "⑤ 双系·蹦蹦种子（海神球形态）": {
+   "name": "蹦蹦种子（海神球形态）",
+   "select": "pet_000016",
+   "types": [
+    "🌿草系",
+    "🧪毒系"
+   ],
+   "facts": {
+    "url": "/api/roco/sprite?id=pet_000016&v=default",
+    "source": "capture",
+    "key": null,
+    "bytes": 30919,
+    "sha256": "7a8ae28888053686ab8be1337462d80a2810521c697ce5a404cf574b49e8296d",
+    "w": 256,
+    "h": 256,
+    "natural": [
+     256,
+     256
+    ],
+    "shown": [
+     28,
+     28
+    ]
+   }
+  },
+  "⑥ 缺口读数·默认档点卡片": {
+   "kind": "catalog",
+   "grouped": "no",
+   "cards": 24,
+   "dataDetail": 0,
+   "faceHasDetail": 0,
+   "viewAfterClick": "list",
+   "note": "默认档（全部精灵）卡上无 data-detail ⇒ 点击处理器 `[data-detail]` 不命中，详情进不去；「我的盒子」档走分组抽屉，行上有 data-detail（见 ②/⑤ 就是用那条路进的）"
+  },
+  "⑥ 缺口读数·深链第 5 页的个体": {
+   "deepLink": "box.html?pet=pet_000112（第 5 页）",
+   "imgSrc": "(没有 img)",
+   "title": "雪影娃娃 · 详情",
+   "note": "二级页只从当前已加载那一页的 rows 找卡；找不到 ⇒ card.group 为空 ⇒ src 空 id ⇒ 404"
+  }
+ },
+ "files": [
+  "docs/roco/review-2026-09-28/shots/batch01/art-01-list-official.png",
+  "docs/roco/review-2026-09-28/shots/batch01/art-02-detail.png",
+  "docs/roco/review-2026-09-28/shots/batch01/art-03-mobile-390.png",
+  "docs/roco/review-2026-09-28/shots/batch01/art-04-forms.png",
+  "docs/roco/review-2026-09-28/shots/batch01/art-05-dual-type.png"
+ ]
+}

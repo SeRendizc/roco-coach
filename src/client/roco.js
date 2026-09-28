@@ -2468,6 +2468,15 @@ function b3SpriteUrl(petOrName, variant) {
   if (pet.pet_id) params.set('id', String(pet.pet_id));
   if (pet.name) params.set('name', String(pet.name));
   params.set('v', variant);
+  // ⚠ 2026-09-29 加（人类 2026-09-29 逐字：「**战斗用大比例不就行，用两组图呗**」；
+  // Codex 计划 P1-03：「530 assets / ~220MB 是**存储**、不是生产加载目标……生成缩略图、
+  // 懒加载、缓存/版本化并带回落」）：
+  // 立绘现在有**两档** —— 列表/详情/候选池/六槽用 `thumb/`（256px，均 53 KB），
+  // **战斗页用 `battle/`（512px）**：立绘框 `min-height:120px` 且 `flex:1`，256px 在高分屏上会发虚，
+  // 而一局只加载我方+对方两张（≈ 300 KB），值得。
+  // 服务端按 `size=battle` 取大图、**取不到自动退小图**（那条回落写在 `/api/roco/sprite` 里），
+  // 所以这里不需要判断"有没有大图"。
+  params.set('size', 'battle');
   return `/api/roco/sprite?${params.toString()}`;
 }
 

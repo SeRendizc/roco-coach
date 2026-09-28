@@ -5,3 +5,16 @@
 originals/
 # sips 的临时文件
 thumb/.tmp-*.png
+
+# 512px 的**战斗档**预览（539 张，实测 93 MB）也**不进仓库**。
+#
+# 为什么：仓库里 256px 那套（`thumb/`，29 MB）已经够列表/详情/候选池/六槽用；
+# 战斗页要的那一档是「同一个东西的更大一份」，93 MB 换来的是高分屏更清晰。
+# 而服务端的回落链是 `wantBattle ? (big ?? small) : (small ?? big)`
+# ⇒ **没有大图也照常出图**，只是退到 256px。所以缺它不会坏，只是不如本机清晰。
+#
+# 本机（有原件时）一条命令重建：
+#   node scripts/roco/fetch-capture-art.mjs --thumbs-only    # 重新生成 thumb/ + battle/ 两档
+# 或者从零：
+#   node scripts/roco/fetch-capture-art.mjs --all            # 原件 253 MB + 两档预览
+battle/
