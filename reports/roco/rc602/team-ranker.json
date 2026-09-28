@@ -2,7 +2,7 @@
   "schema": "roco-rc602-team-ranker-report/v1",
   "generated_by": "scripts/roco/build-rc602-report.mjs",
   "ruleset_id": "roco-world-s4-2026-09-10",
-  "dataset_hash": "dcb536159f0ed607f10fe42c97dcd77514a56d0452dbc800b682a6ddaef15678",
+  "dataset_hash": "23cf46728e34c065ae6f4b508823dd2fec7ee2a677625214d04417bfbe8f5782",
   "ranker_id": "roco-rule-pairwise-ranker",
   "ranker_version": "rc602/1",
   "ranker_status": {
@@ -82,11 +82,11 @@
     "latency_ms": {
       "unit": "毫秒（实测墙钟，只用于延迟报告）",
       "samples": 1176,
-      "p50": 0.016,
+      "p50": 0.017,
       "p95": 0.041,
-      "min": 0.011,
-      "max": 1.225,
-      "total": 29.124
+      "min": 0.012,
+      "max": 1.077,
+      "total": 29.646
     },
     "per_axis_availability": {
       "type_coverage": {
@@ -231,10 +231,10 @@
     "latency_ms": {
       "unit": "毫秒（实测墙钟，只用于延迟报告）",
       "samples": 28,
-      "p50": 0.083,
-      "p95": 0.123,
-      "min": 0.071,
-      "max": 0.192
+      "p50": 0.085,
+      "p95": 0.125,
+      "min": 0.07,
+      "max": 0.208
     },
     "sample_pairing": {
       "team_a": "rc602-team-01",
@@ -754,10 +754,10 @@
     "latency_ms": {
       "unit": "毫秒（实测墙钟，只用于延迟报告）",
       "samples": 5,
-      "p50": 0.347,
-      "p95": 0.935,
-      "min": 0.34,
-      "max": 0.935
+      "p50": 0.394,
+      "p95": 0.885,
+      "min": 0.348,
+      "max": 0.885
     }
   },
   "partial_completion_value": {
@@ -766,10 +766,10 @@
     "latency_ms": {
       "unit": "毫秒（实测墙钟，只用于延迟报告）",
       "samples": 6,
-      "p50": 0.085,
-      "p95": 0.38,
-      "min": 0.067,
-      "max": 0.38
+      "p50": 0.088,
+      "p95": 0.4,
+      "min": 0.071,
+      "max": 0.4
     },
     "rows": [
       {

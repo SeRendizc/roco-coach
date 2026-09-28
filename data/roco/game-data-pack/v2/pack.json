@@ -66,7 +66,7 @@
   "evidence_ledger_path": "data/roco/evidence/rule-evidence-ledger.json",
   "evidence_ledger_sha256": "267e9b4eeb85342947c7168587650b610c1aa63172a4823772ab8f629bdb0bd8",
   "reconciliation_report_path": "reports/roco/reconciliation/catalog-reconciliation.json",
-  "reconciliation_report_sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+  "reconciliation_report_sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
   "sources_path": "data/roco/sources.yaml",
   "sources_sha256": "30b69933778cff771e2780deac88b1e6cdaef62093ad80b8978643946fc2af79",
   "note": "数据层（L1 图鉴）不依赖战斗规则；这条绑定声明的是「消费这些数值时该按哪套 ruleset 配置模拟」，以及本包所依据的对账报告/证据台账的**指纹**（换一份报告，指纹就变）。"
@@ -300,7 +300,7 @@
    }
   },
   "reports/roco/reconciliation/catalog-reconciliation.json": {
-   "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+   "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
    "bytes": 61537,
    "source_id": "wiki-rocom-snapshot"
   },
@@ -105505,7 +105505,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "buckets.unresolved[0]"
      }
     ],
@@ -105530,7 +105530,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "buckets.unresolved[1]"
      }
     ],
@@ -105555,7 +105555,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "buckets.unresolved[2]"
      }
     ],
@@ -105580,7 +105580,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "buckets.unresolved[3]"
      }
     ],
@@ -105614,7 +105614,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[0]"
      }
     ],
@@ -105648,7 +105648,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[1]"
      }
     ],
@@ -105674,7 +105674,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[2]"
      }
     ],
@@ -105700,7 +105700,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[3]"
      }
     ],
@@ -105726,7 +105726,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[4]"
      }
     ],
@@ -105756,7 +105756,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[5]"
      }
     ],
@@ -105786,7 +105786,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[6]"
      }
     ],
@@ -105816,7 +105816,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[7]"
      }
     ],
@@ -105846,7 +105846,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[8]"
      }
     ],
@@ -105872,7 +105872,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[9]"
      }
     ],
@@ -105898,7 +105898,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[10]"
      }
     ],
@@ -105924,7 +105924,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[11]"
      }
     ],
@@ -105954,7 +105954,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[12]"
      }
     ],
@@ -105988,7 +105988,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[13]"
      }
     ],
@@ -106022,7 +106022,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[14]"
      }
     ],
@@ -106052,7 +106052,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[15]"
      }
     ],
@@ -106082,7 +106082,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[16]"
      }
     ],
@@ -106112,7 +106112,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[17]"
      }
     ],
@@ -106138,7 +106138,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[18]"
      }
     ],
@@ -106164,7 +106164,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[19]"
      }
     ],
@@ -106190,7 +106190,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[20]"
      }
     ],
@@ -106216,7 +106216,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[21]"
      }
     ],
@@ -106246,7 +106246,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[22]"
      }
     ],
@@ -106276,7 +106276,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[23]"
      }
     ],
@@ -106306,7 +106306,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[24]"
      }
     ],
@@ -106336,7 +106336,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[25]"
      }
     ],
@@ -106362,7 +106362,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[26]"
      }
     ],
@@ -106388,7 +106388,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[27]"
      }
     ],
@@ -106414,7 +106414,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[28]"
      }
     ],
@@ -106440,7 +106440,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[29]"
      }
     ],
@@ -106466,7 +106466,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[30]"
      }
     ],
@@ -106492,7 +106492,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[31]"
      }
     ],
@@ -106518,7 +106518,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[32]"
      }
     ],
@@ -106544,7 +106544,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[33]"
      }
     ],
@@ -106570,7 +106570,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[34]"
      }
     ],
@@ -106596,7 +106596,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[35]"
      }
     ],
@@ -106622,7 +106622,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[36]"
      }
     ],
@@ -106648,7 +106648,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[37]"
      }
     ],
@@ -106674,7 +106674,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[38]"
      }
     ],
@@ -106700,7 +106700,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[39]"
      }
     ],
@@ -106726,7 +106726,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[40]"
      }
     ],
@@ -106752,7 +106752,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[41]"
      }
     ],
@@ -106778,7 +106778,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[42]"
      }
     ],
@@ -106804,7 +106804,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[43]"
      }
     ],
@@ -106842,7 +106842,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[44]"
      }
     ],
@@ -106868,7 +106868,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[45]"
      }
     ],
@@ -106894,7 +106894,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[46]"
      }
     ],
@@ -106920,7 +106920,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[47]"
      }
     ],
@@ -106950,7 +106950,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[48]"
      }
     ],
@@ -106978,7 +106978,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[49]"
      }
     ],
@@ -107018,7 +107018,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[50]"
      }
     ],
@@ -107044,7 +107044,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[51]"
      }
     ],
@@ -107070,7 +107070,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[52]"
      }
     ],
@@ -107096,7 +107096,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[53]"
      }
     ],
@@ -107122,7 +107122,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[54]"
      }
     ],
@@ -107148,7 +107148,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[55]"
      }
     ],
@@ -107174,7 +107174,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[56]"
      }
     ],
@@ -107200,7 +107200,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[57]"
      }
     ],
@@ -107226,7 +107226,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[58]"
      }
     ],
@@ -107252,7 +107252,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[59]"
      }
     ],
@@ -107278,7 +107278,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "name_collision_diagnostics.groups[60]"
      }
     ],
@@ -107302,7 +107302,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[0]"
      }
     ],
@@ -107326,7 +107326,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[1]"
      }
     ],
@@ -107350,7 +107350,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[2]"
      }
     ],
@@ -107374,7 +107374,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[3]"
      }
     ],
@@ -107398,7 +107398,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[4]"
      }
     ],
@@ -107422,7 +107422,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[5]"
      }
     ],
@@ -107446,7 +107446,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[6]"
      }
     ],
@@ -107470,7 +107470,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[7]"
      }
     ],
@@ -107494,7 +107494,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[8]"
      }
     ],
@@ -107518,7 +107518,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[9]"
      }
     ],
@@ -107542,7 +107542,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[10]"
      }
     ],
@@ -107566,7 +107566,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[11]"
      }
     ],
@@ -107590,7 +107590,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[12]"
      }
     ],
@@ -107614,7 +107614,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[13]"
      }
     ],
@@ -107638,7 +107638,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[14]"
      }
     ],
@@ -107662,7 +107662,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[15]"
      }
     ],
@@ -107686,7 +107686,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[16]"
      }
     ],
@@ -107710,7 +107710,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[17]"
      }
     ],
@@ -107734,7 +107734,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[18]"
      }
     ],
@@ -107758,7 +107758,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[19]"
      }
     ],
@@ -107782,7 +107782,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[20]"
      }
     ],
@@ -107806,7 +107806,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[21]"
      }
     ],
@@ -107830,7 +107830,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[22]"
      }
     ],
@@ -107854,7 +107854,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[23]"
      }
     ],
@@ -107878,7 +107878,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[24]"
      }
     ],
@@ -107902,7 +107902,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[25]"
      }
     ],
@@ -107926,7 +107926,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[26]"
      }
     ],
@@ -107950,7 +107950,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[27]"
      }
     ],
@@ -107974,7 +107974,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[28]"
      }
     ],
@@ -107998,7 +107998,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[29]"
      }
     ],
@@ -108022,7 +108022,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[30]"
      }
     ],
@@ -108046,7 +108046,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[31]"
      }
     ],
@@ -108070,7 +108070,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[32]"
      }
     ],
@@ -108094,7 +108094,7 @@
      {
       "kind": "reconciliation_report",
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
-      "sha256": "6eec9a5c5c864052435f111afeeba2462fa1121d1e060fffa7783a88b892dcf6",
+      "sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "pointer": "convention_notes.items[33]"
      }
     ],

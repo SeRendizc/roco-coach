@@ -109,7 +109,7 @@
       "source_id": "wiki-rocom-snapshot",
       "source_scope": "frozen_l1",
       "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-      "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+      "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
       "pointer": "source_registry",
       "note": "来源台账与许可（licence_ref 的解析依据）"
     }
@@ -4779,7 +4779,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[11].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -4806,7 +4806,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "ea21ec0fd6581c0975a6dbe51d495edc4ed0f4af6584138ac5171b0dcf7cf566"
+      "build_hash": "1ab59a9ba7f9e5bd8785cf372038f338dff0cfb30ea37e71899d54943c4a5f12"
     },
     {
       "build_id": "build-own-0002",
@@ -4818,7 +4818,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[61].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -4844,7 +4844,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "912af0c582cf636cae2ce1b065a31ea8419a9b3a50f65df18c2c31b6f757c67a"
+      "build_hash": "20cc8fec0fdd31bfaebcb2d16d3b9cde505113cb545d7edaef3544244816a007"
     },
     {
       "build_id": "build-own-0003",
@@ -4856,7 +4856,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[99].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -4883,7 +4883,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "43aa23d4f4b146105d7bc1e0ebe89792cd413f8f7db1306acd9bb1fe3bcf2406"
+      "build_hash": "0b69b10bbe8209e2a853a5ef295948a691427f62eefa8d1718ced558a0833dd2"
     },
     {
       "build_id": "build-own-0004",
@@ -4895,7 +4895,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[111].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -4921,7 +4921,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "dd222fb5790c702b75b21c7ab360281ed5544f165b7af06e395f8caf2162ad28"
+      "build_hash": "8ca6a95853e3e69cfc974f8a0f7c758c76dd8f09b268e6c7fa3f233399d274d2"
     },
     {
       "build_id": "build-own-0005",
@@ -4933,7 +4933,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[117].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -4960,7 +4960,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "51a8b1b4e38fa0a074edb673c092339ec1c8900ba96a36c61c98ac8b222591e4"
+      "build_hash": "28566598972532b1be469bc0fc2154c72d39e85e2d53596e8f1d39723797afd2"
     },
     {
       "build_id": "build-own-0006",
@@ -4972,7 +4972,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[123].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -4998,7 +4998,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "ecdc990d118062b76d3b315a60f72e7dfc8e4936e2e141a58703de83bdc7ffe2"
+      "build_hash": "cbe3e53871d079fcf51c6e589b8aa72a3e3dad8c8e0dd92a3e3076fc5c2ce137"
     },
     {
       "build_id": "build-own-0007",
@@ -5010,7 +5010,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[129].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5037,7 +5037,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "5e30d8b0d4dd84ddb033c2703818d6c77e6f1e8169dd339c8e4c65768f626ec6"
+      "build_hash": "6f393783a9999ad4554d28905d0bcec7b456c7e2650e7bc687990276e2dad316"
     },
     {
       "build_id": "build-own-0008",
@@ -5049,7 +5049,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[136].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5076,7 +5076,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "08402012b23323379c2058405c831b26a626996680bd24a02812c599a8215495"
+      "build_hash": "5bc62e064d24ffdbcaa4415a3bfd024d5bc6d8dd2951ea6af0fe1f1cf66709a5"
     },
     {
       "build_id": "build-own-0009",
@@ -5088,7 +5088,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[138].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5115,7 +5115,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "f7f13f56fdf75d5e7f01b7ec76d020af93ef40aafa1e74dc9b86bc9fef4fccfe"
+      "build_hash": "b3443522bdfb2c2fbb395c66c9f6e53be37c354731d437194699884616a556da"
     },
     {
       "build_id": "build-own-0010",
@@ -5127,7 +5127,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[142].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5154,7 +5154,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "37ff132f4e4454445bcb90450738e2cf47ea22bb0555abdca7e93b7805eb33cb"
+      "build_hash": "27b5fe740c19fdfa1f62def293c9116069ab83e9341ee2a310c2665de7ea844e"
     },
     {
       "build_id": "build-own-0011",
@@ -5166,7 +5166,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[151].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5193,7 +5193,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "e2285ed013f7bf10e235afcef62625f6275a1aa244133cb3beeb3ead9981f9db"
+      "build_hash": "42b6b33b06fc3ffe4c413b465da510da36c181e030566b0472a8b920b12cac9c"
     },
     {
       "build_id": "build-own-0012",
@@ -5205,7 +5205,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[152].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5232,7 +5232,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "bb022edd809b74a40b1b1084ae05e087b3023d121549f5ecd9131f36ee1a852a"
+      "build_hash": "a43a1ff223ddf13a27a452a9b36dfc49c9f583ff747d9f69873790d026b6ea4e"
     },
     {
       "build_id": "build-own-0013",
@@ -5244,7 +5244,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[161].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5271,7 +5271,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "d833ddb31baeb4fafa6d8aa50ca5bf04cf4f5ce857d84ef1484a90bf373ef616"
+      "build_hash": "492edfa4c1851458f8715131103166e7561469662693dcd28c4b01f23eb1fe6d"
     },
     {
       "build_id": "build-own-0014",
@@ -5283,7 +5283,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[162].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5310,7 +5310,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "94171d1b9072b95131383d021521c2d367756f69346ae4a929f3d4301a3cd109"
+      "build_hash": "a9627c95850a2b6e051fc018a88bc37ea2792110b84f4df5a747b51c0f48ca65"
     },
     {
       "build_id": "build-own-0015",
@@ -5322,7 +5322,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[166].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5349,7 +5349,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "d94c7ed29fa09864094291996f074fb15c663e7c4bed1a02816f141fb25cc2f3"
+      "build_hash": "9d35c18343c8187231a1f09e0d1e5924f2e79ae2855a4659be4c0c21175c9118"
     },
     {
       "build_id": "build-own-0016",
@@ -5361,7 +5361,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[171].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5388,7 +5388,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "8048f8415c9de87c29f842eb47cf9d1e4e93970e4cc6b32db2efbd458e966bc3"
+      "build_hash": "213b90c715dae8aec81617dbe256b83013fbb1156fe739e91a61350fbe164986"
     },
     {
       "build_id": "build-own-0017",
@@ -5400,7 +5400,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[189].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5426,7 +5426,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "3c882c51bca486bd0e747462d9fe87ab79d9b18265e9f87f73678c3def882095"
+      "build_hash": "d8c898f9c34af3a064bc6ae490a75ef9dff90a224eda7d1b80a039fe8bf64520"
     },
     {
       "build_id": "build-own-0018",
@@ -5438,7 +5438,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[217].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5465,7 +5465,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "b03ef730877a4d6180a31d1f5c97032082574981e985582798ccefc9b0f96c70"
+      "build_hash": "ce4f5185b5b52f00c1f10a1490bc15ac3a2e00c95dbc1072e06a9a3323632420"
     },
     {
       "build_id": "build-own-0019",
@@ -5477,7 +5477,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[218].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5504,7 +5504,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "906c5e65b78ba8464905c8f848ba03aee15b286ef01c348dbe286c8153be3780"
+      "build_hash": "bfdb8ba4e77b68d257fb6bea5a4ccc60ef822fce10ce4fb504221b6fd31d7161"
     },
     {
       "build_id": "build-own-0020",
@@ -5516,7 +5516,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[224].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5542,7 +5542,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "cf7a245e7c3fdd06f504e1f1ea6bf2e8530a3633516d69ca1de397fd9900749b"
+      "build_hash": "d1f8038247cd22124cfae7f59d732959be99fb18a94258f34d00e333eb796b63"
     },
     {
       "build_id": "build-own-0021",
@@ -5554,7 +5554,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[239].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5581,7 +5581,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "6ca42079cb72890162b1b723a0e43ad22d1d5a7de9e645b88da9f1deb36b3690"
+      "build_hash": "d04b486024c6a857b719aa810b5e96d21734992f9054cacbba5508b247a063b2"
     },
     {
       "build_id": "build-own-0022",
@@ -5593,7 +5593,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[242].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5620,7 +5620,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "effae7a4583f1c5d1de23e0e25bd52beba370e165bc61d2bc302d2f7e210e79e"
+      "build_hash": "2ab394cca1ac2983e77ae1da518a51fafafb569f8eb0cab15e3d14847f124589"
     },
     {
       "build_id": "build-own-0023",
@@ -5632,7 +5632,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[247].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5659,7 +5659,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "7edf327e38804f5dd21285645b0b25095f3f490dcbf72e0354c38b7d38dedb07"
+      "build_hash": "a6dcaad1fbcfcc91503777bcef4c2944a8db7bd821162869bf052a0c0efa4050"
     },
     {
       "build_id": "build-own-0024",
@@ -5671,7 +5671,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[307].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5698,7 +5698,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "9767b2704cda66830a8f1a75e5d32166f1678d7a61d0f313d06a0f2897b8608a"
+      "build_hash": "cd471e698e7964f4472a0202b1537d41588926b78ca523a90554478397df9803"
     },
     {
       "build_id": "build-own-0025",
@@ -5710,7 +5710,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[327].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5737,7 +5737,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "b8f90b8047d8276c3b80311a8d6fd744bc24d9c72698a9004bd995f35c3759b9"
+      "build_hash": "f8ee29d51ffc3bdc606fb858421d047f5366226ce15c4675aff116458e661e0d"
     },
     {
       "build_id": "build-own-0026",
@@ -5749,7 +5749,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[329].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5776,7 +5776,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "c29ec114336aa039dd6d4a6c9ea7af07fc8e8cd5a0565b2ea2c2478fa7bc7cdc"
+      "build_hash": "568f502d12edace2a73f25fab9e51ee95f2e974f077fa8c80f69ced62c894a92"
     },
     {
       "build_id": "build-own-0027",
@@ -5788,7 +5788,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[416].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5814,7 +5814,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "d2280522c64343f93d8a9b7b48cdb0f39ddd721d13fb3929231e22072b3352ee"
+      "build_hash": "00cfb93f1479e9536c2795c2f47a7a6ea75d127d192d593ffc1ff1700dbb102a"
     },
     {
       "build_id": "build-own-0028",
@@ -5826,7 +5826,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[444].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5852,7 +5852,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "70b114111ca83b67e786fc8d03b7ea0dd005cec6e6e65efb97818aae7c3deacb"
+      "build_hash": "1326823ad21c7b8148f9ec3dd4e45795026867321f21097c2194197c604a09c2"
     },
     {
       "build_id": "build-own-0029",
@@ -5864,7 +5864,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[447].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5891,7 +5891,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "5d139f2f53e969afd1d49b433cebd9ff337829d01df4fbd7883fe9f68ad4da83"
+      "build_hash": "46d820bf1435405497ab03b92a4d82288d1fdf201762c2ad0879545a3d3bf9e7"
     },
     {
       "build_id": "build-own-0030",
@@ -5903,7 +5903,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[449].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5930,7 +5930,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "ac7ed6d0c025dae3e56e2466e3d9ec8b27a816b4ca6976cb755a7f85bfe9e3cc"
+      "build_hash": "29151ea979bebad073b751d8f8e5942353014ecfb3ef4afc74c5e6b5e340ef8c"
     },
     {
       "build_id": "build-own-0031",
@@ -5942,7 +5942,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[450].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -5968,7 +5968,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "8e6d12904ddceb60c6033792e7b93ab84a4a33522e07a8fe45177d300061ea7a"
+      "build_hash": "b2cd417a9e1b99f1746f7ef2d90da2e611abce6d882f001460a6a9119e37e7b3"
     },
     {
       "build_id": "build-own-0032",
@@ -5980,7 +5980,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[455].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6007,7 +6007,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "debbf11515c96b989571ff2c46c273e29f53dd074b74ca5f0d9bee656bc73596"
+      "build_hash": "cf1fe463843774563be0090b999c000b5877b2cf67a34bd8dd278f7a38c7150e"
     },
     {
       "build_id": "build-own-0033",
@@ -6019,7 +6019,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[457].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6046,7 +6046,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "4903d22a5f9fffd64e9ce88e326bcf8e27a89e1dd91e97fda9be33ecf180d551"
+      "build_hash": "877d3c829aed0977e8b83b263d31fcd2794505f53e41381c76fe0b9e604fd957"
     },
     {
       "build_id": "build-own-0034",
@@ -6058,7 +6058,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[472].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6085,7 +6085,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "1786e0dff3c291b7d5c9dcee4a86ffa639620f17d8cb34caeb1621e923c73838"
+      "build_hash": "4f2dd631f204ce5ce2befc43b18932f167586129887ded2ec97f4e21a3216b56"
     },
     {
       "build_id": "build-own-0035",
@@ -6097,7 +6097,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[473].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6123,7 +6123,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "ca0a58cd294d89cc65efa4e6fabfa1de5aaf494cfd7386e21ee82e9b0f471403"
+      "build_hash": "3219eaef837a08fe01e64d59abae7471658e910a721864542832c5c6783b2c66"
     },
     {
       "build_id": "build-own-0036",
@@ -6135,7 +6135,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[478].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6162,7 +6162,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "4536a12e3d35a231a46b2584aac762718f6d57572446df438e09c8168848690d"
+      "build_hash": "9ef167ce9b723a01ae9f9a3d70d86208b73ab17b05f3afbc1dcbeafafb6eab58"
     },
     {
       "build_id": "build-own-0037",
@@ -6174,7 +6174,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[483].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6201,7 +6201,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "734dfa3b7a736a2d828fe53e2a705a5a0a4847e0ccd64752119ecc0d1d1f2983"
+      "build_hash": "eb1d667fe3312e02863378b80685646def91595064323e7020c86682d5dc2a7d"
     },
     {
       "build_id": "build-own-0038",
@@ -6213,7 +6213,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[484].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6240,7 +6240,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "3dd246e822a8a438e131b9081c7c0f4961693ab844558e14bfed9480ce02760b"
+      "build_hash": "8676a576f125bbad41abbea0700b989bb0e0ad81c8413a6262761c511b90e5d6"
     },
     {
       "build_id": "build-own-0039",
@@ -6252,7 +6252,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[540].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6279,7 +6279,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "2e349f874fbf298dffaa9dc1e49aef2776b8eb1ae1f3d7d7ce7a316fd3c0e58e"
+      "build_hash": "34360b596d0260263b4831afca2bfccbc451929e1797e1b93e14a82396029f46"
     },
     {
       "build_id": "build-own-0040",
@@ -6291,7 +6291,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[543].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6318,7 +6318,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "31c42a4d1e43c713736ec0e94106bd845612851a272bb8cb74ccee2b513096b8"
+      "build_hash": "19a23fc69d3f10e150f55fcb9302fae189d31566f96ec9432b4ee29f0e4ba06f"
     },
     {
       "build_id": "build-own-0041",
@@ -6330,7 +6330,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[546].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6357,7 +6357,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "a60169d14698d5602c8b84d389d4802285fd1ff082bec349d867c6529263e036"
+      "build_hash": "e77ce708e24ab28cc689629d39774c2614eac29221111bea9e3e859edd94bd10"
     },
     {
       "build_id": "build-own-0042",
@@ -6369,7 +6369,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[554].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6396,7 +6396,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "77d2416495d386e81cea60e1617c352cf25f5c1d368c4933407d20a7d567065b"
+      "build_hash": "ab6248a51d6b1cf5914092096d871d964b3587c6e913e0359d31dc52b9cd2aff"
     },
     {
       "build_id": "build-own-0043",
@@ -6408,7 +6408,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[573].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6435,7 +6435,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "9d14b85de840233a2749e6bc33db8afd6ec35808ae8705fbadedc2793405b287"
+      "build_hash": "0f3f87565f6ba0306094594cee69412f234bb8c6c8c7939ab2b60d03174f2780"
     },
     {
       "build_id": "build-own-0044",
@@ -6447,7 +6447,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[599].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6473,7 +6473,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "f7891f587f731ce88111c426ba1e6312a951f604e222a5b083e3edbb73a4378c"
+      "build_hash": "37aee621d6b0cad94626cc2f7321eb67e49770ba29a4db99604da041f3e91e0b"
     },
     {
       "build_id": "build-own-0045",
@@ -6485,7 +6485,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[606].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6511,7 +6511,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "62cd2c453e8f540a0a09e93ca518f1e25f7cf24946e4706bb8528b138af77c37"
+      "build_hash": "816e16e42a5c8401c5e9b4eeea38c1d81ec2f50cef271a88b0e74d39ec962c41"
     },
     {
       "build_id": "build-own-0046",
@@ -6523,7 +6523,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[607].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6550,7 +6550,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "86fe32fa00bba07680ae90a9f4760048eed3b41d4eff2cc20dce75233aa5d763"
+      "build_hash": "57794b57314a672a2a7ef5b5289c749e823e2c680d080e3f0a99dcec96e3beb6"
     },
     {
       "build_id": "build-own-0047",
@@ -6562,7 +6562,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[609].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6588,7 +6588,7 @@
       "unknown_fields": [
         "derived_stats"
       ],
-      "build_hash": "db60c4db34a62099c5f4a7500065c90630795b5fdc047014e27a584942f19a25"
+      "build_hash": "86faf237cf709933af72cf69c39da7f6f227ffcba7ebb895ef63e5b7156ba0a8"
     },
     {
       "build_id": "build-own-0048",
@@ -6600,7 +6600,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[611].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6627,7 +6627,7 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "a4be8c2052c0d82085f5d8103bb6a543eea37ab3d5e5ec1d3cf3927f7cdec285"
+      "build_hash": "49cb886c767212b83e0e7c4ff577ec80bde137c7ca7cfdb5781c83a3f699a5ed"
     },
     {
       "build_id": "build-own-0049",
@@ -6639,7 +6639,7 @@
           "source_id": "wiki-rocom-snapshot",
           "source_scope": "frozen_l1",
           "artifact_path": "data/roco/game-data-pack/v2/pack.json",
-          "artifact_sha256": "813f42332de5275f8459922f6d91ff90721d258d4cb062206d57df97109aaa5d",
+          "artifact_sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379",
           "pointer": "sections.distributable.entities[11].form_axis.axis",
           "note": "出战形态轴出处"
         }
@@ -6666,8 +6666,8 @@
         "derived_stats",
         "effective_bloodline"
       ],
-      "build_hash": "15bf060a54b2678d3c18b3b3dcf0721bc9f6881ff4de974f72bb39d7d1e0c0f2"
+      "build_hash": "283ca19e569b5edbf76943cf495fac5da747a7191192875c3b151a7ce1f58192"
     }
   ],
-  "dataset_hash": "8275b9086f64e696aa6084c55167bd0d570ca98dca5b64cb796cc7bc347bbf60"
+  "dataset_hash": "23cf46728e34c065ae6f4b508823dd2fec7ee2a677625214d04417bfbe8f5782"
 }

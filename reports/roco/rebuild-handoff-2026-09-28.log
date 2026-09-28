@@ -1,0 +1,19 @@
+
+> roco:rebuild
+> node scripts/roco/rebuild-derived.mjs
+
+[1/18] 全量图鉴（含抓包六维覆盖） … ok（51ms）
+[2/18] 图鉴对账报告 … ok（44ms）
+[3/18] id 别名表（首领形态主键） … ok（33ms）
+[4/18] 数据包 pack.json/schema.json … ok（78ms）
+[5/18] 就绪报告 … ok（76ms）
+[6/18] 规则语料核实 … ok（290ms）
+[7/18] 个体层 owned-pets … ok（88ms）
+[8/18] 按需配招 … ok（49ms）
+[9/18] 精灵机制层 … ok（60ms）
+[10/18] 配队榜报告（RC-602） … ok（96ms）
+[11/18] RAG 评测报告 … ok（2518ms）
+[12/18] 先验 meta-prior … ok（68ms）
+[13/18] RC-304 报告（重写） … ok（763ms）
+[14/18] RC-604 报告（重写） … ok（155ms）
+[15/18] Agent 轨迹集 … 
