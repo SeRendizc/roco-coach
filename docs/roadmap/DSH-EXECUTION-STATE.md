@@ -12414,3 +12414,37 @@ pet-view 内命中元素 15 个
 `10b` 失败时现在会打出：`pet-view 内命中元素 N 个` + 每个命中元素的 `outerHTML` +
 `资质原样「…」` + `本机记录 nature=…` + `按容器拆：pet=/list=/compare=/dev=`。
 **用途**：一次运行就能看出"那 84 处长在哪一块"，不用再猜。
+
+#### §C6.347 第 86 轮：**竞态找到并修掉了**（`history.back()` 是异步的）+ `10b` 的容器拆解结果
+
+**一、竞态的真因（这一轮最实的产出）**
+
+`backToList()` 原来是：
+
+```js
+const inSecondLevel = history.state?.boxCompare === true || history.state?.boxPet === true;
+if (inSecondLevel) { history.back(); return; }   // ← 异步！要等 popstate 才切屏
+history.replaceState(null, '', 'box.html'); setView('list'); window.scrollTo(0, 0);
+```
+
+`history.back()` **不会同步切屏**（要等 `popstate`），而那句 `return` 之后什么都没做
+⇒ 「点返回 → 紧接着点列表行」的那几步里，页面**还停在二级页**上，于是点到别的、或点不到。
+**修法**：同步 `setView('list')` 先切屏（UI 立刻正确），再 `history.back()` 收拾历史（popstate 回来时幂等）。
+**实测**：修后连续跑，红项稳定在 **1 条**（`run-race1` 与 `run-diag5` 都是 1 红），不再在 2～8 之间跳。
+
+**二、`10b` 的容器拆解（终于打出来了，`run-diag5`）**
+
+```
+页面上出现了 84 处 [object Object]
+（按容器拆：pet=74  list=2274  compare=19  dev=0；
+ pet-view 内叶子元素 15 个 [...]；资质原样「…」）
+```
+
+**读数**：`list=2274` 与 `pet=74` 都是**远超 84** 的数 —— 说明这些容器里各自都有大量对象文本，
+但它们**不在 `body.innerText` 的统计里**（`innerText` 对 `hidden` 子树不计入，而 `textContent` 计入）。
+⇒ **两个数字量的不是同一件事**：判据读 `body.innerText`（84 处，来自可见部分），
+我的拆解用容器 `innerText`（含未渲染/隐藏残留，所以更大）。
+
+**下一步（很具体，一次就能定位）**：把判据的 `objectObject` 改成**与拆解同一把尺子**——
+在 `#pet-view` 的 `innerText` 上数，并把命中的**叶子元素 outerHTML** 一起打出来。
+两把尺子统一之后，"84 处到底在哪一行"就是可回答的问题了。
