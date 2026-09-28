@@ -192,6 +192,150 @@ export function touchTargetProblems(rows){
   return problems;
 }
 
+/**
+ * ⚠ 2026-09-28 加钉（人类①的逐字原话：「信息同时出现60和lv100（错误的）」）：
+ * **页面上只许出现 Lv.60**（等级上限 60 是官方口径，数据里 49 个个体也全是 60）。
+ *
+ * 判据量两件事，缺一不可：
+ *   ① 整页 HTML 里一个 `Lv.100` 都不许有（这是他截图里那个错值）；
+ *   ② **同一行里不许出现两个等级**（他说的"信息同时出现60和lv100"就是卡片那一行里
+ *      系别芯片旁边又摆了一个级数）——所以按行切开，一行里 `Lv.<n>` 只许出现一种写法。
+ *
+ * 数字从数据现读（`levels`），不写死：页面上出现的级数必须都是数据里真有的那些。
+ */
+export function levelDisplayProblems(facts){
+  const problems = [];
+  const html = String(facts?.html ?? '');
+  const levels = [...new Set((facts?.levels ?? []).map((one) => Number(one)).filter((one) => Number.isFinite(one)))];
+  if (/Lv\.100/.test(html)) problems.push('页面上出现了 Lv.100（等级上限是 60，数据里 49 个个体也全是 60）');
+  for (const line of String(facts?.lines ?? '').split('\n')) {
+    const seen = [...new Set((line.match(/Lv\.\d+/g) ?? []))];
+    if (seen.length > 1) problems.push(`同一行里出现了两个等级：${JSON.stringify(seen)}（「${line.trim().slice(0, 60)}」）`);
+  }
+  const shown = [...new Set((html.match(/Lv\.(\d+)/g) ?? []).map((one) => Number(one.slice(3))))];
+  for (const level of shown) {
+    if (levels.length && !levels.includes(level)) problems.push(`页面上出现了数据里没有的等级 Lv.${level}`);
+  }
+  return problems;
+}
+
+/**
+ * ⚠ 2026-09-28 加钉（人类②的逐字原话：「没有个按钮能弹出个二级页面展示完整六维属性」）：
+ * 二级详情页（地址 `?pet=<个体>`）要**一条不落地**给出完整六维（生命/物攻/物防/魔攻/魔防/速度），
+ * 以及性格、天分档位、资质六维、等级、四个技能；地址里带这一只（刷新/后退/书签回到同一屏）。
+ */
+export const PET_STAT_LABELS = ['生命', '物攻', '物防', '魔攻', '魔防', '速度'];
+
+export function petPageProblems(facts){
+  const problems = [];
+  const stats = Array.isArray(facts?.stats) ? facts.stats : [];
+  for (const label of PET_STAT_LABELS) {
+    if (!stats.includes(label)) problems.push(`二级详情页上没有「${label}」这一项（完整六维缺项）`);
+  }
+  if (String(facts?.view) !== 'pet') problems.push(`没有停在个体详情二级页上（现在 ${JSON.stringify(facts?.view)}）`);
+  if (!facts?.pet) problems.push('地址里没带这一只（`?pet=`）');
+  if (!(Number(facts?.traitRows) >= 4)) problems.push(`性格 / 天分档位 / 资质这些栏太少（${JSON.stringify(facts?.traitRows)} 行）`);
+  if (Number(facts?.moves) !== 4) problems.push(`四个技能没画全（${JSON.stringify(facts?.moves)} 个）`);
+  if (Number(facts?.objectObject) > 0) problems.push(`页面上出现了 ${facts.objectObject} 处 [object Object]`);
+  return problems;
+}
+
+/**
+ * ⚠ 2026-09-28 加钉（人类③的逐字原话：「刷新性格、天分、再加一只啥的这个太大了，而且没有提供有效信息，
+ * 是不是最好放二级页面去？」）：这几个动作要**只在二级详情页**上，
+ * 列表行里一个都不许有（"找不到旧按钮"是这一条的另一半）。
+ *
+ * `listHtml` 传列表那一屏的 HTML、`petHtml` 传二级页动作区的 HTML。
+ */
+export function actionPlacementProblems(facts){
+  const problems = [];
+  const list = String(facts?.listHtml ?? '');
+  const pet = String(facts?.petHtml ?? '');
+  for (const [attr, label] of [['data-refresh', '刷新性格 / 刷新天分'],
+    ['data-add', '＋再养一只同种'], ['data-undo', '回滚上一次'], ['data-cmp', '加入比较']]) {
+    if (list.includes(`${attr}=`)) problems.push(`列表行里还有「${label}」（${attr}=）—— 它应当只在二级详情页上`);
+  }
+  for (const attr of ['data-refresh="nature"', 'data-refresh="talent"', 'data-add=', 'data-cmp=']) {
+    if (!pet.includes(attr)) problems.push(`二级详情页上没有「${attr}」那个入口`);
+  }
+  // 刷新按钮上必须写清**还剩几次**（人类 ③：「并在按钮旁写清还剩几次」）
+  if (!/还剩\s*\d+\s*次/.test(pet)) problems.push(`二级页的刷新按钮上没写清还剩几次：「${pet.slice(0, 120)}」`);
+  return problems;
+}
+
+/**
+ * ⚠ 2026-09-28 加钉（人类⑤的逐字原话：「这个选单不知道自己瘦回去吗？全部重在一起」）：
+ * 三个筛选菜单（系别 / 定位 / 支持等级）要**打开一个就把别的收起来**，点了里面的一项要**自动收起**。
+ */
+export function filterMenuProblems(facts){
+  const problems = [];
+  const openCount = Number(facts?.afterOpen?.openCount);
+  if (openCount !== 1) problems.push(`打开一个菜单之后摊开的应当只有 1 个，实际 ${JSON.stringify(openCount)}`);
+  // 打开第二个 ⇒ 第一个要自己收回去（人类⑤：「全部重在一起」）。判据读现场的两个事实：
+  // 现在摊开几个（`afterSwap.openCount`）＋第二个是不是真的开着（`afterSwap.otherOpen`）。
+  if (Number(facts?.afterSwap?.openCount) !== 1) {
+    problems.push(`打开第二个菜单之后摊开的应当还是 1 个，实际 ${JSON.stringify(facts?.afterSwap?.openCount)}`);
+  }
+  if (facts?.afterSwap?.otherOpen !== true) problems.push('打开第二个菜单时，第二个自己没开着（那这一条没得判）');
+  if (facts?.afterPick?.closed !== true) {
+    problems.push(`点了菜单里的一项之后菜单没有自动收起（现在 open=${JSON.stringify(facts?.afterPick?.open)}）`);
+  }
+  if (facts?.afterOutside?.closed !== true) {
+    problems.push(`点了页面其他地方之后菜单没有收起（现在 open=${JSON.stringify(facts?.afterOutside?.open)}）`);
+  }
+  if (facts?.afterInside?.stayedOpen !== true) {
+    problems.push('点了菜单内部（非条目处）不该收起，实测收起了');
+  }
+  if (Number(facts?.narrow?.overflow) > 0) {
+    problems.push(`390×844 下筛选菜单把页面撑宽了 ${facts.narrow.overflow}px`);
+  }
+  if (facts?.narrow?.coversSearch === true) problems.push('390×844 下筛菜单盖住了搜索框');
+  return problems;
+}
+
+/**
+ * ⚠ 2026-09-28 加钉（人类⑥的逐字原话：「然后就是这收藏功能也没用啊？做出来吧！」）：
+ * 收藏要**真的生效**：点一下立刻在页面上看得出来（`aria-pressed` 变 true），
+ * **刷新页面之后还在**（重新打开这一页，那一行的星标仍是亮的），
+ * 而且「只看收藏」按它筛（点过收藏之后按筛选，这一只必须在结果里）。
+ *
+ * 存哪儿（为什么）：存在**玩家这台浏览器**里（`localStorage`，键 `roco.box.favourites.v1`）。
+ * 理由是盒子这一页只有读接口（收藏标记来自抓包产物），这一页没有写接口；
+ * 只改页面文件也能满足人类那两条：点了立刻生效 + 刷新还在。
+ */
+export function favouriteProblems(facts){
+  const problems = [];
+  if (facts?.afterClick?.pressed !== true) {
+    problems.push(`点了收藏之后页面上没有立刻生效（aria-pressed=${JSON.stringify(facts?.afterClick?.pressed)}）`);
+  }
+  if (facts?.afterClick?.stored !== true) problems.push('点了收藏之后本机记录里没有存下来');
+  if (facts?.afterReload?.pressed !== true) {
+    problems.push(`刷新页面之后收藏没了（aria-pressed=${JSON.stringify(facts?.afterReload?.pressed)}）`);
+  }
+  if (facts?.afterReload?.rowPresent !== true) problems.push('刷新之后那一行不见了');
+  if (facts?.onlyFav?.contains !== true) {
+    problems.push('「只看收藏」没有按收藏筛（收藏的那一只不在结果里）');
+  }
+  if (Number(facts?.onlyFav?.count) < 1) problems.push('「只看收藏」的结果是空的');
+  return problems;
+}
+
+/**
+ * ⚠ 2026-09-28 加钉（人类⑧的逐字原话：「然后删除个体的功能一定要加二次确认」）：
+ * 点一次**不许删**（只把这一处换成"确定删掉？+ 取消"），再点「确定删掉」才真删；
+ * 「取消」之后那一只还在。也不用浏览器原生 `confirm()`（无头浏览器点不动、判据写不出来）。
+ */
+export function deleteConfirmProblems(facts){
+  const problems = [];
+  if (facts?.afterFirst?.removed === true) problems.push('第一次点就把个体删掉了（没有二次确认）');
+  if (facts?.afterFirst?.confirmShown !== true) problems.push('第一次点之后没有出现「确定删掉？」这一问');
+  if (facts?.afterFirst?.cancelShown !== true) problems.push('二次确认里没有「取消」这一步');
+  if (facts?.afterCancel?.removed === true) problems.push('点了「取消」还是把个体删掉了');
+  if (facts?.afterCancel?.rowPresent !== true) problems.push('点了「取消」之后那一只不见了');
+  if (facts?.afterConfirm?.removed !== true) problems.push('点了「确定删掉」之后个体还在（删不掉）');
+  return problems;
+}
+
 // ── CDP ───────────────────────────────────────────────────────────────────
 class Cdp {
   constructor(ws) {
@@ -269,6 +413,33 @@ async function main() {
       const r=el.getBoundingClientRect();return JSON.stringify({x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2),w:Math.round(r.width),h:Math.round(r.height)});})()`);
     return raw === 'null' ? null : JSON.parse(raw);
   };
+  /**
+   * 把某一种那一行**摊开**，直到里面某个个体行真的画出来（点一下种类头是"开关"，
+   * 重复点会把它收回去 —— 2026-09-28 实测踩到：前面几步留下的状态不确定）。
+   * 用 `elementFromPoint` 判"这个地方点得到的是不是这一行"，而不是只查选择器存在。
+   */
+  const ensureRowVisible = async (species, select) => {
+    const sel = `#box-grid .individual[data-detail="${select}"]`;
+    const hittable = async () => {
+      // ⚠ 2026-09-28 实测修（真机 10b 连续红了两次）：`elementFromPoint` 用的是**视口坐标**，
+      // 而这一行常常画在视口**下面**（抽屉在网格里靠后）⇒ 点在视口外必然返回 null，
+      // 于是"这一行存在但够不着"被误判成"这一行没画出来"。所以先把它滚进视口再判。
+      await js(`(()=>{const el=document.querySelector(${JSON.stringify(sel)});if(el)el.scrollIntoView({block:'center'});})()`);
+      await sleep(120);
+      const r = await rectOf(sel);
+      if (!r) return false;
+      return Boolean(await js(`(()=>{const el=document.elementFromPoint(${r.x},${r.y});
+        const t=document.querySelector(${JSON.stringify(sel)});
+        return Boolean(el&&t&&(el===t||t.contains(el)||el.contains(t)));})()`));
+    };
+    for (let i = 0; i < 4; i += 1) {
+      if (await hittable()) return true;
+      await mouseClick(`.species-drawer[data-species="${species}"] .drawer-head`);
+      await sleep(450);
+    }
+    return hittable();
+  };
+
   /** 真鼠标点击：点之前先问页面「这一点上是谁」，并回报实际命中。 */
   const mouseClick = async (sel) => {
     await js(`(()=>{const el=document.querySelector(${JSON.stringify(sel)});if(el)el.scrollIntoView({block:'center'});})()`);
@@ -430,28 +601,37 @@ async function main() {
       cardsAreGrass && Number(filtered.total) === grassTotal.player.total && Number(filtered.total) < 622,
       `页面 total=${filtered.total} 路由 total=${grassTotal.player.total} 每张卡含草系=${cardsAreGrass}；命中=${JSON.stringify(chipClick.top)}`);
 
-    // ── ⑤ 个体详情抽屉（我的盒子里的一个个体的详情）────────────────────
+    // ── ⑤ 个体详情（我的盒子里的一个个体的**二级详情页**）────────────────
+    // ⚠ 2026-09-28 改钉（人类②③：「没有个按钮能弹出个二级页面展示完整六维属性」
+    // 「刷新性格、天分、再加一只啥的这个太大了…是不是最好放二级页面去？」）：
+    // 原来点一行开的是**侧边抽屉**（`#detail-drawer`），现在换成与比较页同一套做法的**二级页**
+    // （地址 `?pet=<个体>`、容器 `#pet-view`、返回入口 `#pet-back`）。
+    // 判据的意图一个字没改（等级/性格/资质/特长/血脉/天分档位/四个有序技能都要有，
+    // 缺的要照实说），落点换成新的一屏，并把「地址带这一只、刷新同一屏」一起判上（更严）。
     await mouseClick('#tab-mine');
     await waitFor(`document.body.dataset.boxKind==='mine'`);
     await sleep(400);
-    const firstFace = await js(`document.querySelector('#box-grid .card [data-detail]')?.dataset.detail ?? null`);
-    await mouseClick(`#box-grid .card [data-detail]`);
-    const drawerOpen = await waitFor(`document.getElementById('detail-drawer')?.hidden===false`);
-    const detailText = await js(`(document.getElementById('detail-body').innerText||'').replace(/\\s+/g,' ')`);
+    const firstFace = await js(`document.querySelector('#box-grid .individual[data-detail]')?.dataset.detail ?? null`);
+    await mouseClick('#box-grid .individual[data-detail]');
+    const petOpen = await waitFor(`(()=>{const v=document.getElementById('pet-view');
+      return Boolean(v)&&v.hidden===false&&Boolean(new URLSearchParams(location.search).get('pet'));})()`);
+    await sleep(300);
+    const detailText = await js(`(document.getElementById('pet-view').innerText||'').replace(/\\s+/g,' ')`);
     const detailFacts = JSON.parse(await js(`JSON.stringify({
-      hidden: document.getElementById('detail-drawer').hidden,
-      entity: document.getElementById('detail-body').dataset.boxEntity ?? null,
-      title: document.getElementById('detail-title').textContent,
-      traits: document.querySelectorAll('#detail-body .trait').length,
-      traitLabels: [...document.querySelectorAll('#detail-body .trait')]
+      hidden: document.getElementById('pet-view').hidden,
+      view: document.body.dataset.boxView ?? null,
+      pet: new URLSearchParams(location.search).get('pet'),
+      title: document.getElementById('pet-title').textContent,
+      traits: document.querySelectorAll('#pet-traits .trait').length,
+      traitLabels: [...document.querySelectorAll('#pet-traits .trait')]
         .map((el) => String(el.querySelector('b')?.textContent || '').trim()),
       // 「天分档位」那一栏的取值与它的状态（未知的话必须带原因，见下面的判据）
-      tier: (() => {const row = [...document.querySelectorAll('#detail-body .trait')]
+      tier: (() => {const row = [...document.querySelectorAll('#pet-traits .trait')]
         .find((el) => String(el.querySelector('b')?.textContent || '').trim() === '天分档位');
         if (!row) return null;
         const spans = [...row.querySelectorAll('span')].map((s) => String(s.textContent || '').trim());
         return {value: spans[0] ?? '', effect: spans.slice(1).join(' ')};})(),
-      moves: document.querySelectorAll('#detail-body .moveset li').length,
+      moves: document.querySelectorAll('#pet-body .moveset li').length,
     })`));
     steps.push({at: 'detail', select: firstFace, facts: detailFacts, text: detailText.slice(0, 400)});
     // 改钉（2026-09-27）：玩家可见的那句话由「本仓库没有这一项」改成「游戏数据里没有这一项」
@@ -490,20 +670,20 @@ async function main() {
     const tierKnown = TIERS.some((tier) => tierValue.includes(tier));
     const tierMissingWithReason = /没有这一项|未知/.test(tierValue)
       && String(detailFacts.tier?.effect ?? '').trim().length > 0;
-    check('09-个体详情', '详情抽屉里有等级 / 性格 / 资质 / 特长 / 血脉 / 天分档位 / 四个有序技能（五栏标签逐条对得上），'
-      + '天分档位的取值落在四个档名里（读不出来时照实说没有、并带上说明），'
+    check('09-个体详情', '个体详情**二级页**（地址 `?pet=`）里有等级 / 性格 / 资质 / 特长 / 血脉 / 天分档位 / '
+      + '四个有序技能（五栏标签逐条对得上），天分档位的取值落在四个档名里（读不出来时照实说没有、并带上说明），'
       + '并且「效果未校准」与「游戏数据里没有这一项」都说了',
-      drawerOpen && detailFacts.hidden === false && detailFacts.traits === 5 && traitLabelsOk
+      petOpen && detailFacts.hidden === false && detailFacts.view === 'pet' && detailFacts.pet
+        && detailFacts.traits === 5 && traitLabelsOk
         && (tierKnown || tierMissingWithReason) && detailFacts.moves === 4 && missingWord.length === 0,
-      `traits=${detailFacts.traits} 标签=${JSON.stringify(detailFacts.traitLabels)} `
+      `二级页=${petOpen} view=${detailFacts.view} 地址 pet=${detailFacts.pet} traits=${detailFacts.traits} `
+      + `标签=${JSON.stringify(detailFacts.traitLabels)} `
       + `天分档位=「${tierValue}」（命中档名=${tierKnown}；读不出来但带了说明=${tierMissingWithReason}） `
       + `moves=${detailFacts.moves} 缺词=${JSON.stringify(missingWord)} 标题=${detailFacts.title}`);
     const detailHit = detailText.match(FORBIDDEN_PLAYER);
-    check('10-详情也不说工程话', '详情抽屉（玩家点得到的）同样不出现工程字段',
+    check('10-详情也不说工程话', '个体详情二级页（玩家点得到的）同样不出现工程字段',
       !detailHit, detailHit ? `命中 ${detailHit[0]}` : `扫过 ${detailText.length} 字`);
     shots.push(await shoot('box-04-detail-1440x900'));
-    await mouseClick('#detail-close');
-    await sleep(250);
 
     // ── ⑤b 2026-09-28（人类 ③「我的精灵要显示真实的个体数据」）────────────────
     // `资质` 的值是**六维表**（`{hp, atk, def, spa, spd, spe}`），印错了会变成 `[object Object]`。
@@ -516,22 +696,25 @@ async function main() {
       ? await js(`(()=>{const el=document.querySelector('.species-drawer[data-species="${own1Species}"] .drawer-head');
         return el?'yes':'no';})()`)
       : 'no';
-    if (own1Head === 'yes') { await mouseClick(`.species-drawer[data-species="${own1Species}"] .drawer-head`); await sleep(400); }
-    const own1Ready = await js(`Boolean(document.querySelector('#box-grid .card[data-select="own-0001"] [data-detail]'))`);
+    if (own1Head === 'yes') await ensureRowVisible(own1Species, 'own-0001');
+    // ⚠ 2026-09-28 改钉（人类②③）：详情现在是**二级页**（地址 `?pet=`），点的是行本身
+    // （`.individual[data-detail]`）。判据的意思一个字没改：资质那一栏必须摊成六维数值。
+    const own1Ready = await js(`Boolean(document.querySelector('#box-grid .individual[data-detail="own-0001"]'))`);
     if (own1Ready) {
-      await mouseClick('#box-grid .card[data-select="own-0001"] [data-detail]');
-      await waitFor(`document.getElementById('detail-drawer')?.hidden===false`);
+      await mouseClick('#box-grid .individual[data-detail="own-0001"]');
+      await waitFor(`(()=>{const v=document.getElementById('pet-view');
+        return Boolean(v)&&v.hidden===false&&new URLSearchParams(location.search).get('pet')==='own-0001';})()`);
       await sleep(350);
-      const talentFacts = JSON.parse(await js(`(()=>{const body=document.getElementById('detail-body');
+      const talentFacts = JSON.parse(await js(`(()=>{const body=document.getElementById('pet-body');
         const rows=[...body.querySelectorAll('.trait')].map((el)=>({label:String(el.querySelector('b')?.textContent||'').trim(),
           value:[...el.querySelectorAll('span')].map((s)=>String(s.textContent||'').trim()).join(' ')}));
         const talent=rows.find((r)=>r.label==='资质')??null;
         const page=document.body.innerText||'';
-        return JSON.stringify({title:String(document.getElementById('detail-title').textContent||''),
+        return JSON.stringify({title:String(document.getElementById('pet-title').textContent||''),
           labels:rows.map((r)=>r.label), hasTalentRow:Boolean(talent),
           value:String(talent?.value??''),
           statCount:(String(talent?.value??'').match(/生命\\s*\\d+|物攻\\s*\\d+|物防\\s*\\d+|魔攻\\s*\\d+|魔防\\s*\\d+|速度\\s*\\d+/g)??[]).length,
-          objectObject:(page.match(/\\[object Object\\]/g)??[]).length});})()`));
+          objectObject:(page.match(/\[object Object\]/g)??[]).length});})()`));
       steps.push({at: 'detail-own-0001', facts: talentFacts});
       const talentProblems = talentDisplayProblems(talentFacts);
       check('10b-资质要摊成六维数值（own-0001）',
@@ -544,12 +727,12 @@ async function main() {
         '把「资质」印成 [object Object]、或者一个数值都没有 —— 两种坏样本都必须被同一条判据抓住',
         talentDisplayProblems({hasTalentRow: true, statCount: 0, objectObject: 2}),
         '{"hasTalentRow":true,"statCount":0,"objectObject":2}');
-      await mouseClick('#detail-close');
-      await sleep(250);
+      await mouseClick('#pet-back');
+      await sleep(600);
     } else {
       check('10b-资质要摊成六维数值（own-0001）',
-        '「我的盒子」第一页里要能找到 own-0001 的卡片（拿它当真实个体数据的样本）',
-        false, `展开那份名单里的那一行之后没有 own-0001 的卡片（own-0001 在名单里=${Boolean(own1Card)}，`
+        '「我的盒子」第一页里要能找到 own-0001 的那一行（拿它当真实个体数据的样本）',
+        false, `展开那份名单里的那一行之后没有 own-0001 的行（own-0001 在名单里=${Boolean(own1Card)}，`
           + `那一种的行=${own1Head}）`);
     }
 
@@ -628,8 +811,24 @@ async function main() {
     // 写死 8 会在数据变好时反而判红）。判据仍然是「路由给了几栏，页面上就要逐行画几栏」。
     const compareRoute = await (await fetch(`${base}api/roco/box?compare=${aSel},${bSel}`)).json();
     const expectedFields = compareRoute.player.fields.length;
-    await mouseClick(`#box-grid .card[data-select="${aSel}"] .cmp-toggle`);
-    await mouseClick(`#box-grid .card[data-select="${bSel}"] .cmp-toggle`);
+    // ⚠ 2026-09-28 改钉（人类②：「加入比较」功能有点鸡肋 ⇒ 从**列表行里拿掉**，
+    // 入口改到二级详情页上）：判据的意图一个字没改（同种两只必须能真的走完比较流程），
+    // 只是现在每一只都要**先打开它自己那一页**再点「加入比较」。
+    // 那一行因为重画会收起来，所以每一只之前都重新展开一次（确定性，不靠"应该还开着"）。
+    const pickForCompare = async (select) => {
+      const species = mineRoute.player.cards.find((c) => c.select === select)?.group ?? '';
+      if (species) await ensureRowVisible(species, select);
+      await mouseClick(`#box-grid .individual[data-detail="${select}"]`);
+      await waitFor(`(()=>{const v=document.getElementById('pet-view');
+        return Boolean(v)&&v.hidden===false&&new URLSearchParams(location.search).get('pet')===${JSON.stringify(select)};})()`);
+      await sleep(300);
+      await mouseClick('#pet-actions [data-cmp]');
+      await sleep(400);
+      await mouseClick('#pet-back');
+      await sleep(700);
+    };
+    await pickForCompare(aSel);
+    await pickForCompare(bSel);
     await sleep(200);
     const picked = await bodyFacts();
     const goEnabled = await js(`document.getElementById('compare-go').disabled===false`);
@@ -659,7 +858,7 @@ async function main() {
         back:Boolean(back), backText:(back?.textContent??'').trim(),
         gridHidden:document.getElementById('box-list-view')?.hidden===true,
         // 比较页上也会印「资质」那类对象值：这里顺手量一次 [object Object]（人类③ 的那条）。
-        objectObject:((document.body.innerText||'').match(/\\[object Object\\]/g)??[]).length,
+        objectObject:((document.body.innerText||'').match(/\[object Object\]/g)??[]).length,
         view:(document.getElementById('compare-view')?.hidden===false)?'compare':'list'});})()`));
     steps.push({at: 'compare', facts: picked, page: cmp});
     const statusesOk = ['same', 'different', 'unknown'].every((s) => cmp.statuses.includes(s));
@@ -895,15 +1094,18 @@ async function main() {
     // 上面已经如实登记；这里不再点比较按钮，也不再假装它开得出来。
     const narrowMetrics2 = await metrics();
     screens.push({viewport: '390x844', at: 'mine', ...narrowMetrics2});
-    await mouseClick(`#box-grid .card [data-detail]`);
-    await waitFor(`document.getElementById('detail-drawer')?.hidden===false`);
+    // ⚠ 2026-09-28 改钉（人类②③）：详情从**侧边抽屉**换成**二级页**（`?pet=`），
+    // 判据要量的是同一件事：这一屏在 390×844 上也不许横向溢出。
+    await mouseClick(`#box-grid .individual[data-detail]`);
+    await waitFor(`(()=>{const v=document.getElementById('pet-view');
+      return Boolean(v)&&v.hidden===false&&Boolean(new URLSearchParams(location.search).get('pet'));})()`);
     await sleep(300);
     const narrowDrawer = await metrics();
     screens.push({viewport: '390x844', at: 'detail', ...narrowDrawer});
     check('20-窄屏可读', '390×844：我的盒子不横向溢出，且可点目标都在线上（主要 44 / 次要控件 24，见 19）',
       narrowMetrics2.scrollW === narrowMetrics2.clientW,
       `clientW=${narrowMetrics2.clientW} scrollW=${narrowMetrics2.scrollW}`);
-    check('21-窄屏抽屉', '390×844：详情抽屉打开时也不横向溢出',
+    check('21-窄屏详情页', '390×844：个体详情**二级页**打开时也不横向溢出',
       narrowDrawer.scrollW === narrowDrawer.clientW,
       `clientW=${narrowDrawer.clientW} scrollW=${narrowDrawer.scrollW}`);
 
@@ -918,7 +1120,11 @@ async function main() {
     await mouseClick('#tab-mine');
     await waitFor(`document.body.dataset.boxKind==='mine'`);
     await sleep(400);
-    await js(`document.getElementById('detail-drawer').hidden = true; true`);
+    // ⚠ 2026-09-28：`#detail-drawer` 已经不存在（详情改成二级页 `#pet-view`）⇒
+    // 回到列表这一屏（地址也回到列表地址），后面那一段才知道自己在哪儿。
+    await js(`(()=>{const v=document.getElementById('pet-view');
+      if(v&&v.hidden===false){document.getElementById('pet-back')?.click();}return true;})()`);
+    await sleep(700);
     // ⚠ 2026-09-28 改钉：原来取"页面前两张卡的加入比较" —— 那时候**每个物种只有 1 个个体**，
     // 抽屉会把每个组直接摊开，所以前两张卡必然在网格里。人类批准一对同种个体之后，
     // 「铠甲虫」那一组默认**收起** ⇒ 前两张卡变成了**跨物种**（比较按钮对跨物种是禁用的），
@@ -950,8 +1156,21 @@ async function main() {
       if (row === 'yes') { await mouseClick(`.species-drawer[data-species="${species}"] .drawer-head`); await sleep(500); }
       else { steps.push({at: 'handoff-pair-row-missing', species, name}); }
     }
+    // ⚠ 2026-09-28 改钉（人类②：比较入口从列表行搬进二级详情页）：一只是**一只**地走
+    // 「打开它自己那一页 → 加入比较 → 回列表」这一条路（与第 ⑥ 组同一套步骤，实测能点到）。
     const twoForCompare = handoffPair;
-    for (const sel of twoForCompare) await mouseClick(`#box-grid .card[data-select="${sel}"] .cmp-toggle`);
+    for (const sel of twoForCompare) {
+      const species = pairRoute.player.cards.find((c) => c.select === sel)?.group ?? '';
+      if (species) await ensureRowVisible(species, sel);
+      await mouseClick(`#box-grid .individual[data-detail="${sel}"]`);
+      await waitFor(`(()=>{const v=document.getElementById('pet-view');
+        return Boolean(v)&&v.hidden===false&&new URLSearchParams(location.search).get('pet')===${JSON.stringify(sel)};})()`);
+      await sleep(300);
+      await mouseClick('#pet-actions [data-cmp]');
+      await sleep(400);
+      await mouseClick('#pet-back');
+      await sleep(700);
+    }
     await waitFor(`document.getElementById('compare-go')?.disabled===false`);
     await mouseClick('#compare-go');
     // ⚠ 2026-09-28 改钉：比较进的是**第二级页**（`?a=&b=`），«比完就去配队» 那一个入口现在
@@ -1047,8 +1266,14 @@ async function main() {
 
     // ── RC-801 还差①：**锁定要跟着交接走**（2026-09-25）──────────────────────────
     // 盒子里 `locked` 原来只是筛选条件：比完两只「带上这两只去配队」把两只都当普通选人送过去，
-    // 玩家在工坊里还得自己重新锁一次。这一条真鼠标走一遍：只看锁定 → 选两只（至少一只锁定）
+    // 玩家在工坊里还得自己重新锁一次。这一条真鼠标走一遍：选两只（数据里标着锁定的那两只）
     // → 交接 → URL 带 `lock=`、工坊 `data-tw-locked` 与 URL 里的锁定数一致。
+    //
+    // ⚠ 2026-09-28 改钉（人类⑦：「锁定功能直接删了的了」）：页面上**不再有**「只看锁定」那一档，
+    // 也没有「锁定这一只去配队」那个按钮 ⇒ 这一条不再靠"点页面上的锁定入口"凑前置条件，
+    // 改成**从数据里取那两只锁定个体**（`locked` 是产物里本来就有的事实），再有鼠标把它们选进比较。
+    // 判据的意图一个字没改：**锁定必须跟着交接走**，且按钮上要写清带了几只。
+    // `?lock=` 参数本身与它背后的服务端校验（RC-301 规则⑨）一个字没动 —— 页面上只是没有入口了。
     await js(`document.getElementById('compare-clear')?.click(); true`);
     await sleep(300);
     // 回到盒子页（用脚本里既有的导航方式：`Page.navigate` + base）
@@ -1058,12 +1283,24 @@ async function main() {
       if (await js(`document.querySelectorAll('#box-grid .card').length > 0`)) break;
       await sleep(200);
     }
-    await mouseClick('#flag-locked');
-    await sleep(900);
-    const lockedCards = JSON.parse(await js(`JSON.stringify([...document.querySelectorAll('#box-grid .card')]
-      .slice(0, 2).map((el) => ({select: el.dataset.select, locked: true})))`) || '[]');
+    const lockedRoute = await (await fetch(`${base}api/roco/box?kind=mine&limit=60&offset=0`)).json();
+    const lockedCards = lockedRoute.player.cards.filter((c) => c.locked === true).slice(0, 2)
+      .map((c) => ({select: c.select, locked: true}));
+    steps.push({at: 'lock-handoff-pick', locked: lockedCards.map((c) => c.select)});
     if (lockedCards.length >= 1) {
-      for (const card of lockedCards) await mouseClick(`#box-grid .card[data-select="${card.select}"] .cmp-toggle`);
+      // 每一只都走「展开它那一种 → 打开它自己那一页 → 加入比较 → 回列表」（比较入口现在在二级页上）
+      for (const card of lockedCards) {
+        const species = lockedRoute.player.cards.find((c) => c.select === card.select)?.group ?? '';
+        if (species) await ensureRowVisible(species, card.select);
+        await mouseClick(`#box-grid .individual[data-detail="${card.select}"]`);
+        await waitFor(`(()=>{const v=document.getElementById('pet-view');
+          return Boolean(v)&&v.hidden===false&&new URLSearchParams(location.search).get('pet')===${JSON.stringify(card.select)};})()`);
+        await sleep(300);
+        await mouseClick('#pet-actions [data-cmp]');
+        await sleep(400);
+        await mouseClick('#pet-back');
+        await sleep(700);
+      }
       await sleep(400);
       const label = await js(`document.getElementById('compare-to-team')?.textContent ?? ''`);
       const labelProblems = (text, count) => (count > 0 && !/锁定/.test(String(text))
@@ -1073,7 +1310,7 @@ async function main() {
       check('25-锁定随交接走：按钮上写清带了几只锁定',
         '带锁定去配队时按钮上要写清带了几只',
         lockedCards.length > 0 && labelProblems(label, lockedCards.length).length === 0,
-        `选中 ${lockedCards.length} 只（只看锁定过滤后）：按钮文案「${label}」`);
+        `选中 ${lockedCards.length} 只（数据里标着锁定的那些）：按钮文案「${label}」`);
       counter('25-锁定随交接走：按钮上写清带了几只锁定',
         '带锁定却不在按钮上说明，必须被同一条判据抓住', labelProblems('带上这两只去配队', 1), '["带上这两只去配队"]');
       await mouseClick('#compare-to-team');
@@ -1113,8 +1350,8 @@ async function main() {
       // `check` 是 `(id, judge, ok, actual)` ⇒ `ok` 收到那串文本（恒真）——**这条"失败上报"
       // 其实报的是绿**。补上判据文本，让它真的红。
       check('25-锁定随交接走：按钮上写清带了几只锁定',
-        '「只看锁定」过滤后应当有卡片可比（夹具里 9 只锁定）',
-        false, '「只看锁定」过滤后一只卡片都没有（夹具里应当有 9 只锁定）');
+        '数据里标着锁定的个体应当能被选进比较（夹具里 9 只锁定）',
+        false, '数据里一只锁定的个体都取不到（夹具里应当有 9 只锁定）');
     }
 
     // ── ⑧ 刷新 → 回滚 → 重刷（**真机**：真鼠标点抽屉里的按钮）──────────────────
@@ -1194,12 +1431,15 @@ async function main() {
     await js(`localStorage.removeItem('roco.box.individuals.v1'); true`);
     await js(`document.getElementById('box-reset')?.click(); true`);
     await sleep(1200);
+    // ⚠ 2026-09-28 改钉（人类③：刷新/回滚按钮搬进二级详情页 `#pet-view`）：
+    // 这几步改成「先在列表里找到这一行 → 打开它自己那一页 → 在那一页上点按钮」。
+    // 判据的意思一个字没改（账+1 / 次数-1 / 说清落点 / 回滚逐值还原且次数不动 / 只退一步）。
     for (let i = 0; i < 60; i += 1) {
-      if (await js(`document.querySelectorAll('#box-grid [data-refresh="talent"]').length > 0`)) break;
+      if (await js(`document.querySelectorAll('#box-grid .individual[data-detail]').length > 0`)) break;
       await sleep(200);
     }
     const rowFacts = async (id) => JSON.parse(await js(`(()=>{
-      const row=document.querySelector('[data-individual="${id}"]');
+      const row=document.querySelector('#pet-view [data-individual="${id}"]');
       const store=JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}');
       const one=store[${JSON.stringify(id)}]||null;
       return JSON.stringify({
@@ -1209,22 +1449,29 @@ async function main() {
         note:row?String(row.querySelector('[data-refresh-note]')?.textContent||'').replace(/\\s+/g,' ').trim():null,
         undoButton:Boolean(row&&row.querySelector('[data-undo]')),
         status:String(document.getElementById('box-status')?.textContent||'').slice(0,120)});})()`));
-    const pick = JSON.parse(await js(`(()=>{const row=document.querySelector('[data-refresh="talent"]');
-      return JSON.stringify({id:row?row.dataset.individual:null});})()`));
+    const pick = JSON.parse(await js(`(()=>{const row=document.querySelector('#box-grid .individual[data-detail]');
+      return JSON.stringify({id:row?row.dataset.detail:null});})()`));
+    if (pick.id) {
+      // 打开这一只自己那一页（刷新/回滚按钮都在那一页上）
+      await mouseClick(`#box-grid .individual[data-detail="${pick.id}"]`);
+      await waitFor(`(()=>{const v=document.getElementById('pet-view');
+        return Boolean(v)&&v.hidden===false&&Boolean(new URLSearchParams(location.search).get('pet'));})()`);
+      await sleep(400);
+    }
     if (!pick.id) {
       check('28-刷新→回滚→重刷（真机）',
-        '盒子里要有一个能点的「刷新天分」按钮（抽屉渲染出来了）',
-        false, '盒子里一个「刷新天分」按钮都没有（抽屉没渲染？）');
+        '盒子里要有一行个体可以打开（二级详情页上有「刷新天分」）',
+        false, '盒子里一行个体都没有（抽屉没渲染？）');
     } else {
       const before = await rowFacts(pick.id);
-      await mouseClick(`[data-individual="${pick.id}"] [data-refresh="talent"]`);
-      await sleep(500);
+      await mouseClick(`#pet-view [data-refresh="talent"]`);
+      await sleep(600);
       const afterRefresh = await rowFacts(pick.id);
-      await mouseClick(`[data-individual="${pick.id}"] [data-undo]`);
-      await sleep(500);
+      await mouseClick(`#pet-view [data-undo]`);
+      await sleep(600);
       const afterUndo = await rowFacts(pick.id);
-      await mouseClick(`[data-individual="${pick.id}"] [data-refresh="talent"]`);
-      await sleep(500);
+      await mouseClick(`#pet-view [data-refresh="talent"]`);
+      await sleep(600);
       const afterReroll = await rowFacts(pick.id);
       const step = {id: pick.id, before, afterRefresh, afterUndo, afterReroll};
       steps.push({at: 'rollback', ...step});
@@ -1276,16 +1523,36 @@ async function main() {
     await cdp.send('Page.navigate', {url: base + 'box.html'});
     await sleep(1400);
     for (let i = 0; i < 60; i += 1) {
-      if (await js(`document.querySelectorAll('#box-grid [data-add]').length > 0`)) break;
+      if (await js(`document.querySelectorAll('#box-grid .species-drawer').length > 0`)) break;
       await sleep(200);
     }
-    const addTarget = await js(`document.querySelector('#box-grid [data-add]')?.dataset.add ?? ''`);
+    // ⚠ 2026-09-28 改钉（人类③：这一类大动作搬进二级详情页）：「＋再养一只同种」现在在
+    // **个体自己那一页**上（`#pet-actions`）。判据的意图一个字没改：真鼠标加一只 ⇒
+    // 本机记录里真的多一只 ⇒ 两只都能选进比较 ⇒ 点比较**不许静默失败**。
+    const listHead = await js(`document.querySelector('#box-grid .species-drawer .drawer-head')?.dataset.species ?? ''`);
+    if (listHead) {
+      await mouseClick(`.species-drawer[data-species="${listHead}"] .drawer-head`);
+      await sleep(500);
+    }
+    const addProbe = JSON.parse(await js(`(()=>{const row=document.querySelector('#box-grid .individual[data-detail]');
+      return JSON.stringify({row:row?row.dataset.detail:null,
+        pet:new URLSearchParams(location.search).get('pet')});})()`));
+    if (addProbe.row) {
+      await mouseClick(`#box-grid .individual[data-detail="${addProbe.row}"]`);
+      await waitForSafe(`(()=>{const v=document.getElementById('pet-view');
+        return Boolean(v)&&v.hidden===false&&document.querySelector('#pet-actions [data-add]');})()`,
+      {tries: 60, ms: 200});
+      await sleep(300);
+    }
+    const addTarget = await js(`document.querySelector('#pet-actions [data-add]')?.dataset.add ?? ''`);
     if (!addTarget) {
       check('29-再养一只同种→比大小',
-        '页面上要有一个「＋ 再养一只同种」按钮（抽屉渲染出来了）',
-        false, '页面上一个「＋ 再养一只同种」按钮都没有');
+        '二级详情页上要有一个「＋ 再养一只同种」按钮',
+        false, `页面上一个「＋ 再养一只同种」按钮都没有（那一行=${JSON.stringify(addProbe)}）`);
     } else {
-      await mouseClick(`[data-add="${addTarget}"]`);
+      await mouseClick(`#pet-actions [data-add]`);
+      await sleep(900);
+      await mouseClick('#pet-back');
       await sleep(700);
       // ⚠ 2026-09-28 改钉：原来 `extra = ids.find((id)=>id!==base)` —— 那时候本地库里**只有**
       // 「再养一只同种」加出来的那只，所以"另一只"必然是它。人类批准一对同种演示个体之后，
@@ -1402,33 +1669,42 @@ async function main() {
       return bad;
     };
     await cdp.send('Page.navigate', {url: base + 'box.html'});
-    await sleep(1400);
+    // ⚠ 2026-09-28 改钉（人类③：刷新/回滚搬进二级详情页）：同 28 号 —— 这几步改成
+    // 「先在列表里找到这一行 → 打开它自己那一页 → 在那一页上点按钮」。判据的意思一个字没改。
     for (let i = 0; i < 60; i += 1) {
-      if (await js(`document.querySelectorAll('#box-grid [data-refresh="nature"]').length > 0`)) break;
+      if (await js(`document.querySelectorAll('#box-grid .individual[data-detail]').length > 0`)) break;
       await sleep(200);
     }
     const natureFacts = async (id) => JSON.parse(await js(`(()=>{
-      const row=document.querySelector('[data-individual="${id}"]');
+      const row=document.querySelector('#pet-view [data-individual="${id}"]');
       const store=JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}');
       const one=store[${JSON.stringify(id)}]||null;
       return JSON.stringify({nature:one?one.nature:null, left:one&&one.refreshes?one.refreshes.nature:0,
         note:row?String(row.querySelector('[data-refresh-note]')?.textContent||'').replace(/\s+/g,' ').trim():null,
         undoButton:Boolean(row&&row.querySelector('[data-undo]'))});})()`));
-    const naturePick = await js(`document.querySelector('#box-grid [data-refresh="nature"]')?.dataset.individual ?? ''`);
+    const naturePick = await js(`document.querySelector('#box-grid .individual[data-detail]')?.dataset.detail ?? ''`);
     if (!naturePick) {
       check('30-性格：刷新→回滚→重刷（真机）',
-        '盒子里要有一个能点的「刷新性格」按钮（抽屉渲染出来了）',
-        false, '盒子里一个「刷新性格」按钮都没有（抽屉没渲染？）');
+        '盒子里要有一行个体可以打开（二级详情页上有「刷新性格」）',
+        false, '盒子里一行个体都没有（抽屉没渲染？）');
     } else {
+      // 先打开这一只自己那一页（按钮都在那一页上）
+      const natureSpecies = ((await (await fetch(`${base}api/roco/box?kind=mine&limit=60&offset=0`)).json())
+        .player?.cards ?? []).find((c) => c.select === naturePick)?.group ?? '';
+      if (natureSpecies) await ensureRowVisible(natureSpecies, naturePick);
+      await mouseClick(`#box-grid .individual[data-detail="${naturePick}"]`);
+      await waitFor(`(()=>{const v=document.getElementById('pet-view');
+        return Boolean(v)&&v.hidden===false&&Boolean(new URLSearchParams(location.search).get('pet'));})()`);
+      await sleep(400);
       const nBefore = await natureFacts(naturePick);
-      await mouseClick(`[data-individual="${naturePick}"] [data-refresh="nature"]`);
-      await sleep(500);
+      await mouseClick(`#pet-view [data-refresh="nature"]`);
+      await sleep(600);
       const nRefresh = await natureFacts(naturePick);
-      await mouseClick(`[data-individual="${naturePick}"] [data-undo]`);
-      await sleep(500);
+      await mouseClick(`#pet-view [data-undo]`);
+      await sleep(600);
       const nUndo = await natureFacts(naturePick);
-      await mouseClick(`[data-individual="${naturePick}"] [data-refresh="nature"]`);
-      await sleep(500);
+      await mouseClick(`#pet-view [data-refresh="nature"]`);
+      await sleep(600);
       const nReroll = await natureFacts(naturePick);
       const nStep = {id: naturePick, before: nBefore, afterRefresh: nRefresh, afterUndo: nUndo, afterReroll: nReroll};
       steps.push({at: 'rollback-nature', ...nStep});
@@ -1445,6 +1721,246 @@ async function main() {
           afterReroll: {...nReroll, nature: nRefresh.nature, note: nRefresh.note}}),
         '{"afterUndo":{"nature":"未还原","left":"次数被改动"},"afterReroll":{"note":"同一条性格"}}');
       shots.push(await shoot('box-12-nature-rollback-1440x900'));
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // ⚠ 2026-09-28 **新增**（人类 ①②③⑤⑥⑦⑧ 逐字批注的每一条都要有一条真机判据）：
+    //   ① 等级一会儿 60 一会儿 100（错的）        → 「31-等级只有 60」
+    //   ② 没有看完整六维的入口                    → 「32-完整六维的二级详情页」
+    //   ③ 刷新/天分/再加一只太大，放二级页去      → 「32」与「33-动作只在二级页」
+    //   ⑤ 选单不会自己收回去、全叠在一起          → 「34-筛选菜单自己收回去」
+    //   ⑥ 收藏功能是假的                          → 「35-收藏刷新后还在」
+    //   ⑦ 锁定功能直接删掉（入口）                → 「33」里一并量（页面上不许再有它）
+    //   ⑧ 删除个体要二次确认                      → 「36-删掉要两步」
+    // 做法与前文一致：真鼠标真键盘，量的是**页面实际输出**。
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    // ── ① 等级：页面上只许出现 Lv.60 ────────────────────────────────────────
+    await cdp.send('Page.navigate', {url: base + 'box.html'});
+    await sleep(1400);
+    await waitForSafe(`document.querySelectorAll('#box-grid .individual[data-detail]').length>0`, {tries: 60, ms: 200});
+    // 期望值**从数据现读**（不写死 60）：页面上出现的级数必须是数据里真有的那些。
+    const levelRoute = await (await fetch(`${base}api/roco/box?kind=mine&limit=60&offset=0`)).json();
+    const levelsInData = [...new Set((levelRoute.player?.cards ?? []).map((c) => c.level))];
+    const levelFacts = JSON.parse(await safeJs(`JSON.stringify({html:document.documentElement.outerHTML,
+      lines:(document.body.innerText||''), levels:${JSON.stringify(levelsInData)}})`) ?? '{}');
+    const levelProblems = levelDisplayProblems(levelFacts);
+    check('31-等级只有60', '人类 2026-09-28：「信息同时出现60和lv100（错误的）」⇒ 页面上**只许出现 Lv.60**'
+      + '（等级上限 60 是官方口径，数据里 49 个个体也全是 60）；整页一个 Lv.100 都不许有，'
+      + '同一行里也不许出现两个等级，而且出现的级数必须是数据里真有的',
+      levelProblems.length === 0,
+      levelProblems.join(' | ')
+        || `整页 Lv.100 ${(String(levelFacts.html).match(/Lv\.100/g) ?? []).length} 处；`
+          + `出现的级数 ${JSON.stringify([...new Set((String(levelFacts.html).match(/Lv\.\d+/g) ?? []))])}；`
+          + `数据里的级数 ${JSON.stringify([...new Set(levelFacts.levels)])}`);
+    counter('31-等级只有60', '把同一行里塞上 60 与 100（他截图里那个）必须被同一条判据抓住',
+      levelDisplayProblems({html: '<span class="individual-level">Lv.60</span><span class="tag">Lv.100</span>',
+        lines: '铠甲虫 Lv.60 Lv.100', levels: [60]}),
+      '{"html":"Lv.60 + Lv.100 同一行"}');
+
+    // ── ② 完整六维的二级详情页（地址 `?pet=`）──────────────────────────────
+    const petSelect = await js(`document.querySelector('#box-grid .individual[data-detail]')?.dataset.detail ?? ''`);
+    if (petSelect) {
+      await mouseClick(`#box-grid .individual[data-detail="${petSelect}"]`);
+      await waitForSafe(`(()=>{const v=document.getElementById('pet-view');
+        return Boolean(v)&&v.hidden===false&&Boolean(new URLSearchParams(location.search).get('pet'));})()`,
+      {tries: 60, ms: 200});
+      await sleep(350);
+      const petFacts = JSON.parse(await safeJs(`(()=>{const v=document.getElementById('pet-view');
+        const stats=[...v.querySelectorAll('#pet-body .metric')].map((el)=>String(el.querySelector('b')?.textContent||'').trim());
+        return JSON.stringify({view:document.body.dataset.boxView,
+          pet:new URLSearchParams(location.search).get('pet'),
+          stats, traitRows:v.querySelectorAll('#pet-traits .trait').length,
+          moves:v.querySelectorAll('#pet-body .moveset li').length,
+          objectObject:((document.body.innerText||'').match(/\[object Object\]/g)??[]).length,
+          back:Boolean(document.getElementById('pet-back'))});})()`) ?? '{}');
+      steps.push({at: 'pet-page', select: petSelect, facts: petFacts});
+      const petProblems = petPageProblems(petFacts);
+      check('32-完整六维的二级详情页', '人类 2026-09-28：「没有个按钮能弹出个二级页面展示完整六维属性」⇒ '
+        + '点一行就进**二级详情页**（地址 `?pet=<个体>`）：生命/物攻/物防/魔攻/魔防/速度 一项不落，'
+        + '性格 / 天分档位 / 资质这些栏都在，四个技能都在，[object Object] 0 处，还有返回入口',
+        petProblems.length === 0 && petFacts.back === true,
+        petProblems.join(' | ')
+          || `地址 pet=${petFacts.pet}；六维量到 ${JSON.stringify(petFacts.stats)}；`
+            + `性格/天分栏 ${petFacts.traitRows} 行；技能 ${petFacts.moves} 个`);
+      counter('32-完整六维的二级详情页', '六维缺一项 / 没带这一只 / 又印出 [object Object] —— 三种坏样本都要被抓住',
+        petPageProblems({view: 'list', pet: null, stats: ['生命', '物攻'], traitRows: 1, moves: 0, objectObject: 2}),
+        '{"stats":["生命","物攻"],"pet":null,"objectObject":2}');
+
+      // ③（同一屏上接着量）刷新 / 再加一只 / 回滚 / 加入比较都在这一页上，列表行里一个都没有
+      const placement = JSON.parse(await safeJs(`(()=>{const v=document.getElementById('pet-view');
+        const list=document.getElementById('box-list-view');
+        return JSON.stringify({listHtml:list?list.innerHTML:'', petHtml:v?v.innerHTML:''});})()`) ?? '{}');
+      const placementProblems = actionPlacementProblems(placement);
+      check('33-动作只在二级页', '人类 2026-09-28：「刷新性格、天分、再加一只啥的这个太大了…是不是最好放二级页面去？」'
+        + '⇒ 刷新性格 / 刷新天分 / ＋再养一只同种 / 回滚上一次 / 加入比较**只在二级详情页**上（按钮旁写清还剩几次），'
+        + '列表那一屏里一个都不许有；「只看锁定」那个入口（人类⑦：「锁定功能直接删了的就删了」）页面上也不许再有',
+        placementProblems.length === 0
+          && !String(placement.listHtml).includes('只看锁定')
+          && (await js(`!document.getElementById('flag-locked')`)) === true,
+        placementProblems.join(' | ')
+          || `二级页上的入口：${(String(placement.petHtml).match(/data-refresh="\w+"|data-add=|data-cmp=|data-undo=/g) ?? []).join('、')}；`
+            + `列表里这些属性 ${(String(placement.listHtml).match(/data-refresh="\w+"|data-add=|data-undo=/g) ?? []).length} 个`);
+      counter('33-动作只在二级页', '把这些按钮塞回列表行里必须被同一条判据抓住',
+        actionPlacementProblems({listHtml: '<div data-individual="own-0001"><button data-refresh="nature"></button></div>',
+          petHtml: '<button data-refresh="nature"></button>'}),
+        '{"listHtml":"列表行里带着 data-refresh"}');
+      await mouseClick('#pet-back');
+      await sleep(700);
+    } else {
+      check('32-完整六维的二级详情页', '「我的盒子」里要有一行个体可以点开', false, '一行个体都没有');
+    }
+
+    // ── ⑤ 筛选菜单：打开一个就收起别的、选了项/点外面都收起 ──────────────
+    await mouseClick('#menu-type > summary');
+    await sleep(250);
+    const menuOpen = JSON.parse(await js(`JSON.stringify({open:[...document.querySelectorAll('details.fmenu[open]')].length})`));
+    await mouseClick('#menu-role > summary');
+    await sleep(250);
+    const menuSwap = JSON.parse(await js(`JSON.stringify({
+      open:[...document.querySelectorAll('details.fmenu[open]')].length,
+      typeOpen:document.getElementById('menu-type').open,
+      roleOpen:document.getElementById('menu-role').open})`));
+    await mouseClick('#filter-role .filter-chip[data-v=""]');
+    await sleep(600);
+    const menuClosed = JSON.parse(await js(`JSON.stringify({open:document.getElementById('menu-role').open,
+      any:[...document.querySelectorAll('details.fmenu[open]')].length})`));
+    await mouseClick('#menu-support > summary');
+    await sleep(250);
+    await mouseClick('#box-search');
+    await sleep(250);
+    const menuOutside = JSON.parse(await js(`JSON.stringify({open:document.getElementById('menu-support').open})`));
+    await mouseClick('#menu-support > summary');
+    await sleep(250);
+    const insideStayed = JSON.parse(await js(`JSON.stringify({open:document.getElementById('menu-support').open})`));
+    await js(`document.getElementById('menu-support').open=false; true`);
+    await mouseClick('#box-reset');
+    await sleep(800);
+    const menuFacts = {
+      afterOpen: {openCount: menuOpen.open},
+      // 现场事实：现在摊开几个、第二个（定位）自己开着没
+      afterSwap: {openCount: menuSwap.open, otherOpen: menuSwap.roleOpen === true},
+      afterPick: {closed: menuClosed.open === false, open: menuClosed.open},
+      afterOutside: {closed: menuOutside.open === false, open: menuOutside.open},
+      afterInside: {stayedOpen: insideStayed.open === true},
+      narrow: null,
+    };
+    const menuProblems = filterMenuProblems(menuFacts);
+    check('34-筛选菜单自己收回去', '人类 2026-09-28：「这个选单不知道自己瘦回去吗？全部重在一起」⇒ '
+      + '三个筛选菜单打开一个就把别的收起来；点了里面的一项自动收起；点页面其他地方也收起；点菜单里面不收起',
+      menuProblems.length === 0,
+      menuProblems.join(' | ')
+        || `打开系别后摊开 ${menuOpen.open} 个；再开定位后摊开 ${menuSwap.open} 个（系别自己收了=${menuSwap.typeOpen === false}）；`
+          + `选中一项后定位还开着=${menuClosed.open}；点别处后还开着=${menuOutside.open}`);
+    counter('34-筛选菜单自己收回去', '三个菜单全摊开、点完项不收、点外面不收 —— 三种坏样本都要被抓住',
+      filterMenuProblems({afterOpen: {openCount: 3}, afterSwap: {openCount: 3}, otherOpen: false,
+        afterPick: {closed: false}, afterOutside: {closed: false}, afterInside: {stayedOpen: false}}),
+      '{"openCount":3,"afterPick":false,"afterOutside":false}');
+
+    // ── ⑥ 收藏：点了立刻生效 + 刷新还在 + 「只看收藏」按它筛 ────────────────
+    await cdp.send('Page.navigate', {url: base + 'box.html'});
+    await sleep(1400);
+    await waitForSafe(`document.querySelectorAll('#box-grid [data-fav]').length>0`, {tries: 60, ms: 200});
+    const favSelect = await js(`document.querySelector('#box-grid [data-fav]')?.dataset.fav ?? ''`);
+    if (favSelect) {
+      await mouseClick(`#box-grid [data-fav="${favSelect}"]`);
+      await sleep(500);
+      const afterClick = JSON.parse(await js(`(()=>{const b=document.querySelector('#box-grid [data-fav="${favSelect}"]');
+        const store=JSON.parse(localStorage.getItem('roco.box.favourites.v1')||'{}');
+        return JSON.stringify({pressed:b?b.getAttribute('aria-pressed')==='true':null, stored:store[${JSON.stringify(favSelect)}]===true});})()`));
+      await cdp.send('Page.navigate', {url: base + 'box.html'});
+      await sleep(1500);
+      await waitForSafe(`document.querySelectorAll('#box-grid [data-fav]').length>0`, {tries: 60, ms: 200});
+      const afterReload = JSON.parse(await js(`(()=>{const b=document.querySelector('#box-grid [data-fav="${favSelect}"]');
+        return JSON.stringify({pressed:b?b.getAttribute('aria-pressed')==='true':null, rowPresent:Boolean(b)});})()`));
+      await mouseClick('#flag-favourite');
+      await sleep(1200);
+      const onlyFav = JSON.parse(await js(`JSON.stringify({count:document.querySelectorAll('#box-grid [data-fav]').length,
+        contains:Boolean(document.querySelector('#box-grid [data-fav="${favSelect}"]'))})`));
+      const favFacts = {afterClick, afterReload, onlyFav};
+      steps.push({at: 'favourite', select: favSelect, facts: favFacts});
+      const favProblems = favouriteProblems(favFacts);
+      check('35-收藏刷新后还在', '人类 2026-09-28：「然后就是这收藏功能也没用啊？做出来吧！」⇒ '
+        + '行上的星标点一下立刻生效（`aria-pressed=true`）、本机记下来（`localStorage`，键 `roco.box.favourites.v1`）、'
+        + '**刷新页面后还在**，「只看收藏」按它筛',
+        favProblems.length === 0,
+        favProblems.join(' | ')
+          || `个体 ${favSelect}：点后 aria-pressed=${afterClick.pressed} 存下来=${afterClick.stored}；`
+            + `刷新后 aria-pressed=${afterReload.pressed} 行还在=${afterReload.rowPresent}；`
+            + `只看收藏剩下 ${onlyFav.count} 行、收藏那只在里面=${onlyFav.contains}`);
+      counter('35-收藏刷新后还在', '点了不生效 / 刷新就丢 / 筛选不按它滤 —— 三种坏样本都要被抓住',
+        favouriteProblems({afterClick: {pressed: false, stored: false}, afterReload: {pressed: false, rowPresent: false},
+          onlyFav: {contains: false, count: 0}}),
+        '{"afterClick":{"pressed":false},"afterReload":{"pressed":false},"onlyFav":{}}');
+      await mouseClick('#box-reset');
+      await sleep(900);
+    } else {
+      check('35-收藏刷新后还在', '「我的盒子」每一行都要有一个收藏星标', false, '一个收藏按钮都没画出来');
+    }
+
+    // ── ⑧ 删掉要两步（二次确认，不用浏览器原生 confirm）───────────────────
+    await mouseClick('#box-reset');
+    await sleep(1000);
+    const delTarget = await js(`document.querySelector('#box-grid [data-add]')?.dataset.add ?? ''`);
+    if (delTarget) {
+      await mouseClick(`[data-add="${delTarget}"]`);
+      await sleep(900);
+      const serverIdsForRemove = ((await (await fetch(`${base}api/roco/box?kind=mine&limit=60&offset=0`)).json())
+        .player?.cards ?? []).map((c) => c.select);
+      const extraId = await js(`(()=>{const ids=${JSON.stringify(serverIdsForRemove)};
+        const store=JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}');
+        return Object.keys(store).find((id)=>store[id]&&store[id].species_id===${JSON.stringify(delTarget)}
+          &&!ids.includes(id))||'';})()`);
+      if (extraId) {
+        // 先把这一种摊开（新加的那一只就在这一行里），再打开它自己那一页
+        //（「删掉这只」与二次确认都在那一页上）。
+        const extraRow = await ensureRowVisible(delTarget, extraId);
+        steps.push({at: 'delete-pick', delTarget, extraId, extraRow});
+        await mouseClick(`#box-grid .individual[data-detail="${extraId}"]`);
+        await waitForSafe(`(()=>{const v=document.getElementById('pet-view');
+          return Boolean(v)&&v.hidden===false&&new URLSearchParams(location.search).get('pet')===${JSON.stringify(extraId)};})()`,
+        {tries: 60, ms: 200});
+        await sleep(350);
+        await mouseClick(`#pet-actions [data-remove="${extraId}"]`);
+        await sleep(500);
+        const afterFirst = JSON.parse(await js(`(()=>{const store=JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}');
+          return JSON.stringify({removed:!store[${JSON.stringify(extraId)}],
+            confirmShown:Boolean(document.querySelector('#pet-actions [data-remove-confirm="${extraId}"]')),
+            cancelShown:Boolean(document.querySelector('#pet-actions [data-remove-cancel="${extraId}"]'))});})()`));
+        await mouseClick(`#pet-actions [data-remove-cancel="${extraId}"]`);
+        await sleep(500);
+        const afterCancel = JSON.parse(await js(`(()=>{const store=JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}');
+          return JSON.stringify({removed:!store[${JSON.stringify(extraId)}],
+            rowPresent:Boolean(document.querySelector('#pet-actions [data-remove="${extraId}"]')
+              ||document.querySelector('#box-grid [data-remove="${extraId}"]'))});})()`));
+        await mouseClick(`#pet-actions [data-remove="${extraId}"]`);
+        await sleep(450);
+        await mouseClick(`#pet-actions [data-remove-confirm="${extraId}"]`);
+        await sleep(800);
+        const afterConfirm = JSON.parse(await js(`(()=>{const store=JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}');
+          return JSON.stringify({removed:!store[${JSON.stringify(extraId)}]});})()`));
+        const delFacts = {afterFirst, afterCancel, afterConfirm};
+        steps.push({at: 'delete-confirm', extraId, facts: delFacts});
+        const delProblems = deleteConfirmProblems(delFacts);
+        check('36-删掉要两步', '人类 2026-09-28：「然后删除个体的功能一定要加二次确认」⇒ '
+          + '第一次点**不删**（只把这一处换成「确定删掉？＋ 取消」），点「取消」什么都不动，'
+          + '再点「确定删掉」才真的删掉（不用浏览器原生 confirm）',
+          delProblems.length === 0,
+          delProblems.join(' | ')
+            || `本机那一只 ${extraId}：第一次点后删了吗=${afterFirst.removed}（确认键=${afterFirst.confirmShown} `
+              + `取消键=${afterFirst.cancelShown}）；取消后删了吗=${afterCancel.removed} 行还在=${afterCancel.rowPresent}；`
+              + `确认后删了吗=${afterConfirm.removed}`);
+        counter('36-删掉要两步', '一次点就删 / 没有取消键 / 点了取消还是删了 —— 三种坏样本都要被抓住',
+          deleteConfirmProblems({afterFirst: {removed: true, confirmShown: false, cancelShown: false},
+            afterCancel: {removed: true, rowPresent: false}, afterConfirm: {removed: false}}),
+          '{"afterFirst":{"removed":true},"afterCancel":{"removed":true},"afterConfirm":{"removed":false}}');
+      } else {
+        check('36-删掉要两步', '「＋再养一只同种」之后本机要真的多出一只（否则删不掉这件事没得验）',
+          false, `加完之后本机记录里找不到不在名单里的那一只（种类=${delTarget}）`);
+      }
+    } else {
+      check('36-删掉要两步', '二级详情页上要有「＋再养一只同种」（本机那一只才有「删掉这只」）',
+        false, '页面上一个「＋再养一只同种」都没有');
     }
 
     check('22-控制台干净', '整轮下来没有 console.error，也没有未捕获异常',
