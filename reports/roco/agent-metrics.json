@@ -1,7 +1,7 @@
 {
  "schema": "roco-agent-metrics/v1",
  "generated_by": "scripts/roco/agent-metrics.mjs",
- "generated_at": "2026-09-25T07:32:58.935Z",
+ "generated_at": "2026-09-28T05:49:18.770Z",
  "scope": "两栏计量（问模型几次 / 问引擎几次 / 检索什么）+ 延迟分段。只读既有产物，不调模型、不联网。",
  "sources": {
   "live_model_eval": {
@@ -18,7 +18,7 @@
   },
   "model_arm_trajectories": {
    "path": "tests/evals/agent-trajectories-model-v1.jsonl",
-   "sha256": "f5230e485c3430f52393bcf9f25306db6f97a9e5525ca8b89246982bb03565b2",
+   "sha256": "c5cc09c78801ae5a67c4ad94adae8e29e6206574ca0ccf8730dea81c4b932404",
    "rows": 1752
   }
  },
@@ -1022,467 +1022,385 @@
   "engine_calls": {
    "n": 1752,
    "p50": 0,
-   "p90": 1,
+   "p90": 0,
    "p95": 1,
    "max": 1,
    "mean": 0
   },
   "stopped_distribution": {
-   "complete": 1584,
-   "receipt-budget": 108,
+   "complete": 1656,
+   "receipt-budget": 36,
    "policy": 60
   },
-  "checks_passed": 1617,
+  "checks_passed": 1014,
   "rows": [
    {
     "case_id": "rl-pet-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-pet-f1-02",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-02",
@@ -1503,32 +1421,18 @@
    {
     "case_id": "rl-pet-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-pet-f1-02",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-02",
@@ -1565,22 +1469,10 @@
    {
     "case_id": "rl-pet-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-pet-f1-03",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-03",
@@ -1633,102 +1525,90 @@
    {
     "case_id": "rl-pet-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-pet-f1-03",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-01",
@@ -1781,132 +1661,98 @@
    {
     "case_id": "rl-pet-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-pet-f2-03",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-03",
@@ -1959,312 +1805,258 @@
    {
     "case_id": "rl-pet-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-pet-f2-03",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-pet-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-03",
@@ -2317,462 +2109,370 @@
    {
     "case_id": "rl-skill-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-01",
@@ -2787,62 +2487,50 @@
    {
     "case_id": "rl-skill-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-01",
@@ -2887,62 +2575,50 @@
    {
     "case_id": "rl-skill-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-02",
@@ -2957,12 +2633,42 @@
    {
     "case_id": "rl-skill-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-skill-f2-03",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-skill-f2-03",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-skill-f2-03",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-skill-f2-03",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-03",
@@ -2997,322 +2703,266 @@
    {
     "case_id": "rl-skill-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-skill-f2-03",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-skill-f2-03",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-skill-f2-03",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-skill-f2-03",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-skill-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-type-f0-03",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-type-f0-03",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-type-f0-03",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-type-f0-03",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-type-f0-03",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-03",
@@ -3347,212 +2997,130 @@
    {
     "case_id": "rl-type-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-type-f0-03",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-type-f0-03",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-type-f0-03",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-type-f0-03",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-type-f0-03",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-01",
@@ -3677,92 +3245,82 @@
    {
     "case_id": "rl-type-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-type-f1-04",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-04",
@@ -3797,62 +3355,42 @@
    {
     "case_id": "rl-type-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-type-f1-04",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f2-01",
@@ -3877,12 +3415,50 @@
    {
     "case_id": "rl-type-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-type-f2-01",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-type-f2-01",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-type-f2-01",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-type-f2-01",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-type-f2-01",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f2-01",
@@ -3895,54 +3471,28 @@
     "checks_passed": true
    },
    {
-    "case_id": "rl-type-f2-01",
+    "case_id": "rl-type-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
-    "case_id": "rl-type-f2-01",
+    "case_id": "rl-type-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
-    "case_id": "rl-type-f2-01",
+    "case_id": "rl-type-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-type-f2-01",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-type-f2-01",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f2-02",
@@ -3977,152 +3527,98 @@
    {
     "case_id": "rl-type-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-type-f2-02",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-type-f2-02",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-type-f2-02",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f2-04",
@@ -4157,62 +3653,70 @@
    {
     "case_id": "rl-type-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-type-f2-04",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-type-f2-04",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-type-f2-04",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-type-f2-04",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-type-f2-04",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-learn-f0-01",
     "arm": "local_4b",
     "engine_calls": 1,
     "engine_tools": [
      "query_rules"
     ],
-    "stopped": "complete",
-    "checks_passed": true
+    "stopped": "receipt-budget",
+    "checks_passed": false
    },
    {
-    "case_id": "rl-type-f2-04",
+    "case_id": "rl-learn-f0-01",
     "arm": "local_4b",
     "engine_calls": 1,
     "engine_tools": [
      "query_rules"
     ],
-    "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-type-f2-04",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-type-f2-04",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-type-f2-04",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
+    "stopped": "receipt-budget",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f0-01",
@@ -4282,27 +3786,27 @@
      "query_rules"
     ],
     "stopped": "receipt-budget",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
-    "case_id": "rl-learn-f0-01",
+    "case_id": "rl-learn-f0-02",
     "arm": "local_4b",
     "engine_calls": 1,
     "engine_tools": [
      "query_rules"
     ],
     "stopped": "receipt-budget",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
-    "case_id": "rl-learn-f0-01",
+    "case_id": "rl-learn-f0-02",
     "arm": "local_4b",
     "engine_calls": 1,
     "engine_tools": [
      "query_rules"
     ],
     "stopped": "receipt-budget",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f0-02",
@@ -4372,27 +3876,7 @@
      "query_rules"
     ],
     "stopped": "receipt-budget",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-learn-f0-02",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-learn-f0-02",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f0-03",
@@ -4402,7 +3886,7 @@
      "query_rules"
     ],
     "stopped": "receipt-budget",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f0-03",
@@ -4412,7 +3896,7 @@
      "query_rules"
     ],
     "stopped": "receipt-budget",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f0-03",
@@ -4422,7 +3906,7 @@
      "query_rules"
     ],
     "stopped": "receipt-budget",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f0-03",
@@ -4492,7 +3976,7 @@
      "query_rules"
     ],
     "stopped": "receipt-budget",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f0-04",
@@ -4562,7 +4046,7 @@
      "query_rules"
     ],
     "stopped": "receipt-budget",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f0-04",
@@ -4572,727 +4056,583 @@
      "query_rules"
     ],
     "stopped": "receipt-budget",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-learn-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "receipt-budget",
-    "checks_passed": true
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f0-01",
@@ -5477,12 +4817,26 @@
    {
     "case_id": "rl-term-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-term-f0-03",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rl-term-f0-03",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f0-03",
@@ -5545,114 +4899,76 @@
     "checks_passed": true
    },
    {
-    "case_id": "rl-term-f0-03",
+    "case_id": "rl-term-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-term-f0-03",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rl-term-f0-04",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-01",
@@ -5677,62 +4993,50 @@
    {
     "case_id": "rl-term-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-01",
@@ -5867,152 +5171,122 @@
    {
     "case_id": "rl-term-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f2-01",
@@ -6287,1172 +5561,938 @@
    {
     "case_id": "rl-term-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-term-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rl-ruleset-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f0-01",
@@ -7673,272 +6713,218 @@
    {
     "case_id": "rc-eval-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-03",
@@ -8015,282 +7001,218 @@
    {
     "case_id": "rc-eval-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rc-eval-f2-03",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-03",
@@ -8343,832 +7265,690 @@
    {
     "case_id": "rc-eval-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
+   },
+   {
+    "case_id": "rc-eval-f2-03",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-eval-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "evaluate_team"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rc-swap-f0-01",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rc-swap-f0-01",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f0-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rc-swap-f1-03",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rc-swap-f1-03",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f1-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
+   },
+   {
+    "case_id": "rc-swap-f2-01",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
+   },
+   {
+    "case_id": "rc-swap-f2-01",
+    "arm": "local_4b",
+    "engine_calls": 0,
+    "engine_tools": [],
+    "stopped": "complete",
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f2-01",
@@ -9197,32 +7977,10 @@
    {
     "case_id": "rc-swap-f2-01",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rc-swap-f2-01",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
-   },
-   {
-    "case_id": "rc-swap-f2-01",
-    "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
-    "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f2-01",
@@ -9259,32 +8017,26 @@
    {
     "case_id": "rc-swap-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f2-02",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f2-02",
@@ -9329,32 +8081,26 @@
    {
     "case_id": "rc-swap-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f2-03",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f2-03",
@@ -9407,92 +8153,74 @@
    {
     "case_id": "rc-swap-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "rc-swap-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "compare_team_change"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
-    "checks_passed": true
+    "checks_passed": false
    },
    {
     "case_id": "cs-answered-f0-01",
@@ -12361,20 +11089,16 @@
    {
     "case_id": "tf-damage-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": true
    },
    {
     "case_id": "tf-damage-f2-04",
     "arm": "local_4b",
-    "engine_calls": 1,
-    "engine_tools": [
-     "query_rules"
-    ],
+    "engine_calls": 0,
+    "engine_tools": [],
     "stopped": "complete",
     "checks_passed": true
    },
