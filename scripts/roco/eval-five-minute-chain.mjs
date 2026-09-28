@@ -516,7 +516,13 @@ async function collectFacts({cdp, driver, results, base, mode}) {
   let compare = {ok: false, note: ''};
   try {
     const cards = JSON.parse(await js(`JSON.stringify([...document.querySelectorAll('#box-grid .card')]
-      .map((el)=>({select:el.dataset.select, group:el.dataset.group||'', locked:String(el.innerHTML).includes('锁定')})))`) || '[]');
+      // 2026-09-28 改钉（真的红了才发现）：这里原来拿**徽章里的中文文案**判锁定 ——
+      // String(el.innerHTML).includes('锁定')。而人类 ⑨「锁定功能直接删了的了」把那个只读徽章
+      // 从玩家层去掉了（src/client/box.js 的 cardHtml 过滤掉「锁定/收藏」两个 badge）
+      // ⇒ 这句再也读不到，这一整步一只锁定个体都挑不出来，交接 URL 变成 lock 0 只，判据红。
+      // 判据本来就该读**结构化数据**、而不是读一段给人看的中文：卡片上现在有
+      // data-locked=true|false（唯一事实源仍是服务端卡片的 locked），改成读它。
+      .map((el)=>({select:el.dataset.select, group:el.dataset.group||'', locked:el.dataset.locked==='true'})))`) || '[]');
     const locked = cards.filter((c) => c.locked);
     const pool = locked.length >= 2 ? locked : cards;
     const byGroup = new Map();

@@ -12981,3 +12981,55 @@ console_errors: []
 2. **把门禁读数补进台账**（本节 §九那张表里"门禁整条没重跑"那一条可以划掉），
    然后 `node --test tests/evals/state-doc.test.js tests/roco-handoff-doc.test.js` 单独复跑一次
    这两条与文档挂钩的判据（它们最容易被"文档改了但产物没跟上"弄红）。
+
+**十四、发版门禁重跑（第 92 轮，`bash-522`，日志 `reports/roco/verify-release-round92.log`）**
+
+**27 套里 25 套绿**，`latest.json` 的 `failed` = `["unit", "five-minute-chain"]`：
+
+| 套件 | 结果 | 备注 |
+|---|---|---|
+| `env` / `bridge` / `toolbox-roco` / `plan-e2e` / `trajectories` / `sft-split` / `model-manifest` / `provenance` / `rag-eval` / `game-data-pack` / `reconciliation` / `sprite-identity` | ✔ | —— |
+| **`trajectories-model`** | **✔** | 此前因适配器版本错而红，换 v8 重出后转绿 |
+| **`state-doc`** | **✔** | 说明这一轮改的文档是自洽的 |
+| `guard-selftest` | ✔ 60s | —— |
+| `browser-acceptance` | ✔ 20s | —— |
+| `demo-acceptance` | ✔ 159s | —— |
+| `mobile-sweep` | ✔ 15s | —— |
+| **`box-acceptance`** | **✔ 100s** | **这一格从 ✖（5 条红）翻绿** —— §一/§二/§三/§五/§六 修的就是它 |
+| `workshop-acceptance` / `loadout-acceptance` / `roco-ux-acceptance` / `battle-feedback` / `coverage-axes` / `retained-assets` | ✔ | —— |
+| `unit` | ✖ 196s | 只剩**那条判据本身站不住**的 ④（§C6.338 三方案待拍板） |
+| **`five-minute-chain`** | ✖ 12s | **我自己引入的回归**，见下 |
+
+**十五、门禁抓到的第二个我自己引入的回归（已修，附完整证据链）**
+
+门禁里 `five-minute-chain` 红在 `step-lock-handoff`：
+
+```
+✖ step-lock-handoff 561ms（预算 15000ms）· 按钮文案「带上这两只去配队」→ roco.html
+  （team own-0002,own-0003 / lock 0 只）；工作台 selected=2 locked=0
+```
+
+**根因**：这一步挑"已锁定"的个体靠的是**徽章里的中文文案** ——
+`scripts/roco/eval-five-minute-chain.mjs` 原来写 `locked: String(el.innerHTML).includes('锁定')`。
+而我在 §三 按人类 ⑨ 把「锁定 / 收藏」两个只读徽章从玩家层过滤掉了
+⇒ 这句**再也读不到**，整步一只锁定个体都挑不出来 ⇒ 交接 URL 变成 `lock 0 只` ⇒ 红。
+
+**这是我的改动引起的，不是判据过期** —— 但它暴露了判据本身的一个真问题：
+**判据不该读一段"给人看的中文"，该读结构化数据。**
+所以修法不是把徽章加回来（那会违背人类 ⑨「锁定功能直接删了的了」），而是：
+
+1. `src/client/box.js` 的 `cardHtml` 给卡片加 **`data-locked="true|false"`**
+   （唯一事实源仍是服务端卡片的 `locked`，与 `data-select`/`data-group` 同一层）；
+2. `eval-five-minute-chain.mjs` 改成读 `el.dataset.locked === 'true'`。
+
+**实测**：`node scripts/roco/eval-five-minute-chain.mjs` → **判据 19/19 通过；反证 19/19 命中**
+（`reports/roco/five-min-after-lockfix.log`）。
+
+⚠ 途中还踩了一个小坑并已修：那段注释我写在了 `js(\`…\`)` 的**模板字符串内部**，
+而注释里带了反引号 ⇒ 字符串被截断、`node --check` 报 `missing ) after argument list`。
+**写在模板字符串里的注释不许出现反引号**。
+
+**下一轮第一件事（更新）**：`five-minute-chain` 修好之后，**门禁需要再跑一次**才能拿到
+`failed: ["unit"]` —— 这一轮的 `latest.json` 仍是 `["unit", "five-minute-chain"]`（红在修复之前）。
+交接文档第 79 行已由 `tmp/sync-gate-line.mjs` 同步成那一次的真实读数；
+**再跑一次门禁后必须再同步一次**（判据会逐个点名去 `failed` 里核对，写多了会红）。

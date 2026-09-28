@@ -189,6 +189,7 @@ function cardHtml(card, {compact = false} = {}) {
   }
   return `<article class="card${picked ? ' picked' : ''}${compact ? ' card-compact' : ''}"
    data-select="${escapeAttr(card.select)}" data-group="${escapeAttr(card.group ?? '')}"
+   data-locked="${card.locked === true ? 'true' : 'false'}"
    data-status="${picked ? 'picked' : 'idle'}">
    <button class="card-face" aria-label="看 ${escapeAttr(card.name)} 的详情">
     ${compact ? '' : `<span class="avatar" style="border-color:${color}" aria-hidden="true">${emoji}</span>`}
