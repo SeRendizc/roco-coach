@@ -168,9 +168,9 @@ export function talentDisplayProblems(facts){
     // ⚠ 2026-09-28：连红 8 次都只报总数，无法定位 ⇒ 把「长在哪个容器」一起写进这条问题里
     //（原来那些字段挂在 check 的第二参数上，而这一支先 return 了这些问题，字段根本没被打印）。
     problems.push(`页面上出现了 ${facts.objectObject} 处 [object Object]`
-      + `（按容器拆：pet=${facts.inPet} list=${facts.inList} compare=${facts.inCompare} dev=${facts.inDev}`
-      + `；pet-view 内叶子元素 ${facts.leakElements} 个 ${JSON.stringify(facts.leakWhere)}`
-      + `；资质原样「${facts.talentRaw}」）`);
+      + `（二级页可见文字里 ${facts.petVisibleObject} 处）`
+      + `｜命中行：${JSON.stringify(facts.petLeakOuter)}`
+      + `｜资质原样「${facts.talentRaw}」`);
   }
   return problems;
 }
@@ -735,7 +735,12 @@ async function main() {
           leakElements:[].slice.call(document.querySelectorAll('#pet-view *')).filter(function(el){return el.children.length===0&&/\[object Object\]/.test(el.textContent||'');}).length,
           leakWhere:[].slice.call(document.querySelectorAll('#pet-view *')).filter(function(el){return el.children.length===0&&/\[object Object\]/.test(el.textContent||'');}).slice(0,5).map(function(el){var p=el.closest('[id]');return el.tagName+'.'+String(el.className).slice(0,20)+'@'+(p?p.id:'?')+' html='+String(el.outerHTML).slice(0,120);}),
           talentRaw:String(document.getElementById('pet-view') ? (document.getElementById('pet-view').dataset.talentRaw||'') : ''),
-          storeOne:String((JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}')['own-0001']||{}).nature)});})()`));
+          storeOne:String((JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}')['own-0001']||{}).nature),
+          // 与判据**同一把尺子**：只看二级页那一屏的可见文字
+          petVisibleObject:(function(){var v=document.getElementById('pet-view');return v?((v.innerText||'').match(/\[object Object\]/g)||[]).length:0;})(),
+          petLeakOuter:[].slice.call(document.querySelectorAll('#pet-view *'))
+            .filter(function(el){return /\[object Object\]/.test(el.textContent||'');})
+            .slice(0,8).map(function(el){return el.tagName+'.'+String(el.className).slice(0,16)+'#'+(el.id||'')+' :: '+String(el.textContent).trim().slice(0,110);})});})()`));
       steps.push({at: 'detail-own-0001', facts: talentFacts});
       const talentProblems = talentDisplayProblems(talentFacts);
       check('10b-资质要摊成六维数值（own-0001）',
