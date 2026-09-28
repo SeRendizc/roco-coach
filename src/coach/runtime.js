@@ -1989,6 +1989,13 @@ export function policyFor(message='',context={}){
  // 面板问句先判：它要的是"算出来的六维面板"，不是图鉴里那一格（`codex-fact` 只答单个字段）。
  // ⚠ 放在 codex 之前，但**只认"面板"这两个字**（`panelAsk` 里卡着），不会抢走「喵喵的种族值是多少」。
  if(panelAsk(text))return {need:null,reason:'panel-ask'};
+ // ⭐ 2026-09-28（人类：「多琢磨下 agent/coach 功能」）：**规则集版本**这一族。
+ // 由来：`--policy-first` 对照实测（288 条任务）判挂只剩 2 条，两条都是「这份规则集是哪个版本？」——
+ // 政策对这类问句**没有形状** ⇒ 静默交回模型 ⇒ 模型调了 `read_state`（错工具）。
+ // 这正是"漏了不报错"的典型：政策没覆盖时没人会知道，只会在评测里掉分。
+ // 形状依据是**任务集本身**：`agent-tasks-v1.jsonl` 里 12 条「规则集」问句的期望工具
+ // 100% 是 `query_rules` + `{kind:'ruleset'}`，且那 12 条没有一条属于"不需要工具"的任务。
+ if(rulesetVersionAsk(text))return {need:'query_rules',reason:'ruleset-version-ask'};
  if(codexLookupEnabled()&&codexFactAsk(text))return {need:'query_rules',reason:'codex-fact'};
  // 「X 是谁」也是图鉴事实（查得到就摆记录，查不到就把"图鉴里没有"这个结论说清楚）。
  if(codexLookupEnabled()&&petIntroAsk(text))return {need:'query_rules',reason:'pet-intro-ask'};
@@ -2285,6 +2292,17 @@ function skillFieldAsk(text){
  if(!name)return null;
  if(/^(我|你|他|她|它|这|那|谁|哪|技能|招式|这个|那个)/.test(name))return null;
  return name;
+}
+/**
+ * 「这份规则集是哪个版本？」这一类问句的形状。
+ *
+ * ⚠ 必须**同时**出现"版本/哪一版"和"规则/规则集/ruleset"才算 —— 只认「版本」会把
+ * 「这游戏什么版本」这种与规则集无关的问句也拖去查规则（那是误伤，比漏判更糟）。
+ * ⚠ 前缀（「我锁定寂灭骨龙，」「我在练习场，想问下：」）不影响：这里**全句搜索**，不锚定开头。
+ */
+export function rulesetVersionAsk(text=''){
+ const t=String(text);
+ return /(版本|哪一版)/.test(t)&&/(规则集|规则书|ruleset|规则)/i.test(t);
 }
 export function codexFactAsk(text=''){
  const t=String(text).trim();
@@ -3260,6 +3278,9 @@ export function defaultArgsFor(name,context,message){
  const text=playerQuestion(message);
  // 图鉴查询的参数**从问题里取名字**：引擎按名字查，查不到就 fail closed（不编 id、不编数值）。
  if(name==='query_rules'){
+  // ⭐ 2026-09-28：规则集版本（`kind:'ruleset'` 不吃名字，也不需要名单）。
+  // 实测原来这里返回 `null` ⇒ 政策即使判出了 `need`，参数也凑不出来 ⇒ 一次都不调。
+  if(rulesetVersionAsk(text))return {kind:'ruleset'};
   // 配招可学性（P0-a）：精灵名 + 枚举出来的技能名，逐个交给引擎认（认不出的照实标出来）。
   if(legalityAsk(text,context))return legalityTarget(text,context);
   // 单只图鉴介绍：「X 是谁」按名字查（引擎查不到就 404 —— 那也是一条结论）。
