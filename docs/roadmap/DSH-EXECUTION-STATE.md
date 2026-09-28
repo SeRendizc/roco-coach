@@ -13713,3 +13713,43 @@ Codex 第 5 条点的"前后矛盾"消掉。
 反证实测会响。队友自己报的，还附了基线对照：全量 5 红里 **4 条基线就红**
 （`roco-experience` 系别配色 / `model-trajectories` 双路径 / `roco-team-cards-layout` 两视口），
 **1 条是 task-5 引入的**（他漏跑了 Node 全量）。
+
+##### 十八、阶段 2 启动 + 4B 前置做掉两项（2026-09-29 凌晨，目标 goal-bc9cfda2）
+
+**当前版本 `49f1bb8`**。上一阶段目标完成、团队全部 inactive、后台任务全结束（Codex 监工核实过）
+⇒ 按用户授权**恢复持续目标**（阶段 2，40 轮上限），四条按可验收玩家任务分发（写域互不重叠）：
+`task-7` A/P0-01 无密钥走真实资料（coach-context）· `task-8` B 迪莫 6×4 链路（build-snapshot）·
+`task-9` C 旧 `#actions` 与 b3 实时配招一致（battle-smoke）· `task-10` D 独立 UI 验收（art-finish）。
+
+**Lead 自己做的 4B 前置（Codex 第 2、3 项）**：
+
+**第 2 项 —— 清掉随工具退役失效的目标（`fbc29bd`）**：
+实测输入侧 **1008 行**的 `tools` 列表有 **13** 项（= 12 现行 + 已退役的 `inspect_training`，
+`toolbox.js:149`，人类「加点不要了」那天退役的）；目标侧 **144 行**要调那个不存在的工具。
+清理器带**已核过的失效族白名单**，**没登记的一律拒绝（退出码 2）** —— 这条拒绝路径当场抓出了
+我**没分析过的第 4 族**「它满级了吗？」（8 条）；如果我写成"不认识就改 stop"，那 8 条会被静默错标。
+四族的理由**各不相同**，其中「培养格是怎么分配的？」看起来该走 `query_rules`，
+但核了规则源**0 命中** ⇒ 标 `query_rules` 是把模型送去答不出来的工具，比诚实 stop 更糟。
+读数：Codex 审计脚本 `errorCount` **144 → 0**；产出 `reports/roco/sft-v8-clean/`（**v8 原文件保留**）。
+
+**第 3 项 —— 90 条真实样本 + 执行回执的种子集（`49f1bb8`）**：
+来源是 `tests/evals/agent-trajectories-model-v1.jsonl` 的 **1752 条真实录制**（带真实 `receipt.ok`）。
+`reviewed: true` 由 **R1–R7 挣来**（每条都能对着回执核），不是填的。
+产出 `reports/roco/sft-v9-seed/`：**90 条**（train 51 / valid 20 / test 19）、**88 个族**、
+**跨分片组重叠 0 与同问句重叠 0**、每条带 `meta.{group_id,source,contract_version,reviewed}`；
+`contract_version = tools:97a79a115da6` 是**契约指纹**（契约一变就变，适用性不靠嘴说）。
+**Codex 审计脚本严格档 `--new-data`：`errorCount 0`**（v8 在同档 **2875** 条错）。
+
+**首版踩的三个坑（都留在代码注释与提交信息里）**：
+① 把 **0 次调用**（模型决定 `stop`）当成坏样本整批丢了，标签还错写成"不是恰好一次" ——
+实测 **1332 条**，改完候选 52 → 216；
+② **先到先得把种子灌成单一类**（前 52 条**全是** `query_rules`）⇒ 改成 stop 与工具**混采**（46 + 44）；
+③ 把 `state_version: 0` 写进了目标，而审计规定「目标里不许出现它」⇒ 改成"补着校验、不写进去"。
+
+**冻结判据** `tests/roco-sft-dataset-contract.test.js` **8/8**：幽灵工具 / 输入 tools 逐字等于
+`LOCAL_PLAN_TOOLS` / 清理器只改已登记族 / 两份数据集审计读数 / **种子 50–100 条且 `reviewed` 必须有回执支撑**
+（堵"虚填 ready"）/ **跨分片组重叠 0** / 严格档 0 错 / 反证。
+
+**未完成（如实）**：种子只覆盖 `query_rules` 与 `stop` 两类 —— 这批录制里其余工具的回执 `ok` **全是 0**，
+**这条来源给不出它们**，要覆盖得另找成功录制；Codex 第 4 项（训练/推理 `enable_thinking`、
+token 前缀、`mask_prompt` 答案区间一致）**未做**。**无训练、无下载、无切模型。**
