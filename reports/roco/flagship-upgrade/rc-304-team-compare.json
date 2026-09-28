@@ -697,7 +697,7 @@
         ],
         "confidence": "ENGINE_HYPOTHESIS",
         "unverified": [
-          "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
+          "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层 542 只（RC-302 的域上限；2026-09-28 前是 48 只），其余只能是 unknown",
           "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 12 / 21 条缺口），已按条数计入覆盖置信的扣分"
         ],
         "missing": []
@@ -804,7 +804,7 @@
         ],
         "confidence": "COMMUNITY_CURRENT",
         "unverified": [
-          "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
+          "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层 542 只（RC-302 的域上限；2026-09-28 前是 48 只），其余只能是 unknown",
           "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 16 / 41 条缺口），已按条数计入覆盖置信的扣分"
         ],
         "missing": []
@@ -918,7 +918,7 @@
         ],
         "confidence": "COMMUNITY_CURRENT",
         "unverified": [
-          "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
+          "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层 542 只（RC-302 的域上限；2026-09-28 前是 48 只），其余只能是 unknown",
           "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 12 / 39 条缺口），已按条数计入覆盖置信的扣分"
         ],
         "missing": []
@@ -1029,7 +1029,7 @@
         ],
         "confidence": "COMMUNITY_CURRENT",
         "unverified": [
-          "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
+          "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层 542 只（RC-302 的域上限；2026-09-28 前是 48 只），其余只能是 unknown",
           "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 15 / 31 条缺口），已按条数计入覆盖置信的扣分"
         ],
         "missing": []
@@ -1140,7 +1140,7 @@
         ],
         "confidence": "ENGINE_HYPOTHESIS",
         "unverified": [
-          "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
+          "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层 542 只（RC-302 的域上限；2026-09-28 前是 48 只），其余只能是 unknown",
           "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 12 / 23 条缺口），已按条数计入覆盖置信的扣分"
         ],
         "missing": []
@@ -1248,7 +1248,7 @@
         ],
         "confidence": "ENGINE_HYPOTHESIS",
         "unverified": [
-          "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
+          "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层 542 只（RC-302 的域上限；2026-09-28 前是 48 只），其余只能是 unknown",
           "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 10 / 18 条缺口），已按条数计入覆盖置信的扣分"
         ],
         "missing": []

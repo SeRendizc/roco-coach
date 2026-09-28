@@ -1,7 +1,7 @@
 {
  "schema": "roco-battle-feedback/v1",
  "all_ok": true,
- "generated_at": "2026-09-28T10:29:50.929Z",
+ "generated_at": "2026-09-28T14:11:00.282Z",
  "what": "战斗反馈验收：① 伤害/治疗数字真的看得见（不是被立绘压住）② 出手与受击有先后（不同一帧齐发）③ 背包屏的数字可追溯（引擎实数 / 已登记证据）+ 该显示的必须显示（2026-09-25 决策 4「（甲）读法」）④ 立绘框底边接缝（框底那一行跳变 ≤ 6 + 跨框底一步 |Δ亮度| ≤ 3；2026-09-25 决策 1「把接缝压掉」）",
  "how": "自起 app server(8895) + 自拉 headless Chrome + 真鼠标进战斗 + 量立绘框接缝（J8：整页 PNG 的像素） + 真鼠标点「物品」读背包屏（J7）+ 真鼠标点技能；页面里挂 MutationObserver(childList/subtree/attributes/characterData) 记 DOM 变化时间，逐帧 elementFromPoint 记「数字在不在最上层」；**不读客户端自述的任何时间戳字段**",
  "totals": {
@@ -18,7 +18,7 @@
    "id": "J1",
    "name": "数字存在",
    "ok": true,
-   "actual": "浮字 2 个，其中含阿拉伯数字 2 个：[\"防御 70%@foe\",\"-14@foe\"]",
+   "actual": "浮字 2 个，其中含阿拉伯数字 2 个：[\"防御 70%@foe\",\"-3@foe\"]",
    "missing": [],
    "problems": [],
    "problems_detail": [],
@@ -28,7 +28,7 @@
    "id": "J10",
    "name": "生命心 ♥ 常显（= 魔力：实心数 == view.mana.{self,opponent}、总数 == view.mana.pool；力竭掉心 -1 且与引擎逐位一致；拿不到 mana 必须 hidden）",
    "ok": true,
-   "actual": "开局后（turn=2）：引擎 {\"self\":4,\"opponent\":4,\"pool\":4} / DOM self=\"♥♥♥♥\"(4实心/4总，hidden=false) foe=\"♥♥♥♥\"(4实心/4总，hidden=false)；力竭掉心（第 4 步 / turn 5→5，引擎事件 \"对方的精灵力竭，失去 1 点魔力（剩余 3 点）（力竭扣魔力未实机核实，本条为候选口径）。\"）：引擎 {\"self\":4,\"opponent\":3,\"pool\":4} / DOM self=\"♥♥♥♥\"(4实心/4总，hidden=false) foe=\"♥♥♥♡\"(3实心/4总，hidden=false)；抽掉 mana 的探针（合成「引擎没给」）：self.hidden=true foe.hidden=true 页面上心形字符=0（探针后已还原=true）；入口=\"真鼠标点「开一局（标准 PVP · 六宠）」（盒子六只 own 个体经 ?team= 交接；6 只）\"；问题 0 条",
+   "actual": "开局后（turn=2）：引擎 {\"self\":4,\"opponent\":4,\"pool\":4} / DOM self=\"♥♥♥♥\"(4实心/4总，hidden=false) foe=\"♥♥♥♥\"(4实心/4总，hidden=false)；力竭掉心（第 2 步 / turn 3→3，引擎事件 \"我方的精灵力竭，失去 1 点魔力（剩余 3 点）（力竭扣魔力未实机核实，本条为候选口径）。\"）：引擎 {\"self\":3,\"opponent\":4,\"pool\":4} / DOM self=\"♥♥♥♡\"(3实心/4总，hidden=false) foe=\"♥♥♥♥\"(4实心/4总，hidden=false)；抽掉 mana 的探针（合成「引擎没给」）：self.hidden=true foe.hidden=true 页面上心形字符=0（探针后已还原=true）；入口=\"真鼠标点「开一局（标准 PVP · 六宠）」（盒子六只 own 个体经 ?team= 交接；6 只）\"；问题 0 条",
    "missing": [],
    "problems": [],
    "problems_detail": [],
@@ -38,7 +38,7 @@
    "id": "J2",
    "name": "真的在最上层",
    "ok": true,
-   "actual": "2 个浮字逐帧 elementFromPoint：「防御 70%」40/40 帧命中自身（命中 [\"b3-float b3-float--shield\"]）／探针 \"b3-float b3-float--shield\"；「-14」40/40 帧命中自身（命中 [\"b3-float b3-float--hit\"]）／探针 \"b3-float b3-float--hit\"；总采样帧 134",
+   "actual": "2 个浮字逐帧 elementFromPoint：「防御 70%」41/41 帧命中自身（命中 [\"b3-float b3-float--shield\"]）／探针 \"b3-float b3-float--shield\"；「-3」41/41 帧命中自身（命中 [\"b3-float b3-float--weak\"]）／探针 \"b3-float b3-float--weak\"；总采样帧 133",
    "missing": [],
    "problems": [],
    "problems_detail": [],
@@ -48,7 +48,7 @@
    "id": "J3",
    "name": "有先后",
    "ok": true,
-   "actual": "出手线索 3 条 → 合并成 1 拍（首个 side=self t=7317.1ms）；受击方 cue 1 条、浮字 2 条；配对 1 对，判据要求 ≥ 100ms：出手→受击 +450.1ms（其中 出手→.b3-hit +450.1ms、出手→伤害浮字 +450.2ms「-14」）",
+   "actual": "出手线索 1 条 → 合并成 1 拍（首个 side=self t=7591.2ms）；受击方 cue 1 条、浮字 2 条；配对 1 对，判据要求 ≥ 100ms：出手→受击 +449.5ms（其中 出手→.b3-hit +449.5ms、出手→伤害浮字 +449.5ms「-3」）",
    "missing": [],
    "problems": [],
    "problems_detail": [],
@@ -58,7 +58,7 @@
    "id": "J4",
    "name": "不残留",
    "ok": true,
-   "actual": "结束时剩 0 个浮字；2 个浮字的存活时长：[\"防御 70%=1199.6ms\",\"-14=1200.9ms\"]",
+   "actual": "结束时剩 0 个浮字；2 个浮字的存活时长：[\"防御 70%=1200ms\",\"-3=1200.9ms\"]",
    "missing": [],
    "problems": [],
    "problems_detail": [],
@@ -68,7 +68,7 @@
    "id": "J5",
    "name": "前置",
    "ok": true,
-   "actual": "ready=\"yes\" 战斗区=true 开局=true 合法技能=4 可点格=4 点击被接住=true 未捕获异常=0 console.error=0 入口=\"真鼠标点「开一局（标准 PVP · 六宠）」（盒子六只 own 个体经 ?team= 交接；6 只）\" 技能={\"slot\":0,\"label\":\"啃咬\",\"category\":\"攻击\",\"damage\":null,\"engineCategory\":\"攻击\",\"choice_basis\":\"优先攻击招（页面类别「攻击」或引擎 category=attack），并且优先引擎给过伤害样本的那一格\"}",
+   "actual": "ready=\"yes\" 战斗区=true 开局=true 合法技能=4 可点格=4 点击被接住=true 未捕获异常=0 console.error=0 入口=\"真鼠标点「开一局（标准 PVP · 六宠）」（盒子六只 own 个体经 ?team= 交接；6 只）\" 技能={\"slot\":0,\"label\":\"甩水\",\"category\":\"攻击\",\"damage\":null,\"engineCategory\":\"攻击\",\"choice_basis\":\"优先攻击招（页面类别「攻击」或引擎 category=attack），并且优先引擎给过伤害样本的那一格\"}",
    "missing": [],
    "problems": [],
    "problems_detail": [],
@@ -78,7 +78,7 @@
    "id": "J6",
    "name": "星不够的格子（灰置 + 红⭐ + 不可点）",
    "ok": true,
-   "actual": "第 8 回合触发：1 个 short=yes 格 [\"翅刃(费3/色rgb(255, 154, 154)/legal=no)\"]；允许的红：rgb(255, 154, 154)",
+   "actual": "第 7 回合触发：2 个 short=yes 格 [\"水炮(费5/色rgb(255, 154, 154)/legal=no)\",\"多维击打(费4/色rgb(255, 154, 154)/legal=no)\"]；允许的红：rgb(255, 154, 154)",
    "missing": [],
    "problems": [],
    "problems_detail": [],
@@ -98,7 +98,7 @@
    "id": "J8",
    "name": "立绘框底边接缝（框底那一行跳变 ≤ 6 + 跨框底一步 |Δ亮度| ≤ 3）",
    "ok": true,
-   "actual": "我方 rect={\"x\":295,\"y\":251,\"w\":404,\"h\":465,\"bottom\":716,\"right\":699} → borderJump=0.8（阈值 ≤ 6，框底 y=715 均色 #111c26） stepAcrossBottom=0（阈值 ≤ 3） 框内最大行跳变=2；对手 rect={\"x\":741,\"y\":251,\"w\":404,\"h\":465,\"bottom\":716,\"right\":1145} → borderJump=0.6（阈值 ≤ 6，框底 y=715 均色 #111c26） stepAcrossBottom=1.1（阈值 ≤ 3） 框内最大行跳变=2.9；整页截图=\"battle-feedback/04-spritebox-seam.png\"（deviceScaleFactor=1 ⇒ 客户区坐标 == 页面坐标，直接按 rect 取像素）；问题 0 条",
+   "actual": "我方 rect={\"x\":295,\"y\":251,\"w\":404,\"h\":465,\"bottom\":716,\"right\":699} → borderJump=0.6（阈值 ≤ 6，框底 y=715 均色 #111c26） stepAcrossBottom=0（阈值 ≤ 3） 框内最大行跳变=0.9；对手 rect={\"x\":741,\"y\":251,\"w\":404,\"h\":465,\"bottom\":716,\"right\":1145} → borderJump=0.6（阈值 ≤ 6，框底 y=715 均色 #111c26） stepAcrossBottom=1.1（阈值 ≤ 3） 框内最大行跳变=0.9；整页截图=\"battle-feedback/04-spritebox-seam.png\"（deviceScaleFactor=1 ⇒ 客户区坐标 == 页面坐标，直接按 rect 取像素）；问题 0 条",
    "missing": [],
    "problems": [],
    "problems_detail": [],
@@ -415,7 +415,7 @@
     "key": "now",
     "label": "量真实页面时那一版 CSS（`.b3-fx` 没有 z-index、`.b3-float` 没开 pointer-events）",
     "appliedRule": "（不加任何规则）",
-    "bornT": 415.6,
+    "bornT": 407.1,
     "css": {
      "fxZIndex": "auto",
      "spriteZIndex": "1",
@@ -440,7 +440,7 @@
     "float": {
      "text": "-30",
      "side": "self",
-     "aliveMs": 105.5,
+     "aliveMs": 105.3,
      "samples": 3,
      "measurableSamples": 3,
      "onTopSamples": 0,
@@ -448,7 +448,7 @@
       "b3-sprite"
      ],
      "paintProbe": {
-      "t": 450.6,
+      "t": 429.4,
       "hitClass": "b3-sprite",
       "hitTag": "img",
       "hitIsFloat": false
@@ -461,21 +461,21 @@
     "paintOrderHitIsFloat": false,
     "measuredFrames": [
      {
-      "t": 450.6,
+      "t": 429.4,
       "measurable": true,
       "hitClass": "b3-sprite",
       "hitTag": "img",
       "hitIsFloat": false
      },
      {
-      "t": 477.1,
+      "t": 462.6,
       "measurable": true,
       "hitClass": "b3-sprite",
       "hitTag": "img",
       "hitIsFloat": false
      },
      {
-      "t": 501.9,
+      "t": 494.8,
       "measurable": true,
       "hitClass": "b3-sprite",
       "hitTag": "img",
@@ -490,7 +490,7 @@
     "key": "zOnly",
     "label": "只把 `.b3-fx` 抬到 z-index:3（不动 pointer-events）",
     "appliedRule": ".b3-wrap .b3-fx{z-index:3}",
-    "bornT": 527,
+    "bornT": 517,
     "css": {
      "fxZIndex": "3",
      "spriteZIndex": "1",
@@ -515,7 +515,7 @@
     "float": {
      "text": "-30",
      "side": "self",
-     "aliveMs": 105.9,
+     "aliveMs": 102.8,
      "samples": 3,
      "measurableSamples": 3,
      "onTopSamples": 0,
@@ -523,7 +523,7 @@
       "b3-sprite"
      ],
      "paintProbe": {
-      "t": 534,
+      "t": 529.5,
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
       "hitIsFloat": true
@@ -536,21 +536,21 @@
     "paintOrderHitIsFloat": true,
     "measuredFrames": [
      {
-      "t": 534,
+      "t": 529.5,
       "measurable": true,
       "hitClass": "b3-sprite",
       "hitTag": "img",
       "hitIsFloat": false
      },
      {
-      "t": 568.5,
+      "t": 561.4,
       "measurable": true,
       "hitClass": "b3-sprite",
       "hitTag": "img",
       "hitIsFloat": false
      },
      {
-      "t": 600,
+      "t": 596.1,
       "measurable": true,
       "hitClass": "b3-sprite",
       "hitTag": "img",
@@ -565,7 +565,7 @@
     "key": "fixed",
     "label": "`.b3-fx{z-index:3}` + `.b3-float{pointer-events:auto}`（客户端那一版修法的两行）",
     "appliedRule": ".b3-wrap .b3-fx{z-index:3}.b3-wrap .b3-float{pointer-events:auto}",
-    "bornT": 637,
+    "bornT": 623.7,
     "css": {
      "fxZIndex": "3",
      "spriteZIndex": "1",
@@ -590,15 +590,15 @@
     "float": {
      "text": "-30",
      "side": "self",
-     "aliveMs": 104.5,
-     "samples": 3,
-     "measurableSamples": 3,
-     "onTopSamples": 3,
+     "aliveMs": 104.3,
+     "samples": 4,
+     "measurableSamples": 4,
+     "onTopSamples": 4,
      "hitClasses": [
       "b3-float b3-float--hit"
      ],
      "paintProbe": {
-      "t": 651.2,
+      "t": 629.4,
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
       "hitIsFloat": true
@@ -611,21 +611,28 @@
     "paintOrderHitIsFloat": true,
     "measuredFrames": [
      {
-      "t": 651.2,
+      "t": 629.4,
       "measurable": true,
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
       "hitIsFloat": true
      },
      {
-      "t": 683.2,
+      "t": 661.6,
       "measurable": true,
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
       "hitIsFloat": true
      },
      {
-      "t": 718.5,
+      "t": 684.6,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--hit",
+      "hitTag": "span",
+      "hitIsFloat": true
+     },
+     {
+      "t": 712.9,
       "measurable": true,
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
@@ -641,7 +648,7 @@
    "key": "now",
    "label": "量真实页面时那一版 CSS（`.b3-fx` 没有 z-index、`.b3-float` 没开 pointer-events）",
    "appliedRule": "（不加任何规则）",
-   "bornT": 415.6,
+   "bornT": 407.1,
    "css": {
     "fxZIndex": "auto",
     "spriteZIndex": "1",
@@ -666,7 +673,7 @@
    "float": {
     "text": "-30",
     "side": "self",
-    "aliveMs": 105.5,
+    "aliveMs": 105.3,
     "samples": 3,
     "measurableSamples": 3,
     "onTopSamples": 0,
@@ -674,7 +681,7 @@
      "b3-sprite"
     ],
     "paintProbe": {
-     "t": 450.6,
+     "t": 429.4,
      "hitClass": "b3-sprite",
      "hitTag": "img",
      "hitIsFloat": false
@@ -687,21 +694,21 @@
    "paintOrderHitIsFloat": false,
    "measuredFrames": [
     {
-     "t": 450.6,
+     "t": 429.4,
      "measurable": true,
      "hitClass": "b3-sprite",
      "hitTag": "img",
      "hitIsFloat": false
     },
     {
-     "t": 477.1,
+     "t": 462.6,
      "measurable": true,
      "hitClass": "b3-sprite",
      "hitTag": "img",
      "hitIsFloat": false
     },
     {
-     "t": 501.9,
+     "t": 494.8,
      "measurable": true,
      "hitClass": "b3-sprite",
      "hitTag": "img",
@@ -716,7 +723,7 @@
    "key": "zOnly",
    "label": "只把 `.b3-fx` 抬到 z-index:3（不动 pointer-events）",
    "appliedRule": ".b3-wrap .b3-fx{z-index:3}",
-   "bornT": 527,
+   "bornT": 517,
    "css": {
     "fxZIndex": "3",
     "spriteZIndex": "1",
@@ -741,7 +748,7 @@
    "float": {
     "text": "-30",
     "side": "self",
-    "aliveMs": 105.9,
+    "aliveMs": 102.8,
     "samples": 3,
     "measurableSamples": 3,
     "onTopSamples": 0,
@@ -749,7 +756,7 @@
      "b3-sprite"
     ],
     "paintProbe": {
-     "t": 534,
+     "t": 529.5,
      "hitClass": "b3-float b3-float--hit",
      "hitTag": "span",
      "hitIsFloat": true
@@ -762,21 +769,21 @@
    "paintOrderHitIsFloat": true,
    "measuredFrames": [
     {
-     "t": 534,
+     "t": 529.5,
      "measurable": true,
      "hitClass": "b3-sprite",
      "hitTag": "img",
      "hitIsFloat": false
     },
     {
-     "t": 568.5,
+     "t": 561.4,
      "measurable": true,
      "hitClass": "b3-sprite",
      "hitTag": "img",
      "hitIsFloat": false
     },
     {
-     "t": 600,
+     "t": 596.1,
      "measurable": true,
      "hitClass": "b3-sprite",
      "hitTag": "img",
@@ -791,7 +798,7 @@
    "key": "fixed",
    "label": "`.b3-fx{z-index:3}` + `.b3-float{pointer-events:auto}`（客户端那一版修法的两行）",
    "appliedRule": ".b3-wrap .b3-fx{z-index:3}.b3-wrap .b3-float{pointer-events:auto}",
-   "bornT": 637,
+   "bornT": 623.7,
    "css": {
     "fxZIndex": "3",
     "spriteZIndex": "1",
@@ -816,15 +823,15 @@
    "float": {
     "text": "-30",
     "side": "self",
-    "aliveMs": 104.5,
-    "samples": 3,
-    "measurableSamples": 3,
-    "onTopSamples": 3,
+    "aliveMs": 104.3,
+    "samples": 4,
+    "measurableSamples": 4,
+    "onTopSamples": 4,
     "hitClasses": [
      "b3-float b3-float--hit"
     ],
     "paintProbe": {
-     "t": 651.2,
+     "t": 629.4,
      "hitClass": "b3-float b3-float--hit",
      "hitTag": "span",
      "hitIsFloat": true
@@ -837,21 +844,28 @@
    "paintOrderHitIsFloat": true,
    "measuredFrames": [
     {
-     "t": 651.2,
+     "t": 629.4,
      "measurable": true,
      "hitClass": "b3-float b3-float--hit",
      "hitTag": "span",
      "hitIsFloat": true
     },
     {
-     "t": 683.2,
+     "t": 661.6,
      "measurable": true,
      "hitClass": "b3-float b3-float--hit",
      "hitTag": "span",
      "hitIsFloat": true
     },
     {
-     "t": 718.5,
+     "t": 684.6,
+     "measurable": true,
+     "hitClass": "b3-float b3-float--hit",
+     "hitTag": "span",
+     "hitIsFloat": true
+    },
+    {
+     "t": 712.9,
      "measurable": true,
      "hitClass": "b3-float b3-float--hit",
      "hitTag": "span",
@@ -972,8 +986,8 @@
   "failReason": null,
   "path": "真鼠标点「开一局（标准 PVP · 六宠）」（盒子六只 own 个体经 ?team= 交接；6 只）",
   "manaAvailable": true,
-  "turnsDriven": 4,
-  "elapsedMs": 2668,
+  "turnsDriven": 2,
+  "elapsedMs": 1751,
   "initial": {
    "engine": {
     "mana": {
@@ -1008,24 +1022,24 @@
     }
    },
    "bodyHearts": 8,
-   "at": 4440
+   "at": 4463
   },
   "faint": {
    "found": true,
-   "steps": 4,
-   "eventSide": "enemy",
-   "side": "opponent",
+   "steps": 2,
+   "eventSide": "player",
+   "side": "self",
    "engineChanged": true,
    "event": {
-    "turn": 5,
+    "turn": 3,
     "kind": "mana_loss",
     "side": null,
     "detail": {
-     "side": "enemy",
+     "side": "player",
      "faint_cost": 1,
      "mana": 3
     },
-    "text": "对方的精灵力竭，失去 1 点魔力（剩余 3 点）（力竭扣魔力未实机核实，本条为候选口径）。"
+    "text": "我方的精灵力竭，失去 1 点魔力（剩余 3 点）（力竭扣魔力未实机核实，本条为候选口径）。"
    },
    "before": {
     "engine": {
@@ -1034,9 +1048,9 @@
       "opponent": 4,
       "pool": 4
      },
-     "turn": 5,
+     "turn": 3,
      "phase": "battle",
-     "stateVersion": 17
+     "stateVersion": 10
     },
     "dom": {
      "self": {
@@ -1061,31 +1075,21 @@
      }
     },
     "bodyHearts": 8,
-    "at": 5768
+    "at": 4909
    },
    "after": {
     "engine": {
      "mana": {
-      "self": 4,
-      "opponent": 3,
+      "self": 3,
+      "opponent": 4,
       "pool": 4
      },
-     "turn": 5,
+     "turn": 3,
      "phase": "replace",
-     "stateVersion": 23
+     "stateVersion": 17
     },
     "dom": {
      "self": {
-      "found": true,
-      "hidden": false,
-      "visible": true,
-      "full": 4,
-      "empty": 0,
-      "total": 4,
-      "text": "♥♥♥♥",
-      "html": "<span class=\"b3-hearts\" id=\"b3-hearts-self\" data-b3-hearts-self=\"yes\" data-b3-src=\"view.hearts.self（引擎暂无 → 保持 hidden；掉心动效时才显）\"><i>♥♥♥♥</i><i class=\"lost\"></i></span>"
-     },
-     "foe": {
       "found": true,
       "hidden": false,
       "visible": true,
@@ -1093,14 +1097,24 @@
       "empty": 1,
       "total": 4,
       "text": "♥♥♥♡",
-      "html": "<span class=\"b3-hearts\" id=\"b3-hearts-foe\" data-b3-hearts-foe=\"yes\" data-b3-src=\"view.hearts.opponent（同上；引擎暂无 → hidden）\"><i>♥♥♥</i><i class=\"lost\">♡</i></span>"
+      "html": "<span class=\"b3-hearts\" id=\"b3-hearts-self\" data-b3-hearts-self=\"yes\" data-b3-src=\"view.hearts.self（引擎暂无 → 保持 hidden；掉心动效时才显）\"><i>♥♥♥</i><i class=\"lost\">♡</i></span>"
+     },
+     "foe": {
+      "found": true,
+      "hidden": false,
+      "visible": true,
+      "full": 4,
+      "empty": 0,
+      "total": 4,
+      "text": "♥♥♥♥",
+      "html": "<span class=\"b3-hearts\" id=\"b3-hearts-foe\" data-b3-hearts-foe=\"yes\" data-b3-src=\"view.hearts.opponent（同上；引擎暂无 → hidden）\"><i>♥♥♥♥</i><i class=\"lost\"></i></span>"
      }
     },
-    "bodyHearts": 16,
-    "at": 6218
+    "bodyHearts": 17,
+    "at": 5341
    },
-   "domSelf": "掉心前 ♥♥♥♥ → 掉心后 ♥♥♥♥",
-   "domFoe": "掉心前 ♥♥♥♥ → 掉心后 ♥♥♥♡"
+   "domSelf": "掉心前 ♥♥♥♥ → 掉心后 ♥♥♥♡",
+   "domFoe": "掉心前 ♥♥♥♥ → 掉心后 ♥♥♥♥"
   },
   "missingManaProbe": {
    "taken": true,
@@ -1140,7 +1154,7 @@
      }
     },
     "bodyHearts": 8,
-    "at": 4440
+    "at": 4463
    },
    "after": {
     "engine": {
@@ -1172,7 +1186,7 @@
      }
     },
     "bodyHearts": 0,
-    "at": 4445
+    "at": 4468
    },
    "restoredRead": {
     "engine": {
@@ -1208,7 +1222,7 @@
      }
     },
     "bodyHearts": 8,
-    "at": 4448
+    "at": 4471
    },
    "reason": "合成「引擎没给」：抽掉 state.view.mana 再 window.rocoDemo.render()（同一帧读 DOM），随后原样塞回"
   },
@@ -1261,139 +1275,139 @@
    "read_reason": null,
    "metrics": {
     "border": 715,
-    "borderJump": 0.8,
+    "borderJump": 0.6,
     "borderMean": "#111c26",
     "stepAcrossBottom": 0,
-    "innerMaxJump": 2,
+    "innerMaxJump": 0.9,
     "rows": [
      {
       "y": 690,
-      "jump": 39.2,
-      "mean": "#45474a"
+      "jump": 1.1,
+      "mean": "#0d141a"
      },
      {
       "y": 691,
-      "jump": 3.2,
-      "mean": "#424548"
+      "jump": 1,
+      "mean": "#0d141b"
      },
      {
       "y": 692,
-      "jump": 40.1,
-      "mean": "#6a6d70"
+      "jump": 0.9,
+      "mean": "#0d151b"
      },
      {
       "y": 693,
-      "jump": 1.3,
-      "mean": "#6a6d70"
+      "jump": 0.8,
+      "mean": "#0d151c"
      },
      {
       "y": 694,
-      "jump": 47.8,
-      "mean": "#3a3d41"
+      "jump": 0.7,
+      "mean": "#0d151c"
      },
      {
       "y": 695,
-      "jump": 22.6,
-      "mean": "#23262b"
+      "jump": 0.6,
+      "mean": "#0d151d"
      },
      {
       "y": 696,
-      "jump": 22.2,
-      "mean": "#383c42"
+      "jump": 0.7,
+      "mean": "#0e161d"
      },
      {
       "y": 697,
-      "jump": 5.3,
-      "mean": "#33373d"
+      "jump": 0.9,
+      "mean": "#0e161d"
      },
      {
       "y": 698,
-      "jump": 2.1,
-      "mean": "#31363b"
+      "jump": 0.9,
+      "mean": "#0e161e"
      },
      {
       "y": 699,
-      "jump": 1.5,
-      "mean": "#2f343a"
+      "jump": 0.7,
+      "mean": "#0e161f"
      },
      {
       "y": 700,
-      "jump": 1.6,
-      "mean": "#2d3339"
+      "jump": 0.7,
+      "mean": "#0e171f"
      },
      {
       "y": 701,
-      "jump": 1.8,
-      "mean": "#2b3138"
+      "jump": 0.6,
+      "mean": "#0e1720"
      },
      {
       "y": 702,
-      "jump": 1.8,
-      "mean": "#2a3036"
+      "jump": 0.5,
+      "mean": "#0f1720"
      },
      {
       "y": 703,
-      "jump": 1.7,
-      "mean": "#282e35"
+      "jump": 0.5,
+      "mean": "#0f1820"
      },
      {
       "y": 704,
-      "jump": 2,
-      "mean": "#262d34"
+      "jump": 0.9,
+      "mean": "#0f1921"
      },
      {
       "y": 705,
-      "jump": 1.9,
-      "mean": "#242b32"
+      "jump": 0.7,
+      "mean": "#0f1821"
      },
      {
       "y": 706,
-      "jump": 1.7,
-      "mean": "#222a31"
+      "jump": 0.7,
+      "mean": "#101922"
      },
      {
       "y": 707,
-      "jump": 1.9,
-      "mean": "#202830"
+      "jump": 0.7,
+      "mean": "#0f1a22"
      },
      {
       "y": 708,
-      "jump": 1.9,
-      "mean": "#1e272e"
+      "jump": 0.6,
+      "mean": "#101a23"
      },
      {
       "y": 709,
-      "jump": 1.7,
-      "mean": "#1c252d"
+      "jump": 0.7,
+      "mean": "#101a23"
      },
      {
       "y": 710,
-      "jump": 2,
-      "mean": "#1a232c"
+      "jump": 0.8,
+      "mean": "#101b24"
      },
      {
       "y": 711,
-      "jump": 1.9,
-      "mean": "#18222a"
+      "jump": 0.3,
+      "mean": "#101b24"
      },
      {
       "y": 712,
-      "jump": 1.6,
-      "mean": "#162029"
+      "jump": 0.5,
+      "mean": "#111b25"
      },
      {
       "y": 713,
-      "jump": 1.9,
-      "mean": "#131f28"
+      "jump": 0.9,
+      "mean": "#101c25"
      },
      {
       "y": 714,
-      "jump": 1.9,
-      "mean": "#121d26"
+      "jump": 0.6,
+      "mean": "#101b25"
      },
      {
       "y": 715,
-      "jump": 0.8,
+      "jump": 0.6,
       "mean": "#111c26"
      },
      {
@@ -1434,12 +1448,12 @@
     "borderJump": 0.6,
     "borderMean": "#111c26",
     "stepAcrossBottom": 1.1,
-    "innerMaxJump": 2.9,
+    "innerMaxJump": 0.9,
     "rows": [
      {
       "y": 690,
-      "jump": 1,
-      "mean": "#0e141b"
+      "jump": 1.1,
+      "mean": "#0d141a"
      },
      {
       "y": 691,
@@ -1458,77 +1472,77 @@
      },
      {
       "y": 694,
-      "jump": 0.8,
-      "mean": "#0e161d"
+      "jump": 0.7,
+      "mean": "#0d151c"
      },
      {
       "y": 695,
       "jump": 0.6,
-      "mean": "#0e161d"
+      "mean": "#0d151d"
      },
      {
       "y": 696,
       "jump": 0.7,
-      "mean": "#0e161e"
+      "mean": "#0e161d"
      },
      {
       "y": 697,
       "jump": 0.9,
-      "mean": "#0e171e"
+      "mean": "#0e161d"
      },
      {
       "y": 698,
       "jump": 1,
-      "mean": "#0f171f"
+      "mean": "#0e161e"
      },
      {
       "y": 699,
-      "jump": 0.8,
-      "mean": "#0e171f"
+      "jump": 0.7,
+      "mean": "#0e161f"
      },
      {
       "y": 700,
       "jump": 0.7,
-      "mean": "#0f171f"
+      "mean": "#0e171f"
      },
      {
       "y": 701,
       "jump": 0.6,
-      "mean": "#0f1820"
+      "mean": "#0e1720"
      },
      {
       "y": 702,
-      "jump": 0.6,
-      "mean": "#0f1821"
+      "jump": 0.5,
+      "mean": "#0f1720"
      },
      {
       "y": 703,
-      "jump": 0.6,
+      "jump": 0.5,
       "mean": "#0f1820"
      },
      {
       "y": 704,
-      "jump": 1,
-      "mean": "#0f1922"
+      "jump": 0.9,
+      "mean": "#0f1921"
      },
      {
       "y": 705,
-      "jump": 0.8,
-      "mean": "#101922"
+      "jump": 0.7,
+      "mean": "#0f1821"
      },
      {
       "y": 706,
-      "jump": 2.9,
-      "mean": "#131c25"
+      "jump": 0.7,
+      "mean": "#101922"
      },
      {
       "y": 707,
-      "jump": 1.5,
-      "mean": "#101b24"
+      "jump": 0.7,
+      "mean": "#0f1a22"
      },
      {
       "y": 708,
-      "jump": 1.2,
+      "jump": 0.6,
       "mean": "#101a23"
      },
      {
@@ -1538,7 +1552,7 @@
      },
      {
       "y": 710,
-      "jump": 0.7,
+      "jump": 0.8,
       "mean": "#101b24"
      },
      {
@@ -1661,12 +1675,12 @@
   },
   "digest": {
    "attempt": 1,
-   "turn": 6,
-   "turnAfter": 7,
+   "turn": 4,
+   "turnAfter": 5,
    "phase": "battle",
-   "eventsAfter": 4,
+   "eventsAfter": 5,
    "slot": 0,
-   "label": "啃咬",
+   "label": "甩水",
    "category": "攻击",
    "damage": null,
    "hitBefore": {
@@ -1682,21 +1696,21 @@
     "w": 232,
     "h": 146
    },
-   "windowMs": 3877.3,
-   "timeline": 8,
-   "cues": 4,
-   "attackCues": 3,
+   "windowMs": 3881.5,
+   "timeline": 6,
+   "cues": 2,
+   "attackCues": 1,
    "floatEvents": 2,
    "floats": 2,
    "digitFloats": 2,
    "defenderEvents": 3,
-   "deltaFirstPairMs": -450.2,
+   "deltaFirstPairMs": -450.7,
    "finalFloatCount": 0,
    "floatTexts": [
     "防御 70%@foe",
-    "-14@foe"
+    "-3@foe"
    ],
-   "frames": 134,
+   "frames": 133,
    "selfErrors": [],
    "seam": {
     "shot": "battle-feedback/04-spritebox-seam.png",
@@ -1725,139 +1739,139 @@
      "read_reason": null,
      "metrics": {
       "border": 715,
-      "borderJump": 0.8,
+      "borderJump": 0.6,
       "borderMean": "#111c26",
       "stepAcrossBottom": 0,
-      "innerMaxJump": 2,
+      "innerMaxJump": 0.9,
       "rows": [
        {
         "y": 690,
-        "jump": 39.2,
-        "mean": "#45474a"
+        "jump": 1.1,
+        "mean": "#0d141a"
        },
        {
         "y": 691,
-        "jump": 3.2,
-        "mean": "#424548"
+        "jump": 1,
+        "mean": "#0d141b"
        },
        {
         "y": 692,
-        "jump": 40.1,
-        "mean": "#6a6d70"
+        "jump": 0.9,
+        "mean": "#0d151b"
        },
        {
         "y": 693,
-        "jump": 1.3,
-        "mean": "#6a6d70"
+        "jump": 0.8,
+        "mean": "#0d151c"
        },
        {
         "y": 694,
-        "jump": 47.8,
-        "mean": "#3a3d41"
+        "jump": 0.7,
+        "mean": "#0d151c"
        },
        {
         "y": 695,
-        "jump": 22.6,
-        "mean": "#23262b"
+        "jump": 0.6,
+        "mean": "#0d151d"
        },
        {
         "y": 696,
-        "jump": 22.2,
-        "mean": "#383c42"
+        "jump": 0.7,
+        "mean": "#0e161d"
        },
        {
         "y": 697,
-        "jump": 5.3,
-        "mean": "#33373d"
+        "jump": 0.9,
+        "mean": "#0e161d"
        },
        {
         "y": 698,
-        "jump": 2.1,
-        "mean": "#31363b"
+        "jump": 0.9,
+        "mean": "#0e161e"
        },
        {
         "y": 699,
-        "jump": 1.5,
-        "mean": "#2f343a"
+        "jump": 0.7,
+        "mean": "#0e161f"
        },
        {
         "y": 700,
-        "jump": 1.6,
-        "mean": "#2d3339"
+        "jump": 0.7,
+        "mean": "#0e171f"
        },
        {
         "y": 701,
-        "jump": 1.8,
-        "mean": "#2b3138"
+        "jump": 0.6,
+        "mean": "#0e1720"
        },
        {
         "y": 702,
-        "jump": 1.8,
-        "mean": "#2a3036"
+        "jump": 0.5,
+        "mean": "#0f1720"
        },
        {
         "y": 703,
-        "jump": 1.7,
-        "mean": "#282e35"
+        "jump": 0.5,
+        "mean": "#0f1820"
        },
        {
         "y": 704,
-        "jump": 2,
-        "mean": "#262d34"
+        "jump": 0.9,
+        "mean": "#0f1921"
        },
        {
         "y": 705,
-        "jump": 1.9,
-        "mean": "#242b32"
+        "jump": 0.7,
+        "mean": "#0f1821"
        },
        {
         "y": 706,
-        "jump": 1.7,
-        "mean": "#222a31"
+        "jump": 0.7,
+        "mean": "#101922"
        },
        {
         "y": 707,
-        "jump": 1.9,
-        "mean": "#202830"
+        "jump": 0.7,
+        "mean": "#0f1a22"
        },
        {
         "y": 708,
-        "jump": 1.9,
-        "mean": "#1e272e"
+        "jump": 0.6,
+        "mean": "#101a23"
        },
        {
         "y": 709,
-        "jump": 1.7,
-        "mean": "#1c252d"
+        "jump": 0.7,
+        "mean": "#101a23"
        },
        {
         "y": 710,
-        "jump": 2,
-        "mean": "#1a232c"
+        "jump": 0.8,
+        "mean": "#101b24"
        },
        {
         "y": 711,
-        "jump": 1.9,
-        "mean": "#18222a"
+        "jump": 0.3,
+        "mean": "#101b24"
        },
        {
         "y": 712,
-        "jump": 1.6,
-        "mean": "#162029"
+        "jump": 0.5,
+        "mean": "#111b25"
        },
        {
         "y": 713,
-        "jump": 1.9,
-        "mean": "#131f28"
+        "jump": 0.9,
+        "mean": "#101c25"
        },
        {
         "y": 714,
-        "jump": 1.9,
-        "mean": "#121d26"
+        "jump": 0.6,
+        "mean": "#101b25"
        },
        {
         "y": 715,
-        "jump": 0.8,
+        "jump": 0.6,
         "mean": "#111c26"
        },
        {
@@ -1898,12 +1912,12 @@
       "borderJump": 0.6,
       "borderMean": "#111c26",
       "stepAcrossBottom": 1.1,
-      "innerMaxJump": 2.9,
+      "innerMaxJump": 0.9,
       "rows": [
        {
         "y": 690,
-        "jump": 1,
-        "mean": "#0e141b"
+        "jump": 1.1,
+        "mean": "#0d141a"
        },
        {
         "y": 691,
@@ -1922,77 +1936,77 @@
        },
        {
         "y": 694,
-        "jump": 0.8,
-        "mean": "#0e161d"
+        "jump": 0.7,
+        "mean": "#0d151c"
        },
        {
         "y": 695,
         "jump": 0.6,
-        "mean": "#0e161d"
+        "mean": "#0d151d"
        },
        {
         "y": 696,
         "jump": 0.7,
-        "mean": "#0e161e"
+        "mean": "#0e161d"
        },
        {
         "y": 697,
         "jump": 0.9,
-        "mean": "#0e171e"
+        "mean": "#0e161d"
        },
        {
         "y": 698,
         "jump": 1,
-        "mean": "#0f171f"
+        "mean": "#0e161e"
        },
        {
         "y": 699,
-        "jump": 0.8,
-        "mean": "#0e171f"
+        "jump": 0.7,
+        "mean": "#0e161f"
        },
        {
         "y": 700,
         "jump": 0.7,
-        "mean": "#0f171f"
+        "mean": "#0e171f"
        },
        {
         "y": 701,
         "jump": 0.6,
-        "mean": "#0f1820"
+        "mean": "#0e1720"
        },
        {
         "y": 702,
-        "jump": 0.6,
-        "mean": "#0f1821"
+        "jump": 0.5,
+        "mean": "#0f1720"
        },
        {
         "y": 703,
-        "jump": 0.6,
+        "jump": 0.5,
         "mean": "#0f1820"
        },
        {
         "y": 704,
-        "jump": 1,
-        "mean": "#0f1922"
+        "jump": 0.9,
+        "mean": "#0f1921"
        },
        {
         "y": 705,
-        "jump": 0.8,
-        "mean": "#101922"
+        "jump": 0.7,
+        "mean": "#0f1821"
        },
        {
         "y": 706,
-        "jump": 2.9,
-        "mean": "#131c25"
+        "jump": 0.7,
+        "mean": "#101922"
        },
        {
         "y": 707,
-        "jump": 1.5,
-        "mean": "#101b24"
+        "jump": 0.7,
+        "mean": "#0f1a22"
        },
        {
         "y": 708,
-        "jump": 1.2,
+        "jump": 0.6,
         "mean": "#101a23"
        },
        {
@@ -2002,7 +2016,7 @@
        },
        {
         "y": 710,
-        "jump": 0.7,
+        "jump": 0.8,
         "mean": "#101b24"
        },
        {
@@ -2052,105 +2066,102 @@
    }
   },
   "facts_summary": {
-   "timeline_entries": 8,
-   "cues": 4,
-   "attack_cues": 3,
+   "timeline_entries": 6,
+   "cues": 2,
+   "attack_cues": 1,
    "hit_cues": 1,
    "float_events": 2,
    "float_gone_events": 2,
    "first_attack_cue": {
-    "t": 7317.1,
+    "t": 7591.2,
     "side": "self",
     "what": ".b3-attack",
     "relT": 0
    },
    "timeline_rel_ms": [
     {
-     "t": 6866.9,
-     "relT": -450.2,
+     "t": 7140.5,
+     "relT": -450.7,
      "kind": "float",
      "side": "foe",
      "what": "防御 70%"
     },
     {
-     "t": 7317.1,
+     "t": 7591.2,
      "relT": 0,
      "kind": "cue",
      "side": "self",
      "what": ".b3-attack"
     },
     {
-     "t": 7317.1,
-     "relT": 0,
-     "kind": "cue",
-     "side": "self",
-     "what": "data-b3-variant=action"
-    },
-    {
-     "t": 7317.1,
-     "relT": 0,
-     "kind": "cue",
-     "side": "self",
-     "what": "sprite src → action 立绘"
-    },
-    {
-     "t": 7767.2,
-     "relT": 450.1,
+     "t": 8040.7,
+     "relT": 449.5,
      "kind": "cue",
      "side": "foe",
      "what": ".b3-hit"
     },
     {
-     "t": 7767.3,
-     "relT": 450.2,
+     "t": 8040.7,
+     "relT": 449.5,
      "kind": "float",
      "side": "foe",
-     "what": "-14"
+     "what": "-3"
     },
     {
-     "t": 8066.5,
-     "relT": 749.4,
+     "t": 8340.5,
+     "relT": 749.3,
      "kind": "float-gone",
      "side": null,
      "what": "防御 70%"
     },
     {
-     "t": 8968.2,
-     "relT": 1651.1,
+     "t": 9241.6,
+     "relT": 1650.4,
      "kind": "float-gone",
      "side": null,
-     "what": "-14"
+     "what": "-3"
     }
    ],
    "floats": [
     {
      "text": "防御 70%",
      "side": "foe",
-     "bornT": 6866.9,
-     "goneT": 8066.5,
-     "aliveMs": 1199.6,
+     "bornT": 7140.5,
+     "goneT": 8340.5,
+     "aliveMs": 1200,
      "removed": true,
      "rect": {
-      "w": 58.29,
-      "h": 18.85,
+      "w": 58.28,
+      "h": 18.84,
       "cx": 943,
-      "cy": 493.53
+      "cy": 454.5
      },
-     "samples": 40,
-     "measurable": 40,
-     "onTop": 40,
+     "samples": 41,
+     "measurable": 41,
+     "onTop": 41,
      "hitClasses": [
       "b3-float b3-float--shield"
      ],
      "paint_probe": {
-      "t": 6895.4,
+      "t": 7153.2,
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true
      },
      "sample_detail": [
       {
-       "t": 6895.4,
+       "t": 7153.2,
+       "measurable": true,
+       "cx": 943,
+       "cy": 523.48,
+       "w": 52.45,
+       "h": 16.96,
+       "hitClass": "b3-float b3-float--shield",
+       "hitTag": "span",
+       "hitIsFloat": true
+      },
+      {
+       "t": 7177.4,
        "measurable": true,
        "cx": 943,
        "cy": 522.35,
@@ -2161,40 +2172,40 @@
        "hitIsFloat": true
       },
       {
-       "t": 6923.4,
+       "t": 7203.1,
        "measurable": true,
        "cx": 943,
-       "cy": 521.29,
-       "w": 54.5,
-       "h": 17.62,
+       "cy": 520.28,
+       "w": 55.44,
+       "h": 17.92,
        "hitClass": "b3-float b3-float--shield",
        "hitTag": "span",
        "hitIsFloat": true
       },
       {
-       "t": 6945.8,
+       "t": 7237.2,
        "measurable": true,
        "cx": 943,
-       "cy": 519.33,
-       "w": 56.33,
-       "h": 18.21,
+       "cy": 518.43,
+       "w": 57.17,
+       "h": 18.48,
        "hitClass": "b3-float b3-float--shield",
        "hitTag": "span",
        "hitIsFloat": true
       },
       {
-       "t": 6978.6,
+       "t": 7269.6,
        "measurable": true,
        "cx": 943,
-       "cy": 517.58,
-       "w": 57.96,
-       "h": 18.74,
+       "cy": 516.79,
+       "w": 58.69,
+       "h": 18.98,
        "hitClass": "b3-float b3-float--shield",
        "hitTag": "span",
        "hitIsFloat": true
       },
       {
-       "t": 7012.5,
+       "t": 7298.6,
        "measurable": true,
        "cx": 943,
        "cy": 516.06,
@@ -2205,18 +2216,18 @@
        "hitIsFloat": true
       },
       {
-       "t": 7041.9,
+       "t": 7320,
        "measurable": true,
        "cx": 943,
-       "cy": 515.4,
-       "w": 59.99,
-       "h": 19.4,
+       "cy": 514.82,
+       "w": 60.53,
+       "h": 19.57,
        "hitClass": "b3-float b3-float--shield",
        "hitTag": "span",
        "hitIsFloat": true
       },
       {
-       "t": 7078.9,
+       "t": 7353,
        "measurable": true,
        "cx": 943,
        "cy": 513.93,
@@ -2225,131 +2236,120 @@
        "hitClass": "b3-float b3-float--shield",
        "hitTag": "span",
        "hitIsFloat": true
-      },
-      {
-       "t": 7101.8,
-       "measurable": true,
-       "cx": 943,
-       "cy": 513.65,
-       "w": 61.63,
-       "h": 19.93,
-       "hitClass": "b3-float b3-float--shield",
-       "hitTag": "span",
-       "hitIsFloat": true
       }
      ]
     },
     {
-     "text": "-14",
+     "text": "-3",
      "side": "foe",
-     "bornT": 7767.3,
-     "goneT": 8968.2,
+     "bornT": 8040.7,
+     "goneT": 9241.6,
      "aliveMs": 1200.9,
      "removed": true,
      "rect": {
-      "w": 32.31,
-      "h": 29,
+      "w": 15.67,
+      "h": 18.84,
       "cx": 943,
-      "cy": 368.98
+      "cy": 324.9
      },
-     "samples": 40,
-     "measurable": 40,
-     "onTop": 40,
+     "samples": 41,
+     "measurable": 41,
+     "onTop": 41,
      "hitClasses": [
-      "b3-float b3-float--hit"
+      "b3-float b3-float--weak"
      ],
      "paint_probe": {
-      "t": 7794.3,
-      "hitClass": "b3-float b3-float--hit",
+      "t": 8054.7,
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true
      },
      "sample_detail": [
       {
-       "t": 7794.3,
+       "t": 8054.7,
        "measurable": true,
        "cx": 943,
-       "cy": 397.84,
-       "w": 29.66,
-       "h": 26.62,
-       "hitClass": "b3-float b3-float--hit",
+       "cy": 393.89,
+       "w": 14.1,
+       "h": 16.96,
+       "hitClass": "b3-float b3-float--weak",
        "hitTag": "span",
        "hitIsFloat": true
       },
       {
-       "t": 7823.3,
+       "t": 8077.1,
        "measurable": true,
        "cx": 943,
-       "cy": 396.78,
-       "w": 30.22,
-       "h": 27.12,
-       "hitClass": "b3-float b3-float--hit",
+       "cy": 392.76,
+       "w": 14.39,
+       "h": 17.3,
+       "hitClass": "b3-float b3-float--weak",
        "hitTag": "span",
        "hitIsFloat": true
       },
       {
-       "t": 7846,
+       "t": 8103.1,
        "measurable": true,
        "cx": 943,
-       "cy": 394.81,
-       "w": 31.23,
-       "h": 28.03,
-       "hitClass": "b3-float b3-float--hit",
+       "cy": 390.69,
+       "w": 14.91,
+       "h": 17.93,
+       "hitClass": "b3-float b3-float--weak",
        "hitTag": "span",
        "hitIsFloat": true
       },
       {
-       "t": 7877.8,
+       "t": 8137.2,
        "measurable": true,
        "cx": 943,
-       "cy": 393.06,
-       "w": 32.14,
-       "h": 28.84,
-       "hitClass": "b3-float b3-float--hit",
+       "cy": 388.83,
+       "w": 15.37,
+       "h": 18.48,
+       "hitClass": "b3-float b3-float--weak",
        "hitTag": "span",
        "hitIsFloat": true
       },
       {
-       "t": 7912.4,
+       "t": 8170.8,
        "measurable": true,
        "cx": 943,
-       "cy": 391.55,
-       "w": 32.92,
-       "h": 29.54,
-       "hitClass": "b3-float b3-float--hit",
+       "cy": 387.2,
+       "w": 15.78,
+       "h": 18.98,
+       "hitClass": "b3-float b3-float--weak",
        "hitTag": "span",
        "hitIsFloat": true
       },
       {
-       "t": 7941.9,
+       "t": 8197.6,
        "measurable": true,
        "cx": 943,
-       "cy": 390.89,
-       "w": 33.26,
-       "h": 29.85,
-       "hitClass": "b3-float b3-float--hit",
+       "cy": 386.47,
+       "w": 15.97,
+       "h": 19.2,
+       "hitClass": "b3-float b3-float--weak",
        "hitTag": "span",
        "hitIsFloat": true
       },
       {
-       "t": 7979,
+       "t": 8220.6,
        "measurable": true,
        "cx": 943,
-       "cy": 389.41,
-       "w": 34.02,
-       "h": 30.53,
-       "hitClass": "b3-float b3-float--hit",
+       "cy": 385.23,
+       "w": 16.28,
+       "h": 19.57,
+       "hitClass": "b3-float b3-float--weak",
        "hitTag": "span",
        "hitIsFloat": true
       },
       {
-       "t": 8003,
+       "t": 8253.7,
        "measurable": true,
        "cx": 943,
-       "cy": 389.13,
-       "w": 34.17,
-       "h": 30.67,
-       "hitClass": "b3-float b3-float--hit",
+       "cy": 384.34,
+       "w": 16.5,
+       "h": 19.84,
+       "hitClass": "b3-float b3-float--weak",
        "hitTag": "span",
        "hitIsFloat": true
       }
@@ -2360,23 +2360,21 @@
    "cycles": {
     "leads": [
      {
-      "t": 7317.1,
+      "t": 7591.2,
       "side": "self",
       "cues": [
-       ".b3-attack",
-       "data-b3-variant=action",
-       "sprite src → action 立绘"
+       ".b3-attack"
       ]
      }
     ],
     "pairs": [
      {
-      "t": 7317.1,
+      "t": 7591.2,
       "attacker": "self",
-      "deltaMs": 450.1,
-      "deltaHitMs": 450.1,
-      "deltaFloatMs": 450.2,
-      "floatText": "-14",
+      "deltaMs": 449.5,
+      "deltaHitMs": 449.5,
+      "deltaFloatMs": 449.5,
+      "floatText": "-3",
       "hitWhat": ".b3-hit",
       "reactions": 2
      }
@@ -2385,16 +2383,14 @@
     "inversions": []
    },
    "deltas_ms": {
-    "attack_to_first_defender": 450.1,
+    "attack_to_first_defender": 449.5,
     "defender_side": "foe",
     "consecutive_ms": [
-     450.2,
+     450.7,
+     449.5,
      0,
-     0,
-     450.1,
-     0.1,
-     299.2,
-     901.7
+     299.8,
+     901.1
     ]
    }
   },
@@ -2456,8 +2452,8 @@
    "failReason": null,
    "path": "真鼠标点「开一局（标准 PVP · 六宠）」（盒子六只 own 个体经 ?team= 交接；6 只）",
    "manaAvailable": true,
-   "turnsDriven": 4,
-   "elapsedMs": 2668,
+   "turnsDriven": 2,
+   "elapsedMs": 1751,
    "initial": {
     "engine": {
      "mana": {
@@ -2492,24 +2488,24 @@
      }
     },
     "bodyHearts": 8,
-    "at": 4440
+    "at": 4463
    },
    "faint": {
     "found": true,
-    "steps": 4,
-    "eventSide": "enemy",
-    "side": "opponent",
+    "steps": 2,
+    "eventSide": "player",
+    "side": "self",
     "engineChanged": true,
     "event": {
-     "turn": 5,
+     "turn": 3,
      "kind": "mana_loss",
      "side": null,
      "detail": {
-      "side": "enemy",
+      "side": "player",
       "faint_cost": 1,
       "mana": 3
      },
-     "text": "对方的精灵力竭，失去 1 点魔力（剩余 3 点）（力竭扣魔力未实机核实，本条为候选口径）。"
+     "text": "我方的精灵力竭，失去 1 点魔力（剩余 3 点）（力竭扣魔力未实机核实，本条为候选口径）。"
     },
     "before": {
      "engine": {
@@ -2518,9 +2514,9 @@
        "opponent": 4,
        "pool": 4
       },
-      "turn": 5,
+      "turn": 3,
       "phase": "battle",
-      "stateVersion": 17
+      "stateVersion": 10
      },
      "dom": {
       "self": {
@@ -2545,31 +2541,21 @@
       }
      },
      "bodyHearts": 8,
-     "at": 5768
+     "at": 4909
     },
     "after": {
      "engine": {
       "mana": {
-       "self": 4,
-       "opponent": 3,
+       "self": 3,
+       "opponent": 4,
        "pool": 4
       },
-      "turn": 5,
+      "turn": 3,
       "phase": "replace",
-      "stateVersion": 23
+      "stateVersion": 17
      },
      "dom": {
       "self": {
-       "found": true,
-       "hidden": false,
-       "visible": true,
-       "full": 4,
-       "empty": 0,
-       "total": 4,
-       "text": "♥♥♥♥",
-       "html": "<span class=\"b3-hearts\" id=\"b3-hearts-self\" data-b3-hearts-self=\"yes\" data-b3-src=\"view.hearts.self（引擎暂无 → 保持 hidden；掉心动效时才显）\"><i>♥♥♥♥</i><i class=\"lost\"></i></span>"
-      },
-      "foe": {
        "found": true,
        "hidden": false,
        "visible": true,
@@ -2577,14 +2563,24 @@
        "empty": 1,
        "total": 4,
        "text": "♥♥♥♡",
-       "html": "<span class=\"b3-hearts\" id=\"b3-hearts-foe\" data-b3-hearts-foe=\"yes\" data-b3-src=\"view.hearts.opponent（同上；引擎暂无 → hidden）\"><i>♥♥♥</i><i class=\"lost\">♡</i></span>"
+       "html": "<span class=\"b3-hearts\" id=\"b3-hearts-self\" data-b3-hearts-self=\"yes\" data-b3-src=\"view.hearts.self（引擎暂无 → 保持 hidden；掉心动效时才显）\"><i>♥♥♥</i><i class=\"lost\">♡</i></span>"
+      },
+      "foe": {
+       "found": true,
+       "hidden": false,
+       "visible": true,
+       "full": 4,
+       "empty": 0,
+       "total": 4,
+       "text": "♥♥♥♥",
+       "html": "<span class=\"b3-hearts\" id=\"b3-hearts-foe\" data-b3-hearts-foe=\"yes\" data-b3-src=\"view.hearts.opponent（同上；引擎暂无 → hidden）\"><i>♥♥♥♥</i><i class=\"lost\"></i></span>"
       }
      },
-     "bodyHearts": 16,
-     "at": 6218
+     "bodyHearts": 17,
+     "at": 5341
     },
-    "domSelf": "掉心前 ♥♥♥♥ → 掉心后 ♥♥♥♥",
-    "domFoe": "掉心前 ♥♥♥♥ → 掉心后 ♥♥♥♡"
+    "domSelf": "掉心前 ♥♥♥♥ → 掉心后 ♥♥♥♡",
+    "domFoe": "掉心前 ♥♥♥♥ → 掉心后 ♥♥♥♥"
    },
    "missingManaProbe": {
     "taken": true,
@@ -2624,7 +2620,7 @@
       }
      },
      "bodyHearts": 8,
-     "at": 4440
+     "at": 4463
     },
     "after": {
      "engine": {
@@ -2656,7 +2652,7 @@
       }
      },
      "bodyHearts": 0,
-     "at": 4445
+     "at": 4468
     },
     "restoredRead": {
      "engine": {
@@ -2692,7 +2688,7 @@
       }
      },
      "bodyHearts": 8,
-     "at": 4448
+     "at": 4471
     },
     "reason": "合成「引擎没给」：抽掉 state.view.mana 再 window.rocoDemo.render()（同一帧读 DOM），随后原样塞回"
    },
@@ -2730,139 +2726,139 @@
     "read_reason": null,
     "metrics": {
      "border": 715,
-     "borderJump": 0.8,
+     "borderJump": 0.6,
      "borderMean": "#111c26",
      "stepAcrossBottom": 0,
-     "innerMaxJump": 2,
+     "innerMaxJump": 0.9,
      "rows": [
       {
        "y": 690,
-       "jump": 39.2,
-       "mean": "#45474a"
+       "jump": 1.1,
+       "mean": "#0d141a"
       },
       {
        "y": 691,
-       "jump": 3.2,
-       "mean": "#424548"
+       "jump": 1,
+       "mean": "#0d141b"
       },
       {
        "y": 692,
-       "jump": 40.1,
-       "mean": "#6a6d70"
+       "jump": 0.9,
+       "mean": "#0d151b"
       },
       {
        "y": 693,
-       "jump": 1.3,
-       "mean": "#6a6d70"
+       "jump": 0.8,
+       "mean": "#0d151c"
       },
       {
        "y": 694,
-       "jump": 47.8,
-       "mean": "#3a3d41"
+       "jump": 0.7,
+       "mean": "#0d151c"
       },
       {
        "y": 695,
-       "jump": 22.6,
-       "mean": "#23262b"
+       "jump": 0.6,
+       "mean": "#0d151d"
       },
       {
        "y": 696,
-       "jump": 22.2,
-       "mean": "#383c42"
+       "jump": 0.7,
+       "mean": "#0e161d"
       },
       {
        "y": 697,
-       "jump": 5.3,
-       "mean": "#33373d"
+       "jump": 0.9,
+       "mean": "#0e161d"
       },
       {
        "y": 698,
-       "jump": 2.1,
-       "mean": "#31363b"
+       "jump": 0.9,
+       "mean": "#0e161e"
       },
       {
        "y": 699,
-       "jump": 1.5,
-       "mean": "#2f343a"
+       "jump": 0.7,
+       "mean": "#0e161f"
       },
       {
        "y": 700,
-       "jump": 1.6,
-       "mean": "#2d3339"
+       "jump": 0.7,
+       "mean": "#0e171f"
       },
       {
        "y": 701,
-       "jump": 1.8,
-       "mean": "#2b3138"
+       "jump": 0.6,
+       "mean": "#0e1720"
       },
       {
        "y": 702,
-       "jump": 1.8,
-       "mean": "#2a3036"
+       "jump": 0.5,
+       "mean": "#0f1720"
       },
       {
        "y": 703,
-       "jump": 1.7,
-       "mean": "#282e35"
+       "jump": 0.5,
+       "mean": "#0f1820"
       },
       {
        "y": 704,
-       "jump": 2,
-       "mean": "#262d34"
+       "jump": 0.9,
+       "mean": "#0f1921"
       },
       {
        "y": 705,
-       "jump": 1.9,
-       "mean": "#242b32"
+       "jump": 0.7,
+       "mean": "#0f1821"
       },
       {
        "y": 706,
-       "jump": 1.7,
-       "mean": "#222a31"
+       "jump": 0.7,
+       "mean": "#101922"
       },
       {
        "y": 707,
-       "jump": 1.9,
-       "mean": "#202830"
+       "jump": 0.7,
+       "mean": "#0f1a22"
       },
       {
        "y": 708,
-       "jump": 1.9,
-       "mean": "#1e272e"
+       "jump": 0.6,
+       "mean": "#101a23"
       },
       {
        "y": 709,
-       "jump": 1.7,
-       "mean": "#1c252d"
+       "jump": 0.7,
+       "mean": "#101a23"
       },
       {
        "y": 710,
-       "jump": 2,
-       "mean": "#1a232c"
+       "jump": 0.8,
+       "mean": "#101b24"
       },
       {
        "y": 711,
-       "jump": 1.9,
-       "mean": "#18222a"
+       "jump": 0.3,
+       "mean": "#101b24"
       },
       {
        "y": 712,
-       "jump": 1.6,
-       "mean": "#162029"
+       "jump": 0.5,
+       "mean": "#111b25"
       },
       {
        "y": 713,
-       "jump": 1.9,
-       "mean": "#131f28"
+       "jump": 0.9,
+       "mean": "#101c25"
       },
       {
        "y": 714,
-       "jump": 1.9,
-       "mean": "#121d26"
+       "jump": 0.6,
+       "mean": "#101b25"
       },
       {
        "y": 715,
-       "jump": 0.8,
+       "jump": 0.6,
        "mean": "#111c26"
       },
       {
@@ -2903,12 +2899,12 @@
      "borderJump": 0.6,
      "borderMean": "#111c26",
      "stepAcrossBottom": 1.1,
-     "innerMaxJump": 2.9,
+     "innerMaxJump": 0.9,
      "rows": [
       {
        "y": 690,
-       "jump": 1,
-       "mean": "#0e141b"
+       "jump": 1.1,
+       "mean": "#0d141a"
       },
       {
        "y": 691,
@@ -2927,77 +2923,77 @@
       },
       {
        "y": 694,
-       "jump": 0.8,
-       "mean": "#0e161d"
+       "jump": 0.7,
+       "mean": "#0d151c"
       },
       {
        "y": 695,
        "jump": 0.6,
-       "mean": "#0e161d"
+       "mean": "#0d151d"
       },
       {
        "y": 696,
        "jump": 0.7,
-       "mean": "#0e161e"
+       "mean": "#0e161d"
       },
       {
        "y": 697,
        "jump": 0.9,
-       "mean": "#0e171e"
+       "mean": "#0e161d"
       },
       {
        "y": 698,
        "jump": 1,
-       "mean": "#0f171f"
+       "mean": "#0e161e"
       },
       {
        "y": 699,
-       "jump": 0.8,
-       "mean": "#0e171f"
+       "jump": 0.7,
+       "mean": "#0e161f"
       },
       {
        "y": 700,
        "jump": 0.7,
-       "mean": "#0f171f"
+       "mean": "#0e171f"
       },
       {
        "y": 701,
        "jump": 0.6,
-       "mean": "#0f1820"
+       "mean": "#0e1720"
       },
       {
        "y": 702,
-       "jump": 0.6,
-       "mean": "#0f1821"
+       "jump": 0.5,
+       "mean": "#0f1720"
       },
       {
        "y": 703,
-       "jump": 0.6,
+       "jump": 0.5,
        "mean": "#0f1820"
       },
       {
        "y": 704,
-       "jump": 1,
-       "mean": "#0f1922"
+       "jump": 0.9,
+       "mean": "#0f1921"
       },
       {
        "y": 705,
-       "jump": 0.8,
-       "mean": "#101922"
+       "jump": 0.7,
+       "mean": "#0f1821"
       },
       {
        "y": 706,
-       "jump": 2.9,
-       "mean": "#131c25"
+       "jump": 0.7,
+       "mean": "#101922"
       },
       {
        "y": 707,
-       "jump": 1.5,
-       "mean": "#101b24"
+       "jump": 0.7,
+       "mean": "#0f1a22"
       },
       {
        "y": 708,
-       "jump": 1.2,
+       "jump": 0.6,
        "mean": "#101a23"
       },
       {
@@ -3007,7 +3003,7 @@
       },
       {
        "y": 710,
-       "jump": 0.7,
+       "jump": 0.8,
        "mean": "#101b24"
       },
       {
@@ -3062,12 +3058,12 @@
     "why": null,
     "digest": {
      "attempt": 1,
-     "turn": 6,
-     "turnAfter": 7,
+     "turn": 4,
+     "turnAfter": 5,
      "phase": "battle",
-     "eventsAfter": 4,
+     "eventsAfter": 5,
      "slot": 0,
-     "label": "啃咬",
+     "label": "甩水",
      "category": "攻击",
      "damage": null,
      "hitBefore": {
@@ -3083,21 +3079,21 @@
       "w": 232,
       "h": 146
      },
-     "windowMs": 3877.3,
-     "timeline": 8,
-     "cues": 4,
-     "attackCues": 3,
+     "windowMs": 3881.5,
+     "timeline": 6,
+     "cues": 2,
+     "attackCues": 1,
      "floatEvents": 2,
      "floats": 2,
      "digitFloats": 2,
      "defenderEvents": 3,
-     "deltaFirstPairMs": -450.2,
+     "deltaFirstPairMs": -450.7,
      "finalFloatCount": 0,
      "floatTexts": [
       "防御 70%@foe",
-      "-14@foe"
+      "-3@foe"
      ],
-     "frames": 134,
+     "frames": 133,
      "selfErrors": [],
      "seam": {
       "shot": "battle-feedback/04-spritebox-seam.png",
@@ -3126,139 +3122,139 @@
        "read_reason": null,
        "metrics": {
         "border": 715,
-        "borderJump": 0.8,
+        "borderJump": 0.6,
         "borderMean": "#111c26",
         "stepAcrossBottom": 0,
-        "innerMaxJump": 2,
+        "innerMaxJump": 0.9,
         "rows": [
          {
           "y": 690,
-          "jump": 39.2,
-          "mean": "#45474a"
+          "jump": 1.1,
+          "mean": "#0d141a"
          },
          {
           "y": 691,
-          "jump": 3.2,
-          "mean": "#424548"
+          "jump": 1,
+          "mean": "#0d141b"
          },
          {
           "y": 692,
-          "jump": 40.1,
-          "mean": "#6a6d70"
+          "jump": 0.9,
+          "mean": "#0d151b"
          },
          {
           "y": 693,
-          "jump": 1.3,
-          "mean": "#6a6d70"
+          "jump": 0.8,
+          "mean": "#0d151c"
          },
          {
           "y": 694,
-          "jump": 47.8,
-          "mean": "#3a3d41"
+          "jump": 0.7,
+          "mean": "#0d151c"
          },
          {
           "y": 695,
-          "jump": 22.6,
-          "mean": "#23262b"
+          "jump": 0.6,
+          "mean": "#0d151d"
          },
          {
           "y": 696,
-          "jump": 22.2,
-          "mean": "#383c42"
+          "jump": 0.7,
+          "mean": "#0e161d"
          },
          {
           "y": 697,
-          "jump": 5.3,
-          "mean": "#33373d"
+          "jump": 0.9,
+          "mean": "#0e161d"
          },
          {
           "y": 698,
-          "jump": 2.1,
-          "mean": "#31363b"
+          "jump": 0.9,
+          "mean": "#0e161e"
          },
          {
           "y": 699,
-          "jump": 1.5,
-          "mean": "#2f343a"
+          "jump": 0.7,
+          "mean": "#0e161f"
          },
          {
           "y": 700,
-          "jump": 1.6,
-          "mean": "#2d3339"
+          "jump": 0.7,
+          "mean": "#0e171f"
          },
          {
           "y": 701,
-          "jump": 1.8,
-          "mean": "#2b3138"
+          "jump": 0.6,
+          "mean": "#0e1720"
          },
          {
           "y": 702,
-          "jump": 1.8,
-          "mean": "#2a3036"
+          "jump": 0.5,
+          "mean": "#0f1720"
          },
          {
           "y": 703,
-          "jump": 1.7,
-          "mean": "#282e35"
+          "jump": 0.5,
+          "mean": "#0f1820"
          },
          {
           "y": 704,
-          "jump": 2,
-          "mean": "#262d34"
+          "jump": 0.9,
+          "mean": "#0f1921"
          },
          {
           "y": 705,
-          "jump": 1.9,
-          "mean": "#242b32"
+          "jump": 0.7,
+          "mean": "#0f1821"
          },
          {
           "y": 706,
-          "jump": 1.7,
-          "mean": "#222a31"
+          "jump": 0.7,
+          "mean": "#101922"
          },
          {
           "y": 707,
-          "jump": 1.9,
-          "mean": "#202830"
+          "jump": 0.7,
+          "mean": "#0f1a22"
          },
          {
           "y": 708,
-          "jump": 1.9,
-          "mean": "#1e272e"
+          "jump": 0.6,
+          "mean": "#101a23"
          },
          {
           "y": 709,
-          "jump": 1.7,
-          "mean": "#1c252d"
+          "jump": 0.7,
+          "mean": "#101a23"
          },
          {
           "y": 710,
-          "jump": 2,
-          "mean": "#1a232c"
+          "jump": 0.8,
+          "mean": "#101b24"
          },
          {
           "y": 711,
-          "jump": 1.9,
-          "mean": "#18222a"
+          "jump": 0.3,
+          "mean": "#101b24"
          },
          {
           "y": 712,
-          "jump": 1.6,
-          "mean": "#162029"
+          "jump": 0.5,
+          "mean": "#111b25"
          },
          {
           "y": 713,
-          "jump": 1.9,
-          "mean": "#131f28"
+          "jump": 0.9,
+          "mean": "#101c25"
          },
          {
           "y": 714,
-          "jump": 1.9,
-          "mean": "#121d26"
+          "jump": 0.6,
+          "mean": "#101b25"
          },
          {
           "y": 715,
-          "jump": 0.8,
+          "jump": 0.6,
           "mean": "#111c26"
          },
          {
@@ -3299,12 +3295,12 @@
         "borderJump": 0.6,
         "borderMean": "#111c26",
         "stepAcrossBottom": 1.1,
-        "innerMaxJump": 2.9,
+        "innerMaxJump": 0.9,
         "rows": [
          {
           "y": 690,
-          "jump": 1,
-          "mean": "#0e141b"
+          "jump": 1.1,
+          "mean": "#0d141a"
          },
          {
           "y": 691,
@@ -3323,77 +3319,77 @@
          },
          {
           "y": 694,
-          "jump": 0.8,
-          "mean": "#0e161d"
+          "jump": 0.7,
+          "mean": "#0d151c"
          },
          {
           "y": 695,
           "jump": 0.6,
-          "mean": "#0e161d"
+          "mean": "#0d151d"
          },
          {
           "y": 696,
           "jump": 0.7,
-          "mean": "#0e161e"
+          "mean": "#0e161d"
          },
          {
           "y": 697,
           "jump": 0.9,
-          "mean": "#0e171e"
+          "mean": "#0e161d"
          },
          {
           "y": 698,
           "jump": 1,
-          "mean": "#0f171f"
+          "mean": "#0e161e"
          },
          {
           "y": 699,
-          "jump": 0.8,
-          "mean": "#0e171f"
+          "jump": 0.7,
+          "mean": "#0e161f"
          },
          {
           "y": 700,
           "jump": 0.7,
-          "mean": "#0f171f"
+          "mean": "#0e171f"
          },
          {
           "y": 701,
           "jump": 0.6,
-          "mean": "#0f1820"
+          "mean": "#0e1720"
          },
          {
           "y": 702,
-          "jump": 0.6,
-          "mean": "#0f1821"
+          "jump": 0.5,
+          "mean": "#0f1720"
          },
          {
           "y": 703,
-          "jump": 0.6,
+          "jump": 0.5,
           "mean": "#0f1820"
          },
          {
           "y": 704,
-          "jump": 1,
-          "mean": "#0f1922"
+          "jump": 0.9,
+          "mean": "#0f1921"
          },
          {
           "y": 705,
-          "jump": 0.8,
-          "mean": "#101922"
+          "jump": 0.7,
+          "mean": "#0f1821"
          },
          {
           "y": 706,
-          "jump": 2.9,
-          "mean": "#131c25"
+          "jump": 0.7,
+          "mean": "#101922"
          },
          {
           "y": 707,
-          "jump": 1.5,
-          "mean": "#101b24"
+          "jump": 0.7,
+          "mean": "#0f1a22"
          },
          {
           "y": 708,
-          "jump": 1.2,
+          "jump": 0.6,
           "mean": "#101a23"
          },
          {
@@ -3403,7 +3399,7 @@
          },
          {
           "y": 710,
-          "jump": 0.7,
+          "jump": 0.8,
           "mean": "#101b24"
          },
          {
@@ -3456,18 +3452,18 @@
   ],
   "timeline": [
    {
-    "t": 6866.9,
+    "t": 7140.5,
     "kind": "float",
     "side": "foe",
     "detail": {
      "role": "float",
-     "floatId": "f2",
+     "floatId": "f1",
      "text": "防御 70%",
      "classes": "b3-float b3-float--shield"
     }
    },
    {
-    "t": 7317.1,
+    "t": 7591.2,
     "kind": "cue",
     "side": "self",
     "detail": {
@@ -3478,28 +3474,7 @@
     }
    },
    {
-    "t": 7317.1,
-    "kind": "cue",
-    "side": "self",
-    "detail": {
-     "role": "attack",
-     "what": "data-b3-variant=action",
-     "attr": "data-b3-variant"
-    }
-   },
-   {
-    "t": 7317.1,
-    "kind": "cue",
-    "side": "self",
-    "detail": {
-     "role": "attack",
-     "what": "sprite src → action 立绘",
-     "attr": "data-src",
-     "src": "/api/roco/sprite?id=pet_000012&name=%E9%93%A0%E7%94%B2%E8%99%AB&v=action"
-    }
-   },
-   {
-    "t": 7767.2,
+    "t": 8040.7,
     "kind": "cue",
     "side": "foe",
     "detail": {
@@ -3510,52 +3485,68 @@
     }
    },
    {
-    "t": 7767.3,
+    "t": 8040.7,
     "kind": "float",
     "side": "foe",
     "detail": {
      "role": "float",
-     "floatId": "f3",
-     "text": "-14",
-     "classes": "b3-float b3-float--hit"
+     "floatId": "f2",
+     "text": "-3",
+     "classes": "b3-float b3-float--weak"
     }
    },
    {
-    "t": 8066.5,
+    "t": 8340.5,
+    "kind": "float-gone",
+    "side": null,
+    "detail": {
+     "role": "float-gone",
+     "floatId": "f1",
+     "text": "防御 70%",
+     "aliveMs": 1200
+    }
+   },
+   {
+    "t": 9241.6,
     "kind": "float-gone",
     "side": null,
     "detail": {
      "role": "float-gone",
      "floatId": "f2",
-     "text": "防御 70%",
-     "aliveMs": 1199.6
-    }
-   },
-   {
-    "t": 8968.2,
-    "kind": "float-gone",
-    "side": null,
-    "detail": {
-     "role": "float-gone",
-     "floatId": "f3",
-     "text": "-14",
+     "text": "-3",
      "aliveMs": 1200.9
     }
    }
   ],
   "floats": [
    {
-    "id": "f2",
+    "id": "f1",
     "text": "防御 70%",
     "side": "foe",
-    "bornT": 6866.9,
-    "goneT": 8066.5,
+    "bornT": 7140.5,
+    "goneT": 8340.5,
     "samples": [
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 6895.4,
+      "t": 7153.2,
+      "cx": 943,
+      "cy": 523.48,
+      "w": 52.45,
+      "h": 16.96,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--shield",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f1",
+      "text": "防御 70%",
+      "side": "foe",
+      "t": 7177.4,
       "cx": 943,
       "cy": 522.35,
       "w": 53.51,
@@ -3565,33 +3556,17 @@
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
-     },
-     {
-      "id": "f2",
-      "text": "防御 70%",
-      "side": "foe",
-      "t": 6923.4,
-      "cx": 943,
-      "cy": 521.29,
-      "w": 54.5,
-      "h": 17.62,
-      "inViewport": true,
-      "measurable": true,
-      "hitClass": "b3-float b3-float--shield",
-      "hitTag": "span",
-      "hitIsFloat": true,
       "source": "timer"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 6945.8,
+      "t": 7203.1,
       "cx": 943,
-      "cy": 519.33,
-      "w": 56.33,
-      "h": 18.21,
+      "cy": 520.28,
+      "w": 55.44,
+      "h": 17.92,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
@@ -3600,14 +3575,14 @@
       "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 6978.6,
+      "t": 7237.2,
       "cx": 943,
-      "cy": 517.58,
-      "w": 57.96,
-      "h": 18.74,
+      "cy": 518.43,
+      "w": 57.17,
+      "h": 18.48,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
@@ -3616,10 +3591,26 @@
       "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7012.5,
+      "t": 7269.6,
+      "cx": 943,
+      "cy": 516.79,
+      "w": 58.69,
+      "h": 18.98,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--shield",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f1",
+      "text": "防御 70%",
+      "side": "foe",
+      "t": 7298.6,
       "cx": 943,
       "cy": 516.06,
       "w": 59.38,
@@ -3629,29 +3620,29 @@
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
+      "source": "timer"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7041.9,
+      "t": 7320,
       "cx": 943,
-      "cy": 515.4,
-      "w": 59.99,
-      "h": 19.4,
+      "cy": 514.82,
+      "w": 60.53,
+      "h": 19.57,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "timer"
+      "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7078.9,
+      "t": 7353,
       "cx": 943,
       "cy": 513.93,
       "w": 61.36,
@@ -3664,26 +3655,26 @@
       "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7101.8,
+      "t": 7387.1,
       "cx": 943,
-      "cy": 513.65,
-      "w": 61.63,
-      "h": 19.93,
+      "cy": 513.5,
+      "w": 61.76,
+      "h": 19.97,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "timer"
+      "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7127.5,
+      "t": 7418.4,
       "cx": 943,
       "cy": 513.13,
       "w": 61.72,
@@ -3693,17 +3684,17 @@
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
+      "source": "timer"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7162.4,
+      "t": 7453.2,
       "cx": 943,
-      "cy": 512,
-      "w": 61.52,
-      "h": 19.89,
+      "cy": 511.44,
+      "w": 61.42,
+      "h": 19.86,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
@@ -3712,10 +3703,10 @@
       "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7194.3,
+      "t": 7477.3,
       "cx": 943,
       "cy": 510.9,
       "w": 61.33,
@@ -3725,33 +3716,17 @@
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
-     },
-     {
-      "id": "f2",
-      "text": "防御 70%",
-      "side": "foe",
-      "t": 7223,
-      "cx": 943,
-      "cy": 510.36,
-      "w": 61.23,
-      "h": 19.8,
-      "inViewport": true,
-      "measurable": true,
-      "hitClass": "b3-float b3-float--shield",
-      "hitTag": "span",
-      "hitIsFloat": true,
       "source": "timer"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7245.9,
+      "t": 7503.7,
       "cx": 943,
-      "cy": 509.31,
-      "w": 61.05,
-      "h": 19.74,
+      "cy": 509.83,
+      "w": 61.14,
+      "h": 19.77,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
@@ -3760,14 +3735,14 @@
       "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7277.5,
+      "t": 7536.6,
       "cx": 943,
-      "cy": 508.28,
-      "w": 60.87,
-      "h": 19.68,
+      "cy": 508.79,
+      "w": 60.96,
+      "h": 19.71,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
@@ -3776,10 +3751,26 @@
       "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7312.3,
+      "t": 7570.2,
+      "cx": 943,
+      "cy": 507.77,
+      "w": 60.78,
+      "h": 19.65,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--shield",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f1",
+      "text": "防御 70%",
+      "side": "foe",
+      "t": 7597.7,
       "cx": 943,
       "cy": 507.28,
       "w": 60.69,
@@ -3789,29 +3780,29 @@
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
+      "source": "timer"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7342.8,
+      "t": 7619.9,
       "cx": 943,
-      "cy": 506.79,
-      "w": 60.61,
-      "h": 19.6,
+      "cy": 506.3,
+      "w": 60.52,
+      "h": 19.57,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "timer"
+      "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7377.8,
+      "t": 7653.6,
       "cx": 943,
       "cy": 505.36,
       "w": 60.36,
@@ -3824,30 +3815,14 @@
       "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7401.7,
+      "t": 7686.4,
       "cx": 943,
-      "cy": 504.89,
-      "w": 60.28,
-      "h": 19.49,
-      "inViewport": true,
-      "measurable": true,
-      "hitClass": "b3-float b3-float--shield",
-      "hitTag": "span",
-      "hitIsFloat": true,
-      "source": "timer"
-     },
-     {
-      "id": "f2",
-      "text": "防御 70%",
-      "side": "foe",
-      "t": 7427.8,
-      "cx": 943,
-      "cy": 503.98,
-      "w": 60.12,
-      "h": 19.44,
+      "cy": 504.43,
+      "w": 60.2,
+      "h": 19.46,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
@@ -3856,10 +3831,26 @@
       "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7461.2,
+      "t": 7716.1,
+      "cx": 943,
+      "cy": 503.99,
+      "w": 60.12,
+      "h": 19.44,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--shield",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "timer"
+     },
+     {
+      "id": "f1",
+      "text": "防御 70%",
+      "side": "foe",
+      "t": 7736.8,
       "cx": 943,
       "cy": 503.1,
       "w": 59.96,
@@ -3872,10 +3863,10 @@
       "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7496,
+      "t": 7769.7,
       "cx": 943,
       "cy": 502.25,
       "w": 59.81,
@@ -3888,30 +3879,14 @@
       "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7523.5,
+      "t": 7803.9,
       "cx": 943,
-      "cy": 501.84,
-      "w": 59.74,
-      "h": 19.32,
-      "inViewport": true,
-      "measurable": true,
-      "hitClass": "b3-float b3-float--shield",
-      "hitTag": "span",
-      "hitIsFloat": true,
-      "source": "timer"
-     },
-     {
-      "id": "f2",
-      "text": "防御 70%",
-      "side": "foe",
-      "t": 7544.5,
-      "cx": 943,
-      "cy": 501.03,
-      "w": 59.6,
-      "h": 19.27,
+      "cy": 501.43,
+      "w": 59.67,
+      "h": 19.29,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
@@ -3920,14 +3895,14 @@
       "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7579.1,
+      "t": 7837.5,
       "cx": 943,
-      "cy": 500.24,
-      "w": 59.46,
-      "h": 19.23,
+      "cy": 500.63,
+      "w": 59.53,
+      "h": 19.25,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
@@ -3936,10 +3911,26 @@
       "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7612.7,
+      "t": 7869.9,
+      "cx": 943,
+      "cy": 499.87,
+      "w": 59.4,
+      "h": 19.2,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--shield",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f1",
+      "text": "防御 70%",
+      "side": "foe",
+      "t": 7897.3,
       "cx": 943,
       "cy": 499.5,
       "w": 59.33,
@@ -3949,29 +3940,29 @@
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
+      "source": "timer"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7643.2,
+      "t": 7920.3,
       "cx": 943,
-      "cy": 499.14,
-      "w": 59.27,
-      "h": 19.16,
+      "cy": 498.78,
+      "w": 59.21,
+      "h": 19.14,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "timer"
+      "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7677.7,
+      "t": 7953.2,
       "cx": 943,
       "cy": 498.1,
       "w": 59.09,
@@ -3984,26 +3975,26 @@
       "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7702,
+      "t": 7986.8,
       "cx": 943,
-      "cy": 497.77,
-      "w": 59.03,
-      "h": 19.09,
+      "cy": 497.45,
+      "w": 58.97,
+      "h": 19.07,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "timer"
+      "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7728.9,
+      "t": 8018.2,
       "cx": 943,
       "cy": 497.14,
       "w": 58.92,
@@ -4013,17 +4004,17 @@
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
+      "source": "timer"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7762.6,
+      "t": 8054.7,
       "cx": 943,
-      "cy": 496.55,
-      "w": 58.82,
-      "h": 19.02,
+      "cy": 496.27,
+      "w": 58.77,
+      "h": 19,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
@@ -4032,10 +4023,10 @@
       "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7794.3,
+      "t": 8077.1,
       "cx": 943,
       "cy": 496,
       "w": 58.72,
@@ -4045,33 +4036,17 @@
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
-     },
-     {
-      "id": "f2",
-      "text": "防御 70%",
-      "side": "foe",
-      "t": 7823.3,
-      "cx": 943,
-      "cy": 495.74,
-      "w": 58.68,
-      "h": 18.97,
-      "inViewport": true,
-      "measurable": true,
-      "hitClass": "b3-float b3-float--shield",
-      "hitTag": "span",
-      "hitIsFloat": true,
       "source": "timer"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7846,
+      "t": 8103.1,
       "cx": 943,
-      "cy": 495.26,
-      "w": 58.59,
-      "h": 18.94,
+      "cy": 495.5,
+      "w": 58.63,
+      "h": 18.96,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
@@ -4080,14 +4055,14 @@
       "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7877.8,
+      "t": 8137.2,
       "cx": 943,
-      "cy": 494.83,
-      "w": 58.52,
-      "h": 18.92,
+      "cy": 495.04,
+      "w": 58.55,
+      "h": 18.93,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
@@ -4096,10 +4071,26 @@
       "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7912.4,
+      "t": 8170.8,
+      "cx": 943,
+      "cy": 494.63,
+      "w": 58.48,
+      "h": 18.91,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--shield",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f1",
+      "text": "防御 70%",
+      "side": "foe",
+      "t": 8197.6,
       "cx": 943,
       "cy": 494.44,
       "w": 58.45,
@@ -4109,29 +4100,29 @@
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
+      "source": "timer"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7941.9,
+      "t": 8220.6,
       "cx": 943,
-      "cy": 494.27,
-      "w": 58.42,
-      "h": 18.89,
+      "cy": 494.12,
+      "w": 58.39,
+      "h": 18.88,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "timer"
+      "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7979,
+      "t": 8253.7,
       "cx": 943,
       "cy": 493.85,
       "w": 58.35,
@@ -4144,28 +4135,28 @@
       "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 8003,
+      "t": 8286.5,
       "cx": 943,
-      "cy": 493.74,
-      "w": 58.33,
-      "h": 18.86,
+      "cy": 454.65,
+      "w": 58.31,
+      "h": 18.85,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "timer"
+      "source": "raf"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 8027.6,
+      "t": 8316.3,
       "cx": 943,
-      "cy": 493.58,
+      "cy": 454.58,
       "w": 58.3,
       "h": 18.85,
       "inViewport": true,
@@ -4173,715 +4164,731 @@
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
+      "source": "timer"
      },
      {
-      "id": "f2",
+      "id": "f1",
       "text": "防御 70%",
       "side": "foe",
-      "t": 8061.5,
+      "t": 8337.5,
       "cx": 943,
-      "cy": 493.53,
-      "w": 58.29,
-      "h": 18.85,
+      "cy": 454.5,
+      "w": 58.28,
+      "h": 18.84,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "timer"
+      "source": "raf"
      }
     ],
     "rect": {
-     "w": 58.29,
-     "h": 18.85,
+     "w": 58.28,
+     "h": 18.84,
      "cx": 943,
-     "cy": 493.53
+     "cy": 454.5
     },
     "classes": "b3-float b3-float--shield",
     "textChanges": 0,
     "paintProbe": {
-     "t": 6895.4,
+     "t": 7153.2,
      "hitClass": "b3-float b3-float--shield",
      "hitTag": "span",
      "hitIsFloat": true
     },
-    "sampleCount": 40,
-    "measurableSamples": 40,
-    "onTopSamples": 40,
+    "sampleCount": 41,
+    "measurableSamples": 41,
+    "onTopSamples": 41,
     "hitClasses": [
      "b3-float b3-float--shield"
     ],
-    "aliveMs": 1199.6,
+    "aliveMs": 1200,
     "removed": true
    },
    {
-    "id": "f3",
-    "text": "-14",
+    "id": "f2",
+    "text": "-3",
     "side": "foe",
-    "bornT": 7767.3,
-    "goneT": 8968.2,
+    "bornT": 8040.7,
+    "goneT": 9241.6,
     "samples": [
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 7794.3,
+      "t": 8054.7,
       "cx": 943,
-      "cy": 397.84,
-      "w": 29.66,
-      "h": 26.62,
+      "cy": 393.89,
+      "w": 14.1,
+      "h": 16.96,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "raf"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 7823.3,
+      "t": 8077.1,
       "cx": 943,
-      "cy": 396.78,
-      "w": 30.22,
-      "h": 27.12,
+      "cy": 392.76,
+      "w": 14.39,
+      "h": 17.3,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "timer"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 7846,
+      "t": 8103.1,
       "cx": 943,
-      "cy": 394.81,
-      "w": 31.23,
-      "h": 28.03,
+      "cy": 390.69,
+      "w": 14.91,
+      "h": 17.93,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "raf"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 7877.8,
+      "t": 8137.2,
       "cx": 943,
-      "cy": 393.06,
-      "w": 32.14,
-      "h": 28.84,
+      "cy": 388.83,
+      "w": 15.37,
+      "h": 18.48,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "raf"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 7912.4,
+      "t": 8170.8,
       "cx": 943,
-      "cy": 391.55,
-      "w": 32.92,
-      "h": 29.54,
+      "cy": 387.2,
+      "w": 15.78,
+      "h": 18.98,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "raf"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 7941.9,
+      "t": 8197.6,
       "cx": 943,
-      "cy": 390.89,
-      "w": 33.26,
-      "h": 29.85,
+      "cy": 386.47,
+      "w": 15.97,
+      "h": 19.2,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "timer"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 7979,
+      "t": 8220.6,
       "cx": 943,
-      "cy": 389.41,
-      "w": 34.02,
-      "h": 30.53,
+      "cy": 385.23,
+      "w": 16.28,
+      "h": 19.57,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "raf"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8003,
+      "t": 8253.7,
       "cx": 943,
-      "cy": 389.13,
-      "w": 34.17,
-      "h": 30.67,
+      "cy": 384.34,
+      "w": 16.5,
+      "h": 19.84,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f2",
+      "text": "-3",
+      "side": "foe",
+      "t": 8286.5,
+      "cx": 943,
+      "cy": 344.9,
+      "w": 16.61,
+      "h": 19.97,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--weak",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f2",
+      "text": "-3",
+      "side": "foe",
+      "t": 8316.3,
+      "cx": 943,
+      "cy": 344.54,
+      "w": 16.6,
+      "h": 19.95,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "timer"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8027.6,
+      "t": 8337.5,
       "cx": 943,
-      "cy": 388.62,
-      "w": 34.22,
-      "h": 30.71,
+      "cy": 343.4,
+      "w": 16.54,
+      "h": 19.89,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "raf"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8061.5,
+      "t": 8369.8,
       "cx": 943,
-      "cy": 388.04,
-      "w": 34.16,
-      "h": 30.66,
+      "cy": 342.3,
+      "w": 16.49,
+      "h": 19.83,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f2",
+      "text": "-3",
+      "side": "foe",
+      "t": 8404,
+      "cx": 943,
+      "cy": 341.24,
+      "w": 16.44,
+      "h": 19.77,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--weak",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f2",
+      "text": "-3",
+      "side": "foe",
+      "t": 8436.3,
+      "cx": 943,
+      "cy": 340.19,
+      "w": 16.39,
+      "h": 19.71,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--weak",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f2",
+      "text": "-3",
+      "side": "foe",
+      "t": 8470.6,
+      "cx": 943,
+      "cy": 339.18,
+      "w": 16.34,
+      "h": 19.65,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--weak",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f2",
+      "text": "-3",
+      "side": "foe",
+      "t": 8497.3,
+      "cx": 943,
+      "cy": 338.68,
+      "w": 16.32,
+      "h": 19.62,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "timer"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8095.8,
+      "t": 8519.7,
       "cx": 943,
-      "cy": 386.38,
-      "w": 34,
-      "h": 30.51,
+      "cy": 337.71,
+      "w": 16.27,
+      "h": 19.57,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "raf"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8123.7,
+      "t": 8553.9,
       "cx": 943,
-      "cy": 385.84,
-      "w": 33.95,
-      "h": 30.47,
+      "cy": 336.76,
+      "w": 16.23,
+      "h": 19.51,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f2",
+      "text": "-3",
+      "side": "foe",
+      "t": 8587.5,
+      "cx": 943,
+      "cy": 335.84,
+      "w": 16.19,
+      "h": 19.46,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--weak",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f2",
+      "text": "-3",
+      "side": "foe",
+      "t": 8618.7,
+      "cx": 943,
+      "cy": 335.39,
+      "w": 16.17,
+      "h": 19.44,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "timer"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8145.6,
+      "t": 8654.2,
       "cx": 943,
-      "cy": 384.79,
-      "w": 33.85,
-      "h": 30.38,
+      "cy": 334.08,
+      "w": 16.1,
+      "h": 19.36,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "raf"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8179.3,
+      "t": 8677.4,
       "cx": 943,
-      "cy": 383.76,
-      "w": 33.75,
-      "h": 30.29,
+      "cy": 333.66,
+      "w": 16.08,
+      "h": 19.34,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
-      "hitTag": "span",
-      "hitIsFloat": true,
-      "source": "raf"
-     },
-     {
-      "id": "f3",
-      "text": "-14",
-      "side": "foe",
-      "t": 8211.1,
-      "cx": 943,
-      "cy": 382.76,
-      "w": 33.65,
-      "h": 30.2,
-      "inViewport": true,
-      "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
-      "hitTag": "span",
-      "hitIsFloat": true,
-      "source": "raf"
-     },
-     {
-      "id": "f3",
-      "text": "-14",
-      "side": "foe",
-      "t": 8242,
-      "cx": 943,
-      "cy": 382.27,
-      "w": 33.6,
-      "h": 30.16,
-      "inViewport": true,
-      "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "timer"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8262.6,
+      "t": 8703.3,
       "cx": 943,
-      "cy": 381.31,
-      "w": 33.51,
-      "h": 30.07,
+      "cy": 332.83,
+      "w": 16.05,
+      "h": 19.29,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "raf"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8296,
+      "t": 8737.5,
       "cx": 943,
-      "cy": 380.38,
-      "w": 33.42,
-      "h": 29.99,
+      "cy": 332.04,
+      "w": 16.01,
+      "h": 19.25,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "raf"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8329.2,
+      "t": 8769.7,
       "cx": 943,
-      "cy": 379.47,
-      "w": 33.33,
-      "h": 29.91,
+      "cy": 331.27,
+      "w": 15.97,
+      "h": 19.2,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "raf"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8362.3,
+      "t": 8797.8,
       "cx": 943,
-      "cy": 379.03,
-      "w": 33.29,
-      "h": 29.87,
+      "cy": 330.9,
+      "w": 15.95,
+      "h": 19.18,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "timer"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8395.1,
+      "t": 8820.6,
       "cx": 943,
-      "cy": 377.74,
-      "w": 33.16,
-      "h": 29.76,
+      "cy": 330.19,
+      "w": 15.92,
+      "h": 19.14,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "raf"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8423.4,
+      "t": 8853.3,
       "cx": 943,
-      "cy": 377.32,
-      "w": 33.12,
-      "h": 29.73,
+      "cy": 329.5,
+      "w": 15.89,
+      "h": 19.1,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f2",
+      "text": "-3",
+      "side": "foe",
+      "t": 8887.2,
+      "cx": 943,
+      "cy": 328.86,
+      "w": 15.86,
+      "h": 19.07,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--weak",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f2",
+      "text": "-3",
+      "side": "foe",
+      "t": 8918,
+      "cx": 943,
+      "cy": 328.55,
+      "w": 15.84,
+      "h": 19.05,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "timer"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8444.2,
+      "t": 8953.2,
       "cx": 943,
-      "cy": 376.51,
-      "w": 33.04,
-      "h": 29.66,
+      "cy": 327.68,
+      "w": 15.8,
+      "h": 19,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "raf"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8478.6,
+      "t": 8977.4,
       "cx": 943,
-      "cy": 375.73,
-      "w": 32.97,
-      "h": 29.59,
+      "cy": 327.41,
+      "w": 15.79,
+      "h": 18.99,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
-      "hitTag": "span",
-      "hitIsFloat": true,
-      "source": "raf"
-     },
-     {
-      "id": "f3",
-      "text": "-14",
-      "side": "foe",
-      "t": 8512.6,
-      "cx": 943,
-      "cy": 374.98,
-      "w": 32.9,
-      "h": 29.52,
-      "inViewport": true,
-      "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
-      "hitTag": "span",
-      "hitIsFloat": true,
-      "source": "raf"
-     },
-     {
-      "id": "f3",
-      "text": "-14",
-      "side": "foe",
-      "t": 8544,
-      "cx": 943,
-      "cy": 374.62,
-      "w": 32.86,
-      "h": 29.49,
-      "inViewport": true,
-      "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "timer"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8579.3,
+      "t": 9002.9,
       "cx": 943,
-      "cy": 373.58,
-      "w": 32.76,
-      "h": 29.4,
+      "cy": 326.9,
+      "w": 15.77,
+      "h": 18.96,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "raf"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8602.8,
+      "t": 9036.5,
       "cx": 943,
-      "cy": 373.25,
-      "w": 32.73,
-      "h": 29.37,
+      "cy": 326.45,
+      "w": 15.74,
+      "h": 18.93,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f2",
+      "text": "-3",
+      "side": "foe",
+      "t": 9069.4,
+      "cx": 943,
+      "cy": 326.04,
+      "w": 15.73,
+      "h": 18.91,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--weak",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f2",
+      "text": "-3",
+      "side": "foe",
+      "t": 9097.2,
+      "cx": 943,
+      "cy": 325.85,
+      "w": 15.72,
+      "h": 18.9,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "timer"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8627.7,
+      "t": 9120,
       "cx": 943,
-      "cy": 372.63,
-      "w": 32.67,
-      "h": 29.32,
+      "cy": 325.52,
+      "w": 15.7,
+      "h": 18.88,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "raf"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8661.9,
+      "t": 9154.1,
       "cx": 943,
-      "cy": 372.33,
-      "w": 32.64,
-      "h": 29.29,
+      "cy": 325.26,
+      "w": 15.69,
+      "h": 18.86,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f2",
+      "text": "-3",
+      "side": "foe",
+      "t": 9186.4,
+      "cx": 943,
+      "cy": 325.06,
+      "w": 15.68,
+      "h": 18.85,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--weak",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "raf"
+     },
+     {
+      "id": "f2",
+      "text": "-3",
+      "side": "foe",
+      "t": 9216.5,
+      "cx": 943,
+      "cy": 324.99,
+      "w": 15.68,
+      "h": 18.85,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "timer"
      },
      {
-      "id": "f3",
-      "text": "-14",
+      "id": "f2",
+      "text": "-3",
       "side": "foe",
-      "t": 8695.9,
+      "t": 9237.1,
       "cx": 943,
-      "cy": 371.49,
-      "w": 32.56,
-      "h": 29.22,
+      "cy": 324.9,
+      "w": 15.67,
+      "h": 18.84,
       "inViewport": true,
       "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
-      "hitTag": "span",
-      "hitIsFloat": true,
-      "source": "raf"
-     },
-     {
-      "id": "f3",
-      "text": "-14",
-      "side": "foe",
-      "t": 8723.9,
-      "cx": 943,
-      "cy": 371.23,
-      "w": 32.53,
-      "h": 29.2,
-      "inViewport": true,
-      "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
-      "hitTag": "span",
-      "hitIsFloat": true,
-      "source": "timer"
-     },
-     {
-      "id": "f3",
-      "text": "-14",
-      "side": "foe",
-      "t": 8746,
-      "cx": 943,
-      "cy": 370.75,
-      "w": 32.48,
-      "h": 29.15,
-      "inViewport": true,
-      "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
-      "hitTag": "span",
-      "hitIsFloat": true,
-      "source": "raf"
-     },
-     {
-      "id": "f3",
-      "text": "-14",
-      "side": "foe",
-      "t": 8777.7,
-      "cx": 943,
-      "cy": 370.31,
-      "w": 32.44,
-      "h": 29.12,
-      "inViewport": true,
-      "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
-      "hitTag": "span",
-      "hitIsFloat": true,
-      "source": "raf"
-     },
-     {
-      "id": "f3",
-      "text": "-14",
-      "side": "foe",
-      "t": 8812.2,
-      "cx": 943,
-      "cy": 369.93,
-      "w": 32.41,
-      "h": 29.08,
-      "inViewport": true,
-      "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
-      "hitTag": "span",
-      "hitIsFloat": true,
-      "source": "raf"
-     },
-     {
-      "id": "f3",
-      "text": "-14",
-      "side": "foe",
-      "t": 8843,
-      "cx": 943,
-      "cy": 369.76,
-      "w": 32.39,
-      "h": 29.07,
-      "inViewport": true,
-      "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
-      "hitTag": "span",
-      "hitIsFloat": true,
-      "source": "timer"
-     },
-     {
-      "id": "f3",
-      "text": "-14",
-      "side": "foe",
-      "t": 8877.7,
-      "cx": 943,
-      "cy": 369.34,
-      "w": 32.35,
-      "h": 29.03,
-      "inViewport": true,
-      "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
-      "hitTag": "span",
-      "hitIsFloat": true,
-      "source": "raf"
-     },
-     {
-      "id": "f3",
-      "text": "-14",
-      "side": "foe",
-      "t": 8901.7,
-      "cx": 943,
-      "cy": 369.23,
-      "w": 32.34,
-      "h": 29.02,
-      "inViewport": true,
-      "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
-      "hitTag": "span",
-      "hitIsFloat": true,
-      "source": "timer"
-     },
-     {
-      "id": "f3",
-      "text": "-14",
-      "side": "foe",
-      "t": 8929.5,
-      "cx": 943,
-      "cy": 369.07,
-      "w": 32.32,
-      "h": 29.01,
-      "inViewport": true,
-      "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
-      "hitTag": "span",
-      "hitIsFloat": true,
-      "source": "raf"
-     },
-     {
-      "id": "f3",
-      "text": "-14",
-      "side": "foe",
-      "t": 8961.2,
-      "cx": 943,
-      "cy": 368.98,
-      "w": 32.31,
-      "h": 29,
-      "inViewport": true,
-      "measurable": true,
-      "hitClass": "b3-float b3-float--hit",
+      "hitClass": "b3-float b3-float--weak",
       "hitTag": "span",
       "hitIsFloat": true,
       "source": "raf"
      }
     ],
     "rect": {
-     "w": 32.31,
-     "h": 29,
+     "w": 15.67,
+     "h": 18.84,
      "cx": 943,
-     "cy": 368.98
+     "cy": 324.9
     },
-    "classes": "b3-float b3-float--hit",
+    "classes": "b3-float b3-float--weak",
     "textChanges": 0,
     "paintProbe": {
-     "t": 7794.3,
-     "hitClass": "b3-float b3-float--hit",
+     "t": 8054.7,
+     "hitClass": "b3-float b3-float--weak",
      "hitTag": "span",
      "hitIsFloat": true
     },
-    "sampleCount": 40,
-    "measurableSamples": 40,
-    "onTopSamples": 40,
+    "sampleCount": 41,
+    "measurableSamples": 41,
+    "onTopSamples": 41,
     "hitClasses": [
-     "b3-float b3-float--hit"
+     "b3-float b3-float--weak"
     ],
     "aliveMs": 1200.9,
     "removed": true
@@ -4891,7 +4898,18 @@
    {
     "float": "防御 70%",
     "side": "foe",
-    "t": 6895.4,
+    "t": 7153.2,
+    "measurable": true,
+    "cx": 943,
+    "cy": 523.48,
+    "hitClass": "b3-float b3-float--shield",
+    "hitTag": "span",
+    "hitIsFloat": true
+   },
+   {
+    "float": "防御 70%",
+    "side": "foe",
+    "t": 7177.4,
     "measurable": true,
     "cx": 943,
     "cy": 522.35,
@@ -4902,10 +4920,10 @@
    {
     "float": "防御 70%",
     "side": "foe",
-    "t": 6923.4,
+    "t": 7203.1,
     "measurable": true,
     "cx": 943,
-    "cy": 521.29,
+    "cy": 520.28,
     "hitClass": "b3-float b3-float--shield",
     "hitTag": "span",
     "hitIsFloat": true
@@ -4913,10 +4931,10 @@
    {
     "float": "防御 70%",
     "side": "foe",
-    "t": 6945.8,
+    "t": 7237.2,
     "measurable": true,
     "cx": 943,
-    "cy": 519.33,
+    "cy": 518.43,
     "hitClass": "b3-float b3-float--shield",
     "hitTag": "span",
     "hitIsFloat": true
@@ -4924,10 +4942,10 @@
    {
     "float": "防御 70%",
     "side": "foe",
-    "t": 6978.6,
+    "t": 7269.6,
     "measurable": true,
     "cx": 943,
-    "cy": 517.58,
+    "cy": 516.79,
     "hitClass": "b3-float b3-float--shield",
     "hitTag": "span",
     "hitIsFloat": true
@@ -4935,7 +4953,7 @@
    {
     "float": "防御 70%",
     "side": "foe",
-    "t": 7012.5,
+    "t": 7298.6,
     "measurable": true,
     "cx": 943,
     "cy": 516.06,
@@ -4944,84 +4962,73 @@
     "hitIsFloat": true
    },
    {
-    "float": "防御 70%",
+    "float": "-3",
     "side": "foe",
-    "t": 7041.9,
+    "t": 8054.7,
     "measurable": true,
     "cx": 943,
-    "cy": 515.4,
-    "hitClass": "b3-float b3-float--shield",
+    "cy": 393.89,
+    "hitClass": "b3-float b3-float--weak",
     "hitTag": "span",
     "hitIsFloat": true
    },
    {
-    "float": "-14",
+    "float": "-3",
     "side": "foe",
-    "t": 7794.3,
+    "t": 8077.1,
     "measurable": true,
     "cx": 943,
-    "cy": 397.84,
-    "hitClass": "b3-float b3-float--hit",
+    "cy": 392.76,
+    "hitClass": "b3-float b3-float--weak",
     "hitTag": "span",
     "hitIsFloat": true
    },
    {
-    "float": "-14",
+    "float": "-3",
     "side": "foe",
-    "t": 7823.3,
+    "t": 8103.1,
     "measurable": true,
     "cx": 943,
-    "cy": 396.78,
-    "hitClass": "b3-float b3-float--hit",
+    "cy": 390.69,
+    "hitClass": "b3-float b3-float--weak",
     "hitTag": "span",
     "hitIsFloat": true
    },
    {
-    "float": "-14",
+    "float": "-3",
     "side": "foe",
-    "t": 7846,
+    "t": 8137.2,
     "measurable": true,
     "cx": 943,
-    "cy": 394.81,
-    "hitClass": "b3-float b3-float--hit",
+    "cy": 388.83,
+    "hitClass": "b3-float b3-float--weak",
     "hitTag": "span",
     "hitIsFloat": true
    },
    {
-    "float": "-14",
+    "float": "-3",
     "side": "foe",
-    "t": 7877.8,
+    "t": 8170.8,
     "measurable": true,
     "cx": 943,
-    "cy": 393.06,
-    "hitClass": "b3-float b3-float--hit",
+    "cy": 387.2,
+    "hitClass": "b3-float b3-float--weak",
     "hitTag": "span",
     "hitIsFloat": true
    },
    {
-    "float": "-14",
+    "float": "-3",
     "side": "foe",
-    "t": 7912.4,
+    "t": 8197.6,
     "measurable": true,
     "cx": 943,
-    "cy": 391.55,
-    "hitClass": "b3-float b3-float--hit",
-    "hitTag": "span",
-    "hitIsFloat": true
-   },
-   {
-    "float": "-14",
-    "side": "foe",
-    "t": 7941.9,
-    "measurable": true,
-    "cx": 943,
-    "cy": 390.89,
-    "hitClass": "b3-float b3-float--hit",
+    "cy": 386.47,
+    "hitClass": "b3-float b3-float--weak",
     "hitTag": "span",
     "hitIsFloat": true
    }
   ],
-  "frames_count": 134,
+  "frames_count": 133,
   "side_evidence": {
    "rule": "按 DOM 归属判定 side：node.closest([data-b3-side]) → [data-b3-self-card]/[data-b3-foe-card] → .b3-fighter--self/--foe → [data-b3-mirror]；不靠文本猜。（实测：客户端把 `data-b3-side` 写在 `.b3-free.b3-spritebox` 上；`[data-b3-spritebox]` 这个属性不存在，所以立绘画框那一格用 `.b3-free` 读，见下面 selfFree/foeFree。）",
    "wrap": {
@@ -5035,7 +5042,7 @@
      "w": 1406,
      "h": 742
     },
-    "text": "场上：第 1 位魔力 / 心4魔力 / 心3 \ud83d"
+    "text": "场上：第 2 位魔力 / 心3魔力 / 心4 \ud83d"
    },
    "selfCard": {
     "selector": "[data-b3-self-card]",
@@ -5048,7 +5055,7 @@
      "w": 436,
      "h": 607.5
     },
-    "text": "铠甲虫 🐛虫系 60 级 ⭐ 8 生命 202"
+    "text": "水蓝蓝 💧水系 60 级 ⭐ 10 生命 34"
    },
    "foeCard": {
     "selector": "[data-b3-foe-card]",
@@ -5061,7 +5068,7 @@
      "w": 436,
      "h": 607.5
     },
-    "text": "60 级 ❄️冰系 雪蛮人 97% 生命 428"
+    "text": "60 级 🌿草系 魔力猫 85% 生命 346"
    },
    "selfSpritebox": null,
    "foeSpritebox": null,
@@ -5098,7 +5105,7 @@
     "ensured": {
      "ok": true,
      "probe": {
-      "turn": 6,
+      "turn": 4,
       "phase": "battle",
       "tab": "skill",
       "legalSkills": 4,
@@ -5107,12 +5114,12 @@
        {
         "i": 0,
         "kind": "skill",
-        "skillId": "skill_000632",
+        "skillId": "skill_000418",
         "actionIndex": 1,
-        "label": "啃咬",
+        "label": "甩水",
         "cat": "攻击",
         "engineCat": "攻击",
-        "engineSkillId": "skill_000632",
+        "engineSkillId": "skill_000418",
         "damage": null,
         "legal": "yes",
         "pending": null,
@@ -5141,12 +5148,12 @@
        {
         "i": 2,
         "kind": "skill",
-        "skillId": "skill_000650",
+        "skillId": "skill_000421",
         "actionIndex": 2,
-        "label": "翅刃",
+        "label": "水炮",
         "cat": "攻击",
         "engineCat": "攻击",
-        "engineSkillId": "skill_000650",
+        "engineSkillId": "skill_000421",
         "damage": null,
         "legal": "yes",
         "pending": null,
@@ -5158,12 +5165,12 @@
        {
         "i": 3,
         "kind": "skill",
-        "skillId": "skill_000704",
+        "skillId": "skill_000808",
         "actionIndex": 3,
-        "label": "风隐",
-        "cat": "状态",
-        "engineCat": "状态",
-        "engineSkillId": "skill_000704",
+        "label": "多维击打",
+        "cat": "攻击",
+        "engineCat": "攻击",
+        "engineSkillId": "skill_000808",
         "damage": null,
         "legal": "yes",
         "pending": null,
@@ -5177,7 +5184,15 @@
      "trace": [
       {
        "step": 0,
-       "turn": 6,
+       "turn": 3,
+       "phase": "replace",
+       "tab": "switch",
+       "legalSkills": 0,
+       "clickable": 0
+      },
+      {
+       "step": 1,
+       "turn": 4,
        "phase": "battle",
        "tab": "skill",
        "legalSkills": 4,
@@ -5192,9 +5207,9 @@
   "before": [
    {
     "file": "src/client/roco.js",
-    "sha256": "ae5ecf288a2cad00",
-    "bytes": 273623,
-    "mtime": "2026-09-27T03:09:34.976Z"
+    "sha256": "2a20adfa6230b27e",
+    "bytes": 273706,
+    "mtime": "2026-09-28T13:32:58.678Z"
    },
    {
     "file": "src/client/battle-v3.css",
@@ -5212,9 +5227,9 @@
   "after": [
    {
     "file": "src/client/roco.js",
-    "sha256": "ae5ecf288a2cad00",
-    "bytes": 273623,
-    "mtime": "2026-09-27T03:09:34.976Z"
+    "sha256": "2a20adfa6230b27e",
+    "bytes": 273706,
+    "mtime": "2026-09-28T13:32:58.678Z"
    },
    {
     "file": "src/client/battle-v3.css",

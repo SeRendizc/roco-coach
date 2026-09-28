@@ -1,7 +1,7 @@
 {
  "schema": "roco-agent-metrics/v1",
  "generated_by": "scripts/roco/agent-metrics.mjs",
- "generated_at": "2026-09-28T07:55:54.991Z",
+ "generated_at": "2026-09-28T14:11:21.344Z",
  "scope": "两栏计量（问模型几次 / 问引擎几次 / 检索什么）+ 延迟分段。只读既有产物，不调模型、不联网。",
  "sources": {
   "live_model_eval": {
@@ -18,7 +18,7 @@
   },
   "model_arm_trajectories": {
    "path": "tests/evals/agent-trajectories-model-v1.jsonl",
-   "sha256": "77a1c84f6e6808e8d3372f8b65cef5b021e415ee528655ce26efc94cab85a4e9",
+   "sha256": "49fd8de36e130bea4ba059ec441cad4da51b044cd676ca61828e9acf7f76811b",
    "rows": 1752
   }
  },
