@@ -910,7 +910,15 @@ async function main() {
         back:Boolean(back), backText:(back?.textContent??'').trim(),
         gridHidden:document.getElementById('box-list-view')?.hidden===true,
         // 比较页上也会印「资质」那类对象值：这里顺手量一次 [object Object]（人类③ 的那条）。
-        objectObject:[].slice.call(view.querySelectorAll('*')).filter(function(el){return el.children.length===0&&/\[object Object\]/.test(el.textContent||'');}).length,
+        // 与 10b 同一把尺子：可见 + 自己的直接文本（旧口径会把隐藏/重建的文本算进来）
+        objectObject:[].slice.call(view.querySelectorAll('*')).filter(function(el){
+          if (!el.offsetParent && el !== document.body) return false;
+          var own=''; for (var n=0;n<el.childNodes;n+=1) { var c=el.childNodes[n]; if (c.nodeType===3) own+=c.nodeValue; }
+          return /\[object Object\]/.test(own);}).length,
+        compareLeak:[].slice.call(view.querySelectorAll('.cmp-value, .cmp-side, .cmp-row')).filter(function(el){
+          if (!el.offsetParent) return false;
+          return /\[object Object\]/.test(el.textContent||'');}).slice(0,6).map(function(el){
+            return String(el.className)+' :: '+String(el.textContent||'').replace(/\s+/g,' ').slice(0,80);}),
         view:(document.getElementById('compare-view')?.hidden===false)?'compare':'list'});})()`));
     steps.push({at: 'compare', facts: picked, page: cmp});
     const statusesOk = ['same', 'different', 'unknown'].every((s) => cmp.statuses.includes(s));
