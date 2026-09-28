@@ -83,6 +83,18 @@ function isFavourite(select, card = null) {
   if (select in all) return all[select] === true;
   return card?.favourite === true;
 }
+/**
+ * 这一只锁没锁。**两个来源都要认**：
+ *   · 列表卡片（服务端 `boxMineCard` 直接给的 `locked`）——从列表点进来时走这条；
+ *   · 详情回执（地址直达、或列表那一页还没读完时卡片是空的，服务端把「锁定」放进 `badges`）。
+ * 2026-09-28 真机量的：验收 25/26 走的正是**直达**那条路 —— 只认卡片的话，按钮上不会写
+ * 「含锁定 1 只」，`?lock=` 也会丢，锁定就传不到工坊去（这是产品缺口，不是判据写法的问题）。
+ * ⚠ 只读既有事实，不新增任何写入路径。
+ */
+function lockedOf(card = null) {
+  if (card?.locked === true) return true;
+  return (state.petData?.badges ?? []).includes('锁定');
+}
 function toggleFavourite(select) {
   const all = favouritesLoad();
   const next = !isFavourite(select);
@@ -104,7 +116,10 @@ const TYPE_AVATAR = {
 const TYPE_FALLBACK = ['◇', '#4b5b70'];
 
 const state = {
-  kind: 'mine',
+  // 2026-09-28（人类：「所有精灵实装，这样就不需要我的精灵了，直接全筛选」）：
+  // 默认落在**全部精灵**那一档。可玩层扩到 542 之后「我的盒子」与它几乎重合，
+  // 玩家的入口应该是「一进去就看到全部、然后筛」，而不是先看自己那几十只。
+  kind: 'catalog',
   q: '', type: '', role: '', support: '',
   favourite: false,
   offset: 0, pageSize: 24,
@@ -551,7 +566,7 @@ function petActionsHtml(select, individual) {
    ${undoButton(individual)}
    <button class="pet-team-btn" data-to-team="${escapeAttr(select)}">带上它去配队`
      // 锁定的要说清带了几只锁定（真机 25 号量的就是这句）：数据里 `locked` 是既成事实，这里只读它。
-     + `${card.locked === true ? '（含锁定 1 只）' : ''}</button>
+     + `${lockedOf(card) ? '（含锁定 1 只）' : ''}</button>
    ${favouriteButton(individual, {favourite: isFavourite(select, card)})}
    ${removeButton(individual, {confirming: state.confirmRemove === select})}`;
 }
@@ -761,6 +776,22 @@ function backToList() {
 
 
 // ── 接线 ────────────────────────────────────────────────────────────────────
+/**
+ * 把两个主标签的高亮对齐到当前这一档。
+ *
+ * ⚠ 2026-09-28：默认档从「我的盒子」换成「全部精灵」之后**必须**单独抽出来 ——
+ * `setKind()` 在 `state.kind === kind` 时会**提前返回**，而 HTML 里写死的 `selected`
+ * 还在「我的盒子」那个按钮上 ⇒ 启动时高亮是错的（页面显示全部精灵，亮着的却是我的盒子）。
+ * 启动路径直接调它一次，别指望 `setKind` 会顺手同步。
+ */
+function syncTabs(kind) {
+  for (const tab of document.querySelectorAll('.tab')) {
+    const active = tab.dataset.kind === kind;
+    tab.classList.toggle('selected', active);
+    tab.setAttribute('aria-selected', active ? 'true' : 'false');
+  }
+}
+
 function setKind(kind) {
   if (state.kind === kind) return;
   state.kind = kind;
@@ -772,11 +803,7 @@ function setKind(kind) {
   state.role = '';
   state.support = '';
   $('box-search').value = '';
-  for (const tab of document.querySelectorAll('.tab')) {
-    const active = tab.dataset.kind === kind;
-    tab.classList.toggle('selected', active);
-    tab.setAttribute('aria-selected', active ? 'true' : 'false');
-  }
+  syncTabs(kind);
   $('flag-favourite').setAttribute('aria-pressed', 'false');
   // 2026-09-28 实测（真机 04 号）：二级页这一路原来写的是 `backToList()` —— 而 `backToList()`
   // 在二级页上会走 `history.back()`，那是**异步**的：popstate 回来时会从 URL 把 `kind` 读回来，
@@ -985,7 +1012,7 @@ function wire() {
       const {card} = individualOf(pick);
       // 交接读的是 `state.selected`：这里只放**这一只**进去，去重/锁定那套规则仍在 `goToTeam` 里。
       state.selected = [{select: pick, group: card?.group ?? state.petCard?.group ?? '',
-        name: card?.name ?? '', locked: card?.locked === true, localOnly: card?.localOnly === true}];
+        name: card?.name ?? '', locked: lockedOf(card), localOnly: card?.localOnly === true}];
       goToTeam();
       return;
     }
@@ -1102,6 +1129,7 @@ async function boot() {
   // 右上角小芽 + 弹出式小芽（人类 2026-09-25 纠偏①）：注入到页头 .header-actions 的最右端。
   mountXiaoya({mode: 'popup'});
   wire();
+  syncTabs(state.kind);   // HTML 里写死的高亮跟着默认档走（见 `syncTabs` 的注释）
   setView('list');
   await loadTotals();
   await load({reset: true});

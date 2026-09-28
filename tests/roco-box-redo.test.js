@@ -293,3 +293,37 @@ test('㉒ 四个共用动作处理器必须在模块顶层（真机 page_error �
       `${name} 不许出现在嵌套作用域里（缩进的 function 声明）`);
   }
 });
+
+/**
+ * ㉓ 「这一只锁没锁」必须**两个来源都认**。
+ *
+ * 2026-09-28 真机量的产品缺口（不是判据写法问题）：页面上那句
+ * 「带上它去配队（含锁定 1 只）」与交接 URL 上的 `lock=` 原来**只读列表卡片**
+ * （`state.petCard.locked`）。而二级详情页可以**按地址直达**（`?pet=`，验收 25/26 走的正是
+ * 那条路，玩家分享链接也一样）—— 那一刻列表还没载入 / 这一只不在当前页，`state.petCard` 是空的
+ * ⇒ 按钮不写锁定、`lock=` 也丢，**锁定传不到工坊**。
+ *
+ * 服务端详情回执里其实一直带着这个事实：`player.badges` 里就有「锁定」
+ * （`src/server/roco-service.js` 里 `badges:[...favourite, ...locked]`）。
+ * 所以判据是：`lockedOf()` 存在、且**两个来源都在里面**；两个调用点都改用它。
+ */
+test('㉓ 锁定判定要同时认列表卡片与详情回执（地址直达时卡片是空的）', () => {
+  assert.match(BOX_JS, /function lockedOf\(card = null\) \{/,
+    '要有一个统一的 lockedOf()：否则"从列表点进来"与"地址直达"两条路会各判各的');
+  const body = BOX_JS.slice(BOX_JS.indexOf('function lockedOf(card = null) {'));
+  const fn = body.slice(0, body.indexOf('\n}'));
+  assert.match(fn, /card\?\.locked === true/, '第一个来源：列表卡片上的 locked');
+  assert.match(fn, /state\.petData\?\.badges/, '第二个来源：详情回执的 badges（地址直达时只有它有）');
+  assert.match(fn, /includes\('锁定'\)/, 'badges 里那个词就是「锁定」本身');
+
+  // 两个调用点都必须走它 —— 只改一处的话，按钮说了锁定、URL 却没带上（或反过来）。
+  assert.match(BOX_JS, /lockedOf\(card\) \? '（含锁定 1 只）' : ''/,
+    '按钮文案要读 lockedOf()（旧写法 `card.locked === true ? ...` 在地址直达时不写这句）');
+  assert.match(BOX_JS, /locked: lockedOf\(card\)/,
+    '交接载荷也要读 lockedOf()（旧写法会让 `?lock=` 丢掉，工坊那边就锁不上）');
+  // 反证：旧写法（只认卡片）不许再出现在这两个位置上
+  assert.doesNotMatch(BOX_JS, /card\.locked === true \? '（含锁定 1 只）'/,
+    '按钮文案不许退回"只认卡片"的旧写法');
+  assert.doesNotMatch(BOX_JS, /locked: card\?\.locked === true/,
+    '交接载荷不许退回"只认卡片"的旧写法');
+});

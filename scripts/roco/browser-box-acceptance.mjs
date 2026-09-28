@@ -566,9 +566,25 @@ async function main() {
     check('01-路由总数', `我的盒子 == ${expectedMine} 个个体（= owned-pets.json 的实例数），全图鉴 == 622 条记录`,
       boot.mineCount === expectedMine && boot.catalogCount === '622',
       `count-mine=${boot.mineCount} count-catalog=${boot.catalogCount}`);
-    check('02-默认视图', `默认进入「我的盒子」，总数 ${expectedMine}（一人一只），每页 24 张卡`,
-      boot.kind === 'mine' && boot.total === expectedMine && boot.cards === '24',
-      `kind=${boot.kind} total=${boot.total} cards=${boot.cards}`);
+    // 2026-09-28 改钉（人类：「所有精灵实装，这样就不需要我的精灵了，直接全筛选」）：
+    // 默认标签从「我的盒子」换成**「全部精灵」**（可玩层扩到 542 之后，先看自己那几十只没意义）。
+    // 旧断言是 `boot.kind === 'mine' && boot.total === expectedMine`。
+    const defaultViewProblems = (f) => ((f?.kind === 'catalog' && f?.total === '622' && f?.cards === '24')
+      ? [] : [`默认视图不对：kind=${f?.kind} total=${f?.total} cards=${f?.cards}`]);
+    counter('02-默认视图', '默认还停在「我的盒子」上必须被同一条判据抓住',
+      defaultViewProblems({kind: 'mine', total: '48', cards: '24'}),
+      '{"kind":"mine","total":"48","cards":"24"}');
+    check('02-默认视图', '默认进入「全部精灵」，总数 622（全部可查的精灵），每页 24 张卡',
+      defaultViewProblems(boot).length === 0,
+      defaultViewProblems(boot).join(' | '));
+    // ⚠ 反证要拿**坏样本**过同一个判据（我第一版把"真实那一份"塞进去 ⇒ 恒不命中，
+    // 判据自己报了「没命中——判据是空的！」）。
+    // ⚠ 下面那一段（③ 起的"我的盒子"相关步骤）**显式切回「我的盒子」**：
+    // 默认标签一改，后面所有假定"一开始就在我的盒子上"的步骤都会点不到行。
+    // 判据要量的是那些行为，不是"默认落在哪一档"（那一条上面已经单独钉了）。
+    await mouseClick('#tab-mine');
+    await waitFor(`document.body.dataset.boxKind==='mine'`);
+    await sleep(500);
 
     const wide = await metrics();
     screens.push({viewport: '1440x900', at: 'mine', ...wide});
@@ -733,6 +749,10 @@ async function main() {
     // 这里真的用鼠标打开 **own-0001** 的详情（它在「铠甲虫」那一行里，默认收起 ⇒ 先展开那一行），
     // 量两件事：资质那一栏摊成了「生命 10 / 物攻 3 / …」这样的数值；整页不出现 [object Object]。
     await diag('before-10b');
+    // ⚠ 2026-09-28：默认标签是「全部精灵」⇒ 这一段按 `kind=mine` 取的行要先切档才渲染得出来。
+    await mouseClick('#tab-mine');
+    await waitFor(`document.body.dataset.boxKind==='mine'`);
+    await sleep(500);
     const own1Route = await (await fetch(`${base}api/roco/box?kind=mine&limit=60&offset=0`)).json();
     const own1Card = own1Route.player.cards.find((c) => c.select === 'own-0001') ?? null;
     const own1Species = own1Card?.group ?? '';
@@ -838,10 +858,15 @@ async function main() {
     const pair = pairs[0] ?? null;
     if (!pair) {
       const speciesCount = new Set(mineRoute.player.cards.map((c) => c.group)).size;
-      check('11-两个体比较', '产物里每个物种只有一个个体（人类要求删掉重复）→ 同种比较在本产物上**不可达**，'
-        + '能力改由 tests/roco-box.test.js 的显式夹具验',
-        mineRoute.player.total === speciesCount && pairs.length === 0,
-        `我的盒子 ${mineRoute.player.total} 个个体 / ${speciesCount} 个物种；同种对 ${pairs.length} 组`);
+      // 2026-09-28 改钉（人类：「不要比较」+「不要同种多个体」）：
+      // 旧断言还有半句 `mineRoute.player.total === speciesCount` —— 那是拿**总个体数**比
+      // **这一页（limit=60）的物种数**，本来就是个站不住的比较（可玩层扩到 542 之后当场红）。
+      // 现在只钉真正要钉的那件事：**这一页里没有同种对**（"一个物种一只"由产物侧判据管）。
+      check('11-两个体比较', '同种比较整块已拆（人类：「不要比较」）⇒ 在本产物上**不可达**；'
+        + '而且盒子里没有同种对（人类：「不要同种多个体」）',
+        pairs.length === 0,
+        `这一页 ${mineRoute.player.cards.length} 张卡 / ${speciesCount} 个物种；同种对 ${pairs.length} 组`
+          + `（我的盒子共 ${mineRoute.player.total} 个个体）`);
       check('12-比较也不说工程话', '（随 11 不可达）比较面板在本产物上打不开，改由单元判据扫它的文案',
         true, '（登记为不可达：没有同种对）');
       steps.push({at: 'compare-unreachable', pairs: pairs.length, speciesCount});
@@ -1228,7 +1253,11 @@ async function main() {
       await cdp.send('Page.navigate', {url: base + 'box.html'});
       await sleep(1200);
       await waitFor('document.querySelectorAll("#box-grid .card").length>0');
-      await sleep(300);
+      // ⚠ 2026-09-28：默认标签换成「全部精灵」之后，下面按 `kind=mine` 取的那一只**不在当前这一档里**
+      // ⇒ 行根本没渲染、`ensureRowVisible` 会抛「找不到可点的元素」。先显式切回「我的盒子」。
+      await mouseClick('#tab-mine');
+      await waitFor(`document.body.dataset.boxKind==='mine'`);
+      await sleep(500);
       await ensureRowVisible(handoffOne.group, handoffOne.select);
       await mouseClick(`#box-grid .individual[data-detail="${handoffOne.select}"]`);
       await waitForSafe(`(()=>{const v=document.getElementById('pet-view');
@@ -1322,9 +1351,16 @@ async function main() {
       // 判据的意图一个字没改：**锁定要跟着交接走，而且按钮上要写清带了几只锁定**。
       // 只带一只（这就是新口径：一个物种一只），所以下面按 1 只来核。
       const card = lockedCards[0];
-      const species = lockedRoute.player.cards.find((c) => c.select === card.select)?.group ?? '';
-      if (species) await ensureRowVisible(species, card.select);
-      await mouseClick(`#box-grid .individual[data-detail="${card.select}"]`);
+      // ⚠ 2026-09-28：可玩层扩到 542 之后，锁定的那几只**不一定落在第一页**，
+      // 而 `ensureRowVisible` 是按"这一页画出来的行"去点的 ⇒ 会抛「找不到可点的元素」。
+      // 二级详情页本来就能**按地址直达**（`?pet=`，与玩家点进去是同一屏），所以直接导航过去 ——
+      // 判据要量的是那一屏上的按钮文案与交接，不是"必须从列表点进去"。
+      await cdp.send('Page.navigate', {url: `${base}box.html?pet=${card.select}`});
+      await sleep(1100);
+      await waitForSafe(`(()=>{const v=document.getElementById('pet-view');
+        return Boolean(v)&&v.hidden===false
+          &&new URLSearchParams(location.search).get('pet')===${JSON.stringify(card.select)};})()`,
+      {tries: 60, ms: 200});
       await waitFor(`(()=>{const v=document.getElementById('pet-view');
         return Boolean(v)&&v.hidden===false&&new URLSearchParams(location.search).get('pet')===${JSON.stringify(card.select)};})()`);
       await sleep(300);
@@ -1333,10 +1369,13 @@ async function main() {
         ? [`带走的锁定有 ${count} 只，按钮上却没说：${JSON.stringify(text)}`] : []);
       // ⚠ 2026-09-27：这条原来是**三参数**写法，而这个脚本的 check 是 `(id, judge, ok, actual)`
       // ⇒ 判据文本落进 `ok`（恒真）—— **一直是假绿**。静态守卫的警告把它列出来了，这里补上判据文本。
+      // ⚠ 2026-09-28 改钉：导航过去的是 **`card` 这一只**（新口径：一个物种一只），
+      // 判据却还按 `lockedCards.length`（切片最多 2 只）来核 ⇒ 数据里有 2 只锁定就一定红，
+      // 而红的理由（"按钮没说"）根本不是页面的事。按**实际带过去的那一只**核。
       check('25-锁定随交接走：按钮上写清带了几只锁定',
         '带锁定去配队时按钮上要写清带了几只',
-        lockedCards.length > 0 && labelProblems(label, lockedCards.length).length === 0,
-        `选中 ${lockedCards.length} 只（数据里标着锁定的那些）：按钮文案「${label}」`);
+        Boolean(card) && labelProblems(label, 1).length === 0,
+        `这一只（${card.select}）在数据里标着锁定：按钮文案「${label}」`);
       counter('25-锁定随交接走：按钮上写清带了几只锁定',
         '带锁定却不在按钮上说明，必须被同一条判据抓住', labelProblems('带上这两只去配队', 1), '["带上这两只去配队"]');
       await mouseClick('#pet-actions [data-to-team]');
@@ -1453,6 +1492,13 @@ async function main() {
       if (await js(`document.querySelectorAll('#box-grid .card').length > 0`)) break;
       await sleep(200);
     }
+    // ⚠ 2026-09-28 改钉：默认视图已改成「全部精灵」（人类：「所有精灵实装…直接全筛选」），
+    // 而**抽屉与二级详情页只长在「我的盒子」上** ⇒ 这一段必须先切回「我的盒子」，
+    // 否则下面等 `.individual[data-detail]` 会等到超时、再抛「找不到可点的元素」。
+    // 判据的意思一个字没改：要量的是刷新/回滚本身，不是默认落在哪个页签。
+    await mouseClick('#tab-mine');
+    await waitFor(`document.body.dataset.boxKind==='mine'`);
+    await sleep(400);
     // 真机上**每个个体只留一份状态**：先清掉本机记录，让这一次从 3+3 次开始（可复现）。
     await js(`localStorage.removeItem('roco.box.individuals.v1'); true`);
     await js(`document.getElementById('box-reset')?.click(); true`);
@@ -1565,6 +1611,9 @@ async function main() {
     };
     await cdp.send('Page.navigate', {url: base + 'box.html'});
     await sleep(1400);
+    // 2026-09-28：同上 —— 抽屉只在「我的盒子」上，默认视图是「全部精灵」⇒ 先切回来。
+    await mouseClick('#tab-mine');
+    await waitFor(`document.body.dataset.boxKind==='mine'`);
     await waitForSafe(`document.querySelectorAll('#box-grid .individual[data-detail]').length>0`, {tries: 60, ms: 200});
     await mouseClick('#box-grid .individual[data-detail]');
     await waitForSafe(`(()=>{const v=document.getElementById('pet-view');return Boolean(v)&&v.hidden===false;})()`,
@@ -1596,6 +1645,9 @@ async function main() {
     // ── ① 等级：页面上只许出现 Lv.60 ────────────────────────────────────────
     await cdp.send('Page.navigate', {url: base + 'box.html'});
     await sleep(1400);
+    // 2026-09-28：同上 —— 抽屉只在「我的盒子」上，默认视图是「全部精灵」⇒ 先切回来。
+    await mouseClick('#tab-mine');
+    await waitFor(`document.body.dataset.boxKind==='mine'`);
     await waitForSafe(`document.querySelectorAll('#box-grid .individual[data-detail]').length>0`, {tries: 60, ms: 200});
     // 期望值**从数据现读**（不写死 60）：页面上出现的级数必须是数据里真有的那些。
     const levelRoute = await (await fetch(`${base}api/roco/box?kind=mine&limit=60&offset=0`)).json();
@@ -1725,8 +1777,12 @@ async function main() {
       '{"openCount":3,"afterPick":false,"afterOutside":false}');
 
     // ── ⑥ 收藏：点了立刻生效 + 刷新还在 + 「只看收藏」按它筛 ────────────────
+    // ⚠ 2026-09-28：星标只长在「我的盒子」的抽屉行上（`favouriteButton` 的调用点在
+    // `box-drawer.js` 的行里与二级页动作区），而默认视图是「全部精灵」⇒ 两次导航之后都要先切回来。
     await cdp.send('Page.navigate', {url: base + 'box.html'});
     await sleep(1400);
+    await mouseClick('#tab-mine');
+    await waitFor(`document.body.dataset.boxKind==='mine'`);
     await waitForSafe(`document.querySelectorAll('#box-grid [data-fav]').length>0`, {tries: 60, ms: 200});
     const favSelect = await js(`document.querySelector('#box-grid [data-fav]')?.dataset.fav ?? ''`);
     if (favSelect) {
@@ -1737,6 +1793,8 @@ async function main() {
         return JSON.stringify({pressed:b?b.getAttribute('aria-pressed')==='true':null, stored:store[${JSON.stringify(favSelect)}]===true});})()`));
       await cdp.send('Page.navigate', {url: base + 'box.html'});
       await sleep(1500);
+      await mouseClick('#tab-mine');
+      await waitFor(`document.body.dataset.boxKind==='mine'`);
       await waitForSafe(`document.querySelectorAll('#box-grid [data-fav]').length>0`, {tries: 60, ms: 200});
       const afterReload = JSON.parse(await js(`(()=>{const b=document.querySelector('#box-grid [data-fav="${favSelect}"]');
         return JSON.stringify({pressed:b?b.getAttribute('aria-pressed')==='true':null, rowPresent:Boolean(b)});})()`));
@@ -1777,6 +1835,9 @@ async function main() {
     // 如果哪天又要能删个体，这条判据要连按钮一起恢复。
     await cdp.send('Page.navigate', {url: base + 'box.html'});
     await sleep(1400);
+    // 2026-09-28：同上 —— 抽屉只在「我的盒子」上，默认视图是「全部精灵」⇒ 先切回来。
+    await mouseClick('#tab-mine');
+    await waitFor(`document.body.dataset.boxKind==='mine'`);
     await waitForSafe(`document.querySelectorAll('#box-grid .individual[data-detail]').length>0`, {tries: 60, ms: 200});
     const retiredDelete = JSON.parse(await js(`(()=>{const list=document.getElementById('box-grid');
       const store=JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}');
@@ -1796,6 +1857,9 @@ async function main() {
       localStorage.setItem(key,JSON.stringify(store));return true;})()`);
     await cdp.send('Page.navigate', {url: base + 'box.html'});
     await sleep(1400);
+    // 2026-09-28：同上 —— 抽屉只在「我的盒子」上，默认视图是「全部精灵」⇒ 先切回来。
+    await mouseClick('#tab-mine');
+    await waitFor(`document.body.dataset.boxKind==='mine'`);
     await waitForSafe(`document.querySelectorAll('#box-grid .individual[data-detail]').length>0`, {tries: 60, ms: 200});
     const afterSeed = JSON.parse(await js(`(()=>{const list=document.getElementById('box-grid');
       const store=JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}');
