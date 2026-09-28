@@ -1707,7 +1707,12 @@ async function main() {
       const bad = [];
       if (texts.length < 2) return [`同名不同物种的两行没同时出现（只有 ${texts.length} 行）—— 判据不许变空`];
       if (new Set(texts).size !== texts.length) bad.push(`同名两行的可见文本完全相同：「${texts[0]}」`);
-      if (!texts.every((t) => /Lv\d+/.test(t))) {
+      // ⚠ 2026-09-29 改钉（人类报的 A3：「pvp选精灵看不到等级？」）：等级写法从 `Lv60` 统一成 **`Lv.60`**
+      // —— 与**盒子页**卡片上一直用的 `Lv.60` 一致（同一份数据在两个页面上不该有两种写法）。
+      // 所以正则从 `/Lv\d+/` 放宽成 `/Lv\.?\d+/`：**点可有可无**，但「Lv + 数字」这条**意图一字未变**
+      // （每一行都必须带出自己的等级读数）。
+      // 旧断言留档：if (!texts.every((t) => /Lv\d+/.test(t))) { … }
+      if (!texts.every((t) => /Lv\.?\d+/.test(t))) {
         bad.push(`每行都要带自己的等级读数：${JSON.stringify(texts)}`);
       }
       // ⚠ 2026-09-28 改钉（旧断言原文：「两行要各自带出定位、且不止一种（看到的定位：…）」——

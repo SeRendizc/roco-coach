@@ -952,7 +952,15 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
           : (sameNameHeld
             ? '<span class="tw-state-tag tw-state-held">持有 · 名字重复</span>'
             : '<span class="tw-state-tag tw-state-trial">图鉴 · 按需推算（未核验）</span>');
+        // ⚠ 2026-09-29 新增 `data-tw-slot-instance`（队友 coach-context 报的**精确缺口**：
+        // 「配队六槽接不进小芽 —— 槽位 DOM 上没有"这一格是哪个个体"的钩子，只有 `data-tw-slot` 序号 + 名字」）。
+        // 为什么需要它：小芽要回答"我队伍里这一只的性格是什么"，就必须知道**装进这一格的那个个体 id**
+        // （`own-XXXX`），而不是按名字去猜物种 —— 重名的时候猜不了（实测「棋契陛下」就有两只）。
+        // 顺序与 `data-tw-remove-slot="${slot.index - 1}"` **同一个来源**（都是 `state.selected` 的下标），
+        // 所以「移除第 N 格」和「读第 N 格的个体」永远指向同一只，不会错位。
+        const slotInstance = state.selected[slot.index - 1] ?? null;
         return `<article class="tw-slot on" role="listitem" data-tw-slot="${slot.index}"
+          data-tw-slot-instance="${escapeAttr(slotInstance ?? '')}"
           data-tw-state="filled" data-tw-fieldable="${held || sameNameHeld ? 'yes' : 'no'}">
          <div class="tw-row">${twArtHtml({group: species, art: state.artBySpecies?.get?.(String(species ?? '')) === true}, {size: 32})}<span class="tw-who">${escapeHtml(slot.name ?? NO_ITEM)}</span>
           ${slot.locked ? '<span class="tw-lock">锁定</span>' : ''}
