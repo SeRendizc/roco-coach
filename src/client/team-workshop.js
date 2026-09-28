@@ -1224,9 +1224,24 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       const who = isMine && sameSpecies.length > 1 && ordinal > 0
         ? `${escapeHtml(card.name ?? NO_ITEM)} <span class="tw-rowtag">第 ${ordinal} 只</span>`
         : escapeHtml(card.name ?? NO_ITEM);
+      // ⚠ 2026-09-29 修（Lead 实测挖到的）：「全图鉴」页签（**默认页签**）里，
+      // 玩家**已经拥有**的那些行 `data-tw-instance` / `data-tw-owned` 原来是**空串**。
+      // 为什么会空：图鉴卡是**物种级**的（有两个 id 语义，`select` 在图鉴里是物种 id），
+      // 所以原来把 `instanceId` 直接写成 `''` —— 这个区分本身是对的，**但拥有的那一行其实是知道个体的**
+      // （`state.ownedBySpecies` 里有），只是没写进 DOM。
+      // 影响（实测坐标）：`src/client/xiaoya.js:747` 的焦点 provider 就是读 `[data-tw-instance]`
+      // ⇒ 在**默认页签**点一只候选，小芽**不知道你看的是哪一只**（切到「我的盒子」才有值）。
+      // 现在：拥有的行补上那只个体的 id；**没有的仍然留空**（物种级就是物种级，不编一个个体出来）。
+      // 组队行为不变：`addCandidate()` 拿到个体 id 就直接用，拿不到就按物种查 —— 两条路殊途同归。
+      // ⚠ 形状以 `loadOwnedIndex` 为准：`ownedBySpecies` 的值是**数组**
+      // （`bySpecies.get(speciesId).push({select, name, level, note})`），**不是** `{variants: [...]}`
+      // —— 我第一版按 `mergeMineRows` 那个形状写了 `?.variants?.[0]`，于是取不到值、修复静默失效
+      // （真机实测 `twInstance` 仍是空串才发现的）。`addCandidate()` 用的也是 `?.[0]?.select`，与这里一致。
+      const ownedVariant = isMine ? null : (state.ownedBySpecies.get(speciesId)?.[0] ?? null);
+      const domInstance = isMine ? instanceId : String(ownedVariant?.select ?? '');
       return `<button class="tw-row" data-tw-species="${escapeAttr(speciesId)}"
-        data-tw-instance="${escapeAttr(instanceId)}"
-        data-tw-owned="${escapeAttr(instanceId)}"
+        data-tw-instance="${escapeAttr(domInstance)}"
+        data-tw-owned="${escapeAttr(domInstance)}"
         data-tw-status="${held ? 'held' : 'on_demand'}"
         data-tw-kind="${isMine ? 'mine' : 'catalog'}">
        ${twArtHtml(card)}
