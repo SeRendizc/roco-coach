@@ -167,6 +167,16 @@ export async function fixReceipts(rows, {client, pythonOk}) {
       const now = fresh[index];
       if (!now) continue;
       const recorded = call.receipt || {};
+      // ⚠ 2026-09-28 修一处**误报**（守卫的意图不变，只是更准）：指纹**已经一致**就说明这条回执
+      // 一个字都没变 —— 那既没有要重钉的东西，也没有什么"行为变化"要人判，直接跳过。
+      // 为什么必须加这一句：`compare_actions` 这类工具返回的是**裸载荷**（`{text, evidence}`，
+      // 压根没有 `ok` 字段），而记录里存的是 `receiptSummary()` 归一化过的摘要（`ok:false,...`）。
+      // 于是 `now.result?.ok ?? null` 得到 `null`、记录是 `false` ⇒ `null !== false` ⇒ 被判成
+      // 「行为变了」，`--fix` **整份文件一个字节都不写**（实测：模型那份轨迹集就是这么被挡住的）。
+      // 而实测 `compare_actions` 的回执指纹在 HEAD 与扩容前**逐字相同**（`6eaa41be434e`）——
+      // 它根本不需要重钉。判据的意图一字未变：**指纹变了**的回执，`ok`/`error_type`/`failure_class`
+      // 仍然必须逐字相同，一旦从「弃答」变成「给出结果」（或反过来）照样拒绝、照样不写文件。
+      if (now.digest === recorded.digest) continue;
       // 只比**记录里真有**的那几项：`receiptSummary` 只存 ok / error_type（不存 failure_class），
       // 拿一个记录里根本没有的字段去比，会把「同一类回执换了文案」误判成行为变化。
       const sameKind = (now.result?.ok ?? null) === (recorded.ok ?? null)
@@ -177,10 +187,8 @@ export async function fixReceipts(rows, {client, pythonOk}) {
           + `，现在 ok=${now.result?.ok}/error_type=${now.result?.error_type} —— 这是行为变了，不是文案漂了`);
         continue;
       }
-      if (now.digest !== recorded.digest) {
-        changed.push({traj_id: row.traj_id, tool: call.tool,
-          from: String(recorded.digest).slice(0, 12), to: now.digest.slice(0, 12)});
-      }
+      changed.push({traj_id: row.traj_id, tool: call.tool,
+        from: String(recorded.digest).slice(0, 12), to: now.digest.slice(0, 12)});
       call.receipt = receiptSummary(now.result);
     }
   }
