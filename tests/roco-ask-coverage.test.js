@@ -1951,3 +1951,27 @@ test('㉞ 加点退役后：两档都说"没有加点"；能量仍然按档分�
   assert.match((energyMobile.evidence || []).join(' '), /EV-ENERGY-MAX/, '依据里要给得出条目名');
 });
 
+
+test('㉟ 规则集版本问句：政策必须判得出来、参数必须凑得出来（2026-09-28 补的缺口）', () => {
+  // 由来：`--policy-first` 对照实测（288 条任务）判挂只剩 2 条，两条都是「这份规则集是哪个版本？」——
+  // 政策对这类问句**没有形状** ⇒ 静默交回模型 ⇒ 模型调了 read_state（错工具）。
+  // 这一条钉两件事：① 形状认得出（含各种前缀）；② 参数凑得出来（原来 defaultArgsFor 返回 null，
+  // 政策判出了 need 也白判）。
+  const ctx = {mode: 'camp'};
+  for (const message of ['这份规则集是哪个版本？', '这份规则集是哪个版本啊？',
+    '再确认一下，这份规则集是哪个版本？', '我在练习场，想问下：这份规则集是哪个版本？',
+    '我锁定寂灭骨龙，我在练习场，想问下：这份规则集是哪个版本？']) {
+    const policy = policyFor(message, ctx);
+    assert.equal(policy.need, 'query_rules', `政策要认得出：${message}`);
+    assert.equal(policy.reason, 'ruleset-version-ask', message);
+    assert.deepEqual(defaultArgsFor('query_rules', ctx, message), {kind: 'ruleset'},
+      `参数要凑得出来（原来这里是 null）：${message}`);
+  }
+  // 反证①：只提"版本"、与规则集无关的问句**不许**被抢走（误伤比漏判更糟）
+  assert.equal(policyFor('这游戏什么版本？', ctx).need, null);
+  // 反证②：图鉴问句仍走原来那一路，参数形状不变
+  const pet = policyFor('寂灭骨龙的种族值是多少？', ctx);
+  assert.equal(pet.reason, 'codex-fact');
+  assert.deepEqual(defaultArgsFor('query_rules', ctx, '寂灭骨龙的种族值是多少？'),
+    {kind: 'pet', name: '寂灭骨龙'});
+});
