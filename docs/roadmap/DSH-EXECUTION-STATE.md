@@ -12558,3 +12558,27 @@ guard-selftest / browser-acceptance / demo-acceptance / mobile-sweep）**全绿*
 `document.querySelectorAll('#pet-view *')` 里逐个算 `innerText` 长度与 `textContent`，
 找出**只有 `innerText` 才含对象**的那一个元素；或者更直接：把 `#pet-view` 的 `outerHTML`
 整个写进报告（哪怕 200KB），在文件里搜 `[object Object]` 的前后文。
+
+**六、现在稳定在 **1 红**（`10b`），其余 41 条全绿**
+
+最近两次独立运行读数一致：
+
+| 运行 | 红项 |
+|---|---:|
+| `run-final1` | 8 |
+| `run-clean-final` | **1**（只剩 `10b`） |
+
+⇒ 加上渲染信号与"先清上一位数据"之后，**`11` 与 `28～36` 全部转绿**，
+`10b` 是**唯一**剩下的（它数的是整页 `[object Object]`，而其它判据只是被它连带的那一批已经不红了）。
+
+**七、我这边的实测与本机的差异（照实记，免得下一个人重复劳动）**
+
+我直接开 `?pet=own-0001`（复刻"先列表 → 再开二级页"）拿到的是：
+`pet-rendered=server`、`#pet-view` **outerHTML 4193 字符、`[object Object]` 0 处**、
+元素扫描 `innerText`/`textContent` 两条都 0 —— **本机复现不出来**。
+而验收里同一步稳定报 **84 处（二级页 74 处）**。
+⇒ **差距在"验收那条路径留下的状态"**，不在渲染代码本身（离线渲染实验也证明 `petBodyHtml` 两种形状都干净）。
+
+**下一轮的第一件事（很具体）**：在验收里**每过一步**就记一次
+`#pet-view` 的 `innerHTML.length` 与 `[object Object]` 计数（1～9b 各一次），
+**哪一步之后从 0 跳到 74，就是那一步**写进去的 —— 一次运行定位，不要再看总数。
