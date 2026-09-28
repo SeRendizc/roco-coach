@@ -626,7 +626,7 @@ async function main() {
     const firstFace = await js(`document.querySelector('#box-grid .individual[data-detail]')?.dataset.detail ?? null`);
     await mouseClick('#box-grid .individual[data-detail]');
     const petOpen = await waitFor(`(()=>{const v=document.getElementById('pet-view');
-      return Boolean(v)&&v.hidden===false&&Boolean(new URLSearchParams(location.search).get('pet'));})()`);
+      return Boolean(v)&&v.hidden===false&&v.dataset.petRendered==='server'&&Boolean(new URLSearchParams(location.search).get('pet'));})()`);
     await sleep(300);
     const detailText = await js(`(document.getElementById('pet-view').innerText||'').replace(/\\s+/g,' ')`);
     const detailFacts = JSON.parse(await js(`JSON.stringify({
@@ -715,7 +715,7 @@ async function main() {
     if (own1Ready) {
       await mouseClick('#box-grid .individual[data-detail="own-0001"]');
       await waitFor(`(()=>{const v=document.getElementById('pet-view');
-        return Boolean(v)&&v.hidden===false&&new URLSearchParams(location.search).get('pet')==='own-0001';})()`);
+        return Boolean(v)&&v.hidden===false&&v.dataset.petRendered==='server'&&new URLSearchParams(location.search).get('pet')==='own-0001';})()`);
       await sleep(350);
       const talentFacts = JSON.parse(await js(`(()=>{const body=document.getElementById('pet-body');
         const rows=[...body.querySelectorAll('.trait')].map((el)=>({label:String(el.querySelector('b')?.textContent||'').trim(),
@@ -1129,7 +1129,7 @@ async function main() {
     // 判据要量的是同一件事：这一屏在 390×844 上也不许横向溢出。
     await mouseClick(`#box-grid .individual[data-detail]`);
     await waitFor(`(()=>{const v=document.getElementById('pet-view');
-      return Boolean(v)&&v.hidden===false&&Boolean(new URLSearchParams(location.search).get('pet'));})()`);
+      return Boolean(v)&&v.hidden===false&&v.dataset.petRendered==='server'&&Boolean(new URLSearchParams(location.search).get('pet'));})()`);
     await sleep(300);
     const narrowDrawer = await metrics();
     screens.push({viewport: '390x844', at: 'detail', ...narrowDrawer});
@@ -1486,7 +1486,7 @@ async function main() {
       // 打开这一只自己那一页（刷新/回滚按钮都在那一页上）
       await mouseClick(`#box-grid .individual[data-detail="${pick.id}"]`);
       await waitFor(`(()=>{const v=document.getElementById('pet-view');
-        return Boolean(v)&&v.hidden===false&&Boolean(new URLSearchParams(location.search).get('pet'));})()`);
+        return Boolean(v)&&v.hidden===false&&v.dataset.petRendered==='server'&&Boolean(new URLSearchParams(location.search).get('pet'));})()`);
       await sleep(400);
     }
     if (!pick.id) {
@@ -1725,7 +1725,7 @@ async function main() {
       if (natureSpecies) await ensureRowVisible(natureSpecies, naturePick);
       await mouseClick(`#box-grid .individual[data-detail="${naturePick}"]`);
       await waitFor(`(()=>{const v=document.getElementById('pet-view');
-        return Boolean(v)&&v.hidden===false&&Boolean(new URLSearchParams(location.search).get('pet'));})()`);
+        return Boolean(v)&&v.hidden===false&&v.dataset.petRendered==='server'&&Boolean(new URLSearchParams(location.search).get('pet'));})()`);
       await sleep(400);
       const nBefore = await natureFacts(naturePick);
       await mouseClick(`#pet-view [data-refresh="nature"]`);
@@ -1794,7 +1794,7 @@ async function main() {
     if (petSelect) {
       await mouseClick(`#box-grid .individual[data-detail="${petSelect}"]`);
       await waitForSafe(`(()=>{const v=document.getElementById('pet-view');
-        return Boolean(v)&&v.hidden===false&&Boolean(new URLSearchParams(location.search).get('pet'));})()`,
+        return Boolean(v)&&v.hidden===false&&v.dataset.petRendered==='server'&&Boolean(new URLSearchParams(location.search).get('pet'));})()`,
       {tries: 60, ms: 200});
       await sleep(350);
       const petFacts = JSON.parse(await safeJs(`(()=>{const v=document.getElementById('pet-view');
