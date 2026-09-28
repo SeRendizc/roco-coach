@@ -1895,6 +1895,74 @@ async function main() {
       ((f) => (f.rowDrawn === false && f.banned === false) ? [] : ['还画/还没清'])({rowDrawn: true, banned: true}),
       '{"rowDrawn":true,"banned":true}');
 
+    // ── ③ 多属性：双系精灵必须**两个系别都画出来** ──────────────────────────────
+    //
+    // 人类 2026-09-28 逐字：「还是体现不出多属性」。原来说明里一条判据都没有 ——
+    // 只有「系别筛选」那一条（08），它管的是筛选，管不着"一只双系精灵在卡上是不是真的写着两个系"。
+    // 这一条**拿服务端的数据当真值**（`player.cards[].types`），逐字比卡上画出来的芯片：
+    // 少画一个系、只画第一个、把「草系/毒系」拼成一个词都算红。
+    const typeProblems = (facts) => {
+      const bad = [];
+      const expected = Array.isArray(facts?.expected) ? facts.expected : [];
+      const shown = Array.isArray(facts?.shown) ? facts.shown : [];
+      if (expected.length < 2) {
+        bad.push(`这一条会变空：样例不是双系（服务端给的系别 ${JSON.stringify(expected)}）`);
+        return bad;
+      }
+      if (shown.length !== expected.length) {
+        bad.push(`卡上画了 ${shown.length} 个系别、服务端给的是 ${expected.length} 个：${JSON.stringify(shown)}`);
+      }
+      for (const one of expected) {
+        // 芯片里带一个 emoji（`🌿草系`），所以按**包含**比，不是全等。
+        if (!shown.some((t) => String(t).includes(one))) {
+          bad.push(`卡上没画出「${one}」（卡上只有 ${JSON.stringify(shown)}）`);
+        }
+      }
+      // 人类 2026-09-28 逐字：「双属性两个属性中间加隔断（eg 毒系｜地系）」——
+      // 两个胶囊紧挨着读起来是「毒系地系」一坨，所以 n 个系别之间要有 n-1 个隔断。
+      if (Number(facts?.seps) !== expected.length - 1) {
+        bad.push(`${expected.length} 个系别之间要有 ${expected.length - 1} 个隔断，实际 ${facts?.seps}`);
+      }
+      return bad;
+    };
+    await cdp.send('Page.navigate', {url: base + 'box.html'});
+    await sleep(1400);
+    await waitForSafe(`document.querySelectorAll('#box-grid .card').length>0`, {tries: 60, ms: 200});
+    await sleep(300);
+    const typeFacts = JSON.parse(await safeJs(`(async()=>{
+      const cards=[...document.querySelectorAll('#box-grid .card')];
+      const route=await (await fetch('/api/roco/box?kind=catalog&limit=24&offset=0')).json();
+      const truth=new Map((route?.player?.cards??[]).map((c)=>[c.select,Array.isArray(c.types)?c.types:[]]));
+      for(const el of cards){
+        const expected=truth.get(el.dataset.select)??[];
+        if(expected.length<2) continue;
+        const shown=[...el.querySelectorAll('.card-types > .type')]
+          .map((x)=>String(x.textContent).trim()).filter(Boolean);
+        return JSON.stringify({select:el.dataset.select, name:el.querySelector('.card-name')?.textContent?.trim()??'',
+          expected, shown, seps:el.querySelectorAll('.card-types > .type-sep').length});
+      }
+      return JSON.stringify({select:null, expected:[], shown:[], note:'这一页没有双系精灵'});
+    })()`) ?? '{}');
+    steps.push({at: 'dual-type', facts: typeFacts});
+    check('40-多属性：双系精灵在卡上要写出两个系别',
+      '人类 2026-09-28：「还是体现不出多属性」⇒ 服务端说这只是双系（`types` 有两条）时，'
+      + '卡上必须**两个系别都画出来**、而且两个胶囊之间要有隔断'
+      + '（人类：「双属性两个属性中间加隔断（eg 毒系｜地系）」）；服务端数据是真值，逐字比',
+      typeProblems(typeFacts).length === 0,
+      typeProblems(typeFacts).join(' | ')
+        || `${typeFacts.name}（${typeFacts.select}）服务端给 ${JSON.stringify(typeFacts.expected)}，`
+          + `卡上画出 ${JSON.stringify(typeFacts.shown)}，隔断 ${typeFacts.seps} 个`);
+    counter('40-多属性：双系精灵在卡上要写出两个系别',
+      '① 只画第一个系 ② 一个系都不画 ③ 两个系拼成一个词 ④ 两个胶囊之间没有隔断'
+      + ' —— 四种坏样本都要被同一条判据抓住',
+      [[typeFacts.shown?.slice(0, 1)], [], [typeFacts.shown?.join('')],
+        [typeFacts.shown, 0]]
+        .map(([shown, seps]) => typeProblems({...typeFacts, shown,
+          seps: seps === undefined ? typeFacts.seps : seps})).flat(),
+      `只画第一个=${JSON.stringify(typeProblems({...typeFacts, shown: typeFacts.shown?.slice(0, 1)}))}；`
+        + `拼成一个词=${JSON.stringify(typeProblems({...typeFacts, shown: [typeFacts.shown?.join('')]}))}；`
+        + `没有隔断=${JSON.stringify(typeProblems({...typeFacts, seps: 0}))}`);
+
     // ── ④ 换技能：真的换、真的存进「开局那一页」读的那份记录 ────────────────────
     //
     // 2026-09-28（人类逐字：「换技能还是没实装是吧？实装一下」）。

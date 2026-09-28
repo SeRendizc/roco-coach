@@ -25,10 +25,40 @@ V3 = "mobile_s4_candidate_v3"
 LEGACY = "legacy_sim_v1"
 
 
+# ── 2026-09-28 改钉（夹具的**载体查找**多一条回落；判据与断言一条都没动，也没有放宽）──────
+# 旧写法（留档，不许删）：
+#     def _pet_with(skill_id: str) -> str:
+#         for pid in RS.pets:
+#             if skill_id in (RS.candidate_moveset(pid) or ()):
+#                 return pid
+#         raise AssertionError(f"没有精灵带 {skill_id}")
+#
+# 凭什么改（实测，不是猜的）：本轮可玩层从旧 36 只换成纯抓包的 530 只（合并冻结 542；人类
+# 2026-09-28 逐字「就用现在抓包得到的数据吧，别的不找不要了，问题数据也不要了。所有精灵实装」）。
+# 层里的 `support-matrix.json` 是**重新生成的规范配招**，`skill_000468 械斗` 在新层有
+# **167 只** FULL_VERIFIED 精灵学得到，但**没有任何一只**的规范配招带它（旧层同样是 0 只：
+# 旧的载体 `pet_000500 小鼓象 / pet_000501 巨鼓象` 当时是按需推算的 SIMULATABLE_UNVERIFIED，
+# 推算出来的配招恰好把械斗排在 4 号位；新层它们进了冻结层，规范配招重选后不再带械斗）。
+# ⇒ 「规范配招」这条线索在新层断了，但**技能本身没被撤下**、载体也没被撤下。回落顺序：
+#   ① 先照旧找「规范配招里带它」的（数据回到那种形态时行为一字不变）；
+#   ② 找不到再找「冻结学招表里学得到它」的 FULL_VERIFIED 精灵 —— 本文件本来就**显式传
+#      `loadouts`**（`_run` / 第三条判据都是），所以配招由判据自己装，载体只要能学得到即可。
+# 判据本身（1 号位 +60 / 4 号位不触发 / 未声明能力一个事件都没有 / 传动 1 后配招顺序真的变）
+# 逐条照旧，没有一个字被放宽。
+def _learns(skill_id: str) -> str | None:
+    for pid in sorted(RS.pets):
+        if RS.build_support_of(pid) == rdata.SUPPORT_FULL_VERIFIED and RS.is_learnable(pid, skill_id):
+            return pid
+    return None
+
+
 def _pet_with(skill_id: str) -> str:
     for pid in RS.pets:
         if skill_id in (RS.candidate_moveset(pid) or ()):
             return pid
+    fallback = _learns(skill_id)
+    if fallback is not None:
+        return fallback
     raise AssertionError(f"没有精灵带 {skill_id}")
 
 

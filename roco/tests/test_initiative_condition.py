@@ -88,13 +88,41 @@ class InitiativeParseTest(unittest.TestCase):
         self.assertEqual(level, rcov.SUPPORT_PARTIAL)
 
 
+# ── 2026-09-28 改钉（夹具补一条**显式配招**；判据与断言一条都没动，也没有放宽）──────────
+# 改了哪里：`_state()` 现在把 `loadouts={CARRIER: tuple([FAN] + 规范配招里其余三个)}` 传给
+# `reset()`。旧写法（留档，不许删）是**不传** `loadouts`，靠 `reset()` 的默认值 ——
+# 省略时用 `Ruleset.candidate_moveset`（M1 选定的规范配招）。
+#
+# 凭什么改（事实，不是猜的）：
+#   · 引擎侧的行为**没错**，也没变：`legal_actions()` 明确「按**配招**枚举，不是整个学习表
+#     （图鉴可学 ≠ 这场带得上）」（`env.py` 那段注释），`reset()` 的 docstring 同样写着省略
+#     loadouts 时才回落到规范配招。所以"这一手合不合法"取决于配招，这是设计，不是缺陷。
+#   · 变的是数据：本轮可玩层从旧 36 只换成纯抓包的 530 只（人类 2026-09-28 逐字「就用现在
+#     抓包得到的数据吧，别的不找不要了，问题数据也不要了。所有精灵实装」）。`CARRIER`
+#     `pet_000228 魔眷鸟` 旧层里**没有**它（它是按需推算的 SIMULATABLE_UNVERIFIED，推算出来的
+#     配招里带「扇风」）；新层里它是 **FULL_VERIFIED**，规范配招由抓包选择器重选为
+#     `skill_000686 / skill_000286 / skill_000717 / skill_000298` —— **不含扇风**（实测），
+#     于是 `step_joint(..., skill_id=FAN, ...)` 报「player 的行动不合法：扇风」。
+#   · 「扇风」本身没被撤下：`skill_000687` 在新层有 **57 只** FULL_VERIFIED 精灵学得到，
+#     `魔眷鸟` 自己就学得到（`native_skills` 里，冻结学招表）。撤下的是"默认配招正好带它"
+#     这个巧合 ⇒ 把它**显式装上**即可，判据量的仍然是「若先于敌方攻击，本次技能威力+50%」，
+#     一字未变：威力 112 = 75×1.5、非攻击不加成、legacy 逐位不变、能力位关掉回到 75。
+#   · 顺带把注释里那条事实钉住：`CARRIER=魔眷鸟 spe=135`、`SLOW_FOE=一窝蜂 spe=26` 在新层
+#     **逐值不变**（实测），所以"谁先动由速度确定性决定"这条夹具前提照旧成立，没有换载体。
+def _loadout_with(carrier: str, skill_id: str) -> tuple:
+    """把探针技能放进配招（其余三位取该精灵的规范配招，保证全部真在冻结学招表里）。"""
+    base = list(RS.candidate_moveset(carrier) or ())
+    return tuple([skill_id] + [s for s in base if s != skill_id][:3])
+
+
 class InitiativeEngineTest(unittest.TestCase):
     def _state(self, config_id, team_size=6, config=None):
         cfg = config if config is not None else rc.get_rule_config(config_id)
         team = [CARRIER] + [p for p in RS.pets if p != CARRIER][:team_size - 1]
         foe = [SLOW_FOE] + [p for p in RS.pets if p not in (CARRIER, SLOW_FOE)][:team_size - 1]
         kwargs = {"unverified_overrides": OVERRIDES} if cfg.has_mana or cfg.allowed_kinds else {}
-        state = renv.reset(team, foe, seed=7, rs=RS, config=cfg, **kwargs)
+        state = renv.reset(team, foe, seed=7, rs=RS, config=cfg,
+                           loadouts={CARRIER: _loadout_with(CARRIER, FAN)}, **kwargs)
         # 把能量补足：legacy 的开局能量比 v3 少，扇风（3 能耗）在 legacy 里可能不是合法动作
         # —— 这条判据要量的是**先手条件**，不该被"付不起"挡住。
         for side in (state.player, state.enemy):

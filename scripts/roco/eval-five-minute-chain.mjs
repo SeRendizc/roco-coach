@@ -508,6 +508,15 @@ async function collectFacts({cdp, driver, results, base, mode}) {
   let t = Date.now();
   await cdp.send('Page.navigate', {url: `${base}/box.html`});
   const boxReady = await waitFor(`document.body.dataset.boxReady==='yes'&&document.querySelectorAll('#box-grid .card').length>0`, 80, 250);
+  // ⚠ 2026-09-28 改钉（盒子默认视图从「我的盒子」换成「全部精灵」）：`.card` 在两个页签里都有，
+  // 而**抽屉与二级详情页只长在「我的盒子」上** ⇒ 不切回来的话下面 `data-detail="…"` 一个都点不到
+  // （真机报的原文：「点不到 #box-grid .individual[data-detail="pet_000001"]（元素不存在）」，
+  // 而且挑出来的是图鉴卡片的**物种 id**）。判据的意思一个字没改：量的是这条链，不是默认落在哪一档。
+  if (boxReady) {
+    try { await mouseClick('#tab-mine'); } catch { /* 已经在我的盒子上：页签可能没有可点区域 */ }
+    await waitFor(`document.body.dataset.boxKind==='mine'
+      &&document.querySelectorAll('#box-grid .individual[data-detail]').length>0`, 60, 200);
+  }
   facts.shots.push(await shot('chain-01-box'));
   closeStep(spec('enter-box'), t, boxReady,
     boxReady ? `盒子就绪，卡片 ${await js(`document.querySelectorAll('#box-grid .card').length`)} 张` : '盒子没有就绪（data-box-ready 一直是别的值）');

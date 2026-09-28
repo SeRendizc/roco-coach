@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "ruleset_id": "roco-world-s4-2026-09-10",
-  "snapshot_fingerprint": "30690aff6198afc2dfb06149ad6db3035ef9f2f169fab49ba060b56fe8661997",
-  "generated_at": "2026-09-27T23:29:02+00:00",
+  "snapshot_fingerprint": "4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc",
+  "generated_at": "2026-09-28T13:16:35+00:00",
   "generated_by": "scripts/roco/export-trait-status.py",
   "note": "这是**引擎侧**的实现状态，与数据侧的 `effect_support` 字段是两件事。数据侧全部标 unsupported（上游快照的说法），引擎侧有实现、部分实现与被拒绝三档。REFUSED 不等于「没做」：它表示依赖引擎做不到的前提，理由写在 reason 里。",
   "counts": {

@@ -40,11 +40,48 @@ OVERRIDES = [{"path": "turn_order.speed_tie", "value": "random_seeded",
               "confidence": "ENGINE_HYPOTHESIS", "reason": "MC-E05 未录制", "microcase_id": "MC-E05"}]
 
 
+# ── 2026-09-28 改钉（夹具的载体查找多一条回落 + 一条判据显式装探针技能）──────────────────
+# 旧写法（留档，不许删）：
+#     def _carrier(skill_id):
+#         for pid in sorted(RS.pets):
+#             if skill_id in (RS.candidate_moveset(pid) or ()):
+#                 return pid
+#         raise AssertionError(f"语料里找不到带 {skill_id} 的精灵，夹具失效")
+#
+# 凭什么改（实测，不是猜的）：本轮可玩层从旧 36 只换成纯抓包的 530 只（合并冻结 542；人类
+# 2026-09-28 逐字「就用现在抓包得到的数据吧，别的不找不要了，问题数据也不要了。所有精灵实装」）。
+# `skill_000250 迫近攻击` 在新层有 **11 只** FULL_VERIFIED 精灵学得到，但**没有任何一只**的
+# 规范配招带它（旧层的载体 `pet_000392 兽花蕾` 当时是按需推算的 SIMULATABLE_UNVERIFIED，
+# 推算配招里带迫近攻击；新层它进了冻结层，规范配招由抓包选择器重选为
+# `skill_000321/000453/000361/000346`，不再带迫近攻击）。**技能没被撤下、载体也没被撤下**，
+# 断的只是"默认配招正好带它"这条线索 ⇒ 回落顺序：
+#   ① 先照旧找「规范配招里带它」的（数据回到那种形态时行为一字不变）；
+#   ② 找不到再找「冻结学招表里学得到它」的 FULL_VERIFIED 精灵，并由**判据显式把它装上**
+#      （`loadouts=`，与 `test_position_subsystem._run` 同一套做法 —— 引擎的纪律本来就是
+#      「图鉴可学 ≠ 这场带得上」，合法动作按配招算）。
+# 判据一条都没动：威力累计 90 → 135（`seen[1] == base_power + 45`）、能耗累计 -3、legacy 逐位
+# 不变、能力位关掉回到原价 —— 全部逐字照旧，没有一处放宽。
+def _learns(skill_id):
+    for pid in sorted(RS.pets):
+        if RS.build_support_of(pid) == rdata.SUPPORT_FULL_VERIFIED and RS.is_learnable(pid, skill_id):
+            return pid
+    return None
+
+
 def _carrier(skill_id):
     for pid in sorted(RS.pets):
         if skill_id in (RS.candidate_moveset(pid) or ()):
             return pid
+    fallback = _learns(skill_id)
+    if fallback is not None:
+        return fallback
     raise AssertionError(f"语料里找不到带 {skill_id} 的精灵，夹具失效")
+
+
+def _loadout_with(carrier, skill_id):
+    """把探针技能放进配招（其余三位取该精灵的规范配招，保证全部真在冻结学招表里）。"""
+    base = list(RS.candidate_moveset(carrier) or ())
+    return tuple([skill_id] + [s for s in base if s != skill_id][:3])
 
 
 def _foe_attack():
@@ -133,7 +170,14 @@ class PerUseRampEngineTest(unittest.TestCase):
         carrier = _carrier(CHARGE)
         team = [carrier] + [p for p in RS.pets if p != carrier][:5]
         foe = ["pet_000050"] + [p for p in RS.pets if p not in (carrier, "pet_000050")][:5]
-        state = renv.reset(team, foe, seed=7, rs=RS, config=cfg, unverified_overrides=OVERRIDES)
+        # 2026-09-28：`_carrier(CHARGE)` 现在可能落到「冻结学招表里学得到、但规范配招没带它」的
+        # 精灵上（见 `_carrier` 上方的改钉说明）⇒ 由判据自己把 `迫近攻击` 装进配招。
+        # 判据量的仍然是「每次使用后本技能威力永久+45」：90 → 135，一个字没变。
+        loadouts = None
+        if CHARGE not in (RS.candidate_moveset(carrier) or ()):
+            loadouts = {carrier: _loadout_with(carrier, CHARGE)}
+        state = renv.reset(team, foe, seed=7, rs=RS, config=cfg, unverified_overrides=OVERRIDES,
+                           loadouts=loadouts)
         for side in (state.player, state.enemy):
             for pet in side.pets:
                 pet.energy = 10

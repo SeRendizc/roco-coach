@@ -43,11 +43,49 @@ OVERRIDES = [{"path": "turn_order.speed_tie", "value": "random_seeded",
               "confidence": "ENGINE_HYPOTHESIS", "reason": "MC-E05 未录制", "microcase_id": "MC-E05"}]
 
 
+# ── 2026-09-28 改钉（夹具的载体查找多一条回落 + 一条判据显式装探针技能）──────────────────
+# 旧写法（留档，不许删）：
+#     def _carrier(skill_id):
+#         for pid in sorted(RS.pets):
+#             if skill_id in (RS.candidate_moveset(pid) or ()):
+#                 return pid
+#         raise AssertionError(f"语料里找不到带 {skill_id} 的精灵，夹具失效")
+#
+# 凭什么改（实测，不是猜的）：本轮可玩层从旧 36 只换成纯抓包的 530 只（合并冻结 542；人类
+# 2026-09-28 逐字「就用现在抓包得到的数据吧，别的不找不要了，问题数据也不要了。所有精灵实装」）。
+# `skill_000374 针刺射击` 在新层有 **20 只** FULL_VERIFIED 精灵学得到，但**没有任何一只**的
+# 规范配招带它（旧层的载体 `pet_000008 草头鸭` 当时是按需推算的 SIMULATABLE_UNVERIFIED，
+# 推算配招里带针刺射击；新层它进了冻结层，规范配招由抓包选择器重选为
+# `skill_000678/000286/000362/000683`，不再带针刺射击）。**技能没被撤下、载体也没被撤下**，
+# 断的只是"默认配招正好带它"这条线索 ⇒ 回落顺序：
+#   ① 先照旧找「规范配招里带它」的（数据回到那种形态时行为一字不变）；
+#   ② 找不到再找「冻结学招表里学得到它」的 FULL_VERIFIED 精灵，并由**判据显式把它装上**
+#      （`loadouts=`，与 `test_position_subsystem._run` 同一套做法 —— 引擎的纪律本来就是
+#      「图鉴可学 ≠ 这场带得上」，合法动作按配招算）。
+# 判据一条都没动：对手换人 ⇒ 回 7 点能量 / 威力 +100 / 威力翻倍；对手攻击或聚能 ⇒ 不加成
+# 且如实记 `foe_switch_condition_skipped`；legacy 逐位不变；能力位关掉加成消失 —— 全部逐字
+# 照旧，没有一处放宽。
+def _learns(skill_id):
+    for pid in sorted(RS.pets):
+        if RS.build_support_of(pid) == rdata.SUPPORT_FULL_VERIFIED and RS.is_learnable(pid, skill_id):
+            return pid
+    return None
+
+
 def _carrier(skill_id):
     for pid in sorted(RS.pets):
         if skill_id in (RS.candidate_moveset(pid) or ()):
             return pid
+    fallback = _learns(skill_id)
+    if fallback is not None:
+        return fallback
     raise AssertionError(f"语料里找不到带 {skill_id} 的精灵，夹具失效")
+
+
+def _loadout_with(carrier, skill_id):
+    """把探针技能放进配招（其余三位取该精灵的规范配招，保证全部真在冻结学招表里）。"""
+    base = list(RS.candidate_moveset(carrier) or ())
+    return tuple([skill_id] + [s for s in base if s != skill_id][:3])
 
 
 class FoeSwitchParseTest(unittest.TestCase):
@@ -99,7 +137,13 @@ class FoeSwitchEngineTest(unittest.TestCase):
         team = [carrier] + [p for p in RS.pets if p != carrier][:team_size - 1]
         foe = ["pet_000050"] + [p for p in RS.pets if p not in (carrier, "pet_000050")][:team_size - 1]
         kwargs = {"unverified_overrides": OVERRIDES} if cfg.has_mana or cfg.allowed_kinds else {}
-        state = renv.reset(team, foe, seed=7, rs=RS, config=cfg, **kwargs)
+        # 2026-09-28：`_carrier(skill_id)` 现在可能落到「冻结学招表里学得到、但规范配招没带它」
+        # 的精灵上（见 `_carrier` 上方的改钉说明）⇒ 由判据自己把探针技能装进配招。
+        # 规范配招本来就带它的那几条（`当头棒喝` / `回旋踢`）走的还是旧路径，一个字节没变。
+        loadouts = None
+        if skill_id not in (RS.candidate_moveset(carrier) or ()):
+            loadouts = {carrier: _loadout_with(carrier, skill_id)}
+        state = renv.reset(team, foe, seed=7, rs=RS, config=cfg, loadouts=loadouts, **kwargs)
         for side in (state.player, state.enemy):
             for pet in side.pets:
                 pet.energy = 10

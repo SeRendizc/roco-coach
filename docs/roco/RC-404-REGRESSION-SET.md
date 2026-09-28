@@ -16,16 +16,16 @@
 
 | 场景 | 维度 | 关键证据 |
 |---|---|---|
-| `damage-type-advantage` | 属性/伤害 | damage 30 / faint 6 / replacement 5 |
-| `defense-branch` | 防御 | defense 7（按**技能类别**选招，不是按 desc 里的词） |
+| `damage-type-advantage` | 属性/伤害 | damage 28 / faint 5 / replacement 5（2026-09-28 重生成前：30 / 6 / 5） |
+| `defense-branch` | 防御 | defense 13（按**技能类别**选招，不是按 desc 里的词；2026-09-28 重生成前：7） |
 | `energy-and-charge` | 资源（能量/聚能） | charge 16（注：v3 的回合末回能是 **0**，所以这条**不**期望 `energy_regen`） |
-| `faint-and-mana` | 力竭/魔力 | faint 7 / mana_loss 7 / game_end 1 |
-| `replacement` | 换入离场 | replacement 6 |
-| `mark` | 印记 | **`mark_added` 1**（自动找一条**真的会加印记**的技能当首发） |
+| `faint-and-mana` | 力竭/魔力 | faint 6 / mana_loss 6 / game_end 1（2026-09-28 重生成前：7 / 7 / 1） |
+| `replacement` | 换入离场 | replacement 5（2026-09-28 重生成前：6） |
+| `mark` | 印记 | 自动找一条**真的会加印记**的技能当首发。2026-09-28 重生成后首发改成 `skill_000812 星链`（2 连击型）⇒ **`mark_added` 0**、如实记 `status_unsupported` 3（详见文末「2026-09-28 重建」一节）。旧值：**`mark_added` 1** |
 | `weather` | 天气 | **登记为不可达**：没有任何精灵的**规范配招**带 `weather` 效果（学得到 ≠ 带得上场） |
-| `status` | 持续状态 | **`status_added` 1 / `status_tick` 10** |
-| `speed-order` | 速度层次 | 冻结层最快（秩序鱿墨 spe 130）对最慢（女王蜂 spe 40）；damage 33 / turn_start 21，先手方按回合逐条记录 |
-| `speed-tie` | 同速平手（候选口径） | 双方首发同一只 ⇒ 速度、先手度全同；damage 19 / turn_start 16，**可复现**是唯一判据 |
+| `status` | 持续状态 | 2026-09-28 重生成后首发改成 `skill_000562 打喷嚏`（3 连击型）⇒ **`status_applied` 4 / `status_unsupported` 6**、**没有** `status_added`（详见文末）。旧值：**`status_added` 1 / `status_tick` 10** |
+| `speed-order` | 速度层次 | 冻结层最快对最慢；damage 32 / turn_start 22，先手方按回合逐条记录（2026-09-28 重生成前：damage 33 / turn_start 21） |
+| `speed-tie` | 同速平手（候选口径） | 双方首发同一只 ⇒ 速度、先手度全同；damage 16 / turn_start 16，**可复现**是唯一判据（2026-09-28 重生成前：damage 19） |
 | `legacy-practice-3v3` | 迁移夹具 | legacy 3v3 场景也在集里（`energy_regen` 34 —— 那是 legacy 的回合末回能） |
 | `type-sweep-<属性>` ×18 | 属性（18 个单属性各一条） | 每条都要求**玩家侧伤害真的发生过**，并记录相性倍率 |
 
@@ -34,8 +34,11 @@
 每个单属性一条场景：自动找一个**规范配招里有该属性攻击技能**的精灵当首发（其余五只按固定顺序补齐，
 保证确定性），打满 12 回合，记录玩家侧每次伤害的 `type_multiplier`。
 
-实测倍率分布：**1.0 ×93 / 2.0 ×11 / 0.5 ×13 / 3.0 ×5 / 0.25 ×18** —— 克制、抵抗、中性都真的出现过，
-所以「属性表被真的用上了」这句话是有数字的，不是印象。
+实测倍率分布（2026-09-28 重生成后，共 272 格）：**1.0 ×142 / 2.0 ×32 / 0.5 ×72 / 4.0 ×7 / 0.25 ×19**
+—— 克制、抵抗、中性都真的出现过，所以「属性表被真的用上了」这句话是有数字的，不是印象。
+（旧值按「改钉不删」留着，两代都留：
+① 本页原文那一代（更早一轮）＝ **1.0 ×93 / 2.0 ×11 / 0.5 ×13 / 3.0 ×5 / 0.25 ×18**；
+② 本轮重建前 HEAD 那份产物 ＝ **1.0 ×183 / 2.0 ×18 / 0.5 ×52 / 4.0 ×4 / 0.25 ×22**，共 279 格。）
 
 两个坑（都写进注释）：
 - 首发的技能必须是**攻击类**：普通系那里曾挑到一条状态技，整条场景一次玩家伤害都没有；
@@ -99,3 +102,76 @@
   换人后的顺序变化还没有专门场景。
 - 同速平手的裁决是**工程权宜**（`random_seeded`，MC-E05 未录制）：它只保证可复现，
   不保证与实机一致 —— 实机录到之后这条口径要重判。
+
+## 2026-09-28 重建（可玩层 36 → 542 只；产物过期，走官方重生成路径，判据一字未改）
+
+**凭什么重建**：`npm run test:env` 上 `DiskArtifactIsFreshTest` 报红 —— 磁盘上的指纹表（上一次
+生成于更早的提交，`git log` 可证 HEAD `c6a7171` **没有**动过这份产物）与「现在重算」
+**27 / 29 条场景对不上**（点名 `['damage-type-advantage', 'defense-branch', 'energy-and-charge',
+'faint-and-mana', 'replacement', 'mark', 'weather', 'status', 'speed-order', …18 条 type-sweep…]`）。
+原因是本轮把 `data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/` 从旧 36 只换成
+**纯抓包**的 530 只（合并冻结 542；人类 2026-09-28 逐字「就用现在抓包得到的数据吧，别的不找
+不要了，问题数据也不要了。所有精灵实装」）。回归集的首发选择器读的是**规范配招**
+（`candidate_moveset`），而规范配招整批重选过 ⇒ 每个场景打到的人、打出的倍率、终局摘要都变了。
+
+**怎么重建**（官方路径，不是手改 JSON）：`cd roco && PYTHONPATH=src python3 -m
+roco_env.regression --out ../reports/roco/rc404/regression-set.json`；重建后
+29 条场景 / 0 条空转 / `--check` 与磁盘一致。
+
+**逐字段变了多少（HEAD 那份产物 → 现在重算，逐条数出来的）**：
+
+| 字段 | 变化的场景数 | 说明 |
+|---|---|---|
+| `state_digest` | **27 / 29** | 终局摘要；这正是 `DiskArtifactIsFreshTest` 判红的那一项 |
+| `type_multipliers` | 18 | 全部是 type-sweep 那 18 条 |
+| `event_kinds` / `used_skills` | 19 | 含 `mark` / `status` 两条 + 17 条 type-sweep |
+| `pick_hit_rate` | 17 | |
+| `key_events` / `first_damage_by_turn` | 12 | |
+| `lead_pet` / `lead_skill` | 2 | 只有 `mark` 与 `status` 换了首发 |
+
+两条场景**逐字节没变**：`speed-tie`、`legacy-practice-3v3`。
+`totals` 仍是 **29 条场景 / 29 个维度 / 0 条有问题的场景**；`unreachable` 仍是**同样那 3 条**
+（天气 / 迅捷 / 传动），只有「迅捷 / 传动」理由里那两个**现算**出来的条数跟着规范配招规模变了。
+
+属性扫描倍率分布（总格数 279 → 272，因为有些场景回合数变了）：
+
+| | 1.0 | 2.0 | 0.5 | 4.0 | 0.25 |
+|---|---|---|---|---|---|
+| 旧（HEAD 产物） | 183 | 18 | 52 | 4 | 22 |
+| 新（现在重算） | 142 | 32 | 72 | 7 | 19 |
+
+> 旧值逐条留档（不许删）：`{1.0: 183, 2.0: 18, 0.5: 52, 4.0: 4, 0.25: 22}`（共 279 格）；
+> `unreachable` 的「迅捷」= **31** 条、「传动」= **57** 条。
+
+**如实记一条覆盖面变化（不是我改的，也不是判据放宽）**：`mark` 与 `status` 两条场景的**首发
+被选择器换掉了**，而新首发恰好都是「**连击**型条件效果」的技能，引擎按纪律**不静态结算**：
+
+| 场景 | 旧首发 | 旧证据 | 新首发 | 新证据 |
+|---|---|---|---|---|
+| `mark` | `skill_000809 错乱` | `mark_added` **2** | `skill_000812 星链`（2 连击） | 无 `mark_added` ⇒ `status_unsupported` 3 |
+| `status` | `skill_000610 连续毒针` | `status_added` **5** / `status_tick` **11** | `skill_000562 打喷嚏`（3 连击） | 无 `status_added` ⇒ `status_applied` 4 / `status_unsupported` 6 |
+
+两条新首发的描述分别是「2连击，每次连击使敌方获得1层星陨印记。」与「3连击，每次连击敌方获得
+1层冻结。」—— 层数取决于连击数，而连击数本身没结算（解析器如实把「连击」留在 `unparsed` 里），
+所以引擎登记 `*_unsupported` 而不是编一个层数。守卫照旧全绿，因为这两条场景的 `expect_kinds`
+只要 `damage`、`find_lead` 只要求那条技能**真的用出来过**。**这条没有被我改**（选择器在
+`regression.py` 里，改它等于改回归集的语义）—— 如实记在这里，供人决定是否要给
+`mark`/`status` 加一条「不要选连击型」的选取规则。`speed-order` 里的 `status_added 8 /
+status_tick 16` 一格里就有这部分覆盖，但它不是那两条场景的**指定证据**。
+
+**另核过一条，避免误读成「引擎坏了」**：印记机制本身照常工作。`_find_lead` 的排序键是
+`(tier, energy, pet_id, sid)`，而新层里**唯一**规范配招带印记效果的 FULL_VERIFIED 精灵是
+`pet_000358 月牙雪熊` / `pet_000367 星云旅者`（都是 `skill_000812 星链`，2 连击型）；
+非连击型的印记技能（`skill_000809 错乱` / `skill_000832 奇点` / `skill_000831 量子涨落`）
+只在 SIMULATABLE_UNVERIFIED 的按需推算精灵身上（`pet_000602 玳龟` / `pet_000603 玳塔` /
+`pet_000618 布灵`，实测），tier 排在后面 ⇒ 永远轮不到。现场复核：把首发换成玳龟、这一手
+出 `错乱`，同一条场景跑出 **`mark_added: 2`、0 条 problems**（实证，不是推断）。
+也就是说：**引擎没坏，是选择器在 tier-0 里只能挑到连击型**。要不要改选取规则由人决定。
+
+> **判据一条都没动**：`EXEC`/`expect_kinds`/`find_lead`、`check_against()`、
+> `probe_unreachable()` 与 `roco/tests/test_regression_set.py` 的 17 条守卫逐字未改；
+> 这次只是**重生成产物**（判据 ⑤ 的正确修法），没有放宽、没有跳过、没有手改 JSON。
+> 另外：本页上面「场景表」「实测倍率分布」两处原文引的是**更早一轮**的数字（例如
+> `damage-type-advantage` 的 damage 30 / faint 6、倍率 1.0×93…），在本轮之前就已经落后于
+> HEAD 那份产物了 —— 已按现在重算的值就地更正，并把两代旧值都留在原处（括号 / 引用块 /
+> 本节的「旧值逐条留档」），一个字都没删。
