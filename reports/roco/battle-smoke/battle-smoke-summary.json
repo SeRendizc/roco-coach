@@ -1,7 +1,7 @@
 {
  "schema_version": 1,
  "artifact": "battle-smoke-summary",
- "generated_at": "2026-09-29T00:34:53+0800",
+ "generated_at": "2026-09-29T00:47:45+0800",
  "ruleset_id": "roco-world-s4-2026-09-10",
  "scope": "data/roco/owned/owned-pets.json 的全部实例（= 当前已拥有清单）",
  "commands": [
@@ -3869,79 +3869,601 @@
    "instance_id": "own-0442（冒烟里踩到的那一只）/ 自足复现配方：pet_000446 + pet_000482",
    "species_id": "pet_000482",
    "name": "溯源钟（持有「绞轮」）",
-   "step": "结算中途（自足复现打在第 6 回合）",
+   "step": "结算中途（自足复现；修前炸在第 6 回合，修后整局打到第 37 回合结算）",
    "recorded_action": {
-    "kind": "skill",
-    "skill_id": "skill_000696"
+    "i": 5,
+    "turn": 6,
+    "phase": "battle",
+    "enemy_field": "pet_000482",
+    "enemy_ramp_skill_000494": -5,
+    "enemy_effective_cost_skill_000494": 0,
+    "rampled_in_enemy_legal": true,
+    "my_field": "pet_000446"
    },
-   "engine_reply": "UnsupportedEffect: 未支持的机制：技能「绞轮」的有效能耗（能耗修正把它压到 -1（基础 5）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）",
-   "error_type": "internal_error（服务层兜底）→ Node 报 HTTP 400",
-   "root_cause": "「绞轮」的基础能耗 5，描述是「造成物伤，每受到1次抵抗的技能攻击（不含连击），本技能能耗永久-1」。自足复现逐回合读数：ramp = -1/-2/-3/-4/-5 时有效能耗 4/3/2/1/**0**，而**这五回合它都在合法动作列表里**（引擎自己列的）。到 0 那一回合，同一回合里我方先出手的一次**属性抵抗**命中让它再 -1（ramp -6），随后轮到它结算时 `_execute` 重算能耗 = 5 + (-6) = **-1** ⇒ env.py:928 抛 UnsupportedEffect。`step_joint` 不接这个异常、`battle_advance` 只接 ValueError/RulesetError ⇒ 服务层兜底 internal_error ⇒ Node 报 HTTP 400 ⇒ **整局中断且重试必复现**。",
-   "engine_implemented": "机制**实现了一半**：能耗永久-1 的累加是真的（skill_ramps 逐回合涨），降到 0 也照常出招；缺的是「能耗被压到 0 以下怎么办」——术语里没有依据（MC-018），引擎按纪律 fail closed、不猜 0。",
-   "the_defect": "**接口不自洽**：一个已经被列为合法的动作，在同一回合结算时变成非法，而这个矛盾以「未处理异常」的形式把整局炸掉，而不是把这一手作废/改成聚能继续打。",
-   "fix_scope": "roco/src/roco_env/env.py（legal_actions 与 _execute 的能耗口径要对齐，或在 _execute 里把这种局面转成可结算事件）与 service.py 的错误分类 —— 都在 task-2 的写域之外，**未改**，报 Lead 决定。",
+   "engine_reply": "修前：UnsupportedEffect: 未支持的机制：技能「绞轮」的有效能耗（能耗修正把它压到 -1（基础 5）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）　⇒ 服务层 internal_error ⇒ Node HTTP 400，重试必复现。\n修后：不抛异常 —— 这一手变成 `action_cancelled{reason: energy_cost_unresolved}`",
+   "error_type": "修前 internal_error / 修后（无异常）",
+   "gap_status": "**缺口仍在，一个字都没降**：引擎**没有**给负能耗定下限（MC-018 没定义），`skill_000494` 依旧列在②机制核验的缺口里。这次修的只有「别炸整局 / 别把死局递给玩家」。",
+   "root_cause": "「绞轮」的基础能耗 5，描述是「造成物伤，每受到1次抵抗的技能攻击（不含连击），本技能能耗永久-1」。修前逐回合：ramp = —/-1/-2/-3/-4/-5，有效能耗 5/4/3/2/1/**0**，**每一回合它都在合法动作列表里**（引擎自己列的）。到 0 那一回合，同一回合里我方先出手的一次**属性抵抗**命中让它再 -1（ramp -6），随后轮到它结算时 `_execute` 重算能耗 = 5 + (-6) = **-1** ⇒ 抛 UnsupportedEffect。",
+   "fix": "**两层都做了**：① `legal_actions` 与 `_execute` 现在读**同一个** `resolved_skill_cost`，解不出定价（含负值）就**不提供这一手**，不再「算不出就退回基础能耗」；② 执行前再判一次（`_cancel_unresolvable_skill`）—— 合法动作表是回合开始时算的，中途被压负的那一手变成一条**能结算的** `action_cancelled` 事件、回合继续走完。另外玩家路径（`service.battle_advance`）对任何残留 unsupported 都兜底成可结算事件，错误分类改成 422 `unsupported_effect`（不再是 500 `internal_error` / HTTP 400）。",
+   "before_after": {
+    "before": {
+     "outcome": "crash",
+     "turn": 6,
+     "exception_type": "UnsupportedEffect"
+    },
+    "after": {
+     "outcome": "settled",
+     "battle_result": "loss",
+     "turns": 37,
+     "cancellations": 4,
+     "unsupported_entries": 28
+    }
+   },
+   "cancellations": [
+    {
+     "turn": 6,
+     "detail": {
+      "side": "enemy",
+      "reason": "energy_cost_unresolved",
+      "skill_id": "skill_000494",
+      "base_energy": 5,
+      "effective_cost": -1,
+      "microcase_id": "MC-018"
+     },
+     "text": "对方这一手没有打出去（这一手的能耗解不出来（负能耗下限未定义，MC-018））。"
+    },
+    {
+     "turn": 23,
+     "detail": {
+      "side": "player",
+      "reason": "fainted"
+     },
+     "text": "我方这一手没有打出去（已经倒下）。"
+    },
+    {
+     "turn": 25,
+     "detail": {
+      "side": "player",
+      "reason": "fainted"
+     },
+     "text": "我方这一手没有打出去（已经倒下）。"
+    },
+    {
+     "turn": 31,
+     "detail": {
+      "side": "player",
+      "reason": "fainted"
+     },
+     "text": "我方这一手没有打出去（已经倒下）。"
+    }
+   ],
    "repro": "python3 scripts/roco/battle-smoke-repro-negative-cost.py",
    "repro_artifact": "reports/roco/battle-smoke/negative-energy-cost-repro.json",
+   "before_artifact": "reports/roco/battle-smoke/negative-energy-cost-repro.before.json",
    "timeline": [
     {
      "i": 0,
      "turn": 1,
      "phase": "battle",
      "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
      "enemy_ramp_skill_000494": null,
      "enemy_effective_cost_skill_000494": 5,
-     "rampled_in_enemy_legal": true,
-     "my_field": "pet_000446"
+     "rampled_in_enemy_legal": true
     },
     {
      "i": 1,
      "turn": 2,
      "phase": "battle",
      "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
      "enemy_ramp_skill_000494": -1,
      "enemy_effective_cost_skill_000494": 4,
-     "rampled_in_enemy_legal": true,
-     "my_field": "pet_000446"
+     "rampled_in_enemy_legal": true
     },
     {
      "i": 2,
      "turn": 3,
      "phase": "battle",
      "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
      "enemy_ramp_skill_000494": -2,
      "enemy_effective_cost_skill_000494": 3,
-     "rampled_in_enemy_legal": true,
-     "my_field": "pet_000446"
+     "rampled_in_enemy_legal": true
     },
     {
      "i": 3,
      "turn": 4,
      "phase": "battle",
      "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
      "enemy_ramp_skill_000494": -3,
      "enemy_effective_cost_skill_000494": 2,
-     "rampled_in_enemy_legal": true,
-     "my_field": "pet_000446"
+     "rampled_in_enemy_legal": true
     },
     {
      "i": 4,
      "turn": 5,
      "phase": "battle",
      "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
      "enemy_ramp_skill_000494": -4,
      "enemy_effective_cost_skill_000494": 1,
-     "rampled_in_enemy_legal": true,
-     "my_field": "pet_000446"
+     "rampled_in_enemy_legal": true
     },
     {
      "i": 5,
      "turn": 6,
      "phase": "battle",
      "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
      "enemy_ramp_skill_000494": -5,
      "enemy_effective_cost_skill_000494": 0,
-     "rampled_in_enemy_legal": true,
-     "my_field": "pet_000446"
+     "rampled_in_enemy_legal": true
+    },
+    {
+     "i": 6,
+     "turn": 7,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": -6,
+     "enemy_effective_cost_skill_000494": -1,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 7,
+     "turn": 8,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": -6,
+     "enemy_effective_cost_skill_000494": -1,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 8,
+     "turn": 9,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": -7,
+     "enemy_effective_cost_skill_000494": -2,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 9,
+     "turn": 10,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": -8,
+     "enemy_effective_cost_skill_000494": -3,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 10,
+     "turn": 11,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": -9,
+     "enemy_effective_cost_skill_000494": -4,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 11,
+     "turn": 12,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": -10,
+     "enemy_effective_cost_skill_000494": -5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 12,
+     "turn": 13,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": -11,
+     "enemy_effective_cost_skill_000494": -6,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 13,
+     "turn": 14,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": -12,
+     "enemy_effective_cost_skill_000494": -7,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 14,
+     "turn": 15,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": -13,
+     "enemy_effective_cost_skill_000494": -8,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 15,
+     "turn": 16,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": -14,
+     "enemy_effective_cost_skill_000494": -9,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 16,
+     "turn": 17,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": -15,
+     "enemy_effective_cost_skill_000494": -10,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 17,
+     "turn": 18,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": -16,
+     "enemy_effective_cost_skill_000494": -11,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 18,
+     "turn": 19,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": -17,
+     "enemy_effective_cost_skill_000494": -12,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 19,
+     "turn": 20,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": -18,
+     "enemy_effective_cost_skill_000494": -13,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 20,
+     "turn": 21,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": -19,
+     "enemy_effective_cost_skill_000494": -14,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 21,
+     "turn": 22,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": -20,
+     "enemy_effective_cost_skill_000494": -15,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 22,
+     "turn": 22,
+     "phase": "replace",
+     "enemy_field": "pet_000482",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": -21,
+     "enemy_effective_cost_skill_000494": -16,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 23,
+     "turn": 23,
+     "phase": "battle",
+     "enemy_field": "pet_000006",
+     "my_field": "pet_000001",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 24,
+     "turn": 23,
+     "phase": "replace",
+     "enemy_field": "pet_000006",
+     "my_field": "pet_000001",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 25,
+     "turn": 24,
+     "phase": "battle",
+     "enemy_field": "pet_000006",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 26,
+     "turn": 25,
+     "phase": "battle",
+     "enemy_field": "pet_000006",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 27,
+     "turn": 25,
+     "phase": "replace",
+     "enemy_field": "pet_000006",
+     "my_field": "pet_000446",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 28,
+     "turn": 26,
+     "phase": "battle",
+     "enemy_field": "pet_000006",
+     "my_field": "pet_000002",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 29,
+     "turn": 27,
+     "phase": "battle",
+     "enemy_field": "pet_000006",
+     "my_field": "pet_000002",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 30,
+     "turn": 28,
+     "phase": "battle",
+     "enemy_field": "pet_000006",
+     "my_field": "pet_000002",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 31,
+     "turn": 28,
+     "phase": "replace",
+     "enemy_field": "pet_000006",
+     "my_field": "pet_000002",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 32,
+     "turn": 29,
+     "phase": "battle",
+     "enemy_field": "pet_000009",
+     "my_field": "pet_000003",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 33,
+     "turn": 30,
+     "phase": "battle",
+     "enemy_field": "pet_000009",
+     "my_field": "pet_000003",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 34,
+     "turn": 31,
+     "phase": "battle",
+     "enemy_field": "pet_000009",
+     "my_field": "pet_000003",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 35,
+     "turn": 31,
+     "phase": "replace",
+     "enemy_field": "pet_000009",
+     "my_field": "pet_000003",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 36,
+     "turn": 32,
+     "phase": "battle",
+     "enemy_field": "pet_000009",
+     "my_field": "pet_000002",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 37,
+     "turn": 33,
+     "phase": "battle",
+     "enemy_field": "pet_000009",
+     "my_field": "pet_000002",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 38,
+     "turn": 33,
+     "phase": "replace",
+     "enemy_field": "pet_000009",
+     "my_field": "pet_000002",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 39,
+     "turn": 34,
+     "phase": "battle",
+     "enemy_field": "pet_000007",
+     "my_field": "pet_000004",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 40,
+     "turn": 35,
+     "phase": "battle",
+     "enemy_field": "pet_000007",
+     "my_field": "pet_000004",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 41,
+     "turn": 36,
+     "phase": "battle",
+     "enemy_field": "pet_000007",
+     "my_field": "pet_000004",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    },
+    {
+     "i": 42,
+     "turn": 37,
+     "phase": "battle",
+     "enemy_field": "pet_000007",
+     "my_field": "pet_000004",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": false
+    }
+   ]
+  },
+  {
+   "instance_id": "全类扫描（不是单只）",
+   "species_id": null,
+   "name": "负能耗入口 + 残留 unsupported（12 条「能耗永久-N」技能逐条打）",
+   "step": "机制级判据 A/B/C",
+   "engine_reply": "cases=14 ok=12 skipped=2 failed=0；残留 unsupported 探针（skill_000671「硬门」）：in_player_legal=True、默认 step_joint 仍抛=True、玩家路径=200 ['我方这一手没有打出去（这条机制还没有实现）。']",
+   "gap_status": "这 12 条技能的**机制缺口一条都没变**：引擎仍然没有给「能耗被压到 0 以下」定任何下限。补的是「拿不到定价就不提供 / 不炸局」，不是「这条机制支持了」。",
+   "fix": "按**机制**而不是按技能名扫：① ramp（12 条会减的技能逐条）；② 能耗修正（能把基础能耗 0 的技能也压成 -1）；③ 组合（单看每项都不为负）。每条都判三件事：A 有效能耗<0 时不出现在合法动作里；B 直接 `_execute` 仍 fail closed 且**没扣能量**；C 执行前守卫把它变成 1 条可结算事件。另有一条残留 unsupported（非能耗，样例「硬门」）证明：搜索/推演那条路仍然抛（planner 的 -inf 信号不丢），玩家路径能结算。",
+   "before_after": {
+    "before": {
+     "outcome": "crash"
+    },
+    "after": {
+     "outcome": "settled",
+     "cases_ok": 12,
+     "cases_skipped": 2,
+     "cases_failed": 0
+    }
+   },
+   "repro": "python3 scripts/roco/battle-smoke-negative-cost-scan.py",
+   "repro_artifact": "reports/roco/battle-smoke/negative-cost-scan.json",
+   "skipped": [
+    {
+     "skill_id": "skill_000037",
+     "reason": "规则集的学习表里**没有任何物种**学得到这条技能（`is_learnable` 全 False）⇒ 它不可能出现在任何配招里，够不到这条入口"
+    },
+    {
+     "skill_id": "skill_000105",
+     "reason": "规则集的学习表里**没有任何物种**学得到这条技能（`is_learnable` 全 False）⇒ 它不可能出现在任何配招里，够不到这条入口"
+    }
+   ],
+   "window": [
+    {
+     "skill_id": "skill_000252",
+     "name": null,
+     "window": "同回合窗口不存在（这一手的能耗由自己出手/回合末决定）"
+    },
+    {
+     "skill_id": "skill_000270",
+     "name": null,
+     "window": "同回合窗口不存在（这一手的能耗由自己出手/回合末决定）"
+    },
+    {
+     "skill_id": "skill_000421",
+     "name": null,
+     "window": "同回合窗口不存在（这一手的能耗由自己出手/回合末决定）"
+    },
+    {
+     "skill_id": "skill_000422",
+     "name": null,
+     "window": "同回合窗口可能（对手先出手就会改能耗）"
+    },
+    {
+     "skill_id": "skill_000423",
+     "name": null,
+     "window": "同回合窗口可能（对手先出手就会改能耗）"
+    },
+    {
+     "skill_id": "skill_000475",
+     "name": null,
+     "window": "同回合窗口可能（对手先出手就会改能耗）"
+    },
+    {
+     "skill_id": "skill_000494",
+     "name": null,
+     "window": "同回合窗口可能（对手先出手就会改能耗）"
+    },
+    {
+     "skill_id": "skill_000500",
+     "name": null,
+     "window": "同回合窗口可能（对手先出手就会改能耗）"
+    },
+    {
+     "skill_id": "skill_000503",
+     "name": null,
+     "window": "同回合窗口不存在（这一手的能耗由自己出手/回合末决定）"
+    },
+    {
+     "skill_id": "skill_000721",
+     "name": null,
+     "window": "同回合窗口不存在（这一手的能耗由自己出手/回合末决定）"
+    },
+    {
+     "skill_id": "skill_000246",
+     "name": null,
+     "window": "同回合窗口不存在（这一手的能耗由自己出手/回合末决定）"
+    },
+    {
+     "skill_id": "skill_000252",
+     "name": null,
+     "window": "同回合窗口不存在（这一手的能耗由自己出手/回合末决定）"
     }
    ]
   }

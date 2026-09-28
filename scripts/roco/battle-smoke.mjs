@@ -73,11 +73,16 @@ if (!has('skip-repro') && existsSync(join(OUT_DIR, 'entry-sweep.json'))) {
       'python3', [join('scripts', 'roco', 'battle-smoke-repro.py')])});
 }
 if (!has('skip-repro')) {
-  // 这一条**不依赖任何一次冒烟的轨迹**：按配方现打一局，把「合法动作结算到一半变成非法」
-  // 这个缺口稳定打出来。缺口的读数进 `battle-smoke-summary.json` 的 `blocking_mechanism_gaps`。
+  // 这一条**不依赖任何一次冒烟的轨迹**：按配方现打一局。
+  // task-5 之后它的期望是「能结算 + 1 条 energy_cost_unresolved 事件」，不再是「必现炸局」；
+  // 修前的那一份留在 `negative-energy-cost-repro.before.json` 里做对照。
   steps.push({name: 'repro-negative-cost',
-    ...run('⑤ 绞轮负能耗自足复现（机制缺口，必现）', 'python3',
+    ...run('⑤ 绞轮负能耗自足复现（修后：可结算 + 原因可读）', 'python3',
       [join('scripts', 'roco', 'battle-smoke-repro-negative-cost.py')])});
+  // ⑥ 按**机制**扫全部「能耗永久-N」技能 + 残留 unsupported 的玩家路径/planner 分流。
+  steps.push({name: 'negative-cost-scan',
+    ...run('⑥ 负能耗入口全扫（ramp / 能耗修正 / 组合）+ 残留 unsupported 探针', 'python3',
+      [join('scripts', 'roco', 'battle-smoke-negative-cost-scan.py')])});
 }
 
 const failed = steps.filter((s) => !s.ok);

@@ -1,6 +1,6 @@
 # B 段 · 全部已拥有实例的最小战斗冒烟（可玩与机制核验**分开**统计）
 
-生成：2026-09-29T00:34:53+0800　规则集：`roco-world-s4-2026-09-10`　范围：data/roco/owned/owned-pets.json 的全部实例（= 当前已拥有清单）
+生成：2026-09-29T00:47:45+0800　规则集：`roco-world-s4-2026-09-10`　范围：data/roco/owned/owned-pets.json 的全部实例（= 当前已拥有清单）
 
 口径来自《长线计划与监工规则》B 节与人类 2026-09-29 的补充：
 **「每只的基础可玩与特殊机制/实机核验分开统计，不能只改标签宣布全可战斗」**。
@@ -102,19 +102,28 @@
 ①的读数是在**这一版冒烟脚本的策略**下取的，换一串动作顺序就会踩到；
 所以它按口径记在②，并配一条**自足复现**（不依赖任何一次冒烟的轨迹）。
 
-- **`own-0442（冒烟里踩到的那一只）/ 自足复现配方：pet_000446 + pet_000482`（溯源钟（持有「绞轮」））· 失败步骤 结算中途（自足复现打在第 6 回合）**
-  - 引擎回执原文：`UnsupportedEffect: 未支持的机制：技能「绞轮」的有效能耗（能耗修正把它压到 -1（基础 5）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）`
-  - 机制实现到哪：机制**实现了一半**：能耗永久-1 的累加是真的（skill_ramps 逐回合涨），降到 0 也照常出招；缺的是「能耗被压到 0 以下怎么办」——术语里没有依据（MC-018），引擎按纪律 fail closed、不猜 0。
-  - 真正的缺陷：**接口不自洽**：一个已经被列为合法的动作，在同一回合结算时变成非法，而这个矛盾以「未处理异常」的形式把整局炸掉，而不是把这一手作废/改成聚能继续打。
-  - 触发条件与根因：「绞轮」的基础能耗 5，描述是「造成物伤，每受到1次抵抗的技能攻击（不含连击），本技能能耗永久-1」。自足复现逐回合读数：ramp = -1/-2/-3/-4/-5 时有效能耗 4/3/2/1/**0**，而**这五回合它都在合法动作列表里**（引擎自己列的）。到 0 那一回合，同一回合里我方先出手的一次**属性抵抗**命中让它再 -1（ramp -6），随后轮到它结算时 `_execute` 重算能耗 = 5 + (-6) = **-1** ⇒ env.py:928 抛 UnsupportedEffect。`step_joint` 不接这个异常、`battle_advance` 只接 ValueError/RulesetError ⇒ 服务层兜底 internal_error ⇒ Node 报 HTTP 400 ⇒ **整局中断且重试必复现**。
-  - 该改哪里（**未改**，写域外）：roco/src/roco_env/env.py（legal_actions 与 _execute 的能耗口径要对齐，或在 _execute 里把这种局面转成可结算事件）与 service.py 的错误分类 —— 都在 task-2 的写域之外，**未改**，报 Lead 决定。
+- **`own-0442（冒烟里踩到的那一只）/ 自足复现配方：pet_000446 + pet_000482`（溯源钟（持有「绞轮」））· 结算中途（自足复现；修前炸在第 6 回合，修后整局打到第 37 回合结算）**
+  - **缺口状态**：**缺口仍在，一个字都没降**：引擎**没有**给负能耗定下限（MC-018 没定义），`skill_000494` 依旧列在②机制核验的缺口里。这次修的只有「别炸整局 / 别把死局递给玩家」。
+  - 引擎回执：修前：UnsupportedEffect: 未支持的机制：技能「绞轮」的有效能耗（能耗修正把它压到 -1（基础 5）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）　⇒ 服务层 internal_error ⇒ Node HTTP 400，重试必复现。
+修后：不抛异常 —— 这一手变成 `action_cancelled{reason: energy_cost_unresolved}`
+  - 做了什么：**两层都做了**：① `legal_actions` 与 `_execute` 现在读**同一个** `resolved_skill_cost`，解不出定价（含负值）就**不提供这一手**，不再「算不出就退回基础能耗」；② 执行前再判一次（`_cancel_unresolvable_skill`）—— 合法动作表是回合开始时算的，中途被压负的那一手变成一条**能结算的** `action_cancelled` 事件、回合继续走完。另外玩家路径（`service.battle_advance`）对任何残留 unsupported 都兜底成可结算事件，错误分类改成 422 `unsupported_effect`（不再是 500 `internal_error` / HTTP 400）。
+  - 修前/修后：{"before": {"outcome": "crash", "turn": 6, "exception_type": "UnsupportedEffect"}, "after": {"outcome": "settled", "battle_result": "loss", "turns": 37, "cancellations": 4, "unsupported_entries": 28}}
+  - 触发条件与根因：「绞轮」的基础能耗 5，描述是「造成物伤，每受到1次抵抗的技能攻击（不含连击），本技能能耗永久-1」。修前逐回合：ramp = —/-1/-2/-3/-4/-5，有效能耗 5/4/3/2/1/**0**，**每一回合它都在合法动作列表里**（引擎自己列的）。到 0 那一回合，同一回合里我方先出手的一次**属性抵抗**命中让它再 -1（ramp -6），随后轮到它结算时 `_execute` 重算能耗 = 5 + (-6) = **-1** ⇒ 抛 UnsupportedEffect。
     - 第 1 回合：ramp=None 有效能耗=5 被列为合法=True
     - 第 2 回合：ramp=-1 有效能耗=4 被列为合法=True
     - 第 3 回合：ramp=-2 有效能耗=3 被列为合法=True
     - 第 4 回合：ramp=-3 有效能耗=2 被列为合法=True
     - 第 5 回合：ramp=-4 有效能耗=1 被列为合法=True
     - 第 6 回合：ramp=-5 有效能耗=0 被列为合法=True
+    - 第 7 回合：ramp=-6 有效能耗=-1 被列为合法=False
+    - 第 8 回合：ramp=-6 有效能耗=-1 被列为合法=False
   - 复现：`python3 scripts/roco/battle-smoke-repro-negative-cost.py`　产物：`reports/roco/battle-smoke/negative-energy-cost-repro.json`
+- **`全类扫描（不是单只）`（负能耗入口 + 残留 unsupported（12 条「能耗永久-N」技能逐条打））· 机制级判据 A/B/C**
+  - **缺口状态**：这 12 条技能的**机制缺口一条都没变**：引擎仍然没有给「能耗被压到 0 以下」定任何下限。补的是「拿不到定价就不提供 / 不炸局」，不是「这条机制支持了」。
+  - 引擎回执：cases=14 ok=12 skipped=2 failed=0；残留 unsupported 探针（skill_000671「硬门」）：in_player_legal=True、默认 step_joint 仍抛=True、玩家路径=200 ['我方这一手没有打出去（这条机制还没有实现）。']
+  - 做了什么：按**机制**而不是按技能名扫：① ramp（12 条会减的技能逐条）；② 能耗修正（能把基础能耗 0 的技能也压成 -1）；③ 组合（单看每项都不为负）。每条都判三件事：A 有效能耗<0 时不出现在合法动作里；B 直接 `_execute` 仍 fail closed 且**没扣能量**；C 执行前守卫把它变成 1 条可结算事件。另有一条残留 unsupported（非能耗，样例「硬门」）证明：搜索/推演那条路仍然抛（planner 的 -inf 信号不丢），玩家路径能结算。
+  - 修前/修后：{"before": {"outcome": "crash"}, "after": {"outcome": "settled", "cases_ok": 12, "cases_skipped": 2, "cases_failed": 0}}
+  - 复现：`python3 scripts/roco/battle-smoke-negative-cost-scan.py`　产物：`reports/roco/battle-smoke/negative-cost-scan.json`
 
 ## 没修的 / 缺口 / 下一项
 
@@ -122,8 +131,12 @@
 - 冒烟脚本自己的策略：四个技能出完之后**继续出招**（原来会 `?? charge` 一直聚能，`own-0007` 卡到脚本上限就是这么来的 —— 同一条队在引擎侧 30 回合内就结算了）；还没出过的技能**贵的先出**。
 - `battle-smoke-repro.py` 现在能拿**活着的那份 GameState** 重放失败那一手（`battle_advance` 内部 deserialize 出的对象抛错后就没了，只看入参字典会以为状态没变）。
 
-**没修（写域外，报 Lead 决定）**：
-- `own-0442（冒烟里踩到的那一只）/ 自足复现配方：pet_000446 + pet_000482` 的绞轮负能耗整局中断：roco/src/roco_env/env.py（legal_actions 与 _execute 的能耗口径要对齐，或在 _execute 里把这种局面转成可结算事件）与 service.py 的错误分类 —— 都在 task-2 的写域之外，**未改**，报 Lead 决定。
+**task-5 修了什么（`roco/src/roco_env/**` + `src/server/roco-service.js`）**：
+- ① `legal_actions` 与 `_execute` 读**同一个** `resolved_skill_cost`：解不出有效能耗（负值 / 缺口径）就**不提供这一手**，不再「算不出就退回基础能耗、照样列成合法」。
+- ② `_cancel_unresolvable_skill`：合法动作表是回合开始时算的，中途被压负的那一手在执行前被拦下 ⇒ 不结算 + 如实登记 + **一条可结算的 `action_cancelled{energy_cost_unresolved}`** + 回合走完。
+- ② `step_joint(tolerate_unsupported=True)`（**只在玩家路径开**）：任何残留的 unsupported 也变成可结算事件；搜索/推演那条路不传，`planner` 的 `-inf` 契约逐位不变。
+- ② 错误分类：`service.battle_advance` 接住 `UnsupportedEffect` → 422 `unsupported_effect`；`src/server/roco-service.js` 的 `advanceBattle` 不再一律 400（unavailable→503 / unsupported_effect→422）。
+- **没有**给负能耗定任何默认值/下限，**没有**删用例、**没有**改契约。
 
 **这一轮没做的**：
 - 逐只全量只在**标准 PVP 六宠**（`mobile_s4_candidate_v3`）这一份配置上跑；`legacy_sim_v1`（3v3 练习局）没跑全量。

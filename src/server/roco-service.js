@@ -2309,7 +2309,11 @@ function sampleEnemyPool(){
   }finally{
    session.inFlight=false;   // 无论成败都复位，否则这一局会被永久锁死
   }
-  if(!out.ok)return {ok:false,status:400,error:out.reason,error_type:out.error_type};
+  if(!out.ok)return {ok:false,error:out.reason,error_type:out.error_type,
+   // 2026-09-29（绞轮 skill_000494 实测）：这里原来**一律 400** —— 于是「机制没有依据」
+   // 被显示成「你的请求不合法」，而「规则服务挂了」也被算进 400。
+   // 与 `startBattle` / `freeAction` 对齐：unavailable→503、unsupported_effect→422、其余 400。
+   status:out.error_type==='unavailable'?503:(out.error_type==='unsupported_effect'?422:400)};
   session.state=out.result.state;
   session.turn=out.result.turn;
   counters.advances+=1;

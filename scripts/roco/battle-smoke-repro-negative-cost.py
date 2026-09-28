@@ -111,9 +111,7 @@ def main() -> int:
     team = [ATTACKER] + pick_fillers(rs, [ATTACKER, TARGET])
     enemy = [TARGET] + pick_fillers(rs, [ATTACKER, TARGET] + team)
     loadouts = {pid: list(rs.candidate_moveset(pid)) for pid in set(team + enemy)}
-    if RESISTED not in loadouts[ATTACKER]:
-        return 3
-    if RAMPLED not in loadouts[TARGET]:
+    if RESISTED not in loadouts[ATTACKER] or RAMPLED not in loadouts[TARGET]:
         return 3
 
     status, env = svc.battle_new({
@@ -129,10 +127,13 @@ def main() -> int:
     state_dict, sv = r["state"], r["state_version"]
 
     timeline: List[Dict[str, Any]] = []
+    cancels: List[Dict[str, Any]] = []
     failure: Optional[Dict[str, Any]] = None
     switched_out = switched_in = False
+    interesting = False          # 已经过了「ramp 到 0、下回合被压到负」那一段
+    max_turns_seen = 0
 
-    for i in range(80):
+    for i in range(240):
         live, rs2, early = svc._private_state(
             {"state": state_dict, "ruleset_config_id": CONFIG_ID, "state_version": sv},
             time.perf_counter())
@@ -141,33 +142,47 @@ def main() -> int:
         if live.result:
             break
         legal = env_mod.legal_actions(live, rs2, "player")
+        if not legal:
+            break
         ramps = dict(live.enemy.field_pet.skill_ramps or {})
         ramp_cost = (ramps.get(RAMPLED) or {}).get("cost")
+        eff = cost_now(live, rs2, "enemy", RAMPLED)
+        in_legal = any(a.kind == "skill" and a.skill_id == RAMPLED
+                       for a in env_mod.legal_actions(live, rs2, "enemy"))
         timeline.append({
             "i": i, "turn": live.turn, "phase": live.phase,
             "enemy_field": live.enemy.field_pet.pet_id,
-            "enemy_ramp_skill_000494": ramp_cost,
-            "enemy_effective_cost_skill_000494": cost_now(live, rs2, "enemy", RAMPLED),
-            "rampled_in_enemy_legal": any(a.kind == "skill" and a.skill_id == RAMPLED for a in
-                                          env_mod.legal_actions(live, rs2, "enemy")),
             "my_field": live.player.field_pet.pet_id,
+            "enemy_ramp_skill_000494": ramp_cost,
+            "enemy_effective_cost_skill_000494": eff,
+            "rampled_in_enemy_legal": in_legal,
         })
+        if eff is None or eff < 0:
+            interesting = True
+
+        # ── 打法：先「换出 → 换入」覆盖入场，再用鸣叫刷抵抗命中（每次给绞轮 -1），
+        # 过了那一段之后改用最强攻击把这一局**打完**（要的是「能结算」）。
+        switches = [a for a in legal if a.kind == "switch"]
+        skills = [a for a in legal if a.kind == "skill"]
         if live.phase == "replace":
-            switch = [a for a in legal if a.kind == "switch"]
-            if not switch:
-                break
-            action = switch[0]
-        else:
-            switch = [a for a in legal if a.kind == "switch"]
+            action = switches[0] if switches else None
+        elif not interesting:
             if live.player.field_pet.pet_id != ATTACKER or live.player.field_pet.fainted:
-                if switched_out and not switched_in:
-                    back = next((a for a in switch if a.target_index == 0), None)
-                    action = back or (legal[0] if legal else None)
-                else:
-                    action = switch[0] if switch else (legal[0] if legal else None)
+                back = next((a for a in switches if a.target_index == 0), None)
+                action = back or (switches[0] if switches else (skills[0] if skills else None))
             else:
-                spam = next((a for a in legal if a.kind == "skill" and a.skill_id == RESISTED), None)
-                action = spam or (legal[0] if legal else None)
+                action = (next((a for a in skills if a.skill_id == RESISTED), None)
+                          or (skills[0] if skills else None))
+        else:
+            def _power(a):
+                sk = rs2.skills.get(a.skill_id)
+                pw = getattr(sk, "power", None) if sk is not None else None
+                return float(pw) if isinstance(pw, (int, float)) else -1.0
+            action = (max(skills, key=_power) if skills
+                      else (next((a for a in legal if a.kind == "charge"), None)
+                            or (switches[0] if switches else legal[0])))
+            if live.player.field_pet.fainted and switches:
+                action = switches[0]
         if action is None:
             break
         if action.kind == "switch":
@@ -179,24 +194,51 @@ def main() -> int:
         try:
             status, env2 = svc.battle_advance({"state": state_dict, "action": action.to_dict(),
                                                "strategy": "greedy_damage", "state_version": sv})
-        except Exception as exc:  # noqa: BLE001
-            failure = {"stage": "exception", "at_index": i, "action": action.to_dict(),
+        except Exception as exc:  # noqa: BLE001 —— 修前就是从这里炸出去的
+            failure = {"stage": "exception", "at_index": i, "turn": live.turn,
+                       "action": action.to_dict(),
                        "exception_type": type(exc).__name__, "message": str(exc),
                        "traceback": traceback.format_exc().splitlines()[-16:],
                        "state_before": digest(live)}
             break
         if not env2.get("ok"):
-            failure = {"stage": "engine_error", "at_index": i, "action": action.to_dict(),
+            failure = {"stage": "engine_error", "at_index": i, "turn": live.turn,
+                       "action": action.to_dict(),
                        "status": status, "error_type": env2.get("error_type"),
                        "error": env2.get("error"), "state_before": digest(live)}
             break
         r = env2["result"]
         state_dict, sv = r["state"], r["state_version"]
+        max_turns_seen = max(max_turns_seen, r["turn"])
+        for e in r.get("events") or []:
+            if e.get("kind") == "action_cancelled":
+                cancels.append({"turn": e.get("turn"), "detail": e.get("detail"),
+                                "text": e.get("text")})
+
+    final_unsupported = state_dict.get("unsupported") or []
+    settled = state_dict.get("result") in ("win", "loss", "draw")
+
+    before = None
+    before_path = os.path.join(SMOKE, "negative-energy-cost-repro.before.json")
+    if os.path.exists(before_path):
+        try:
+            with open(before_path, encoding="utf-8") as fh:
+                b = json.load(fh)
+            before = {
+                "artifact": b.get("artifact"),
+                "outcome": "crash" if b.get("reproduced") else "settled",
+                "turn": (b.get("failure") or {}).get("state_before", {}).get("turn"),
+                "exception_type": (b.get("failure") or {}).get("exception_type"),
+                "message": (b.get("failure") or {}).get("message"),
+                "timeline_tail": (b.get("timeline") or [])[-3:],
+            }
+        except Exception:  # noqa: BLE001
+            before = None
 
     out = {
-        "schema_version": 1,
+        "schema_version": 2,
         "artifact": "battle-smoke-repro-negative-cost",
-        "how": "自足复现：不依赖任何一次冒烟的轨迹，按配方现打一遍",
+        "how": "自足复现：不依赖任何一次冒烟的轨迹，按配方现打一遍（引擎确定性 ⇒ 逐位可复现）",
         "ruleset_id": rs.ruleset_id,
         "ruleset_config_id": CONFIG_ID,
         "seed": 20260921,
@@ -206,25 +248,47 @@ def main() -> int:
         "rampled": {"pet_id": TARGET, "name": rs.pets[TARGET].name, "skill": RAMPLED,
                     "skill_name": rs.skill(RAMPLED).name,
                     "desc": rs.skill(RAMPLED).desc, "base_energy": rs.skill(RAMPLED).energy},
-        "reproduced": failure is not None,
-        "failure": failure,
+        "outcome": "crash" if failure else ("settled" if settled else "unfinished"),
+        "crash": failure,
+        "battle_result": state_dict.get("result"),
+        "turns": max_turns_used if (max_turns_used := state_dict.get("turn")) is not None else max_turns_seen,
+        "cancellations": cancels,
+        "unsupported_entries": final_unsupported,
         "timeline": timeline,
-        "why_it_matters": (
-            "玩家侧看到的是：这一手是页面上点得动的合法动作，点下去整局中断（HTTP 400），"
-            "而且重试必复现 —— 这一局打不完。"),
-        "fix_scope": ("roco/src/roco_env/env.py 的 legal_actions 与 _execute 能耗口径要对齐，"
-                      "或在 _execute 里把这种局面转成可结算事件；service.py 的错误分类也要跟上。"
-                      "**不在 task-2 的写域内，未改。**"),
+        "reading": {
+            "① 合法动作口径": (
+                "绞轮的有效能耗被压到负值之后，`legal_actions` **不再提供这一手**"
+                "（timeline 里 `rampled_in_enemy_legal` 从 true 翻成 false），"
+                "与 `_execute` 的扣费口径读的是同一个 `resolved_skill_cost`。"),
+            "② 兜底": (
+                "被压到负值的那**一个回合**（合法动作表是回合开始时算的，中途才被改）"
+                "由 `_cancel_unresolvable_skill` 在执行前拦下：这一手不结算、如实登记、"
+                "产出一条可结算的 `action_cancelled{reason: energy_cost_unresolved}`，**整局继续**。"),
+            "缺口计数": (
+                "skill_000494 仍然在②机制核验那一列的缺口里 —— 引擎**没有**给负能耗定下限，"
+                "这一条只修「别炸整局」，不是「这条机制现在支持了」。"),
+        },
+        "before_after": {
+            "before": before,
+            "after": {"outcome": "crash" if failure else ("settled" if settled else "unfinished"),
+                      "battle_result": state_dict.get("result"),
+                      "cancellations": len(cancels),
+                      "unsupported_entries": len(final_unsupported)},
+        },
+        "repro_command": "python3 scripts/roco/battle-smoke-repro-negative-cost.py",
     }
     os.makedirs(SMOKE, exist_ok=True)
     with open(os.path.join(SMOKE, "negative-energy-cost-repro.json"), "w", encoding="utf-8") as fh:
         json.dump(out, fh, ensure_ascii=False, indent=1)
-    print(json.dumps({"reproduced": out["reproduced"],
-                      "message": (failure or {}).get("message"),
-                      "at_turn": (failure or {}).get("state_before", {}).get("turn")},
-                     ensure_ascii=False))
+    print(json.dumps({"outcome": out["outcome"], "battle_result": out["battle_result"],
+                      "turns": out["turns"], "cancellations": len(cancels),
+                      "unsupported_entries": len(final_unsupported),
+                      "crash": (failure or {}).get("message")}, ensure_ascii=False))
     print("→ reports/roco/battle-smoke/negative-energy-cost-repro.json")
-    return 0 if out["reproduced"] else 1
+    # 修好之后期望：能结算 + 至少一条 action_cancelled（原因可读）+ 无未处理异常
+    ok = failure is None and settled and any(
+        (c.get("detail") or {}).get("reason") == "energy_cost_unresolved" for c in cancels)
+    return 0 if ok else 1
 
 
 if __name__ == "__main__":

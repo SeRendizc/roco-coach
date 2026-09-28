@@ -2495,7 +2495,20 @@ class RocoService:
                         "「愿力强化」不占行动（自由动作）：请走 POST /battle/free，"
                         "把它当成这一手交上来会白搭一个回合（这一手仍然照常要出一个技能）"),
                         body, started)
-                env_mod.step_joint(state, rs, player_action, enemy_action)
+                # `tolerate_unsupported=True`：**玩家路径**要的是「别把整局炸掉」——
+                # 一手的机制解不出就变成一条能结算的 action_cancelled 事件、回合走完。
+                # 搜索/推演那条路（planner / opponents）**不传**这个开关，语义逐位不变
+                #（`planner._safe_step` 靠 `UnsupportedEffect` 把推不动的动作记成 -inf）。
+                env_mod.step_joint(state, rs, player_action, enemy_action,
+                                   tolerate_unsupported=True)
+        except env_mod.fx.UnsupportedEffect as exc:
+            # 2026-09-29（绞轮 skill_000494 实测）：`step_joint` 现在会把**能结算的**那种
+            # unsupported 变成事件、把回合走完；但**残留**的仍可能从结算里冒出来。
+            # 那种情况必须是 422 `unsupported_effect`（「机制未定义」），
+            # **不许**落进 `_dispatch` 的兜底变成 500 `internal_error` ——
+            # 那会让页面把它显示成「规则服务出问题了」，而真相是「这条机制没有依据」。
+            return self._answer_envelope(
+                _unsupported("unverified_mechanics_seen", str(exc)), body, started)
         except (ValueError, RulesetError) as exc:
             return self._answer_envelope(_bad_request(f"无法推进：{exc}"), body, started)
 
@@ -2537,9 +2550,15 @@ class RocoService:
         try:
             env_mod.step_free(state, rs, "player", action)
         except env_mod.fx.UnsupportedEffect as exc:
-            # 配置没声明这条能力（或动作类不是自由动作）—— 引擎没有依据，422 不是 400。
-            return self._answer_envelope(_unsupported("free_action_not_declared", str(exc)),
-                                         body, started)
+            # 两种来源要分清（2026-09-29）：
+            #   ① 配置没声明这条能力（`free_action_not_declared`）；
+            #   ② 结算里残留的未核验机制（`unverified_mechanics_seen`，例如某技能的有效能耗）。
+            # 混成同一个 code 会让「配置问题」与「机制缺依据」分不开。
+            declared = "没有声明" in str(exc) or "fail closed" in str(exc)
+            return self._answer_envelope(
+                _unsupported("free_action_not_declared" if declared else "unverified_mechanics_seen",
+                             str(exc)),
+                body, started)
         except (ValueError, RulesetError) as exc:
             return self._answer_envelope(_bad_request(f"自由动作被拒绝：{exc}"), body, started)
 

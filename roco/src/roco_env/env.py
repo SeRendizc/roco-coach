@@ -375,14 +375,12 @@ def legal_actions(state: GameState, rs: Ruleset, side: str,
         if skill is None or skill.is_trait:
             continue
         # RC-401 批三：可付性按**有效能耗**（基础 + 能耗修正）。声明了机制才不一样。
-        # 负值表示「修正把能耗压到 0 以下」——下限未定义（MC-018），此时**不提供这一手**
-        # （拿不到定价就不报合法动作），而不是猜一个 0。
-        try:
-            # 沙暴让地系技能能耗减半 —— 天气是场地级，所以这里也要带上它
-            cost = effective_skill_cost(pet, skill, cfg, weather=state.weather,
-                                        foe_status_layers=_poison_layers(state, side))
-        except RuleConfigError:
-            cost = int(skill.energy)
+        # 负值 / 解不出定价（MC-018）都**不提供这一手** —— 拿不到定价就不报合法动作，
+        # 而不是猜一个 0、也不是退回基础能耗（2026-09-29 绞轮炸局的根因之一）。
+        # 与 `_execute` 读的是**同一个** `resolved_skill_cost`。
+        cost = resolved_skill_cost(state, side, skill, cfg)
+        if cost is None:
+            continue
         if cost < 0:
             continue
         if cost > pet.energy:
@@ -648,17 +646,83 @@ def _note_unsupported(state: GameState, what: str, detail: str, evidence: str = 
     })
 
 
+def resolved_skill_cost(state: GameState, side: str, skill, cfg: RuleConfig) -> Optional[int]:
+    """这一手**现在**要付多少能量；**解不出定价时返回 `None`**（不猜、也不回落到基础能耗）。
+
+    `legal_actions`（可付性）与 `_execute`（扣费）**必须**读这**一个**入口 ——
+    2026-09-29 的实战缺陷（`skill_000494`「绞轮」炸局）就是两处口径各算各的：
+    列表那边算不出就退回基础能耗、照样把这一手列为合法，扣费那边算不出就抛异常。
+    """
+    try:
+        return effective_skill_cost(getattr(state, side).field_pet, skill, cfg,
+                                    weather=state.weather,
+                                    foe_status_layers=_poison_layers(state, side))
+    except RuleConfigError:
+        return None
+
+
+def _cancel_unresolvable_skill(state: GameState, rs: Ruleset, side: str,
+                               action: Action, cfg: RuleConfig) -> bool:
+    """**执行前再判一次**：这一手现在还解不解得出有效能耗？解不出就不结算，但**回合照走完**。
+
+    为什么必须再判一次：合法动作表是**回合开始时**按当时的状态算出来的，而同一回合里
+    先出手的一方可以改掉另一方的能耗（`绞轮` `skill_000494`：「每受到1次抵抗的技能攻击，
+    本技能能耗永久-1」）。于是存在一个真实窗口：**列表里合法 → 结算到一半解不出**。
+
+    MC-018 没有定义负能耗的下限，所以引擎**不猜 0**（那是编数据）；但也不能把整局炸掉 ——
+    这一手不结算、如实登记进 `state.unsupported`、并产出一条可结算的 `action_cancelled` 事件。
+    这与既有的「精灵已倒下 → `action_cancelled`」是同一形态，不是新发明。
+    """
+    if action.kind != ACTION_SKILL or not action.skill_id:
+        return False
+    pet = getattr(state, side).field_pet
+    if not pet.alive:
+        return False          # 倒下那一条走 `_execute` 既有的守卫（逐位不变）
+    skill = rs.skills.get(action.skill_id)
+    if skill is None or skill.is_trait:
+        return False
+    cost = resolved_skill_cost(state, side, skill, cfg)
+    if cost is not None and cost >= 0:
+        return False
+    label = "你" if side == "player" else "对手"
+    name = rs.pet(pet.pet_id).name
+    what = f"技能「{skill.name}」的有效能耗"
+    if cost is None:
+        detail = (f"规则配置 {cfg.ruleset_config_id} 里算不出这一手的有效能耗"
+                  "（能耗修正/天气口径不齐）—— 不猜一个数，这一手不结算")
+    else:
+        detail = (f"能耗修正把它压到 {cost}（基础 {skill.energy}）—— 负能耗的下限在术语里没有定义"
+                  "（MC-018），不猜一个 0、也不按负数回能；这一手不结算")
+    _note_unsupported(state, what, detail, skill.skill_id)
+    state.log.append(f"{label}的{name}的{skill.name}没有结算：{detail}。")
+    _bump(state, "action_cancelled", {
+        "side": side, "reason": "energy_cost_unresolved", "skill_id": skill.skill_id,
+        "base_energy": int(skill.energy), "effective_cost": cost, "microcase_id": "MC-018",
+    }, evidence=(skill.skill_id,))
+    return True
+
+
 def step_joint(
     state: GameState,
     rs: Ruleset,
     player_action: Action,
     enemy_action: Action,
+    *,
+    tolerate_unsupported: bool = False,
 ) -> GameState:
     """双方基于**同一事前状态**各出一手，然后统一推进。
 
     隐藏信息纪律：本函数在结算前先为双方快照 observation，
     并把它们写进 history。这样任何「后出手的一方偷看了对手选择」的实现错误
     都能从回放里查出来。
+
+    `tolerate_unsupported`（2026-09-29 加，**默认 False = 逐位不变**）：
+      一手的机制解不出时，`_execute` 会抛 `fx.UnsupportedEffect`。这是引擎的
+      **既有契约**，而且是被依赖的：`planner._safe_step` 就是靠它把「推不动的动作」
+      记成 `-inf`（`roco/tests/test_planner.py` 钉着这一条）。所以**默认不改**。
+      **玩家路径**（`service.battle_advance`）显式传 `True`：那一层要的是
+      「别把整局炸掉」—— 解不出的那一手变成一条**能结算的** `action_cancelled` 事件
+      （带玩家可读的原因），回合照常走完。搜索/推演那条路不传，语义不变。
     """
     if state.result:
         raise ValueError("对局已结束，不能再行动")
@@ -734,7 +798,29 @@ def step_joint(
         _surrender(state, cfg, pre_surrender)
     else:
         for side, action in order:
-            _execute(state, rs, side, action, cfg)
+            # ① 执行前再判一次能耗口径（绞轮那一类：列表里合法 → 结算时解不出）。
+            # 解不出就不结算，但**回合继续走完**，不再是未处理异常炸整局。
+            if _cancel_unresolvable_skill(state, rs, side, action, cfg):
+                continue
+            # ② 兜底：只有**玩家路径**（`tolerate_unsupported=True`）才把残留的
+            # unsupported 变成可结算的事件 —— 玩家那里「点得动的动作把整局炸掉」不可接受。
+            # 搜索/推演那条路（planner / opponents / regression）不传这个开关，
+            # 保持「抛异常 ⇒ 这个动作推不动 ⇒ -inf」的既有契约（`test_planner.py` 钉着）。
+            if not tolerate_unsupported:
+                _execute(state, rs, side, action, cfg)
+            else:
+                try:
+                    _execute(state, rs, side, action, cfg)
+                except fx.UnsupportedEffect as exc:
+                    _note_unsupported(state, exc.what, exc.detail or str(exc), exc.evidence or "")
+                    state.log.append(
+                        f"{'你' if side == 'player' else '对手'}的这一手没有结算：{exc}")
+                    _bump(state, "action_cancelled", {
+                        "side": side, "reason": "unsupported_effect",
+                        "action_kind": action.kind, "skill_id": action.skill_id,
+                        "what": exc.what, "detail": exc.detail,
+                    }, evidence=(exc.evidence or "",))
+                    continue
             # RC-401 批次十二：「每次使用后，本技能<属性>永久±N」在**成功出手之后**累加。
             # 放在 `_execute` 之后、且只对技能类动作做（换人/聚能/道具没有这条属性）。
             if action.kind == ACTION_SKILL and action.skill_id:
@@ -921,9 +1007,16 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
 
     skill = rs.skill(action.skill_id)
     # RC-401 批三：扣的是**有效能耗**（特性可以增减它）。
-    # 两条路径（可付性与扣费）都走 `effective_skill_cost` 这**一个读点**。
-    cost = effective_skill_cost(pet, skill, cfg, weather=state.weather,
-                                foe_status_layers=_poison_layers(state, side))
+    # 两条路径（可付性与扣费）都走 `resolved_skill_cost` 这**一个读点**。
+    cost = resolved_skill_cost(state, side, skill, cfg)
+    if cost is None:
+        # 直接调用 `_execute`（测试、脚本）时也要 fail closed：算不出定价就不结算，不猜。
+        # 走 `step_joint` 的那条路更早一步就会被 `_cancel_unresolvable_skill` 拦下。
+        raise fx.UnsupportedEffect(
+            f"技能「{skill.name}」的有效能耗",
+            f"规则配置 {cfg.ruleset_config_id} 里算不出这一手的能耗（能耗修正/天气口径不齐）"
+            "—— 不猜一个数",
+        )
     if cost < 0:
         raise fx.UnsupportedEffect(
             f"技能「{skill.name}」的有效能耗",

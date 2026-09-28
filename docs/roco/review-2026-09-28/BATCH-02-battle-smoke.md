@@ -176,11 +176,51 @@
 | 自足复现逐回合读数 | 第 1~6 回合 ramp = —/-1/-2/-3/-4/-5，有效能耗 = 5/4/3/2/1/**0**，**每一回合都被引擎列为合法**；第 6 回合结算到一半 → 异常 |
 | 复现命令 | `python3 scripts/roco/battle-smoke-repro-negative-cost.py` |
 | 产物 | `reports/roco/battle-smoke/negative-energy-cost-repro.json`（含逐回合 timeline 与 traceback） |
-| 该改哪里（**未改**） | `roco/src/roco_env/env.py`（`legal_actions` 与 `_execute` 的能耗口径要对齐，或在 `_execute` 里把这种局面转成可结算事件）+ `service.py` 的错误分类 —— 都在 task-2 写域之外 |
+| 该改哪里 | `roco/src/roco_env/env.py`（`legal_actions` 与 `_execute` 的能耗口径要对齐）+ `service.py` 与 `src/server/roco-service.js` 的错误分类 |
 | 风险面 | 描述里带「能耗永久±N」的技能共 **15 条**；已拥有实例里配招含这类技能的有 **61 只**；本次 542 局里**双方任一方带这类技能的 365 局**。本次实测炸掉 1 局（`own-0442` 那一局），自足复现可稳定打出 |
 
-**口径声明**：这一条**记在②，不算①**，也**没有**为了让数字好看删掉那一局的用例、
-或给它设一个没有依据的能耗下限。
+#### 3.4.1 task-5 修前 → 修后（逐回合对照）
+
+| | 修前 | 修后 |
+| --- | --- | --- |
+| 第 1~6 回合 ramp / 有效能耗 | —/-1/-2/-3/-4/-5 → 5/4/3/2/1/**0**，**每一回合都在合法动作列表里** | 同左（合法表本来就是回合开始时算的） |
+| 第 6 回合结算中途 | 我方先出手的属性抵抗命中 ⇒ ramp -6 ⇒ 结算时 5+(-6)=**-1** ⇒ `UnsupportedEffect` ⇒ 服务层 `internal_error` ⇒ Node **HTTP 400**，**重试必复现** | 同一位置被 `_cancel_unresolvable_skill` 拦下：这一手**不结算** + 如实登记 + 一条可结算事件 `对方这一手没有打出去（这一手的能耗解不出来（负能耗下限未定义，MC-018））`，事件里带 `{reason: energy_cost_unresolved, skill_id: skill_000494, base_energy: 5, effective_cost: -1, microcase_id: MC-018}` |
+| 第 7 回合起 | （已经打不下去） | `legal_actions` **不再提供这一手**（`rampled_in_enemy_legal` 由 true 翻成 false）—— ① 的两处口径现在读同一个 `resolved_skill_cost` |
+| 整局结果 | 第 6 回合**中断** | **打到结算**：37 回合、`loss`、**0 未处理异常**、4 条 `action_cancelled`（其中 1 条是负能耗，另 3 条是既有的「已倒下」） |
+
+读数出处：`reports/roco/battle-smoke/negative-energy-cost-repro.json`（修后，`outcome: settled`）
+与 `…-repro.before.json`（修前快照，`outcome: crash`，第 6 回合 `UnsupportedEffect`）。
+复现命令：`python3 scripts/roco/battle-smoke-repro-negative-cost.py`。
+
+#### 3.4.2 按**机制**全扫（不是只堵这一只）
+
+修一只最怕「只堵这一只」。入口是一**类**：有效能耗 = 基础 + 逐技能 ramp + 每条能耗修正 +
+每层中毒 + 天气。`scripts/roco/battle-smoke-negative-cost-scan.py` 逐类当场打：
+
+| 类 | 覆盖面 | 判据 | 读数 |
+| --- | --- | --- | --- |
+| ① `skill_ramps`（「本技能能耗永久-N」） | 12 条会**减**的技能逐条 | A/B/C | 全过 |
+| ② `energy_cost_mods`（能耗修正能把基础 0 的技能压成 -1） | 1 条 | A/B/C | 过 |
+| ③ 组合（ramp 一半 + 修正一半，单看每项都不为负） | 1 条 | A/B/C | 过 |
+| 附：残留 unsupported（**非能耗**） | 「硬门」`skill_000671` | 玩家路径 vs planner | 过 |
+
+判据：**A** 有效能耗 < 0 时 `legal_actions` 不提供这一手；**B** 直接 `_execute` 仍
+`UnsupportedEffect`（fail closed，**且没扣能量**）；**C** 执行前的守卫把它变成 1 条可结算事件。
+另有 2 条技能（`skill_000037` 洄游、`skill_000105` 机械变式）**规则集里没有任何物种学得到**
+（`is_learnable` 全 False）⇒ 不可能进配招、够不到这条入口，如实记为 `skipped` 而不是判过。
+
+产物：`reports/roco/battle-smoke/negative-cost-scan.json`（14 例：ok 12 / skipped 2 / failed 0）。
+
+#### 3.4.3 缺口计数**没有降**
+
+这一条**仍然**记在②机制核验那一列：引擎依旧**没有**给「能耗被压到 0 以下」定任何下限
+（MC-018 没定义就是没定义）。task-5 修的是「别把死局递给玩家 / 别炸整局」，
+**不是**「这条机制现在支持了」。证据：`negative-cost-scan.json` 里 12 条技能的机制缺口一条没少；
+`battle-smoke-summary.json` 的 `blocking_mechanism_gaps` 由 1 条变 **2 条**（新增全类扫描那条），
+②的死结计数只增不减。
+
+**口径声明**：**没有**为了让数字好看删掉那一局的用例、**没有**改契约、
+**没有**给负能耗设任何默认值或缺依据的下限。
 
 ---
 
@@ -207,12 +247,13 @@
 ## 5. 可复验命令（一条命令 + 分段）
 
 ```bash
-node scripts/roco/battle-smoke.mjs                    # 一条命令跑完 ①~④（≈3min）
+node scripts/roco/battle-smoke.mjs                    # 一条命令跑完 ①~⑥（≈2min）
 python3 scripts/roco/battle-smoke-engine.py            # ① 引擎侧全量 542（≈40s）
-node scripts/roco/battle-smoke-entry.mjs --settle=all  # ② HTTP 入口侧全量 542（≈90s）
+node scripts/roco/battle-smoke-entry.mjs --settle=all  # ② HTTP 入口侧全量 542（≈80s）
 python3 scripts/roco/battle-smoke-summary.py           # ③ 合成清单 + 人读 md
 python3 scripts/roco/battle-smoke-repro.py             # ④ 打不完的局逐手复现（带 traceback）
-python3 scripts/roco/battle-smoke-repro-negative-cost.py   # 绞轮负能耗自足复现（必现）
+python3 scripts/roco/battle-smoke-repro-negative-cost.py   # ⑤ 绞轮自足复现：修后必须 settled + 原因可读
+python3 scripts/roco/battle-smoke-negative-cost-scan.py    # ⑥ 负能耗入口全扫 + 残留 unsupported 探针
 node scripts/roco/battle-smoke-browser.mjs --base=http://127.0.0.1:8765 --shots  # 先抢锁
 ```
 
@@ -223,11 +264,14 @@ node scripts/roco/battle-smoke-browser.mjs --base=http://127.0.0.1:8765 --shots 
 - `reports/roco/battle-smoke/battle-smoke-summary.json` / `battle-smoke.md`（两列清单）
 - `reports/roco/battle-smoke/negative-energy-cost-repro.json`（绞轮缺口自足复现）
 - `reports/roco/battle-smoke/repro-failures.json`（trace 逐手复现，含活对象状态）
+- `reports/roco/battle-smoke/negative-cost-scan.json`（负能耗入口全扫 + 残留 unsupported 探针）
+- `reports/roco/battle-smoke/negative-energy-cost-repro.before.json`（**修前**快照：第 6 回合炸局）
+- `reports/roco/battle-smoke/test-env-baseline.log` / `test-env-after.log`（改前/改后 636 条 Python 套件）
 - `reports/roco/battle-smoke/browser-entry.json` + `docs/roco/review-2026-09-28/shots/battle/*.png`
 
 ---
 
-## 6. 修了什么 / 没修什么
+## 6. 修了什么 / 没修什么（含 task-5）
 
 **修了（只在冒烟脚本这一层，没碰产品代码）**
 
@@ -242,10 +286,22 @@ node scripts/roco/battle-smoke-browser.mjs --base=http://127.0.0.1:8765 --shots 
      （`rule_config.get_rule_config(CONFIG_ID).energy_max`），不再抄常数（RC-101）。
    读数：`node --test tests/evals/structure-contract.test.js` → **28 pass / 0 fail**。
 
-**没修（写域外，报 Lead 决定）**
+**task-5 修了（`roco/src/roco_env/**` + `src/server/roco-service.js`）**
 
-1. `own-0442` 绞轮负能耗整局中断（§3.4）—— 要动 `roco/src/roco_env/env.py` 与
-   `src/server/roco-service.js` 的错误分类。**按纪律停下来报，没有自己改。**
+1. **① 口径自洽**：`legal_actions` 与 `_execute` 现在读**同一个** `resolved_skill_cost`。
+   解不出有效能耗（负值 / 缺口径）的招式**根本不提供** —— 不再「算不出就退回基础能耗、
+   照样列成合法」（这正是 CLAUDE 那句注释早就写了、代码却没做到的地方）。
+2. **② 执行前守卫** `_cancel_unresolvable_skill`：合法动作表是回合开始时算的，
+   同一回合里先出手的一方可以改掉另一方的能耗 ⇒ 存在「列表里合法 → 结算时解不出」的真实窗口。
+   这一手在 `_execute` 之前被拦下：不结算 + 如实登记进 `state.unsupported` +
+   一条**能结算的** `action_cancelled{reason: energy_cost_unresolved}`（带玩家可读原因），**回合继续走完**。
+3. **② 玩家路径兜底**：`step_joint(..., tolerate_unsupported=True)`（**只有 `service.battle_advance` 传**）——
+   任何残留 unsupported 也变成可结算事件。搜索/推演那条路不传，`planner` 的 `-inf` 契约逐位不变
+   （`roco/tests/test_planner.py` 的「硬门 = -inf」那条仍然绿）。
+4. **② 错误分类**：`service.battle_advance` 接住 `UnsupportedEffect` → 422 `unsupported_effect`；
+   `src/server/roco-service.js` 的 `advanceBattle` 不再**一律 400**（`unavailable`→503 /
+   `unsupported_effect`→422），与 `startBattle` / `freeAction` 对齐。
+5. **也没有**给负能耗定任何默认值/下限、**没有**删用例、**没有**改契约。
 
 **这一轮没做 / 缺口**
 
@@ -257,8 +313,10 @@ node scripts/roco/battle-smoke-browser.mjs --base=http://127.0.0.1:8765 --shots 
 
 ## 7. 下一项（按影响排序）
 
-1. **决定绞轮那条怎么排**：修 `legal_actions`/`_execute` 的能耗口径（让「合法动作」在执行前不会被同回合的修正翻面），
-   或至少让服务层把这种局面识别成一个**可结算事件**而不是 `internal_error`。
-2. 按同样的方式扫一遍另外 14 条「能耗永久±N」技能，确认还有没有别的负能耗入口。
-3. 机制那一列：把 527 只「引擎未登记」的决定性特性排一个补建顺序（先高频使用 / 先能定义触发条件的）。
-4. 实机核验：这一列要动需要 microcase 录制，属于另一条线。
+1. **同类残留**：`legal_actions` 会把**机制没实现**的技能也列成合法（样例「硬门」`skill_000671`，
+   描述里读不出减伤比例）。现在玩家路径不会炸整局了（变成一条可读的 `action_cancelled`），
+   但玩家点下去还是白搭一手 —— 要不要在列表层就标出来/不提供，是一个**产品口径**决定，
+   需要 Lead 定（`legal_actions` 得先有一个「这一手结算得了吗」的判据）。
+2. **机制那一列**：把 527 只「引擎未登记」的决定性特性排一个补建顺序（先高频使用 / 先能定义触发条件的）。
+3. **实机核验**：这一列要动需要 microcase 录制，属于另一条线。
+4. `legacy_sim_v1`（3v3 练习局）没跑全量；组合测试是 10 随机 + 2 指定，非穷举。

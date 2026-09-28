@@ -1,0 +1,488 @@
+{
+ "schema_version": 1,
+ "artifact": "battle-smoke-negative-cost-scan",
+ "generated_at": "2026-09-29T00:47:45+0800",
+ "ruleset_id": "roco-world-s4-2026-09-10",
+ "ruleset_config_id": "mobile_s4_candidate_v3",
+ "why": "修绞轮最怕「只堵这一只」。入口是一**类**：有效能耗 = 基础 + ramp + 能耗修正 + 每层中毒 + 天气，任一项把总数压到 <0 都走同一条路。这里按机制逐类当场打一遍。",
+ "criteria": {
+  "A": "有效能耗 < 0 ⇒ legal_actions 不提供这一手",
+  "B": "直接 _execute 仍 UnsupportedEffect（fail closed，不猜 0，且没扣能量）",
+  "C": "走 step_joint：合法表算完之后才被压负 ⇒ 不炸整局，产出 1 条 action_cancelled{reason: energy_cost_unresolved} 且回合走完"
+ },
+ "ramp_skill_count": 12,
+ "cases": [
+  {
+   "skill_id": "skill_000037",
+   "mechanism": "skill_ramps（本技能能耗永久-N）",
+   "owner": null,
+   "ramp": -1,
+   "mods": [],
+   "ok": null,
+   "skipped": true,
+   "reason": "规则集的学习表里**没有任何物种**学得到这条技能（`is_learnable` 全 False）⇒ 它不可能出现在任何配招里，够不到这条入口"
+  },
+  {
+   "skill_id": "skill_000105",
+   "mechanism": "skill_ramps（本技能能耗永久-N）",
+   "owner": null,
+   "ramp": -1,
+   "mods": [],
+   "ok": null,
+   "skipped": true,
+   "reason": "规则集的学习表里**没有任何物种**学得到这条技能（`is_learnable` 全 False）⇒ 它不可能出现在任何配招里，够不到这条入口"
+  },
+  {
+   "skill_id": "skill_000252",
+   "mechanism": "skill_ramps（本技能能耗永久-N）",
+   "owner": "pet_000011",
+   "ramp": -8,
+   "mods": [],
+   "pet_id": "pet_000011",
+   "base_energy": 7,
+   "effective_cost": -1,
+   "A_legal_when_negative": false,
+   "B_execute_raise": "未支持的机制：技能「冲撞」的有效能耗（能耗修正把它压到 -1（基础 7）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）",
+   "B_fail_closed": true,
+   "B_energy_untouched": true,
+   "C_cost_at_list_time": 0,
+   "C_listed_at_zero": true,
+   "C_cost_at_execute_time": -1,
+   "C_guard_exception": null,
+   "C_cancelled": true,
+   "C_cancelled_events": [
+    {
+     "side": "player",
+     "reason": "energy_cost_unresolved",
+     "skill_id": "skill_000252",
+     "base_energy": 7,
+     "effective_cost": -1,
+     "microcase_id": "MC-018"
+    }
+   ],
+   "C_energy_untouched": true,
+   "C_unsupported_recorded": true,
+   "C_state_version_bumped": true,
+   "C_window_heuristic": "同回合窗口不存在（这一手的能耗由自己出手/回合末决定）",
+   "ok": true
+  },
+  {
+   "skill_id": "skill_000270",
+   "mechanism": "skill_ramps（本技能能耗永久-N）",
+   "owner": "pet_000033",
+   "ramp": -7,
+   "mods": [],
+   "pet_id": "pet_000033",
+   "base_energy": 6,
+   "effective_cost": -1,
+   "A_legal_when_negative": false,
+   "B_execute_raise": "未支持的机制：技能「蓄能轰击」的有效能耗（能耗修正把它压到 -1（基础 6）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）",
+   "B_fail_closed": true,
+   "B_energy_untouched": true,
+   "C_cost_at_list_time": 0,
+   "C_listed_at_zero": true,
+   "C_cost_at_execute_time": -1,
+   "C_guard_exception": null,
+   "C_cancelled": true,
+   "C_cancelled_events": [
+    {
+     "side": "player",
+     "reason": "energy_cost_unresolved",
+     "skill_id": "skill_000270",
+     "base_energy": 6,
+     "effective_cost": -1,
+     "microcase_id": "MC-018"
+    }
+   ],
+   "C_energy_untouched": true,
+   "C_unsupported_recorded": true,
+   "C_state_version_bumped": true,
+   "C_window_heuristic": "同回合窗口不存在（这一手的能耗由自己出手/回合末决定）",
+   "ok": true
+  },
+  {
+   "skill_id": "skill_000421",
+   "mechanism": "skill_ramps（本技能能耗永久-N）",
+   "owner": "pet_000002",
+   "ramp": -6,
+   "mods": [],
+   "pet_id": "pet_000002",
+   "base_energy": 5,
+   "effective_cost": -1,
+   "A_legal_when_negative": false,
+   "B_execute_raise": "未支持的机制：技能「水炮」的有效能耗（能耗修正把它压到 -1（基础 5）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）",
+   "B_fail_closed": true,
+   "B_energy_untouched": true,
+   "C_cost_at_list_time": 0,
+   "C_listed_at_zero": true,
+   "C_cost_at_execute_time": -1,
+   "C_guard_exception": null,
+   "C_cancelled": true,
+   "C_cancelled_events": [
+    {
+     "side": "player",
+     "reason": "energy_cost_unresolved",
+     "skill_id": "skill_000421",
+     "base_energy": 5,
+     "effective_cost": -1,
+     "microcase_id": "MC-018"
+    }
+   ],
+   "C_energy_untouched": true,
+   "C_unsupported_recorded": true,
+   "C_state_version_bumped": true,
+   "C_window_heuristic": "同回合窗口不存在（这一手的能耗由自己出手/回合末决定）",
+   "ok": true
+  },
+  {
+   "skill_id": "skill_000422",
+   "mechanism": "skill_ramps（本技能能耗永久-N）",
+   "owner": "pet_000008",
+   "ramp": -5,
+   "mods": [],
+   "pet_id": "pet_000008",
+   "base_energy": 4,
+   "effective_cost": -1,
+   "A_legal_when_negative": false,
+   "B_execute_raise": "未支持的机制：技能「水刃」的有效能耗（能耗修正把它压到 -1（基础 4）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）",
+   "B_fail_closed": true,
+   "B_energy_untouched": true,
+   "C_cost_at_list_time": 0,
+   "C_listed_at_zero": true,
+   "C_cost_at_execute_time": -1,
+   "C_guard_exception": null,
+   "C_cancelled": true,
+   "C_cancelled_events": [
+    {
+     "side": "player",
+     "reason": "energy_cost_unresolved",
+     "skill_id": "skill_000422",
+     "base_energy": 4,
+     "effective_cost": -1,
+     "microcase_id": "MC-018"
+    }
+   ],
+   "C_energy_untouched": true,
+   "C_unsupported_recorded": true,
+   "C_state_version_bumped": true,
+   "C_window_heuristic": "同回合窗口可能（对手先出手就会改能耗）",
+   "ok": true
+  },
+  {
+   "skill_id": "skill_000423",
+   "mechanism": "skill_ramps（本技能能耗永久-N）",
+   "owner": "pet_000002",
+   "ramp": -8,
+   "mods": [],
+   "pet_id": "pet_000002",
+   "base_energy": 7,
+   "effective_cost": -1,
+   "A_legal_when_negative": false,
+   "B_execute_raise": "未支持的机制：技能「天洪」的有效能耗（能耗修正把它压到 -1（基础 7）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）",
+   "B_fail_closed": true,
+   "B_energy_untouched": true,
+   "C_cost_at_list_time": 0,
+   "C_listed_at_zero": true,
+   "C_cost_at_execute_time": -1,
+   "C_guard_exception": null,
+   "C_cancelled": true,
+   "C_cancelled_events": [
+    {
+     "side": "player",
+     "reason": "energy_cost_unresolved",
+     "skill_id": "skill_000423",
+     "base_energy": 7,
+     "effective_cost": -1,
+     "microcase_id": "MC-018"
+    }
+   ],
+   "C_energy_untouched": true,
+   "C_unsupported_recorded": true,
+   "C_state_version_bumped": true,
+   "C_window_heuristic": "同回合窗口可能（对手先出手就会改能耗）",
+   "ok": true
+  },
+  {
+   "skill_id": "skill_000475",
+   "mechanism": "skill_ramps（本技能能耗永久-N）",
+   "owner": "pet_000180",
+   "ramp": -3,
+   "mods": [],
+   "pet_id": "pet_000180",
+   "base_energy": 2,
+   "effective_cost": -1,
+   "A_legal_when_negative": false,
+   "B_execute_raise": "未支持的机制：技能「能量守恒」的有效能耗（能耗修正把它压到 -1（基础 2）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）",
+   "B_fail_closed": true,
+   "B_energy_untouched": true,
+   "C_cost_at_list_time": 0,
+   "C_listed_at_zero": true,
+   "C_cost_at_execute_time": -1,
+   "C_guard_exception": null,
+   "C_cancelled": true,
+   "C_cancelled_events": [
+    {
+     "side": "player",
+     "reason": "energy_cost_unresolved",
+     "skill_id": "skill_000475",
+     "base_energy": 2,
+     "effective_cost": -1,
+     "microcase_id": "MC-018"
+    }
+   ],
+   "C_energy_untouched": true,
+   "C_unsupported_recorded": true,
+   "C_state_version_bumped": true,
+   "C_window_heuristic": "同回合窗口可能（对手先出手就会改能耗）",
+   "ok": true
+  },
+  {
+   "skill_id": "skill_000494",
+   "mechanism": "skill_ramps（本技能能耗永久-N）",
+   "owner": "pet_000177",
+   "ramp": -6,
+   "mods": [],
+   "pet_id": "pet_000177",
+   "base_energy": 5,
+   "effective_cost": -1,
+   "A_legal_when_negative": false,
+   "B_execute_raise": "未支持的机制：技能「绞轮」的有效能耗（能耗修正把它压到 -1（基础 5）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）",
+   "B_fail_closed": true,
+   "B_energy_untouched": true,
+   "C_cost_at_list_time": 0,
+   "C_listed_at_zero": true,
+   "C_cost_at_execute_time": -1,
+   "C_guard_exception": null,
+   "C_cancelled": true,
+   "C_cancelled_events": [
+    {
+     "side": "player",
+     "reason": "energy_cost_unresolved",
+     "skill_id": "skill_000494",
+     "base_energy": 5,
+     "effective_cost": -1,
+     "microcase_id": "MC-018"
+    }
+   ],
+   "C_energy_untouched": true,
+   "C_unsupported_recorded": true,
+   "C_state_version_bumped": true,
+   "C_window_heuristic": "同回合窗口可能（对手先出手就会改能耗）",
+   "ok": true
+  },
+  {
+   "skill_id": "skill_000500",
+   "mechanism": "skill_ramps（本技能能耗永久-N）",
+   "owner": "pet_000013",
+   "ramp": -9,
+   "mods": [],
+   "pet_id": "pet_000013",
+   "base_energy": 8,
+   "effective_cost": -1,
+   "A_legal_when_negative": false,
+   "B_execute_raise": "未支持的机制：技能「岩土暴击」的有效能耗（能耗修正把它压到 -1（基础 8）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）",
+   "B_fail_closed": true,
+   "B_energy_untouched": true,
+   "C_cost_at_list_time": 0,
+   "C_listed_at_zero": true,
+   "C_cost_at_execute_time": -1,
+   "C_guard_exception": null,
+   "C_cancelled": true,
+   "C_cancelled_events": [
+    {
+     "side": "player",
+     "reason": "energy_cost_unresolved",
+     "skill_id": "skill_000500",
+     "base_energy": 8,
+     "effective_cost": -1,
+     "microcase_id": "MC-018"
+    }
+   ],
+   "C_energy_untouched": true,
+   "C_unsupported_recorded": true,
+   "C_state_version_bumped": true,
+   "C_window_heuristic": "同回合窗口可能（对手先出手就会改能耗）",
+   "ok": true
+  },
+  {
+   "skill_id": "skill_000503",
+   "mechanism": "skill_ramps（本技能能耗永久-N）",
+   "owner": "pet_000019",
+   "ramp": -31,
+   "mods": [],
+   "pet_id": "pet_000019",
+   "base_energy": 30,
+   "effective_cost": -1,
+   "A_legal_when_negative": false,
+   "B_execute_raise": "未支持的机制：技能「抛石」的有效能耗（能耗修正把它压到 -1（基础 30）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）",
+   "B_fail_closed": true,
+   "B_energy_untouched": true,
+   "C_cost_at_list_time": 0,
+   "C_listed_at_zero": true,
+   "C_cost_at_execute_time": -1,
+   "C_guard_exception": null,
+   "C_cancelled": true,
+   "C_cancelled_events": [
+    {
+     "side": "player",
+     "reason": "energy_cost_unresolved",
+     "skill_id": "skill_000503",
+     "base_energy": 30,
+     "effective_cost": -1,
+     "microcase_id": "MC-018"
+    }
+   ],
+   "C_energy_untouched": true,
+   "C_unsupported_recorded": true,
+   "C_state_version_bumped": true,
+   "C_window_heuristic": "同回合窗口不存在（这一手的能耗由自己出手/回合末决定）",
+   "ok": true
+  },
+  {
+   "skill_id": "skill_000721",
+   "mechanism": "skill_ramps（本技能能耗永久-N）",
+   "owner": "pet_000072",
+   "ramp": -3,
+   "mods": [],
+   "pet_id": "pet_000072",
+   "base_energy": 2,
+   "effective_cost": -1,
+   "A_legal_when_negative": false,
+   "B_execute_raise": "未支持的机制：技能「赤子之心」的有效能耗（能耗修正把它压到 -1（基础 2）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）",
+   "B_fail_closed": true,
+   "B_energy_untouched": true,
+   "C_cost_at_list_time": 0,
+   "C_listed_at_zero": true,
+   "C_cost_at_execute_time": -1,
+   "C_guard_exception": null,
+   "C_cancelled": true,
+   "C_cancelled_events": [
+    {
+     "side": "player",
+     "reason": "energy_cost_unresolved",
+     "skill_id": "skill_000721",
+     "base_energy": 2,
+     "effective_cost": -1,
+     "microcase_id": "MC-018"
+    }
+   ],
+   "C_energy_untouched": true,
+   "C_unsupported_recorded": true,
+   "C_state_version_bumped": true,
+   "C_window_heuristic": "同回合窗口不存在（这一手的能耗由自己出手/回合末决定）",
+   "ok": true
+  },
+  {
+   "skill_id": "skill_000246",
+   "mechanism": "energy_cost_mods（全技能修正把 0 压成 -1）",
+   "owner": "pet_000001",
+   "ramp": null,
+   "mods": [
+    -1
+   ],
+   "pet_id": "pet_000001",
+   "base_energy": 0,
+   "effective_cost": -1,
+   "A_legal_when_negative": false,
+   "B_execute_raise": "未支持的机制：技能「抓挠」的有效能耗（能耗修正把它压到 -1（基础 0）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）",
+   "B_fail_closed": true,
+   "B_energy_untouched": true,
+   "C_cost_at_list_time": 0,
+   "C_listed_at_zero": true,
+   "C_cost_at_execute_time": -1,
+   "C_guard_exception": null,
+   "C_cancelled": true,
+   "C_cancelled_events": [
+    {
+     "side": "player",
+     "reason": "energy_cost_unresolved",
+     "skill_id": "skill_000246",
+     "base_energy": 0,
+     "effective_cost": -1,
+     "microcase_id": "MC-018"
+    }
+   ],
+   "C_energy_untouched": true,
+   "C_unsupported_recorded": true,
+   "C_state_version_bumped": true,
+   "C_window_heuristic": "同回合窗口不存在（这一手的能耗由自己出手/回合末决定）",
+   "ok": true
+  },
+  {
+   "skill_id": "skill_000252",
+   "mechanism": "组合（ramp 一半 + 修正一半）",
+   "owner": "pet_000011",
+   "ramp": -4,
+   "mods": [
+    -4
+   ],
+   "pet_id": "pet_000011",
+   "base_energy": 7,
+   "effective_cost": -1,
+   "A_legal_when_negative": false,
+   "B_execute_raise": "未支持的机制：技能「冲撞」的有效能耗（能耗修正把它压到 -1（基础 7）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）",
+   "B_fail_closed": true,
+   "B_energy_untouched": true,
+   "C_cost_at_list_time": 0,
+   "C_listed_at_zero": true,
+   "C_cost_at_execute_time": -1,
+   "C_guard_exception": null,
+   "C_cancelled": true,
+   "C_cancelled_events": [
+    {
+     "side": "player",
+     "reason": "energy_cost_unresolved",
+     "skill_id": "skill_000252",
+     "base_energy": 7,
+     "effective_cost": -1,
+     "microcase_id": "MC-018"
+    }
+   ],
+   "C_energy_untouched": true,
+   "C_unsupported_recorded": true,
+   "C_state_version_bumped": true,
+   "C_window_heuristic": "同回合窗口不存在（这一手的能耗由自己出手/回合末决定）",
+   "ok": true
+  }
+ ],
+ "residual_unsupported_probe": {
+  "skill_id": "skill_000671",
+  "skill_name": "硬门",
+  "owner": "pet_000047",
+  "in_player_legal": true,
+  "default_step_joint_raises": true,
+  "default_step_joint_message": "未支持的机制：防御技能「硬门」（描述里读不出减伤比例）",
+  "player_path_ok": true,
+  "player_path_status": 200,
+  "player_path_error_type": null,
+  "player_path_cancellations": [
+   {
+    "side": "player",
+    "reason": "unsupported_effect",
+    "action_kind": "skill",
+    "skill_id": "skill_000671",
+    "what": "防御技能「硬门」",
+    "detail": "描述里读不出减伤比例"
+   }
+  ],
+  "player_path_cancel_text": [
+   "我方这一手没有打出去（这条机制还没有实现）。"
+  ],
+  "player_path_unsupported": [
+   {
+    "turn": 1,
+    "what": "防御技能「硬门」",
+    "detail": "描述里读不出减伤比例",
+    "evidence": "skill_000671"
+   }
+  ],
+  "ok": true
+ },
+ "counts": {
+  "cases": 14,
+  "ok": 12,
+  "skipped": 2,
+  "failed": 0
+ },
+ "elapsed_s": 0.1
+}

@@ -3,26 +3,26 @@
 $ python3 scripts/roco/battle-smoke-engine.py
 [engine] 25/542 可玩 25 用时 2s
 [engine] 50/542 可玩 50 用时 4s
-[engine] 75/542 可玩 75 用时 6s
-[engine] 100/542 可玩 100 用时 8s
-[engine] 125/542 可玩 125 用时 9s
-[engine] 150/542 可玩 150 用时 12s
-[engine] 175/542 可玩 175 用时 14s
-[engine] 200/542 可玩 200 用时 16s
-[engine] 225/542 可玩 225 用时 19s
-[engine] 250/542 可玩 250 用时 21s
-[engine] 275/542 可玩 275 用时 23s
-[engine] 300/542 可玩 300 用时 25s
-[engine] 325/542 可玩 325 用时 26s
-[engine] 350/542 可玩 350 用时 28s
-[engine] 375/542 可玩 375 用时 30s
-[engine] 400/542 可玩 400 用时 32s
-[engine] 425/542 可玩 425 用时 35s
-[engine] 450/542 可玩 450 用时 37s
-[engine] 475/542 可玩 475 用时 39s
-[engine] 500/542 可玩 500 用时 41s
-[engine] 525/542 可玩 525 用时 44s
-[engine] 542/542 可玩 542 用时 45s
+[engine] 75/542 可玩 75 用时 5s
+[engine] 100/542 可玩 100 用时 7s
+[engine] 125/542 可玩 125 用时 8s
+[engine] 150/542 可玩 150 用时 11s
+[engine] 175/542 可玩 175 用时 12s
+[engine] 200/542 可玩 200 用时 14s
+[engine] 225/542 可玩 225 用时 17s
+[engine] 250/542 可玩 250 用时 18s
+[engine] 275/542 可玩 275 用时 20s
+[engine] 300/542 可玩 300 用时 21s
+[engine] 325/542 可玩 325 用时 23s
+[engine] 350/542 可玩 350 用时 25s
+[engine] 375/542 可玩 375 用时 26s
+[engine] 400/542 可玩 400 用时 28s
+[engine] 425/542 可玩 425 用时 31s
+[engine] 450/542 可玩 450 用时 33s
+[engine] 475/542 可玩 475 用时 35s
+[engine] 500/542 可玩 500 用时 37s
+[engine] 525/542 可玩 525 用时 39s
+[engine] 542/542 可玩 542 用时 40s
 {"total": 542, "playable": 542, "blocked": 0, "settled": 542, "all_four_used": 536, "used_at_least_one": 542, "all_four_used_on_requested_loadout": 536, "loadout_replaced": 0, "switch_out_ok": 542, "switch_in_ok": 542, "took_damage": 542, "target_fainted": 542, "any_unsupported_seen": 485}
 → /Users/serendizc/Developer/roco-coach/reports/roco/battle-smoke/engine-sweep.json
 
@@ -40,7 +40,7 @@ $ node scripts/roco/battle-smoke-entry.mjs --base=http://127.0.0.1:8765 --settle
 [entry] 250/542 入口可玩 250 用时 1s
 [entry] 275/542 入口可玩 275 用时 1s
 [entry] 300/542 入口可玩 300 用时 1s
-[entry] 325/542 入口可玩 325 用时 1s
+[entry] 325/542 入口可玩 325 用时 2s
 [entry] 350/542 入口可玩 350 用时 2s
 [entry] 375/542 入口可玩 375 用时 2s
 [entry] 400/542 入口可玩 400 用时 2s
@@ -48,7 +48,7 @@ $ node scripts/roco/battle-smoke-entry.mjs --base=http://127.0.0.1:8765 --settle
 [entry] 450/542 入口可玩 450 用时 2s
 [entry] 475/542 入口可玩 475 用时 2s
 [entry] 500/542 入口可玩 500 用时 2s
-[entry] 525/542 入口可玩 525 用时 2s
+[entry] 525/542 入口可玩 525 用时 3s
 {
  "counts": {
   "total": 542,
@@ -63,7 +63,7 @@ $ node scripts/roco/battle-smoke-entry.mjs --base=http://127.0.0.1:8765 --settle
  },
  "combos_ok": 12,
  "combos_total": 12,
- "elapsed_s": 84
+ "elapsed_s": 75
 }
 → /Users/serendizc/Developer/roco-coach/reports/roco/battle-smoke/entry-sweep.json
 
@@ -78,16 +78,26 @@ $ python3 scripts/roco/battle-smoke-repro.py
 入口侧没有打不完的局，无需复现；保留上一次的产物不动。
 （上一次的逐手 trace 复现见 reports/roco/battle-smoke/repro-own-0442-from-trace.json；不依赖任何轨迹的自足复现见 scripts/roco/battle-smoke-repro-negative-cost.py）
 
-=== ⑤ 绞轮负能耗自足复现（机制缺口，必现） ===
+=== ⑤ 绞轮负能耗自足复现（修后：可结算 + 原因可读） ===
 $ python3 scripts/roco/battle-smoke-repro-negative-cost.py
-{"reproduced": true, "message": "未支持的机制：技能「绞轮」的有效能耗（能耗修正把它压到 -1（基础 5）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）", "at_turn": 6}
+{"outcome": "settled", "battle_result": "loss", "turns": 37, "cancellations": 4, "unsupported_entries": 28, "crash": null}
 → reports/roco/battle-smoke/negative-energy-cost-repro.json
 
+=== ⑥ 负能耗入口全扫（ramp / 能耗修正 / 组合）+ 残留 unsupported 探针 ===
+$ python3 scripts/roco/battle-smoke-negative-cost-scan.py
+{"cases": 14, "ok": 12, "skipped": 2, "failed": 0}
+  ② 残留 unsupported（非能耗，样例「硬门」）: {"skill_id": "skill_000671", "in_player_legal": true, "default_step_joint_raises": true, "player_path_ok": true, "player_path_status": 200, "player_path_cancel_text": ["我方这一手没有打出去（这条机制还没有实现）。"], "ok": true}
+  SKIP skill_000037 规则集的学习表里**没有任何物种**学得到这条技能（`is_learnable` 全 False）⇒ 它不可能出现在任何配招里，够不到这条入口
+  SKIP skill_000105 规则集的学习表里**没有任何物种**学得到这条技能（`is_learnable` 全 False）⇒ 它不可能出现在任何配招里，够不到这条入口
+→ /Users/serendizc/Developer/roco-coach/reports/roco/battle-smoke/negative-cost-scan.json
+
 === 汇总 ===
-  OK   engine-sweep（45.4s）
-  OK   entry-sweep（84.5s）
+  OK   engine-sweep（40.7s）
+  OK   entry-sweep（75.2s）
   OK   summary（0.1s）
   OK   repro-trace（0.2s）
-  OK   repro-negative-cost（0.2s）
-总耗时 130.3s
+  OK   repro-negative-cost（0.3s）
+  OK   negative-cost-scan（0.2s）
+总耗时 116.6s
 产物目录：reports/roco/battle-smoke/
+orchestrator_exit=0
