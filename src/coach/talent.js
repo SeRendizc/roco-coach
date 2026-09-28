@@ -332,11 +332,17 @@ export function talentTierOf({talent = null, nature = null} = {}) {
 export const STAR_BREAKTHROUGH = Object.freeze({
   stars: 5,                                                        // 默认档：满突破 = 5 星
   multiplier: 6,                                                   // 0–10（原来/一星） → 0–60（五星内部刻度）
+  talent_factor: 6,                                                // ⭐ 面板里资质那一项的**放大倍数**（5 星档）
+  panel_scale_decision: '人类 2026-09-28 **第二次拍板**（逐字）：「面板数值也要跟着变大」。'
+    + '第一版把 ×6 当单位换算抵消掉（面板逐值不变、噼啪鸟速度 294），人类不认；'
+    + '现在 5 星档按 `race + (3 × 6) × 资质(0–10)` 算 ⇒ 噼啪鸟速度 **294 → 492**。'
+    + '**代价如实记**：这一版面板不再与外部「PVP 一速榜」那 9 个数一致（那 9 个数改钉保留在 '
+    + '`tests/roco-panel-level.test.js` 的「旧口径」表里，不是删掉）。',
   entry_scale: {min: TALENT_RANGE.min, max: TALENT_RANGE.max},     // 0–10：调用方传进来的那一档
-  internal_scale: {min: 0, max: TALENT_RANGE.max * 6},             // 0–60：等级公式真正吃的刻度
-  zero_star: {stars: 0, scale: {min: 0, max: TALENT_RANGE.max},    // 0 星（零突破）：内部刻度就是 0–10 本身
+  internal_scale: {min: 0, max: TALENT_RANGE.max * 6},             // 0–60：内部刻度（显示/文案用）
+  zero_star: {stars: 0, scale: {min: 0, max: TALENT_RANGE.max},    // 0 星（零突破）：面板里资质不放大
     note: '这一档的每点系数在 L=60 下正是老公式 `PANEL_FORMULA` 的 0.55 / 0.85'},
-  text: '默认按 5 星算：资质（0–10）先 ×6 换成内部刻度（0–60），再进等级公式。',
+  text: '默认按 5 星算：资质（0–10）先 ×6 换成内部刻度（0–60）；**面板里资质那一项按 5 星的放大倍数计入**。',
   source: '人类 2026-09-28 批注逐字：「另外升星系统虽然不做，但是还是默认做成5星，然后个体值都突破，'
     + '比如原来是+10，五星是+60」',
   external_support: `${TALENT_PVP_STEP.external_support}；原文还有「天分值一级的时候单一属性最高为 10，`
@@ -426,10 +432,11 @@ export function panelOf({race = null, talent = null, nature = null, scope = 'pvp
     return {panel: {}, unknown, sources};
   }
   const atFiveStar = stars === STAR_BREAKTHROUGH.stars;
-  // 公式吃的是**内部刻度**的资质，所以系数一律用"每个内部点"那一条：`LEVEL_FORMULA.talent ÷ 6`（= 0.5）。
-  // 5 星时先 ×6（`talentAtFiveStar`）⇒ 0.5 × 6 = 3 = 旧实现的 `3 × 资质(0–10)`，**逐值相同**；
-  // 0 星时不换（内部就是 0–10）⇒ 资质只贡献一半，那才是"原来那一档"。
-  const scaledTalent = atFiveStar ? talentAtFiveStar(talent) : talent;
+  // ⭐ 2026-09-28 人类第二次拍板（逐字，见 STAR_BREAKTHROUGH.panel_scale_decision）：
+  //   上面那一版把 ×6 当"单位换算"抵消掉 ⇒ 面板**逐值不变**（噼啪鸟速度 294）。人类不认这个：
+  //   「面板数值也要跟着变大」⇒ ×6 现在是**真的放大**，面板按 `race + (3 × 6) × 资质(0–10)` 算。
+  //   ⚠ 代价如实记在这里：这一版面板**不再与外部「PVP 一速榜」那 9 个数一致**
+  //   （噼啪鸟速度 294 → **492**），那 9 个数**改钉保留**在 `tests/roco-panel-level.test.js` 的 `旧口径` 表里。
   if (!Number.isFinite(level) || level < 1 || level > LEVEL_FORMULA.cap) {
     unknown.push(`等级 ${level} 不在 1–${LEVEL_FORMULA.cap} 之内 ⇒ 这一份面板不算（等级上限 60 是官方口径）`);
     return {panel: {}, unknown, sources};
@@ -452,15 +459,15 @@ export function panelOf({race = null, talent = null, nature = null, scope = 'pvp
   for (const stat of STAT_KEYS) {
     const raceValue = numOrNull(race[stat]);
     if (raceValue === null) { unknown.push(`种族值缺「${STAT_NAMES[stat]}」⇒ 这一项不算`); continue; }
-    const talentValue = numOrNull(scaledTalent?.[stat]) ?? 0;
+    const talentValue = numOrNull(talent?.[stat]) ?? 0;
     const shape = stat === 'hp' ? LEVEL_FORMULA.hp : LEVEL_FORMULA.other;
     const nf = natureFactor(nature, stat, {breakthrough: steps});
     if (!nf.known) unknown.push(`性格：${nf.reason}`);
     // 取整顺序**照判例来**：先 round 内层 → 加常数 → 乘性格 → round → 加末尾常数。
-    // 资质那一项的系数：`LEVEL_FORMULA.talent ÷ STAR_BREAKTHROUGH.multiplier`（3 ÷ 6 = 0.5，每个**内部点**）
-    // × 上面 `scaledTalent` 给出的内部刻度资质 ⇒ 5 星（×6）与旧的 `3 × 资质(0–10)` 逐值相同。
-    const scaled = (shape.race * raceValue
-      + (shape.talent / STAR_BREAKTHROUGH.multiplier) * talentValue)
+    // 资质那一项的系数：5 星 = `shape.talent × STAR_BREAKTHROUGH.talent_factor`（3 × 6 = 18，每个 0–10 点）；
+    // 0 星 = `shape.talent`（每个 0–10 点）—— 那才是"原来那一档"。
+    const talentCoefficient = shape.talent * (atFiveStar ? STAR_BREAKTHROUGH.talent_factor : 1);
+    const scaled = (shape.race * raceValue + talentCoefficient * talentValue)
       * (level + shape.level) / shape.divisor;
     panel[stat] = Math.round((Math.round(scaled) + shape.base) * nf.factor) + shape.add;
   }

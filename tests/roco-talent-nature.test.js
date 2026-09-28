@@ -96,13 +96,17 @@ test('④ 面板公式：等级公式的算例（手算，含性格与突破档�
   assert.equal(level60(RACE, zero, '开朗', 5).spe, 220, '满突破 +20% 那一档');
   assert.equal(pvpPanelOf({race: RACE, talent: zero, nature: '开朗'}).panel.spe, 220,
     'pvpPanelOf 的定义就是满级 + 满突破');
-  // 天分 10 点的净增：速度每点 3×1.1 = 3.3（零突破性格系数 1.1）⇒ 10 点 = 36.3 的取整结果
+  // 天分 10 点的净增（**2026-09-28 改钉**：5 星档资质项 = `3 × 6 = 18` 每点，面板真的放大）
   const full = level60(RACE, {hp: 10, atk: 10, spa: 10, def: 10, spd: 10, spe: 10}, '开朗');
-  const expectSpe = (iv) => Math.round((Math.round((120 + 3 * iv) * 1.1) + 10) * 1.1) + 50;
-  assert.equal(full.spe, expectSpe(10), '速度按等级公式现算');
-  assert.notEqual(full.spe - kai.spe, 60, '天分 10 点**不是** +60（那是"每点 +6"那条旧口径，已判定不参与面板）');
-  const expectHp = (iv) => Math.round((Math.round((85 + 3 * iv) * 1.7) + 70) * 1) + 100;
-  assert.equal(full.hp - kai.hp, expectHp(10) - expectHp(0), '生命按等级公式现算');
+  const expectSpe = (iv) => Math.round((Math.round((120 + 18 * iv) * 1.1) + 10) * 1.1) + 50;
+  assert.equal(full.spe, expectSpe(10), '速度按等级公式现算（5 星档）');
+  // 旧口径（资质不放大）那一档：天分 10 点净增 36 —— 现在净增 218，两档都在
+  assert.equal(panelOf({race: RACE, talent: {hp: 10, atk: 10, spa: 10, def: 10, spd: 10, spe: 10},
+    nature: '开朗', scope: 'pvp', level: 60, breakthrough: 0, stars: 0}).panel.spe,
+  Math.round((Math.round((120 + 3 * 10) * 1.1) + 10) * 1.1) + 50,
+  'stars: 0 那一档仍然是每点 3（旧口径，改钉不删）');
+  const expectHp = (iv) => Math.round((Math.round((85 + 18 * iv) * 1.7) + 70) * 1) + 100;
+  assert.equal(full.hp - kai.hp, expectHp(10) - expectHp(0), '生命按等级公式现算（5 星档）');
   // 性格换成正中和的（沉默）看速度不变（而不是把它当成长处）
   const silent = level60(RACE, zero, '沉默');
   assert.equal(silent.spe, Math.round((Math.round(132) + 10) * 1) + 50, '沉默不加速度 ⇒ 速度按中性算');
@@ -120,22 +124,19 @@ test('⑤ 缺输入不许拿 0 冒充：种族值缺 ⇒ 不算；天分缺 ⇒ 
   assert.ok(partial.unknown.some((row) => row.includes('魔攻')), '缺哪一项要说出来');
 });
 
-test('⑥ 天分只许进面板**一次**（2026-09-27 查证：×6 是单位换算，"每点 +6"不再参与面板）', () => {
-  // 改钉记录：这一天之前，本仓把两条口径**拼**在一起用（种族/性格走老公式 + 天分另加"每点 +6"），
-  // 结果是天分被算了两遍。查证的结论是：
-  //   · 配置表 `ATTR_GLOBAL_CONFIG` 的 `talent_constant` 是**括号内**的（生命 100→3×、其他 50→3×）；
-  //   · 笔记里那句「个体值 pvp 中自动乘六倍」讲的是 **UI 0–10 → 内部 0–60 的单位换算**，
-  //     不是"PVP 额外再加六倍"；
-  //   · 「7-8-9-10 → +42/48/54/60」那条**解释不了**已实测的 9/9（见 `roco-panel-level` ①），
-  //     所以它只作为**历史记录**保留（`TALENT_PVP_STEP`），**不再参与任何面板换算**。
+test('⑥ 天分只许进面板**一次**（2026-09-28 改钉：一次 = 资质项 `3 × 6`，不再另加"每点 +6"）', () => {
+  // 改钉记录（2026-09-28）：这一天之前，本仓把两条口径**拼**在一起用（种族/性格走老公式 + 天分另加"每点 +6"），
+  // 结果是天分被算了两遍。查证的结论是：配置表 `ATTR_GLOBAL_CONFIG` 的 `talent_constant` 是**括号内**的。
+  // ⚠ 同一天人类**第二次拍板**「面板数值也要跟着变大」⇒ 括号内那一项现在是 `3 × 6 = 18`（5 星档）。
+  //   「只进一次」这条的**意思没变**（不许在括号外再另加一份），变的是括号内那一个数。
   assert.equal(TALENT_PVP_STEP.table[10], 60, '历史记录照旧留着（改钉不删）');
   assert.ok(TALENT_PVP_STEP.external_support.includes('TapTap'), '外部查证出处照旧留着');
   assert.match(TALENT_PVP_STEP.decision, /不再参与.*面板|不参与.*面板/, '要写明它已退出面板换算');
-  // 行为判据：面板只按等级公式算 —— 换成"每点 +6"那套必须对不上
+  // 行为判据：面板只按等级公式算（5 星档的资质项 = 18 每点）
   const race = {hp: 100, atk: 100, spa: 100, def: 100, spd: 100, spe: 100};
   const talent = {hp: 0, atk: 0, spa: 0, def: 0, spd: 0, spe: 10};
   const got = pvpPanelOf({race, talent}).panel.spe;
-  const formulaOnly = Math.round((Math.round((100 + 30) * 1.1) + 10) * 1) + 50;
+  const formulaOnly = Math.round((Math.round((100 + 18 * 10) * 1.1) + 10) * 1) + 50;
   assert.equal(got, formulaOnly, `天分 10 点只许进一次：${got}`);
   assert.notEqual(got, Math.round((Math.round(100 * 1.1) + 10) * 1) + 50 + 60,
     '旧口径（再加 +6/点）必须与现在的算法对不上');
@@ -256,7 +257,7 @@ test('⑨ 天分四档：按人类口述的"激活几条"判；判不出来必�
   assert.notEqual(ignoreOverlap(TALENT_TIERS[3]), '了不起的天分', '前提：忽略重合真的会给出另一个档名');
 });
 
-test('⑩ 默认 5 星：资质 ×6 换成内部刻度 ⇒ 与 stars: 0 不同且更高（老数一个不动）', () => {
+test('⑩ 默认 5 星：资质按 5 星档进面板 ⇒ 与 stars: 0 不同且更高（2026-09-28 改钉）', () => {
   const T10 = Object.fromEntries(STAT_KEYS.map((stat) => [stat, 10]));
   const five = pvpPanelOf({race: RACE, talent: T10, nature: '开朗'});
   const zeroStar = pvpPanelOf({race: RACE, talent: T10, nature: '开朗', stars: 0});
@@ -265,11 +266,12 @@ test('⑩ 默认 5 星：资质 ×6 换成内部刻度 ⇒ 与 stars: 0 不同�
     `5 星必须更高（5 星 ${five.panel.spe} / 0 星 ${zeroStar.panel.spe}）`);
   // 缺省就是 5 星：不写 stars 与写 5 逐项相同
   assert.deepEqual(five, pvpPanelOf({race: RACE, talent: T10, nature: '开朗', stars: 5}));
-  // ⭐ 而且与**改动前的老数**逐值相同：老口径 `3 × 资质(0–10)` 与新口径 `0.5 × 资质(0–60)` 是同一个数
+  // ⚠ 2026-09-28 **改钉**：这一天之前这里钉的是「5 星与改动前逐值相同（260）」。
+  // 人类第二次拍板「面板数值也要跟着变大」⇒ 5 星档 = `3 × 6 = 18` 每点，**旧数 260 落在 stars: 0 那一档**。
   const legacy = Math.round((Math.round((RACE.spe + 3 * 10) * 1.1) + 10) * 1.2) + 50;
-  assert.equal(five.panel.spe, legacy, '老口径 3×资质(0–10) 必须与新口径逐值相同（默认行为不许动）');
-  assert.equal(five.panel.spe, 260, `开朗 / 资质 10 / 满突破：${five.panel.spe}`);
-  assert.equal(zeroStar.panel.spe, 228, `0 星（零突破，内部刻度就是 0–10）：${zeroStar.panel.spe}`);
+  assert.equal(zeroStar.panel.spe, legacy, '旧数 3×资质(0–10) 现在落在 stars: 0 那一档（改钉不删）');
+  assert.equal(zeroStar.panel.spe, 260, `0 星（零突破，资质不放大）：${zeroStar.panel.spe}`);
+  assert.equal(five.panel.spe, 458, `5 星（开朗 / 资质 10 / 满突破）：${five.panel.spe}`);
   // panelOf 也要认这个开关（不是只在 pvpPanelOf 里）：同一档（零突破下界）下 5 星必须高于 0 星
   const pv0 = panelOf({race: RACE, talent: T10, nature: '开朗', stars: 0}).panel.spe;
   const pv5 = panelOf({race: RACE, talent: T10, nature: '开朗', stars: 5}).panel.spe;
@@ -281,22 +283,21 @@ test('⑩ 默认 5 星：资质 ×6 换成内部刻度 ⇒ 与 stars: 0 不同�
   const mid = pvpPanelOf({race: RACE, talent: T10, nature: '开朗', stars: 3});
   assert.deepEqual(mid.panel, {}, '1–4 星不算面板（我们没有那一档的资质上限）');
   assert.ok(mid.unknown.some((row) => /1–4 星/.test(row)), `要说明为什么：${JSON.stringify(mid.unknown)}`);
-  // ⭐ 必红反证：`talentAtFiveStar` 若写成恒等（不乘 6），5 星分支拿到的就是 0–10 本身 ⇒
-  //    算出来的数与 stars: 0 **必然相等**（228）⇒ 上面那两条 `notEqual` / `>` 立刻红。
-  //    （恒等实现下 5 星分支 ≡ 下面这条 stars: 0 满突破的算法：0.5 × 资质(0–10)）
-  const identityTalent = (talent) => ({...talent});
-  const collapsed = pvpPanelOf({race: RACE, talent: identityTalent(T10), nature: '开朗', stars: 0}).panel.spe;
-  assert.equal(collapsed, zeroStar.panel.spe, '恒等实现 ⇒ 5 星那条路退化成 0 星那一档');
-  assert.notEqual(collapsed, five.panel.spe, '恒等实现与真实现必须不同 —— 这就是上面那条的"红"');
+  // ⭐ 必红反证：把 5 星档的放大倍数换成 1（`STAR_BREAKTHROUGH.talent_factor = 1`）⇒ 5 星会退化成 0 星那一档
+  const collapsed = Math.round((Math.round((RACE.spe + 3 * 10) * 1.1) + 10) * 1.2) + 50;
+  assert.equal(collapsed, zeroStar.panel.spe, '倍数写 1 ⇒ 5 星那条路退化成 0 星那一档');
+  assert.notEqual(collapsed, five.panel.spe, '倍数写 1 与真实现必须不同 —— 这就是上面那条的"红"');
 });
 
-test('⑪ 5 星换算：×6、缺项保持缺项、不改入参；它与 LEVEL_FORMULA 的系数是同一个数（含双重放大反证）', () => {
+test('⑪ 5 星放大：系数是 `3 × talent_factor`；显示刻度 ×6 只做读数、不进面板（含两条反证）', () => {
   assert.equal(STAR_BREAKTHROUGH.stars, 5, '默认档就是 5 星（人类 2026-09-28）');
   assert.equal(STAR_BREAKTHROUGH.multiplier, 6, '「原来是 +10，五星是 +60」⇒ 倍率 6');
+  assert.equal(STAR_BREAKTHROUGH.talent_factor, 6, '面板里资质那一项的放大倍数（2026-09-28 第二次拍板）');
+  assert.match(STAR_BREAKTHROUGH.panel_scale_decision, /面板数值也要跟着变大/, '第二次拍板要逐字留档');
   assert.match(STAR_BREAKTHROUGH.source, /2026-09-28/, '要写清这是哪一天的口述口径');
   assert.match(STAR_BREAKTHROUGH.source, /原来是\+10，五星是\+60/, '出处要逐字带上人类那句话');
   assert.deepEqual([STAR_BREAKTHROUGH.entry_scale.max, STAR_BREAKTHROUGH.internal_scale.max], [10, 60],
-    '换算的两端：玩家填的 0–10 → 公式吃的内部 0–60');
+    '换算的两端：玩家填的 0–10 → 内部 0–60');
   const input = {hp: 0, atk: 10, def: 5, spa: null, spd: undefined, spe: ''};
   const out = talentAtFiveStar(input);
   assert.deepEqual(out, {hp: 0, atk: 60, def: 30, spa: null, spd: undefined, spe: ''},
@@ -304,24 +305,23 @@ test('⑪ 5 星换算：×6、缺项保持缺项、不改入参；它与 LEVEL_F
   assert.equal(input.atk, 10, '入参不许被改（返回的是新对象）');
   assert.notEqual(out, input);
   assert.equal(talentAtFiveStar(null), null, '没填天分就照旧返回 null（不编一份 0 出来）');
-  // ×6 与公式的关系：括号里的 3 是"每个 0–10 点"，换成"每个内部点"就是 3 ÷ 6 = 0.5；
-  // 社区老公式（`PANEL_FORMULA`）在 L=60 下的每点系数**正是**这个 0.5（0.55 ÷ 1.1、0.85 ÷ 1.7）
-  const other60 = (LEVEL_FORMULA.cap + LEVEL_FORMULA.other.level) / LEVEL_FORMULA.other.divisor;
-  const hp60 = (LEVEL_FORMULA.cap + LEVEL_FORMULA.hp.level) / LEVEL_FORMULA.hp.divisor;
-  assert.equal(LEVEL_FORMULA.other.talent / STAR_BREAKTHROUGH.multiplier, PANEL_FORMULA.other.talent / other60);
-  assert.equal(LEVEL_FORMULA.hp.talent / STAR_BREAKTHROUGH.multiplier, PANEL_FORMULA.hp.talent / hp60);
-  assert.equal(LEVEL_FORMULA.other.talent / STAR_BREAKTHROUGH.multiplier, 0.5, '内部刻度下每点 0.5');
-  // ⭐ 必红反证：`talentAtFiveStar` 写成恒等（不乘）
+  // ⭐ 必红反证①：`talentAtFiveStar` 写成恒等（不乘）
   const identity = (row) => ({...row});
   assert.equal(identity(input).atk, 10, '恒等实现给 10');
   assert.equal(out.atk, 60, '真实现给 60');
   assert.notEqual(identity(input).atk, out.atk);
-  // ⭐ 必红反证：把 ×6 直接塞进 `3 × 资质`（系数不动 = 双重放大）—— 与已实测的噼啪鸟 294 必须对不上
+  // ⭐ 必红反证②（**2026-09-28 语义反转，改钉不删**）：这一天之前，"把 ×6 直接塞进 `3 × 资质`"
+  //    被钉成**错误**（与外部一速榜 294 对不上）。人类第二次拍板后，**它变成了正确行为**：
+  //    5 星档就该给出 492。所以这一条现在钉的是相反的方向 —— 谁把它改回 294，谁就红。
   const pipa = {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 145};        // 噼啪鸟速度种族值 145
-  const doubleCounted = Math.round((Math.round((145 + LEVEL_FORMULA.other.talent * 10 * 6) * 1.1) + 10) * 1.2) + 50;
-  assert.equal(doubleCounted, 492, '双重放大会给出 492（资质那一项被算了 6 倍）');
+  const scaled = Math.round((Math.round((145 + LEVEL_FORMULA.other.talent * STAR_BREAKTHROUGH.talent_factor * 10)
+    * 1.1) + 10) * 1.2) + 50;
+  assert.equal(scaled, 492, '5 星档的资质项 = 3 × 6（每个 0–10 点）⇒ 492');
   assert.equal(pvpPanelOf({race: pipa,
-    talent: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 10}, nature: '开朗'}).panel.spe, 294,
-  '实现必须仍是实测那一档 294（见 tests/roco-panel-level.test.js ①）');
-  assert.notEqual(doubleCounted, 294, '双重放大与实测 294 必须对不上 —— 这就是"算爆了"的样子');
+    talent: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 10}, nature: '开朗'}).panel.spe, 492,
+  '实现必须给出 492（2026-09-28 人类拍板那一档）');
+  // 旧口径那一档仍可复算（外部一速榜 294 落在它上面，见 tests/roco-panel-level.test.js ①）
+  assert.equal(pvpPanelOf({race: pipa, talent: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 10},
+    nature: '开朗', stars: 0}).panel.spe, 294, 'stars: 0 那一档仍是外部榜单的 294');
+  assert.notEqual(scaled, 294, '5 星档与旧榜那一档必须不同 —— 这就是"面板变大"的证据');
 });

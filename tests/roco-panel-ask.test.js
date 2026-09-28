@@ -112,3 +112,12 @@ test('④ 反证：面板问句不许抢走图鉴字段那一路（「X 的种�
   assert.equal(panelAsk('喵喵的面板是多少？'), true);
   assert.equal(panelAsk('寂灭骨龙的面板'), true, '不带"是多少"也认');
 });
+
+test('⑥ 正文口径：面板那一串必须写「资质」，且说清默认 5 星、逗号后不留孤空格', async () => {
+  // 人类 2026-09-28 拍板：「资质」这个词**要**出现在玩家正文里（原先只写"种族值 + 天分 + 性格"）。
+  const text = String((await panelLocalAnswer('喵喵的面板是多少？', {})).text);
+  assert.match(text, /面板 = 种族值 \+ 资质 \+ 天分 \+ 性格/, text);
+  assert.match(text, /默认 5 星/, '要说清默认按 5 星算');
+  assert.match(text, /放大 6 倍/, '要说清资质那一项被放大 6 倍（否则玩家看不懂数为什么这么大）');
+  assert.doesNotMatch(text, /[）)] +算的/, `标点后不许留孤零零的空格（排版）：${text}`);
+});
