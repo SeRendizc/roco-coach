@@ -532,8 +532,12 @@ function renderPetPage() {
   // 这一屏也带着"这一只是谁"（`data-individual`）：刷新/回滚那几件事与列表那一行共用同一个落点，
   // 免得到处各写一套选择器（真机验收 28/30 号读的就是它）。
   $('pet-view').dataset.individual = select;
+  // ⚠ 2026-09-28 真机抓到（验收 10b：整页 **84 处** `[object Object]`）：
+  // 服务端详情页把「天分」那一栏的 `value` 直接给成**六维对象**（`{hp: 10, …}`，见 `boxGrowthPlayer`），
+  // 而 `fmtValue` 只认数值/数组/字符串 ⇒ 对象被原样 String() 成 `[object Object]`。
+  // 与比较页同一个根因，所以用同一个拆包口径（`unwrapGrowth` 只拆 `{value}` 一层，不动别的形状）。
   $('pet-body').innerHTML = player
-    ? petBodyHtml(player, individual)
+    ? petBodyHtml(unwrapGrowth(player), individual)
     : `<h4>基础</h4><div class="traits"><div class="trait"><b>等级</b>
         <span>${Number.isFinite(Number(individual.level)) ? `Lv.${Number(individual.level)}` : '—'}</span>
         <span class="trait-effect">等级上限 60（官方口径）</span></div></div>
