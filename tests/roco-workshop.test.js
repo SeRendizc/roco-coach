@@ -204,8 +204,14 @@ test('路由契约：0 只给体系入口（不假装存在唯一答案），1 �
 
 test('路由契约：2 只与 5 只都给**恰好三个**下一只候选（取舍标签两两不同）', async () => {
   // 这条判据要求三个取舍标签两两不同，而那个结果依赖**具体哪几只**；
-  // 依赖「池子前 5 个」会随样例池变化假红/假绿。实测这组满足（且物种互不相同）。
-  const FIVE = ['own-0005', 'own-0007', 'own-0009', 'own-0011', 'own-0013'];
+  // 依赖「池子前 5 个」会随样例池变化假红/假绿，所以这里显式点名一组。
+  // 2026-09-28 改钉（**旧值不删**：原来是 `['own-0005','own-0007','own-0009','own-0011','own-0013']`）。
+  // 甲案（盒子 = 可玩层镜像，48 → 542 个实例）之后，那 5 只选出来的下一只候选是
+  // `["强度","候选参考","候选参考"]` —— 只有 **1** 个真取舍口径（第三位由召回的参考候选补上，
+  // 见 `src/server/roco-service.js:1160-1178` 的 `recall_tail` 回落），判据当场红。
+  // 实测换成下面这组**跨池子均匀取样**的 5 只，标签是 `["强度","稳定","候选参考"]` ⇒
+  // 三个两两不同、真取舍口径 2 个（判据一个字没改，改的是样例）。
+  const FIVE = ['own-0001', 'own-0101', 'own-0201', 'own-0301', 'own-0401'];
   const sampleOf = (count) => (count === 5 ? FIVE : IDS.slice(0, count));
   for (const count of [2, 5]) {
     const result = await workshop(`selected=${sampleOf(count).join(',')}`);
@@ -944,3 +950,36 @@ test('槽位载荷必须带 skills（每个 {skill_id,name}），否则「引擎
   for (const id of one) assert.ok(index.skills.get(id)?.name, `${id} 要查得到名字`);
 });
 
+
+// ── 换招要**真的落到对局**，而且刷新不丢（2026-09-28，人类逐字：「换技能还是没实装是吧？实装一下」）──
+//
+// 事实经过（真机核过，不是推测）：
+//   · 工坊的 `loadouts` 原来是个**纯内存 Map** —— 开局时它确实交给服务端（`battle/new` 的
+//     `loadouts`），所以"工坊里换的招能进对局"是真的；但**刷新一下就没了**。
+//   · 盒子二级详情页那份配招写的是另一个键（`roco.box.loadout.v1`，键 = 个体 `own-…`），
+//     **谁都不读** ⇒ 盒子里配好的四个永远进不了对局（那一页的旧文案自己都写着
+//     "去开局那一页时请照这四个重新带上"，等于承认没实装）。
+// 现在两边共用 `src/client/loadout-store.js` 那一把钥匙（键 = 引擎回执的 `pet_id`）。
+test('换招要读共用记录、也要写回去（否则刷新丢、盒子里配的也进不了对局）', async () => {
+  const {readFileSync: read} = await import('node:fs');
+  const src = read(new URL('../src/client/team-workshop.js', import.meta.url), 'utf8');
+  // ① 开局时先读共用记录（盒子里配过的那一份也在里面）
+  assert.match(src, /import \{readSharedLoadouts, writeSharedLoadout\} from '\.\/loadout-store\.js'/,
+    '工坊必须用共用的那一把钥匙，不许自己再拼一个键名');
+  assert.match(src, /const loadouts = new Map\(readSharedLoadouts\(\)\)/,
+    '开局时要把共用记录读进 loadouts（键 = pet_id）');
+  // ② 保存时写回去
+  assert.match(src, /writeSharedLoadout\(null, editor\.petId \?\? editor\.species, editor\.draft\.slice\(\)\)/,
+    '保存时要把这四个写回共用记录');
+  // ③ 交给服务端那条链一个字没动（能进对局靠的就是它）
+  assert.match(src, /loadouts: Object\.fromEntries\(\[\.\.\.loadouts\.entries\(\)\]/,
+    '开局时仍然要把 loadouts 交给服务端 —— 这才是"进对局"');
+  // ④ 反证：共用的键只有一处定义
+  const store = read(new URL('../src/client/loadout-store.js', import.meta.url), 'utf8');
+  assert.match(store, /export const LOADOUT_STORE_KEY = 'roco\.workshop\.loadouts\.v1'/);
+  for (const f of ['../src/client/team-workshop.js', '../src/client/box-loadout.js']) {
+    const one = read(new URL(f, import.meta.url), 'utf8');
+    assert.doesNotMatch(one, /'roco\.workshop\.loadouts\.v1'/,
+      `${f} 不许自己写死这个键名（只能从 loadout-store.js 引）`);
+  }
+});

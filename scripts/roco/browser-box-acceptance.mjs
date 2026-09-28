@@ -1895,6 +1895,95 @@ async function main() {
       ((f) => (f.rowDrawn === false && f.banned === false) ? [] : ['还画/还没清'])({rowDrawn: true, banned: true}),
       '{"rowDrawn":true,"banned":true}');
 
+    // ── ④ 换技能：真的换、真的存进「开局那一页」读的那份记录 ────────────────────
+    //
+    // 2026-09-28（人类逐字：「换技能还是没实装是吧？实装一下」）。
+    // 这一条量的**不是**"面板画出来了没有"，而是那句承诺兑现了没有：保存之后，
+    // **开局那一页（配队工坊）读的那份记录**里到底有没有这四个 —— 工坊开局时把这份
+    // 记录交给服务端（`battle/new` 的 `loadouts`），所以"进得了对局"靠的就是它。
+    // 之前两份记录互不相识（盒子写 `roco.box.loadout.v1`，工坊用的是内存 Map）⇒ 没实装。
+    const loadoutProblems = (f) => {
+      const bad = [];
+      if (!Array.isArray(f?.picks) || f.picks.length !== 4) {
+        bad.push(`玩家在面板上挑的不是四个（${JSON.stringify(f?.picks)}）`);
+      }
+      if (!f?.key) bad.push('这一只的物种键取不到（核不了共用记录）');
+      if (!Array.isArray(f?.stored)) bad.push('开局那一页读的那份记录里没有这一只（换技能没实装）');
+      else if (JSON.stringify(f.stored) !== JSON.stringify(f.picks)) {
+        bad.push(`存下来的与玩家挑的不一致：挑了 ${JSON.stringify(f.picks)}，存的是 ${JSON.stringify(f.stored)}`);
+      }
+      if (f?.honest !== true) {
+        bad.push(`保存之后要说清"开局那一页会带上这四个"，实际状态行「${f?.status}」`);
+      }
+      return bad;
+    };
+    await cdp.send('Page.navigate', {url: base + 'box.html'});
+    await sleep(1400);
+    await mouseClick('#tab-mine');
+    await waitFor(`document.body.dataset.boxKind==='mine'`);
+    await waitForSafe(`document.querySelectorAll('#box-grid .individual[data-detail]').length>0`, {tries: 60, ms: 200});
+    const loadoutSelect = await js(`document.querySelector('#box-grid .individual[data-detail]')?.dataset.detail ?? ''`);
+    if (loadoutSelect) {
+      await mouseClick(`#box-grid .individual[data-detail="${loadoutSelect}"]`);
+      await waitForSafe(`(()=>{const v=document.getElementById('pet-view');
+        return Boolean(v)&&v.hidden===false&&v.dataset.petRendered==='server';})()`, {tries: 60, ms: 200});
+      await waitForSafe(`Boolean(document.querySelector('#pet-loadout [data-loadout-read]'))`, {tries: 60, ms: 200});
+      await sleep(300);
+      await mouseClick('#pet-loadout [data-loadout-read]');
+      await waitForSafe(`document.getElementById('pet-loadout')?.dataset.loadoutState==='ready'`, {tries: 60, ms: 200});
+      await sleep(300);
+      // 去掉一个、换上另一个 —— 这样"存下去的"确实是**玩家这一次挑的**，而不是页面预选那份。
+      const sides = JSON.parse(await safeJs(`(()=>{const p=document.getElementById('pet-loadout');
+        const on=[...p.querySelectorAll('[data-loadout-pick][aria-pressed="true"]')].map((e)=>e.dataset.loadoutPick);
+        const off=[...p.querySelectorAll('[data-loadout-pick][aria-pressed="false"]')].map((e)=>e.dataset.loadoutPick);
+        return JSON.stringify({on,off});})()`) ?? '{}');
+      let swapped = false;
+      if (sides?.on?.length && sides?.off?.length) {
+        await mouseClick(`#pet-loadout [data-loadout-pick="${sides.on[0]}"]`);
+        await sleep(200);
+        await mouseClick(`#pet-loadout [data-loadout-pick="${sides.off[0]}"]`);
+        await sleep(200);
+        swapped = true;
+      }
+      await mouseClick('#pet-loadout [data-loadout-save]');
+      await sleep(1000);
+      // 物种键**从服务端回执现读**（页面上的 `group` 就是它），不写死
+      const loadoutDetail = await (await fetch(`${base}api/roco/box?detail=${encodeURIComponent(loadoutSelect)}`)).json();
+      const speciesKey = String(loadoutDetail?.player?.group ?? '');
+      const loadoutFacts = JSON.parse(await safeJs(`(()=>{const p=document.getElementById('pet-loadout');
+        const picks=[...p.querySelectorAll('[data-loadout-pick][aria-pressed="true"]')].map((e)=>e.dataset.loadoutPick);
+        let all={}; try{all=JSON.parse(localStorage.getItem('roco.workshop.loadouts.v1')||'{}')}catch{}
+        const key=${JSON.stringify(speciesKey)};
+        const line=p.querySelector('[data-loadout-status]');
+        const text=line?String(line.textContent).replace(/\\s+/g,' ').trim():'';
+        return JSON.stringify({picks,key,stored:all[key]??null,sharedKeys:Object.keys(all),
+          status:text,honest:/开局那一页/.test(text)});})()`) ?? '{}');
+      steps.push({at: 'loadout', select: loadoutSelect, swapped, facts: loadoutFacts});
+      check('39-换技能要真的实装（存进开局那一页读的那份记录）',
+        '人类 2026-09-28：「换技能还是没实装是吧？实装一下」⇒ 在二级页真鼠标换掉一个技能并保存后，'
+        + '**开局那一页（配队工坊）开局时交给服务端的那份记录**里必须正好是玩家挑的这四个，'
+        + '而且保存后要说清这一点',
+        loadoutProblems(loadoutFacts).length === 0,
+        loadoutProblems(loadoutFacts).join(' | ')
+          || `这一只 ${loadoutSelect}（${speciesKey}）${swapped ? '换掉一个技能后' : '（没换，面板上没有别的可选）'}`
+            + `存下 ${JSON.stringify(loadoutFacts.stored)}；共用记录里 ${JSON.stringify(loadoutFacts.sharedKeys)}`);
+      counter('39-换技能要真的实装（存进开局那一页读的那份记录）',
+        '① 记录里根本没这一只 ② 存下来的是页面预选那份（不是玩家挑的）'
+        + ' ③ 保存后不说清会带进对局 —— 三种坏样本都要被同一条判据抓住',
+        loadoutProblems({...loadoutFacts, stored: null, picks: ['skill_000001', 'skill_000002', 'skill_000003', 'skill_000004'],
+          honest: false, status: '已保存。'}),
+        '{"stored":null,"honest":false}');
+      counter('39-换技能要真的实装（存进开局那一页读的那份记录）',
+        '存下来的四个与玩家挑的不是同一组（差一个）也必须被抓住',
+        loadoutProblems({...loadoutFacts, stored: [...(loadoutFacts.picks ?? [])].reverse()}),
+        '{"stored":"顺序或成员与 picks 不一致"}');
+      shots.push(await shoot('box-11-loadout-1440x900'));
+    } else {
+      check('39-换技能要真的实装（存进开局那一页读的那份记录）',
+        '盒子里要有一行个体可以打开二级页（换技能面板在那一页上）',
+        false, '盒子里一行个体都没有 —— 打开不了二级页，换技能无从量起');
+    }
+
     check('22-控制台干净', '整轮下来没有 console.error，也没有未捕获异常',
       consoleErrors.length === 0 && pageErrors.length === 0,
       `consoleErrors=${JSON.stringify(consoleErrors.slice(0, 2))} pageErrors=${JSON.stringify(pageErrors.slice(0, 2))}`);

@@ -21,6 +21,7 @@ import assert from 'node:assert/strict';
 
 import {LOADOUT_SLOTS, LOADOUT_STYLE, loadoutOptionsPath, loadoutPanelHtml, mountLoadout,
   playerReasonOf} from '../src/client/box-loadout.js';
+import {LOADOUT_STORE_KEY} from '../src/client/loadout-store.js';
 
 // ── 夹具：盒子详情页给的那四个（**没有 skill_id**，形状照抄 roco-service.js:707-721）───
 
@@ -196,6 +197,17 @@ function mount(props) {
   const root = props.root ?? fakeRoot();
   const controller = mountLoadout({...props, root});
   return {root, controller};
+}
+
+/**
+ * 等面板**稳定下来**再动手：池子到手之后 `prefill()` 还会再落一次预选（详情页是两段式渲染，
+ * 真机同样如此）。点早了会被那一次预选盖掉 —— 我第一版就是这么写的，四点点中了三点。
+ */
+async function settle(controller) {
+  for (let i = 0; i < 20 && !(controller.state.pool && controller.state.prefilled); i += 1) {
+    await flush();
+  }
+  return controller.state;
 }
 
 // ── ① 四个槽位 + 关键字段 ─────────────────────────────────────────────────
@@ -418,8 +430,79 @@ test('③d 本机不让记（隐私模式）⇒ 说清「引擎确认过、但�
   const line = statusLine(root.innerHTML);
   assert.equal(line.kind, 'warn', '记不下就不是干净的「已保存」');
   assert.match(line.text, /不让记/);
-  assert.match(line.text, /刷新之后这份选择就没了/);
+  // ⚠ 2026-09-28 改钉（人类 ④：「换技能还是没实装是吧？实装一下」）：保存时**多写了一份**
+  // 交给开局那一页（`loadout-store.js`），所以"会丢"这件事要分两种情形说清 ——
+  //   · 盒子这一份没记下：隐私模式；
+  //   · 交给开局那一页那一份没写成：浏览器不让记，或引擎回执里没带 pet_id。
+  // 旧断言是 `assert.match(line.text, /刷新之后这份选择就没了/)`（那句是按旧文案逐字写的：
+  // 旧文案自己说"这份选择记在这台浏览器上…去开局那一页时请照这四个重新带上"，等于承认没实装）。
+  // 判据的**意图一个字没改**：不许说「已保存」，而且必须说清"这份选择会丢"。
+  assert.match(line.text, /这份选择可能丢/, '要说清这份选择会丢');
   assert.ok(!/^已保存/.test(line.text), `不许说「已保存」：${line.text}`);
+});
+
+/**
+ * ③e 保存要**真的交给开局那一页**（人类 ④ 逐字：「换技能还是没实装是吧？实装一下」）。
+ *
+ * 2026-09-28 之前这条路是**断的**：盒子写 `roco.box.loadout.v1`（键 = 个体 `own-…`），
+ * 而工坊开局时交给服务端的是它自己那个**内存 Map**（键 = 引擎回执的 `pet_id`）——
+ * 两份记录互不相识 ⇒ 盒子里配好的四个**进不了对局**（旧文案自己都写着"去开局那一页时
+ * 请照这四个重新带上"，等于承认没实装）。
+ *
+ * 判据：保存之后，**共用记录**里必须出现 `pet_id → 四个技能`，且逐值与玩家挑的一致。
+ */
+test('③e 保存要把这四个写进共用记录（开局那一页读的就是它）', async () => {
+  const storage = fakeStorage({});
+  const {root, controller} = mount({select: 'own-0001', species: REPLY.pet_id, skills: CURRENT, storage,
+    request: fakeRequest(() => REPLY)});
+  click(root, {loadoutRead: '1'});
+  await settle(controller);
+  const prefilled = controller.state.draft.slice();
+  assert.equal(prefilled.filter(Boolean).length, 4, '先得预选满四个（否则下面证明不了"改动被写下去"）');
+  // **换掉第 1 个**：写下去的必须是玩家挑的那四个，不是预选那一份。
+  click(root, {loadoutPick: prefilled[0]});
+  click(root, {loadoutPick: 'skill_000645'});     // 蛰针：回执里有、现在这四个里没有
+  const picked = controller.state.draft.slice();
+  assert.equal(picked[0], 'skill_000645', '第 1 个要真的换成玩家点的那个');
+  click(root, {loadoutSave: '1'});
+  await flush();
+  const shared = JSON.parse(storage.getItem(LOADOUT_STORE_KEY) ?? '{}');
+  assert.deepEqual(shared[REPLY.pet_id], picked,
+    `共用记录里要有 ${REPLY.pet_id} → 玩家挑的四个（实际 ${JSON.stringify(shared)}）`);
+  // 盒子自己那一份还在（两把钥匙并存，各管各的读者）
+  assert.ok(JSON.parse(storage.getItem('roco.box.loadout.v1') ?? '{}')['own-0001'],
+    '盒子那份也还要写（详情页自己读它）');
+  // 反证：**只写盒子那份、没写共用记录**的坏样本，必须被同一条判据抓住
+  const bad = fakeStorage({});
+  bad.setItem('roco.box.loadout.v1', JSON.stringify({'own-0001': {ids: picked}}));
+  const badShared = JSON.parse(bad.getItem(LOADOUT_STORE_KEY) ?? '{}');
+  assert.notDeepEqual(badShared[REPLY.pet_id], picked,
+    '反证要真的缺这一条 —— 否则它什么都验不了');
+});
+
+/**
+ * ③f 开局那一页记过的配招，盒子这一页要**读得到**（两边是同一件事）。
+ *
+ * 判据：共用记录里先放一份，而**盒子里没记过这一只** ⇒ 草稿要用那一份，
+ * 并且说清这份配招是从哪儿来的（不是各记各的）。
+ */
+test('③f 工坊里配过的招，盒子这一页接着改（不是各记各的）', async () => {
+  const storage = fakeStorage({});
+  const fromWorkshop = REPLY.learnable.slice(0, 4).map((r) => r.skill_id);
+  storage.setItem(LOADOUT_STORE_KEY, JSON.stringify({[REPLY.pet_id]: fromWorkshop}));
+  const {root} = mount({select: 'own-0001', species: REPLY.pet_id, skills: CURRENT, storage,
+    request: fakeRequest(() => REPLY)});
+  click(root, {loadoutRead: '1'});
+  await flush();
+  const line = statusLine(root.innerHTML);
+  assert.equal(line.kind, 'ok');
+  assert.match(line.text, /开局那一页/, `要说清这份配招是从哪儿来的：${line.text}`);
+  for (const id of fromWorkshop) {
+    assert.match(root.innerHTML, new RegExp(`data-loadout-pick="${id}"[^>]*aria-pressed="true"`),
+      `${id} 应当是"已挑中"的样子（工坊记过的那一份）`);
+  }
+  // 反证：没记过的另一只不许也变成"已挑中"（否则这条判据分不清"读到了"和"一律当成挑中"）
+  assert.equal(new RegExp('data-loadout-picks="4"').test(root.innerHTML), true, '四个都要在草稿里');
 });
 
 // ── ④ 玩家可见文案 ────────────────────────────────────────────────────────

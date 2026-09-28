@@ -1,7 +1,7 @@
 {
  "generated_by": "scripts/roco/browser-box-acceptance.mjs",
  "page": "box.html",
- "judged_at": "2026-09-28T12:47:48.641Z",
+ "judged_at": "2026-09-28T12:52:38.066Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|licence|pack_id|ruleset_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "screenshots": [
   "reports/roco/box-acceptance/box-01-mine-1440x900.png",
@@ -11,7 +11,8 @@
   "reports/roco/box-acceptance/box-06-mine-390x844.png",
   "reports/roco/box-acceptance/box-08-handoff-roco-1440x900.png",
   "reports/roco/box-acceptance/box-09-lock-handoff-1440x900.png",
-  "reports/roco/box-acceptance/box-10-rollback-1440x900.png"
+  "reports/roco/box-acceptance/box-10-rollback-1440x900.png",
+  "reports/roco/box-acceptance/box-11-loadout-1440x900.png"
  ],
  "viewport_metrics": [
   {
@@ -271,6 +272,12 @@
    "actual": "塞进去之后：被画出来=false，记录还在=false，清理计数=1"
   },
   {
+   "id": "39-换技能要真的实装（存进开局那一页读的那份记录）",
+   "judge": "人类 2026-09-28：「换技能还是没实装是吧？实装一下」⇒ 在二级页真鼠标换掉一个技能并保存后，**开局那一页（配队工坊）开局时交给服务端的那份记录**里必须正好是玩家挑的这四个，而且保存后要说清这一点",
+   "ok": true,
+   "actual": "这一只 own-0001（pet_000001）换掉一个技能后存下 [\"skill_000273\",\"skill_000286\",\"skill_000340\",\"skill_000624\"]；共用记录里 [\"pet_000001\"]"
+  },
+  {
    "id": "22-控制台干净",
    "judge": "整轮下来没有 console.error，也没有未捕获异常",
    "ok": true,
@@ -438,6 +445,20 @@
    "ok": true,
    "hit": "还画/还没清",
    "actual": "{\"rowDrawn\":true,\"banned\":true}"
+  },
+  {
+   "id": "39-换技能要真的实装（存进开局那一页读的那份记录）",
+   "judge": "① 记录里根本没这一只 ② 存下来的是页面预选那份（不是玩家挑的） ③ 保存后不说清会带进对局 —— 三种坏样本都要被同一条判据抓住",
+   "ok": true,
+   "hit": "开局那一页读的那份记录里没有这一只（换技能没实装） | 保存之后要说清\"开局那一页会带上这四个\"，实际状态行「已保存。」",
+   "actual": "{\"stored\":null,\"honest\":false}"
+  },
+  {
+   "id": "39-换技能要真的实装（存进开局那一页读的那份记录）",
+   "judge": "存下来的四个与玩家挑的不是同一组（差一个）也必须被抓住",
+   "ok": true,
+   "hit": "存下来的与玩家挑的不一致：挑了 [\"skill_000273\",\"skill_000286\",\"skill_000340\",\"skill_000624\"]，存的是 [\"skill_000624\",\"skill_000340\",\"skill_000286\",\"skill_000273\"]",
+   "actual": "{\"stored\":\"顺序或成员与 picks 不一致\"}"
   }
  ],
  "console_errors": [],
@@ -769,6 +790,31 @@
     "rowDrawn": false,
     "banned": false,
     "pruned": "1"
+   }
+  },
+  {
+   "at": "loadout",
+   "select": "own-0001",
+   "swapped": true,
+   "facts": {
+    "picks": [
+     "skill_000273",
+     "skill_000286",
+     "skill_000340",
+     "skill_000624"
+    ],
+    "key": "pet_000001",
+    "stored": [
+     "skill_000273",
+     "skill_000286",
+     "skill_000340",
+     "skill_000624"
+    ],
+    "sharedKeys": [
+     "pet_000001"
+    ],
+    "status": "已保存：引擎确认这四个都学得到（它能学 51 个）：第 1 个 休息回复、第 2 个 防御、第 3 个 仙人掌刺击、第 4 个 腐化。开局那一页（配队工坊）会直接带上这四个。",
+    "honest": true
    }
   }
  ],

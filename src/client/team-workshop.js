@@ -111,6 +111,7 @@ export const AXIS_LEGEND = Object.freeze({
 });
 
 import {markdown as renderMarkdown} from '../coach/experience.js';
+import {readSharedLoadouts, writeSharedLoadout} from './loadout-store.js';
 
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => (
   {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
@@ -628,7 +629,12 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     : [];
   // 换招（2026-09-25）：species_id → 玩家选的四个技能 id。**只存玩家真的选过的**；
   // 没选过的走引擎的规范配招（服务端 `startBattle` 不带 loadouts 时就是这么跑的）。
-  const loadouts = new Map();
+  //
+  // 2026-09-28（人类 ④ 逐字：「换技能还是没实装是吧？实装一下」）：这一份原来是**纯内存**的
+  // ⇒ 换完招一刷新就没了（而盒子那一页配的四个又从来不进对局）。现在两边共用
+  // `loadout-store.js` 那一把钥匙：开局时先把**上次存下的**读进来（盒子里配的也在里面），
+  // 保存时再写回去。键与盒子写下去的是同一个 id 空间（引擎回执里的 `pet_id`）。
+  const loadouts = new Map(readSharedLoadouts());
   /** 技能 id → 名字：读过学习表就记下来。标签里要显示**名字**（显示 id 等于让玩家读内部串）。 */
   const skillNames = new Map();
   /** 正在编辑哪一只 + 它的可学池（`/api/roco/loadout/options` 的回执）+ 草稿。 */
@@ -838,6 +844,10 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     // 键必须是**引擎回执里的 pet_id**（"这份学习表属于哪一只"的唯一证据），
     // 页面按名字解析出的 species 只用来找入口 —— 两者不一致时以引擎为准。
     loadouts.set(editor.petId ?? editor.species, editor.draft.slice());
+    // 写回共用记录（`loadout-store.js`）：不写回去的话，换完招一刷新就丢，
+    // 盒子那一页也读不到（人类 ④：「换技能还是没实装是吧？实装一下」）。
+    // 写失败不拦着这一步 —— 当次开局照样带着这四个（`emit()` 走的是上面那个 Map）。
+    writeSharedLoadout(null, editor.petId ?? editor.species, editor.draft.slice());
     editor = null;
     refreshSlots();
     emit();          // 队伍一变就派发：主线程当次开局就带着这四个

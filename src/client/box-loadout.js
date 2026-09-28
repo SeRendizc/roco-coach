@@ -36,6 +36,8 @@
  * 这台浏览器上。回执没到、或回执里缺任何一个，都**不报成功**（fail closed）。
  */
 
+import {readSharedLoadout, writeSharedLoadout} from './loadout-store.js';
+
 /** 与引擎、工坊同格数（`LOADOUT_SLOTS`，src/server/roco-service.js 的配招格数）。 */
 export const LOADOUT_SLOTS = 4;
 
@@ -44,6 +46,12 @@ const NO_ITEM = '游戏数据里没有这一项';
 
 /** 本机记录：键名跟着盒子的另外两份本机记录（`roco.box.favourites.v1` / `roco.box.individuals.v1`）。 */
 const STORE_KEY = 'roco.box.loadout.v1';
+
+/**
+ * 「这一份配招是从开局那一页带过来的」。
+ * 两处用同一句（种子那一步、以及读池子收尾时把它放回来），不许各写一份文案。
+ */
+const SEED_NOTE = '这一只的配招是你在开局那一页（配队工坊）选的，在这里接着改就行。';
 const STYLE_ID = 'box-loadout-style';
 
 /** 池子请求：与工坊**同一个端点、同一套查询参数**，不另造口径。 */
@@ -449,6 +457,9 @@ function createController(host, props, request) {
       state.saving = false;
       state.status = null;
       state.prefilled = false;
+      // 换了这一只，「这份配招来自开局那一页」那句话也要跟着清掉 ——
+      // 否则上一只的那句会挂在新的一只脸上。
+      state.seededFrom = false;
       state.names = new Map();
       const stored = readStored(storageOf(), select);
       state.draft = stored ? stored.ids.slice() : [null, null, null, null];
@@ -461,7 +472,24 @@ function createController(host, props, request) {
           + '（记在这台浏览器上）。要改就点「看它能学什么」。'};
       }
     }
-    if (next.species !== undefined) state.species = textOf(next.species);
+    if (next.species !== undefined) {
+      state.species = textOf(next.species);
+      // 盒子里没记过这一只、但**开局那一页记过**（在工坊换的招）⇒ 把那一份摆成草稿：
+      // 两边看到的是同一件事（人类 ④：换技能要真的实装）。盒子的本机记录优先 ——
+      // 那是玩家在**这一页**最后一次保存的，`prefilled` 为真时这里不覆盖。
+      if (!state.prefilled && state.species) {
+        const shared = readSharedLoadout(storageOf(), state.species);
+        if (shared) {
+          state.draft = shared.slice();
+          state.prefilled = true;
+          // ⚠ 这一句要**活得比读池子久**：`loadPool()` 收尾时会重设 `state.status`
+          // （原来是无条件设成 null），那样这句"这份配招是从哪儿来的"读一次学习表就没了。
+          // 所以另记一个标记，读池子那一步见到它就把这句放回去（见下面 `SEED_NOTE`）。
+          state.seededFrom = true;
+          state.status = {kind: 'ok', text: SEED_NOTE};
+        }
+      }
+    }
     if (Array.isArray(next.skills)) state.skills = next.skills.slice(0, LOADOUT_SLOTS);
     // 池子已经读过了、这一只的四个又刚拿到（详情页是两段式渲染）：这时候才补预选。
     if (prefill()) {
@@ -602,7 +630,9 @@ function createController(host, props, request) {
       // 草稿：本机记录 > 现在这四个（按名字唯一对上）。两边都没有就留空让玩家自己挑。
       prefill();
       const missed = unmatchedNote();
-      state.status = missed ? {kind: 'error', text: missed} : null;
+      // 对不上名字优先说（那是玩家要马上处理的）；否则把"这份配招来自开局那一页"那句放回去。
+      state.status = missed ? {kind: 'error', text: missed}
+        : (state.seededFrom ? {kind: 'ok', text: SEED_NOTE} : null);
     } catch (error) {
       if (seq !== state.seq) return;
       state.pool = null;
@@ -664,13 +694,20 @@ function createController(host, props, request) {
       state.raw = null;
       ids.forEach((id, i) => state.names.set(id, names[i]));
       const stored = writeStored(storageOf(), state.select, ids, names);
+      // 2026-09-28（人类 ④ 逐字：「换技能还是没实装是吧？实装一下」）：
+      // **光记在盒子这一页不算实装** —— 开局那一页（配队工坊）读的是另一份记录，
+      // 而它开局时会把那份交给服务端（`battle/new` 的 `loadouts`）。两边现在共用
+      // `loadout-store.js` 那一把钥匙，所以这里**同时写一份**：键是引擎回执里的 `pet_id`，
+      // 与工坊的键**同一个 id 空间**（真机核过）。写失败就照实说，不许乐观 UI。
+      const shared = writeSharedLoadout(storageOf(), state.petId, ids);
       const receipt = `引擎确认这四个都学得到（它能学 ${rows.length} 个）：`
         + names.map((name, i) => `第 ${i + 1} 个 ${name}`).join('、') + '。';
-      state.status = stored
-        ? {kind: 'ok', text: `已保存：${receipt}这份选择记在这台浏览器上；盒子这一页不开局，`
-          + '去开局那一页时请照这四个重新带上。'}
-        : {kind: 'warn', text: `引擎确认过这四个都学得到，但这台浏览器不让记（可能是隐私模式）：`
-          + '刷新之后这份选择就没了。'};
+      state.status = (stored && shared)
+        ? {kind: 'ok', text: `已保存：${receipt}开局那一页（配队工坊）会直接带上这四个。`}
+        : {kind: 'warn', text: `引擎确认过这四个都学得到，但没能全部记下来`
+          + `${stored ? '' : '（这台浏览器不让记盒子这一份，可能是隐私模式）'}`
+          + `${shared ? '' : '（没能交给开局那一页：浏览器不让记，或引擎回执里没带 pet_id）'}`
+          + '：刷新之后、或去开局那一页时，这份选择可能丢。'};
     } catch (error) {
       state.status = {kind: 'error', text: `没保存：${playerReasonOf(error?.message ?? error)}`};
       state.raw = String(error?.message ?? error ?? '').slice(0, 300);
