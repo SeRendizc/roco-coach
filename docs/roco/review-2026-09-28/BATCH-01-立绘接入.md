@@ -10,7 +10,7 @@
 
 | | 之前 | 现在 |
 |---|---|---|
-| 盒子列表 | 只有迪莫 1 张有官方立绘（本批次之前刚实装），其余画系别 emoji | **24/24 张全部是官方立绘**（截图 `reports/roco/capture-art/batch1-01-box-list.png`） |
+| 盒子列表 | 只有迪莫 1 张有官方立绘（本批次之前刚实装），其余画系别 emoji | **24/24 张全部是官方立绘**（截图 `docs/roco/review-2026-09-28/shots/batch01/batch1-01-box-list.png`） |
 | 盒子详情 | 只有迪莫有 | 有图就画图（256×256），没有才画 emoji |
 | 配队候选池 | 没有头像 | 每行一个立绘（截图 `batch1-03-team-candidates.png`） |
 | 配队六槽 | 没有头像 | 六个槽位各一个立绘（截图 `batch1-04-team-slots.png`） |
@@ -76,10 +76,10 @@
 
 | 截图 | 看什么 |
 |---|---|
-| `reports/roco/capture-art/batch1-01-box-list.png` | 盒子列表 24 张全是官方立绘 |
-| `reports/roco/capture-art/batch1-02-box-detail.png` | 详情页大头像 256×256 |
-| `reports/roco/capture-art/batch1-03-team-candidates.png` | 候选池每行一个立绘 |
-| `reports/roco/capture-art/batch1-04-team-slots.png` | 六槽各一个立绘（截图里六只：喵喵/水蓝蓝/火花/迪莫/水灵/火神） |
+| `docs/roco/review-2026-09-28/shots/batch01/batch1-01-box-list.png` | 盒子列表 24 张全是官方立绘 |
+| `docs/roco/review-2026-09-28/shots/batch01/batch1-02-box-detail.png` | 详情页大头像 256×256 |
+| `docs/roco/review-2026-09-28/shots/batch01/batch1-03-team-candidates.png` | 候选池每行一个立绘 |
+| `docs/roco/review-2026-09-28/shots/batch01/batch1-04-team-slots.png` | 六槽各一个立绘（截图里六只：喵喵/水蓝蓝/火花/迪莫/水灵/火神） |
 
 ## 5. 已知未完成（精确缺口）
 
@@ -105,3 +105,18 @@
 2. 手机版式实测 + 形态/双属性抽检截图（补 §5.6/5.7 的验收尾巴）。
 3. 「培养配置随战斗入口完整传递」与小芽当前对象通路（对应 P0-02 / P0-05），
    这一条与 B 段耦合：进战斗的那份六只/四技能必须与详情页看到的是同一份。
+
+
+---
+
+## 7. Lead 自纠（2026-09-29，本批次交付之后发现的两处）
+
+1. **截图原先没进仓库**：`.gitignore:79` 有一条 `reports/roco/**/*.png` ——
+   我把交付截图写在 `reports/roco/capture-art/`，所以它们**只在磁盘上、clone 下来没有**。
+   现已复制到 `docs/roco/review-2026-09-28/shots/batch01/`（这一处不被忽略）并随提交入库。
+   上面第 4 节的路径已改成新位置。**给队友的提醒：截图要放 `docs/.../shots/`，不要放 `reports/`。**
+2. **浏览器串行锁踩了两个坑**（约定已升级，写在 `tmp/BROWSER-LOCK.md`）：
+   ① 第一版只有 `mkdir`，有一把锁被留了 5 分多钟、期间没有任何 Chrome，把四个人全堵住
+   ⇒ 现在**必须写 owner（pid + 时间戳）**，且「owner 超 5 分钟 + 无 Chrome」允许任何人清掉；
+   ② 我自己把清理写成了无条件 `rm -rf`，而那一刻锁已被队友重新拿上 ⇒ **删了别人的锁**
+   （当时没有 Chrome 在跑，没造成碰撞）。正确写法是**只删自己的**（拿不到就一个字都不删）。

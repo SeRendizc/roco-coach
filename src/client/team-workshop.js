@@ -511,8 +511,14 @@ export function axisLevelWord(value) {
   for (const [edge, word] of AXIS_LEVEL_BANDS) if (value < edge) return word;
   return '偏高';
 }
-/** 主行文案：只给**能读的一句话**。没有值就返回 null，不拿 0 顶上。 */
-function axisValueText(axis) {
+/**
+ * 主行文案：只给**能读的一句话**。没有值就返回 null，不拿 0 顶上。
+ *
+ * 2026-09-29：**导出**是为了让 `tests/roco-workshop.test.js` 能直接钉住一件事 ——
+ * 「假设的权重永远不许被说成观测频率」（Codex P0-04）。走页面渲染去测那句话成本太高，
+ * 而这条判据要的正是这句话本身。
+ */
+export function axisValueText(axis) {
   if (!axis.available || axis.value === null || axis.value === undefined) return null;
   if (axis.value_kind === 'archetype') {
     // 2026-09-26（人类：面板不是人话）：主行以前直接印**机器 id**（`wing_king_force` 这种）
@@ -524,7 +530,20 @@ function axisValueText(axis) {
     const raw = axis.value.label ?? axis.value.archetype_label;
     const label = typeof raw === 'string' && raw ? raw : null;
     const weight = Number.isFinite(axis.value.weight) && axis.value.weight > 0 ? axis.value.weight : null;
-    const share = weight ? `这类在环境里大约每 ${Math.max(2, Math.round(1 / weight))} 局遇到 1 次` : '环境里占多少没有数据';
+    // ⚠ 2026-09-29 改（Codex 体检报告 **P0-04**：环境权重与数值宣称）：
+    // 这一句原来不分来源，一律说「这类在环境里**大约每 N 局遇到 1 次**」——
+    // 而 N 是从一个**赛前假设的权重**（各体系等权）算出来的，**不是实测出场率**。
+    // 服务端其实早就把来源放在 `axis.distribution_kind` 里了（`measured` / `assumption` / `null`），
+    // 同一份回执的 `available_note` 也写着「先假设『对手会用什么体系』…不是实测数据」——
+    // 也就是**同一屏上两句互相打架**。现在按来源分档说，**测过才敢说次数**：
+    //   · `measured` ⇒ 说「实测对手分布里大约每 N 局遇到 1 次」；
+    //   · 其余（假设 / 没标） ⇒ 只说这是**赛前假设的权重**，并明说不是实测出场率。
+    // 判据的意图：**假设的权重永远不许被说成观测频率**（`tests/roco-workshop.test.js` 有一条钉它）。
+    const measured = axis.distribution_kind === 'measured';
+    const share = !weight ? '环境里占多少没有数据'
+      : (measured
+        ? `这类在实测的对手分布里大约每 ${Math.max(2, Math.round(1 / weight))} 局遇到 1 次`
+        : `赛前假设这类占 ${Math.round(weight * 100)}%（各体系等权）——这是假设的权重，不是实测出场率`);
     return `${label ? `撞上「${label}」这类` : '撞上某类体系时'}最吃亏（${share}）`;
   }
   const word = axisLevelWord(axis.value);
@@ -535,6 +554,7 @@ function axisValueText(axis) {
 function axisRawText(axis) {
   if (!axis.available || axis.value === null || axis.value === undefined) return null;
   if (axis.value_kind === 'archetype') return `archetype_id=${axis.value.archetype_id ?? NO_ITEM} · weight=${axis.value.weight ?? NO_ITEM}`
+   + ` · distribution_kind=${axis.distribution_kind ?? NO_ITEM}`
    + ((axis.value.label ?? axis.value.archetype_label) ? ` · label=${axis.value.label ?? axis.value.archetype_label}` : '');
   const unit = axis.value_kind === 'spread' ? '相对分极差' : '相对分（0～1 的序数标度）';
   return `${axis.value} · ${unit}`;

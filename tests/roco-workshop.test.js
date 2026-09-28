@@ -983,3 +983,36 @@ test('换招要读共用记录、也要写回去（否则刷新丢、盒子里�
       `${f} 不许自己写死这个键名（只能从 loadout-store.js 引）`);
   }
 });
+
+// ── 环境权重不许被说成观测频率（2026-09-29，Codex 体检报告 P0-04）────────────────────
+//
+// 事实经过（审计实测）：`team-workshop.js` 把「最怕的体系」那一轴渲染成
+// 「这类在环境里**大约每 N 局遇到 1 次**」，而 N 是从一个**赛前假设的权重**（各体系等权）
+// 算出来的 —— 不是实测出场率。同一份回执的 `available_note` 里明明写着
+// 「先假设"对手会用什么体系"（现在各体系按同等权重）…不是实测数据」，
+// 也就是**同一屏上两句互相打架**，而且读起来像观测数据。
+//
+// 服务端早就有来源字段 `axis.distribution_kind`（`measured` / `assumption` / `null`），
+// 所以这只是客户端没有按它分档。判据：**测过才敢说次数**。
+test('环境权重按来源分档：假设的权重不许说成「每 N 局遇到 1 次」', async () => {
+  const {axisValueText} = await import('../src/client/team-workshop.js');
+  const base = {id: 'worst_archetype', label: '最怕的体系', available: true, value_kind: 'archetype'};
+  const arche = {archetype_id: 'wing_king_force', label: '翼王强攻', weight: 1 / 7};
+
+  const assumed = axisValueText({...base, value: arche, distribution_kind: 'assumption'});
+  assert.ok(assumed, '有值时主行要有话');
+  assert.doesNotMatch(assumed, /每\s*\d+\s*局/, `假设的权重不许说成遇到频率：${assumed}`);
+  assert.match(assumed, /假设/, `要说清这是假设：${assumed}`);
+  assert.match(assumed, /不是实测(出场率|数据)/, `要明说不是实测：${assumed}`);
+
+  const unmarked = axisValueText({...base, value: arche, distribution_kind: null});
+  assert.doesNotMatch(unmarked, /每\s*\d+\s*局/, `来源没标时同样不许说成频率：${unmarked}`);
+
+  const measured = axisValueText({...base, value: arche, distribution_kind: 'measured'});
+  assert.match(measured, /每\s*7\s*局/, `实测的才可以说次数（1/(1/7)=7）：${measured}`);
+  assert.match(measured, /实测/, `实测来源要写出来：${measured}`);
+
+  // 反证：把两种来源的文案对调，必须被上面三条断言抓住
+  const swapped = axisValueText({...base, value: arche, distribution_kind: 'measured'});
+  assert.notEqual(swapped, assumed, '实测与假设的文案必须不同（否则分档没生效）');
+});
