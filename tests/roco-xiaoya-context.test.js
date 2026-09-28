@@ -16,7 +16,7 @@ import {readFileSync} from 'node:fs';
 
 import {
   focusFromUrl, focusSnapshotFrom, mergeFocusIntoProfile, detectFocus, createFocusProvider,
-  FOCUS_KEY, FOCUS_EVENT,
+  focusFromClick, FOCUS_KEY, FOCUS_EVENT,
 } from '../src/client/xiaoya.js';
 import {focusAsk, focusFactAnswer, focusAdviceAnswer, focusIntent, focusDetailOf,
   localFactAsk, runCoach, buildContext} from '../src/coach/runtime.js';
@@ -460,4 +460,71 @@ test('⑨c 端到端路由（这一条是**改钉**：函数对了不等于路�
   assert.match(factRun.text, /性格「专注」/);
   assert.doesNotMatch(factRun.text, /\*\*建议\*\*/, '事实问不许被建议那一支抢走');
   assert.notEqual(factRun.text, adviceRun.text, '两次的回答必须明显不同');
+});
+
+// ── art-finish D①-b / D①-c（2026-09-29）：六槽钩子要有人读、焦点不许滞后一拍 ──
+//
+// D 的独立验收在真机上量到两条：`data-tw-slot-instance` **有写入、无读取方**（点六槽不派发焦点）；
+// 而且**点完立刻读** `[data-xy-focus]` 仍是"没在看"，要**再问一句**才变（滞后一拍）。
+// 这两条直接决定"小芽知道我在看谁"这条主线成不成立，所以钉在纯函数 + provider 两层上。
+
+/** 一个最小的假元素（只实现 `closest`/`getAttribute`/`querySelector`，够 `focusFromClick` 用）。 */
+function fakeEl(attrs = {}, kids = {}) {
+  const self = {
+    getAttribute: (name) => (name in attrs ? attrs[name] : null),
+    querySelector: (sel) => kids[sel] ?? null,
+    closest: (sel) => (sel.replace(/^\[|\]$/g, '') in attrs ? self : null),
+    textContent: kids.text ?? '',
+  };
+  return self;
+}
+
+test('⑫ 点第 N 格 → 焦点是**这一格的个体 id**（不许按名字猜物种）', () => {
+  // 六槽卡片：`data-tw-slot-instance` 是这一格装的那个个体（team-workshop.js 写的钩子）。
+  const slot = fakeEl({'data-tw-slot-instance': 'own-0004', 'data-tw-slot': '3'},
+    {'.tw-who': {textContent: '迪莫'}});
+  const inner = {...fakeEl(), closest: (sel) => (sel === '[data-tw-slot-instance]' ? slot : null)};
+  assert.deepEqual(focusFromClick(inner),
+    {instanceId: 'own-0004', scene: 'team-slot', name: '迪莫'});
+  // 候选池那张卡（`data-tw-instance`）：槽位钩子不在时用它。
+  const card = fakeEl({'data-tw-instance': 'own-0007'}, {'.tw-name': {textContent: '魔力猫'}});
+  const innerCard = {...fakeEl(), closest: (sel) => (sel === '[data-tw-instance]' ? card : null)};
+  assert.deepEqual(focusFromClick(innerCard),
+    {instanceId: 'own-0007', scene: 'team-candidate', name: '魔力猫'});
+  // 空钩子（空格位/名字重复那种）不许当成焦点 —— 空串不是 id。
+  const empty = fakeEl({'data-tw-slot-instance': '  '});
+  const innerEmpty = {...fakeEl(),
+    closest: (sel) => (sel === '[data-tw-slot-instance]' ? empty : null)};
+  assert.equal(focusFromClick(innerEmpty), null);
+  // 点在不带钩子的地方 ⇒ 不改变焦点。
+  assert.equal(focusFromClick(fakeEl()), null);
+  assert.equal(focusFromClick(null), null);
+  // 反漂移：这两个钩子名必须还在 `team-workshop.js` 里写着（改一边不改另一边要红）。
+  assert.match(read('src/client/team-workshop.js'), /data-tw-slot-instance=/,
+    '六槽卡片的个体钩子（writer 那一半）');
+  assert.match(read('src/client/team-workshop.js'), /data-tw-instance=/,
+    '候选池卡片的个体钩子');
+});
+
+test('⑬ 点完**立刻**就是焦点（不许滞后一拍）：状态里同步换人，不用等下一次 resolve', async () => {
+  const provider = createFocusProvider({doc: {body: {dataset: {}}, getElementById: () => null},
+    loc: {search: ''}, storage: null, win: {}, fetchImpl: async () => { throw Error('本用例不该联网'); }});
+  const seen = [];
+  provider.subscribeContextChanged((context) => seen.push({id: context.focusInstanceId,
+    live: context.focusLive, snap: context.visibleSnapshot}));
+  assert.equal(provider.getContext().focusInstanceId, null, '起点：没在看具体的某一只');
+  // 玩家那一下点击（同步事实）⇒ 状态必须**当场**跟上。
+  provider.notePicked({instanceId: 'own-0004', scene: 'team-slot', name: '迪莫'});
+  const now = provider.getContext();
+  assert.equal(now.focusInstanceId, 'own-0004', '点完立刻读就必须是这一只（滞后一拍 = 这条红）');
+  assert.equal(now.focusName, '迪莫');
+  assert.equal(now.focusLive, true);
+  assert.equal(now.visibleSnapshot, null, '详情还没取回来 ⇒ 快照是 null，但"在看谁"已经有答案');
+  assert.ok(seen.some((row) => row.id === 'own-0004'), '订阅方（那一行）当场收到');
+  // 再点另一格：还是当场换。
+  provider.notePicked({instanceId: 'own-0007', scene: 'team-slot', name: '魔力猫'});
+  assert.equal(provider.getContext().focusInstanceId, 'own-0007');
+  // 空 id 不许把焦点清掉（误点空格位不该让"我在看谁"消失）。
+  provider.notePicked({instanceId: '', scene: 'team-slot'});
+  assert.equal(provider.getContext().focusInstanceId, 'own-0007');
 });

@@ -19,36 +19,59 @@ export function requestCoach(payload){
 async function executeCoach(payload,signal){
  const originalMessage=payload.message;
  if((payload.context.battle?.result||!payload.context.battle&&payload.context.lastMatch)&&/优化|总结|分析|输在哪|为什么输|为什么赢|打得怎么样/.test(payload.message)&&!/回合|整局|整场|上一局/.test(payload.message))payload={...payload,message:'关于这份整局战报：'+payload.message};
- const local=await runCoach(payload);
- if(local.localOnly||local.route==='policy')return {...local,stateToken:payload.stateToken};
+ // ── 执行位置：**先服务端**（Codex P0-01 的核心一条）──────────────────────────
+ //
+ // 修前是「先在浏览器里 `runCoach`，本地结果一出来就 `return`（`localOnly` / `route==='policy'`
+ // 两支）」，而**没有密钥时**后面那句 `session.configured===false` 又直接返回本地那一份 ——
+ // 于是 `/api/coach` **一次都没发出去**。后果不是"少查一次"，是：
+ //   · 浏览器里那层规则资料工具（`coach/toolbox.js` 动态 import `./roco-client.js`）**根本不在
+ //     静态模块图里** ⇒ 每次事实问都在浏览器里失败（网络面板里那条 404 就是它）；
+ //   · 失败之后落到陪练/军师那两句模板 —— 「进入一场 PVE 对战后…」「这条我没依据…」，
+ //     与《洛克王国：世界》无关（真人实测就是这么答的）。
+ //
+ // 现在：**浏览器只负责输入/上下文/显示**；游戏数据与工具一律由服务端执行，
+ // 而服务端在没有密钥时走的是**确定性执行**（`provider:'local'`，0 次云端调用）——
+ // 资料照样查得到。见 `src/server/index.js` 的 `/api/coach`（`baseProvider` 只在有凭据时才建）。
  payload={...payload,message:payload.message+RESPONSE_INSTRUCTIONS};
  const assembled=assembleContext(payload);
  try{
- if(!session||session.configured===false)await connectionStatus();
- if(session.configured===false)return {...local,stateToken:payload.stateToken,fallbackReason:'未连接模型，显示本局规则分析'};
- // 重启后端会清空内存里的会话，页面上还留着旧 cookie，第一个请求必然 403。
- // 这里重建会话并原样重试一次，不让用户看到一次莫名其妙的失败。
- const send=async()=>{const r=await fetch('/api/coach',{method:'POST',headers:{'Content-Type':'application/json','X-Coach-CSRF':session.csrf},body:JSON.stringify(assembled.payload),signal});let d;try{d=await r.json();}catch{throw Error('后端响应异常');}return {r,d};};
- let {r:response,d:data}=await send();
- if(response.status===403){session=null;await connectionStatus();if(session.configured!==false)({r:response,d:data}=await send());}
- if(!response.ok){if(response.status===403)session=null;throw Error(data.error||('教练请求失败（HTTP '+response.status+'）'));}const validation=checkGroundedAnswer(data);
- // 陪练的档位约束与事实检查走同一条降级路径：模型把 R1 写成安慰、或用问句追问时，
- // 直接回退到 runCoach 已经算好的本机记录模板（local），而不是把越界的话展示给玩家。
- const restraint=data.route==='companion'?companionRestraint(data,payload):{valid:true,reasons:[]};
- if(data.provider==='deepseek'&&!validation.valid){const fallback=await runCoach(payload);data={...fallback,provider:'local-fallback',validation,fallbackReason:'模型回答未通过事实检查，显示本局规则分析',stateToken:payload.stateToken};}
- else if(data.provider==='deepseek'&&!restraint.valid)data={...local,provider:'local-fallback',restraint,restraintCodes:restraint.reasons,fallbackReason:'模型这次说得不太合适，已换成本局规则结论（具体原因记在日志里，不往界面上抛内部代码）',stateToken:payload.stateToken};
- else if(!restraint.valid)data={...data,restraint};
- data.memory={...data.memory,journal:payload.memory.journal||[],reflections:payload.memory.reflections||{},watches:payload.memory.watches||[],quizCount:payload.memory.quizCount||0,goal:data.memory?.goal||payload.memory.goal||null};data.memory.dialogue=(data.memory.dialogue||[]).map(m=>m.role==='user'&&m.content===payload.message?{...m,content:originalMessage}:m);data.contextAudit=assembled.audit;return data;
- }catch(error){if(signal?.aborted||error?.name==='AbortError')throw error;const fallback=await runCoach(payload);
- // 把真实原因带出来，不再一律显示"暂不可用"，否则无法区分会话失效、鉴权失败和超时。
- const why=error?.message||'网络异常';
- // 这句话玩家会直接看到（教练面板顶部），所以不能把内部错误码原样抛出去。
- // 原来的写法会把「教练上下文无效」这类服务端措辞端到玩家面前。
- const friendly=/超时|aborted|timeout/i.test(why)?'等模型太久了，先按本局规则给你结论'
-  :/上下文无效|invalid|400/.test(why)?'这次没能把局面传给模型，先按本局规则给你结论'
-  :/403|鉴权|auth|会话/.test(why)?'模型连接过期了，正在重连；先按本局规则给你结论'
-  :'模型暂时没答上来，先按本局规则给你结论';
- return {...fallback,provider:'local-fallback',fallbackReason:friendly,stateToken:payload.stateToken,contextAudit:assembled.audit};}
+  if(!session)await connectionStatus();
+  // 重启后端会清空内存里的会话，页面上还留着旧 cookie，第一个请求必然 403。
+  // 这里重建会话并原样重试一次，不让用户看到一次莫名其妙的失败。
+  const send=async()=>{const r=await fetch('/api/coach',{method:'POST',headers:{'Content-Type':'application/json','X-Coach-CSRF':session.csrf},body:JSON.stringify(assembled.payload),signal});let d;try{d=await r.json();}catch{throw Error('后端响应异常');}return {r,d};};
+  let {r:response,d:data}=await send();
+  if(response.status===403){session=null;await connectionStatus();({r:response,d:data}=await send());}
+  if(!response.ok){if(response.status===403)session=null;throw Error(data.error||('教练请求失败（HTTP '+response.status+'）'));}
+  // 服务端已经把「本机工具算出来的那一份」也跑过了（它那边的工具是真的能跑的）——
+  // 所以浏览器**不再自己跑一遍**去覆盖它。只有服务端明确说这一轮没成时才回落。
+  if(data?.dedupFailed===true||data?.ok===false){throw Error(data.error||'服务端这一轮没有拿到答案');}
+  const validation=checkGroundedAnswer(data);
+  // 陪练的档位约束与事实检查走同一条降级路径：模型把 R1 写成安慰、或用问句追问时，
+  // 回退到**服务端已经算好的**本机版本（`data.localText`），而不是把越界的话展示给玩家。
+  const restraint=data.route==='companion'?companionRestraint(data,payload):{valid:true,reasons:[]};
+  if(data.provider==='deepseek'&&!validation.valid){data={...data,provider:'local-fallback',validation,
+    text:data.localText??data.text,fallbackReason:'模型回答未通过事实检查，显示本局规则分析'};}
+  else if(data.provider==='deepseek'&&!restraint.valid){data={...data,provider:'local-fallback',restraint,
+    restraintCodes:restraint.reasons,text:data.localText??data.text,
+    fallbackReason:'模型这次说得不太合适，已换成本局规则结论（具体原因记在日志里，不往界面上抛内部代码）'};}
+  else if(!restraint.valid)data={...data,restraint};
+  data.memory={...data.memory,journal:payload.memory.journal||[],reflections:payload.memory.reflections||{},watches:payload.memory.watches||[],quizCount:payload.memory.quizCount||0,goal:data.memory?.goal||payload.memory.goal||null};data.memory.dialogue=(data.memory.dialogue||[]).map(m=>m.role==='user'&&m.content===payload.message?{...m,content:originalMessage}:m);
+  return {...data,execution:'server',stateToken:payload.stateToken??data.stateToken,contextAudit:assembled.audit};
+ }catch(error){
+  if(signal?.aborted||error?.name==='AbortError')throw error;
+  // 服务端这一轮没成：本地那一份只当**底稿**，而且**不许**拿它冒充服务端的资料。
+  // `runCoach` 自己会在"规则资料工具跑不起来"时给出**点名缺哪一项**的失败句
+  // （见 runtime.js 的 `serverDataFailure`），这里只负责把它端出去 + 记结构化回执。
+  const fallback=await runCoach(payload);
+  const why=error?.message||'网络异常';
+  const need=fallback?.taskFailure??null;
+  const friendly=need?`连不上服务端的资料，缺的是「${need.missing}」`
+   :/超时|aborted|timeout/i.test(why)?'等模型太久了，先按本局规则给你结论'
+   :/上下文无效|invalid|400/.test(why)?'这次没能把局面传给模型，先按本局规则给你结论'
+   :/403|鉴权|auth|会话/.test(why)?'模型连接过期了，正在重连；先按本局规则给你结论'
+   :'模型暂时没答上来，先按本局规则给你结论';
+  return {...fallback,provider:'local-fallback',fallbackReason:friendly,execution:'local-fallback',
+   ...(need?{taskFailure:{...need,transport:why}}:{}),stateToken:payload.stateToken,contextAudit:assembled.audit};}
 }
 // 陪练档位扫描用的最小事实集：只判断「有没有真实经历可以支撑过去陈述」和「课程名是否真的记录过」。
 // playerMessage 传的是**玩家原话**（先把 RESPONSE_INSTRUCTIONS 切掉）：问候轮的那条硬线

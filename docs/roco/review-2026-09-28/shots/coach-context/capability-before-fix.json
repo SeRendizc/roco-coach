@@ -1,0 +1,613 @@
+{
+  "base": "http://127.0.0.1:8765",
+  "mode": "normal",
+  "startedAt": "2026-09-28T17:49:28.006Z",
+  "questions": [
+    {
+      "question": "雨天水系伤害加多少？",
+      "answer": "这条我没依据，换个说法或点名一只精灵。",
+      "requests": [
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:8765/api/roco/box?kind=mine&limit=48",
+          "status": 200,
+          "failed": null,
+          "snippet": null
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:8765/src/coach/roco-client.js",
+          "status": null,
+          "failed": "net::ERR_ABORTED",
+          "snippet": null
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:8765/api/bootstrap",
+          "status": 200,
+          "failed": null,
+          "snippet": "{\"runtimeVersion\":\"0.11\",\"configured\":false,\"verified\":false,\"model\":\"deepseek-flash\",\"provider\":\"local\",\"rag_mode\":\"shadow\",\"started_at\":\"2026-09-28T16:36:34.037Z\",\"assets\":60,\"csrf\":\"049fcbaccf7317921584f6f5ca66e9cd50d6580c6e3b06ed\",\"nonce\":\"aa1a211ab033e3af1756b8d37f8d4acc\",\"publicKey\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs5G4iPFmZOzfKio/UWwFNQ3safsBemrbzCsZZRjb5AK/uHjFjVPMRt1loqlqXeGjDZgmSLs9mKbbjFyQwZ40IzU9o37AjX+F7ls7AHPWpIA5JiJdlGVGJfDmWMWUkl6BQk74QIlQXx6Y7sMVgSZCwk/tVjRSL9quKxEEvKKR5u0AgjqjNoja6fc7tBDb4BEAdhDjUdyMlQXgaDdYgAEBI88Chk+LbUwZ/tBB+43FRNQ9sEGRbhVb4IJAqPz8w5uO0Z53n/juh"
+        }
+      ]
+    },
+    {
+      "question": "火系克制什么属性？",
+      "answer": "进入一场 PVE 对战后，我可以结合当前生命、能量和队伍比较行动。",
+      "requests": [
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:8765/api/bootstrap",
+          "status": 200,
+          "failed": null,
+          "snippet": "{\"runtimeVersion\":\"0.11\",\"configured\":false,\"verified\":false,\"model\":\"deepseek-flash\",\"provider\":\"local\",\"rag_mode\":\"shadow\",\"started_at\":\"2026-09-28T16:36:34.037Z\",\"assets\":60,\"csrf\":\"049fcbaccf7317921584f6f5ca66e9cd50d6580c6e3b06ed\",\"nonce\":\"003ad50430dc6355f9f1a119fac90c56\",\"publicKey\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs5G4iPFmZOzfKio/UWwFNQ3safsBemrbzCsZZRjb5AK/uHjFjVPMRt1loqlqXeGjDZgmSLs9mKbbjFyQwZ40IzU9o37AjX+F7ls7AHPWpIA5JiJdlGVGJfDmWMWUkl6BQk74QIlQXx6Y7sMVgSZCwk/tVjRSL9quKxEEvKKR5u0AgjqjNoja6fc7tBDb4BEAdhDjUdyMlQXgaDdYgAEBI88Chk+LbUwZ/tBB+43FRNQ9sEGRbhVb4IJAqPz8w5uO0Z53n/juh"
+        }
+      ]
+    },
+    {
+      "question": "喵喵的种族值是多少？",
+      "answer": "「喵喵」这一问我没核到：规则服务不可用：Failed to fetch dynamically imported module: http://127.0.0.1:8765/src/c。手游图鉴（622 只）里查不到这个名字，我不凭印象给它编数值。",
+      "requests": [
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:8765/api/bootstrap",
+          "status": 200,
+          "failed": null,
+          "snippet": "{\"runtimeVersion\":\"0.11\",\"configured\":false,\"verified\":false,\"model\":\"deepseek-flash\",\"provider\":\"local\",\"rag_mode\":\"shadow\",\"started_at\":\"2026-09-28T16:36:34.037Z\",\"assets\":60,\"csrf\":\"049fcbaccf7317921584f6f5ca66e9cd50d6580c6e3b06ed\",\"nonce\":\"b0d5d7fb494e66718a45df78a7ca81b7\",\"publicKey\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs5G4iPFmZOzfKio/UWwFNQ3safsBemrbzCsZZRjb5AK/uHjFjVPMRt1loqlqXeGjDZgmSLs9mKbbjFyQwZ40IzU9o37AjX+F7ls7AHPWpIA5JiJdlGVGJfDmWMWUkl6BQk74QIlQXx6Y7sMVgSZCwk/tVjRSL9quKxEEvKKR5u0AgjqjNoja6fc7tBDb4BEAdhDjUdyMlQXgaDdYgAEBI88Chk+LbUwZ/tBB+43FRNQ9sEGRbhVb4IJAqPz8w5uO0Z53n/juh"
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "name": "② 服务端把能力状态与模型状态**分开**报出来（serverReady / toolsReady / modelReady 三个独立字段）",
+      "ok": false,
+      "detail": "bootstrap 回执里没有 capabilities：{\"runtimeVersion\":\"0.11\",\"configured\":false,\"verified\":false,\"model\":\"deepseek-flash\",\"provider\":\"local\",\"rag_mode\":\"sha"
+    },
+    {
+      "name": "②a 模型没连**不许**被说成\"游戏数据不可用\"（两条状态各自的后果写在页面上）",
+      "ok": false,
+      "detail": "页面上那条：null"
+    },
+    {
+      "name": "① 「雨天水系伤害加多少？」走了服务端执行（网络面板里有 POST /api/coach 200）",
+      "ok": false,
+      "detail": "一次 /api/coach 都没有"
+    },
+    {
+      "name": "①a 「雨天水系伤害加多少？」答的是洛手的内容（没有旧练习局口气）",
+      "ok": false,
+      "detail": "命中旧语料：这条我没依据"
+    },
+    {
+      "name": "③ 「雨天水系伤害加多少？」没说笼统的\"暂时无法回答\"",
+      "ok": true,
+      "detail": "（没有含糊措辞）"
+    },
+    {
+      "name": "① 「火系克制什么属性？」走了服务端执行（网络面板里有 POST /api/coach 200）",
+      "ok": false,
+      "detail": "一次 /api/coach 都没有"
+    },
+    {
+      "name": "①a 「火系克制什么属性？」答的是洛手的内容（没有旧练习局口气）",
+      "ok": false,
+      "detail": "命中旧语料：进入一场 PVE 对战后"
+    },
+    {
+      "name": "③ 「火系克制什么属性？」没说笼统的\"暂时无法回答\"",
+      "ok": true,
+      "detail": "（没有含糊措辞）"
+    },
+    {
+      "name": "① 「喵喵的种族值是多少？」走了服务端执行（网络面板里有 POST /api/coach 200）",
+      "ok": false,
+      "detail": "一次 /api/coach 都没有"
+    },
+    {
+      "name": "①a 「喵喵的种族值是多少？」答的是洛手的内容（没有旧练习局口气）",
+      "ok": true,
+      "detail": "「喵喵」这一问我没核到：规则服务不可用：Failed to fetch dynamically imported module: http://127.0.0.1:8765/src"
+    },
+    {
+      "name": "③ 「喵喵的种族值是多少？」没说笼统的\"暂时无法回答\"",
+      "ok": true,
+      "detail": "（没有含糊措辞）"
+    },
+    {
+      "name": "⑥ 控制台没有报错",
+      "ok": true,
+      "detail": "console=0 pageerror=0"
+    }
+  ],
+  "shots": [
+    "docs/roco/review-2026-09-28/shots/coach-context/capability-normal-xiaoya-page.png"
+  ],
+  "capability": {
+    "statusLine": "未连接模型：小芽只给规则事实（去 connect.html 配置）",
+    "capability": null,
+    "bootstrap": "{\"runtimeVersion\":\"0.11\",\"configured\":false,\"verified\":false,\"model\":\"deepseek-flash\",\"provider\":\"local\",\"rag_mode\":\"shadow\",\"started_at\":\"2026-09-28T16:36:34.037Z\",\"assets\":60,\"csrf\":\"049fcbaccf7317921584f6f5ca66e9cd50d6580c6e3b06ed\",\"nonce\":\"a99ea65c3344231bfc7311fdac01ade4\",\"publicKey\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs5G4iPFmZOzfKio/UWwFNQ3safsBemrbzCsZZRjb5AK/uHjFjVPMRt1loqlqXeGjDZgmSLs9mKbbjFyQwZ40IzU9o37AjX+F7ls7AHPWpIA5JiJdlGVGJfDmWMWUkl6BQk74QIlQXx6Y7sMVgSZCwk/tVjRSL9quKxEEvKKR5u0AgjqjNoja6fc7tBDb4BEAdhDjUdyMlQXgaDdYgAEBI88Chk+LbUwZ/tBB+43FRNQ9sEGRbhVb4IJAqPz8w5uO0Z53n/juh",
+    "bootstrapStatus": 200
+  },
+  "exchanges": [
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/xiaoya.html",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/client/style.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/client/xiaoya.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/client.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/client/box-individuals.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/client/stale-page.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/game/progression.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/individuals.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/runtime.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/memory.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/experience.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/client/evidence-view.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/scheduler.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/game/engine.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/talent.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/policy.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/game/battle-modes.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/env.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/companion.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/activity.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/toolbox.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/strategist.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/profile-shape.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/teacher.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/nature-advice.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/evidence-levels.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/evolution-advice.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/plain-words.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/intervention-model.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/natures-data.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/team-request.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/game/content.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/pet-names-data.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/intervention-model.generated.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/api/bootstrap",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/api/bootstrap",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/favicon.ico",
+      "status": 404,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/xiaoya.html",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/client/style.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/client/xiaoya.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/client.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/game/progression.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/client/box-individuals.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/individuals.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/client/stale-page.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/memory.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/runtime.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/experience.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/client/evidence-view.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/scheduler.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/game/engine.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/talent.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/game/battle-modes.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/policy.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/companion.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/toolbox.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/env.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/activity.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/strategist.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/teacher.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/profile-shape.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/nature-advice.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/evidence-levels.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/evolution-advice.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/plain-words.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/intervention-model.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/natures-data.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/pet-names-data.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/game/content.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/intervention-model.generated.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/team-request.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/api/bootstrap",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/api/bootstrap",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/api/roco/box?kind=mine&limit=48",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/src/coach/roco-client.js",
+      "status": null,
+      "failed": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/api/bootstrap",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/api/bootstrap",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8765/api/bootstrap",
+      "status": 200,
+      "failed": null
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "verdict": "fail",
+  "failed": [
+    "② 服务端把能力状态与模型状态**分开**报出来（serverReady / toolsReady / modelReady 三个独立字段）",
+    "②a 模型没连**不许**被说成\"游戏数据不可用\"（两条状态各自的后果写在页面上）",
+    "① 「雨天水系伤害加多少？」走了服务端执行（网络面板里有 POST /api/coach 200）",
+    "①a 「雨天水系伤害加多少？」答的是洛手的内容（没有旧练习局口气）",
+    "① 「火系克制什么属性？」走了服务端执行（网络面板里有 POST /api/coach 200）",
+    "①a 「火系克制什么属性？」答的是洛手的内容（没有旧练习局口气）",
+    "① 「喵喵的种族值是多少？」走了服务端执行（网络面板里有 POST /api/coach 200）"
+  ]
+}

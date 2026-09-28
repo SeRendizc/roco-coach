@@ -1,0 +1,712 @@
+{
+  "base": "http://127.0.0.1:59614",
+  "pid": 92129,
+  "mode": "own-server",
+  "startedAt": "2026-09-28T18:08:37.248Z",
+  "questions": [
+    {
+      "question": "雨天水系伤害加多少？",
+      "answer": "天气只能存在一种，持续 8 回合。雨天：天气为雨天时，双方的水系技能威力+75%；沙暴：天气为沙暴时，双方的地系技能能耗减半；暴风雪：天气为暴风雪时，双方每回合结束获得2层冻结（冰系精灵免疫此效果）；雷鸣：天气为雷鸣时，双方每回合结束获得1层引电（电系精灵免疫此效果）。（来源：规则配置 mobile_s4_candidate_v3（模式 pvp-standard-six-pet 绑定的那份） 里的天气声明，依据等级 官方当前材料；数值逐字来自配置，不换算）",
+      "requests": [
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:59614/api/roco/box?kind=mine&limit=48",
+          "status": 200,
+          "failed": null,
+          "snippet": null
+        },
+        {
+          "method": "POST",
+          "url": "http://127.0.0.1:59614/api/coach",
+          "status": 200,
+          "failed": null,
+          "snippet": "{\"text\":\"天气只能存在一种，持续 8 回合。雨天：天气为雨天时，双方的水系技能威力+75%；沙暴：天气为沙暴时，双方的地系技能能耗减半；暴风雪：天气为暴风雪时，双方每回合结束获得2层冻结（冰系精灵免疫此效果）；雷鸣：天气为雷鸣时，双方每回合结束获得1层引电（电系精灵免疫此效果）。（来源：规则配置 mobile_s4_candidate_v3（模式 pvp-standard-six-pet 绑定的那份） 里的天气声明，依据等级 官方当前材料；数值逐字来自配置，不换算）\",\"evidence\":[\"ev:roco-world-s4-2026-09-10:rulesets#mobile_s4_candidate_v3.json\",\"规则配置 mobile_s4_candidate_v3（模式 pvp-standard-six-pet 绑定的那份） 的 policies.weather_policy：依据等级 OFFICIAL_CURRENT，台账编号 EV-WEATHER-STANDARD-PVP\",\"名单说明：profile.pets 里是**候选池的一页**（本页 48 条候选宇宙共 542 条），**不是玩家名下的全部**。玩家问\\\"我有多少只/都有哪些\\\"时按这些数回答，别把本页条数当成总数。\"],\"toolTrace\":[{\"id\":\"tool:1\",\"tool\":\"query_rules\",\"args\":{\"kind\":\"policy\",\"name\":\"weather\",\"mode_id\":\"pvp-standard-six-pet\",\"state_version\":0},\"result\":{\"tool\":\"query_rules\",\"ok\":true,\"ruleset_id\":\"roco-world-s4-2026-09-10\",\"state_version\":0,\"coverage\":1,\"evidence_ids\":[\"ev:roco-world-s4-2026-09-10:rulesets#mobile_s4_candidate_v3.json\"],\"latency_ms\":144.861,\"engine_latency_ms\":2.45,\"error_type\":null,\"failure_class\":null,\"limitations\":[],\"doesNotClaim\":\"本记录是规则配置里 `policies.weather_policy` 的逐字转录（生成器从登记表照抄）。数值以「当前规则集」为准；更早版本的口径登记在 `unknowns` 里，不改写。\",\"freshness\":{\"checked\":true,\"stale\":false,\"requested\":0,\"current\":0,\"source\":\"context.stateVersion\",\"establishedBy\":\"authority\"},\"result\":{\"record\":\"policy\",\"name\":\"weather\",\"ruleset_config_id\":\"mobile_s4_candidate_v3\",\"enabled\":true,\"mode_id\":\"pvp-standard-six-pet\",\"ruleset_binding\":\"mobile_s4_candidate_v3\",\"value\":\"enabled\",\"confidence\":\"OFFICIAL_CURRENT\",\"evidence_id\":\"EV-WEATHER-STANDARD-PVP\",\"max_concurrent\":1,\"duration_turns\":8,\"duration_source\":\"skill_desc\",\"effects\":{\"雨天\":{\"element\":\"水系\",\"kind\":\"skill_power_multiplier\",\"value\":1.75,\"term_id\":\"3008\",\"text\":\"天气为雨天时，双方的水系技能威力+75%。\"},\"沙暴\":{\"element\":\"地系\",\"kind\":\"skill_energy_cost_multiplier\",\"value\":0.5,\"term_id\":\"3006\",\"text\":\"天气为沙暴时，双方的地系技能能耗减半。\"},\"暴风雪\":{\"kind\":\"end_turn_status\",\"status\":\"冻结\",\"layers\":2,\"immune_element\":\"冰系\",\"term_id\":\"3007\",\"text\":\"天气为暴风雪时，双方每回合结束获得2层冻结。（冰系精灵免疫此效果）\"},\"雷鸣\":{\"kind\":\"end_turn_status\",\"status\":\"引电\",\"layers\":1,\"immune_element\":\"电系\",\"term_id\":\"3021\",\"text\":\"天气为雷鸣时，双方每回合结束获得1层引电。（电系精灵免疫此效果）\"}},\"unknowns\":[{\"field\":\"energy_cost_halving_rounding\",\"value\":null,\"status\":\"UNVERIFIED\",\"why\":\"「能耗减半」遇到**奇数**能耗怎么取整（1 能耗 → 0 还是 1）没有任何来源；引擎按**向下取整**实现并登记，等人类裁决（不要以为这是规则）。\"},{\"field\":\"freeze_tick\",\"value\":null,\"status\":\"UNVERIFIED\",\"why\":\"冻结层数的结算（术语 1004「冻结5%生命，若当前生命低于冻结比例，则力竭」）**未实现**：本轮只做「获得层数」。引擎照既有做法把未实现的回合末状态登记进 unsupported（不静默、不猜伤害）。\"},{\"field\":\"shock_two_layer_trigger\",\"value\":null,\"status\":\"UNVERIFIED\",\"why\":\"术语 3022「获得2层引电时，立即受到25%生命的电系伤害，并失去2层引电」—— 雷鸣每回合 +1 层，两层时**该不该立刻结算**没有来源；引擎不实现它，只在层数达到 2 时登记 unsupported。\"},{\"field\":\"end_turn_order_vs_status_tick\",\"value\":null,\"status\":\"UNVERIFIED\",\"why\":\"天气的回合末效果与 status_tick / regen 的先后顺序没有一手证据（官方只说「每回合结束时」）；引擎选「声明阶段之后」并登记。\"},{\"field\":\"rain_power_percent\",\"value\":null,\"status\":\"UNVERIFIED\",\"why\":\"官方 4/14 逐字「双方水系技能威力提升50%」，而仓内 S4 术语表 3008 逐字「双方的水系技能威力+75%」。**版本差异**：人类裁决取**当前规则集（S4 术语表）= +75%**，+50% 作为更早版本逐字留在台账 EV-WEATHER-STANDARD-PVP 的 notes 里。本条登记的是「两个数都真实存在过」，不是「随便取一个」。\"}],\"reason\":\"官方一手（腾讯新闻·官方号《洛个明白》闪耀大赛入门篇 2026-04-14，正文全文精读）在整篇讲闪耀大赛的语境下专设「07 对战基础：印记与天气效果」一节，逐字：「天气是常驻在全场的效果，让对战双方都能获得相应的加成，但天气只能存在一种。」2026-09-25 人类据此**推翻**此前「天气仅存在于 PvE ⇒ 引擎删掉天气层」的口径（旧口径原话逐字留在 superseded_ruling 里，不抹掉）。四种天气的效果与数值以**当前规则集（S4 术语表 terms.json）**为准：3008 雨天水系技能威力 +75% / 3006 沙暴地系技能能耗减半 / 3007 暴风雪双方回合末 +2 层冻结（冰系免疫）/ 3021 雷鸣双方回合末 +1 层引电（电系免疫）；官方 4/14 那篇写雨天 +50%，属**更早版本**，逐字登记在 unknowns。回合数限制与「只能存在一种」同出官方 4/14；持续 8 回合由造天气技能的冻结描述给出（见 duration_note）。\",\"note\":\"本记录是规则配置里 `policies.weather_policy` 的逐字转录（生成器从登记表照抄）。数值以「当前规则集」为准；更早版本的口径登记在 `unknowns` 里，不改写。\"}},\"chosenBy\":\"policy\"}],\"agentStop\":\"policy-fact-local\",\"roster\":[{\"id\":\"own-0001\",\"species_id\":\"pet_000001\",\"name\":\"喵喵\",\"types\":[\"草系\"],\"level\":60,\"role\":\"回复\",\"mechanism\":\"特性「氧循环」：使用草系技能后，回复10%生命。\",\"talent\":{\"hp\":7,\"atk\":0,\"def\":0,\"spa\":10,\"spd\":0,\"spe\":9},\"talent_source\":\"rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）\",\"nature\":\"稳重\",\"nature_source\":\"rolled（原版抓到时随机生成；这里"
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:59614/api/bootstrap",
+          "status": 200,
+          "failed": null,
+          "snippet": "{\"runtimeVersion\":\"0.11\",\"configured\":false,\"verified\":false,\"model\":\"deepseek-flash\",\"provider\":\"local\",\"rag_mode\":\"shadow\",\"started_at\":\"2026-09-28T18:08:36.883Z\",\"assets\":60,\"capabilities\":{\"serverReady\":true,\"toolsReady\":true,\"modelReady\":false,\"rulesetId\":\"roco-world-s4-2026-09-10\",\"missing\":[\"云端模型没配（只影响自由发挥的文字）\"],\"toolsError\":null,\"toolsBridge\":{\"loadable\":true,\"clientReady\":true,\"engineAlive\":true,\"builds\":1},\"note\":\"toolsReady 只管资料查询；modelReady 只管自由文本生成。没配密钥不影响资料查询。\"},\"csrf\":\"bbdb17a0e53ad921d045e79159785c8a2bffebd200e74209\",\"nonce\":\"1e6aa55bf4fcef62f8db47202ea6aeed\",\"publicKey\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlLKBV1XZV7mP/8MlGe3y57jhTiCbHw3Bva8gE/sSXO9dmQ6syJF8do8wAakuITTZ/HwgChSFv55n9WH/L3muGmOc/DI+dqJUtlg27LHmDHJU030Hb+5XcG6715si2o21bvPyrk0mervzP1heB0LhccBIVDWEKlFdqN2bZ+7ck2UegBgWCmz31hwaC3A8Y2yGSq96l9UeZRb9bYiHgiluzDbvqD1zxHoKZzg6G6MdhsHA5iYCnth9vf+mq2S5ZDb39q734liIL+0bkGmK1ArlIqVGee/6HXsasAB3vBqrfZo0SfWi55dYFgEj5mfUo0wIBZjysmWf0dhllBiz2IlktQIDAQAB\",\"server\":{\"started_at\":\"2026-09-28T18:08:36.883Z\",\"assets\":60,\"asset_refreshes\":1,\"asset_refreshable\":false,\"note\":\"静态资源清单来自磁盘的模块图；miss 时会自愈重算一次\"}}"
+        }
+      ]
+    },
+    {
+      "question": "火系克制什么属性？",
+      "answer": "火系克制：冰系 ×2、机械系 ×2、草系 ×2、虫系 ×2。反过来，火系怕：水系 ×2、地系 ×2。（依据：游戏图鉴的相性表 火系 那一行，逐字抄录）",
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://127.0.0.1:59614/api/coach",
+          "status": 200,
+          "failed": null,
+          "snippet": "{\"text\":\"火系克制：冰系 ×2、机械系 ×2、草系 ×2、虫系 ×2。反过来，火系怕：水系 ×2、地系 ×2。（依据：游戏图鉴的相性表 火系 那一行，逐字抄录）\",\"evidence\":[\"ev:roco-world-s4-2026-09-10:types.json#火系\",\"名单说明：profile.pets 里是**候选池的一页**（本页 48 条候选宇宙共 542 条），**不是玩家名下的全部**。玩家问\\\"我有多少只/都有哪些\\\"时按这些数回答，别把本页条数当成总数。\"],\"toolTrace\":[{\"id\":\"tool:1\",\"tool\":\"query_rules\",\"args\":{\"kind\":\"type_row\",\"type\":\"火系\",\"state_version\":0},\"result\":{\"tool\":\"query_rules\",\"ok\":true,\"ruleset_id\":\"roco-world-s4-2026-09-10\",\"state_version\":0,\"coverage\":1,\"evidence_ids\":[\"ev:roco-world-s4-2026-09-10:types.json#火系\"],\"latency_ms\":1.474,\"engine_latency_ms\":1.44,\"error_type\":null,\"failure_class\":null,\"limitations\":[],\"doesNotClaim\":\"本记录是 types.json 的逐字转录（数据面）；**结算**用 type_multiplier，双属性按两系相乘（台账 EV-TYPE-MULTIPLIER，2026-09-25 人类裁决）。`weak`/`resist` 是防守向（怕什么/抗什么），`offense` 是进攻向（克制谁）。\",\"freshness\":{\"checked\":true,\"stale\":false,\"requested\":0,\"current\":0,\"source\":\"context.stateVersion\",\"establishedBy\":\"authority\"},\"result\":{\"record\":\"type_row\",\"key\":\"火系\",\"weak\":[{\"type\":\"水系\",\"multiplier\":2},{\"type\":\"地系\",\"multiplier\":2}],\"resist\":[{\"type\":\"草系\",\"multiplier\":0.5},{\"type\":\"冰系\",\"multiplier\":0.5},{\"type\":\"虫系\",\"multiplier\":0.5},{\"type\":\"萌系\",\"multiplier\":0.5},{\"type\":\"机械系\",\"multiplier\":0.5}],\"offense\":[{\"type\":\"冰系\",\"multiplier\":2},{\"type\":\"机械系\",\"multiplier\":2},{\"type\":\"草系\",\"multiplier\":2},{\"type\":\"虫系\",\"multiplier\":2}],\"neutral_default\":1,\"note\":\"本记录是 types.json 的逐字转录（数据面）；**结算**用 type_multiplier，双属性按两系相乘（台账 EV-TYPE-MULTIPLIER，2026-09-25 人类裁决）。`weak`/`resist` 是防守向（怕什么/抗什么），`offense` 是进攻向（克制谁）。\"}},\"chosenBy\":\"policy\"}],\"agentStop\":\"policy-fact-local\",\"roster\":[{\"id\":\"own-0001\",\"species_id\":\"pet_000001\",\"name\":\"喵喵\",\"types\":[\"草系\"],\"level\":60,\"role\":\"回复\",\"mechanism\":\"特性「氧循环」：使用草系技能后，回复10%生命。\",\"talent\":{\"hp\":7,\"atk\":0,\"def\":0,\"spa\":10,\"spd\":0,\"spe\":9},\"talent_source\":\"rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）\",\"nature\":\"稳重\",\"nature_source\":\"rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）\"},{\"id\":\"own-0002\",\"species_id\":\"pet_000002\",\"name\":\"水蓝蓝\",\"types\":[\"水系\"],\"level\":60,\"role\":\"辅助\",\"mechanism\":\"特性「浸润」：使用水系技能后，全技能能耗-1。\",\"talent\":{\"hp\":0,\"atk\":0,\"def\":0,\"spa\":0,\"spd\":0,\"spe\":7},\"talent_source\":\"rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）\",\"nature\":\"稳重\",\"nature_source\":\"rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）\"},{\"id\":\"own-0003\",\"species_id\":\"pet_000003\",\"name\":\"火花\",\"types\":[\"火系\"],\"level\":60,\"role\":\"回复\",\"mechanism\":\"特性「助燃」：使用火系技能后，获得双攻+20%。\",\"talent\":{\"hp\":0,\"atk\":8,\"def\":0,\"spa\":10,\"spd\":0,\"spe\":7},\"talent_source\":\"rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）\",\"nature\":\"悠闲\",\"nature_source\":\"rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）\"},{\"id\":\"own-0004\",\"species_id\":\"pet_000004\",\"name\":\"迪莫\",\"types\":[\"光系\"],\"level\":60,\"role\":\"辅助\",\"mechanism\":\"特性「最好的伙伴」：造成克制伤害后，获得攻防速+20%，并回复2能量。\",\"talent\":{\"hp\":0,\"atk\":7,\"def\":10,\"spa\":0,\"spd\":7,\"spe\":0},\"talent_source\":\"rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）\",\"nature\":\"专注\",\"nature_source\":\"rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）\"},{\"id\":\"own-0005\",\"species_id\":\"pet_000005\",\"name\":\"水灵\",\"types\":[\"水系\"],\"level\":60,\"role\":\"坦克\",\"mechanism\":\"特性「浸润」：使用水系技能后，全技能能耗-1。\",\"talent\":{\"hp\":9,\"atk\":7,\"def\":0,\"spa\":0,\"spd\":7,\"spe\":0},\"talent_source\":\"rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）\",\"nature\":\"坦率\",\"nature_source\":\"rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）\"},{\"id\":\"own-0006\",\"species_id\":\"pet_000006\",\"name\":\"火神\",\"types\":[\"火系\"],\"level\":60,\"role\":\"输出\",\"mechanism\":\"特性「助燃」：使用火系技能后，获得双攻+20%。\",\"talent\":{\"hp\":0,\"atk\":0,\"def\":7,\"spa\":0,\"spd\":0,\"spe\":7},\"talent_source\":\"rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）\",\"nature\":\"专注\",\"nature_source\":\"rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）\"},{\"id\":\"own-0007\",\"species_id\":\"pet_000007\",\"name\":\"魔力猫\",\"types\":[\"草系\"],\"level\":60,\"role\":\"坦克\",\"mechanism\":\"特性「氧循环」：使用草系技能后，回复10%生命。\",\"talent\":{\"hp\":0,\"atk\":0,\"def\":7,\"spa\":0,\"spd\":10,\"spe\":7},\"talent_source\":\"rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建"
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:59614/api/bootstrap",
+          "status": 200,
+          "failed": null,
+          "snippet": "{\"runtimeVersion\":\"0.11\",\"configured\":false,\"verified\":false,\"model\":\"deepseek-flash\",\"provider\":\"local\",\"rag_mode\":\"shadow\",\"started_at\":\"2026-09-28T18:08:36.883Z\",\"assets\":60,\"capabilities\":{\"serverReady\":true,\"toolsReady\":true,\"modelReady\":false,\"rulesetId\":\"roco-world-s4-2026-09-10\",\"missing\":[\"云端模型没配（只影响自由发挥的文字）\"],\"toolsError\":null,\"toolsBridge\":{\"loadable\":true,\"clientReady\":true,\"engineAlive\":true,\"builds\":1},\"note\":\"toolsReady 只管资料查询；modelReady 只管自由文本生成。没配密钥不影响资料查询。\"},\"csrf\":\"bbdb17a0e53ad921d045e79159785c8a2bffebd200e74209\",\"nonce\":\"02277a3d218401b5c2bee390a85ed3ac\",\"publicKey\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlLKBV1XZV7mP/8MlGe3y57jhTiCbHw3Bva8gE/sSXO9dmQ6syJF8do8wAakuITTZ/HwgChSFv55n9WH/L3muGmOc/DI+dqJUtlg27LHmDHJU030Hb+5XcG6715si2o21bvPyrk0mervzP1heB0LhccBIVDWEKlFdqN2bZ+7ck2UegBgWCmz31hwaC3A8Y2yGSq96l9UeZRb9bYiHgiluzDbvqD1zxHoKZzg6G6MdhsHA5iYCnth9vf+mq2S5ZDb39q734liIL+0bkGmK1ArlIqVGee/6HXsasAB3vBqrfZo0SfWi55dYFgEj5mfUo0wIBZjysmWf0dhllBiz2IlktQIDAQAB\",\"server\":{\"started_at\":\"2026-09-28T18:08:36.883Z\",\"assets\":60,\"asset_refreshes\":1,\"asset_refreshable\":false,\"note\":\"静态资源清单来自磁盘的模块图；miss 时会自愈重算一次\"}}"
+        }
+      ]
+    },
+    {
+      "question": "喵喵的种族值是多少？",
+      "answer": "喵喵：草系，种族值合计 370（生命 65 / 物攻 66 / 魔攻 66 / 物防 49 / 魔防 91 / 速度 33）。",
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://127.0.0.1:59614/api/coach",
+          "status": 200,
+          "failed": null,
+          "snippet": "{\"text\":\"喵喵：草系，种族值合计 370（生命 65 / 物攻 66 / 魔攻 66 / 物防 49 / 魔防 91 / 速度 33）。\",\"evidence\":[\"ev:roco-world-s4-2026-09-10:pets.json#pet_000001\",\"数值来自图鉴层（抓包采用后与模拟基线逐值相同）\",\"query_rules{kind:'pet',name:'喵喵'}；问的字段=种族值\",\"引擎读数：{\\\"field\\\":\\\"种族值\\\",\\\"types\\\":[\\\"草系\\\"],\\\"stat_total\\\":370}\",\"名单说明：profile.pets 里是**候选池的一页**（本页 48 条候选宇宙共 542 条），**不是玩家名下的全部**。玩家问\\\"我有多少只/都有哪些\\\"时按这些数回答，别把本页条数当成总数。\"],\"toolTrace\":[{\"id\":\"tool:1\",\"tool\":\"query_rules\",\"args\":{\"kind\":\"pet\",\"name\":\"喵喵\",\"state_version\":0},\"result\":{\"tool\":\"query_rules\",\"ok\":true,\"ruleset_id\":\"roco-world-s4-2026-09-10\",\"state_version\":0,\"coverage\":1,\"evidence_ids\":[\"ev:roco-world-s4-2026-09-10:pets.json#pet_000001\"],\"latency_ms\":0.981,\"engine_latency_ms\":0.898,\"error_type\":null,\"failure_class\":null,\"limitations\":[],\"freshness\":{\"checked\":true,\"stale\":false,\"requested\":0,\"current\":0,\"source\":\"context.stateVersion\",\"establishedBy\":\"authority\"},\"result\":{\"record\":\"pet\",\"pet_id\":\"pet_000001\",\"name\":\"喵喵\",\"title\":\"喵喵\",\"types\":[\"草系\"],\"stats\":{\"hp\":65,\"atk\":66,\"def\":49,\"spa\":66,\"spd\":91,\"spe\":33},\"stat_total\":370,\"feature_skill_id\":\"skill_000003\",\"learnset_id\":\"learnset_cap_3001\",\"release_date\":\"2026-03-26\",\"game_id\":3001,\"learnset_summary\":{\"native\":16,\"blood\":18,\"stones\":17,\"total\":51}}},\"chosenBy\":\"policy\"}],\"agentStop\":\"policy-fact-local\",\"roster\":[{\"id\":\"own-0001\",\"species_id\":\"pet_000001\",\"name\":\"喵喵\",\"types\":[\"草系\"],\"level\":60,\"role\":\"回复\",\"mechanism\":\"特性「氧循环」：使用草系技能后，回复10%生命。\",\"talent\":{\"hp\":7,\"atk\":0,\"def\":0,\"spa\":10,\"spd\":0,\"spe\":9},\"talent_source\":\"rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）\",\"nature\":\"稳重\",\"nature_source\":\"rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）\"},{\"id\":\"own-0002\",\"species_id\":\"pet_000002\",\"name\":\"水蓝蓝\",\"types\":[\"水系\"],\"level\":60,\"role\":\"辅助\",\"mechanism\":\"特性「浸润」：使用水系技能后，全技能能耗-1。\",\"talent\":{\"hp\":0,\"atk\":0,\"def\":0,\"spa\":0,\"spd\":0,\"spe\":7},\"talent_source\":\"rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）\",\"nature\":\"稳重\",\"nature_source\":\"rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）\"},{\"id\":\"own-0003\",\"species_id\":\"pet_000003\",\"name\":\"火花\",\"types\":[\"火系\"],\"level\":60,\"role\":\"回复\",\"mechanism\":\"特性「助燃」：使用火系技能后，获得双攻+20%。\",\"talent\":{\"hp\":0,\"atk\":8,\"def\":0,\"spa\":10,\"spd\":0,\"spe\":7},\"talent_source\":\"rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）\",\"nature\":\"悠闲\",\"nature_source\":\"rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）\"},{\"id\":\"own-0004\",\"species_id\":\"pet_000004\",\"name\":\"迪莫\",\"types\":[\"光系\"],\"level\":60,\"role\":\"辅助\",\"mechanism\":\"特性「最好的伙伴」：造成克制伤害后，获得攻防速+20%，并回复2能量。\",\"talent\":{\"hp\":0,\"atk\":7,\"def\":10,\"spa\":0,\"spd\":7,\"spe\":0},\"talent_source\":\"rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）\",\"nature\":\"专注\",\"nature_source\":\"rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）\"},{\"id\":\"own-0005\",\"species_id\":\"pet_000005\",\"name\":\"水灵\",\"types\":[\"水系\"],\"level\":60,\"role\":\"坦克\",\"mechanism\":\"特性「浸润」：使用水系技能后，全技能能耗-1。\",\"talent\":{\"hp\":9,\"atk\":7,\"def\":0,\"spa\":0,\"spd\":7,\"spe\":0},\"talent_source\":\"rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）\",\"nature\":\"坦率\",\"nature_source\":\"rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）\"},{\"id\":\"own-0006\",\"species_id\":\"pet_000006\",\"name\":\"火神\",\"types\":[\"火系\"],\"level\":60,\"role\":\"输出\",\"mechanism\":\"特性「助燃」：使用火系技能后，获得双攻+20%。\",\"talent\":{\"hp\":0,\"atk\":0,\"def\":7,\"spa\":0,\"spd\":0,\"spe\":7},\"talent_source\":\"rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）\",\"nature\":\"专注\",\"nature_source\":\"rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）\"},{\"id\":\"own-0007\",\"species_id\":\"pet_000007\",\"name\":\"魔力猫\",\"types\":[\"草系\"],\"level\":60,\"role\":\"坦克\",\"mechanism\":\"特性「氧循环」：使用草系技能后，回复10%生命。\",\"talent\":{\"hp\":0,\"atk\":0,\"def\":7,\"spa\":0,\"spd\":10,\"spe\":7},\"talent_source\":\"rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）\",\"nature\":\"悠闲\",\"nature_source\":\"rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）\"},{\"id\":\"own-0008\",\"species_id\":\"pet_000008\",\"name\":\"草头鸭\",\"types\":[\"草系\"],\"level\":60,\"role\":\"回复\",\"mechanism\":\"特性「得寸进尺」：天气为雨天，或处于其他水系环境中时，获得双攻+100%。\",\"talent\":{\"hp\":0,\"atk\":0,\"def\":0,"
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:59614/api/bootstrap",
+          "status": 200,
+          "failed": null,
+          "snippet": "{\"runtimeVersion\":\"0.11\",\"configured\":false,\"verified\":false,\"model\":\"deepseek-flash\",\"provider\":\"local\",\"rag_mode\":\"shadow\",\"started_at\":\"2026-09-28T18:08:36.883Z\",\"assets\":60,\"capabilities\":{\"serverReady\":true,\"toolsReady\":true,\"modelReady\":false,\"rulesetId\":\"roco-world-s4-2026-09-10\",\"missing\":[\"云端模型没配（只影响自由发挥的文字）\"],\"toolsError\":null,\"toolsBridge\":{\"loadable\":true,\"clientReady\":true,\"engineAlive\":true,\"builds\":1},\"note\":\"toolsReady 只管资料查询；modelReady 只管自由文本生成。没配密钥不影响资料查询。\"},\"csrf\":\"bbdb17a0e53ad921d045e79159785c8a2bffebd200e74209\",\"nonce\":\"fe31b10a5cdaa5c37565421167230bb3\",\"publicKey\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlLKBV1XZV7mP/8MlGe3y57jhTiCbHw3Bva8gE/sSXO9dmQ6syJF8do8wAakuITTZ/HwgChSFv55n9WH/L3muGmOc/DI+dqJUtlg27LHmDHJU030Hb+5XcG6715si2o21bvPyrk0mervzP1heB0LhccBIVDWEKlFdqN2bZ+7ck2UegBgWCmz31hwaC3A8Y2yGSq96l9UeZRb9bYiHgiluzDbvqD1zxHoKZzg6G6MdhsHA5iYCnth9vf+mq2S5ZDb39q734liIL+0bkGmK1ArlIqVGee/6HXsasAB3vBqrfZo0SfWi55dYFgEj5mfUo0wIBZjysmWf0dhllBiz2IlktQIDAQAB\",\"server\":{\"started_at\":\"2026-09-28T18:08:36.883Z\",\"assets\":60,\"asset_refreshes\":1,\"asset_refreshable\":false,\"note\":\"静态资源清单来自磁盘的模块图；miss 时会自愈重算一次\"}}"
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "name": "② 服务端把能力状态与模型状态**分开**报出来（serverReady / toolsReady / modelReady 三个独立字段）",
+      "ok": true,
+      "detail": "{\"serverReady\":true,\"toolsReady\":null,\"modelReady\":false,\"rulesetId\":\"roco-world-s4-2026-09-10\",\"missing\":[\"规则服务还没被拉起来（它是第一次查询才启动的：没启动过 ≠ 坏了）\",\"云端模型没配（只影响自由发挥的文字）\"],\"toolsError\":null,\"toolsBridge\":{\"loadable\":true,\"clientReady\":false,\"engineAlive\":null,\"builds\":0},\"note\":\"toolsReady 只管资料查询；modelReady 只管自由文本生成。没配密钥不影响资料查询。\"}"
+    },
+    {
+      "name": "②a 页面上**同时**看得到\"资料\"与\"模型\"两条，且各自的后果写清（模型没连不等于资料不可用）",
+      "ok": true,
+      "detail": "页面上那两条：资料查询：还没拉起来（规则服务是第一次查询才启动的；问一句就会拉起它）；云端模型：没有连 —— 只影响自由发挥的文字，上面那些资料查询照常"
+    },
+    {
+      "name": "②b 页面上那两条状态有机器可读的钩子（tools/model/server 三个各报各的）",
+      "ok": true,
+      "detail": "body[data-xy-capability]=\"tools=unknown;model=off;server=ok\""
+    },
+    {
+      "name": "① 「雨天水系伤害加多少？」走了服务端执行（网络面板里有 POST /api/coach 200）",
+      "ok": true,
+      "detail": "POST http://127.0.0.1:59614/api/coach → 200"
+    },
+    {
+      "name": "①a 「雨天水系伤害加多少？」答的是洛手的内容（没有旧练习局口气）",
+      "ok": true,
+      "detail": "天气只能存在一种，持续 8 回合。雨天：天气为雨天时，双方的水系技能威力+75%；沙暴：天气为沙暴时，双方的地系技能能耗减半；暴风雪：天气为暴风雪时，双方每回合结束获得2层冻结（冰"
+    },
+    {
+      "name": "③ 「雨天水系伤害加多少？」没说笼统的\"暂时无法回答\"",
+      "ok": true,
+      "detail": "（没有含糊措辞）"
+    },
+    {
+      "name": "① 「火系克制什么属性？」走了服务端执行（网络面板里有 POST /api/coach 200）",
+      "ok": true,
+      "detail": "POST http://127.0.0.1:59614/api/coach → 200"
+    },
+    {
+      "name": "①a 「火系克制什么属性？」答的是洛手的内容（没有旧练习局口气）",
+      "ok": true,
+      "detail": "火系克制：冰系 ×2、机械系 ×2、草系 ×2、虫系 ×2。反过来，火系怕：水系 ×2、地系 ×2。（依据：游戏图鉴的相性表 火系 那一行，逐字抄录）"
+    },
+    {
+      "name": "③ 「火系克制什么属性？」没说笼统的\"暂时无法回答\"",
+      "ok": true,
+      "detail": "（没有含糊措辞）"
+    },
+    {
+      "name": "① 「喵喵的种族值是多少？」走了服务端执行（网络面板里有 POST /api/coach 200）",
+      "ok": true,
+      "detail": "POST http://127.0.0.1:59614/api/coach → 200"
+    },
+    {
+      "name": "①a 「喵喵的种族值是多少？」答的是洛手的内容（没有旧练习局口气）",
+      "ok": true,
+      "detail": "喵喵：草系，种族值合计 370（生命 65 / 物攻 66 / 魔攻 66 / 物防 49 / 魔防 91 / 速度 33）。"
+    },
+    {
+      "name": "③ 「喵喵的种族值是多少？」没说笼统的\"暂时无法回答\"",
+      "ok": true,
+      "detail": "（没有含糊措辞）"
+    },
+    {
+      "name": "②c `toolsReady` 跟着现实变：问过一句真资料之后从「还不知道」变成「在」（写死成 true 的假绿灯过不了这条）",
+      "ok": true,
+      "detail": "问之前 tools=unknown → 问之后 tools=ok（HTTP 直读 toolsReady=true）"
+    },
+    {
+      "name": "④ 默认可见文本里没有内部 id / 机器串（收起态）",
+      "ok": true,
+      "detail": "三问的正文都干净（机器串正则：ev:[A-Za-z0-9:_-]+|own-\\d{4}|pet_\\d{6}|s…）"
+    },
+    {
+      "name": "④a 展开「依据/查了什么」之后：内部记号只允许出现在**依据那一层**，且要看得出来（记录用）",
+      "ok": true,
+      "detail": "展开态命中：ev:roco-world-s4-2026-09-10:pets｜details 个数=2"
+    },
+    {
+      "name": "⑥ 控制台没有报错",
+      "ok": true,
+      "detail": "console=0 pageerror=0"
+    }
+  ],
+  "shots": [
+    "docs/roco/review-2026-09-28/shots/coach-context/capability-own-server-status-lines.png",
+    "docs/roco/review-2026-09-28/shots/coach-context/capability-own-server-xiaoya-page.png"
+  ],
+  "capability": {
+    "statusLine": "正在读取连接状态…",
+    "capabilityLine": "资料查询：还没拉起来（规则服务是第一次查询才启动的；问一句就会拉起它）；云端模型：没有连 —— 只影响自由发挥的文字，上面那些资料查询照常",
+    "capability": "tools=unknown;model=off;server=ok",
+    "bootstrap": "{\"runtimeVersion\":\"0.11\",\"configured\":false,\"verified\":false,\"model\":\"deepseek-flash\",\"provider\":\"local\",\"rag_mode\":\"shadow\",\"started_at\":\"2026-09-28T18:08:36.883Z\",\"assets\":60,\"capabilities\":{\"serverReady\":true,\"toolsReady\":null,\"modelReady\":false,\"rulesetId\":\"roco-world-s4-2026-09-10\",\"missing\":[\"规则服务还没被拉起来（它是第一次查询才启动的：没启动过 ≠ 坏了）\",\"云端模型没配（只影响自由发挥的文字）\"],\"toolsError\":null,\"toolsBridge\":{\"loadable\":true,\"clientReady\":false,\"engineAlive\":null,\"builds\":0},\"note\":\"toolsReady 只管资料查询；modelReady 只管自由文本生成。没配密钥不影响资料查询。\"},\"csrf\":\"bbdb17a0e53ad921d045e79159785c8a2bffebd200e74209\",\"nonce\":\"23a22f14c6212b6684b80029539e6ed8\",\"publicKey\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlLKBV1XZV7mP/8MlGe3y57jhTiCbHw3Bva8gE/sSXO9dmQ6syJF8do8wAakuITTZ/HwgChSFv55n9WH/L3muGmOc/DI+dqJUtlg27LHmDHJU030Hb+5XcG6715si2o21bvPyrk0mervzP1heB0LhccBIVDWEKlFdqN2bZ+7ck2UegBgWCmz31hwaC3A8Y2yGSq96l9UeZRb9bYiHgiluzDbvqD1zxHoKZzg6G6MdhsHA5iYCnth9vf+mq2S5ZDb39q734liIL+0bkGmK1ArlIqVGee/6HXsasAB3vBqrfZo0SfWi55dYFgEj5mfUo0wIBZjysmWf0dhllBiz2IlktQIDAQAB\",\"server\":{\"started_at\":\"2026-09-28T18:08:36.883Z\",\"assets\":60,\"asset_refreshes\":1,\"asset_refreshable\":false,\"note\":\"静态资源清单来自磁盘的模块图；miss 时会自愈重算一次\"}}",
+    "bootstrapStatus": 200
+  },
+  "capabilitiesHttpAfter": {
+    "serverReady": true,
+    "toolsReady": true,
+    "modelReady": false,
+    "rulesetId": "roco-world-s4-2026-09-10",
+    "missing": [
+      "云端模型没配（只影响自由发挥的文字）"
+    ],
+    "toolsError": null,
+    "toolsBridge": {
+      "loadable": true,
+      "clientReady": true,
+      "engineAlive": true,
+      "builds": 1
+    },
+    "note": "toolsReady 只管资料查询；modelReady 只管自由文本生成。没配密钥不影响资料查询。"
+  },
+  "scriptSideToolbox": {
+    "browserLoadable": true,
+    "clientReady": true,
+    "builds": 1,
+    "moduleUrl": "file:///Users/serendizc/Developer/roco-coach/src/coach/toolbox.js",
+    "engineAlive": true,
+    "pidSelf": 92129,
+    "moduleUrlSelf": "file:///Users/serendizc/Developer/roco-coach/reports/roco/xiaoya-context/browser-capability-acceptance.mjs"
+  },
+  "scriptSideCoach": {
+    "status": 200,
+    "text": "火系克制：冰系 ×2、机械系 ×2、草系 ×2、虫系 ×2。反过来，火系怕：水系 ×2、地系 ×2。（依据：游戏图鉴的相",
+    "tools": [
+      "query_rules:true"
+    ],
+    "toolboxAfter": {
+      "browserLoadable": true,
+      "clientReady": true,
+      "builds": 1,
+      "moduleUrl": "file:///Users/serendizc/Developer/roco-coach/src/coach/toolbox.js",
+      "engineAlive": true
+    },
+    "bootstrapAfter": true
+  },
+  "capabilityAfter": {
+    "statusLine": "本地规则核验 · 依据可展开查看",
+    "capabilityLine": "资料查询：可用（本机规则服务已连，规则集 roco-world-s4-2026-09-10）；云端模型：没有连 —— 只影响自由发挥的文字，上面那些资料查询照常",
+    "capability": "tools=ok;model=off;server=ok",
+    "bootstrap": "{\"runtimeVersion\":\"0.11\",\"configured\":false,\"verified\":false,\"model\":\"deepseek-flash\",\"provider\":\"local\",\"rag_mode\":\"shadow\",\"started_at\":\"2026-09-28T18:08:36.883Z\",\"assets\":60,\"capabilities\":{\"serverReady\":true,\"toolsReady\":true,\"modelReady\":false,\"rulesetId\":\"roco-world-s4-2026-09-10\",\"missing\":[\"云端模型没配（只影响自由发挥的文字）\"],\"toolsError\":null,\"toolsBridge\":{\"loadable\":true,\"clientReady\":true,\"engineAlive\":true,\"builds\":1},\"note\":\"toolsReady 只管资料查询；modelReady 只管自由文本生成。没配密钥不影响资料查询。\"},\"csrf\":\"bbdb17a0e53ad921d045e79159785c8a2bffebd200e74209\",\"nonce\":\"9d55ef085cef068463b7287412133bd7\",\"publicKey\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlLKBV1XZV7mP/8MlGe3y57jhTiCbHw3Bva8gE/sSXO9dmQ6syJF8do8wAakuITTZ/HwgChSFv55n9WH/L3muGmOc/DI+dqJUtlg27LHmDHJU030Hb+5XcG6715si2o21bvPyrk0mervzP1heB0LhccBIVDWEKlFdqN2bZ+7ck2UegBgWCmz31hwaC3A8Y2yGSq96l9UeZRb9bYiHgiluzDbvqD1zxHoKZzg6G6MdhsHA5iYCnth9vf+mq2S5ZDb39q734liIL+0bkGmK1ArlIqVGee/6HXsasAB3vBqrfZo0SfWi55dYFgEj5mfUo0wIBZjysmWf0dhllBiz2IlktQIDAQAB\",\"server\":{\"started_at\":\"2026-09-28T18:08:36.883Z\",\"assets\":60,\"asset_refreshes\":1,\"asset_refreshable\":false,\"note\":\"静态资源清单来自磁盘的模块图；miss 时会自愈重算一次\"}}",
+    "bootstrapStatus": 200
+  },
+  "expandedEvidence": {
+    "details": 2,
+    "expandedText": "小芽喵喵：草系，种族值合计 370（生命 65 / 物攻 66 / 魔攻 66 / 物防 49 / 魔防 91 / 速度 33）。依据ev:roco-world-s4-2026-09-10:pets.json#pet_000001数值来自图鉴层（抓包采用后与模拟基线逐值相同）名单说明：profile.pets 里是**候选池的一页**（本页 48 条候选宇宙共 542 条），**不是玩家名下的全部**。玩家问\"我有多少只/都有哪些\"时按这些数回答，别把本页条数当成总数。小芽查了什么图鉴与规则表"
+  },
+  "exchanges": [
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/xiaoya.html",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/client/style.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/client/xiaoya.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/client.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/memory.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/individuals.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/runtime.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/client/box-individuals.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/game/progression.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/client/stale-page.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/experience.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/client/evidence-view.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/scheduler.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/game/engine.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/talent.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/toolbox.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/companion.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/game/battle-modes.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/policy.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/env.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/activity.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/strategist.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/profile-shape.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/teacher.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/nature-advice.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/natures-data.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/evolution-advice.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/plain-words.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/intervention-model.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/evidence-levels.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/team-request.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/game/content.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/intervention-model.generated.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/pet-names-data.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/favicon.ico",
+      "status": 404,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/api/bootstrap",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/api/bootstrap",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/xiaoya.html",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/client/style.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/client/xiaoya.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/client.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/client/box-individuals.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/individuals.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/game/progression.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/memory.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/client/stale-page.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/runtime.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/experience.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/client/evidence-view.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/scheduler.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/game/engine.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/talent.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/game/battle-modes.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/policy.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/toolbox.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/companion.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/env.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/activity.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/strategist.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/profile-shape.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/nature-advice.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/teacher.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/evolution-advice.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/evidence-levels.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/plain-words.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/intervention-model.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/natures-data.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/pet-names-data.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/game/content.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/team-request.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/src/coach/intervention-model.generated.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/api/bootstrap",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/api/bootstrap",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/api/roco/box?kind=mine&limit=48",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:59614/api/coach",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/api/bootstrap",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:59614/api/coach",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/api/bootstrap",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:59614/api/coach",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/api/bootstrap",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:59614/api/bootstrap",
+      "status": 200,
+      "failed": null
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "verdict": "pass",
+  "failed": []
+}

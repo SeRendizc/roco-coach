@@ -667,6 +667,9 @@ export const ROCO_PLAN_TIMEOUT_MS=8000;
 let rocoClient=null;
 let rocoClientFactory=null;      // null = 用动态 import 来的 createRocoClient
 let rocoModule=null;             // import('./roco-client.js') 的结果（成功或失败都只试一次）
+//: 这个**模块实例**里桥客户端被建过几次（诊断用：`rocoToolsStatus()` 会报它）。
+//: 有了它，「服务端说工具已经能跑、另一处却读到 null」这种多实例/多进程的怀疑可以被直接证伪。
+let rocoClientBuilds=0;
 let rocoStateVersionProvider=null;
 let rocoPlanner=null;
 // RC-301：阵容请求合同的数据集（owned / pack / modes / rulesets）。注入式，避免每次调用读盘。
@@ -874,11 +877,46 @@ export function resetRocoTools({keepClient=false}={}){
  recommendationInputsProvider=null;
  rocoSeenStateVersions.clear();
 }
+/**
+ * 资料工具的**被动**状态：不新建连接、不拉引擎、不读盘（`/api/bootstrap` 每次开页面都要问）。
+ *
+ * 为什么需要它（Codex P0-01 第 2 条的"能力状态"那一半）：`/api/coach` 的工具走的是**这条**桥
+ * （`getRocoClient()` → `coach/roco-client.js`），而 `/api/roco/status` 报的是**它自己**那个
+ * 规则服务实例 —— 两者是**两个引擎进程**。只读后者会把"工具其实已经能跑"报成"不可用"
+ * （真机实测：小芽已经答出了相性表，而 `/api/roco/status` 仍然 `available:false`）。
+ *
+ * 三个字段各说各的：
+ *   · `browserLoadable`：这个运行时里 `coach/roco-client.js` **能不能**加载。浏览器里恒 `false`
+ *     —— 它不在静态模块图里（`NOT in the web bundle` 是有意的，见文件头注释）；
+ *   · `clientReady`：桥客户端建过没有（建过 = 这条进程里至少成功跑过一次资料工具）；
+ *   · `engineAlive`：已经建过的那个客户端现在还活着吗（`null` = 还不知道 —— **不许**当成 false）。
+ */
+export function rocoToolsStatus(){
+ const status={browserLoadable:typeof process!=='undefined'&&Boolean(process.versions?.node),
+  clientReady:Boolean(rocoClient),builds:rocoClientBuilds,
+  //: 这个实例是从哪儿加载的（排障用；**只给本机脚本看**，不进 HTTP 回执 —— 那是绝对路径）。
+  moduleUrl:import.meta.url,engineAlive:null};
+ if(rocoClient){
+  try{
+   const child=rocoClient.child??null;
+   if(child&&typeof child.exitCode!=='undefined'){
+    status.engineAlive=child.exitCode===null&&(child.signalCode===null||child.signalCode===undefined);
+   }else if(rocoClient.baseUrl){
+    // 外部托管的规则服务（`baseUrl` 有值、没有本地子进程）：能拿到地址就算"在"。
+    status.engineAlive=true;
+   }
+  }catch{/* 拿不到就留 null（未知），不猜 */}
+ }
+ return status;
+}
+
 /** 当前的桥客户端；没有注入过就动态构造一个（浏览器里这一步会抛，由调用方接住）。 */
 export async function getRocoClient(){
  if(rocoClient)return rocoClient;
  const mod=await loadRocoModule();
  rocoClient=rocoClientFactory?rocoClientFactory({}):mod.createRocoClient({});
+ rocoClientBuilds+=1;
+ if(globalThis.process?.env?.ROCO_DEBUG_TOOLBOX==='1')console.error(`[toolbox] 建桥客户端 #${rocoClientBuilds} @ ${import.meta.url} pid=${globalThis.process?.pid}`);
  return rocoClient;
 }
 
@@ -1027,6 +1065,7 @@ export async function planActionsViaPlanner({client,state,state_version,timeoutM
 
 async function executeRocoTool(name,args,context){
  const started=rocoNow();
+ if(globalThis.process?.env?.ROCO_DEBUG_TOOLBOX==='1')console.error(`[toolbox] 执行 ${name} pid=${globalThis.process?.pid} builds=${rocoClientBuilds} @ ${import.meta.url}`);
  const freshness=checkRocoFreshness(args,context);
  if(freshness.stale){
   return rocoRefusal(name,{error_type:ROCO_ERROR.VERSION_MISMATCH,

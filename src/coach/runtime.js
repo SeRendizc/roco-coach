@@ -206,6 +206,61 @@ const FOCUS_STAT_ORDER = Object.freeze([['hp', '生命'], ['atk', '物攻'], ['d
 //: 页面 `box.js` 的 `NO_ITEM` 逐字同一条（缺项不许写 0、不许留白）。
 const FOCUS_NO_ITEM = '游戏数据里没有这一项';
 
+// ── 服务端资料跑不起来时，交一份**点名缺哪一项**的失败（P0-01 第 4 条）──────────
+//
+// 修前：事实问在本地失败之后，`runCoach` 会落到陪练/军师那两句模板 ——
+// 「进入一场 PVE 对战后，我可以结合当前生命、能量和队伍比较行动。」（真机实测，与洛手无关）。
+// 这不是"措辞不好"，是**拿别的游戏的内容顶了一条本作的问题**（Codex 明令禁止跨域回落）。
+//
+// 现在：工具回执里一旦出现"跑不起来"，答案就换成下面这一句 ——
+//   · 缺的是**哪一项**（规则服务 / 图鉴条目 / 规则集 / 局面版本 / 超时），逐项点名；
+//   · 不编、不换话题、不拿旧模板顶；并给出一个**同一域内**的下一步。
+// 工具自己的 `error_type` 是唯一事实源（`toolbox.js` 的 `ROCO_ERROR`），这里只做翻译。
+const SERVER_TOOL_LABELS = Object.freeze({query_rules: '规则与图鉴', evaluate_team: '阵容评估',
+  compare_team_change: '换人对比', plan_actions: '行动规划', summarize_battle: '整局总结',
+  read_state: '当前局面', search_rules: '规则检索'});
+/** 工具回执的 `error_type` → 「缺的是哪一项」（玩家话，不出现内部 error_type 字面）。 */
+const SERVER_MISSING_LABELS = Object.freeze({
+  unavailable: '本机**规则服务**（跑规则/图鉴/相性表的那个进程）没有连上',
+  ruleset_unsupported: '当前生效的**规则集**里没有登记这一项',
+  not_found: '**图鉴/规则表**里没有这一条（名字对不上，或者它不在本作里）',
+  version_mismatch: '**局面版本**对不上（手里这份是旧状态，不能拿它算）',
+  timeout: '**规则服务**这一问超时了（是没算完，不是没有答案）',
+  not_implemented: '这一项**规则服务还没实现**（不是查不到，是还没做）',
+  protocol_error: '这一页和**规则服务**的版本对不上（服务是旧的，或者两边不是同一版）',
+  internal_error: '**规则服务**自己报错了',
+  bad_request: '这一问的参数**规则服务**没收下（问法对不上）',
+  hidden_information: '这一条属于**对手的隐藏信息**，规则服务不提供',
+});
+
+/**
+ * 工具回执里"跑不起来"的那几条 → 一句玩家话 + 结构化回执。
+ * 没有失败回执就返回 `null`（不是这一族）。
+ */
+export function serverDataFailure(unavailable = [], context = null) {
+  const rows = (Array.isArray(unavailable) ? unavailable : []).filter(Boolean);
+  if (!rows.length) return null;
+  const first = rows[0];
+  const tool = first.tool ?? null;
+  const type = String(first.error_type ?? 'unavailable');
+  const label = SERVER_TOOL_LABELS[tool] ?? '规则与图鉴';
+  const missing = SERVER_MISSING_LABELS[type] ?? '**规则服务**这一项没答上来';
+  // 工具自己的原话：结构化那份（`detail`）**原样留档**，但**玩家正文里不许出现**任何
+  // 内部字样 —— 真机实测这一句会端出 `Failed to fetch dynamically imported module: http://…/roco-client.js`
+  // 这种工程噪声（URL + 模块加载器英文），玩家读不懂，也不该读。
+  const raw = String(first.message ?? '').replace(/\s+/g, ' ').trim().slice(0, 300);
+  const jargon = /Failed to fetch|dynamically imported|Cannot read|is not a function|TypeError|node:|undefined/;
+  const plain = jargon.test(raw) ? '浏览器这一侧连不上本机规则服务' : raw.slice(0, 140);
+  const body = `这条要查**服务端的资料**（${label}），但这份资料现在用不了。\n\n`
+    + `缺的是：${missing}。${plain ? `\n（${plain}）` : ''}\n\n`
+    + '先别急 —— 这一步**不需要模型密钥**：规则 / 图鉴 / 相性表都在本机规则服务里。'
+    + '确认服务已启动（`npm start` 会一起把规则服务拉起来）之后，把这句话原样再问一次就行。\n\n'
+    + '（我不会拿别的内容顶这一条：洛手的资料只从规则服务那一份来。）';
+  return {text: body, tool, error_type: type, missing: missing.replace(/\*\*/g, ''), detail: raw || null,
+    source: label, alternatives: ['确认本机规则服务已启动后原样再问一次',
+      '换成同域里已登记的问题（属性相性 / 天气 / 图鉴条目）']};
+}
+
 /** 这一问问的是不是**页面送来那一只**（`context.focusDetail`）。读不到焦点就一律 `false`。 */
 export function focusDetailOf(context) {
   const focus = context?.focusDetail;
@@ -795,7 +850,7 @@ function individualOf(context,message){
  return (hit.talent||hit.nature)?hit:null;
 }
 
-async function localFactAnswer({message,context,policy,retrieve,memory=null}){ // 性格/天分那一族最优先：它自带取舍句（防止纯机器算），而且不需要任何工具调用。
+async function localFactAnswer({message,context,policy,retrieve,memory=null,audit=null}){ // 性格/天分那一族最优先：它自带取舍句（防止纯机器算），而且不需要任何工具调用。
  // 「我正在看的那一只」（P0-05）排在**最前**：它答的是页面上那一栏的原文，
  // 别的族（面板 / 性格建议）说的都是"按种族值算出来的"，两者不许互相顶。
  // 意图分叉（Codex 监工第 5 条）：事实问短答、建议问给建议 + 理由 —— 两者不许互相冒充。
@@ -840,7 +895,12 @@ async function localFactAnswer({message,context,policy,retrieve,memory=null}){ /
   // 是**裸对象**（`{rulesVersion, cards, missing, rag}`）。原来只认 `ok===true` ⇒ 裸回执被判成失败，
   // 组队建议永远说"检索没命中"（而同一句手工调明明有卡）。现在：只有**显式** `ok===false` 才算失败。
   const failed=receipt?.ok===false;
-  if(failed)lastFailure=receipt??{ok:false,error:'这次没查到',error_type:'no_receipt'};
+  if(failed){
+   lastFailure=receipt??{ok:false,error:'这次没查到',error_type:'no_receipt'};
+   // **服务端资料这一轮没跑起来**要记账（Codex P0-01 第 4 条）：
+   // 只记结构化回执，不在这里改文案 —— 成句由 `serverDataFailure()` 一处负责。
+   if(audit)audit.unavailable.push({tool,...(receipt??{error_type:'no_receipt'})});
+  }
   return failed?null:receipt;
  };
  const call=(args)=>callTool('query_rules',args);
@@ -1041,11 +1101,20 @@ async function localFactAnswer({message,context,policy,retrieve,memory=null}){ /
        `按精灵查得到 pet_id=${pet.pet_id??'—'} ⇒ 这是精灵名，不是技能名`],trace};
     }
    }
-   return {text:`「${missed?missed[1]:used.name}」这一问我没核到：${String(why).slice(0,80)}。`
+   // ⚠ 给玩家的这句里**不许出现**内部噪声：真机实测端出来过
+   // 「Failed to fetch dynamically imported module: http://127.0.0.1:8765/src/coach/roco-client.js」
+   // （URL + 模块加载器英文）—— 玩家读不懂，也不该读。原话留在 `evidence`（依据那一层）里给排障用，
+   // 正文只用一句人话点名"缺的是规则服务"。
+   const whyText=String(why??'');
+   const loaderNoise=/Failed to fetch|dynamically imported|Cannot read|is not a function|TypeError|node:/;
+   const whyPlain=/规则服务不可用|规则服务/.test(whyText)||loaderNoise.test(whyText)
+     ?'本机规则服务这一条没答上来（缺的是那份规则资料，不是模型密钥）'
+     :whyText.slice(0,80);
+   return {text:`「${missed?missed[1]:used.name}」这一问我没核到：${whyPlain}。`
     +(used.kind==='skill'
       ?'（技能名可能记错了 —— 换个说法或者给我它所属的精灵，我按学习表逐条核。）'
-      :`手游图鉴（622 只）里${/未知精灵名|未知精灵 id/.test(String(why))?'没有':'查不到'}这个名字，我不凭印象给它编数值。`)
-    ,evidence:[`query_rules{kind:'${used.kind}',name:'${used.name}'} → ${why}`],trace};
+      :`手游图鉴（622 只）里${/未知精灵名|未知精灵 id/.test(whyText)?'没有':'查不到'}这个名字，我不凭印象给它编数值。`)
+    ,evidence:[`query_rules{kind:'${used.kind}',name:'${used.name}'} → ${whyText}`],trace};
   }
   let res=receipt.result??{};
   // ⚠ 2026-09-27（真机抓到两个数打架之后定的口径）：**回答精灵数值时以 L1 图鉴层为准**。
@@ -1883,8 +1952,11 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  // 在 `pureFact` 块**之前**声明：`useModel`（块外）要用它；写成块内 `const` 会 TDZ
  // （真踩到：整条 `runCoach` 抛 ReferenceError，ask-coverage 一口气红了 12 条）。
  let judgementOverFacts=false;
+ // 这一轮里**服务端的资料工具**有没有跑起来：跑不起来时不许退成旧模板
+ //（Codex P0-01 第 4 条：工具失败要交出「缺的是哪一项」，绝不跨游戏域回落）。
+ const factsAudit={unavailable:[],need:factPolicy.need??null};
  if(pureFact){
-  try{factAnswer=await localFactAnswer({message,context,policy:factPolicy,retrieve:provider?.retrieve??null,memory});}
+  try{factAnswer=await localFactAnswer({message,context,policy:factPolicy,retrieve:provider?.retrieve??null,memory,audit:factsAudit});}
   catch(error){
    factAnswer=null;
    // 不静默：本地事实单发失败要么是工具不可用、要么是这张表没覆盖到。
@@ -2023,7 +2095,13 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  let answerCorrection=false,answerSuppressed=false;
  let answerSkipReason=null,textBlocks=null;            // 没改写时的原因（只说事实，不假装改过）
  let correctionUsage=null;                             // 记账（结构化；没有自由文本反思字段）
- const text=useModel?await provider.generate(modelPacket(packet,{message})):(factAnswer?factAnswer.text:scrubbedText);
+ // 服务端的资料工具跑不起来 ⇒ 交「缺哪一项」，**不许**拿陪练/军师那两句旧模板顶
+ //（Codex P0-01 第 4 条：绝不跨游戏域回落）。只在事实路径**没给出答案**时才接管，
+ // 已经有答案的族（原话照说"查不到 + 为什么"的那些）一个字都不动。
+ const serverFailure=factAnswer?null:serverDataFailure(factsAudit.unavailable,context);
+ if(serverFailure)packet={...packet,text:serverFailure.text,evidence:[...(Array.isArray(packet.evidence)?packet.evidence:[]),
+  `服务端资料未就绪：缺的是「${serverFailure.missing}」`]};
+ const text=useModel?await provider.generate(modelPacket(packet,{message})):(factAnswer?factAnswer.text:(serverFailure?serverFailure.text:scrubbedText));
  if(typeof text!=='string'||!text.trim())throw Error('教练暂时没有生成有效回答');
  // 「回答必须和工具回执一致」也要由代码判一次，而不是写在提示里指望模型自觉：
  // 回执说某回合没有记录、说只模拟了这两个行动，正文就不能反过来讲。
@@ -2175,7 +2253,11 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  // 会回退到 base（引擎模板），而回执如果还写 `provider:'mlx-local'`，那就是**谎报**——
  // 玩家以为这句话是模型说的。有 `lastFallback` 就报 `local-fallback` 并把原因带上。
  const localFallback=useModel&&!rejected?provider?.lastFallback??null:null;
- return {...packet,...(judgment?{judgment}:{}),activity,activityLine:activityLine(activity),text:finalText,memory:next,route,provider:rejected?'local-fallback':localFallback?'local-fallback':useModel?provider.name:'local',verified:!useModel,localOnly:deterministic,receiptConsistency:finalConsistency,validation,...(answerCorrection?{answerCorrection:correctionUsage}:{}),fallbackReason:localFallback?`本地模型这一轮没用上（${localFallback.code??'unknown'}），显示的是引擎算出来的那份结论`:rejected?(tooLong?'模型输出过长，显示已核验的本局分析':!modelConsistency.consistent?'那份回答和引擎的记录对不上，换成我核过的这一份':rejectedReason==='unlabeled-unknown'?'模型回答只交了一句「不知道」，显示已核验的本局分析':'模型回答里有未经登记的数字或引用，显示已核验的本局分析'):undefined};
+ // `localText` = **引擎/工具算出来的那一份正文**（`scrubbedText`），与 `text`（可能是模型说的）分开。
+ // 浏览器侧在「模型正文没过事实守卫」时要用它降级 —— 修前那个降级是浏览器自己再跑一遍 `runCoach`，
+ // 而浏览器里资料工具跑不起来（P0-01 的根因），降级出来的东西与洛手无关。这里由服务端直接给出。
+ return {...packet,...(judgment?{judgment}:{}),activity,activityLine:activityLine(activity),text:finalText,localText:scrubbedText,memory:next,route,provider:rejected?'local-fallback':localFallback?'local-fallback':useModel?provider.name:'local',verified:!useModel,localOnly:deterministic,receiptConsistency:finalConsistency,validation,
+ ...(serverFailure?{agentStop:'server-data-unavailable',taskFailure:serverFailure}:{}),...(answerCorrection?{answerCorrection:correctionUsage}:{}),fallbackReason:localFallback?`本地模型这一轮没用上（${localFallback.code??'unknown'}），显示的是引擎算出来的那份结论`:rejected?(tooLong?'模型输出过长，显示已核验的本局分析':!modelConsistency.consistent?'那份回答和引擎的记录对不上，换成我核过的这一份':rejectedReason==='unlabeled-unknown'?'模型回答只交了一句「不知道」，显示已核验的本局分析':'模型回答里有未经登记的数字或引用，显示已核验的本局分析'):undefined};
 }
 
 /**

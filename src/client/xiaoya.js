@@ -256,6 +256,44 @@ export function mergeFocusIntoProfile(profile, snapshot) {
   return touched ? {...profile, pets, focus_patched: touched} : profile;
 }
 
+/**
+ * 一次点击落在**哪一只**上（配队页的两种钩子）。
+ *
+ * 为什么需要它（art-finish D①-b：`data-tw-slot-instance` **有写入、无读取方**）：
+ * 六槽卡片上早就写着"这一格装的是哪个个体"（`team-workshop.js` 的 `data-tw-slot-instance`），
+ * 但没人读它 ⇒ 玩家点第 3 格，小芽一无所知。
+ *
+ * ⚠ **只认个体 id，不按名字猜物种**：真机实测「棋契陛下」有两只（同名不同种），
+ * 按名字猜出来的物种是错的（`team-workshop.js` 的注释里记着同一次错位）。
+ * 两条钩子各自的优先级：**槽位**（这一格装的是谁）先于**候选池**（这一张卡是谁）。
+ */
+export function focusFromClick(nodeOrEvent) {
+  // ⚠ 两种入参都要认（真机踩到的那次就是这里）：
+  //   · **事件**：配队工作台挂在 **shadow DOM** 里（`team-workshop.js` 的 `attachShadow`），
+  //     而 shadow 里的 click 冒泡到 document 时 `event.target` 会被**重定向成宿主元素**
+  //     （`<div id="team-workshop">`）⇒ 在 document 上用 `event.target.closest(...)` 永远找不到槽位。
+  //     必须走 `event.composedPath()`：它给的是**真实路径**（含 shadow 内部节点）。
+  //   · **元素**：单测/别处直接传节点时的用法（走 `closest` 向上找）。
+  const read = (el, attr) => String(el?.getAttribute?.(attr) ?? '').trim();
+  const path = typeof nodeOrEvent?.composedPath === 'function' ? nodeOrEvent.composedPath() : null;
+  const candidates = path ? [...path] : [];
+  const current = path ? path[0] : nodeOrEvent;
+  const climb = (attr) => {
+    for (const el of candidates) if (read(el, attr)) return el;
+    // 元素入参（或 composedPath 没覆盖到）时，退回 `closest`。
+    return current?.closest?.(`[${attr}]`) ?? null;
+  };
+  const slot = climb('data-tw-slot-instance');
+  const slotId = read(slot, 'data-tw-slot-instance');
+  if (slotId) return {instanceId: slotId, scene: 'team-slot',
+    name: slot?.querySelector?.('.tw-who')?.textContent?.trim() ?? null};
+  const card = climb('data-tw-instance');
+  const cardId = read(card, 'data-tw-instance');
+  if (cardId) return {instanceId: cardId, scene: 'team-candidate',
+    name: card?.querySelector?.('.tw-name')?.textContent?.trim() ?? null};
+  return null;
+}
+
 /** 「现在这一屏在看谁」。live = 真在看这一屏；last = 上一轮看过的那一只（要如实这么说）。 */
 export function detectFocus({doc = globalThis.document, loc = globalThis.location,
   storage = null, picked = null, battle = null} = {}) {
@@ -433,8 +471,22 @@ export function createFocusProvider({doc = globalThis.document, loc = globalThis
     resolve,
     /** 详情读不出来时那句原话（给人看的排障口，`null` = 正常）。 */
     failureOf: () => last.failure,
-    /** 工作台的候选池/槽位：点过哪一只就记哪一只（读 DOM 的既有钩子，不改那个模块）。 */
-    notePicked(detail) { if (detail?.instanceId) { picked = detail; snapshotId = null; notify(); } },
+    /**
+     * 工作台的候选池/槽位：点过哪一只就**立刻**记哪一只（读 DOM 的既有钩子，不改那个模块）。
+     *
+     * ⚠ 2026-09-29 改钉（art-finish D①-c 真机实测的"滞后一拍"）：原来这里只改 `picked` 再
+     * `notify()`，而 `getContext()` 读的是 `last` —— 于是**点完立刻读** `[data-xy-focus]`
+     * 仍是"没在看"，要**再问一句**（`resolve()` 跑过）才变成「正在看：迪莫」。
+     * 玩家那一下点击是**同步**的事实，界面没有理由等一拍。现在 `last` 一起切过去。
+     */
+    notePicked(detail) {
+      if (!detail?.instanceId) return;
+      picked = detail;
+      last = {...last, instanceId: detail.instanceId, scene: detail.scene ?? 'team',
+        source: 'team', name: detail.name ?? null, snapshot: null, failure: null};
+      epoch += 1;
+      notify();
+    },
   };
 }
 
@@ -639,6 +691,8 @@ export function mountXiaoya({mode = 'popup', host = null} = {}) {
       }
       persist(message, answer.text ?? '');
       setStatus(statusLine(answer));
+      // 答完再读一次能力状态：第一问会把惰性启动的规则服务拉起来，那之后那两行才是真的。
+      void refreshCapability(true);
     } catch (error) {
       persist(message, '');
       addEntry('小芽', '这次没有完成分析，请重试。');
@@ -700,6 +754,13 @@ export function mountXiaoya({mode = 'popup', host = null} = {}) {
   chip.className = 'xy-focus';
   chip.id = mode === 'page' ? 'xy-focus' : 'xiaoya-focus';
   chip.setAttribute('role', 'status');
+  // 能力状态那一行（「资料」与「模型」两条）**单独一个元素**：`setStatus()` 每次答完都会
+  // 改写顶部那句"这次是谁答的"，两条状态不能被它冲掉（冲掉就等于玩家再也看不到）。
+  const capEl = document.createElement('div');
+  capEl.className = 'xy-focus';
+  capEl.id = mode === 'page' ? 'xy-capability' : 'xiaoya-capability';
+  capEl.setAttribute('role', 'status');
+  if (log?.parentNode) log.parentNode.insertBefore(capEl, log);
   if (log?.parentNode) log.parentNode.insertBefore(chip, log);
   if (log?.parentNode) log.parentNode.insertBefore(actions, log);
   drawHistory();
@@ -707,15 +768,25 @@ export function mountXiaoya({mode = 'popup', host = null} = {}) {
   /** 焦点那一行。**读不到就说读不到**，并且说清"这是最近看过"还是"正在看"。 */
   function updateFocusChip(context, resolved = null) {
     const snapshot = context?.visibleSnapshot ?? null;
+    const live = context?.focusLive !== false;
     const source = resolved?.source ?? null;
+    const prefix = live ? '正在看' : '最近看过';
+    const instanceId = context?.focusInstanceId ?? null;
     if (snapshot) {
       const bits = [snapshot.name ?? context?.focusName ?? '这一只'];
       if (snapshot.nature) bits.push(`性格 ${snapshot.nature}`);
       if (snapshot.skills?.length) bits.push(`${snapshot.skills.length} 个技能`);
       if (snapshot.battle_only) bits.splice(1, 0, '对战场上（只有名字/系别）');
-      chip.textContent = `${source === 'last' ? '最近看过' : '正在看'}：${bits.join(' · ')}`;
-      chip.dataset.xyFocus = String(context?.focusInstanceId ?? snapshot.name ?? '');
-      chip.dataset.xyFocusLive = source === 'last' ? 'no' : 'yes';
+      chip.textContent = `${prefix}：${bits.join(' · ')}`;
+      chip.dataset.xyFocus = String(instanceId ?? snapshot.name ?? '');
+      chip.dataset.xyFocusLive = live ? 'yes' : 'no';
+    } else if (instanceId) {
+      // ⚠ 2026-09-29（art-finish D①-c）：点了槽位/候选卡之后，**详情还没取回来**的那一帧也要
+      // 如实写出"正在看谁"（`data-xy-focus` 立刻就是那个个体 id）。原来这一支落到下面的
+      // "没在看具体的某一只" ⇒ 点完立刻读是空的，要再问一句才变 —— 滞后一拍就是这么来的。
+      chip.textContent = `${prefix}：${context?.focusName ?? instanceId}（正在读它的培养数据…）`;
+      chip.dataset.xyFocus = String(instanceId);
+      chip.dataset.xyFocusLive = live ? 'yes' : 'no';
     } else if (resolved?.failure) {
       chip.textContent = `正在看的那一只读不出来：${resolved.failure}`;
       chip.dataset.xyFocus = '';
@@ -743,11 +814,9 @@ export function mountXiaoya({mode = 'popup', host = null} = {}) {
       {attributes: true, attributeFilter: ['data-box-pet', 'data-box-view']});
   }
   document.addEventListener('click', (event) => {
-    const node = event.target?.closest?.('[data-tw-instance]');
-    const instanceId = node?.dataset?.twInstance ?? null;
-    if (!instanceId) return;
-    focusProvider.notePicked({instanceId,
-      name: node.querySelector?.('.tw-name')?.textContent?.trim() ?? null});
+    // 传**事件**（不是 `event.target`）：配队工作台在 shadow DOM 里，target 会被重定向。
+    const focus = focusFromClick(event);
+    if (focus) focusProvider.notePicked(focus);
   }, true);
 
   if (quick) {
@@ -773,11 +842,50 @@ export function mountXiaoya({mode = 'popup', host = null} = {}) {
       });
     });
   }
-  // 连接状态：读不到就照实说读不到（不谎报「已连接」）。
-  connectionStatus().then((info) => {
-    setStatus(info?.configured ? `模型已连接（${info.provider ?? 'deepseek'}）· 依据可展开查看`
-      : '未连接模型：小芽只给规则事实（去 connect.html 配置）');
-  }).catch(() => setStatus('读不到模型连接状态（只给规则事实）'));
+  // ── 能力状态：**资料**与**模型**两条分开说（Codex P0-01 第 2 条）──────────────
+  //
+  // 修前这里只有一句：「未连接模型：小芽只给规则事实（去 connect.html 配置）」——
+  // 玩家读到的意思是"没配 key ⇒ 什么都查不了"。而事实是：**不配 key 也能查**
+  // （天气 / 属性相性 / 图鉴条目 / 学习表都在本机规则服务里，服务端那条路 0 次模型调用）。
+  // 现在两条各说各的后果，谁都不许替谁下结论：
+  //   ① 资料查询：规则服务连没连上（`toolsReady`）—— 它决定"事实问有没有答案"；
+  //   ② 云端模型：能不能生成自由发挥的文字（`modelReady`）—— 它**不**决定资料能不能查。
+  // 两条都进 `body[data-xy-capability]`，验收/排障读它（人读的是下面那两行字）。
+  // 画那两行 + 写机器可读钩子（挂载时画一次；**每次答完再刷一次** —— 规则服务是惰性启动的，
+  // 第一问会把引擎拉起来，那之后 `toolsReady` 才变成"在"。不刷新的话，页面上会一直停在
+  // 「还没拉起来」，而那已经是一句过期的话了）。
+  let capabilityAt = 0;
+  const paintCapability = (info) => {
+    const cap = info?.capabilities ?? null;
+    // 三态：`true` 在 / `false` 明确不在 / `null` **还没拉起来过**（惰性启动，不许报成"坏了"）。
+    const tools = cap?.toolsReady === true ? 'ok' : cap?.toolsReady === false ? 'down' : 'unknown';
+    const model = cap?.modelReady === true ? 'ok' : cap?.modelReady === false ? 'off' : 'unknown';
+    document.body.dataset.xyCapability = `tools=${tools};model=${model};server=${cap?.serverReady === true ? 'ok' : 'unknown'}`;
+    const toolsLine = tools === 'ok'
+      ? `资料查询：可用（本机规则服务已连${cap?.rulesetId ? `，规则集 ${cap.rulesetId}` : ''}）`
+      : tools === 'down'
+        ? `资料查询：不可用 —— 缺的是「${(cap?.missing ?? [])[0] ?? '本机规则服务'}」。这一步不需要模型密钥；启动服务后原样再问。`
+        : '资料查询：还没拉起来（规则服务是第一次查询才启动的；问一句就会拉起它）';
+    const modelLine = model === 'ok'
+      ? '云端模型：已连接 —— 自由发挥的文字由它生成'
+      : model === 'off'
+        ? '云端模型：没有连 —— 只影响自由发挥的文字，上面那些资料查询照常'
+        : '云端模型：状态未知（只影响自由发挥的文字）';
+    capEl.textContent = `${toolsLine}；${modelLine}`;
+    if (chip) chip.title = `${toolsLine}\n${modelLine}`;
+  };
+  const refreshCapability = async (force = false) => {
+    // 1 秒内不重复打（防抖）；答完每次都**强制**刷 —— 第一问会把惰性启动的规则服务拉起来，
+    // 那之后页面上那两行才准（不许停在过期的那一句上）。
+    if (!force && Date.now() - capabilityAt < 1000) return;
+    capabilityAt = Date.now();
+    try { paintCapability(await connectionStatus()); }
+    catch {
+      document.body.dataset.xyCapability = 'tools=unknown;model=unknown;server=unknown';
+      capEl.textContent = '读不到服务状态：资料查询与模型连接都按「未知」处理（不谎报已连接）';
+    }
+  };
+  void refreshCapability(true);
 
   // 模块图完整才跑得到这里：撤掉「脚本没加载成功」的兜底横幅。
   document.getElementById('boot-fallback')?.remove();

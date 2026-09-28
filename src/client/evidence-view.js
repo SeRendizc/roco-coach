@@ -13,7 +13,14 @@
  */
 
 /** 像工程记号的行：花括号/等号赋值、源码路径、内部模块名、内部编号、snake_case 常量。 */
-const INTERNAL = /[{}]|src\/|\bRULES\.|\bENGINE_[A-Z]|\bmemory\.|\b[a-z]{2,}_[a-z]{2,}(?:_[a-z]{2,})?\b|=\s*\S/;
+// ⚠ 2026-09-29 补（`coach-context` 报、Lead 复核后拍板）：加 `\bev:`。
+// 依据行的**原始出处 id** 形如 `ev:roco-world-s4-2026-09-10:pets#pet_000225`，是工程串，
+// 不该给玩家看（哪怕它在可展开的「依据」块里）。
+// **只滤 id、不动正文**：玩家读到的「（依据：游戏图鉴的相性表 火系 那一行，逐字抄录）」
+// 是回答 `text` 的一部分（`runtime.js:1534`），而 `ev:` 来自**单独的** `evidence` 数组
+// （`receipt.evidence_ids`）—— 两者不是同一行，所以这一改不会把人话一起滤掉。
+// 旧正则留档：/[{}]|src\/|\bRULES\.|\bENGINE_[A-Z]|\bmemory\.|\b[a-z]{2,}_[a-z]{2,}(?:_[a-z]{2,})?\b|=\s*\S/
+const INTERNAL = /[{}]|src\/|\bRULES\.|\bENGINE_[A-Z]|\bmemory\.|\bev:|\b[a-z]{2,}_[a-z]{2,}(?:_[a-z]{2,})?\b|=\s*\S/;
 
 /**
  * @param {unknown} lines 原始证据行（可能是任何东西，调用方不必先清洗）

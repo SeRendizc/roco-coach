@@ -1,0 +1,65 @@
+{
+  "base": "http://127.0.0.1:8765",
+  "mode": "normal",
+  "pid": 92220,
+  "startedAt": "2026-09-28T18:08:43.049Z",
+  "checks": [
+    {
+      "name": "① 起点：还没点过任何一格 ⇒ 那一行是\"没在看具体的某一只\"",
+      "ok": true,
+      "detail": "data-xy-focus=\"\"｜「没在看具体的某一只 —— 问\"这只\"我会先请你点开一只。」"
+    },
+    {
+      "name": "①a 页面上有装着个体的槽位（有 `data-tw-slot-instance` 可读）",
+      "ok": true,
+      "detail": "第 1 格 = 迪莫（own-0004）"
+    },
+    {
+      "name": "①b 点第 N 格 → **立刻**（不再问一句）焦点就是这一格的个体 id",
+      "ok": true,
+      "detail": "期望 own-0004，读到 data-xy-focus=\"own-0004\"｜「正在看：迪莫（正在读它的培养数据…）」"
+    },
+    {
+      "name": "①c 那一行同时写着\"正在看：<名字>\"（不是\"没在看\"）",
+      "ok": true,
+      "detail": "「正在看：迪莫（正在读它的培养数据…）」"
+    },
+    {
+      "name": "② 用这一格问一句：答的是**这一格那一只**的性格（与盒子详情页那一栏逐字一致）",
+      "ok": true,
+      "detail": "详情页：专注｜回答：你现在看的这一只是迪莫（Lv.60）：性格「专注」。"
+    },
+    {
+      "name": "③ 浏览器控制台没有报错",
+      "ok": true,
+      "detail": "console=0 pageerror=0"
+    }
+  ],
+  "shots": [
+    "docs/roco/review-2026-09-28/shots/coach-context/slot-focus-normal-after-click.png",
+    "docs/roco/review-2026-09-28/shots/coach-context/slot-focus-normal-answer.png"
+  ],
+  "slotsAtStart": {
+    "total": 6,
+    "filled": 0
+  },
+  "slotsFilled": {
+    "by": "ok",
+    "slots": {
+      "total": 6,
+      "filled": 2
+    }
+  },
+  "afterClick": {
+    "hook": null,
+    "attr": "own-0004",
+    "live": "yes",
+    "text": "正在看：迪莫（正在读它的培养数据…）",
+    "mounted": "yes"
+  },
+  "answer": "你现在看的这一只是迪莫（Lv.60）：性格「专注」。",
+  "consoleErrors": [],
+  "pageErrors": [],
+  "verdict": "pass",
+  "failed": []
+}

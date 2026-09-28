@@ -1,0 +1,119 @@
+{
+  "base": "http://127.0.0.1:58837",
+  "pid": 90200,
+  "mode": "coach-down",
+  "startedAt": "2026-09-28T18:04:34.790Z",
+  "questions": [
+    {
+      "question": "雨天水系伤害加多少？",
+      "answer": "这条要查（规则与图鉴），但这份资料现在用不了。缺的是：本机（跑规则/图鉴/相性表的那个进程）没有连上。（浏览器这一侧连不上本机规则服务）先别急 —— 这一步：规则 / 图鉴 / 相性表都在本机规则服务里。确认服务已启动（npm start 会一起把规则服务拉起来）之后，把这句话原样再问一次就行。（我不会拿别的内容顶这一条：洛手的资料只从规则服务那一份来。）",
+      "requests": [
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:58837/api/roco/box?kind=mine&limit=48",
+          "status": 200,
+          "failed": null,
+          "snippet": null
+        },
+        {
+          "method": "POST",
+          "url": "http://127.0.0.1:58837/api/coach",
+          "status": null,
+          "failed": "net::ERR_CONNECTION_FAILED",
+          "snippet": null
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:58837/src/coach/roco-client.js",
+          "status": null,
+          "failed": "net::ERR_ABORTED",
+          "snippet": null
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:58837/api/bootstrap",
+          "status": 200,
+          "failed": null,
+          "snippet": "{\"runtimeVersion\":\"0.11\",\"configured\":false,\"verified\":false,\"model\":\"deepseek-flash\",\"provider\":\"local\",\"rag_mode\":\"shadow\",\"started_at\":\"2026-09-28T18:04:34.338Z\",\"assets\":60,\"capabilities\":{\"serverReady\":true,\"toolsReady\":null,\"modelReady\":false,\"rulesetId\":\"roco-world-s4-2026-09-10\",\"missing\":[\"规则服务还没被拉起来（它是第一次查询才启动的：没启动过 ≠ 坏了）\",\"云端模型没配（只影响自由发挥的文字）\"],\"toolsError\":null,\"toolsBridge\":{\"loadable\":true,\"clientReady\":false,\"engineAlive\":null,\"builds\":0,\"moduleUrl\":\"file:///Users/serendizc/Developer/roco-coach/src/coach/toolbox.js\"},\"note\":\"toolsReady 只管资料查询；modelReady 只管自由文本生成。没配密钥不影响资料查询。\"},\"csrf\":\"8e12e6293e0bc33db86d9c40366d12106e5e70a972529d15\",\"nonce\":\"3346397197c9b1370bce3a5f1d78e679\",\"publicKey\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzE0FJjMCBM9tFmWsz0FOSMMFml74tl8STyz7l4Q6bapqca/JzNbboqkVTEFsui8Tf01P48Oas+Ykz2pMsaWQCCV0fdz42PZjq2Jsa4EW+Jyf8KEj7mly56sitDPcvWBT4Md+Vy/TeVz/CJIja0ETGReyupJCJ8mD4CREAj7eeDjrzMHxxV5UHOYrBHb2PhuL5VYqss0c9dUwELlif8+BG6f76XVCK2UODi8S9iJFlgeUqtd9k/Z3ncBkTdm1FhZ0QvkmZ9UwA8FgvX1e9aYVQ6VVa1joSYvu7ORmTwJFR8aSVUmsTjvjxUt0Yo7LA+PGsWxVu1NFpA1NsFjdIKVaxwIDAQAB\",\"server\":{\"started_at\":\"2026-09-28T18:04:34.338Z\",\"assets\":60,\"asset_refreshes\":2,\"asset_refreshable\":false,\"note\":\"静态资源清单来自磁盘的模块图；miss 时会自愈重算一次\"}}"
+        }
+      ]
+    },
+    {
+      "question": "火系克制什么属性？",
+      "answer": "这条要查（规则与图鉴），但这份资料现在用不了。缺的是：本机（跑规则/图鉴/相性表的那个进程）没有连上。（浏览器这一侧连不上本机规则服务）先别急 —— 这一步：规则 / 图鉴 / 相性表都在本机规则服务里。确认服务已启动（npm start 会一起把规则服务拉起来）之后，把这句话原样再问一次就行。（我不会拿别的内容顶这一条：洛手的资料只从规则服务那一份来。）",
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://127.0.0.1:58837/api/coach",
+          "status": null,
+          "failed": "net::ERR_CONNECTION_FAILED",
+          "snippet": null
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:58837/api/bootstrap",
+          "status": 200,
+          "failed": null,
+          "snippet": "{\"runtimeVersion\":\"0.11\",\"configured\":false,\"verified\":false,\"model\":\"deepseek-flash\",\"provider\":\"local\",\"rag_mode\":\"shadow\",\"started_at\":\"2026-09-28T18:04:34.338Z\",\"assets\":60,\"capabilities\":{\"serverReady\":true,\"toolsReady\":null,\"modelReady\":false,\"rulesetId\":\"roco-world-s4-2026-09-10\",\"missing\":[\"规则服务还没被拉起来（它是第一次查询才启动的：没启动过 ≠ 坏了）\",\"云端模型没配（只影响自由发挥的文字）\"],\"toolsError\":null,\"toolsBridge\":{\"loadable\":true,\"clientReady\":false,\"engineAlive\":null,\"builds\":0,\"moduleUrl\":\"file:///Users/serendizc/Developer/roco-coach/src/coach/toolbox.js\"},\"note\":\"toolsReady 只管资料查询；modelReady 只管自由文本生成。没配密钥不影响资料查询。\"},\"csrf\":\"8e12e6293e0bc33db86d9c40366d12106e5e70a972529d15\",\"nonce\":\"414da2a2c7fde7fa7a7191382c179760\",\"publicKey\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzE0FJjMCBM9tFmWsz0FOSMMFml74tl8STyz7l4Q6bapqca/JzNbboqkVTEFsui8Tf01P48Oas+Ykz2pMsaWQCCV0fdz42PZjq2Jsa4EW+Jyf8KEj7mly56sitDPcvWBT4Md+Vy/TeVz/CJIja0ETGReyupJCJ8mD4CREAj7eeDjrzMHxxV5UHOYrBHb2PhuL5VYqss0c9dUwELlif8+BG6f76XVCK2UODi8S9iJFlgeUqtd9k/Z3ncBkTdm1FhZ0QvkmZ9UwA8FgvX1e9aYVQ6VVa1joSYvu7ORmTwJFR8aSVUmsTjvjxUt0Yo7LA+PGsWxVu1NFpA1NsFjdIKVaxwIDAQAB\",\"server\":{\"started_at\":\"2026-09-28T18:04:34.338Z\",\"assets\":60,\"asset_refreshes\":2,\"asset_refreshable\":false,\"note\":\"静态资源清单来自磁盘的模块图；miss 时会自愈重算一次\"}}"
+        }
+      ]
+    },
+    {
+      "question": "喵喵的种族值是多少？",
+      "answer": "「喵喵」这一问我没核到：本机规则服务这一条没答上来（缺的是那份规则资料，不是模型密钥）。手游图鉴（622 只）里查不到这个名字，我不凭印象给它编数值。",
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://127.0.0.1:58837/api/coach",
+          "status": null,
+          "failed": "net::ERR_CONNECTION_FAILED",
+          "snippet": null
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:58837/api/bootstrap",
+          "status": 200,
+          "failed": null,
+          "snippet": "{\"runtimeVersion\":\"0.11\",\"configured\":false,\"verified\":false,\"model\":\"deepseek-flash\",\"provider\":\"local\",\"rag_mode\":\"shadow\",\"started_at\":\"2026-09-28T18:04:34.338Z\",\"assets\":60,\"capabilities\":{\"serverReady\":true,\"toolsReady\":null,\"modelReady\":false,\"rulesetId\":\"roco-world-s4-2026-09-10\",\"missing\":[\"规则服务还没被拉起来（它是第一次查询才启动的：没启动过 ≠ 坏了）\",\"云端模型没配（只影响自由发挥的文字）\"],\"toolsError\":null,\"toolsBridge\":{\"loadable\":true,\"clientReady\":false,\"engineAlive\":null,\"builds\":0,\"moduleUrl\":\"file:///Users/serendizc/Developer/roco-coach/src/coach/toolbox.js\"},\"note\":\"toolsReady 只管资料查询；modelReady 只管自由文本生成。没配密钥不影响资料查询。\"},\"csrf\":\"8e12e6293e0bc33db86d9c40366d12106e5e70a972529d15\",\"nonce\":\"9deed99007dc817cd33f88e989bfe637\",\"publicKey\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzE0FJjMCBM9tFmWsz0FOSMMFml74tl8STyz7l4Q6bapqca/JzNbboqkVTEFsui8Tf01P48Oas+Ykz2pMsaWQCCV0fdz42PZjq2Jsa4EW+Jyf8KEj7mly56sitDPcvWBT4Md+Vy/TeVz/CJIja0ETGReyupJCJ8mD4CREAj7eeDjrzMHxxV5UHOYrBHb2PhuL5VYqss0c9dUwELlif8+BG6f76XVCK2UODi8S9iJFlgeUqtd9k/Z3ncBkTdm1FhZ0QvkmZ9UwA8FgvX1e9aYVQ6VVa1joSYvu7ORmTwJFR8aSVUmsTjvjxUt0Yo7LA+PGsWxVu1NFpA1NsFjdIKVaxwIDAQAB\",\"server\":{\"started_at\":\"2026-09-28T18:04:34.338Z\",\"assets\":60,\"asset_refreshes\":2,\"asset_refreshable\":false,\"note\":\"静态资源清单来自磁盘的模块图；miss 时会自愈重算一次\"}}"
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "name": "③a 服务端资料掐断时：页面上那一行**不许**是绿的（tools 不能是 ok）",
+      "ok": true,
+      "detail": "body[data-xy-capability]=\"tools=unknown;model=off;server=ok\"｜那两行：资料查询：还没拉起来（规则服务是第一次查询才启动的；问一句就会拉起它）；云端模型：没有连 —— 只影响自由发挥的文字，上面那些资料查询照常"
+    },
+    {
+      "name": "③ 「雨天水系伤害加多少？」服务端掐断时：点名缺的是哪一项（不是旧模板、不是笼统话）",
+      "ok": true,
+      "detail": "旧语料=无｜含糊=无｜回答：这条要查（规则与图鉴），但这份资料现在用不了。缺的是：本机（跑规则/图鉴/相性表的那个进程）没有连上。（浏览器这一侧连不上本机规则服务）先别急 —— 这一步：规则 / 图鉴 / 相性表都在本机规则服务里。确认服务已启动（"
+    },
+    {
+      "name": "③ 「火系克制什么属性？」服务端掐断时：点名缺的是哪一项（不是旧模板、不是笼统话）",
+      "ok": true,
+      "detail": "旧语料=无｜含糊=无｜回答：这条要查（规则与图鉴），但这份资料现在用不了。缺的是：本机（跑规则/图鉴/相性表的那个进程）没有连上。（浏览器这一侧连不上本机规则服务）先别急 —— 这一步：规则 / 图鉴 / 相性表都在本机规则服务里。确认服务已启动（"
+    },
+    {
+      "name": "③ 「喵喵的种族值是多少？」服务端掐断时：点名缺的是哪一项（不是旧模板、不是笼统话）",
+      "ok": true,
+      "detail": "旧语料=无｜含糊=无｜回答：「喵喵」这一问我没核到：本机规则服务这一条没答上来（缺的是那份规则资料，不是模型密钥）。手游图鉴（622 只）里查不到这个名字，我不凭印象给它编数值。"
+    }
+  ],
+  "shots": [],
+  "capability": {
+    "capability": null,
+    "capabilityLine": null,
+    "bootstrap": null
+  },
+  "capabilityDown": {
+    "statusLine": "正在读取连接状态…",
+    "capabilityLine": "资料查询：还没拉起来（规则服务是第一次查询才启动的；问一句就会拉起它）；云端模型：没有连 —— 只影响自由发挥的文字，上面那些资料查询照常",
+    "capability": "tools=unknown;model=off;server=ok",
+    "bootstrap": "{\"runtimeVersion\":\"0.11\",\"configured\":false,\"verified\":false,\"model\":\"deepseek-flash\",\"provider\":\"local\",\"rag_mode\":\"shadow\",\"started_at\":\"2026-09-28T18:04:34.338Z\",\"assets\":60,\"capabilities\":{\"serverReady\":true,\"toolsReady\":null,\"modelReady\":false,\"rulesetId\":\"roco-world-s4-2026-09-10\",\"missing\":[\"规则服务还没被拉起来（它是第一次查询才启动的：没启动过 ≠ 坏了）\",\"云端模型没配（只影响自由发挥的文字）\"],\"toolsError\":null,\"toolsBridge\":{\"loadable\":true,\"clientReady\":false,\"engineAlive\":null,\"builds\":0,\"moduleUrl\":\"file:///Users/serendizc/Developer/roco-coach/src/coach/toolbox.js\"},\"note\":\"toolsReady 只管资料查询；modelReady 只管自由文本生成。没配密钥不影响资料查询。\"},\"csrf\":\"8e12e6293e0bc33db86d9c40366d12106e5e70a972529d15\",\"nonce\":\"f17abb5f8b193a1711f0dfbd29e07a49\",\"publicKey\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzE0FJjMCBM9tFmWsz0FOSMMFml74tl8STyz7l4Q6bapqca/JzNbboqkVTEFsui8Tf01P48Oas+Ykz2pMsaWQCCV0fdz42PZjq2Jsa4EW+Jyf8KEj7mly56sitDPcvWBT4Md+Vy/TeVz/CJIja0ETGReyupJCJ8mD4CREAj7eeDjrzMHxxV5UHOYrBHb2PhuL5VYqss0c9dUwELlif8+BG6f76XVCK2UODi8S9iJFlgeUqtd9k/Z3ncBkTdm1FhZ0QvkmZ9UwA8FgvX1e9aYVQ6VVa1joSYvu7ORmTwJFR8aSVUmsTjvjxUt0Yo7LA+PGsWxVu1NFpA1NsFjdIKVaxwIDAQAB\",\"server\":{\"started_at\":\"2026-09-28T18:04:34.338Z\",\"assets\":60,\"asset_refreshes\":1,\"asset_refreshable\":false,\"note\":\"静态资源清单来自磁盘的模块图；miss 时会自愈重算一次\"}}",
+    "bootstrapStatus": 200
+  },
+  "verdict": "pass",
+  "failed": []
+}
