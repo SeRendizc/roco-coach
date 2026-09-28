@@ -1,0 +1,108 @@
+{
+  "folder": "/Users/serendizc/Developer/roco-coach/reports/roco/sft-v8",
+  "strict": false,
+  "registry": [
+    "read_state",
+    "search_rules",
+    "compare_actions",
+    "simulate_branch",
+    "read_match",
+    "read_evidence",
+    "read_last_turn",
+    "query_rules",
+    "evaluate_team",
+    "compare_team_change",
+    "plan_actions",
+    "summarize_battle"
+  ],
+  "counts": {
+    "train": {
+      "rows": 2403,
+      "targets": {
+        "query_rules": 486,
+        "evaluate_team": 81,
+        "compare_team_change": 81,
+        "stop": 859,
+        "read_state": 128,
+        "compare_actions": 128,
+        "simulate_branch": 128,
+        "inspect_training": 128,
+        "read_match": 128,
+        "read_evidence": 128,
+        "read_last_turn": 128
+      },
+      "inputSchemas": {
+        "hints,message,screen": 1395,
+        "hints,message,receipts,screen,tools": 1008
+      }
+    },
+    "valid": {
+      "rows": 362,
+      "targets": {
+        "query_rules": 162,
+        "evaluate_team": 27,
+        "compare_team_change": 27,
+        "stop": 90,
+        "read_state": 8,
+        "compare_actions": 8,
+        "simulate_branch": 8,
+        "inspect_training": 8,
+        "read_match": 8,
+        "read_evidence": 8,
+        "read_last_turn": 8
+      },
+      "inputSchemas": {
+        "hints,message,screen": 306,
+        "hints,message,receipts,screen,tools": 56
+      }
+    },
+    "test": {
+      "rows": 107,
+      "targets": {
+        "stop": 51,
+        "read_state": 8,
+        "compare_actions": 8,
+        "simulate_branch": 8,
+        "inspect_training": 8,
+        "read_match": 8,
+        "read_evidence": 8,
+        "read_last_turn": 8
+      },
+      "inputSchemas": {
+        "hints,message,screen": 51,
+        "hints,message,receipts,screen,tools": 56
+      }
+    }
+  },
+  "errorCount": 144,
+  "warningCount": 0,
+  "errors": [
+    "train:1450 unknown tool inspect_training",
+    "train:1451 unknown tool inspect_training",
+    "train:1452 unknown tool inspect_training",
+    "train:1453 unknown tool inspect_training",
+    "train:1454 unknown tool inspect_training",
+    "train:1455 unknown tool inspect_training",
+    "train:1456 unknown tool inspect_training",
+    "train:1457 unknown tool inspect_training",
+    "train:1458 unknown tool inspect_training",
+    "train:1459 unknown tool inspect_training",
+    "train:1460 unknown tool inspect_training",
+    "train:1461 unknown tool inspect_training",
+    "train:1462 unknown tool inspect_training",
+    "train:1463 unknown tool inspect_training",
+    "train:1464 unknown tool inspect_training",
+    "train:1465 unknown tool inspect_training",
+    "train:1576 unknown tool inspect_training",
+    "train:1577 unknown tool inspect_training",
+    "train:1578 unknown tool inspect_training",
+    "train:1579 unknown tool inspect_training",
+    "train:1580 unknown tool inspect_training",
+    "train:1581 unknown tool inspect_training",
+    "train:1582 unknown tool inspect_training",
+    "train:1583 unknown tool inspect_training",
+    "train:1584 unknown tool inspect_training"
+  ],
+  "warnings": [],
+  "limits": "Structural audit only. Does not execute tools, establish correct semantic args, measure grounding or certify split-family independence."
+}

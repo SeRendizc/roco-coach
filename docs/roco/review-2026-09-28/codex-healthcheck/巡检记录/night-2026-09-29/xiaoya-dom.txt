@@ -1,0 +1,157 @@
+Browser tab: 7, Title: "小芽 · 精灵盒子（我的 / 全图鉴）", URL: "http://127.0.0.1:8765/box.html?pet=own-0004".
+1 AXWebArea 小芽 · 精灵盒子（我的 / 全图鉴）, URL: 127.0.0.1:8765/box.html?pet=own-0004
+	2 container
+		3 heading 小芽 · 精灵盒子 全部精灵 / 我的盒子, Value: 1
+			4 text 小芽 · 精灵盒子  全部精灵 / 我的盒子
+		5 link Description: ← 返回首页, Value: 127.0.0.1:8765/, ID: box-nav-home
+		6 link Description: ⚔ 开始 PVP, Value: 127.0.0.1:8765/roco.html, ID: box-nav-pvp
+		149 text 我的盒子 542 个个体
+		8 button 重置筛选, ID: box-reset
+		9 button (collapsed) 关于这一页（来源与快照） ▾, Secondary Actions: Expand
+			10 text 关于这一页（来源与快照）
+			11 text ▾
+		12 pop up button (expanded) 小芽, ID: xiaoya-open, Secondary Actions: Collapse
+		150 container 迪莫 · 详情, ID: pet-view
+			151 button ← 返回精灵盒子, ID: pet-back
+			152 heading 迪莫 · 详情, Value: 2, ID: pet-title
+				153 text 迪莫 · 详情
+			154 container pet-head
+				155 heading 迪莫, Value: 3
+					156 text 迪莫
+				157 text 定位：辅助
+			158 container pet-actions
+				159 button 刷新性格（还剩 2 次）
+				160 button 刷新天分（还剩 2 次）
+				161 button 带上它去配队
+				162 checkbox 收藏, Help: 收藏这一只（只记在你自己这台机器上）, Value: 0
+			163 container
+				164 heading 换技能, Value: 4
+					165 text 换技能
+				166 text 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。
+				167 content list
+					168 container
+						169 text 第 1 个 光刃 现在带着的 系别 光系 · 类别 攻击 · 耗能 4 · 威力 120
+					170 container
+						171 text 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 游戏数据里没有这一项
+					172 container
+						173 text 第 3 个 棘突 现在带着的 系别 草系 · 类别 攻击 · 耗能 3 · 威力 100
+					174 container
+						175 text 第 4 个 抽枝 现在带着的 系别 草系 · 类别 攻击 · 耗能 4 · 威力 90
+				176 button 看它能学什么
+			177 container pet-body
+				178 heading 等级, Value: 4
+					179 text 等级
+				180 container
+					181 text 等级 Lv.60
+				182 heading 性格与资质, Value: 4
+					183 text 性格与资质
+				184 container pet-traits
+					185 container
+						186 text 性格 专注
+					187 container
+						188 text 资质 生命 0 / 物攻 7 / 物防 10 / 魔攻 0 / 魔防 7 / 速度 0
+					189 container
+						190 text 天分档位 相当好的天分
+				191 heading 六维（60 级）, Value: 4
+					192 text 六维（60 级）
+				193 text 生命
+				194 text 374
+				195 text 种族 120
+				196 text 物攻
+				197 text 287
+				198 container
+					199 text 种族 80 +7
+				200 text 物防
+				201 text 342
+				202 container
+					203 text 种族 105 +10
+				204 text 魔攻
+				205 text 158
+				206 text 种族 80
+				207 text 魔防
+				208 text 314
+				209 container
+					210 text 种族 105 +7
+				211 text 速度
+				212 text 161
+				213 text 种族 92
+				214 text 主数是按 60 级公式换算的面板值（默认 5 星 · 零突破）；下面一行是它的两个输入：种族值，以及这一只的天分（黄色）。这是给你看的换算值，引擎对战里用的不是这一份。没有种族值的精灵只给种族值本身，不编面板。
+				215 heading 四个技能（按顺序）, Value: 4
+					216 text 四个技能（按顺序）
+				217 content list
+					218 container
+						219 text 第 1 个 光刃 光系 · 攻击 · 耗能 4 · 威力 120 对敌方精灵造成物理伤害。
+					220 container
+						221 text 第 2 个 防御 普通系 · 防御 · 耗能 1 · 威力 游戏数据里没有这一项 减伤70%，应对攻击。
+					222 container
+						223 text 第 3 个 棘突 草系 · 攻击 · 耗能 3 · 威力 100 对敌方精灵造成魔法伤害。
+					224 container
+						225 text 第 4 个 抽枝 草系 · 攻击 · 耗能 4 · 威力 90 造成物伤，应对状态：自己回复50%生命和5能量。
+				226 text 等级换算后的面板数值：这个数值游戏数据里没有——换算公式还没校准，所以盒子里只给迁移层登记过的种族值，不给伪精确的成品数值。
+	227 container Description: 和小芽说话, ID: xiaoya-pop
+		228 text ✦ 小芽
+		286 text 未连接模型，显示本局规则分析
+		230 button Description: 关闭小芽, ID: xiaoya-close
+		287 text 正在看：迪莫 · 性格 专注 · 4 个技能
+		232 container xiaoya-actions
+			233 button 新对话, Help: 开一段新对话；这一段留在记录里，跨局记忆不动。, ID: xiaoya-new-chat
+			234 button 清空本次对话, Help: 只清这一段对话的轮次；跨局记忆（学到的东西、偏好）不动。, ID: xiaoya-clear-chat
+		235 container xiaoya-log
+			236 text 你
+			237 text 我一共有多少只精灵？
+			238 text 小芽
+			239 text 这一页给了 48 只，你的持有总数是 542 只（我只数名单，不替你把没见过的那部分也算上）。要看整本图鉴（622 只）可以翻精灵盒子；要挑一只，我可以按属性相性/学习表帮你筛。（来源：精灵盒子（我的）；只读、不猜）
+			240 text 你
+			241 text 雨天水系伤害加多少？
+			242 text 小芽
+			243 text 你上次来是11天前，那天打了2局，最后一局没拿下来。那天0胜2负。你上一局在冠军高地打到第8回合，没拿下来。
+			244 text 你
+			245 text 我想以迪莫为核心配一队，给我六只和每只四个技能，说明为什么这样配。
+			246 text 小芽
+			247 text 按战术卡，组队先看这几条：「组队职责」：为队伍安排输出、承伤和收尾职责；狐偏快攻与灼烧联动，狮偏慢速破防爆发。（反例：不是三个不同属性就一定合理；先检查队伍是否都怕同一种节奏，以及玩家偏好。）（来源：战术卡，卡里带出处；你名单里有 48 只——要具体到"带哪几只"，把目标（打谁、要快还是要稳）说清楚，或者让我按属性/相性把候选筛出来。这是
+			248 text 结构建议
+			249 text ，不是胜率。）
+			250 text 你
+			251 text 火系克制什么属性？
+			252 text 小芽
+			253 text 进入一场 PVE 对战后，我可以结合当前生命、能量和队伍比较行动。
+			254 text 你
+			255 text 给我出一道洛克王国世界的先手小测验
+			256 text 小芽
+			257 text 这一页给我的是你
+			258 text 自己的
+			259 text 精灵名单，但我没能从图鉴里读到「喵喵」的面板速度，所以出不了这道题 —— 我不编一个速度。你可以稍后再试一次，或者直接问我它的六维/技能。
+			260 text 你
+			261 text 雨天水系伤害加多少？
+			262 text 小芽
+			263 text 天气只能存在一种，持续 8 回合。雨天：天气为雨天时，双方的水系技能威力+75%；沙暴：天气为沙暴时，双方的地系技能能耗减半；暴风雪：天气为暴风雪时，双方每回合结束获得2层冻结（冰系精灵免疫此效果）；雷鸣：天气为雷鸣时，双方每回合结束获得1层引电（电系精灵免疫此效果）。（来源：规则配置 mobile_s4_candidate_v3（模式 pvp-standard-six-pet 绑定的那份） 里的天气声明，依据等级 官方当前材料；数值逐字来自配置，不换算）
+			264 text 你
+			265 text 我现在看的这只精灵叫什么？适合什么性格？
+			266 text 小芽
+			267 text 你上次来是11天前，那天打了2局，最后一局没拿下来。那天0胜2负。你上一局在冠军高地打到第8回合，没拿下来。
+			278 text 你
+			279 text 这只的性格是什么？
+			280 text 小芽
+			281 text 你现在看的这一只是迪莫（Lv.60）：性格「专注」；资质 生命 0 / 物攻 7 / 物防 10 / 魔攻 0 / 魔防 7 / 速度 0；天分档位「相当好的天分」；带的 4 个技能（按页面上那一栏的顺序）：1 光刃（光系 · 攻击 · 耗能 4 · 威力 120）、2 防御（普通系 · 防御 · 耗能 1 · 威力 游戏数据里没有这一项）、3 棘突（草系 · 攻击 · 耗能 3 · 威力 100）、4 抽枝（草系 · 攻击 · 耗能 4 · 威力 90）。（这几格都是
+			282 text 逐字
+			283 text 来自这一页「性格与资质 / 四个技能」那两栏，同一个来源；换一只再问我，我跟着换。）
+			284 button (collapsed) 依据, Secondary Actions: Expand
+				285 text 依据
+			288 text 你
+			289 text 这只适合什么性格？为什么？
+			290 text 小芽
+			291 text 你现在看的这一只是迪莫（Lv.60）：性格「专注」；资质 生命 0 / 物攻 7 / 物防 10 / 魔攻 0 / 魔防 7 / 速度 0；天分档位「相当好的天分」；带的 4 个技能（按页面上那一栏的顺序）：1 光刃（光系 · 攻击 · 耗能 4 · 威力 120）、2 防御（普通系 · 防御 · 耗能 1 · 威力 游戏数据里没有这一项）、3 棘突（草系 · 攻击 · 耗能 3 · 威力 100）、4 抽枝（草系 · 攻击 · 耗能 4 · 威力 90）。（这几格都是
+			292 text 逐字
+			293 text 来自这一页「性格与资质 / 四个技能」那两栏，同一个来源；换一只再问我，我跟着换。）
+			294 button (collapsed) 依据, Secondary Actions: Expand
+				295 text 依据
+		268 container xiaoya-quick
+			269 button 我一共有多少只精灵？
+			270 button 雨天水系伤害加多少？
+			271 button 火系克制什么属性？
+			272 button 你能做什么
+		273 container xiaoya-form
+			274 text field (settable) xiaoya-input
+			275 button 发送, ID: xiaoya-send
+
+The focused UI element is 1 AXWebArea 小芽 · 精灵盒子（我的 / 全图鉴）, URL: 127.0.0.1:8765/box.html?pet=own-0004

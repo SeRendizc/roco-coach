@@ -1,0 +1,41 @@
+{
+ "base": "http://127.0.0.1:8765",
+ "verdict": "degraded",
+ "items": [
+  {
+   "id": "http",
+   "level": "ok",
+   "text": "box.html HTTP 200"
+  },
+  {
+   "id": "data",
+   "level": "ok",
+   "text": "我的盒子 542 / 图鉴 622"
+  },
+  {
+   "id": "engine",
+   "level": "ok",
+   "text": "引擎 available=true"
+  },
+  {
+   "id": "model",
+   "level": "degraded",
+   "text": "云端 cloud-deepseek：connected=false verified=false｜reason=\"还没有配置 API key\""
+  },
+  {
+   "id": "model.local",
+   "level": "info",
+   "text": "local-qwen35-4b：connected=false｜reason=\"本地模型开关是 off（ROCO_LOCAL_MODEL=on 才启用）\""
+  },
+  {
+   "id": "model.local",
+   "level": "info",
+   "text": "local-qwen38-27b：connected=false｜reason=\"本地模型开关是 off（ROCO_LOCAL_MODEL=on 才启用）\""
+  },
+  {
+   "id": "sprite",
+   "level": "ok",
+   "text": "迪莫 thumb 45357 字节 image/png"
+  }
+ ]
+}
