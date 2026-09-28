@@ -2109,6 +2109,59 @@ async function main() {
         + `留空框=${JSON.stringify(artProblems({...artFacts, plainEmoji: 0}))}`);
     shots.push(await shoot('box-12-capture-art-1440x900'));
 
+    // ── 判据 42（2026-09-29 新增）：**默认档也要能点进详情** ─────────────────────
+    //
+    // 这条补的是一个**判据的洞**（不是新功能）：原来的详情点击判据**先切到 `#tab-mine` 再点**，
+    // 而两个页签走的是**两套渲染**——
+    //   · 「我的盒子」⇒ `drawerListHtml` ⇒ `box-drawer.js:291` 渲染 `.individual[data-detail]` —— **能点**；
+    //   · 「全部精灵」（**页面默认档**）⇒ `cardHtml` ⇒ `<article class="card">` —— 重写时**把 `data-detail` 弄丢了**。
+    // 结果：41/41 全绿，而**默认视图点卡片什么都不发生**（`art-finish` 真机发现、我复核了模板）。
+    // 而 `box-drawer.js:128` 的注释早就写明 `[data-detail]` 是**契约选择器**、且上一版就是因此把详情弄丢过。
+    //
+    // ⚠ 写法上刻意**先诊断再点**：元素不在时判红并打出读数，**不许让整轮崩成 `fatal`**
+    //（第一版就是直接 `mouseClick`，元素找不到抛异常 ⇒ 后面所有判据一条都没跑）。
+    {
+      await mouseClick('#tab-catalog');
+      const onCatalog = await waitFor(`document.body.dataset.boxKind==='catalog'`, {tries: 40, ms: 200});
+      await waitForSafe(`document.querySelectorAll('#box-grid .card').length>0`, {tries: 40, ms: 200});
+      await sleep(400);
+      const diag = JSON.parse(await safeJs(`JSON.stringify({
+        kind: document.body.dataset.boxKind ?? null,
+        grouped: document.getElementById('box-grid')?.dataset?.grouped ?? null,
+        cards: document.querySelectorAll('#box-grid .card').length,
+        withDetail: document.querySelectorAll('#box-grid .card[data-detail]').length,
+        faces: document.querySelectorAll('#box-grid .card[data-detail] .card-face').length,
+        individualFaces: document.querySelectorAll('#box-grid .individual[data-detail] .card-face').length,
+        firstCardCls: document.querySelector('#box-grid .card')?.className ?? null,
+        rows: document.querySelectorAll('#box-grid > *').length,
+      })`) ?? '{}');
+      const target = diag.faces > 0 ? '#box-grid .card[data-detail] .card-face'
+        : (diag.individualFaces > 0 ? '#box-grid .individual[data-detail] .card-face' : null);
+      const detailId = target
+        ? await js(`document.querySelector(${JSON.stringify(target)})?.closest('[data-detail]')?.dataset?.detail ?? null`)
+        : null;
+      let opened = false;
+      if (target) {
+        await mouseClick(target);
+        opened = await waitFor(`(()=>{const v=document.getElementById('pet-view');
+          return Boolean(v)&&v.hidden===false&&Boolean(new URLSearchParams(location.search).get('pet'));})()`,
+        {tries: 60, ms: 200});
+      }
+      steps.push({at: 'catalog-card-click', onCatalog, diag, target, detailId, opened});
+      check('42-默认档也要能点进详情',
+        '两套渲染（`.individual[data-detail]` 与 `.card`）**都必须**带 `data-detail` —— 它是契约选择器'
+        + '（`box-drawer.js:128`：不许换掉，上一版就是因为重写丢了它而把详情功能弄丢）。'
+        + '在**不切页签**的默认档点第一张卡，二级详情必须真的打开',
+        Boolean(target) && Boolean(detailId) && opened === true,
+        `切到图鉴=${onCatalog}｜网格读数=${JSON.stringify(diag)}｜可点目标=${JSON.stringify(target)}｜`
+        + `目标那一只=${JSON.stringify(detailId)}｜点完详情打开了=${opened}`);
+      // 回到列表，别把状态留给后面的判据；**回不去也不许抛异常**
+      if (opened) {
+        await js(`history.back(); true`).catch(() => {});
+        await waitForSafe(`document.getElementById('pet-view')?.hidden===true`, {tries: 40, ms: 200});
+      }
+    }
+
     check('22-控制台干净', '整轮下来没有 console.error，也没有未捕获异常',
       consoleErrors.length === 0 && pageErrors.length === 0,
       `consoleErrors=${JSON.stringify(consoleErrors.slice(0, 2))} pageErrors=${JSON.stringify(pageErrors.slice(0, 2))}`);

@@ -247,7 +247,21 @@ function cardHtml(card, {compact = false} = {}) {
   for (const badge of card.badges ?? []) {
     if (!HIDDEN_BADGES.has(badge)) tags.push({text: badge, cls: 'tag-badge'});
   }
+  // ⚠ 2026-09-29 修（`art-finish` 报的精确缺口①，我核实并复现）：
+  // **默认档「全部精灵」的卡片根本没有 `data-detail`** ⇒ 点击处理器
+  // `event.target.closest('[data-detail]')` 永远不命中 ⇒ **点卡片什么都不发生**。
+  // 「我的盒子」档走的是 `drawerListHtml`（`box-drawer.js:291` 渲染 `.individual[data-detail]`），所以那一档能点
+  // —— 同一屏两个页签一个能点一个不能；而验收脚本**先切到 mine 再点**，于是 41/41 全绿却漏掉默认视图。
+  // 这个选择器是**契约**：`box-drawer.js:128` 的注释写着「`.card`、`[data-detail]`、`[data-cmp]` 是它自己的
+  // 契约与验收选择器，**不许换掉**（第一版自己重写了一份，结果验收点不到 `[data-detail]`，
+  // **真机上等于把详情功能弄丢了**）」—— 这一版正是重写时把它弄丢了。
+  // 按钮上的 `aria-label` 一直写着「看 … 的详情」，本来就该能点。
+  // `card.select` 两类都对：mine 卡是 `own-XXXX`（个体），图鉴卡是 `pet_XXXXXX`（物种），`openPet()` 两者都收。
+  // ⚠ 加在**容器** `<article>` 上、不是按钮上 —— 与契约另一处的写法一致（`.individual[data-detail]`，
+  // `box-drawer.js:291`）。我第一版加在按钮上，判据按契约找 `.card[data-detail]` 于是量到 0，
+  // 真机诊断读数把它抓出来了（`cards:24, withDetail:0`）——**判据按契约写是对的，改的是代码**。
   return `<article class="card${picked ? ' picked' : ''}${compact ? ' card-compact' : ''}"
+   data-detail="${escapeAttr(card.select)}"
    data-select="${escapeAttr(card.select)}" data-group="${escapeAttr(card.group ?? '')}"
    data-locked="${card.locked === true ? 'true' : 'false'}"
    data-status="${picked ? 'picked' : 'idle'}">
