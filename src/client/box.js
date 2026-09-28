@@ -470,9 +470,9 @@ const STAT_LABELS = Object.freeze({hp: '生命', atk: '物攻', def: '物防', s
  * 二级详情页上的动作：刷新性格 / 刷新天分（各带剩余次数）、再养一只同种、回滚上一次、
  * 删掉这一只（**两步确认**）、收藏。全部从 `box-drawer.js` 取同一份文案。
  */
-function petActionsHtml(select, individual) {
+function petActionsHtml(select, individual, speciesArg = null) {
   const card = state.petCard ?? {};
-  const species = card.group ?? localCardById(select)?.group ?? '';
+  const species = speciesArg ?? card.group ?? localCardById(select)?.group ?? '';
   const picked = state.selected.some((row) => row.select === select);
   return `<button class="cmp-toggle" data-cmp="${escapeAttr(select)}" aria-pressed="${picked ? 'true' : 'false'}">`
     + `${picked ? '已选入比较' : '加入比较'}</button>
@@ -498,6 +498,8 @@ function renderPetPage() {
   document.body.dataset.boxView = 'pet';
   document.body.dataset.boxPet = select;
   const player = state.petData;
+  // 种类（`data-add` 要用它）：卡片里没有就问服务端详情要 —— 两处都没有才留空（不编）。
+  const speciesForActions = card.group ?? player?.group ?? localCardById(state.pet)?.group ?? '';
   const name = player?.name ?? card.name ?? '这一只';
   const types = player?.types ?? card.types ?? [];
   $('pet-title').textContent = `${name} · 详情`;
@@ -511,14 +513,20 @@ function renderPetPage() {
       .map((t) => `<span class="tag">${escapeAttr(t)}</span>`).join('')}</span>
     ${card.extra === true ? '<span class="card-tags"><span class="tag tag-badge">本机加的</span></span>' : ''}
    </div></div>`;
-  $('pet-actions').innerHTML = petActionsHtml(select, individual);
+  $('pet-actions').innerHTML = petActionsHtml(select, individual, speciesForActions);
   // 刷新之后那句话（"上一次刷天分：+10 加到「魔攻」"）在这一屏上也要看得见：
   // 它是玩家确认"刚才那一下落在哪一项"的地方（列表那一行里不再画它了）。
   const note = $('pet-note');
   const lastNote = state.petNote ? '' : lastRefreshNote(individual);
   note.textContent = state.petNote || lastNote || '';
   note.hidden = !note.textContent;
+  // ⚠ 2026-09-28 真机抓到（验收 28/30：读 `#pet-view [data-refresh-note]` 读到 null）：
+  // 刷新那一句原来只有 `#pet-note` 自己带 `data-refresh-note`，而二级页的落点是 `#pet-view`
+  // （`data-individual` 在它身上）⇒ 判据按"这一页上的刷新说明"去读，读到的是空。
+  // 两处都挂上：整页一个钩子、那一行一个钩子，谁读都对（意图不变：**玩家要看得见落在哪一项**）。
   if (lastNote) note.dataset.refreshNote = 'yes'; else delete note.dataset.refreshNote;
+  const petView = $('pet-view');
+  if (lastNote) petView.dataset.refreshNote = 'yes'; else delete petView.dataset.refreshNote;
   // 这一屏也带着"这一只是谁"的钩子（`data-individual`）：刷新/回滚那几件事实在太多地方要读它，
   // 让这一屏与列表那一行共用同一个落点，省得两处各写一套。
   // 这一屏也带着"这一只是谁"（`data-individual`）：刷新/回滚那几件事与列表那一行共用同一个落点，
@@ -558,6 +566,15 @@ async function openPet(select, {push = true} = {}) {
     state.lastDev = data.dev;
     state.petData = data.player;
     state.petNote = '';
+    // ⚠ 2026-09-28 真机抓到（验收 29/36：`#pet-actions` 里没有 `[data-add]`）：
+    // 二级页的动作按钮要靠**这一只属于哪个种类**才画得出来，而它原来只从 `state.petCard` 取。
+    // 直接开 `?pet=` 链接、或列表那一页还没读完时，`state.petCard` 是空的 ⇒ `data-add=""`
+    // ⇒ 按钮看着在、其实没带种类，点了也没用（判据读 `dataset.add` 是空串）。
+    // 这里补一条**服务端详情自己带的**兜底（`player.group` 就是 species_id），仍然不编值。
+    if (data.player && typeof data.player.group === 'string' && data.player.group) {
+      state.petCard = {...(state.petCard ?? {}), group: data.player.group,
+        name: state.petCard?.name ?? data.player.name ?? null};
+    }
     renderPetPage();
     renderDev();
   } catch (error) {
