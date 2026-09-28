@@ -107,66 +107,69 @@ test('反证：把 `inspect_training` 塞回一个目标里 ⇒ 判据 ① 必�
     '这个伪造目标必须被判为"不在契约里"——否则判据 ① 抓不到幽灵工具');
 });
 
-// ── 种子集（Codex 4B 前置第 3 项）──────────────────────────────────────────────
+// ── v9 **候选集**（Codex 02:03 纠偏之后重做的口径）─────────────────────────────
 //
-// 「先交 **50–100 条真实场景样本与执行回执**，再扩为新数据。meta 中保留
-//   `group_id/source/contract_version/reviewed`；**按原始战斗/队伍/模板族分割**，
-//   不能随机把改写同源案例分到 test。」
-// 并明确：「**ready 标记必须关联真实完成证据，不得为了让脚本通过虚填。**」
-const SEED = join(ROOT, 'reports', 'roco', 'sft-v9-seed');
-const readSeed = () => ['train', 'valid', 'test'].flatMap((split) =>
-  readFileSync(join(SEED, `${split}.jsonl`), 'utf8').split('\n').filter((l) => l.trim())
+// ⚠ **改钉记录（2026-09-29）**：这里原来钉的是"种子集 50–100 条、`reviewed===true`、
+// 严格档审计 0 错"。Codex 02:03 巡检指出**那是错的**，三条都成立：
+//   1. 把**历史模型输出 + 工具回执 ok** 当成了黄金标签 —— 例：「为什么这一手要防御？」被标 `stop`，
+//      而 `reply` 是「这次没有查到可用的规则事实（complete），未核验的部分我不编。」⇒ **失败轨迹**；
+//   2. 「化蝶是哪一只」的目标是 `pet_000225`（**寂灭骨龙**，化蝶是 `pet_000124`）⇒ **目标语义就错**；
+//   3. 按 `case_id` 分组 = 按**措辞变体**分组（实测 288 个），而**语义族只有 27 个**
+//      ⇒ `be-defense-f0-01`(train)/`f1-02`(valid)/`f2-02`(test) 跨片，"0 重叠"技术为真、语义无意义。
+// ⇒ 现在钉的是**诚实的候选状态**，**不是**"已就绪"。
+const CAND = join(ROOT, 'reports', 'roco', 'sft-v9-candidates');
+const readCand = () => ['train', 'valid', 'test'].flatMap((split) =>
+  readFileSync(join(CAND, `${split}.jsonl`), 'utf8').split('\n').filter((l) => l.trim())
     .map((l) => ({split, row: JSON.parse(l)})));
 
-test('种子集：50–100 条、每条带 meta 四键、reviewed 是**挣来的**', (t) => {
-  if (!existsSync(join(SEED, 'train.jsonl'))) { t.skip('还没跑过 build-sft-seed.mjs --write'); return; }
-  const rows = readSeed();
-  assert.ok(rows.length >= 50 && rows.length <= 100, `条数要在 50–100，实际 ${rows.length}`);
+test('候选集：**一律 reviewed:false** + 明确 review_status（不许冒充已审数据）', (t) => {
+  if (!existsSync(join(CAND, 'train.jsonl'))) { t.skip('还没跑过 build-sft-candidates.mjs --write'); return; }
+  const rows = readCand();
+  assert.ok(rows.length >= 50, `候选太少：${rows.length}`);
   for (const {split, row} of rows) {
-    const meta = row.meta ?? {};
-    for (const key of ['group_id', 'source', 'contract_version', 'reviewed']) {
-      assert.ok(meta[key] !== undefined && meta[key] !== '' && meta[key] !== null,
-        `${split} 缺 meta.${key}：${JSON.stringify(meta).slice(0, 120)}`);
-    }
-    assert.equal(meta.reviewed, true, 'reviewed 必须是 true（且它对应 R1–R7 的真实回执核对）');
-    // reviewed 不许是空口：每条都得带得出**执行回执**或"0 次调用后停止"的真实记录
-    assert.ok(meta.receipt && typeof meta.receipt === 'object' && meta.receipt.ok === true,
-      `${split} 的 reviewed 没有回执支撑：${JSON.stringify(meta.receipt)}`);
-    // 目标必须是契约里的工具，或 stop
-    const target = JSON.parse(row.messages.find((m) => m.role === 'assistant').content);
-    if (target.tool) assert.ok(allowed.has(target.tool), `目标工具 ${target.tool} 不在契约里`);
-    else assert.equal(target.stop, true, '目标只能是工具调用或 stop');
+    assert.equal(row.meta.reviewed, false, `${split} 把候选标成了 reviewed=true —— 历史模型输出不是黄金标签`);
+    assert.equal(row.meta.review_status, 'candidate-pending-human-review');
+    assert.ok(Array.isArray(row.meta.review_flags), '每条都要带审查标记（哪怕是空数组）');
   }
 });
 
-test('种子集：**按族分割** —— 跨分片组重叠 0、同问句重叠 0，且 stop 与工具两类都有', (t) => {
-  if (!existsSync(join(SEED, 'train.jsonl'))) { t.skip('还没跑过 build-sft-seed.mjs --write'); return; }
-  const rows = readSeed();
-  const groups = {};
-  const prompts = {};
-  const kinds = {};
-  for (const split of ['train', 'valid', 'test']) { groups[split] = new Set(); prompts[split] = new Set(); }
-  for (const {split, row} of rows) {
-    groups[split].add(row.meta.group_id);
-    prompts[split].add(JSON.parse(row.messages.find((m) => m.role === 'user').content).message);
-    const target = JSON.parse(row.messages.find((m) => m.role === 'assistant').content);
-    const kind = target.stop ? 'stop' : target.tool;
-    kinds[kind] = (kinds[kind] ?? 0) + 1;
-  }
+test('候选集：**语义族**跨分片重叠 0（不是"措辞变体"级别 —— 那正是第一版骗过自己的地方）', (t) => {
+  if (!existsSync(join(CAND, 'train.jsonl'))) { t.skip('还没跑过 build-sft-candidates.mjs --write'); return; }
+  const rows = readCand();
+  const fam = {train: new Set(), valid: new Set(), test: new Set()};
+  const variants = new Set();
+  for (const {split, row} of rows) { fam[split].add(row.meta.group_id); variants.add(row.meta.wording_variant); }
   for (const [a, b] of [['train', 'valid'], ['train', 'test'], ['valid', 'test']]) {
-    const shared = [...groups[a]].filter((g) => groups[b].has(g));
-    assert.deepEqual(shared, [], `${a}/${b} 有同族案例被分到两边（Codex 明确禁止）：${shared.slice(0, 5)}`);
-    const dup = [...prompts[a]].filter((p) => prompts[b].has(p));
-    assert.deepEqual(dup, [], `${a}/${b} 有完全相同问句：${dup.slice(0, 3)}`);
+    const shared = [...fam[a]].filter((f) => fam[b].has(f));
+    assert.deepEqual(shared, [], `${a}/${b} 有**同一语义族**的候选被分到两边：${shared.slice(0, 5)}`);
   }
-  // 两类都要有 —— 只按族名排序取前 N 条会灌成单一类（首版实测 52 条全是 query_rules）
-  assert.ok(kinds.stop > 0 && Object.keys(kinds).some((k) => k !== 'stop'),
-    `stop 与工具两类都要有，实际 ${JSON.stringify(kinds)}`);
+  // 语义族必须**明显少于**措辞变体 —— 否则说明我们又在按变体分组
+  const allFamilies = new Set(rows.map((r) => r.row.meta.group_id));
+  assert.ok(allFamilies.size < variants.size,
+    `语义族(${allFamilies.size}) 应当少于措辞变体(${variants.size})`);
 });
 
-test('种子集：Codex 的审计脚本在**严格档**下必须 errorCount 0（v8 在同档是 2875）', (t) => {
-  if (!existsSync(join(SEED, 'train.jsonl')) || !existsSync(AUDIT)) { t.skip('种子或审计脚本不在'); return; }
-  const raw = execFileSync(process.execPath, [AUDIT, SEED, '--new-data'], {cwd: ROOT, encoding: 'utf8'});
-  const report = JSON.parse(raw);
-  assert.equal(report.errorCount, 0, `严格档报错：${JSON.stringify(report.errors.slice(0, 5))}`);
+test('候选集：逐条审查表存在，且**如实标出**失败回复与目标不匹配', (t) => {
+  if (!existsSync(join(CAND, 'REVIEW-TABLE.md'))) { t.skip('还没生成审查表'); return; }
+  const table = readFileSync(join(CAND, 'REVIEW-TABLE.md'), 'utf8');
+  assert.match(table, /待审，不是训练数据/, '表头必须写清它**不是**训练数据');
+  assert.match(table, /为什么这一手要防御/, '那条已证实的失败轨迹要能人眼看到');
+  assert.match(table, /reply_is_failure/, '标记要出现在表里');
+  const report = JSON.parse(readFileSync(join(CAND, 'REPORT.json'), 'utf8'));
+  assert.ok(report.flagged.reply_is_failure > 0,
+    '这一批里**确实有**失败回复（Codex 给的例子就是），标 0 说明标记坏了');
+  assert.ok(report.missing_tool_coverage, '缺哪些工具覆盖要如实写出来，不许用条数掩盖');
+  assert.equal(report.semantic_family_overlap_across_splits.length, 0);
+});
+
+test('严格档审计**应当报错**（这是**有意的**：候选还不是已审数据）—— 谁把它"修绿"谁就是在造假', (t) => {
+  if (!existsSync(join(CAND, 'train.jsonl')) || !existsSync(AUDIT)) { t.skip('候选或审计脚本不在'); return; }
+  let out = '';
+  try {
+    out = execFileSync(process.execPath, [AUDIT, CAND, '--new-data'], {cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']});
+  } catch (error) { out = String(error.stdout ?? ''); }
+  const report = JSON.parse(out);
+  assert.ok(report.errorCount > 0,
+    '严格档现在**必须**报错（缺 reviewed=true）—— 报 0 说明有人在候选上虚填了 ready 标记');
+  assert.ok(report.errors.some((e) => /reviewed/.test(e)), `报的应当是缺 reviewed：${report.errors.slice(0, 2)}`);
 });

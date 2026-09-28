@@ -1,0 +1,45 @@
+{
+ "artifact": "sft-v9-candidates",
+ "status": "CANDIDATES — 待人工审查，**不得**直接当训练数据",
+ "why": "Codex 02:03 纠偏：历史模型输出 + 工具回执 ok **不是**黄金标签（「为什么这一手要防御？」被标 stop 而 reply 是\"没查到事实\"；「化蝶是哪一只」目标是寂灭骨龙 pet_000225）",
+ "corrections_vs_v1": [
+  "reviewed 一律 false（v1 写成 true 是错的）",
+  "按**语义族**分片（v1 按 case_id=措辞变体，288 个 vs 语义族 27 个）",
+  "逐行打审查标记，并出逐条审查表"
+ ],
+ "source_file": "tests/evals/agent-trajectories-model-v1.jsonl",
+ "source_rows": 1752,
+ "contract_version": "tools:97a79a115da6",
+ "semantic_families_total": 19,
+ "wording_variants_total": 214,
+ "candidates": 94,
+ "per_split": {
+  "train": 60,
+  "valid": 12,
+  "test": 22
+ },
+ "semantic_family_overlap_across_splits": [],
+ "flagged": {
+  "reply_is_failure": 60,
+  "target_entity_not_in_question": 7,
+  "clean": 27
+ },
+ "target_distribution": {
+  "stop": 82,
+  "query_rules": 12
+ },
+ "rejected": {
+  "重复(问句,目标)": 930,
+  "执行回执 ok!==true": 34,
+  "缺问句或回答": 60
+ },
+ "missing_tool_coverage": {
+  "note": "Codex 要求\"补关键工具任务\"。这批录制**给不出**：非 query_rules 的工具回执 ok 全是 0。",
+  "measured": {
+   "compare_actions": "8 步 / ok 0",
+   "read_state": "4 步 / ok 0",
+   "read_last_turn": "3 步 / ok 0"
+  },
+  "verdict": "必须另找成功录制或人工构造 —— 本脚本不编，也不靠加条数掩盖"
+ }
+}
