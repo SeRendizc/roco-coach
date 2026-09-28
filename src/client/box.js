@@ -569,6 +569,13 @@ async function openPet(select, {push = true} = {}) {
   state.petCard = state.rows.find((row) => row.select === select)
     ?? state.extraRows.find((row) => row.select === select)
     ?? localCardById(select) ?? {};
+  // ⚠ 2026-09-28 **两处改动（真机 10b 连红 8 次的真因）**：
+  //  ① 打开新的那一只时必须**先把上一位的数据清掉** —— 原来 `petData = null` 写在 `renderPetPage()`
+  //     **之后**，于是中间那一帧画的是**上一只**的 traits（而上一只那份**没走 `unwrapGrowth`** ——
+  //     `unwrapGrowth` 是我这一轮新加的拆包，只作用在"服务端这次回来的那一份"上）
+  //    ⇒ 页面上出现 74 处 `[object Object]`，而且**显示的是别人的性格/资质**（比对象泄漏更糟）。
+  //  ② 清掉之后 `petBodyHtml` 不会被调用（`player` 为空），中间那一帧走"本机这一份"的兜底，
+  //    详情回来再画一次 —— 这条链与页面别处的"两段式渲染"一致。
   state.petData = null;
   renderPetPage();
   try {
