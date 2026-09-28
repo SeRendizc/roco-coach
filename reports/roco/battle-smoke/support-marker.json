@@ -1,7 +1,7 @@
 {
  "schema_version": 1,
  "artifact": "battle-smoke-support-marker",
- "generated_at": "2026-09-28T17:02:45.029Z",
+ "generated_at": "2026-09-28T18:01:33.478Z",
  "selftest": [
   {
    "id": "base-case",
@@ -71,7 +71,7 @@
   "SIMULATABLE",
   "PARTIAL"
  ],
- "base": "http://127.0.0.1:51255",
+ "base": "http://127.0.0.1:58025",
  "base_kind": "in-process（`createCoachServer`，与演示页同一份代码）",
  "hard_gate": {
   "instance_id": "own-0047",

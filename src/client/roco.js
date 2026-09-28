@@ -1097,14 +1097,70 @@ function sampleDamageOf(sample){
   if (Number.isFinite(sample.max)) return sample.max;
   return null;
 }
+/**
+ * 这一局**该显示哪四个技能** —— 页面里的**唯一实现**（旧行动坞 `#actions` 与 b3 面板共用）。
+ *
+ * task-9（2026-09-29）：以前 `skillSlots`（旧行动坞）与 b3 面板**各写了一份**：
+ * b3 那份在 2026-09-23 已经改成「引擎实时配招是权威」，而行动坞那份仍在按名册的
+ * **冻结 `moveset`** 画四格 —— 把「硬门」换进配招之后，那一坞画的是
+ * `气波/防御/后发制人/复写`（3 格 `legal=no`），真正合法的四手**一格都没有**。
+ * 两套渲染器对「这四个技能是什么」的答案不一致，就是这条缺陷的根。
+ *
+ * 口径（与 2026-09-23 那条一致）：
+ *   ① 有 `view.self.loadouts[pet_id]` ⇒ **引擎这一局的实时配招是权威**（按位次取前四）；
+ *      名册只用来补展示字段（名字/系别/类别/消耗），名册里没有就去**合法动作**自带的那份找；
+ *   ② 没有 `loadouts`（旧 fixture / legacy 路线）⇒ 退回名册的冻结四格，形状不变；
+ *   ③ 名册连行都没有（按需推算的精灵）⇒ 回落到引擎给的合法技能，免得四格全空且点不动。
+ */
+function liveMovesOf(view, petId, {rosterPool = null, legalSkills = null} = {}) {
+  const pool = rosterPool ?? [...(state.roster ?? []), ...(state.rosterAll ?? [])];
+  const legal = legalSkills ?? (view?.legal ?? []).filter((a) => a.kind === 'skill');
+  const row = pool.find((p) => p.pet_id === petId) ?? null;
+  const rosterMoves = (row?.moveset ?? []).filter((m) => m.is_trait !== true).slice(0, 4);
+  const live = Array.isArray(view?.self?.loadouts?.[petId]) ? view.self.loadouts[petId] : null;
+  if (live && live.length) {
+    return live.slice(0, 4).map((sid) => {
+      const known = rosterMoves.find((m) => m.skill_id === sid) ?? null;
+      if (known) return known;
+      const act = legal.find((a) => a.skill_id === sid) ?? null;
+      const listed = (Array.isArray(view?.self?.skills) ? view.self.skills : [])
+        .find((s) => (s.skill_id ?? s.skill?.skill_id) === sid) ?? null;
+      const info = act?.skill ?? listed?.skill ?? null;
+      return {
+        skill_id: sid,
+        name: info?.name ?? null,
+        element: info?.element ?? null,
+        category: info?.category ?? null,
+        energy: info?.energy ?? null,
+        is_trait: false,
+        // 引擎换进来的技能没有冻结来源的威力口径（它是派生产物）→ 记一笔，卡片上如实标。
+        swapped_in: true,
+      };
+    });
+  }
+  if (rosterMoves.length) return rosterMoves;
+  // B（子代理 C 报的真缺陷）：按需推算的精灵在 legacy 路线上 `state.rosterAll` 是 null →
+  //   名单行找不到 → 四格全 `data-b3-pending`（空且点不动）。这里**回落到引擎给的合法技能**：
+  //   `view.legal` 里 kind=skill 的动作自带 skill 名称/属性/消耗，足够填满四格并可点。
+  return legal.map((a) => ({
+    ...(a.skill ?? {}),
+    // skill_id 在**动作**上（a.skill_id），a.skill 里没有 —— 第一版只 spread 了 a.skill，
+    // 于是 find(a.skill_id === mv.skill_id) 永远落空 → 名字填上了、四格仍然点不动。
+    skill_id: a.skill_id ?? a.skill?.skill_id ?? null,
+    name: a.skill?.name ?? a.skill_name ?? a.label ?? null,
+    element: a.skill?.element ?? a.element ?? null,
+    category: a.skill?.category ?? a.category ?? null,
+    energy: a.skill?.energy ?? a.energy ?? a.cost ?? null,
+  }));
+}
+
 function skillSlots(view, legalSkills) {
   const active = view?.self?.pets?.[view?.self?.active ?? 0] ?? null;
   if (!active) return null;
-  const speciesId = active.species_id ?? active.pet_id ?? null;
-  const pool = [...(state.roster ?? []), ...(state.rosterAll ?? [])];
-  const row = pool.find((p) => p.pet_id === speciesId)
-    ?? pool.find((p) => p.name === active.name);
-  const moves = (row?.moveset ?? []).filter((m) => m.is_trait !== true).slice(0, 4);
+  const petId = active.pet_id ?? active.species_id ?? null;
+  // task-9：四格来自**这一局的实时配招**（与 b3 面板同一个 `liveMovesOf`），
+  // 不再按名册的冻结 `moveset` 画。拿不到 `loadouts` 时它的回退行为与以前一致。
+  const moves = liveMovesOf(view, petId, {legalSkills});
   if (!moves.length) return null;
   const energy = Number.isFinite(active.energy) ? active.energy : null;
   const samples = Array.isArray(view?.damage_preview?.samples) ? view.damage_preview.samples : [];
@@ -1964,54 +2020,15 @@ function renderB3Panels(view) {
   fillCard('foe', view?.opponent?.field ?? null, true);
 
   // ② 四格技能：这一只的配招 × 引擎给的合法技能 × 伤害样本（拿不到就留空）
-  const row = (state.roster ?? []).concat(state.rosterAll ?? [])
-    .find((p) => p.pet_id === (me?.species_id ?? me?.pet_id)) ?? null;
-  const moves = (row?.moveset ?? []).filter((m) => m.is_trait !== true).slice(0, 4);
   const legalSkills = (view?.legal ?? []).filter((a) => a.kind === 'skill');
   const samples = Array.isArray(view?.damage_preview?.samples) ? view.damage_preview.samples : [];
   // 2026-09-23（接手复核）：**引擎的实时配招是权威**。
   // PVP 魔法「愿力强化」会把场上精灵的**第一个技能**换掉（人类口径），而名册里的 `moveset`
   // 是**冻结的那一份** —— 换完之后格子还写着旧技能名，引擎却在发「愿力冲击」这个动作
-  // （名字、系别、消耗、可点性全对不上）。视图现在给己方的 `loadouts`（pet_id → 按位次的技能 id），
-  // 这里逐格对齐；拿不到 `loadouts`（旧 fixture）就完全退回名册，形状不变。
-  const liveLoadout = Array.isArray(view?.self?.loadouts?.[me?.pet_id])
-    ? view.self.loadouts[me.pet_id] : null;
-  const engineMoves = liveLoadout
-    ? liveLoadout.slice(0, 4).map((sid) => {
-      const known = moves.find((m) => m.skill_id === sid) ?? null;
-      if (known) return known;
-      const act = legalSkills.find((a) => a.skill_id === sid) ?? null;
-      const listed = (Array.isArray(view?.self?.skills) ? view.self.skills : [])
-        .find((s) => (s.skill_id ?? s.skill?.skill_id) === sid) ?? null;
-      const info = act?.skill ?? listed?.skill ?? null;
-      return {
-        skill_id: sid,
-        name: info?.name ?? null,
-        element: info?.element ?? null,
-        category: info?.category ?? null,
-        energy: info?.energy ?? null,
-        is_trait: false,
-        // 引擎换进来的技能没有冻结来源的威力口径（它是派生产物）→ 记一笔，卡片上如实标。
-        swapped_in: true,
-      };
-    })
-    : null;
-  // B（子代理 C 报的真缺陷）：按需推算的精灵在 legacy 路线上 `state.rosterAll` 是 null →
-  //   名单行找不到 → 四格全 `data-b3-pending`（空且点不动）。这里**回落到引擎给的合法技能**：
-  //   `view.legal` 里 kind=skill 的动作自带 skill 名称/属性/消耗，足够填满四格并可点。
-  const fallbackMoves = legalSkills.map((a) => ({
-    ...(a.skill ?? {}),
-    // skill_id 在**动作**上（a.skill_id），a.skill 里没有 —— 第一版只 spread 了 a.skill，
-    // 于是 find(a.skill_id === mv.skill_id) 永远落空 → 名字填上了、四格仍然点不动。
-    skill_id: a.skill_id ?? a.skill?.skill_id ?? null,
-    name: a.skill?.name ?? a.skill_name ?? a.label ?? null,
-    element: a.skill?.element ?? a.element ?? null,
-    category: a.skill?.category ?? a.category ?? null,
-    energy: a.skill?.energy ?? a.energy ?? a.cost ?? null,
-  }));
-  const movesFinal = (engineMoves && engineMoves.length ? engineMoves : moves).length
-    ? (engineMoves && engineMoves.length ? engineMoves : moves)
-    : fallbackMoves.slice(0, 4);
+  // （名字、系别、消耗、可点性全对不上）。视图现在给己方的 `loadouts`（pet_id → 按位次的技能 id）。
+  // 2026-09-29（task-9）：这段逻辑**提成了 `liveMovesOf`**，旧行动坞 `#actions` 也读同一份 ——
+  //   两套渲染器各写一份正是那条缺陷的根（行动坞按名册冻结配招画，换招后画的是旧四格）。
+  const movesFinal = liveMovesOf(view, me?.pet_id ?? me?.species_id ?? null, {legalSkills});
   const slots = [...root.querySelectorAll('[data-b3-skill-slot]')];
   slots.forEach((slot, i) => {
     const mv = movesFinal[i];

@@ -323,15 +323,141 @@ actual: 3   expected: 2
   「开局 / 出招 / 自由动作三处」。task-5 当时的回归清单只要求 `test:env` + `structure-contract`，
   **是我漏跑了 Node 全量**，这条由我负责报出来。
 
+#### 3.5.8 → 已由 **task-9** 接手并修掉（见 §3.6）
+
 #### 3.5.8 顺带发现（**未改**，报 Lead）
 
 旧行动坞 `#actions`（`skillSlots`）**按名册的冻结配招画四格，不看引擎这一局的实时配招**
 （`view.self.loadouts`）。实测：把「硬门」换进配招后，那一坞画的是
 `气波/防御/后发制人/复写`，其中 3 格 `legal=no`，而真正合法的 4 手**一格都没有**。
-本页玩家实际点的是 b3 那一套（已按实时配招对齐），所以不影响本次交付；
-但两套渲染器的口径不一致本身是个缺陷 —— 与 2026-09-23 在另一个面板修过的
-「引擎实时配招是权威」是同一类。**没有动它**：那超出 task-6 的范围，且要先确认这一坞
-在当前版式里到底还可见不可见。
+（task-6 时按纪律没有动它 —— 那超出当时范围；**task-9 已修**，见 §3.6。）
+
+---
+
+### 3.6 task-9：旧 `#actions` 行动坞与 b3 实时配招一致（修 + 量 + 反证 + 端到端）
+
+#### 3.6.1 改前 / 改后读数（**同一把尺子**量同一局）
+
+`scripts/roco/battle-smoke-dock-parity.mjs` 起进程内服务（独立端口，**不碰 8765**），
+真 Chrome 走「改配招 → 开局」；改前那一份是把**同一支脚本**放到 `git archive HEAD`
+（task-9 之前）的树里跑的（`dock-parity.before.json`）。两边同一只精灵（板板壳）、
+同一套换招（硬门 + 肥皂泡 + 防御 + 魔法增效）：
+
+| 量的是什么 | 改前（HEAD） | 改后 |
+| --- | --- | --- |
+| 旧行动坞 `#actions` 画了哪四格 | `气波 / 防御 / 后发制人 / 复写`（= 名册**冻结配招**） | `硬门 / 肥皂泡 / 防御 / 魔法增效`（= **这一局的实时配招**） |
+| 其中几格**合法** | **1 / 4** | **4 / 4** |
+| b3 技能屏画了哪四格 | `硬门 / 肥皂泡 / 防御 / 魔法增效`（4/4 合法） | 同 |
+| 两套渲染器是否一致 | **否** | **是** |
+| 判据 | **红 3~4 条**（两套不一致 + 不是实时配招 + 还是冻结配招 + 合法格不足） | **绿 0 条** |
+| 行动坞可见性 | `#action-panel` computed `display:none`（父链命中 `action-panel`）、`#actions` rect **0×0**、不在视口内；b3 技能屏 `display:flex` | 同 |
+
+**「这一坞到底画不画」的实测答案**：**它仍然在画**（`renderActions` 每回合照常填 `#actions`，
+DOM 里四格齐全、`data-roco-skill-id` 都在），但**在当前版式下玩家看不到**——
+整块 `#action-panel` 被 `body[data-roco-view="ready"] #action-panel{display:none !important}`
+压掉（`roco.css`），`#actions` 因此 rect 恒为 0×0。所以这条缺陷的**用户可见后果是「两套口径不一致」**，
+而不是「玩家点不到技能」；**如实记在这里，不夸大也不掩盖**。
+
+#### 3.6.2 改了什么（`src/client/roco.js`，唯一实现）
+
+以前 `skillSlots`（行动坞）与 b3 面板**各写了一份**「这四个技能是什么」：
+b3 那份 2026-09-23 已改成「引擎实时配招是权威」，行动坞那份仍按名册冻结 `moveset`。
+现在抽成**一个** `liveMovesOf(view, petId, {legalSkills})`，两处都调它：
+
+1. 有 `view.self.loadouts[pet_id]` ⇒ 按**引擎这一局的实时配招**取前四（名册只补展示字段）；
+2. 没有（旧 fixture / legacy）⇒ 退回名册冻结四格，形状不变；
+3. 名册没有行（按需推算的精灵）⇒ 回落到合法动作自带的那份，免得四格全空。
+
+#### 3.6.3 判据 + 必红反证（**响度实测**）
+
+判据 `dockParityProblems` 是**导出的纯函数**，入参是**测量出来的事实**
+（`dock` / `b3` / `live` / `frozen` / `legal` 五组 id 与合法格数），咬这些：
+
+- 两套渲染器对「这四个技能」的答案必须一致；
+- 行动坞必须等于**这一局的实时配招**；
+- 换招之后**不许再出现名册的冻结配招**；
+- 行动坞的合法格数不许少于本回合的合法技能数。
+
+**必红反证在真实 DOM 上做，不是改 fixture**：直接改行动坞那四格的
+`data-roco-skill-id` / `data-roco-skill-legal`，把它们按名册冻结配招重画（= 修前那条路径），
+再跑**同一支测量 + 同一支判据**。读数：
+
+| 反证 | 判据反应 |
+| --- | --- |
+| 塞回名册冻结配招（`cp-frozen-dock`） | **红 5 条**，逐条点名两组四格与「一格都不合法」 |
+| 行动坞落后一局（`cp-stale-dock`） | 红 2 条 |
+| 两套不一致（`cp-b3-desync`） | 红 5 条 |
+| 四格全不可点（`cp-no-legal`） | 红 2 条 |
+| 恢复重画（`step3-restored-green`） | **回到绿 0 条** |
+
+即：**反证真的会响**，而且报的是具体哪四格 —— 不是「总是绿」。
+
+#### 3.6.4 回归与归因（改这一处**没有**引入新的红）
+
+同一把尺子：`node --test --test-concurrency=1 tests/roco-*.test.js tests/evals/roco/*.test.js`。
+
+| 树 | 读数 | 说明 |
+| --- | --- | --- |
+| `git archive HEAD`（task-9 之前） | 1237 tests / 1209 pass / **16 fail** | archive 里缺未入库的产出物，含噪声 |
+| 同一棵树 + **只**把 task-9 改的 `src/client/roco.js` 换进去 | 1237 / 1209 / **16 fail** | **失败集合完全相同，零 delta** ⇒ task-9 本身不引入红 |
+| 当前工作区（含他人未提交改动） | 1245 / 1235 / **10 fail** | 增量 8 个测试来自工作区里他人的改动 |
+| 页面级判据（`roco-page-ux` + `roco-battle-context` + `roco-standard-pvp-battle` + `roco-battle-panel-static` + `roco-loadout-ui` + `structure-contract` + `player-copy`） | **108 / 108 过** | 直接覆盖战斗页渲染 |
+
+工作区那 10 条红的归属（逐条看过源码，**都不是本文件**）：
+
+- `src/coach/runtime.js` 相关：`roco-agent-stops` ①②、`roco-answer-level-correction` ③、
+  `roco-plain-speak` ②（报的原文就是 `src/coach/runtime.js 的工程语气从 15 涨到了 16`） ⇒ **A / task-7 的写域**；
+- `src/client/team-workshop.js` 相关：`roco-team-cards-layout` ×3、`roco-workshop` ①
+  （原文 `ReferenceError: SHARED_LOADOUT_SLOTS is not defined`）⇒ **B / task-8 的写域**；
+- `model-trajectories`（轨迹双路径）、`roco-experience`（系别 emoji 配色）⇒ **基线就红**（task-5/6 时已做基线对照）。
+
+#### 3.6.5 机制缺口（**两列分开，一个数都没动**）
+
+**① 基础可玩**（引擎侧 / HTTP 入口侧全量 542）：**542/542**，与 task-5/6 逐位相同（见 §2、§5）。
+
+**② 机制核验**（**没有因为 task-9 变小**）：
+
+| 项 | 读数 |
+| --- | --- |
+| 决定性特性·引擎侧实现 | `FULL 8 / PARTIAL 3 / REFUSED 4 / 引擎未登记 527` ⇒ **8/542** |
+| **实机核验** | **0/542**（`pet-mechanisms.json` 里 542 只全是 `FROZEN_DESC`，每只带两条 `unverified`） |
+| 战斗中「自己出手、引擎登记了未结算」 | **295/542** |
+| 技能档位（全库 615 条战斗技能） | `SIMULATABLE_UNVERIFIED` 290 / **`PARTIAL` 313** / **`KNOWLEDGE_ONLY` 12** |
+
+**阻塞性缺口（逐条可复现）**：
+
+| # | 缺口 | 条件 | 引擎原文 | 复现 |
+| --- | --- | --- | --- | --- |
+| 1 | `skill_000494`「绞轮」负能耗（持有者 `pet_000482` 溯源钟） | 能耗被修正压到 **0**（此时仍在合法动作表里）后，同回合先出手的一次**属性抵抗**命中把它再压到 **-1** | `未支持的机制：技能「绞轮」的有效能耗（能耗修正把它压到 -1（基础 5）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）` | `python3 scripts/roco/battle-smoke-repro-negative-cost.py` |
+| 2 | 「能耗永久-N」这一类（12 条会减的技能） | 任何一项把有效能耗压到 < 0 | 同上（逐条打出来的原文见 `negative-cost-scan.json`） | `python3 scripts/roco/battle-smoke-negative-cost-scan.py` |
+| 3 | `skill_000671`「硬门」等 `PARTIAL`/`KNOWLEDGE_ONLY` 技能 | 决定性效果读不出（如「描述里读不出减伤比例」） | `未支持的机制：防御技能「硬门」（描述里读不出减伤比例）`（**现在不再炸整局**：变成一条可结算的 `action_cancelled{unsupported_effect}`，并在界面点之前标出「这招有一部分效果引擎还不会算」） | `node scripts/roco/battle-smoke-support-marker.mjs` |
+
+**口径**：这 3 条都**记在②**，没有降计数、没有为数字好看删用例、没有给负能耗设无依据的下限；
+**实机核验仍然是 0** —— 本轮不动这条线。
+
+#### 3.6.4 端到端（改配招 → 开局 → 出手 → 结算）
+
+| 步 | 读数 |
+| --- | --- |
+| 改配招 | 工作台显示「你选的：硬门、肥皂泡、防御、魔法增效」 |
+| 开局 | 行动坞 4/4 合法、与 b3 一致、= 实时配招 |
+| 出手 | 点真实技能格「硬门」→ 回合 **第 1 → 第 2** |
+| 结算 | 连点 20 手 → **第 18 回合结算 `loss`**；局末复盘卡与「下一局练一件事」都在 |
+
+截图（`docs/roco/review-2026-09-28/shots/battle/`，**不放被 gitignore 的 `reports/roco/**`**）：
+
+- `browser-05-dock-parity-loadout-swapped-1440x900.png`（改配招后）
+- `browser-06-dock-parity-battle-opened-1440x900.png`（开局）
+- `browser-07-dock-parity-after-action-1440x900.png`（出手后）
+- `browser-08-dock-parity-settlement-1440x900.png`（结算 + 局末复盘）
+
+读数：**9/9 步过**（`dock-parity.json`）；改前同一支脚本 **7/9**（红的正是 `step2-parity`
+与 `step3-restored-green`）。复现命令：
+
+```bash
+node scripts/roco/battle-smoke-dock-parity.mjs          # 先按 tmp/BROWSER-LOCK.md 抢锁
+node scripts/roco/battle-smoke.mjs --dock-parity        # 或并进 B 段那一键
+```
 
 ---
 
@@ -367,6 +493,8 @@ python3 scripts/roco/battle-smoke-repro-negative-cost.py   # ⑤ 绞轮自足复
 python3 scripts/roco/battle-smoke-negative-cost-scan.py    # ⑥ 负能耗入口全扫 + 残留 unsupported 探针
 node scripts/roco/battle-smoke-support-marker.mjs           # ⑦ task-6 读数 + 判据 + 必红反证（自起进程内服务）
 node scripts/roco/battle-smoke-support-marker-browser.mjs   # ⑦ 真机截图（先抢浏览器锁）
+node scripts/roco/battle-smoke-dock-parity.mjs               # ⑧ task-9 行动坞↔b3 一致（先抢浏览器锁；含反证+端到端）
+node scripts/roco/battle-smoke.mjs --dock-parity             # 或把 ⑧ 并进那一键
 node scripts/roco/battle-smoke-browser.mjs --base=http://127.0.0.1:8765 --shots  # 先抢锁
 ```
 
@@ -381,6 +509,7 @@ node scripts/roco/battle-smoke-browser.mjs --base=http://127.0.0.1:8765 --shots 
 - `reports/roco/battle-smoke/support-marker.json`（task-6：step1 读数 + 判据 + 6 条自检/反证）
 - `reports/roco/battle-smoke/support-marker-browser.json`（task-6：真机 5/5 步）
 - `reports/roco/battle-smoke/unsupported-flag-probe.before.json`（**改前**的 step1 读数：回执里没有这个字段）
+- `reports/roco/battle-smoke/dock-parity.json` / `dock-parity.before.json`（task-9：改后 9/9、改前 7/9）
 - `reports/roco/battle-smoke/negative-energy-cost-repro.before.json`（**修前**快照：第 6 回合炸局）
 - `reports/roco/battle-smoke/test-env-baseline.log` / `test-env-after.log`（改前/改后 636 条 Python 套件）
 - `reports/roco/battle-smoke/browser-entry.json` + `docs/roco/review-2026-09-28/shots/battle/*.png`

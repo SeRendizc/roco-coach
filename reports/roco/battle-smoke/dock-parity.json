@@ -1,0 +1,489 @@
+{
+ "schema_version": 1,
+ "artifact": "battle-smoke-dock-parity",
+ "generated_at": "2026-09-28T17:49:52.908Z",
+ "why": "旧行动坞 `#actions` 与 b3 技能屏必须对「这一局这四个技能是什么」给出同一个答案，且以引擎的实时配招为准；换招之后不许再出现名册的冻结四格。",
+ "steps": [
+  {
+   "id": "step1-swap-loadout",
+   "ok": true,
+   "note": "工作台显示「换招 你选的：硬门、肥皂泡、防御、魔法增效」",
+   "loadout_picks": [
+    "skill_000435",
+    "skill_000286",
+    "skill_000272",
+    "skill_000671"
+   ]
+  },
+  {
+   "id": "step2-dock-drawn",
+   "ok": true,
+   "note": "行动坞画了 4 格 [硬门/肥皂泡/防御/魔法增效]，其中合法 4 格",
+   "measure": {
+    "petId": "pet_000047",
+    "live": [
+     "skill_000671",
+     "skill_000435",
+     "skill_000286",
+     "skill_000272"
+    ],
+    "legal": [
+     "skill_000272",
+     "skill_000286",
+     "skill_000435",
+     "skill_000671"
+    ],
+    "dock": {
+     "ids": [
+      "skill_000671",
+      "skill_000435",
+      "skill_000286",
+      "skill_000272"
+     ],
+     "legal": 4,
+     "names": [
+      "硬门",
+      "肥皂泡",
+      "防御",
+      "魔法增效"
+     ]
+    },
+    "b3": {
+     "ids": [
+      "skill_000671",
+      "skill_000435",
+      "skill_000286",
+      "skill_000272"
+     ],
+     "legal": 4,
+     "names": [
+      "硬门",
+      "肥皂泡",
+      "防御",
+      "魔法增效"
+     ]
+    },
+    "visibility": {
+     "actionPanel": {
+      "exists": true,
+      "display": "none",
+      "visibility": "visible",
+      "opacity": "1",
+      "w": 0,
+      "h": 0,
+      "inViewport": false,
+      "offsetParent": false,
+      "hiddenChain": [
+       "action-panel"
+      ]
+     },
+     "actions": {
+      "exists": true,
+      "display": "block",
+      "visibility": "visible",
+      "opacity": "1",
+      "w": 0,
+      "h": 0,
+      "inViewport": false,
+      "offsetParent": false,
+      "hiddenChain": [
+       "action-panel"
+      ]
+     },
+     "b3Skills": {
+      "exists": true,
+      "display": "flex",
+      "visibility": "visible",
+      "opacity": "1",
+      "w": 232,
+      "h": 465,
+      "inViewport": true,
+      "offsetParent": true,
+      "hiddenChain": []
+     }
+    },
+    "dockText": "技能 4 / 4 可用 🌟 2 硬门 武系 · 防御 预计伤害：算不出 这招有一部分效果引擎还不会算 详情 引擎这一手没有给出伤害样本 🌟 1 肥皂泡 水系",
+    "turn": "第 1 回合",
+    "frozen": [
+     "skill_000673",
+     "skill_000286",
+     "skill_000317",
+     "skill_000298"
+    ]
+   }
+  },
+  {
+   "id": "step2-parity",
+   "ok": true,
+   "note": "两套渲染器一致，且等于这一局的实时配招 [skill_000671、skill_000435、skill_000286、skill_000272]",
+   "problems": []
+  },
+  {
+   "id": "step2-dock-visibility",
+   "ok": true,
+   "note": "行动坞「画不画」：画了 4 格；可见性 #action-panel display=none（父链命中 [action-panel]）、#actions rect=0x0、在视口内=false；b3 技能屏 display=flex",
+   "visibility": {
+    "actionPanel": {
+     "exists": true,
+     "display": "none",
+     "visibility": "visible",
+     "opacity": "1",
+     "w": 0,
+     "h": 0,
+     "inViewport": false,
+     "offsetParent": false,
+     "hiddenChain": [
+      "action-panel"
+     ]
+    },
+    "actions": {
+     "exists": true,
+     "display": "block",
+     "visibility": "visible",
+     "opacity": "1",
+     "w": 0,
+     "h": 0,
+     "inViewport": false,
+     "offsetParent": false,
+     "hiddenChain": [
+      "action-panel"
+     ]
+    },
+    "b3Skills": {
+     "exists": true,
+     "display": "flex",
+     "visibility": "visible",
+     "opacity": "1",
+     "w": 232,
+     "h": 465,
+     "inViewport": true,
+     "offsetParent": true,
+     "hiddenChain": []
+    }
+   }
+  },
+  {
+   "id": "step3-counterproof-loud",
+   "ok": true,
+   "note": "把冻结配招塞回行动坞后，判据报了 5 条：两套渲染器对「这四个技能」的答案不一致：行动坞=[skill_000673、skill_000286、skill_000317、skill_000298] / b3=[skill_000671、skill_000435、skill_000286、skill_000272]；行动坞不是这一局的实时配招：它画的是 [skill_000673、skill_000286、skill_000317、skill_000298]，引擎这一局给的是 [skill_000671、skill_000435、skill_000286、skill_000272]；行动坞画的还是名册的**冻结配招** [skill_000673、skill_000286、skill_000317、skill_000298]（换招之后不该再出现这四格）；行动坞四格里**一格都不合法**（legal=0），而这一局引擎给了 4 手合法技能 [skill_000272、skill_000286、skill_000435、skill_000671]；行动坞只有 0 格合法 < 本回合合法技能数 4（合法的是 [skill_000272、skill_000286、skill_000435、skill_000671]）",
+   "mutated": {
+    "dock": {
+     "ids": [
+      "skill_000673",
+      "skill_000286",
+      "skill_000317",
+      "skill_000298"
+     ],
+     "legal": 0,
+     "names": [
+      "硬门",
+      "肥皂泡",
+      "防御",
+      "魔法增效"
+     ]
+    },
+    "b3": {
+     "ids": [
+      "skill_000671",
+      "skill_000435",
+      "skill_000286",
+      "skill_000272"
+     ],
+     "legal": 4,
+     "names": [
+      "硬门",
+      "肥皂泡",
+      "防御",
+      "魔法增效"
+     ]
+    },
+    "live": [
+     "skill_000671",
+     "skill_000435",
+     "skill_000286",
+     "skill_000272"
+    ],
+    "legal": [
+     "skill_000272",
+     "skill_000286",
+     "skill_000435",
+     "skill_000671"
+    ]
+   },
+   "problems": [
+    "两套渲染器对「这四个技能」的答案不一致：行动坞=[skill_000673、skill_000286、skill_000317、skill_000298] / b3=[skill_000671、skill_000435、skill_000286、skill_000272]",
+    "行动坞不是这一局的实时配招：它画的是 [skill_000673、skill_000286、skill_000317、skill_000298]，引擎这一局给的是 [skill_000671、skill_000435、skill_000286、skill_000272]",
+    "行动坞画的还是名册的**冻结配招** [skill_000673、skill_000286、skill_000317、skill_000298]（换招之后不该再出现这四格）",
+    "行动坞四格里**一格都不合法**（legal=0），而这一局引擎给了 4 手合法技能 [skill_000272、skill_000286、skill_000435、skill_000671]",
+    "行动坞只有 0 格合法 < 本回合合法技能数 4（合法的是 [skill_000272、skill_000286、skill_000435、skill_000671]）"
+   ]
+  },
+  {
+   "id": "step3-restored-green",
+   "ok": true,
+   "note": "恢复重画之后判据回到绿",
+   "restored": {
+    "petId": "pet_000047",
+    "live": [
+     "skill_000671",
+     "skill_000435",
+     "skill_000286",
+     "skill_000272"
+    ],
+    "legal": [
+     "skill_000272",
+     "skill_000286",
+     "skill_000435",
+     "skill_000671"
+    ],
+    "dock": {
+     "ids": [
+      "skill_000671",
+      "skill_000435",
+      "skill_000286",
+      "skill_000272"
+     ],
+     "legal": 4,
+     "names": [
+      "硬门",
+      "肥皂泡",
+      "防御",
+      "魔法增效"
+     ]
+    },
+    "b3": {
+     "ids": [
+      "skill_000671",
+      "skill_000435",
+      "skill_000286",
+      "skill_000272"
+     ],
+     "legal": 4,
+     "names": [
+      "硬门",
+      "肥皂泡",
+      "防御",
+      "魔法增效"
+     ]
+    },
+    "visibility": {
+     "actionPanel": {
+      "exists": true,
+      "display": "none",
+      "visibility": "visible",
+      "opacity": "1",
+      "w": 0,
+      "h": 0,
+      "inViewport": false,
+      "offsetParent": false,
+      "hiddenChain": [
+       "action-panel"
+      ]
+     },
+     "actions": {
+      "exists": true,
+      "display": "block",
+      "visibility": "visible",
+      "opacity": "1",
+      "w": 0,
+      "h": 0,
+      "inViewport": false,
+      "offsetParent": false,
+      "hiddenChain": [
+       "action-panel"
+      ]
+     },
+     "b3Skills": {
+      "exists": true,
+      "display": "flex",
+      "visibility": "visible",
+      "opacity": "1",
+      "w": 232,
+      "h": 465,
+      "inViewport": true,
+      "offsetParent": true,
+      "hiddenChain": []
+     }
+    },
+    "dockText": "技能 4 / 4 可用 🌟 2 硬门 武系 · 防御 预计伤害：算不出 这招有一部分效果引擎还不会算 详情 引擎这一手没有给出伤害样本 🌟 1 肥皂泡 水系",
+    "turn": "第 1 回合"
+   }
+  },
+  {
+   "id": "step4-one-action",
+   "ok": true,
+   "note": "点了「硬门」，回合 → 第 2 回合",
+   "firstMove": {
+    "name": "硬门",
+    "skillId": "skill_000671",
+    "turn": "第 2 回合"
+   }
+  },
+  {
+   "id": "step4-settled",
+   "ok": true,
+   "note": "点了 20 手 → 结算 loss（18 回合）；局末教学：有",
+   "settled": {
+    "clicks": 20,
+    "result": "loss",
+    "turn": 18,
+    "lesson": "关键转折在第 18 回合（这一局 18 个回合）。",
+    "resultTurns": "18 回合 · 训练场"
+   }
+  },
+  {
+   "id": "no-console-exception",
+   "ok": true,
+   "note": "页面异常 0 条",
+   "consoleErrors": []
+  }
+ ],
+ "steps_ok": 9,
+ "steps_total": 9,
+ "ok": true,
+ "extra": {
+  "base": "http://127.0.0.1:53991",
+  "base_kind": "in-process（`createCoachServer`，独立端口）",
+  "gate": {
+   "instance_id": "own-0047",
+   "species_id": "pet_000047",
+   "name": "板板壳"
+  },
+  "frozen": [
+   "skill_000673",
+   "skill_000286",
+   "skill_000317",
+   "skill_000298"
+  ],
+  "loadout_picks": [
+   "skill_000435",
+   "skill_000286",
+   "skill_000272",
+   "skill_000671"
+  ],
+  "measured": {
+   "petId": "pet_000047",
+   "live": [
+    "skill_000671",
+    "skill_000435",
+    "skill_000286",
+    "skill_000272"
+   ],
+   "legal": [
+    "skill_000272",
+    "skill_000286",
+    "skill_000435",
+    "skill_000671"
+   ],
+   "dock": {
+    "ids": [
+     "skill_000671",
+     "skill_000435",
+     "skill_000286",
+     "skill_000272"
+    ],
+    "legal": 4,
+    "names": [
+     "硬门",
+     "肥皂泡",
+     "防御",
+     "魔法增效"
+    ]
+   },
+   "b3": {
+    "ids": [
+     "skill_000671",
+     "skill_000435",
+     "skill_000286",
+     "skill_000272"
+    ],
+    "legal": 4,
+    "names": [
+     "硬门",
+     "肥皂泡",
+     "防御",
+     "魔法增效"
+    ]
+   },
+   "visibility": {
+    "actionPanel": {
+     "exists": true,
+     "display": "none",
+     "visibility": "visible",
+     "opacity": "1",
+     "w": 0,
+     "h": 0,
+     "inViewport": false,
+     "offsetParent": false,
+     "hiddenChain": [
+      "action-panel"
+     ]
+    },
+    "actions": {
+     "exists": true,
+     "display": "block",
+     "visibility": "visible",
+     "opacity": "1",
+     "w": 0,
+     "h": 0,
+     "inViewport": false,
+     "offsetParent": false,
+     "hiddenChain": [
+      "action-panel"
+     ]
+    },
+    "b3Skills": {
+     "exists": true,
+     "display": "flex",
+     "visibility": "visible",
+     "opacity": "1",
+     "w": 232,
+     "h": 465,
+     "inViewport": true,
+     "offsetParent": true,
+     "hiddenChain": []
+    }
+   },
+   "dockText": "技能 4 / 4 可用 🌟 2 硬门 武系 · 防御 预计伤害：算不出 这招有一部分效果引擎还不会算 详情 引擎这一手没有给出伤害样本 🌟 1 肥皂泡 水系",
+   "turn": "第 1 回合",
+   "frozen": [
+    "skill_000673",
+    "skill_000286",
+    "skill_000317",
+    "skill_000298"
+   ]
+  },
+  "problems": [],
+  "counterproof": {
+   "mutated_problems": [
+    "两套渲染器对「这四个技能」的答案不一致：行动坞=[skill_000673、skill_000286、skill_000317、skill_000298] / b3=[skill_000671、skill_000435、skill_000286、skill_000272]",
+    "行动坞不是这一局的实时配招：它画的是 [skill_000673、skill_000286、skill_000317、skill_000298]，引擎这一局给的是 [skill_000671、skill_000435、skill_000286、skill_000272]",
+    "行动坞画的还是名册的**冻结配招** [skill_000673、skill_000286、skill_000317、skill_000298]（换招之后不该再出现这四格）",
+    "行动坞四格里**一格都不合法**（legal=0），而这一局引擎给了 4 手合法技能 [skill_000272、skill_000286、skill_000435、skill_000671]",
+    "行动坞只有 0 格合法 < 本回合合法技能数 4（合法的是 [skill_000272、skill_000286、skill_000435、skill_000671]）"
+   ],
+   "muted": false,
+   "restored_problems": []
+  },
+  "end_to_end": {
+   "first_action": {
+    "name": "硬门",
+    "skillId": "skill_000671",
+    "turn": "第 2 回合"
+   },
+   "settled": {
+    "clicks": 20,
+    "result": "loss",
+    "turn": 18,
+    "lesson": "关键转折在第 18 回合（这一局 18 个回合）。",
+    "resultTurns": "18 回合 · 训练场"
+   }
+  },
+  "shots": {
+   "loadout": "docs/roco/review-2026-09-28/shots/battle/browser-05-dock-parity-loadout-swapped-1440x900.png",
+   "opened": "docs/roco/review-2026-09-28/shots/battle/browser-06-dock-parity-battle-opened-1440x900.png",
+   "after_action": "docs/roco/review-2026-09-28/shots/battle/browser-07-dock-parity-after-action-1440x900.png",
+   "settlement": "docs/roco/review-2026-09-28/shots/battle/browser-08-dock-parity-settlement-1440x900.png"
+  }
+ }
+}
