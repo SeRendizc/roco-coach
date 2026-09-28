@@ -723,7 +723,7 @@ async function main() {
           statCount:(String(talent?.value??'').match(/生命\\s*\\d+|物攻\\s*\\d+|物防\\s*\\d+|魔攻\\s*\\d+|魔防\\s*\\d+|速度\\s*\\d+/g)??[]).length,
           objectObject:(page.match(/\[object Object\]/g)??[]).length,
           leakElements:[].slice.call(document.querySelectorAll('#pet-view *')).filter(function(el){return el.children.length===0&&/\[object Object\]/.test(el.textContent||'');}).length,
-          leakWhere:[].slice.call(document.querySelectorAll('#pet-view *')).filter(function(el){return el.children.length===0&&/\[object Object\]/.test(el.textContent||'');}).slice(0,5).map(function(el){var p=el.closest('[id]');return el.tagName+'.'+String(el.className).slice(0,20)+'@'+(p?p.id:'?')+': '+String(el.textContent).trim().slice(0,44);}),
+          leakWhere:[].slice.call(document.querySelectorAll('#pet-view *')).filter(function(el){return el.children.length===0&&/\[object Object\]/.test(el.textContent||'');}).slice(0,5).map(function(el){var p=el.closest('[id]');return el.tagName+'.'+String(el.className).slice(0,20)+'@'+(p?p.id:'?')+' html='+String(el.outerHTML).slice(0,120);}),
           talentRaw:String(document.getElementById('pet-view') ? (document.getElementById('pet-view').dataset.talentRaw||'') : ''),
           storeOne:String((JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}')['own-0001']||{}).nature)});})()`));
       steps.push({at: 'detail-own-0001', facts: talentFacts});
