@@ -12634,3 +12634,29 @@ guard-selftest / browser-acceptance / demo-acceptance / mobile-sweep）**全绿*
    预期 `failed: ["unit","box-acceptance"]`。
 3. `model-trajectories ④`（要求模型两次独立运行逐窗口全等，实测差 13.5%）**仍在等人类拍板**，
    三条方案在 §C6.338。
+
+#### §C6.351 第 90 轮：**盒子验收的读数与"机器忙不忙"强相关**（这一轮最重要的发现）
+
+同一份代码，`box-acceptance` 的读数是**分两档**的：
+
+| 跑法 | 红项 |
+|---|---:|
+| **单独跑**（机器空闲） | **1**（`run-elem` / `run-clean-final`） |
+| **与别的浏览器套件并发跑**（门禁里就是这样） | **8～9**（`run-diag-final` 9 红、`run-diag-final2` 8 红） |
+
+⇒ **它的"红/绿"与并发负载强相关**，不是纯功能信号。
+**含义**：门禁里 `box-acceptance` 那一格的红**不能直接读成"功能坏了"**；
+要拿到可信读数，必须**单独跑**（`node scripts/roco/browser-box-acceptance.mjs`，机器空闲时）。
+
+**这一轮另外两件**
+
+1. `state-doc` 在门禁里红了一次 —— 根因是**台账自己**（HEAD 行落后 5 个提交）。
+   已跟到 `3abb70c` 并复验 **7/7 绿**。
+2. `petBodyHtml` 的**全部插值**逐行列过了（8 处），其中
+   `player.metrics_total` 是唯一**没有 escapeAttr 的数值插值** —— 已查证服务端给它的是
+   `Number.isFinite(p.stat_total) ? p.stat_total : null`（**数字或 null，不会是对象**）⇒ **这条嫌疑排除**。
+   剩下的线索：诊断打出来的命中元素是 `.trait` 那几行，而它们的可见文字是干净的
+   （「性格 稳重」「天分 相当好的天分」…）⇒ 泄漏在**父容器聚合后的文本**里，
+   下一轮按 `.trait` 的 `outerHTML` 逐字找（不要再数总数）。
+
+**没做到**：`10b` 那 82 处仍未定位到具体标签；门禁最终数字以 `reports/roco/verification/latest.json` 为准。
