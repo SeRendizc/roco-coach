@@ -839,10 +839,14 @@ async function compareSelected() {
 /** 从二级页回首层：历史里有上一屏就退回去（选人还在），没有就直接换回列表地址。 */
 function backToList() {
   const inSecondLevel = history.state?.boxCompare === true || history.state?.boxPet === true;
-  if (inSecondLevel) { history.back(); return; }
-  history.replaceState(null, '', 'box.html');
+  // ⚠ 2026-09-28 真机竞态（验收 10b/28/30/32/33/36 时红时绿的真因之一）：
+  // `history.back()` 是**异步**的 —— 它要等 popstate 才会切屏。原来这里 `return` 得干干净净，
+  // 于是「点返回」之后那一瞬间页面**还停在二级页**上：紧接着去点列表行，自然点不到/点到别的。
+  // 现在**同步先切回列表**（UI 立刻正确），再顺手把 history 收拾干净（popstate 回来时已是 list，幂等）。
   setView('list');
   window.scrollTo(0, 0);
+  if (inSecondLevel) { history.back(); return; }
+  history.replaceState(null, '', 'box.html');
 }
 
 /**
