@@ -155,18 +155,55 @@ const stubModel=({configured,coach})=>{
  return {calls,restore:()=>{globalThis.fetch=saved;}};
 };
 
-test('没配密钥时教练只用本机引擎，而且一个模型请求都不发',async t=>{
+// ⚠ 2026-09-29 **改钉**（Codex P0-01 / task-7；Lead 复核后批准改这一条，写域加给 coach-context）。
+//
+// 旧钉子（原文留档，别再改回来）：
+//   assert.equal(answer.fallbackReason,'未连接模型，显示本局规则分析');
+//   assert.deepEqual(calls,['bootstrap'],'无密钥时只查一次连接状态，不请求模型');
+// 旧钉子的**意图**是「不花云端调用」，但它写成了「不发 HTTP」—— 而"不发 /api/coach"
+// 恰恰是 P0-01 要根除的那件事：浏览器里那层规则资料工具（`coach/toolbox.js` 动态 import
+// `./roco-client.js`）**不在静态模块图里**，不发服务端就等于每次事实问都在浏览器里失败，
+// 再落到陪练/军师那两句与洛手无关的模板（真机实测：问「火系克制什么属性？」答
+// 「进入一场 PVE 对战后…」）。
+//
+// Lead 独立核过"无凭据 ⇒ 不会花云端调用"这个前提（两层）：
+//   ① 决策函数 `model-routing.js` 的 `cloudDecision()`：task=fact/free/plan 在
+//      `cloudConfigured:false` 时一律 `useCloud=false, reason='cloud-not-configured'`；
+//   ② 服务端接线 `src/server/index.js` 的 `baseProvider` 只在有 `credential` 时才建，
+//      `_base=(_mode==='on'&&!modelRoute.useCloud)?localProvider:baseProvider`。
+// ⇒ 无凭据 ⇒ 走 `provider:'local'` 的**确定性执行**（引擎/工具算，不生成文字）。
+// 所以新钉子证明的是同一件事（0 次云端调用），只是把「不发请求」换成「发服务端、但不带凭据」。
+test('没配密钥时也要走服务端的确定性执行（不花云端调用），服务端不可达才退本机并点名缺什么',async t=>{
  const payload=await degradePayload();
  const expected=await localAnswerFor(payload);
- const {calls,restore}=stubModel({configured:false,coach:()=>{throw Error('无密钥时不该发 /api/coach');}});
+ // ① 无密钥**也要发** /api/coach：服务端那条路是 `provider:'local'`（引擎/工具算，0 次云端调用）。
+ //    这一档是**确定性正文**（本机引擎能逐字复现），所以直接用它当服务端回执 ——
+ //    判据要断的是**客户端有没有发、发了之后怎么处理**，不是服务端重算一遍。
+ const {calls,restore}=stubModel({configured:false,coach:()=>new Response(JSON.stringify({
+   ...JSON.parse(JSON.stringify({text:expected,memory:payload.memory,route:'strategist',provider:'local',
+     verified:true,localOnly:true,validation:{valid:true,reasons:[]}})),stateToken:payload.stateToken}),
+  {status:200,headers:{'content-type':'application/json'}})});
  t.after(restore);
  const {requestCoach}=await import('../src/coach/client.js');
  const answer=await requestCoach(payload);
- assert.equal(answer.provider,'local','无密钥时必须标成本机');
- assert.equal(answer.fallbackReason,'未连接模型，显示本局规则分析');
+ assert.equal(answer.provider,'local','无密钥时必须标成本机（不是 deepseek）');
+ assert.notEqual(answer.provider,'deepseek','这一条路上不许出现云端 provider');
+ assert.equal(answer.execution,'server','执行位置必须是服务端（浏览器只负责输入/上下文/显示）');
+ assert.equal(answer.usage??null,null,'0 次云端调用：回执里不许有 usage');
  assert.ok(answer.text.trim().length>0,'必须给出可读结论');
  assert.equal(answer.text,expected,'无密钥时界面显示的必须就是本机引擎的结论');
- assert.deepEqual(calls,['bootstrap'],'无密钥时只查一次连接状态，不请求模型');
+ assert.deepEqual(calls,['bootstrap','coach'],'无密钥时：查一次状态 + **发一次** /api/coach（不发就等于资料工具用不上）');
+
+ // ② 服务端不可达那一档：退本机 + **点名缺哪一项**，不许是笼统的"暂时无法回答"。
+ const down=stubModel({configured:false,coach:()=>{throw Error('fetch failed');}});
+ t.after(down.restore);
+ const offline=await requestCoach(payload);
+ assert.equal(offline.provider,'local-fallback','连不上服务端必须如实标成本机降级');
+ assert.equal(offline.execution,'local-fallback');
+ assert.match(String(offline.fallbackReason),/连不上服务端的资料|先按本局规则/,
+  `降级原因要不含糊：${offline.fallbackReason}`);
+ assert.doesNotMatch(String(offline.fallbackReason),/暂时无法回答|暂时不可用/,'不许退化成笼统话');
+ assert.ok(String(offline.text).trim().length>0,'降级也要给得出一句话');
 });
 
 test('模型返回非法结构时退回本机引擎，并说明为什么退回',async t=>{
