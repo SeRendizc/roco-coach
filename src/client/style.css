@@ -573,7 +573,13 @@
 .xy-log{flex:1;overflow-y:auto;margin:10px 0;min-height:60px}
 .xy-entry{font-size:14px;line-height:1.6;padding:9px;border-radius:8px;background:#2b403c;margin:8px 0}
 .xy-entry.user{background:#2b3c4c;margin-left:24px}
-.xy-entry strong{display:block;font-size:12px;color:#a5c7b2;margin-bottom:4px}
+/* ⚠ 2026-09-29 修（`art-finish` 的 D 组验收报的 ④-a，真机实测 3/3 `display=block`）：
+   这条规则的**本意是说话人表头**（`xiaoya.js` 里 `entry.append(head)`，head 是**第一个子节点**
+   那个 `<strong>小芽</strong>`），但 `.xy-entry strong` 是**后代选择器** ⇒ 它把正文里 markdown 的
+   `**加粗**` 也一起变成了块级 ⇒ 一句「这一版没有加点：培养就是改性格与天分」被拆成 6 行。
+   改成只命中外层那个表头：`> strong:first-child`（正文里的 `<strong>` 永远不是第一个子节点）。
+   旧规则留档：.xy-entry strong{display:block;font-size:12px;color:#a5c7b2;margin-bottom:4px} */
+.xy-entry > strong:first-child{display:block;font-size:12px;color:#a5c7b2;margin-bottom:4px}
 .xy-entry details{margin-top:6px}
 .xy-entry summary{font-size:12px;color:#a9c6d8;cursor:pointer}
 .xy-entry p{margin:4px 0 0;font-size:12px;color:#b9c9d6}

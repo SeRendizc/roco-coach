@@ -1,0 +1,699 @@
+{
+ "base": "http://127.0.0.1:8765/",
+ "started_at": "2026-09-28T17:58:56.266Z",
+ "source_snapshot_before": {
+  "xiaoya_js": "05dd23d4865f",
+  "box_js": "73a5e027b472",
+  "team_workshop_js": "426441e88971"
+ },
+ "steps": {
+  "① 六槽焦点与默认图鉴行": {
+   "ready": true,
+   "pool": {
+    "scopeAll": "true",
+    "scopeMine": "false",
+    "rows": 10,
+    "withInstance": 10,
+    "held": 10,
+    "heldWithInstance": 10,
+    "onDemand": 0,
+    "onDemandWithInstance": 0,
+    "sampleHeld": [
+     {
+      "name": "喵喵",
+      "instance": "own-0001",
+      "status": "held"
+     },
+     {
+      "name": "水蓝蓝",
+      "instance": "own-0002",
+      "status": "held"
+     },
+     {
+      "name": "火花",
+      "instance": "own-0003",
+      "status": "held"
+     },
+     {
+      "name": "迪莫",
+      "instance": "own-0004",
+      "status": "held"
+     }
+    ],
+    "sampleOnDemand": []
+   },
+   "clicks": [
+    {
+     "rowIndex": 0,
+     "clicked": {
+      "name": "喵喵",
+      "instance": "own-0001"
+     },
+     "clickedRect": {
+      "x": 1022,
+      "y": 355,
+      "w": 566,
+      "h": 44,
+      "top": 333,
+      "bottom": 377
+     },
+     "afterClick": {
+      "twSelected": "1",
+      "twFilled": "1",
+      "slots": [
+       {
+        "i": "1",
+        "state": "filled",
+        "inst": "own-0001"
+       },
+       {
+        "i": "2",
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": "3",
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": "4",
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": "5",
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": "6",
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": null,
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": null,
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": null,
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": null,
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": null,
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": null,
+        "state": "empty",
+        "inst": ""
+       }
+      ]
+     }
+    },
+    {
+     "rowIndex": 1,
+     "clicked": {
+      "name": "水蓝蓝",
+      "instance": "own-0002"
+     },
+     "clickedRect": {
+      "x": 1022,
+      "y": 405,
+      "w": 566,
+      "h": 44,
+      "top": 383,
+      "bottom": 427
+     },
+     "afterClick": {
+      "twSelected": "2",
+      "twFilled": "2",
+      "slots": [
+       {
+        "i": "1",
+        "state": "filled",
+        "inst": "own-0001"
+       },
+       {
+        "i": "2",
+        "state": "filled",
+        "inst": "own-0002"
+       },
+       {
+        "i": "3",
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": "4",
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": "5",
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": "6",
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": null,
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": null,
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": null,
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": null,
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": null,
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": null,
+        "state": "empty",
+        "inst": ""
+       }
+      ]
+     }
+    },
+    {
+     "rowIndex": 2,
+     "clicked": {
+      "name": "火花",
+      "instance": "own-0003"
+     },
+     "clickedRect": {
+      "x": 1022,
+      "y": 455,
+      "w": 566,
+      "h": 44,
+      "top": 433,
+      "bottom": 477
+     },
+     "afterClick": {
+      "twSelected": "3",
+      "twFilled": "3",
+      "slots": [
+       {
+        "i": "1",
+        "state": "filled",
+        "inst": "own-0001"
+       },
+       {
+        "i": "2",
+        "state": "filled",
+        "inst": "own-0002"
+       },
+       {
+        "i": "3",
+        "state": "filled",
+        "inst": "own-0003"
+       },
+       {
+        "i": "4",
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": "5",
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": "6",
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": null,
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": null,
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": null,
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": null,
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": null,
+        "state": "empty",
+        "inst": ""
+       },
+       {
+        "i": null,
+        "state": "empty",
+        "inst": ""
+       }
+      ]
+     }
+    }
+   ],
+   "slotMap": [
+    {
+     "index": "1",
+     "state": "filled",
+     "instance": "own-0001",
+     "name": "喵喵"
+    },
+    {
+     "index": "2",
+     "state": "filled",
+     "instance": "own-0002",
+     "name": "水蓝蓝"
+    },
+    {
+     "index": "3",
+     "state": "filled",
+     "instance": "own-0003",
+     "name": "火花"
+    },
+    {
+     "index": "4",
+     "state": "empty",
+     "instance": "",
+     "name": null
+    },
+    {
+     "index": "5",
+     "state": "empty",
+     "instance": "",
+     "name": null
+    },
+    {
+     "index": "6",
+     "state": "empty",
+     "instance": "",
+     "name": null
+    },
+    {
+     "index": null,
+     "state": "empty",
+     "instance": "",
+     "name": null
+    },
+    {
+     "index": null,
+     "state": "empty",
+     "instance": "",
+     "name": null
+    },
+    {
+     "index": null,
+     "state": "empty",
+     "instance": "",
+     "name": null
+    },
+    {
+     "index": null,
+     "state": "empty",
+     "instance": "",
+     "name": null
+    },
+    {
+     "index": null,
+     "state": "empty",
+     "instance": "",
+     "name": null
+    },
+    {
+     "index": null,
+     "state": "empty",
+     "instance": "",
+     "name": null
+    }
+   ],
+   "slotRect": {
+    "x": 227,
+    "y": 358,
+    "w": 183,
+    "h": 386,
+    "top": 165,
+    "bottom": 551
+   },
+   "afterSlotClick": {
+    "focusChips": 0,
+    "xiaoyaMounted": null,
+    "twInstanceElems": 0
+   },
+   "exceptionsDuringClicks": [],
+   "shot": "docs/roco/review-2026-09-28/shots/ui-context/ui-01-workshop-focus.png"
+  },
+  "①c 交接路径（?team=own-0001）六槽读数": {
+   "twSelected": "1",
+   "twFilled": "1",
+   "twHandoff": "1",
+   "slots": [
+    {
+     "i": "1",
+     "state": "filled",
+     "inst": "own-0001",
+     "name": "喵喵"
+    },
+    {
+     "i": "2",
+     "state": "empty",
+     "inst": "",
+     "name": null
+    },
+    {
+     "i": "3",
+     "state": "empty",
+     "inst": "",
+     "name": null
+    },
+    {
+     "i": "4",
+     "state": "empty",
+     "inst": "",
+     "name": null
+    },
+    {
+     "i": "5",
+     "state": "empty",
+     "inst": "",
+     "name": null
+    },
+    {
+     "i": "6",
+     "state": "empty",
+     "inst": "",
+     "name": null
+    },
+    {
+     "i": null,
+     "state": "empty",
+     "inst": "",
+     "name": null
+    },
+    {
+     "i": null,
+     "state": "empty",
+     "inst": "",
+     "name": null
+    },
+    {
+     "i": null,
+     "state": "empty",
+     "inst": "",
+     "name": null
+    },
+    {
+     "i": null,
+     "state": "empty",
+     "inst": "",
+     "name": null
+    },
+    {
+     "i": null,
+     "state": "empty",
+     "inst": "",
+     "name": null
+    },
+    {
+     "i": null,
+     "state": "empty",
+     "inst": "",
+     "name": null
+    }
+   ]
+  },
+  "①d 未拥有行（搜「星星眼」）": {
+   "rows": 1,
+   "empty": null,
+   "listed": [
+    {
+     "name": "星星眼",
+     "status": "on_demand",
+     "instance": ""
+    }
+   ]
+  },
+  "①b 焦点消费方合约探针（合成行，非产品路径）": {
+   "chipAfterClickBeforeAsk": {
+    "text": "没在看具体的某一只 —— 问\"这只\"我会先请你点开一只。",
+    "focus": "",
+    "live": "no"
+   },
+   "chipAfterAsk": {
+    "text": "正在看：迪莫 · 性格 专注 · 4 个技能",
+    "focus": "own-0004",
+    "live": "yes"
+   }
+  },
+  "② 默认图鉴点卡片进详情": {
+   "default": {
+    "kind": "catalog",
+    "grouped": "no",
+    "cards": 24,
+    "withDataDetail": 24
+   },
+   "firstCardName": "喵喵",
+   "afterCardClick": {
+    "view": "pet",
+    "pet": "pet_000001",
+    "urlHasPet": true,
+    "title": "喵喵 · 详情",
+    "imgSrc": "/api/roco/sprite?id=pet_000001&v=default",
+    "natural": [
+     256,
+     256
+    ]
+   },
+   "shot": "docs/roco/review-2026-09-28/shots/ui-context/ui-02-box-default-detail.png"
+  },
+  "② 深链（不在当前页的个体）": {
+   "pet_000012": {
+    "note": "第 1 页（对照）",
+    "pet": "pet_000012",
+    "title": "铠甲虫 · 详情",
+    "imgSrc": "/api/roco/sprite?id=pet_000012&v=default",
+    "hasArtSpan": true,
+    "natural": [
+     256,
+     256
+    ]
+   },
+   "pet_000112": {
+    "note": "第 5 页（缺口③）",
+    "pet": "pet_000112",
+    "title": "雪影娃娃 · 详情",
+    "imgSrc": null,
+    "hasArtSpan": false,
+    "natural": [
+     0,
+     0
+    ]
+   }
+  },
+  "② 深链缺口截图": "docs/roco/review-2026-09-28/shots/ui-context/ui-03-deeplink-offpage.png",
+  "③ 手机 390×844": {
+   "盒子列表": {
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "overflow": false,
+    "smallTargets": 0,
+    "smallest": [],
+    "art": {
+     "imgs": 24,
+     "loaded": 24,
+     "spill": 0
+    },
+    "shot": "docs/roco/review-2026-09-28/shots/ui-context/ui-04-mobile-box-list.png"
+   },
+   "盒子详情": {
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "overflow": false,
+    "smallTargets": 0,
+    "smallest": [],
+    "view": "pet",
+    "pet": "pet_000001",
+    "art": {
+     "src": "/api/roco/sprite?id=pet_000001&v=default",
+     "natural": [
+      256,
+      256
+     ],
+     "insideView": true
+    },
+    "shot": "docs/roco/review-2026-09-28/shots/ui-context/ui-05-mobile-box-detail.png"
+   },
+   "配队工作台": {
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "overflow": false,
+    "rows": 6,
+    "rowOverflow": 0,
+    "smallTargets": 0,
+    "smallest": [],
+    "shot": "docs/roco/review-2026-09-28/shots/ui-context/ui-06-mobile-workshop.png"
+   },
+   "我的盒子（分组档，补量）": {
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "overflow": false,
+    "smallTargets": 0,
+    "smallest": []
+   }
+  },
+  "④ 小芽回答层次（UI 实测）": {
+   "answers": {
+    "事实问": {
+     "question": "迪莫的种族值是多少？",
+     "body": "迪莫：光系，种族值合计 582（生命 120 / 物攻 80 / 魔攻 80 / 物防 105 / 魔防 105 / 速度 92）。",
+     "bodyLen": 66,
+     "evidence": [
+      {
+       "summary": "依据",
+       "text": "ev:roco-world-s4-2026-09-10:pets.json#pet_000004数值来自图鉴层（抓包采用后与模拟基线逐值相同）名单说明：profile.pets 里是**候选池的一页**（本页 48 条候选宇宙共 542 条），**不是玩家名下的全部**。玩家问\"我有多少只/都有哪些\"时按这些数回答，别把本页条数当成总数。"
+      },
+      {
+       "summary": "小芽查了什么",
+       "text": "图鉴与规则表"
+      }
+     ],
+     "status": "本地规则核验 · 依据可展开查看"
+    },
+    "建议问": {
+     "question": "怎么培养迪莫？",
+     "body": "这一版没有加点：培养就是改性格与天分 —— 在我的盒子里按种类点开个体，每只各能刷 3 次（刷性格与刷天分分开计数）。等级与经验照常涨。",
+     "bodyLen": 68,
+     "evidence": [
+      {
+       "summary": "依据",
+       "text": "问句落在「训练点 / 培养格 / 加点」这一族：这一版（原版）没有这套机制，所以不给那些数名单说明：profile.pets 里是**候选池的一页**（本页 48 条候选宇宙共 542 条），**不是玩家名下的全部**。玩家问\"我有多少只/都有哪些\"时按这些数回答，别把本页条数当成总数。"
+      }
+     ],
+     "status": "本地规则核验 · 依据可展开查看"
+    },
+    "无依据问": {
+     "question": "帮我预测下个版本会出什么新精灵",
+     "body": "这条我没依据，换个说法或点名一只精灵。",
+     "bodyLen": 19,
+     "evidence": [
+      {
+       "summary": "依据",
+       "text": "语气档位 R0（不说）：本机没有任何真实记录，不编造过去。你的设置：交流偏好未设置、玩法目标未设置、本命未设置、怎么称呼你未设置（来源：你明确表达过才会记录）。名单说明：profile.pets 里是**候选池的一页**（本页 48 条候选宇宙共 542 条），**不是玩家名下的全部**。玩家问\"我有多少只/都有哪些\"时按这些数回答，别把本页条数当成总数。"
+      }
+     ],
+     "status": "本地规则核验 · 依据可展开查看"
+    },
+    "旧语料探针": {
+     "question": "烬尾狐的种族值是多少？",
+     "body": "「烬尾狐」这一问我没核到：未知精灵名：烬尾狐。手游图鉴（622 只）里没有这个名字，我不凭印象给它编数值。",
+     "bodyLen": 53,
+     "evidence": [
+      {
+       "summary": "依据",
+       "text": "名单说明：profile.pets 里是**候选池的一页**（本页 48 条候选宇宙共 542 条），**不是玩家名下的全部**。玩家问\"我有多少只/都有哪些\"时按这些数回答，别把本页条数当成总数。"
+      },
+      {
+       "summary": "小芽查了什么",
+       "text": "图鉴与规则表"
+      }
+     ],
+     "status": "本地规则核验 · 依据可展开查看"
+    },
+    "名单问": {
+     "question": "我都有哪些精灵？",
+     "body": "你的持有总数是 542 只（这一页给了 48 只）：喵喵、水蓝蓝、火花、迪莫、水灵、火神、魔力猫、草头鸭、恶魔叮、恶魔狼、鸭吉吉（蓬松的样子）、铠甲虫（还有 36 只没列出来）。要按属性/定位筛，或者看某一只的技能与学习表，直接说名字就行（名单来自精灵盒子「我的」，只读、不猜）。",
+     "bodyLen": 140,
+     "evidence": [
+      {
+       "summary": "依据",
+       "text": "名单说明：profile.pets 里是**候选池的一页**（本页 48 条候选宇宙共 542 条），**不是玩家名下的全部**。玩家问\"我有多少只/都有哪些\"时按这些数回答，别把本页条数当成总数。"
+      }
+     ],
+     "status": "本地规则核验 · 依据可展开查看"
+    }
+   },
+   "structure": {
+    "事实问_正文": "迪莫：光系，种族值合计 582（生命 120 / 物攻 80 / 魔攻 80 / 物防 105 / 魔防 105 / 速度 92）。",
+    "建议问_正文": "这一版没有加点：培养就是改性格与天分 —— 在我的盒子里按种类点开个体，每只各能刷 3 次（刷性格与刷天分分开计数）。等级与经验照常涨。",
+    "事实问_依据条数": 2,
+    "建议问_依据条数": 1,
+    "正文长度": {
+     "事实问": 66,
+     "建议问": 68,
+     "无依据问": 19,
+     "旧语料探针": 53,
+     "名单问": 140
+    }
+   },
+   "unique": 5,
+   "stale_corpus_leaks": [],
+   "stale_probe_refused": true,
+   "shot": "docs/roco/review-2026-09-28/shots/ui-context/ui-07-xiaoya-answers.png"
+  },
+  "④b 正文加粗的渲染": {
+   "bodyBoldCount": 3,
+   "bodyBoldDisplayBlock": 3,
+   "roleLabelDisplay": "block",
+   "sample": [
+    "没有加点",
+    "性格",
+    "天分"
+   ]
+  }
+ },
+ "problems": [
+  "② 缺口③未修：深链到第 5 页的个体 `?pet=pet_000112` 没立绘（src 空 id）—— 与 art-finish 2026-09-29 报的同一条"
+ ],
+ "notes": [
+  "①d 未拥有的行 1 行、data-tw-instance 全为空 ✔",
+  "①b 是用**合成行**在 xiaoya.html 上打的合约探针：它只证明\"点击监听 + 焦点 provider 这条合约通\"，不证明工作台页面上的真实集成（工作台在 roco.html 的 shadow root 里，而这页没有小芽实例 —— 见 ① 的 afterSlotClick 读数）。"
+ ],
+ "findings": {
+  "小芽回答里的加粗被拆成整行": {
+   "evidence": "正文里 3 个 <strong>，其中 3 个 computed display=block",
+   "where": "src/client/style.css:576 `.xy-entry strong{display:block}`（本意是角色名那一个）+ src/coach/experience.js:47 `markdown()` 把 `**x**` 变 `<strong>`",
+   "visible": "截图 ui-07：「这一版 / 没有加点 / ：培养就是改 / 性格 / 与 / 天分」被拆成 6 行",
+   "repro": "xiaoya.html 问「怎么培养迪莫？」→ 看小芽那一条的换行"
+  }
+ },
+ "source_snapshot_after": {
+  "xiaoya_js": "05dd23d4865f",
+  "box_js": "73a5e027b472",
+  "team_workshop_js": "426441e88971"
+ },
+ "finished_at": "2026-09-28T17:59:19.479Z"
+}
