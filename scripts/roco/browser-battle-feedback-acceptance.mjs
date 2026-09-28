@@ -2350,10 +2350,18 @@ async function enterBattle({js, send, mouseClick, waitFor, base, serverGet, shoo
   let teamIds = [];
   try {
     const mine = await serverGet('/api/roco/box?kind=mine&limit=60');
-    const seen = new Set();
+    // ⚠ 2026-09-28：必须按**物种**去重（一支队伍里同一物种只能占一个槽位）。
+    // 人类批准那对同种演示个体之后，盒子前两张卡是同一物种（`pet_000012` ×2）——
+    // 只按 id 去重会把它俩一起塞进队伍，服务端照规矩拒绝，页面退回**不声明 mana 的配置**，
+    // 于是这一套里的 J7/J9/J10（愿力强化 / 魔力心）全部**量不到**（实测：门禁多出一条红）。
+    const speciesSeen = new Set();
     for (const card of (mine?.player?.cards ?? [])) {
       const id = card?.select ?? card?.group;
-      if (typeof id === 'string' && /^own-\d+$/.test(id) && !seen.has(id)) { seen.add(id); teamIds.push(id); }
+      const species = card?.group ?? null;
+      if (typeof id !== 'string' || !/^own-\d+$/.test(id)) continue;
+      if (species && speciesSeen.has(species)) continue;
+      if (species) speciesSeen.add(species);
+      teamIds.push(id);
       if (teamIds.length === 6) break;
     }
   } catch (error) { out.trail.push({step: 'mine-box', error: oneLine(error?.message, 160)}); }
