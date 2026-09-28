@@ -420,6 +420,13 @@ async function main() {
    */
   const ensureRowVisible = async (species, select) => {
     const sel = `#box-grid .individual[data-detail="${select}"]`;
+    // ⚠ 2026-09-28 实测修（真机 10b 连红三次的**真因**）：二级详情页还开着的时候，
+    // `#box-list-view` 是 `hidden` ⇒ 里面那一行的 `getBoundingClientRect()` 全是 0 ⇒
+    // `elementFromPoint(0,0)` 命中的是别的元素 ⇒ "这一行存在但量不到"被误判成"没画出来"。
+    // 先退回列表那一屏再找行（判据的意图一个字没改：它要量的还是那一行上的资质六维）。
+    const inDetail = await js(`(()=>{const v=document.getElementById('pet-view');
+      return Boolean(v)&&v.hidden===false;})()`);
+    if (inDetail) { await mouseClick('#pet-back'); await sleep(600); }
     const hittable = async () => {
       // ⚠ 2026-09-28 实测修（真机 10b 连续红了两次）：`elementFromPoint` 用的是**视口坐标**，
       // 而这一行常常画在视口**下面**（抽屉在网格里靠后）⇒ 点在视口外必然返回 null，
