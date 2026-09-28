@@ -16,4 +16,9 @@
 [12/18] 先验 meta-prior … ok（68ms）
 [13/18] RC-304 报告（重写） … ok（763ms）
 [14/18] RC-604 报告（重写） … ok（155ms）
-[15/18] Agent 轨迹集 … 
+[15/18] Agent 轨迹集 … ok（373170ms）
+[16/18] SFT 数据 … ok（2193ms）
+[17/18] 覆盖切片 … ok（32ms）
+[18/18] 奖励报告 … ok（152ms）
+
+重建完成：18 步。下一步跑 npm run test:unit 与 npm run verify:release。
