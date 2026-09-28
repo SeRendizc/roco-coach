@@ -16,7 +16,7 @@ import {requestCoach, connectionStatus, readChatStore, serializeChatStore,
   activeChatSession, chatConversation, appendChatTurn, startChatSession, emptyChatStore,
   beginNewChatSession, clearActiveChatSession} from '../coach/client.js';
 import {buildContext} from '../coach/runtime.js';
-import {freshMemory, readMemory} from '../coach/memory.js';
+import {freshMemory, readMemory, memoryItems, deleteMemoryItem, MEMORY_GROUPS} from '../coach/memory.js';
 // 培养那几样（性格 / 六项资质 / 天分档位）的**唯一**投影：页面读它，小芽也读它 ——
 // 刷新/回滚之后两边必须一起变（Codex 监工第 2 条；A7 之后页面上那一栏就是从这条读的）。
 import {cultivationOf} from '../coach/individuals.js';
@@ -294,6 +294,134 @@ export function focusFromClick(nodeOrEvent) {
   return null;
 }
 
+/**
+ * **宿主动局上下文口**（task-13 甲①，加性选项）。
+ *
+ * 为什么必须有它：`xiaoya.js` 原来把上下文写死成「没有对局」（`buildContext(null, …, 'meadow', …)`），
+ * 而产品页的小芽是要在**对局中**回答"我现在该换谁"的 —— 那一屏的公开战况（`roco_battle`）与
+ * 引擎这一手的规划（`roco_plan`）只有宿主页拿得到。没有这个口，退役旧面板就是**功能倒退**。
+ *
+ * 形状（`raw` 是 `contextProvider()` 的返回值，缺什么就是什么，一律不猜）：
+ *   · `game`     —— 交给 `buildContext` 的对局对象（`null` = 这一屏没有对局，与老行为一致）；
+ *   · `archive`  —— 复盘用的存档（`buildContext` 的第 4 个参数）；
+ *   · `stageId`  —— 真实关卡 id（缺省仍是营地页那个 `'meadow'`）；
+ *   · `extra`    —— **原样并进上下文**的加性键（`roco_battle` / `roco_plan` / …）。
+ *     `null` / `undefined` 的键**不并**（"拿不到就不加那个字段"是本仓既有口径）。
+ */
+export function hostContextOf(raw) {
+  const out = {game: null, archive: null, stageId: null, extra: null};
+  if (!raw || typeof raw !== 'object') return out;
+  if (raw.game && typeof raw.game === 'object') out.game = raw.game;
+  if (raw.archive && typeof raw.archive === 'object') out.archive = raw.archive;
+  if (typeof raw.stageId === 'string' && raw.stageId.trim()) out.stageId = raw.stageId.trim();
+  const source = raw.extra && typeof raw.extra === 'object' && !Array.isArray(raw.extra) ? raw.extra : null;
+  if (source) {
+    const clean = {};
+    for (const [key, value] of Object.entries(source)) {
+      if (value === undefined || value === null) continue;
+      if (typeof key !== 'string' || !key) continue;
+      clean[key] = value;
+    }
+    if (Object.keys(clean).length) out.extra = clean;
+  }
+  return out;
+}
+
+// ── 两套记忆键合并（task-13 甲③）：`roco-coach-memory-v1` → `xiaoya-memory-v1` ──────────
+//
+// 背景：产品页的小芽（`#companion-card`，接线在 `roco.js`）记的是 `roco-coach-memory-v1`，
+// 而营地/盒子这一套记的是 `xiaoya-memory-v1` —— **两个键、两套记忆**（同一个玩家在两页
+// 说过的话互不可见）。合成一份是甲的目标之一，但**不许直接丢玩家已有记忆**。
+//
+// 口径：**读旧键 → 与新键合并（新键优先）→ 写新键 → 旧键留一次迁移标记**（旧内容原样留着，
+// 出问题时还能人工捞回来）。合并后**再过一遍 `readMemory()`**，让上限/形状那些不变量只有一处实现。
+export const LEGACY_MEMORY_KEY = 'roco-coach-memory-v1';
+export const MEMORY_MIGRATED_FLAG = 'xiaoya-memory-migrated-v1';
+
+/** 按 key 去重取并集（旧的在前、新的在后 —— 新的同名条目覆盖旧的那一条）。 */
+function unionBy(older, newer, keyOf, limit) {
+  const map = new Map();
+  for (const row of [...(Array.isArray(older) ? older : []), ...(Array.isArray(newer) ? newer : [])]) {
+    const key = keyOf(row);
+    if (key === null || key === undefined || key === '') continue;
+    map.set(key, row);
+  }
+  const merged = [...map.values()];
+  return Number.isFinite(limit) && merged.length > limit ? merged.slice(-limit) : merged;
+}
+
+/**
+ * 两份账本合成一份。**新键的那一份说了算**（玩家最近在这个键上说的话），旧的只补它没有的。
+ * 列表型字段按 id 去重取并集（旧的在先），标量/对象型缺就用旧的那一份。
+ */
+export function mergeMemories(older, newer) {
+  const a = older ?? {};
+  const b = newer ?? {};
+  const pick = (value, fallback) => (value === undefined || value === null
+    || (Array.isArray(value) && !value.length) ? fallback : value);
+  return {
+    version: 1,
+    preference: pick(b.preference, a.preference),
+    goal: pick(b.goal, a.goal),
+    favorite: pick(b.favorite, a.favorite),
+    lastTopic: pick(b.lastTopic, a.lastTopic),
+    ruleReferenceId: pick(b.ruleReferenceId, a.ruleReferenceId),
+    pendingQuiz: pick(b.pendingQuiz, a.pendingQuiz),
+    mood: pick(b.mood, a.mood),
+    habits: pick(b.habits, a.habits),
+    skill: pick(b.skill, a.skill),
+    acceptance: pick(b.acceptance, a.acceptance),
+    quizCount: Math.max(Number(a.quizCount) || 0, Number(b.quizCount) || 0),
+    lessons: unionBy(a.lessons, b.lessons, (x) => (typeof x === 'string' ? x : null), 12),
+    events: unionBy(a.events, b.events, (row) => (row?.id ?? row?.time ?? null), 12),
+    journal: unionBy(a.journal, b.journal, (row) => row?.id ?? null, 240),
+    quizLog: unionBy(a.quizLog, b.quizLog, (row) => row?.id ?? null, 24),
+    dialogue: unionBy(a.dialogue, b.dialogue, (row) => `${row?.role ?? ''}:${row?.content ?? ''}`, 8),
+    watches: pick(b.watches, a.watches),
+    stated: unionBy(a.stated, b.stated, (row) => `${row?.kind ?? ''}:${row?.value ?? ''}`, 12),
+    reflections: {...(a.reflections ?? {}), ...(b.reflections ?? {})},
+  };
+}
+
+/**
+ * 迁移一次。返回 `{migrated, reason, merged}` —— **纯函数式**（storage 由调用方给），
+ * 判据可以在 Node 里用假 storage 直接钉。
+ *   · 旧键没数据 ⇒ 什么都不做（`reason:'no-legacy'`）；
+ *   · 已经迁移过（`MEMORY_MIGRATED_FLAG === 'yes'`）⇒ 不再动（`reason:'already'`）；
+ *   · 否则：合并 → 写新键 → 旧键打标记（**旧内容一个字不删**）。
+ */
+export function migrateLegacyMemory(storage) {
+  if (!storage?.getItem) return {migrated: false, reason: 'no-storage', merged: null};
+  const read = (key) => { try { return storage.getItem(key); } catch { return null; } };
+  const write = (key, value) => { try { storage.setItem(key, value); } catch { /* 隐私模式：这次不持久，但不炸 */ } };
+  if (read(MEMORY_MIGRATED_FLAG) === 'yes') return {migrated: false, reason: 'already', merged: null};
+  const legacyRaw = read(LEGACY_MEMORY_KEY);
+  if (!legacyRaw) { write(MEMORY_MIGRATED_FLAG, 'yes'); return {migrated: false, reason: 'no-legacy', merged: null}; }
+  const legacy = readMemory(legacyRaw);
+  const current = readMemory(read(MEMORY_KEY));
+  const merged = readMemory(JSON.stringify(mergeMemories(legacy, current)));
+  write(MEMORY_KEY, JSON.stringify(merged));
+  // 旧键**不动内容**，只加一次标记（下一次不再重复合并；出问题还能人工捞回来）。
+  try {
+    const raw = JSON.parse(legacyRaw);
+    if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+      write(LEGACY_MEMORY_KEY, JSON.stringify({...raw, ['migrated_to']: MEMORY_KEY, ['migrated_at']: new Date().toISOString()}));
+    }
+  } catch { /* 旧值不是 JSON：原样留着，不覆盖 */ }
+  write(MEMORY_MIGRATED_FLAG, 'yes');
+  return {migrated: true, reason: 'merged', merged};
+}
+
+/** 问一次宿主"这一屏的上下文是什么"；**它自己炸了也不许把问话打断**（如实当成没有对局）。 */
+export async function readHostContext(provider) {
+  if (typeof provider !== 'function') return {context: hostContextOf(null), failure: null};
+  try {
+    return {context: hostContextOf(await provider()), failure: null};
+  } catch (error) {
+    return {context: hostContextOf(null), failure: String(error?.message ?? error).slice(0, 120)};
+  }
+}
+
 /** 「现在这一屏在看谁」。live = 真在看这一屏；last = 上一轮看过的那一只（要如实这么说）。 */
 export function detectFocus({doc = globalThis.document, loc = globalThis.location,
   storage = null, picked = null, battle = null} = {}) {
@@ -516,6 +644,17 @@ function createSession() {
 
 /** 把回答里可展开的那两层（依据 / 查了什么）画进一条对话里，与营地页同一套口径。 */
 function decorate(entry, answer) {
+  // 甲②③：**服务端算好的那一行活动说明**（`activityLine`）—— 旧面板把它渲染成回答下面的一段
+  //（`.say-basis`），这里同样渲染出来，**逐字用服务端给的那一句**，页面不重新拼一遍
+  //（重拼就是第二份事实，措辞迟早漂；活动说明的措辞由 `src/coach/activity.js` 与判据钉着）。
+  const activityLine = typeof answer?.activityLine === 'string' ? answer.activityLine.trim() : '';
+  if (activityLine) {
+    const basis = document.createElement('p');
+    basis.className = 'say-basis';
+    basis.textContent = activityLine;
+    entry.append(basis);
+    entry.dataset.xyActivity = activityLine.slice(0, 240);
+  }
   const evidence = Array.isArray(answer.evidence) ? answer.evidence : [];
   if (evidence.length) {
     const details = document.createElement('details');
@@ -578,7 +717,26 @@ function injectFocusStyles() {
     + '.xy-actions{display:flex;gap:8px;padding:6px 10px}'
     + '.xy-actions button{font-size:12.5px;padding:4px 10px;border-radius:8px;border:1px solid #36495e;'
     + 'background:transparent;color:#c6d2de;cursor:pointer}'
-    + '.xy-actions button:hover{border-color:#8dd49c;color:#dfe8ef}';
+    + '.xy-actions button:hover{border-color:#8dd49c;color:#dfe8ef}'
+    + '.xy-entry .say-basis{margin:6px 0 0;font-size:12px;color:#9caebe;border-left:2px solid #36495e;padding-left:8px}'
+    + '.xy-roles{display:flex;gap:6px;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.08)}'
+    + '.xy-roles button{flex:1 1 0;font-size:12px;padding:3px 0;border-radius:8px;border:1px solid #36495e;background:transparent;color:#c6d2de;cursor:pointer}'
+    + '.xy-roles button.selected{border-color:#8dd49c;color:#dfe8ef}'
+    + '.xy-fold{padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.08)}'
+    + '.xy-fold>summary{cursor:pointer;font-size:12.5px;color:#a9c6d8;list-style:none}'
+    + '.xy-models{display:flex;gap:6px;margin-top:6px}'
+    + '.xy-models .model-cell{flex:1 1 0;min-width:0;text-align:center;padding:4px 2px;border:1px solid #36495e;border-radius:8px}'
+    + '.xy-models .mc-name{color:#c6d2de;white-space:nowrap;overflow:hidden}'
+    + '.xy-models .mc-state{font-size:11px;color:#9caebe}.xy-models .mc-state.ok{color:#8dd49c}'
+    + '.xy-actions2{display:flex;gap:6px;margin-top:6px}'
+    + '.xy-actions2 button{font-size:12px;padding:3px 9px;border-radius:8px;border:1px solid #36495e;background:transparent;color:#c6d2de;cursor:pointer}'
+    + '.xy-memory{padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.08);max-height:40vh;overflow:auto}'
+    + '.xy-memory ul{list-style:none;margin:0;padding:0}'
+    + '.xy-memory li{display:flex;gap:6px;align-items:center;font-size:12.5px;padding:3px 0;color:#c6d2de}'
+    + '.xy-memory .mem-kind{color:#9caebe;flex:0 0 auto}'
+    + '.xy-memory .mem-label{flex:1 1 auto;overflow-wrap:anywhere}'
+    + '.xy-memory .mem-forget{font-size:11.5px;padding:2px 8px;border-radius:8px;border:1px solid #36495e;'
+    + 'background:transparent;color:#c6d2de;cursor:pointer}.xy-memory .mem-forget:hover{border-color:#8dd49c}';
   document.head?.append(style);
 }
 
@@ -589,12 +747,14 @@ function injectFocusStyles() {
  * 两种模式共用下面**同一段** ask / 渲染 / 存档逻辑 —— 「单独页面」与「弹出式」
  * 不是两个小芽，是同一个教练的两块版式。
  */
-export function mountXiaoya({mode = 'popup', host = null} = {}) {
+export function mountXiaoya({mode = 'popup', host = null, contextProvider = null} = {}) {
   if (document.body.dataset.xiaoyaMounted === 'yes') return null;
   document.body.dataset.xiaoyaMounted = 'yes';
 
   if (mode === 'popup') injectPopup(host);
   injectFocusStyles();
+  // 甲③：两套记忆键合并（只跑一次；旧键留标记、内容不删）。
+  migrateLegacyMemory((() => { try { return localStorage; } catch { return null; } })());
   const el = (id) => document.getElementById(id);
   const log = el(mode === 'page' ? 'xy-log' : 'xiaoya-log');
   const form = el(mode === 'page' ? 'xy-form' : 'xiaoya-form');
@@ -664,8 +824,14 @@ export function mountXiaoya({mode = 'popup', host = null} = {}) {
       const activeProfile = state.mobileProfile ?? state.profile;
       const focus = resolved.snapshot?.instance_id ?? resolved.instanceId
         ?? (Array.isArray(activeProfile.pets) ? (activeProfile.pets[0]?.id ?? null) : state.pet);
-      const context = buildContext(null, activeProfile, focus, null, CAMPAIGN_STAGE_ID, message);
+      // **宿主动局上下文口**（甲①）：有对局就把对局交给 `buildContext`，没有就照老行为（`null`）。
+      const incoming = await readHostContext(contextProvider);
+      const context = buildContext(incoming.context.game, activeProfile, focus, incoming.context.archive,
+        incoming.context.stageId ?? CAMPAIGN_STAGE_ID, message);
+      // 加性键（`roco_battle` / `roco_plan` …）原样并进去；拿不到的键不出现（与旧面板同一条口径）。
+      if (incoming.context.extra) Object.assign(context, incoming.context.extra);
       context.coachAllowed = true;
+      if (incoming.failure) context.hostContextFailure = incoming.failure;
       // 加性键：老路（没有聚焦对象时）一个字段都不出现，行为与改动前逐字一致。
       if (resolved.snapshot) context.focusDetail = {...resolved.snapshot, live: resolved.source !== 'last'};
       if (resolved.failure) context.focusFailure = resolved.failure;
@@ -693,6 +859,8 @@ export function mountXiaoya({mode = 'popup', host = null} = {}) {
       setStatus(statusLine(answer));
       // 答完再读一次能力状态：第一问会把惰性启动的规则服务拉起来，那之后那两行才是真的。
       void refreshCapability(true);
+      // 记忆那一块也重画：这一轮里她可能刚记住/改了一条。
+      renderMemoryList();
     } catch (error) {
       persist(message, '');
       addEntry('小芽', '这次没有完成分析，请重试。');
@@ -721,6 +889,99 @@ export function mountXiaoya({mode = 'popup', host = null} = {}) {
     if (!turns.length) { addEntry('小芽', OPENING); return; }
     for (const turn of turns) addEntry(turn.role === 'user' ? '你' : '小芽', turn.content);
   };
+  // ── 记忆面板（task-13 甲②①：`#memory-pop` 从旧面板搬到这里）──────────────────
+  //
+  // 语义与旧面板**完全同一套**（不是第二份实现）：
+  //   · 行 = `memoryItems(state.memory)` 里 `group === 'stated'` 的那些（玩家自己说过的）；
+  //   · 删除 = `deleteMemoryItem(state.memory, {id})`，`deleted:false` 时**不改页面、不假装成功**；
+  //   · DOM 形状沿用同一套名字（`#memory-list` / `.mem-kind` / `.mem-label` / `.mem-forget`）——
+  //     给**同一个语义**起同一个名字，探针与玩家认知都不用改。
+  const memoryPanel = document.createElement('div');
+  memoryPanel.className = 'xy-memory';
+  memoryPanel.id = 'xy-memory-panel';
+  memoryPanel.hidden = true;
+  memoryPanel.setAttribute('role', 'dialog');
+  memoryPanel.setAttribute('aria-label', '小芽的记忆');
+  memoryPanel.innerHTML = '<p class="muted" id="memory-empty">她还没记住什么。你可以说「以后叫我老王」「本命是迪莫」「输了先不复盘」。</p>'
+    + '<ul id="memory-list" class="memory"></ul>';
+  const renderMemoryList = () => {
+    const list = memoryPanel.querySelector('#memory-list');
+    const empty = memoryPanel.querySelector('#memory-empty');
+    if (!list) return;
+    const rows = memoryItems(state.memory).filter((row) => row.group === 'stated');
+    list.hidden = rows.length === 0;
+    if (empty) empty.hidden = rows.length > 0;
+    list.innerHTML = rows.map((row) => `<li data-memory="${esc(row.id)}">
+      <span class="mem-kind">${esc(MEMORY_GROUPS[row.group] ?? row.group)}</span>
+      <span class="mem-label">${esc(row.label)}</span>
+      <span class="muted">${esc(String(row.time || '').slice(0, 10))}</span>
+      <button class="mem-forget" data-forget="${esc(row.id)}" aria-label="忘掉这条">忘掉</button>
+    </li>`).join('');
+    for (const button of list.querySelectorAll('button[data-forget]')) {
+      button.addEventListener('click', () => forgetMemory(button.dataset.forget));
+    }
+    // 与旧面板同一个语义的钩子（探针读它；名字换成 `xy-` 是因为**面板换了主人**，
+    // 不是给同一个东西起两个名字 —— `data-roco-memory` 属于旧面板，退役时一起消失）。
+    document.body.dataset.xyMemory = rows.length ? String(rows.length) : 'none';
+  };
+  const forgetMemory = (id) => {
+    const result = deleteMemoryItem(state.memory, {id});
+    if (!result.deleted) return;          // 没这条就不动页面、也不假装成功（与旧面板同一条口径）
+    state.memory = result.memory;
+    writeStored(MEMORY_KEY, JSON.stringify(state.memory));
+    renderMemoryList();
+  };
+  renderMemoryList();
+
+  // ── 连接状态（三格模型 + 去连接页）（task-13 甲②②：`#model-list` / `#open-connect` 从旧面板搬来）──
+  //
+  // 与旧面板**同一套语义、同一套 id/class**（给同一个东西同一个名字），数据源也同一条 `/api/models`：
+  //   · 三格：`#model-list .model-cell[data-model-id]` + `.mc-name` + `.mc-state`；
+  //   · 名字放不下就**缩小字号**（不是省略号）；拿不到数据写「未知」，不猜；
+  //   · `#open-connect` 按一下弹 `connect.html` 独立小窗（与旧面板逐字同一条行为）。
+  // ⚠ 这一块**不写 `#model-chip`**（旧面板踩过的坑：一个读取点两个写入者 ⇒ 判据读到被覆盖的那份）。
+  //    chip 仍归能力状态那一行（甲②③ 再决定要不要把它搬过来）。
+  const statusFold = document.createElement('details');
+  statusFold.className = 'xy-fold';
+  statusFold.id = 'xy-fold-status';
+  statusFold.innerHTML = '<summary id="xy-fold-label">展开连接状态</summary>'
+    + '<div class="xy-models" id="model-list" role="list"></div>'
+    + '<div class="xy-actions2"><button class="xy-open" id="open-connect" type="button">调试连接</button></div>';
+  const renderModelList = async () => {
+    const box = statusFold.querySelector('#model-list');
+    if (!box) return;
+    let data = null;
+    try {
+      const response = await fetch('/api/models', {headers: {Accept: 'application/json'}});
+      if (response.ok) data = await response.json();
+    } catch { data = null; }
+    const rows = Array.isArray(data?.models) ? data.models : [];
+    const SHORT = {cloud: 'ds api', local_4b: 'qwen3.5-4b', local_27b: 'qwen3.8-27b'};
+    const cells = rows.length ? rows.slice(0, 3) : [
+      {id: 'cloud', label: 'ds api'}, {id: 'local_4b', label: 'qwen3.5-4b'}, {id: 'local_27b', label: 'qwen3.8-27b'},
+    ];
+    box.innerHTML = cells.map((m) => {
+      const raw = String(m.label ?? m.id ?? '模型');
+      const short = SHORT[m.id] ?? raw.replace(/^(云端|本地)\s*·\s*/, '').replace(/\s*\(.*\)$/, '');
+      const state = rows.length ? (m.connected ? '已连' : '未连') : '未知';
+      const title = `${m.label ?? m.id ?? '模型'}：${rows.length ? (m.connected ? '已连接' : '未连接') : '状态未知'}`
+        + (m.reason ? `（${m.reason}）` : '');
+      const nameLen = String(short ?? '').length;
+      const size = nameLen > 18 ? '10px' : (nameLen > 14 ? '10.5px' : '11.5px');
+      return `<div class="model-cell" data-model-id="${esc(m.id ?? '')}" title="${esc(title)}">`
+        + `<div class="mc-name" style="font-size:${size}">${esc(short)}</div>`
+        + `<div class="mc-state ${m.connected ? 'ok' : 'no'}">● ${state}</div></div>`;
+    }).join('');
+    // 钩子：面板换了主人 ⇒ `xy-models`（`data-roco-models` 属旧面板，退役时一起消失）
+    document.body.dataset.xyModels = rows.length ? (rows.some((m) => m.connected) ? 'partial' : 'offline') : 'unknown';
+  };
+  statusFold.querySelector('#open-connect')?.addEventListener('click', () => {
+    // 与旧面板逐字同一条行为：独立小窗，不覆盖主界面
+    window.open('connect.html', 'roco-connect', 'width=520,height=680,noopener');
+  });
+  statusFold.addEventListener('toggle', () => { if (statusFold.open) void renderModelList(); });
+  void renderModelList();
+
   const actions = document.createElement('div');
   actions.className = 'xy-actions';
   actions.id = mode === 'page' ? 'xy-actions' : 'xiaoya-actions';
@@ -748,7 +1009,17 @@ export function mountXiaoya({mode = 'popup', host = null} = {}) {
     drawHistory();
     setStatus('已清空这一段对话（跨局记忆没动）');
   };
-  actions.append(newChat, clearChat);
+  // 「查看记忆」（甲②①）：与旧面板同一个入口名字，点一下开/关这一块。
+  const memoryButton = document.createElement('button');
+  memoryButton.type = 'button';
+  memoryButton.id = 'open-memory';
+  memoryButton.textContent = '查看记忆';
+  memoryButton.title = '她记住的都是你自己说过的（称呼 / 本命 / 偏好 / 拒绝）。';
+  memoryButton.onclick = () => {
+    memoryPanel.hidden = !memoryPanel.hidden;
+    if (!memoryPanel.hidden) renderMemoryList();
+  };
+  actions.append(newChat, clearChat, memoryButton);
   // 焦点那一行（"我现在在看谁"）：画在小芽自己的版式里，让玩家看得出对象有没有跟着换。
   const chip = document.createElement('div');
   chip.className = 'xy-focus';
@@ -756,11 +1027,21 @@ export function mountXiaoya({mode = 'popup', host = null} = {}) {
   chip.setAttribute('role', 'status');
   // 能力状态那一行（「资料」与「模型」两条）**单独一个元素**：`setStatus()` 每次答完都会
   // 改写顶部那句"这次是谁答的"，两条状态不能被它冲掉（冲掉就等于玩家再也看不到）。
-  const capEl = document.createElement('div');
+  // 甲②③/(a′)：这一块**就叫 `#model-chip`**（与旧面板同一个语义 ⇒ 同一个名字，
+  // 不是"再放一个 chip"，而**是同一块元素**）。为什么必须现在定：
+  // 判据 `live-model-status`（`scripts/roco/browser-live-acceptance.mjs`）读的就是 `#model-chip`
+  //（文字 / `data-roco-model` / `href` 连接入口 / 高度 ≥24 / 未连接时明说）——
+  // 甲④ 一退役旧面板，这个 id 就得有人写，否则那条判据当场红（"退役后才暴露的断链"）。
+  // 做成 `<a href="connect.html">`：判据要"给连接入口"，玩家也真的点得动。
+  const capEl = document.createElement('a');
   capEl.className = 'xy-focus';
-  capEl.id = mode === 'page' ? 'xy-capability' : 'xiaoya-capability';
+  capEl.id = 'model-chip';
+  capEl.href = 'connect.html';
+  capEl.title = '点这里去连接模型';
   capEl.setAttribute('role', 'status');
   if (log?.parentNode) log.parentNode.insertBefore(capEl, log);
+  if (log?.parentNode) log.parentNode.insertBefore(statusFold, log);
+  if (log?.parentNode) log.parentNode.insertBefore(memoryPanel, log);
   if (log?.parentNode) log.parentNode.insertBefore(chip, log);
   if (log?.parentNode) log.parentNode.insertBefore(actions, log);
   drawHistory();
@@ -833,15 +1114,25 @@ export function mountXiaoya({mode = 'popup', host = null} = {}) {
     void ask(input?.value ?? '');
     if (input) input.value = '';
   });
-  if (mode === 'page') {
-    document.querySelectorAll('[data-xy-role]').forEach((button) => {
-      button.addEventListener('click', () => {
-        state.role = button.dataset.xyRole;
-        document.querySelectorAll('[data-xy-role]').forEach((b) => b.classList.toggle('selected', b === button));
-        setStatus(`身份：${button.textContent}`);
-      });
-    });
+  // 甲②③：**popup 也放 role 选择**（Lead 拍板：退役旧面板是"换实现"不是"砍能力"）。
+  // page 模式那 4 个按钮在 `xiaoya.html` 的静态标记里；popup 模式这里按**同一份定义**注入，
+  // 绑定与状态更新走**同一个 handler**（下面这段），不是第二份实现。
+  const ROLE_CHOICES = [['auto', '自动'], ['companion', '陪练'], ['strategist', '军师'], ['teacher', '老师']];
+  if (mode !== 'page') {
+    const roles = document.createElement('div');
+    roles.className = 'xy-roles';
+    roles.id = 'xiaoya-roles';
+    roles.innerHTML = ROLE_CHOICES.map(([value, label]) =>
+      `<button type="button" data-xy-role="${value}"${value === state.role ? ' class="selected"' : ''}>${label}</button>`).join('');
+    if (log?.parentNode) log.parentNode.insertBefore(roles, log);
   }
+  document.querySelectorAll('[data-xy-role]').forEach((button) => {
+    button.addEventListener('click', () => {
+      state.role = button.dataset.xyRole;
+      document.querySelectorAll('[data-xy-role]').forEach((b) => b.classList.toggle('selected', b === button));
+      setStatus(`身份：${button.textContent}`);
+    });
+  });
   // ── 能力状态：**资料**与**模型**两条分开说（Codex P0-01 第 2 条）──────────────
   //
   // 修前这里只有一句：「未连接模型：小芽只给规则事实（去 connect.html 配置）」——
@@ -861,6 +1152,10 @@ export function mountXiaoya({mode = 'popup', host = null} = {}) {
     const tools = cap?.toolsReady === true ? 'ok' : cap?.toolsReady === false ? 'down' : 'unknown';
     const model = cap?.modelReady === true ? 'ok' : cap?.modelReady === false ? 'off' : 'unknown';
     document.body.dataset.xyCapability = `tools=${tools};model=${model};server=${cap?.serverReady === true ? 'ok' : 'unknown'}`;
+    // 判据 `live-model-status` 读的钩子（旧面板由 `renderModelChip()` 写；甲④ 之后由这里写）。
+    // **不许为了绿而写假的**：`connected` 只在真的连上模型时写（`model === 'ok'`）。
+    capEl.dataset.rocoModel = model === 'ok' ? 'connected' : 'offline';
+    document.body.dataset.rocoModelConfigured = model === 'ok' ? 'yes' : 'no';
     const toolsLine = tools === 'ok'
       ? `资料查询：可用（本机规则服务已连${cap?.rulesetId ? `，规则集 ${cap.rulesetId}` : ''}）`
       : tools === 'down'
@@ -869,7 +1164,11 @@ export function mountXiaoya({mode = 'popup', host = null} = {}) {
     const modelLine = model === 'ok'
       ? '云端模型：已连接 —— 自由发挥的文字由它生成'
       : model === 'off'
-        ? '云端模型：没有连 —— 只影响自由发挥的文字，上面那些资料查询照常'
+        // ⚠ 措辞里必须保留「未连接」三个字：判据 `live-model-status`（`scripts/roco/browser-live-acceptance.mjs`）
+        //   要求「没连模型时**明说**」（正则 `/未连接|没连|未连/`），而「没有连」**不匹配**
+        //   （`没连` 中间不许有"有"）。甲②③ 在自己实例上实测到这一条：退役旧面板后
+        //   `#model-chip` 由这里写 ⇒ 不修的话那条判据当场红。口径不变，只把词换成它认的那个。
+        ? '云端模型：未连接 —— 只影响自由发挥的文字，上面那些资料查询照常'
         : '云端模型：状态未知（只影响自由发挥的文字）';
     capEl.textContent = `${toolsLine}；${modelLine}`;
     if (chip) chip.title = `${toolsLine}\n${modelLine}`;
@@ -882,7 +1181,13 @@ export function mountXiaoya({mode = 'popup', host = null} = {}) {
     try { paintCapability(await connectionStatus()); }
     catch {
       document.body.dataset.xyCapability = 'tools=unknown;model=unknown;server=unknown';
-      capEl.textContent = '读不到服务状态：资料查询与模型连接都按「未知」处理（不谎报已连接）';
+      // 读不到状态时**只说自己知道的那一件事**：没读到"已连接"的证据 ⇒ 绝不标 connected。
+      // 所以这里写 `offline` + 明说，而不是留空 —— 留空会让判据 `live-model-status` 读到 `null`
+      //（"没连模型却标 null"），而"读不到"与"连上了"是两件事，前者不能冒充后者。
+      capEl.dataset.rocoModel = 'offline';
+      document.body.dataset.rocoModelConfigured = 'no';
+      capEl.textContent = '读不到连接状态：云端模型按「未连接」处理（不谎报已连接）；'
+        + '资料查询按「未知」处理（第一次提问会把它拉起来）。';
     }
   };
   void refreshCapability(true);

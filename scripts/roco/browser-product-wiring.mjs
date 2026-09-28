@@ -336,7 +336,14 @@ async function main(){
  const companion=JSON.parse(await js(`(()=>{const d=document.body.dataset;
   const rows=[...document.querySelectorAll('#memory-list li .mem-label')].map((e)=>e.textContent);
   const s=window.rocoDemo.state;
-  let stored=null;try{stored=JSON.parse(localStorage.getItem('roco-coach-memory-v1')||'null');}catch{}
+  // ⚠ 2026-09-29 **改钉**（task-13 甲③：两套记忆键合并；Lead 拍板走"甲"）。
+  // 旧写法（原文留档，别再改回来）：
+  //   let stored=null;try{stored=JSON.parse(localStorage.getItem('roco-coach-memory-v1')||'null');}catch{}
+  // 为什么改：产品页与营地/盒子那套小芽曾经各记一个键（roco-coach-memory-v1 /
+  // xiaoya-memory-v1）—— 同一个玩家在两页说过的话互不可见。现在**共用 xiaoya-memory-v1**，
+  // 旧键只在迁移时被读一次（xiaoya.js 的 migrateLegacyMemory：读旧→合并→写新→旧键只加标记）。
+  // 判据的**意图一个字没松**：仍然是"页面真的把偏好与账本写进了 localStorage"。
+  let stored=null;try{stored=JSON.parse(localStorage.getItem('xiaoya-memory-v1')||'null');}catch{}
   return JSON.stringify({register:d.rocoCompanion??null,why:d.rocoCompanionWhy??null,
    seen:d.rocoCompanionSeen??null,
    reply:(document.getElementById('say-reply').textContent||'').trim(),
@@ -442,7 +449,8 @@ async function main(){
  const memoryGuard=JSON.parse(await js(`(()=>{const s=window.rocoDemo.state;
   const journal=Array.isArray(s.memory.journal)?s.memory.journal:[];
   const stated=Array.isArray(s.memory.stated)?s.memory.stated:[];
-  let stored=null;try{stored=JSON.parse(localStorage.getItem('roco-coach-memory-v1')||'null');}catch{}
+  // 同上（2026-09-29 改钉）：读的是**合并之后的那一个键** xiaoya-memory-v1。
+  let stored=null;try{stored=JSON.parse(localStorage.getItem('xiaoya-memory-v1')||'null');}catch{}
   return JSON.stringify({stated:stated.map((x)=>({kind:x.kind,label:x.label,value:x.value})),
    journal_kinds:journal.map((r)=>r.kind),
    stored_stated:(stored&&stored.stated||[]).length,

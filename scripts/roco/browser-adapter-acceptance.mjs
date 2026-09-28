@@ -152,7 +152,13 @@ async function main() {
     await cdp.send('Emulation.setDeviceMetricsOverride', {width: 1440, height: 900, deviceScaleFactor: 1, mobile: false});
     await cdp.send('Page.navigate', {url: base + 'roco.html?legacy3v3=1'});
     for (let i = 0; i < 80; i++) { await sleep(250); if (await js(`document.body.dataset.rocoReady==='yes'`)) break; }
-    await js(`localStorage.removeItem('roco-coach-memory-v1');localStorage.removeItem('roco-coach-onboard-v1')`);
+    // ⚠ 2026-09-29 **改钉**（task-13 甲③）：两套记忆键已合并成 `xiaoya-memory-v1`。
+    // 旧写法（原文留档）：`localStorage.removeItem('roco-coach-memory-v1');localStorage.removeItem('roco-coach-onboard-v1')`
+    // 为什么两个键都要清：只清旧键的话，**新键里还留着上一轮的数据**（产品页现在写的就是它），
+    // 于是"清档之后从零开始"这个前提不成立 —— 判据结果不可信。迁移标记也一起清，
+    // 这样这一轮仍然会走一次真实的迁移路径（旧键为空 ⇒ 什么都不做，但标记会被写）。
+    await js(`localStorage.removeItem('xiaoya-memory-v1');localStorage.removeItem('roco-coach-memory-v1');`
+      + `localStorage.removeItem('xiaoya-memory-migrated-v1');localStorage.removeItem('roco-coach-onboard-v1')`);
     // 页面侧的网络账：只记 `/api/roco/*` 的状态码与耗时。
     // 与服务端计时对照，就能分清「服务端没回」与「页面没等到」。
     await js(`(()=>{window.__rocoFetchLog=[];const orig=window.fetch;

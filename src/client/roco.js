@@ -61,7 +61,7 @@ import {mountTeamWorkshop} from './team-workshop.js';
 // task-12（丙）：**当前聚焦对象**这一层只有一份实现 —— `xiaoya.js` 导出的
 // `createFocusProvider()` / `focusFromClick()`（与 DOM 无关的纯模块，box 页那套小芽用的也是它）。
 // 这里只 import 来接线，**不**在本文件里重写焦点逻辑（重写就是第二份事实，迟早漂）。
-import {createFocusProvider, focusFromClick} from './xiaoya.js';
+import {createFocusProvider, focusFromClick, migrateLegacyMemory} from './xiaoya.js';
 import {mountStalePageBanner} from './stale-page.js';
 
 // ── 页面状态 ────────────────────────────────────────────────────────────────
@@ -120,7 +120,13 @@ const state = {
   seedOverride: null,  // 只给验收脚本换局用；界面上没有这个开关
 };
 
-const MEMORY_KEY = 'roco-coach-memory-v1';
+// ⚠ 2026-09-29 **改钉**（task-13 甲③：两套记忆键合并）。旧键留档：`roco-coach-memory-v1`。
+// 为什么改：同一个玩家在**产品页**说过的话（目标/偏好/本命/教训）记在旧键里，而营地/盒子那套
+// 小芽记的是 `xiaoya-memory-v1` —— 两页互不可见（"两个键、两套记忆"）。现在两页共用**同一个键**，
+// 并在 `loadMemory()` 之前跑一次迁移（旧键 → 合并进新键，旧键只打标记、内容一个字不删）。
+const MEMORY_KEY = 'xiaoya-memory-v1';
+//: 合并过来的那份旧账本（迁移标记与来源说明见 `xiaoya.js` 的 `migrateLegacyMemory`）。
+const LEGACY_MEMORY_KEY = 'roco-coach-memory-v1';
 //: 教程「跳过」的记账。**刷新之后仍然要跳过**，所以存在 localStorage 而不是内存里。
 const ONBOARD_KEY = 'roco-coach-onboard-v1';
 
@@ -260,6 +266,8 @@ async function api(path, body) {
 // ── 记忆：只存玩家自己说过的与本机真实发生过的 ──────────────────────────────
 function loadMemory() {
   try {
+    // 甲③：先把旧键（产品页那套）并进来，再读 —— 只跑一次，旧内容不删（`migrateLegacyMemory` 里写明）。
+    migrateLegacyMemory(localStorage);
     const raw = localStorage.getItem(MEMORY_KEY);
     return raw ? readMemory(raw) : freshMemory();
   } catch {

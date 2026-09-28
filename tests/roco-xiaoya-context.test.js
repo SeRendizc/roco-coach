@@ -16,7 +16,7 @@ import {readFileSync} from 'node:fs';
 
 import {
   focusFromUrl, focusSnapshotFrom, mergeFocusIntoProfile, detectFocus, createFocusProvider,
-  focusFromClick, FOCUS_KEY, FOCUS_EVENT,
+  focusFromClick, hostContextOf, FOCUS_KEY, FOCUS_EVENT,
 } from '../src/client/xiaoya.js';
 import {focusAsk, focusFactAnswer, focusAdviceAnswer, focusIntent, focusDetailOf,
   localFactAsk, runCoach, buildContext} from '../src/coach/runtime.js';
@@ -25,6 +25,7 @@ import {
   beginNewChatSession, clearActiveChatSession, CHAT_LIMITS,
 } from '../src/coach/client.js';
 import {cultivationOf} from '../src/coach/individuals.js';
+import {readMemory} from '../src/coach/memory.js';
 
 const ROOT = new URL('..', import.meta.url);
 const read = (path) => readFileSync(new URL(path, ROOT), 'utf8');
@@ -579,7 +580,10 @@ test('⑮ 丙：产品页的焦点只用共享实现；断线档不许再退回"
   const roco = read('src/client/roco.js');
   const html = read('src/client/roco.html');
   // ① 焦点**只有一份实现**：import `xiaoya.js` 那两个导出，不许在本文件里重写一份。
-  assert.match(roco, /import \{createFocusProvider, focusFromClick\} from '\.\/xiaoya\.js'/,
+  // ⚠ 2026-09-29 改钉（task-13 甲③）：同一行 import 现在多带了 `migrateLegacyMemory`
+  //（两套记忆键合并）—— 断言从"逐字三个名字"改成"这一行确实 import 了那两个焦点导出"，
+  // 意图一个字没松：**焦点只有一份实现**，`roco.js` 只能 import。
+  assert.match(roco, /import \{[^}]*\bcreateFocusProvider\b[^}]*\bfocusFromClick\b[^}]*\} from '\.\/xiaoya\.js'/,
     'roco.js 要 import 共享的焦点 provider/解析函数');
   assert.doesNotMatch(roco, /function focusFromClick\s*\(/, '解析函数不许有第二份');
   assert.doesNotMatch(roco, /function createFocusProvider\s*\(/, 'provider 不许有第二份');
@@ -599,4 +603,169 @@ test('⑮ 丙：产品页的焦点只用共享实现；断线档不许再退回"
   const xiaoya = read('src/client/xiaoya.js');
   assert.match(xiaoya, /export function createFocusProvider/, '导出 provider');
   assert.match(xiaoya, /export function focusFromClick/, '导出解析函数');
+});
+
+test('⑯ 甲①：宿主动局上下文口（`mountXiaoya({contextProvider})`）—— 局中不许退成"没有对战况"', async () => {
+  // 为什么必须有它（Lead 写死的顺序）：`xiaoya.js` 原来把上下文写死成"没有对局"
+  //（`buildContext(null, …, 'meadow', …)`），而产品页的小芽要在**对局中**回答"我现在该换谁"。
+  // 没有这个口就退役旧面板 = **功能倒退**，不是"少一套 UI"。
+  const {hostContextOf, readHostContext} = await import('../src/client/xiaoya.js');
+  // ① 规整：缺什么就是什么，不猜、不补
+  assert.deepEqual(hostContextOf(null), {game: null, archive: null, stageId: null, extra: null});
+  assert.deepEqual(hostContextOf('游戏'), {game: null, archive: null, stageId: null, extra: null});
+  const game = {id: 'g1', mode: 'camp'};
+  const full = hostContextOf({game, archive: {current: game}, stageId: '  meadow-2  ',
+    extra: {roco_battle: {turn: 3}, roco_plan: {recommendation: '换人'}, empty: null, missing: undefined}});
+  assert.equal(full.game, game);
+  assert.deepEqual(full.archive, {current: game});
+  assert.equal(full.stageId, 'meadow-2', 'stageId 要去空白（它是真实关卡 id）');
+  assert.deepEqual(full.extra, {roco_battle: {turn: 3}, roco_plan: {recommendation: '换人'}},
+    'null/undefined 的键**不并进去**（拿不到就不加那个字段）');
+  assert.equal(hostContextOf({stageId: '   '}).stageId, null, '空白 stageId 当成没给');
+  assert.equal(hostContextOf({extra: []}).extra, null, '数组不是 extra');
+  // ② 宿主 provider 抛异常 ⇒ 如实记一句，但**不许把问话打断**
+  const broken = await readHostContext(() => { throw Error('宿主这一屏还没准备好'); });
+  assert.deepEqual(broken.context, {game: null, archive: null, stageId: null, extra: null});
+  assert.match(broken.failure, /宿主这一屏还没准备好/, '原因要带回来（进 context.hostContextFailure）');
+  const none = await readHostContext(null);
+  assert.equal(none.failure, null, '没给 provider 就不算失败');
+  // ③ 端到端：局中的问句要真的拿到战况（把上游那段装配跑一遍）
+  const battle = {id: 'match-1', mode: 'pvp-local', version: '0.6', turn: 4, phase: 'battle',
+    result: null, environment: null, player: {active: 0, pets: []}, enemy: {active: 0, pets: []},
+    history: [], log: [], frames: []};
+  const provided = hostContextOf({game: null, stageId: 'meadow',
+    extra: {roco_battle: {battle_id: 'match-1', turn: 4, self: [{name: '迪莫', hp: 30, max_hp: 40, energy: 3}]}}});
+  const context = buildContext(provided.game, {pets: [{id: 'own-0004', name: '迪莫'}]}, 'own-0004',
+    provided.archive, provided.stageId ?? 'meadow', '我现在该换谁');
+  Object.assign(context, provided.extra);
+  assert.equal(context.battle, null, '这一档没有引擎整局对象（与旧面板一致）');
+  assert.equal(context.roco_battle.turn, 4, '对局公开战况必须真的进去 —— 没有它 = 功能倒退');
+  assert.equal(context.roco_battle.self[0].hp, 30);
+  // ④ 反证：把口摘掉（provider 给 null）⇒ 战况就没了 —— 局中判据必须因此变红
+  const withoutPort = buildContext(null, {pets: [{id: 'own-0004', name: '迪莫'}]}, 'own-0004',
+    null, 'meadow', '我现在该换谁');
+  assert.equal(withoutPort.roco_battle, undefined, '没接上下文口时上下文里就没有战况');
+});
+
+test('⑰ 甲③：两套记忆键合并 —— 旧键有数据 ⇒ 迁移后新键读得到（不许丢玩家记忆）', async () => {
+  const {migrateLegacyMemory, mergeMemories, LEGACY_MEMORY_KEY, MEMORY_MIGRATED_FLAG} =
+    await import('../src/client/xiaoya.js');
+  const fakeStorage = (initial = {}) => {
+    const map = new Map(Object.entries(initial));
+    return {map, getItem: (k) => (map.has(k) ? map.get(k) : null),
+      setItem: (k, v) => map.set(k, String(v)), removeItem: (k) => map.delete(k)};
+  };
+  const legacy = JSON.stringify({version: 1, goal: '稳健', preference: 'brief', favorite: '音速犬',
+    lessons: ['失败后先看资源'], journal: [{id: 'j-old', time: '2026-01-01T00:00:00.000Z'}],
+    events: [{id: 'm-old', result: 'loss', time: '2026-01-01T00:00:00.000Z'}], quizCount: 3});
+  const current = JSON.stringify({version: 1, lastTopic: 'focus',
+    journal: [{id: 'j-new', time: '2026-02-01T00:00:00.000Z'}]});
+  // ① 旧键有数据、新键也有一部分 ⇒ 两边都要在（新键优先，旧的补缺）
+  const store = fakeStorage({[LEGACY_MEMORY_KEY]: legacy, 'xiaoya-memory-v1': current});
+  const first = migrateLegacyMemory(store);
+  assert.equal(first.migrated, true, '旧键有数据 ⇒ 必须真的迁移');
+  assert.equal(first.reason, 'merged');
+  const after = readMemory(store.getItem('xiaoya-memory-v1'));
+  assert.equal(after.goal, '稳健', '旧键的目标要读得到');
+  assert.equal(after.favorite, '音速犬', '旧键的本命要读得到');
+  assert.equal(after.preference, 'brief');
+  assert.equal(after.lastTopic, 'focus', '新键自己那一份要保留');
+  assert.deepEqual(after.lessons, ['失败后先看资源']);
+  assert.deepEqual(after.journal.map((row) => row.id), ['j-old', 'j-new'], '两边的记录都在');
+  assert.equal(after.events.length, 1, '旧键的对局记录也带过来');
+  assert.equal(after.quizCount, 3);
+  // ② 旧键**内容一个字不删**，只打一次标记
+  const legacyAfter = store.getItem(LEGACY_MEMORY_KEY);
+  assert.match(legacyAfter, /失败后先看资源/, '旧键里的内容不许被删');
+  assert.match(legacyAfter, /migrated_to/, '旧键只加迁移标记');
+  assert.equal(store.getItem(MEMORY_MIGRATED_FLAG), 'yes');
+  // ③ 再跑一次不许重复合并（也不会把标记弄丢）
+  const second = migrateLegacyMemory(store);
+  assert.equal(second.migrated, false);
+  assert.equal(second.reason, 'already');
+  // ④ 旧键没数据 ⇒ 什么都不做（但记一次"看过了"，之后不再反复读）
+  const empty = fakeStorage({'xiaoya-memory-v1': current});
+  assert.equal(migrateLegacyMemory(empty).reason, 'no-legacy');
+  assert.equal(empty.getItem('xiaoya-memory-v1'), current, '没旧数据时不许动新键');
+  // ⑤ 没有 storage（隐私模式/Node）⇒ 不许炸
+  assert.equal(migrateLegacyMemory(null).reason, 'no-storage');
+  // ⑥ 合并函数本身：标量缺就用旧的、列表取并集
+  const merged = mergeMemories({goal: '速攻', lessons: ['a']}, {goal: null, lessons: ['b']});
+  assert.equal(merged.goal, '速攻');
+  assert.deepEqual(merged.lessons, ['a', 'b']);
+  // ⑦ 产品页也读同一个键（否则"合并"只合了一半）
+  const rocoSrc = read('src/client/roco.js');
+  assert.match(rocoSrc, /const MEMORY_KEY = 'xiaoya-memory-v1'/, '产品页要用同一个记忆键');
+  assert.match(rocoSrc, /migrateLegacyMemory\(localStorage\)/, '产品页读记忆之前要先迁移一次');
+});
+
+test('⑱ 甲②①：记忆面板搬进 xiaoya —— 同一套语义/同一批函数/同一套 id，且不许"两个名字"', () => {
+  const src = read('src/client/xiaoya.js');
+  const roco = read('src/client/roco.js');
+  // ① 语义来源只有一份：`memoryItems` / `deleteMemoryItem` / `MEMORY_GROUPS` 都从 `coach/memory.js` 来
+  assert.match(src, /import \{[^}]*\bmemoryItems\b[^}]*\bdeleteMemoryItem\b[^}]*\bMEMORY_GROUPS\b[^}]*\} from '\.\.\/coach\/memory\.js'/,
+    '记忆的读取与删除必须用共享实现');
+  assert.match(src, /memoryItems\(state\.memory\)\.filter\(\(row\) => row\.group === 'stated'\)/,
+    '与旧面板同一条口径：只列玩家自己说过的（stated）');
+  assert.match(src, /deleteMemoryItem\(state\.memory, \{id\}\)/, '删除走同一个函数');
+  assert.match(src, /if \(!result\.deleted\) return;/, '没这条就不改页面、也不假装成功（旧面板同一条口径）');
+  // ② DOM 形状**沿用同一套名字**（同一个语义同一个名字 —— Lead 批的只有这一种"复用"）
+  assert.match(src, /id="memory-list"/, '沿用 #memory-list');
+  assert.match(src, /class="mem-label"/, '沿用 .mem-label');
+  assert.match(src, /class="mem-forget" data-forget=/, '沿用 .mem-forget + data-forget');
+  // ③ **不许**给同一件东西再起一个旧名字（`#say-input`/`#say-reply` 这类别名 Lead 明确不批）
+  assert.doesNotMatch(src, /say-input|say-reply/, 'xiaoya 里不许出现旧面板的输入/回复 id');
+  // ④ 入口与钩子
+  assert.match(src, /id = 'open-memory'/, '要有「查看记忆」入口（与旧面板同一个名字）');
+  assert.match(src, /document\.body\.dataset\.xyMemory = rows\.length/, '面板换了主人 ⇒ 钩子换成 xy-memory');
+  // ⑤ 旧面板仍然在（甲④ 之前不许退役）
+  assert.match(roco, /function renderMemory\(\)/, '甲④ 之前旧面板的 renderMemory 不许删');
+  assert.match(read('src/client/roco.html'), /id="memory-pop"/, '甲④ 之前旧面板的 #memory-pop 不许删');
+});
+
+test('⑲ 甲②②：`#model-list` + `#open-connect` 搬进 xiaoya —— 同名 id/class、同一数据源、不写 chip', () => {
+  const src = read('src/client/xiaoya.js');
+  const roco = read('src/client/roco.js');
+  // ① 同一个数据源（`/api/models`）与同一套 id/class
+  assert.match(src, /fetch\('\/api\/models'/, '三格模型状态的来源必须是同一条只读接口');
+  assert.match(src, /id="model-list" role="list"/, '沿用 #model-list');
+  assert.match(src, /class="model-cell" data-model-id=/, '沿用 .model-cell + data-model-id');
+  assert.match(src, /class="mc-name"/, '沿用 .mc-name');
+  assert.match(src, /class="mc-state \$\{m\.connected \? 'ok' : 'no'\}"/, '沿用 .mc-state（ok/no 两档）');
+  assert.match(src, /id="open-connect"/, '沿用 #open-connect');
+  assert.match(src, /window\.open\('connect\.html', 'roco-connect'/, '与旧面板逐字同一条行为：独立小窗');
+  // ② 拿不到数据不许猜（写「未知」，与旧面板同一条口径）
+  assert.match(src, /const state = rows\.length \? \(m\.connected \? '已连' : '未连'\) : '未知'/);
+  // ③ 一个读取点只能有一个写入者：这一块**不许**碰 `#model-chip`
+  const block = src.slice(src.indexOf('const statusFold'), src.indexOf('const actions = document.createElement'));
+  assert.doesNotMatch(block, /model-chip/, '三格那一块不许写 #model-chip（旧面板踩过"两个写入者"的坑）');
+  // ④ 钩子换名字（面板换主人）；旧面板的 `data-roco-models` 退役时一起消失
+  assert.match(src, /document\.body\.dataset\.xyModels =/);
+  assert.doesNotMatch(src, /dataset\.rocoModels/, 'xiaoya 不该写旧面板的钩子');
+  // ⑤ 甲④ 之前旧面板那一份还在
+  assert.match(roco, /async function renderModelList\(\)/, '旧面板的 renderModelList 甲④ 之前不许删');
+});
+
+test('⑳ 甲②③：activityLine 逐字渲染 + popup 也有 role 选择 + `#model-chip` 由 xiaoya 写', () => {
+  const src = read('src/client/xiaoya.js');
+  // ① activityLine：用服务端给的那一句，页面不重拼（重拼=第二份事实）
+  assert.match(src, /const activityLine = typeof answer\?\.activityLine === 'string' \? answer\.activityLine\.trim\(\) : ''/,
+    '要读服务端算好的 activityLine');
+  assert.match(src, /basis\.textContent = activityLine;/, '逐字放进去（不重新拼措辞）');
+  assert.match(src, /class = 'say-basis'|className = 'say-basis'/, '与旧面板同一个 class 名');
+  // ② role：popup 也放，且**只有一份 handler**（page 的静态按钮与 popup 的注入按钮同源）
+  assert.match(src, /const ROLE_CHOICES = \[\['auto', '自动'\], \['companion', '陪练'\], \['strategist', '军师'\], \['teacher', '老师'\]\]/,
+    'popup 的 4 个 role 与 page 同一份定义');
+  assert.match(src, /if \(mode !== 'page'\) \{/, 'page 模式用静态标记，只有 popup 注入');
+  assert.doesNotMatch(src, /if \(mode === 'page'\) \{\s*document\.querySelectorAll\('\[data-xy-role\]'\)/,
+    '绑定不许再按模式分两份');
+  const binds = src.match(/querySelectorAll\('\[data-xy-role\]'\)\.forEach\(\(button\) => \{/g) ?? [];
+  assert.equal(binds.length, 1, `role 的绑定只能有一处（实测 ${binds.length}）`);
+  // ③ `#model-chip`：甲④ 退役后由 xiaoya 这一块写（判据 live-model-status 的读取点）
+  assert.match(src, /capEl\.id = 'model-chip'/, '能力状态那一块就叫 #model-chip（同名同语义，不是再加一个）');
+  assert.match(src, /capEl\.href = 'connect\.html'/, '判据要"连接入口"，玩家也要点得动');
+  assert.match(src, /capEl\.dataset\.rocoModel = model === 'ok' \? 'connected' : 'offline'/,
+    '要写判据读的那个钩子，且**只按真实状态**写（不许为了绿写假的）');
+  assert.match(src, /document\.body\.dataset\.rocoModelConfigured = model === 'ok' \? 'yes' : 'no'/);
+  assert.doesNotMatch(src, /xy-capability'|xiaoya-capability'/, '不再有第二个能力状态元素（同一件东西一个名字）');
 });

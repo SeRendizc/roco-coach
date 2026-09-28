@@ -186,8 +186,16 @@ test('小芽页的名单来自手游盒子，且拿不到时绝不退回 MVP 那
   // 且**页面模式**（`mode==='page'`）下不许出现在建上下文那一句里。
   assert.match(src, /const activeProfile = state\.mobileProfile \?\? state\.profile;/,
     '页面/盒子这一档优先用手游档案');
-  assert.match(src, /const context = buildContext\(null, activeProfile, focus/,
-    '建上下文用的必须是手游档案');
+  // ⚠ 2026-09-29 **改钉**（task-13 甲①：宿主动局上下文口；与 `roco-page-ux` 那批同一类，Lead 批的"改钉不删"）。
+  // 旧断言（原文留档，别再改回来）：
+  //   assert.match(src, /const context = buildContext\(null, activeProfile, focus/, '建上下文用的必须是手游档案');
+  // 为什么改：`buildContext` 的第一个参数原来是**写死的 `null`**（= 这一屏没有对局），而产品页的小芽
+  // 要在**对局中**回答"我现在该换谁" —— 甲① 为此开了宿主动局上下文口
+  //（`mountXiaoya({contextProvider})` + `hostContextOf()`：`game` / `archive` / `stageId` / `extra`）。
+  // 判据的**意图一个字没松**：第二个参数必须仍然是那份**手游档案**（`activeProfile`），
+  // 而不是 MVP 练习局存档 —— 第一个参数换的是"有没有对局"，不是"用哪份名单"。
+  assert.match(src, /const context = buildContext\(incoming\.context\.game, activeProfile, focus/,
+    '建上下文用的必须是手游档案（第一个参数由宿主上下文口给）');
   // 快捷问题也不许再是 MVP 口径（「怎么培养/回顾上一局」是练习局那一套）
   const quick = /const QUICK = \[([^\]]+)\]/.exec(src);
   assert.ok(quick, 'QUICK 必须还在');
