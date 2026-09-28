@@ -411,7 +411,25 @@ export function loadBoxIndex(){
  const catalogById=new Map(catalog.map((e)=>[e.id,e]));
 
  // ② 迁移层 48 只：配招、种族值、定位、速度档（登记层标注）。
- const layer=new Map((roster.pets??[]).map((p)=>[p.pet_id,p]));
+ // ⚠ 2026-09-28 修（人类 2026-09-28 逐字：「所有精灵实装，这样就不需要我的精灵了，直接全筛选」）：
+ // 这一张 `layer` 原来**只从 `roster-48.json` 建**（48 条）—— 而可玩层早就是 **542 只**
+ // （基线 `support-matrix.json` 12 + 可玩层 `layer-playable-48/support-matrix.json` 530）。
+ // 后果是真机看得见的：盒子里**只有 48 只能读出「定位」**，另外 494 只一律显示「定位未登记」，
+ // 而层里那 530 条的 `role` **全都有值**（实测 530/530）；`coverage` 里也跟着报
+ // `with_moveset_layer: 48` / `base_stats_available: 48` 两个错数。
+ // 换成与下面 `support` **同一组来源**（两份 support-matrix 合并）。两份的形状对得上
+ // （都有 `pet_id`/`role`/`types`/`stats`/`speed_tier`），而这张表在盒子里**只被读这四样**
+ // （`layer.role` / `layer.types` / `layer.stats` / `layer.size|values`，逐处数过），所以换源是安全的。
+ // 旧写法留档：const layer=new Map((roster.pets??[]).map((p)=>[p.pet_id,p]));
+ const layer=new Map([...(matrix.pets??[]),...(matrixLayer.pets??[])].map((p)=>[p.pet_id,p]));
+ // 四个技能在两份数据里**字段名不同**，这里统一成 `moveset`：
+ //   · 迁移层 `roster-48.json` → `moveset`（数组，直接可用）；
+ //   · 两份 support-matrix → `candidate_moveset.skills`（同样是数组，530 条**全都有**，实测 530/530）。
+ // 不合并的话，换源之后**所有**精灵的配招都会变成「没有这一项」—— 判据当场红，这是好事。
+ for(const p of (roster.pets??[])){
+  const cur=layer.get(p.pet_id);
+  if(cur&&Array.isArray(p.moveset)&&!Array.isArray(cur.moveset)) layer.set(p.pet_id,{...cur,moveset:p.moveset});
+ }
 
  // ③ 支持等级：两份 support-matrix 各管一段（12 baseline + 36 overlay），合并成一张表。
  const support=new Map();
@@ -547,7 +565,12 @@ function boxLayerNumbers(index,petId){
  const p=index.layer.get(petId);
  if(!p)return null;
  const stats=p.stats&&typeof p.stats==='object'?p.stats:null;
- const moveset=(Array.isArray(p.moveset)?p.moveset:[]).map((m,position)=>({
+ // ⚠ 2026-09-28：四个技能在两份数据里字段名不同 —— 迁移层是 `moveset`，
+ // 两份 support-matrix 是 `candidate_moveset.skills`（530/530 都有）。两处都收，
+ // 否则新层那 530 只的配招会全部变成「没有这一项」（真机验过：这就是换源后判据红的原因）。
+ const raw=Array.isArray(p.moveset)?p.moveset
+  :(Array.isArray(p.candidate_moveset?.skills)?p.candidate_moveset.skills:[]);
+ const moveset=raw.map((m,position)=>({
   order:position+1,
   slot_label:BOX_SLOT_LABELS[m.slot]??null,
   name:m.name??null,element:m.element??null,category:m.category??null,
@@ -606,7 +629,15 @@ function boxMineCard(index,i){
  return {
   select:i.instance_id,
   group:i.species_id,
-  name:i.species_name??e?.name??null,
+  // ⚠ 2026-09-28 修（人类 2026-09-25 逐字：「这个什么陛下有啥区别？我根本看不出来啊」的**真因**）：
+  // 原来这里只取 `i.species_name`（物种名），而**形态名在图鉴实体的 `title` 上**
+  // （例：`pet_000271` = 「千棘盔」、`pet_000378` = 「千棘盔（磨损的样子）」，同名、同属性、同编号）。
+  // 全图鉴里这种「同名、编号也相同、只有形态名不同」的登记有 **55 组 / 154 条**
+  // （蹦蹦种子 ×4、鸭吉吉 ×6…）⇒ 盒子与工坊里会出现**两行逐字相同**的卡，玩家分不出是哪一只。
+  // 目录页的卡（`boxCatalogCard`）一直是对的（`e.title ?? e.name`），只有这一处漏了形态名。
+  name:e?.title??i.species_name??e?.name??null,
+  // 名字里已经带了形态时，把**物种本名**留一份（与目录页同款字段），供需要分别显示的地方用。
+  alias:e?.title&&e?.name&&e.title!==e.name?e.name:null,
   types:e?[...e.types]:(layer?[...layer.types]:[]),
   level:Number.isFinite(i.level)?i.level:null,
   badges,

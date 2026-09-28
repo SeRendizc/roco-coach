@@ -101,8 +101,16 @@ test('路由契约：kind=catalog 是**全量 622**，不是 48 只迁移层', a
   assert.equal(json.player.total, 622, `全图鉴必须是 622 条，实际 ${json.player.total}`);
   assert.equal(json.player.count, 24, '默认每页 24 条');
   assert.equal(json.player.cards.length, 24);
-  assert.equal(json.dev.coverage.with_moveset_layer, 48,
-    '48 只能是「迁移层配过招的条数」，它不该等于全量');
+  // ⚠ 2026-09-28 改钉（人类 2026-09-28 逐字：「所有精灵实装，这样就不需要我的精灵了，直接全筛选」）：
+  // 旧断言是 `assert.equal(json.dev.coverage.with_moveset_layer, 48, '48 只能是「迁移层配过招的条数」，它不该等于全量')`。
+  // 可玩层现在是 **542 只**（基线 12 + 抓包层 530），而这一栏原来**只从 `roster-48.json` 建**
+  // ⇒ 盒子里只有 48 只能读出「定位」，另外 494 只一律显示「定位未登记」，而层里那 530 条的
+  // `role` **全都有值**（实测 530/530）。换源之后这一栏就是 542。
+  // 判据的**意图一个字没变**：这一栏是「配过招的条数」，**不许冒充全量**。
+  assert.equal(json.dev.coverage.with_moveset_layer, 542,
+    `配过招的条数 = 可玩层 542（实际 ${json.dev.coverage.with_moveset_layer}）`);
+  assert.notEqual(json.dev.coverage.with_moveset_layer, json.player.total,
+    '配过招的条数不许冒充全量（旧口径钉的是"不该等于全量"，这一句把意图直接写出来）');
   assert.equal(json.dev.coverage.pet_record + json.dev.coverage.pet_form, 622,
     '精灵 460 + 形态 162 应当正好是 622');
   // 卡片首层只有玩家该看到的那几样（`mechanism` 是 2026-09-22 人类 P0 之后加的**加性**键：
@@ -171,8 +179,13 @@ test('路由契约：detail 有面板/配招就给，没有就如实说没有（
   log('[实际] pet_000062 =', rich.json.player.name, rich.json.player.metrics_label,
     '；四招 =', rich.json.player.moveset.map((m) => `${m.slot_label}:${m.name}(威力${m.power_label})`).join(' '));
 
-  // 不在 48 只迁移层里的：必须说「本仓库没有这一项」，而且没有任何数字
-  const plain = await box('detail=pet_000001');
+  // ⚠ 2026-09-28 改钉：样例原来用 `pet_000001`（喵喵）当「不在迁移层里」的那一只 ——
+  // 它现在**在可玩层里**（层从 48 扩到 542），所以它有六维也有配招，这条判据就不再成立。
+  // 换成 `pet_000139`（古啦多）：它在 622 图鉴里、但**不在可玩层 542 只里**
+  // （按需推算档 80 只之一），所以它才是真正「没有登记」的那一档。
+  // 判据的意图一个字没变：**没有登记时就如实说没有，不许编、不许补 0**。
+  // 旧写法留档：const plain = await box('detail=pet_000001');
+  const plain = await box('detail=pet_000139');
   assert.equal(plain.status, 200);
   assert.equal(plain.json.player.metrics, null, '没有迁移层登记时不许给数值');
   assert.equal(plain.json.player.moveset, null, '没有配招时不许编一个');
@@ -540,4 +553,34 @@ test('跨物种比较必须被拒（产物里已经没有同种两只，跨物�
   assert.equal(mismatched.status, 400, '两个不同物种的个体不许比较，必须是 400');
   assert.ok(String(mismatched.json.error).length > 0, '拒绝要写清原因');
   log('[实际] 跨物种比较 →', mismatched.status, mismatched.json.error);
+});
+
+/**
+ * 同名形态必须**看得出区别**（人类 2026-09-25 逐字：「这个什么陛下有啥区别？我根本看不出来啊」）。
+ *
+ * 2026-09-28 查到真因（不是判据写得不对，是产品真缺一块）：全量图鉴里「同名 + 同编号 +
+ * 只有形态名不同」的登记有 **55 组 / 154 条**（例：`pet_000271` = 「千棘盔」、
+ * `pet_000378` = 「千棘盔（磨损的样子）」，同名同属性同编号 078）。
+ * 目录页那张卡一直是形态名优先（`name: e.title ?? e.name`），
+ * 只有**「我的盒子」**那张卡漏了（原来写 `name: i.species_name ?? e?.name`，只取物种名）
+ * ⇒ 盒子里两行**逐字相同**，玩家分不出是哪一只。
+ *
+ * 判据：mine 卡的名字要取形态名；形态名与物种本名不同时，`alias` 里要留着本名。
+ * 反证：拿同一张卡把 `title` 抹掉 ⇒ 两行名字必然相同（说明判据量的正是这个字段）。
+ */
+test('同名形态分得出来：mine 卡要用形态名（缺了就会两行逐字相同）', async () => {
+  const mine = await box('kind=mine&q=' + encodeURIComponent('千棘盔') + '&limit=10&offset=0');
+  assert.equal(mine.status, 200, '这个查询要能通');
+  const cards = mine.json.player.cards;
+  assert.ok(cards.length >= 2, `「千棘盔」在图鉴里至少两条登记（实际 ${cards.length}）`);
+  const names = cards.map((c) => String(c.name));
+  assert.equal(new Set(names).size, names.length, `同名的两条必须看得出区别，实际都是：${JSON.stringify(names)}`);
+  const withForm = cards.find((c) => String(c.name).includes('形态') || String(c.name).includes('（'));
+  assert.ok(withForm, `至少要有一条带形态名：${JSON.stringify(names)}`);
+  assert.equal(withForm.alias, '千棘盔', `形态名之外要把物种本名留在 alias 里（实际 ${JSON.stringify(withForm.alias)}）`);
+  // 反证：把形态名抹掉 ⇒ 两条名字必然相同（这条判据真的在量这个字段）
+  const stripped = cards.map((c) => String(c.alias ?? c.name));
+  assert.ok(new Set(stripped).size < stripped.length,
+    `反证要真的成立：抹掉形态名之后两条应当撞名，实际 ${JSON.stringify(stripped)}`);
+  log('[实际] 同名形态：', JSON.stringify(names), '| alias', JSON.stringify(cards.map((c) => c.alias)));
 });
