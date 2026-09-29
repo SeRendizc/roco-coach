@@ -17,7 +17,7 @@
  */
 
 import {spawn} from 'node:child_process';
-import {mkdirSync, mkdtempSync, writeFileSync} from 'node:fs';
+import {mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -82,9 +82,27 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function main() {
   const asJson = process.argv.includes('--json');
   const profile = mkdtempSync(join(tmpdir(), 'roco-regress-'));
+  // ⚠ 2026-09-29 补（Codex 查到的真实流量问题）：测试 Chrome **不该后台联网**。
+  // 裸跑时 Chrome 会反复从 Google 下载 ~35MB 的 Optimization Guide 组件；
+  // 探针只在**本机页面**上跑，那些请求没有任何用 —— 而且是**每轮**都下。
+  // 另外：异常退出时必须**一定**关掉 Chrome，否则残留无头进程会继续下载。
   const chrome = spawn(CHROME, ['--headless=new', '--no-sandbox', '--disable-gpu', '--no-first-run',
+    '--disable-background-networking',        // 禁后台联网（含组件/优化指南下载）
+    '--disable-component-update',             // 禁组件更新下载
+    '--disable-sync', '--no-default-browser-check',
     `--user-data-dir=${profile}`, '--remote-debugging-port=0', '--window-size=1440,900', 'about:blank'],
   {stdio: ['ignore', 'ignore', 'pipe']});
+
+  // **无论成功、异常还是超时都要收尾**（原来只在正常路径 kill ⇒ 异常就留残留进程 + 残留 profile）。
+  // `rmSync` 带 `maxRetries`（裸删会 ENOTEMPTY —— 本仓有结构判据专门管这条）。
+  const cleanup = () => {
+    try { chrome.kill('SIGKILL'); } catch { /* 已退出 */ }
+    try { rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120}); } catch { /* 尽力而为 */ }
+  };
+  process.once('exit', cleanup);
+  const onFatal = (error) => { cleanup(); throw error; };
+  process.once('uncaughtException', onFatal);
+  process.once('unhandledRejection', onFatal);
   let port = 0; let err = '';
   chrome.stderr.on('data', (d) => { err += String(d); const m = /ws:\/\/[^:]+:(\d+)\//.exec(err); if (m) port = Number(m[1]); });
   for (let i = 0; i < 80 && !port; i += 1) await sleep(100);
@@ -157,7 +175,7 @@ async function main() {
       for (const p of r.problems) console.log(`      ✖ ${p}`);
     }
   }
-  try { chrome.kill('SIGKILL'); } catch { /* 已退出 */ }
+  cleanup();                                   // 正常路径也走同一处收尾（不再各写一遍）
   process.exit(failed.length ? 1 : 0);
 }
 
