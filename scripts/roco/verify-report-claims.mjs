@@ -137,4 +137,36 @@ if (problems.length) {
   console.log(`[核报告] ✖ ${problems.length} 个数字与源不符 ⇒ **报告在说谎，或源变了没重跑**`);
   process.exit(2);
 }
-console.log('[核报告] ✔ 报告里声称"实测"的数字**全部能从源重算出来**');
+// ── 文档正文也要跟得上（我的错大多写在**文档正文**里，不只是 REPORT.json）────────────
+// 口径：对一组关键读数，**文档必须引用"当前"的值**。
+// 这不检查"文档里每个数字都对"（历史值/错版留档本来就该出现在文档里），
+// 而是检查**文档没有停在旧值上**。
+// 文档路径可覆盖（`ROCO_CLAIM_DOC`）—— 好让**判据能造一份"数字改旧"的副本验反证**，
+// 而不是只在自己身上测一次。
+const DOC = process.env.ROCO_CLAIM_DOC
+  ?? join(ROOT, 'docs', 'roco', 'review-2026-09-28', '4B-训练就绪-阻塞与对齐方案.md');
+if (existsSync(DOC)) {
+  const doc = readFileSync(DOC, 'utf8');
+  // ⚠ **第一版这条检查是假的**：它用 `doc.includes(String(v))`，而 `324` 这类数字在文档别处也出现
+  // ⇒ 我把文档里的 `**324 / 324**` 改成 `**101 / 101**` 造反证时，**护栏照样绿**。
+  // （这正是这一程反复的教训：**"看起来在检查"和"真的会响"是两件事**。）
+  // ⇒ 改成核**带格式的精确串**，改一个数字就必须红。
+  const ev = perFileOk['agent-trajectories-v1.jsonl'] ?? {};
+  const keyFigures = [
+    ['源轨迹行数', `**${raw.length}**`],
+    ['评测判过但回复是失败句', `**${measured['eval_judgment_contradiction.measured_on_source.passed_but_reply_is_failure']}**`],
+    ['其中零工具调用', `**${measured['eval_judgment_contradiction.measured_on_source.of_which_zero_tool_calls']}**`],
+    ['limitation_words 非空', `**${measured['limitation_words_evidence.measured_corrected.limitation_words_nonempty']}**`],
+    ['两者都满足', `**${measured['limitation_words_evidence.measured_corrected.both']}**`],
+    ['第二份录制 evaluate_team', `**${ev.evaluate_team ?? 0} / ${ev.evaluate_team ?? 0}**`],
+    ['第二份录制 compare_team_change', `**${ev.compare_team_change ?? 0} / ${ev.compare_team_change ?? 0}**`],
+  ];
+  const missing = keyFigures.filter(([, needle]) => !doc.includes(needle));
+  console.log(`[核报告] 文档关键读数：核了 ${keyFigures.length} 个`);
+  for (const [name, needle] of missing) console.log(`  ✖ 文档里找不到当前值 ${needle}（${name}）—— 文档可能停在旧值上`);
+  if (missing.length) {
+    console.log('[核报告] ✖ 文档与数据的当前值对不上'); process.exit(2);
+  }
+}
+
+console.log('[核报告] ✔ 报告里声称"实测"的数字**全部能从源重算出来**；文档也引用了当前值');

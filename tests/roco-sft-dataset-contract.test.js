@@ -18,7 +18,8 @@
  */
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
-import {existsSync, readFileSync} from 'node:fs';
+import {existsSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
+import {tmpdir} from 'node:os';
 import {dirname, join} from 'node:path';
 import test from 'node:test';
 import {fileURLToPath} from 'node:url';
@@ -358,4 +359,22 @@ test('报告里的"实测"数字**能从源重算出来**（对不上就是报�
   // 护栏本身要**真的在重算**（不是空跑）
   const n = Number(/从源重算了 (\d+) 个数字/.exec(out)?.[1] ?? 0);
   assert.ok(n >= 15, `护栏只重算了 ${n} 个数字 —— 太少了，说明它没在真正核对`);
+});
+
+test('**反证**：把文档里的关键读数改旧 ⇒ 那条"文档引用当前值"的检查必须红（否则它是摆设）', (t) => {
+  const script = join(ROOT, 'scripts', 'roco', 'verify-report-claims.mjs');
+  const doc = join(ROOT, 'docs', 'roco', 'review-2026-09-28', '4B-训练就绪-阻塞与对齐方案.md');
+  if (!existsSync(script) || !existsSync(doc)) { t.skip('缺脚本 / 文档'); return; }
+  const original = readFileSync(doc, 'utf8');
+  // 造一份"数字改旧"的副本（把第二份录制的 324/324 改成 101/101）
+  const mutated = original.replace(/\*\*324 \/ 324\*\*/g, '**101 / 101**');
+  assert.notEqual(mutated, original, '替身没改到东西 —— 文档里没有 `**324 / 324**` 这个串，反证失效');
+  const tmpDoc = join(tmpdir(), `roco-claim-doc-${process.pid}.md`);
+  writeFileSync(tmpDoc, mutated);
+  t.after(() => { try { rmSync(tmpDoc, {force: true}); } catch { /* 尽力 */ } });
+  let code = 0;
+  try {
+    execFileSync(process.execPath, [script], {cwd: ROOT, env: {...process.env, ROCO_CLAIM_DOC: tmpDoc}, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']});
+  } catch (error) { code = Number(error.status ?? 1); }
+  assert.equal(code, 2, '把文档数字改旧之后护栏**必须红** —— 绿了就说明这条检查是摆设（我第一版就是摆设，被反证抓出来）');
 });
