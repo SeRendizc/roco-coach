@@ -322,11 +322,57 @@
 **他无后台任务**；**`tmp/browser-lock` 现在不存在**（无锁）；**机器上有 26 个 headless Chrome** ——
 他**无法归属**（可能是队友在跑或历史残留）⇒ **没杀**，留给接手人按人核实。
 
-### 10.4 `build-snapshot`（`task-18` in_progress）—— **报告未回**
+### 10.4 `build-snapshot`（`task-18` in_progress）—— **已停手并报全**（含**接手关键信息**）
 
-已发停止通知；在飞改动**已随 `84a68c8` 入库**（§2 第 2 行）。
-他停手前在跑 `after-mobile` / `after-roco-ux` 两个日志（**已入库**），
-`reports/roco/build-snapshot/{scan-probe-lifecycle.mjs,verify-probe-session-tool.mjs,probe-lifecycle.json,probe-session-tool.json}` 是半成品。
+**工作区 0 条未提交**（他的改动都在 `84a68c8` 里）。
+
+| 路径 | 一句话 | 能不能跑 |
+|---|---|---|
+| `scripts/roco/lib/probe-session.mjs`（**新，311 行**） | 共用探针工具：专用 profile 守卫 / 页面侧会话握手（**形状分类**）/ 宿主 API 就绪 / 命中测试 | **能跑**，A–E 五条自证全绿 |
+| `scripts/roco/browser-mobile-sweep.mjs` | 改用共用工具 | **能跑到底**：判据 8/10、反证 9/9 |
+| `scripts/roco/browser-roco-ux-acceptance.mjs` | 同上 + 命中测试从"只记录"升级成"断言" | **跑不到底**：握手 OK 后死在 **`#say-input`** |
+| `scripts/roco/browser-live-acceptance.mjs` | 同上 | **跑不到底**：死在 **`#compare-lock-team`** |
+| `reports/roco/build-snapshot/{scan-probe-lifecycle.mjs, probe-lifecycle.json}` | **四项中招表**（**35 个文件**逐脚本） | 完成 |
+| `reports/roco/build-snapshot/{verify-probe-session-tool.mjs, probe-session-tool.json, verify.log}` | 工具 A–E 自证（含"故意造错"） | 完成 |
+| `reports/roco/build-snapshot/{after-mobile.log, after-roco-ux.log}` | 三个脚本改后读数 | 完成 |
+| 重新生成的 `reports/roco/rc505/mobile-sweep.json`、`reports/roco/live/live-acceptance.json` | 带 `probe` 块 / 判据 2/3 fatal | 已落盘 |
+
+**工具自证读数（A–E）**：A profile 守卫 **2/2** 非法路径被拒（含**用户真实 Chrome 路径**）；
+B 正常握手 `ok`（引擎等 **234ms**）；C **故意留旧 cookie + 旧 csrf** ⇒ 报 **`session-invalid`**
+（bootstrap 200 自愈、**POST 403**）；D 允许自愈 ⇒ `ok` + `stale-cookie-cleared`；
+E 宿主 API 不存在的超时**如实报 712ms**；
+**被盖住的按钮退回 `via=js-click hit=false`（记账，不假装真鼠标）**、正常按钮 `via=mouse hit=true`。
+
+#### ⚠ 接手最关键的一条：**两个脚本跑不到底，根因是产品侧 DOM 早改了、探测点没重钉**
+
+| 旧探测点 | 现状 | 影响的脚本 |
+|---|---|---|
+| `#say-input` / `#say-form button` | 已被 `RETIRED_COMPANION_IDS` 退役；**新的是 `#xiaoya-input` / `#xiaoya-form`** | `roco-ux` 死在 `#say-input`；`mobile-sweep` 的 `tapScope` 下限 4 也因它消失而红 2 条 |
+| `#compare-lock-team` | 比较 UI 早在 **`49e7c50`** 整个拆掉 | `live-acceptance` **第一步就死** |
+
+**他做了对照证明与他的改动无关**：把 HEAD 版脚本复制到 `tmp/probe-before/` 镜像里各跑一遍，
+**红的一模一样**（8/10、同样死在 `#say-input`）；`live-acceptance` 是文本证据
+（HEAD 版 `:405/:408` 就在点它，产品里只剩一句"已删掉"的注释）。
+⚠ **`tmp/probe-before/` 他已删除**（避免以后有人跑旧 HEAD —— 符合"不得跑旧 HEAD"）。
+
+#### 他没做完的（照抄）
+
+1. **两个脚本的探测点没重钉**（`#say-input`/`#say-form button` → `#xiaoya-input`/`#xiaoya-form`；
+   `#compare-lock-team` 已不存在）—— **修这三处（改钉不删）就能给 `coach-context` 的 (i) 取证**；
+2. **`launchProbeChrome` 还没加测试前置两条**（`--disable-background-networking` / `--disable-component-update`）；
+3. **异常路径的 Chrome 收尾还没兜底**（`main()` 抛错时不保证 `browser.close()`；工具里也**没有** `finally`）
+   —— 他这次 `roco-ux` 崩溃就留下过一个用专用 profile 的 Chrome（**已手动清掉**）；
+4. `BATCH-11-探针生命周期.md` **没写**（被叫停）；
+5. **四项中招表已出（35 个文件）**：①临时 profile **30**、②无会话握手 **29**、③不等宿主 API **13**、④无命中测试 **12**
+   （判定用的是**写明在报告里的正则启发式**）；但**只改了这三个脚本**，其余 32 个（含他自己那 3 个真机判据脚本）没动；
+6. `tests/` 里**没有**给这个工具补单测（靠 A–E 自证覆盖）。
+
+#### 残留
+
+node 进程 **0**（早前一个 detached 残壳 `42356` 已 `kill -9`）；
+用他专用 profile 的 Chrome **0**；`tmp/browser-lock` **空**；
+⚠ 他如实记了一次：**有一次 `mobile-sweep` 是在无锁状态下跑的**（他的锁中途被人当陈旧锁清过）。
+**别人的 Chrome 一律没碰；8765 未重启、未清数据。**
 
 ### 10.5 锁与环境（交接时）
 
