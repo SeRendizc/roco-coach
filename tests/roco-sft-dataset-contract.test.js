@@ -222,6 +222,16 @@ test('候选集：输入**必须带决策所需的局面**（Codex 反复点的�
   const auditPath = join(CAND, 'REVIEW-AUDIT.json');
   assert.ok(existsSync(auditPath), '审查产物不存在 —— 先跑 `node scripts/roco/review-candidates.mjs`');
   const audit = JSON.parse(readFileSync(auditPath, 'utf8'));
+  // **审核必须覆盖全部产物**：第一版只读 train/valid/test（69 条）⇒
+  // `contrast`(24) 与 `from-eval-expectation`(96) **一条没审**，120 条（63%）漏在外面。
+  assert.ok(Array.isArray(audit.files_audited) && audit.files_audited.length >= 5,
+    `审核必须覆盖全部 5 个产物，实际只审了 ${JSON.stringify(audit.files_audited)}`);
+  const totalOnDisk = audit.files_audited.reduce((a, f) => a + (audit.rows_per_file[f] ?? 0), 0);
+  assert.equal(audit.rows, totalOnDisk, '`rows` 必须等于各文件条数之和（不许少审）');
+  // 这条启发式的精度要如实标着：到目前**全是假阳**
+  assert.ok(audit.kind_hint_precision, '低精度启发式的历史命中要留档');
+  assert.equal(audit.kind_hint_precision.true_positives_to_date, 0,
+    '若这条启发式真抓到过真问题，就把它改成 1 并写清是哪一条（否则一直标 0）');
   assert.ok(Array.isArray(audit.checked_and_REJECTED) && audit.checked_and_REJECTED.length,
     '被否决的判据尝试要留档（含"为什么否决"），否则后人会重复踩');
 });

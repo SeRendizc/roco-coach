@@ -1,12 +1,26 @@
 {
  "generated_by": "scripts/roco/review-candidates.mjs",
  "what_this_is": "**待审清单**，不是\"审核通过\"。机械能核的六项全量跑；\"这个决策对不对\"必须人看。",
- "rows": 69,
+ "files_audited": [
+  "train",
+  "valid",
+  "test",
+  "contrast",
+  "from-eval-expectation"
+ ],
+ "rows_per_file": {
+  "train": 42,
+  "valid": 10,
+  "test": 17,
+  "contrast": 24,
+  "from-eval-expectation": 96
+ },
+ "rows": 189,
  "target_kinds": {
-  "stop": 12,
-  "query_rules": 24,
-  "compare_team_change": 16,
-  "evaluate_team": 17
+  "stop": 36,
+  "query_rules": 96,
+  "compare_team_change": 28,
+  "evaluate_team": 29
  },
  "mechanical_failures": 0,
  "needs_human_review": 0,
@@ -31,6 +45,12 @@
    "lesson": "这一程第 **四** 次同一类错：**判据挑字眼 / 拿常量当信号**。**先问三句**：这个字段真的会变吗？我理解的概念与它定义的概念是同一个吗？反证会响吗？"
   }
  ],
+ "kind_hint_precision": {
+  "true_positives_to_date": 0,
+  "false_positives_to_date": 3,
+  "detail": "`KIND_HINTS`（问句意图 → 该用哪个 `kind`）到目前**抓到的全是假阳**：① 「能量和威力是什么关系？」被判该查 `skill`（14 条）；② 「这份规则集是哪个版本？」被判该查 `term`（12 条）。**两次都是我判据挑字眼，不是标签错。**",
+  "verdict": "⇒ 这条启发式**精度极低**，只当**低置信提示**看：**看到 12 条提示不等于 12 个问题**；真正判对错要靠人读语义。留着它的唯一理由是\"万一\"。"
+ },
  "heuristic_false_positive_found": {
   "what": "KIND_HINTS 第一版把「能量和威力是什么关系？」（问**概念关系**）判成\"该查 kind=skill\"",
   "how_many": 14,

@@ -40,17 +40,29 @@ const KIND_HINTS = Object.freeze([
   // "该查 kind=skill" —— 那是问**两个概念的关系**，`term`/`ruleset` 才对。
   // **这是我判据的假阳，不是坏标签**（14 条全是同一族）。⇒ 要求问句真的在问**某一个具体技能**。
   [/这个技能|这招|技能效果|(这一|那)个?技能|技能(的)?(威力|能耗)/, 'skill'],
-  [/规则|怎么算|什么意思|术语/, 'term'],
+  // ⚠ 又收紧一次：「**规则集**是哪个版本？」问的是 **ruleset**，而 `/规则/` 会命中「规则**集**」⇒
+  // 12 条假阳。⇒ `term` 不许匹配「规则集」；并把 `ruleset` 单列。
+  [/规则集|规则版本|哪个版本.*规则/, 'ruleset'],
+  [/(?<!规则)(术语|怎么算|什么意思|是什么意思)/, 'term'],
 ]);
 
+// ⚠ 2026-09-29 修（**我自己的审核覆盖不全**）：第一版只读 `train/valid/test`（69 条），
+// 而产物有 **5 个文件**——`contrast.jsonl`(24) 与 `from-eval-expectation.jsonl`(96) **一条没审**，
+// **120 条（63%）漏在外面**。这与上一轮"只验了 `team_after`"是同一类错：**检查自己不全**。
+// ⇒ 五个文件全读，并**按文件分别报数**（它们的规则本来就不同）。
+const ARTIFACTS = ['train', 'valid', 'test', 'contrast', 'from-eval-expectation'];
 const rows = [];
-for (const split of ['train', 'valid', 'test']) {
+const perFile = {};
+for (const split of ARTIFACTS) {
   const p = join(CAND, `${split}.jsonl`);
   if (!existsSync(p)) continue;
+  let n = 0;
   for (const line of readFileSync(p, 'utf8').split('\n')) {
     if (!line.trim()) continue;
     rows.push({split, row: JSON.parse(line)});
+    n += 1;
   }
+  perFile[split] = n;
 }
 
 const findings = [];
@@ -109,7 +121,10 @@ for (const {split, row} of rows) {
 
 // ⑥ 跨分片语义族零重叠
 const famOf = {};
-for (const {split, row} of rows) (famOf[split] ??= new Set()).add(row.meta.group_id);
+for (const {split, row} of rows) {
+  if (!['train', 'valid', 'test'].includes(split)) continue;   // `contrast` / `from-eval-expectation` 不是分片
+  (famOf[split] ??= new Set()).add(row.meta.group_id);
+}
 for (const [a, b] of [['train', 'valid'], ['train', 'test'], ['valid', 'test']]) {
   const shared = [...(famOf[a] ?? [])].filter((f) => (famOf[b] ?? new Set()).has(f));
   if (shared.length) add(`${a}/${b}`, 'FAIL', '语义族跨分片重叠', shared.slice(0, 5).join('、'));
@@ -137,6 +152,8 @@ const kinds = rows.reduce((acc, {row}) => {
 const report = {
   generated_by: 'scripts/roco/review-candidates.mjs',
   what_this_is: '**待审清单**，不是"审核通过"。机械能核的六项全量跑；"这个决策对不对"必须人看。',
+  files_audited: ARTIFACTS.filter((f) => (perFile[f] ?? 0) > 0),
+  rows_per_file: perFile,
   rows: rows.length,
   target_kinds: kinds,
   mechanical_failures: findings.filter((f) => f.level === 'FAIL').length,
@@ -155,6 +172,17 @@ const report = {
         + '**先问三句**：这个字段真的会变吗？我理解的概念与它定义的概念是同一个吗？反证会响吗？',
     },
   ],
+  kind_hint_precision: {
+    true_positives_to_date: 0,
+    false_positives_to_date: 3,
+    detail: '`KIND_HINTS`（问句意图 → 该用哪个 `kind`）到目前**抓到的全是假阳**：'
+      + '① 「能量和威力是什么关系？」被判该查 `skill`（14 条）；'
+      + '② 「这份规则集是哪个版本？」被判该查 `term`（12 条）。'
+      + '**两次都是我判据挑字眼，不是标签错。**',
+    verdict: '⇒ 这条启发式**精度极低**，只当**低置信提示**看：'
+      + '**看到 12 条提示不等于 12 个问题**；真正判对错要靠人读语义。'
+      + '留着它的唯一理由是"万一"。',
+  },
   heuristic_false_positive_found: {
     what: 'KIND_HINTS 第一版把「能量和威力是什么关系？」（问**概念关系**）判成"该查 kind=skill"',
     how_many: 14,
@@ -172,7 +200,7 @@ writeFileSync(join(CAND, 'REVIEW-AUDIT.json'), `${JSON.stringify(report, null, 1
 
 if (process.argv.includes('--json')) console.log(JSON.stringify(report, null, 1));
 else {
-  console.log(`[逐条审核] ${rows.length} 条｜工具种类 ${JSON.stringify(kinds)}`);
+  console.log(`[逐条审核] ${rows.length} 条（${Object.entries(perFile).map(([k, v]) => `${k} ${v}`).join(' / ')}）｜工具种类 ${JSON.stringify(kinds)}`);
   console.log(`[逐条审核] 机械 FAIL ${report.mechanical_failures} 条｜需人看 ${report.needs_human_review} 条`);
   const fails = findings.filter((f) => f.level === 'FAIL');
   for (const f of fails.slice(0, 8)) console.log(`  ✖ ${f.id}｜${f.what}｜${String(f.detail).slice(0, 50)}`);
