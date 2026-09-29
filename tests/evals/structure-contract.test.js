@@ -1281,9 +1281,20 @@ test('结构契约：每个页面的模块图闭包都在白名单里且都真�
 test('结构契约：浏览器脚本收尾删临时 profile 必须带重试（裸 rmSync 会 ENOTEMPTY 把绿判据变红）', () => {
   const dir = join(ROOT, 'scripts', 'roco');
   const naked = [];
+  // ⚠ 2026-09-29 修（Lead 定）：**grep 之前先剥掉行注释**。
+  //
+  // 起因：本仓的「**改钉不删**」约定要求把旧写法**原文留在注释里**，而这条判据按**源码原文** grep
+  // ⇒ 留档注释里的 `rmSync(profile, …)` 被当成了"代码里还有一处裸收尾"，判据红。
+  // **这是我们自己两条约定打架**：不能因为"判据 grep 原文"就不许留档，也不能因为留档就让判据红。
+  // ⇒ 修判据（剥注释），而不是让注释绕着判据写（那样留档就成了摆设）。
+  // 只剥 `//` 之后的部分；`rmSync(...)` 只可能出现在代码里，不会出现在字符串里，所以这样剥是安全的。
+  const stripLineComments = (src) => src.split('\n').map((line) => {
+    const i = line.indexOf('//');
+    return i === -1 ? line : line.slice(0, i);
+  }).join('\n');
   for (const name of readdirSync(dir)) {
     if (!name.endsWith('.mjs')) continue;
-    const src = readFileSync(join(dir, name), 'utf8');
+    const src = stripLineComments(readFileSync(join(dir, name), 'utf8'));
     for (const m of src.matchAll(/rmSync\(\s*(profile|dir|tmp|temp)[^)]*\)/g)) {
       if (!/maxRetries/.test(m[0])) naked.push(`${name}: ${m[0]}`);
     }

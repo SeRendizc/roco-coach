@@ -1,0 +1,26 @@
+{
+ "generated_by": "scripts/roco/review-candidates.mjs",
+ "what_this_is": "**待审清单**，不是\"审核通过\"。机械能核的六项全量跑；\"这个决策对不对\"必须人看。",
+ "rows": 93,
+ "target_kinds": {
+  "stop": 36,
+  "query_rules": 24,
+  "compare_team_change": 16,
+  "evaluate_team": 17
+ },
+ "mechanical_failures": 0,
+ "needs_human_review": 0,
+ "findings": [],
+ "heuristic_false_positive_found": {
+  "what": "KIND_HINTS 第一版把「能量和威力是什么关系？」（问**概念关系**）判成\"该查 kind=skill\"",
+  "how_many": 14,
+  "verdict": "**判据错、不是标签错** —— 那 14 条的目标是 `term`/`ruleset`，问的确实是两个概念的关系",
+  "fixed": "收紧成\"必须真的在问某一个具体技能\"；收紧后需人看 = 0",
+  "lesson": "这一程反复出现同一类错：判据挑字眼 ⇒ 假阳 ⇒ 逼人去改本来没问题的东西。**先问\"是不是我判据错了\"。**"
+ },
+ "cannot_check_by_machine": [
+  "目标是不是**当前上下文下最该做的决策**（例：「为什么这一手要防御？」标 stop —— 机器只能标出\"回复是失败句\"）",
+  "样本是否覆盖了**玩家真实遇到的局面分布**（这一程的录制偏向某些任务模板）",
+  "回复正文的措辞质量（另有 plain-speak 判据管，但那不是\"决策对不对\"）"
+ ]
+}
