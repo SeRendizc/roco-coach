@@ -49,6 +49,28 @@
   "执行回执 ok!==true": 245,
   "缺问句或回答": 348
  },
+ "input_context": {
+  "note": "**输入必须带决策所需的局面**（Codex 反复点的那条）。第一版只留 {message,screen,tools} ⇒ 把局面全丢了。",
+  "first_version_error": "源里本来就有 mode / world（id/seed/turns/ruleset_id）/ public_state_digest —— 是**构建器**丢的，不是源的错。",
+  "source_input_keys_census": {
+   "message": 8664,
+   "mode": 8664,
+   "screen": 8664,
+   "world": 8664,
+   "public_state_digest": 8664
+  },
+  "now_included": [
+   "message",
+   "mode",
+   "screen",
+   "world（剥掉宿主键 state_version / state_version_authority）",
+   "public_state_digest",
+   "tools"
+  ],
+  "still_missing": {
+   "focus": "**源里就没有 `focus`**（这一份录制没记\"玩家正在看哪一只\"）⇒ 对 `query_rules` 那类点名具体 `pet_id` 的目标，输入里只能靠问句文本推 ⇒ **这是真实局限，不编**。"
+  }
+ },
  "key_tool_coverage": {
   "note": "关键工具覆盖（Codex 要求\"补关键工具任务，不用扩大条数掩盖\"）—— 已用**第二份录制**补上。",
   "first_attempt_error": "第一版只读一个文件，于是报告里写\"evaluate_team 这批给不出\"——**那句话是错的**。",

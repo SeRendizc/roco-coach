@@ -91,6 +91,11 @@ for (const src of SRCS) {
   }
 }
 
+const SOURCE_INPUT_KEYS = (() => {
+  const census = {};
+  for (const r of rows) for (const k of Object.keys(r.input ?? {})) census[k] = (census[k] ?? 0) + 1;
+  return census;
+})();
 const rejected = {};
 const reject = (why) => { rejected[why] = (rejected[why] ?? 0) + 1; };
 
@@ -139,7 +144,16 @@ for (const row of rows) {
     semantic_family: semanticFamily(row.case_id),
     wording_variant: String(row.case_id ?? ''),
     source: `tests/evals/${row.__src}#${row.traj_id ?? row.case_id}`,
-    message, screen: row.input?.mode === 'camp' ? 'camp' : 'battle',
+    message,
+    mode: row.input?.mode ?? null,
+    screen: row.input?.screen ?? (row.input?.mode === 'camp' ? 'camp' : 'battle'),
+    world: (() => {           // 宿主键剥掉，其余局面原样带
+      const w = row.input?.world;
+      if (!w || typeof w !== 'object') return null;
+      const {state_version: _sv, state_version_authority: _sva, ...rest} = w;
+      return rest;
+    })(),
+    public_state_digest: row.input?.public_state_digest ?? null,
     target, reply: reply.slice(0, 120),
     flags,
     // ⚠ **极性**（2026-09-29 阶段 3）：回复是"没查到事实"这类**失败句**的轨迹，
@@ -237,6 +251,16 @@ const report = {
     acc[k] = (acc[k] ?? 0) + 1; return acc;
   }, {}),
   rejected,
+  input_context: {
+    note: '**输入必须带决策所需的局面**（Codex 反复点的那条）。第一版只留 {message,screen,tools} ⇒ 把局面全丢了。',
+    first_version_error: '源里本来就有 mode / world（id/seed/turns/ruleset_id）/ public_state_digest —— 是**构建器**丢的，不是源的错。',
+    source_input_keys_census: SOURCE_INPUT_KEYS,
+    now_included: ['message', 'mode', 'screen', 'world（剥掉宿主键 state_version / state_version_authority）', 'public_state_digest', 'tools'],
+    still_missing: {
+      focus: '**源里就没有 `focus`**（这一份录制没记"玩家正在看哪一只"）⇒ 对 `query_rules` 那类'
+        + '点名具体 `pet_id` 的目标，输入里只能靠问句文本推 ⇒ **这是真实局限，不编**。',
+    },
+  },
   key_tool_coverage: {
     note: '关键工具覆盖（Codex 要求"补关键工具任务，不用扩大条数掩盖"）—— 已用**第二份录制**补上。',
     first_attempt_error: '第一版只读一个文件，于是报告里写"evaluate_team 这批给不出"——**那句话是错的**。',
@@ -252,7 +276,20 @@ if (write) {
   mkdirSync(OUT_DIR, {recursive: true});
   const asLine = (c) => JSON.stringify({
       messages: [
-        {role: 'user', content: JSON.stringify({message: c.message, screen: c.screen, tools: [...LOCAL_PLAN_TOOLS]})},
+        // ⚠ 2026-09-29（阶段 3，Codex 反复点的那条）：**输入里必须带决策所需的局面**。
+        // 第一版只留了 `{message, screen, tools}` ⇒ 把源里**本来就有**的 `mode` / `world`
+        // （`id`/`seed`/`turns`/`ruleset_id`）/ `public_state_digest` **全丢了** ⇒
+        // 训出来的模型是在"**没有局面**"的情况下学做决策。**这是构建器的错，不是源的错。**
+        // 宿主键（`state_version` / `state_version_authority`）**不进输入**：那是宿主的协调键，
+        // 与"这一局是什么局面"无关（判据另有"目标里不许出现宿主键"那条）。
+        {role: 'user', content: JSON.stringify({
+          message: c.message,
+          mode: c.mode,
+          screen: c.screen,
+          world: c.world,
+          public_state_digest: c.public_state_digest,
+          tools: [...LOCAL_PLAN_TOOLS],
+        })},
         {role: 'assistant', content: JSON.stringify(c.target)},
       ],
       meta: {

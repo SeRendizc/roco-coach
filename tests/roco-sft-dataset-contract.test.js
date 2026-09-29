@@ -169,6 +169,28 @@ test('候选集：逐条审查表存在，且**如实标出**失败回复与目�
   assert.equal(report.semantic_family_overlap_across_splits.length, 0);
 });
 
+test('候选集：输入**必须带决策所需的局面**（Codex 反复点的那条：不许只给 message/screen/tools）', (t) => {
+  if (!existsSync(join(CAND, 'train.jsonl'))) { t.skip('还没跑过 build-sft-candidates.mjs --write'); return; }
+  const rows = readCand();
+  for (const {split, row} of rows) {
+    const input = JSON.parse(row.messages.find((m) => m.role === 'user').content);
+    // 局面必须在：源里本来就有 world（id/seed/turns/ruleset_id）—— 第一版构建器把它丢了，
+    // 那等于让模型在"没有局面"的情况下学做决策。
+    assert.ok(input.world && typeof input.world === 'object',
+      `${split} 的输入没有 world（局面）—— 训练出来的是"不看局面做决策"的模型：${JSON.stringify(input).slice(0, 120)}`);
+    assert.ok(input.world.id, 'world 必须有 id（哪一局）');
+    assert.ok(input.mode !== undefined && input.screen !== undefined, 'mode / screen 要在');
+    assert.ok(Array.isArray(input.tools), 'tools 要在');
+    // 宿主协��键**不进输入**（'目标里不许出现宿主键'那条管的是目标，输入也不该带）
+    assert.equal(input.world.state_version, undefined, 'host 键 state_version 不该进输入');
+    assert.equal(input.world.state_version_authority, undefined, 'host 键 state_version_authority 不该进输入');
+  }
+  const report = JSON.parse(readFileSync(join(CAND, 'REPORT.json'), 'utf8'));
+  assert.ok(report.input_context, '报告要如实写"源里有什么 / 缺什么"');
+  assert.ok(report.input_context.source_input_keys_census, '源的 input 键清点要落进报告（可证伪）');
+  assert.ok(report.input_context.still_missing?.focus, '源里缺 focus 这件事要如实记着，不许省略');
+});
+
 test('候选集：**回复是失败句的轨迹不许当正向目标** —— 单独进 contrast.jsonl', (t) => {
   if (!existsSync(join(CAND, 'train.jsonl'))) { t.skip('还没跑过 build-sft-candidates.mjs --write'); return; }
   const rows = readCand();
