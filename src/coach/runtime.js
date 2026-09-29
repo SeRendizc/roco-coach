@@ -1798,6 +1798,96 @@ async function quizPanelOf(context,call){
  }
  return {id:target.id??petId,name:target.name,speed,source:`图鉴 ${petId} 的 stats.spe=${speed}`};
 }
+/**
+ * 六宠对局（`context.roco_battle`）里「**这一局实际带的六只**」到底是哪一份（2026-09-29，task-19 G1）。
+ *
+ * 权威是 `roco_battle.self`：它是**这一局引擎公开视图**裁出来的，每只带血量/能量/是否倒下，
+ * 与屏幕上画的是同一份。`context.profile.pets` 是**候选池那一页名单**（页面送的是"一页候选"），
+ * **不代表玩家带的队**。
+ *
+ * 这一程的缺口正是把后者当队伍用：`roco.html` 上玩家选好的六只落在 `roco_battle.self` 里，
+ * 而包里只有 `roster` ⇒ 本地那一支以为"你没有队伍"，回一句通用反问。
+ * 真机实测（`reports/roco/art-finish/inbattle-readings.json`）：局中问「我现在该换谁？」
+ * 只拿到「说一下你的队伍和对手，我按相性挑。」——**没提场上任何一只、回合、血量**。
+ * 所以两份同时在包里时，措辞必须分清谁是这一局的权威（见下面进包那一处的说明）。
+ */
+function rocoLineupOf(context){
+ const self=Array.isArray(context?.roco_battle?.self)?context.roco_battle.self:null;
+ if(!self)return [];
+ const active=Number.isInteger(context.roco_battle.self_active)?context.roco_battle.self_active:null;
+ return self.map((pet,index)=>({...(pet&&typeof pet==='object'?pet:{}),slot:index+1,active:index===active}))
+  .filter((pet)=>typeof pet.name==='string'||typeof pet.pet_id==='string');
+}
+
+/** 局中问答要用的**这一个回合**的读数；读不到就返回 null（绝不编一个局面出来）。 */
+function rocoBattleFacts(context){
+ const battle=context?.roco_battle;
+ if(!battle||!Number.isInteger(battle.turn))return null;
+ const self=rocoLineupOf(context);
+ if(!self.length)return null;
+ const activeIndex=Number.isInteger(battle.self_active)?battle.self_active:null;
+ const foe=Array.isArray(battle.foe)&&battle.foe[0]&&typeof battle.foe[0]==='object'?battle.foe[0]:null;
+ const legal=Array.isArray(battle.legal)?battle.legal:[];
+ return {turn:battle.turn,self,activeIndex,active:activeIndex!==null?(self[activeIndex]??null):null,foe,
+  bench:self.filter((pet)=>pet.active!==true&&pet.alive!==false),
+  switches:legal.filter((one)=>one&&one.kind==='switch'&&typeof one.label==='string').map((one)=>one.label)};
+}
+
+/** `换上第N位` → 那一只（标签里的位次与 `self` 同源：都来自引擎公开视图）。 */
+function switchTargetOf(label,facts){
+ const m=/(\d+)/.exec(String(label??''));
+ if(!m)return null;
+ const index=Number(m[1])-1;
+ return Number.isInteger(index)&&index>=0?(facts.self[index]??null):null;
+}
+
+/** 局中「该换谁 / 这回合怎么打」的**本地确定性回答**用到的问句形状（与政策那一支同一族）。 */
+const ROCO_BATTLE_ADVICE_ASK=/这回合|这一回合|现在该|该不该|该怎么打|怎么打|出招还是|防御还是|换宠还是|要不要换|该攻还是该守|换谁|该上谁|换上谁|换哪只|换一只|替补/;
+
+/**
+ * 局中问句的**本地确定性回答**（只给"没有模型"那一档用）。
+ *
+ * 每一个数字都来自**这一局的公开视图**或**引擎的规划**（`rocoPlan`），一个字都不发明：
+ *   · 没有 `rocoPlan` 时明说"引擎这一手还没给出推荐"，只摆合法换人目标与后备血量；
+ *   · 不猜速度、不猜对手后备的名字 —— 视图里没有的东西不出现；
+ *   · 依据里把用到的读数逐条写出来（本仓的守卫按"数字必须出现在依据里"核对）。
+ */
+function localRocoBattleReply({message,context}){
+ if(!ROCO_BATTLE_ADVICE_ASK.test(String(message??'')))return null;
+ const facts=rocoBattleFacts(context);
+ if(!facts)return null;
+ const plan=context?.roco_plan&&typeof context.roco_plan==='object'?context.roco_plan:null;
+ const hpOf=(pet)=>Number.isFinite(pet?.hp)&&Number.isFinite(pet?.max_hp)?`${pet.hp}/${pet.max_hp} 血`
+  :(Number.isFinite(pet?.hp)?`${pet.hp} 血`:'血量没给');
+ const lines=[];
+ lines.push(`第 ${facts.turn} 回合：${facts.active
+  ?`${facts.active.name} 在场上（${hpOf(facts.active)}${Number.isFinite(facts.active.energy)?`，能量 ${facts.active.energy}`:''}）`
+  :'场上那一只读不出来'}${facts.foe?`；对手是 ${facts.foe.name}（${hpOf(facts.foe)}）`:''}。`);
+ if(plan&&typeof plan.recommendation==='string'&&plan.recommendation){
+  const target=switchTargetOf(plan.recommendation,facts);
+  lines.push(`引擎这一手推荐「${plan.recommendation}」${target?`，也就是换 ${target.name} 上来（${hpOf(target)}）`:''}`
+   +`${Number.isInteger(plan.branches_evaluated)?`；它算过 ${plan.branches_evaluated} 个分支、深度 ${plan.depth_searched??'—'}`:''}`
+   +`${plan.recommendation_stable===true?'，推荐是稳的':''}。`);
+ }else{
+  lines.push('引擎这一手还没给出推荐（这一轮包里没有规划）—— 我不替你挑，下面只摆现在看得见的。');
+ }
+ if(plan?.main_counter)lines.push(`对手最可能的应对：${plan.main_counter}。`);
+ if(plan?.damage_preview?.available)lines.push(`出手伤害预估 ${plan.damage_preview.min}–${plan.damage_preview.max}`
+  +`${Number.isFinite(plan.damage_preview.foe_hp)?`（对 ${plan.damage_preview.foe_hp} 血的目标）`:''}`
+  +`${plan.damage_preview.best_label?`，最高的是「${plan.damage_preview.best_label}」`:''}。`);
+ const targets=facts.switches.map((label)=>{const pet=switchTargetOf(label,facts);
+  return pet?`${label}（${pet.name}${Number.isFinite(pet.hp)&&Number.isFinite(pet.max_hp)?` ${pet.hp}/${pet.max_hp}`:''}）`:label;});
+ if(targets.length)lines.push(`这一回合能换的（引擎给的合法动作）：${targets.join('、')}。`);
+ const bench=[...facts.bench].filter((pet)=>Number.isFinite(pet.hp)).sort((a,b)=>b.hp-a.hp).slice(0,3);
+ if(bench.length)lines.push(`后备里血最多的三只：${bench.map((pet)=>`${pet.name} ${hpOf(pet)}`).join('、')}。`);
+ lines.push('换人要把这一回合用掉（引擎把它列成 switch 动作）；上面全是这一局公开视图里的数，它没给的我一个都不编。');
+ return {text:lines.join(''),evidence:[
+  `战况来源：这一局的公开视图（第 ${facts.turn} 回合、我方 ${facts.self.length} 只、对手场上 ${facts.foe?.name??'未知'}`
+   +`${Number.isFinite(facts.foe?.hp)?` ${facts.foe.hp} 血`:''}）。`,
+  ...(plan?['本回合的规划来自规则引擎（推荐、主要应对、伤害预估、分支数都在里面）。']:[]),
+  '这一局实际带的六只以 rocoLineup（引擎公开视图）为准；名单（roster）只是候选池那一页，不代表你带的队。',
+ ]};
+}
 export async function runCoach({message,role='auto',context,memory,conversation=[],provider=localProvider,correctionBudget=1}){
  // 路由只认**玩家原话**。
  //
@@ -2015,7 +2105,18 @@ export async function runCoach({message,role='auto',context,memory,conversation=
     &&(Boolean(factAnswer)||provider.name!=='local');
    if(role==='auto')route=factAsk?'teacher':(/培养|加点|成长/.test(routingText)?'teacher':(/怎么打|建议|这回合|换宠|换上|换成|换掉|换一只|补位|技能|出招|先手|能量|豆|属性|克制|防御|守一下|守住|预判/.test(routingText)||situational&&context.battle)?'strategist':'companion');
    if(followup&&['teacher','strategist'].includes(memory.lastTopic))route=memory.lastTopic;
-   if(factAsk){
+   // ── 2026-09-29（task-19 G1）：**局中「该换谁」本地这一支也要用战况** ──────────────────────
+   // 修前实测（真机 + 独立实例）：`roco_battle` 在包里，但这一句既不匹配上面那条 route 正则
+   // （「换谁」不在词表里），`situational&&context.battle` 也只看 legacy 的 `battle`（对局在 `roco_battle`）
+   // ⇒ 落到 `companion(...)`，而陪练看的是**队伍档案**（`profile.lineup`，页面上根本没送）
+   // ⇒ 以为"你没有队伍" ⇒ 回通用反问「说一下你的队伍和对手，我按相性挑。」
+   // 现在：没有模型那一档直接用这一局的公开视图 + 引擎规划组织回答（有模型时这一支不抢，
+   // 仍走 `simulate_branch` 的工具循环；`rocoLineup` 两条路都进包）。
+   const battleReply=provider.name==='local'?localRocoBattleReply({message,context}):null;
+   if(battleReply){
+    packet={text:battleReply.text,evidence:battleReply.evidence};
+    locked=true;route='strategist';next.lastTopic='strategist';
+   }else if(factAsk){
     packet={text:FACT_DRAFT,evidence:[]};
     next.lastTopic='rules';
    }else{
@@ -2034,6 +2135,9 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  // `read_*`/`search_rules`/`compare_*`（金标 c25–c34 一条都不含 query_rules），一个字都不动。
  // `!factAnswer||judgementOverFacts`：纯事实不问模型；带取舍的问句**查完事实再问**。
  const useModel=provider.name!=='local'&&!deterministic&&(!factAnswer||judgementOverFacts);
+ // 2026-09-29（task-19 G1）：**这一局实际带的六只**按权威那一份进包（`rocoLineup` ← `roco_battle.self`）。
+ // 不覆盖 `lineup`：那一位是页面自己送上来的（营地/工坊那两条老路），这里只加"引擎说的这一局的队"。
+ const rocoLineup=rocoLineupOf(context);
  if(!locked&&next.preference==='brief'&&packet.text.length>160)packet={...packet,text:packet.text.slice(0,157)+'…'};
  // 2026-09-25：六宠对局的**公开状态**（客户端从引擎公开视图裁出来的）按原样进包 ——
  // 小芽在对局中终于能看到战况。**只在客户端真的送了它的时候**才加这个键：
@@ -2049,6 +2153,13 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  // 实测：「我一共有多少只精灵？」→「你名下有 12 只精灵。」—— 12 是候选池第 1 页的条数。
  ...(rosterIsPage(context)?{evidence:[...(Array.isArray(packet.evidence)?packet.evidence:[]),
   rosterNote(context)]}:{}),...(context.roco_battle?{rocoBattle:context.roco_battle}:{}),...(context.roco_plan?{rocoPlan:context.roco_plan}:{}),
+ // 2026-09-29（task-19 G1）：**这一局实际带的六只**（权威：引擎公开视图）与**名单**同时在包里时，
+ // 必须说清哪一份是"这一局的队伍" —— 否则按名字猜队伍就是两份事实打架（本仓栽过多次）。
+ // 加性：只有真的在对局里（`roco_battle` 在位）才有这个键；营地/三宠那两条老路一字不变。
+ ...(rocoLineup.length?{rocoLineup}:{}),
+ ...(rocoLineup.length?{evidence:[...(Array.isArray(packet.evidence)?packet.evidence:[]),
+  `这一局实际带的六只在 rocoLineup 里（来源：第 ${context.roco_battle.turn} 回合的引擎公开视图，`
+  +'**这一局的权威**，每只都带血量/能量/是否倒下）；roster 只是候选池的一页，不代表你带的队。']}:{}),
  // 2026-09-25：引擎的规划进包时附一条**来源说明**（与 roco-service 的「对手是示例阵容」同款）：
  // 实测同一句话连跑 6 次，有 2 次模型说「我不冒充引擎 / 我这边没有能支撑的记录」——它手里其实有。
  // 这条只讲**这份数据是什么、可以引用**，不含任何结论（结论在 `rocoPlan` 里，来自引擎）。
@@ -2248,7 +2359,9 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  const activity=coachActivity({trace:packet.toolTrace,rejected,rejectedReason,answerCorrection,
   answerCorrectionRetried:answerSuppressed,provided:{
   plan:Boolean(context.roco_plan),battle:Boolean(context.battle),
-  lineup:Boolean(context.profile?.lineup?.length),roster:Boolean(context.profile?.pets?.length)}});
+  // 2026-09-29（task-19）：对局里那六只**也在包里**（`rocoLineup` ← 引擎公开视图）——
+  // 修前这一行只看 `profile.lineup`，于是局中活动行写的是「你的名单」而不是「你选的六只」。
+  lineup:Boolean(context.profile?.lineup?.length||rocoLineup.length),roster:Boolean(context.profile?.pets?.length)}});
  // 本地模型的**降级**要如实报（2026-09-26）：包装层（`wrapWithLocalModel`）在 4B 超时/不可用时
  // 会回退到 base（引擎模板），而回执如果还写 `provider:'mlx-local'`，那就是**谎报**——
  // 玩家以为这句话是模型说的。有 `lastFallback` 就报 `local-fallback` 并把原因带上。

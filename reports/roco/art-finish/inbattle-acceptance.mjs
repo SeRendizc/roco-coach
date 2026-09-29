@@ -115,6 +115,7 @@ async function main() {
       roco_js: sha256(join(ROOT, 'src/client/roco.js')),
       xiaoya_js: sha256(join(ROOT, 'src/client/xiaoya.js')),
       team_workshop_js: sha256(join(ROOT, 'src/client/team-workshop.js')),
+      coach_runtime_js: sha256(join(ROOT, 'src/coach/runtime.js')),
       roco_html: sha256(join(ROOT, 'src/client/roco.html')),
     }, steps: {}, problems: [], notes: []};
 
@@ -278,6 +279,19 @@ async function main() {
       };
 
       const positive = await ask('我现在该换谁？');
+      // 📸 正例的屏幕证据**必须在反证之前拍**：反证会把 `state.view` 藏掉、日志里最后一条变成反证那句，
+      // 在反证之后拍就会"拍到另一句"（我第一版就是这么拍的，图与读数对不上，已改）。
+      const positiveShot = await shot('inbattle-01-coach-ask');
+      // 把这一问的**完整请求体**单独落一份：task-19 的修前/修后要用它做不熄灯的 Node 复现
+      // （浏览器一轮 ~3 分钟；同问同局的复现要能秒级迭代）。体积大，所以不进主读数文件。
+      try {
+        if (positive.http?.postData) {
+          writeFileSync(join(OUT, 'inbattle-ask-body.json'), `${JSON.stringify({
+            captured_at: new Date().toISOString(), source: 'inbattle-acceptance.mjs 的局中正例',
+            question: positive.question, postData: JSON.parse(positive.http.postData),
+          }, null, 2)}\n`);
+        }
+      } catch { /* 落不下不影响判据 */ }
       const verdictOk = evaluateAsk(positive.record);
       readings.steps['③ 局中正例'] = {turn: positive.screen.turn, turnDom: positive.screen.turnDom,
         coachRequestCount: coachReqs.length,
@@ -285,7 +299,8 @@ async function main() {
         onFieldNames: positive.screen.onFieldNames, answer: positive.screen.answer,
         requestBodyKeys: (() => { try { return Object.keys(JSON.parse(positive.http?.postData ?? '{}').context ?? {}); } catch { return null; } })(),
         rocoBattle: (() => { try { return JSON.parse(positive.http?.postData ?? '{}').context?.roco_battle ?? null; } catch { return null; } })(),
-        httpStatus: positive.http?.status ?? null, failures: verdictOk.bad, detail: verdictOk.detail};
+        httpStatus: positive.http?.status ?? null, failures: verdictOk.bad, detail: verdictOk.detail,
+        screenshot: positiveShot};
       if (verdictOk.bad.length) readings.problems.push(`③ 局中正例没全过：${verdictOk.bad.join('；')}`);
 
       // 必红反证：把宿主动局上下文口的来源 `state.view` 藏掉 ⇒ 同一条判据必须红
@@ -303,7 +318,7 @@ async function main() {
         readings.problems.push('③ 必红反证**没有红**：藏掉 state.view 之后同一条判据仍然全过 ⇒ 判据是空的');
       }
       readings.notes.push(`③ 反证响度：${verdictRed.bad.length}/4 条变红（${verdictRed.bad.map((x) => x.slice(0, 2)).join('、')}）`);
-      readings.steps['③ 局中截图'] = await shot('inbattle-01-coach-ask');
+      readings.steps['③ 反证截图'] = await shot('inbattle-01b-coach-ask-after-red-control');
 
       // ── ④ 介入链路：局中自动气泡/提示 ───────────────────────────────────────────
       // `refreshHint()` 是**自动**那条路：`requestPlan({reason:'match-start'})` 回来之后调用

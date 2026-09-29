@@ -1,5 +1,5 @@
 {
- "started_at": "2026-09-29T01:43:41.637Z",
+ "started_at": "2026-09-29T02:03:26.426Z",
  "team6": [
   "own-0001",
   "own-0002",
@@ -9,9 +9,10 @@
   "own-0006"
  ],
  "source_snapshot": {
-  "roco_js": "637edf4a77fb",
-  "xiaoya_js": "b2b25036bb6c",
+  "roco_js": "302087b6d968",
+  "xiaoya_js": "bf50c9cc89cd",
   "team_workshop_js": "eaac58061da5",
+  "coach_runtime_js": "b1660ad7d51d",
   "roco_html": "f1cc3e814d72"
  },
  "steps": {
@@ -124,7 +125,7 @@
     "火神",
     "魔力猫"
    ],
-   "answer": "说一下你的队伍和对手，我按相性挑。依据：本回合的规划（引擎算的） · 你的名单",
+   "answer": "第 1 回合：喵喵 在场上（332/332 血，能量 10）；对手是 魔力猫（405/405 血）。引擎这一手推荐「换上第6位」，也就是换 火神 上来（420/420 血）；它算过 96 个分支、深度 2，推荐是稳的。对手最可能的应对：腐化。出手伤害预估 28–180（对 405 血的目标），最高的是「仙人掌刺击」。这一回合能换的（引擎给的合法动作）：换上第2位（水蓝蓝 348/348）、换上第3位（火花 340/340）、换上第4位（迪莫 425/425）、换上第5位（水灵 434/434）、换上第6位（火神 420/420）。后备里血最多的三只：水灵 434/434 血、迪莫 425/425 血、火神 420/420 血。换人要把这一回合用掉（引擎把它列成 switch 动作）；上面全是这一局公开视图里的数，它没给的我一个都不编。依据：本回合的规划（引擎算的） · 你选的六只 · 你的名单",
    "requestBodyKeys": [
     "evidenceIndex",
     "mode",
@@ -143,7 +144,7 @@
    ],
    "rocoBattle": {
     "turn": 1,
-    "battle_id": "s1-vu9ppxzo",
+    "battle_id": "s1-oda3pm7f",
     "state_version": 0,
     "phase": "battle",
     "result": null,
@@ -284,20 +285,35 @@
     ]
    },
    "httpStatus": 200,
-   "failures": [
-    "④ 回答看不出与当前局面有关（没提到场上任何一只、也没提当前回合或任何血量数字）"
-   ],
+   "failures": [],
    "detail": {
-    "answerLen": 39,
+    "answerLen": 402,
     "battlePresent": true,
     "turn": 1,
     "screenTurn": 1,
-    "nameHits": [],
-    "turnHit": false,
-    "hpHits": [],
+    "nameHits": [
+     "喵喵",
+     "水蓝蓝",
+     "火花",
+     "迪莫",
+     "水灵",
+     "火神",
+     "魔力猫"
+    ],
+    "turnHit": true,
+    "hpHits": [
+     "332",
+     "348",
+     "340",
+     "425",
+     "434",
+     "420",
+     "405"
+    ],
     "appendedInstruction": "\n回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释。游戏按回合结算，不按秒；不要编造技能冷",
     "requestMessageHead": "我现在该换谁？\n回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释"
-   }
+   },
+   "screenshot": "docs/roco/review-2026-09-28/shots/art-finish/inbattle-01-coach-ask.png"
   },
   "③ 必红反证（藏掉 state.view）": {
    "answer": "说一下你的队伍和对手，我按相性挑。依据：你的名单",
@@ -320,7 +336,7 @@
    },
    "loudness": "2/4 条判据变红"
   },
-  "③ 局中截图": "docs/roco/review-2026-09-28/shots/art-finish/inbattle-01-coach-ask.png",
+  "③ 反证截图": "docs/roco/review-2026-09-28/shots/art-finish/inbattle-01b-coach-ask-after-red-control.png",
   "④ 介入链路（自动气泡）": {
    "samples": [
     {
@@ -669,7 +685,7 @@
   "⑤ 三屏与异常计数": {
    "培养（首页训练场）": {
     "ready": true,
-    "url": "http://127.0.0.1:56813/index.html",
+    "url": "http://127.0.0.1:61234/index.html",
     "exceptions": 0,
     "shot": "docs/roco/review-2026-09-28/shots/art-finish/inbattle-03-nurture.png",
     "visible": {
@@ -680,7 +696,7 @@
    },
    "配队（roco.html 工作台）": {
     "ready": true,
-    "url": "http://127.0.0.1:56813/roco.html?team=own-0001,own-0002,own-0003,own-0004,own-0005,own-0006",
+    "url": "http://127.0.0.1:61234/roco.html?team=own-0001,own-0002,own-0003,own-0004,own-0005,own-0006",
     "exceptions": 0,
     "shot": "docs/roco/review-2026-09-28/shots/art-finish/inbattle-04-workshop.png",
     "visible": {
@@ -691,25 +707,23 @@
    },
    "对战（本轮的局中那一屏）": {
     "ready": true,
-    "url": "http://127.0.0.1:56813/roco.html#battle",
+    "url": "http://127.0.0.1:61234/roco.html#battle",
     "exceptions": null,
     "shot": "docs/roco/review-2026-09-28/shots/art-finish/inbattle-02-battle-hint.png",
     "note": "对战那一屏就是上面局中那一次；异常计数见 exceptionsDuringRun"
    }
   }
  },
- "problems": [
-  "③ 局中正例没全过：④ 回答看不出与当前局面有关（没提到场上任何一只、也没提当前回合或任何血量数字）"
- ],
+ "problems": [],
  "notes": [
   "③ 反证响度：2/4 条变红（③ 、④ ）",
   "④ 现版 DOM 里 `#plan` / `#auto-turn` 都不存在（roco.js 里对它们是死绑定）⇒ 玩家没有\"手动叫出提示\"的入口"
  ],
  "own_server": {
-  "base": "http://127.0.0.1:56813/",
-  "port": 56813,
+  "base": "http://127.0.0.1:61234/",
+  "port": 61234,
   "note": "独立实例（不是 8765）：进程内 createCoachServer + listen(0)；引擎是它自己的 Python 子进程（--port 0）"
  },
  "exceptionsDuringRun": [],
- "finished_at": "2026-09-29T01:44:28.835Z"
+ "finished_at": "2026-09-29T02:04:12.572Z"
 }
