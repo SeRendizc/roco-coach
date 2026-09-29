@@ -57,6 +57,15 @@
 ⚠ **第 5/7 条我怀疑"已经修了但用户那版没吃到"** —— 参见 §3 的**未部署**清单。
 **这决定了新对话的第一件事：确认用户看到的到底是哪一版。**
 
+### 1.2 ⚠ 两条**已经被实测推翻**的旧判断（别再把它们当待修问题）
+
+1. **「记忆丢失 / 她记不住我说的话」—— 不成立。**
+   `coach-context` 停手前的最终读数：气泡 `3→5`，`stated=1`、`rows:["称呼：老王"]` ⇒
+   **服务端那份记忆照旧记进去了**。早先的 `stated=0` 是他**探针没把第二条发出去**（气泡 `3→3`）。
+   ⇒ **记忆的写入者仍然只有服务端那一份**（没有第二个来源，也没有"功能丢失"）。
+2. **「她说不出局面」—— 一半已解决。** `task-19` 之后局中问「我现在该换谁？」是 **402 字场面型回答**
+   （回合/血量/能量/对手/引擎推荐/合法换人），不再是 39 字反问；**但用户那版可能没吃到**（见 §3）。
+
 ---
 
 ## 2. WIP 归属（本轮已全部提交为 `84a68c8`，工作区干净）
@@ -269,12 +278,49 @@
 - **复核入口**：`node reports/roco/art-finish/inbattle-ask-repro.mjs`（含 `--drop roco_battle` 红方向）；
   交接材料 `reports/roco/art-finish/G1-局中问答-修前修后.md`、`BATCH-07`、`BATCH-09`。
 
-### 10.3 `coach-context`（`task-13` in_progress）—— **报告未回**
+### 10.3 `coach-context`（`task-13` in_progress）—— **已停手并报全**（含一条**推翻性更正**）
 
-已发停止通知；他的在飞改动**已随 `84a68c8` 入库**（§2 第 1 行）。
-接手前**必须先读他的 `docs/roco/review-2026-09-28/BATCH-05-no-key-server-data.md`**，
-并**先跑 `node --test tests/roco-xiaoya-context.test.js tests/roco-battle-panel-static.test.js`**
-确认他停在哪一步（我最后一次核是 34/34 绿）。
+**工作区 0 条未提交**（他的改动都在 `84a68c8` / `f490412` / `f5dafee` 里）。逐条：
+
+| 文件 | 说明 | 状态 |
+|---|---|---|
+| `src/client/roco.html` | 甲④-1：移除 `#companion-card` 整块，入口保留 | 能跑（boot 干净） |
+| `src/client/roco.js` | `mountRocoXiaoya({contextProvider})`、入口开/关浮层、`rocoDemo.companionVisibility()/renderCompanion()` 按 (i) 转真实状态、旧面板 6 个画法早退守卫、`retiredStub` 替身（**已改成同一棵游离树**，修掉 `insertBefore` 崩溃）、审计高 11 那套仍在（**死绑定**） | 能跑（**局中 9/9**，独立实例） |
+| `src/client/xiaoya.js` | 甲②①/②②/③ 搬迁 + 宿主 `contextProvider` 口 + `handle{isOpen,open,close,render}` + 审计高 11 飞行守卫；**记忆那处抢跑修改已撤回**（审计过程留注释） | 能跑，单测 27/27 |
+| `scripts/roco/demo-acceptance.mjs` | 旧面板选择器改钉到**活着的浮层**、禁浏览器缓存、**加前置读数「气泡数必须涨」** + `--red-proof` | **128 通过 / 2 失败** |
+| `tests/roco-battle-panel-static.test.js` | 审计高 11 判据**改钉不删** | 7/7 |
+| `tests/roco-xiaoya-context.test.js` | ⑯–⑳ 结构钉 + 两处改钉 | 27/27 |
+| `reports/roco/xiaoya-context/*.mjs` | 探针：`--own-server`、持久 profile、每轮清 cookie、等引擎热 | 能跑 |
+
+**跑法**：`node scripts/roco/demo-acceptance.mjs` —— 它自己 `createCoachServer + listen(0)`（随机端口，如 `127.0.0.1:59363`）；**独立实例；8765 全程未碰**。
+
+#### ⚠⚠ **最重要的一条更正读数**（他停手前刚拿到，**推翻了我 §1.1 与之前的判断**）
+
+```
+⓪ 前置：气泡 3→5 ✔
+记忆：「玩家说过的话会出现在『她记住了什么』里」ok=true
+      detail={"hook":"1","rows":["称呼：老王"],"stated":1,"statedLabels":["称呼：老王"]}
+```
+⇒ **「真功能丢失」完全不成立**：走浮层说「以后叫我老王」，**服务端那份记忆照旧记进去了**。
+早先的 `stated=0` 是**他的探针把浮层 toggle 关了**导致第二条没发出去（`气泡 3→3` 就是证据）。
+⇒ **他据此撤回那处抢跑的产品修改是对的**；**记忆的写入者仍然只有服务端那一份**（没有第二个 remembered 来源）。
+
+#### 他没做完的（照抄，一条不含糊）
+
+1. `demo-acceptance` 剩 **2 条红**：①「忘掉一条之后列表里真的没有了」（忘掉那步要改钉到浮层）；
+   ②「④ 真鼠标打开小芽弹窗 + 按原路径要一份建议」（**`#plan` 那条老链路，链接在已被删的 `#plan`/`.battle-tools` 上**）；
+2. **前置读数的必红反证没跑**（`--red-proof` 开关已写好、**未执行**）；
+3. **其余 5 个浏览器脚本未改**（`browser-coach-agent-acceptance` / `browser-battle-coach-acceptance` /
+   `browser-battle-feedback-acceptance` / `capture-battle-evidence` / `eval-five-minute-chain` / `cdp-companion-lines.js`）；
+   三个 `tests/`（companion-contract 9 / coach-activity 2 / page-ux 1）**未逐个核实**"注释 vs 真读 DOM"；
+4. **④-2 未做完**：旧面板死代码未清、**`retiredStub` 替身必须删掉**（它现在不抛了，但按纪律要清）、
+   `roco-page-ux` 字面量钉未改；
+5. `task-19`(G1) 不在他这儿。
+
+#### 残留
+
+**他无后台任务**；**`tmp/browser-lock` 现在不存在**（无锁）；**机器上有 26 个 headless Chrome** ——
+他**无法归属**（可能是队友在跑或历史残留）⇒ **没杀**，留给接手人按人核实。
 
 ### 10.4 `build-snapshot`（`task-18` in_progress）—— **报告未回**
 
