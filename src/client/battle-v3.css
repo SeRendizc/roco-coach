@@ -294,6 +294,45 @@ body[data-b3-tab="escape"] .b3-wrap .b3-panel--escape,
    拿它兜底就是替引擎宣称一件没算过的事）。 */
 .b3-wrap .b3-rel[data-b3-rel="unknown"] svg{display:none}
 
+/* ── U05（2026-09-29）承伤相性的**文字**部分：不只靠红绿三角，旁边永远有一句带系别的字 ──
+   换人候选那一句在 `.b3-slot-tail`（`[data-b3-switch-rel-text]`）里，我在场上那一只在
+   `.b3-threat` 里；两者用同一套方向词（threat/resist/neutral/unknown），所以这一段管两处。 */
+.b3-wrap .b3-slot-tail[data-b3-switch-affinity="threat"]{color:#ff9c9c;font-weight:650}
+.b3-wrap .b3-slot-tail[data-b3-switch-affinity="resist"]{color:#7fdcae;font-weight:650}
+.b3-wrap .b3-slot-tail[data-b3-switch-affinity="neutral"]{color:#c8d6e2}
+/* unknown ⇒ 上一帧可能留过字：兜住"没有权威倍率就一个字都不留"。 */
+.b3-wrap .b3-slot-tail[data-b3-switch-affinity="unknown"]{color:#8ea2b4}
+
+/* ①-b 我在场上这一只的承伤相性：一行、紧凑；窄屏省略号而不是撑破卡片。 */
+.b3-wrap .b3-threat{
+  font-size:11.5px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  color:#c8d6e2;border-left:2px solid #33485c;padding-left:7px;
+}
+.b3-wrap .b3-threat[data-b3-self-threat="threat"]{color:#ff9c9c;border-left-color:#7a3b3b}
+.b3-wrap .b3-threat[data-b3-self-threat="resist"]{color:#7fdcae;border-left-color:#2f6b52}
+
+/* ── U08（2026-09-29）：「查看建议」高亮的那一格 ────────────────────────────────
+   点小芽建议卡上的「查看」时，宿主把对应格子滚进视野并加这个类约 2.6 秒。
+   **只是高亮，不是执行** —— 玩家自己再点一下才真的出手（不许替玩家出招）。 */
+.b3-wrap .b3-slot.b3-slot--advised,
+.b3-wrap .b3-slot--advised{
+  outline:2px solid #7fdcae;outline-offset:2px;box-shadow:0 0 0 4px rgba(127,220,174,.16);
+  transition:box-shadow .2s ease,outline-color .2s ease;
+}
+
+/* ── U06（2026-09-29）：战报里的「未核验说明」降级成小字 ────────────────────────
+   用户截图 6：每一句事件后面都拖一段同样重的括号说明，整屏读起来像工程日志。
+   口径是「先呈现玩家事件，估算与未核验影响保留为**简短相关说明**」——
+   所以**一个字都没删**（文本仍完整、仍在同一段里），只是把它压小、压暗一档：
+   玩家先读到"谁用了什么、打了多少、谁倒下"，要追究时那一句还在原地可读。 */
+.b3-wrap .b3-log-line .b3-log-caveat,
+.b3-wrap [data-b3-log-caveat="yes"]{
+  display:inline-block;margin-left:2px;font-size:10.5px;line-height:1.45;
+  color:#8ea2b4;opacity:.9;
+}
+/* 一行里既有正文又有说明时，正文那一截保持正常亮度（说明不再和它抢注意力）。 */
+.b3-wrap p[data-b3-log-has-caveat="yes"]{line-height:1.7}
+
 /* ── ③ 中间两张卡（显式镜像，不靠 row-reverse 猜顺序） ─────────────────── */
 .b3-wrap .b3-stage{
   display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);

@@ -1,0 +1,550 @@
+{
+  "at": "2026-09-29T03:01:16.179Z",
+  "base": "http://127.0.0.1:8765",
+  "viewport": "1440x900",
+  "servedVersion": {
+    "src/client/roco.html": {
+      "status": 200,
+      "bytes": 45277
+    },
+    "src/client/roco.js": {
+      "status": 200,
+      "bytes": 231045
+    },
+    "src/client/xiaoya.js": {
+      "status": 200,
+      "bytes": 76908
+    },
+    "src/client/roco.css": {
+      "status": 200,
+      "bytes": 67335
+    },
+    "src/client/battle-v3.css": {
+      "status": 200,
+      "bytes": 34036
+    },
+    "src/client/type-affinity.js": {
+      "status": 200,
+      "bytes": 4841
+    },
+    "src/client/type-affinity.data.js": {
+      "status": 200,
+      "bytes": 12090
+    },
+    "src/client/box.js": {
+      "status": 200,
+      "bytes": 70519
+    },
+    "/api/bootstrap": {}
+  },
+  "workspaceHeads": {
+    "src/client/roco.html": {
+      "servedEqualsDisk": true,
+      "servedBytes": 45277,
+      "diskBytes": 45277,
+      "diskSha256": "46d87c786726ae711871638b3289ae9de0cac5e3ec17269b7ea1f2d28ee384fc"
+    },
+    "src/client/roco.js": {
+      "servedEqualsDisk": true,
+      "servedBytes": 231045,
+      "diskBytes": 231045,
+      "diskSha256": "49017aabeb6898513de7e286494b829e4ebe5e9fe63763b3809cc03251445741"
+    },
+    "src/client/xiaoya.js": {
+      "servedEqualsDisk": true,
+      "servedBytes": 76908,
+      "diskBytes": 76908,
+      "diskSha256": "d1bb307b462b5d5d1c22f13423151d7373e74fd872ecefe7cfcda68752b04a23"
+    },
+    "src/client/roco.css": {
+      "servedEqualsDisk": true,
+      "servedBytes": 67335,
+      "diskBytes": 67335,
+      "diskSha256": "4aa3ebdc0a39ff6182ad70b4e0ffbbee7c10b9d53aa8ac344c8ce1904aae3abe"
+    },
+    "src/client/battle-v3.css": {
+      "servedEqualsDisk": true,
+      "servedBytes": 34036,
+      "diskBytes": 34036,
+      "diskSha256": "c4ba9090753db0bfe00da051500e423ea60ebd54f04684279f357e3bc7170058"
+    },
+    "src/client/type-affinity.js": {
+      "servedEqualsDisk": true,
+      "servedBytes": 4841,
+      "diskBytes": 4841,
+      "diskSha256": "e4d78d9bb34ea8a0554974dc55e58b96493c2d5b205b35b54c39b70fc0073a69"
+    },
+    "src/client/type-affinity.data.js": {
+      "servedEqualsDisk": true,
+      "servedBytes": 12090,
+      "diskBytes": 12090,
+      "diskSha256": "48d721cb4e10adfc5b5f35642f2371ab8851d022fb0fa3502fdff34c1aa0565f"
+    },
+    "src/client/box.js": {
+      "servedEqualsDisk": true,
+      "servedBytes": 70519,
+      "diskBytes": 70519,
+      "diskSha256": "a9bbdc928ba89a72b9727a3b1dc2cf862bb4a9575d603b02976ff5342304cdea"
+    }
+  },
+  "checks": {
+    "sixPetPool": {
+      "ids": [
+        "own-0177",
+        "own-0325",
+        "own-0327",
+        "own-0328",
+        "own-0481",
+        "own-0501"
+      ],
+      "total": 25
+    },
+    "sixPetWaitTicks": 0,
+    "start": {
+      "ok": false,
+      "why": "点了之后 15 秒里没进六宠局",
+      "before": {
+        "disabled": false,
+        "mode": "formal",
+        "team": 6,
+        "fieldable": 6
+      },
+      "now": {
+        "pets": null,
+        "turn": null
+      },
+      "note": "只要选满六只开局"
+    },
+    "u09": {
+      "focusPatch": {
+        "before": false,
+        "after": true
+      },
+      "turnsPlayed": 24,
+      "docHeightSeries": [
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900
+      ],
+      "docHeightStable": true,
+      "perTurn": [
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        },
+        {
+          "turn": null,
+          "action": null,
+          "gate": null,
+          "reason": null,
+          "renderedGate": "",
+          "renderedAction": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceSource": null,
+          "speakBlockedBy": null,
+          "unavoidable": null,
+          "value": null,
+          "floor": null,
+          "decisive": false
+        }
+      ],
+      "aboveFloorTurns": [],
+      "gateHistogram": {
+        "|silent": 24
+      },
+      "adviceKindsSeen": [],
+      "gateSwallowedAdvice": [],
+      "bubbles": [],
+      "codeLeaks": [],
+      "uselessSentence": [],
+      "lastTurn": null,
+      "finished": false
+    }
+  }
+}

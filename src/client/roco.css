@@ -839,6 +839,10 @@ body[data-roco-view="ready"] main>#select-panel,
 body[data-roco-view="ready"] main>#pool-footbar,
 body[data-roco-view="ready"] main>#result-panel,
 body[data-roco-view="ready"]:not([data-roco-lesson="shown"]) main>#lesson-card{display:none}
+/* ⚠ 2026-09-29 U10：上面 `main>#lesson-card` 那一条**已经不匹配任何元素**了 ——
+   复盘卡搬进了 `#battle-result-card > .roco-result-box`（见本文件 U10 那一段）。
+   留着不删是「改钉不删」：它记录了"复盘曾经是 main 的直接子元素"这件事。
+   新口径：复盘跟着结算框出现，不再由 `data-roco-lesson` 控制背后页面的显示。 */
 
 /* 战斗态旧底栏已收起，页面就别再给它留位置（否则 main 仍预留 ~250px，docH 1132 > 900）。 */
 body[data-roco-view="ready"] main{padding-bottom:8px}
@@ -1103,7 +1107,7 @@ body:has(#battle-panel:not([hidden])){overflow-x:hidden}
 .roco-result-card{position:fixed;inset:0;z-index:75;display:flex;align-items:center;justify-content:center;
  padding:20px;background:none;pointer-events:none}
 .roco-result-card[hidden]{display:none !important}
-.roco-result-box{width:min(420px,92vw);background:#101a24;border:1px solid var(--line);border-radius:18px;
+.roco-result-box{width:min(420px,92vw);background:#101a24;border:1px solid var(--line);border-radius:18px;max-height:86vh;overflow:auto;overscroll-behavior:contain;
  padding:18px 20px;display:flex;flex-direction:column;gap:10px;box-shadow:0 18px 46px rgba(0,0,0,.6);
  pointer-events:auto}
 /* 2026-09-23（接手复核）：**不做暗化遮罩、也不吃整屏点击**。
@@ -1117,6 +1121,29 @@ body:has(#battle-panel:not([hidden])){overflow-x:hidden}
 .roco-result-note{margin:0;font-size:12px;line-height:1.7;color:#9caebe}
 .roco-result-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:4px}
 .roco-result-actions button{min-height:44px;flex:1 1 auto}
+
+/* ── U10（2026-09-29）：复盘**搬进结算框之后**的版式 ─────────────────────────────
+   修前（原文留档，别删）：复盘卡是 `<main>` 直接子元素、在结算框**外面**，由
+   `body[data-roco-view="ready"] main>#lesson-card` 那两条 display 规则管着；
+   它一出现就把背后那一页往下挤一截 —— 用户 2026-09-29 截图 10 报的就是这个。
+   现在它在框里，所以：
+     · 框按内容放宽（420 → 最多 560），但**永远不超过视口高度**；
+     · 框自己滚动（长复盘不会把「再来一局」按钮推出屏幕）；
+     · 复盘卡在里面**去掉面板外框**（它已经在一个框里了，再套一层就是两层边）；
+     · 底部四个出口 `sticky` 贴框底 —— 滚到哪都点得到（结算页不能让人先找出口）。 */
+.roco-result-box:has(#lesson-card:not([hidden])){width:min(560px,94vw)}
+.roco-result-box>.lesson-card{
+  border:0;background:transparent;margin:2px 0 0;border-top:1px solid var(--line);padding:10px 0 0;
+}
+.roco-result-box>.lesson-card .section-title h2{font-size:15px}
+.roco-result-box>.lesson-card .result-turn{margin:4px 0 0;font-size:13.5px;line-height:1.7}
+.roco-result-box>.lesson-card .result-goal{margin-top:8px;padding:7px 11px;font-size:13.5px}
+.roco-result-box>.lesson-card .lesson-full{margin-top:8px}
+.roco-result-box>.lesson-card .lesson-full p{font-size:12.5px;line-height:1.7}
+.roco-result-box>.roco-result-actions{
+  position:sticky;bottom:-18px;margin:2px -20px -18px;padding:10px 20px 16px;
+  background:linear-gradient(180deg,rgba(16,26,36,.72),#101a24 38%);border-top:1px solid var(--line);
+}
 
 /* ── 小芽面板里那一行模型连接状态（判据 `live-model-status` 的读取点 `#model-chip`）──
    高度按判据给足（≥24px），点它去连接页；文案与 `data-roco-model` 由 `renderModelChip()` 写。 */

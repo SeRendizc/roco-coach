@@ -106,6 +106,12 @@ SAMPLE_EVENTS = {
         "side": "Enemy", "weather": "暴风雪", "status": "freeze", "layers": 2, "layers_after": 2}},
     "weather_immune": {"kind": "weather_immune", "turn": 1, "detail": {
         "side": "Player", "weather": "暴风雪", "status": "freeze", "immune_element": "冰"}},
+    # 2026-09-29（U06）：`env._accumulate_per_use_ramp` 一直在发这个 kind，模板缺席 ⇒
+    # 玩家看到的是兜底话「发生了一件事（引擎事件 per_use_ramp，本页还没有它的中文说法）」
+    # —— 就是用户截图 6 里那一行。样本按引擎**真实形状**给：`side` 现在是 `None`（env 没带），
+    # 所以句子必须**不写主语**，也不许把 `None` 漏到屏幕上。
+    "per_use_ramp": {"kind": "per_use_ramp", "turn": 6, "detail": {
+        "side": None, "skill_id": "skill_000365", "field": "power", "delta": -30, "total": -30}},
     "drain_energy": {"kind": "drain_energy", "turn": 2, "detail": {"side": "enemy", "taken": 2}},
     "item": {"kind": "item", "turn": 5, "detail": {"side": "player", "item": "potion", "healed": 50}},
     "switch": {"kind": "switch", "turn": 5, "detail": {"side": "player", "to_slot": 1}},
@@ -207,6 +213,30 @@ class WeatherSentencesTest(unittest.TestCase):
         immune = events_text.event_text(SAMPLE_EVENTS["weather_immune"])
         self.assertIn("免疫", immune)
         self.assertIn("冰冻", immune)
+
+    def test_per_use_ramp_reads_as_a_real_sentence(self):
+        """U06（2026-09-29）：这一条原来是兜底话「发生了一件事（引擎事件 per_use_ramp…）」。
+
+        用户截图 6 点名的就是它，所以这里钉三件事：
+          ① 不许再出现兜底话；② 要把「哪个量、这次加了多少、现在累计多少」念出来；
+          ③ `side` 是 `None` ⇒ 句子里**不许**出现 `None` / `None` 的痕迹。
+        """
+        text = events_text.event_text(SAMPLE_EVENTS["per_use_ramp"], RS)
+        self.assertNotIn("还没有它的中文说法", text, "不许再落到兜底句")
+        self.assertIn("威力", text)
+        self.assertIn("-30", text)
+        self.assertIn("累计", text)
+        self.assertNotIn("None", text, "detail.side 是 None ⇒ 不许把它印到屏幕上")
+        # 反向：加值要带 "+"，且累计值要念出来（不能只说"变了"）。
+        up = {"kind": "per_use_ramp", "turn": 7, "detail": {
+            "side": None, "skill_id": "skill_000365", "field": "power", "delta": 10, "total": -20}}
+        up_text = events_text.event_text(up, RS)
+        self.assertIn("+10", up_text)
+        self.assertIn("-20", up_text)
+        # 拿不到「哪个量/变了多少」时：如实说不知道，**不编 0**、也不静默。
+        blind = events_text.event_text({"kind": "per_use_ramp", "turn": 8, "detail": {"side": None}})
+        self.assertIn("没给", blind)
+        self.assertNotIn("0", blind.replace("没给", ""), "拿不到增量时不许编一个数字")
         status = events_text.event_text(SAMPLE_EVENTS["weather_status"])
         self.assertIn("2 层", status)
         self.assertIn("冰冻", status)

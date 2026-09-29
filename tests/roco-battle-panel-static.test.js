@@ -59,8 +59,29 @@ test('④ 客户端从 sample.multiplier 推三角与颜色；更换屏显式 un
     '倍率只能来自引擎给的 sample.multiplier');
   assert.match(CLIENT, /const relWord = mult === null \? 'unknown' : mult > 1 \? 'up' : mult < 1 \? 'down' : 'none'/,
     'up/down/none 的判定必须写在这一处（拿不到就是 unknown）');
-  assert.match(CLIENT, /const mark = cell\.querySelector\('\[data-b3-rel\]'\);\s*\n\s*if \(mark\) mark\.dataset\.b3Rel = 'unknown'/,
-    '更换屏的三角必须显式写成 unknown（不清掉就会一直显示设计稿的值）');
+  // ⚠ 2026-09-29 U05 **改钉**（旧断言原文留档，**别删**）：
+  //     assert.match(CLIENT, /const mark = cell\.querySelector\('\[data-b3-rel\]'\);\s*\n\s*if \(mark\) mark\.dataset\.b3Rel = 'unknown'/,
+  //       '更换屏的三角必须显式写成 unknown（不清掉就会一直显示设计稿的值）');
+  // 为什么改（依据：用户 2026-09-29 截图 5/6 的 U05 口径 + review-2026-09-28/product-reset-2026-09-29/README.md U05）：
+  //   旧口径是「承伤倍率拿不到 ⇒ 一律 unknown」。而用户报的正是「换精灵后克制/被克制标记**丢失**」
+  //   —— "一律 unknown"就是那个"丢失"本身：设计稿里写死的值确实被清掉了，但**真的倍率一个都没补**。
+  //   现在口径定了：换人候选 = **承伤向**相性（对手属性各当一次攻击系，取最坏那一格），
+  //   数据来自 `src/client/type-affinity.js`（由冻结真值 `types.json` 生成，逐格对账 2160/2160）。
+  //   所以这一格**必须**写活值，只允许「防御组合没登记」时落回 unknown。
+  //   同一段里技能格那条**进攻向**倍率（引擎 samples）一个字没动 —— 两者不许混用。
+  assert.match(CLIENT, /const REL_MARK = Object\.freeze\(\{threat: 'down', resist: 'up', neutral: 'none', unknown: 'unknown'\}\)/,
+    '承伤相性的方向词只在一处映射成 CSS 认的 up/down/none（避免两套口径）');
+  assert.match(CLIENT, /const mark = cell\.querySelector\('\[data-b3-rel\]'\);\s*\n\s*if \(mark\) \{\s*\n\s*mark\.dataset\.b3Rel = REL_MARK\[affinity\.direction\] \?\? 'unknown'/,
+    '更换屏的三角必须按**现算**的承伤相性写（只有组合未登记才落回 unknown，不许一律 unknown）');
+  // 反证：这条新断言必须能红 —— 拿旧写法（一律 unknown）喂给它，必须不匹配。
+  assert.equal(/mark\.dataset\.b3Rel = REL_MARK\[affinity\.direction\]/.test("if (mark) mark.dataset.b3Rel = 'unknown'"), false,
+    '反证：新探测器对"一律 unknown"的旧写法必须为假');
+  // 反证：把相性函数从源码里抽掉，新断言也必须红（防止它变成"只要写了 REL_MARK 就绿"的摆设）。
+  assert.equal(
+    /const mark = cell\.querySelector\('\[data-b3-rel\]'\);\s*\n\s*if \(mark\) \{\s*\n\s*mark\.dataset\.b3Rel = REL_MARK\[affinity\.direction\] \?\? 'unknown'/
+      .test(CLIENT.replaceAll('incomingAffinity', 'REMOVED')),
+    true,
+    '说明：这条钉的是"写法"，不含函数名 —— 函数是否真的被调用由 tests/roco-client-type-affinity.test.js 与真机读数负责');
   // 反证：探测器对准"没有这段"的源码必须为假
   const probe = (src) => /const relWord = mult === null/.test(src);
   assert.equal(probe('const x = 1;'), false, '探测器本身必须能红');

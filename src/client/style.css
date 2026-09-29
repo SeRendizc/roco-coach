@@ -564,13 +564,42 @@
 .xy-fab:hover{background:#233a33;border-color:#6f9c7f}
 .xy-fab[aria-expanded="true"]{color:#152c24;background:var(--accent);border-color:var(--accent);font-weight:600}
 .xy-pop{position:fixed;right:16px;top:62px;z-index:70;display:flex;flex-direction:column;
- width:min(430px,calc(100vw - 24px));height:min(560px,calc(100dvh - 82px));padding:14px;
+ width:min(430px,calc(100vw - 24px));
+ /* U07（2026-09-30）版式：**稳定侧栏/浮层**，不遮挡主要战斗动作。
+    roco.html 的主要动作是一条贴底通栏（`.action-panel`，高度写在 `--bottombar`），
+    所以面板高度要把它让出来；`clamp` 的下限 320px 保证再矮的视口也读得到对话区。
+    标题栏/状态两行/输入行都不参与滚动，中间 `.xy-log` 自己滚（见下）。
+    旧规则留档（改钉不删，别再改回来）：
+      height:min(560px,calc(100dvh - 82px))  —— 高度里没给底部动作坞留位置，
+      矮视口/展开次级区时输入行会被挤出面板。 */
+ height:clamp(320px,calc(100dvh - 82px - var(--bottombar,0px)),620px);
+ overflow:hidden;padding:14px;
  border:1px solid #698d7b;border-radius:14px;background:#1e2d32;box-shadow:0 15px 70px #0009}
-.xy-pop-head{display:flex;align-items:center;gap:8px}
+.xy-pop-head{display:flex;align-items:center;gap:8px;flex:0 0 auto}
 .xy-pop-head strong{font-size:15px}
 .xy-pop-head .muted{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .xy-pop-close{min-width:34px;padding:4px 9px;font-size:15px;line-height:1.2}
-.xy-log{flex:1;overflow-y:auto;margin:10px 0;min-height:60px}
+.xy-log{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin:10px 0}
+/* 常驻两行状态（`#model-chip` 能力状态 + 焦点行）：固定，不参与滚动。
+   2026-09-30 加（U07）：它们原来和对话区抢同一列高度。 */
+.xy-pop-meta{flex:0 0 auto}
+/* 收起的二级区（模型三格 / 对话动作 / 记忆 / 身份）：默认不占版面，对话占主要空间。
+   ⚠ 里面的 id/class 一个都没换（`#model-list` / `#open-memory` / `#open-connect` / `#xiaoya-roles`），
+   只是搬进这一个 `<details>`；`#model-chip` **不在这里**（判据要它一直看得见）。 */
+.xy-pop-more{flex:0 0 auto;margin:6px 0 0}
+.xy-pop-more>summary{cursor:pointer;font-size:12.5px;color:#a9c6d8;list-style:none}
+.xy-pop-more>summary::-webkit-details-marker{display:none}
+.xy-pop-more>summary::after{content:'▾';margin-left:8px;color:#7f93a6;font-size:11px}
+.xy-pop-more[open]>summary::after{content:'▴'}
+.xy-pop-more-body{display:grid;gap:2px;margin-top:6px}
+/* 「↓ 有新消息」：玩家在读历史时新消息来了才出现（U07 第 3 条）。
+   绝对定位在输入行上方 —— **不占版面、不推动对话区**，点一下回到最新。 */
+.xy-new-msg{position:absolute;left:50%;transform:translateX(-50%);bottom:78px;z-index:3;
+ display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:4px 12px;border-radius:999px;
+ border:1px solid #4a6858;background:#233a33;color:#cfeeda;font:inherit;font-size:12.5px;cursor:pointer;
+ box-shadow:0 6px 18px #0006}
+.xy-new-msg:hover{background:#2b4a41;border-color:#6f9c7f}
+.xy-new-msg[hidden]{display:none}
 .xy-entry{font-size:14px;line-height:1.6;padding:9px;border-radius:8px;background:#2b403c;margin:8px 0}
 .xy-entry.user{background:#2b3c4c;margin-left:24px}
 /* ⚠ 2026-09-29 修（`art-finish` 的 D 组验收报的 ④-a，真机实测 3/3 `display=block`）：
@@ -583,21 +612,43 @@
 .xy-entry details{margin-top:6px}
 .xy-entry summary{font-size:12px;color:#a9c6d8;cursor:pointer}
 .xy-entry p{margin:4px 0 0;font-size:12px;color:#b9c9d6}
-.xy-quick{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
+/* ── U08 建议卡片（`decorateAdvice()` 画的，2026-09-30）──────────────────────────
+   画在回答气泡**里面**、正文下方；默认收起，展开才有五行 + 两个按钮。
+   卡片本身不滚动（它属于对话内容，跟着 `.xy-log` 那一个滚动区走）。 */
+.xy-advice{margin-top:8px;border:1px solid #3c5b6e;border-radius:10px;background:#1b2b38;padding:6px 9px}
+.xy-advice>summary{font-size:13px;color:#d6e6d9;cursor:pointer;list-style:none}
+.xy-advice>summary::-webkit-details-marker{display:none}
+.xy-advice>summary::after{content:'▾';margin-left:8px;color:#7f93a6;font-size:11px}
+.xy-advice[open]>summary::after{content:'▴'}
+.xy-advice-body{margin-top:5px}
+/* ⚠ 选择器要盖过 `.xy-entry p`（那条是 0,1,1）：行与注脚都写成两段类名。 */
+.xy-advice .xy-advice-row{display:flex;gap:7px;align-items:baseline;font-size:12.5px;line-height:1.55;
+ color:#c6d2de;margin:3px 0}
+.xy-advice-key{flex:0 0 auto;color:#9caebe;font-size:12px}
+.xy-advice-text{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+.xy-advice-actions{display:flex;gap:7px;margin-top:7px}
+.xy-advice-actions button{font-size:12.5px;min-height:32px;padding:5px 12px;border-radius:8px}
+.xy-advice .xy-advice-note{margin:6px 0 0;font-size:11.5px;color:#8fa3b4}
+.xy-quick{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px;flex:0 0 auto}
 .xy-quick button{font-size:12px;padding:5px 9px}
-.xy-form{display:flex;gap:7px}
+.xy-form{display:flex;gap:7px;flex:0 0 auto}
 .xy-form input{flex:1;min-width:0}
 .xy-form button{min-height:36px}
 @media(max-width:560px){
- .xy-pop{right:0;left:0;top:auto;bottom:0;width:100vw;height:min(70dvh,560px);border-radius:14px 14px 0 0}
+ .xy-pop{right:0;left:0;top:auto;bottom:0;width:100vw;height:min(70dvh,560px);
+  border-radius:14px 14px 0 0;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
  .xy-fab{min-height:44px}
 }
 
 /* ── 单独的小芽页面（人类 2026-09-25：「小芽就直接出一个单独的小芽页面，可以大点」）
-    与弹出式那一个共用 `xiaoya.js` 的同一段对话实现，只是版式更大、能常驻。 */
-.xy-page-body{display:grid;grid-template-rows:minmax(0,1fr) auto;gap:10px;
+    与弹出式那一个共用 `xiaoya.js` 的同一段对话实现，只是版式更大、能常驻。
+    U07（2026-09-30）四行网格：状态两行 / 收起的二级区 / **唯一滚动的**对话区 / 输入那一块。
+    旧规则留档（改钉不删，别再改回来）：
+      grid-template-rows:minmax(0,1fr) auto —— 只有两行，而 `xiaoya.js` 会往 `#xy-log` 前面
+      插进状态与折叠好几块 ⇒ 第一块（能力状态那一行）被撑成 1fr、对话区反而按内容长。 */
+.xy-page-body{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:10px;position:relative;
  min-height:calc(100dvh - 150px)}
-.xy-page-log{overflow-y:auto;padding:4px 2px}
+.xy-page-log{overflow-y:auto;overscroll-behavior:contain;min-height:0;padding:4px 2px}
 .xy-page-compose{display:grid;gap:9px}
 .xy-page-compose .xy-form input{min-height:44px;font-size:15px}
 .xy-page-compose .xy-form button{min-width:96px}

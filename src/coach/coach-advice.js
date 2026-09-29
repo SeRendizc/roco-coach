@@ -173,8 +173,47 @@ function hpRatio(pet) {
   return Math.max(0, Math.min(1, hp / maxHp));
 }
 
+/**
+ * 合法动作的可寻址标识：`kind#下标:标签`。
+ *
+ * 为什么要一个**自己的**标识，而不是 `skill_id`：手游 `/api/coach` 那条快照
+ * （客户端 `coachRocoBattle()`）只搬玩家看得见的 `{label, kind}` 两个字段 —— 拿不到 id。
+ * 「不给标识」的后果不是报错，而是客户端的「采用建议」**没有可回填的目标**：
+ * 建议渲染得出来，点下去却不知道该选哪一项。
+ *
+ * 用「当前合法集合里的位置 + 标签」当标识是**故意**的：局面一变（回合推进、合法表变化），
+ * 标识跟着变，「旧建议失效」就有了机器可读的判据（配合 `stateVersion` 用）。
+ */
+export function legalActionIdOf(action, index) {
+  const kind = str(action?.kind) ?? 'action';
+  const label = str(action?.label) ?? str(action?.name);
+  // ⚠ 2026-09-29 改钉（Lead 的宿主侧契约）：标识里**不许放数组下标**。
+  //
+  // 起因：客户端「采用建议」要按这个标识在**当前** `state.view.legal` 里重新解析后执行
+  //（`roco.js` 的 `roco:advice-adopt`，解析不到就拒绝执行）。数组下标会漂 ——
+  // 同一件道具换个位置，下标就从 `item#2` 变成 `item#0`，客户端会解析到**另一项**上。
+  // 现在一律用**动作自己的身份**：换人用 `target_index`（聊天快照里没有它就退回标签里的位次，
+  // 与 `switchIndexFromLabel` 同一口径），技能优先 `skill_id`、道具优先 `item_id`，
+  // 拿不到 id 才退回标签（标签是引擎给的公开动作名，仍然稳定）。
+  // `index` 只用来做最后的兜底，且只在完全没有名字时才会出现。
+  const targetIndex = Number.isInteger(action?.targetIndex)
+    ? action.targetIndex
+    : switchIndexFromLabel(action?.label);
+  if (kind === 'switch' && Number.isInteger(targetIndex)) return `switch#${targetIndex}`;
+  if (kind === 'skill') return `skill#${str(action?.skillId) ?? label ?? (Number.isInteger(index) ? index : '?')}`;
+  if (kind === 'item') return `item#${str(action?.itemId) ?? label ?? (Number.isInteger(index) ? index : '?')}`;
+  return `${kind}#${label ?? (Number.isInteger(index) ? index : '?')}`;
+}
+
+/** 玩家看到的那一项叫什么：换人用**伙伴名**（换「水蓝蓝」），其余用引擎给的标签。 */
+function displayLabelOf(action) {
+  if (!action) return null;
+  if (action.kind === 'switch' && action.targetName) return action.targetName;
+  return str(action.label) ?? str(action.name);
+}
+
 /** 合法动作归一。技能名可能只在 `label` 上（换人/道具就没有 `skill`）。 */
-function readAction(action) {
+function readAction(action, index = null) {
   if (!isObj(action)) return null;
   const skill = isObj(action.skill) ? action.skill : null;
   const kind = str(action.kind);
@@ -182,6 +221,7 @@ function readAction(action) {
   return {
     kind,
     label,
+    legalIndex: Number.isInteger(index) ? index : null,
     skillId: str(action.skill_id),
     name: str(skill?.name) ?? (kind === 'skill' ? label : null),
     element: str(skill?.element),
@@ -190,6 +230,21 @@ function readAction(action) {
     targetIndex: num(action.target_index),
     itemId: str(action.item_id),
   };
+}
+
+/**
+ * 换人标签里的位次 → 伙伴下标。
+ *
+ * 为什么从**标签**里读而不是 `target_index`：手游快照的合法动作只有 `{label, kind}`，
+ * `target_index` 在客户端就被裁掉了（`coachRocoBattle()` 只搬 label/kind）。
+ * 位次与引擎公开视图同源（「换上第3位」就是 `self[2]`），所以这不是猜 ——
+ * 与 `runtime.js` 的 `switchTargetOf()` 同一口径。读不出数字就返回 null（不猜）。
+ */
+function switchIndexFromLabel(label) {
+  const m = /(\d+)/.exec(String(label ?? ''));
+  if (!m) return null;
+  const index = Number(m[1]) - 1;
+  return Number.isInteger(index) && index >= 0 ? index : null;
 }
 
 /**
@@ -246,7 +301,8 @@ function readPosition(game) {
   }
 
   const activeIndex = num(game.player?.active) ?? num(rawSelf?.active) ?? 0;
-  const legal = (Array.isArray(raw?.legal) ? raw.legal : []).map(readAction).filter(Boolean);
+  // 下标要**真的传下去**：`legalActionIdOf()` 用它构成可寻址标识（见那个函数的说明）。
+  const legal = (Array.isArray(raw?.legal) ? raw.legal : []).map((one, index) => readAction(one, index)).filter(Boolean);
   const skills = (Array.isArray(rawSelf?.skills) ? rawSelf.skills : []).map(readSkillRow).filter(Boolean);
   const needsReplacement = Array.isArray(raw?.needs_replacement) ? raw.needs_replacement : [];
 
@@ -280,12 +336,34 @@ function legalSkills(pos) {
   return pos.legal.filter((a) => a.kind === 'skill' && a.name);
 }
 
+/**
+ * 合法招里**估算最高**的那一条；没有估算数据就返回 null。
+ *
+ * 为什么不用 `power`（面板威力）挑：威力是配方表里的数，不等于这一下的伤害
+ * （属性倍率、防御、异常都会改），拿它挑会得到一条「看起来最强、实际不是」的建议。
+ * 估算只认服务端发下来的 `damage_preview.samples`，没有就什么都不挑 ——
+ * 由上层如实写「没有估算数据」。
+ */
+function bestLegalAttack(pos, plan) {
+  const estimates = estimateTable(pos, plan);
+  const rows = legalSkills(pos)
+    .map((action) => ({action, est: estimates.get(action.label) ?? null}))
+    .filter((row) => row.est && (row.est.max !== null || row.est.min !== null))
+    .sort((a, b) => ((b.est.max ?? b.est.min ?? -Infinity) - (a.est.max ?? a.est.min ?? -Infinity))
+      || (a.action.legalIndex ?? 0) - (b.action.legalIndex ?? 0));
+  return rows.length ? rows[0].action : null;
+}
+
 /** 能换到的那几只（合法 switch 动作指向的、还站着的伙伴）。 */
 function switchTargets(pos) {
   const out = [];
   for (const action of pos.legal) {
-    if (action.kind !== 'switch' || action.targetIndex === null) continue;
-    const index = pos.myPets.findIndex((p, i) => (p.slot ?? i) === action.targetIndex || i === action.targetIndex);
+    if (action.kind !== 'switch') continue;
+    // `target_index` 优先（视图里有就用它）；手游快照里它被裁掉了，于是退回**标签里的位次**
+    // ——「换上第3位」与 `self[2]` 同源（见 `switchIndexFromLabel` 的说明）。
+    const fromLabel = switchIndexFromLabel(action.label);
+    if (action.targetIndex === null && fromLabel === null) continue;
+    const index = pos.myPets.findIndex((p, i) => (p.slot ?? i) === (action.targetIndex ?? fromLabel) || i === (action.targetIndex ?? fromLabel));
     if (index < 0 || index === pos.myActiveIndex) continue;
     const pet = pos.myPets[index];
     if (!pet || pet.fainted) continue;
@@ -365,6 +443,8 @@ function hasLegalName(pos, name) {
 
 const KIND_PRIORITY = Object.freeze({
   'replace-required': 1,
+  // 对手在补位：与「我方必须补位」同族（都是补位阶段的事实），但**不是我必须动**。
+  'foe-replacing': 1,
   'ko-now': 2,
   'ko-maybe': 3,
   'foe-low-hp': 4,
@@ -375,33 +455,168 @@ const KIND_PRIORITY = Object.freeze({
   'type-favoured': 9,
   'speed-decides': 10,
   'foe-energy-high': 11,
+  // U09 的确定性兜底：分数层判「这一手必须说话」（decisive），而没有一个检测器
+  // 够得上自己的触发条件时，仍然要给出一条合法首选行动 —— 那一类的标签就是它。
+  // 放在最后一位：它是**兜底**，永远不该抢在具体局面事实前面。
+  'primary-action': 12,
 });
 
-function candidate(kind, text, why, risk, evidence) {
-  return {kind, priority: KIND_PRIORITY[kind] ?? 99, text, why, risk, evidence: evidence ?? {}};
+function candidate(kind, text, why, risk, evidence, action = null) {
+  return {kind, priority: KIND_PRIORITY[kind] ?? 99, text, why, risk, evidence: evidence ?? {}, action};
+}
+
+/**
+ * 把一条候选里的行动翻成**机器可读的可执行目标**。
+ *
+ * 为什么必须有这一栏：U08 要求建议里的行动「在最新合法集合里」并且客户端要能渲染
+ * 「查看 / 采用建议」。「文本里提到了某个技能名」证明不了它在合法集合里，也点不下去；
+ * 只有 `legalActionId` + 下标才能被客户端回填到与合法表**同一项**。
+ * 拿不到（`action` 为 null）就如实为 null —— 不拿一个像样的标签顶替。
+ */
+function actionRefOf(pos, action) {
+  if (!action) return null;
+  const index = Number.isInteger(action.legalIndex)
+    ? action.legalIndex
+    : pos.legal.findIndex((one) => one === action || (one.kind === action.kind && one.label === action.label));
+  const resolved = index >= 0 ? pos.legal[index] : null;
+  const label = resolved?.label ?? action.label ?? action.name ?? null;
+  // 传**完整动作**（`targetIndex` / `skillId` / `itemId` 都在里面）——标识必须是动作的身份，
+  // 不是它在数组里的位置（见 `legalActionIdOf` 的说明）。
+  return {
+    legalActionId: legalActionIdOf(resolved ?? action, index),
+    legalIndex: index >= 0 ? index : null,
+    kind: action.kind ?? null,
+    // 引擎给的合法动作标签（客户端「采用」时要回填的那一项）。
+    label,
+    // 给句子用的名字：换人用伙伴名（「换上第3位」对玩家没有意义）。
+    display: displayLabelOf(action) ?? label,
+  };
+}
+
+/** 换人动作 + 目标伙伴：`actionRefOf` 需要伙伴名才能写出玩家看得懂的那一项。 */
+function switchActionOf(entry) {
+  return entry?.action ? {...entry.action, targetName: entry.pet?.name ?? null} : null;
+}
+
+/**
+ * 建议里的「另一个合法选项」：只列**当前合法集合里**的项，带一句解释（有估算就说估算）。
+ * 上限 2 条：备选多了就不是建议，是一张表。
+ */
+function alternatesOf(pos, primaryRef, plan) {
+  const estimates = estimateTable(pos, plan);
+  const rows = [];
+  for (const [index, action] of pos.legal.entries()) {
+    if (primaryRef && action.kind === primaryRef.kind && action.label === primaryRef.label) continue;
+    const target = action.kind === 'switch'
+      ? switchIndexFromLabel(action.label)
+      : null;
+    const pet = target === null ? null : pos.myPets[target] ?? null;
+    const label = action.kind === 'switch' && pet?.name ? pet.name : (action.label ?? action.name ?? '这一项');
+    const est = estimates.get(action.label ?? '') ?? null;
+    const note = est
+      ? `按未核验公式估 ${estimateText(est.min, est.max)} 点`
+      : (action.kind === 'switch'
+        ? `换上去 ${pet && pet.hp !== null ? `${show(pet.hp)} 血` : '血量没给'}`
+        : (action.kind === 'item' ? '用一件道具（这一手就不能出招了）' : '没有估算数据'));
+    rows.push({label, kind: action.kind ?? null, legalActionId: legalActionIdOf(action, index),
+      legalIndex: index, note});
+    if (rows.length >= 2) break;
+  }
+  return rows;
+}
+
+/**
+ * 估算表：`技能标签 → {min,max}`。
+ *
+ * 只认**服务端真的发下来**的样本（`plan.damage_preview.samples`）。没有就是空表 ——
+ * 本层宁可说「没有估算数据」，也不拿一个配方表算出来的数顶替
+ * （伤害公式未核验，`coach-advice.js` 文件头的纪律）。
+ */
+function estimateTable(pos, plan) {
+  const preview = plan?.damage_preview;
+  const out = new Map();
+  if (!isObj(preview)) return out;
+  for (const sample of Array.isArray(preview.samples) ? preview.samples : []) {
+    const label = str(sample?.label);
+    if (!label) continue;
+    const min = num(sample?.min);
+    const max = num(sample?.max);
+    if (min === null && max === null) continue;
+    out.set(label, {min, max});
+  }
+  if (out.size === 0 && str(preview.best_label) && (num(preview.min) !== null || num(preview.max) !== null)) {
+    out.set(preview.best_label, {min: num(preview.min), max: num(preview.max)});
+  }
+  return out;
 }
 
 /** 1. 场上的倒了，必须补位。命名一只能换上去的、最厚的伙伴。 */
 function detectReplaceRequired(pos) {
-  if (pos.phase !== 'replace' && !pos.needsReplacement.includes('player')) return null;
+  // U09 的硬要求：**己方倒下必须提示合法存活可换对象**。
+  //
+  // ⚠ 2026-09-29 改钉（真 8765 六宠局 t8 抓到的**事实错误**）：触发条件**不能**用
+  // `phase==='replace'`。那是**双方共用**的阶段名，而引擎在补位阶段对**两边**都只发 switch
+  // （`env.py:360`）；对手倒下时 `needs_replacement` 只有 `['enemy']`。旧写法于是在
+  // 「对面喵喵倒下、我方多彩方方还活着 246/360」的那一手说出「你的多彩方方倒了，换缇塔顶上」
+  // —— 名字、状态、因果全错。权威信号只有一个：**引擎说 player 要补位**，或者我方场上那只
+  // 真的倒了/hp 为 0（`self.active` 指向已倒下的伙伴，见 `tests/evals/coach-advice.test.js`
+  // 的「对手的 active 是它在自己队伍里的位次」那一格 —— 那一格 `phase==='battle'`，
+  // 所以「hp 为 0」这条不会误伤它）。
+  const mineHp = num(pos.mine?.hp);
+  const fainted = pos.mine?.fainted === true || (mineHp !== null && mineHp <= 0);
+  const mustReplace = pos.needsReplacement.includes('player') || fainted;
+  if (!mustReplace) return null;
   const mine = pos.mine;
-  if (!mine || !mine.fainted) return null;
-  const picks = pickSwitchTargets(pos);
+  // 只能从**合法动作**里挑（补位也是引擎给的 switch 动作）；没有合法目标就不开口。
+  const picks = pickSwitchTargets(pos).filter((entry) => !entry.pet.fainted && (entry.pet.hp === null || entry.pet.hp > 0));
   if (!picks.length) return null;
   const pick = picks[0];
   const foeName = pos.foe?.name ?? null;
   const foeTail = foeName ? `对面${ref(foeName)}还在场，补位别一上来就挨打` : '补位选厚的顶住这一轮';
+  const faintedName = mine?.name ?? null;
   return candidate(
     'replace-required',
-    `${ref(mine.name)}倒了，换${ref(pick.pet.name)}顶上：${foeTail}`,
+    `${faintedName ? ref(faintedName) : '场上那一只'}倒了，换${ref(pick.pet.name)}顶上：${foeTail}`,
     '场上的伙伴已经倒下，这一手只能补位，没有别的选择',
     `补上来的这只这一轮就要接对面的手${foeName ? `（${foeName}）` : ''}`,
     {
-      fainted: mine.name,
+      fainted: faintedName,
       bench: picks.map((p) => ({name: p.pet.name, hp: p.pet.hp, maxHp: p.pet.maxHp})),
       foe: foeName,
       foeHp: pos.foe?.hp ?? null,
     },
+    switchActionOf(pick),
+  );
+}
+
+/**
+ * 1b. **对手**正在补位（`needs_replacement` 里有 enemy、没有 player）。
+ *
+ * 为什么单独一条：这一幕的引擎合法动作表**只有换人**（补位阶段两边都只发 switch），
+ * 于是玩家屏幕上只有「更换」，很容易被读成「我必须换人」。事实不是：
+ *   · 服务端会**自动替对手补位**（`service.py:2451` 的 `for side in queue`），玩家可以什么都不做；
+ *   · 玩家主动换人是**允许但不必须**（`service.py` 会把 player 插到队列最前）。
+ * 所以这里说的是「等它亮明是谁再决定」这件**具体的事**，以及「真要动就换最厚的哪一只」，
+ * 而不是编一句「你的宠倒了」。对手换上来的属性/配招不在公开视图里 —— 进 `risk`，不猜。
+ */
+function detectFoeReplacing(pos) {
+  if (pos.phase !== 'replace') return null;
+  if (!pos.needsReplacement.includes('enemy')) return null;
+  if (pos.needsReplacement.includes('player')) return null;   // 我方那一档由 replace-required 负责
+  const foeName = pos.foe?.name ?? null;
+  const pick = pickSwitchTargets(pos)[0] ?? null;
+  const pickText = pick && Number.isFinite(pick.pet.hp)
+    ? `真要动就换${ref(pick.pet.name)}（${show(pick.pet.hp)} 血，是后备里最厚的），别把还站着的${ref(pos.mine?.name)}主动换下去`
+    : '真要动就先换后备里最厚的那一只，别把还站着的这一只主动换下去';
+  return candidate(
+    'foe-replacing',
+    `对面${ref(foeName)}倒下了、正在补位：这一轮你**不必**换人（可以先等它上场）；${pickText}`,
+    '引擎这一轮给你的是补位阶段的动作表（只有换人），但 `needs_replacement` 里有 enemy、没有 player —— 要补位的是对面，不是你',
+    '它换上来的那一只是什么系、会什么招不在公开视图里：等它亮明再决定打谁；别在这一轮把健康的伙伴白换下去',
+    {foe: foeName, needsReplacement: [...pos.needsReplacement],
+      bench: pick ? {name: pick.pet.name, hp: pick.pet.hp, maxHp: pick.pet.maxHp} : null,
+      myActive: pos.mine?.name ?? null},
+    null,
   );
 }
 
@@ -434,6 +649,7 @@ function detectKo(pos, plan) {
       `对面只剩 ${show(foeHp)} 血，${ref(steady.label)}的估算伤害（${estimateText(steady.min, steady.max)}）把它盖住了`,
       '对面换人可以先躲掉这一下（换人比技能先动）',
       {foe: foeName, foeHp, move: steady.label, estimate: {min: steady.min, max: steady.max}, formulaVerified: preview.formula_verified === true},
+      legalByName(pos, steady.label),
     );
   }
   if (maybe) {
@@ -443,6 +659,7 @@ function detectKo(pos, plan) {
       `估算的上下界跨过了对面的血线（${show(foeHp)}），所以这不是一个稳的收线`,
       '这一下收不掉就白送对面一轮，想稳就先别赌',
       {foe: foeName, foeHp, move: maybe.label, estimate: {min: maybe.min, max: maybe.max}, formulaVerified: preview.formula_verified === true},
+      legalByName(pos, maybe.label),
     );
   }
   return null;
@@ -460,7 +677,7 @@ function detectKo(pos, plan) {
  * 什么时候**不**说：我自己也残血、而且对面比我快——那时候先换人更值
  * （这一手会先挨打，可能等不到我出手）。那一条路由 `switch-low-hp` 接手。
  */
-function detectFoeLowHp(pos) {
+function detectFoeLowHp(pos, plan) {
   const foe = pos.foe;
   const mine = pos.mine;
   const foeRatio = hpRatio(foe);
@@ -476,6 +693,8 @@ function detectFoeLowHp(pos) {
     `它只剩 ${show(foe.hp)}/${show(foe.maxHp)}，是这一轮最值得先兑现的东西`,
     foeActsFirst ? '它比你快，这一下可能先落在你身上' : '对面换人就能躲掉这一下（换人比技能先动）',
     {foe: foe.name, foeHp: foe.hp, foeMaxHp: foe.maxHp, foeRatio: Number(foeRatio.toFixed(3)), myHp: mine?.hp ?? null, foeActsFirst},
+    // 「补掉它」得有一招能补：只认合法招里**有估算数据**的那一条，没有就不编一个招名。
+    bestLegalAttack(pos, plan),
   );
 }
 
@@ -501,6 +720,7 @@ function detectSwitchLowHp(pos) {
       pick: pick.pet.name, pickHp: pick.pet.hp, pickMaxHp: pick.pet.maxHp,
       foe: pos.foe?.name ?? null, foeHp: pos.foe?.hp ?? null,
     },
+    switchActionOf(pick),
   );
 }
 
@@ -552,6 +772,7 @@ function detectEnergyShort(pos, plan) {
         : `${ref(mine.name)}只有 ${show(energy)} 点能量，配招里最便宜的招现在也放不出来`,
       '这一轮吃道具虽然先动，但对面那一手照样会打过来',
       {energy, cost, move: bestBlocked.label, estimate: {min: bestBlocked.min, max: bestBlocked.max}, foeHp, item: '能量果', decisive},
+      energyItem,
     );
   }
   if (!decisive || !bestCastable) return null; // 说不出「改放什么」、或换招也救不了 → 不开口
@@ -561,6 +782,7 @@ function detectEnergyShort(pos, plan) {
     `${ref(bestBlocked.label)}估 ${estimateText(bestBlocked.min, bestBlocked.max)} 盖得过对面 ${show(foeHp)} 血，但能量还差 ${show(deficit)} 点`,
     `这一轮只能用${ref(bestCastable.label)}这种小招，对面会趁这一轮压过来`,
     {energy, cost, move: bestBlocked.label, alternative: bestCastable.label, estimate: {min: bestCastable.min, max: bestCastable.max}, foeHp, decisive},
+    legalByName(pos, bestCastable.label),
   );
 }
 
@@ -587,6 +809,9 @@ function detectFoeStatus(pos) {
       : `上一手它因为${name}掉了约 ${show(tickDamage)} 血，这个扣血每回合都会来一次`,
     `它换人就能把这层持续伤害甩掉（回合末只结算场上那只）`,
     {foe: foe.name, status: name, layers, tickDamage, foeHp: foe.hp, foeMaxHp: foe.maxHp},
+    // 「拖住」得有一个真的能拖的合法动作：只认「防御」（引擎的减伤/回能动作）。
+    // 拿不到就为 null —— 这句话仍然是立场与风险，但**不假装**有一条具体行动。
+    legalByName(pos, '防御'),
   );
 }
 
@@ -620,6 +845,7 @@ function detectTypeMatchup(pos) {
       `${ref(name)}打对面${foeName ? ref(foeName) : ''}是克制伤害，换成别的招反而更轻`,
       '对面换人躲一下，这个克制关系就不一定还在了',
       evidence,
+      legalByName(pos, name),
     );
   }
   return candidate(
@@ -628,6 +854,9 @@ function detectTypeMatchup(pos) {
     `上一手${ref(name)}被对面属性抵抗，这一轮再用就是同样的轻伤害`,
     '硬打这一手等于把回合让给对面，改招或先换人都比它强',
     evidence,
+    // 「别再硬用它」必须给出一条**替代**的合法动作：优先「换成另一招」，
+    // 没有别的招才退回换人（后者在文本里已经说了「或先换人」）。
+    legalSkills(pos).find((one) => one.label !== name) ?? switchActionOf(pickSwitchTargets(pos)[0]) ?? legalByName(pos, name),
   );
 }
 
@@ -644,6 +873,8 @@ function detectSpeed(pos) {
       `速度比你慢的是对面，同一档出手顺序里你先动`,
       '对面要是掏先手招，速度再快也快不过它',
       {mySpe: mineSpe, foeSpe, foe: foeName},
+      // 「压上去」= 先手出一招：合法招里估算最高的那一条（拿不到估算就为 null）。
+      bestLegalAttack(pos, null),
     );
   }
   const defend = hasLegalName(pos, '防御');
@@ -653,6 +884,7 @@ function detectSpeed(pos) {
     `对面的速度比你高，同档对拼是它先出手`,
     '硬拼的话这一下会先落在你身上',
     {mySpe: mineSpe, foeSpe, foe: foeName, defendLegal: defend},
+    legalByName(pos, '防御') ?? switchActionOf(pickSwitchTargets(pos)[0]),
   );
 }
 
@@ -675,6 +907,8 @@ function detectFoeEnergyHigh(pos) {
     `它能量已经攒到 ${show(energy)}（上限 ${show(energyMax)}），这一轮随时放得出重招`,
     '这一下硬接可能直接倒一只，先把厚的那只留在场上',
     {foe: foe.name, foeEnergy: energy, energyMax, foeHp: foe.hp},
+    // 「先把厚的那只留在场上」= 换人顶上；没有能换的就用「防御」顶。两条都不合法时如实为 null。
+    switchActionOf(pickSwitchTargets(pos)[0]) ?? legalByName(pos, '防御'),
   );
 }
 
@@ -688,6 +922,7 @@ function pickSwitchTargets(pos) {
 /** 检测器表：**数组顺序 = 优先级**，第一个开口的就是这一轮的结论。 */
 const DETECTORS = Object.freeze([
   (pos, plan) => detectReplaceRequired(pos, plan),
+  (pos, plan) => detectFoeReplacing(pos, plan),
   (pos, plan) => detectKo(pos, plan),
   (pos, plan) => detectFoeLowHp(pos, plan),
   (pos, plan) => detectSwitchLowHp(pos, plan),
@@ -723,6 +958,10 @@ export function coachAdvice({game, plan, session, host} = {}) {
   if (session?.dismissed === true) return null;
   const pos = readPosition(game);
   if (!pos || pos.result) return null;
+  // 引擎这一轮**没有任何合法动作** ⇒ 没什么可建议的（对手正在补位、或这一局要结算了）。
+  // 没有这一条时，属性/速度那些检测器仍会对着一个"没有按钮可点"的局面开口
+  //（实测：对手补位的那一手会给出一句「你速度更快，先手压上去」）—— 那是噪声，不是建议。
+  if (!pos.legal.length) return null;
 
   for (const detect of DETECTORS) {
     const picked = detect(pos, isObj(plan) ? plan : null);
@@ -735,6 +974,9 @@ export function coachAdvice({game, plan, session, host} = {}) {
       risk: picked.risk,
       kind: picked.kind,
       evidence: {...picked.evidence},
+      // U09/U08 的机器可读那一栏：这一条建议**指向哪个合法动作**。
+      // 加性字段 —— 老的调用方（只读 text/why/risk/evidence）逐字节不变。
+      action: actionRefOf(pos, picked.action),
     };
   }
   // 没有一条局面事实值得说 → 沉默。这里**不**回退到「引擎推荐了什么」：
@@ -744,3 +986,480 @@ export function coachAdvice({game, plan, session, host} = {}) {
 
 /** 本层可能产出的全部标签（测试与页面按它断言，别在别处再抄一份）。 */
 export const COACH_ADVICE_KINDS = Object.freeze(Object.keys(KIND_PRIORITY));
+
+// ─────────────────────────────────────────────────────────────────────────────
+// U08：玩家**明确要建议**时的那一层（局中问答链路）
+//
+// 背景（用户 2026-09-29 的 12 张截图，第 08 张）：
+//   玩家在对局里问建议，小芽回的是
+//     「具体这手该出什么，还是你自己定；想让我帮你对比两个选项的差异，说说你倾向哪边。」
+//   这句话在 `src/` 里**没有字面量** —— 它是模型自己组出来的。由此得到本任务最重要的
+//   一条结论：**建议的保障不能只靠提示词**。提示词能提高概率，但「必须给一个当前合法
+//   且有价值的首选行动」是个**硬要求**，所以这里有一层确定性的实现，回答层再拿它做兜底
+//   （见 `runtime.js` 的 `adviceEnforcement`）。
+//
+// 与 `coachAdvice()` 的分工：
+//   · `coachAdvice()` 服务**主动气泡**（页面已经有 view，检波器按「值不值得打断」挑）；
+//   · `battleAdvice()` 服务**玩家点名要建议**：这时不能沉默，必须给出首选行动 ——
+//     检波器命中就用它（它更局面化），一条都不命中就按公开事实做**最小真实比较**。
+//
+// 三条纪律（每一条都能被机器核对）：
+//   ① 行动必须在**当前合法集合**里，并带 `legalActionId`（客户端「查看/采用建议」靠它回填）；
+//   ② 只搬公开事实（回合、精灵、血量、能量、引擎的合法动作表与伤害估算），
+//      对手后备血量/配招/速度这些没给的**写成 unknown**，不编；
+//   ③ 不自动替玩家出招：本层只产出结构与文本，不提交任何动作（没有 fetch、没有副作用）。
+
+/**
+ * 「玩家在明确要建议」的问句形状。
+ *
+ * 为什么必须是**窄表**：它决定「要不要强行塞一条建议」。宽一个词，事实问句
+ * （「火系克制什么属性」）就会被吞掉，玩家得到一段答非所问的战术建议 —— 这比沉默更糟。
+ * 所以只收三类说法：**现在做什么 / 这一手怎么打 / 换谁**。
+ * 调用方必须同时满足「这一局有公开战况」（`context.roco_battle`）才允许命中，
+ * 营地/图鉴那些链路一个字都不受影响。
+ */
+export function rocoAdviceAsk(message) {
+  const text = String(message ?? '');
+  if (!text) return false;
+  return /现在(该怎么办|怎么办|做什么|该做什么|该干什么|该怎么打|该出什么|出什么|打什么|怎么打|该干嘛)/
+    .test(text)
+    || /(这|本|下)(一)?(手|回合|轮)(该)?(怎么打|怎么办|该出什么|出什么|出哪(一)?招|怎么出|该干嘛|打什么)/.test(text)
+    || /该出什么|出什么(招|好)|(该|要)用什么招|出哪一?招|这一手出什么/.test(text)
+    || /(该|要|应该)换(谁|哪只|哪一?只|什么|上谁)|换上谁|换谁(好|上|顶)|谁(来|去)顶|补谁/.test(text)
+    || /(出招|进攻|打)还是(防御|守|换)|(防御|守)还是(出招|进攻|换)|要不要换(人|宠|只)|该攻还是该守|怎么选/.test(text)
+    || /(接下来|下一步|下面)(该)?(做什么|干什么|怎么办|怎么打|该干嘛|怎么走)/.test(text)
+    || /(给|来|出)(我)?(个|条|点)?建议|有什么建议|帮我(选|挑|定)|我该怎么选/.test(text);
+}
+
+/**
+ * 手游快照（`context.roco_battle`）→ 本层认得的局面。
+ *
+ * 为什么不复用 `readPosition()`：那是给**公开视图**（`self.pets[] / opponent.field`）写的，
+ * 而 `/api/coach` 送上来的是**裁过的一层**（`self[] / foe[0] / legal[{label,kind}]`）。
+ * 少认一种形状的后果不是报错，而是建议层安静地拿不到局面 —— 那正是要修的东西。
+ * 两份形状的**事实来源是同一个**（引擎的 `ui_public_view`），这里只做字段搬运。
+ */
+function positionFromSnapshot(battle, plan = null) {
+  if (!isObj(battle)) return null;
+  const self = Array.isArray(battle.self) ? battle.self : [];
+  if (!self.length) return null;
+  const activeIndex = Number.isInteger(battle.self_active) ? battle.self_active : 0;
+  const petOf = (row, index) => ({
+    name: str(row?.name) ?? str(row?.pet_id),
+    types: Array.isArray(row?.types) ? row.types.slice() : [],
+    // 速度：快照里没有（客户端只搬 label/kind 与血量）。没有就是 null，
+    // 「谁先动」那类结论因此不会在问答链路上出现（宁可不说）。
+    spe: num(row?.spe) ?? num(row?.stats?.spe),
+    hp: num(row?.hp),
+    maxHp: num(row?.max_hp),
+    energy: num(row?.energy),
+    fainted: row?.alive === false || num(row?.hp) === 0,
+    statuses: statusMap(isObj(row?.statuses) ? row.statuses : (str(row?.status) ? {[row.status]: {}} : null)),
+    slot: index,
+  });
+  const myPets = self.map(petOf);
+  const foeRow = Array.isArray(battle.foe) && isObj(battle.foe[0]) ? battle.foe[0] : null;
+  const foe = foeRow ? petOf(foeRow, 0) : null;
+  const foeBench = (Array.isArray(battle.foe_bench) ? battle.foe_bench : []).map((row) => ({
+    name: null, types: [], spe: null, hp: null, maxHp: null, energy: null,
+    fainted: row?.fainted === true, statuses: {}, slot: num(row?.slot),
+  }));
+  const legal = (Array.isArray(battle.legal) ? battle.legal : []).map((one, index) => readAction(one, index)).filter(Boolean);
+  return {
+    phase: str(battle.phase),
+    turn: num(battle.turn),
+    result: battle.result ?? null,
+    mine: myPets[activeIndex] ?? null,
+    myActiveIndex: activeIndex,
+    myPets,
+    myBench: myPets.filter((_, index) => index !== activeIndex),
+    foe,
+    foeBench,
+    energyMax: num(battle.self_energy_max),
+    legal,
+    skills: [],
+    events: [],
+    needsReplacement: [],
+    // 局面指纹的原料：回合 + 阶段 + 版本 + 合法动作表。任何一项变了，旧建议就不属于这个局面。
+    stateVersion: Number.isInteger(battle.state_version) ? battle.state_version : null,
+  };
+}
+
+/** 标签归一：去引号/空白，用来把「引擎推荐的那一项」认回合法动作表里的同一条。 */
+function labelKey(value) {
+  return String(value ?? '').replace(/[「」“”"'\s·，,。:：]/g, '');
+}
+
+/**
+ * 最小真实比较（**不依赖 roco_plan**）：从当前合法集合里挑一条首选行动。
+ *
+ * 次序的口径（每一步都只用公开事实）：
+ *   ① 必须补位 → 补位（引擎在 replace 阶段给的就只有 switch 动作）；
+ *   ② 引擎这一轮的推荐**确实是合法动作** → 用它（它已经把双方应对算过一遍）；
+ *   ③ 有伤害估算时：先看有没有一招的下界就盖过对面血量（收线），再看估算最高的那条；
+ *   ④ 都没有 → 合法招里的第一条，并如实写「这一手没有估算数据」。
+ * 每一步都返回 `reason`，玩家看得到「为什么是它」；拿不到的部分进 `unknown`。
+ */
+function primaryFromFacts(pos, plan) {
+  const estimates = estimateTable(pos, plan);
+  const foeHp = num(pos.foe?.hp);
+  const refOf = (action) => actionRefOf(pos, action);
+  const switchEntry = pickSwitchTargets(pos)[0] ?? null;
+
+  // ① 必须补位：判据是**引擎说 player 要补位**（或我方场上那只真的倒了），
+  //    不是「阶段叫 replace」—— 后者在对手补位时同样成立（见 `detectReplaceRequired` 的说明）。
+  const mineHpRaw = num(pos.mine?.hp);
+  if (pos.needsReplacement.includes('player') || pos.mine?.fainted === true || (mineHpRaw !== null && mineHpRaw <= 0)) {
+    if (switchEntry) {
+      return {
+        ref: refOf(switchActionOf(switchEntry)),
+        reason: pos.mine?.name
+          ? `${pos.mine.name}已经倒下，这一手只能补位（引擎在补位阶段给的合法动作里只有换人）`
+          : '场上的伙伴已经倒下，这一手只能补位（引擎在补位阶段给的合法动作里只有换人）',
+        upside: `${switchEntry.pet.name}现在 ${show(switchEntry.pet.hp)}/${show(switchEntry.pet.maxHp)} 血，补位不占回合`,
+        risk: `补上来的这一只这一轮就要接对面的手${pos.foe?.name ? `（${pos.foe.name}）` : ''}`,
+        unknown: pos.foe?.hp === null ? ['对手场上那只的血量不在公开视图里'] : [],
+      };
+    }
+    return null;
+  }
+
+  // ② 引擎的推荐：**只在它真的是合法动作时**才算建议（不然就是把一个不属于当前局面的结论端出去）。
+  const rec = str(plan?.recommendation);
+  if (rec) {
+    const key = labelKey(rec);
+    const hit = pos.legal.find((one) => labelKey(one.label) === key)
+      ?? pos.legal.find((one) => one.name && labelKey(one.name) === key)
+      ?? pos.legal.find((one) => one.kind === 'switch' && switchPetName(pos, one) && labelKey(switchPetName(pos, one)) === key)
+      ?? null;
+    if (hit) {
+      const branches = num(plan?.branches_evaluated);
+      const stable = plan?.recommendation_stable === true;
+      return {
+        ref: refOf(hit.kind === 'switch' ? {...hit, targetName: switchPetName(pos, hit)} : hit),
+        reason: `引擎把这一回合的双方应对算过一遍${branches === null ? '' : `（${show(branches)} 个分支）`}，推荐的就是这一项`
+          + `${stable ? '，而且推荐在多个分析种子里是稳的' : ''}`,
+        upside: upsideOfAction(pos, plan, hit),
+        risk: riskOfAction(pos, hit, plan),
+        unknown: stable ? [] : ['引擎的推荐只在部分分析种子里成立（不稳），换一个种子可能换一手'],
+      };
+    }
+  }
+
+  // ②b 想放的招这一轮放不出来（能量不够是最常见的原因），而它比能放的更狠。
+  //     先说这一条，再说「哪一招最高」—— 不然玩家会照着一条被削过的招下注。
+  const blocked = blockedDecisiveMove(pos, plan, estimates);
+  if (blocked) {
+    const legalBest = legalSkills(pos).find((one) => one.label === blocked.legalBestLabel) ?? null;
+    const energyItem = pos.legal.find((one) => one.kind === 'item' && labelKey(one.label).includes('能量果')) ?? null;
+    const pick = energyItem ?? legalBest ?? pos.legal[0] ?? null;
+    if (pick) {
+      const energy = num(pos.mine?.energy);
+      const energyMax = num(pos.energyMax);
+      const energyText = energy === null
+        ? '（快照里没有给当前能量）'
+        : `（你现在 ${show(energy)} 点能量${energyMax === null ? '' : `，上限 ${show(energyMax)}`}）`;
+      return {
+        ref: refOf(pick.kind === 'switch' ? {...pick, targetName: switchPetName(pos, pick)} : pick),
+        reason: `按引擎这一轮的估算，「${blocked.label}」能打出 ${estimateText(blocked.min, blocked.max)}`
+          + `${blocked.foeHp === null ? '' : `（对面剩 ${show(blocked.foeHp)} 血）`}，`
+          + `但这一轮它不在合法动作里 —— 引擎没把它列出来${energyText}`,
+        upside: upsideOfAction(pos, plan, pick),
+        risk: legalBest
+          ? `这一轮只能先用「${blocked.legalBestLabel}」顶过去，对面会趁这一轮压过来`
+          : '这一轮连一招攻击都放不出来，对面会趁这一轮压过来',
+        unknown: [
+          `「${blocked.label}」这一轮放不出来的确切原因（快照里没有能耗表，只看得到它不在合法集合里）`,
+          '这一只的能耗表（所以我不说「还差几点能量」）',
+        ],
+      };
+    }
+  }
+
+  // ③ 伤害估算：先收线，再最高。
+  const legalWithEst = legalSkills(pos)
+    .map((action) => ({action, est: estimates.get(action.label) ?? null}))
+    .filter((row) => row.est && (row.est.max !== null || row.est.min !== null));
+  const lethal = foeHp === null ? [] : legalWithEst.filter((row) => row.est.min !== null && row.est.min >= foeHp);
+  const ranked = (lethal.length ? lethal : legalWithEst)
+    .sort((a, b) => ((b.est.max ?? b.est.min ?? -Infinity) - (a.est.max ?? a.est.min ?? -Infinity))
+      || (a.action.legalIndex ?? 0) - (b.action.legalIndex ?? 0));
+  if (ranked.length) {
+    const best = ranked[0].action;
+    return {
+      ref: refOf(best),
+      reason: lethal.length
+        ? `对面${pos.foe?.name ? `「${pos.foe.name}」` : ''}只剩 ${show(foeHp)} 血，「${best.label}」的估算下界（${show(ranked[0].est.min)}）就盖过它，是这一轮能结算掉它的合法行动`
+        : `按引擎这一轮的伤害估算，它是当前合法招里打得最重的一条`,
+      upside: upsideOfAction(pos, plan, best),
+      risk: riskOfAction(pos, best, plan),
+      unknown: [],
+    };
+  }
+
+  // ④ 没有估算数据：给一条**现在就能出手**的合法行动，并说清缺的是什么。
+  const firstSkill = legalSkills(pos)[0] ?? null;
+  const fallback = firstSkill
+    ?? pos.legal.find((one) => one.kind === 'item')
+    ?? pos.legal[0]
+    ?? null;
+  if (!fallback) return null;
+  return {
+    ref: refOf(fallback.kind === 'switch' ? {...fallback, targetName: switchPetName(pos, fallback)} : fallback),
+    reason: firstSkill
+      ? '这一轮没有可比较的伤害估算（包里没有引擎的规划），所以只按「现在就能出手」挑：它是合法招里的第一条'
+      : '这一轮没有可比较的伤害估算，只能先从合法动作里挑一条现在就能做的',
+    upside: upsideOfAction(pos, plan, fallback),
+    risk: riskOfAction(pos, fallback, plan),
+    unknown: ['这一手的伤害估算（这一轮没有 damage_preview）', '对手这一回合会做什么'],
+  };
+}
+
+/**
+ * 「想放的那一招这一轮放不出来，而它比能放的招更狠」——最小真实比较里的一个真实缺口。
+ *
+ * 为什么要有它（而不是只靠 `detectEnergyShort`）：那个检测器要**能耗表**
+ * （`self.skills` / 合法动作的 `skill.energy`）才敢说「差几点能量」；手游快照只有
+ * `{label, kind}`，于是它在问答链路上**恒不成立** —— 玩家问「现在怎么办」时，
+ * 引擎估算里那个能收掉对面的招明明在配招表里、却放不出来，建议层却一个字都不提。
+ *
+ * 这里的口径刻意收窄：只认「不在合法集合里」+「估算比所有合法招都高」两个公开事实，
+ * 并且只在**它真的决定这一轮**时才算数（估算盖过对面血量，或者这一轮一招攻击都放不出）。
+ * 具体差几点能量**不说** —— 快照里没有能耗表，那是编。缺的那一块进 `unknown`。
+ */
+function blockedDecisiveMove(pos, plan, estimates = null) {
+  const table = estimates ?? estimateTable(pos, plan);
+  const legalBest = bestLegalAttack(pos, plan);
+  const legalMax = legalBest ? (table.get(legalBest.label)?.max ?? -Infinity) : -Infinity;
+  const rows = [...table.entries()]
+    .filter(([label]) => !legalByName(pos, label))
+    .map(([label, est]) => ({label, min: est.min, max: est.max}))
+    .filter((row) => row.max !== null || row.min !== null)
+    .sort((a, b) => ((b.max ?? b.min ?? -Infinity) - (a.max ?? a.min ?? -Infinity)));
+  const best = rows[0] ?? null;
+  if (!best) return null;
+  const top = best.max ?? best.min ?? -Infinity;
+  if (!(top > legalMax)) return null;                       // 放不出来的那招并不更狠 → 不是问题
+  const foeHp = num(pos.foe?.hp);
+  const decisive = (foeHp !== null && top >= foeHp) || !legalBest;
+  if (!decisive) return null;
+  return {...best, legalBestLabel: legalBest?.label ?? null, foeHp};
+}
+
+/** 换人动作对应的伙伴名（标签里的位次 → `myPets`）。 */
+function switchPetName(pos, action) {
+  const index = action?.targetIndex ?? switchIndexFromLabel(action?.label);
+  if (index === null || index === undefined) return null;
+  return pos.myPets[index]?.name ?? null;
+}
+
+/** 收益那一栏：有估算就写估算（带「未核验」），换人/道具写它们真实的代价与作用。 */
+function upsideOfAction(pos, plan, action) {
+  if (!action) return null;
+  if (action.kind === 'switch') {
+    const name = switchPetName(pos, action);
+    const index = action.targetIndex ?? switchIndexFromLabel(action.label);
+    const pet = index === null || index === undefined ? null : pos.myPets[index] ?? null;
+    return `${name ? `换${name}上来` : '换人'}${pet && pet.hp !== null ? `（${show(pet.hp)}/${show(pet.maxHp)} 血）` : ''}`
+      + `${pos.phase === 'replace' ? '；补位不占回合' : '；这一手会把回合用掉'}`;
+  }
+  if (action.kind === 'item') return '吃道具占这一回合，之后不能再出招（回血/回能立刻结算）';
+  if (action.kind === 'skill' && labelKey(action.label).includes('防御')) return '防御能减伤、额外回 2 点能量';
+  const est = action.kind === 'skill' ? estimateTable(pos, plan).get(action.label) ?? null : null;
+  if (!est) return '这一条是现在就能出手的合法行动（这一轮没有它的伤害估算）';
+  const foeHp = num(pos.foe?.hp);
+  const parts = [`按未核验公式估 ${estimateText(est.min, est.max)} 点`];
+  if (foeHp !== null) {
+    if (est.min !== null && est.min >= foeHp) parts.push(`对面剩 ${show(foeHp)} 血，够收掉`);
+    else if (est.max !== null && est.max >= foeHp) parts.push(`对面剩 ${show(foeHp)} 血：有的口径够收，不稳`);
+    else parts.push(`对面剩 ${show(foeHp)} 血，这一下收不掉`);
+  }
+  return parts.join('；');
+}
+
+/** 主要风险那一栏：一条，具体的，能对上公开事实的。 */
+function riskOfAction(pos, action, plan) {
+  if (!action) return null;
+  if (action.kind === 'switch') return '换人先结算，但上来的那一只照样可能吃对面这一手';
+  if (action.kind === 'item') return '这一轮只吃道具不出招，对面会趁这一轮压过来';
+  const key = labelKey(action.label);
+  if (key.includes('防御')) return '防御挡不住已有的中毒或灼烧，也不能连用';
+  const est = action.kind === 'skill' ? estimateTable(pos, plan).get(action.label) ?? null : null;
+  const foeHp = num(pos.foe?.hp);
+  if (est && foeHp !== null && est.max !== null && est.max >= foeHp && (est.min === null || est.min < foeHp)) {
+    return '估算的上界跨过了对面的血线，这一下不稳：收不掉就白送对面一轮';
+  }
+  // 没有估算数据时**不许**把「估算来自未核验公式」当风险说 —— 那句话在这里是假的
+  // （这一轮根本没有估算），而假话比少说一句糟得多。
+  return est
+    ? '对面换人可以先躲掉这一下（换人比技能先动）；估算来自未核验公式'
+    : '对面换人可以先躲掉这一下（换人比技能先动）；这一手没有伤害估算，打多少要打完才知道';
+}
+
+/** 把一条检波器候选翻成 U08 的结构（行动那一栏同样要能被客户端回填）。 */
+function adviceFromCandidate(pos, picked, plan) {
+  const ref = actionRefOf(pos, picked.action);
+  if (!ref) return null;
+  return {
+    ref,
+    reason: picked.why ?? null,
+    upside: upsideOfAction(pos, plan, picked.action),
+    risk: picked.risk ?? riskOfAction(pos, picked.action, plan),
+    unknown: [],
+    kind: picked.kind,
+  };
+}
+
+/**
+ * 段首那一行：**引用当前精灵与回合**（U08 要求建议引用当前局面，不是泛泛而谈）。
+ * 读不到的字段就不写那一句（宁可短，也不编）。
+ */
+function situationLine(pos) {
+  const parts = [];
+  const turn = Number.isInteger(pos.turn) ? `第 ${pos.turn} 回合` : '这一回合';
+  const mine = pos.mine;
+  const mineText = mine
+    ? `${mine.name ?? '场上那只'}${mine.hp !== null && mine.maxHp !== null ? `（${show(mine.hp)}/${show(mine.maxHp)} 血`
+      + `${mine.energy !== null ? `，能量 ${show(mine.energy)}` : ''}）` : (mine.energy !== null ? `（能量 ${show(mine.energy)}）` : '')}`
+    : null;
+  parts.push(mineText ? `${turn}：${mineText}` : turn);
+  const foe = pos.foe;
+  if (foe) {
+    const foeText = `${foe.name ?? '对面场上那只'}${foe.hp !== null ? `（${show(foe.hp)}${foe.maxHp !== null ? `/${show(foe.maxHp)}` : ''} 血` : ''}`
+      + (foe.hp !== null ? '）' : '');
+    parts.push(`对手是${foeText}`);
+  }
+  return `${parts.join('，')}。`;
+}
+
+/**
+ * 局中「明确要建议」的确定性建议（U08 的唯一入口）。
+ *
+ * @param {{battle?: object, plan?: object, message?: string}} input
+ *   `battle` = `context.roco_battle`（引擎公开视图裁出来的那一层）
+ *   `plan`   = `context.roco_plan`（引擎这一轮的规划；**可以为空** —— 缺它也要能建议）
+ * @returns {null | {
+ *   headline: string, reason: string, upside: string, risk: string,
+ *   alternates: Array<{label:string,kind:string,legalActionId:string,note:string}>,
+ *   actionLabel: string, actionKind: string, legalActionId: string, legalIndex: number|null,
+ *   turn: number|null, phase: string|null, stateVersion: number|null, fingerprint: string,
+ *   unknown: string[], evidence: object, kind: string|null, text: string,
+ * }}
+ */
+export function battleAdvice({battle = null, plan = null, message = null} = {}) {
+  return adviceForPosition(positionFromSnapshot(battle, plan), plan);
+}
+
+/**
+ * 主动气泡那一路的确定性兜底：**公开视图**（`rocoIntervention` 手里那一份）→ 建议。
+ *
+ * 为什么需要它：分数层（`interventionScore`）判 decisive 时，门控已经放行，而建议层的
+ * 检测器可能一条都够不上（例如只剩低血量、后备里没有更厚的、也没有伤害估算）。
+ * 那时的正确行为不是「静默」——静默会让回执看起来像「该说没说」，玩家也拿不到任何东西。
+ * 这里用**同一套**最小真实比较算出一条合法首选行动。
+ *
+ * `session` 传进来是为了复用同一条去重口径（`session.said` 里已经有这个形状就不再说）——
+ * 重复本身就是在浪费玩家的注意力（U09）。
+ */
+export function adviceForView(view, plan = null, {session = null} = {}) {
+  const pos = readPosition(view);
+  if (!pos || pos.result || pos.phase === 'ended') return null;
+  if (!pos.legal.length) return null;
+  const advice = adviceForPosition(pos, plan);
+  if (!advice) return null;
+  if (alreadySaid(session, normaliseAdviceShape(advice.text))) return null;
+  return advice;
+}
+
+/** 建议的**唯一**装配点：局面 → 结构 + 正文（`battleAdvice` 与 `adviceForView` 都走它）。 */
+export function adviceForPosition(pos, plan = null) {
+  if (!pos || pos.result || pos.phase === 'ended') return null;
+  if (!pos.legal.length) return null;
+
+  // 检波器先来：它按「哪一条局面事实最值得说」排序（补位 > 收线 > 换血 > 能量 > …），
+  // 命中时它的措辞比通用比较准。一条都不命中（平稳回合）才退回最小真实比较。
+  // 「这一手只能补位」= 引擎在补位阶段/我方倒下时只给 switch 动作（与 experience.js 的
+  // `situationRisk` 同一口径）。兜底 kind 用它把「必须补位」与「一般首选行动」分开。
+  const mineHpForKind = num(pos.mine?.hp);
+  const mustReplace = pos.needsReplacement.includes('player')
+    || pos.mine?.fainted === true || (mineHpForKind !== null && mineHpForKind <= 0);
+  const picked = DETECTORS.map((detect) => detect(pos, isObj(plan) ? plan : null)).find(Boolean) ?? null;
+  const base = (picked ? adviceFromCandidate(pos, picked, plan) : null) ?? primaryFromFacts(pos, plan);
+  if (!base?.ref) return null;
+
+  const ref = base.ref;
+  const actionLabel = ref.display ?? ref.label;
+  // 段首已经引用过回合与精灵，标题里不再重复「第 N 回合」—— 复读正是 U10 要修的那种毛病。
+  const headline = ref.kind === 'switch' ? `换${actionLabel}上场` : `出「${actionLabel}」`;
+  const fingerprint = [pos.turn ?? '?', pos.phase ?? '?', pos.stateVersion ?? '?',
+    pos.legal.map((one) => `${one.kind}:${one.label}`).join('|')].join('@');
+  // 只列**真的缺**的那几项。不写「对手这一回合的选择」这种放之四海皆准的话 ——
+  // 那不是「哪一项未知」，是一句谁都知道的废话（U09 的同一条口径：没有信息量就不说）。
+  const unknown = [...new Set(base.unknown ?? [])].filter((row) => typeof row === 'string' && row);
+  const estimates = estimateTable(pos, plan);
+  const est = ref.kind === 'skill' ? estimates.get(ref.label) ?? null : null;
+
+  const advice = {
+    headline,
+    reason: base.reason,
+    upside: base.upside,
+    risk: base.risk,
+    alternates: alternatesOf(pos, ref, plan),
+    actionLabel,
+    actionKind: ref.kind ?? null,
+    legalActionId: ref.legalActionId,
+    legalIndex: ref.legalIndex,
+    // 与 `coachAdvice()` 同一形状的**可执行目标**：客户端渲染「查看 / 采用建议」都读它
+    // （`legalActionId` 用来回填当前合法动作表里那一项，`display` 是给玩家看的名字）。
+    action: ref,
+    // 行动**同时**带上引擎给的原始标签：客户端「采用」时按它回填合法表里那一项。
+    legalLabel: ref.label ?? null,
+    turn: pos.turn,
+    phase: pos.phase,
+    stateVersion: pos.stateVersion,
+    fingerprint,
+    unknown,
+    // 这一条建议属于哪一类局面事实。**兜底那一支也必须给一个契约里的 kind** ——
+    // 客户端的浮条按「有没有 kind」判有没有信息量，null 会被当成「没话说」而把气泡藏掉。
+    kind: base.kind ?? picked?.kind ?? (mustReplace ? 'replace-required' : 'primary-action'),
+    evidence: {
+      turn: pos.turn,
+      my: pos.mine ? {name: pos.mine.name, hp: pos.mine.hp, maxHp: pos.mine.maxHp, energy: pos.mine.energy} : null,
+      foe: pos.foe ? {name: pos.foe.name, hp: pos.foe.hp, maxHp: pos.foe.maxHp, energy: pos.foe.energy} : null,
+      legal: pos.legal.map((one, index) => ({legalActionId: legalActionIdOf(one, index), kind: one.kind, label: one.label})),
+      estimate: est ? {min: est.min, max: est.max} : null,
+      plan_recommendation: str(plan?.recommendation),
+      plan_branches: num(plan?.branches_evaluated),
+    },
+    // 结构化字段之外的**可读正文**：无模型档直接用它；有模型时它是兜底与校对基准。
+    text: null,
+  };
+  advice.text = battleAdviceText(advice, pos);
+  return advice;
+}
+
+/**
+ * 建议写成玩家读得懂的一段话。
+ *
+ * 每一栏都必须能对上 `advice.evidence` 里的公开事实（这是这一段的判据，不是文风）：
+ *   局面 → 首选行动 → 为什么 → 收益 → 主要风险 → 备选 → 未知 → 不会替你出招。
+ */
+export function battleAdviceText(advice, pos = null) {
+  if (!advice) return null;
+  const lines = [];
+  const position = pos ?? {turn: advice.turn, phase: advice.phase, mine: null, foe: null};
+  const intro = pos ? situationLine(pos) : (Number.isInteger(advice.turn) ? `第 ${advice.turn} 回合。` : '');
+  if (intro) lines.push(intro);
+  lines.push(`首选行动：${advice.headline}（引擎给的合法动作：${advice.legalLabel ?? advice.actionLabel}）。`);
+  if (advice.reason) lines.push(`为什么是它：${advice.reason}。`);
+  if (advice.upside) lines.push(`收益：${advice.upside}。`);
+  if (advice.risk) lines.push(`主要风险：${advice.risk}。`);
+  if (Array.isArray(advice.alternates) && advice.alternates.length) {
+    lines.push(`备选：${advice.alternates.map((row) => `${row.label}（${row.note}）`).join('；')}。`);
+  }
+  if (Array.isArray(advice.unknown) && advice.unknown.length) {
+    lines.push(`我这里不知道的：${advice.unknown.join('；')}。`);
+  }
+  lines.push('以上都来自这一轮的公开局面与引擎估算（不是胜率）；我不会自动替你出招，采用与否由你决定。');
+  return lines.join('');
+}

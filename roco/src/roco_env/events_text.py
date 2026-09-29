@@ -449,6 +449,38 @@ def event_text(event: Dict[str, Any], rs: Any = None) -> str:
         why = f"{element}系" if element else "该属性"
         return f"{who}是{why}，免疫{name}的{status}。"
 
+    # ── 每次使用后的永久累计（U06，2026-09-29）─────────────────────────────────
+    # `env._accumulate_per_use_ramp` 的 detail：{side, skill_id, field, delta, total}
+    # —— 一次**成功出手**之后，这一招自己身上「每次使用后永久 ±N」累到了多少。
+    #
+    # ⚠ 这个 kind 一直是**玩家看得见的兜底话**：用户 2026-09-29 的截图 6 里那一行
+    #   「发生了一件事（引擎事件 per_use_ramp，本页还没有它的中文说法）」就是它。
+    #   为什么一直没被发现：它**没进 `KNOWN_EVENT_KINDS`**，而 `test_event_text` 那条
+    #   「真对局收 kind」的判据是按这个集合咬的 —— 照不到它；它又只在
+    #   `damage_per_use_ramp` 打开、且配招里有这类技能时才出得来。
+    #
+    # 句子口径：
+    #   · 说清「哪一招、哪个量、这一次加了多少、现在累计多少」——**不写**"发生了一件事"；
+    #   · `side` 目前是 `None`（`_accumulate_per_use_ramp` 没带），所以**不写主语** ——
+    #     `_side(None)` 返回空串，这里显式判空，绝不让 `None`/空串漏到屏幕上；
+    #   · 数值只来自 `detail`，拿不到就不写那一段（**不编 0**）；
+    #   · 这一条不改机制：只把引擎已经算出来的累计念成人话。
+    if kind == "per_use_ramp":
+        field_cn = {"power": "威力", "cost": "能耗", "hits": "连击数"}.get(str(detail.get("field") or ""))
+        delta = _num(detail.get("delta"))
+        total = _num(detail.get("total"))
+        who = side or ""
+        name = skill_name()
+        if field_cn is None or delta is None:
+            # 拿不到「哪个量 / 变了多少」：如实说不知道是什么变了，不猜、也不静默。
+            return (f"{who}「{name}」用完之后，每次使用的累计变了"
+                    "（引擎没给是哪个量、变了多少）。")
+        sign = "" if str(delta).startswith("-") else "+"
+        head = f"{who}「{name}」用完之后，{field_cn}永久 {sign}{delta}"
+        if total is not None:
+            head += f"（累计 {total}）"
+        return head + "。"
+
     # 未知 kind **不静默**：交给测试去红，运行时给一句诚实的兜底
     return f"发生了一件事（引擎事件 {kind or '未知'}，本页还没有它的中文说法）。"
 
@@ -480,4 +512,8 @@ KNOWN_EVENT_KINDS = frozenset({
     # 这五个 kind 曾经「引擎会发、模板缺席」，而且**判据照不到**（真对局跑不出天气，
     # 因为规范配招里没有造天气技能）——是主线程用 loadouts 显式换招才打出来的。
     "weather_set", "weather_tick", "weather_end", "weather_status", "weather_immune",
+    # 2026-09-29（U06）：`env._accumulate_per_use_ramp` 一直在发这个 kind，模板缺席 ⇒
+    # 玩家看到的是兜底话「发生了一件事（引擎事件 per_use_ramp…）」（用户截图 6 点名）。
+    # 补模板的同时登记进来 —— 这样「真对局收 kind」那条判据才咬得住它。
+    "per_use_ramp",
 })

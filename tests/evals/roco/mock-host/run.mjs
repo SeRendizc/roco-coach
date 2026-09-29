@@ -119,6 +119,12 @@ export async function runBattleScenario(scenario, {service, deadlineMs = 3000, i
       known_skills: [...knownSkills],
       layer: decision.detail?.layer ?? null,
       advice_kind: decision.detail?.advice?.kind ?? null,
+      // U09（2026-09-29 加性）：这一手是不是**不可逆**那一档（我方必须补位 / 场上已倒下）。
+      // 它决定「每局 2 次打断」这条额度要不要让路 —— 用户验收原文：「倒下必须提示可换的
+      // 合法存活精灵，不能预算用尽后沉默」。这一栏就是那条判据的可核对输入。
+      unavoidable: decision.detail?.unavoidable === true,
+      blocked_by: decision.detail?.speak_blocked_by ?? null,
+      advice_action: decision.detail?.advice?.action?.legalActionId ?? null,
       why: decision.detail?.text?.why ?? null,
       compare: (await import('../../../../src/coach/compare-model.js')).rocoCompareModel({plan, legal, view: host._view()}),
       plan: plan && plan.ok ? {

@@ -69,7 +69,19 @@ button{min-width:44px}
 
 /* ── 卡片网格：首层只有头像符号 / 名字 / 系别 / 标签 ─────────────────────── */
 .box-main{padding:13px 14px}
-.box-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:10px}
+/* ⚠ 2026-09-29（U11）**改钉**：这里原来是 `repeat(auto-fill,minmax(158px,1fr))` ——
+   在 1440 宽下算出 **7 列**，而每页固定 **24 项**（`box.js` 的 `state.pageSize`）
+   ⇒ 正常页最后一行只填 3 格、空 4 格（截图 11 的「1 / 26」那页，实测 rowCounts=[7,7,7,3]）。
+   现在**固定列数**，并且每一档都能整除 24（8 / 6 / 4 / 3 / 2 ⇒ 3 / 4 / 6 / 8 / 12 行整行）：
+     ≥1600 → 8 列   | 1200–1599 → 6 列（1440 实测这一档）| 900–1199 → 4 列
+     620–899 → 3 列 | <620 → 2 列（390 手机这一档）
+   最后一页允许真实不足（那是数据本身的余数，不是排版硬凑的）。
+   旧写法留档（改钉不删）：`.box-grid{grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:10px}` */
+.box-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+@media(min-width:1600px){.box-grid{grid-template-columns:repeat(8,minmax(0,1fr))}}
+@media(max-width:1199px){.box-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:899px){.box-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:619px){.box-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .card{display:flex;flex-direction:column;gap:6px;background:#182635;border:1px solid var(--line);
  border-radius:12px;padding:9px 10px;min-width:0}
 .card.picked{border-color:var(--accent);background:#1c3128}
@@ -92,6 +104,13 @@ button{min-width:44px}
 .tag-form{background:#4a3f6b;color:#e2dcff}
 .tag-badge{background:#4a4030;color:#f0dda8}
 .card-key{font-size:11.5px;color:#b4c3d1}
+/* ⭐ 2026-09-29（U01，Lead 在真 8765 复验时点名）：卡片上要能看见**等级**与
+   **最重要培养摘要**（「名字/形态、可辨形象、属性、等级和最重要培养摘要」）。
+   等级那一格是**从数据读**的（`data-level` 带着原值，缺就不画）；图鉴卡上的 `你的：…`
+   只有在**本机记录里真有这一只**时才出现（具体值：等级 · 性格 · 天分档位），不编、不刷噪音。 */
+.card-level{font-size:12px;color:#cfe0d6;background:#101a26;border:1px solid var(--line);
+  border-radius:999px;padding:1px 9px;align-self:flex-start}
+.card-owned{font-size:11.5px;line-height:1.5;color:#b4c3d1;overflow-wrap:anywhere}
 /* 「加入比较」：**次要动作**，做成一个 chip —— 2026-09-28（人类：「加入比较为啥那么大，
    有那么重要？」）。改前实测：和技能/等级那些标签一样大（宽 100%、高 44px，整张卡最抢眼的一行）。
    改后：高 24px、字号 11.5px、内边距 2/8、低调描边；下限 24×24（摸得到），
@@ -144,7 +163,8 @@ button{min-width:44px}
 /* ── 窄屏：卡片两列、抽屉占满、所有长文本可换行 ─────────────────────────── */
 @media(max-width:560px){
  main{padding:10px 12px}
- .box-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ /* ⚠ 2026-09-29（U11）：列数已由上面那组固定列数接管（<620px 是 2 列，正好整除 24）。
+    这里只留卡片内部的紧凑化，不再重复声明 grid-template-columns（两处一定会漂）。 */
  .card{padding:8px}
  .avatar{width:28px;height:28px;font-size:16px}
  .card-name{font-size:14px}
@@ -231,8 +251,13 @@ button{min-width:44px}
 
 /* 一个个体的那一行（抽屉版重排）：左卡片 / 右等级，下面整行放性格天分与动作。
    2026-09-27（人类：「培养页面丑死了，竖着挤在一坨」）：改前实测抽屉宽 158px、一行 544px 高。
-   改法只作用于抽屉版（`data-grouped="yes"`）：列宽 330px ⇒ 1440 下 4 列；行内两列网格。 */
-#box-grid[data-grouped="yes"]{grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;align-items:start}
+   改法只作用于抽屉版（`data-grouped="yes"`）：列宽 330px ⇒ 1440 下 4 列；行内两列网格。
+   ⚠ 2026-09-29（U11）：列数改成**固定档位**，每一档都整除 24（本页每页 24 项）
+   ⇒ 4 / 3 / 2 / 1 列 = 6 / 8 / 12 / 24 行，正常页不会剩半行（最后一页允许真实不足）。 */
+#box-grid[data-grouped="yes"]{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start}
+@media(min-width:1500px){#box-grid[data-grouped="yes"]{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:999px){#box-grid[data-grouped="yes"]{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:759px){#box-grid[data-grouped="yes"]{grid-template-columns:minmax(0,1fr)}}
 #box-grid[data-grouped="yes"] .species-drawer{margin:0}
 #box-grid[data-grouped="yes"] .drawer-body{padding:2px 12px 10px 14px;gap:8px}
 #box-grid[data-grouped="yes"] .individual{
@@ -261,11 +286,40 @@ button{min-width:44px}
   flex-direction:row;align-items:center;flex-wrap:wrap;gap:6px 8px;min-height:44px}
 #box-grid[data-grouped="yes"] .individual-card .card-name{font-size:14px}
 /* ⚠ 人类 ④「第一排和第二排信息冗余」：组里**多个体**时组头已经写过名字与系别 ⇒
-   每一行不再重复画它们（`multi=yes` 由页面传进来），只留区分它们必需的东西。 */
-#box-grid[data-grouped="yes"] .individual[data-multi="yes"] .individual-card .avatar,
-#box-grid[data-grouped="yes"] .individual[data-multi="yes"] .individual-card .card-name,
+   每一行**不再重复画系别那一排**（`multi=yes` 由页面传进来），但**名字与形象必须保留**。
+   ⚠ 2026-09-29（U12）**改钉**：这里原来是把整张卡片藏掉 ——
+     `#box-grid[data-grouped="yes"] .individual[data-multi="yes"] .individual-card{display:none}`
+     （以及 .avatar / .card-name / .card-types 三条 display:none）
+   后果就是人类截图 12 里那两个**无名字无图的嵌套空框**（「铠甲虫 2 个体」下面什么都没有）。
+   现在改成"紧凑但可辨"：形象 + 名字照画，系别那一排不重复；多出来的「第 N 只」标签、
+   等级、性格/资质、收藏、去培养/去配队都在各自那一行上（实例级，互不覆盖）。 */
+#box-grid[data-grouped="yes"] .individual[data-multi="yes"]{
+  display:flex;flex-wrap:wrap;align-items:center;gap:5px 9px;padding:7px 10px;
+  border:1px solid var(--line,#2a3442);border-radius:10px;background:#141f2c}
+#box-grid[data-grouped="yes"] .individual[data-multi="yes"]:hover{border-color:#4a6076}
+#box-grid[data-grouped="yes"] .individual[data-multi="yes"] .individual-card{flex:1 1 190px;min-width:0}
+#box-grid[data-grouped="yes"] .individual[data-multi="yes"] .individual-card .avatar{
+  width:26px;height:26px;font-size:15px;flex:0 0 auto}
 #box-grid[data-grouped="yes"] .individual[data-multi="yes"] .individual-card .card-types{display:none}
-#box-grid[data-grouped="yes"] .individual[data-multi="yes"] .individual-card{display:none}
+#box-grid[data-grouped="yes"] .individual[data-multi="yes"] .individual-card .card-name{
+  font-size:13.5px;font-weight:600}
+#box-grid[data-grouped="yes"] .individual[data-multi="yes"] .individual-level{
+  grid-column:auto;font-size:12px}
+#box-grid[data-grouped="yes"] .individual[data-multi="yes"] .individual-traits{grid-column:auto}
+#box-grid[data-grouped="yes"] .individual[data-multi="yes"] .individual-actions{
+  grid-column:auto;margin-left:auto;flex-wrap:nowrap}
+/* 「第 N 只」：多个体时每一只的可辨编号（配「本机加的」那一枚标签用）。 */
+.individual-ordinal{font-size:12px;color:#cfe0d6;background:#101a26;border:1px solid var(--line);
+  border-radius:999px;padding:1px 8px;white-space:nowrap}
+/* 「本机加的」那一行的**来源说明**：真实来源 + 缺哪几个字段（不伪造已导入的培养值）。 */
+.individual-source{flex:1 1 100%;font-size:11.5px;line-height:1.5;color:#b4c3d1}
+/* 实例级动作（去培养 / 去配队）：只在多个体时出现，尺寸比星标再小一点。 */
+.instance-act{min-height:28px;height:28px;padding:0 9px;font-size:12px;border-radius:999px;
+  background:#121e2c;border:1px solid var(--line);color:#cfe0d6;cursor:pointer}
+.instance-act:hover{border-color:#4a6076}
+@media(max-width:560px){
+  #box-grid[data-grouped="yes"] .instance-act{min-height:44px;height:44px}
+}
 @media(max-width:560px){
   #box-grid[data-grouped="yes"]{grid-template-columns:minmax(0,1fr)}
   #box-grid[data-grouped="yes"] .fav-btn{min-height:44px;height:44px;padding:0 12px}
@@ -276,10 +330,53 @@ button{min-width:44px}
 /* ── 二级详情页（`?pet=<个体>`）────────────────────────────────────────────
    2026-09-28（人类 ②③）：「没有个按钮能弹出个二级页面展示完整六维属性」
    「刷新性格、天分、再加一只啥的这个太大了…是不是最好放二级页面去？」
-   与比较二级页同一套：返回入口 + 正文；动作排一行，窄屏自动换行。 */
+   与比较二级页同一套：返回入口 + 正文；动作排一行，窄屏自动换行。
+
+   ⚠ 2026-09-29（U02）**改钉**：这一屏原来是**一条单列**，等级 / 性格 / 资质各占一整条
+   通栏（实测 1440 下每条宽 1164px、内容只有「Lv.60」几个字 ⇒ 人类说的「等级占整屏空条」）。
+   现在：
+     · 顶部一块**紧凑摘要**（`.pet-summary`：形象 + 名称 + 属性 + 等级胶囊 + 性格/资质/天分/
+       刷新记录四小格），不再有整屏通栏；
+     · 宽屏两区（`.pet-cols`：左 340px 摘要 + 动作，右**唯一一组**四个技能 + 六维）；
+     · 窄屏（≤880px）单列，顺序照读；390px 无横向溢出（长名字/双属性都换行）。 */
 .pet-view{margin-bottom:12px}
 .pet-view-head{justify-content:flex-start;gap:12px;flex-wrap:wrap}
 #pet-back{height:auto;min-height:44px}
+.pet-cols{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:14px;align-items:start}
+.pet-side,.pet-main{display:flex;flex-direction:column;gap:10px;min-width:0}
+@media(max-width:880px){.pet-cols{grid-template-columns:minmax(0,1fr)}}
+.pet-summary{background:#141f2c;border:1px solid var(--line);border-radius:12px;padding:11px 12px;
+  min-width:0}
+.pet-summary-top{display:flex;gap:11px;align-items:flex-start}
+.pet-summary-top .avatar.big{width:64px;height:64px;font-size:34px;flex:0 0 auto}
+.pet-summary-id{min-width:0;display:flex;flex-direction:column;gap:5px}
+.pet-summary-id h3{margin:0;font-size:17px;line-height:1.3;overflow-wrap:anywhere}
+.pet-summary .card-types,.pet-summary .card-tags{display:flex;flex-wrap:wrap;gap:4px}
+.pet-game-traits{display:flex;flex-direction:column;gap:4px}
+.pet-game-traits .trait{padding:4px 8px}
+.pet-facts{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.pet-chip{font-size:12.5px;background:#101a26;border:1px solid var(--line);border-radius:999px;
+  padding:3px 10px;white-space:nowrap}
+.pet-chip b{color:var(--muted);font-weight:500;margin-right:6px}
+/* 三件事各占一格：性格 / 资质 / 天分档位 / 刷新天分记录（U01：不许混成一个字符串）。 */
+.pet-traits{margin-top:8px}
+.pet-traits .trait{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;padding:6px 9px}
+.pet-traits .trait>b{flex:0 0 auto;min-width:6em}
+.pet-traits .trait>span{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+.pet-talent-why,.pet-missing,.pet-note-inline{flex:1 1 100%;font-size:11.5px;line-height:1.55;
+  color:#b4c3d1;font-style:normal;overflow-wrap:anywhere}
+.pet-missing{color:#e8ce88}
+/* （`.pet-attrs` / `.pet-attr-cell` 那一排六格资质在 2026-09-29 删掉了：它与
+   「资质」那一行逐值重复 —— 六项数值只在那一行里出现一次。） */
+.pet-talent-conflict,.pet-talent-remedy,.pet-shared-note{font-size:12.5px;line-height:1.6;
+  color:#dbe5ef;margin:8px 0 0;overflow-wrap:anywhere}
+.pet-talent-conflict{background:#1a2534;border:1px solid #3d5268;border-radius:9px;padding:8px 10px}
+.pet-shared-note{color:#b4c3d1}
+.pet-fix-btn{display:block;margin-top:7px;min-height:44px;padding:8px 12px;font-size:13px;
+  border-radius:9px;background:#1c3128;border:1px solid var(--accent);color:#d8f3dd;cursor:pointer;
+  white-space:normal;text-align:left}
+/* 左栏窄 ⇒ 动作按钮在栏内换行（桌面那条"排成一横排"的规则是给整幅宽屏用的）。 */
+.pet-side .pet-actions{flex-wrap:wrap;overflow-x:visible}
 .pet-lead{margin:0 0 10px;line-height:1.6}
 .pet-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
 /* 人类 2026-09-28：「排成一横排不行吗？？？」⇒ 桌面宽度够时不许换行（窄屏照旧允许换行，

@@ -33,8 +33,8 @@ import {drawerListHtml, formatTraitValue, refreshButton, undoButton, removeButto
 //     后者是「＋再养一只同种」用的，而那个功能整个下线了（人类：「每种精灵只允许有一只」）。
 //   · 顺带删掉了那个「本机已有几只」的计数函数（它只为那个按钮服务）。
 import {individualsForRows, refreshIndividual, undoIndividual,
-  localCardById, localIndividualsGrouped, removeIndividual,
-  pruneRetiredExtras} from './box-individuals.js';
+  localCardById, localIndividualsGrouped, localIndividualBySpecies, removeIndividual,
+  pruneRetiredExtras, resetTalentFromImport} from './box-individuals.js';
 // 60 级面板：**数字只有一个来源**（`coach/talent.js` 的 `panelOf`），这一层只负责把它画出来。
 // 本仓的 60 级公式是游戏导出配置表那一套（PVP 一速榜 9/9 实测），**不是**宝可梦那套 ——
 // 同一只音速犬宝可梦式算速度 153、这条算 331，混用会把数算飞。
@@ -47,6 +47,9 @@ import {panelOfIndividual, cultivationOf} from '../coach/individuals.js';
 import {mountLoadout} from './box-loadout.js';
 // 刷新之后「落在哪一项」那句话只有一处（`lastRefreshNote`）——页面只负责显示。
 import {lastRefreshNote} from '../coach/individuals.js';
+// ⭐ 2026-09-29（U01）：「天分 / 资质 / 刷新天分记录」三件事的**唯一读法与唯一说法**在
+// `box-talent.js`（纯函数）。列表行、详情页、补救按钮共用它 —— 这一页不再自己拼那几句。
+import {talentReadingOf, talentChipOf, refreshLedgerOf} from './box-talent.js';
 
 /** 一句话口径：没有登记的栏目一律这么说，绝不用 0 或估计值顶上。 */
 const NO_ITEM = '游戏数据里没有这一项';
@@ -230,7 +233,16 @@ function renderFilterMenus() {
 //   · 卡片上**不再画等级** —— 等级只在每一行的一个地方写一次（`Lv.60`），
 //     不会出现"同一行两个等级"（他看到的 60 与 100 同时出现就是这么来的）；
 //   · 同种多只时**不再重复名字与系别**（组头已经写过一遍），只画能区分它们的那些东西。
-function cardHtml(card, {compact = false} = {}) {
+//
+// ⚠ 2026-09-29 **改钉**（Lead 在真 8765 复验 U01 时点名）：上面第二条被**收窄**了 ——
+// 要收掉的应当是"同一个体一行里说两遍"，而不是"卡片上不许有等级"。
+// U01 的验收原文写着：卡片只保留「名字/形态、可辨形象、属性、**等级**和最重要培养摘要」。
+// 所以现在：
+//   · `showLevel`（默认真）⇒ 卡片上画 `Lv.60`（数据里有才画；缺就一个数都不编）；
+//   · 抽屉那一行传 `showLevel: false` —— 行里已经有 `.individual-level` 那一格，
+//     "同一行一个等级"这条口径一个字没变（判据：`tests/roco-box-redo.test.js` 的 ⓪）；
+//   · 图鉴那一档再补一格**最重要培养摘要**（`ownedSummaryHtml`）。
+function cardHtml(card, {compact = false, showLevel = true} = {}) {
   const mine = state.kind === 'mine';
   // 2026-09-28：`emoji/color` 这两个局部量在这里已经没人用了（头像统一走 `avatarHtml`），
   // 留着会让下一个人以为卡片还在自己拼头像。旧写法留档：const [emoji, color] = avatarOf(card.types);
@@ -238,6 +250,10 @@ function cardHtml(card, {compact = false} = {}) {
   const tags = [];
   if (card.form_label) tags.push({text: card.form_label, cls: 'tag-form'});
   if (card.role_label) tags.push({text: `定位：${card.role_label}`});
+  // ⭐ 2026-09-29（U01）：等级（数据里有才画，缺就一个级数都不编 —— 人类：「同时出现 60 和 lv100」）。
+  const level = Number.isFinite(Number(card?.level)) && Number(card?.level) > 0
+    ? Number(card.level) : null;
+  const showLv = showLevel && level !== null;
   // 2026-09-28（人类指着截图逐字）：
   //   · 「支持：仅图鉴资料」—— 列表里**每张卡都挂一遍**，读起来像"我自己的精灵不完整"
   //     （人类：「啥玩意儿，"我的精灵"不应该完整的吗？？？」）。支持等级挪去二级详情页说，
@@ -278,17 +294,44 @@ function cardHtml(card, {compact = false} = {}) {
     ${compact ? '' : avatarHtml(card)}
     ${compact ? '' : `<span class="card-name">${escapeAttr(card.name)}</span>`}
     ${compact ? '' : `<span class="card-types">${typeChips(card.types)}</span>`}
+    ${compact ? '' : (showLv ? `<span class="card-level" data-level="${level}">Lv.${level}</span>` : '')}
     ${tags.length ? `<span class="card-tags">${tags.map((t) => `<span class="tag ${t.cls ?? ''}">${escapeAttr(t.text)}</span>`).join('')}</span>` : ''}
+    ${compact ? '' : ownedSummaryHtml(card)}
    </button>
   </article>`;
 }
 
 /**
+ * 图鉴卡上那一格「最重要培养摘要」（U01 验收原文点名的第二样）。
+ *
+ * 只在**图鉴那一档**画，而且只在**本机记录里真有这一只**的时候画 —— 写的是具体值：
+ * `你的：Lv.60 · 性格 稳重 · 一般般的天分`（天分那一段走 `box-talent.js`，与列表行同一个说法）。
+ * 没有本机记录（这一只不在你盒子里）⇒ 返回空串：不编，也不把一句"没有数据"
+ * 在 622 张卡上各印一遍 —— 那正是人类 2026-09-28 骂过的机械噪音。
+ */
+function ownedSummaryHtml(card) {
+  if (state.kind !== 'catalog') return '';
+  const speciesId = card?.group ?? card?.select ?? '';
+  const one = localIndividualBySpecies(speciesId);
+  if (!one) return '';
+  const bits = [];
+  if (Number.isFinite(Number(one.level)) && Number(one.level) > 0) bits.push(`Lv.${Number(one.level)}`);
+  if (one.nature) bits.push(`性格 ${one.nature}`);
+  const chip = talentChipOf(talentReadingOf(one));
+  if (chip?.label) bits.push(chip.label);
+  if (!bits.length) return '';
+  return `<span class="card-owned" data-owned-summary="yes">你的：${escapeAttr(bits.join(' · '))}</span>`;
+}
+
+/**
  * 抽屉里那张卡片怎么画：**同一行里还有别的个体**时用紧凑版（组头已经写过名字与系别）。
  * 单独成函数是为了让 `renderCards` 里那次调用保持一行（一条静态判据盯着它的形状）。
+ *
+ * ⚠ 2026-09-29（U01）：抽屉那一行**不在卡片上再画一次等级** —— 行里已经有一格
+ * `.individual-level`（`box-drawer.js` 的 `individualHtml`），"同一行一个等级"这条口径没变。
  */
 function drawerCardHtml(card) {
-  return cardHtml(card, {compact: card?.compact === true});
+  return cardHtml(card, {compact: card?.compact === true, showLevel: false});
 }
 
 /** 点抽屉头：把这一个种类摊开或收起（`state.openDrawers` 是"玩家手动点开过"的集合）。 */
@@ -404,11 +447,37 @@ function boxQuery(extra = {}) {
  * 人类逐字：「重复精灵不要了，把铠甲虫还原回来」+「每种精灵只允许有一只」。
  * 那些 `-b` 后缀的个体是**已经下线的「＋再养一只同种」留下的产物**：功能删了，产物也不该再画 ——
  * 否则玩家看到一个删不掉、也加不出来的第二只（截图里铠甲虫就是「4 个个体」）。
- * 本机记录**仍然保留**（它还存着性格/天分/刷新次数），只是不再当成额外的行画出来。
  * 旧记录的一次性清理在 `box-individuals.js` 的 `pruneRetiredExtras()`。
+ *
+ * ⚠ 2026-09-29（U12）**改钉**：这一支原来无条件 `return []` —— 连**本机记录里真有的**个体
+ * 也一起吞掉了。后果不是"少画一行"，而是**画成一个空框**：`drawerHtml` 的个体数据是按
+ * `individuals[card.select]` 取的，而 `individuals` 由 `individualsForRows([...rows, ...extraRows])`
+ * 造出来 ⇒ `extraRows` 为空时，本机那一行只能拿到 `{individual_id}` 一个字段
+ * ⇒ 屏幕上就是「铠甲虫 / 2 个个体 / 本机加的 / 性格 待导出 / 天分 待导出」（截图 12 的第二只）。
+ * 现在按**本机记录里真有的**返回（退休后缀那批已经由 `pruneRetiredExtras()` 清掉，
+ * 所以这条不会有"复活已下线功能"的效果）；页面据此把这一只自己的等级/性格/资质画出来。
  */
-function localRowsFor() {
-  return [];
+function localRowsFor(page) {
+  // ⚠ 只有「我的盒子」这一档才有"本机的个体"这回事：图鉴那一档的一行是**物种**
+  // （`pet_XXXXXX`），本机记录是 `own-XXXX`，两边编号空间不同 ⇒ 在图鉴档里"不在这一页里"
+  // 对每一条本机记录都成立，会把它们**全部**当成额外的卡片塞进网格（实测：24 → 48 张卡）。
+  if (state.kind !== 'mine') return [];
+  const rows = Array.isArray(page) ? page : [];
+  const drawn = rows.map((row) => row?.select).filter(Boolean);
+  // 只看**这一页上真有的那几个种类**：别的页/别的种类的本机记录不该硬塞进这一页
+  // （旧实现把它们画成"额外的行"，那正是这一支被 `return []` 掉的原因之一）。
+  const speciesOnPage = new Set(rows.map((row) => String(row?.group ?? '')).filter(Boolean));
+  const grouped = localIndividualsGrouped(drawn);
+  const out = [];
+  for (const [species, list] of Object.entries(grouped)) {
+    if (!speciesOnPage.has(String(species))) continue;
+    for (const one of list) {
+      const card = localCardById(one.individual_id);
+      // `extra: true` = 这一只不在抓包名单那一页里（列表行据此写「本机加的」+ 缺哪些字段）。
+      if (card) out.push({...card, extra: true});
+    }
+  }
+  return out;
 }
 
 /** 「只看收藏」这一档：收藏是本机记的，所以过滤在页面里做。 */
@@ -581,6 +650,26 @@ function raceOfMetrics(metrics) {
   return out;
 }
 
+/**
+ * 抓包回执里那两份**导入字段**：「资质」（六维表）与「天分档位」（档名）。
+ *
+ * ⚠ 它们**不是**屏幕上那一份（屏幕上以本机记录为准，见 `buildSnapshotOf` 顶上那段）。
+ * 用途只有两个（U01「不许静默二选一」）：
+ *   ① 两边不一致时**如实把名单那一份也说出来**；
+ *   ② 玩家点「用名单那一份重设资质」时，作为**可采纳的来源**。
+ */
+function importedTalentOf(player) {
+  const traits = Array.isArray(player?.traits) ? player.traits : [];
+  const byLabel = new Map(traits.map((trait) => [trait.label, trait]));
+  const qualification = byLabel.get('资质');
+  const tier = byLabel.get('天分档位');
+  const values = qualification?.value && typeof qualification.value === 'object'
+    && !Array.isArray(qualification.value) ? qualification.value : null;
+  const label = typeof tier?.value === 'string' && tier.value.trim() ? tier.value.trim() : null;
+  if (!values && !label) return null;
+  return {values, label, source: '抓包名单里的「资质 / 天分档位」栏'};
+}
+
 // ── 一处真值：这一只的 BuildSnapshot（人类 2026-09-29 报的 A7 + Codex 体检 P0-02）──────────
 //
 // ⚠ 2026-09-29 **改钉**（人类逐字：「刷新天分没效果，刷新性格没试过但也要检查下」）：
@@ -636,6 +725,8 @@ function buildSnapshotOf({select, card, player, individual}) {
     // 服务端回执里这两栏是**游戏数据字段**（不是玩家培养出来的）：有值才画，没值整栏不画。
     // 只有它们跟着回执走 —— 培养那三栏（性格/资质/天分档位）一律走 `cultivation`。
     gameTraits: ['特长', '血脉'].map((label) => byLabel.get(label)).filter(Boolean),
+    // ⭐ U01：回执里那两份**导入字段**（只用于"两边不一致时如实标注"与玩家主动采纳，见上面的注释）。
+    importedTalent: importedTalentOf(player),
     raceList: Array.isArray(player?.metrics) ? player.metrics : [],
     panel: converted?.panel ?? null,
     // ⭐ 四个技能：个体回执在 `skills`，**物种回执在 `moveset`**（同一套形状：order/name/element/
@@ -695,31 +786,92 @@ function panelGrid(build) {
 }
 
 /**
- * 二级详情页的正文。**只吃一份 `BuildSnapshot`**（见 `buildSnapshotOf`）——
- * 页面不再自己去摸 `state` 里那两份数据，这是"一处真值"在渲染层的落点。
+ * 二级详情页的正文：**六维 + 说明**。
+ *
+ * ⚠ 2026-09-29（U03）**改钉**：这一屏原来还画一段 `<h4>四个技能（按顺序）</h4><ol class="moveset">`，
+ * 而「换技能」面板（`box-loadout.js`）里又画了同一组四个 ⇒ 屏幕上**同一件事说两遍**
+ * （截图 2/3：上面四张巨卡 + 下面可学技能格）。现在四个技能只留**一组**
+ * （`#pet-loadout` 的面板，带效果说明），这里只剩六维与那句前提说明。
+ * 旧写法留档（改钉不删）：`<h4>四个技能（按顺序）</h4><ol class="moveset">…`
+ *
+ * 顶部那一块**紧凑摘要**（形象 / 名称 / 属性 / 等级 / 性格 / 资质 / 天分 / 刷新记录）在
+ * `petSummaryHtml`；测试与验收读的钩子仍然是 `#pet-head`。
  */
 function petBodyHtml(build) {
-  // 2026-09-29：这一屏原来**两条渲染路径**（有回执画一套、没回执另写一套 HTML），
-  // 现在只剩这一条 —— 本机新养的那只（服务端不认识）也走它，画法不会跟有回执时漂。
-  const level = build.level === null ? '—' : `Lv.${build.level}`;
-  // 2026-09-28（人类：「没有就删掉啊」）：**没有值的栏目整栏不画** ——
-  // 此前「特长 无」还要再挂一句未核验说明，等于拿两行废话占地方。
-  const traits = petTraitsOf(build)
+  return `<h4>${build.panel ? '六维（60 级 · 估算）' : '六维（种族值）'}${build.panel ? ' <span class="tag tag-badge">推导值</span>' : ''}</h4>${panelGrid(build)
+     || `<p class="missing">${escapeAttr(build.metricsMissingReason ?? NO_ITEM)}</p>`}
+   <p class="metric-label">${escapeAttr(build.panel ? PANEL_NOTE : PANEL_NOTE_SPECIES)}</p>${panelReasonHtml(build)}`;
+}
+
+/**
+ * 顶部那一块**紧凑精灵摘要**（U02）：形象 / 名称 / 属性 / 等级 / 性格 / 资质 + 天分那一栏。
+ *
+ * 人类口径（README U02）：「等级不用整屏空条」「宽屏两区按信息组织，窄屏单列自然阅读，
+ * 不让单个标签占一整行大面板」。所以原来那三条通栏（`等级 Lv.60` / `性格 …` / `资质 …`
+ * 各占一整条 1164px 宽的条）改成：一行小胶囊（等级 / 性格 / 天分）+ 六格资质。
+ *
+ * ⚠ U01：这里同时是「天分 / 资质 / 刷新天分记录」**三件事分开说**的落点 ——
+ * 三样各有各的容器与钩子（`data-pet-level` / `data-pet-qualification` / `data-pet-tier` /
+ * `data-pet-ledger`），验收可以分别读，不会再混成一个字符串。
+ */
+function petSummaryHtml(build, reading, individual, {instanceCount = 1} = {}) {
+  const name = build.name ?? '这一只';
+  const level = build.level === null || build.level === undefined ? '—' : `Lv.${build.level}`;
+  // ⚠ 2026-09-29：这一块原来还额外画了一排**六格资质**（`.pet-attrs`）—— 与上面「资质」那一行
+  // 逐值重复（人类 2026-09-28 骂过"这几行不是重复吗？"）⇒ 删掉那一排，六项数值只在
+  // 「资质」那一行里出现一次（缺的那几项照旧点名，见 `reading.qualification.missingLabels`）。
+  // 回执里那两栏游戏数据字段（特长 / 血脉）：有值才画，没值整栏不画（口径没变）。
+  // 仍然走 `petTraitRow`（一处印法）—— 它也是"缺的就照实说"那条口径的落点。
+  const gameRows = petTraitsOf(build)
+    .filter((trait) => trait.label === '特长' || trait.label === '血脉')
     .filter((trait) => trait.value !== null && trait.value !== undefined && trait.value !== '')
     .map((trait) => petTraitRow(trait.label, trait)).join('');
-  return `<h4>等级</h4><div class="traits">
-    <div class="trait"><b>等级</b><span>${level}</span></div>
+  const ledger = refreshLedgerOf(individual, {note: lastRefreshNote(individual)});
+  const conflict = reading.conflict;
+  const adopt = conflict?.adoptable
+    ? `<button class="pet-fix-btn" data-adopt-talent="${escapeAttr(build.instanceId ?? '')}"`
+      + ` title="把抓包名单里的那六项资质写进这一台机器的记录（性格 / 等级 / 剩余刷新次数一个都不动）">`
+      + `用名单那一份重设资质（还剩 ${ledger.talentLeft ?? '—'} 次刷新不动）</button>`
+    : '';
+  return `<div class="pet-summary" data-pet-summary="yes">
+   <div class="pet-summary-top">
+    ${avatarHtml({...build, art: build.art, spriteId: build.spriteId, group: build.spriteId,
+      types: build.types}, {big: true})}
+    <div class="pet-summary-id">
+     <h3>${escapeAttr(name)}</h3>
+     <span class="card-types">${typeChips(build.types)}</span>
+     <span class="card-tags">${[build.roleLabel ? `定位：${build.roleLabel}` : null,
+       build.formLabel].filter(Boolean)
+       .map((t) => `<span class="tag">${escapeAttr(t)}</span>`).join('')}</span>
+     ${gameRows ? `<div class="pet-game-traits">${gameRows}</div>` : ''}
+    </div>
    </div>
-   ${traits ? `<h4>性格与资质</h4><div class="traits" id="pet-traits">${traits}</div>` : ''}
-   <h4>${build.panel ? '六维（60 级 · 估算）' : '六维（种族值）'}${build.panel ? ' <span class="tag tag-badge">推导值</span>' : ''}</h4>${panelGrid(build)
-     || `<p class="missing">${escapeAttr(build.metricsMissingReason ?? NO_ITEM)}</p>`}
-   <p class="metric-label">${escapeAttr(build.panel ? PANEL_NOTE : PANEL_NOTE_SPECIES)}</p>
-   <h4>四个技能（按顺序）</h4><ol class="moveset">${build.skills.map((s) => `<li>
-     <span class="move-slot">第 ${s.order} 个</span>
-     <b>${escapeAttr(s.name ?? NO_ITEM)}</b>
-     <span class="move-meta">${escapeAttr(s.element ?? '')}${s.category ? ` · ${escapeAttr(s.category)}` : ''}${s.energy !== null ? ` · 耗能 ${s.energy}` : ''} · 威力 ${escapeAttr(s.power_label ?? NO_ITEM)}</span>
-     <span class="move-desc">${escapeAttr(s.desc ?? '')}</span>
-    </li>`).join('')}</ol>${panelReasonHtml(build)}`;
+   <div class="pet-facts">
+    <span class="pet-chip" data-pet-level="${escapeAttr(build.level ?? '')}"><b>等级</b>${escapeAttr(level)}</span>
+   </div>
+   <div class="traits pet-traits" id="pet-traits" data-talent-source="${escapeAttr(reading.source)}">
+    <div class="trait" data-pet-nature="yes"><b>性格</b><span>${escapeAttr(build.cultivation?.nature ?? '待导出')}</span></div>
+    <div class="trait" data-pet-qualification="yes" data-missing="${escapeAttr(reading.qualification.missing.length)}">
+      <b>资质</b><span>${escapeAttr(reading.qualificationText || NO_ITEM)}</span>
+      ${reading.qualification.missingLabels.length
+        ? `<em class="pet-missing">缺 ${escapeAttr(reading.qualification.missingLabels.join('、'))}</em>` : ''}</div>
+    <div class="trait" data-pet-tier="yes" data-talent-status="${escapeAttr(reading.status)}">
+      <b>天分档位</b><span>${escapeAttr(reading.tierLabel ?? '还没定档')}</span>
+      <em class="pet-talent-why" data-pet-talent-reason="yes">${escapeAttr(reading.reason)}</em></div>
+    <div class="trait" data-pet-ledger="yes"><b>刷新天分记录</b>
+      <span>${escapeAttr(ledger.text.replace(/^刷新天分记录：/, ''))}</span>
+      ${ledger.note ? `<em class="pet-note-inline">${escapeAttr(ledger.note)}</em>` : ''}</div>
+   </div>
+   ${conflict ? `<p class="pet-talent-conflict" data-pet-conflict="yes">名单那一份（${escapeAttr(conflict.source)}）写的是：`
+     + `${escapeAttr(conflict.label ?? '没有档名')}${conflict.valuesText ? `（资质 ${escapeAttr(conflict.valuesText)}）` : ''}`
+     + `。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。${adopt}</p>`
+     : ''}
+   ${(!conflict || !conflict.adoptable) && reading.remedy
+     ? `<p class="pet-talent-remedy" data-pet-remedy="yes">补救：${escapeAttr(reading.remedy)}</p>` : ''}
+   ${instanceCount > 1 ? `<p class="pet-shared-note" data-pet-shared="yes">这一种在名单里有 ${instanceCount} 只：`
+     + '性格 / 资质 / 等级 / 收藏各按个体单独存；配招（四个技能）按**物种**保存 —— '
+     + '开局时引擎按物种下发，所以同种的两只会共用同一份四技能。</p>' : ''}
+  </div>`;
 }
 
 /**
@@ -781,22 +933,23 @@ function renderPetPage() {
   // ⭐ **这一屏唯一的真值对象**：页面下面所有渲染都只读它（不再各自去摸 `state.petData` / 本机记录）。
   const build = buildSnapshotOf({select, card, player, individual});
   state.petBuild = build;
+  // ⭐ U01：这一屏上「天分 / 资质 / 刷新天分记录」三件事的读数（一处真值，见 `box-talent.js`）。
+  // 屏幕上那一份以**本机记录**为准；回执里那两份导入字段只用于"两边不一致时说清"与补救。
+  const reading = talentReadingOf(individual, {imported: build.importedTalent});
+  state.petReading = reading;
+  // 同种在这一页上有几只（名单那一页 + 本机记录，按编号去重）：
+  // 用来提醒玩家"哪些按个体存、哪些按物种存"（U12：不同实例不许互相覆盖配置的那一半）。
+  const speciesId = build.speciesId;
+  const instanceCount = speciesId
+    ? new Set([...state.rows, ...state.extraRows]
+      .filter((row) => row?.group === speciesId).map((row) => row.select)).size
+    : 1;
   const name = build.name ?? '这一只';
-  const types = build.types;
   $('pet-title').textContent = `${name} · 详情`;
-  $('pet-head').innerHTML = `<div class="detail-head">
-   ${avatarHtml({...card, art: build.art, spriteId: build.spriteId, group: build.spriteId, types}, {big: true})}
-   <div><h3>${escapeAttr(name)}</h3>
-    <span class="card-types">${typeChips(types)}</span>
-    <span class="card-tags">${[build.roleLabel ? `定位：${build.roleLabel}` : null,
-      // 2026-09-28（人类：「还有就是那个仅图鉴资料是错的啊你为啥不改」）：
-      // 「支持：xxx」这个标签**整个不画**了。它是引擎的收录档位（`BOX_SUPPORT_LABELS`），
-      // 不是这只精灵的属性；挂在自己家的精灵身上读起来像"你的精灵是残的"。
-      // 玩家要判断"能不能拿去打"，看的是「带上它去配队」能不能点、以及工坊那边的说法。
-      build.formLabel].filter(Boolean)
-      .map((t) => `<span class="tag">${escapeAttr(t)}</span>`).join('')}</span>
-    ${card.extra === true ? '<span class="card-tags"><span class="tag tag-badge">本机加的</span></span>' : ''}
-   </div></div>`;
+  // 2026-09-29（U02）**改钉**：顶部那一块原来是「大头像 + 名字 + 系别 / 定位」的散装一行，
+  // 详情正文里再各占一条通栏（等级 / 性格 / 资质）。现在合成**一块紧凑摘要**：
+  // 形象 + 名称 + 属性 + 等级 + 性格 + 资质 + 天分 + 刷新记录，全部在这一块里（`petSummaryHtml`）。
+  $('pet-head').innerHTML = petSummaryHtml(build, reading, individual, {instanceCount});
   // ⭐ 2026-09-29（art-finish 缺口③ 的收尾）：官方立绘**加载失败**（这一只没有抓包图）⇒
   // 换回系别 emoji，**不留空框**（人类 2026-09-28 的口径）。物种页没法事先问"有没有图"，
   // 所以这一层兜底是它敢按编号画 `<img>` 的前提。
@@ -811,9 +964,12 @@ function renderPetPage() {
   }
   $('pet-actions').innerHTML = petActionsHtml(select, individual);
   // 换技能面板挂在动作区**后面（同级兄弟）**：`#pet-actions` 每次重画，挂它里面会被抹掉。
+  // ⚠ 2026-09-29（U02/U03）：宿主改成 `box.html` 里**静态**的 `#pet-loadout`（在右栏顶部），
+  // 页面重画不再重建它 —— 挑到一半的候选不会因为刷新一次就丢。
   // ⚠ 2026-09-29：技能也从**同一份快照**取（此前直接读 `state.petData.skills`）——
   // 这就是"四技能与性格/资质被同一份快照带着走"那一条的落点。
-  mountLoadout({select, species: build.speciesId, skills: build.skills, request: getJson});
+  mountLoadout({select, species: build.speciesId, skills: build.skills, request: getJson,
+    root: $('pet-loadout'), instanceCount});
   // 刷新之后那句话（"上一次刷天分：+10 加到「魔攻」"）在这一屏上也要看得见：
   // 它是玩家确认"刚才那一下落在哪一项"的地方（列表那一行里不再画它了）。
   const note = $('pet-note');
@@ -850,15 +1006,24 @@ function renderPetPage() {
   $('pet-body').innerHTML = petBodyHtml(build);
   // 排障/验收用的钩子：这一页上「资质」那一栏原样印出来是什么（真机 10b 就是读它判的）。
   // 只读标记，不改变任何渲染 —— 没有这一栏时写空串（不编值）。
+  // ⚠ 2026-09-29（U01/U02）：这一栏从 `#pet-body` 里的通栏挪进了顶部摘要（`[data-pet-qualification]`），
+  // 钩子的语义一个字没改（还是"屏幕上那一栏原样印出来的字"），只是读的地方跟着走。
   // ⚠ 2026-09-29 **改钉**：这一小段原来写在 `#pet-body.innerHTML = …` **之前**，
   // 读到的是**上一次渲染**留下的 DOM（于是"刷新一次之后 `data-talent-raw` 还是旧值"，
   // 一个量屏幕的钩子自己却慢一帧 —— 12b/10b 的排障字段就是这么被污染的）。
   // 挪到渲染之后，读数与屏幕上这一刻一致；判据的语义一个字没改。
   {
-    const talentRow = [...document.querySelectorAll('#pet-body .trait')]
-      .find((el) => String(el.querySelector('b')?.textContent ?? '').trim() === '资质');
-    $('pet-view').dataset.talentRaw = talentRow
-      ? String([...talentRow.querySelectorAll('span')].map((s) => s.textContent).join(' ')).trim() : '';
+    const row = document.querySelector('#pet-head [data-pet-qualification]');
+    $('pet-view').dataset.talentRaw = row
+      ? String([...row.querySelectorAll('span')].map((s) => s.textContent).join(' ')).trim() : '';
+    // ⭐ U01 新增：屏幕上的三件事各自的原文（天分档位 / 资质 / 刷新天分记录），
+    // 判据据此逐项比对「列表 · 详情 · 战斗 · 小芽」四处读数是否同一份（不是同一个字符串）。
+    const tierRow = document.querySelector('#pet-head [data-pet-tier]');
+    $('pet-view').dataset.tierRaw = tierRow
+      ? String(tierRow.querySelector('span')?.textContent ?? '').trim() : '';
+    const ledgerRow = document.querySelector('#pet-head [data-pet-ledger]');
+    $('pet-view').dataset.ledgerRaw = ledgerRow
+      ? String(ledgerRow.querySelector('span')?.textContent ?? '').trim() : '';
   }
   window.scrollTo(0, 0);
 }
@@ -1115,6 +1280,47 @@ function handleFavClick(event) {
 }
 
 /**
+ * 「带上它去配队」（RC-801 的交接链）——**列表行与二级详情页共用一份逻辑**。
+ *
+ * ⚠ 2026-09-29（U12）：多个体时每一行都要有**自己的**「去配队」入口（实例级动作），
+ * 所以这段从 `#pet-view` 的监听里抽出来，列表那一侧也挂上。
+ * 交接读的是 `state.selected`：只放这一只进去，去重 / 锁定那套规则仍然在 `goToTeam` 里。
+ */
+function handleToTeamClick(event, goToTeam) {
+  const toTeam = event.target.closest?.('[data-to-team]');
+  if (!toTeam) return false;
+  event.preventDefault();
+  const pick = toTeam.dataset.toTeam;
+  const {card} = individualOf(pick);
+  state.selected = [{select: pick, group: card?.group ?? state.petCard?.group ?? '',
+    name: card?.name ?? '', locked: lockedOf(card), localOnly: card?.localOnly === true}];
+  goToTeam();
+  return true;
+}
+
+/**
+ * U01 的**可执行补救**：把抓包名单里的那六项资质写进本机记录（玩家点一下才发生）。
+ *
+ * 为什么不是页面自动换：真值优先级是"本机记录为准"（Lead 口径），页面偷偷换一份就是静默二选一。
+ * 这里只做玩家点的那一下；写完之后这一屏与列表一起重画 —— 档位立刻就有了，
+ * 而**性格 / 等级 / 剩余刷新次数一个都不动**（`box-individuals.js` 的那条注释写着）。
+ */
+function handleAdoptTalentClick(event) {
+  const btn = event.target.closest?.('[data-adopt-talent]');
+  if (!btn) return false;
+  event.preventDefault();
+  const select = btn.dataset.adoptTalent || state.pet;
+  const imported = state.petBuild?.importedTalent ?? null;
+  if (!imported?.values) { $('box-status').textContent = '名单里没有这一只的资质，没法重设。'; return true; }
+  const result = resetTalentFromImport(select, {talent: imported.values, source: imported.source});
+  $('box-status').textContent = result.ok
+    ? `已经按抓包名单把这一只的资质重设好了（${result.filled} 项；性格与剩余刷新次数都没动）`
+    : `重设失败：${result.reason}`;
+  if (result.ok) { renderCards(); renderPetPage(); }
+  return true;
+}
+
+/**
  * 「删掉这只」的两步确认（人类 ⑩：「删除个体的功能一定要加二次确认」）：
  * 第一次点只把这一处换成「确定删掉？+ 取消」，**再点一次**确定才真删。
  * 不用浏览器原生 confirm —— 无头浏览器点不动它，判据也就写不出来。
@@ -1214,6 +1420,8 @@ function wire() {
     // 收藏与「删掉这只」都抽成两屏共用的处理器（二级详情页上也要能用）。
     if (handleFavClick(event)) return;
     if (handleRemoveClick(event)) return;
+    // ⭐ U12：多个体时每一行都有自己的「去配队」（实例级动作，与二级页同一段逻辑）。
+    if (handleToTeamClick(event, goToTeam)) return;
     const head = event.target.closest?.('.drawer-head');
     if (head) { toggleDrawer(head.dataset.species); return; }
     const face = event.target.closest?.('[data-detail]');
@@ -1226,17 +1434,9 @@ function wire() {
     if (handleRemoveClick(event)) return;
     // 2026-09-28（人类：「加入比较不是删了吗？再养一只也不要」）：这两个入口都下线了。
     // 取而代之的是**一键带走这一只**（交接链不能断，见 `petActionsHtml` 顶上那段）。
-    const toTeam = event.target.closest?.('[data-to-team]');
-    if (toTeam) {
-      event.preventDefault();
-      const pick = toTeam.dataset.toTeam;
-      const {card} = individualOf(pick);
-      // 交接读的是 `state.selected`：这里只放**这一只**进去，去重/锁定那套规则仍在 `goToTeam` 里。
-      state.selected = [{select: pick, group: card?.group ?? state.petCard?.group ?? '',
-        name: card?.name ?? '', locked: lockedOf(card), localOnly: card?.localOnly === true}];
-      goToTeam();
-      return;
-    }
+    if (handleToTeamClick(event, goToTeam)) return;
+    // U01 的补救：用名单那一份重设资质（玩家点一下才发生）。
+    if (handleAdoptTalentClick(event)) return;
     const undoBtn = event.target.closest?.('[data-undo]');
     if (undoBtn) {
       event.preventDefault();
@@ -1362,7 +1562,12 @@ async function boot() {
   // 右上角小芽 + 弹出式小芽（人类 2026-09-25 纠偏①）：注入到页头 .header-actions 的最右端。
   mountXiaoya({mode: 'popup'});
   wire();
-  syncTabs(state.kind);   // HTML 里写死的高亮跟着默认档走（见 `syncTabs` 的注释）
+  // ⭐ 2026-09-29（Lead 复验 U01/U12 时要一条**可复跑的定位**）：地址上给了哪一档就落在哪一档
+  // —— `box.html?kind=mine`（我的盒子）/ `box.html?kind=catalog`（全部精灵），与 `?pet=` 同一套做法。
+  // 不传就还是默认档（全部精灵）。这样"铠甲虫在第几页""多实例怎么看"都有可复制的地址。
+  const kindParam = (new URLSearchParams(window.location.search).get('kind') ?? '').trim();
+  if (kindParam === 'mine' || kindParam === 'catalog') state.kind = kindParam;
+  syncTabs(state.kind);   // HTML 里写死的高亮跟着这一档走（见 `syncTabs` 的注释）
   setView('list');
   await loadTotals();
   await load({reset: true});

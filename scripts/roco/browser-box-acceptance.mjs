@@ -680,7 +680,12 @@ async function main() {
         if (!row) return null;
         const spans = [...row.querySelectorAll('span')].map((s) => String(s.textContent || '').trim());
         return {value: spans[0] ?? '', effect: spans.slice(1).join(' ')};})(),
-      moves: document.querySelectorAll('#pet-body .moveset li').length,
+      // ⚠ 2026-09-29 **改钉**（U03：四个技能合成一组 #pet-loadout .bl-slots）。
+      //   旧选择器原文留档（别删）：#pet-body .moveset li
+      //   为什么改：box-loadout.js 把「当前四技能」重建成 ol.bl-slots > li.bl-slot，
+      //   .moveset 那一块在详情页已经不存在了 ⇒ 旧选择器恒读 0，
+      //   判据会从「四个技能都在」悄悄变成「0 个也算过」。语义没变：**仍然数四个格子**。
+      moves: document.querySelectorAll('#pet-loadout .bl-slots .bl-slot').length,
     })`));
     steps.push({at: 'detail', select: firstFace, facts: detailFacts, text: detailText.slice(0, 400)});
     // 改钉（2026-09-27）：玩家可见的那句话由「本仓库没有这一项」改成「游戏数据里没有这一项」
@@ -796,7 +801,7 @@ async function main() {
           storeOne:String((JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}')['own-0001']||{}).nature),
           // 与判据**同一把尺子**：只看二级页那一屏的可见文字
           petVisibleObject:(function(){var v=document.getElementById('pet-view');return v?((v.innerText||'').match(/\[object Object\]/g)||[]).length:0;})(),
-          petLeakOuter:[].slice.call(document.querySelectorAll('.trait, .metric, .cmp-value, .moveset li, #pet-body *'))
+          petLeakOuter:[].slice.call(document.querySelectorAll('.trait, .metric, .cmp-value, .moveset li, .bl-slot, #pet-body *, #pet-loadout *'))
             .filter(function(el){return /\[object Object\]/.test(el.textContent||'');})
             .slice(0,10).map(function(el){
               var txt=String(el.textContent||'').replace(/\s+/g,' ');
@@ -1682,7 +1687,9 @@ async function main() {
         return JSON.stringify({view:document.body.dataset.boxView,
           pet:new URLSearchParams(location.search).get('pet'),
           stats, traitRows:v.querySelectorAll('#pet-traits .trait').length,
-          moves:v.querySelectorAll('#pet-body .moveset li').length,
+          // ⚠ 2026-09-29 **改钉**（U03，同上）：旧选择器 #pet-body .moveset li 留档。
+          // 注意这一条与上面两处**同源不同用**：这里量的是"四个格子"的条数，语义不变。
+          moves:v.querySelectorAll('#pet-loadout .bl-slots .bl-slot').length,
           // 与 10b / 11 同一把尺子（可见 + 直接文本）：旧口径（body.innerText）读的是重建出来的文本
           objectObject:[].slice.call(document.querySelectorAll('#pet-view *, #pet-view')).filter(function(el){
             if (!el.offsetParent && el !== document.body) return false;

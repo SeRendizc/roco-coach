@@ -67,14 +67,38 @@ test('P01 宿主门控：后台、动画、聊天、预制、结束、不在对�
  assert.equal(shouldIntervene({...strongest,decisionKey:'4:battle',lastDecisionKey:'3:battle'}),'action_hint');
 });
 
+// ⚠ 2026-09-29 **改钉**（U09，task-2 advice-engine）：预算这一条现在有**一个例外** ——
+// 「我方倒下/必须补位」那一档（`risk>=1`）不接受频率预算与冷却。用户验收原文：
+//   「倒下必须提示可换的合法存活精灵，不能预算用尽后沉默或继续推荐已倒下对象。」
+// 旧断言用的夹具 `strongest.risk===1`，改钉之后它落在**例外**那一档（见下面第二个用例）。
+// 这里把原断言**原样保留**在非例外档（risk 0.8 = 危险血线但不是补位）上 —— 判据的意图没松：
+// 「可以打断但不是非说不可」的提醒，预算照旧把它降成 defer_to_review。
+// 旧写法留档（原文，别再改回来）：
+//   const capped=interventionDetail({...strongest,recentHints:...});
+//   const cooling=interventionDetail({...strongest,recentHints:1,...});
 test('P01 预算是硬上限：决定性局面转成 defer_to_review，而不是消失也不是打断',()=>{
- const capped=interventionDetail({...strongest,recentHints:INTERVENTION_LIMITS.maxHintsPerMatch});
+ // 非例外档：risk 0.8（危险血线）—— 预算与冷却照旧生效。
+ const budgeted={...strongest,risk:.8};
+ const capped=interventionDetail({...budgeted,recentHints:INTERVENTION_LIMITS.maxHintsPerMatch});
  assert.equal(capped.action,'defer_to_review');
  assert.equal(capped.reason,'hint-budget');
  assert.equal(capped.budget,'hint-budget');
- const cooling=interventionDetail({...strongest,recentHints:1,lastHintAt:100000-INTERVENTION_LIMITS.cooldownMs+1,now:100000});
+ assert.notEqual(capped.unavoidable,true,'危险血线不是「必须补位」那一档');
+ const cooling=interventionDetail({...budgeted,recentHints:1,lastHintAt:100000-INTERVENTION_LIMITS.cooldownMs+1,now:100000});
  assert.equal(cooling.action,'defer_to_review');
  assert.equal(cooling.reason,'cooldown');
+ // ── 例外档（U09）：我方倒下/必须补位（risk=1）—— 预算与冷却都拦不住 ──────────
+ const fallen=interventionDetail({...strongest,recentHints:INTERVENTION_LIMITS.maxHintsPerMatch});
+ assert.equal(fallen.action,'action_hint','倒下那一手不许被额度静默');
+ // 理由码取决于这一手还有没有别的决定性证据（`strongest` 的分差很大 ⇒ decisive-gap）；
+ // 这一条判的是**没有被预算降级**，不是理由码的取值。
+ assert.ok(['critical-risk','decisive-gap'].includes(fallen.reason),`理由码异常：${fallen.reason}`);
+ assert.equal(fallen.budget,null,'例外档不看预算，预算栏必须是空的（不是被拦后伪装成放行）');
+ assert.equal(fallen.unavoidable,true,'「不看预算」要如实进回执');
+ const fallenCooling=interventionDetail({...strongest,recentHints:1,lastHintAt:100000-INTERVENTION_LIMITS.cooldownMs+1,now:100000});
+ assert.equal(fallenCooling.action,'action_hint','倒下那一手不许被冷却静默');
+ const fallenNoTime=interventionDetail({...strongest,timeLeft:0});
+ assert.equal(fallenNoTime.action,'action_hint','倒下那一手也不许被「来不及」降级');
  // 冷却过去、换一个决策就恢复。
  assert.equal(shouldIntervene({...strongest,recentHints:1,lastHintAt:100000-INTERVENTION_LIMITS.cooldownMs-1,now:100000}),'action_hint');
  // 没有价值的时候连复盘条目都不生成。

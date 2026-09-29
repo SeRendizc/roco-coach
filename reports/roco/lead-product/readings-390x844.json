@@ -1,0 +1,939 @@
+{
+  "at": "2026-09-29T02:41:18.366Z",
+  "base": "http://127.0.0.1:8765",
+  "viewport": "390x844",
+  "servedVersion": {
+    "src/client/roco.html": {
+      "status": 200,
+      "bytes": 45277
+    },
+    "src/client/roco.js": {
+      "status": 200,
+      "bytes": 227306
+    },
+    "src/client/xiaoya.js": {
+      "status": 200,
+      "bytes": 69864
+    },
+    "src/client/roco.css": {
+      "status": 200,
+      "bytes": 67335
+    },
+    "src/client/battle-v3.css": {
+      "status": 200,
+      "bytes": 33522
+    },
+    "src/client/type-affinity.js": {
+      "status": 200,
+      "bytes": 4841
+    },
+    "src/client/type-affinity.data.js": {
+      "status": 200,
+      "bytes": 12090
+    },
+    "src/client/box.js": {
+      "status": 200,
+      "bytes": 67966
+    },
+    "/api/bootstrap": {
+      "runtimeVersion": "0.11",
+      "model": "deepseek-flash",
+      "provider": "deepseek",
+      "configured": true,
+      "verified": true,
+      "started_at": "2026-09-28T16:36:34.037Z"
+    }
+  },
+  "workspaceHeads": {
+    "src/client/roco.html": {
+      "servedEqualsDisk": true,
+      "servedBytes": 45277,
+      "diskBytes": 45277,
+      "diskSha256": "c10acee0827388dc6879635e2af5fadce7d69d728054362dc86e5f37a0c5eab9"
+    },
+    "src/client/roco.js": {
+      "servedEqualsDisk": true,
+      "servedBytes": 227306,
+      "diskBytes": 227306,
+      "diskSha256": "eb2beadceacacd0220c7d22a6e56e4adaac3eb47ed4c948f77814ccbb543a38f"
+    },
+    "src/client/xiaoya.js": {
+      "servedEqualsDisk": true,
+      "servedBytes": 69864,
+      "diskBytes": 69864,
+      "diskSha256": "7ebb5b3df5d44fe8b63a5569a59cc1342ce0250dfe529d65c793cb1a194c9dc2"
+    },
+    "src/client/roco.css": {
+      "servedEqualsDisk": true,
+      "servedBytes": 67335,
+      "diskBytes": 67335,
+      "diskSha256": "4aa3ebdc0a39ff6182ad70b4e0ffbbee7c10b9d53aa8ac344c8ce1904aae3abe"
+    },
+    "src/client/battle-v3.css": {
+      "servedEqualsDisk": true,
+      "servedBytes": 33522,
+      "diskBytes": 33522,
+      "diskSha256": "af9872aa61adf10cbdb25b4620c131e876d3910fc051a46ac369ddd981bf9671"
+    },
+    "src/client/type-affinity.js": {
+      "servedEqualsDisk": true,
+      "servedBytes": 4841,
+      "diskBytes": 4841,
+      "diskSha256": "e4d78d9bb34ea8a0554974dc55e58b96493c2d5b205b35b54c39b70fc0073a69"
+    },
+    "src/client/type-affinity.data.js": {
+      "servedEqualsDisk": true,
+      "servedBytes": 12090,
+      "diskBytes": 12090,
+      "diskSha256": "48d721cb4e10adfc5b5f35642f2371ab8851d022fb0fa3502fdff34c1aa0565f"
+    },
+    "src/client/box.js": {
+      "servedEqualsDisk": true,
+      "servedBytes": 67966,
+      "diskBytes": 67966,
+      "diskSha256": "527b951c0569ecc76b9fa6aff211d4bb17b3ce111f33d477d5b3a9807a47a6c3"
+    }
+  },
+  "checks": {
+    "u07": {
+      "beforeOpen": {
+        "count": 1,
+        "rows": [
+          {
+            "id": "coach-entry",
+            "cls": "nav-btn xy",
+            "text": "✦ 小芽",
+            "rect": {
+              "x": 322,
+              "y": 30,
+              "w": 56,
+              "h": 44
+            }
+          }
+        ]
+      }
+    },
+    "start": {
+      "ok": true,
+      "turn": 1,
+      "self": 3,
+      "battleId": "s1696-exp7ks66",
+      "firstTurn": 1
+    },
+    "u05": {
+      "before": {
+        "turn": 1,
+        "stateVersion": 0,
+        "battleResult": null,
+        "activeName": "寂灭骨龙",
+        "activeTypes": [
+          "龙系",
+          "幽系"
+        ],
+        "foeName": "喵喵",
+        "foeTypes": [
+          "草系"
+        ],
+        "legalSwitchTargets": [
+          1,
+          2
+        ],
+        "threat": {
+          "hidden": false,
+          "direction": "resist",
+          "text": "寂灭骨龙 承伤 草系 ×0.5（抵抗）",
+          "title": "龙系·幽系 对对手（草系）的承伤：草系 ×0.5（按对手属性系推算；来源 ruleset roco-world-s4-2026-09-10，防御组合 龙系|幽系）"
+        },
+        "rows": [
+          {
+            "row": 0,
+            "name": "海豹船长",
+            "petTypes": [
+              "武系",
+              "水系"
+            ],
+            "rel": "down",
+            "mult": "2",
+            "text": "承伤 草系 ×2（被克制）",
+            "legal": "yes"
+          },
+          {
+            "row": 1,
+            "name": "黑猫巫师",
+            "petTypes": [
+              "普通系"
+            ],
+            "rel": "none",
+            "mult": "1",
+            "text": "承伤中性",
+            "legal": "yes"
+          },
+          {
+            "row": 2,
+            "name": "",
+            "petTypes": null,
+            "rel": "unknown",
+            "mult": null,
+            "text": "",
+            "legal": "yes"
+          },
+          {
+            "row": 3,
+            "name": "",
+            "petTypes": null,
+            "rel": "unknown",
+            "mult": null,
+            "text": "",
+            "legal": "yes"
+          },
+          {
+            "row": 4,
+            "name": "",
+            "petTypes": null,
+            "rel": "unknown",
+            "mult": null,
+            "text": "",
+            "legal": "yes"
+          }
+        ]
+      },
+      "beforeCrossCheck": {
+        "rows": [
+          {
+            "name": "海豹船长",
+            "petTypes": [
+              "武系",
+              "水系"
+            ],
+            "expectedRel": "down",
+            "onScreenRel": "down",
+            "expectedText": "承伤 草系 ×2（被克制）",
+            "onScreenText": "承伤 草系 ×2（被克制）",
+            "expectedMult": "2",
+            "onScreenMult": "2",
+            "match": true
+          },
+          {
+            "name": "黑猫巫师",
+            "petTypes": [
+              "普通系"
+            ],
+            "expectedRel": "none",
+            "onScreenRel": "none",
+            "expectedText": "承伤中性",
+            "onScreenText": "承伤中性",
+            "expectedMult": "1",
+            "onScreenMult": "1",
+            "match": true
+          },
+          {
+            "name": "",
+            "petTypes": null,
+            "expectedRel": "unknown",
+            "onScreenRel": "unknown",
+            "expectedText": "",
+            "onScreenText": "",
+            "expectedMult": "",
+            "onScreenMult": "",
+            "match": true
+          },
+          {
+            "name": "",
+            "petTypes": null,
+            "expectedRel": "unknown",
+            "onScreenRel": "unknown",
+            "expectedText": "",
+            "onScreenText": "",
+            "expectedMult": "",
+            "onScreenMult": "",
+            "match": true
+          },
+          {
+            "name": "",
+            "petTypes": null,
+            "expectedRel": "unknown",
+            "onScreenRel": "unknown",
+            "expectedText": "",
+            "onScreenText": "",
+            "expectedMult": "",
+            "onScreenMult": "",
+            "match": true
+          }
+        ],
+        "threat": {
+          "activeTypes": [
+            "龙系",
+            "幽系"
+          ],
+          "expectedRel": "up",
+          "expectedText": "承伤 草系 ×0.5（抵抗）",
+          "onScreenRel": "resist",
+          "onScreenText": "寂灭骨龙 承伤 草系 ×0.5（抵抗）",
+          "hidden": false,
+          "match": true
+        },
+        "allRowsMatch": true,
+        "noUnknownLeak": true
+      },
+      "switched": {
+        "ok": true,
+        "target": 1,
+        "turn": 2,
+        "active": 1,
+        "activeName": "海豹船长"
+      },
+      "after": {
+        "turn": 2,
+        "stateVersion": 5,
+        "battleResult": null,
+        "activeName": "海豹船长",
+        "activeTypes": [
+          "武系",
+          "水系"
+        ],
+        "foeName": "喵喵",
+        "foeTypes": [
+          "草系"
+        ],
+        "legalSwitchTargets": [
+          0,
+          2
+        ],
+        "threat": {
+          "hidden": false,
+          "direction": "threat",
+          "text": "海豹船长 承伤 草系 ×2（被克制）",
+          "title": "武系·水系 对对手（草系）的承伤：草系 ×2（按对手属性系推算；来源 ruleset roco-world-s4-2026-09-10，防御组合 武系|水系）"
+        },
+        "rows": [
+          {
+            "row": 0,
+            "name": "寂灭骨龙",
+            "petTypes": [
+              "龙系",
+              "幽系"
+            ],
+            "rel": "up",
+            "mult": "0.5",
+            "text": "承伤 草系 ×0.5（抵抗）",
+            "legal": "yes"
+          },
+          {
+            "row": 1,
+            "name": "黑猫巫师",
+            "petTypes": [
+              "普通系"
+            ],
+            "rel": "none",
+            "mult": "1",
+            "text": "承伤中性",
+            "legal": "yes"
+          },
+          {
+            "row": 2,
+            "name": "",
+            "petTypes": null,
+            "rel": "unknown",
+            "mult": null,
+            "text": "",
+            "legal": "yes"
+          },
+          {
+            "row": 3,
+            "name": "",
+            "petTypes": null,
+            "rel": "unknown",
+            "mult": null,
+            "text": "",
+            "legal": "yes"
+          },
+          {
+            "row": 4,
+            "name": "",
+            "petTypes": null,
+            "rel": "unknown",
+            "mult": null,
+            "text": "",
+            "legal": "yes"
+          }
+        ]
+      },
+      "afterCrossCheck": {
+        "rows": [
+          {
+            "name": "寂灭骨龙",
+            "petTypes": [
+              "龙系",
+              "幽系"
+            ],
+            "expectedRel": "up",
+            "onScreenRel": "up",
+            "expectedText": "承伤 草系 ×0.5（抵抗）",
+            "onScreenText": "承伤 草系 ×0.5（抵抗）",
+            "expectedMult": "0.5",
+            "onScreenMult": "0.5",
+            "match": true
+          },
+          {
+            "name": "黑猫巫师",
+            "petTypes": [
+              "普通系"
+            ],
+            "expectedRel": "none",
+            "onScreenRel": "none",
+            "expectedText": "承伤中性",
+            "onScreenText": "承伤中性",
+            "expectedMult": "1",
+            "onScreenMult": "1",
+            "match": true
+          },
+          {
+            "name": "",
+            "petTypes": null,
+            "expectedRel": "unknown",
+            "onScreenRel": "unknown",
+            "expectedText": "",
+            "onScreenText": "",
+            "expectedMult": "",
+            "onScreenMult": "",
+            "match": true
+          },
+          {
+            "name": "",
+            "petTypes": null,
+            "expectedRel": "unknown",
+            "onScreenRel": "unknown",
+            "expectedText": "",
+            "onScreenText": "",
+            "expectedMult": "",
+            "onScreenMult": "",
+            "match": true
+          },
+          {
+            "name": "",
+            "petTypes": null,
+            "expectedRel": "unknown",
+            "onScreenRel": "unknown",
+            "expectedText": "",
+            "onScreenText": "",
+            "expectedMult": "",
+            "onScreenMult": "",
+            "match": true
+          }
+        ],
+        "threat": {
+          "activeTypes": [
+            "武系",
+            "水系"
+          ],
+          "expectedRel": "down",
+          "expectedText": "承伤 草系 ×2（被克制）",
+          "onScreenRel": "threat",
+          "onScreenText": "海豹船长 承伤 草系 ×2（被克制）",
+          "hidden": false,
+          "match": true
+        },
+        "allRowsMatch": true,
+        "noUnknownLeak": true
+      },
+      "affinityChangedAfterSwitch": true,
+      "activeChangedAfterSwitch": true
+    },
+    "u09": {
+      "focusPatch": {
+        "before": false,
+        "after": true
+      },
+      "turnsPlayed": 24,
+      "docHeightSeries": [
+        1668,
+        1668,
+        1668,
+        1668,
+        1668,
+        1734,
+        1665,
+        1661,
+        1661,
+        1665,
+        1661,
+        1661,
+        1668,
+        1661,
+        1704,
+        1707,
+        1665,
+        1663,
+        1704,
+        1713,
+        1661,
+        1663,
+        1661,
+        1752
+      ],
+      "docHeightStable": false,
+      "perTurn": [
+        {
+          "turn": 3,
+          "gate": "below-threshold",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": "speed-decides",
+          "adviceReasonCode": "below-threshold",
+          "value": 0.6,
+          "floor": 1.2,
+          "decisive": false
+        },
+        {
+          "turn": 4,
+          "gate": "below-threshold",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": "speed-decides",
+          "adviceReasonCode": "below-threshold",
+          "value": 0.6,
+          "floor": 1.2,
+          "decisive": false
+        },
+        {
+          "turn": 5,
+          "gate": "",
+          "action": "action_hint",
+          "visible": true,
+          "adviceKind": "switch-low-hp",
+          "adviceReasonCode": "critical-risk",
+          "value": 2.4,
+          "floor": 1.2,
+          "decisive": true
+        },
+        {
+          "turn": 6,
+          "gate": "critical-risk",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceReasonCode": "critical-risk",
+          "value": 2.4,
+          "floor": 1.2,
+          "decisive": true
+        },
+        {
+          "turn": 7,
+          "gate": "critical-risk",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceReasonCode": "critical-risk",
+          "value": 2.4,
+          "floor": 1.2,
+          "decisive": true
+        },
+        {
+          "turn": 7,
+          "gate": "critical-risk",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceReasonCode": "critical-risk",
+          "value": 3,
+          "floor": 1.2,
+          "decisive": true
+        },
+        {
+          "turn": 8,
+          "gate": "cooldown",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": "speed-decides",
+          "adviceReasonCode": "cooldown",
+          "value": 0.6,
+          "floor": 1.2,
+          "decisive": false
+        },
+        {
+          "turn": 9,
+          "gate": "cooldown",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": "speed-decides",
+          "adviceReasonCode": "cooldown",
+          "value": 0.6,
+          "floor": 1.2,
+          "decisive": false
+        },
+        {
+          "turn": 10,
+          "gate": "cooldown",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": "speed-decides",
+          "adviceReasonCode": "cooldown",
+          "value": 0.6,
+          "floor": 1.2,
+          "decisive": false
+        },
+        {
+          "turn": 11,
+          "gate": "cooldown",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": "speed-decides",
+          "adviceReasonCode": "cooldown",
+          "value": 0.6,
+          "floor": 1.2,
+          "decisive": false
+        },
+        {
+          "turn": 12,
+          "gate": "cooldown",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": "speed-decides",
+          "adviceReasonCode": "cooldown",
+          "value": 0.6,
+          "floor": 1.2,
+          "decisive": false
+        },
+        {
+          "turn": 13,
+          "gate": "cooldown",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": "speed-decides",
+          "adviceReasonCode": "cooldown",
+          "value": 0.6,
+          "floor": 1.2,
+          "decisive": false
+        },
+        {
+          "turn": 14,
+          "gate": "cooldown",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": "foe-low-hp",
+          "adviceReasonCode": "cooldown",
+          "value": 0.6,
+          "floor": 1.2,
+          "decisive": false
+        },
+        {
+          "turn": 15,
+          "gate": "cooldown",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": "foe-low-hp",
+          "adviceReasonCode": "cooldown",
+          "value": 0.6,
+          "floor": 1.2,
+          "decisive": false
+        },
+        {
+          "turn": 15,
+          "gate": "cooldown",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceReasonCode": "cooldown",
+          "value": 3,
+          "floor": 1.2,
+          "decisive": true
+        },
+        {
+          "turn": 16,
+          "gate": "hint-budget",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": "speed-decides",
+          "adviceReasonCode": "hint-budget",
+          "value": 0.6,
+          "floor": 1.2,
+          "decisive": false
+        },
+        {
+          "turn": 17,
+          "gate": "hint-budget",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": "foe-low-hp",
+          "adviceReasonCode": "hint-budget",
+          "value": 0.6,
+          "floor": 1.2,
+          "decisive": false
+        },
+        {
+          "turn": 18,
+          "gate": "hint-budget",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": "foe-low-hp",
+          "adviceReasonCode": "hint-budget",
+          "value": 0.6,
+          "floor": 1.2,
+          "decisive": false
+        },
+        {
+          "turn": 18,
+          "gate": "hint-budget",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": null,
+          "adviceReasonCode": "hint-budget",
+          "value": 3,
+          "floor": 1.2,
+          "decisive": true
+        },
+        {
+          "turn": 19,
+          "gate": "hint-budget",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": "ko-now",
+          "adviceReasonCode": "hint-budget",
+          "value": 0.6,
+          "floor": 1.2,
+          "decisive": false
+        },
+        {
+          "turn": 20,
+          "gate": "hint-budget",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": "speed-decides",
+          "adviceReasonCode": "hint-budget",
+          "value": 0.6,
+          "floor": 1.2,
+          "decisive": false
+        },
+        {
+          "turn": 21,
+          "gate": "hint-budget",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": "speed-decides",
+          "adviceReasonCode": "hint-budget",
+          "value": 0.6,
+          "floor": 1.2,
+          "decisive": false
+        },
+        {
+          "turn": 22,
+          "gate": "hint-budget",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": "foe-low-hp",
+          "adviceReasonCode": "hint-budget",
+          "value": 0.6,
+          "floor": 1.2,
+          "decisive": false
+        },
+        {
+          "turn": 22,
+          "gate": "hint-budget",
+          "action": "silent",
+          "visible": false,
+          "adviceKind": "foe-low-hp",
+          "adviceReasonCode": "hint-budget",
+          "value": 0.6,
+          "floor": 1.2,
+          "decisive": false
+        }
+      ],
+      "aboveFloorTurns": [
+        {
+          "turn": 5,
+          "value": 2.4,
+          "floor": 1.2,
+          "decisive": true,
+          "gate": "",
+          "action": "action_hint",
+          "visible": true
+        },
+        {
+          "turn": 6,
+          "value": 2.4,
+          "floor": 1.2,
+          "decisive": true,
+          "gate": "critical-risk",
+          "action": "silent",
+          "visible": false
+        },
+        {
+          "turn": 7,
+          "value": 2.4,
+          "floor": 1.2,
+          "decisive": true,
+          "gate": "critical-risk",
+          "action": "silent",
+          "visible": false
+        },
+        {
+          "turn": 7,
+          "value": 3,
+          "floor": 1.2,
+          "decisive": true,
+          "gate": "critical-risk",
+          "action": "silent",
+          "visible": false
+        },
+        {
+          "turn": 15,
+          "value": 3,
+          "floor": 1.2,
+          "decisive": true,
+          "gate": "cooldown",
+          "action": "silent",
+          "visible": false
+        },
+        {
+          "turn": 18,
+          "value": 3,
+          "floor": 1.2,
+          "decisive": true,
+          "gate": "hint-budget",
+          "action": "silent",
+          "visible": false
+        }
+      ],
+      "gateHistogram": {
+        "below-threshold|silent": 2,
+        "|action_hint": 1,
+        "critical-risk|silent": 3,
+        "cooldown|silent": 9,
+        "hint-budget|silent": 9
+      },
+      "adviceKindsSeen": [
+        "speed-decides",
+        "switch-low-hp",
+        "foe-low-hp",
+        "ko-now"
+      ],
+      "gateSwallowedAdvice": [
+        {
+          "turn": 3,
+          "adviceKind": "speed-decides",
+          "gate": "below-threshold"
+        },
+        {
+          "turn": 4,
+          "adviceKind": "speed-decides",
+          "gate": "below-threshold"
+        },
+        {
+          "turn": 8,
+          "adviceKind": "speed-decides",
+          "gate": "cooldown"
+        },
+        {
+          "turn": 9,
+          "adviceKind": "speed-decides",
+          "gate": "cooldown"
+        },
+        {
+          "turn": 10,
+          "adviceKind": "speed-decides",
+          "gate": "cooldown"
+        },
+        {
+          "turn": 11,
+          "adviceKind": "speed-decides",
+          "gate": "cooldown"
+        },
+        {
+          "turn": 12,
+          "adviceKind": "speed-decides",
+          "gate": "cooldown"
+        },
+        {
+          "turn": 13,
+          "adviceKind": "speed-decides",
+          "gate": "cooldown"
+        },
+        {
+          "turn": 14,
+          "adviceKind": "foe-low-hp",
+          "gate": "cooldown"
+        },
+        {
+          "turn": 15,
+          "adviceKind": "foe-low-hp",
+          "gate": "cooldown"
+        },
+        {
+          "turn": 16,
+          "adviceKind": "speed-decides",
+          "gate": "hint-budget"
+        },
+        {
+          "turn": 17,
+          "adviceKind": "foe-low-hp",
+          "gate": "hint-budget"
+        },
+        {
+          "turn": 18,
+          "adviceKind": "foe-low-hp",
+          "gate": "hint-budget"
+        },
+        {
+          "turn": 19,
+          "adviceKind": "ko-now",
+          "gate": "hint-budget"
+        },
+        {
+          "turn": 20,
+          "adviceKind": "speed-decides",
+          "gate": "hint-budget"
+        },
+        {
+          "turn": 21,
+          "adviceKind": "speed-decides",
+          "gate": "hint-budget"
+        },
+        {
+          "turn": 22,
+          "adviceKind": "foe-low-hp",
+          "gate": "hint-budget"
+        },
+        {
+          "turn": 22,
+          "adviceKind": "foe-low-hp",
+          "gate": "hint-budget"
+        }
+      ],
+      "bubbles": [
+        {
+          "turn": 5,
+          "text": "你只剩 10% 血，换「寂灭骨龙」上来：它还厚，别把「海豹船长」白送掉",
+          "why": "依据：场上这只血量已经到底（36/374），后备里有更厚的伙伴 · 风险：换人这一手虽然先动，但上来的那只照样要吃对面这一下",
+          "action": "action_hint",
+          "gate": ""
+        }
+      ],
+      "codeLeaks": [],
+      "uselessSentence": [],
+      "lastTurn": 22,
+      "finished": true
+    },
+    "u10": {
+      "turnsToFinish": 0,
+      "resultVisible": true,
+      "lessonExists": true,
+      "lessonInsideResult": true,
+      "lessonHidden": false,
+      "lessonVisible": true,
+      "docHeight": 1798,
+      "boxRect": {
+        "w": 350,
+        "h": 723,
+        "top": 61
+      },
+      "actionsSticky": true,
+      "reviewText": {
+        "question": "这一局一共 22 个回合，最后赢了下来。第 7 回合 我方 海豹船长 倒下，这是全场第一次减员。它倒下之前，背包里的回复药一直没有用过。全场最重的一次伤害在第 16 回合（我方，约 315 点）；我方主动换人 1 次、被动补位 3 次、用道具 0 次。",
+        "learning": "这一局学到一件事：血线掉下一半时先把回复药吃掉，再决定继续输出还是换人。 下一次再遇到第 4 回合那种局面（对方打出属性克制的一击），先换掉挨打的那一只再打。",
+        "progress": "",
+        "note": "依据：第 7 回合：我方 海豹船长 倒下（第一次减员）。 第 7 回合 我方 海豹船长 是在一次约 14 点伤害之后倒下的。这是单次伤害记录，不能据此断定整局走向。 我方 海豹船长 倒下之前没有用过回复药（这一局没有我方用药的记录；背包里还有回复药）。 关键片段：全场最重的一次伤害在第 16 回合——我方那一手打出约 315 点（用的是「彗星」），打在对方第 2 位身上。 关键片段：最吃亏的一回合是第 4 回合——我方在这一回合一共挨了约 294 点（对方出手 1 次）。 资源：我方主动换人 1 次（第 1 回合）；被动补位：我方 3 次／对方 2 次（补位不占回合）；最长连着 21 个回合没有主动换人（第 2–22 回合）。 资源：道具——我方这一局没有用药或用道具的记录（道具事件 0 条）；对方用了 3 次：第 12 回合 回复药（回 45 点）、第 13 回合 回复药（回 45 点）、第 15 回合 回复药（回 45 点）。 资源：我方回合末的能量记录里最低是 1 点（第 1、8、16、17、21 回合；这一局记到 21 次回能，能量上限 6）。 资源：手段——对方减伤/应对 7 次（第 1–20 回合之间）；对方技能回能 8 次（第 2–21 回合之间，合计约 8 点能量）；我方减伤/应对 5 次（第 8、11、14、17、19 回合）。"
+      },
+      "verdict": "我方胜"
+    }
+  }
+}

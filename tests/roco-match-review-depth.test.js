@@ -506,6 +506,50 @@ test('装配层：深一层并入「依据」与正文，老师原有的结论�
   for (const line of collectStrings(merged.depth)) assertNoForbidden(line, '装配后的复盘');
 });
 
+// ── U10（2026-09-29 加性）：默认口径与新增字段在装配层不被弄丢 ────────────────
+//
+// 这一条**是新增的**（没有替换任何旧断言），放这里有两个理由：
+//   ① U10 那五条的完整判据在 `tests/roco-review-u10.test.js`（新文件），而新文件在被
+//      某个 npm script 或 `scripts/roco/guard-selftest.mjs` 登记之前，`test:unit` 跑不到它；
+//      本文件已经在 `test:unit` 清单里，所以把「**默认口径没变**」这一条最关键的守卫
+//      放在这里，改动一旦把默认行为弄坏，常规那一跑就会红。
+//   ② `rocoMatchReview` 只并 `evidence` 与 `text`，新加的字段（`outcome` /
+//      `alternative` / `repeat_avoided` / `repeat_detail` / `ledger`）必须原样透出来——
+//      将来谁把这个装配层改成「只挑几个字段返回」，复盘卡片上那些新结论就会静默消失。
+test('U10 加性字段：装配层透传新结论，而「合法替代」默认整层关闭', () => {
+  const {events, turns, game} = matchA();
+  const view = matchA().view;
+  const merged = rocoMatchReview({
+    matchId: 'm-depth-A', finalView: view, lastLiveView: view,
+    events, turns, result: 'loss', memory: freshMemory(),
+  });
+  assert.ok(merged.review);
+  // 结果四类分开：这一局引擎给的是 loss，就照实说 loss（不是「没有记下来」）
+  assert.equal(merged.review.outcome.category, 'loss');
+  assert.equal(merged.review.outcome.result, 'loss');
+  assert.match(merged.review.text, /最后输掉了/);
+  // 加性字段透传：新账本带着这一局的编号与结论
+  assert.equal(merged.review.matchId, 'm-depth-A');
+  assert.equal(merged.review.ledger.matchId, 'm-depth-A');
+  assert.equal(merged.review.ledger.goal, merged.review.goal);
+  assert.deepEqual(merged.review.repeat_detail, {memory_taught: false, same_match: false, previous_match: false});
+  assert.equal(merged.review.repeat_avoided.detected, false);
+  // 默认关闭这条口径钉在**直接调用**上（装配层将来接上 legalByTurn 也不影响这一条：
+  // 「不传参数 ⇒ 不开这一层」是 `reviewMatch` 自己的契约）
+  const direct = reviewMatch({events, turns, result: 'loss', game});
+  assert.equal(direct.alternative, null, '不传 legalByTurn 时「合法替代」这一层不许开工');
+  assert.ok(!direct.text.includes('合法动作'), direct.text);
+  // 单次伤害的免责句与「在一次约 N 点伤害之后倒下」那一句**同进同出**：
+  // 这一局的课讲的是补位那一幕（没引用致命一击），所以两样都不该出现；
+  // 带致命一击的强形式判据在 `tests/roco-review-u10.test.js`（含「撤掉那一击必须一起消失」的反证）。
+  const fatalLines = direct.evidence.filter((line) => /是在一次约 \d+ 点伤害之后倒下的/.test(line));
+  for (const line of fatalLines) assert.match(line, /这是单次伤害记录，不能据此断定整局走向/);
+  if (!fatalLines.length) {
+    assert.ok(!direct.evidence.some((line) => line.includes('单次伤害记录')),
+      `没有引用任何一次伤害，却挂了一句「单次伤害记录」：${JSON.stringify(direct.evidence)}`);
+  }
+});
+
 // ── 真服务：真引擎的一局，用真事件再核一遍 ──────────────────────────────────
 
 function probePython(bin) {

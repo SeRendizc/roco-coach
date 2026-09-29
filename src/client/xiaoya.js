@@ -703,6 +703,211 @@ function statusLine(answer) {
 }
 
 /**
+ * 一条回答**自己**证明了什么（U07 第 4 条：连通状态不许自相矛盾）。
+ *
+ * 修的是什么（用户截图 08 的逐字矛盾）：标题写着「DeepSeek 已回答 · 依据可展开查看」，
+ * 下面那两行却还写着「资料查询：还没拉起来」「云端模型：状态未知」——
+ * 明明是云端模型刚答的这一句，状态行却说不知道模型在不在。
+ *
+ * 根因不是 `refreshCapability()` 没写，而是那两行**只有一个来源**：
+ * `/api/bootstrap` 的被动探针（它按设计只说"还没被拉起来过"，且回答后那次刷新是 `void` 的）。
+ * 于是从"答完"到"探针回来"之间（探针本身也可能读不到）页面就停在一句**过期的话**上。
+ *
+ * 口径（只拿回答里真的有的东西，不猜）：
+ *   · `provider === 'deepseek'` ⇒ 云端模型**此刻确实在**（这一句就是它生成的）；
+ *   · `toolTrace` 非空 ⇒ 本机规则服务**刚刚真的跑过**（工具回执是它给的）；
+ *   · `taskFailure.missing` 点到规则服务 ⇒ 它现在**确实不在**（如实说不在，别说"未知"）；
+ *   · `ruleset_config_id` 从**这一问的上下文**里取（页面那一局绑定的规则配置就是它）。
+ * 探针（`/api/bootstrap`）那一份仍然是主来源，这里只在探针**说不清**、
+ * 或探针与刚发生的事实**相反**时说话 —— 见 `paintCapability` 的合并。
+ */
+export function capabilityEvidenceOf(answer, context = null) {
+  const out = {model: null, tools: null, rulesetId: null};
+  if (answer && typeof answer === 'object' && answer.provider === 'deepseek') out.model = 'ok';
+  const trace = Array.isArray(answer?.toolTrace) ? answer.toolTrace : [];
+  if (trace.length) out.tools = 'ok';
+  const missing = answer?.taskFailure?.missing ?? null;
+  const named = Array.isArray(missing) ? missing.join(' ') : String(missing ?? '');
+  if (/规则服务|规则资料|ruleset|roco/i.test(named)) out.tools = 'down';
+  const config = context?.roco_battle?.ruleset_config_id ?? context?.ruleset_config_id ?? null;
+  if (typeof config === 'string' && config.trim()) out.rulesetId = config.trim();
+  return out;
+}
+
+/**
+ * 那两行状态文案的**唯一**渲染处（给人读的字与机器读的钩子都由它派生，免得两处措辞漂）。
+ * `tools`/`model` 都是三态，与探针同一条口径：`ok` 在 / `down`·`off` 明确不在 / `unknown` 不知道。
+ */
+export function capabilityLines({tools = 'unknown', model = 'unknown', rulesetId = null, missing = null} = {}) {
+  const lack = Array.isArray(missing) ? missing[0] : (typeof missing === 'string' && missing ? missing : null);
+  const toolsLine = tools === 'ok'
+    ? `资料查询：可用（本机规则服务已连${rulesetId ? `，规则集 ${rulesetId}` : ''}）`
+    : tools === 'down'
+      ? `资料查询：不可用 —— 缺的是「${lack ?? '本机规则服务'}」。这一步不需要模型密钥；启动服务后原样再问。`
+      : `资料查询：还没拉起来（规则服务是第一次查询才启动的；问一句就会拉起它）`
+        + `${rulesetId ? ` · 本机规则集 ${rulesetId}` : ''}`;
+  const modelLine = model === 'ok'
+    ? '云端模型：已连接 —— 自由发挥的文字由它生成'
+    : model === 'off'
+      ? '云端模型：未连接 —— 只影响自由发挥的文字，上面那些资料查询照常'
+      : '云端模型：状态未知（只影响自由发挥的文字）';
+  return {toolsLine, modelLine};
+}
+
+/**
+ * 「我现在读到哪一段」（U07 第 3 条：新消息不许把玩家的阅读位置顶掉）。**纯函数**：
+ * 单测钉阈值两侧，浏览器验收里量的是真 `scrollTop`。
+ *
+ * `distance` = 距底部还有多少像素；`following` = 新消息该不该跟着走（贴底才算跟随）。
+ * 阈值 48px：一行文字的高度量级 —— 贴底（连滚动条取整/一点点误差都算）才叫"在底部"。
+ */
+export function readingPositionOf({scrollTop = 0, scrollHeight = 0, clientHeight = 0} = {}, threshold = 48) {
+  const distance = Math.max(0, Number(scrollHeight) - Number(clientHeight) - Number(scrollTop));
+  return {distance, following: distance <= threshold};
+}
+
+// ── U08：局中「首选行动」的建议卡片（客户端那一半）────────────────────────────
+//
+// 分工（与 Lead 在 `roco.js` 里写死的那一段是同一份契约，两边都不许另起一套）：
+//   · **面板只渲染 + 只广播**：`document.dispatchEvent(new CustomEvent('roco:advice-adopt',
+//     {detail:{advice, mode:'view'|'adopt'}}))`。它**不碰**对局状态、不自己发 `/api/roco/*`、
+//     更不替玩家出招（"采用"以后真正走哪一手由宿主页在**当前**合法动作表里重新解析）。
+//   · 宿主页认这一条事件：`view` 只高亮/滚动（不执行），`adopt` 才走真实行动。
+//
+// 结构（`answer.rocoAdvice`，服务端 `coach-advice.js` 的 `adviceForPosition()` 产出）：
+//   `{headline, reason, upside, risk, alternates[], action:{legalActionId, legalIndex, kind, label, display}}`
+export const ADVICE_EVENT = 'roco:advice-adopt';
+//: 风险那一段缺失时的**兜底话**：不许省这一段，也不许拿一句"未提供"糊过去。
+export const ADVICE_RISK_FALLBACK = '这一条建议里没有写风险 —— 「没写」不等于「没风险」，出手前自己再看一眼。';
+
+/**
+ * 上屏前的**唯一**清洗口。
+ *
+ * 截图 09 的脏东西就是这一类：玩家在气泡里读到 `依据：hint-budget` —— 那是内部预算名字，
+ * 不是人话。口径：小写连字符 token（`hint-budget` / `below-threshold` / `pvp-standard-six-pet`）
+ * 一律**摘掉**；摘完剩下的括号/空白收拾干净，别留一个空括号。
+ * 只动 ASCII 的连字符 token（中文、大写缩写、数字、`×0.5` 这类都不受影响）。
+ */
+export function sanitizeAdviceText(value) {
+  const raw = value === null || value === undefined ? '' : String(value);
+  return raw
+    .replace(/(?<![A-Za-z0-9_])[a-z][a-z0-9]*(?:-[a-z0-9]+)+(?![A-Za-z0-9_])/g, '')
+    .replace(/（\s*[）)]|\(\s*\)/g, '')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\s+([，。；：、！？])/g, '$1')
+    .replace(/^[\s，；、：,;:]+/, '')
+    .trim();
+}
+
+/**
+ * 建议结构 → 卡片要画的那五行（**纯数据**：DOM 与判据读同一份，免得两处措辞漂）。
+ * 返回 `null` = **不画卡片**（没有建议，或只有一句空话）—— 这时也**不许**退化成
+ * 「你自己定 / 说说你倾向哪边」那类没有结论的话（那是 U08 要修的原话）。
+ */
+export function adviceCardOf(advice) {
+  if (!advice || typeof advice !== 'object') return null;
+  const action = advice.action && typeof advice.action === 'object' ? advice.action : null;
+  const headline = sanitizeAdviceText(advice.headline)
+    || sanitizeAdviceText(action?.display) || sanitizeAdviceText(action?.label);
+  if (!headline && !action) return null;
+  const alternates = (Array.isArray(advice.alternates) ? advice.alternates : [])
+    .map((row) => ({label: sanitizeAdviceText(row?.label), note: sanitizeAdviceText(row?.note)}))
+    .filter((row) => row.label || row.note);
+  return {
+    headline: headline || '这一手有一条推荐',
+    //: 理由：服务端没写就**照实说没写**（不编一个理由）。
+    reason: sanitizeAdviceText(advice.reason),
+    //: 收益（服务端结构里有就画；没有就不画这一行）。
+    upside: sanitizeAdviceText(advice.upside),
+    //: 风险：**永远有这一行**（缺就画兜底话）。
+    risk: sanitizeAdviceText(advice.risk) || ADVICE_RISK_FALLBACK,
+    alternates,
+    action,
+  };
+}
+
+/**
+ * 把建议卡片画进**这一条回答气泡里面**（正文下方，`<details>` 默认收起）。
+ *
+ * 返回值就是那张卡（`null` = 没画）。两个按钮的 id 只在这一张卡上（新卡出现时把旧的摘掉，
+ * 页面里永远只有一组 `#xiaoya-advice-view` / `#xiaoya-advice-adopt`，"最新那一条"才点得动）。
+ */
+export function decorateAdvice(entry, advice, notify = null) {
+  const card = adviceCardOf(advice);
+  if (!card || !entry) return null;
+  // 旧卡上的 id 先摘掉（同名 id 在页面里只能有一组；事件本身与 id 无关，旧卡照样点得动）。
+  for (const id of ['xiaoya-advice-view', 'xiaoya-advice-adopt']) {
+    document.getElementById(id)?.removeAttribute('id');
+  }
+  const fold = document.createElement('details');
+  fold.className = 'xy-advice';
+  fold.dataset.xyAdvice = card.headline;
+  fold.setAttribute('data-advice-kind', String(advice?.kind ?? ''));
+  const summary = document.createElement('summary');
+  summary.className = 'xy-advice-headline';
+  summary.textContent = `首选行动：${card.headline}`;
+  const body = document.createElement('div');
+  body.className = 'xy-advice-body';
+  const row = (kind, label, text) => {
+    if (!text) return;
+    const line = document.createElement('p');
+    line.className = 'xy-advice-row';
+    line.dataset.xyAdviceRow = kind;
+    const key = document.createElement('span');
+    key.className = 'xy-advice-key';
+    key.textContent = label;
+    const value = document.createElement('span');
+    value.className = 'xy-advice-text';
+    value.textContent = text;          // 纯文本（值来自服务端，不走 innerHTML）
+    line.append(key, value);
+    body.append(line);
+  };
+  // 顺序：理由 → 收益（有才画）→ **风险（永远有）** → 备选（有才画）。
+  row('reason', '理由', card.reason);
+  row('upside', '收益', card.upside);
+  row('risk', '风险', card.risk);
+  if (card.alternates.length) {
+    row('alternate', '备选',
+      card.alternates.map((one) => (one.note ? `${one.label}（${one.note}）` : one.label)).join('；'));
+  }
+  const actions = document.createElement('div');
+  actions.className = 'xy-advice-actions';
+  const emit = (mode) => {
+    // **只广播**：面板不执行、不改状态。宿主页按 `detail.advice.action` 在**当前**合法表里重解析。
+    document.dispatchEvent(new CustomEvent(ADVICE_EVENT, {detail: {advice, mode}}));
+    notify?.(mode === 'adopt'
+      ? '已把「采用建议」交给这一页 —— 真正出招由页面按现在合法的动作表来。'
+      : '已在动作坞里高亮给你看（**没有**替你点）。');
+  };
+  const view = document.createElement('button');
+  view.type = 'button';
+  view.id = 'xiaoya-advice-view';
+  view.dataset.xyAdviceView = 'yes';
+  view.textContent = '查看';
+  view.title = '在动作坞里高亮这一手（不执行）';
+  view.onclick = () => emit('view');
+  actions.append(view);
+  if (card.action) {
+    const adopt = document.createElement('button');
+    adopt.type = 'button';
+    adopt.id = 'xiaoya-advice-adopt';
+    adopt.dataset.xyAdviceAdopt = 'yes';
+    adopt.className = 'primary';
+    adopt.textContent = '采用建议';
+    adopt.title = '按这一条去出手（页面会在当前合法的动作表里重新解析）';
+    adopt.onclick = () => emit('adopt');
+    actions.append(adopt);
+  }
+  const note = document.createElement('p');
+  note.className = 'xy-advice-note';
+  note.textContent = '我不自动替你出招：点「查看」只看，点「采用建议」才真的走这一手。';
+  body.append(actions, note);
+  fold.append(summary, body);
+  entry.append(fold);
+  return fold;
+}
+
+/**
  * 「正在看谁」那一行 + 两个动作按钮的样式。
  *
  * 为什么写在 JS 里而不是 `src/client/style.css`：这一轮只许动小芽自己的模块
@@ -745,14 +950,21 @@ function injectFocusStyles() {
  * 挂载小芽。`mode:'page'` 用页面里已经写好的那几个 id（`xiaoya.html`）；
  * `mode:'popup'` 自己注入右上角的按钮 + 浮层（培养页 / 精灵盒子等）。
  *
+ * `entryButton`（U07 第 1 条：**每页只有一套入口**）：
+ *   · 不传（`undefined`）—— 与改动前**逐字一样**：注入 `#xiaoya-open`（`.xy-fab`）。
+ *     `box.html` / `workshop.html` 走的就是这一档，它们页头没有别的小芽入口；
+ *   · `false` —— **不注入**入口按钮。宿主页自己已经有入口（`roco.html` 的 `#coach-entry`），
+ *     它调 `handle.open()/close()` 开关这一块面板；面板本身（`#xiaoya-pop` / `#xiaoya-close`）
+ *     照旧存在，`handle.open()/close()` 走**真开关**（不再去点一个不存在的按钮）。
+ *
  * 两种模式共用下面**同一段** ask / 渲染 / 存档逻辑 —— 「单独页面」与「弹出式」
  * 不是两个小芽，是同一个教练的两块版式。
  */
-export function mountXiaoya({mode = 'popup', host = null, contextProvider = null} = {}) {
+export function mountXiaoya({mode = 'popup', host = null, contextProvider = null, entryButton} = {}) {
   if (document.body.dataset.xiaoyaMounted === 'yes') return null;
   document.body.dataset.xiaoyaMounted = 'yes';
 
-  if (mode === 'popup') injectPopup(host);
+  const panel = mode === 'popup' ? injectPopup(host, {entryButton}) : null;
   injectFocusStyles();
   // 甲③：两套记忆键合并（只跑一次；旧键留标记、内容不删）。
   migrateLegacyMemory((() => { try { return localStorage; } catch { return null; } })());
@@ -768,7 +980,39 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
   state.focusProvider = focusProvider;
 
   const setStatus = (text) => { if (status) status.textContent = text; };
+
+  // ── 对话区滚动归**玩家**（U07 第 3 条：新消息不许把阅读位置顶掉）──────────────────
+  //
+  // 修前 `addEntry()` 最后一句是 `log.scrollTop = log.scrollHeight` —— **每**加一条都贴底。
+  // 玩家往上翻着看历史时，一条新回答（甚至他自己刚发出去的那句）就把位置顶回底部，
+  // 读到一半那一段当场丢掉。现在只有三种情况会贴底：
+  //   ① 玩家**本来就在底部**（跟随中）⇒ 新消息跟着走（聊天窗口的直觉）；
+  //   ② 点「回到最新」那一下；③ 重新打开面板。
+  // 其余时候：滚过的那个位置一个像素都不动，只在输入框上方浮出一句「↓ 有新消息」。
+  const readingPosition = () => (log
+    ? readingPositionOf({scrollTop: log.scrollTop, scrollHeight: log.scrollHeight, clientHeight: log.clientHeight})
+    : {following: true, distance: 0});
+  const scrollLogToBottom = () => { if (log) log.scrollTop = log.scrollHeight; };
+  const newMsg = document.createElement('button');
+  newMsg.type = 'button';
+  newMsg.className = 'xy-new-msg';
+  newMsg.id = 'xy-new-msg';
+  newMsg.hidden = true;
+  newMsg.textContent = '↓ 有新消息';
+  newMsg.title = '回到最新那一句（你正在看的那一段位置不会丢）';
+  newMsg.addEventListener('click', () => { scrollLogToBottom(); newMsg.hidden = true; });
+  if (log?.parentNode) log.parentNode.insertBefore(newMsg, log);
+  // 自己滚回底部 ⇒ 提示就该消失（不用再点一下）。
+  log?.addEventListener('scroll', () => { if (readingPosition().following) newMsg.hidden = true; });
+  if (panel) {
+    panel.onOpen = () => { scrollLogToBottom(); newMsg.hidden = true; };
+  }
+
   const addEntry = (who, text, answer = null) => {
+    // ⚠ **先**量位置再 append：append 之后 `scrollHeight` 就变了，那会儿再问"在不在底部"已经晚了
+    //（贴底的玩家会被判成"在读历史"，于是新消息反而不跟随）。
+    const {following} = readingPosition();
+    const keep = log?.scrollTop ?? 0;
     const entry = document.createElement('div');
     entry.className = `xy-entry${who === '你' ? ' user' : ''}`;
     const head = document.createElement('strong');
@@ -778,8 +1022,15 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
     if (who === '小芽') entry.insertAdjacentHTML('beforeend', markdown(text ?? ''));
     else entry.append(document.createTextNode(text ?? ''));
     if (answer) decorate(entry, answer);
+    // U08：**局中建议卡片**（客户端那一半）—— 画在正文下方、依据折叠区之外，
+    // `<details>` 默认收起，点了只广播事件（执行不在这一层）。
+    if (answer?.rocoAdvice) decorateAdvice(entry, answer.rocoAdvice, setStatus);
     log?.append(entry);
-    if (log) log.scrollTop = log.scrollHeight;
+    if (log) {
+      if (following) log.scrollTop = log.scrollHeight;
+      // 在读历史：把位置写回**加之前**那个值（只多不少地保证不被顶走），并给一句提示。
+      else { log.scrollTop = keep; newMsg.hidden = false; }
+    }
     return entry;
   };
   const persist = (question, answer) => {
@@ -868,8 +1119,9 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
       }
       persist(message, answer.text ?? '');
       setStatus(statusLine(answer));
-      // 答完再读一次能力状态：第一问会把惰性启动的规则服务拉起来，那之后那两行才是真的。
-      void refreshCapability(true);
+      // 答完那一刻先把**这一条回答自己的证据**落进状态行（同步），再问一次探针（异步）：
+      // 修的是用户截图 08 的逐字矛盾（标题「DeepSeek 已回答」+ 状态行「云端模型：状态未知」）。
+      noteAnswerEvidence(answer, context);
       // 记忆那一块也重画：这一轮里她可能刚记住/改了一条。
       renderMemoryList();
     } catch (error) {
@@ -896,8 +1148,12 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
     const session = activeChatSession(state.chatStore);
     const turns = Array.isArray(session?.turns) ? session.turns : [];
     if (log) log.replaceChildren();
-    if (!turns.length) { addEntry('小芽', OPENING); return; }
-    for (const turn of turns) addEntry(turn.role === 'user' ? '你' : '小芽', turn.content);
+    if (!turns.length) { addEntry('小芽', OPENING); }
+    else for (const turn of turns) addEntry(turn.role === 'user' ? '你' : '小芽', turn.content);
+    // 重画（挂载 / 新对话 / 清空）之后是"看最新"那一档：贴底、收起"有新消息"。
+    // ⚠ 这不是"新消息"，是新的一段会话/刚打开 —— 与 `addEntry` 里那一条不许顶走阅读位置的口径不冲突。
+    scrollLogToBottom();
+    newMsg.hidden = true;
   };
   // ── 记忆面板（task-13 甲②①：`#memory-pop` 从旧面板搬到这里）──────────────────
   //
@@ -1049,11 +1305,34 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
   capEl.href = 'connect.html';
   capEl.title = '点这里去连接模型';
   capEl.setAttribute('role', 'status');
-  if (log?.parentNode) log.parentNode.insertBefore(capEl, log);
-  if (log?.parentNode) log.parentNode.insertBefore(statusFold, log);
-  if (log?.parentNode) log.parentNode.insertBefore(memoryPanel, log);
-  if (log?.parentNode) log.parentNode.insertBefore(chip, log);
-  if (log?.parentNode) log.parentNode.insertBefore(actions, log);
+  // ── 版式（U07 第 2 条）：标题栏固定 / 输入行固定 / 中间对话区自己滚 ───────────────
+  //
+  // 修前：上面这八九块（能力状态两行 / 连接状态折叠 / 记忆 / 焦点行 / 三个动作 / 四个身份）
+  // **全部**摊在面板里、和对话区抢同一列高度 —— 面板高度是死的（`min(560px, …)`），
+  // 一级级摊下来对话区只剩一条缝，长回答就把输入行挤出面板外（用户截图 07/08 那一屏）。
+  //
+  // 现在分三层：
+  //   · 常驻一层（`.xy-pop-meta`）：两行状态（`#model-chip` + 焦点行）—— 这两行是"玩家随时要看见"的；
+  //   · 收起一层（`#xy-fold-more`，默认 `<details>` 关闭）：三格模型 / 对话动作 / 记忆 / 身份。
+  //     它们仍然**在 DOM 里**（同名 id 全部保留：`#model-list` / `#open-memory` / `#open-connect`），
+  //     只是默认不占版面 —— 对话占主要空间；
+  //   · 滚动一层（`.xy-log`，`flex:1;min-height:0;overflow-y:auto`）：**唯一**会滚的那一块；
+  //     输入行（`.xy-form`）与快捷问（`.xy-quick`）在它下面，`flex:0 0 auto` ⇒ 永远在面板底部。
+  const meta = document.createElement('div');
+  meta.className = 'xy-pop-meta';
+  meta.append(capEl, chip);
+  const more = document.createElement('details');
+  more.className = 'xy-pop-more';
+  more.id = 'xy-fold-more';
+  more.innerHTML = '<summary id="xy-fold-more-label">状态、记忆与身份</summary>';
+  const moreBody = document.createElement('div');
+  moreBody.className = 'xy-pop-more-body';
+  moreBody.append(actions, memoryPanel, statusFold);
+  more.append(moreBody);
+  if (log?.parentNode) {
+    log.parentNode.insertBefore(meta, log);
+    log.parentNode.insertBefore(more, log);
+  }
   drawHistory();
 
   /** 焦点那一行。**读不到就说读不到**，并且说清"这是最近看过"还是"正在看"。 */
@@ -1066,6 +1345,18 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
     if (snapshot) {
       const bits = [snapshot.name ?? context?.focusName ?? '这一只'];
       if (snapshot.nature) bits.push(`性格 ${snapshot.nature}`);
+      // ── U01（2026-09-29，Lead 接手）：**天分 / 资质**也要在这一行出现 ─────────────
+      // 用户 U01 的验收原文：「抽查正常导入、空值、旧字段、刷新后的
+      // **列表 / 详情 / 战斗 / 小芽**一致」—— 这一行就是"小芽"那一处，而它原来只有
+      // 「名字 · 性格 · N 个技能」，天分在这一页**根本不出现** ⇒ 玩家在战斗页看不到这一只的天分
+      // （盒子那边已经能做）。T3 的交付报告把这一处记成"要 roco.js 加一处"，
+      // 实测这一行在 `xiaoya.js`（`#xiaoya-focus`，popup 档），不在 roco.js。
+      //
+      // 口径与盒子**同源**：值来自 `focusSnapshotFrom()` 读的**本机记录**（`cultivationOf`），
+      // 这一层不另算一份；有档位就写档位，没有就写**为什么没有**（`talent_tier_reason`）——
+      // 空着不说才是最坏的（玩家分不清"没有"和"没读出来"）。
+      if (snapshot.talent_tier) bits.push(`天分 ${snapshot.talent_tier}`);
+      else if (snapshot.talent_tier_reason) bits.push(`天分${snapshot.talent_tier_reason}`);
       if (snapshot.skills?.length) bits.push(`${snapshot.skills.length} 个技能`);
       if (snapshot.battle_only) bits.splice(1, 0, '对战场上（只有名字/系别）');
       chip.textContent = `${prefix}：${bits.join(' · ')}`;
@@ -1107,7 +1398,20 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
   document.addEventListener('click', (event) => {
     // 传**事件**（不是 `event.target`）：配队工作台在 shadow DOM 里，target 会被重定向。
     const focus = focusFromClick(event);
-    if (focus) focusProvider.notePicked(focus);
+    if (!focus) return;
+    focusProvider.notePicked(focus);
+    // ⚠⚠ 2026-09-29（U01 第四处 · 真机实测抓到的**真缺陷**）：`notePicked` 只记"点的是谁"，
+    //   **不会去取快照** —— 这一页里 `resolve()` 原来**只有 `ask()`（问小芽）会调**。
+    //   后果（真 8765，带 `?team=own-0177,…` 点第一个槽位，10 秒轮询）：
+    //     `data-xy-focus` 立刻 = `own-0177`（对），而这一行**一直是**
+    //     「正在看：多彩方方（正在读它的培养数据…）」⇒ 快照永远不来 ⇒
+    //     **性格 / 天分 / 技能数一处都不出现**，U01 的「战斗 / 小芽一致」就断在这。
+    //   端点本身是好的（实测 `GET /api/roco/box?detail=own-0177` → 200 / 7760B / <1ms），
+    //   所以只是**少接了这一次调用**。
+    //   取不到也不抛给玩家：`resolve()` 把失败写进 `failure`，那一行如实说读不到。
+    void Promise.resolve(focusProvider.resolve())
+      .then(() => updateFocusChip(focusProvider.getContext()))
+      .catch(() => { /* 焦点这一层不许把页面搞挂；原因已经在快照的 failure 里 */ });
   }, true);
 
   if (quick) {
@@ -1144,7 +1448,9 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
     roles.id = 'xiaoya-roles';
     roles.innerHTML = ROLE_CHOICES.map(([value, label]) =>
       `<button type="button" data-xy-role="${value}"${value === state.role ? ' class="selected"' : ''}>${label}</button>`).join('');
-    if (log?.parentNode) log.parentNode.insertBefore(roles, log);
+    // 身份那一排进**收起的二级区**（U07：模型/资料状态、模式、记忆默认收起来，对话占主要空间）。
+    // 仍然在 DOM 里、同名 id/class 不变（判据按同一个名字读）。
+    moreBody.append(roles);
   }
   document.querySelectorAll('[data-xy-role]').forEach((button) => {
     button.addEventListener('click', () => {
@@ -1166,30 +1472,41 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
   // 第一问会把引擎拉起来，那之后 `toolsReady` 才变成"在"。不刷新的话，页面上会一直停在
   // 「还没拉起来」，而那已经是一句过期的话了）。
   let capabilityAt = 0;
+  //: 最近一次探针回执（`null` = 还没读到）；回答证据要跟它合并，所以要留着。
+  let probeInfo = null;
+  //: 回答**自己**证明的那几件事（`capabilityEvidenceOf`）。只增不减地覆盖："刚刚真的发生过"优先。
+  const answerEvidence = {model: null, tools: null, rulesetId: null};
+  /**
+   * 两行状态的**唯一**画法。合并规则（U07 第 4 条：不许自相矛盾）：
+   *   · 探针说 `true` ⇒ 在；说 `false` ⇒ 明确不在（这两档都以探针为准）；
+   *   · 探针说 `null`（还没拉起来过）⇒ 看**回答证据**（工具回执 ⇒ 刚刚真的跑过 ⇒ 可用）；
+   *   · 回答证明模型答过（`provider:'deepseek'`）⇒ 云端模型这一行**必须**是"已连接"，
+   *     哪怕探针那一份还是过期的 `modelReady:false` —— 两句自相矛盾的话里，
+   *     有实时证据的那一句赢（截图 08 的矛盾就是这里出来的）。
+   */
   const paintCapability = (info) => {
     const cap = info?.capabilities ?? null;
+    if (info) probeInfo = info;
     // 三态：`true` 在 / `false` 明确不在 / `null` **还没拉起来过**（惰性启动，不许报成"坏了"）。
-    const tools = cap?.toolsReady === true ? 'ok' : cap?.toolsReady === false ? 'down' : 'unknown';
-    const model = cap?.modelReady === true ? 'ok' : cap?.modelReady === false ? 'off' : 'unknown';
+    const probeTools = cap?.toolsReady === true ? 'ok' : cap?.toolsReady === false ? 'down' : 'unknown';
+    const probeModel = cap?.modelReady === true ? 'ok' : cap?.modelReady === false ? 'off' : 'unknown';
+    const tools = answerEvidence.tools === 'ok' || probeTools === 'ok' ? 'ok'
+      : answerEvidence.tools === 'down' || probeTools === 'down' ? 'down' : 'unknown';
+    const model = answerEvidence.model === 'ok' || probeModel === 'ok' ? 'ok'
+      : probeModel === 'off' ? 'off' : 'unknown';
+    // 规则集：探针那一份优先，其次**这一问的上下文**里那一局绑定的配置（已知就要写出来）。
+    const rulesetId = cap?.rulesetId ?? answerEvidence.rulesetId ?? null;
     document.body.dataset.xyCapability = `tools=${tools};model=${model};server=${cap?.serverReady === true ? 'ok' : 'unknown'}`;
     // 判据 `live-model-status` 读的钩子（旧面板由 `renderModelChip()` 写；甲④ 之后由这里写）。
     // **不许为了绿而写假的**：`connected` 只在真的连上模型时写（`model === 'ok'`）。
     capEl.dataset.rocoModel = model === 'ok' ? 'connected' : 'offline';
     document.body.dataset.rocoModelConfigured = model === 'ok' ? 'yes' : 'no';
-    const toolsLine = tools === 'ok'
-      ? `资料查询：可用（本机规则服务已连${cap?.rulesetId ? `，规则集 ${cap.rulesetId}` : ''}）`
-      : tools === 'down'
-        ? `资料查询：不可用 —— 缺的是「${(cap?.missing ?? [])[0] ?? '本机规则服务'}」。这一步不需要模型密钥；启动服务后原样再问。`
-        : '资料查询：还没拉起来（规则服务是第一次查询才启动的；问一句就会拉起它）';
-    const modelLine = model === 'ok'
-      ? '云端模型：已连接 —— 自由发挥的文字由它生成'
-      : model === 'off'
-        // ⚠ 措辞里必须保留「未连接」三个字：判据 `live-model-status`（`scripts/roco/browser-live-acceptance.mjs`）
-        //   要求「没连模型时**明说**」（正则 `/未连接|没连|未连/`），而「没有连」**不匹配**
-        //   （`没连` 中间不许有"有"）。甲②③ 在自己实例上实测到这一条：退役旧面板后
-        //   `#model-chip` 由这里写 ⇒ 不修的话那条判据当场红。口径不变，只把词换成它认的那个。
-        ? '云端模型：未连接 —— 只影响自由发挥的文字，上面那些资料查询照常'
-        : '云端模型：状态未知（只影响自由发挥的文字）';
+    // 文案只有一份渲染处（`capabilityLines`）：人读的两行与钩子不会各说各的。
+    // ⚠ 「未连接」三个字必须保留：判据 `live-model-status`（`scripts/roco/browser-live-acceptance.mjs`）
+    //   要求「没连模型时**明说**」（正则 `/未连接|没连|未连/`），而「没有连」**不匹配**
+    //   （`没连` 中间不许有"有"）。甲②③ 在自己实例上实测到这一条：退役旧面板后
+    //   `#model-chip` 由这里写 ⇒ 不修的话那条判据当场红。口径不变，只把词换成它认的那个。
+    const {toolsLine, modelLine} = capabilityLines({tools, model, rulesetId, missing: cap?.missing});
     capEl.textContent = `${toolsLine}；${modelLine}`;
     if (chip) chip.title = `${toolsLine}\n${modelLine}`;
   };
@@ -1200,15 +1517,37 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
     capabilityAt = Date.now();
     try { paintCapability(await connectionStatus()); }
     catch {
-      document.body.dataset.xyCapability = 'tools=unknown;model=unknown;server=unknown';
-      // 读不到状态时**只说自己知道的那一件事**：没读到"已连接"的证据 ⇒ 绝不标 connected。
-      // 所以这里写 `offline` + 明说，而不是留空 —— 留空会让判据 `live-model-status` 读到 `null`
+      // 读不到探针时**只说自己知道的那一件事**：没有"已连接"的证据 ⇒ 绝不标 connected。
+      // 所以 `offline` + 明说，而不是留空 —— 留空会让判据 `live-model-status` 读到 `null`
       //（"没连模型却标 null"），而"读不到"与"连上了"是两件事，前者不能冒充后者。
-      capEl.dataset.rocoModel = 'offline';
-      document.body.dataset.rocoModelConfigured = 'no';
-      capEl.textContent = '读不到连接状态：云端模型按「未连接」处理（不谎报已连接）；'
-        + '资料查询按「未知」处理（第一次提问会把它拉起来）。';
+      // ⚠ 答过之后（有回答证据）就按证据说：不能因为探针读不到，把"这一句就是模型答的"改口成"未连接"。
+      const tools = answerEvidence.tools ?? 'unknown';
+      const model = answerEvidence.model === 'ok' ? 'ok' : 'unknown';
+      document.body.dataset.xyCapability = `tools=${tools};model=${model};server=unknown`;
+      capEl.dataset.rocoModel = model === 'ok' ? 'connected' : 'offline';
+      document.body.dataset.rocoModelConfigured = model === 'ok' ? 'yes' : 'no';
+      if (answerEvidence.model || answerEvidence.tools) {
+        const {toolsLine, modelLine} = capabilityLines({tools, model,
+          rulesetId: answerEvidence.rulesetId, missing: null});
+        capEl.textContent = `${toolsLine}；${modelLine}`;
+      } else {
+        capEl.textContent = '读不到连接状态：云端模型按「未连接」处理（不谎报已连接）；'
+          + '资料查询按「未知」处理（第一次提问会把它拉起来）。';
+      }
+      if (chip) chip.title = capEl.textContent;
     }
+  };
+  /**
+   * 答完那一刻：把这一条回答的**证据**并进状态（同步重画，不留"标题与状态打架"的那一帧），
+   * 再去问一次探针（异步；第一问会把惰性启动的规则服务拉起来，那之后探针才准）。
+   */
+  const noteAnswerEvidence = (answer, context = null) => {
+    const seen = capabilityEvidenceOf(answer, context);
+    if (seen.model) answerEvidence.model = seen.model;
+    if (seen.tools) answerEvidence.tools = seen.tools;
+    if (seen.rulesetId) answerEvidence.rulesetId = seen.rulesetId;
+    paintCapability(probeInfo);
+    void refreshCapability(true);
   };
   void refreshCapability(true);
 
@@ -1220,33 +1559,53 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
   //   · `isOpen()` 读真实 DOM 可见性（浮层没挂/被 hidden 都算不可见）；
   //   · `open()/close()` **复用真按钮的 handler**（点 `#xiaoya-open` / `#xiaoya-close`），不另写一套开关；
   //   · `render()` 调**真的那几个画法**（历史 + 记忆 + 能力状态 + 焦点），不是空函数。
+  // 甲④-1：给宿主页一个**真实**的把手（旧面板退役后，`rocoDemo.companionVisibility()/renderCompanion()`
+  // 那三个验收脚本要用它 —— 同名同语义，不改判据）。三条都对着"真实状态"，不许常量、不许空转：
+  //   · `isOpen()` 读真实 DOM 可见性（浮层没挂/被 hidden 都算不可见）；
+  //   · `open()/close()` 走**真开关**（`injectPopup` 的 `setOpen`）—— ⚠ 2026-09-30 改钉（U07 第 1 条）：
+  //     原来这里是 `document.getElementById('xiaoya-open')?.click()`。宿主页不再造入口按钮
+  //     （`entryButton:false`）时那个元素不存在，`?.` 会把整件事吞掉 ⇒ 把手返回了、面板没动。
+  //     旧写法原文留档（别再改回来）：
+  //       open: () => { if (!handle.isOpen()) document.getElementById('xiaoya-open')?.click(); },
+  //       close: () => { if (handle.isOpen()) document.getElementById('xiaoya-close')?.click(); },
+  //     `#xiaoya-close`（面板里的 ×）与 Esc 仍然是玩家真能点的那两条路，只是开关逻辑只有一份。
+  //   · `render()` 调**真的那几个画法**（历史 + 记忆 + 能力状态 + 焦点），不是空函数。
   const handle = {
     isOpen: () => { const pop = document.getElementById('xiaoya-pop'); return Boolean(pop) && pop.hidden === false; },
-    open: () => { if (!handle.isOpen()) document.getElementById('xiaoya-open')?.click(); },
-    close: () => { if (handle.isOpen()) document.getElementById('xiaoya-close')?.click(); },
+    open: () => { if (panel && !panel.isOpen()) panel.setOpen(true); },
+    close: () => { if (panel && panel.isOpen()) panel.setOpen(false); },
     render: () => {
       drawHistory();
       renderMemoryList();
       void refreshCapability(true);
       updateFocusChip(focusProvider.getContext());
     },
+    //: 这一份浮层有没有自己的入口按钮（`entryButton:false` 时是 false）—— 验收读它，不数 DOM 猜。
+    hasEntryButton: () => Boolean(panel?.hasEntryButton),
   };
   return handle;
   return {ask, state};
 }
 
 /** 右上角入口 + 弹出式浮层（培养页 / 精灵盒子这一档轻页面用）。 */
-function injectPopup(host) {
+function injectPopup(host, {entryButton = true} = {}) {
   const target = host ?? document.querySelector('.header-actions') ?? document.body;
-  const button = document.createElement('button');
-  button.className = 'xy-fab';
-  button.id = 'xiaoya-open';
-  button.type = 'button';
-  button.setAttribute('aria-haspopup', 'dialog');
-  button.setAttribute('aria-expanded', 'false');
-  button.setAttribute('aria-controls', 'xiaoya-pop');
-  button.innerHTML = '<span aria-hidden="true">✦</span> 小芽';
-  target.append(button);
+  // 入口按钮：**默认造**（培养页 / 精灵盒子这一档轻页面 —— 它们页头没有小芽入口）。
+  // `entryButton === false` ⇒ **不造**：宿主页自己已经有「✦ 小芽」（`roco.html` 的 `#coach-entry`）。
+  // 一页两个入口就是用户截图 07/08/09 右上角那两个一模一样的按钮（同一个教练、两套按钮）。
+  const wantButton = entryButton !== false;
+  let button = null;
+  if (wantButton) {
+    button = document.createElement('button');
+    button.className = 'xy-fab';
+    button.id = 'xiaoya-open';
+    button.type = 'button';
+    button.setAttribute('aria-haspopup', 'dialog');
+    button.setAttribute('aria-expanded', 'false');
+    button.setAttribute('aria-controls', 'xiaoya-pop');
+    button.innerHTML = '<span aria-hidden="true">✦</span> 小芽';
+    target.append(button);
+  }
 
   const pop = document.createElement('div');
   pop.className = 'xy-pop';
@@ -1263,19 +1622,43 @@ function injectPopup(host) {
     + 'placeholder="问小芽：怎么培养 / 出一道小测验"><button class="primary" id="xiaoya-send" type="submit">发送</button></form>';
   document.body.append(pop);
 
+  /**
+   * 面板开/关的**唯一**实现（`handle.open()/close()` 也走它）。
+   *
+   * 为什么必须收在这里：`mountXiaoya` 的把手原来写的是 `document.getElementById('xiaoya-open')?.click()` ——
+   * 那是**空转**：宿主页不给入口按钮时（`entryButton:false`）那个元素根本不存在，
+   * `?.` 把整件事吞掉 ⇒ `handle.open()` 返回了但面板纹丝不动（"点了没反应"这一类）。
+   * 现在开关只有这一份：真按钮点它、把手调它、Esc/× 也调它。
+   */
   const setOpen = (open) => {
     pop.hidden = !open;
-    button.setAttribute('aria-expanded', open ? 'true' : 'false');
-    if (open) document.getElementById('xiaoya-input')?.focus();
+    if (button) button.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) {
+      document.getElementById('xiaoya-input')?.focus();
+      // 打开面板 = 想看最新那一句 ⇒ 把对话区贴到底（`onOpen` 由 `mountXiaoya` 装上）。
+      // ⚠ 自动滚**只有这一处**与"玩家本来就在底部"那一处；正在翻历史的那个位置不许动。
+      onOpen?.();
+    }
   };
-  button.addEventListener('click', () => setOpen(pop.hidden));
-  // 只在这两处关：再点一次右上角的「小芽」，或点浮层里的 ×。
+  if (button) button.addEventListener('click', () => setOpen(pop.hidden));
+  // 只在这两处关：再点一次右上角的「小芽」（有的话），或点浮层里的 ×。
   //
   // 刻意**不做**「点别处自动收起」：人类 2026-09-25 纠偏②对阵容评估说的就是这件事
-  //（「既然不遮挡，那就不要设置点别的地方自动消失」）。小芽这一层与它同类：
+  //（「既然不遮挡，那就不要设点别的地方自动消失」）。小芽这一层与它同类：
   // 点页面别处常常是想一边看内容一边问，自动收起只会把刚打的字弄丢。
   pop.querySelector('#xiaoya-close')?.addEventListener('click', () => setOpen(false));
   document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !pop.hidden) setOpen(false); });
+  let onOpen = null;
+  return {
+    //: 真开关（`handle.open()/close()` 的唯一入口）。
+    setOpen,
+    isOpen: () => pop.hidden === false,
+    //: 这一份有没有自己造入口按钮（验收/排障读它，别去数 DOM 猜）。
+    hasEntryButton: wantButton,
+    //: 打开时要做的额外一件事（贴底滚动 + 收起"有新消息"提示），由 `mountXiaoya` 装。
+    set onOpen(fn) { onOpen = fn; },
+    element: pop,
+  };
 }
 
 // 单独的小芽页面（`xiaoya.html`）：body 上的钩子就是它的挂载点。

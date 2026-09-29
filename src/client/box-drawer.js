@@ -10,6 +10,10 @@
 import {REFRESH_LIMIT, lastRefreshNote, canUndo} from '../coach/individuals.js';
 // 天分档位（人类 2026-09-28 ⑤ 的四档名）—— 读法在 `coach/talent.js`，页面不另写一套判据。
 import {talentTierOf} from '../coach/talent.js';
+// ⭐ 2026-09-29（U01）：「天分 / 资质 / 刷新天分记录」这三件事的唯一读法与唯一说法在
+// `box-talent.js`。列表行、详情页、补救按钮全部走它 —— 这一层不再自己拼那句三元表达式
+// （那正是"三件事被压成一个字符串"的来源）。
+import {talentReadingOf, talentChipOf, numberOrNull} from './box-talent.js';
 
 /** 服务器给的一行（`/api/roco/box` 的 card）：`select` 是个体编号、`group` 是种类编号。 */
 export function groupCards(cards, {open = null} = {}) {
@@ -54,9 +58,12 @@ export function formatTraitValue(value) {
   if (value === null || value === undefined) return '';
   if (Array.isArray(value)) return value.length ? value.map((item) => String(item)).join('、') : '';
   if (typeof value === 'object') {
+    // ⚠ 2026-09-29 **改钉**（U01「不能凭空生成」）：这里原来是 `Number.isFinite(Number(value[key]))`，
+    // 而 `Number(null) === 0`、`Number('') === 0` ⇒ 缺的那一项被印成 `0` —— 屏幕上出现一个
+    // 游戏数据里根本没有的数字。现在只认**真的数值**（`numberOrNull`，见 box-talent.js）。
     return STAT_ORDER
-      .filter(([key]) => Number.isFinite(Number(value[key])))
-      .map(([key, label]) => `${label} ${Number(value[key])}`)
+      .filter(([key]) => numberOrNull(value[key]) !== null)
+      .map(([key, label]) => `${label} ${numberOrNull(value[key])}`)
       .join(' / ');
   }
   return String(value);
@@ -134,8 +141,9 @@ function defaultCardHtml(card) {
 }
 
 /** 把行里那一串小胶囊印出来（性格 / 天分档位 / 最长的那两项天分）。 */
-function chipSpan(label, state) {
-  return `<span class="trait" data-state="${state}">${esc(label)}</span>`;
+function chipSpan(label, state, title = '') {
+  return `<span class="trait" data-state="${state}"`
+    + `${title ? ` title="${esc(title)}"` : ''}>${esc(label)}</span>`;
 }
 
 /**
@@ -166,21 +174,19 @@ export function individualRowChips(individual, {select = '', multi = false} = {}
   const chips = [];
   const nature = individual?.nature ?? null;
   chips.push(nature ? chipSpan(`性格 ${nature}`, 'known') : chipSpan('性格 待导出', 'absent'));
-  // 天分档位按**掷出来的那一份**读（扣掉玩家自己加的级），与详情页同一口径：
-  // 名单里那两只的档位不能被后来的加成顶上去。
-  const base = individual?.talent && typeof individual.talent === 'object' ? {...individual.talent} : null;
-  for (const boost of Array.isArray(individual?.talent_boosts) ? individual.talent_boosts : []) {
-    if (base && boost?.stat && Number.isFinite(Number(base[boost.stat]))) {
-      base[boost.stat] = Number(base[boost.stat]) - Number(boost.delta ?? 0);
-    }
-  }
-  const tier = base ? talentTierOf({talent: base, nature}) : null;
-  const hasValue = base ? Object.values(base).some((value) => Number(value) > 0) : false;
-  // 2026-09-28（人类：「就说 一般般的天分 不就好了？不需要前面加天分俩字」）：
-  // 档名本身就是「一般般的天分」这种完整说法 ⇒ **前面不再加「天分档位」**。
-  chips.push(tier?.label
-    ? chipSpan(tier.label, 'known')
-    : chipSpan(hasValue ? '天分认不出' : '天分待导出', hasValue ? 'known' : 'absent'));
+  // 2026-09-29（U01）**改钉**：天分这一格交给 `box-talent.js` 的**一处说法**
+  // （`talentReadingOf` → `talentChipOf`）。它保证三件事：
+  //   · 档位认得出 ⇒ 只说档名（人类 2026-09-28：「就说 一般般的天分 不就好了？不需要前面加天分俩字」）；
+  //   · 认不出 ⇒ 说**具体为什么**（激活几项 / 缺哪几项），不再是整页全一样的「天分认不出」；
+  //   · 悬停/读屏那一句（`title`）把**具体值与补救**说全（详细仍在二级页）。
+  // 旧写法留档（改钉不删）：
+  //   chips.push(tier?.label ? chipSpan(tier.label, 'known')
+  //     : chipSpan(hasValue ? '天分认不出' : '天分待导出', hasValue ? 'known' : 'absent'));
+  const reading = talentReadingOf(individual);
+  const talent = talentChipOf(reading);
+  // 档位按**掷出来的那一份**读这件事已经在 `coach/individuals.js` 的 `cultivationOf` 里
+  // （它会扣掉玩家自己加的级）—— 这里不再自己扣一遍（两处一定会漂）。
+  chips.push(chipSpan(talent.label, talent.state, talent.title));
   const id = String(select || individual?.individual_id || '');
   const suffix = id.match(/-(b|c|d|e|f)$/)?.[1] ?? '';
   if (suffix) chips.push(chipSpan(`第 ${suffix.toUpperCase()} 只`, 'known'));
@@ -258,21 +264,47 @@ export function favouriteButton(individual, {favourite = false} = {}) {
 }
 
 /**
+ * 一条实例的**来源说明**（人类口径：不许无名字无图地摆一个空框，也不许伪造已导入的培养值）。
+ *
+ * 只在 `card.extra === true`（只在本机记录里、抓包名单里没有这一只）时出现，写清两件事：
+ *   ① **真实来源**：这一只只在这台机器的记录里 —— 不是从抓包/导入那份来的；
+ *   ② **缺哪几个字段**：本机记录里真没有的那几样逐项点名（有就说有，**一个数都不编**）。
+ */
+export function instanceSourceNote(card, individual) {
+  if (card?.extra !== true) return '';
+  const reading = talentReadingOf(individual);
+  const missing = [];
+  if (!individual?.nature) missing.push('性格');
+  if (reading.qualification.missingLabels.length) {
+    missing.push(`${reading.qualification.missingLabels.join('、')} 资质`);
+  }
+  if (!Number.isFinite(Number(individual?.level)) || Number(individual?.level) <= 0) missing.push('等级');
+  return `本机加的：这一只只在这台机器的记录里（抓包名单里没有它）`
+    + (missing.length ? `；本机记录里缺 ${missing.join('、')}` : '；本机记录里性格 / 资质 / 等级都有数');
+}
+
+/**
  * 一个个体的那一行：**列表里只留信息，动作不在这里**。
  *
  * 2026-09-28（人类逐字）：「另外第一排和第二配信息显示冗余；另外这个选单不知道自己瘦回去吗？
  * 全部重在一起」「另外「加入比较」功能我觉得有点鸡肋」「刷新性格、天分、再加一只啥的这个太大了…
  * 是不是最好放二级页面去？」⇒ 这一行现在只有：
  *   · 等级（**只从数据读**，缺就写「—」，不写死任何级数）
- *   · 性格 / 天分档位 / 天分最高的两项（`individualRowChips`）
- *   · 「本机加的」标记、收藏星标、以及只给本机那只能用的一次删除入口
+ *   · 性格 / 天分档位（`individualRowChips`，三件事分开口径见 `box-talent.js`）
+ *   · 「本机加的」标记与来源说明、收藏星标、以及只给本机那只能用的一次删除入口
  * 看详情、加入比较、刷新、回滚、再养一只都在**二级详情页**（`box.js` 的 `#pet-view`）。
  *
  * ⚠ 行本身带着 `data-detail`（点它 = 打开这一只的二级详情页）。原来那个动作挂在卡片本体的
  * `<button data-detail>` 上；多只同种时行里**不再重复画名字与系别**（人类 ④），所以整行就是入口。
+ *
+ * ⭐ 2026-09-29（U12）**改钉**：**同种多只时，每一只都必须有自己的名字与形象**（人类截图 12
+ * 「铠甲虫 2 个体」下面两个无名字无图的嵌套空框）。此前是靠一条 CSS
+ * （`.individual[data-multi="yes"] .individual-card{display:none}`）把卡片整块藏掉 ——
+ * 那正是空框的来源。现在改成：卡片照画（名字 + 头像都在），多出来的那一只额外带
+ * 「第 N 只」标签、来源说明、以及**这一只自己的**「去培养 / 去配队」入口。
  */
 export function individualHtml(card, individual, {cardHtml = defaultCardHtml, favourite = false,
-  confirming = false, multi = false} = {}) {
+  confirming = false, multi = false, index = null, count = null} = {}) {
   const select = card?.select ?? individual?.individual_id ?? '';
   // ⚠ 2026-09-28 改钉（人类指着截图问「不是60级吗？lv100哪儿来的？」）：这里原来**硬编码 Lv.100**
   // —— 等级在 9-27 就统一成 60 了，抽屉这一行忘了跟着改。现在只从数据里读（缺就写"—"），
@@ -288,15 +320,27 @@ export function individualHtml(card, individual, {cardHtml = defaultCardHtml, fa
   const cardBox = face
     ? `<span class="individual-card${multi ? ' multi' : ''}">${face}</span>`
     : '';
+  const note = instanceSourceNote(card, individual);
+  const ordinal = multi && Number.isInteger(index) && index > 0
+    ? `<span class="individual-ordinal">第 ${index} 只${Number.isInteger(count) && count > 1 ? `（共 ${count} 只）` : ''}</span>`
+    : '';
+  // U12：多个体时每一只都要有**自己的**动作（去培养 / 去配队），不带别人身上的配置。
+  const multiActions = multi
+    ? `<button class="instance-act" data-detail="${esc(select)}" title="打开这一只自己的详情页（性格 / 资质 / 技能都在它自己的记录里）">去培养</button>`
+      + `<button class="instance-act" data-to-team="${esc(select)}" title="把这一只送去配队（只带这一只，锁定跟着走）">去配队</button>`
+    : '';
   return `<div class="individual" data-individual="${esc(select)}" data-detail="${esc(select)}"
    data-multi="${multi ? 'yes' : 'no'}"
    data-level-source="${esc(individual?.level_source ?? 'unknown')}">
    ${cardBox}
+   ${ordinal}
    ${card?.extra === true ? '<span class="trait" data-state="local">本机加的</span>' : ''}
    ${level === null ? '' : `<span class="individual-level">Lv.${level}</span>`}
    ${chips ? `<span class="individual-traits">${chips}</span>` : ''}
+   ${note ? `<span class="individual-source">${esc(note)}</span>` : ''}
    ${lastRefreshNote(individual) ? `<span class="individual-note" data-refresh-note="yes">${esc(lastRefreshNote(individual))}</span>` : ''}
    <span class="individual-actions">
+    ${multiActions}
     ${favouriteButton(individual, {favourite})}
     ${removeButton(individual, {confirming})}
    </span>
@@ -311,20 +355,27 @@ export function individualHtml(card, individual, {cardHtml = defaultCardHtml, fa
  * 与抽屉的 `best` 同一口径 —— 确定性、不随渲染顺序变）。
  */
 export function groupSummary(rows, individuals = {}) {
+  const order = Object.fromEntries(STAT_ORDER.map(([key, label]) => [key, label]));
   const scored = rows.map((card) => {
     const one = individuals[card.select] ?? {};
-    const talent = one.talent && typeof one.talent === 'object' ? one.talent : {};
-    const total = Object.values(talent).reduce((sum, value) => sum + (Number(value) > 0 ? Number(value) : 0), 0);
-    const top = Object.entries(talent).filter(([, value]) => Number(value) > 0)
-      .sort((a, b) => b[1] - a[1]).slice(0, 2);
-    return {card, one, total, top};
+    const reading = talentReadingOf(one);
+    // 挑"天分总和最高的那一只"这条口径一个字没改（确定性、不随渲染顺序变）。
+    const rowsWithValue = reading.qualification.entries.filter((entry) => (entry.value ?? 0) > 0)
+      .sort((a, b) => b.value - a.value);
+    const total = reading.qualification.entries.reduce((sum, entry) => sum + (entry.value ?? 0), 0);
+    return {card, one, reading, total, top: rowsWithValue.slice(0, 2)};
   }).sort((a, b) => b.total - a.total || String(a.card.select).localeCompare(String(b.card.select)));
   const best = scored[0];
   if (!best) return '';
-  const order = {hp: '生命', atk: '物攻', def: '物防', spa: '魔攻', spd: '魔防', spe: '速度'};
   const bits = [];
   if (best.one.nature) bits.push(`性格 ${best.one.nature}`);
-  if (best.top.length) bits.push(`天分 ${best.top.map(([key, value]) => `${order[key] ?? key} ${value}`).join(' / ')}`);
+  if (best.top.length) {
+    bits.push(`天分 ${best.top.map((entry) => `${order[entry.key] ?? entry.label} ${entry.value}`).join(' / ')}`);
+  }
+  // ⚠ 2026-09-29（U01）：再补一句**档名**（与列表行**同一个说法**，`talentChipOf`）——
+  // 此前摘要里只有"最高的两项数值"，玩家看不到这一种是四档里的哪一档。
+  const chip = talentChipOf(best.reading);
+  if (chip?.label) bits.push(chip.label);
   if (Number.isFinite(Number(best.one.level))) bits.push(`Lv.${Number(best.one.level)}`);
   return bits.join(' · ');
 }
@@ -364,9 +415,10 @@ export function drawerHtml(group, {individuals = {}, cardHtml = defaultCardHtml,
   // 不再重复名字与系别（`multi` 传给 `individualHtml`，页面注入的卡片本体据此画成紧凑版）。
   const multi = count > 1;
   const body = group.expanded
-    ? `<div class="drawer-body">${rows.map((card) => individualHtml(card,
+    ? `<div class="drawer-body">${rows.map((card, at) => individualHtml(card,
       individuals[card.select] ?? {individual_id: card.select},
-      {cardHtml, multi, favourite: isFav(card.select), confirming: confirmRemove === card.select})).join('')}</div>`
+      {cardHtml, multi, index: at + 1, count: rows.length,
+        favourite: isFav(card.select), confirming: confirmRemove === card.select})).join('')}</div>`
     : '<div class="drawer-body collapsed"></div>';
   return `<section class="species-drawer" data-species="${esc(group.species_id)}" `
     + `data-count="${count}">${head}${body}</section>`;

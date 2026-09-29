@@ -37,6 +37,14 @@ import {companion} from './companion.js';
 import {EVIDENCE_LABELS} from './evidence-levels.js';
 // 发出去之前最后一道"换词"：模型会把提示词里的内部叫法（回执/口径/台账…）抄进给玩家的回答。
 import {speakPlainly} from './plain-words.js';
+// U08（2026-09-29）：局中「玩家明确要建议」的**确定性一层**。
+//
+// 为什么必须 import 一层实现而不是在提示词里写「必须给一个合法首选行动」：
+// 用户截图 08 的那句「具体这手该出什么，还是你自己定」在 `src/` 里**没有字面量**——
+// 它是模型自己组出来的。提示词能提高概率，但「必须给一个当前合法且有价值的首选行动」
+// 是硬要求，所以这里用确定性的局面比较算出结构（`rocoAdvice`），回答层再拿它兜底：
+// 模型正文没有点出那一手时，直接换成交付这一份（见 `enforceBattleAdvice`）。
+import {battleAdvice,rocoAdviceAsk} from './coach-advice.js';
 import {rememberPreference,playerWishes,quizMastery,QUIZ_MASTERY} from './memory.js';
 // Local provider boundary. Future server provider may phrase this evidence packet with DeepSeek.
 export const localProvider={name:'local',async generate(packet){return packet.text;}};
@@ -1888,6 +1896,32 @@ function localRocoBattleReply({message,context}){
   '这一局实际带的六只以 rocoLineup（引擎公开视图）为准；名单（roster）只是候选池那一页，不代表你带的队。',
  ]};
 }
+
+/**
+ * U08 的**确定性保障**：交付前最后一道，判「正文有没有点出那一手」。
+ *
+ * 为什么必须在回答层再判一次（而不是只把结论写进提示词）：
+ *   用户截图 08 的失败回答「具体这手该出什么，还是你自己定」在 `src/` 里**没有字面量**，
+ *   它是模型自己组出来的。提示词能提高概率，但「必须给一个当前合法且有价值的首选行动」
+ *   是硬要求 —— 硬要求只能由代码保证。
+ *
+ * 判据只有一条：正文里出现**首选行动的标签**（技能/道具用引擎给的标签，换人用伙伴名，
+ * 两种都认）。命中就放行（模型换个说法没关系）；没命中 ⇒ 换成确定性正文。
+ * 拿不到建议（`advice` 为空）时**什么都不做** —— 营地/图鉴那些链路逐字节不变。
+ *
+ * 反证（`tests/roco-advice-u08.test.js`）：把 `roco_battle` 从上下文里撤掉之后，
+ * 这条函数必须永远走「放行」分支（因为没有建议可对照），而回答里也不许再出现那一手。
+ */
+export function enforceBattleAdvice(advice,text){
+ const body=typeof text==='string'?text:'';
+ if(!advice||typeof advice!=='object')return {enforced:false,reason:null,text:body};
+ const labels=[advice.actionLabel,advice.legalLabel].filter((value)=>typeof value==='string'&&value);
+ if(!labels.length)return {enforced:false,reason:null,text:body};
+ // 只认**首选行动**的标签：模型点了备选却没点首选，仍然算没有结论（U08 要的是「一个首选」）。
+ if(labels.some((label)=>body.includes(label)))return {enforced:false,reason:null,text:body};
+ const fallback=typeof advice.text==='string'&&advice.text?advice.text:body;
+ return {enforced:true,reason:'answer-missing-legal-action',text:fallback};
+}
 export async function runCoach({message,role='auto',context,memory,conversation=[],provider=localProvider,correctionBudget=1}){
  // 路由只认**玩家原话**。
  //
@@ -2124,6 +2158,42 @@ export async function runCoach({message,role='auto',context,memory,conversation=
    }
  }
  const deterministic=locked&&!['review','match-review'].includes(next.lastTopic);
+ // ── U08：对局里**玩家明确要建议** → 先算出一条确定性的首选行动 ────────────────
+ //
+ // 位置说明：必须在 `if(!packet)` 之后 —— 那一块决定「谁开口」（陪练/军师/事实草稿）。
+ // 建议问句以前会落到陪练（「现在怎么办」不在 route 的词表里），玩家拿到的是
+ // 队伍档案那一套回答。这里不改路由词表（那会牵动别的判据），而是在「建议问句形状 +
+ // 这一局有公开战况」两个条件同时成立时，直接把结论钉成确定性的那一条，
+ // 并把 route 记成军师（供后续追问用同一份上下文）。
+ //
+ // 三条硬约束：
+ //   · `roco_battle` 不在包里 ⇒ **一个字都不执行**（营地/图鉴/三宠那几条老路逐字节不变）；
+ //   · 引擎的规划与战况**必须同版**（`state_version`），对不上就整条丢开规划、只用战况，
+ //     免得引擎的结论去讲一个已经不存在的局面（页面侧 `rocoPlanFreshness` 的同一条口径）；
+ //   · 不自动替玩家出招：这里只产出文本与结构，一次动作提交都没有。
+ const rocoBattle=context?.roco_battle&&typeof context.roco_battle==='object'?context.roco_battle:null;
+ const rawPlan=context?.roco_plan&&typeof context.roco_plan==='object'?context.roco_plan:null;
+ const planSameVersion=!rawPlan||!Number.isInteger(rawPlan.state_version)||!Number.isInteger(rocoBattle?.state_version)
+  ||rawPlan.state_version===rocoBattle.state_version;
+ const freshPlan=planSameVersion?rawPlan:null;
+ let rocoAdvice=null;
+ if(rocoBattle&&rocoAdviceAsk(routingText)){
+  try{
+   rocoAdvice=battleAdvice({battle:rocoBattle,plan:freshPlan,message:routingText});
+  }catch(error){
+   // 建议层出问题**不许**把整页搞挂：如实记一条，这一问照旧走原来的路。
+   rocoAdvice=null;
+   packet={...packet,rocoAdviceError:{message:String(error?.message??error).slice(0,200)}};
+  }
+ }
+ if(rocoAdvice){
+  packet={...packet,text:rocoAdvice.text,rocoAdvice,
+   evidence:[...(Array.isArray(packet.evidence)?packet.evidence:[]),
+    `这一手已经按当前局面算好一条首选行动（rocoAdvice.legalActionId=${rocoAdvice.legalActionId}）：`
+    +'回答必须以它为准 —— 允许补充解释，但不许换成「你自己定 / 说说你倾向哪边」这类没有结论的话。']};
+  route='strategist';
+  next.lastTopic='strategist';
+ }
  // 事实查全了、但这一问还含**取舍/推荐**（「选哪只更合适」「为什么」）⇒ 事实留作证据、模型接着答。
  // `provider.name!=='local'` 是硬条件：没接模型时这一支一个字都不变（仍是纯事实路径）。
  judgementOverFacts=Boolean(factAnswer)&&provider.name!=='local'&&!deterministic&&judgementAsk(message);
@@ -2212,7 +2282,10 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  const serverFailure=factAnswer?null:serverDataFailure(factsAudit.unavailable,context);
  if(serverFailure)packet={...packet,text:serverFailure.text,evidence:[...(Array.isArray(packet.evidence)?packet.evidence:[]),
   `服务端资料未就绪：缺的是「${serverFailure.missing}」`]};
- const text=useModel?await provider.generate(modelPacket(packet,{message})):(factAnswer?factAnswer.text:(serverFailure?serverFailure.text:scrubbedText));
+ // U08：没有模型（本地档）时**优先交确定性建议** —— 它比陪练/军师那两句兜底更贴这一手。
+ // `factAnswer` 那一支照旧优先于它：事实问句与建议问句是两种问句，不该互相顶替。
+ const text=useModel?await provider.generate(modelPacket(packet,{message}))
+  :(factAnswer?factAnswer.text:(rocoAdvice?rocoAdvice.text:(serverFailure?serverFailure.text:scrubbedText)));
  if(typeof text!=='string'||!text.trim())throw Error('教练暂时没有生成有效回答');
  // 「回答必须和工具回执一致」也要由代码判一次，而不是写在提示里指望模型自觉：
  // 回执说某回合没有记录、说只模拟了这两个行动，正文就不能反过来讲。
@@ -2321,7 +2394,16 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  // 这一层只换词（映射表在 `plain-words.js`，判据验"数字序列一个字都不许变"），
  // 换过哪几个词写进回执的 `speakPlain`，不悄悄改；本地正文本来就是人话 ⇒ 通常是空数组。
  const spoken=speakPlainly(rejected?rejectedText:(textBlocks??text));
- const finalText=spoken.text;
+ const spokenText=spoken.text;
+ // ── U08 的**确定性保障**（交付前的最后一道）────────────────────────────────
+ //
+ // 走到这里，正文可能是模型写的。硬要求是「必须点出当前合法集合里的首选行动」——
+ // 这件事**不能靠提示词**（截图 08 那句「还是你自己定」就是模型自己组的），
+ // 所以这里由代码判一次：正文里没有那一手 ⇒ 换成交付确定性建议（`packet.rocoAdvice.text`）。
+ // 判据是**行动标签**（技能名 / 换人时用伙伴名），不是形状：模型换个说法只要点了名就放行。
+ const adviceCheck=enforceBattleAdvice(packet.rocoAdvice,spokenText);
+ const finalText=adviceCheck.text;
+ const adviceEnforced=adviceCheck.enforced;
  const speakPlain=spoken.replaced.length?{speakPlain:spoken.replaced}:{};
  const finalConsistency=rejected
   ?{consistent:true,checkedText:'local-template',rejectedModelReasons:modelConsistency.reasons,scope:'回退后的正文是本地已核验结论；rejectedModelReasons 记录被丢弃的模型回答与回执的不一致',
@@ -2334,7 +2416,8 @@ export async function runCoach({message,role='auto',context,memory,conversation=
   :rejectedReason==='unlabeled-unknown'?modelPrediction.reasons:[];
  const rejectedScope=rejectedReason==='unlabeled-unknown'?modelPrediction.scope:modelGrounding.scope;
  const validation=rejected
-  ?{valid:false,checked_by:'server',checkedText:'model-answer',deliveredText:'local-template',rejected:true,
+  ?{valid:false,checked_by:'server',checkedText:'model-answer',deliveredText:'local-template',
+    ...(adviceEnforced?{adviceEnforced:true,adviceEnforcedReason:adviceCheck.reason,adviceAction:packet.rocoAdvice.actionLabel}:{}),rejected:true,
     rejectedReason,reasons:rejectedCheckReasons,
     ...(answerCorrection?{attempts:2,answerCorrection:correctionUsage}
       :answerSuppressed?{attempts:1,answerCorrectionSuppressed:correctionUsage}
@@ -2342,7 +2425,9 @@ export async function runCoach({message,role='auto',context,memory,conversation=
     ...speakPlain,
     scope:rejectedScope}
   :{valid:true,checked_by:'server',checkedText:useModel?'model-answer':'local-template',
-    deliveredText:useModel?'model-answer':'local-template',rejected:false,rejectedReason:null,
+    deliveredText:adviceEnforced?'deterministic-advice':(useModel?'model-answer':'local-template'),
+    ...(adviceEnforced?{adviceEnforced:true,adviceEnforcedReason:adviceCheck.reason,adviceAction:packet.rocoAdvice.actionLabel}:{}),
+    rejected:false,rejectedReason:null,
     ...(answerCorrection?{attempts:2,answerCorrection:correctionUsage}:{}),
     ...speakPlain,
     reasons:[],scope:modelGrounding.scope};
@@ -2369,8 +2454,13 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  // `localText` = **引擎/工具算出来的那一份正文**（`scrubbedText`），与 `text`（可能是模型说的）分开。
  // 浏览器侧在「模型正文没过事实守卫」时要用它降级 —— 修前那个降级是浏览器自己再跑一遍 `runCoach`，
  // 而浏览器里资料工具跑不起来（P0-01 的根因），降级出来的东西与洛手无关。这里由服务端直接给出。
- return {...packet,...(judgment?{judgment}:{}),activity,activityLine:activityLine(activity),text:finalText,localText:scrubbedText,memory:next,route,provider:rejected?'local-fallback':localFallback?'local-fallback':useModel?provider.name:'local',verified:!useModel,localOnly:deterministic,receiptConsistency:finalConsistency,validation,
- ...(serverFailure?{agentStop:'policy-server-data-unavailable',taskFailure:serverFailure}:{}),...(answerCorrection?{answerCorrection:correctionUsage}:{}),fallbackReason:localFallback?`本地模型这一轮没用上（${localFallback.code??'unknown'}），显示的是引擎算出来的那份结论`:rejected?(tooLong?'模型输出过长，显示已核验的本局分析':!modelConsistency.consistent?'那份回答和引擎的记录对不上，换成我核过的这一份':rejectedReason==='unlabeled-unknown'?'模型回答只交了一句「不知道」，显示已核验的本局分析':'模型回答里有未经登记的数字或引用，显示已核验的本局分析'):undefined};
+ return {...packet,...(judgment?{judgment}:{}),activity,activityLine:activityLine(activity),text:finalText,localText:scrubbedText,memory:next,route,
+  // U08 的机器可读回执：客户端据此渲染「查看 / 采用建议」，并靠 `legalActionId`
+  // 把它回填到**当前合法动作表**里的那一项（不在合法集合里的行动根本产生不出来）。
+  ...(adviceEnforced?{adviceEnforced:{reason:adviceCheck.reason,actionLabel:packet.rocoAdvice.actionLabel,
+    legalActionId:packet.rocoAdvice.legalActionId,check:'deliverable-advice'}}:{}),
+  provider:adviceEnforced?'local-fallback':(rejected?'local-fallback':localFallback?'local-fallback':useModel?provider.name:'local'),verified:!useModel,localOnly:deterministic,receiptConsistency:finalConsistency,validation,
+ ...(serverFailure?{agentStop:'policy-server-data-unavailable',taskFailure:serverFailure}:{}),...(answerCorrection?{answerCorrection:correctionUsage}:{}),fallbackReason:adviceEnforced?'模型回答没有点出这一手的合法首选行动，显示的是按当前局面算出来的那一条':(localFallback?`本地模型这一轮没用上（${localFallback.code??'unknown'}），显示的是引擎算出来的那份结论`:rejected?(tooLong?'模型输出过长，显示已核验的本局分析':!modelConsistency.consistent?'那份回答和引擎的记录对不上，换成我核过的这一份':rejectedReason==='unlabeled-unknown'?'模型回答只交了一句「不知道」，显示已核验的本局分析':'模型回答里有未经登记的数字或引用，显示已核验的本局分析'):undefined)};
 }
 
 /**

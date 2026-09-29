@@ -9,6 +9,9 @@
 import {refresh, individualFromInstance, canUndo, undoLastRefresh, duplicateIndividual,
   rollNatureAndTalent,
   undoUsed, lastHistoryOf} from '../coach/individuals.js';
+// 六项的键与顺序只有一处（`coach/talent.js` 的 `STAT_KEYS`）—— 上面那个"采纳名单资质"的补救
+// 也要按同一套键写回去，别在这里另排一份顺序。
+import {STAT_KEYS} from '../coach/talent.js';
 
 const STORE_KEY = 'roco.box.individuals.v1';
 
@@ -154,6 +157,78 @@ export function refreshIndividual(kind, individualId, {at = null} = {}) {
   }
   saveAll(all);
   return {ok: true, individual: all[individualId]};
+}
+
+/**
+ * **用抓包名单那一份重设这一只的资质**（U01 的"可执行补救"那一半，2026-09-29）。
+ *
+ * 为什么需要它：浏览器里那些**旧记录**的资质是本仓**旧口径**掷出来的（随机三项 7–10、
+ * 其余 0–6 ⇒ 激活 4–6 项），而人类给的四档名只覆盖「激活 1 / 2 / 3 项」⇒ 整页卡片都判不出档位
+ * （截图 1/12 的「天分认不出」）。那六个数**本来就不是游戏里的真值**（没有导入字段当年才掷的），
+ * 而抓包回执里的「资质」栏是**导入字段**（数据层真有的那一份）。
+ *
+ * 所以补救做成**玩家点一下才发生**的一件事，而不是页面偷偷换一份：
+ *   · 只改 `talent` 这一项（六项数值）与它的来源标记；
+ *   · **性格、等级、刷新次数、刷新历史一个都不动** —— 尤其不许消耗玩家真实的剩余次数；
+ *   · 原始那一份留在记录里（`talent_before_import`），写错了也查得回来。
+ *
+ * 返回 `{ok:true, individual}` / `{ok:false, reason}`（不抛给页面：成不成都是一句要说给玩家听的话）。
+ */
+export function resetTalentFromImport(individualId, {talent, source = '抓包回执的「资质」栏'} = {}) {
+  const id = String(individualId ?? '').trim();
+  if (!id) return {ok: false, reason: '没有编号 ⇒ 不知道改哪一只'};
+  const all = loadAll();
+  const one = all[id];
+  if (!one || typeof one !== 'object') {
+    return {ok: false, reason: '这一只不在本机记录里：先在盒子里打开它一次，我才能记下它的培养数据'};
+  }
+  const clean = {};
+  let count = 0;
+  for (const key of STAT_KEYS) {
+    const value = numberTalent(talent?.[key]);
+    if (value !== null) { clean[key] = value; count += 1; }
+  }
+  if (!count) return {ok: false, reason: '这份名单里没有它的资质（六项都是空的）⇒ 没有可采纳的数'};
+  all[id] = {
+    ...one,
+    talent: clean,
+    // 原始那一份留档（只留一次：再采纳一次时不许把第一次的原始值覆盖掉）。
+    talent_before_import: one.talent_before_import ?? (one.talent ?? null),
+    talent_source: `名单导入（${source}；这一只原来的资质是本机旧口径掷出来的）`,
+    talent_imported_at: new Date().toISOString(),
+  };
+  saveAll(all);
+  return {ok: true, individual: all[id], filled: count};
+}
+
+/** U01 口径的「真的是个数」判据：`Number(null) === 0` 不算（`coach/individuals.js` 那边不收 null）。 */
+function numberTalent(value) {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  if (typeof value === 'string' && value.trim() !== '') {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
+
+/**
+ * 本机记录里**属于这个物种**的那一只（按编号排序取第一只；没有就 null）。
+ *
+ * 用途（2026-09-29，Lead 在真 8765 上复验 U01 时点名的缺口）：**图鉴卡**上要有一格
+ * "最重要培养摘要"。图鉴那一档是**物种**（没有个体），但玩家可能已经有这一只 ——
+ * 那时屏幕上就该写**你自己那一只**的真值（等级 / 性格 / 天分档位），而不是一句空的
+ * "图鉴资料"。没有本机记录就返回 null（调用方**什么都不画** —— 不是你的精灵，
+ * 就没有"缺字段"这回事，硬写一句 622 遍就是人类骂过的机械噪音）。
+ */
+export function localIndividualBySpecies(speciesId) {
+  const wanted = String(speciesId ?? '').trim();
+  if (!wanted) return null;
+  const all = loadAll();
+  const hits = Object.values(all)
+    .filter((one) => one && typeof one === 'object' && String(one.species_id ?? '') === wanted)
+    .sort((a, b) => String(a.individual_id ?? '').localeCompare(String(b.individual_id ?? '')));
+  if (!hits.length) return null;
+  return localIndividualById(hits[0].individual_id);
 }
 
 /** 只给判据用：清空本地记录。 */

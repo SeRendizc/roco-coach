@@ -180,13 +180,39 @@ export function interventionBudget(f={}){
  return {blocked:false,reason:null};
 }
 
+/**
+ * 哪一方**必须补位**（引擎的 `needs_replacement`）。读不到返回 `null`（不知道 ≠ 空表）。
+ *
+ * 两种形状都认：手游投影把引擎字段原样留在 `game.roco.needs_replacement`（`rocoGameView` 也
+ * 单独投影了一份 `needsReplacement`），老引擎没有这个字段。
+ */
+function needsReplacementOf(game){
+ const raw=Array.isArray(game?.roco?.needs_replacement)?game.roco.needs_replacement:null;
+ if(raw)return raw.filter((side)=>typeof side==='string');
+ const proj=Array.isArray(game?.needsReplacement)?game.needsReplacement:null;
+ if(proj)return proj.filter((side)=>typeof side==='string');
+ return null;
+}
+
 // 局面风险：只用公开且确定的事实（是否必须补位、当前血量比例）。
 // 0.35 这条线沿用 observe() 与 decisiveOpportunity 已经在用的危险血线，不另立一套。
 export function situationRisk(game){
  if(!playable(game))return 0;
  const p=active(game,'player');
  if(!p)return 0;
- if(game.phase==='replace'||p.hp<=0)return 1;        // 必须补位：不可逆，而补位是免费动作
+ // 「我必须补位」的权威信号是**引擎说这一方要补位**（`needs_replacement` 里有 player），
+ // 或者我方场上这只已经倒下。**不能**用「阶段叫 replace」或「我的合法动作只有换人」判：
+ // 两者在**对手补位**时同样成立 —— 引擎的 `legal_actions()` 对两边都只发 switch
+ //（`env.py:360` 的 `if state.phase == "replace": for i in me.bench_indices(): emit(switch)`），
+ // 而对手倒下时 `needs_replacement` 只有 `['enemy']`。
+ //
+ // 踩过的坑（2026-09-29 真 8765 六宠局 t8，逐字读数）：对面喵喵倒下、我方多彩方方还活着
+ // 246/360，旧判据（phase 或 switchOnly）给出 `risk=1` ⇒ 分数层判 decisive ⇒ 气泡说
+ // 「你的多彩方方倒了，换缇塔顶上」—— **事实是错的**；而真到我自己倒下时那一手也一样，
+ // 分不清「我该补位」与「对手在补位」。现在只认引擎的 needs_replacement / 我方血量。
+ const needs=needsReplacementOf(game);
+ const mySideMustReplace=Array.isArray(needs)&&needs.includes('player');
+ if(mySideMustReplace||p.hp<=0)return 1;
  const ratio=p.maxHp>0?p.hp/p.maxHp:0;
  if(ratio<=.35)return .8;
  if(ratio<=.6)return .5;
@@ -209,10 +235,22 @@ export function interventionScore(f={}){
  const floor=round1(INTERVENTION_LIMITS.valueFloor+INTERVENTION_LIMITS.skillWeight*skill);
  const decisive=(gap!==null&&gap>REASONABLE_GAP)||risk>=INTERVENTION_LIMITS.criticalRisk;
  const budget=interventionBudget(f);
+ // ── U09（用户原话点名的那一条）：**我方倒下/必须补位这一档，频率预算与冷却都拦不住**──
+ //
+ // 用户验收原文：「倒下必须提示可换的合法存活精灵，不能预算用尽后沉默或继续推荐已倒下对象。」
+ // 而旧写法把预算排在风险之前：`risk=1`（`situationRisk` 只在「我方合法动作全是换人」或
+ // 「我方场上 hp<=0」时给 1）的决定性局面照样被 `hint-budget`/`cooldown` 降成
+ // `defer_to_review`；六宠局真机实测抓到 t16/t18 两手正是这样被静默的。
+ //
+ // 口径：预算与冷却约束的是「可以打断、但不说也行」的那些提醒；倒下这一手**不可逆**
+ //（补位是必须做的选择），不属于那一类。所以 `risk>=1` 时直接跳过时间/预算两道闸门，
+ // 也不允许 RL 判定层把它抑制掉 —— 它是这一层的**地板**，与五个硬门控同一性质。
+ // 其余风险档（0.8 / 0.5 / 0.2）行为**一个字不变**。
+ const unavoidable=risk>=1;
  // 剩余时间不够读完再改这一手：不打断，但值得复盘。
- if(timeLeft<INTERVENTION_LIMITS.actionableMs)
+ if(!unavoidable&&timeLeft<INTERVENTION_LIMITS.actionableMs)
   return {action:decisive||value>=floor?'defer_to_review':'silent',reason:'not-actionable-now',value,floor,decisive,budget:null};
- if(budget.blocked)
+ if(!unavoidable&&budget.blocked)
   return {action:decisive||value>=floor?'defer_to_review':'silent',reason:budget.reason,value,floor,decisive,budget:budget.reason};
  // 「仅关键风险」档：非关键局面连复盘条目都不生成——那是玩家明确划掉的注意力预算。
  if(preference==='critical'&&!decisive)
@@ -223,10 +261,11 @@ export function interventionScore(f={}){
  if(decisive||value>=floor){
   // `layer.active` 只有在 flag 为 `on` 时为 true；`shadow` 会算出 suppress
   // 但**不允许生效**——这里漏判 active 的话，shadow 就真的改了行为。
-  if(layer.active&&layer.suppress)return {action:'silent',reason:layer.reason,value,floor,decisive,budget:null,layer};
+  if(layer.active&&layer.suppress&&!unavoidable)return {action:'silent',reason:layer.reason,value,floor,decisive,budget:null,layer};
   const action=decisive?'action_hint':'micro_hint';
   const allowReason=decisive?(gap!==null&&gap>REASONABLE_GAP?'decisive-gap':'critical-risk'):'moderate-risk';
-  return {action,reason:allowReason,value,floor,decisive,budget:null,layer};
+  // `unavoidable` 如实进回执：这一手「不看预算」是可核对的事实，不是隐式行为。
+  return {action,reason:allowReason,value,floor,decisive,budget:null,layer,unavoidable};
  }
  return {action:'silent',reason:'below-threshold',value,floor,decisive,budget:null,layer};
 }

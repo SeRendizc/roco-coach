@@ -104,7 +104,12 @@ function escapeAction() {
 }
 
 /** 一份公开视图（`publicView()` 的形状）。 */
-function view({stateVersion, turn, phase = 'battle', result = null, pets, skills = [], foeField, foeBench, foeActive = 0, legal, events = [], needsReplacement = []}) {
+// ⚠ 2026-09-29 改钉（task-2 advice-engine）：多一个可选参数 `selfActive`。
+// 旧写法（原文，别再改回来）里 `self.active` 恒为 0，于是一份「第 0 只已倒下」的 fixture
+// 会把 `active` 指向一只倒下的伙伴 —— 而真引擎在那种局面下**只给 switch 动作**
+// （`env.py` 的 `legal_actions`：`if not pet.alive: emit(switch)`）。让 fixture 能自洽，
+// 「我方场上是第几只」这件事才能被真正钉住（见「对手的 active 是它在自己队伍里的位次」那一格）。
+function view({stateVersion, turn, phase = 'battle', result = null, pets, skills = [], foeField, foeBench, foeActive = 0, legal, events = [], needsReplacement = [], selfActive = 0}) {
   return {
     schema_version: 1,
     ruleset_id: RULESET,
@@ -112,7 +117,7 @@ function view({stateVersion, turn, phase = 'battle', result = null, pets, skills
     turn,
     phase,
     battle_result: result,
-    self: {active: 0, pets, skills},
+    self: {active: selfActive, pets, skills},
     opponent: {
       active: foeActive,
       living_count: 3,
@@ -558,6 +563,9 @@ test('对手的 active 是它在自己队伍里的位次，不能拿它索引「
   // 拿 `active` 当下标会读到一条后备记录（血/速度/名字全 null），检测器就**安静地不说话**。
   const raw = view({
     stateVersion: 42, turn: 8, foeActive: 1,
+    // 我方场上是第 3 只（注释里说的那一只）；第 0 只倒下时 `active` 不该停在它身上 ——
+    // 真引擎在那种局面下也只会发 switch 动作，这一份 fixture 现在与引擎行为一致。
+    selfActive: 2,
     pets: [withMax(pet({name: '寂灭骨龙', slot: 0, hp: 0, energy: 0, fainted: true}), 425),
       withMax(pet({name: '海豹船长', slot: 1, hp: 374, energy: 0}), 374),
       withMax(pet({name: '黑猫巫师', slot: 2, hp: 242, energy: 4}), 474)],

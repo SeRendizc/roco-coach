@@ -139,9 +139,25 @@ test('门控来自真实 experience.js：失焦是硬门控，不是「这次没
   // 第 43 轮起：包装层会**额外**挂上建议（`advice`）与它的错误栏（`advice_error`）。
   // 那是刻意的——建议必须在这一层算，因为只有这里同时拿得到 view/session/plan/host。
   // 除此之外的每个字段仍然必须与经验层逐个相同：判定**不许**在这一层被改一遍。
-  const {advice, advice_error, ...fromExperience} = focused;
+  // ⚠ 2026-09-29 改钉（U09，task-2 advice-engine）：包装层新增一个**只读**字段 `plan_stale`
+  // —— 「包里那份规划与当前战况不是同一版局面」⇒ 建议层丢掉规划、只用战况事实。
+  // 它与 advice / advice_error 同类：这个事实只有包装层看得到（它同时拿得到 view 与 plan），
+  // 经验层看不到 view，所以必须在这里排除，判据的**意图一个字没松**
+  //（判定仍然不许在包装层被改一遍）。
+  // 旧写法留档（原文，别再改回来）：
+  //   const {advice, advice_error, ...fromExperience} = focused;
+  // ⚠ 2026-09-29 第二次改钉（U09 兜底 + 排障回执）：包装层又多了两个**只读**字段
+  // `advice_source`（这条建议是建议层给的还是确定性兜底）与 `speak_blocked_by`
+  //（判决要说话却没说出来时，是谁拦的）。同样只有包装层看得到 view/plan，经验层没有。
+  // 旧写法留档（原文，别再改回来）：
+  //   const {advice, advice_error, plan_stale, ...fromExperience} = focused;
+  const {advice, advice_error, plan_stale, advice_source, speak_blocked_by, ...fromExperience} = focused;
+  assert.equal(plan_stale, false, '规划与战况同版时不许标成陈旧');
+  assert.ok('plan_stale' in focused, '包装层必须如实给出「规划是不是这一版的」这一栏');
+  assert.ok('advice_source' in focused && 'speak_blocked_by' in focused,
+    '包装层必须如实给出「建议从哪来 / 谁拦的」这两栏');
   assert.deepEqual(fromExperience, direct,
-    '除了 advice / advice_error，包装层的结果必须与经验层逐个字段一致');
+    '除了 advice / advice_error / plan_stale，包装层的结果必须与经验层逐个字段一致');
   assert.ok('advice' in focused && 'advice_error' in focused,
     '包装层必须挂上 advice 与 advice_error 两栏');
   assert.equal(advice_error, null, '正常路径不该有建议错误');
@@ -209,9 +225,21 @@ test('提示文案：建议由**局面**决定，看不到局面就沉默（第 
   // ④ 规则说沉默 → 一律 null
   assert.equal(rocoInterventionText({action: 'silent'}, plan), null, '沉默时不该产出任何文案');
   assert.equal(rocoInterventionText(null, plan), null);
-  // ⑤ 局末复习档保留它自己那句话（与建议层无关）
-  const deferred = rocoInterventionText({action: 'defer_to_review', reason: 'not-actionable-now'}, plan);
-  assert.match(deferred.text, /局后/);
+  // ⑤ **改钉**（U09，user 截图 09 点名的那一句）：局末复习档不再有无信息文案。
+  // 旧断言留档（原文）：这一支返回的是「这一手值得留到局后看一眼。现在先按你的判断走。」
+  // + `why: detail.reason`，于是屏幕上出现「依据：hint-budget」。两个问题都在玩家眼前发生过：
+  //   ① 正文没有任何信息量（没说风险、也没说能做什么）；② 内部理由漏进玩家可见文字。
+  // 新契约：defer_to_review 也是「有建议就说、没建议就沉默」，并且 `why` 里不许有内部代号。
+  assert.equal(rocoInterventionText({action: 'defer_to_review', reason: 'hint-budget'}, plan), null,
+    '没有建议的局末复习档必须沉默（那句无信息文案已删）');
+  const deferred = rocoInterventionText({action: 'defer_to_review', reason: 'hint-budget',
+    advice: {text: '「诡刺」打「画间沉铁兽」只有抵抗：别再硬用它', why: '上一手被属性抵抗',
+      risk: '硬打等于把回合让出去', kind: 'type-resisted', evidence: {multiplier: 0.5},
+      action: {legalActionId: 'skill#1:龙血', legalIndex: 1, kind: 'skill', label: '龙血', display: '龙血'}}}, plan);
+  assert.match(deferred.text, /别再硬用它/, '有建议时必须把建议说出来，而不是那句空话');
+  assert.match(deferred.text, /局后/, '局末复习档要说清它留到局后看');
+  assert.ok(!/hint-budget/.test(String(deferred.why)), `内部理由不许上屏：${deferred.why}`);
+  assert.equal(deferred.action?.legalActionId, 'skill#1:龙血', '气泡也要带可回填的合法动作标识');
 });
 
 test('局末教学入口：没有值得拎出来的决策点就说没有', () => {

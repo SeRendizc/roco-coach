@@ -78,6 +78,26 @@ export const LOADOUT_STYLE = [
   '.bl-slot[data-loadout-slot-state="picked"]{border-color:#4a6858}',
   '.bl-meta{flex:1 1 100%;min-width:0;font-size:12px;color:var(--muted);'
     + 'overflow-wrap:anywhere;word-break:break-word}',
+  // ⚠ 2026-09-29（U03）：每个槽位多两行 —— **一句真实效果 + 关键触发条件**、以及**引擎算了什么**。
+  // 这两行是"技能有没有效果说明"那一条的落点（截图 2/3 里四张巨卡一个字效果都没有）。
+  '.bl-effect{flex:1 1 100%;min-width:0;font-size:12.5px;color:#dbe5ef;'
+    + 'overflow-wrap:anywhere;word-break:break-word}',
+  '.bl-engine{flex:1 1 100%;min-width:0;font-size:11.5px;color:#e8ce88;'
+    + 'overflow-wrap:anywhere;word-break:break-word}',
+  // 候选区的搜索 / 筛选（U03：「替换时展开可搜索筛选的候选」）。
+  '.bl-filter{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-width:0}',
+  '.bl-search{flex:1 1 150px;min-width:0;min-height:44px;font-size:13px}',
+  '.bl-fbtn{min-height:44px;min-width:44px;padding:0 10px;font-size:12px;border-radius:999px;'
+    + 'background:#121e2c;border:1px solid var(--line);color:#cfe0d6;cursor:pointer}',
+  '.bl-fbtn[aria-pressed="true"]{background:var(--accent);color:#152c24;border-color:var(--accent);'
+    + 'font-weight:600}',
+  '.bl-shown{font-size:11.5px;color:var(--muted)}',
+  '.bl-chip[hidden]{display:none}',
+  '.bl-chip{flex-direction:column;align-items:flex-start;gap:2px}',
+  '.bl-chip-effect{font-size:11.5px;color:#dbe5ef;text-align:left;overflow-wrap:anywhere;'
+    + 'word-break:break-word}',
+  '.bl-chip-engine{font-size:11px;color:#e8ce88;text-align:left}',
+  '.bl-chip-src{font-size:11px;color:#cfe0d6}',
   '.bl-pool{display:flex;flex-wrap:wrap;gap:6px;min-width:0;max-height:330px;overflow:auto}',
   '.bl-chip{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:5px;max-width:100%;'
     + 'min-height:44px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);'
@@ -109,35 +129,131 @@ function numberText(value) {
 }
 
 /**
- * 一条技能记录 → 玩家要看的四个字段。
- * 认两种形状：盒子详情页的四个技能（`{name,element,category,energy,power_label}`）
- * 与引擎学习表的记录（`{name,element,category,energy,power}`）—— 缺什么就回 null，
- * 由渲染那一层写成「游戏数据里没有这一项」，**不留空、不补 0**。
+ * 一条技能记录 → 玩家要看的字段。认两种形状：盒子详情页的四个技能
+ * （`{name,element,category,energy,power_label,desc}`）与引擎学习表的记录
+ * （`{name,element,category,energy,power,desc,effect_support,mechanics}`）——
+ * 缺什么就回 null，由渲染那一层写成「游戏数据里没有这一项」，**不留空、不补 0**。
+ *
+ * ⚠ 2026-09-29（U03）补上三样，都是这一屏原来缺的：
+ *   · `desc` = **一句真实效果说明**（数据里本来就有，截图里那四张巨卡一个字都没印）；
+ *   · `hasStaticPower` / `powerStatus` = 静态威力到底有没有（决定"威力"那一栏怎么写）；
+ *   · `effectSupport` / `mechanicsResolved` / `mechanicsReason` = **引擎有没有结算这条效果**
+ *     （资料里写了 ≠ 引擎里算了；这一条不许藏，见下方的 `engineLine`）。
  */
 function skillFields(skill) {
   const row = skill && typeof skill === 'object' ? skill : {};
+  const power = textOf(row.power_label) ?? numberText(row.power);
+  const rawLabel = textOf(row.power_label);
+  // 「游戏数据里没有这一项」是页面层的兜底句 —— 它出现在数据里时说明**没有静态威力**。
+  const hasStaticPower = row.has_static_power === true
+    || (power !== null && power !== NO_ITEM);
   return {
     name: textOf(row.name),
     element: textOf(row.element),
     category: textOf(row.category),
     energy: numberText(row.energy),
-    power: textOf(row.power_label) ?? numberText(row.power),
+    power: hasStaticPower ? power : null,
+    hasStaticPower,
+    powerStatus: textOf(row.power_status) ?? (rawLabel === NO_ITEM ? 'not_provided_by_source' : null),
+    damageClass: textOf(row.damage_class),
+    desc: textOf(row.desc),
+    effectSupport: textOf(row.effect_support),
+    mechanicsResolved: row?.mechanics?.resolved === true,
+    mechanicsReason: textOf(row?.mechanics?.reason),
+    sources: sourcesText(row),
   };
+}
+
+/** 这一招是不是"只有伤害、没有别的决定性情节"（决定"威力"那一栏与引擎那句话怎么写）。 */
+function isDamageOnly(fields) {
+  if (fields.category !== '攻击') return false;
+  const desc = fields.desc ?? '';
+  if (!desc) return fields.hasStaticPower;
+  return !/(回复|减伤|免疫|吸血|护盾|增益|提升|降低|异常|控制|印记|奉献|先手|连击|反弹|清除)/.test(desc);
+}
+
+/**
+ * 「威力」那一栏怎么写 —— **非伤害技能不再印「威力 游戏数据里没有这一项」**
+ * （U03 逐字：「非伤害技能不展示「威力 游戏数据里没有这一项」，用合适字段」）。
+ *
+ * 关键：`slotProblems`（判据）要求四个槽位的「系别 / 类别 / 耗能 / 威力」**都要有字** ——
+ * 所以这一栏永远在，只是非伤害技能写的是"这一类没有威力这件事"，而不是"数据里没有"。
+ */
+function powerText(fields) {
+  if (fields.hasStaticPower) return `必要威力 ${fields.power}`;
+  // 连类别都没有 ⇒ 判不出"是不是伤害技能"，只能照实说数据里没有（不替它下结论）。
+  if (!fields.category || fields.category === '攻击') return `威力 ${NO_ITEM}`;
+  return `威力 不适用（${fields.category}类不造成伤害）`;
 }
 
 /** 槽位那一行：系别 / 类别 / 耗能 / 威力，缺的照实写。 */
 function metaLine(fields) {
   return `系别 ${fields.element ?? NO_ITEM} · 类别 ${fields.category ?? NO_ITEM}`
-    + ` · 耗能 ${fields.energy ?? NO_ITEM} · 威力 ${fields.power ?? NO_ITEM}`;
+    + ` · 耗能 ${fields.energy ?? NO_ITEM} · ${powerText(fields)}`;
 }
 
 /** 技能按钮上那半行：只写有值的（与工坊的 chip 同一套读法，缺项不占地方）。 */
 function chipLine(fields) {
-  return [
-    fields.element,
-    fields.energy === null ? '耗能 ' + NO_ITEM : `耗能 ${fields.energy}`,
-    fields.power === null ? '威力 ' + NO_ITEM : `威力 ${fields.power}`,
-  ].filter(Boolean).join(' · ');
+  const bits = [fields.element,
+    fields.energy === null ? `耗能 ${NO_ITEM}` : `耗能 ${fields.energy}`];
+  if (fields.hasStaticPower) bits.push(`威力 ${fields.power}`);
+  else if (!fields.category || fields.category === '攻击') bits.push(`威力 ${NO_ITEM}`);
+  else bits.push(`无威力（${fields.category}类）`);
+  return bits.filter(Boolean).join(' · ');
+}
+
+/**
+ * 关键触发条件：从**数据里那一句**原样摘出来（不解释、不归纳）。
+ * 例：`减伤70%，应对攻击。` ⇒ `应对攻击`；`造成物伤，应对状态：自己回复50%生命和5能量。` ⇒ 后半句。
+ */
+export function triggerOf(desc) {
+  const text = textOf(desc);
+  if (!text) return null;
+  const response = /(应对[^。；;]*)/.exec(text);
+  if (response) return response[1].replace(/[，,]$/, '');
+  const conditional = /((?:如果|若|当)[^。；;]*?(?:时|后))/.exec(text);
+  return conditional ? conditional[1] : null;
+}
+
+/**
+ * 技能的效果那两行（U03）：**一句真实效果 + 关键触发条件**，都是数据里原样那一句。
+ * 资料里写了 ≠ 引擎里算了 —— 这一句只说"资料里写的是什么"，引擎那一条在 `engineLine`。
+ */
+function effectLines(fields) {
+  const bits = [];
+  if (fields.desc) bits.push(`效果：${fields.desc}`);
+  const trigger = triggerOf(fields.desc);
+  if (trigger) bits.push(`触发：${trigger}`);
+  if (!bits.length) bits.push(`效果：${NO_ITEM}（这一条资料里没写效果）`);
+  return bits.join(' · ');
+}
+
+/**
+ * **引擎到底算了什么**（U03：未实现的决定性效果要在选择时说明并给可用替代）。
+ *
+ * 口径（照 `/api/roco/loadout/options` 的真实字段，不给玩家看工程词）：
+ *   · `mechanics.resolved === true` ⇒ 这条效果引擎结算了；
+ *   · 只有伤害、没有别的决定性效果 ⇒ 引擎结算的就是那个威力（这条可以放心带）；
+ *   · 有决定性效果、但 `effect_support` 不是已实现 ⇒ **照实说没结算**，并给一个可用替代
+ *     （从这一只的学习表里挑一招"只有伤害"的），绝不假装它能生效。
+ *
+ * @param {object} fields  `skillFields()` 的产物
+ * @param {?object[]} pool 这一只的学习表（挑替代用）
+ */
+function engineLine(fields, pool = null) {
+  if (fields.mechanicsResolved) return '引擎：这条效果已经结算。';
+  if (isDamageOnly(fields)) {
+    return '引擎：这一招只有伤害，按威力结算 —— 特效那一层没有别的东西。';
+  }
+  const bits = ['引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，'
+    + '带上它打，伤害照算、特效不生效。'];
+  const alternative = Array.isArray(pool)
+    ? pool.find((row) => {
+      const one = skillFields(row);
+      return one.name && one.name !== fields.name && isDamageOnly(one) && one.hasStaticPower;
+    }) : null;
+  if (alternative) bits.push(`要确定性的话可以先带「${textOf(alternative.name)}」这类只有伤害的招。`);
+  return bits.join('');
 }
 
 /** 学习表回执里的 `sources`（服务端已经给的是玩家话：天生（学习表）/ 血脉 / 技能石）。 */
@@ -188,6 +304,7 @@ export function playerReasonOf(raw) {
 export function loadoutPanelHtml({
   select = '', species = null, skills = [], pool = null, error = null,
   picked = null, status = null, via = null, loading = false, saving = false, raw = null,
+  instanceCount = 1,
 } = {}) {
   const current = (Array.isArray(skills) ? skills : []).slice(0, LOADOUT_SLOTS);
   const drafted = Array.isArray(picked);
@@ -203,7 +320,8 @@ export function loadoutPanelHtml({
     : null;
   const filled = draft ? draft.filter((one) => one && one.id).length : 0;
 
-  // ── 四个槽位 ──────────────────────────────────────────────────────────
+  // ── 四个槽位（**唯一一组「当前四技能」**，U03 把原来重复的那一片合到了这里）──────
+  //    每个槽位现在有四行：编号+名字+标签 / 系别·类别·耗能·威力 / **效果 + 触发** / 引擎结算说明。
   const slots = [];
   for (let i = 0; i < LOADOUT_SLOTS; i += 1) {
     const at = i + 1;
@@ -213,26 +331,30 @@ export function loadoutPanelHtml({
       const fields = skillFields(byId.get(pick.id));
       const from = sourcesText(byId.get(pick.id));
       slots.push({at, state: 'picked', tag: '你挑的', name: fields.name ?? pick.name ?? NO_ITEM,
-        meta: metaLine(fields), hint: from ? `来源：${from}` : null});
+        meta: metaLine(fields), effect: effectLines(fields), engine: engineLine(fields, poolList),
+        hint: from ? `来源：${from}` : null});
       continue;
     }
     if (pick && pick.id) {
       // 挑过、但这次的学习表里没有它（或还没读学习表）：名字以外照实说「还不知道」。
       slots.push({at, state: 'picked', tag: '你挑的', name: pick.name ?? '你挑的那一个',
-        meta: poolList ? '引擎这次的学习表里没有它（系别 / 耗能 / 威力都不知道）'
+        meta: poolList ? `引擎这次的学习表里没有它（系别 / 耗能 / 威力都不知道）`
           : '还没读学习表：系别 / 耗能 / 威力要读了才知道',
+        effect: null, engine: null,
         hint: poolList ? '先点掉它，再从下面挑一个。' : null});
       continue;
     }
     if (draft && cur) {
       slots.push({at, state: 'empty', tag: '这个位置还空着', name: '（还没挑）',
         meta: '要带四个才能保存：从下面挑一个补上。',
+        effect: null, engine: null,
         hint: `不变的话还是它：${textOf(cur.name) ?? NO_ITEM}`});
       continue;
     }
     const fields = skillFields(cur);
     slots.push({at, state: 'current', tag: '现在带着的', name: fields.name ?? NO_ITEM,
-      meta: metaLine(fields), hint: null});
+      meta: metaLine(fields), effect: effectLines(fields), engine: engineLine(fields, poolList),
+      hint: null});
   }
 
   const slotHtml = slots.map((slot) => `      <li class="bl-slot" data-loadout-slot="${slot.at}"`
@@ -241,20 +363,47 @@ export function loadoutPanelHtml({
     + `<span class="bl-name">${escapeHtml(slot.name)}</span>`
     + `<span class="bl-tag">${escapeHtml(slot.tag)}</span>`
     + `<span class="bl-meta">${escapeHtml(slot.meta)}</span>`
+    + `${slot.effect ? `<span class="bl-effect">${escapeHtml(slot.effect)}</span>` : ''}`
+    + `${slot.engine ? `<span class="bl-engine">${escapeHtml(slot.engine)}</span>` : ''}`
     + `${slot.hint ? `<span class="bl-hint">${escapeHtml(slot.hint)}</span>` : ''}</li>`).join('\n');
 
   // ── 池子（只在回执到手之后才画）────────────────────────────────────────
+  //    ⚠ 所有候选按钮**始终在 HTML 里**（判据 `poolProblems` 要求按钮与回执一一对应），
+  //      搜索/筛选是**客户端藏**（`hidden`），不是渲染时筛掉。
   const chips = (poolList ?? []).map((row) => {
     const fields = skillFields(row);
     const on = Boolean(draft && draft.some((one) => one && one.id === String(row.skill_id)));
     const from = sourcesText(row);
+    // 来源放次级详情（`title`）：只有"不是天生学会的"才影响获取，那种才在可见处点一句。
     const title = [fields.category ? `类别 ${fields.category}` : null, from ? `来源：${from}` : null]
       .filter(Boolean).join(' · ');
+    const nonNative = from && !/天生/.test(from)
+      ? `<span class="bl-chip-src">${escapeHtml(from)}</span>` : '';
+    // ⚠ 属性顺序是**判据契约**：`poolProblems` / ⑧ 号判据按
+    // `data-loadout-pick="…" aria-pressed="…"` **相邻**配对读按下状态 ⇒ 这两个必须挨着，
+    // 搜索用的 data-* 只能挂在 `aria-pressed` 之后。
     return `      <button type="button" class="bl-chip" data-loadout-pick="${escapeHtml(row.skill_id)}"`
-      + ` aria-pressed="${on ? 'true' : 'false'}"${title ? ` title="${escapeHtml(title)}"` : ''}>`
+      + ` aria-pressed="${on ? 'true' : 'false'}"`
+      + ` data-loadout-name="${escapeHtml(fields.name ?? '')}"`
+      + ` data-loadout-category="${escapeHtml(fields.category ?? '')}"`
+      + `${title ? ` title="${escapeHtml(title)}"` : ''}>`
       + `${escapeHtml(fields.name ?? NO_ITEM)}<span class="bl-chip-meta">${escapeHtml(chipLine(fields))}</span>`
+      + `${nonNative}`
+      + `<span class="bl-chip-effect">${escapeHtml(fields.desc ?? NO_ITEM)}</span>`
+      + `<span class="bl-chip-engine">${escapeHtml(isDamageOnly(fields) || fields.mechanicsResolved
+        ? '引擎结算：伤害' : '引擎还没结算这一条特效')}</span>`
       + '</button>';
   }).join('\n');
+  // 候选区的搜索/筛选（U03：「替换时展开可搜索筛选的候选」）。
+  const categories = [...new Set((poolList ?? []).map((row) => textOf(skillFields(row).category))
+    .filter(Boolean))];
+  const filterBar = chips
+    ? `\n      <div class="bl-filter">
+        <input type="search" class="bl-search" data-loadout-search="1" placeholder="搜技能名" aria-label="按名字搜技能">
+        <button type="button" class="bl-fbtn" data-loadout-filter="" aria-pressed="true">全部</button>
+        ${categories.map((one) => `<button type="button" class="bl-fbtn" data-loadout-filter="${escapeHtml(one)}" aria-pressed="false">${escapeHtml(one)}</button>`).join('\n        ')}
+        <span class="bl-shown" data-loadout-shown="1">显示 ${poolList?.length ?? 0} 个</span>
+      </div>` : '';
 
   // ── 说明那一句（只写回执里真有的数字）──────────────────────────────────
   let note;
@@ -294,9 +443,16 @@ export function loadoutPanelHtml({
     + ` data-loadout-state="${panelState}" data-loadout-picks="${filled}"`
     + `${via ? ` data-loadout-via="${escapeHtml(via)}"` : ''}`
     + `${raw ? ` data-loadout-raw="${escapeHtml(String(raw).slice(0, 300))}"` : ''}>`
-    + '\n      <h4>换技能</h4>'
+    // ⚠ 2026-09-29（U03）**改钉**：这一块就是**唯一一组「当前四技能」**（此前标题写「换技能」，
+    // 而 `box.js` 的正文里另有一份 `<ol class="moveset">` 又是同样四个 ⇒ 屏幕上说了两遍）。
+    + '\n      <h4>当前四个技能</h4>'
     + `\n      <p class="bl-note">${escapeHtml(note)}</p>`
     + `\n      <ol class="bl-slots">\n${slotHtml}\n      </ol>`
+    + (instanceCount > 1
+      ? `\n      <p class="bl-note" data-loadout-shared="yes">这一种在名单里有 ${Number(instanceCount)} 只：`
+        + '配招按**物种**保存（开局时引擎按物种下发），所以同种的两只会共用这一份四技能；'
+        + '性格 / 资质 / 等级 / 收藏各按个体单独存。</p>' : '')
+    + filterBar
     + (chips ? `\n      <div class="bl-pool">\n${chips}\n      </div>` : '')
     + `\n      <div class="bl-actions">\n        ${actions.join('\n        ')}\n      </div>`
     + (statusText ? `\n      <p class="bl-status" data-loadout-status="${escapeHtml(statusKind)}">`
@@ -400,6 +556,8 @@ function createController(host, props, request) {
     loading: false, saving: false, status: null, raw: null, via: null, seq: 0,
     draft: [null, null, null, null], names: new Map(), request, storage: null,
     prefilled: false,
+    // U03：候选区的搜索词与类别筛选（**只藏不删** —— 候选按钮始终与引擎回执一一对应）。
+    query: '', filterCategory: '', instanceCount: 1,
   };
 
   const controller = {update, destroy, state};
@@ -415,6 +573,41 @@ function createController(host, props, request) {
   function storageOf() {
     if (state.storage) return state.storage;
     try { return globalThis.localStorage ?? null; } catch { return null; }
+  }
+
+  /**
+   * 候选区筛选：按名字（搜索框）与类别（按钮）把**候选按钮藏起来**。
+   * 空的话全显示；顺带报一句「显示 N 个」（玩家要知道自己筛掉了多少）。
+   */
+  function applyFilter() {
+    // ⚠ 判据里那个"宿主"是个只有 `innerHTML` / `addEventListener` 的假元素（Node 里没有 DOM）
+    // ⇒ 这两处一律先问"这个宿主会不会查"（`querySelectorAll` 不存在时跳过筛选，渲染照旧）。
+    const chips = typeof host.querySelectorAll === 'function'
+      ? [...host.querySelectorAll('[data-loadout-pick]')] : [];
+    const query = state.query.trim();
+    let shown = 0;
+    for (const chip of chips) {
+      const name = String(chip.dataset?.loadoutName ?? '');
+      const category = String(chip.dataset?.loadoutCategory ?? '');
+      const hit = (!query || name.includes(query))
+        && (!state.filterCategory || category === state.filterCategory);
+      if (chip.hidden === !hit) continue;
+      chip.hidden = !hit;
+      if (hit) shown += 1;
+    }
+    const label = typeof host.querySelector === 'function'
+      ? host.querySelector('[data-loadout-shown]') : null;
+    if (label) {
+      label.textContent = query || state.filterCategory
+        ? `显示 ${shown} / ${chips.length} 个` : `显示 ${chips.length} 个`;
+    }
+  }
+
+  // ⚠ 搜索框的监听**挂在输入框自己身上**（每次重画都是新元素 ⇒ 不会叠），不挂宿主：
+  // 宿主上的监听类型是判据 ⑨ 的一条契约（"同一块地方挂两次不会叠监听"，按类型数数）。
+  function onSearchInput(event) {
+    state.query = String(event?.target?.value ?? '');
+    applyFilter();
   }
 
   function render() {
@@ -433,10 +626,20 @@ function createController(host, props, request) {
       loading: state.loading,
       saving: state.saving,
       raw: state.raw,
+      instanceCount: state.instanceCount,
     });
     host.dataset.loadoutState = state.loading ? 'loading'
       : (state.saving ? 'saving' : (state.error ? 'error' : (state.pool ? 'ready' : 'idle')));
     host.dataset.loadoutFor = state.select;
+    // ⚠ 重画之后筛选**要接着生效**（不然"搜完再点一个技能"就把筛掉的 40 个又放出来了）。
+    // 搜索框里的词也要放回去（innerHTML 重画会丢输入框的值）。
+    const search = typeof host.querySelector === 'function'
+      ? host.querySelector('[data-loadout-search]') : null;
+    if (search) {
+      if (state.query) search.value = state.query;
+      search.addEventListener('input', onSearchInput);
+    }
+    applyFilter();
   }
 
   /** 换了一只就**整块清掉**（上一只的池子绝不能留在这一只的屏上）。 */
@@ -461,6 +664,9 @@ function createController(host, props, request) {
       // 否则上一只的那句会挂在新的一只脸上。
       state.seededFrom = false;
       state.names = new Map();
+      // 换了一只 ⇒ 搜索词与类别筛选跟着清掉（上一只的筛选不该管到这一只身上）。
+      state.query = '';
+      state.filterCategory = '';
       const stored = readStored(storageOf(), select);
       state.draft = stored ? stored.ids.slice() : [null, null, null, null];
       // 本机记过就以本机那份为草稿 —— 不许被「现在带着的四个」再预选一次盖掉。
@@ -489,6 +695,10 @@ function createController(host, props, request) {
           state.status = {kind: 'ok', text: SEED_NOTE};
         }
       }
+    }
+    if (next.instanceCount !== undefined) {
+      state.instanceCount = Number.isFinite(Number(next.instanceCount))
+        ? Math.max(1, Number(next.instanceCount)) : 1;
     }
     if (Array.isArray(next.skills)) state.skills = next.skills.slice(0, LOADOUT_SLOTS);
     // 池子已经读过了、这一只的四个又刚拿到（详情页是两段式渲染）：这时候才补预选。
@@ -723,6 +933,19 @@ function createController(host, props, request) {
   }
 
   function onClick(event) {
+    // ⚠ 判据里的假元素 `closest()` 不管选择器、一律返回同一个 `{dataset}` ⇒ 这里除了"配上选择器"
+    // 还要**真的带那个键**才算一次筛选点击（否则所有点击都会被当成筛选，整块面板点不动）。
+    const filter = event?.target?.closest?.('[data-loadout-filter]');
+    if (filter?.dataset && 'loadoutFilter' in filter.dataset) {
+      state.filterCategory = String(filter.dataset.loadoutFilter ?? '');
+      if (typeof host.querySelectorAll === 'function') {
+        for (const one of host.querySelectorAll('[data-loadout-filter]')) {
+          one.setAttribute('aria-pressed', one === filter ? 'true' : 'false');
+        }
+      }
+      applyFilter();
+      return;
+    }
     const node = event?.target?.closest?.(
       '[data-loadout-read],[data-loadout-pick],[data-loadout-save],[data-loadout-reset]');
     if (!node?.dataset) return;

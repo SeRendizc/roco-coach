@@ -219,10 +219,36 @@ test('① 四个槽位都在，每个都写出名字与系别 / 类别 / 耗能 
   const slots = slotModels(html);
   assert.deepEqual(slots.map((one) => one.at), [1, 2, 3, 4], '四个槽位按顺序都在');
   assert.deepEqual(slots.map((one) => one.name), ['啃咬', '防御', '翅刃', '风隐']);
-  assert.match(slots[0].meta, /系别 虫系 · 类别 攻击 · 耗能 0 · 威力 40/);
-  // 缺的照实写（不许留空、不许补 0）：第 2 个没有静态威力、第 4 个也没有
-  assert.match(slots[1].meta, /威力 游戏数据里没有这一项/);
-  assert.match(slots[3].meta, /威力 游戏数据里没有这一项/);
+  assert.match(slots[0].meta, /系别 虫系 · 类别 攻击 · 耗能 0 · 必要威力 40/);
+  // ⚠ 2026-09-29 **改钉**（人类 U03 逐字：「非伤害技能不展示『威力 游戏数据里没有这一项』，用合适字段」）。
+  // 语义变化：这一栏原来对**所有**技能都印 `power_label`（防御 / 状态类的数据里写着
+  // "游戏数据里没有这一项"，屏幕上读起来像"这只精灵的数据缺了一块"）。
+  // 现在：伤害技能写「必要威力 N」；非伤害技能写「威力 不适用（防御类不造成伤害）」——
+  // 那一栏**照旧必须有字**（`slotProblems` 还是要它非空：缺的绝不留空，只是不再把
+  // "游戏数据里没有这一项"这句话安在"本来就没有威力这件事"上）。
+  // 旧断言（改钉不删，留档）：
+  //   assert.match(slots[1].meta, /威力 游戏数据里没有这一项/);
+  //   assert.match(slots[3].meta, /威力 游戏数据里没有这一项/);
+  assert.match(slots[1].meta, /威力 不适用（防御类不造成伤害）/, '防御类说"不适用"，不说"数据里没有"');
+  assert.match(slots[3].meta, /威力 不适用（状态类不造成伤害）/, '状态类同理');
+  // 攻击类但数据里真没有威力 ⇒ **照旧**照实写「游戏数据里没有这一项」（这一条没改）
+  const attackNoPower = slotModels(loadoutPanelHtml({select: 'own-0001',
+    skills: [{name: '没有威力的一击', element: '虫系', category: '攻击', energy: 2,
+      power_label: '游戏数据里没有这一项'}]}))[0];
+  assert.match(attackNoPower.meta, /威力 游戏数据里没有这一项/, '攻击类缺威力照旧照实写');
+  // ⭐ U03：每个槽位还要有**一句真实效果 + 关键触发条件**（截图里那四张巨卡一个字效果都没有）。
+  // 夹具 `CURRENT` 没有 `desc`（那一档照实写"资料里没写效果"）；这里补一条**带 desc** 的
+  // （真机回执就有这两个字段：`desc` 与 `category`，见文件头那段回执形状）再验。
+  const withEffect = loadoutPanelHtml({select: 'own-0001', skills: [
+    {order: 1, name: '光刃', element: '光系', category: '攻击', energy: 4, power_label: '120',
+      desc: '对敌方精灵造成物理伤害。'},
+    {order: 2, name: '防御', element: '普通系', category: '防御', energy: 1,
+      power_label: '游戏数据里没有这一项', desc: '减伤70%，应对攻击。'},
+  ]});
+  assert.match(withEffect, /效果：对敌方精灵造成物理伤害。/, '要有数据里那一句效果');
+  assert.match(withEffect, /触发：应对攻击/, '要有从那一句里摘出来的关键触发条件');
+  assert.match(withEffect, /引擎：这条特效还没结算/, '未结算的决定性效果要在选择时说清（不许藏）');
+  assert.doesNotMatch(withEffect, /威力 游戏数据里没有这一项[^<]*类别 防御/, '非伤害技能不写那句');
 
   // 连耗能都缺的那种形状也要照实写
   const bare = loadoutPanelHtml({select: 'own-0001',

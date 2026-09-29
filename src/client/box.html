@@ -93,9 +93,22 @@
   <h2 id="pet-title">这一只的详情</h2>
  </div>
  <p class="cmp-trouble" id="pet-note" role="status" aria-live="polite" hidden></p>
- <div id="pet-head"></div>
- <div class="pet-actions" id="pet-actions"></div>
- <div id="pet-body"></div>
+ <!-- ── 2026-09-29（U02）两区版式 ─────────────────────────────────────────────
+      宽屏：左栏 = 紧凑精灵摘要（形象 / 名称 / 属性 / 等级 / 性格 / 资质 / 天分 / 刷新记录）
+      + 动作按钮；右栏 = **唯一一组**「当前四个技能」（`#pet-loadout`）+ 六维。
+      窄屏（≤880px）：单列，顺序照读（摘要 → 动作 → 四技能 → 六维）。
+      ⚠ `#pet-loadout` 是**静态**宿主：`renderPetPage()` 每次重画只换 innerHTML，
+        不重建它 —— 挑到一半的候选不会因为刷新一次就丢（挂载是幂等的，见 box-loadout.js）。 -->
+ <div class="pet-cols">
+  <div class="pet-side">
+   <div id="pet-head"></div>
+   <div class="pet-actions" id="pet-actions"></div>
+  </div>
+  <div class="pet-main">
+   <div id="pet-loadout"></div>
+   <div id="pet-body"></div>
+  </div>
+ </div>
 </section>
 
 </main>

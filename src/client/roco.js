@@ -63,6 +63,10 @@ import {mountTeamWorkshop} from './team-workshop.js';
 // 这里只 import 来接线，**不**在本文件里重写焦点逻辑（重写就是第二份事实，迟早漂）。
 import {createFocusProvider, focusFromClick, migrateLegacyMemory, mountXiaoya} from './xiaoya.js';
 import {mountStalePageBanner} from './stale-page.js';
+// U05（2026-09-29）：**承伤相性**的现算。数据由 `scripts/roco/build-client-type-affinity.mjs`
+// 从冻结真值 `data/roco/normalized/<ruleset>/types.json` 生成（不是手写的倍率表）。
+// 它与技能格那条**进攻向**倍率（引擎 `damage_preview.samples`）是**两件事**，用途不许互换。
+import {incomingAffinity} from './type-affinity.js';
 
 // ── 页面状态 ────────────────────────────────────────────────────────────────
 const state = {
@@ -73,6 +77,11 @@ const state = {
   // 整局的**全部**事件（`view.events` 只有这一次推进产生的那些，见 service.py:1860）。
   // 局末复盘要按整局找转折点，只拿最后一次推进的事件是找不到的。
   matchEvents: [],
+  //: U10（2026-09-29）：**逐回合的合法行动表**（`{回合号: view.legal}`）。
+  //: 为什么页面要自己攒：引擎每次推进只回**当前**那一回合的 `legal`，而复盘要讲
+  //: 「转折点那一回合当时还能选什么」—— 那份表不攒就永远拿不到（除非引擎改合同）。
+  //: 只做搬运：`finishMatch()` 原样交给 `rocoMatchReview`，页面**不解释**它。
+  legalByTurn: {},
   // **最后一个还能行动的局面**。终局视图里 `legal` 已经空了、对手场上也换成了
   // 补位上来的那一只；拿它做复盘会把「对方倒下的那一只」认成现在场上这只。
   lastLiveView: null,
@@ -2039,6 +2048,95 @@ function b3El(el, name) {
 }
 
 /**
+ * 承伤相性的方向 → CSS 认的那个 `data-b3-rel` 值（`battle-v3.css:290-295`）。
+ *
+ * 箭头在**两侧的含义必须一致**：`up`（绿▲）= 对我有利、`down`（红▼）= 对我不利。
+ *   · 技能格：`up` = 我这一招克制它（进攻向，来自引擎 samples）；
+ *   · 换人候选：`up` = 换上去之后我**扛得住**（承伤向，来自 `type-affinity.js`）。
+ * `neutral → none` 是**真的算过**才写（白圈的含义是"无影响"）；没算过一律 `unknown`（不画）。
+ */
+const REL_MARK = Object.freeze({threat: 'down', resist: 'up', neutral: 'none', unknown: 'unknown'});
+
+//: `roco:advice-adopt` 的监听**只许注册一次**（`bind()` 每次 render 都会跑）。
+//  2026-09-29 T1 复核抓到的真缺陷：不守卫 ⇒ 开一局之后挂上多个监听 ⇒「采用建议」点一次提交多次。
+let rocoAdviceAdoptWired = false;
+
+/**
+ * 战报一行：**主句照常念，未核验说明降级成小字**（U06，2026-09-29）。
+ *
+ * 用户截图 6 的问题不是"说了不该说的"，而是**每一句后面都拖一段同样重的说明**，
+ * 于是整屏读起来像工程日志：谁用了什么、打了多少，全被
+ * 「（伤害公式未核验，这是引擎估值）」「（回能时序未核验…）」淹没。
+ *
+ * 口径（U06 验收原文）：「战报先呈现玩家事件…把估算和未核验影响保留为**简短相关说明**」。
+ * 所以这里**一个字都不删、顺序也不改** —— 只把**括号里的不确定说明**套进 `.b3-log-caveat` 小字。
+ * 玩家先读到事件；需要追究时那一句还在原地、还是原来那个位置。
+ *
+ * ⚠ 第一版按「**句尾**括号」拆，实测**漏掉了最重要的一类**（真机 50 行里 12 行降级成功，
+ *   而下面这两行原样没动 —— 它们正是截图 6 里最扎眼的伤害行）：
+ *     `我方的「拆卸」命中，造成约 37 点伤害（伤害公式未核验，这是引擎估值），属性抗性。`
+ *     `对方的「水炮」命中，造成约 262 点伤害（伤害公式未核验，这是引擎估值），属性克制。`
+ *   说明**不在句尾**，后面还跟着「属性抗性/属性克制」。所以现在改成**按括号内容就地判**：
+ *   句子中间任何一个括号，只要内容带不确定标记，就把那一个括号降级 —— 前后正文都不动。
+ *
+ * 为什么是「内容判据」而不是「位置判据」：`（当前 8 点）`「（共 2 层）」「（累计 -30）」
+ * 是**数值不是说明**，把它们降级比不降级更糟（一个真实数字被压成小字）。只认标记词。
+ */
+const LOG_CAVEAT_MARKER = /未核验|未实机|未核实|不核验|估值|不猜|候选口径|按.{0,8}处理|待确认/;
+
+function logLineHtml(line) {
+  const raw = typeof line === 'string' ? line : '';
+  // 括号里**不允许再嵌套括号**（`[^（）()]`）—— 引擎的句子都是单层，嵌套就整段不动（宁可不动）。
+  let hit = 0;
+  const html = raw.replace(/[（(]([^（）()]*)[）)]/g, (whole, inner) => {
+    if (!LOG_CAVEAT_MARKER.test(String(inner))) return whole;
+    hit += 1;
+    return `<span class="b3-log-caveat" data-b3-log-caveat="yes">${escapeHtml(whole)}</span>`;
+  });
+  const attrs = hit ? ` data-b3-log-has-caveat="yes" data-b3-log-caveat-count="${hit}"` : '';
+  return `<p data-b3-log-line="yes"${attrs}>${hit ? html : escapeHtml(raw)}</p>`;
+}
+
+/**
+ * 把一条建议里的动作**重新解析到当前合法集合**（U08）。
+ *
+ * 为什么不能直接用 `legalIndex`：建议是上一刻算出来的，玩家在这之间可能已经走了一手/
+ * 换了人 ⇒ 下标指向的**已经不是那一手**了。按身份（kind + target_index / skill_id）解析，
+ * 解析不到就返回 null（调用方**不许**执行），这是"过期建议不许生效"的落点。
+ *
+ * `legalActionId` 的形状由 coach 层给（`switch#2:换上第2位` / `skill#<id>:<名字>`），
+ * 这里只当**提示**用：先按它取候选，再逐个用真实字段核对；对不上就退回按 kind 匹配。
+ */
+function resolveAdvisedAction(target) {
+  const legal = Array.isArray(state.view?.legal) ? state.view.legal : [];
+  if (!legal.length || !target) return null;
+  const kind = typeof target.kind === 'string' ? target.kind : null;
+  const id = typeof target.legalActionId === 'string' ? target.legalActionId : '';
+  const idKind = /^([a-z_]+)#/.exec(id)?.[1] ?? null;
+  const idNum = /^[a-z_]+#(\d+)/.exec(id)?.[1] ?? null;
+  const skillId = /^skill#([^:]+)/.exec(id)?.[1] ?? (target.skillId ?? null);
+  const candidates = legal.filter((a) => !kind || a.kind === kind);
+  // ① 换人：按 `target_index` 核（建议里写的是第几位，不是一个会漂的下标）。
+  if (idKind === 'switch' && idNum !== null) {
+    const hit = candidates.find((a) => a.kind === 'switch' && Number(a.target_index) === Number(idNum));
+    if (hit) return {action: hit, how: 'legalActionId:switch#target_index'};
+  }
+  // ② 技能：按 `skill_id` 核。
+  if (skillId) {
+    const hit = candidates.find((a) => a.kind === 'skill' && String(a.skill_id) === String(skillId));
+    if (hit) return {action: hit, how: 'legalActionId:skill#skill_id'};
+  }
+  // ③ 兜底：这一手里该 kind 只有一个候选时，它就是那一个（不猜多选）。
+  if (kind && candidates.length === 1) return {action: candidates[0], how: 'kind-unique'};
+  // ④ `legalIndex` **只在它同时与 kind 相符时**才接受（下标本身不做唯一依据）。
+  if (Number.isInteger(target.legalIndex)) {
+    const byIndex = legal[target.legalIndex];
+    if (byIndex && (!kind || byIndex.kind === kind)) return {action: byIndex, how: 'legalIndex+kind'};
+  }
+  return null;
+}
+
+/**
  * 用公开视图填 v3h 片段的可见内容（示例数据一律隐藏，填一行解除一行）。
  * 纪律：只搬运 `view` 里的公开事实；拿不到的（伤害样本、克制倍率、道具次数）**留空不编**。
  */
@@ -2049,6 +2147,12 @@ function renderB3Panels(view) {
   const active = Number.isInteger(view?.self?.active) ? view.self.active : 0;
   const me = self[active] ?? null;
   const energyMax = Number.isFinite(view?.self?.energy_max) ? view.self.energy_max : null;
+  // 对手当前这一只的属性（**公开**信息）。承伤相性（U05）要用它当"攻击系集合"——
+  // 注意它**不是**"对手这一手要出什么"：口径见 `type-affinity.js` 顶部注释。
+  const foeField = view?.opponent?.field ?? null;
+  const foeTypes = Array.isArray(foeField?.types)
+    ? foeField.types.filter((t) => typeof t === 'string' && t)
+    : (typeof foeField?.type === 'string' && foeField.type ? [foeField.type] : []);
 
   // ① 双方出战卡（左：名字在左、等级在右；右：镜像）
   const fillCard = (side, pet, isFoe) => {
@@ -2075,6 +2179,24 @@ function renderB3Panels(view) {
   };
   fillCard('self', me, false);
   fillCard('foe', view?.opponent?.field ?? null, true);
+
+  // ①-b 我现在这一只的**承伤相性**（U05）：和换人候选用**同一个**函数、同一份口径，
+  // 只是主语换成场上这一只。这样「我该不该换」两边读的是同一件事，不会各算各的。
+  // 拿不到（属性缺失 / 组合没登记 / 对手属性没读到）⇒ hidden + 一个字都不写。
+  const selfThreat = root.querySelector('[data-b3-self-threat]');
+  if (selfThreat) {
+    const mine = me ? (Array.isArray(me.types) ? me.types : (me.type ? [me.type] : [])) : [];
+    const threat = incomingAffinity(mine, foeTypes);
+    selfThreat.hidden = !threat.known;
+    selfThreat.dataset.b3SelfThreat = threat.direction;
+    if (threat.known) {
+      selfThreat.textContent = `${me?.name ? `${me.name} ` : ''}${threat.label}`;
+      selfThreat.title = threat.detail;
+    } else {
+      selfThreat.textContent = '';
+      selfThreat.title = threat.reason ?? '';
+    }
+  }
 
   // ② 四格技能：这一只的配招 × 引擎给的合法技能 × 伤害样本（拿不到就留空）
   const legalSkills = (view?.legal ?? []).filter((a) => a.kind === 'skill');
@@ -2177,7 +2299,33 @@ function renderB3Panels(view) {
   const bench = self.map((p, idx) => ({p, idx})).filter(({idx}) => idx !== active);
   switchRows.forEach((cell, i) => {
     const item = bench[i];
-    if (!item) { cell.setAttribute('data-b3-pending', 'yes'); return; }
+    if (!item) {
+      // ⚠ 2026-09-29 U05（真机抓到的**残留**）：这一支原来只写 `data-b3-pending="yes"` 就 return，
+      //   于是 HTML 里**设计稿写死的**那些字原地留着 —— `battle-v3.css` 里**没有**任何
+      //   `[data-b3-pending="yes"]` 规则，所以它们**真的会显示**：
+      //     第 3/4/5 行分别写着「克制对手」「被对手克制」「无影响」+ 假名字（皇家狮鹫/化蝶/仪式巨像）。
+      //   三宠局（bench 只有 2 行）下这些假行是玩家看得见的；六宠局恰好 5 行全填满才没暴露。
+      //   现在：用不到的格子**清空**（名字/血量/星/相性文字/三角），不留在屏幕上冒充数据。
+      cell.setAttribute('data-b3-pending', 'yes');
+      for (const sel of ['[data-b3-switch-name]', '[data-b3-switch-hp]', '[data-b3-switch-star]', '[data-b3-cost]']) {
+        const el = cell.querySelector(sel);
+        if (el) el.textContent = '';
+      }
+      const tail = cell.querySelector('[data-b3-switch-rel-text]');
+      // ⚠⚠ 2026-09-29 U05 **自己踩过的坑**（真机复算抓到的，写在这里免得再犯）：
+      //   第一版把"方向"写进了 `tail.dataset.b3SwitchRelText` —— 那正是**找这个元素的钩子属性**
+      //   （`[data-b3-switch-rel-text]`）。于是：① 钩子的值被覆盖成 `threat/up`；
+      //   ② 这里再 `delete` 一次 ⇒ **属性没了** ⇒ 之后每一次 `querySelector('[data-b3-switch-rel-text]')`
+      //   都返回 null ⇒ 文案从此**再也写不上去**（屏幕上一直是空的，而 `rel`/`mult` 看着是对的）。
+      //   教训：**钩子属性只用来找元素，不许当成数据槽**。方向走单独的 `data-b3-switch-affinity`。
+      if (tail) { tail.textContent = ''; tail.dataset.b3SwitchAffinity = 'unknown'; }
+      const markEl = cell.querySelector('[data-b3-rel]');
+      if (markEl) { markEl.dataset.b3Rel = 'unknown'; delete markEl.dataset.b3AffinityMult; markEl.title = ''; }
+      delete cell.dataset.b3Action;
+      delete cell.dataset.b3ActionKind;
+      delete cell.dataset.b3Target;
+      return;
+    }
     const p = item.p;
     const n = cell.querySelector('[data-b3-switch-name]');
     if (n) n.textContent = p.name ?? '';
@@ -2192,14 +2340,35 @@ function renderB3Panels(view) {
       star.textContent = Number.isFinite(e) ? `⭐ ${e}` : '⭐ —';
       star.dataset.b3SwitchStar = Number.isFinite(e) ? String(e) : 'unknown';
     }
-    const rel = cell.querySelector('[data-b3-switch-rel-text]');
-    if (rel) rel.textContent = '';        // 克制关系要倍率；拿不到就留空（不编）
-    // 那一格的三角同理：**必须显式写成 unknown**。设计稿在 HTML 里写死了 up/none/up/down/none，
-    // 渲染时不清掉就会一直显示"绿色优势"（人类报的就是这个）。
-    // 「换成它算不算占优」还要一个口径（拿它的哪个属性当攻击方 / 还是看承伤方向）——
-    // 没定之前**不画**，而不是替玩家挑一个算法。
+    // ── 换人候选的**承伤相性**（U05，2026-09-29）────────────────────────────────
+    // 修前（原文留档，别改回去）：
+    //     const rel = cell.querySelector('[data-b3-switch-rel-text]');
+    //     if (rel) rel.textContent = '';        // 克制关系要倍率；拿不到就留空（不编）
+    //     const mark = cell.querySelector('[data-b3-rel]');
+    //     if (mark) mark.dataset.b3Rel = 'unknown';
+    // 为什么当时留空：倍率只有一条来源 —— 引擎的 `damage_preview.samples`，那是**我方技能打对手**
+    // 的进攻向倍率，「换成它挨打会怎样」是**反方向**，samples 里没有这一项。
+    // 为什么不猜：旧注释写着「拿它的哪个属性当攻击方 / 还是看承伤方向 —— 没定之前不画」。
+    // 现在口径**定了**（用户 2026-09-29 U05 验收原文）：
+    //   · 技能格 = 进攻向倍率（引擎 samples，本文件别处，不动）；
+    //   · **换人候选 = 承伤相性**（对手的属性各当一次攻击系，取最坏那一格）；
+    //   · 两者各有各的出处，不许混用。
+    // 数据来自 `type-affinity.js`（由冻结真值 `types.json` 生成，逐格对账 2160/2160），
+    // 组合没登记 ⇒ `unknown`，**一个三角都不画**（白圈的含义是"无影响"，拿它兜底就是替引擎宣称没算过的事）。
+    const affinity = incomingAffinity(p.types ?? (p.type ? [p.type] : []), foeTypes);
+    const relText = cell.querySelector('[data-b3-switch-rel-text]');
+    if (relText) {
+      relText.textContent = affinity.known ? affinity.label : '';
+      // 方向写在**单独的**属性上（`data-b3-switch-rel-text` 是钩子，不许覆盖，见上面那条注释）。
+      relText.dataset.b3SwitchAffinity = affinity.direction;
+    }
     const mark = cell.querySelector('[data-b3-rel]');
-    if (mark) mark.dataset.b3Rel = 'unknown';
+    if (mark) {
+      mark.dataset.b3Rel = REL_MARK[affinity.direction] ?? 'unknown';
+      mark.dataset.b3AffinityMult = affinity.worst ? String(affinity.worst.multiplier) : '';
+      // 文案与倍率都要能在**不点开**的情况下读全（不只靠颜色：#5bd 绿▲ / #f88 红▼ 之外还有字）。
+      mark.title = affinity.known ? affinity.detail : (affinity.reason ?? '');
+    }
     const elSlots = cell.querySelector('.b3-el-slots');
     if (elSlots) b3Els(elSlots, Array.isArray(p.types) ? p.types : (p.type ? [p.type] : []));
     delete cell.dataset.b3Action;
@@ -2257,7 +2426,11 @@ function renderB3Panels(view) {
   // G2 对手印记/增益：引擎给了就逐条画（没给保留 ghost 占位；不编）。
   const foeCard = document.querySelector('[data-b3-foe-card]');
   const foeBuffs = foeCard?.querySelector('[data-b3-foe-buffs]') ?? foeCard?.querySelector('.b3-buffs');
-  const foeField = view?.opponent?.field ?? null;
+  // ⚠ `foeField` 已在**本函数开头**取过（U05 承伤相性要用它）。
+  //   2026-09-29 改钉（原文留档，别改回去）：`const foeField = view?.opponent?.field ?? null;`
+  //   为什么改：同一函数里再声明一次就是**重复声明**（`SyntaxError: Identifier 'foeField'
+  //   has already been declared`）——整页 boot 直接挂掉。两处取的是**同一个**表达式，
+  //   合并成开头那一处，语义一字未变。
   // 人类 2026-09-23：「为啥对面没挂上？」—— 我原来只读 marks，而引擎给的可能是
   // buffs / statuses（自伤/防御冷却那类走 statuses）。三个来源都读，谁给了就画谁。
   const foeRows = [];
@@ -2458,7 +2631,7 @@ function renderB3Panels(view) {
     } else {
       logScroll.innerHTML = turns.map((t, i) => `<div class="b3-log-turn" data-b3-log-turn="${t}"${i === 0 ? ' data-b3-log-latest="yes"' : ''}>
         <b data-b3-log-turn-label="第 ${t} 回合">第 ${t} 回合${i === 0 ? '（最新）' : ''}</b>
-        ${byTurn.get(t).map((line) => `<p data-b3-log-line="yes">${escapeHtml(line)}</p>`).join('')}</div>`).join('');
+        ${byTurn.get(t).map((line) => logLineHtml(line)).join('')}</div>`).join('');
     }
     document.body.dataset.b3LogTurns = String(turns.length);
   }
@@ -2889,6 +3062,26 @@ function dismissOnboard() {
 }
 
 // ── 提示：显示 / 作废 / 展开 ────────────────────────────────────────────────
+/**
+ * 门控层给的「为什么」是**内部代号**还是**人话**（U09，2026-09-29）。
+ *
+ * 用户截图 9 里那条气泡下面写着「依据：hint-budget」——那是 `experience.js`
+ * 频次预算的名字，玩家不该看到。这里做一道**结构判断**（不是关键词黑名单）：
+ * 全小写 ASCII、只由字母数字与 `-`/`_` 组成、可带一个 `:` 分段（`hard-gate:not-in-match`）
+ * ⇒ 判为代号，不上屏；其余（含中文、含空格、含大写）照原样显示。
+ *
+ * 为什么用结构而不是列举：列举会漏（本次就漏过 `below-threshold` / `stale-state` /
+ * `hint-dismissed` / `critical-risk` 这些同样会被写进 `why` 的代号）。
+ */
+const INTERNAL_REASON_CODE = /^[a-z][a-z0-9_-]*(?::[a-z0-9_-]+)*$/;
+function humanReadableWhy(why) {
+  if (typeof why !== 'string') return '';
+  const text = why.trim();
+  if (!text) return '';
+  if (INTERNAL_REASON_CODE.test(text)) return '';
+  return text;
+}
+
 function hideHint(action = 'silent', gate = '') {
   if ($('hint')) $('hint').hidden = true;
   document.body.dataset.rocoHint = 'hidden';
@@ -2982,17 +3175,48 @@ function refreshHint({reason = 'turn', plan = state.plan, explicit = false} = {}
   document.body.dataset.rocoGate = detail.gate ?? '';
   document.body.dataset.rocoAction = detail.action;
   const adviceText = rocoInterventionText(detail, plan);
+  // ── U09（2026-09-29）：**没有信息量的主动气泡不许出现** ─────────────────────────
+  // 用户截图 9 那条原文：「✦小芽 这一手值得留到局后看一看。现在先按你的判断走。」
+  // 下面还写着「依据：hint-budget」——两句话都没说这一手有什么风险、能做什么，
+  // 纯占地方；而且把内部预算名（`hint-budget`）端到了玩家面前。
+  //
+  // 判据不能用"文案像不像废话"（那是拿字符串猜语义，下次改一个字就漏）。用**结构**：
+  // 建议层真的开过口时，`detail.advice` 带 `kind`（`COACH_ADVICE_KINDS` 里的一档）
+  // 与 `risk`；而 `defer_to_review` 那条兜底句**没有** `advice`。
+  // ⇒ 主动提醒只认"有结构化建议"这一档；没有就**安静**（`hideHint`），不是换一句话说。
+  // ⚠ 玩家**主动问**（`explicit`）走的是另一条路，**不受这个门控限制**（U09 原文：
+  //   「玩家主动问不受自动提醒频次预算的误伤」）——所以这一条只包住 `!explicit` 那一支。
+  const structured = detail?.advice && typeof detail.advice === 'object' && detail.advice.kind
+    ? detail.advice
+    : null;
+  if (!explicit && (!adviceText || !structured)) {
+    // 记号要能分辨「为什么安静」：门控层自己给了 `gate` 就用它（`below-threshold` /
+    // `window-unfocused` / `hint-budget` 这些），否则写我们这一层的判据名。
+    // 修前这里无条件写 `no-actionable-advice`，把门控层的真实理由盖掉了 —— 排障时
+    // 分不清"分数没过线"与"建议层没开口"（2026-09-29 实测 24/24 被盖成同一个值）。
+    return hideHint('silent', detail.gate ?? detail.reason ?? 'no-structured-advice');
+  }
   if (!adviceText && !explicit) {
     return hideHint('silent', detail.gate ?? detail.reason ?? '');
   }
   const text = adviceText ?? {
-    text: '这一手引擎没有值得单独说的局面事实：下面是它真的给了的东西，你自己挑。',
-    why: '建议层这一手没有成立的局面事实（不是出错，是它认为不值得占用你的注意力）',
+    // 走到这里只剩"玩家主动问、而建议层这一手确实没有可比较的事实"这一种。
+    // 旧文案（原文留档，别改回去）：
+    //     '这一手引擎没有值得单独说的局面事实：下面是它真的给了的东西，你自己挑。'
+    // 为什么改：后半句把决定推回给玩家，正是 U08 报的那一类（"让玩家自己定"）。
+    // 现在**只说不知道什么 + 现在能确定什么**，「首选行动」由建议层给（U08，advice-engine 那一路）。
+    text: '这一手还没有能比较的局面事实，所以我给不出「首选行动」——缺的是引擎对两种走法的结果对比。'
+      + '下面这些是本局已经公开的事实，可以先照着看。',
+    why: null,
   };
   const hintAction = adviceText ? detail.action : 'explicit-facts';
   state.hint = {...text, stateVersion: view.state_version, action: hintAction, plan, reason};
   $('hint-text').textContent = text.text;
-  $('hint-why').textContent = `依据：${text.why}`;
+  // `依据：` 那一行**只写人话**。修前它无条件写 `text.why`，而 `defer_to_review` 的
+  // `why` 就是门控层的内部代号（`hint-budget` / `below-threshold`）——玩家读到的是预算名。
+  // 这一层不许出现小写连字符代号；判据见 `roco-page-ux` 的「玩家那一行不许出现注册表/验收台术语」。
+  const whyText = humanReadableWhy(text.why);
+  $('hint-why').textContent = whyText ? `依据：${whyText}` : '';
   if (adviceText?.shape && state.session.said) state.session.said.add(adviceText.shape);
   state.lastAdviceEvidence = adviceText?.evidence ?? null;
   const preview = rocoDamagePreviewText(plan);
@@ -3074,6 +3298,11 @@ function applyResult(data) {
   if (nowSelf !== null || nowFoe !== null) state.lastMana = {self: nowSelf, opponent: nowFoe};
   if (b3RejectGuard(data)) return;   // 引擎拒绝这一步时的守卫（见下）
   state.view = data.view;
+  // U10（2026-09-29）：把**这一回合的合法行动表**记下来（复盘要用"当时还能选什么"）。
+  // 只记**真有的**：`legal` 不是数组就不写这一回合（缺表 ⇒ 复盘如实写"查不到"，不编）。
+  if (Number.isInteger(data.view?.turn) && Array.isArray(data.view?.legal)) {
+    state.legalByTurn = {...state.legalByTurn, [data.view.turn]: data.view.legal};
+  }
   if (Array.isArray(data.view?.events)) state.events = data.view.events;
   render();
   flashDamage(data.view?.events);      // legacy 3v3 页面的飘字（元素不在时自动空转）
@@ -3721,6 +3950,8 @@ async function startBattle() {
     state.planStaleDiscards = [];
     state.events = [];
     state.matchEvents = [];
+    // U10：新的一局从**空的动作表**开始（旧局的回合号会与这一局重号，留着就是错的事实）。
+    state.legalByTurn = {};
     state.lastLiveView = null;
     state.pick.open = false;
     $('lesson').textContent = '';
@@ -3958,6 +4189,9 @@ async function finishMatch() {
     turns: view.turn,
     result: view.battle_result,
     memory: state.memory,
+    // U10（2026-09-29）：**逐回合合法表**原样交给复盘层 —— 「转折点那一回合当时还能选什么」
+    // 只能由页面边打边攒（引擎每次只回当前回合的 `legal`）。页面不解释、不筛选、不补。
+    legalByTurn: state.legalByTurn,
   });
 
   // 陪练（轻量气泡）：局末用一句人话接住，不打断、也不冒充复盘。
@@ -4165,6 +4399,14 @@ function mountRocoXiaoya() {
   if (rocoXiaoya) return rocoXiaoya;
   rocoXiaoya = mountXiaoya({
     mode: 'popup',
+    // ⚠ 2026-09-29 U07：**这一页不再由 xiaoya.js 自己注入入口按钮**。
+    //   修前（原文留档，别改回去）：这里没有 `entryButton`，于是 `injectPopup()` 往
+    //   `.header-actions` 又追加了一个 `#xiaoya-open`（`.xy-fab`「✦ 小芽」），
+    //   而 `roco.html` 页头本来就有一个 `#coach-entry` ⇒ 用户截图 7/8/9 右上角**两个小芽**。
+    //   现在：入口只有页头那一个 `#coach-entry`（下面那段绑定开/关同一个浮层），
+    //   `entryButton:false` 让 xiaoya.js **不建** FAB，并且 `handle.open()/close()`
+    //   直接操作真实面板（不再靠 `#xiaoya-open` 的 click —— 那个按钮已经不存在了）。
+    entryButton: false,
     // 宿主上下文口：拿得到就带（拿不到就不加那个字段，与旧面板同一条口径）。
     contextProvider: () => {
       const extra = {};
@@ -4195,7 +4437,21 @@ function wireRocoFocus() {
   // ⚠ 必须传**事件**（不是 `event.target`）：工作台在 shadow DOM 里，target 会被重定向成宿主元素。
   document.addEventListener('click', (event) => {
     const picked = focusFromClick(event);
-    if (picked) rocoFocusProvider.notePicked(picked);
+    if (!picked) return;
+    rocoFocusProvider.notePicked(picked);
+    // ⚠⚠ 2026-09-29（U01 第四处 · 真机实测抓到的**真缺陷**）：点了之后**必须自己 resolve 一次**。
+    //   原来这里只有 `notePicked()` —— 而 `resolve()`（取详情快照 + 读本机培养记录）在 roco 这一页
+    //   **只有 `focusForCompanion()` 会调**，也就是**只有问小芽时才调**。
+    //   后果（真 8765 实测，带 `?team=own-0177,…` 点第一个槽位）：
+    //     点完 `data-xy-focus` 立刻 = `own-0177`（对），但那一行 **10 秒后仍是**
+    //     「正在看：多彩方方（正在读它的培养数据…）」⇒ 快照永远不来 ⇒
+    //     **性格 / 天分 / 技能数在这一页一个都不出现**（U01 的「战斗 / 小芽一致」就断在这里）。
+    //   端点本身是好的（实测 `GET /api/roco/box?detail=own-0177` → 200 / 7760B / <1ms），
+    //   所以不是后端问题，**就是少接了这一次调用**。
+    //   失败不抛给玩家：`resolve()` 自己把失败写进 `failure`，那一行照样如实说读不到。
+    void Promise.resolve(rocoFocusProvider.resolve())
+      .then(() => paintFocusLine(rocoFocusProvider.getContext()))
+      .catch(() => { /* 焦点这一层永远不许把页面搞挂；失败原因已经在快照的 failure 里 */ });
   }, true);
   rocoFocusProvider.subscribeContextChanged((context) => paintFocusLine(context));
   paintFocusLine(rocoFocusProvider.getContext());
@@ -4634,6 +4890,54 @@ function bind() {
   //   · 模型状态现在收在弹窗的 `#xy-fold-status` 这个 `<details>` 里（下面那段绑定）；
   //   · 关闭小芽走 `#close-companion`，它的绑定在 `bindXiaoyaPopups()`。
   // 所以原来那两段绑定（一个空转的 click、一个 null-safe 的 on()）整段删除。
+  // ── U08（2026-09-29）：小芽给出的「首选行动」怎么落到真实宿主行动 ───────────────
+  // 分工写死在这里，避免两边各写一套：
+  //   · **面板只发事件**（`xiaoya.js`）：`document.dispatchEvent(new CustomEvent('roco:advice-adopt',
+  //     {detail:{advice, mode:'view'|'adopt'}}))`——它不碰对局状态、不自己发 `/api/roco/*`；
+  //   · **宿主只认这一条事件**：`view` 高亮并滚到那一格（**不执行**）；`adopt` 才走真实行动。
+  // 关键：`adopt` **不按旧下标执行** —— 建议是上一刻算的，合法集合可能已经变了。
+  //   这里先在**当前** `state.view.legal` 里按身份（kind + target_index / skill_id）重新解析，
+  //   解析不到就**什么都不做**并如实说一句（宁可让玩家自己点，也不执行一个已经非法的动作）。
+  // 执行本身复用**真正的那个格子**（`.click()`）——它内部本来就会按身份重解析；
+  // 找不到格子才回退到 `playAction(解析出来的动作)`，不另写第二条执行路径。
+  //
+  // ⚠⚠ 2026-09-29 **真缺陷**（T1 复核抓到并报了，不是猜的）：这一段原来**写在 `bind()` 里面**
+  //   且**没有守卫**，而 `bind()` 每次 `render()` 都会跑 —— 于是同一页开一局之后会挂上**好几个**
+  //   监听器，「采用建议」点一次会把同一手**提交多次**（`playAction` 的 `actionInFlight` 只挡同帧并发，
+  //   挡不住"点了好几遍"）。同文件里的 `#coach-entry` 那一条正是靠 `dataset.bound` 守卫避免这个坑。
+  //   现在整段**只在模块初始化时注册一次**（`rocoAdviceAdoptWired`），与 render 次数无关。
+  if (!rocoAdviceAdoptWired) {
+    rocoAdviceAdoptWired = true;
+    document.addEventListener('roco:advice-adopt', (event) => {
+      const advice = event?.detail?.advice ?? null;
+      const mode = event?.detail?.mode === 'adopt' ? 'adopt' : 'view';
+      const target = advice?.action ?? null;
+      if (!target) return;
+      const resolved = resolveAdvisedAction(target);
+      if (!resolved) {
+        sayStatus('这条建议对应的动作已经不在这一手的合法集合里了（局面变过），我不替你执行——请按现在能点的来。');
+        return;
+      }
+      const index = (state.view?.legal ?? []).indexOf(resolved.action);
+      const slot = index >= 0
+        ? document.querySelector(`[data-b3-action="${index}"]`) ?? null
+        : null;
+      if (mode === 'view') {
+        if (slot) {
+          slot.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+          slot.classList.add('b3-slot--advised');
+          setTimeout(() => slot.classList.remove('b3-slot--advised'), 2600);
+        }
+        sayStatus(`建议的这一手是「${target.display ?? target.label ?? '——'}」，在动作坞里高亮给你看（没有替你点）。`);
+        return;
+      }
+      // adopt：玩家明确按了「采用建议」才走到这里。
+      if (slot) slot.click();
+      else void playAction(resolved.action);
+      sayStatus(`按建议走了「${target.display ?? target.label ?? '——'}」。`);
+    });
+  }
+
   $('onboard-skip').addEventListener('click', dismissOnboard);
   $('say-form').addEventListener('submit', (event) => {
     event.preventDefault();
@@ -4835,6 +5139,8 @@ async function startStandardPvp() {
     state.planStaleDiscards = [];
     state.events = [];
     state.matchEvents = [];
+    // U10：新的一局从**空的动作表**开始（旧局的回合号会与这一局重号，留着就是错的事实）。
+    state.legalByTurn = {};
     state.lastLiveView = null;
     state.pick.open = false;
     $('lesson').textContent = '';
@@ -4913,6 +5219,9 @@ function returnHome() {
   state.view = null;
   state.events = [];
   state.matchEvents = [];
+  // U10（2026-09-29）：**逐回合合法表**也随这一局一起清 —— 开下一局时旧局的动作表
+  // 留在手里，复盘就会拿"上一局的合法动作"去讲这一局的回合（那是编）。
+  state.legalByTurn = {};
   state.lastLiveView = null;
   state.lastMana = null;
   state.plan = null;

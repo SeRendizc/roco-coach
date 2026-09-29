@@ -1,0 +1,4366 @@
+{
+ "tag": "after",
+ "base": "http://127.0.0.1:8765",
+ "head": "yes",
+ "cases": {
+  "catalog-1440": {
+   "colsComputed": 6,
+   "itemCount": 24,
+   "rowCounts": [
+    6,
+    6,
+    6,
+    6
+   ],
+   "lastRowCount": 6,
+   "lastRowFull": true,
+   "allRowsFull": true,
+   "page": "1 / 26",
+   "countText": "全图鉴 622 项，这一页 24 项",
+   "kind": "catalog",
+   "total": "622",
+   "gridTemplateColumns": "186px 186px 186px 186px 186px 186px",
+   "scrollW": 1440,
+   "clientW": 1440,
+   "cardsWithLevel": 24,
+   "cardsWithOwnedSummary": 24,
+   "firstCards": [
+    {
+     "select": "pet_000001",
+     "text": "喵喵 🌿草系 Lv.60 定位：回复 你的：Lv.60 · 性格 稳重 · 相当好的天分",
+     "level": "Lv.60",
+     "owned": "你的：Lv.60 · 性格 稳重 · 相当好的天分"
+    },
+    {
+     "select": "pet_000002",
+     "text": "水蓝蓝 💧水系 Lv.60 定位：辅助 你的：Lv.60 · 性格 稳重 · 一般般的天分",
+     "level": "Lv.60",
+     "owned": "你的：Lv.60 · 性格 稳重 · 一般般的天分"
+    },
+    {
+     "select": "pet_000003",
+     "text": "火花 🔥火系 Lv.60 定位：回复 你的：Lv.60 · 性格 悠闲 · 相当好的天分",
+     "level": "Lv.60",
+     "owned": "你的：Lv.60 · 性格 悠闲 · 相当好的天分"
+    },
+    {
+     "select": "pet_000004",
+     "text": "迪莫 ✨光系 Lv.60 定位：辅助 你的：Lv.60 · 性格 专注 · 相当好的天分",
+     "level": "Lv.60",
+     "owned": "你的：Lv.60 · 性格 专注 · 相当好的天分"
+    }
+   ]
+  },
+  "mine-1440": {
+   "drawerCount": 24,
+   "rows": [
+    {
+     "species": "pet_000001",
+     "count": "1",
+     "head": "喵喵 草系",
+     "individuals": [
+      {
+       "id": "own-0001",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "喵喵",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 稳重",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "相当好的天分",
+         "state": "known",
+         "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：生命、魔攻、速度；性格长处是物防）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 稳重 相当好的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000002",
+     "count": "1",
+     "head": "水蓝蓝 水系",
+     "individuals": [
+      {
+       "id": "own-0002",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "水蓝蓝",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 稳重",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "一般般的天分",
+         "state": "known",
+         "title": "天分（一般般的天分）：一般般的天分：六项资质里只有一条被激活。（被激活的是：速度）；性格长处是物防（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：辅助 Lv.60 性格 稳重 一般般的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000003",
+     "count": "1",
+     "head": "火花 火系",
+     "individuals": [
+      {
+       "id": "own-0003",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "火花",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 悠闲",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "相当好的天分",
+         "state": "known",
+         "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、魔攻、速度；性格长处是物防）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 悠闲 相当好的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000004",
+     "count": "1",
+     "head": "迪莫 光系",
+     "individuals": [
+      {
+       "id": "own-0004",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "迪莫",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 专注",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "相当好的天分",
+         "state": "known",
+         "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、物防、魔防；性格长处是魔攻）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：辅助 Lv.60 性格 专注 相当好的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000005",
+     "count": "1",
+     "head": "水灵 水系",
+     "individuals": [
+      {
+       "id": "own-0005",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "水灵",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 坦率",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "相当好的天分",
+         "state": "known",
+         "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：生命、物攻、魔防；性格长处是物防）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：坦克 Lv.60 性格 坦率 相当好的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000006",
+     "count": "1",
+     "head": "火神 火系",
+     "individuals": [
+      {
+       "id": "own-0006",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "火神",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 专注",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "还不错的天分",
+         "state": "known",
+         "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：物防、速度）；性格长处是魔攻（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：输出 Lv.60 性格 专注 还不错的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000007",
+     "count": "1",
+     "head": "魔力猫 草系",
+     "individuals": [
+      {
+       "id": "own-0007",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "魔力猫",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 悠闲",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "了不起的天分",
+         "state": "known",
+         "title": "天分（了不起的天分）：了不起的天分：六项资质里有三条被激活，而且性格加成的那一条正好是其中一条。（被激活的是：物防、魔防、速度；性格长处是物防）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：坦克 Lv.60 性格 悠闲 了不起的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000008",
+     "count": "1",
+     "head": "草头鸭 草系",
+     "individuals": [
+      {
+       "id": "own-0008",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "草头鸭",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 调皮",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "相当好的天分",
+         "state": "known",
+         "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：魔攻、魔防、速度；性格长处是物攻）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 调皮 相当好的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000009",
+     "count": "1",
+     "head": "恶魔叮 恶系｜翼系",
+     "individuals": [
+      {
+       "id": "own-0009",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "恶魔叮",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 聪明",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "了不起的天分",
+         "state": "known",
+         "title": "天分（了不起的天分）：了不起的天分：六项资质里有三条被激活，而且性格加成的那一条正好是其中一条。（被激活的是：魔攻、魔防、速度；性格长处是魔攻）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 聪明 了不起的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000010",
+     "count": "1",
+     "head": "恶魔狼 恶系",
+     "individuals": [
+      {
+       "id": "own-0010",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "恶魔狼",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 温顺",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "一般般的天分",
+         "state": "known",
+         "title": "天分（一般般的天分）：一般般的天分：六项资质里只有一条被激活。（被激活的是：魔攻）；性格长处是魔防（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 温顺 一般般的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000011",
+     "count": "1",
+     "head": "鸭吉吉（蓬松的样子） 普通系",
+     "individuals": [
+      {
+       "id": "own-0011",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "鸭吉吉（蓬松的样子）",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 忧郁",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "还不错的天分",
+         "state": "known",
+         "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：生命、速度）；性格长处是生命（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 忧郁 还不错的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000012",
+     "count": "1",
+     "head": "铠甲虫 虫系",
+     "individuals": [
+      {
+       "id": "own-0012",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "铠甲虫",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 懒散",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "了不起的天分",
+         "state": "known",
+         "title": "天分（了不起的天分）：了不起的天分：六项资质里有三条被激活，而且性格加成的那一条正好是其中一条。（被激活的是：物防、魔防、速度；性格长处是物防）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 懒散 了不起的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000013",
+     "count": "1",
+     "head": "阿米亚特 地系",
+     "individuals": [
+      {
+       "id": "own-0013",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "阿米亚特",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 害羞",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "相当好的天分",
+         "state": "known",
+         "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：生命、魔攻、速度；性格长处是魔防）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 害羞 相当好的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000014",
+     "count": "1",
+     "head": "阿米樱 地系",
+     "individuals": [
+      {
+       "id": "own-0014",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "阿米樱",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 懒散",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "相当好的天分",
+         "state": "known",
+         "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：生命、魔攻、速度；性格长处是物防）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 懒散 相当好的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000015",
+     "count": "1",
+     "head": "罗隐 地系｜恶系",
+     "individuals": [
+      {
+       "id": "own-0015",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "罗隐",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 坦率",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "还不错的天分",
+         "state": "known",
+         "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：魔攻、物防）；性格长处是物防（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 坦率 还不错的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000016",
+     "count": "1",
+     "head": "蹦蹦种子（海神球形态） 草系｜毒系",
+     "individuals": [
+      {
+       "id": "own-0016",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "蹦蹦种子（海神球形态）",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 懒散",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "还不错的天分",
+         "state": "known",
+         "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：生命、速度）；性格长处是物防（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 懒散 还不错的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000017",
+     "count": "1",
+     "head": "蹦蹦草（海神球形态） 草系｜毒系",
+     "individuals": [
+      {
+       "id": "own-0017",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "蹦蹦草（海神球形态）",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 坦率",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "还不错的天分",
+         "state": "known",
+         "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：魔攻、魔防）；性格长处是物防（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 坦率 还不错的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000018",
+     "count": "1",
+     "head": "蹦蹦花（海神球形态） 草系｜毒系",
+     "individuals": [
+      {
+       "id": "own-0018",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "蹦蹦花（海神球形态）",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 冷静",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "相当好的天分",
+         "state": "known",
+         "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、物防、魔防；性格长处是魔攻）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 冷静 相当好的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000019",
+     "count": "1",
+     "head": "地鼠（枯水期的样子） 地系",
+     "individuals": [
+      {
+       "id": "own-0019",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "地鼠（枯水期的样子）",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 忧郁",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "还不错的天分",
+         "state": "known",
+         "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：魔攻、魔防）；性格长处是生命（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：辅助 Lv.60 性格 忧郁 还不错的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000020",
+     "count": "1",
+     "head": "遁鼠（枯水期的样子） 地系",
+     "individuals": [
+      {
+       "id": "own-0020",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "遁鼠（枯水期的样子）",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 粗心",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "相当好的天分",
+         "state": "known",
+         "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、魔攻、魔防；性格长处是生命）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：辅助 Lv.60 性格 粗心 相当好的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000021",
+     "count": "1",
+     "head": "遁地鼠（枯水期的样子） 地系",
+     "individuals": [
+      {
+       "id": "own-0021",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "遁地鼠（枯水期的样子）",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 聪明",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "还不错的天分",
+         "state": "known",
+         "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：魔攻、速度）；性格长处是魔攻（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：输出 Lv.60 性格 聪明 还不错的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000022",
+     "count": "1",
+     "head": "喵呜 草系",
+     "individuals": [
+      {
+       "id": "own-0022",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "喵呜",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 急躁",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "了不起的天分",
+         "state": "known",
+         "title": "天分（了不起的天分）：了不起的天分：六项资质里有三条被激活，而且性格加成的那一条正好是其中一条。（被激活的是：生命、物攻、速度；性格长处是速度）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 急躁 了不起的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000023",
+     "count": "1",
+     "head": "绿草精灵 草系｜幻系",
+     "individuals": [
+      {
+       "id": "own-0023",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "绿草精灵",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 忧郁",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "一般般的天分",
+         "state": "known",
+         "title": "天分（一般般的天分）：一般般的天分：六项资质里只有一条被激活。（被激活的是：生命）；性格长处是生命（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 忧郁 一般般的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000024",
+     "count": "1",
+     "head": "蒲公英娃娃 草系｜萌系",
+     "individuals": [
+      {
+       "id": "own-0024",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "蒲公英娃娃",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 莽撞",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "还不错的天分",
+         "state": "known",
+         "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：生命、物防）；性格长处是速度（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：辅助 Lv.60 性格 莽撞 还不错的天分 ★ 已收藏"
+      }
+     ]
+    }
+   ],
+   "scrollW": 1440,
+   "clientW": 1440
+  },
+  "detail-1440": {
+   "viewport": {
+    "w": 1440,
+    "h": 900
+   },
+   "pet": "own-0004",
+   "rendered": "server",
+   "twoColumn": {
+    "gridTemplateColumns": "340px 810px",
+    "tracks": 2
+   },
+   "head": {
+    "x": 138,
+    "y": 167,
+    "w": 340,
+    "h": 360
+   },
+   "summary": {
+    "rect": {
+     "x": 138,
+     "y": 167,
+     "w": 340,
+     "h": 360
+    },
+    "text": "迪莫 等级Lv.60 性格 专注 资质 生命 0 / 物攻 7 / 魔攻 0 / 物防 10 / 魔防 7 / 速度 0 天分档位 相当好的天分 相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、物防、魔防；性格长处是魔攻） 刷新天分记录 还剩 3 次（性格还剩 3 次）"
+   },
+   "headText": "迪莫 等级Lv.60 性格 专注 资质 生命 0 / 物攻 7 / 魔攻 0 / 物防 10 / 魔防 7 / 速度 0 天分档位 相当好的天分 相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、物防、魔防；性格长处是魔攻） 刷新天分记录 还剩 3 次（性格还剩 3 次）",
+   "levelChip": {
+    "text": "等级Lv.60",
+    "rect": {
+     "x": 151,
+     "y": 252,
+     "w": 84,
+     "h": 25
+    }
+   },
+   "qualification": {
+    "text": "资质 生命 0 / 物攻 7 / 魔攻 0 / 物防 10 / 魔防 7 / 速度 0",
+    "rect": {
+     "x": 151,
+     "y": 323,
+     "w": 314,
+     "h": 53
+    }
+   },
+   "tier": {
+    "text": "天分档位 相当好的天分 相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、物防、魔防；性格长处是魔攻）",
+    "rect": {
+     "x": 151,
+     "y": 382,
+     "w": 314,
+     "h": 89
+    }
+   },
+   "ledger": {
+    "text": "刷新天分记录 还剩 3 次（性格还剩 3 次）",
+    "rect": {
+     "x": 151,
+     "y": 477,
+     "w": 314,
+     "h": 32
+    }
+   },
+   "tierStatus": "tier",
+   "talentRaw": "生命 0 / 物攻 7 / 魔攻 0 / 物防 10 / 魔防 7 / 速度 0",
+   "tierRaw": "相当好的天分",
+   "ledgerRaw": "还剩 3 次（性格还剩 3 次）",
+   "conflict": null,
+   "remedy": null,
+   "adoptButton": false,
+   "sharedNote": null,
+   "actionsText": "刷新性格（还剩 3 次） 刷新天分（还剩 3 次） 带上它去配队 ☆ 收藏",
+   "movesetCount": 0,
+   "moveset": [],
+   "slotCount": 4,
+   "slots": [
+    {
+     "state": "current",
+     "text": "第 1 个 光刃 现在带着的 系别 光系 · 类别 攻击 · 耗能 4 · 必要威力 120 效果：对敌方精灵造成物理伤害。 引擎：这一招只有伤害，按威力结算 —— 特效那一层没有别的东西。"
+    },
+    {
+     "state": "current",
+     "text": "第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+    },
+    {
+     "state": "current",
+     "text": "第 3 个 棘突 现在带着的 系别 草系 · 类别 攻击 · 耗能 3 · 必要威力 100 效果：对敌方精灵造成魔法伤害。 引擎：这一招只有伤害，按威力结算 —— 特效那一层没有别的东西。"
+    },
+    {
+     "state": "current",
+     "text": "第 4 个 抽枝 现在带着的 系别 草系 · 类别 攻击 · 耗能 4 · 必要威力 90 效果：造成物伤，应对状态：自己回复50%生命和5能量。 · 触发：应对状态：自己回复50%生命和5能量 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+    }
+   ],
+   "slotHeadsInText": 4,
+   "loadoutPanel": {
+    "rect": {
+     "x": 492,
+     "y": 177,
+     "w": 810,
+     "h": 506
+    },
+    "heading": "当前四个技能",
+    "text": "当前四个技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 光刃 现在带着的 系别 光系 · 类别 攻击 · 耗能 4 · 必要威力 120 效果：对敌方精灵造成物理伤害。 引擎：这一招只有伤害，按威力结算 —— 特效那一层没有别的东西。 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 3 个 棘突 现在带着的 系别 草系 · 类别 攻击 · 耗能 3 · 必要威力 100 效果：对敌方精灵造成魔法伤害。 引擎：这一招只有伤害，按威力结算 —— 特效那一层没有别的东西。 第 4 个 抽枝 现在带着的 系别 草系 · 类别 攻击 · 耗能 4 · 必要威力 90 效果：造成物伤，应对状态：自己回复50%生命和5能量。 · 触发：应对状态：自己回复50%生命和5能量 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 看它能学什么"
+   },
+   "loadoutNote": "这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。",
+   "status": null,
+   "poolChipCount": 0,
+   "poolSearch": false,
+   "poolSample": [],
+   "fourSkillsInFirstScreen": true,
+   "scrollW": 1440,
+   "clientW": 1440,
+   "scrollH": 994,
+   "bodyText": "小芽 · 精灵盒子 全部精灵 / 我的盒子 ← 返回首页 ⚔ 开始 PVP 全图鉴 622 条记录 重置筛选 关于这一页（来源与快照） ✦ 小芽 ← 返回精灵盒子 迪莫 · 详情 迪莫 等级Lv.60 性格 专注 资质 生命 0 / 物攻 7 / 魔攻 0 / 物防 10 / 魔防 7 / 速度 0 天分档位 相当好的天分 相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、物防、魔防；性格长处是魔攻） 刷新天分记录 还剩 3 次（性格还剩 3 次） 刷新性格（还剩 3 次） 刷新天分（还剩 3 次） 带上它去配队 ☆ 收藏 当前四个技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 光刃 现在带着的 系别 光系 · 类别 攻击 · 耗能 4 · 必要威力 120 效果：对敌方精灵造成物理伤害。 引擎：这一招只有伤害，按威力结算 —— 特效那一层没有别的东西。 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 3 个 棘突 现在带着的 系别 草系 · 类别 攻击 · 耗能 3 · 必要威力 100 效果：对敌方精灵造成魔法伤害。 引擎：这一招只有伤害，按威力结算 —— 特效那一层没有别的东西。 第 4 个 抽枝 现在带着的 系别 草系 · 类别 攻击 · 耗能 4 · 必要威力 90 效果：造成物伤，应对状态：自己回复50%生命和5能量。 · 触发：应对状态：自己回复50%生命和5能量 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 看它能学什么 六维（60 级 · 估算） 推导值 生命 374 种族 120 物攻 287 种族 80+7 物防 342 种族 105+10 魔攻 158 种族 80 魔防 314 种族 105+7 速度 161 种族 92 这是推导值（估算），不是游戏里的成品数值：主数按 60 级公式换算，前提是「60 级 · 默认 5 星 · 零突破」这三条（这套换算还没校准，前提也没在游戏里核验过）。下面一行是它的两个输入：种族值（静态登记）与这一只的天分（黄色）。引擎对战里用的不是这一份 —— 战斗里的数值按**种族值**算：引擎只吃种族值，不看性格 / 资质 / 天分（这几样在引擎里根本没有对应概念；开局传下去的是物种与四个技能）。所以这一栏不能当结论用；真正会带进对局的是这一只的四个技能。"
+  },
+  "catalog-390": {
+   "colsComputed": 2,
+   "itemCount": 24,
+   "rowCounts": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "lastRowCount": 2,
+   "lastRowFull": true,
+   "allRowsFull": true,
+   "page": "1 / 26",
+   "countText": "全图鉴 622 项，这一页 24 项",
+   "kind": "catalog",
+   "total": "622",
+   "gridTemplateColumns": "163px 163px",
+   "scrollW": 390,
+   "clientW": 390,
+   "cardsWithLevel": 24,
+   "cardsWithOwnedSummary": 24,
+   "firstCards": [
+    {
+     "select": "pet_000001",
+     "text": "喵喵 🌿草系 Lv.60 定位：回复 你的：Lv.60 · 性格 稳重 · 相当好的天分",
+     "level": "Lv.60",
+     "owned": "你的：Lv.60 · 性格 稳重 · 相当好的天分"
+    },
+    {
+     "select": "pet_000002",
+     "text": "水蓝蓝 💧水系 Lv.60 定位：辅助 你的：Lv.60 · 性格 稳重 · 一般般的天分",
+     "level": "Lv.60",
+     "owned": "你的：Lv.60 · 性格 稳重 · 一般般的天分"
+    },
+    {
+     "select": "pet_000003",
+     "text": "火花 🔥火系 Lv.60 定位：回复 你的：Lv.60 · 性格 悠闲 · 相当好的天分",
+     "level": "Lv.60",
+     "owned": "你的：Lv.60 · 性格 悠闲 · 相当好的天分"
+    },
+    {
+     "select": "pet_000004",
+     "text": "迪莫 ✨光系 Lv.60 定位：辅助 你的：Lv.60 · 性格 专注 · 相当好的天分",
+     "level": "Lv.60",
+     "owned": "你的：Lv.60 · 性格 专注 · 相当好的天分"
+    }
+   ]
+  },
+  "mine-390": {
+   "drawerCount": 24,
+   "rows": [
+    {
+     "species": "pet_000001",
+     "count": "1",
+     "head": "喵喵 草系",
+     "individuals": [
+      {
+       "id": "own-0001",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "喵喵",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 稳重",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "相当好的天分",
+         "state": "known",
+         "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：生命、魔攻、速度；性格长处是物防）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 稳重 相当好的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000002",
+     "count": "1",
+     "head": "水蓝蓝 水系",
+     "individuals": [
+      {
+       "id": "own-0002",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "水蓝蓝",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 稳重",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "一般般的天分",
+         "state": "known",
+         "title": "天分（一般般的天分）：一般般的天分：六项资质里只有一条被激活。（被激活的是：速度）；性格长处是物防（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：辅助 Lv.60 性格 稳重 一般般的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000003",
+     "count": "1",
+     "head": "火花 火系",
+     "individuals": [
+      {
+       "id": "own-0003",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "火花",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 悠闲",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "相当好的天分",
+         "state": "known",
+         "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、魔攻、速度；性格长处是物防）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 悠闲 相当好的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000004",
+     "count": "1",
+     "head": "迪莫 光系",
+     "individuals": [
+      {
+       "id": "own-0004",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "迪莫",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 专注",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "相当好的天分",
+         "state": "known",
+         "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、物防、魔防；性格长处是魔攻）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：辅助 Lv.60 性格 专注 相当好的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000005",
+     "count": "1",
+     "head": "水灵 水系",
+     "individuals": [
+      {
+       "id": "own-0005",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "水灵",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 坦率",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "相当好的天分",
+         "state": "known",
+         "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：生命、物攻、魔防；性格长处是物防）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：坦克 Lv.60 性格 坦率 相当好的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000006",
+     "count": "1",
+     "head": "火神 火系",
+     "individuals": [
+      {
+       "id": "own-0006",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "火神",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 专注",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "还不错的天分",
+         "state": "known",
+         "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：物防、速度）；性格长处是魔攻（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：输出 Lv.60 性格 专注 还不错的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000007",
+     "count": "1",
+     "head": "魔力猫 草系",
+     "individuals": [
+      {
+       "id": "own-0007",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "魔力猫",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 悠闲",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "了不起的天分",
+         "state": "known",
+         "title": "天分（了不起的天分）：了不起的天分：六项资质里有三条被激活，而且性格加成的那一条正好是其中一条。（被激活的是：物防、魔防、速度；性格长处是物防）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：坦克 Lv.60 性格 悠闲 了不起的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000008",
+     "count": "1",
+     "head": "草头鸭 草系",
+     "individuals": [
+      {
+       "id": "own-0008",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "草头鸭",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 调皮",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "相当好的天分",
+         "state": "known",
+         "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：魔攻、魔防、速度；性格长处是物攻）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 调皮 相当好的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000009",
+     "count": "1",
+     "head": "恶魔叮 恶系｜翼系",
+     "individuals": [
+      {
+       "id": "own-0009",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "恶魔叮",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 聪明",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "了不起的天分",
+         "state": "known",
+         "title": "天分（了不起的天分）：了不起的天分：六项资质里有三条被激活，而且性格加成的那一条正好是其中一条。（被激活的是：魔攻、魔防、速度；性格长处是魔攻）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 聪明 了不起的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000010",
+     "count": "1",
+     "head": "恶魔狼 恶系",
+     "individuals": [
+      {
+       "id": "own-0010",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "恶魔狼",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 温顺",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "一般般的天分",
+         "state": "known",
+         "title": "天分（一般般的天分）：一般般的天分：六项资质里只有一条被激活。（被激活的是：魔攻）；性格长处是魔防（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 温顺 一般般的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000011",
+     "count": "1",
+     "head": "鸭吉吉（蓬松的样子） 普通系",
+     "individuals": [
+      {
+       "id": "own-0011",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "鸭吉吉（蓬松的样子）",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 忧郁",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "还不错的天分",
+         "state": "known",
+         "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：生命、速度）；性格长处是生命（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 忧郁 还不错的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000012",
+     "count": "1",
+     "head": "铠甲虫 虫系",
+     "individuals": [
+      {
+       "id": "own-0012",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "铠甲虫",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 懒散",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "了不起的天分",
+         "state": "known",
+         "title": "天分（了不起的天分）：了不起的天分：六项资质里有三条被激活，而且性格加成的那一条正好是其中一条。（被激活的是：物防、魔防、速度；性格长处是物防）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 懒散 了不起的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000013",
+     "count": "1",
+     "head": "阿米亚特 地系",
+     "individuals": [
+      {
+       "id": "own-0013",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "阿米亚特",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 害羞",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "相当好的天分",
+         "state": "known",
+         "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：生命、魔攻、速度；性格长处是魔防）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 害羞 相当好的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000014",
+     "count": "1",
+     "head": "阿米樱 地系",
+     "individuals": [
+      {
+       "id": "own-0014",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "阿米樱",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 懒散",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "相当好的天分",
+         "state": "known",
+         "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：生命、魔攻、速度；性格长处是物防）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 懒散 相当好的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000015",
+     "count": "1",
+     "head": "罗隐 地系｜恶系",
+     "individuals": [
+      {
+       "id": "own-0015",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "罗隐",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 坦率",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "还不错的天分",
+         "state": "known",
+         "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：魔攻、物防）；性格长处是物防（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 坦率 还不错的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000016",
+     "count": "1",
+     "head": "蹦蹦种子（海神球形态） 草系｜毒系",
+     "individuals": [
+      {
+       "id": "own-0016",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "蹦蹦种子（海神球形态）",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 懒散",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "还不错的天分",
+         "state": "known",
+         "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：生命、速度）；性格长处是物防（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 懒散 还不错的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000017",
+     "count": "1",
+     "head": "蹦蹦草（海神球形态） 草系｜毒系",
+     "individuals": [
+      {
+       "id": "own-0017",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "蹦蹦草（海神球形态）",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 坦率",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "还不错的天分",
+         "state": "known",
+         "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：魔攻、魔防）；性格长处是物防（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 坦率 还不错的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000018",
+     "count": "1",
+     "head": "蹦蹦花（海神球形态） 草系｜毒系",
+     "individuals": [
+      {
+       "id": "own-0018",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "蹦蹦花（海神球形态）",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 冷静",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "相当好的天分",
+         "state": "known",
+         "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、物防、魔防；性格长处是魔攻）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 冷静 相当好的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000019",
+     "count": "1",
+     "head": "地鼠（枯水期的样子） 地系",
+     "individuals": [
+      {
+       "id": "own-0019",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "地鼠（枯水期的样子）",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 忧郁",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "还不错的天分",
+         "state": "known",
+         "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：魔攻、魔防）；性格长处是生命（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：辅助 Lv.60 性格 忧郁 还不错的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000020",
+     "count": "1",
+     "head": "遁鼠（枯水期的样子） 地系",
+     "individuals": [
+      {
+       "id": "own-0020",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "遁鼠（枯水期的样子）",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 粗心",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "相当好的天分",
+         "state": "known",
+         "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、魔攻、魔防；性格长处是生命）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：辅助 Lv.60 性格 粗心 相当好的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000021",
+     "count": "1",
+     "head": "遁地鼠（枯水期的样子） 地系",
+     "individuals": [
+      {
+       "id": "own-0021",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "遁地鼠（枯水期的样子）",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 聪明",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "还不错的天分",
+         "state": "known",
+         "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：魔攻、速度）；性格长处是魔攻（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "☆\n收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：输出 Lv.60 性格 聪明 还不错的天分 ☆ 收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000022",
+     "count": "1",
+     "head": "喵呜 草系",
+     "individuals": [
+      {
+       "id": "own-0022",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "喵呜",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 急躁",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "了不起的天分",
+         "state": "known",
+         "title": "天分（了不起的天分）：了不起的天分：六项资质里有三条被激活，而且性格加成的那一条正好是其中一条。（被激活的是：生命、物攻、速度；性格长处是速度）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 急躁 了不起的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000023",
+     "count": "1",
+     "head": "绿草精灵 草系｜幻系",
+     "individuals": [
+      {
+       "id": "own-0023",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "绿草精灵",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 忧郁",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "一般般的天分",
+         "state": "known",
+         "title": "天分（一般般的天分）：一般般的天分：六项资质里只有一条被激活。（被激活的是：生命）；性格长处是生命（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：回复 Lv.60 性格 忧郁 一般般的天分 ★ 已收藏"
+      }
+     ]
+    },
+    {
+     "species": "pet_000024",
+     "count": "1",
+     "head": "蒲公英娃娃 草系｜萌系",
+     "individuals": [
+      {
+       "id": "own-0024",
+       "multi": "no",
+       "label": null,
+       "ordinal": null,
+       "source": null,
+       "cardVisible": true,
+       "avatarArtVisible": true,
+       "avatarText": null,
+       "nameVisible": false,
+       "name": "蒲公英娃娃",
+       "level": "Lv.60",
+       "chips": [
+        {
+         "text": "性格 莽撞",
+         "state": "known",
+         "title": null
+        },
+        {
+         "text": "还不错的天分",
+         "state": "known",
+         "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：生命、物防）；性格长处是速度（这两档不看它）"
+        }
+       ],
+       "actions": [
+        {
+         "text": "★\n已收藏",
+         "detail": null,
+         "team": null
+        }
+       ],
+       "text": "定位：辅助 Lv.60 性格 莽撞 还不错的天分 ★ 已收藏"
+      }
+     ]
+    }
+   ],
+   "scrollW": 390,
+   "clientW": 390
+  },
+  "detail-390": {
+   "viewport": {
+    "w": 390,
+    "h": 844
+   },
+   "pet": "own-0004",
+   "rendered": "server",
+   "twoColumn": {
+    "gridTemplateColumns": "334px",
+    "tracks": 1
+   },
+   "head": {
+    "x": 28,
+    "y": 244,
+    "w": 334,
+    "h": 360
+   },
+   "summary": {
+    "rect": {
+     "x": 28,
+     "y": 244,
+     "w": 334,
+     "h": 360
+    },
+    "text": "迪莫 等级Lv.60 性格 专注 资质 生命 0 / 物攻 7 / 魔攻 0 / 物防 10 / 魔防 7 / 速度 0 天分档位 相当好的天分 相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、物防、魔防；性格长处是魔攻） 刷新天分记录 还剩 3 次（性格还剩 3 次）"
+   },
+   "headText": "迪莫 等级Lv.60 性格 专注 资质 生命 0 / 物攻 7 / 魔攻 0 / 物防 10 / 魔防 7 / 速度 0 天分档位 相当好的天分 相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、物防、魔防；性格长处是魔攻） 刷新天分记录 还剩 3 次（性格还剩 3 次）",
+   "levelChip": {
+    "text": "等级Lv.60",
+    "rect": {
+     "x": 41,
+     "y": 329,
+     "w": 84,
+     "h": 25
+    }
+   },
+   "qualification": {
+    "text": "资质 生命 0 / 物攻 7 / 魔攻 0 / 物防 10 / 魔防 7 / 速度 0",
+    "rect": {
+     "x": 41,
+     "y": 400,
+     "w": 308,
+     "h": 53
+    }
+   },
+   "tier": {
+    "text": "天分档位 相当好的天分 相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、物防、魔防；性格长处是魔攻）",
+    "rect": {
+     "x": 41,
+     "y": 459,
+     "w": 308,
+     "h": 89
+    }
+   },
+   "ledger": {
+    "text": "刷新天分记录 还剩 3 次（性格还剩 3 次）",
+    "rect": {
+     "x": 41,
+     "y": 554,
+     "w": 308,
+     "h": 32
+    }
+   },
+   "tierStatus": "tier",
+   "talentRaw": "生命 0 / 物攻 7 / 魔攻 0 / 物防 10 / 魔防 7 / 速度 0",
+   "tierRaw": "相当好的天分",
+   "ledgerRaw": "还剩 3 次（性格还剩 3 次）",
+   "conflict": null,
+   "remedy": null,
+   "adoptButton": false,
+   "sharedNote": null,
+   "actionsText": "刷新性格（还剩 3 次） 刷新天分（还剩 3 次） 带上它去配队 ☆ 收藏",
+   "movesetCount": 0,
+   "moveset": [],
+   "slotCount": 4,
+   "slots": [
+    {
+     "state": "current",
+     "text": "第 1 个 光刃 现在带着的 系别 光系 · 类别 攻击 · 耗能 4 · 必要威力 120 效果：对敌方精灵造成物理伤害。 引擎：这一招只有伤害，按威力结算 —— 特效那一层没有别的东西。"
+    },
+    {
+     "state": "current",
+     "text": "第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+    },
+    {
+     "state": "current",
+     "text": "第 3 个 棘突 现在带着的 系别 草系 · 类别 攻击 · 耗能 3 · 必要威力 100 效果：对敌方精灵造成魔法伤害。 引擎：这一招只有伤害，按威力结算 —— 特效那一层没有别的东西。"
+    },
+    {
+     "state": "current",
+     "text": "第 4 个 抽枝 现在带着的 系别 草系 · 类别 攻击 · 耗能 4 · 必要威力 90 效果：造成物伤，应对状态：自己回复50%生命和5能量。 · 触发：应对状态：自己回复50%生命和5能量 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+    }
+   ],
+   "slotHeadsInText": 4,
+   "loadoutPanel": {
+    "rect": {
+     "x": 28,
+     "y": 746,
+     "w": 334,
+     "h": 623
+    },
+    "heading": "当前四个技能",
+    "text": "当前四个技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 光刃 现在带着的 系别 光系 · 类别 攻击 · 耗能 4 · 必要威力 120 效果：对敌方精灵造成物理伤害。 引擎：这一招只有伤害，按威力结算 —— 特效那一层没有别的东西。 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 3 个 棘突 现在带着的 系别 草系 · 类别 攻击 · 耗能 3 · 必要威力 100 效果：对敌方精灵造成魔法伤害。 引擎：这一招只有伤害，按威力结算 —— 特效那一层没有别的东西。 第 4 个 抽枝 现在带着的 系别 草系 · 类别 攻击 · 耗能 4 · 必要威力 90 效果：造成物伤，应对状态：自己回复50%生命和5能量。 · 触发：应对状态：自己回复50%生命和5能量 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 看它能学什么"
+   },
+   "loadoutNote": "这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。",
+   "status": null,
+   "poolChipCount": 0,
+   "poolSearch": false,
+   "poolSample": [],
+   "fourSkillsInFirstScreen": true,
+   "scrollW": 390,
+   "clientW": 390,
+   "scrollH": 1829,
+   "bodyText": "小芽 · 精灵盒子 全部精灵 / 我的盒子 ← 返回首页 ⚔ 开始 PVP 全图鉴 622 条记录 重置筛选 关于这一页（来源与快照） ✦ 小芽 ← 返回精灵盒子 迪莫 · 详情 迪莫 等级Lv.60 性格 专注 资质 生命 0 / 物攻 7 / 魔攻 0 / 物防 10 / 魔防 7 / 速度 0 天分档位 相当好的天分 相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、物防、魔防；性格长处是魔攻） 刷新天分记录 还剩 3 次（性格还剩 3 次） 刷新性格（还剩 3 次） 刷新天分（还剩 3 次） 带上它去配队 ☆ 收藏 当前四个技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 光刃 现在带着的 系别 光系 · 类别 攻击 · 耗能 4 · 必要威力 120 效果：对敌方精灵造成物理伤害。 引擎：这一招只有伤害，按威力结算 —— 特效那一层没有别的东西。 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 3 个 棘突 现在带着的 系别 草系 · 类别 攻击 · 耗能 3 · 必要威力 100 效果：对敌方精灵造成魔法伤害。 引擎：这一招只有伤害，按威力结算 —— 特效那一层没有别的东西。 第 4 个 抽枝 现在带着的 系别 草系 · 类别 攻击 · 耗能 4 · 必要威力 90 效果：造成物伤，应对状态：自己回复50%生命和5能量。 · 触发：应对状态：自己回复50%生命和5能量 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 看它能学什么 六维（60 级 · 估算） 推导值 生命 374 种族 120 物攻 287 种族 80+7 物防 342 种族 105+10 魔攻 158 种族 80 魔防 314 种族 105+7 速度 161 种族 92 这是推导值（估算），不是游戏里的成品数值：主数按 60 级公式换算，前提是「60 级 · 默认 5 星 · 零突破」这三条（这套换算还没校准，前提也没在游戏里核验过）。下面一行是它的两个输入：种族值（静态登记）与这一只的天分（黄色）。引擎对战里用的不是这一份 —— 战斗里的数值按**种族值**算：引擎只吃种族值，不看性格 / 资质 / 天分（这几样在引擎里根本没有对应概念；开局传下去的是物种与四个技能）。所以这一栏不能当结论用；真正会带进对局的是这一只的四个技能。"
+  },
+  "isolated-legacy": {
+   "list": {
+    "drawerCount": 24,
+    "rows": [
+     {
+      "species": "pet_000001",
+      "count": "1",
+      "head": "喵喵 草系",
+      "individuals": [
+       {
+        "id": "own-0001",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "喵喵",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 稳重",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "相当好的天分",
+          "state": "known",
+          "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：生命、魔攻、速度；性格长处是物防）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "★\n已收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：回复 Lv.60 性格 稳重 相当好的天分 ★ 已收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000002",
+      "count": "1",
+      "head": "水蓝蓝 水系",
+      "individuals": [
+       {
+        "id": "own-0002",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "水蓝蓝",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 稳重",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "一般般的天分",
+          "state": "known",
+          "title": "天分（一般般的天分）：一般般的天分：六项资质里只有一条被激活。（被激活的是：速度）；性格长处是物防（这两档不看它）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "★\n已收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：辅助 Lv.60 性格 稳重 一般般的天分 ★ 已收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000003",
+      "count": "1",
+      "head": "火花 火系",
+      "individuals": [
+       {
+        "id": "own-0003",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "火花",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 悠闲",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "相当好的天分",
+          "state": "known",
+          "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、魔攻、速度；性格长处是物防）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "☆\n收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：回复 Lv.60 性格 悠闲 相当好的天分 ☆ 收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000004",
+      "count": "1",
+      "head": "迪莫 光系",
+      "individuals": [
+       {
+        "id": "own-0004",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "迪莫",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 专注",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "相当好的天分",
+          "state": "known",
+          "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、物防、魔防；性格长处是魔攻）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "☆\n收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：辅助 Lv.60 性格 专注 相当好的天分 ☆ 收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000005",
+      "count": "1",
+      "head": "水灵 水系",
+      "individuals": [
+       {
+        "id": "own-0005",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "水灵",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 坦率",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "缺 2 项资质",
+          "state": "absent",
+          "title": "天分：缺 魔攻、物防 这 2 项资质 ⇒ 四档判不出来（缺的那几项不知道有没有被激活）。资质：生命 9 / 物攻 7 / 魔防 4 / 速度 3。点开这一只看补救办法"
+         }
+        ],
+        "actions": [
+         {
+          "text": "★\n已收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：坦克 Lv.60 性格 坦率 缺 2 项资质 ★ 已收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000006",
+      "count": "1",
+      "head": "火神 火系",
+      "individuals": [
+       {
+        "id": "own-0006",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "火神",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 专注",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "还不错的天分",
+          "state": "known",
+          "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：物防、速度）；性格长处是魔攻（这两档不看它）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "☆\n收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：输出 Lv.60 性格 专注 还不错的天分 ☆ 收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000007",
+      "count": "1",
+      "head": "魔力猫 草系",
+      "individuals": [
+       {
+        "id": "own-0007",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "魔力猫",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 悠闲",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "了不起的天分",
+          "state": "known",
+          "title": "天分（了不起的天分）：了不起的天分：六项资质里有三条被激活，而且性格加成的那一条正好是其中一条。（被激活的是：物防、魔防、速度；性格长处是物防）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "★\n已收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：坦克 Lv.60 性格 悠闲 了不起的天分 ★ 已收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000008",
+      "count": "1",
+      "head": "草头鸭 草系",
+      "individuals": [
+       {
+        "id": "own-0008",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "草头鸭",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 调皮",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "相当好的天分",
+          "state": "known",
+          "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：魔攻、魔防、速度；性格长处是物攻）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "☆\n收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：回复 Lv.60 性格 调皮 相当好的天分 ☆ 收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000009",
+      "count": "1",
+      "head": "恶魔叮 恶系｜翼系",
+      "individuals": [
+       {
+        "id": "own-0009",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "恶魔叮",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 聪明",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "了不起的天分",
+          "state": "known",
+          "title": "天分（了不起的天分）：了不起的天分：六项资质里有三条被激活，而且性格加成的那一条正好是其中一条。（被激活的是：魔攻、魔防、速度；性格长处是魔攻）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "☆\n收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：回复 Lv.60 性格 聪明 了不起的天分 ☆ 收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000010",
+      "count": "1",
+      "head": "恶魔狼 恶系",
+      "individuals": [
+       {
+        "id": "own-0010",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "恶魔狼",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 温顺",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "一般般的天分",
+          "state": "known",
+          "title": "天分（一般般的天分）：一般般的天分：六项资质里只有一条被激活。（被激活的是：魔攻）；性格长处是魔防（这两档不看它）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "☆\n收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：回复 Lv.60 性格 温顺 一般般的天分 ☆ 收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000011",
+      "count": "1",
+      "head": "鸭吉吉（蓬松的样子） 普通系",
+      "individuals": [
+       {
+        "id": "own-0011",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "鸭吉吉（蓬松的样子）",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 忧郁",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "还不错的天分",
+          "state": "known",
+          "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：生命、速度）；性格长处是生命（这两档不看它）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "★\n已收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：回复 Lv.60 性格 忧郁 还不错的天分 ★ 已收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000012",
+      "count": "1",
+      "head": "铠甲虫 虫系",
+      "individuals": [
+       {
+        "id": "own-0012",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "铠甲虫",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 懒散",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "天分未定档（激活 5 项）",
+          "state": "known",
+          "title": "天分：六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项。资质：生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5。点开这一只看补救办法"
+         }
+        ],
+        "actions": [
+         {
+          "text": "★\n已收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：回复 Lv.60 性格 懒散 天分未定档（激活 5 项） ★ 已收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000013",
+      "count": "1",
+      "head": "阿米亚特 地系",
+      "individuals": [
+       {
+        "id": "own-0013",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "阿米亚特",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 害羞",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "相当好的天分",
+          "state": "known",
+          "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：生命、魔攻、速度；性格长处是魔防）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "☆\n收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：回复 Lv.60 性格 害羞 相当好的天分 ☆ 收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000014",
+      "count": "1",
+      "head": "阿米樱 地系",
+      "individuals": [
+       {
+        "id": "own-0014",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "阿米樱",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 懒散",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "相当好的天分",
+          "state": "known",
+          "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：生命、魔攻、速度；性格长处是物防）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "★\n已收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：回复 Lv.60 性格 懒散 相当好的天分 ★ 已收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000015",
+      "count": "1",
+      "head": "罗隐 地系｜恶系",
+      "individuals": [
+       {
+        "id": "own-0015",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "罗隐",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 坦率",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "还不错的天分",
+          "state": "known",
+          "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：魔攻、物防）；性格长处是物防（这两档不看它）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "★\n已收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：回复 Lv.60 性格 坦率 还不错的天分 ★ 已收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000016",
+      "count": "1",
+      "head": "蹦蹦种子（海神球形态） 草系｜毒系",
+      "individuals": [
+       {
+        "id": "own-0016",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "蹦蹦种子（海神球形态）",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 懒散",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "还不错的天分",
+          "state": "known",
+          "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：生命、速度）；性格长处是物防（这两档不看它）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "☆\n收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：回复 Lv.60 性格 懒散 还不错的天分 ☆ 收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000017",
+      "count": "1",
+      "head": "蹦蹦草（海神球形态） 草系｜毒系",
+      "individuals": [
+       {
+        "id": "own-0017",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "蹦蹦草（海神球形态）",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 坦率",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "还不错的天分",
+          "state": "known",
+          "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：魔攻、魔防）；性格长处是物防（这两档不看它）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "☆\n收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：回复 Lv.60 性格 坦率 还不错的天分 ☆ 收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000018",
+      "count": "1",
+      "head": "蹦蹦花（海神球形态） 草系｜毒系",
+      "individuals": [
+       {
+        "id": "own-0018",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "蹦蹦花（海神球形态）",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 冷静",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "相当好的天分",
+          "state": "known",
+          "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、物防、魔防；性格长处是魔攻）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "☆\n收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：回复 Lv.60 性格 冷静 相当好的天分 ☆ 收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000019",
+      "count": "1",
+      "head": "地鼠（枯水期的样子） 地系",
+      "individuals": [
+       {
+        "id": "own-0019",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "地鼠（枯水期的样子）",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 忧郁",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "还不错的天分",
+          "state": "known",
+          "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：魔攻、魔防）；性格长处是生命（这两档不看它）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "☆\n收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：辅助 Lv.60 性格 忧郁 还不错的天分 ☆ 收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000020",
+      "count": "1",
+      "head": "遁鼠（枯水期的样子） 地系",
+      "individuals": [
+       {
+        "id": "own-0020",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "遁鼠（枯水期的样子）",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 粗心",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "相当好的天分",
+          "state": "known",
+          "title": "天分（相当好的天分）：相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、魔攻、魔防；性格长处是生命）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "☆\n收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：辅助 Lv.60 性格 粗心 相当好的天分 ☆ 收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000021",
+      "count": "1",
+      "head": "遁地鼠（枯水期的样子） 地系",
+      "individuals": [
+       {
+        "id": "own-0021",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "遁地鼠（枯水期的样子）",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 聪明",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "还不错的天分",
+          "state": "known",
+          "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：魔攻、速度）；性格长处是魔攻（这两档不看它）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "☆\n收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：输出 Lv.60 性格 聪明 还不错的天分 ☆ 收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000022",
+      "count": "1",
+      "head": "喵呜 草系",
+      "individuals": [
+       {
+        "id": "own-0022",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "喵呜",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 急躁",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "了不起的天分",
+          "state": "known",
+          "title": "天分（了不起的天分）：了不起的天分：六项资质里有三条被激活，而且性格加成的那一条正好是其中一条。（被激活的是：生命、物攻、速度；性格长处是速度）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "★\n已收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：回复 Lv.60 性格 急躁 了不起的天分 ★ 已收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000023",
+      "count": "1",
+      "head": "绿草精灵 草系｜幻系",
+      "individuals": [
+       {
+        "id": "own-0023",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "绿草精灵",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 忧郁",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "一般般的天分",
+          "state": "known",
+          "title": "天分（一般般的天分）：一般般的天分：六项资质里只有一条被激活。（被激活的是：生命）；性格长处是生命（这两档不看它）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "★\n已收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：回复 Lv.60 性格 忧郁 一般般的天分 ★ 已收藏"
+       }
+      ]
+     },
+     {
+      "species": "pet_000024",
+      "count": "1",
+      "head": "蒲公英娃娃 草系｜萌系",
+      "individuals": [
+       {
+        "id": "own-0024",
+        "multi": "no",
+        "label": null,
+        "ordinal": null,
+        "source": null,
+        "cardVisible": true,
+        "avatarArtVisible": true,
+        "avatarText": null,
+        "nameVisible": false,
+        "name": "蒲公英娃娃",
+        "level": "Lv.60",
+        "chips": [
+         {
+          "text": "性格 莽撞",
+          "state": "known",
+          "title": null
+         },
+         {
+          "text": "还不错的天分",
+          "state": "known",
+          "title": "天分（还不错的天分）：还不错的天分：六项资质里有两条被激活。（被激活的是：生命、物防）；性格长处是速度（这两档不看它）"
+         }
+        ],
+        "actions": [
+         {
+          "text": "★\n已收藏",
+          "detail": null,
+          "team": null
+         }
+        ],
+        "text": "定位：辅助 Lv.60 性格 莽撞 还不错的天分 ★ 已收藏"
+       }
+      ]
+     }
+    ],
+    "scrollW": 1440,
+    "clientW": 1440
+   },
+   "legacyDetail": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pet": "own-0012",
+    "rendered": "server",
+    "twoColumn": {
+     "gridTemplateColumns": "340px 810px",
+     "tracks": 2
+    },
+    "head": {
+     "x": 138,
+     "y": 167,
+     "w": 340,
+     "h": 494
+    },
+    "summary": {
+     "rect": {
+      "x": 138,
+      "y": 167,
+      "w": 340,
+      "h": 494
+     },
+     "text": "铠甲虫 等级Lv.60 性格 懒散 资质 生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5 天分档位 还没定档 六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项 刷新天分记录 还剩 3 次（性格还剩 3 次） 名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：了不起的天分（资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 3 次刷新不动）"
+    },
+    "headText": "铠甲虫 等级Lv.60 性格 懒散 资质 生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5 天分档位 还没定档 六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项 刷新天分记录 还剩 3 次（性格还剩 3 次） 名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：了不起的天分（资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 3 次刷新不动）",
+    "levelChip": {
+     "text": "等级Lv.60",
+     "rect": {
+      "x": 151,
+      "y": 252,
+      "w": 84,
+      "h": 25
+     }
+    },
+    "qualification": {
+     "text": "资质 生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5",
+     "rect": {
+      "x": 151,
+      "y": 323,
+      "w": 314,
+      "h": 53
+     }
+    },
+    "tier": {
+     "text": "天分档位 还没定档 六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项",
+     "rect": {
+      "x": 151,
+      "y": 382,
+      "w": 314,
+      "h": 72
+     }
+    },
+    "ledger": {
+     "text": "刷新天分记录 还剩 3 次（性格还剩 3 次）",
+     "rect": {
+      "x": 151,
+      "y": 460,
+      "w": 314,
+      "h": 32
+     }
+    },
+    "tierStatus": "unresolved",
+    "talentRaw": "生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5",
+    "tierRaw": "还没定档",
+    "ledgerRaw": "还剩 3 次（性格还剩 3 次）",
+    "conflict": "名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：了不起的天分（资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 3 次刷新不动）",
+    "remedy": null,
+    "adoptButton": true,
+    "sharedNote": null,
+    "actionsText": "刷新性格（还剩 3 次） 刷新天分（还剩 3 次） 带上它去配队 ☆ 收藏",
+    "movesetCount": 0,
+    "moveset": [],
+    "slotCount": 4,
+    "slots": [
+     {
+      "state": "current",
+      "text": "第 1 个 啃咬 现在带着的 系别 虫系 · 类别 攻击 · 耗能 0 · 必要威力 40 效果：造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     },
+     {
+      "state": "current",
+      "text": "第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     },
+     {
+      "state": "current",
+      "text": "第 3 个 翅刃 现在带着的 系别 虫系 · 类别 攻击 · 耗能 3 · 必要威力 85 效果：造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。 · 触发：应对状态：改为偷取印记 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     },
+     {
+      "state": "current",
+      "text": "第 4 个 风隐 现在带着的 系别 翼系 · 类别 状态 · 耗能 1 · 威力 不适用（状态类不造成伤害） 效果：敌方和自己均脱离，先手-1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     }
+    ],
+    "slotHeadsInText": 4,
+    "loadoutPanel": {
+     "rect": {
+      "x": 492,
+      "y": 177,
+      "w": 810,
+      "h": 506
+     },
+     "heading": "当前四个技能",
+     "text": "当前四个技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 啃咬 现在带着的 系别 虫系 · 类别 攻击 · 耗能 0 · 必要威力 40 效果：造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 3 个 翅刃 现在带着的 系别 虫系 · 类别 攻击 · 耗能 3 · 必要威力 85 效果：造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。 · 触发：应对状态：改为偷取印记 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 4 个 风隐 现在带着的 系别 翼系 · 类别 状态 · 耗能 1 · 威力 不适用（状态类不造成伤害） 效果：敌方和自己均脱离，先手-1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 看它能学什么"
+    },
+    "loadoutNote": "这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。",
+    "status": null,
+    "poolChipCount": 0,
+    "poolSearch": false,
+    "poolSample": [],
+    "fourSkillsInFirstScreen": true,
+    "scrollW": 1440,
+    "clientW": 1440,
+    "scrollH": 994,
+    "bodyText": "小芽 · 精灵盒子 全部精灵 / 我的盒子 ← 返回首页 ⚔ 开始 PVP 全图鉴 622 条记录 重置筛选 关于这一页（来源与快照） ✦ 小芽 ← 返回精灵盒子 铠甲虫 · 详情 铠甲虫 等级Lv.60 性格 懒散 资质 生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5 天分档位 还没定档 六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项 刷新天分记录 还剩 3 次（性格还剩 3 次） 名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：了不起的天分（资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 3 次刷新不动） 刷新性格（还剩 3 次） 刷新天分（还剩 3 次） 带上它去配队 ☆ 收藏 当前四个技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 啃咬 现在带着的 系别 虫系 · 类别 攻击 · 耗能 0 · 必要威力 40 效果：造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 3 个 翅刃 现在带着的 系别 虫系 · 类别 攻击 · 耗能 3 · 必要威力 85 效果：造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。 · 触发：应对状态：改为偷取印记 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 4 个 风隐 现在带着的 系别 翼系 · 类别 状态 · 耗能 1 · 威力 不适用（状态类不造成伤害） 效果：敌方和自己均脱离，先手-1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 看它能学什么 六维（60 级 · 估算） 推导值 生命 653 种族 122+9 物攻 315 种族 88+8 物防 360 种族 121+7 魔攻 103 种族 39 魔防 243 种族 77+6 速度 242 种族 75+5 这是推导值（估算），不是游戏里的成品数值：主数按 60 级公式换算，前提是「60 级 · 默认 5 星 · 零突破」这三条（这套换算还没校准，前提也没在游戏里核验过）。下面一行是它的两个输入：种族值（静态登记）与这一只的天分（黄色）。引擎对战里用的不是这一份 —— 战斗里的数值按**种族值**算：引擎只吃种族值，不看性格 / 资质 / 天分（这几样在引擎里根本没有对应概念；开局传下去的是物种与四个技能）。所以这一栏不能当结论用；真正会带进对局的是这一只的四个技能。"
+   },
+   "partialDetail": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pet": "own-0005",
+    "rendered": "server",
+    "twoColumn": {
+     "gridTemplateColumns": "340px 810px",
+     "tracks": 2
+    },
+    "head": {
+     "x": 138,
+     "y": 167,
+     "w": 340,
+     "h": 494
+    },
+    "summary": {
+     "rect": {
+      "x": 138,
+      "y": 167,
+      "w": 340,
+      "h": 494
+     },
+     "text": "水灵 等级Lv.60 性格 坦率 资质 生命 9 / 物攻 7 / 魔防 4 / 速度 3 缺 魔攻、物防 天分档位 还没定档 缺 魔攻、物防 这 2 项资质 ⇒ 四档判不出来（缺的那几项不知道有没有被激活） 刷新天分记录 还剩 2 次（性格还剩 3 次） 名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：相当好的天分（资质 生命 9 / 物攻 7 / 魔攻 0 / 物防 0 / 魔防 7 / 速度 0）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 2 次刷新不动）"
+    },
+    "headText": "水灵 等级Lv.60 性格 坦率 资质 生命 9 / 物攻 7 / 魔防 4 / 速度 3 缺 魔攻、物防 天分档位 还没定档 缺 魔攻、物防 这 2 项资质 ⇒ 四档判不出来（缺的那几项不知道有没有被激活） 刷新天分记录 还剩 2 次（性格还剩 3 次） 名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：相当好的天分（资质 生命 9 / 物攻 7 / 魔攻 0 / 物防 0 / 魔防 7 / 速度 0）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 2 次刷新不动）",
+    "levelChip": {
+     "text": "等级Lv.60",
+     "rect": {
+      "x": 151,
+      "y": 252,
+      "w": 84,
+      "h": 25
+     }
+    },
+    "qualification": {
+     "text": "资质 生命 9 / 物攻 7 / 魔防 4 / 速度 3 缺 魔攻、物防",
+     "rect": {
+      "x": 151,
+      "y": 323,
+      "w": 314,
+      "h": 54
+     }
+    },
+    "tier": {
+     "text": "天分档位 还没定档 缺 魔攻、物防 这 2 项资质 ⇒ 四档判不出来（缺的那几项不知道有没有被激活）",
+     "rect": {
+      "x": 151,
+      "y": 383,
+      "w": 314,
+      "h": 72
+     }
+    },
+    "ledger": {
+     "text": "刷新天分记录 还剩 2 次（性格还剩 3 次）",
+     "rect": {
+      "x": 151,
+      "y": 460,
+      "w": 314,
+      "h": 32
+     }
+    },
+    "tierStatus": "missing",
+    "talentRaw": "生命 9 / 物攻 7 / 魔防 4 / 速度 3",
+    "tierRaw": "还没定档",
+    "ledgerRaw": "还剩 2 次（性格还剩 3 次）",
+    "conflict": "名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：相当好的天分（资质 生命 9 / 物攻 7 / 魔攻 0 / 物防 0 / 魔防 7 / 速度 0）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 2 次刷新不动）",
+    "remedy": null,
+    "adoptButton": true,
+    "sharedNote": null,
+    "actionsText": "刷新性格（还剩 3 次） 刷新天分（还剩 2 次） 带上它去配队 ☆ 收藏",
+    "movesetCount": 0,
+    "moveset": [],
+    "slotCount": 4,
+    "slots": [
+     {
+      "state": "current",
+      "text": "第 1 个 甩水 现在带着的 系别 水系 · 类别 攻击 · 耗能 0 · 必要威力 30 效果：造成魔伤，自己回复1能量。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     },
+     {
+      "state": "current",
+      "text": "第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     },
+     {
+      "state": "current",
+      "text": "第 3 个 水炮 现在带着的 系别 水系 · 类别 攻击 · 耗能 5 · 必要威力 110 效果：造成魔伤，每次使用后，本技能能耗永久-1。 引擎：这一招只有伤害，按威力结算 —— 特效那一层没有别的东西。"
+     },
+     {
+      "state": "current",
+      "text": "第 4 个 多维击打 现在带着的 系别 幻系 · 类别 攻击 · 耗能 4 · 必要威力 15 效果：造成魔伤，1连击，敌方每有1层星陨印记，本次技能连击数+1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     }
+    ],
+    "slotHeadsInText": 4,
+    "loadoutPanel": {
+     "rect": {
+      "x": 492,
+      "y": 177,
+      "w": 810,
+      "h": 506
+     },
+     "heading": "当前四个技能",
+     "text": "当前四个技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 甩水 现在带着的 系别 水系 · 类别 攻击 · 耗能 0 · 必要威力 30 效果：造成魔伤，自己回复1能量。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 3 个 水炮 现在带着的 系别 水系 · 类别 攻击 · 耗能 5 · 必要威力 110 效果：造成魔伤，每次使用后，本技能能耗永久-1。 引擎：这一招只有伤害，按威力结算 —— 特效那一层没有别的东西。 第 4 个 多维击打 现在带着的 系别 幻系 · 类别 攻击 · 耗能 4 · 必要威力 15 效果：造成魔伤，1连击，敌方每有1层星陨印记，本次技能连击数+1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 看它能学什么"
+    },
+    "loadoutNote": "这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。",
+    "status": null,
+    "poolChipCount": 0,
+    "poolSearch": false,
+    "poolSample": [],
+    "fourSkillsInFirstScreen": true,
+    "scrollW": 1440,
+    "clientW": 1440,
+    "scrollH": 994,
+    "bodyText": "小芽 · 精灵盒子 全部精灵 / 我的盒子 ← 返回首页 ⚔ 开始 PVP 全图鉴 622 条记录 重置筛选 关于这一页（来源与快照） ✦ 小芽 ← 返回精灵盒子 水灵 · 详情 水灵 等级Lv.60 性格 坦率 资质 生命 9 / 物攻 7 / 魔防 4 / 速度 3 缺 魔攻、物防 天分档位 还没定档 缺 魔攻、物防 这 2 项资质 ⇒ 四档判不出来（缺的那几项不知道有没有被激活） 刷新天分记录 还剩 2 次（性格还剩 3 次） 名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：相当好的天分（资质 生命 9 / 物攻 7 / 魔攻 0 / 物防 0 / 魔防 7 / 速度 0）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 2 次刷新不动） 刷新性格（还剩 3 次） 刷新天分（还剩 2 次） 带上它去配队 ☆ 收藏 当前四个技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 甩水 现在带着的 系别 水系 · 类别 攻击 · 耗能 0 · 必要威力 30 效果：造成魔伤，自己回复1能量。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 3 个 水炮 现在带着的 系别 水系 · 类别 攻击 · 耗能 5 · 必要威力 110 效果：造成魔伤，每次使用后，本技能能耗永久-1。 引擎：这一招只有伤害，按威力结算 —— 特效那一层没有别的东西。 第 4 个 多维击打 现在带着的 系别 幻系 · 类别 攻击 · 耗能 4 · 必要威力 15 效果：造成魔伤，1连击，敌方每有1层星陨印记，本次技能连击数+1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 看它能学什么 六维（60 级 · 估算） 推导值 生命 602 种族 125+9 物攻 262 种族 58+7 物防 174 种族 94 魔攻 200 种族 127 魔防 284 种族 132+4 速度 213 种族 85+3 这是推导值（估算），不是游戏里的成品数值：主数按 60 级公式换算，前提是「60 级 · 默认 5 星 · 零突破」这三条（这套换算还没校准，前提也没在游戏里核验过）。下面一行是它的两个输入：种族值（静态登记）与这一只的天分（黄色）。引擎对战里用的不是这一份 —— 战斗里的数值按**种族值**算：引擎只吃种族值，不看性格 / 资质 / 天分（这几样在引擎里根本没有对应概念；开局传下去的是物种与四个技能）。所以这一栏不能当结论用；真正会带进对局的是这一只的四个技能。"
+   }
+  },
+  "isolated-refresh": {
+   "before": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pet": "own-0012",
+    "rendered": "server",
+    "twoColumn": {
+     "gridTemplateColumns": "340px 810px",
+     "tracks": 2
+    },
+    "head": {
+     "x": 138,
+     "y": 167,
+     "w": 340,
+     "h": 494
+    },
+    "summary": {
+     "rect": {
+      "x": 138,
+      "y": 167,
+      "w": 340,
+      "h": 494
+     },
+     "text": "铠甲虫 等级Lv.60 性格 懒散 资质 生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5 天分档位 还没定档 六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项 刷新天分记录 还剩 3 次（性格还剩 3 次） 名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：了不起的天分（资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 3 次刷新不动）"
+    },
+    "headText": "铠甲虫 等级Lv.60 性格 懒散 资质 生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5 天分档位 还没定档 六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项 刷新天分记录 还剩 3 次（性格还剩 3 次） 名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：了不起的天分（资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 3 次刷新不动）",
+    "levelChip": {
+     "text": "等级Lv.60",
+     "rect": {
+      "x": 151,
+      "y": 252,
+      "w": 84,
+      "h": 25
+     }
+    },
+    "qualification": {
+     "text": "资质 生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5",
+     "rect": {
+      "x": 151,
+      "y": 323,
+      "w": 314,
+      "h": 53
+     }
+    },
+    "tier": {
+     "text": "天分档位 还没定档 六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项",
+     "rect": {
+      "x": 151,
+      "y": 382,
+      "w": 314,
+      "h": 72
+     }
+    },
+    "ledger": {
+     "text": "刷新天分记录 还剩 3 次（性格还剩 3 次）",
+     "rect": {
+      "x": 151,
+      "y": 460,
+      "w": 314,
+      "h": 32
+     }
+    },
+    "tierStatus": "unresolved",
+    "talentRaw": "生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5",
+    "tierRaw": "还没定档",
+    "ledgerRaw": "还剩 3 次（性格还剩 3 次）",
+    "conflict": "名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：了不起的天分（资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 3 次刷新不动）",
+    "remedy": null,
+    "adoptButton": true,
+    "sharedNote": null,
+    "actionsText": "刷新性格（还剩 3 次） 刷新天分（还剩 3 次） 带上它去配队 ☆ 收藏",
+    "movesetCount": 0,
+    "moveset": [],
+    "slotCount": 4,
+    "slots": [
+     {
+      "state": "current",
+      "text": "第 1 个 啃咬 现在带着的 系别 虫系 · 类别 攻击 · 耗能 0 · 必要威力 40 效果：造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     },
+     {
+      "state": "current",
+      "text": "第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     },
+     {
+      "state": "current",
+      "text": "第 3 个 翅刃 现在带着的 系别 虫系 · 类别 攻击 · 耗能 3 · 必要威力 85 效果：造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。 · 触发：应对状态：改为偷取印记 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     },
+     {
+      "state": "current",
+      "text": "第 4 个 风隐 现在带着的 系别 翼系 · 类别 状态 · 耗能 1 · 威力 不适用（状态类不造成伤害） 效果：敌方和自己均脱离，先手-1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     }
+    ],
+    "slotHeadsInText": 4,
+    "loadoutPanel": {
+     "rect": {
+      "x": 492,
+      "y": 177,
+      "w": 810,
+      "h": 506
+     },
+     "heading": "当前四个技能",
+     "text": "当前四个技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 啃咬 现在带着的 系别 虫系 · 类别 攻击 · 耗能 0 · 必要威力 40 效果：造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 3 个 翅刃 现在带着的 系别 虫系 · 类别 攻击 · 耗能 3 · 必要威力 85 效果：造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。 · 触发：应对状态：改为偷取印记 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 4 个 风隐 现在带着的 系别 翼系 · 类别 状态 · 耗能 1 · 威力 不适用（状态类不造成伤害） 效果：敌方和自己均脱离，先手-1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 看它能学什么"
+    },
+    "loadoutNote": "这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。",
+    "status": null,
+    "poolChipCount": 0,
+    "poolSearch": false,
+    "poolSample": [],
+    "fourSkillsInFirstScreen": true,
+    "scrollW": 1440,
+    "clientW": 1440,
+    "scrollH": 994,
+    "bodyText": "小芽 · 精灵盒子 全部精灵 / 我的盒子 ← 返回首页 ⚔ 开始 PVP 全图鉴 622 条记录 重置筛选 关于这一页（来源与快照） ✦ 小芽 ← 返回精灵盒子 铠甲虫 · 详情 铠甲虫 等级Lv.60 性格 懒散 资质 生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5 天分档位 还没定档 六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项 刷新天分记录 还剩 3 次（性格还剩 3 次） 名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：了不起的天分（资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 3 次刷新不动） 刷新性格（还剩 3 次） 刷新天分（还剩 3 次） 带上它去配队 ☆ 收藏 当前四个技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 啃咬 现在带着的 系别 虫系 · 类别 攻击 · 耗能 0 · 必要威力 40 效果：造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 3 个 翅刃 现在带着的 系别 虫系 · 类别 攻击 · 耗能 3 · 必要威力 85 效果：造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。 · 触发：应对状态：改为偷取印记 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 4 个 风隐 现在带着的 系别 翼系 · 类别 状态 · 耗能 1 · 威力 不适用（状态类不造成伤害） 效果：敌方和自己均脱离，先手-1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 看它能学什么 六维（60 级 · 估算） 推导值 生命 653 种族 122+9 物攻 315 种族 88+8 物防 360 种族 121+7 魔攻 103 种族 39 魔防 243 种族 77+6 速度 242 种族 75+5 这是推导值（估算），不是游戏里的成品数值：主数按 60 级公式换算，前提是「60 级 · 默认 5 星 · 零突破」这三条（这套换算还没校准，前提也没在游戏里核验过）。下面一行是它的两个输入：种族值（静态登记）与这一只的天分（黄色）。引擎对战里用的不是这一份 —— 战斗里的数值按**种族值**算：引擎只吃种族值，不看性格 / 资质 / 天分（这几样在引擎里根本没有对应概念；开局传下去的是物种与四个技能）。所以这一栏不能当结论用；真正会带进对局的是这一只的四个技能。"
+   },
+   "after": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pet": "own-0012",
+    "rendered": "server",
+    "twoColumn": {
+     "gridTemplateColumns": "340px 810px",
+     "tracks": 2
+    },
+    "head": {
+     "x": 138,
+     "y": 239,
+     "w": 340,
+     "h": 515
+    },
+    "summary": {
+     "rect": {
+      "x": 138,
+      "y": 239,
+      "w": 340,
+      "h": 515
+     },
+     "text": "铠甲虫 等级Lv.60 性格 懒散 资质 生命 19 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5 天分档位 还没定档 六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项 刷新天分记录 还剩 2 次（性格还剩 3 次） 上一次刷天分（第 1 级）：+10 加到「生命」 名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：了不起的天分（资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 2 次刷新不动）"
+    },
+    "headText": "铠甲虫 等级Lv.60 性格 懒散 资质 生命 19 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5 天分档位 还没定档 六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项 刷新天分记录 还剩 2 次（性格还剩 3 次） 上一次刷天分（第 1 级）：+10 加到「生命」 名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：了不起的天分（资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 2 次刷新不动）",
+    "levelChip": {
+     "text": "等级Lv.60",
+     "rect": {
+      "x": 151,
+      "y": 324,
+      "w": 84,
+      "h": 25
+     }
+    },
+    "qualification": {
+     "text": "资质 生命 19 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5",
+     "rect": {
+      "x": 151,
+      "y": 395,
+      "w": 314,
+      "h": 53
+     }
+    },
+    "tier": {
+     "text": "天分档位 还没定档 六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项",
+     "rect": {
+      "x": 151,
+      "y": 454,
+      "w": 314,
+      "h": 72
+     }
+    },
+    "ledger": {
+     "text": "刷新天分记录 还剩 2 次（性格还剩 3 次） 上一次刷天分（第 1 级）：+10 加到「生命」",
+     "rect": {
+      "x": 151,
+      "y": 532,
+      "w": 314,
+      "h": 54
+     }
+    },
+    "tierStatus": "unresolved",
+    "talentRaw": "生命 19 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5",
+    "tierRaw": "还没定档",
+    "ledgerRaw": "还剩 2 次（性格还剩 3 次）",
+    "conflict": "名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：了不起的天分（资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 2 次刷新不动）",
+    "remedy": null,
+    "adoptButton": true,
+    "sharedNote": null,
+    "actionsText": "刷新性格（还剩 3 次） 刷新天分（还剩 2 次） 回滚上一次 带上它去配队 ☆ 收藏",
+    "movesetCount": 0,
+    "moveset": [],
+    "slotCount": 4,
+    "slots": [
+     {
+      "state": "current",
+      "text": "第 1 个 啃咬 现在带着的 系别 虫系 · 类别 攻击 · 耗能 0 · 必要威力 40 效果：造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     },
+     {
+      "state": "current",
+      "text": "第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     },
+     {
+      "state": "current",
+      "text": "第 3 个 翅刃 现在带着的 系别 虫系 · 类别 攻击 · 耗能 3 · 必要威力 85 效果：造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。 · 触发：应对状态：改为偷取印记 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     },
+     {
+      "state": "current",
+      "text": "第 4 个 风隐 现在带着的 系别 翼系 · 类别 状态 · 耗能 1 · 威力 不适用（状态类不造成伤害） 效果：敌方和自己均脱离，先手-1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     }
+    ],
+    "slotHeadsInText": 4,
+    "loadoutPanel": {
+     "rect": {
+      "x": 492,
+      "y": 249,
+      "w": 810,
+      "h": 506
+     },
+     "heading": "当前四个技能",
+     "text": "当前四个技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 啃咬 现在带着的 系别 虫系 · 类别 攻击 · 耗能 0 · 必要威力 40 效果：造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 3 个 翅刃 现在带着的 系别 虫系 · 类别 攻击 · 耗能 3 · 必要威力 85 效果：造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。 · 触发：应对状态：改为偷取印记 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 4 个 风隐 现在带着的 系别 翼系 · 类别 状态 · 耗能 1 · 威力 不适用（状态类不造成伤害） 效果：敌方和自己均脱离，先手-1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 看它能学什么"
+    },
+    "loadoutNote": "这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。",
+    "status": null,
+    "poolChipCount": 0,
+    "poolSearch": false,
+    "poolSample": [],
+    "fourSkillsInFirstScreen": true,
+    "scrollW": 1440,
+    "clientW": 1440,
+    "scrollH": 1066,
+    "bodyText": "小芽 · 精灵盒子 全部精灵 / 我的盒子 ← 返回首页 ⚔ 开始 PVP 上一次刷天分（第 1 级）：+10 加到「生命」（结果就在这一页上） 重置筛选 关于这一页（来源与快照） ✦ 小芽 ← 返回精灵盒子 铠甲虫 · 详情 上一次刷天分（第 1 级）：+10 加到「生命」 铠甲虫 等级Lv.60 性格 懒散 资质 生命 19 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5 天分档位 还没定档 六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项 刷新天分记录 还剩 2 次（性格还剩 3 次） 上一次刷天分（第 1 级）：+10 加到「生命」 名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：了不起的天分（资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 2 次刷新不动） 刷新性格（还剩 3 次） 刷新天分（还剩 2 次） 回滚上一次 带上它去配队 ☆ 收藏 当前四个技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 啃咬 现在带着的 系别 虫系 · 类别 攻击 · 耗能 0 · 必要威力 40 效果：造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 3 个 翅刃 现在带着的 系别 虫系 · 类别 攻击 · 耗能 3 · 必要威力 85 效果：造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。 · 触发：应对状态：改为偷取印记 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 4 个 风隐 现在带着的 系别 翼系 · 类别 状态 · 耗能 1 · 威力 不适用（状态类不造成伤害） 效果：敌方和自己均脱离，先手-1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 看它能学什么 六维（60 级 · 估算） 推导值 生命 959 种族 122+19 物攻 315 种族 88+8 物防 360 种族 121+7 魔攻 103 种族 39 魔防 243 种族 77+6 速度 242 种族 75+5 这是推导值（估算），不是游戏里的成品数值：主数按 60 级公式换算，前提是「60 级 · 默认 5 星 · 零突破」这三条（这套换算还没校准，前提也没在游戏里核验过）。下面一行是它的两个输入：种族值（静态登记）与这一只的天分（黄色）。引擎对战里用的不是这一份 —— 战斗里的数值按**种族值**算：引擎只吃种族值，不看性格 / 资质 / 天分（这几样在引擎里根本没有对应概念；开局传下去的是物种与四个技能）。所以这一栏不能当结论用；真正会带进对局的是这一只的四个技能。"
+   },
+   "stored": {
+    "individual_id": "own-0012",
+    "species_id": "pet_000012",
+    "species_name": "铠甲虫",
+    "level": 60,
+    "level_source": "test-fixture",
+    "nature": "懒散",
+    "talent": {
+     "hp": 19,
+     "atk": 8,
+     "def": 7,
+     "spa": 0,
+     "spd": 6,
+     "spe": 5
+    },
+    "talent_boosts": [
+     {
+      "tier": 1,
+      "stat": "hp",
+      "delta": 10,
+      "at": "2026-09-29T02:55:10.907Z"
+     }
+    ],
+    "talent_source": "rolled（旧口径）",
+    "refreshes": {
+     "nature": 3,
+     "talent": 2
+    },
+    "history": [
+     {
+      "kind": "talent",
+      "used": 1,
+      "before": {
+       "hp": 9,
+       "atk": 8,
+       "def": 7,
+       "spa": 0,
+       "spd": 6,
+       "spe": 5
+      },
+      "after": {
+       "hp": 19,
+       "atk": 8,
+       "def": 7,
+       "spa": 0,
+       "spd": 6,
+       "spe": 5
+      },
+      "remaining": 2,
+      "rule": "tiered-plus10/v1",
+      "at": "2026-09-29T02:55:10.907Z",
+      "stat": "hp"
+     }
+    ],
+    "rolls": {
+     "talent": 1
+    }
+   },
+   "status": "上一次刷天分（第 1 级）：+10 加到「生命」（结果就在这一页上）"
+  },
+  "isolated-adopt": {
+   "before": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pet": "own-0012",
+    "rendered": "server",
+    "twoColumn": {
+     "gridTemplateColumns": "340px 810px",
+     "tracks": 2
+    },
+    "head": {
+     "x": 138,
+     "y": 167,
+     "w": 340,
+     "h": 494
+    },
+    "summary": {
+     "rect": {
+      "x": 138,
+      "y": 167,
+      "w": 340,
+      "h": 494
+     },
+     "text": "铠甲虫 等级Lv.60 性格 懒散 资质 生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5 天分档位 还没定档 六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项 刷新天分记录 还剩 3 次（性格还剩 3 次） 名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：了不起的天分（资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 3 次刷新不动）"
+    },
+    "headText": "铠甲虫 等级Lv.60 性格 懒散 资质 生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5 天分档位 还没定档 六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项 刷新天分记录 还剩 3 次（性格还剩 3 次） 名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：了不起的天分（资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 3 次刷新不动）",
+    "levelChip": {
+     "text": "等级Lv.60",
+     "rect": {
+      "x": 151,
+      "y": 252,
+      "w": 84,
+      "h": 25
+     }
+    },
+    "qualification": {
+     "text": "资质 生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5",
+     "rect": {
+      "x": 151,
+      "y": 323,
+      "w": 314,
+      "h": 53
+     }
+    },
+    "tier": {
+     "text": "天分档位 还没定档 六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项",
+     "rect": {
+      "x": 151,
+      "y": 382,
+      "w": 314,
+      "h": 72
+     }
+    },
+    "ledger": {
+     "text": "刷新天分记录 还剩 3 次（性格还剩 3 次）",
+     "rect": {
+      "x": 151,
+      "y": 460,
+      "w": 314,
+      "h": 32
+     }
+    },
+    "tierStatus": "unresolved",
+    "talentRaw": "生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5",
+    "tierRaw": "还没定档",
+    "ledgerRaw": "还剩 3 次（性格还剩 3 次）",
+    "conflict": "名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：了不起的天分（资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 3 次刷新不动）",
+    "remedy": null,
+    "adoptButton": true,
+    "sharedNote": null,
+    "actionsText": "刷新性格（还剩 3 次） 刷新天分（还剩 3 次） 带上它去配队 ☆ 收藏",
+    "movesetCount": 0,
+    "moveset": [],
+    "slotCount": 4,
+    "slots": [
+     {
+      "state": "current",
+      "text": "第 1 个 啃咬 现在带着的 系别 虫系 · 类别 攻击 · 耗能 0 · 必要威力 40 效果：造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     },
+     {
+      "state": "current",
+      "text": "第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     },
+     {
+      "state": "current",
+      "text": "第 3 个 翅刃 现在带着的 系别 虫系 · 类别 攻击 · 耗能 3 · 必要威力 85 效果：造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。 · 触发：应对状态：改为偷取印记 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     },
+     {
+      "state": "current",
+      "text": "第 4 个 风隐 现在带着的 系别 翼系 · 类别 状态 · 耗能 1 · 威力 不适用（状态类不造成伤害） 效果：敌方和自己均脱离，先手-1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     }
+    ],
+    "slotHeadsInText": 4,
+    "loadoutPanel": {
+     "rect": {
+      "x": 492,
+      "y": 177,
+      "w": 810,
+      "h": 506
+     },
+     "heading": "当前四个技能",
+     "text": "当前四个技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 啃咬 现在带着的 系别 虫系 · 类别 攻击 · 耗能 0 · 必要威力 40 效果：造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 3 个 翅刃 现在带着的 系别 虫系 · 类别 攻击 · 耗能 3 · 必要威力 85 效果：造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。 · 触发：应对状态：改为偷取印记 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 4 个 风隐 现在带着的 系别 翼系 · 类别 状态 · 耗能 1 · 威力 不适用（状态类不造成伤害） 效果：敌方和自己均脱离，先手-1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 看它能学什么"
+    },
+    "loadoutNote": "这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。",
+    "status": null,
+    "poolChipCount": 0,
+    "poolSearch": false,
+    "poolSample": [],
+    "fourSkillsInFirstScreen": true,
+    "scrollW": 1440,
+    "clientW": 1440,
+    "scrollH": 994,
+    "bodyText": "小芽 · 精灵盒子 全部精灵 / 我的盒子 ← 返回首页 ⚔ 开始 PVP 全图鉴 622 条记录 重置筛选 关于这一页（来源与快照） ✦ 小芽 ← 返回精灵盒子 铠甲虫 · 详情 铠甲虫 等级Lv.60 性格 懒散 资质 生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5 天分档位 还没定档 六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项 刷新天分记录 还剩 3 次（性格还剩 3 次） 名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：了不起的天分（资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 3 次刷新不动） 刷新性格（还剩 3 次） 刷新天分（还剩 3 次） 带上它去配队 ☆ 收藏 当前四个技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 啃咬 现在带着的 系别 虫系 · 类别 攻击 · 耗能 0 · 必要威力 40 效果：造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 3 个 翅刃 现在带着的 系别 虫系 · 类别 攻击 · 耗能 3 · 必要威力 85 效果：造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。 · 触发：应对状态：改为偷取印记 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 4 个 风隐 现在带着的 系别 翼系 · 类别 状态 · 耗能 1 · 威力 不适用（状态类不造成伤害） 效果：敌方和自己均脱离，先手-1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 看它能学什么 六维（60 级 · 估算） 推导值 生命 653 种族 122+9 物攻 315 种族 88+8 物防 360 种族 121+7 魔攻 103 种族 39 魔防 243 种族 77+6 速度 242 种族 75+5 这是推导值（估算），不是游戏里的成品数值：主数按 60 级公式换算，前提是「60 级 · 默认 5 星 · 零突破」这三条（这套换算还没校准，前提也没在游戏里核验过）。下面一行是它的两个输入：种族值（静态登记）与这一只的天分（黄色）。引擎对战里用的不是这一份 —— 战斗里的数值按**种族值**算：引擎只吃种族值，不看性格 / 资质 / 天分（这几样在引擎里根本没有对应概念；开局传下去的是物种与四个技能）。所以这一栏不能当结论用；真正会带进对局的是这一只的四个技能。"
+   },
+   "after": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pet": "own-0012",
+    "rendered": "server",
+    "twoColumn": {
+     "gridTemplateColumns": "340px 810px",
+     "tracks": 2
+    },
+    "head": {
+     "x": 138,
+     "y": 203,
+     "w": 340,
+     "h": 360
+    },
+    "summary": {
+     "rect": {
+      "x": 138,
+      "y": 203,
+      "w": 340,
+      "h": 360
+     },
+     "text": "铠甲虫 等级Lv.60 性格 懒散 资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7 天分档位 了不起的天分 了不起的天分：六项资质里有三条被激活，而且性格加成的那一条正好是其中一条。（被激活的是：物防、魔防、速度；性格长处是物防） 刷新天分记录 还剩 3 次（性格还剩 3 次）"
+    },
+    "headText": "铠甲虫 等级Lv.60 性格 懒散 资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7 天分档位 了不起的天分 了不起的天分：六项资质里有三条被激活，而且性格加成的那一条正好是其中一条。（被激活的是：物防、魔防、速度；性格长处是物防） 刷新天分记录 还剩 3 次（性格还剩 3 次）",
+    "levelChip": {
+     "text": "等级Lv.60",
+     "rect": {
+      "x": 151,
+      "y": 288,
+      "w": 84,
+      "h": 25
+     }
+    },
+    "qualification": {
+     "text": "资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7",
+     "rect": {
+      "x": 151,
+      "y": 359,
+      "w": 314,
+      "h": 53
+     }
+    },
+    "tier": {
+     "text": "天分档位 了不起的天分 了不起的天分：六项资质里有三条被激活，而且性格加成的那一条正好是其中一条。（被激活的是：物防、魔防、速度；性格长处是物防）",
+     "rect": {
+      "x": 151,
+      "y": 418,
+      "w": 314,
+      "h": 89
+     }
+    },
+    "ledger": {
+     "text": "刷新天分记录 还剩 3 次（性格还剩 3 次）",
+     "rect": {
+      "x": 151,
+      "y": 513,
+      "w": 314,
+      "h": 32
+     }
+    },
+    "tierStatus": "tier",
+    "talentRaw": "生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7",
+    "tierRaw": "了不起的天分",
+    "ledgerRaw": "还剩 3 次（性格还剩 3 次）",
+    "conflict": null,
+    "remedy": null,
+    "adoptButton": false,
+    "sharedNote": null,
+    "actionsText": "刷新性格（还剩 3 次） 刷新天分（还剩 3 次） 带上它去配队 ☆ 收藏",
+    "movesetCount": 0,
+    "moveset": [],
+    "slotCount": 4,
+    "slots": [
+     {
+      "state": "current",
+      "text": "第 1 个 啃咬 现在带着的 系别 虫系 · 类别 攻击 · 耗能 0 · 必要威力 40 效果：造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     },
+     {
+      "state": "current",
+      "text": "第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     },
+     {
+      "state": "current",
+      "text": "第 3 个 翅刃 现在带着的 系别 虫系 · 类别 攻击 · 耗能 3 · 必要威力 85 效果：造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。 · 触发：应对状态：改为偷取印记 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     },
+     {
+      "state": "current",
+      "text": "第 4 个 风隐 现在带着的 系别 翼系 · 类别 状态 · 耗能 1 · 威力 不适用（状态类不造成伤害） 效果：敌方和自己均脱离，先手-1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。"
+     }
+    ],
+    "slotHeadsInText": 4,
+    "loadoutPanel": {
+     "rect": {
+      "x": 492,
+      "y": 213,
+      "w": 810,
+      "h": 506
+     },
+     "heading": "当前四个技能",
+     "text": "当前四个技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 啃咬 现在带着的 系别 虫系 · 类别 攻击 · 耗能 0 · 必要威力 40 效果：造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 3 个 翅刃 现在带着的 系别 虫系 · 类别 攻击 · 耗能 3 · 必要威力 85 效果：造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。 · 触发：应对状态：改为偷取印记 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 4 个 风隐 现在带着的 系别 翼系 · 类别 状态 · 耗能 1 · 威力 不适用（状态类不造成伤害） 效果：敌方和自己均脱离，先手-1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 看它能学什么"
+    },
+    "loadoutNote": "这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。",
+    "status": null,
+    "poolChipCount": 0,
+    "poolSearch": false,
+    "poolSample": [],
+    "fourSkillsInFirstScreen": true,
+    "scrollW": 1440,
+    "clientW": 1440,
+    "scrollH": 1030,
+    "bodyText": "小芽 · 精灵盒子 全部精灵 / 我的盒子 ← 返回首页 ⚔ 开始 PVP 已经按抓包名单把这一只的资质重设好了（6 项；性格与剩余刷新次数都没动） 重置筛选 关于这一页（来源与快照） ✦ 小芽 ← 返回精灵盒子 铠甲虫 · 详情 铠甲虫 等级Lv.60 性格 懒散 资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7 天分档位 了不起的天分 了不起的天分：六项资质里有三条被激活，而且性格加成的那一条正好是其中一条。（被激活的是：物防、魔防、速度；性格长处是物防） 刷新天分记录 还剩 3 次（性格还剩 3 次） 刷新性格（还剩 3 次） 刷新天分（还剩 3 次） 带上它去配队 ☆ 收藏 当前四个技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 啃咬 现在带着的 系别 虫系 · 类别 攻击 · 耗能 0 · 必要威力 40 效果：造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 不适用（防御类不造成伤害） 效果：减伤70%，应对攻击。 · 触发：应对攻击 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 3 个 翅刃 现在带着的 系别 虫系 · 类别 攻击 · 耗能 3 · 必要威力 85 效果：造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。 · 触发：应对状态：改为偷取印记 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 第 4 个 风隐 现在带着的 系别 翼系 · 类别 状态 · 耗能 1 · 威力 不适用（状态类不造成伤害） 效果：敌方和自己均脱离，先手-1。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。 看它能学什么 六维（60 级 · 估算） 推导值 生命 377 种族 122 物攻 157 种族 88 物防 403 种族 121+9 魔攻 103 种族 39 魔防 260 种族 77+7 速度 281 种族 75+7 这是推导值（估算），不是游戏里的成品数值：主数按 60 级公式换算，前提是「60 级 · 默认 5 星 · 零突破」这三条（这套换算还没校准，前提也没在游戏里核验过）。下面一行是它的两个输入：种族值（静态登记）与这一只的天分（黄色）。引擎对战里用的不是这一份 —— 战斗里的数值按**种族值**算：引擎只吃种族值，不看性格 / 资质 / 天分（这几样在引擎里根本没有对应概念；开局传下去的是物种与四个技能）。所以这一栏不能当结论用；真正会带进对局的是这一只的四个技能。"
+   },
+   "stored": {
+    "individual_id": "own-0012",
+    "species_id": "pet_000012",
+    "species_name": "铠甲虫",
+    "level": 60,
+    "level_source": "test-fixture",
+    "nature": "懒散",
+    "talent": {
+     "hp": 0,
+     "atk": 0,
+     "spa": 0,
+     "def": 9,
+     "spd": 7,
+     "spe": 7
+    },
+    "talent_boosts": [],
+    "talent_source": "名单导入（抓包名单里的「资质 / 天分档位」栏；这一只原来的资质是本机旧口径掷出来的）",
+    "refreshes": {
+     "nature": 3,
+     "talent": 3
+    },
+    "history": [],
+    "talent_before_import": {
+     "hp": 9,
+     "atk": 8,
+     "def": 7,
+     "spa": 0,
+     "spd": 6,
+     "spe": 5
+    },
+    "talent_imported_at": "2026-09-29T02:55:14.068Z"
+   },
+   "status": "已经按抓包名单把这一只的资质重设好了（6 项；性格与剩余刷新次数都没动）"
+  },
+  "four-place": {
+   "list": {
+    "id": "own-0012",
+    "level": "Lv.60",
+    "chips": [
+     "性格 懒散",
+     "天分未定档（激活 5 项）"
+    ],
+    "title": [
+     null,
+     "天分：六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项。资质：生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5。点开这一只看补救办法"
+    ]
+   },
+   "detail": {
+    "qualification": {
+     "text": "资质 生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5",
+     "rect": {
+      "x": 151,
+      "y": 323,
+      "w": 314,
+      "h": 53
+     }
+    },
+    "tier": {
+     "text": "天分档位 还没定档 六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项",
+     "rect": {
+      "x": 151,
+      "y": 382,
+      "w": 314,
+      "h": 72
+     }
+    },
+    "ledger": {
+     "text": "刷新天分记录 还剩 3 次（性格还剩 3 次）",
+     "rect": {
+      "x": 151,
+      "y": 460,
+      "w": 314,
+      "h": 32
+     }
+    },
+    "tierStatus": "unresolved",
+    "conflict": "名单那一份（抓包名单里的「资质 / 天分档位」栏）写的是：了不起的天分（资质 生命 0 / 物攻 0 / 魔攻 0 / 物防 9 / 魔防 7 / 速度 7）。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。 用名单那一份重设资质（还剩 3 次刷新不动）",
+    "adoptButton": true
+   },
+   "detailStore": "{\"individual_id\":\"own-0012\",\"species_id\":\"pet_000012\",\"species_name\":\"铠甲虫\",\"level\":60,\"level_source\":\"test-fixture\",\"nature\":\"懒散\",\"talent\":{\"hp\":9,\"atk\":8,\"def\":7,\"spa\":0,\"spd\":6,\"spe\":5},\"talent_boosts\":[],\"talent_source\":\"rolled（旧口径）\",\"refreshes\":{\"nature\":3,\"talent\":3},\"history\":[]}",
+   "xiaoya": {
+    "text": "正在看：铠甲虫 · 性格 懒散 · 4 个技能",
+    "id": "own-0012",
+    "live": "yes"
+   },
+   "battle": {
+    "text": "正在看：铠甲虫（正在读它的培养数据…）",
+    "id": "own-0012",
+    "live": "yes"
+   },
+   "battleSlot": {
+    "x": 227,
+    "y": 358,
+    "tag": "ARTICLE",
+    "inst": "own-0012"
+   },
+   "battleStore": "{\"individual_id\":\"own-0012\",\"species_id\":\"pet_000012\",\"species_name\":\"铠甲虫\",\"level\":60,\"level_source\":\"test-fixture\",\"nature\":\"懒散\",\"talent\":{\"hp\":9,\"atk\":8,\"def\":7,\"spa\":0,\"spd\":6,\"spe\":5},\"talent_boosts\":[],\"talent_source\":\"rolled（旧口径）\",\"refreshes\":{\"nature\":3,\"talent\":3},\"history\":[]}"
+  },
+  "multi-instance": {
+   "drawer": {
+    "species": "pet_000012",
+    "count": "2",
+    "head": "铠甲虫 虫系 2 个个体",
+    "individuals": [
+     {
+      "id": "own-0012",
+      "multi": "yes",
+      "label": null,
+      "ordinal": "第 1 只（共 2 只）",
+      "source": null,
+      "cardVisible": true,
+      "avatarArtVisible": true,
+      "avatarText": null,
+      "nameVisible": true,
+      "name": "铠甲虫",
+      "level": "Lv.60",
+      "chips": [
+       {
+        "text": "性格 懒散",
+        "state": "known",
+        "title": null
+       },
+       {
+        "text": "天分未定档（激活 5 项）",
+        "state": "known",
+        "title": "天分：六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项。资质：生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5。点开这一只看补救办法"
+       }
+      ],
+      "actions": [
+       {
+        "text": "去培养",
+        "detail": "own-0012",
+        "team": null
+       },
+       {
+        "text": "去配队",
+        "detail": null,
+        "team": "own-0012"
+       },
+       {
+        "text": "★\n已收藏",
+        "detail": null,
+        "team": null
+       }
+      ],
+      "text": "铠甲虫 定位：回复 第 1 只（共 2 只） Lv.60 性格 懒散 天分未定档（激活 5 项） 去培养 去配队 ★ 已收藏"
+     },
+     {
+      "id": "own-9001",
+      "multi": "yes",
+      "label": "本机加的",
+      "ordinal": "第 2 只（共 2 只）",
+      "source": "本机加的：这一只只在这台机器的记录里（抓包名单里没有它）；本机记录里性格 / 资质 / 等级都有数",
+      "cardVisible": true,
+      "avatarArtVisible": false,
+      "avatarText": "◇",
+      "nameVisible": true,
+      "name": "铠甲虫",
+      "level": "Lv.60",
+      "chips": [
+       {
+        "text": "性格 聪明",
+        "state": "known",
+        "title": null
+       },
+       {
+        "text": "了不起的天分",
+        "state": "known",
+        "title": "天分（了不起的天分）：了不起的天分：六项资质里有三条被激活，而且性格加成的那一条正好是其中一条。（被激活的是：生命、魔攻、物防；性格长处是魔攻）"
+       }
+      ],
+      "actions": [
+       {
+        "text": "去培养",
+        "detail": "own-9001",
+        "team": null
+       },
+       {
+        "text": "去配队",
+        "detail": null,
+        "team": "own-9001"
+       },
+       {
+        "text": "☆\n收藏",
+        "detail": null,
+        "team": null
+       }
+      ],
+      "text": "◇ 铠甲虫 第 2 只（共 2 只） 本机加的 Lv.60 性格 聪明 了不起的天分 本机加的：这一只只在这台机器的记录里（抓包名单里没有它）；本机记录里性格 / 资质 / 等级都有数 去培养 去配队 ☆ 收藏"
+     }
+    ]
+   },
+   "favBefore": [
+    {
+     "id": "own-0012",
+     "pressed": [
+      "true"
+     ]
+    },
+    {
+     "id": "own-9001",
+     "pressed": [
+      "false"
+     ]
+    }
+   ],
+   "favClick": "own-9001",
+   "favState": {
+    "rows": [
+     {
+      "id": "own-0012",
+      "fav": [
+       {
+        "id": "own-0012",
+        "pressed": "true"
+       }
+      ]
+     },
+     {
+      "id": "own-9001",
+      "fav": [
+       {
+        "id": "own-9001",
+        "pressed": "true"
+       }
+      ]
+     }
+    ],
+    "store": "{\"own-9001\":true}"
+   },
+   "scrollW": 1440,
+   "clientW": 1440
+  },
+  "multi-instance-390": {
+   "drawer": {
+    "species": "pet_000012",
+    "count": "2",
+    "head": "铠甲虫 虫系 2 个个体",
+    "individuals": [
+     {
+      "id": "own-0012",
+      "multi": "yes",
+      "label": null,
+      "ordinal": "第 1 只（共 2 只）",
+      "source": null,
+      "cardVisible": true,
+      "avatarArtVisible": true,
+      "avatarText": null,
+      "nameVisible": true,
+      "name": "铠甲虫",
+      "level": "Lv.60",
+      "chips": [
+       {
+        "text": "性格 懒散",
+        "state": "known",
+        "title": null
+       },
+       {
+        "text": "天分未定档（激活 5 项）",
+        "state": "known",
+        "title": "天分：六项资质都有数，但被激活的有 5 项（生命、物攻、物防、魔防、速度）—— 四档名只覆盖 1 / 2 / 3 项。资质：生命 9 / 物攻 8 / 魔攻 0 / 物防 7 / 魔防 6 / 速度 5。点开这一只看补救办法"
+       }
+      ],
+      "actions": [
+       {
+        "text": "去培养",
+        "detail": "own-0012",
+        "team": null
+       },
+       {
+        "text": "去配队",
+        "detail": null,
+        "team": "own-0012"
+       },
+       {
+        "text": "★\n已收藏",
+        "detail": null,
+        "team": null
+       }
+      ],
+      "text": "铠甲虫 定位：回复 第 1 只（共 2 只） Lv.60 性格 懒散 天分未定档（激活 5 项） 去培养 去配队 ★ 已收藏"
+     },
+     {
+      "id": "own-9001",
+      "multi": "yes",
+      "label": "本机加的",
+      "ordinal": "第 2 只（共 2 只）",
+      "source": "本机加的：这一只只在这台机器的记录里（抓包名单里没有它）；本机记录里性格 / 资质 / 等级都有数",
+      "cardVisible": true,
+      "avatarArtVisible": false,
+      "avatarText": "◇",
+      "nameVisible": true,
+      "name": "铠甲虫",
+      "level": "Lv.60",
+      "chips": [
+       {
+        "text": "性格 聪明",
+        "state": "known",
+        "title": null
+       },
+       {
+        "text": "了不起的天分",
+        "state": "known",
+        "title": "天分（了不起的天分）：了不起的天分：六项资质里有三条被激活，而且性格加成的那一条正好是其中一条。（被激活的是：生命、魔攻、物防；性格长处是魔攻）"
+       }
+      ],
+      "actions": [
+       {
+        "text": "去培养",
+        "detail": "own-9001",
+        "team": null
+       },
+       {
+        "text": "去配队",
+        "detail": null,
+        "team": "own-9001"
+       },
+       {
+        "text": "★\n已收藏",
+        "detail": null,
+        "team": null
+       }
+      ],
+      "text": "◇ 铠甲虫 第 2 只（共 2 只） 本机加的 Lv.60 性格 聪明 了不起的天分 本机加的：这一只只在这台机器的记录里（抓包名单里没有它）；本机记录里性格 / 资质 / 等级都有数 去培养 去配队 ★ 已收藏"
+     }
+    ]
+   },
+   "favBefore": [
+    {
+     "id": "own-0012",
+     "pressed": [
+      "true"
+     ]
+    },
+    {
+     "id": "own-9001",
+     "pressed": [
+      "true"
+     ]
+    }
+   ],
+   "favClick": "own-9001",
+   "favState": {
+    "rows": [
+     {
+      "id": "own-0012",
+      "fav": [
+       {
+        "id": "own-0012",
+        "pressed": "true"
+       }
+      ]
+     },
+     {
+      "id": "own-9001",
+      "fav": [
+       {
+        "id": "own-9001",
+        "pressed": "false"
+       }
+      ]
+     }
+    ],
+    "store": "{\"own-9001\":false}"
+   },
+   "scrollW": 390,
+   "clientW": 390
+  }
+ },
+ "consoleErrors": [],
+ "pageErrors": []
+}

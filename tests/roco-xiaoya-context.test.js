@@ -780,3 +780,372 @@ test('⑳ 甲②③：activityLine 逐字渲染 + popup 也有 role 选择 + `#m
   assert.match(src, /document\.body\.dataset\.rocoModelConfigured = model === 'ok' \? 'yes' : 'no'/);
   assert.doesNotMatch(src, /xy-capability'|xiaoya-capability'/, '不再有第二个能力状态元素（同一件东西一个名字）');
 });
+
+// ── U07（2026-09-30，task-01）：小芽唯一入口 + 稳定侧栏面板 ─────────────────────
+//
+// 这一组量的四件事都是用户截图里看得见的（07/08/09）：
+//   ① **每页只有一套入口**：`roco.html` 页头已经有 `#coach-entry`，`xiaoya.js` 又往
+//      `.header-actions` 追加了一个 `#xiaoya-open` ⇒ 右上角两个一模一样的「✦ 小芽」；
+//   ② 版式：面板高度是死的、次级区全摊开 ⇒ 输入行被长回答挤出面板；
+//   ③ 新消息：`addEntry()` 无条件 `log.scrollTop = log.scrollHeight` ⇒ 玩家往上翻历史时被顶回底部；
+//   ④ 连通状态自相矛盾：标题「DeepSeek 已回答」+ 状态行「云端模型：状态未知」。
+
+test('㉑ U07-① 每页只有一套入口：`entryButton:false` 不造 `#xiaoya-open`，把手走**真开关**', async () => {
+  const src = read('src/client/xiaoya.js');
+  // ① 开关只有一份：`injectPopup` 返回真 `setOpen`，把手调它（不再 `.click()` 一个可能不存在的按钮）
+  assert.match(src, /export function mountXiaoya\(\{mode = 'popup', host = null, contextProvider = null, entryButton\} = \{\}\)/,
+    '挂载选项要收 `entryButton`（不传 = 与改动前逐字一样）');
+  assert.match(src, /const wantButton = entryButton !== false;/,
+    '只有**明确传 false** 才不造入口（`undefined` 必须保持现状：box.html / workshop.html 不变）');
+  assert.match(src, /if \(wantButton\) \{/, '按钮的创建要被它挡住');
+  assert.match(src, /open: \(\) => \{ if \(panel && !panel\.isOpen\(\)\) panel\.setOpen\(true\); \}/,
+    'handle.open() 走真开关（没有 FAB 时也真的开）');
+  assert.match(src, /close: \(\) => \{ if \(panel && panel\.isOpen\(\)\) panel\.setOpen\(false\); \}/,
+    'handle.close() 同理');
+  // ⚠ 改钉不删：旧写法原文留档（FAB 不存在时 `?.click()` 是空转，把手返回了面板没动）。
+  //    旧断言（当时钉的就是"复用真按钮的 handler"）：
+  //      assert.match(src, /open: \(\) => \{ if \(!handle\.isOpen\(\)\) document\.getElementById\('xiaoya-open'\)\?\.click\(\); \}/);
+  //    判据只认**代码行**，不认留档注释（同 ⑮ 那条口径）：先摘掉 `/* … */` 块注释，再丢掉整行 `//` 注释。
+  const codeLines = src.replace(/\/\*[\s\S]*?\*\//g, '')
+    .split('\n').filter((line) => !line.trim().startsWith('//')).join('\n');
+  assert.doesNotMatch(codeLines, /document\.getElementById\('xiaoya-open'\)\?\.click\(\)/,
+    '`?.click()` 那一套必须消失（`entryButton:false` 时它是空转）');
+  assert.match(src, /旧写法原文留档[\s\S]{0,300}document\.getElementById\('xiaoya-open'\)\?\.click\(\)/,
+    '改钉不删：旧写法原文留在注释里（日期 + 依据）');
+  // ② 默认档不许变：`#xiaoya-open` / `#xiaoya-close` 仍然造（判据 regression-key-questions 在 box.html 上点它）
+  assert.match(src, /button\.id = 'xiaoya-open';/, '默认档仍然有 #xiaoya-open');
+  assert.match(src, /id="xiaoya-close"/, '面板自己的关闭按钮不许动');
+  assert.match(src, /setOpen,/, '真开关要能被把手拿到');
+  assert.match(src, /hasEntryButton: wantButton/, '有没有入口按钮要如实报出来（验收读它，不数 DOM 猜）');
+  // ③ 真函数：把一个最小 DOM 装上，`entryButton:false` 时页面上不许出现那个 id，而 open() 必须真的开
+  const {mountXiaoya} = await import('../src/client/xiaoya.js');
+  const doc = fakeDom();
+  const previous = {document: globalThis.document, window: globalThis.window,
+    localStorage: globalThis.localStorage, location: globalThis.location};
+  Object.assign(globalThis, {document: doc, window: doc.defaultView, location: {search: '', href: 'http://x/'}});
+  try {
+    const handle = mountXiaoya({mode: 'popup', entryButton: false});
+    assert.ok(handle, '要返回把手');
+    assert.equal(doc.getElementById('xiaoya-open'), null, '`entryButton:false` ⇒ 页面上**不许**有第二个入口按钮');
+    assert.equal(doc.getElementById('xiaoya-pop')?.hidden, true, '面板初始是收起的');
+    assert.equal(handle.hasEntryButton(), false, '把手如实说"这一份没有入口按钮"');
+    handle.open();
+    assert.equal(handle.isOpen(), true, '没有 FAB 时 handle.open() 必须真的把面板打开（旧写法在这一步空转）');
+    assert.equal(doc.getElementById('xiaoya-pop')?.hidden, false);
+    handle.close();
+    assert.equal(handle.isOpen(), false, 'handle.close() 同理');
+    // ④ 反证：同一个把手在**默认档**下必须造按钮 —— 否则"唯一入口"就把 box.html 的入口也砍掉了
+    doc.body.dataset.xiaoyaMounted = 'no';
+    const boxHandle = mountXiaoya({mode: 'popup'});
+    assert.ok(doc.getElementById('xiaoya-open'), '默认档（不传 entryButton）必须仍然造 #xiaoya-open');
+    assert.equal(boxHandle.hasEntryButton(), true);
+    boxHandle.open();
+    assert.equal(boxHandle.isOpen(), true);
+    // 挂载会顺手发起几件异步事（能力状态探针 / 模型三格）：等它们在这个假 DOM 上跑完再收工，
+    // 否则它们在测试结束后才落到 `document.body` 上 —— 那是"测试尾巴上炸"，不是产品的问题。
+    await new Promise((resolve) => setTimeout(resolve, 150));
+  } finally {
+    Object.assign(globalThis, previous);
+  }
+});
+
+//: 一份够 `mountXiaoya` 起步的最小 DOM（不是 jsdom：本仓的判据一律不引第三方依赖）。
+function fakeDom() {
+  class Node {
+    constructor(tag = null) {
+      this.tagName = String(tag ?? '').toUpperCase(); this.children = []; this.parentNode = null;
+      this.dataset = {}; this.attributes = {}; this.style = {}; this.hidden = false;
+      this.textContent = ''; this._html = '';
+    }
+    set className(value) { this._class = value; } get className() { return this._class ?? ''; }
+    // ⚠ id 要**登记**：`injectPopup()` 是 `pop.id = 'xiaoya-pop'` 这样写的，
+    //   而 `handle.isOpen()` 读 `document.getElementById('xiaoya-pop')` —— 不登记就永远量不到。
+    set id(value) { this.attributes.id = String(value); byId.set(String(value), this); }
+    get id() { return this.attributes.id ?? ''; }
+    set innerHTML(value) { this._html = String(value); } get innerHTML() { return this._html; }
+    set type(value) { this.attributes.type = value; } get type() { return this.attributes.type ?? ''; }
+    append(...nodes) { for (const node of nodes) this.appendNode(node); }
+    appendNode(node) {
+      if (node == null) return node;
+      if (typeof node === 'string') { this.textContent += node; return node; }
+      node.parentNode?.remove?.(node);
+      node.parentNode = this; this.children.push(node); return node;
+    }
+    insertBefore(node, ref) {
+      const at = ref == null ? this.children.length : this.children.indexOf(ref);
+      this.appendNode(node);
+      const moved = this.children.pop();
+      this.children.splice(at < 0 ? this.children.length : at, 0, moved);
+      return moved;
+    }
+    replaceChildren() { for (const child of this.children) child.parentNode = null; this.children = []; }
+    remove() { this.parentNode?.removeChild?.(this); }
+    removeChild(node) { const at = this.children.indexOf(node); if (at >= 0) this.children.splice(at, 1); return node; }
+    querySelector() { return null; }
+    querySelectorAll() { return []; }
+    setAttribute(name, value) { this.attributes[name] = String(value); }
+    getAttribute(name) { return this.attributes[name] ?? null; }
+    removeAttribute(name) {
+      if (name === 'id') { byId.delete(String(this.attributes.id ?? '')); delete this.attributes.id; return; }
+      delete this.attributes[name];
+    }
+    hasAttribute(name) { return Object.hasOwn(this.attributes, name); }
+    addEventListener() {}
+    removeEventListener() {}
+    scrollIntoView() {}
+    getContext() { return null; }
+    focus() {}
+    insertAdjacentHTML() {}
+    get scrollTop() { return this._scrollTop ?? 0; } set scrollTop(value) { this._scrollTop = value; }
+    get scrollHeight() { return 0; } get clientHeight() { return 0; }
+    getBoundingClientRect() { return {top: 0, left: 0, width: 0, height: 0, right: 0, bottom: 0}; }
+  }
+  const byId = new Map();
+  const doc = new Node('#document');
+  //: `window` 也要够用（`mountXiaoya` 会在它上面挂 popstate/hashchange/自定义事件的监听）。
+  doc.defaultView = {addEventListener() {}, removeEventListener() {}, location: {search: ''}, rocoDemo: null};
+  doc.head = new Node('head'); doc.body = new Node('body');
+  doc.documentElement = new Node('html');
+  doc.getElementById = (id) => byId.get(id) ?? null;
+  // 页面里那几个**静态** id（真实页面由 HTML 写好）；其余（面板 / 状态两行 / 收起区）由 `mountXiaoya` 自己造。
+  for (const id of ['xiaoya-log', 'xiaoya-form', 'xiaoya-input', 'xiaoya-send', 'xiaoya-status', 'xiaoya-quick']) {
+    const node = new Node('div'); node.id = id;
+    // `#xiaoya-log` 要有父节点：状态那几块是 `log.parentNode.insertBefore(...)` 插进去的。
+    if (id === 'xiaoya-log') doc.body.append(node);
+  }
+  doc.createElement = (tag) => new Node(tag);
+  doc.addEventListener = () => {};
+  return doc;
+}
+
+test('㉒ U07-④ 连通状态不自相矛盾：答完那一句自己的证据必须写进状态行', async () => {
+  const {capabilityEvidenceOf, capabilityLines} = await import('../src/client/xiaoya.js');
+  // ① 云端答过 ⇒ 证据说"模型此刻在"；这一行就**不许**再写"状态未知"（截图 08 的逐字矛盾）
+  const deep = capabilityEvidenceOf({provider: 'deepseek', text: '嗯', toolTrace: [{tool: 'query_rules'}]},
+    {roco_battle: {ruleset_config_id: 'mobile_s4_candidate_v3'}});
+  assert.equal(deep.model, 'ok', '`provider:deepseek` 就是"云端模型此刻确实在"的证据');
+  assert.equal(deep.tools, 'ok', '带了工具回执 ⇒ 本机规则服务刚刚真的跑过');
+  assert.equal(deep.rulesetId, 'mobile_s4_candidate_v3', '这一局绑定的规则配置要从上下文里取出来（已知就要写出来）');
+  const lines = capabilityLines({tools: deep.tools, model: deep.model, rulesetId: deep.rulesetId});
+  assert.match(lines.modelLine, /云端模型：已连接/, '模型答过就必须写"已连接"');
+  assert.doesNotMatch(lines.modelLine, /状态未知|未连接/, '同一屏里不许一边说模型答了、一边说不知道模型在不在');
+  assert.match(lines.toolsLine, /资料查询：可用/, '工具刚跑过就必须写"可用"');
+  assert.match(lines.toolsLine, /规则集 mobile_s4_candidate_v3/, '规则集已知要逐字写出来');
+  // ② 规则服务**确实不在**时如实说不存在（不许含糊成"未知"）
+  const down = capabilityEvidenceOf({provider: 'local', text: '这条要查服务端的资料，但这份资料现在用不了。',
+    taskFailure: {missing: '本机规则服务（规则 / 图鉴 / 相性表）没连上'}});
+  assert.equal(down.tools, 'down', '回答点名缺规则服务 ⇒ 状态行说"不可用"，不是"未知"');
+  assert.match(capabilityLines({tools: 'down', missing: ['本机规则服务（规则 / 图鉴 / 相性表）没连上']}).toolsLine,
+    /资料查询：不可用/);
+  // ③ 没有证据时**一个字都不许改**（改钉不删：旧文案原文留档，探针说不清就是这两句）
+  assert.deepEqual(capabilityEvidenceOf({provider: 'local', text: '嗯', evidence: [{k: 1}]}, null),
+    {model: null, tools: null, rulesetId: null}, '只有 evidence、没有工具回执，不够格说"规则服务跑过"');
+  const silent = capabilityLines({tools: 'unknown', model: 'unknown'});
+  assert.equal(silent.toolsLine, '资料查询：还没拉起来（规则服务是第一次查询才启动的；问一句就会拉起它）');
+  assert.equal(silent.modelLine, '云端模型：状态未知（只影响自由发挥的文字）');
+  // ④ 探针说"没连"时仍然要**明说**（判据 live-model-status 的正则 `/未连接|没连|未连/` 不许破）
+  assert.match(capabilityLines({tools: 'unknown', model: 'off'}).modelLine, /未连接/);
+  // ⑤ 接线：答完那一刻先按证据同步重画，再去问探针（顺序反了就会留一帧自相矛盾）
+  const src = read('src/client/xiaoya.js');
+  assert.match(src, /const noteAnswerEvidence = \(answer, context = null\) => \{/);
+  assert.match(src, /paintCapability\(probeInfo\);\s*\n\s*void refreshCapability\(true\);/,
+    '先按证据重画（同步），再刷新探针（异步）');
+  assert.match(src, /noteAnswerEvidence\(answer, context\);/, 'ask() 里要真的调它（函数对了不等于接上了）');
+  // ⑥ 探针读不到时也不许把刚证实的真相改口（"这一句就是模型答的"不能说成"未连接"）
+  assert.match(src, /const model = answerEvidence\.model === 'ok' \? 'ok' : 'unknown';/,
+    '探针失败那一支要按回答证据说，不许一律写 offline');
+});
+
+test('㉓ U07-③ 新消息不许顶掉阅读位置：贴底才跟随，否则原地不动 + 提示', async () => {
+  const {readingPositionOf} = await import('../src/client/xiaoya.js');
+  // ① 纯函数：底部跟随 / 读历史不跟随 —— 两侧都钉住
+  assert.equal(readingPositionOf({scrollTop: 700, scrollHeight: 1000, clientHeight: 300}).following, true,
+    '贴底 ⇒ 跟随（新消息跟着走）');
+  assert.equal(readingPositionOf({scrollTop: 0, scrollHeight: 1000, clientHeight: 300}).following, false,
+    '往上翻了 700px ⇒ 不许跟随（位置要保持）');
+  assert.equal(readingPositionOf({scrollTop: 0, scrollHeight: 300, clientHeight: 300}).following, true,
+    '内容还没超出一屏 ⇒ 算贴底');
+  assert.equal(readingPositionOf({scrollTop: 660, scrollHeight: 1000, clientHeight: 300}).following, true,
+    '距底 40px（滚动条取整/半行的高度）仍然算贴底，不许因为一点点误差就不跟随');
+  assert.equal(readingPositionOf({scrollTop: 640, scrollHeight: 1000, clientHeight: 300}).following, false,
+    '距底 60px（超过阈值）就是"在读历史"，不许跟随');
+  // ② 接线：`addEntry` 必须**先量位置再 append**，并且不许再无条件贴底
+  const src = read('src/client/xiaoya.js');
+  assert.match(src, /const \{following\} = readingPosition\(\);/, 'append 之前先量');
+  assert.match(src, /if \(following\) log\.scrollTop = log\.scrollHeight;/,
+    '只有"本来就在底部"才贴底');
+  assert.match(src, /else \{ log\.scrollTop = keep; newMsg\.hidden = false; \}/,
+    '读历史时写回原位置并给"有新消息"提示');
+  // ⚠ 改钉不删：旧写法原文留档（无条件贴底 = 把阅读位置顶掉，用户截图那一屏就是这么丢的）。
+  //    旧断言（当时钉的是"新消息一定要看得见"）：
+  //      assert.match(src, /log\.append\(entry\);\s*\n\s*if \(log\) log\.scrollTop = log\.scrollHeight;/);
+  assert.doesNotMatch(src, /log\.append\(entry\);\s*\n\s*if \(log\) log\.scrollTop = log\.scrollHeight;/,
+    '无条件贴底那一句必须消失');
+  assert.match(src, /id = 'xy-new-msg'/, '要有"↓ 有新消息"提示（不是静默不跟随）');
+  assert.match(src, /if \(readingPosition\(\)\.following\) newMsg\.hidden = true;/,
+    '玩家自己滚回底部 ⇒ 提示消失');
+});
+
+test('㉔ U07-② 版式：标题栏与输入行固定、对话区独立滚动、次级区默认收起', () => {
+  const css = read('src/client/style.css');
+  // ⚠ 判据只认**代码**，不认"改钉不删"的留档注释（同 ⑮ 那条口径：注释里当然有旧写法）。
+  const cssCode = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const src = read('src/client/xiaoya.js');
+  // ① 对话区是**唯一**的滚动块：flex 收缩 + min-height:0 + 自己滚 + 不把滚动传给整页
+  assert.match(cssCode, /\.xy-log\{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain/,
+    '中间对话区独立滚动（min-height:0 是它能被压缩的前提；overscroll-behavior 挡住整页跟着滚）');
+  // ⚠ 改钉不删：旧规则原文留档（`min-height:60px` 是地板，次级区展开时把输入行挤出面板）：
+  //    .xy-log{flex:1;overflow-y:auto;margin:10px 0;min-height:60px}
+  assert.doesNotMatch(cssCode, /\.xy-log\{flex:1;overflow-y:auto;margin:10px 0;min-height:60px\}/,
+    '旧那条会顶出输入行的规则必须从代码里消失');
+  // ② 输入行与快捷问不参与压缩（钉在面板底部）
+  assert.match(cssCode, /\.xy-form\{display:flex;gap:7px;flex:0 0 auto\}/);
+  assert.match(cssCode, /\.xy-quick\{[^}]*flex:0 0 auto\}/);
+  // ③ 高度：给底部动作坞留位置（`--bottombar`），不再是一个"没算动作坞"的死高度
+  assert.match(cssCode, /height:clamp\(320px,calc\(100dvh - 82px - var\(--bottombar,0px\)\),620px\)/,
+    '面板高度要跟着视口与底部动作坞算 —— 不遮挡主要战斗动作');
+  assert.doesNotMatch(cssCode, /height:min\(560px,calc\(100dvh - 82px\)\)/,
+    '旧那个没给动作坞留位置的高度必须从代码里消失');
+  assert.match(css, /旧规则留档[\s\S]{0,400}height:min\(560px,calc\(100dvh - 82px\)\)/,
+    '改钉不删：旧高度原文留在注释里（日期 + 依据）');
+  // ④ 二级区默认收起，且**同名 id 一个都不许丢**（判据 ⑲/⑳ 与 demo-acceptance 都按这些名字读）
+  assert.match(src, /const more = document\.createElement\('details'\);/, '二级区是个 <details>');
+  assert.match(src, /more\.id = 'xy-fold-more';/);
+  assert.match(src, /moreBody\.append\(actions, memoryPanel, statusFold\);/,
+    '动作 / 记忆 / 模型三格搬进收起区（id 不变）');
+  assert.match(src, /moreBody\.append\(roles\);/, '身份那一排也在收起区');
+  assert.doesNotMatch(src, /moreBody\.append\([^)]*capEl/, '`#model-chip` **不许**进收起区（判据要它一直可见、高度 ≥24）');
+  assert.match(src, /meta\.append\(capEl, chip\);/, '两行状态常驻在 .xy-pop-meta');
+  // ⑤ 单独页面（xiaoya.html）也是同一套三层：四行网格，对话那行才是 1fr
+  assert.match(cssCode, /\.xy-page-body\{display:grid;grid-template-rows:auto auto minmax\(0,1fr\) auto;/,
+    'page 模式：状态/收起区/对话(1fr，唯一滚动)/输入');
+});
+
+
+// ── U08（2026-09-30，task-04）：局中建议卡片 —— 面板只渲染 + 只广播 ──────────────
+//
+// 这一组钉的是"客户端那一半"的契约（Lead 在 `roco.js` 里绑的是同一条事件）：
+//   ① 有 `rocoAdvice` 才画卡片，画在气泡里、默认收起，五行齐全（**风险永远有**）；
+//   ② 没有 `rocoAdvice`（或只有一句空话）⇒ **不画**，也不许退化成「你自己定/说说你倾向哪边」；
+//   ③ 按钮只做一件事：`document.dispatchEvent(new CustomEvent('roco:advice-adopt',
+//      {detail:{advice, mode}}))` —— 面板不碰对局状态、不自己发 `/api/roco/*`、不执行动作；
+//   ④ 上屏文字里不许有 `hint-budget` / `below-threshold` 这类内部 token（截图 09 就是被它脏的）。
+
+/** U08 的一份**真实形状**夹具（逐字照 `src/coach/coach-advice.js` 的 `adviceForPosition()` 产出）。 */
+const ADVICE = {
+  headline: '换火神上场',
+  reason: '对手是草系，它这一手大概率打你水系',
+  upside: '换上去之后你扛草系 ×0.5',
+  risk: '但对方可能换成电系，那一只没有抗性',
+  alternates: [{label: '继续出招', note: '留着聚能，下回合爆发'}],
+  unknown: ['对手这一回合的选择'],
+  actionLabel: '换上第2位', actionKind: 'switch', legalActionId: 'switch#2:换上第2位', legalIndex: 2,
+  action: {legalActionId: 'switch#2:换上第2位', legalIndex: 2, kind: 'switch', label: '换上第2位', display: '火神'},
+  kind: 'switch-advantage',
+};
+
+test('㉕ U08：建议卡片的五段与两个按钮（风险永远在；只有 action 才画「采用建议」）', async () => {
+  const {adviceCardOf, ADVICE_RISK_FALLBACK} = await import('../src/client/xiaoya.js');
+  const card = adviceCardOf(ADVICE);
+  assert.equal(card.headline, '换火神上场', '首选行动用服务端的 headline');
+  assert.equal(card.reason, '对手是草系，它这一手大概率打你水系');
+  assert.equal(card.upside, '换上去之后你扛草系 ×0.5');
+  assert.equal(card.risk, '但对方可能换成电系，那一只没有抗性', '风险段必须原样带出来');
+  assert.deepEqual(card.alternates, [{label: '继续出招', note: '留着聚能，下回合爆发'}]);
+  assert.equal(card.action.legalActionId, 'switch#2:换上第2位', '可执行目标原样交给宿主（面板不解析、不执行）');
+  // ① headline 缺席 ⇒ 退到 action.display（Lead 给的第二顺位），不是退成一句废话
+  assert.equal(adviceCardOf({...ADVICE, headline: null}).headline, '火神');
+  // ② **风险不许省**：服务端没写风险 ⇒ 画兜底话（不是空行、不是"未提供"）
+  const noRisk = adviceCardOf({...ADVICE, risk: null});
+  assert.equal(noRisk.risk, ADVICE_RISK_FALLBACK);
+  assert.match(noRisk.risk, /没写.*不等于.*没风险/);
+  // ③ 理由缺席就是空（如实说没有 —— 不许编一个理由），收益缺席同样不画这一行
+  assert.equal(adviceCardOf({...ADVICE, reason: ''}).reason, '');
+  assert.equal(adviceCardOf({...ADVICE, upside: undefined}).upside, '');
+  // ④ 反证：没有建议 / 只有空壳 ⇒ **不画卡片**（U08 反证那一档）
+  assert.equal(adviceCardOf(null), null);
+  assert.equal(adviceCardOf('换上火神'), null);
+  assert.equal(adviceCardOf({}), null, '空对象 ⇒ 不画（不许因为它没字段就编一张卡）');
+  assert.equal(adviceCardOf({headline: '   ', action: null}), null);
+});
+
+test('㉖ U08：卡片真的画进气泡里（最小 DOM 上跑真函数）—— 默认收起 + 只广播，不执行', async () => {
+  const src = read('src/client/xiaoya.js');
+  // ① 接线：`addEntry` 里由**回答**带着 `rocoAdvice` 才画（历史轮次没有结构化建议，不画空壳）
+  assert.match(src, /if \(answer\?\.rocoAdvice\) decorateAdvice\(entry, answer\.rocoAdvice, setStatus\);/,
+    '卡片接线在 addEntry 里、只有服务端给了 rocoAdvice 才画');
+  // ② 面板不许自己执行：不碰对局状态、不自己发 roco 接口、不调宿主行动
+  //    （只切 `decorateAdvice` **这一个函数体** —— 别把后面 mountXiaoya 里的请求也切进来。）
+  const adviceBlock = src.slice(src.indexOf('export function decorateAdvice'),
+    src.indexOf('/**\n * 「正在看谁」那一行 + 两个动作按钮的样式。'));
+  assert.ok(adviceBlock.includes('return fold;'), '切片要正好落在 decorateAdvice 函数体上');
+  assert.doesNotMatch(adviceBlock, /fetch\(|playAction|rocoDemo|state\.view/, '建议卡片这一层不许执行/请求任何东西');
+  assert.match(adviceBlock, /document\.dispatchEvent\(new CustomEvent\(ADVICE_EVENT, \{detail: \{advice, mode\}\}\)\);/,
+    '唯一的动作 = 广播这一条事件（detail 形状与宿主约定逐字一致）');
+  assert.match(src, /export const ADVICE_EVENT = 'roco:advice-adopt';/, '事件名与 Lead 绑定的一致');
+  // ③ 真 DOM（最小实现）：画出来的卡片默认收起、五段齐全、两个按钮都在、点了只广播
+  const doc = fakeDom();
+  const previous = {document: globalThis.document, window: globalThis.window,
+    localStorage: globalThis.localStorage, location: globalThis.location};
+  Object.assign(globalThis, {document: doc, window: doc.defaultView, location: {search: '', href: 'http://x/'}});
+  try {
+    const {decorateAdvice} = await import('../src/client/xiaoya.js');
+    const bubble = doc.createElement('div');
+    const notices = [];
+    const fired = [];
+    doc.dispatchEvent = (event) => { fired.push(event); return true; };
+    const card = decorateAdvice(bubble, ADVICE, (text) => notices.push(text));
+    assert.ok(card, '要画出一张卡');
+    assert.equal(card.tagName, 'DETAILS');
+    assert.equal(card.open, undefined, '默认**收起**（不是展开）');
+    assert.equal(bubble.children.includes(card), true, '卡片在回答气泡**里面**');
+    const rows = card.children.find((n) => n.className === 'xy-advice-body').children
+      .filter((n) => n.className === 'xy-advice-row').map((n) => n.dataset.xyAdviceRow);
+    assert.deepEqual(rows, ['reason', 'upside', 'risk', 'alternate'],
+      '四行按名字画（理由/收益/风险/备选）；首选行动在 summary 上');
+    assert.match(card.children[0].textContent, /首选行动：换火神上场/);
+    const buttons = card.children.find((n) => n.className === 'xy-advice-body').children
+      .filter((n) => n.className === 'xy-advice-actions')[0].children;
+    assert.deepEqual(buttons.map((b) => b.id), ['xiaoya-advice-view', 'xiaoya-advice-adopt']);
+    assert.deepEqual(buttons.map((b) => b.textContent), ['查看', '采用建议']);
+    // ④ 「查看」= mode view；「采用」= mode adopt；两者都只是**广播**
+    buttons[0].onclick();
+    buttons[1].onclick();
+    assert.deepEqual(fired.map((e) => [e.type, e.detail.mode, e.detail.advice.headline]),
+      [['roco:advice-adopt', 'view', '换火神上场'], ['roco:advice-adopt', 'adopt', '换火神上场']]);
+    assert.equal(notices.length, 2, '两次点击各回一句人话（"没有替你点" / "交给这一页"）');
+    assert.match(notices[0], /没有.*替你点/);
+    assert.match(notices[1], /交给这一页/);
+    // ⑤ 只有 action 存在才画「采用建议」；没有 action ⇒ 只画「查看」，且 detail 里照样带原 advice
+    const bubble2 = doc.createElement('div');
+    const card2 = decorateAdvice(bubble2, {...ADVICE, action: null}, null);
+    const buttons2 = card2.children.find((n) => n.className === 'xy-advice-body').children
+      .filter((n) => n.className === 'xy-advice-actions')[0].children;
+    assert.deepEqual(buttons2.map((b) => b.id), ['xiaoya-advice-view'], '没有可执行目标就不给「采用建议」');
+    assert.equal(doc.getElementById('xiaoya-advice-adopt'), null, '旧卡上的 id 要摘掉（同名 id 只有一组）');
+    // ⑥ 反证：把 rocoAdvice 拿掉 ⇒ 这一个函数什么都不画（不是画一张空卡）
+    assert.equal(decorateAdvice(doc.createElement('div'), null), null);
+    assert.equal(decorateAdvice(doc.createElement('div'), {headline: ''}), null);
+  } finally {
+    Object.assign(globalThis, previous);
+  }
+});
+
+test('㉗ U08/U09：内部 token 不许上屏（hint-budget / below-threshold 那一类）', async () => {
+  const {sanitizeAdviceText, adviceCardOf} = await import('../src/client/xiaoya.js');
+  // 截图 09 的原话脏点：`依据 hint-budget` / `below-threshold`
+  assert.equal(sanitizeAdviceText('依据 hint-budget'), '依据');
+  assert.equal(sanitizeAdviceText('（below-threshold）'), '');
+  assert.equal(sanitizeAdviceText('这一手值得留到局后看一看（hint-budget）'), '这一手值得留到局后看一看');
+  assert.equal(sanitizeAdviceText('规则配置 pvp-standard-six-pet 里的天气声明'),
+    '规则配置 里的天气声明');
+  // 不许误伤：中文、数字、大写缩写、乘号都不动
+  assert.equal(sanitizeAdviceText('扛草系 ×0.5，PVP 第 3 回合'), '扛草系 ×0.5，PVP 第 3 回合');
+  assert.equal(sanitizeAdviceText('换上第2位（火神）'), '换上第2位（火神）');
+  // 卡片里也一样干净（值走同一个清洗口）
+  const card = adviceCardOf({headline: '换火神上场 below-threshold', reason: '对手是草系 hint-budget',
+    risk: '对方可能换电系 below-threshold', action: {label: '换上第2位'}});
+  assert.equal(card.headline, '换火神上场');
+  assert.equal(card.reason, '对手是草系');
+  assert.doesNotMatch(card.risk, /below-threshold|hint-budget/);
+});

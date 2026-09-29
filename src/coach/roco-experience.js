@@ -16,7 +16,7 @@
 // 也就不会顺着投影漏进任何提示文案。
 
 import {interventionDetail,interventionFeaturesOfGame} from './experience.js';
-import {coachAdvice, normaliseAdviceShape} from './coach-advice.js';
+import {coachAdvice, adviceForView, normaliseAdviceShape} from './coach-advice.js';
 import {reviewMatch, checkLearningProgress, teacherMatchFacts} from './teacher-review.js';
 
 /** 手游 3v3 训练场在旧引擎口径下的「模式」：它属于本地 PvE 练习。 */
@@ -67,6 +67,13 @@ export function rocoGameView(view, {matchId = null} = {}) {
     // `battle_result` 是这局的结果（null = 进行中）。经验层用 `result` 判断「已结束」。
     result: view.battle_result ?? null,
     phase: view.phase ?? null,
+    // 哪一方**必须补位**（引擎的 `needs_replacement`）。这一栏是「我方倒下」的唯一权威信号：
+    // `phase==='replace'` 是**双方共用**的阶段名 —— 对手倒下轮到他补位时，我方的合法动作
+    // 同样只有 switch（引擎在补位阶段对两边都只发换人），拿「合法动作全是换人」或「阶段是 replace」
+    // 判「我方必须补位」都会误报（2026-09-29 真 8765 六宠局 t8 实测：对面喵喵倒下、
+    // 我方多彩方方还活着 246/360，旧判据却让气泡说「你的多彩方方倒了」）。
+    // 加性：视图没给就是空表（老调用方一字不变）。
+    needsReplacement: Array.isArray(view.needs_replacement) ? view.needs_replacement.slice() : [],
     turn: Number.isFinite(view.turn) ? view.turn : 0,
     player: {
       active: Number.isInteger(self.active) ? self.active : 0,
@@ -899,6 +906,11 @@ export function battleLoadouts({loadouts = null, teamSpecies = null, slots = nul
 export function rocoMatchReview({
   matchId = null, finalView = null, lastLiveView = null,
   events = [], turns = null, result = null, memory = null, skills = null,
+  // U10（加性）：**逐回合的合法行动表**。引擎每次推进只回**当前**那一回合的 `legal`，
+  // 所以「转折点那一回合当时还能选什么」只能由调用方边打边攒（`{回合号: view.legal}`）。
+  // 不送（`undefined`）时行为与以前**逐字节相同**（复盘不提合法替代）；
+  // 送 `{}`＝「明确要这一栏但手里没有表」⇒ 复盘如实写「查不到，不编」。
+  legalByTurn = undefined,
 } = {}) {
   const finalGame = rocoGameView(finalView, {matchId});
   const reviewGame = lastLiveView ? rocoGameView(lastLiveView, {matchId}) : finalGame;
@@ -909,6 +921,7 @@ export function rocoMatchReview({
     result: result ?? finalView?.battle_result ?? null,
     game: reviewGame,
     memory,
+    ...(legalByTurn === undefined ? {} : {legalByTurn}),
   });
   // ── 更深一层的事实（关键片段 / 资源账 / 一条有条件的下一步）────────────────
   //
@@ -937,13 +950,22 @@ export function rocoMatchReview({
  *     直接显示它 —— 这正是 F01 那条「状态变化撤销旧建议」要的证据。
  */
 export function rocoIntervention({view = null, session = null, plan = null, host = {}, now = Date.now()} = {}) {
+  // ── U09：**玩家主动问**不受自动提醒的频次预算误伤 ────────────────────────────
+  //
+  // 「每局 2 条 / 45 秒冷却 / 本回合已说过」管的是**主动打断**；玩家自己开口问，
+  // 这些记账就不该再拦他（否则「额度用尽」会变成「问了也不答」——用户截图 08 那类
+  // 无结论回答的一部分成因）。这里只换掉预算那几栏，**其余硬门控一个都不放松**：
+  // 安静档、线上竞技、失焦、陈旧、已结束、玩家点掉之后的自动开口，仍然照旧。
+  const askSession = host.explicit === true
+    ? {...session, dismissed: false, hints: 0, lastAt: -Infinity, said: new Set()}
+    : session;
   const game = rocoGameView(view, { matchId: host.matchId ?? null });
   const planFeatures = rocoPlanFeatures(plan);
   // 装配走经验层自己的那一个函数（只此一处字段清单），这里不重抄一遍。
   const features = interventionFeaturesOfGame({
     game,
     attention: null,
-    session,
+    session: askSession,
     mode: host.preference ?? 'gentle',
     now,
     host,
@@ -975,14 +997,53 @@ export function rocoIntervention({view = null, session = null, plan = null, host
   // 那就沉默——不为了「总得说点什么」退回旧模板。
   detail.advice = null;
   detail.advice_error = null;
+  // 建议的**来源**（诊断用，不是玩家文案）：'coach-advice' | 'deterministic-fallback' | null。
+  detail.advice_source = null;
+  // 规划与战况**必须同版**：对不上就整条丢开规划（只用战况事实），并如实记一笔。
+  // 页面侧 `rocoPlanFreshness()` 已经判过一次，这里是服务端的同一条口径 —— 拿一份属于
+  // 旧局面的规划去讲当前局面，比不讲糟得多（第 65 轮实测过的那种竞态）。
+  const planVersion = Number.isInteger(plan?.state_version) ? plan.state_version : null;
+  const viewVersion = Number.isInteger(view?.state_version) ? view.state_version : null;
+  const planStale = planVersion !== null && viewVersion !== null && planVersion !== viewVersion;
+  detail.plan_stale = planStale;
   try {
-    detail.advice = coachAdvice({game, plan, session, host});
+    detail.advice = coachAdvice({game, plan: planStale ? null : plan, session: askSession, host});
   } catch (error) {
     // 建议层出问题**不许**把整页搞挂，也不许退回旧模板：记下错误、这一手沉默，
     // 错误留给开发者面板。上下文留给排查，别吞掉。
     detail.advice_error = {message: String(error?.message ?? error).slice(0, 200),
       at: new Date().toISOString()};
   }
+  detail.advice_source = detail.advice ? 'coach-advice' : null;
+  // ── U09：分数层已经判「该说话」，而建议层一条都够不上时，用确定性兜底 ──────────
+  //
+  // 为什么必须有这一层（2026-09-29 Lead 在真机 24 手上量到的那一格）：
+  //   `{action:'silent', reason:'critical-risk', decisive:true, adviceKind:null}` ——
+  //   门控放行、分数判定要说话，而气泡一个字都没出。两个后果都不可接受：
+  //   ① 玩家在最需要一句话的那一手（例如场上那只倒了、或者只剩一两成血）什么都没拿到；
+  //   ② 回执看起来像「该说没说」，排障时分不清是分数没过线还是建议层没开口。
+  // 现在的契约：只要判决是 {micro_hint|action_hint|defer_to_review}，`detail.advice`
+  // **要么**有内容、**要么** `detail.speak_blocked_by` 写明是谁拦的。
+  const speakWanted = ['micro_hint', 'action_hint', 'defer_to_review'].includes(detail.action);
+  if (!detail.advice && speakWanted && !detail.advice_error) {
+    try {
+      detail.advice = adviceForView(view, planStale ? null : plan, {session: askSession});
+      if (detail.advice) detail.advice_source = 'deterministic-fallback';
+    } catch (error) {
+      detail.advice_error = {message: String(error?.message ?? error).slice(0, 200),
+        at: new Date().toISOString()};
+    }
+  }
+  // 「这一手谁拦的」——玩家可见文案之外的**结构化**回执（排障用；客户端不上屏）。
+  // 阶次与真实判定一致：硬门控 > 预算/冷却 > 分数没过线 > 建议层没话可说。
+  // 精确到**具体机制**，不写「advice-layer-silent」这种含糊值：排障时要一眼看出
+  // 「引擎这一轮没有任何合法动作」（通常意味着这一局要结算了）与「建议层没话可说」是两回事。
+  const legalEmpty = !Array.isArray(view?.legal) || view.legal.length === 0;
+  detail.speak_blocked_by = detail.advice ? null
+    : detail.gate ? `hard-gate:${detail.gate}`
+      : detail.action !== 'silent' ? (legalEmpty ? 'no-legal-action' : 'advice-layer-silent')
+        : detail.budget ? `budget:${detail.budget}`
+          : (detail.reason ?? 'below-threshold');
   return detail;
 }
 
@@ -996,19 +1057,32 @@ export function rocoIntervention({view = null, session = null, plan = null, host
  */
 export function rocoInterventionText(detail, plan) {
   if (!detail || detail.action === 'silent') return null;
-  if (detail.action === 'defer_to_review') {
-    return {text: '这一手值得留到局后看一眼。现在先按你的判断走。', why: detail.reason};
-  }
   // **建议层优先**。它看得到局面（换宠博弈 / 速度 / 能量 / 状态 / 后备 / 上一手），
   // 而 `plan` 只当作证据。它说 null 就沉默：硬说一句「引擎推荐 X」正是要修掉的毛病。
+  //
+  // ── U09（2026-09-29，用户截图 09 点名）──────────────────────────────────────
+  // 旧写法在 `defer_to_review` 那一支返回
+  //   「这一手值得留到局后看一眼。现在先按你的判断走。」+ `why: detail.reason`
+  // 两个问题都在玩家眼前发生过：
+  //   ① 正文**没有任何信息量**（没说风险、也没说能做什么）——「没有信息就沉默」；
+  //   ② `why` 直接把内部理由端上屏（截图 09 的「依据：hint-budget」就是这一支渲染的）。
+  // 现在：有没有建议决定说不说，`why` 一律是玩家能读的一句话，内部代号只进回执。
   const advice = detail.advice ?? null;
   if (advice) {
+    const reviewNote = detail.action === 'defer_to_review' ? '这一手来不及改也不打断你，留到局后一起看。' : null;
+    // 拼接要成句：建议层自己的句子可能以「」结尾（没有句号），直接接下一句会读成
+    // 「…别再硬用它这一手来不及改…」。这里只补一个句号，不改建议层一个字。
+    const body = reviewNote
+      ? (/[。！？]$/.test(advice.text) ? `${advice.text}${reviewNote}` : `${advice.text}。${reviewNote}`)
+      : advice.text;
     return {
-      text: advice.text,
+      text: body,
       // 「为什么是现在 + 一个关键风险」一起给玩家；工程术语只进展开证据。
-      why: [advice.why, advice.risk ? `风险：${advice.risk}` : null].filter(Boolean).join(' · '),
+      why: [advice.why, advice.risk ? `风险：${advice.risk}` : null, reviewNote].filter(Boolean).join(' · '),
       kind: advice.kind,
       evidence: advice.evidence,
+      // 机器可读那一栏（U08/U09）：客户端「查看 / 采用建议」按它回填当前合法动作表里的一项。
+      action: advice.action ?? null,
       shape: normaliseAdviceShape(advice.text),
     };
   }

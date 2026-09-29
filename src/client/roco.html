@@ -181,6 +181,29 @@
   </div>
   <p class="roco-result-stats" id="battle-result-stats"></p>
   <p class="roco-result-note" id="battle-result-note"></p>
+
+  <!-- ── 老师的复盘（局末）：一个关键错误或进步点 + 下一局目标；完整复盘折叠 ─────────
+       ⚠ 2026-09-29 U10 **搬家**：这一块原来在结算层**外面**、是 `<main>` 直接子元素
+         （`#battle-result-card` 之后那一节）。用户 2026-09-29 截图 10 报的正是它的后果：
+         结算框浮在屏幕中间，而复盘那条**通栏长条**插在背后的页面上，把整页往下挤一截
+         （`body[data-roco-view="ready"] main>#lesson-card` 那两条 display 规则就是为那位置写的）。
+       现在它**在结算框里面**，跟着结算框一起出现；`id` 一个都没改（`#lesson-question` /
+         `#lesson-learning` / `#lesson-progress` / `#lesson-note` / `#result-stats` / `#lesson-close`），
+        所以 `finishMatch()` 那几处写入与既有判据一字不动。
+       ⚠ 这一块里**没有任何游戏数据**：文字全部由 `rocoMatchReview()` 产出（页面不另拼一份）。 -->
+  <section class="panel lesson-card" id="lesson-card" hidden>
+   <div class="section-title"><h2>✦ 局末复盘</h2><span class="muted">一个关键点 + 下一局练一件事</span></div>
+   <p id="lesson-question" class="result-turn"></p>
+   <div class="result-goal"><b>下一局练一件事</b><span id="lesson-learning"></span></div>
+   <p class="muted" id="lesson-progress"></p>
+   <details class="lesson-full">
+    <summary>完整复盘与依据（默认收起）</summary>
+    <p class="muted" id="lesson-note"></p>
+    <p class="muted" id="result-stats"></p>
+   </details>
+   <p><button id="lesson-close" class="lesson-close">收起这次复盘</button></p>
+  </section>
+
   <div class="roco-result-actions">
    <!-- 2026-09-25 人类口径（第二版）：**逃跑/结束都走这一个弹框**，四个出口：
         首页 / 培养 / 再来一局（配队）/ 小芽。局中页眉不再有「直接去培养」那种旁路 ——
@@ -193,19 +216,9 @@
  </div>
 </div>
 
-<!-- 老师的复盘（局末）：一个关键错误或进步点 + 下一局目标；完整复盘折叠。 -->
-<section class="panel lesson-card" id="lesson-card" hidden>
- <div class="section-title"><h2>✦ 局末复盘</h2><span class="muted">一个关键点 + 下一局练一件事</span></div>
- <p id="lesson-question" class="result-turn"></p>
- <div class="result-goal"><b>下一局练一件事</b><span id="lesson-learning"></span></div>
- <p class="muted" id="lesson-progress"></p>
- <details class="lesson-full">
-  <summary>完整复盘与依据（默认收起）</summary>
-  <p class="muted" id="lesson-note"></p>
-  <p class="muted" id="result-stats"></p>
- </details>
- <p><button id="lesson-close" class="lesson-close">收起这次复盘</button></p>
-</section>
+<!-- ⚠ 2026-09-29 U10：这里原来是 `#lesson-card`（老师的复盘）。它现在**在结算框里面**
+     （见上面 `#battle-result-card` 里那一条注释）。留在页面上的位置**一个字都不写了** ——
+     复盘卡在背后页面顶部把整页挤下去，正是用户截图 10 报的那条缺陷。 -->
 
 <!-- ── 对战页：中央是双方当前宠物的战斗舞台 + 双方阵容状态 ──────────────────── -->
 <section class="panel battle" id="battle-panel" hidden>
@@ -383,7 +396,15 @@
      <div class="b3-slot-row" data-b3-pending="yes">
       <span class="b3-cost" data-b3-cost="0" data-b3-src="view.self.pets[target_index].energy">&#x2B50; 0</span>
       <span class="b3-slot-name" data-b3-switch-name="铠甲虫">铠甲虫</span>
-      <span class="b3-rel" data-b3-rel="unknown" data-b3-src="换上它打对手的属性倍率（up 克制对手 / down 被对手克制 / none 无影响）">
+      <span class="b3-rel" data-b3-rel="unknown"
+        data-b3-src="type-affinity 模块 incomingAffinity(view.self.pets[target_index].types, view.opponent.field.types)｜up 扛得住 / down 被克制 / none 无影响 / unknown 不画（U05 改钉，2026-09-29）"
+        title="换上它之后，按对手当前属性系推算的承伤相性">
+       <!-- ⚠ 2026-09-29 U05 **改钉**（旧值原地留档，别删）：
+              data-b3-src="换上它打对手的属性倍率（up 克制对手 / down 被对手克制 / none 无影响）"
+            为什么改：「换上它**打**对手」是进攻向，而这一格问的是「换上它**挨**打会怎样」——
+            进攻向的倍率来自引擎 `damage_preview.samples`，那一份只覆盖我现在的配招，
+            换个候选就没有样本（旧代码因此只能留空）。现在口径定成**承伤向**，数据来自冻结真值表，
+            候选一多也不会缺。技能格那条进攻向倍率**一个字没动**（两者不许混用）。 -->
        <svg class="b3-rel-up" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.2 L13.2 12.4 Q8 10.6 2.8 12.4 Z" fill="#5fd39a"/></svg>
        <svg class="b3-rel-down" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 12.8 L2.8 3.6 Q8 5.4 13.2 3.6 Z" fill="#ff8f8f"/></svg>
        <svg class="b3-rel-none" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="4.4" fill="#dfe8ef"/></svg>
@@ -554,6 +575,13 @@
         data-b3-src="hp / max_hp（**唯一允许的 inline style**，因为它是数据）"></div></div>
      </div>
     </div>
+    <!-- 我现在这一只的**承伤相性**（U05，2026-09-29）：对手当前属性各当一次攻击系，
+         取最坏那一格。与技能格那条**进攻向**倍率是两件事，措辞里就带「承伤」二字。
+         组合没登记 ⇒ hidden（一个字都不写），不许用"无影响"兜底。
+         data-b3-src 的旧值（原地留档，别删）：
+           "—（本卡无此格）" —— 这一格是 2026-09-29 U05 新增的，之前**没有**这一格。 -->
+    <div class="b3-threat" data-b3-self-threat="yes" hidden
+      data-b3-src="type-affinity 模块 incomingAffinity(view.self.pets[active].types, view.opponent.field.types)"></div>
     <div class="b3-free" data-b3-self-free="yes" data-b3-src="—（立绘/动画预留区，暂不放数据）"></div>
     <!-- buffs：引擎给了才写；没给就保留 ghost 占位（透明度 .32，表示「这个位置存在但没数据」） -->
     <div class="b3-buffs" data-b3-self-buffs="yes" data-b3-src="view.self.pets[active].buffs / .statuses（没给整条不写）">

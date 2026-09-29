@@ -235,17 +235,36 @@ export function checksNonIntrusion(records, seenShapes = null, options = {}) {
   // `recordHintSaid()` 的调用条件一致。
   const spoken = records.filter((r) => r.text);
   const interrupting = spoken.filter((r) => r.action === 'micro_hint' || r.action === 'action_hint');
+  // ⚠ 2026-09-29 改钉（U09，task-2 advice-engine）：额度只管**可以不说**的那些提醒。
+  // 用户验收原文：「倒下必须提示可换的合法存活精灵，不能预算用尽后沉默或继续推荐已倒下对象。」
+  // ⇒ 「我方必须补位/已倒下」那一档（`detail.unavoidable === true`，判据是
+  //   `situationRisk()>=1`）**穿过**额度与冷却，不再计入每局 2 次的打断上限。
+  // 旧判据留档（原文，别再改回来）：
+  //   const interrupting = spoken.filter((r) => r.action === 'micro_hint' || r.action === 'action_hint');
+  //   ok: interrupting.length <= 2
+  // 新判据把两类分开量：**可自行决定说或不说的**仍然 ≤2；不可逆那一档单独点名登记，
+  // 而且必须**点名一个当前合法动作**（不许拿一句含糊话顶）。
+  const unavoidableRows = interrupting.filter((r) => r.unavoidable === true);
+  const discretionary = interrupting.filter((r) => r.unavoidable !== true);
   checks.push({
     name: '① 军师真的出现了（自动开口 ≥1 次，不是一次都没说）',
     ok: spoken.length >= 1,
-    actual: `${spoken.length} 次产出（其中打断 ${interrupting.length} 次）`,
+    actual: `${spoken.length} 次产出（其中打断 ${interrupting.length} 次：可自行决定 ${discretionary.length} + 不可逆 ${unavoidableRows.length}）`,
     expected: '≥1 次',
   });
   checks.push({
-    name: '① 每局打断上限：micro_hint + action_hint ≤ 2（INTERVENTION_LIMITS.maxHintsPerMatch）',
-    ok: interrupting.length <= 2,
-    actual: `${interrupting.length} 次打断`,
+    name: '① 每局打断上限：可自行决定的 micro_hint + action_hint ≤ 2（INTERVENTION_LIMITS.maxHintsPerMatch）',
+    ok: discretionary.length <= 2,
+    actual: `${discretionary.length} 次打断（另有不可逆那一档 ${unavoidableRows.length} 次）`,
     expected: '≤2 次',
+  });
+  checks.push({
+    name: '① 不可逆那一档（我方倒下/必须补位）必须开口、且点名一个当前合法动作',
+    ok: unavoidableRows.length === 0 || unavoidableRows.every((r) => r.text && r.advice_action),
+    actual: unavoidableRows.length
+      ? unavoidableRows.map((r) => `t${r.turn}:${r.advice_action ?? '（没有点名动作）'}`).join('；')
+      : '（这一局没有出现不可逆那一档）',
+    expected: '0 次，或每次都带合法动作标识',
   });
   // 额度用尽之后**不许再打断**：后续所有产出都必须是 defer_to_review（留到局后），
   // 而不是继续弹气泡。这一条是可失败的：只要第 3 次仍然是 action_hint 就红。
@@ -258,16 +277,24 @@ export function checksNonIntrusion(records, seenShapes = null, options = {}) {
     }
     return out;
   })();
+  // ⚠ 2026-09-29 改钉（U09）：额度外的打断分两类 —— **可自行决定**的仍然一次都不许有；
+  // 「不可逆那一档」是 U09 明确要求穿过额度的，单独计数并如实登记（旧判据把所有
+  // 超额度打断一律记 0，会把「倒下被静默」和「多嘴」混成同一条）。
+  // 旧写法留档（原文）：
+  //   const overBudgetInterrupts = records.filter((r, index) => {... before >= 2});
+  //   ok: overBudgetInterrupts.length === 0
   const overBudgetInterrupts = records.filter((r, index) => {
     if (r.action !== 'micro_hint' && r.action !== 'action_hint') return false;
     const before = records.slice(0, index).filter((x) => x.action === 'micro_hint' || x.action === 'action_hint').length;
     return before >= 2;
   });
+  const overBudgetDiscretionary = overBudgetInterrupts.filter((r) => r.unavoidable !== true);
+  const overBudgetUnavoidable = overBudgetInterrupts.filter((r) => r.unavoidable === true);
   checks.push({
-    name: '① 额度用尽后不再打断：第 3 次起只能是 silent 或 defer_to_review（留到局后）',
-    ok: overBudgetInterrupts.length === 0,
-    actual: `超额度打断 ${overBudgetInterrupts.length} 次；额度外的产出 ${afterBudget.filter((x) => x.over_budget).length} 条（全部为 defer_to_review：${afterBudget.filter((x) => x.over_budget).every((x) => x.action === 'defer_to_review')}）`,
-    expected: '0 次超额度打断',
+    name: '① 额度用尽后不再打断：可自行决定的第 3 次起只能是 silent 或 defer_to_review（留到局后）',
+    ok: overBudgetDiscretionary.length === 0,
+    actual: `超额度打断 ${overBudgetDiscretionary.length} 次（另有不可逆那一档 ${overBudgetUnavoidable.length} 次，按 U09 必须开口：${overBudgetUnavoidable.map((r) => `t${r.turn}`).join('、') || '无'}）；额度外的产出 ${afterBudget.filter((x) => x.over_budget).length} 条（全部为 defer_to_review：${afterBudget.filter((x) => x.over_budget).every((x) => x.action === 'defer_to_review')}）`,
+    expected: '0 次超额度打断（可自行决定的那一类）',
   });
   // 去重：本局**产出过**的全部句子形状（数字不同也算同一句）不许重复。
   // 内核侧的去重开关是 `session.said`，页面默认打开；这里的回放把开关**关掉**，
