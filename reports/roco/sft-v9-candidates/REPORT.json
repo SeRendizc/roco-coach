@@ -7,39 +7,57 @@
   "按**语义族**分片（v1 按 case_id=措辞变体，288 个 vs 语义族 27 个）",
   "逐行打审查标记，并出逐条审查表"
  ],
- "source_file": "tests/evals/agent-trajectories-model-v1.jsonl",
- "source_rows": 1752,
+ "source_files": [
+  "tests/evals/agent-trajectories-model-v1.jsonl",
+  "tests/evals/agent-trajectories-v1.jsonl"
+ ],
+ "source_rows": 8664,
  "contract_version": "tools:97a79a115da6",
- "semantic_families_total": 19,
- "wording_variants_total": 214,
- "candidates": 94,
+ "semantic_families_total": 23,
+ "wording_variants_total": 276,
+ "candidates": 93,
  "per_split": {
-  "train": 60,
-  "valid": 12,
-  "test": 22
+  "train": 42,
+  "valid": 22,
+  "test": 29
  },
  "semantic_family_overlap_across_splits": [],
  "flagged": {
-  "reply_is_failure": 60,
-  "target_entity_not_in_question": 7,
-  "clean": 27
+  "reply_is_failure": 24,
+  "target_entity_not_in_question": 0,
+  "clean": 69
  },
+ "target_kinds_covered": [
+  "compare_team_change",
+  "evaluate_team",
+  "query_rules",
+  "stop"
+ ],
  "target_distribution": {
-  "stop": 82,
-  "query_rules": 12
+  "stop": 36,
+  "query_rules": 24,
+  "evaluate_team": 17,
+  "compare_team_change": 16
  },
  "rejected": {
-  "重复(问句,目标)": 930,
-  "执行回执 ok!==true": 34,
-  "缺问句或回答": 60
+  "重复(问句,目标)": 6501,
+  "执行回执 ok!==true": 245,
+  "缺问句或回答": 348
  },
- "missing_tool_coverage": {
-  "note": "Codex 要求\"补关键工具任务\"。这批录制**给不出**：非 query_rules 的工具回执 ok 全是 0。",
-  "measured": {
-   "compare_actions": "8 步 / ok 0",
-   "read_state": "4 步 / ok 0",
-   "read_last_turn": "3 步 / ok 0"
+ "key_tool_coverage": {
+  "note": "关键工具覆盖（Codex 要求\"补关键工具任务，不用扩大条数掩盖\"）—— 已用**第二份录制**补上。",
+  "first_attempt_error": "第一版只读一个文件，于是报告里写\"evaluate_team 这批给不出\"——**那句话是错的**。",
+  "measured_second_source": {
+   "evaluate_team": "101 步 / ok 101",
+   "compare_team_change": "94 步 / ok 94"
   },
-  "verdict": "必须另找成功录制或人工构造 —— 本脚本不编，也不靠加条数掩盖"
+  "still_missing": {
+   "compare_actions": "ok 0",
+   "read_state": "ok 0",
+   "read_last_turn": "ok 0",
+   "simulate_branch": "ok 0",
+   "read_evidence": "ok 0"
+  },
+  "verdict": "evaluate_team / compare_team_change 已可覆盖；其余仍缺 —— 如实列出，不编。"
  }
 }

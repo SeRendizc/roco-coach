@@ -42,7 +42,14 @@ import {fileURLToPath} from 'node:url';
 import {LOCAL_PLAN_TOOLS, TOOL_CONTRACTS, validToolArgs} from '../../src/coach/toolbox.js';
 
 const ROOT = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
-const SRC = join(ROOT, 'tests', 'evals', 'agent-trajectories-model-v1.jsonl');
+// ⚠ 2026-09-29（阶段 3）**补关键工具覆盖**：第一版只读了一个文件，
+// 于是我在报告里写了"compare_actions/evaluate_team 这批录制给不出"—— **那句话是错的**：
+// 仓里另一份 `agent-trajectories-v1.jsonl`（8.8MB）里，`evaluate_team` **101/101 ok**、
+// `compare_team_change` **94/94 ok**。所以候选集**可以**覆盖它们，**不必靠加条数掩盖**。
+const SRCS = [
+  join(ROOT, 'tests', 'evals', 'agent-trajectories-model-v1.jsonl'),
+  join(ROOT, 'tests', 'evals', 'agent-trajectories-v1.jsonl'),
+];
 const OUT_DIR = join(ROOT, 'reports', 'roco', 'sft-v9-candidates');
 const TARGET_SIZE = Number(process.env.ROCO_CANDIDATE_SIZE || 90);
 const VERSIONED = new Set(['query_rules', 'evaluate_team', 'compare_team_change', 'plan_actions', 'summarize_battle']);
@@ -71,8 +78,18 @@ const PET_NAMES = (() => {
   return map;
 })();
 
-const rows = readFileSync(SRC, 'utf8').split('\n').filter((l) => l.trim())
-  .map((l) => JSON.parse(l)).filter((r) => r.record_type === 'agent_trajectory');
+const rows = [];
+for (const src of SRCS) {
+  if (!existsSync(src)) continue;
+  for (const line of readFileSync(src, 'utf8').split('\n')) {
+    if (!line.trim()) continue;
+    let r; try { r = JSON.parse(line); } catch { continue; }
+    // ⚠ 两个文件的首行都是 **header**（`record_type: 'agent_trajectory_header'`）——
+    //    不过滤就会把 header 当成一条轨迹。
+    if (r.record_type !== 'agent_trajectory') continue;
+    rows.push({...r, __src: src.split('/').pop()});
+  }
+}
 
 const rejected = {};
 const reject = (why) => { rejected[why] = (rejected[why] ?? 0) + 1; };
@@ -121,7 +138,7 @@ for (const row of rows) {
   candidates.push({
     semantic_family: semanticFamily(row.case_id),
     wording_variant: String(row.case_id ?? ''),
-    source: `tests/evals/agent-trajectories-model-v1.jsonl#${row.traj_id}`,
+    source: `tests/evals/${row.__src}#${row.traj_id ?? row.case_id}`,
     message, screen: row.input?.mode === 'camp' ? 'camp' : 'battle',
     target, reply: reply.slice(0, 120),
     flags,
@@ -143,14 +160,41 @@ const sideOf = (family) => {
   const h = parseInt(hash(`${family}|candidates-v2`).slice(0, 4), 16) % 100;
   return h < 70 ? 'train' : (h < 85 ? 'valid' : 'test');
 };
+// ⚠ 2026-09-29（阶段 3）**第二个"先到先得"的坑，这次在族级**：
+// 第一版按族名排序取到 90 条就 `break` ⇒ 只写完**排序最前的 4 个族**
+// （`be-defense/be-energy/be-loss/cs-answered`），而携带 `evaluate_team` / `compare_team_change`
+// 的 `rc-eval` / `rc-swap` **永远轮不到** ⇒ 关键工具覆盖为 0。
+// ⇒ 按**目标工具种类**轮转选族，保证每种关键工具都真的进来，再按族补足。
+const kindOfTarget = (c) => (c.target.stop ? 'stop' : c.target.tool);
+const familyKind = new Map();
+for (const [family, items] of byFamily) {
+  const kinds = items.reduce((a, c) => (a[kindOfTarget(c)] = (a[kindOfTarget(c)] ?? 0) + 1, a), {});
+  familyKind.set(family, Object.entries(kinds).sort((a, b) => b[1] - a[1])[0][0]);
+}
+const byKind = new Map();
+for (const [family, items] of [...byFamily.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
+  const k = familyKind.get(family);
+  if (!byKind.has(k)) byKind.set(k, []);
+  byKind.get(k).push([family, items]);
+}
+// 轮转：每轮从每种工具各取一个族 ⇒ 种类覆盖先于条数
+const order = [];
+for (let i = 0; order.length < byFamily.size; i += 1) {
+  let added = false;
+  for (const list of byKind.values()) { if (list[i]) { order.push(list[i]); added = true; } }
+  if (!added) break;
+}
 const picked = [];
 const perSplit = {train: 0, valid: 0, test: 0};
-const families = [...byFamily.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1));
-for (const [family, items] of families) {
+const pickedKinds = new Set();
+for (const [family, items] of order) {
   const side = sideOf(family);
-  for (const c of items) picked.push({...c, side});
+  for (const c of items) { picked.push({...c, side}); pickedKinds.add(kindOfTarget(c)); }
   perSplit[side] += items.length;
-  if (picked.length >= TARGET_SIZE) break;
+  // 只有在**所有出现过的工具种类都已被覆盖**之后，才允许按条数截断
+  const allKinds = new Set([...byFamily.values()].flat().map(kindOfTarget));
+  const covered = [...allKinds].every((k) => pickedKinds.has(k));
+  if (picked.length >= TARGET_SIZE && covered) break;
 }
 const familyOfSide = (side) => new Set(picked.filter((c) => c.side === side).map((c) => c.semantic_family));
 const sharedFamilies = [];
@@ -167,7 +211,7 @@ const report = {
     '按**语义族**分片（v1 按 case_id=措辞变体，288 个 vs 语义族 27 个）',
     '逐行打审查标记，并出逐条审查表',
   ],
-  source_file: 'tests/evals/agent-trajectories-model-v1.jsonl',
+  source_files: SRCS.map((f) => f.replace(`${ROOT}/`, '')),
   source_rows: rows.length,
   contract_version: contractVersion,
   semantic_families_total: byFamily.size,
@@ -180,15 +224,19 @@ const report = {
     target_entity_not_in_question: picked.filter((c) => c.flags.includes('target_entity_not_in_question')).length,
     clean: picked.filter((c) => c.flags.length === 0).length,
   },
+  target_kinds_covered: [...new Set(picked.map((c) => (c.target.stop ? 'stop' : c.target.tool)))].sort(),
   target_distribution: picked.reduce((acc, c) => {
     const k = c.target.stop ? 'stop' : c.target.tool;
     acc[k] = (acc[k] ?? 0) + 1; return acc;
   }, {}),
   rejected,
-  missing_tool_coverage: {
-    note: 'Codex 要求"补关键工具任务"。这批录制**给不出**：非 query_rules 的工具回执 ok 全是 0。',
-    measured: {compare_actions: '8 步 / ok 0', read_state: '4 步 / ok 0', read_last_turn: '3 步 / ok 0'},
-    verdict: '必须另找成功录制或人工构造 —— 本脚本不编，也不靠加条数掩盖',
+  key_tool_coverage: {
+    note: '关键工具覆盖（Codex 要求"补关键工具任务，不用扩大条数掩盖"）—— 已用**第二份录制**补上。',
+    first_attempt_error: '第一版只读一个文件，于是报告里写"evaluate_team 这批给不出"——**那句话是错的**。',
+    measured_second_source: {evaluate_team: '101 步 / ok 101', compare_team_change: '94 步 / ok 94'},
+    still_missing: {compare_actions: 'ok 0', read_state: 'ok 0', read_last_turn: 'ok 0',
+      simulate_branch: 'ok 0', read_evidence: 'ok 0'},
+    verdict: 'evaluate_team / compare_team_change 已可覆盖；其余仍缺 —— 如实列出，不编。',
   },
 };
 

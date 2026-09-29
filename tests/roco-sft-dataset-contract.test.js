@@ -158,8 +158,31 @@ test('候选集：逐条审查表存在，且**如实标出**失败回复与目�
   const report = JSON.parse(readFileSync(join(CAND, 'REPORT.json'), 'utf8'));
   assert.ok(report.flagged.reply_is_failure > 0,
     '这一批里**确实有**失败回复（Codex 给的例子就是），标 0 说明标记坏了');
-  assert.ok(report.missing_tool_coverage, '缺哪些工具覆盖要如实写出来，不许用条数掩盖');
+  // ⚠ 2026-09-29（阶段 3）**改钉**：字段从 `missing_tool_coverage` 改成 `key_tool_coverage` ——
+  // 因为「关键工具覆盖」**补上了**（旧断言原文留档，别再改回来）：
+  //   assert.ok(report.missing_tool_coverage, '缺哪些工具覆盖要如实写出来，不许用条数掩盖');
+  // 为什么补得上：第一版只读了**一个**轨迹文件，于是我在报告里写了"evaluate_team 这批给不出"——
+  // **那句话是错的**。仓里另一份 `agent-trajectories-v1.jsonl` 里 `evaluate_team` **101/101 ok**、
+  // `compare_team_change` **94/94 ok**。现在候选集真的覆盖了它们。
+  assert.ok(report.key_tool_coverage, '关键工具覆盖的读数要如实写出来，不许用条数掩盖');
+  assert.ok(report.key_tool_coverage.still_missing, '还缺哪些工具也要如实列出（不许只报好看的）');
   assert.equal(report.semantic_family_overlap_across_splits.length, 0);
+});
+
+test('候选集：**关键工具真的在目标里**（不是"报告里写了"就算覆盖）', (t) => {
+  if (!existsSync(join(CAND, 'train.jsonl'))) { t.skip('还没跑过 build-sft-candidates.mjs --write'); return; }
+  const rows = readCand();
+  const kinds = new Set(rows.map(({row}) => {
+    const target = JSON.parse(row.messages.find((m) => m.role === 'assistant').content);
+    return target.stop ? 'stop' : target.tool;
+  }));
+  // Codex 要求"补关键工具任务，不用扩大条数掩盖" ⇒ 这两样必须**在数据里**，不只是写在报告里
+  for (const tool of ['evaluate_team', 'compare_team_change', 'query_rules']) {
+    assert.ok(kinds.has(tool), `关键工具 ${tool} 不在候选目标里（只在报告里写了不算覆盖）：实际 ${[...kinds].join('、')}`);
+  }
+  const report = JSON.parse(readFileSync(join(CAND, 'REPORT.json'), 'utf8'));
+  assert.deepEqual([...kinds].sort(), report.target_kinds_covered.slice().sort(),
+    '报告的覆盖种类必须与数据里的一致');
 });
 
 test('严格档审计**应当报错**（这是**有意的**：候选还不是已审数据）—— 谁把它"修绿"谁就是在造假', (t) => {
