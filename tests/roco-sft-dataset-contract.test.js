@@ -169,6 +169,33 @@ test('候选集：逐条审查表存在，且**如实标出**失败回复与目�
   assert.equal(report.semantic_family_overlap_across_splits.length, 0);
 });
 
+test('派生集：**从评测期望**派生的候选单独一个文件、带来源标记、**不进训练分片**', (t) => {
+  const p = join(CAND, 'from-eval-expectation.jsonl');
+  if (!existsSync(join(CAND, 'train.jsonl')) || !existsSync(p)) { t.skip('还没跑过 build-sft-candidates.mjs --write'); return; }
+  const derived = readFileSync(p, 'utf8').split('\n').filter((l) => l.trim()).map((l) => JSON.parse(l));
+  assert.ok(derived.length > 0, '派生集不该是空的（源里明明有 873 条可解析）');
+  // ① 来源必须**可分辨**（人才好加权）：与"模型输出派生"那批混在一起就分不出来了
+  for (const row of derived) {
+    assert.equal(row.meta.label_source, 'eval-expectation',
+      '派生集每条都要标 label_source=eval-expectation（来源必须可分辨）');
+    assert.equal(row.meta.reviewed, false, '派生集同样是**待审**候选，不许冒充已审');
+  }
+  // ② **去重后的多样性**必须如实记着 —— 873 行只有 10 个组合，全加会把分布灌歪
+  const report = JSON.parse(readFileSync(join(CAND, 'REPORT.json'), 'utf8'));
+  const d = report.derived_from_eval_expectation;
+  assert.ok(d, '报告要写清派生集的来历与多样性');
+  assert.ok(d.measured.parseable_complete_args > d.deduped,
+    `报告要如实写"可解析 ${d.measured.parseable_complete_args} 条、去重后 ${d.deduped} 条"（多样性低这件事必须留痕）`);
+  assert.ok(d.low_diversity_warning, '低多样性的警告不许省略');
+  assert.ok(d.why_separate, '为什么要单独一个文件要写清');
+  // ③ 训练分片里**不许**混进派生集（来源不同，混了就分不开）
+  const train = readCand();
+  for (const {split, row} of train) {
+    assert.notEqual(row.meta.label_source, 'eval-expectation',
+      `${split} 里混进了派生集样本 —— 它该在 from-eval-expectation.jsonl`);
+  }
+});
+
 test('候选集：输入**必须带决策所需的局面**（Codex 反复点的那条：不许只给 message/screen/tools）', (t) => {
   if (!existsSync(join(CAND, 'train.jsonl'))) { t.skip('还没跑过 build-sft-candidates.mjs --write'); return; }
   const rows = readCand();

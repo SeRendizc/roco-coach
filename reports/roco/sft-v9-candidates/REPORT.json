@@ -49,6 +49,17 @@
   "执行回执 ok!==true": 245,
   "缺问句或回答": 348
  },
+ "derived_from_eval_expectation": {
+  "note": "从**评测自己的期望**（`checks.violations`）派生的候选 —— **不是模型输出**，比模型输出可信。",
+  "measured": {
+   "rows_with_violations": 1121,
+   "parseable_complete_args": 873
+  },
+  "low_diversity_warning": "873 行只对应 **10 个不同的 (工具+args) 组合**、96 个不同问句（最多一个组合重复 123 次） ⇒ **全加进去会把分布灌歪** ⇒ 按 (问句,目标) **去重后单独放 `from-eval-expectation.jsonl`**，不进训练分片。",
+  "deduped": 96,
+  "distinct_combos": 10,
+  "why_separate": "来源与\"模型输出派生\"的那批**必须可分辨**，人才好加权；混在一起就没法区分了。"
+ },
  "input_context": {
   "note": "**输入必须带决策所需的局面**（Codex 反复点的那条）。第一版只留 {message,screen,tools} ⇒ 把局面全丢了。",
   "first_version_error": "源里本来就有 mode / world（id/seed/turns/ruleset_id）/ public_state_digest —— 是**构建器**丢的，不是源的错。",

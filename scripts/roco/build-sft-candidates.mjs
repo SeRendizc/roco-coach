@@ -221,6 +221,45 @@ for (const [a, b] of [['train', 'valid'], ['train', 'test'], ['valid', 'test']])
   for (const f of familyOfSide(a)) if (familyOfSide(b).has(f)) sharedFamilies.push(`${a}/${b}:${f}`);
 }
 
+// ── 从**评测自己的期望**派生的候选（不是模型输出）────────────────────────────
+//
+// 源里有 **1121** 条带 `checks.violations` 的失败轨迹，其中 **873** 条的 violations **直接写着**
+// 「没有调用应当调用的工具 X」+「参数里没有同时满足 {…} 的一次调用」⇒
+// **"对的那一步"能推出来，而且它来自评测的任务定义，不是模型的猜测** —— 比模型输出可信。
+//
+// ⚠ 但**多样性很低**：873 行只对应 **10 个不同的 (工具+args) 组合**、96 个不同问句
+// （最多一个组合重复 123 次）⇒ **全加进去就是把分布灌歪**。⇒ **按 (问句,目标) 去重后单独放一个文件**，
+// 并标 `label_source: 'eval-expectation'` 与模型输出派生的那批**分开**（来源可分辨，人才好加权）。
+const derived = [];
+{
+  const seenD = new Set();
+  for (const row of rows) {
+    const v = (row.checks?.violations ?? []).join(' | ');
+    const tool = /没有调用应当调用的工具\s*`?([a-z_]+)`?/.exec(v)?.[1];
+    if (!tool || !Object.hasOwn(TOOL_CONTRACTS, tool)) continue;
+    const argJson = /参数里没有同时满足\s*(\{.*?\})\s*的一次调用/.exec(v)?.[1];
+    if (!argJson) continue;
+    let args; try { args = JSON.parse(argJson); } catch { continue; }
+    const message = String(row.input?.message ?? '').trim();
+    if (!message) continue;
+    if (!validToolArgs(tool, {...args, state_version: 0})) continue;
+    const key = `${message}||${tool}||${JSON.stringify(args)}`;
+    if (seenD.has(key)) continue;
+    seenD.add(key);
+    derived.push({
+      semantic_family: semanticFamily(row.case_id), source: `tests/evals/${row.__src}#${row.traj_id ?? row.case_id}`,
+      message, mode: row.input?.mode ?? null, screen: row.input?.screen ?? null,
+      world: (() => { const w = row.input?.world; if (!w || typeof w !== 'object') return null;
+        const {state_version: _a, state_version_authority: _b, ...rest} = w; return rest; })(),
+      public_state_digest: row.input?.public_state_digest ?? null,
+      target: {tool, args}, label_source: 'eval-expectation',
+      reviewed: false, review_status: 'candidate-pending-human-review',
+      contract_version: contractVersion, ruleset_id: 'roco-world-s4-2026-09-10',
+    });
+  }
+}
+const derivedCombos = new Set(derived.map((d) => `${d.target.tool}|${JSON.stringify(d.target.args)}`));
+
 const report = {
   artifact: 'sft-v9-candidates',
   status: 'CANDIDATES — 待人工审查，**不得**直接当训练数据',
@@ -251,6 +290,14 @@ const report = {
     acc[k] = (acc[k] ?? 0) + 1; return acc;
   }, {}),
   rejected,
+  derived_from_eval_expectation: {
+    note: '从**评测自己的期望**（`checks.violations`）派生的候选 —— **不是模型输出**，比模型输出可信。',
+    measured: {rows_with_violations: 1121, parseable_complete_args: 873},
+    low_diversity_warning: '873 行只对应 **10 个不同的 (工具+args) 组合**、96 个不同问句（最多一个组合重复 123 次）'
+      + ' ⇒ **全加进去会把分布灌歪** ⇒ 按 (问句,目标) **去重后单独放 `from-eval-expectation.jsonl`**，不进训练分片。',
+    deduped: derived.length, distinct_combos: derivedCombos.size,
+    why_separate: '来源与"模型输出派生"的那批**必须可分辨**，人才好加权；混在一起就没法区分了。',
+  },
   input_context: {
     note: '**输入必须带决策所需的局面**（Codex 反复点的那条）。第一版只留 {message,screen,tools} ⇒ 把局面全丢了。',
     first_version_error: '源里本来就有 mode / world（id/seed/turns/ruleset_id）/ public_state_digest —— 是**构建器**丢的，不是源的错。',
@@ -307,6 +354,18 @@ if (write) {
   }
   const contrasts = picked.filter((c) => c.polarity === 'negative').map(asLine);
   writeFileSync(join(OUT_DIR, 'contrast.jsonl'), contrasts.length ? `${contrasts.join('\n')}\n` : '');
+  // **单独一个文件**：来源是评测期望（`label_source: 'eval-expectation'`），**不进 train/valid/test**
+  const derivedLines = derived.map((d) => JSON.stringify({
+    messages: [
+      {role: 'user', content: JSON.stringify({message: d.message, mode: d.mode, screen: d.screen,
+        world: d.world, public_state_digest: d.public_state_digest, tools: [...LOCAL_PLAN_TOOLS]})},
+      {role: 'assistant', content: JSON.stringify(d.target)},
+    ],
+    meta: {group_id: d.semantic_family, source: d.source, contract_version: d.contract_version,
+      ruleset_id: d.ruleset_id, reviewed: false, review_status: d.review_status,
+      label_source: d.label_source, polarity: 'positive'},
+  }));
+  writeFileSync(join(OUT_DIR, 'from-eval-expectation.jsonl'), derivedLines.length ? `${derivedLines.join('\n')}\n` : '');
   // **逐条审查表**（人能一行一行看）
   const md = ['# v9 候选 · 逐条审查表（**待审，不是训练数据**）', '',
     `- 生成：\`scripts/roco/build-sft-candidates.mjs\`｜契约指纹 \`${contractVersion}\``,
@@ -328,6 +387,7 @@ console.log(`[候选] 源 ${rows.length} 条真实轨迹 → 候选 ${picked.len
 console.log(`[候选] 分片 ${JSON.stringify(perSplit)}｜**语义族跨片重叠 ${sharedFamilies.length}**${sharedFamilies.length ? ' ✖' : ' ✔'}`);
 console.log(`[候选] 标记：失败回复 ${report.flagged.reply_is_failure}｜目标实体不可核 ${report.flagged.target_entity_not_in_question}｜干净 ${report.flagged.clean}`);
 console.log(`[候选] 目标分布 ${JSON.stringify(report.target_distribution)}`);
+console.log(`[候选] 另有**从评测期望派生**（去重后）${derived.length} 条 / ${derivedCombos.size} 个组合 → from-eval-expectation.jsonl（不进训练分片）`);
 console.log('[候选] **reviewed 一律 false** —— 这是待审候选，不得直接训练');
 for (const [why, n] of Object.entries(rejected).sort((a, b) => b[1] - a[1])) console.log(`  – 拒收 ${n} 条：${why}`);
 if (write) console.log('[候选] 已写 → reports/roco/sft-v9-candidates/（含 REVIEW-TABLE.md）');
