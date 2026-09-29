@@ -106,18 +106,36 @@ test('训练场页给教练的请求必须带局面身份；一次行动在飞�
 });
 
 test('发消息时不许把玩家第二条弄丢（审计高 11）：飞行中禁发、输入框不清空', () => {
-  const src = readFileSync(new URL('../src/client/roco.js', import.meta.url), 'utf8');
+  // ⚠ 2026-09-30 **改钉**（task-13 甲④-1：`#companion-card` 退役，小芽只剩 `xiaoya.js` 一套实现）。
+  // 旧断言（原文留档，别再改回来）：
+  //   const src = readFileSync(new URL('../src/client/roco.js', import.meta.url), 'utf8');
+  //   const html = readFileSync(new URL('../src/client/roco.html', import.meta.url), 'utf8');
+  //   assert.match(html, /id="say-send"/, '发送按钮要有 id（飞行时禁用它）');
+  //   assert.match(src, /if \(state\.coachInFlight\) \{/, '在飞时不发新请求');
+  //   assert.match(src, /sayStatus\('上一条还在查/, '要说一句人话，而不是把第二次提交吞掉');
+  //   assert.match(src, /state\.coachInFlight = true;/, '要真的置位');
+  //   assert.match(src, /finally \{[\s\S]{0,120}state\.coachInFlight = false;/, '无论成败都要复位');
+  //   // 反证：清空输入框必须发生在"确定要发"之后 —— 不能先清空再判断
+  //   const submitAt = src.indexOf("$('say-form').addEventListener('submit'");
+  //   const clearAt = src.indexOf("$('say-input').value = '';", submitAt);
+  //   const guardAt = src.indexOf('if (state.coachInFlight) {', submitAt);
+  //   assert.ok(guardAt > submitAt && clearAt > guardAt, '守卫必须排在清空输入框之前');
+  // 为什么改：这些 id / 变量名属于**已退役的旧面板**（`#say-send` / `state.coachInFlight` 现在只在
+  // `roco.js` 的死绑定里）。**审计高 11 的意图一个字没松**：在飞时不许把玩家第二条吞掉，
+  // 而且要**说一句人话**、**先判断再清空**。新钉指向**现在还活着的那一处**（浮层的表单 + `state.asking`）：
+  const src = readFileSync(new URL('../src/client/xiaoya.js', import.meta.url), 'utf8');
   const html = readFileSync(new URL('../src/client/roco.html', import.meta.url), 'utf8');
-  assert.match(html, /id="say-send"/, '发送按钮要有 id（飞行时禁用它）');
-  assert.match(src, /if \(state\.coachInFlight\) \{/, '在飞时不发新请求');
-  assert.match(src, /sayStatus\('上一条还在查/, '要说一句人话，而不是把第二次提交吞掉');
-  assert.match(src, /state\.coachInFlight = true;/, '要真的置位');
-  assert.match(src, /finally \{[\s\S]{0,120}state\.coachInFlight = false;/, '无论成败都要复位（否则再也发不出去）');
+  assert.match(src, /id="xiaoya-send"/, '发送按钮要有 id（飞行时禁用它）——现在是浮层那一个');
+  assert.doesNotMatch(html, /id="say-send"/, '旧面板的发送按钮不许回来（它已经退役）');
+  assert.match(src, /if \(state\.asking\) \{/, '在飞时不发新请求');
+  assert.match(src, /上一条还在查，等它出来我马上答这一条/, '要说一句人话，而不是把第二次提交吞掉');
+  assert.match(src, /state\.asking = true;/, '要真的置位');
+  assert.match(src, /finally \{[\s\S]{0,200}state\.asking = false;/, '无论成败都要复位（否则再也发不出去）');
   // 反证：清空输入框必须发生在"确定要发"之后 —— 不能先清空再判断
-  const submitAt = src.indexOf("$('say-form').addEventListener('submit'");
-  const clearAt = src.indexOf("$('say-input').value = '';", submitAt);
-  const guardAt = src.indexOf('if (state.coachInFlight) {', submitAt);
-  assert.ok(guardAt > submitAt && clearAt > guardAt,
+  const submitAt = src.indexOf("form?.addEventListener('submit'");
+  const clearAt = src.indexOf("input.value = '';", submitAt);
+  const guardAt = src.indexOf('if (state.asking) {', submitAt);
+  assert.ok(submitAt > -1 && guardAt > submitAt && clearAt > guardAt,
     '守卫必须排在清空输入框之前（先清空就会丢掉玩家打的那句话）');
 });
 

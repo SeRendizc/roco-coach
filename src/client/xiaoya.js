@@ -793,8 +793,9 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
     const message = String(text ?? '').trim();
     if (!message || state.asking) return;
     state.asking = true;
+    // 只禁**发送按钮**：玩家还看得见"上一条在飞"，同时**输入框保持可用**（可以先打第二条，
+    // 在飞时提交会被上面那个守卫接住、原文保留）。
     if (send) send.disabled = true;
-    if (input) input.disabled = true;
     addEntry('你', message);
     setStatus('正在读取依据…');
     const epoch = (state.epoch += 1);
@@ -868,7 +869,6 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
     } finally {
       state.asking = false;
       if (send) send.disabled = false;
-      if (input) input.disabled = false;
     }
   }
 
@@ -1111,8 +1111,18 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
   }
   form?.addEventListener('submit', (event) => {
     event.preventDefault();
-    void ask(input?.value ?? '');
+    // 审计高 11（**从旧面板搬过来的同一条口径**）：这一轮还在飞的时候，**不许把玩家第二条吞掉** ——
+    // 「吞掉」有两种形状：(a) 直接 return、什么都不说；(b) 先把输入框清空再判断。
+    // 所以顺序是：**先判断在飞** ⇒ 说一句人话 ⇒ **不清空**（他打的字还在）⇒ 再走正常那一支才清空。
+    // ⚠ 2026-09-30：旧面板退役后这条口径一度只剩在 `roco.js` 的死绑定里（元素都没了）——
+    //   这里把它接回**活着的那一处**（浮层的表单），并且**输入框不再禁用**（玩家可以先打着字）。
+    if (state.asking) {
+      setStatus('上一条还在查，等它出来我马上答这一条（你打的字还在）。');
+      return;
+    }
+    const typed = input?.value ?? '';
     if (input) input.value = '';
+    void ask(typed);
   });
   // 甲②③：**popup 也放 role 选择**（Lead 拍板：退役旧面板是"换实现"不是"砍能力"）。
   // page 模式那 4 个按钮在 `xiaoya.html` 的静态标记里；popup 模式这里按**同一份定义**注入，
