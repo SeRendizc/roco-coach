@@ -142,6 +142,11 @@ for (const row of rows) {
     message, screen: row.input?.mode === 'camp' ? 'camp' : 'battle',
     target, reply: reply.slice(0, 120),
     flags,
+    // ⚠ **极性**（2026-09-29 阶段 3）：回复是"没查到事实"这类**失败句**的轨迹，
+    // 它的 `target` 是**模型当年做错的那一步**（例：「为什么这一手要防御？」被标 `stop`）。
+    // ⇒ 这类**绝不能当正向目标**分开训 —— 那等于**把失败教成正确决策**。
+    // 它们单独进 `contrast.jsonl`，只能用于**对比/拒答**用途，且必须人来定怎么用。
+    polarity: flags.includes('reply_is_failure') ? 'negative' : 'positive',
     review_status: 'candidate-pending-human-review',
     reviewed: false,
     contract_version: contractVersion,
@@ -190,7 +195,7 @@ const pickedKinds = new Set();
 for (const [family, items] of order) {
   const side = sideOf(family);
   for (const c of items) { picked.push({...c, side}); pickedKinds.add(kindOfTarget(c)); }
-  perSplit[side] += items.length;
+  perSplit[side] += items.filter((c) => c.polarity === 'positive').length;
   // 只有在**所有出现过的工具种类都已被覆盖**之后，才允许按条数截断
   const allKinds = new Set([...byFamily.values()].flat().map(kindOfTarget));
   const covered = [...allKinds].every((k) => pickedKinds.has(k));
@@ -224,6 +229,8 @@ const report = {
     target_entity_not_in_question: picked.filter((c) => c.flags.includes('target_entity_not_in_question')).length,
     clean: picked.filter((c) => c.flags.length === 0).length,
   },
+  polarity: {positive: picked.filter((c) => c.polarity === 'positive').length, negative: picked.filter((c) => c.polarity === 'negative').length,
+    note: '**只有 positive 进 train/valid/test**；negative（回复是失败句）单独进 contrast.jsonl —— 不许当正向目标'},
   target_kinds_covered: [...new Set(picked.map((c) => (c.target.stop ? 'stop' : c.target.tool)))].sort(),
   target_distribution: picked.reduce((acc, c) => {
     const k = c.target.stop ? 'stop' : c.target.tool;
@@ -243,8 +250,7 @@ const report = {
 const write = process.argv.includes('--write');
 if (write) {
   mkdirSync(OUT_DIR, {recursive: true});
-  for (const split of ['train', 'valid', 'test']) {
-    const lines = picked.filter((c) => c.side === split).map((c) => JSON.stringify({
+  const asLine = (c) => JSON.stringify({
       messages: [
         {role: 'user', content: JSON.stringify({message: c.message, screen: c.screen, tools: [...LOCAL_PLAN_TOOLS]})},
         {role: 'assistant', content: JSON.stringify(c.target)},
@@ -253,11 +259,17 @@ if (write) {
         group_id: c.semantic_family, wording_variant: c.wording_variant, source: c.source,
         contract_version: c.contract_version, ruleset_id: c.ruleset_id,
         reviewed: false, review_status: c.review_status, review_flags: c.flags,
+        polarity: c.polarity,
         reply_excerpt: c.reply,
       },
-    }));
+  });
+  // ⚠ **只有 `positive` 才进训练分片**；`negative` 单独一个文件（不进 train/valid/test）。
+  for (const split of ['train', 'valid', 'test']) {
+    const lines = picked.filter((c) => c.side === split && c.polarity === 'positive').map(asLine);
     writeFileSync(join(OUT_DIR, `${split}.jsonl`), lines.length ? `${lines.join('\n')}\n` : '');
   }
+  const contrasts = picked.filter((c) => c.polarity === 'negative').map(asLine);
+  writeFileSync(join(OUT_DIR, 'contrast.jsonl'), contrasts.length ? `${contrasts.join('\n')}\n` : '');
   // **逐条审查表**（人能一行一行看）
   const md = ['# v9 候选 · 逐条审查表（**待审，不是训练数据**）', '',
     `- 生成：\`scripts/roco/build-sft-candidates.mjs\`｜契约指纹 \`${contractVersion}\``,

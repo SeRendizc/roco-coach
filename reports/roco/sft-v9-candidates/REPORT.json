@@ -18,14 +18,19 @@
  "candidates": 93,
  "per_split": {
   "train": 42,
-  "valid": 22,
-  "test": 29
+  "valid": 10,
+  "test": 17
  },
  "semantic_family_overlap_across_splits": [],
  "flagged": {
   "reply_is_failure": 24,
   "target_entity_not_in_question": 0,
   "clean": 69
+ },
+ "polarity": {
+  "positive": 69,
+  "negative": 24,
+  "note": "**只有 positive 进 train/valid/test**；negative（回复是失败句）单独进 contrast.jsonl —— 不许当正向目标"
  },
  "target_kinds_covered": [
   "compare_team_change",

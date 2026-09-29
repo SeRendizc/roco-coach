@@ -1,9 +1,9 @@
 {
  "generated_by": "scripts/roco/review-candidates.mjs",
  "what_this_is": "**待审清单**，不是\"审核通过\"。机械能核的六项全量跑；\"这个决策对不对\"必须人看。",
- "rows": 93,
+ "rows": 69,
  "target_kinds": {
-  "stop": 36,
+  "stop": 12,
   "query_rules": 24,
   "compare_team_change": 16,
   "evaluate_team": 17

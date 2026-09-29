@@ -169,6 +169,30 @@ test('候选集：逐条审查表存在，且**如实标出**失败回复与目�
   assert.equal(report.semantic_family_overlap_across_splits.length, 0);
 });
 
+test('候选集：**回复是失败句的轨迹不许当正向目标** —— 单独进 contrast.jsonl', (t) => {
+  if (!existsSync(join(CAND, 'train.jsonl'))) { t.skip('还没跑过 build-sft-candidates.mjs --write'); return; }
+  const rows = readCand();
+  assert.ok(rows.length, '候选不该是空的');
+  // ① 训练分片里**一条 negative 都不许有**
+  for (const {split, row} of rows) {
+    assert.notEqual(row.meta.polarity, 'negative',
+      `${split} 里混进了 polarity=negative 的样本（回复是失败句）—— `
+      + '那等于**把失败教成正确决策**。它该进 contrast.jsonl。');
+  }
+  // ② negative 必须**真的存在**于 contrast.jsonl（不是被悄悄删掉）
+  const contrastPath = join(CAND, 'contrast.jsonl');
+  assert.ok(existsSync(contrastPath), 'contrast.jsonl 不存在 —— negative 样本要么没分出来、要么被删了');
+  const contrast = readFileSync(contrastPath, 'utf8').split('\n').filter((l) => l.trim()).map((l) => JSON.parse(l));
+  const report = JSON.parse(readFileSync(join(CAND, 'REPORT.json'), 'utf8'));
+  assert.equal(contrast.length, report.polarity.negative,
+    `contrast.jsonl 条数(${contrast.length}) 与报告的 negative 数(${report.polarity.negative}) 不一致`);
+  assert.ok(contrast.length > 0, '这一批里**确实有**失败轨迹（Codex 给的例子就是），negative 为 0 说明分流坏了');
+  for (const row of contrast) {
+    assert.equal(row.meta.polarity, 'negative');
+    assert.ok(row.meta.review_flags.includes('reply_is_failure'), 'negative 必须带 reply_is_failure 标记');
+  }
+});
+
 test('候选集：**关键工具真的在目标里**（不是"报告里写了"就算覆盖）', (t) => {
   if (!existsSync(join(CAND, 'train.jsonl'))) { t.skip('还没跑过 build-sft-candidates.mjs --write'); return; }
   const rows = readCand();
