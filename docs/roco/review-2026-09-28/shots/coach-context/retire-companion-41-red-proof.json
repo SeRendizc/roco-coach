@@ -1,0 +1,55 @@
+{
+  "base": "http://127.0.0.1:8765",
+  "mode": "normal",
+  "pid": 20449,
+  "startedAt": "2026-09-29T01:36:47.463Z",
+  "checks": [
+    {
+      "name": "① 打开入口之后页面上有可用的邀请入口（输入框 + 发送键）",
+      "ok": false,
+      "detail": "入口点了之后没有任何小芽输入框 —— 面板打不开、邀请发不出去"
+    }
+  ],
+  "shots": [],
+  "engineUp": true,
+  "engineStatusKeys": [
+    "available",
+    "ruleset_id",
+    "health",
+    "strategies",
+    "default_team",
+    "analysis_seeds",
+    "sessions",
+    "last_error"
+  ],
+  "filled": "ok",
+  "teamState": {
+    "teamWorkshopTeam": 6,
+    "analysisTeam": 0
+  },
+  "appliedTeam": true,
+  "startPath": "real-mouse",
+  "startHit": {
+    "top": "start-standard-pvp",
+    "inside": true
+  },
+  "battle": {
+    "turn": 1,
+    "phase": "battle",
+    "self": [
+      "喵喵",
+      "水蓝蓝",
+      "火花",
+      "迪莫",
+      "水灵",
+      "火神"
+    ],
+    "active": 0,
+    "view": "ready"
+  },
+  "panelUnavailable": true,
+  "verdict": "fail",
+  "failed": [
+    "① 打开入口之后页面上有可用的邀请入口（输入框 + 发送键）"
+  ]
+}

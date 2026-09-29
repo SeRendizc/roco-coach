@@ -102,7 +102,12 @@ async function main() {
   const ws = new WebSocket(wsUrl);
   await new Promise((res, rej) => { ws.addEventListener('open', res); ws.addEventListener('error', rej); });
   const cdp = new Cdp(ws);
-  await cdp.send('Page.enable'); await cdp.send('Runtime.enable'); await cdp.send('Network.enable'); await cdp.send('Log.enable');
+  await cdp.send('Page.enable'); await cdp.send('Runtime.enable');
+  // per-run cookie clear (learned the hard way): the profile is persistent so we do not mint a new
+  // session every run (the box only keeps 100), but COOKIES IGNORE PORTS - switching to a fresh own
+  // instance would carry the previous instance's coach_session, and the page then reports the rules
+  // service as down (a shape indistinguishable from a product bug).
+  await cdp.send('Network.clearBrowserCookies'); await cdp.send('Network.enable'); await cdp.send('Log.enable');
   const requests = [];
   cdp.on('Network.requestWillBeSent', (p) => { if (/\/api\/coach/.test(p.request.url)) requests.push({url: p.request.url, id: p.requestId}); });
   cdp.on('Network.responseReceived', (p) => { const hit = requests.find((r) => r.id === p.requestId); if (hit) hit.status = p.response.status; });

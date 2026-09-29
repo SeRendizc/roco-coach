@@ -138,6 +138,12 @@ async function main() {
 
   const result = {base: BASE, mode: MODE, pid: process.pid, startedAt: new Date().toISOString(), checks: [], shots: []};
 
+  // ⚠ 每轮**先清 cookie**：profile 是持久的（为了别再增会话位），而 cookie **不分端口** ——
+  //   换一个独立实例端口时，浏览器会把**上一个实例**的 `coach_session` 带过去，
+  //   新实例不认那条会话 ⇒ 页面报「请启动新版本机后端」，形状与"产品坏了"一模一样（实测踩过）。
+  await cdp.send('Network.clearBrowserCookies');
+  // localStorage 也每轮清（profile 持久带来的另一半：上一轮的偏好/记忆会串）。
+  try { await cdp.send('Storage.clearDataForOrigin', {origin: BASE, storageTypes: 'local_storage'}); } catch {}
   await cdp.send('Page.bringToFront');
   await cdp.send('Emulation.setDeviceMetricsOverride', {width: 1600, height: 1100, deviceScaleFactor: 1, mobile: false});
   await cdp.send('Page.navigate', {url: `${BASE}/roco.html`});
@@ -157,10 +163,27 @@ async function main() {
   // ⚠ **规则服务（Python 引擎）要先起来**：独立实例是现开的，引擎子进程冷启动要几秒到十几秒。
   //   不等它就点开局 ⇒ `startStandardPvp()` 抛「请启动新版本机后端」并写进 `#plan-note`，
   //   表现与"按钮点了没反应"极像（实测：这条就是前几轮"开不出局"的真因，**与甲④-1 无关**）。
-  const ENGINE_READY = `!(document.getElementById('engine-status')?.textContent??'').includes('未连接')`;
-  try { await waitFor(ENGINE_READY, {tries: 120, gap: 500, label: '规则服务连上（引擎冷启动）'}); }
-  catch { log('规则服务一直没连上 —— 如实继续，后面的读数会带着这个前提'); }
-  result.engineText = await js(`(document.getElementById('engine-status')?.textContent??'').trim().slice(0,80)`);
+  // ⚠ 引擎热要问**服务端**（`/api/roco/status` 真的 ok），不是只看页面那行文案 ——
+  //   页面文案可能是上一轮的残留，而"文案说好了、引擎其实还没起"正是上一轮开局失败的样子。
+  const engineUp = async () => {
+    try {
+      const response = await fetch(`${BASE}/api/roco/status`, {cache: 'no-store'});
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data?.ok === false ? null : data;
+    } catch { return null; }
+  };
+  let engineStatus = null;
+  for (let i = 0; i < 120; i += 1) {
+    engineStatus = await engineUp();
+    if (engineStatus) break;
+    await sleep(500);
+  }
+  result.engineUp = Boolean(engineStatus);
+  result.engineStatusKeys = engineStatus ? Object.keys(engineStatus).slice(0, 8) : null;
+  log(`服务端规则服务状态：${engineStatus ? 'ok' : '一直没 ok'}`
+    + `（页面文案：「${await js(`(document.getElementById('engine-status')?.textContent??'').trim().slice(0,60)`)}」）`);
+  if (!engineStatus) log('⚠ 引擎一直没热 —— 后面的开局读数会带着这个前提，不写成产品结论');
   // 装六只**我自己的**个体（正式开局要六只持有个体），然后开局。
   const filled = await js(`(async()=>{const api=window.rocoTeamWorkshop;if(!api?.addCandidate)return 'no-api';
     for(const id of ['own-0001','own-0002','own-0003','own-0004','own-0005','own-0006'])
@@ -177,7 +200,7 @@ async function main() {
   log('装人结果：' + filled + '｜' + teamState);
   if (result.teamState.teamWorkshopTeam !== 6) {
     log('六格没装满（或工作台没回传）—— 如实停止，不把"点不动"当成产品结论');
-    kill(); if (ownedServer) { try { ownedServer.close(); } catch {} }
+    kill();
     process.exit(1);
   }
   // ⚠ 六槽工作台的"应用这套配置"（`#tw-config-apply`，在 shadow DOM 里）要**先按一次**，
@@ -258,7 +281,22 @@ async function main() {
     const el=document.querySelector(sel);if(el&&el.offsetParent!==null)return sel;}return '';})()`);
   const sendSel = await js(`(()=>{for(const sel of ['#say-send','#xiaoya-send','#xy-send']){
     const el=document.querySelector(sel);if(el)return sel;}return '';})()`);
-  if (!inputSel || !sendSel) { log('找不到小芽输入框/发送键'); kill(); process.exit(1); }
+  if (!inputSel || !sendSel) {
+    // ⚠ 这一支就是**甲④-1 的必红反证形状**：把唯一那套小芽卸掉 ⇒ 入口点了之后页面上
+    //   一个输入框都没有 ⇒ 玩家**邀请都发不出去**。这里不早退：把读数写下来（响度），再红着退出。
+    check('① 打开入口之后页面上有可用的邀请入口（输入框 + 发送键）', false,
+      '入口点了之后没有任何小芽输入框 —— 面板打不开、邀请发不出去');
+    result.panelUnavailable = true;
+    result.checks = checks;
+    const passedFail = checks.filter((c) => c.ok).length;
+    result.verdict = 'fail';
+    result.failed = checks.filter((c) => !c.ok).map((c) => c.name);
+    writeFileSync(join(OUT, `battle-context-${MODE}.json`), JSON.stringify(result, null, 2));
+    log(`判据 ${passedFail}/${checks.length} 未通过（面板打不开：这一支就是必红反证的形状）`);
+    log('产物：' + REL + `/battle-context-${MODE}.json`);
+    kill();
+    process.exit(1);
+  }
   const p1 = await rectOf(inputSel);
   await clickAt(p1.x, p1.y);
   const QUESTION = '我现在该换谁？';
@@ -319,22 +357,32 @@ async function main() {
     JSON.stringify(single));
 
   // 入口的双向控制（Lead 要求：可见/不可见两种状态返回值必须不同 ⇒ 不是常量）
-  const visOpen = await js(`window.rocoDemo.companionVisibility()`);
+  // ⚠ 不许**假设初始状态**：前面那一问已经把浮层打开了（实测第一版就是这么红的）。
+  //   所以逐次读"报告值 + 真实 DOM 可见性"，断言两者**始终一致**、且两次切换后值**不同**。
+  const readVis = async () => JSON.parse(await js(`JSON.stringify({
+    reported: window.rocoDemo.companionVisibility(),
+    popHidden: document.getElementById('xiaoya-pop')?.hidden ?? null})`));
+  const visA = await readVis();
   await js(`document.getElementById('coach-entry').click()`);
-  await sleep(500);
-  const visAfterToggle = await js(`window.rocoDemo.companionVisibility()`);
-  const xiaoyaOpenAfterToggle = await js(`document.getElementById('xiaoya-pop')?.hidden === false`);
+  await sleep(600);
+  const visB = await readVis();
   await js(`document.getElementById('coach-entry').click()`);
-  await sleep(500);
-  const visClosed = await js(`window.rocoDemo.companionVisibility()`);
-  result.entryToggle = {visOpen, visAfterToggle, visClosed, xiaoyaOpenAfterToggle};
-  check('⑦ 页头入口真的开/关小芽浮层，且 `companionVisibility()` **两种状态给不同的值**（不是常量）',
-    visAfterToggle !== visClosed && visAfterToggle === visOpen && xiaoyaOpenAfterToggle === true,
-    `关→开：${visOpen} ⇒ ${visAfterToggle}（浮层 open=${xiaoyaOpenAfterToggle}）；再点一次：${visAfterToggle} ⇒ ${visClosed}`);
+  await sleep(600);
+  const visC = await readVis();
+  const consistent = [visA, visB, visC].every((v) => v.reported === (v.popHidden === false ? 'visible' : 'hidden'));
+  result.entryToggle = {visA, visB, visC, consistent};
+  check('⑦ 页头入口真的开/关小芽浮层：`companionVisibility()` **与真实 DOM 可见性始终一致**，且两次切换给出**不同的值**（不是常量）',
+    consistent && visA.reported !== visB.reported && visB.reported !== visC.reported,
+    `依次：${visA.reported}(popHidden=${visA.popHidden}) → ${visB.reported}(popHidden=${visB.popHidden})`
+    + ` → ${visC.reported}(popHidden=${visC.popHidden})｜与 DOM 一致=${consistent}`);
 
-  // 「两套抢点击」那条发现的**复验**：现在命中的必须是浮层里的元素
-  await js(`document.getElementById('coach-entry').click()`);
-  await sleep(500);
+  // 「两套抢点击」那条发现的**复验**：现在命中的必须是浮层里的元素。
+  // ⚠ 先**确保浮层是开着的**（上面两次切换之后它是关的 —— 不在 0,0 上量一个隐藏元素）。
+  if (!(await js(`document.getElementById('xiaoya-pop')?.hidden === false`))) {
+    await js(`document.getElementById('coach-entry').click()`);
+    await sleep(600);
+  }
+  await waitFor(`document.getElementById('xiaoya-pop')?.hidden === false`, {tries: 20, gap: 200, label: '浮层打开'});
   const hitPoint = JSON.parse(await js(`(()=>{const el=document.querySelector('#xiaoya-pop #xiaoya-input');
     if(!el)return 'null';el.scrollIntoView({block:'center'});const b=el.getBoundingClientRect();
     const top=document.elementFromPoint(Math.round(b.left+b.width/2),Math.round(b.top+b.height/2));
@@ -345,14 +393,26 @@ async function main() {
     Boolean(hitPoint) && hitPoint.insideXiaoyaPop === true, JSON.stringify(hitPoint));
 
   // 介入链路（页面级战斗机制，退役**不许**动它）：自动气泡必须仍然出现
-  const bubble = JSON.parse(await js(`(()=>{const s=window.rocoDemo?.state;
+  // ⚠ 自动气泡不是第 1 回合就一定会出现（上一轮在 8765 上实测是第 4 回合）——
+  //   所以**推进几手再读**（有界，最多 6 手；结束/失败就停），并把"推到第几手才看到"记进读数。
+  let bubble = null;
+  for (let i = 0; i < 6; i += 1) {
+    bubble = JSON.parse(await js(`(()=>{const s=window.rocoDemo?.state;
+      return JSON.stringify({turn:s?.view?.turn??null, hints:s?.session?.hints??null, hint:Boolean(s?.hint),
+        text:(document.querySelector('#hint .hint-text')?.textContent??'').trim().slice(0,60)});})()`));
+    if (Number(bubble.hints) > 0 || bubble.hint) break;
+    if (bubble.turn === null) break;
+    await js(`window.rocoDemo.autoTurn?.()`);
+    await sleep(1800);
+  }
+  const bubbleDetail = JSON.parse(await js(`(()=>{const s=window.rocoDemo?.state;
     return JSON.stringify({hints:s?.session?.hints??null, hint:Boolean(s?.hint),
       hintText:(document.querySelector('#hint .hint-text')?.textContent??'').trim().slice(0,80),
       datasetHint:document.body.dataset.rocoHint??null, dismissed:Boolean(s?.session?.dismissed)});})()`));
-  result.autoBubble = bubble;
-  check('⑨ 介入链路没被退役动到：自动气泡仍然存在（这一局里 `session.hints` 有计数或有当前 hint）',
-    (Number(bubble.hints) > 0) || bubble.hint === true,
-    JSON.stringify(bubble));
+  result.autoBubble = {...bubbleDetail, seenAtTurn: bubble?.turn ?? null};
+  check('⑨ 介入链路没被退役动到：自动气泡仍然出现（推进最多 6 手，`session.hints` 有计数或有当前 hint）',
+    (Number(bubbleDetail.hints) > 0) || bubbleDetail.hint === true,
+    JSON.stringify(result.autoBubble));
 
   kill();
   result.checks = checks;

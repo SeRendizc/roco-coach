@@ -534,3 +534,38 @@ addCandidate ok ｜ 装满六只后开局按钮 disabled=false ｜ 入口点一�
 **但已分辨归属**：把 `roco.js`/`roco.html` **临时回退到 ④-1 之前**，同一探针 + 同一独立实例**一样开不出局**
 ⇒ **与 ④-1 无关**，是探针×独立实例的交互（该探针此前只在 8765 上跑绿过，而 8765 被会话表 429 挡着）。
 回退备份：`/tmp/roco.pre41.js`、`/tmp/roco.html.pre41`（可逐字还原）。
+
+## 九、甲④-1 的**局中读数**补齐（独立实例）+ 必红反证（2026-09-30）
+
+**探针先修好**（"开不出局"的形状曾与"产品坏了"极像，两个真因都不是产品）：
+1. **装人装早了**：`window.rocoTeamWorkshop.addCandidate` 是 `mountWorkshop()` 之后才有的 ⇒
+   装不上 ⇒ `startStandardPvp()` 里 `team.length !== 6` **静默 return**（连状态行都不写）。
+   现在：**等 API 挂上 + 装完读 `state.teamWorkshop.team` 是不是 6**，不是 6 就如实停。
+2. **每轮先清 cookie**：profile 持久（为了不烧会话位），而 cookie **不分端口** ⇒ 换独立实例端口时
+   会带上一个实例的 `coach_session` ⇒ 页面报「请启动新版本机后端」。现在每轮 `Network.clearBrowserCookies`
+   + `Storage.clearDataForOrigin({origin, storageTypes:'local_storage'})`（**保 cookie 的那一半**由 `build-snapshot` 的
+   共用工具统一处理）。
+3. **引擎热要问服务端**：`GET /api/roco/status` 真的 ok 才开局（不是只看页面那行文案）。
+   实测：热之前开局会失败并写 `#plan-note="标准 PVP开局失败：请启动新版本机后端（npm start）"`。
+
+**读数（独立实例；`battle-context-normal.json`）—— 9/9**
+```
+① 屏幕上有回答（这一页现在是 xiaoya 那一套）：✔「说一下你的队伍和对手，我按相性挑。依据：本回合的规划（引擎算的）…」
+② POST /api/coach → 200 ✔
+③ 请求体 **roco_battle=true turn=1**（与屏幕上第 1 回合一致）、roco_plan=true、stageId=meadow ✔
+④ 回答与当前局面有关 ✔      ⑤ 控制台零报错 ✔
+⑥「只剩一套」：`#companion-card` 不在页面里、`#model-chip` 计数 **1**、`#memory-list` 计数 1 ✔
+⑦ 入口开/关浮层：`companionVisibility()` 与真实 DOM 可见性**始终一致**，两态给**不同**值
+   （visible(popHidden=false) → hidden(true) → visible(false)）✔
+⑧ 不再抢点击：浮层内输入框落点命中 `xiaoya-input`、`insideXiaoyaPop=true` ✔
+⑨ 介入链路未动：推进到第 3 手时自动气泡出现（`hint=true`、`datasetHint=action_hint`）✔
+```
+
+**必红反证（响度实测）**：把 `mountRocoXiaoya()` 唯一那套装卸掉（`return null`）⇒
+**判据 0/1 红**：「打开入口之后页面上有可用的邀请入口（输入框 + 发送键）」——
+入口点了之后**没有任何小芽输入框**（面板打不开、邀请发不出去）。恢复后逐字相同、9/9 复现。
+反证产物：`retire-companion-41-red-proof.json`。
+
+**与主服务分开写**：以上**全部在独立实例**上取得（本次端口随机、进程内 `createCoachServer` + `listen(0)`）；
+**8765 未被触碰**。8765 的新会话已由 8h TTL 自然到期恢复 200（`started_at` 未变 ⇒ 未重启），
+但 `task-15` 的会话层修复**尚未部署**到 8765（跑的是旧代码）⇒ 仍需优先独立实例。

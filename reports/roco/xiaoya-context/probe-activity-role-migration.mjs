@@ -104,6 +104,11 @@ async function main() {
   await new Promise((res, rej) => { ws.addEventListener('open', res); ws.addEventListener('error', rej); });
   const cdp = new Cdp(ws);
   await cdp.send('Page.enable'); await cdp.send('Runtime.enable');
+  // per-run cookie clear (learned the hard way): the profile is persistent so we do not mint a new
+  // session every run (the box only keeps 100), but COOKIES IGNORE PORTS - switching to a fresh own
+  // instance would carry the previous instance's coach_session, and the page then reports the rules
+  // service as down (a shape indistinguishable from a product bug).
+  await cdp.send('Network.clearBrowserCookies');
   // ⚠ `maxPostDataSize`：默认阈值下**大 payload 的 `postData` 会被省掉**（`/api/coach` 的请求体
   //   带着档案+记忆，正好超了），于是"请求体里的 role"读出来是 null —— 那不是产品没发，
   //   是探针没拿到。把上限抬到 8MB 再读。
