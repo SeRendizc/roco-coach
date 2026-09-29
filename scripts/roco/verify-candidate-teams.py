@@ -42,25 +42,34 @@ def main() -> int:
                 r = json.loads(line)
                 rows.append((sp, r["meta"].get("group_id"), json.loads(r["messages"][1]["content"])))
 
-    targets = [(sp, gid, t) for sp, gid, t in rows
-               if not t.get("stop") and (t.get("args", {}).get("team") or t.get("args", {}).get("team_after"))]
-    print(f"[引擎验] 候选 {len(rows)} 条｜带 team 的 {len(targets)} 条")
+    # ⚠ `compare_team_change` 有**两份** team（`team_before` / `team_after`）——
+    # 第一版只验了 `team_after`（`get("team") or get("team_after")`）⇒ **漏了 16 份**。
+    # 一份"改之前"的队伍如果引擎不认，这条样本同样是坏的。⇒ **把每一份都验。**
+    TEAM_KEYS = ("team", "team_before", "team_after")
+    targets = []
+    for sp, gid, t in rows:
+        if t.get("stop"):
+            continue
+        for k in TEAM_KEYS:
+            if t.get("args", {}).get(k):
+                targets.append((sp, gid, k, t["args"][k]))
+    print(f"[引擎验] 候选 {len(rows)} 条｜要验的队伍 {len(targets)} 份")
 
     # 规则集：**生产那条路**（候选声明的 ruleset_id 就是它）
     import roco_env.data as rdata  # noqa: E402
     rs = rdata.load_ruleset("roco-world-s4-2026-09-10")
 
     bad = []
-    for sp, gid, t in targets:
-        team = t["args"].get("team") or t["args"].get("team_after")
+    for sp, gid, key, team in targets:
         try:
             problems = renv.validate_team(rs, list(team), team_size=len(team))
         except TypeError:
             problems = renv.validate_team(rs, list(team))
         if problems:
-            bad.append({"split": sp, "group": gid, "team": team, "problems": problems})
+            bad.append({"split": sp, "group": gid, "which": key, "team": team, "problems": problems})
 
-    print(f"[引擎验] 被引擎接受的: {len(targets) - len(bad)} / {len(targets)}")
+    print(f"[引擎验] 被引擎接受的队伍: {len(targets) - len(bad)} / {len(targets)}"
+          f"（`team` / `team_before` / `team_after` **每一份都验**）")
     for b in bad[:5]:
         print(f"  ✖ {b['split']}｜{b['group']}｜{b['team']}｜{b['problems']}")
     if bad:

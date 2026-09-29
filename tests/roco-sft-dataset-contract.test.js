@@ -291,7 +291,11 @@ test('候选集：带 team 的目标**真引擎**接受（33/33；不是"看着�
     out = execFileSync(py, [script], {cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']});
   } catch (error) { out = String(error.stdout ?? ''); code = Number(error.status ?? 1); }
   assert.equal(code, 0, `有候选被**真引擎**拒了 —— 那些标签不可用：\n${out.slice(-400)}`);
-  assert.match(out, /被引擎接受的: (\d+) \/ \1/, '接受数必须等于带 team 的总数');
+  // ⚠ 口径已改：**每一份 team 都验**（`team` / `team_before` / `team_after`）——
+  // 第一版只验了 `team_after`（`get("team") or get("team_after")`）⇒ 漏了 16 份 `team_before`。
+  // 一份"改之前"的队伍如果引擎不认，这条样本同样是坏的。
+  assert.match(out, /被引擎接受的队伍: (\d+) \/ \1/, '接受数必须等于要验的队伍总数（每一份都验）');
+  assert.match(out, /每一份都验/, '判据要能看出"每一份都验"这个口径，否则回退了也不知道');
   // 反证的意义：这条判据必须**真的在问引擎**，不是把 JS 校验器包一层
   assert.match(out, /\[引擎验\]/);
 });
