@@ -338,3 +338,24 @@ test('候选集：带 team 的目标**真引擎**接受（33/33；不是"看着�
   // 反证的意义：这条判据必须**真的在问引擎**，不是把 JS 校验器包一层
   assert.match(out, /\[引擎验\]/);
 });
+
+// ── 报告里"实测"的数字，从源重算（冲着 Lead 自己反复犯的错造的护栏）────────────────
+//
+// 来历：这一程同一件事上反复栽 —— 只读一个文件就断言"给不出"、只验 `team_after`、
+// 只审 3 个文件、**把 1801 说成"都带 limitation_words"**（实为 864）、判据挑字眼 7 次。
+// 共同点：**写进报告的数字，没有一个是当场能重算的。**
+// ⇒ 这个判据把报告里"声称实测"的数字从源重算并比对；**对不上就红**。
+// 它第一次跑就抓住了真问题（报告写"第二份录制 evaluate_team 101/101"，实为 324/324）。
+test('报告里的"实测"数字**能从源重算出来**（对不上就是报告在说谎或源变了没重跑）', (t) => {
+  const script = join(ROOT, 'scripts', 'roco', 'verify-report-claims.mjs');
+  if (!existsSync(script) || !existsSync(join(CAND, 'REPORT.json'))) { t.skip('缺脚本 / 报告'); return; }
+  let out = ''; let code = 0;
+  try {
+    out = execFileSync(process.execPath, [script], {cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']});
+  } catch (error) { out = String(error.stdout ?? ''); code = Number(error.status ?? 1); }
+  assert.equal(code, 0, `报告里有数字与源不符（**报告在说谎，或源变了没重跑**）：\n${out.slice(-500)}`);
+  assert.match(out, /全部能从源重算出来/);
+  // 护栏本身要**真的在重算**（不是空跑）
+  const n = Number(/从源重算了 (\d+) 个数字/.exec(out)?.[1] ?? 0);
+  assert.ok(n >= 15, `护栏只重算了 ${n} 个数字 —— 太少了，说明它没在真正核对`);
+});

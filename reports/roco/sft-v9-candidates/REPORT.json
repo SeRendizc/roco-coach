@@ -108,10 +108,40 @@
  "key_tool_coverage": {
   "note": "关键工具覆盖（Codex 要求\"补关键工具任务，不用扩大条数掩盖\"）—— 已用**第二份录制**补上。",
   "first_attempt_error": "第一版只读一个文件，于是报告里写\"evaluate_team 这批给不出\"——**那句话是错的**。",
-  "measured_second_source": {
-   "evaluate_team": "101 步 / ok 101",
-   "compare_team_change": "94 步 / ok 94"
+  "measured_per_file": {
+   "__total": {
+    "query_rules": 2350,
+    "read_state": 0,
+    "evaluate_team": 414,
+    "compare_team_change": 264,
+    "read_last_turn": 0,
+    "read_evidence": 0,
+    "simulate_branch": 0,
+    "compare_actions": 0
+   },
+   "agent-trajectories-model-v1.jsonl": {
+    "query_rules": 667,
+    "read_state": 0,
+    "evaluate_team": 90,
+    "compare_team_change": 84,
+    "read_last_turn": 0,
+    "read_evidence": 0,
+    "simulate_branch": 0,
+    "compare_actions": 0
+   },
+   "agent-trajectories-v1.jsonl": {
+    "query_rules": 1683,
+    "evaluate_team": 324,
+    "compare_team_change": 180
+   }
   },
+  "measured_total": {
+   "evaluate_team": "324 步 / ok 324（第二份录制）",
+   "compare_team_change": "180 步 / ok 180（第二份录制）",
+   "__total_evaluate_team": 414,
+   "__total_compare_team_change": 264
+  },
+  "wrong_first_version": "「第二份录制 evaluate_team 101 步 / ok 101、compare_team_change 94 步 / ok 94」 —— **数字来自错的文件**（第一轮扫 model-v1 + reports/roco/*.jsonl 得到的）。",
   "still_missing": {
    "compare_actions": "ok 0",
    "read_state": "ok 0",

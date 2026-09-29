@@ -91,6 +91,21 @@ for (const src of SRCS) {
   }
 }
 
+// 逐文件的工具清点（**每个文件的步数 / 回执 ok**）—— 报数必须能指出是哪个文件
+const perFileToolCensus = (() => {
+  const out = {__total: {}};
+  for (const r of rows) {
+    const file = r.__src;
+    out[file] = out[file] ?? {};
+    for (const s of (Array.isArray(r.trace) ? r.trace : [])) {
+      const t = String(s.tool ?? '?');
+      out[file][t] = (out[file][t] ?? 0) + (s.receipt?.ok === true ? 1 : 0);
+      out.__total[t] = (out.__total[t] ?? 0) + (s.receipt?.ok === true ? 1 : 0);
+    }
+  }
+  return out;
+})();
+
 const SOURCE_INPUT_KEYS = (() => {
   const census = {};
   for (const r of rows) for (const k of Object.keys(r.input ?? {})) census[k] = (census[k] ?? 0) + 1;
@@ -353,7 +368,20 @@ const report = {
   key_tool_coverage: {
     note: '关键工具覆盖（Codex 要求"补关键工具任务，不用扩大条数掩盖"）—— 已用**第二份录制**补上。',
     first_attempt_error: '第一版只读一个文件，于是报告里写"evaluate_team 这批给不出"——**那句话是错的**。',
-    measured_second_source: {evaluate_team: '101 步 / ok 101', compare_team_change: '94 步 / ok 94'},
+    // ⚠ **2026-09-29 改正**：这里原来写「第二份录制里 `evaluate_team` **101 步 / ok 101**、
+    // `compare_team_change` **94 步 / ok 94**」—— **数字来自错的文件**（那是我第一轮扫
+    // `model-v1` + `reports/roco/*.jsonl` 得到的，却挂在了"第二份录制"名下）。
+    // 是 `scripts/roco/verify-report-claims.mjs`（"报告里的数字从源重算"）当场抓出来的。
+    // 实测**逐文件**：
+    measured_per_file: perFileToolCensus,
+    measured_total: {
+      evaluate_team: `${perFileToolCensus['agent-trajectories-v1.jsonl']?.evaluate_team ?? 0} 步 / ok ${perFileToolCensus['agent-trajectories-v1.jsonl']?.evaluate_team ?? 0}（第二份录制）`,
+      compare_team_change: `${perFileToolCensus['agent-trajectories-v1.jsonl']?.compare_team_change ?? 0} 步 / ok ${perFileToolCensus['agent-trajectories-v1.jsonl']?.compare_team_change ?? 0}（第二份录制）`,
+      __total_evaluate_team: perFileToolCensus.__total.evaluate_team,
+      __total_compare_team_change: perFileToolCensus.__total.compare_team_change,
+    },
+    wrong_first_version: '「第二份录制 evaluate_team 101 步 / ok 101、compare_team_change 94 步 / ok 94」'
+      + ' —— **数字来自错的文件**（第一轮扫 model-v1 + reports/roco/*.jsonl 得到的）。',
     still_missing: {compare_actions: 'ok 0', read_state: 'ok 0', read_last_turn: 'ok 0',
       simulate_branch: 'ok 0', read_evidence: 'ok 0'},
     verdict: 'evaluate_team / compare_team_change 已可覆盖；其余仍缺 —— 如实列出，不编。',
