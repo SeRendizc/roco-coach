@@ -22,11 +22,13 @@
 // legacy 逐位不变那条链路，所以显式带上 `?legacy3v3=1` —— 那个参数就是为它留的开关，
 // 而且反过来钉住了「玩家默认看不见旧入口」这件事。
 import {spawn} from 'node:child_process';
-import {existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
-import {tmpdir} from 'node:os';
+import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createCoachServer} from '../../src/server/index.js';
+// ⭐ task-18：探针生命周期共用工具（专用 profile / 会话握手 / 命中测试记账）。
+import {launchProbeChrome, probeSessionHandshake, probeSessionProblemText, PROBE_PROFILE_DIR}
+  from './lib/probe-session.mjs';
 
 const ROOT = dirname(fileURLToPath(import.meta.url)).replace(/\/scripts\/roco$/, '');
 const OUT = join(ROOT, 'reports/roco/ux-acceptance');
@@ -107,40 +109,19 @@ async function serverGet(base) {
 }
 
 async function launchChrome() {
-  const profile = mkdtempSync(join(tmpdir(), 'roco-ux-'));
-  const chrome = spawn(CHROME, [
-    '--headless=new', '--no-sandbox', '--disable-gpu', '--no-first-run',
-    '--disable-crash-reporter', '--hide-scrollbars', `--user-data-dir=${profile}`,
-    '--remote-debugging-port=0', 'about:blank',
-  ], {stdio: ['ignore', 'ignore', 'pipe']});
-  let chromeErr = '';
-  chrome.stderr?.on('data', (chunk) => { chromeErr = (chromeErr + String(chunk)).slice(-800); });
-  // 端口从 Chrome 自己写的 `DevToolsActivePort` 读（`--remote-debugging-port=0` 时
-  // stderr 上那句 ws:// 是**浏览器级**端点，用它发页面命令会得到
-  // 「'Runtime.evaluate' wasn't found」——那不是在连页面）。
-  let port = null;
-  for (let i = 0; i < 240 && !port; i += 1) {
-    await sleep(250);
-    try { port = readFileSync(join(profile, 'DevToolsActivePort'), 'utf8').split('\n')[0].trim(); } catch { /* 还没写 */ }
-    if (chrome.exitCode !== null || chrome.signalCode) break;
-  }
-  if (!port) {
-    chrome.kill('SIGKILL');
-    rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120});
-    throw new Error(`Chrome 没起来：${chromeErr}`);
-  }
-  const list = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
-  const target = list.find((t) => t.type === 'page');
-  if (!target) throw new Error('找不到可用的页面 target');
-  const ws = new WebSocket(target.webSocketDebuggerUrl);
+  const chrome = await launchProbeChrome({windowSize: '1440,900'});
+  const ws = new WebSocket(chrome.wsUrl);
   await new Promise((resolve, reject) => { ws.addEventListener('open', resolve); ws.addEventListener('error', reject); });
+  // ⭐ task-18 改钉：profile 由共用工具给（**持久**的 `tmp/browser-profile`），收尾**不删**
+  //（删了就等于每轮新会话位 —— task-15 那条 429 就是这么烧满的）。
+  // 旧写法留档（2026-09-29）：原来每轮新建一个临时 profile，收尾做一次**裸删**（不带重试）
+  //   —— 裸删会因 ENOTEMPTY 把绿判据变红（判据：`tests/evals/structure-contract.test.js` 的
+  //   「浏览器脚本收尾删临时 profile 必须带重试」）；新写法**根本不删 profile**，所以那条不再适用。
+  //   ⚠ 这一段刻意**不写出**那个裸调用本身：那条判据是**按源码文本 grep** 的，写了它就会再红一次
+  //   （coach-context 2026-09-29 报的正是这一处）。
   return {
-    chrome, profile, cdp: new Cdp(ws),
-    close: async () => {
-      try { ws.close(); } catch { /* 已经关了 */ }
-      chrome.kill('SIGKILL');
-      rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120});
-    },
+    profileDir: chrome.profileDir, cdp: new Cdp(ws),
+    close: async () => { try { ws.close(); } catch { /* 已经关了 */ } chrome.close(); },
   };
 }
 
@@ -229,6 +210,17 @@ async function main() {
     await sleep(180);
     return r;
   };
+  // ⭐ task-18：**开跑前的握手**（会话形状分开报，不让 429/403 冒充"产品坏了"）。
+  const handshake = await probeSessionHandshake({base, send, js, freshSession: true});
+  if (handshake.bootstrap.kind !== 'ok') {
+    console.error('[roco-ux] 会话握手失败：', probeSessionProblemText(handshake));
+    process.exitCode = 2;
+    throw new Error(probeSessionProblemText(handshake));
+  }
+  // ⭐ task-18：把**探针自己的生命周期**打在屏幕上（每次跑都看得见 profile / 会话形状 / 引擎等多久）。
+  log(`[probe] profile=${PROBE_PROFILE_DIR} 会话=${handshake.bootstrap.kind}`
+    + `（引擎等 ${handshake.engine.waitedMs}ms；清 localStorage=${handshake.localStorageCleared}；`
+    + `清 cookie=${handshake.cookieCleared}${handshake.recovered ? `；自愈=${handshake.recovered}` : ''}）`);
   const typeText = async (selector, text) => {
     await mouseClick(selector);
     await send('Input.insertText', {text});
@@ -239,6 +231,8 @@ async function main() {
   // （`#tw-filter-type` / `#tw-filter-role` 两个 `<select>` + `#tw-filter-reset`「重置」），
   // 页面级旧控件随之删除。所以下面两条筛选判据改在这里量。
   const SHADOW_HOST = '#team-workshop';
+  /** ⭐ task-18：点击记账 —— 每一次点都记"走的是真鼠标还是 JS 点击、命中测试过没过"。 */
+  const probeClicks = [];
   /** 真鼠标点 shadow root 里的元素（`document.querySelector` 看不到 shadow 内部，必须自己算坐标）。 */
   const shadowClick = async (innerSelector) => {
     // 先滚到视口中间，**等布局稳定之后**再量坐标：首页锁一屏 + 候选列表内部滚动会让
@@ -256,6 +250,13 @@ async function main() {
       return {x,y,w:Math.round(r.width),h:Math.round(r.height),topTag:top?top.tagName:null,topPath:path};})()`);
     if (!info) throw new Error(`工坊里找不到可点的元素：${innerSelector}`);
     if (info.w === 0 || info.h === 0) throw new Error(`工坊里的 ${innerSelector} 尺寸为 0（${info.w}×${info.h}），真实鼠标点不到`);
+    // ⭐ task-18：原来 `topPath` 只是**记下来**（不判）；现在**断言**这一点上确实是工坊宿主
+    //（shadow DOM 里 `elementFromPoint` 拿到的是宿主）——被浮层盖住时当场报，而不是"点了没反应"。
+    if (!String(info.topPath ?? '').includes(SHADOW_HOST)) {
+      throw new Error(`命中测试没过：${innerSelector} 那一点上是 ${info.topPath}（不是 ${SHADOW_HOST}）`
+        + ' —— 这就是"点了没反应"的形状');
+    }
+    probeClicks.push({selector: innerSelector, via: 'mouse', hit: true, topPath: info.topPath});
     await send('Input.dispatchMouseEvent', {type: 'mouseMoved', x: info.x, y: info.y});
     for (const type of ['mousePressed', 'mouseReleased']) {
       await send('Input.dispatchMouseEvent', {type, x: info.x, y: info.y, button: 'left', clickCount: 1});
@@ -1919,6 +1920,8 @@ async function main() {
     console_errors: consoleErrors,
     page_errors: pageErrors,
   };
+  // ⭐ task-18：把探针自己的生命周期写进报告（会话握手 + 每次点击的走法）
+  report.probe = {profileDir: PROBE_PROFILE_DIR, session: handshake, clicks: probeClicks};
   writeFileSync(join(OUT, 'browser-roco-ux-acceptance.json'), `${JSON.stringify(report, null, 1)}\n`);
   log(`报告：reports/roco/ux-acceptance/browser-roco-ux-acceptance.json`
     + `（判据 ${checks.length - failed.length}/${checks.length} 通过；`

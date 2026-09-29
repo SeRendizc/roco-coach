@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-28T14:27:48.598Z",
+ "judged_at": "2026-09-28T18:49:24.485Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -89,7 +89,7 @@
    "id": "06-初判先于完整载荷",
    "judge": "页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms）",
    "ok": true,
-   "actual": "；fetches=first|full rendered_after_first=yes first_ms=132 full_ms=30 stage=full full_state=ok"
+   "actual": "；fetches=first|full rendered_after_first=yes first_ms=136 full_ms=48 stage=full full_state=ok"
   },
   {
    "id": "07-分段元数据在 dataset",
@@ -119,7 +119,7 @@
    "id": "11-错误态可恢复",
    "judge": "错误态下再点一只有效的候选：模块回到 ok，刚被拒的那一只没有偷偷留在队伍里",
    "ok": true,
-   "actual": "加点={\"added\":true,\"probe\":{\"rows\":3,\"match\":1,\"species\":\"pet_000001\"},\"beforeCount\":0,\"after\":1,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"} state=ok selected=1"
+   "actual": "加点={\"added\":true,\"probe\":{\"rows\":3,\"match\":1,\"species\":\"pet_000001\"},\"beforeCount\":0,\"after\":1,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"} state=ok selected=1"
   },
   {
    "id": "12-真实键鼠选到第 2 只",
@@ -155,7 +155,7 @@
    "id": "17-连续选入六只",
    "judge": "连续用真实键鼠加人：六个槽位全部填满（selected == 6），填进去的是六个**不同**的个体",
    "ok": true,
-   "actual": "selected=6 填了 6/6 槽；加点记录=[{\"name\":\"喵喵\",\"added\":false,\"probe\":{\"rows\":4,\"match\":1,\"species\":\"pet_000001\"},\"beforeCount\":1,\"after\":1,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"},{\"name\":\"水蓝蓝\",\"added\":true,\"probe\":{\"rows\":3,\"match\":1,\"species\":\"pet_000002\"},\"beforeCount\":1,\"after\":2,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"},{\"name\":\"火花\",\"added\":true,\"probe\":{\"rows\":4,\"match\":1,\"species\":\"pet_000003\"},\"beforeCount\":2,\"after\":3,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"},{\"name\":\"迪莫\",\"added\":true,\"probe\":{\"rows\":9,\"match\":1,\"species\":\"pet_000004\"},\"beforeCount\":3,\"after\":4,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"},{\"name\":\"水灵\",\"added\":true,\"probe\":{\"rows\":6,\"match\":1,\"species\":\"pet_000005\"},\"beforeCount\":4,\"after\":5,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"},{\"name\":\"火神\",\"added\":true,\"probe\":{\"rows\":7,\"match\":1,\"species\":\"pet_000006\"},\"beforeCount\":5,\"after\":6,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"}]"
+   "actual": "selected=6 填了 6/6 槽；加点记录=[{\"name\":\"喵喵\",\"added\":false,\"probe\":{\"rows\":4,\"match\":1,\"species\":\"pet_000001\"},\"beforeCount\":1,\"after\":1,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"},{\"name\":\"水蓝蓝\",\"added\":true,\"probe\":{\"rows\":3,\"match\":1,\"species\":\"pet_000002\"},\"beforeCount\":1,\"after\":2,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"},{\"name\":\"火花\",\"added\":true,\"probe\":{\"rows\":4,\"match\":1,\"species\":\"pet_000003\"},\"beforeCount\":2,\"after\":3,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"},{\"name\":\"迪莫\",\"added\":true,\"probe\":{\"rows\":9,\"match\":1,\"species\":\"pet_000004\"},\"beforeCount\":3,\"after\":4,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"},{\"name\":\"水灵\",\"added\":true,\"probe\":{\"rows\":6,\"match\":1,\"species\":\"pet_000005\"},\"beforeCount\":4,\"after\":5,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"},{\"name\":\"火神\",\"added\":true,\"probe\":{\"rows\":7,\"match\":1,\"species\":\"pet_000006\"},\"beforeCount\":5,\"after\":6,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"}]"
   },
   {
    "id": "18-满六只五轴",
@@ -183,15 +183,15 @@
   },
   {
    "id": "39-「最怕的体系」写出体系名",
-   "judge": "这一栏要有**名字**（「撞上「X」这类」）而不是只剩分数或含糊的「某类体系」【§C6.303 改了取数没验渲染】",
+   "judge": "这一栏要有**名字**（「撞上「X」这类」）而不是只剩分数或含糊的「某类体系」；占比要么给「这类占 X%」并**交代来源**（假设的权重 / 各体系等权 / 不是实测），要么如实说没有数据；**不许**把假设的权重说成观测频率【§C6.303 改了取数没验渲染；2026-09-29 task-14 改钉】",
    "ok": true,
-   "actual": "命中=true 示例「最怕的体系 现在能算 撞上「翼王飞翼」这类最吃亏（这类在环境里大约每 7 局遇到 1 次） 这一方面的高低是按阵容结构推出来的（对手分布是假设的），不是实测对局数据。 原始数值与说明 archetype_id=wing_king_flyer · weight=0.142857 · label=翼王飞翼 撞上哪一类体系最」"
+   "actual": "命中=true 示例「最怕的体系 现在能算 撞上「翼王飞翼」这类最吃亏（赛前假设这类占 14%（各体系等权）——这是假设的权重，不是实测出场率） 这一方面的高低是按阵容结构推出来的（对手分布是假设的），不是实测对局数据。 原始数值与说明 archetype_id=wing_king_flyer · weight=0.142857 · dis」"
   },
   {
    "id": "36-评估抽屉滚得动",
    "judge": "评估抽屉内容超出面板高度时必须**滚得动**（真滚轮 → scrollTop > 0）【人类 2026-09-25：「这个阵容评估也是显示不完，下滑不了」】",
    "ok": true,
-   "actual": "scrollHeight=2000 clientHeight=756 （需要滚=true）；滚轮后 scrollTop=200"
+   "actual": "scrollHeight=2020 clientHeight=756 （需要滚=true）；滚轮后 scrollTop=200"
   },
   {
    "id": "37-折叠头两态等高",
@@ -221,7 +221,7 @@
    "id": "41-同名不同种看得出区别",
    "judge": "候选池里同名不同物种的两行：① 可见文本必须不同；② 各带自己的等级读数；③ 各带一个**能区分它们的信号、且两个信号不同**（信号按「定位优先、其次形态名」取）【人类 2026-09-25：「这个什么陛下有啥区别？我根本看不出来啊」】【2026-09-28 改钉①：样例从当前数据现算（同名不同物种 + 两只都在我盒子里），旧样例「棋契陛下」已按人类剔除决定撤下（`excluded_capture_ids` 4086）】【2026-09-28 改钉②：旧口径是「两行的**定位**不止一种」（旧样例一输出一坦克）；当前同名对（如「千棘盔」pet_000271 / pet_000378）是 role 未登记的物种、两边都写「定位未登记」⇒ 定位这一条在现在的数据上不可能满足，而玩家真正能分辨那对的信号是**形态名**（`title`）。产品侧 2026-09-28 已把「我的盒子」卡名改成形态名优先，所以改成「区分信号不同（定位优先、其次形态名）」——文本逐字相同、或两行都拿不出信号仍然必红】",
    "ok": true,
-   "actual": "样例「千棘盔」（pet_000271 / pet_000378）两行：[\"千棘盔 水系毒系 Lv60 · 回复 持有 · 可正式上场 在你的盒子里\",\"千棘盔（磨损的样子） 水系毒系 Lv60 · 回复 持有 · 可正式上场 在你的盒子里\"]；读到信号 [\"回复\",\"回复+磨损的样子\"]；试过的同名组 [{\"name\":\"千棘盔\",\"rows\":2}]"
+   "actual": "样例「千棘盔」（pet_000271 / pet_000378）两行：[\"千 千棘盔 水系毒系 Lv.60 · 回复 持有 · 可正式上场 在你的盒子里\",\"千 千棘盔（磨损的样子） 水系毒系 Lv.60 · 回复 持有 · 可正式上场 在你的盒子里\"]；读到信号 [\"回复\",\"回复+磨损的样子\"]；试过的同名组 [{\"name\":\"千棘盔\",\"rows\":2}]"
   },
   {
    "id": "21-机制行上卡",
@@ -233,13 +233,13 @@
    "id": "22-玩家层无工程话",
    "judge": "模块的可见文本里不出现 pet_id / instance_id / state_version / coverage / provenance / unknown_fields / ranker_status / ruleset，也不出现裸 JSON",
    "ok": true,
-   "actual": "扫过 3481 字（豁免机制原文 8 处）；样例「 阵容评估 收起 › 阵容评估 六只满编 · 六个方面 这六只的五个方面现在都能算。其中四个方面要先假设\"对手会用什么体系\"（现在各体系按同等权重，换成本赛季实测数据会更准）；这里…」"
+   "actual": "扫过 4601 字（豁免机制原文 9 处）；样例「 阵容评估 收起 › 阵容评估 六只满编 · 六个方面 这六只的五个方面现在都能算。其中四个方面要先假设\"对手会用什么体系\"（现在各体系按同等权重，换成本赛季实测数据会更准）；这里…」"
   },
   {
    "id": "23-无胜率与百分数",
-   "judge": "可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法（可核对的冻结机制原文除外）",
+   "judge": "可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法（可核对的冻结机制原文、以及**交代了来源**的假设值除外）",
    "ok": true,
-   "actual": "扫过 3481 字无命中（豁免机制原文 3 条）"
+   "actual": "扫过 4601 字无命中（豁免机制原文 3 条、假设值 1 条）"
   },
   {
    "id": "24-未知写在玩家层",
@@ -317,13 +317,13 @@
    "id": "30-触控目标",
    "judge": "390×844：模块里每个可见可点元素（按钮 / summary / 输入框）都 ≥44×44",
    "ok": true,
-   "actual": "量了 27 个元素，全部达标"
+   "actual": "量了 30 个元素，全部达标"
   },
   {
    "id": "31-移动端顺序",
    "judge": "390×844：常规流里的区块顺序固定为「队伍槽位 → 候选池」（→ 若「当前评估」「小芽短提示」还在流里，必须依次排在后面）；「当前评估」改由左侧悬浮抽屉承担（真鼠标点 `#tw-eval-toggle` 能打开、面板可见且有内容）。【2026-09-23 版式演变：`.tw-coach`（✦ 小芽 · 阵容阶段）按人类批注删除；`.tw-eval` 由人类要求改成 `#tw-eval-drawer` 固定抽屉（不在常规流）。「当前评估」这条口径由抽屉可达性这条等价断言守】",
    "ok": true,
-   "actual": "顺序=[\"tw-team\",\"tw-cand\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":150},{\"cls\":\"tw-cand\",\"top\":456}]；阵容评估抽屉：存在=true 内容 4865 字节，点开后 data-open=\"yes\" 面板可见=true 面板尺寸={\"w\":300,\"h\":287} 切换按钮={\"w\":44,\"h\":132}"
+   "actual": "顺序=[\"tw-team\",\"tw-cand\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":150},{\"cls\":\"tw-cand\",\"top\":456}]；阵容评估抽屉：存在=true 内容 4912 字节，点开后 data-open=\"yes\" 面板可见=true 面板尺寸={\"w\":300,\"h\":287} 切换按钮={\"w\":44,\"h\":132}"
   },
   {
    "id": "31b-窄屏候选区有可见高度",
@@ -335,7 +335,7 @@
    "id": "32-窄屏候选区",
    "judge": "390×844：选到第 2 只后仍然不横向溢出，三个候选与缺口清单都在",
    "ok": true,
-   "actual": "clientW=390 scrollW=390 selected=2 next=3 缺口=9；加人过程=[{\"name\":\"喵喵\",\"added\":true,\"probe\":{\"rows\":2,\"match\":1,\"species\":\"pet_000001\"},\"beforeCount\":0,\"after\":1,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"},{\"name\":\"水蓝蓝\",\"added\":true,\"probe\":{\"rows\":2,\"match\":1,\"species\":\"pet_000002\"},\"beforeCount\":1,\"after\":2,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"}]"
+   "actual": "clientW=390 scrollW=390 selected=2 next=3 缺口=9；加人过程=[{\"name\":\"喵喵\",\"added\":true,\"probe\":{\"rows\":2,\"match\":1,\"species\":\"pet_000001\"},\"beforeCount\":0,\"after\":1,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"},{\"name\":\"水蓝蓝\",\"added\":true,\"probe\":{\"rows\":2,\"match\":1,\"species\":\"pet_000002\"},\"beforeCount\":1,\"after\":2,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"}]"
   },
   {
    "id": "34-标准 PVP 开局按钮",
@@ -491,10 +491,17 @@
   },
   {
    "id": "39-「最怕的体系」写出体系名",
-   "judge": "把名字去掉（只剩「撞上某类体系时」）喂同一条判据必须报",
+   "judge": "喂**旧文案**（「大约每 5 局遇到 1 次」）给同一条判据必须红 —— 证明它不是\"什么都认\"",
    "ok": true,
-   "hit": "没有写出体系名（只剩含糊说法或分数）",
-   "actual": "样本：撞上某类体系时…（无名字）"
+   "hit": "没有写出体系名（只剩含糊说法或分数） | 把**假设的**权重说成了观测频率（「大约每 N 局遇到 1 次」）—— P0-04 明确不许 | 没有说这类体系在环境里占多少（要给「这类占 X%」并交代来源，或如实说没有数据）",
+   "actual": "样本：撞上某类体系时…（旧文案：假设的权重说成观测频率）"
+  },
+  {
+   "id": "39-反向控制：新文案不许被判红",
+   "judge": "「撞上「X」这类最吃亏（赛前假设这类占 14%（各体系等权）——这是假设的权重，不是实测出场率）」与如实说「环境里占多少没有数据」两种写法都**不许**红（判据不许挑字眼）",
+   "ok": true,
+   "hit": "（两份样本都按预期：该空的空、该响的响）",
+   "actual": "样本：新文案（带来源） / 如实说没有数据"
   },
   {
    "id": "36-评估抽屉滚得动",
@@ -602,6 +609,13 @@
    "actual": "{\"next_candidates\":[{\"mechanism\":{\"line\":\"胜率 62%\"}}]}"
   },
   {
+   "id": "23-反向控制：交代了来源的假设值不许被判成伪精确",
+   "judge": "同一句话里有数字+%、有来源短语（各体系等权 / 这是假设的权重 / 不是实测出场率）⇒ 不许红；而挂上「假设」两个字的**胜率**仍然要红（禁语优先）",
+   "ok": true,
+   "hit": "（两份样本都按预期：该空的空、该响的响）",
+   "actual": "样本：占 14%…各体系等权（应空） / 胜率 58%（这是假设的权重）（应命中）"
+  },
+  {
    "id": "25-非法参数(mode)",
    "judge": "把「非法 mode 静默接受」的样本过同一条判据必须报错",
    "ok": true,
@@ -701,8 +715,8 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "132",
-    "fullMs": "30",
+    "firstMs": "136",
+    "fullMs": "48",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
@@ -759,13 +773,13 @@
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
     "firstMs": "25",
-    "fullMs": "27",
+    "fullMs": "25",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "22"
+    "elapsedMs": "19"
    },
    "dom": {
     "slotNodes": 6,
@@ -816,8 +830,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     },
@@ -835,8 +849,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     },
@@ -854,8 +868,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     },
@@ -873,8 +887,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     },
@@ -892,8 +906,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     },
@@ -911,8 +925,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     }
@@ -937,8 +951,8 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "20",
-    "fullMs": "20",
+    "firstMs": "18",
+    "fullMs": "19",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
@@ -998,8 +1012,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     },
@@ -1017,8 +1031,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     },
@@ -1036,8 +1050,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     },
@@ -1055,8 +1069,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     },
@@ -1074,8 +1088,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     },
@@ -1093,8 +1107,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     }
@@ -1119,14 +1133,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "20",
-    "fullMs": "23",
+    "firstMs": "22",
+    "fullMs": "22",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "15"
+    "elapsedMs": "14"
    },
    "dom": {
     "slotNodes": 6,
@@ -1174,8 +1188,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     },
@@ -1193,8 +1207,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     },
@@ -1212,8 +1226,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     },
@@ -1231,8 +1245,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     },
@@ -1250,8 +1264,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     },
@@ -1269,8 +1283,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     }
@@ -1308,14 +1322,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "28",
+    "firstMs": "25",
     "fullMs": "24",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "19"
+    "elapsedMs": "18"
    },
    "dom": {
     "slotNodes": 6,
@@ -1373,7 +1387,7 @@
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
       "shadowTag": "SPAN",
-      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+      "shadowPath": "SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     },
@@ -1391,8 +1405,8 @@
       "tag": "SECTION",
       "cls": "",
       "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
-      "shadowTag": "BUTTON",
-      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
      },
      "topAfter": "ok"
     }

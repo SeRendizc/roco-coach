@@ -42,7 +42,7 @@ import {
 import {
   worldsFor, runInput, runArm, finalAnswer, refusalsIn, makePlanner, armLimit,
   checkTask, receiptSummary, localModelPlanner, localAgentPlanner, canonical, digest,
-  LOCAL_TOOL_SYSTEM, AGENT_TOOL_SYSTEM,
+  LOCAL_TOOL_SYSTEM, AGENT_TOOL_SYSTEM, buildProvenance, engineProvenance, sourceProvenance,
 } from './agent-trajectories.mjs';
 // 2026-09-25（主线程修，与 `gatewayAsk` 同源的一类缺陷）：这个文件在 `:290` 还用了 `modelIdentity`，
 // 同样**从来没有 import 过** ⇒ `npm run roco:shadow-replay -- --arm local_4b` 直接
@@ -359,8 +359,11 @@ async function main(argv) {
   // 逐窗口结果必须逐条相同」当标准，而模型抽样**本来就会翻面** —— 噪声底是这个标准唯一
   // 站得住的参照物。第 2 遍起的结果进 `self_consistency`，不进 `rows`（`rows` 只留第 1 遍）。
   const repeatRuns = [];
+  // 2026-09-29（task-17）：引擎身份要在客户端活着的时候抓（只留确定性字段）。
+  let engineIdentity = null;
   try {
     await client.startService();
+    engineIdentity = engineProvenance(await client.health().catch(() => null));
     for (let pass = 0; pass < repeat; pass += 1) {
       const passRows = [];
       for (const task of tasks) {
@@ -418,7 +421,21 @@ async function main(argv) {
   const path = outPath || (limit > 0
     ? OUT.replace(/\.json$/, `-slice${limit}${arm === 'rule' ? '' : `-${arm}`}.json`)
     : OUT.replace(/\.json$/, arm === 'rule' ? '.json' : `-${arm}.json`));
-  const report = buildShadowReport({arm, gateway, rows, compareWith, identity, outPath: write ? path : null});
+  const report = buildShadowReport({arm, gateway, rows, compareWith, identity, outPath: write ? path : null,
+    provenance: buildProvenance({
+      policyFirst: POLICY_FIRST,
+      arms: [arm],
+      limits: {[arm]: armLimit(arm)},
+      engine: engineIdentity,
+      sources: sourceProvenance([
+        'scripts/roco/agent-trajectories.mjs',
+        'scripts/roco/shadow-replay.mjs',
+        'src/coach/roco-client.js',
+        'roco/src/roco_env/env.py',
+        'roco/src/roco_env/service.py',
+        'roco/src/roco_env/data.py',
+      ]),
+    })});
   if (selfConsistency) {
     report.self_consistency = selfConsistency;
     report.policy_first = POLICY_FIRST;
@@ -442,10 +459,14 @@ async function main(argv) {
  * 抓到了这一点（把 prompt_digest 改成恒 null，注入后仍然全绿）。
  */
 export function buildShadowReport({arm, gateway = null, rows, compareWith = null,
-  identity = null, outPath = null}) {
+  identity = null, outPath = null, provenance = null}) {
   const report = {
     generated_by: 'scripts/roco/shadow-replay.mjs',
     arm,
+    // 2026-09-29（task-17）：口径 + 版本 + 源码 hash（与生成器那一份**同一个** `buildProvenance`）。
+    // 改前这份产物只有 `identity`（模型/适配器）与 `prompt_digest`，查不到 `policy_first`/limit/引擎版本 ——
+    // 而 B5 那一轮正是拿两个口径的产物互比才演了三次乌龙。
+    provenance,
     // 身份栏：这份报告是哪个模型/适配器产出的。**没有它，存档错位不会被发现。**
     identity: identity || null,
     written_to: outPath,

@@ -16,7 +16,7 @@
     {
       "name": "动作按钮上有技能信息（系别/能耗/威力或说明）",
       "ok": true,
-      "detail": "●●● PVP · AI模拟 第 1 回合 ●●● ⭐ 0 诡刺 👻 幽系 攻击 预期伤害 99 ⭐ 2 龙血 🐉 龙系 防御 预期伤害 — ⭐ 0 预期伤害 — ⭐ 2 集中"
+      "detail": "●●● PVP · AI模拟 第 1 回合 ●●● ⭐ 0 诡刺 👻 幽系 攻击 预期伤害 99 ⭐ 2 龙血 🐉 龙系 防御 预期伤害 — 这招有一部分引擎还不会算：本技能可"
     },
     {
       "name": "动作按钮上不出现技能内部 id（只看玩家可见文本）",
@@ -96,7 +96,7 @@
     {
       "name": "形象全部自制：零外链样式/脚本，且页面上所有 <img> 都来自本仓自己的立绘路由",
       "ok": true,
-      "detail": "{\"imgs\":1,\"非本仓立绘\":0,\"外链\":0}"
+      "detail": "{\"imgs\":2,\"非本仓立绘\":0,\"外链\":0}"
     },
     {
       "name": "一局能真的打完（引擎给出结果）",
@@ -138,14 +138,19 @@
       "detail": "teach 行 1"
     },
     {
-      "name": "玩家抱怨时陪练先回应情绪（R2/R3），且回话是一句中文（不是 [object Object]）",
+      "name": "玩家抱怨时陪练先回应情绪（R2/R3），且**屏幕上那句**是一句接住情绪的中文（不是 [object Object]）",
       "ok": true,
-      "detail": "R2: 嗯，这一局确实不顺。要复盘的话我随时在，不想说就先歇会儿。｜气泡「嗯，这一局确实不顺。要复盘的话我随时在，不想说就先歇会儿。（现在没接模型：我只能给规则事实与主动提示。想自由问答——规则、阵容、战术、复盘——请点右上角「小芽 → 设置 → 连接模」"
+      "detail": "语域 R2（本地那一句「嗯，这一局确实不顺。要复盘的话我随时在，不想说就先歇会儿。」）｜屏幕「烦啊——烦就先搁着，不聊对局也行。依据：你选的六只 · 你的名单」"
+    },
+    {
+      "name": "⓪ 前置：这一条真的发出去了（气泡数必须涨）—— 没涨 ⇒ 本轮记忆读数一律无效",
+      "ok": true,
+      "detail": "气泡 3→5"
     },
     {
       "name": "玩家说过的话会出现在「她记住了什么」里（记忆可见）",
       "ok": true,
-      "detail": "{\"hook\":\"1\",\"rows\":[\"称呼：老王\"]}"
+      "detail": "{\"hook\":\"1\",\"rows\":[\"称呼：老王\"],\"stated\":1,\"statedLabels\":[\"称呼：老王\"]}"
     },
     {
       "name": "记忆面板只列偏好，不把对局记录混进来（摘要不等于记忆）",
@@ -154,8 +159,8 @@
     },
     {
       "name": "忘掉一条之后列表里真的没有了（删除落到记忆里，不是只改界面）",
-      "ok": true,
-      "detail": "{\"hook\":\"none\",\"rows\":[]}"
+      "ok": false,
+      "detail": "{\"rows\":[]}"
     },
     {
       "name": "重画一次也不会把刚忘掉的那条捡回来",
@@ -244,7 +249,7 @@
     {
       "name": "玩家可见区域仍然说人话（有中文、有「开一局」这类操作词）",
       "ok": true,
-      "detail": " 小芽 · 洛克王国：世界 训练场 ← 返回首页 ⚔ 开始 PVP ✦ 小芽 "
+      "detail": " 小芽 · 洛克王国：世界 训练场 ← 返回首页 ⚔ 开始 PVP ✦ 小芽 ✦ 小芽 "
     },
     {
       "name": "对照面板默认不显示（要显式点按钮才跑，不打扰玩家）",
@@ -259,37 +264,37 @@
     {
       "name": "点一下能真的问到本机小模型（面板出现内容）",
       "ok": true,
-      "detail": "{\"hidden\":false,\"hasFn\":\"function\",\"battleId\":\"s2-ig7gobep\",\"panelExists\":true,\"err\":null,\"html\":\"\\n      <table class=\\\"shadow\\\">\\n        <tbody><tr><th>规则引擎（真值来源）</th><td>规则引擎这一步的行动建议：使用能量果</td></tr>\\n        <tr><th>本机小模型（只提议工具）</th><td>模型说：不用再查了<br>\\n          <span class=\\\"muted\\\">耗时 460 ms · "
+      "detail": "{\"hidden\":false,\"hasFn\":\"function\",\"battleId\":\"s2-m90sionr\",\"panelExists\":true,\"err\":null,\"html\":\"\\n      <table class=\\\"shadow\\\">\\n        <tbody><tr><th>规则引擎（真值来源）</th><td>规则引擎这一步的行动建议：使用能量果</td></tr>\\n        <tr><th>本机小模型（只提议工具）</th><td>模型说：不用再查了<br>\\n          <span class=\\\"muted\\\">耗时 1993 ms ·"
     },
     {
       "name": "面板明确写出「规则引擎是真值来源 / 模型只提议工具」",
       "ok": true,
-      "detail": " 规则引擎（真值来源）规则引擎这一步的行动建议：使用能量果 本机小模型（只提议工具）模型说：不用再查了 耗时 460 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」"
+      "detail": " 规则引擎（真值来源）规则引擎这一步的行动建议：使用能量果 本机小模型（只提议工具）模型说：不用再查了 耗时 1993 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议"
     },
     {
       "name": "面板不许暗示两边在同一维度上一致",
       "ok": true,
-      "detail": " 规则引擎（真值来源）规则引擎这一步的行动建议：使用能量果 本机小模型（只提议工具）模型说：不用再查了 耗时 460 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」"
+      "detail": " 规则引擎（真值来源）规则引擎这一步的行动建议：使用能量果 本机小模型（只提议工具）模型说：不用再查了 耗时 1993 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议"
     },
     {
       "name": "RC-802 ruleset：规则快照逐字来自引擎公开视图",
       "ok": true,
-      "detail": "ruleset=「roco-world-s4-2026-09-10 · 本局状态版本 0」 注册表 12314 字节 耗时 460ms 摘要 a5cb0fbcc53f…"
+      "detail": "ruleset=「roco-world-s4-2026-09-10 · 本局状态版本 0」 注册表 12314 字节 耗时 1993ms 摘要 a5cb0fbcc53f…"
     },
     {
       "name": "RC-802 support：模式注册表原文与摘要逐字来自 /api/roco/status",
       "ok": true,
-      "detail": "ruleset=「roco-world-s4-2026-09-10 · 本局状态版本 0」 注册表 12314 字节 耗时 460ms 摘要 a5cb0fbcc53f…"
+      "detail": "ruleset=「roco-world-s4-2026-09-10 · 本局状态版本 0」 注册表 12314 字节 耗时 1993ms 摘要 a5cb0fbcc53f…"
     },
     {
       "name": "RC-802 latency：对照栏的耗时逐值来自 /api/roco/shadow 回执",
       "ok": true,
-      "detail": "ruleset=「roco-world-s4-2026-09-10 · 本局状态版本 0」 注册表 12314 字节 耗时 460ms 摘要 a5cb0fbcc53f…"
+      "detail": "ruleset=「roco-world-s4-2026-09-10 · 本局状态版本 0」 注册表 12314 字节 耗时 1993ms 摘要 a5cb0fbcc53f…"
     },
     {
       "name": "RC-802 digest：对照栏的提示摘要逐值来自回执的 prompt_digest_pin",
       "ok": true,
-      "detail": "ruleset=「roco-world-s4-2026-09-10 · 本局状态版本 0」 注册表 12314 字节 耗时 460ms 摘要 a5cb0fbcc53f…"
+      "detail": "ruleset=「roco-world-s4-2026-09-10 · 本局状态版本 0」 注册表 12314 字节 耗时 1993ms 摘要 a5cb0fbcc53f…"
     },
     {
       "name": "RC-802 反证：抽屉里的值换成写死样例，四条判据必须红",
@@ -314,7 +319,7 @@
     {
       "name": "局面矩阵：至少 10 个局面真的有气泡产出（实际 11/12）",
       "ok": true,
-      "detail": "开口 11 个、沉默 1 个；沉默原因 [{\"id\":\"12-peaceful-silent\",\"reason\":\"门控判定 silent（reason=below-threshold）；建议层没有一条成立的局面事实：coachAdvice 返回 null；plan-present（采样时 state.plan 在）；会话 hints=0／上次开口=never／冷却=never；等待落定 261ms／plan 请求 1 次；决策原文 gate=null/reason=below-threshold/value=0.6/floor=1.2/decisive=false/budget=null\"}]"
+      "detail": "开口 11 个、沉默 1 个；沉默原因 [{\"id\":\"12-peaceful-silent\",\"reason\":\"门控判定 silent（reason=below-threshold）；建议层没有一条成立的局面事实：coachAdvice 返回 null；plan-present（采样时 state.plan 在）；会话 hints=0／上次开口=never／冷却=never；等待落定 307ms／plan 请求 1 次；决策原文 gate=null/reason=below-threshold/value=0.6/floor=1.2/decisive=false/budget=null\"}]"
     },
     {
       "name": "局面矩阵：互不相同的 kind ≥ 8（实际 9 种；分支 count>=8）",
@@ -573,8 +578,8 @@
     },
     {
       "name": "④ 真鼠标打开小芽弹窗 + 按原路径要一份建议：浮条真的出现（不再只写一句「建议已就绪」）。【原 `#xy-settings` 折叠与 `#plan`「让小芽看一眼」按钮已按人类 2026-09-23 删除：「打开面板 / 读模型状态 / 记忆入口」由弹出式小芽窗口（`#coach-entry` → `#model-list` / `#open-memory`）承担，「要一份建议」由 `window.rocoDemo.requestPlan({reason:'manual',explicit:true})`（`#plan` 的原 click 监听）承担】",
-      "ok": true,
-      "detail": "自动推进 3 手到第 4 回合（自动开口 kind=foe-energy-high）；点掉后 dismissed=true / 浮条隐藏=false；做什么「「火云车」估 414，够收对面「音速犬」这 190 血：这一轮直接收」/ 为什么=true / 风险=true；状态行（原 `#plan-status`，现在已删）「」；点击路径 小芽入口（弹窗打开=true→关闭=true，模型格 3 个：DeepSeek● 未连 / Qwen3.5-4B● 未连 / Qwen3.8-27B● 未连；记忆入口「查看记忆」）→ 要一份建议（原 `#plan`「让小芽看一眼」已删，走同一条 requestPlan({reason:'manual',explicit:true}) 路径）"
+      "ok": false,
+      "detail": "自动推进 3 手到第 4 回合（自动开口 kind=foe-energy-high）；点掉后 dismissed=true / 浮条隐藏=false；做什么「「火云车」估 414，够收对面「音速犬」这 190 血：这一轮直接收」/ 为什么=true / 风险=true；状态行（原 `#plan-status`，现在已删）「」；点击路径 小芽入口（弹窗打开=false→关闭=false，模型格 3 个：DeepSeek● 未连 / Qwen3.5-4B● 未连 / Qwen3.8-27B● 未连；记忆入口「查看记忆」）→ 要一份建议（原 `#plan`「让小芽看一眼」已删，走同一条 requestPlan({reason:'manual',explicit:true}) 路径）"
     },
     {
       "name": "④ 浮条不超过两行：2 个文本行（做什么 + 为什么·风险），且第一行没有被截断",
@@ -624,7 +629,7 @@
     {
       "name": "④ 陈旧规划必须整条丢弃并记账（构造竞态：规划属于旧版、回来时已推进）【原状态行 `#plan-status`「没有采用这份建议：局面已推进」已随人类 2026-09-23 删除 `#plan`/`.battle-tools` 一起消失；这一层含义现在由 `state.planStaleDiscards` 的版本对（plan_version / view_version）承担，措辞判据在 `#plan-status` 存在时仍然生效】",
       "ok": true,
-      "detail": "规划属于 state_version=31，回来时画面=38；plan 保留=false planAtVersion=null；丢弃账={\"plan_version\":31,\"view_version\":38,\"at\":1790605502120}；状态行（#plan-status 已删）「」"
+      "detail": "规划属于 state_version=31，回来时画面=38；plan 保留=false planAtVersion=null；丢弃账={\"plan_version\":31,\"view_version\":38,\"at\":1790647642020}；状态行（#plan-status 已删）「」"
     },
     {
       "name": "④ 丢弃之后仍按规则短提示开口，且浮条不许挂在被丢弃那一版上",
@@ -662,6 +667,6 @@
   "dom_snapshots": 3,
   "console_errors": [],
   "page_errors": [],
-  "passed": 129,
-  "failed": 0
+  "passed": 128,
+  "failed": 2
 }

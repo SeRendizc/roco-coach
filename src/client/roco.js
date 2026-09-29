@@ -142,14 +142,21 @@ const RETIRED_COMPANION_IDS = new Set(['say-reply', 'say-input', 'say-form', 'sa
   'companion-body', 'companion-line', 'companion-modal', 'memory-pop', 'memory-list', 'memory-empty',
   'model-chip', 'model-list', 'open-connect', 'close-companion', 'open-memory',
   'xy-fold-status', 'xy-fold-label']);
+// ⚠ 2026-09-30（`demo-acceptance` 实测抓到的真缺陷）：替身**必须是同一棵游离树** ——
+//   `sayWritePlayerLine()` 里那句 `body.insertBefore(me, reply)` 要求 `reply` 是 `body` 的子节点；
+//   第一版每个 id 各建一个**互不相干**的游离 div ⇒ `insertBefore` 抛
+//   `NotFoundError: The node before which the new node is to be inserted is not a child of this node`，
+//   而这一句在**陪练**那条路上（`rocoDemo.say()` → `sayOnce()` → `sayWritePlayerLine()`）。
+//   现在：`#companion-body` 的替身是**容器**，其余替身都挂在它下面（与真实 DOM 的父子关系一致）。
 const retiredStubs = new Map();
 const retiredStub = (id) => {
   if (!retiredStubs.has(id)) {
-    const el = document.createElement('div');
+    const el = id === 'companion-body' ? document.createElement('div') : document.createElement('input');
     el.id = `retired-${id}`;
     el.hidden = true;
     el.dataset.retiredCompanion = id;
     retiredStubs.set(id, el);
+    if (id !== 'companion-body') retiredStub('companion-body').append(el);
   }
   return retiredStubs.get(id);
 };

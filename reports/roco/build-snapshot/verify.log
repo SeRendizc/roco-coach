@@ -1,0 +1,11 @@
+[probe-tool] A: 起 Chrome（专用 profile）…
+[probe-tool] A: CDP 就绪
+[probe-tool] B: 实例 A 起来了
+[probe-tool] C: 实例 B 起来了
+[probe-tool] E: 准备量宿主 API 与命中测试
+[probe-tool] A profile 守卫：2/2 个非法路径被拒；专用目录 = /Users/serendizc/Developer/roco-coach/tmp/browser-profile
+[probe-tool] B 正常握手：ok（引擎 ok=true，等 234ms）
+[probe-tool] C 故意留旧 cookie + 旧 csrf ⇒ 工具报「session-invalid」（bootstrap HTTP 200，POST 403）
+[probe-tool] D 允许自愈 ⇒ ok（stale-cookie-cleared）；随后复用同一会话 =ok（清 cookie=false）
+[probe-tool] E 宿主 API 超时如实报（712ms）；被盖住的按钮 via=js-click hit=false；正常按钮 via=mouse hit=true
+[probe-tool] 报告：reports/roco/build-snapshot/probe-session-tool.json

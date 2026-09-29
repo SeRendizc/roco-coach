@@ -1,10 +1,10 @@
 {
  "generated_by": "scripts/roco/browser-product-wiring.mjs",
  "schema": "roco-product-wiring/v1",
- "generated_at": "2026-09-23T17:23:20.335Z",
- "url": "http://127.0.0.1:54620/roco.html?legacy3v3=1",
+ "generated_at": "2026-09-28T18:41:45.900Z",
+ "url": "http://127.0.0.1:65301/roco.html?legacy3v3=1",
  "match": {
-  "battle_id": "s1-m3xxwd13",
+  "battle_id": "s1-gdjl8upi",
   "seed": 20260921,
   "result": "win",
   "turn": 17,
@@ -118,10 +118,10 @@
   "checked": "no",
   "improved": "unknown",
   "cardHidden": false,
-  "question": "这一局一共 17 个回合，最后赢了下来。第 4 回合 对方第 1 位 倒下，这是全场第一次减员。对面补上新的一只之后，我方的下一手打上去还是被抵抗。",
-  "learning": "这一局学到一件事：对面补上新的一只之后，先确认它是谁、什么系，再决定这一手打谁。",
+  "question": "这一局一共 17 个回合，最后赢了下来。第 4 回合 对方第 1 位 倒下，这是全场第一次减员。对面补上新的一只之后，我方的下一手打上去还是被抵抗。全场最重的一次伤害在第 17 回合（我方，约 442 点）；我方主动换人 0 次、被动补位 0 次、用道具 0 次。",
+  "learning": "这一局学到一件事：对面补上新的一只之后，先确认它是谁、什么系，再决定这一手打谁。 下一次再遇到第 7 回合那种局面（对方打出属性克制的一击），先换掉挨打的那一只再打。",
   "progress": "",
-  "note": "依据：第 4 回合：对方第 1 位 倒下（第一次减员）。 对方第 1 位 第 4 回合倒下，之后我方第 6 回合那一手倍率 0.5，用的是「火苗」（打在抵抗上）。",
+  "note": "依据：第 4 回合：对方第 1 位 倒下（第一次减员）。 对方第 1 位 第 4 回合倒下，之后我方第 6 回合那一手倍率 0.5，用的是「火苗」（打在抵抗上）。 关键片段：全场最重的一次伤害在第 17 回合——我方那一手打出约 442 点（用的是「火云车」），打在对方第 2 位身上。 关键片段：最吃亏的一回合是第 2 回合——我方在这一回合一共挨了约 88 点（对方出手 1 次）。 资源：我方这一局没有主动换人的记录（换人事件 0 条）；被动补位：我方 0 次／对方 2 次（补位不占回合）。 资源：道具——我方这一局没有用药或用道具的记录（道具事件 0 条）。 资源：我方回合末的能量记录里最低是 2 点（第 1、4、5、9、13、14 等 7 个回合；这一局记到 17 次回能，能量上限 6）。 资源：手段——我方减伤/应对 5 次（第 1、5、8、11、14 回合）；对方减伤/应对 5 次（第 1、6、9、12、15 回合）；对方技能回能 9 次（第 2–14 回合之间，合计约 5 点能量）；我方技能回能 8 次（第 2–16 回合之间，合计约 8 点能量）。",
   "turnLine": "关键转折在第 4 回合（这一局 17 个回合）。",
   "teachRows": 1
  },
@@ -181,7 +181,7 @@
     "raw_drawer_len": 27834
    },
    "engine_roster_evidence_ids": [
-    "ev:roco-world-s4-2026-09-10:roster#total=48;offset=0;limit=2"
+    "ev:roco-world-s4-2026-09-10:roster#total=542;offset=0;limit=2"
    ],
    "browser_roster_keys": [
     "ok",
@@ -197,10 +197,10 @@
    ],
    "browser_roster_sample": {
     "pet": [
-     "ev:roco-world-s4-2026-09-10:pets.json#pet_000012"
+     "ev:roco-world-s4-2026-09-10:pets.json#pet_000001"
     ],
     "move": [
-     "ev:roco-world-s4-2026-09-10:skills.json#skill_000632"
+     "ev:roco-world-s4-2026-09-10:skills.json#skill_000246"
     ]
    },
    "roster_evidence_ok": true,
@@ -275,8 +275,8 @@
     "improved": "unknown",
     "repeat": "no"
    },
-   "question": "这一局一共 17 个回合，最后赢了下来。第 4 回合 对方第 1 位 倒下，这是全场第一次减员。对面补上新的一只之后，我方的下一手打上去还是被抵抗。",
-   "learning": "这一局学到一件事：对面补上新的一只之后，先确认它是谁、什么系，再决定这一手打谁。"
+   "question": "这一局一共 17 个回合，最后赢了下来。第 4 回合 对方第 1 位 倒下，这是全场第一次减员。对面补上新的一只之后，我方的下一手打上去还是被抵抗。全场最重的一次伤害在第 17 回合（我方，约 442 点）；我方主动换人 0 次、被动补位 0 次、用道具 0 次。",
+   "learning": "这一局学到一件事：对面补上新的一只之后，先确认它是谁、什么系，再决定这一手打谁。 下一次再遇到第 7 回合那种局面（对方打出属性克制的一击），先换掉挨打的那一只再打。"
   },
   {
    "step": "陪练",
@@ -333,7 +333,7 @@
     "raw_drawer_has_evidence": true
    },
    "engine_roster_evidence_ids": [
-    "ev:roco-world-s4-2026-09-10:roster#total=48;offset=0;limit=2"
+    "ev:roco-world-s4-2026-09-10:roster#total=542;offset=0;limit=2"
    ],
    "browser_roster_keys": [
     "ok",
@@ -349,10 +349,10 @@
    ],
    "browser_roster_sample": {
     "pet": [
-     "ev:roco-world-s4-2026-09-10:pets.json#pet_000012"
+     "ev:roco-world-s4-2026-09-10:pets.json#pet_000001"
     ],
     "move": [
-     "ev:roco-world-s4-2026-09-10:skills.json#skill_000632"
+     "ev:roco-world-s4-2026-09-10:skills.json#skill_000246"
     ]
    }
   },
@@ -406,7 +406,7 @@
   {
    "name": "② 老师：给了「下一局练一件事」，并且写进了教学账本（journal 里的 teach 行）",
    "ok": true,
-   "detail": "data-roco-teacher-goal=「read-the-replacement-first」；teach 行 1；学习点「这一局学到一件事：对面补上新的一只之后，先确认它是谁、什么系，再决定这一手打谁。」"
+   "detail": "data-roco-teacher-goal=「read-the-replacement-first」；teach 行 1；学习点「这一局学到一件事：对面补上新的一只之后，先确认它是谁、什么系，再决定这一手打谁。 下一次再遇到第 7 回合那种局面（对方」"
   },
   {
    "name": "③ 陪练：说一句话后拿到真实语域（R0—R3），并且回的是一句中文（不是 [object Object]）",
@@ -436,7 +436,7 @@
   {
    "name": "⑤ RAG：精灵/技能级证据串（evidence_ids）真的到了浏览器（逐只 pets.json#…、逐招 skills.json#…）",
    "ok": true,
-   "detail": "引擎回执 evidence_ids=[\"ev:roco-world-s4-2026-09-10:roster#total=48;offset=0;limit=2\"]；/api/roco/roster 的键是 [\"ok\",\"total\",\"offset\",\"limit\",\"count\",\"usable_count\",\"team_size\",\"note\",\"pets\",\"evidence_ids\"]，样例 [\"ev:roco-world-s4-2026-09-10:pets.json#pet_000012\"] / [\"ev:roco-world-s4-2026-09-10:skills.json#skill_000632\"]"
+   "detail": "引擎回执 evidence_ids=[\"ev:roco-world-s4-2026-09-10:roster#total=542;offset=0;limit=2\"]；/api/roco/roster 的键是 [\"ok\",\"total\",\"offset\",\"limit\",\"count\",\"usable_count\",\"team_size\",\"note\",\"pets\",\"evidence_ids\"]，样例 [\"ev:roco-world-s4-2026-09-10:pets.json#pet_000001\"] / [\"ev:roco-world-s4-2026-09-10:skills.json#skill_000246\"]"
   },
   {
    "name": "⑤ 反证：把 pets[].evidence_ids 剥掉，上面那条判据必须变红（判据有牙）",

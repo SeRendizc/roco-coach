@@ -1,0 +1,1531 @@
+{
+ "generated": "2026-09-29T01:36:07.659Z",
+ "command": "node reports/roco/build-snapshot/scan-probe-lifecycle.mjs",
+ "patterns": {
+  "temp_profile": "mkdtempSync(",
+  "session_handshake": "/api/roco/status 或 /api/bootstrap",
+  "host_api": "window.rocoDemo|window.rocoTeamWorkshop（且没有任何提到它的 wait/poll）",
+  "hit_test": "Input.dispatchMouseEvent 但没有 elementFromPoint"
+ },
+ "rows": [
+  {
+   "file": "reports/roco/build-snapshot/browser-a7-refresh-proof.mjs",
+   "lines": 431,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     67
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": true,
+    "jsClick": [],
+    "hit": false
+   }
+  },
+  {
+   "file": "reports/roco/build-snapshot/browser-box-deeplink-proof.mjs",
+   "lines": 286,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     60
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": false,
+    "hitTest": false,
+    "jsClick": [],
+    "hit": false
+   }
+  },
+  {
+   "file": "reports/roco/build-snapshot/browser-dimo-6x4.mjs",
+   "lines": 565,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     65
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": true,
+    "sites": [
+     {
+      "line": 370,
+      "text": "await waitFor(`document.body.dataset.rocoTrial!==undefined||Boolean(window.rocoDemo?.state",
+      "waitedWithin6Lines": true
+     }
+    ],
+    "unguarded": 0,
+    "hit": false,
+    "first": 370
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": true,
+    "jsClick": [],
+    "hit": false
+   }
+  },
+  {
+   "file": "reports/roco/xiaoya-context/browser-battle-context-acceptance.mjs",
+   "lines": 417,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     59
+    ]
+   },
+   "persistentProfile": true,
+   "sessionHandshake": {
+    "status": [
+     166,
+     170
+    ],
+    "bootstrap": [],
+    "hit": false
+   },
+   "hostApi": {
+    "used": true,
+    "sites": [
+     {
+      "line": 162,
+      "text": "await waitFor(`Boolean(window.rocoTeamWorkshop?.addCandidate)`, {tries: 60, gap: 300, labe",
+      "waitedWithin6Lines": true
+     },
+     {
+      "line": 188,
+      "text": "const filled = await js(`(async()=>{const api=window.rocoTeamWorkshop;if(!api?.addCandidat",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 196,
+      "text": "const teamState = await js(`(()=>{const s=window.rocoDemo?.state;",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 239,
+      "text": "let started = await js(`document.body.dataset.rocoView==='ready'||Boolean(window.rocoDemo?",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 241,
+      "text": "const still = await js(`JSON.stringify({team:(window.rocoDemo?.state?.teamWorkshop?.team??",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 243,
+      "text": "battleId:window.rocoDemo?.state?.battleId??null,",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 257,
+      "text": "await waitFor(`document.body.dataset.rocoView==='ready'||Boolean(window.rocoDemo?.state?.v",
+      "waitedWithin6Lines": true
+     },
+     {
+      "line": 259,
+      "text": "result.battle = JSON.parse(await js(`(()=>{const v=window.rocoDemo?.state?.view;",
+      "waitedWithin6Lines": true
+     }
+    ],
+    "unguarded": 8,
+    "hit": true,
+    "first": 162
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": true,
+    "jsClick": [
+     224,
+     233,
+     235,
+     236,
+     249,
+     250
+    ],
+    "hit": false
+   }
+  },
+  {
+   "file": "reports/roco/xiaoya-context/browser-capability-acceptance.mjs",
+   "lines": 442,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     75
+    ]
+   },
+   "persistentProfile": true,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [
+     29,
+     137,
+     206,
+     209,
+     341,
+     364,
+     378
+    ],
+    "hit": false
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": false,
+    "jsClick": [],
+    "hit": true
+   }
+  },
+  {
+   "file": "reports/roco/xiaoya-context/browser-focus-acceptance.mjs",
+   "lines": 370,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     60
+    ]
+   },
+   "persistentProfile": true,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": false,
+    "jsClick": [
+     221,
+     292,
+     296,
+     305
+    ],
+    "hit": true
+   }
+  },
+  {
+   "file": "reports/roco/xiaoya-context/browser-product-focus-acceptance.mjs",
+   "lines": 275,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     57
+    ]
+   },
+   "persistentProfile": true,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": true,
+    "sites": [
+     {
+      "line": 154,
+      "text": "const filled = await js(`(async()=>{const api=window.rocoTeamWorkshop;if(!api?.addCandidat",
+      "waitedWithin6Lines": true
+     }
+    ],
+    "unguarded": 0,
+    "hit": false,
+    "first": 154
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": false,
+    "jsClick": [
+     191
+    ],
+    "hit": true
+   }
+  },
+  {
+   "file": "reports/roco/xiaoya-context/browser-slot-focus-acceptance.mjs",
+   "lines": 261,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     70
+    ]
+   },
+   "persistentProfile": true,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": false,
+    "jsClick": [
+     172
+    ],
+    "hit": true
+   }
+  },
+  {
+   "file": "reports/roco/xiaoya-context/probe-activity-role-migration.mjs",
+   "lines": 349,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     64
+    ]
+   },
+   "persistentProfile": true,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [
+     24,
+     248
+    ],
+    "hit": false
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": true,
+    "jsClick": [
+     168,
+     175,
+     176,
+     212,
+     243
+    ],
+    "hit": false
+   }
+  },
+  {
+   "file": "reports/roco/xiaoya-context/probe-advice-browser.mjs",
+   "lines": 95,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     14
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": false,
+    "hitTest": false,
+    "jsClick": [],
+    "hit": false
+   }
+  },
+  {
+   "file": "reports/roco/xiaoya-context/probe-baseline.mjs",
+   "lines": 57,
+   "tempProfile": {
+    "hit": false,
+    "at": []
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [
+     4
+    ],
+    "hit": false
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": false,
+    "hitTest": false,
+    "jsClick": [],
+    "hit": false
+   }
+  },
+  {
+   "file": "reports/roco/xiaoya-context/probe-box-dom.mjs",
+   "lines": 61,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     11
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": false,
+    "hitTest": false,
+    "jsClick": [
+     38,
+     41,
+     51
+    ],
+    "hit": false
+   }
+  },
+  {
+   "file": "reports/roco/xiaoya-context/probe-companion-vs-xiaoya.mjs",
+   "lines": 218,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     53
+    ]
+   },
+   "persistentProfile": true,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": false,
+    "jsClick": [],
+    "hit": true
+   }
+  },
+  {
+   "file": "reports/roco/xiaoya-context/probe-focus.mjs",
+   "lines": 44,
+   "tempProfile": {
+    "hit": false,
+    "at": []
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": false,
+    "hitTest": false,
+    "jsClick": [],
+    "hit": false
+   }
+  },
+  {
+   "file": "reports/roco/xiaoya-context/probe-legacy-corpus.mjs",
+   "lines": 66,
+   "tempProfile": {
+    "hit": false,
+    "at": []
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": false,
+    "hitTest": false,
+    "jsClick": [],
+    "hit": false
+   }
+  },
+  {
+   "file": "reports/roco/xiaoya-context/probe-memory-migration.mjs",
+   "lines": 277,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     59
+    ]
+   },
+   "persistentProfile": true,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": true,
+    "jsClick": [
+     167,
+     171,
+     195,
+     203,
+     214,
+     241
+    ],
+    "hit": false
+   }
+  },
+  {
+   "file": "reports/roco/xiaoya-context/probe-model-list-migration.mjs",
+   "lines": 248,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     56
+    ]
+   },
+   "persistentProfile": true,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": true,
+    "jsClick": [
+     9,
+     153,
+     176,
+     177,
+     189,
+     195
+    ],
+    "hit": false
+   }
+  },
+  {
+   "file": "reports/roco/xiaoya-context/probe-retire-boot.mjs",
+   "lines": 120,
+   "tempProfile": {
+    "hit": false,
+    "at": []
+   },
+   "persistentProfile": true,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": true,
+    "sites": [
+     {
+      "line": 63,
+      "text": "workshopApi:Boolean(window.rocoTeamWorkshop?.addCandidate),",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 66,
+      "text": "const filled = await js(`(async()=>{const a=window.rocoTeamWorkshop;if(!a?.addCandidate)re",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 74,
+      "text": "const readWorkshop = () => js(`(()=>{const s=window.rocoDemo?.state;",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 105,
+      "text": "hasView:Boolean(window.rocoDemo?.state?.view),turn:window.rocoDemo?.state?.view?.turn??nul",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 109,
+      "text": "const open = await js(`JSON.stringify({visibility:window.rocoDemo?.companionVisibility?.()",
+      "waitedWithin6Lines": false
+     }
+    ],
+    "unguarded": 5,
+    "hit": true,
+    "first": 63
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": false,
+    "jsClick": [
+     97,
+     101,
+     107
+    ],
+    "hit": true
+   }
+  },
+  {
+   "file": "reports/roco/xiaoya-context/probe-server-coach.mjs",
+   "lines": 41,
+   "tempProfile": {
+    "hit": false,
+    "at": []
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [
+     8
+    ],
+    "hit": false
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": false,
+    "hitTest": false,
+    "jsClick": [],
+    "hit": false
+   }
+  },
+  {
+   "file": "reports/roco/xiaoya-context/probe-serverdata-browser.mjs",
+   "lines": 58,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     13
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": false,
+    "hitTest": false,
+    "jsClick": [],
+    "hit": false
+   }
+  },
+  {
+   "file": "reports/roco/xiaoya-context/retire-companion-acceptance.mjs",
+   "lines": 265,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     69
+    ]
+   },
+   "persistentProfile": true,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": true,
+    "sites": [
+     {
+      "line": 162,
+      "text": "const filled = await js(`(async()=>{const api=window.rocoTeamWorkshop;if(!api?.addCandidat",
+      "waitedWithin6Lines": true
+     },
+     {
+      "line": 176,
+      "text": "result.battle = JSON.parse(await js(`(()=>{const v=window.rocoDemo?.state?.view;",
+      "waitedWithin6Lines": true
+     },
+     {
+      "line": 187,
+      "text": "await js(`(()=>{const d=window.rocoDemo;if(d?.state){d.state.__viewBackup=d.state.view;",
+      "waitedWithin6Lines": false
+     }
+    ],
+    "unguarded": 1,
+    "hit": true,
+    "first": 162
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": true,
+    "jsClick": [
+     194
+    ],
+    "hit": false
+   }
+  },
+  {
+   "file": "scripts/roco/browser-acceptance.mjs",
+   "lines": 315,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     66
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": false,
+    "hitTest": false,
+    "jsClick": [
+     166,
+     169,
+     178,
+     179,
+     224,
+     232
+    ],
+    "hit": false
+   }
+  },
+  {
+   "file": "scripts/roco/browser-adapter-acceptance.mjs",
+   "lines": 383,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     56
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": true,
+    "sites": [
+     {
+      "line": 179,
+      "text": "const picked = await js(`(()=>{const d=window.rocoDemo;d.state.pick.player=['pet_000062','",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 200,
+      "text": "stateVersion: window.rocoDemo.state.view.state_version,",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 213,
+      "text": "await js(`window.rocoDemo.requestPlan({reason:'manual',explicit:true})`);",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 261,
+      "text": "await js(`window.rocoDemo.requestPlan({reason:'manual',explicit:true})`);",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 309,
+      "text": "await js(`window.rocoDemo.autoTurn()`);",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 310,
+      "text": "return {how: 'namespace:window.rocoDemo.autoTurn()', hit: null};",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 322,
+      "text": "const versionBefore = await js(`window.rocoDemo.state.view.state_version`);",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 327,
+      "text": "versionAfter = await js(`window.rocoDemo.state.view.state_version`);",
+      "waitedWithin6Lines": true
+     }
+    ],
+    "unguarded": 7,
+    "hit": true,
+    "first": 179
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": true,
+    "jsClick": [
+     14,
+     127,
+     315
+    ],
+    "hit": false
+   }
+  },
+  {
+   "file": "scripts/roco/browser-battle-coach-acceptance.mjs",
+   "lines": 299,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     51
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": true,
+    "sites": [
+     {
+      "line": 123,
+      "text": "return Boolean(p&&!p.hidden&&(window.rocoDemo?.state?.view?.turn??0)>0);})()`);",
+      "waitedWithin6Lines": true
+     },
+     {
+      "line": 194,
+      "text": "const marks = JSON.parse(await js(`(()=>{const v=window.rocoDemo?.state?.view;",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 215,
+      "text": "const afterTurn = JSON.parse(await js(`(async()=>{const demo=window.rocoDemo;",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 234,
+      "text": "const doubleClick = JSON.parse(await js(`(async()=>{const demo=window.rocoDemo;",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 250,
+      "text": "const replaceUi = JSON.parse(await js(`(()=>{const demo=window.rocoDemo;const v=demo.state",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 267,
+      "text": "const swapUi = await js(`(async()=>{const demo=window.rocoDemo;const v=demo.state.view;",
+      "waitedWithin6Lines": false
+     }
+    ],
+    "unguarded": 5,
+    "hit": true,
+    "first": 123
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": false,
+    "jsClick": [
+     117,
+     270
+    ],
+    "hit": true
+   }
+  },
+  {
+   "file": "scripts/roco/browser-battle-feedback-acceptance.mjs",
+   "lines": 3308,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     1812
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": true,
+    "sites": [
+     {
+      "line": 1057,
+      "text": "*   · **引擎给的实数** —— `window.rocoDemo.state.view.self.magic.{uses_left,cooldown,swapped}`",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 1656,
+      "text": "probe: '抽掉 state.view.mana 后 window.rocoDemo.render() → 两侧必须 hidden'},",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 2334,
+      "text": "const snap = async () => js(`(()=>{const v=window.rocoDemo.state.view;",
+      "waitedWithin6Lines": true
+     },
+     {
+      "line": 2406,
+      "text": "const counts = await js(`(()=>{const d=window.rocoDemo;return {player:d.state.pick.player.",
+      "waitedWithin6Lines": true
+     },
+     {
+      "line": 2417,
+      "text": "const filled = await js(`(()=>{const d=window.rocoDemo;const b=document.getElementById('st",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 2564,
+      "text": "*   · 引擎实数：`window.rocoDemo.state.view.self.magic = {uses_left, cooldown, swapped, cooldow",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 2594,
+      "text": "const v=window.rocoDemo?.state?.view;",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 2618,
+      "text": "? `window.rocoDemo.state.view.self.magic{${probe.magicKeys.join(',')}}`",
+      "waitedWithin6Lines": false
+     }
+    ],
+    "unguarded": 18,
+    "hit": true,
+    "first": 1057
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": true,
+    "jsClick": [],
+    "hit": false
+   }
+  },
+  {
+   "file": "scripts/roco/browser-battle-v3-acceptance.mjs",
+   "lines": 1793,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     1296
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": true,
+    "sites": [
+     {
+      "line": 226,
+      "text": "const view = window.rocoDemo?.state?.view ?? null;",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 681,
+      "text": "if (b.hasView !== true) bad.push('window.rocoDemo.state.view 是空的（没进战斗）');",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 1179,
+      "text": "engine: 'window.rocoDemo.state.view.self.magic', legal: 'window.rocoDemo.state.view.legal[",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 1521,
+      "text": "if(!sr)return null;const inTeam=new Set(window.rocoDemo?.state?.teamWorkshop?.team??[]);",
+      "waitedWithin6Lines": true
+     },
+     {
+      "line": 1528,
+      "text": "const teamN = Number(await js(`(window.rocoDemo?.state?.teamWorkshop?.team??[]).length`));",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 1533,
+      "text": "const v=window.rocoDemo?.state?.view;return Boolean(v)&&!!p&&!p.hidden&&p.getBoundingClien",
+      "waitedWithin6Lines": true
+     },
+     {
+      "line": 1539,
+      "text": "entry.diagnose = await js(`(()=>{const out={view:Boolean(window.rocoDemo?.state?.view),",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 1541,
+      "text": "try{window.rocoDemo.render();out.ok=true;out.hiddenAfter=document.getElementById('battle-p",
+      "waitedWithin6Lines": false
+     }
+    ],
+    "unguarded": 7,
+    "hit": true,
+    "first": 226
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": false,
+    "jsClick": [
+     1433
+    ],
+    "hit": true
+   }
+  },
+  {
+   "file": "scripts/roco/browser-box-acceptance.mjs",
+   "lines": 2214,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     376
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": true,
+    "jsClick": [
+     1233,
+     1335,
+     1504
+    ],
+    "hit": false
+   }
+  },
+  {
+   "file": "scripts/roco/browser-capture-art-decode.mjs",
+   "lines": 511,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     60
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": false,
+    "hitTest": false,
+    "jsClick": [
+     289,
+     296,
+     304,
+     331,
+     470
+    ],
+    "hit": false
+   }
+  },
+  {
+   "file": "scripts/roco/browser-coach-agent-acceptance.mjs",
+   "lines": 222,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     55
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": false,
+    "sites": [],
+    "unguarded": 0,
+    "hit": false,
+    "first": null
+   },
+   "clicks": {
+    "mouseDispatch": false,
+    "hitTest": false,
+    "jsClick": [],
+    "hit": false
+   }
+  },
+  {
+   "file": "scripts/roco/browser-live-acceptance.mjs",
+   "lines": 1958,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     84
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [
+     153
+    ],
+    "bootstrap": [],
+    "hit": false
+   },
+   "hostApi": {
+    "used": true,
+    "sites": [
+     {
+      "line": 279,
+      "text": "const d=window.rocoDemo;",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 306,
+      "text": "* 把**当前这一局**推到结算（真机口径：每一步都走 `window.rocoDemo.autoTurn()`）。",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 324,
+      "text": "const probe = await js(`(()=>{const v=window.rocoDemo.state.view;",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 333,
+      "text": "try { await js('window.rocoDemo.autoTurn()'); } catch { break; }",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 340,
+      "text": "try { await js('window.rocoDemo.autoTurn()'); } catch { break; }",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 363,
+      "text": "const d=window.rocoDemo;",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 514,
+      "text": "await waitFor(`(()=>{const d=window.rocoDemo;",
+      "waitedWithin6Lines": true
+     },
+     {
+      "line": 530,
+      "text": "const teamIds = await js(`JSON.stringify(window.rocoDemo.state.teamWorkshop?.team ?? [])`)",
+      "waitedWithin6Lines": false
+     }
+    ],
+    "unguarded": 28,
+    "hit": true,
+    "first": 279
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": false,
+    "jsClick": [],
+    "hit": true
+   }
+  },
+  {
+   "file": "scripts/roco/browser-loadout-acceptance.mjs",
+   "lines": 212,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     30
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": true,
+    "sites": [
+     {
+      "line": 188,
+      "text": "return Boolean(p&&!p.hidden&&(window.rocoDemo?.state?.view?.turn??0)>0);})()`);}",
+      "waitedWithin6Lines": true
+     },
+     {
+      "line": 196,
+      "text": "const applied=await js(`(()=>{const v=window.rocoDemo?.state?.view;const l=v?.self?.loadou",
+      "waitedWithin6Lines": false
+     }
+    ],
+    "unguarded": 1,
+    "hit": true,
+    "first": 188
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": false,
+    "jsClick": [
+     59,
+     63,
+     77,
+     139,
+     163,
+     166
+    ],
+    "hit": true
+   }
+  },
+  {
+   "file": "scripts/roco/browser-mobile-sweep.mjs",
+   "lines": 492,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     115
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": true,
+    "sites": [
+     {
+      "line": 365,
+      "text": "coach:(()=>{const vis=window.rocoDemo&&window.rocoDemo.companionVisibility?window.rocoDemo",
+      "waitedWithin6Lines": false
+     }
+    ],
+    "unguarded": 1,
+    "hit": true,
+    "first": 365
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": false,
+    "jsClick": [],
+    "hit": true
+   }
+  },
+  {
+   "file": "scripts/roco/browser-product-wiring.mjs",
+   "lines": 562,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     62
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": true,
+    "sites": [
+     {
+      "line": 137,
+      "text": "const undoScriptDismiss=async()=>{await js(`window.rocoDemo.state.session.dismissed=false`",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 148,
+      "text": "await js(`(()=>{const d=window.rocoDemo;",
+      "waitedWithin6Lines": true
+     },
+     {
+      "line": 157,
+      "text": "const startInfo=JSON.parse(await js(`(()=>{const v=window.rocoDemo.state.view;",
+      "waitedWithin6Lines": true
+     },
+     {
+      "line": 158,
+      "text": "return JSON.stringify({turn:v.turn,battleId:window.rocoDemo.state.battleId,",
+      "waitedWithin6Lines": true
+     },
+     {
+      "line": 168,
+      "text": "const quietAtOpen=await js(`(()=>{const s=window.rocoDemo.state;",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 175,
+      "text": "await js(`window.rocoDemo.requestPlan({reason:'manual',explicit:true})`);",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 181,
+      "text": "hintAction:(window.rocoDemo.state.hint||{}).action??null,",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 206,
+      "text": "const s=window.rocoDemo.state;const det=s.lastDetail||{};",
+      "waitedWithin6Lines": false
+     }
+    ],
+    "unguarded": 17,
+    "hit": true,
+    "first": 137
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": false,
+    "jsClick": [],
+    "hit": true
+   }
+  },
+  {
+   "file": "scripts/roco/browser-roco-ux-acceptance.mjs",
+   "lines": 1957,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     110
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": true,
+    "sites": [
+     {
+      "line": 364,
+      "text": "const poolState = async () => js(`(()=>{const d=window.rocoDemo.state.pool;",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 394,
+      "text": "`Number((window.rocoDemo.state.pool||{}).page||0) >= ${page}`, 40, 75);",
+      "waitedWithin6Lines": true
+     },
+     {
+      "line": 645,
+      "text": "const afterFirst = await js(`(()=>{const d=window.rocoDemo;return {player:d.state.pick.pla",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 650,
+      "text": "const afterSecond = await js(`(()=>{const d=window.rocoDemo;return {player:d.state.pick.pl",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 660,
+      "text": "const coachBefore = await js(`window.rocoDemo.companionVisibility()`);",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 663,
+      "text": "const coachAfter = await js(`window.rocoDemo.companionVisibility()`);",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 672,
+      "text": "const vis=window.rocoDemo.companionVisibility();",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 686,
+      "text": "await js(`(()=>{const d=window.rocoDemo;d.state.coach.open=false;d.renderCompanion();retur",
+      "waitedWithin6Lines": false
+     }
+    ],
+    "unguarded": 29,
+    "hit": true,
+    "first": 364
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": true,
+    "jsClick": [],
+    "hit": false
+   }
+  },
+  {
+   "file": "scripts/roco/browser-workshop-acceptance.mjs",
+   "lines": 2375,
+   "tempProfile": {
+    "hit": true,
+    "at": [
+     608
+    ]
+   },
+   "persistentProfile": false,
+   "sessionHandshake": {
+    "status": [],
+    "bootstrap": [],
+    "hit": true
+   },
+   "hostApi": {
+    "used": true,
+    "sites": [
+     {
+      "line": 2224,
+      "text": "const v=window.rocoDemo.state.view;",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 2283,
+      "text": "await js(`window.rocoDemo.requestPlan({reason:'manual',explicit:true})`);",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 2289,
+      "text": "const legal=(window.rocoDemo.state.view?.legal)||[];",
+      "waitedWithin6Lines": true
+     },
+     {
+      "line": 2297,
+      "text": "planMode:window.rocoDemo.state.view?.ruleset_config_id??null,",
+      "waitedWithin6Lines": false
+     },
+     {
+      "line": 2299,
+      "text": "hasPlan:Boolean(window.rocoDemo.state.plan),",
+      "waitedWithin6Lines": false
+     }
+    ],
+    "unguarded": 4,
+    "hit": true,
+    "first": 2224
+   },
+   "clicks": {
+    "mouseDispatch": true,
+    "hitTest": true,
+    "jsClick": [],
+    "hit": false
+   }
+  }
+ ]
+}

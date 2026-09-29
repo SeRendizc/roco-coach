@@ -1,22 +1,22 @@
 {
  "schema": "roco-live-acceptance/v1",
  "generated_by": "scripts/roco/browser-live-acceptance.mjs",
- "base": "http://127.0.0.1:8899/",
+ "base": "http://127.0.0.1:8765/",
  "why": "**对着已经在跑的那个服务**走一遍（不启动临时服务）：现有判据全部自起服务，所以「跑了很久的进程白名单陈旧 → 新模块 404 → 整页 JS 不执行 → 卡在正在读取」这一类运行态故障，它们一条都抓不到。",
- "judged_at": "2026-09-23T11:56:13.102Z",
+ "judged_at": "2026-09-29T01:42:46.830Z",
  "totals": {
-  "checks": 26,
-  "passed": 26,
-  "failed": 0,
-  "counterproofs": 31,
-  "counterproofs_hit": 31
+  "checks": 3,
+  "passed": 2,
+  "failed": 1,
+  "counterproofs": 2,
+  "counterproofs_hit": 2
  },
  "checks": [
   {
    "id": "live-status",
    "judge": "8899 的状态接口必须 available:true 且带健康快照（不许谎报不可用）",
    "ok": true,
-   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=0"
+   "actual": "available=true health=roco-world-s4-2026-09-10/4d5c169fd528 mode=pvp-standard-six-pet 规则服务会话=7"
   },
   {
    "id": "live-boot",
@@ -25,148 +25,10 @@
    "actual": "ready=yes route=six-pet 卡片 12 张 工坊 ok；规则服务：已就绪"
   },
   {
-   "id": "live-box-lock-entry",
-   "judge": "盒子里选**一只** → 「锁定这一只去配队」：URL 同时带 team 与 lock，产品页那一格显示「锁定」（玩家入口，不是手打 URL）",
-   "ok": true,
-   "actual": "按钮 {\"disabled\":false,\"w\":138,\"h\":44}；URL ?team=own-0001&lock=own-0001；已选 1；锁=true"
-  },
-  {
-   "id": "live-lock-handoff",
-   "judge": "URL 交接 `?team=…&lock=…`：选人进去、**锁定的那一格显示锁定**、没锁的不显示",
-   "ok": true,
-   "actual": "URL ?team=own-0001,own-0003&lock=own-0001；已选 2；第1格「\n         铠甲虫\n          锁定\n   」"
-  },
-  {
-   "id": "live-pick-six",
-   "judge": "真鼠标在工坊里选满六只（服务端回执、页面队伍、六个槽位三处一致），且队伍就是点的那六个个体，开局按钮真的可用",
-   "ok": true,
-   "actual": "已选 6/6，页面队伍 6 只=[\"own-0001\",\"own-0003\",\"own-0005\",\"own-0007\",\"own-0013\",\"own-0015\"]，槽位 [\"铠甲虫\",\"音速犬\",\"仪式巨像\",\"雪影娃娃\",\"朔夜伊芙\",\"多多\"]（依次点的：铠甲虫、音速犬、仪式巨像、雪影娃娃、朔夜伊芙、多多）"
-  },
-  {
-   "id": "live-mine-owned",
-   "judge": "「我的精灵（能出战）」：标题是「我的精灵 N 只」，每张卡都是「持有·可正式上场」，并且带个体 id（可点进去）",
-   "ok": true,
-   "actual": "我的精灵 1 只（能出战）；前几张 [{\"status\":\"held\",\"kind\":\"mine\",\"instance\":\"own-0015\",\"species\":\"pet_000137\",\"tag\":\"持有 · 可正式上场\",\"name\":\"多多\"}]"
-  },
-  {
-   "id": "live-mine-add",
-   "judge": "真鼠标点一只「我的精灵」：队伍 0/6 → 1/6（用户实测：点了不变）",
-   "ok": true,
-   "actual": "点之前 0，点之后 1"
-  },
-  {
-   "id": "live-mine-remove",
-   "judge": "点那一格的「移除」：1/6 → 0/6（能加也要能拿走，否则「选不上」会变成「拿不掉」）",
-   "ok": true,
-   "actual": "1→0"
-  },
-  {
-   "id": "live-catalog-to-analysis",
-   "judge": "真鼠标点一只**你没有的**图鉴物种：它进**理论阵容**并带「按需推算（未核验）/仅试玩」标，不再被当成「塞进持有队伍」而报错",
-   "ok": true,
-   "actual": "点了「喵喵」；卡上状态标「图鉴 · 按需推算（未核验）」；理论阵容 1 只；那一格 {\"status\":\"on_demand\",\"canBattle\":\"trial\",\"name\":\"喵喵\"}；标题「理论阵容 1 / 6（其中可正式出战 0 只；还差 5 只）」"
-  },
-  {
-   "id": "live-start",
-   "judge": "真鼠标点「开一局（标准 PVP · 六宠）」：按候选规则进对局（无道具无逃跑，资源条是引擎给的星）",
-   "ok": true,
-   "actual": " ｜ 页眉模式=PVP · AI模拟（注册表 pvp-standard-six-pet）⭐=10/10 顶栏存活点 6/6 引擎动作账=skill:4,charge:1,switch:5,surrender:1,item:0,escape:0 页面渲染=skill,charge,switch,surrender 技能卡=4 开局按钮 195×38；状态行「」规则服务：已连接 view=ready 按钮 {\"disabled\":false,\"text\":\"开一局（标准 PVP · 六宠）\",\"team\":\"6\"}"
-  },
-  {
-   "id": "live-energy-gate",
-   "judge": "开局那一手若引擎没给合法技能：配招**灰置**列出（带费用、不可点）+ 写清差额 + 提示先聚能；有合法技能时灰置块必须消失",
-   "ok": true,
-   "actual": "回合 1：合法技能 4、能量 10/undefined；灰置 0 张 []；聚能=yes；说明「小芽 · 洛克王国：世界 训练场\n \n \n \n ✦ 小芽\n\n \n \n \n \n \n \n  \n   \n    \n     小芽\n     \n     模型：未连接（」"
-  },
-  {
-   "id": "live-battle-spec",
-   "judge": "战斗页规格（v3h）：左列永远四格技能（卡高 ≥44、⭐消耗/属性/类别/克制标记/预期伤害 逐格齐备）、底栏聚能与技能/更换/物品/逃跑四个选项各自独立、只渲染本回合合法动作、最新一条事件在、对手后备只以存活点表示（不放占位也不泄漏 id、不揭示名字）、1440×900 战斗片段在视口内。【按人类 2026-09-23 版式，原来并要求技能格上的「详情层（说明可展开读）」——技能说明不再进战斗主视线，由每格的属性/类别/克制标记/预期伤害四行承担；口径未放松】",
-   "ok": true,
-   "actual": "技能卡 4 张（最矮 146px，合法 4/4）；聚能入口=true「聚能 ⭐ 10 / 10」；更换可点 5/5；逃跑页 确认+取消；对手侧存活点「●●●●●●」；片段底 830 / 视口 900"
-  },
-  {
-   "id": "live-act-tabs",
-   "judge": "四个大选项（技能/物品/更换/逃跑）都在、恰好一个高亮（按 body[data-b3-tab] 实际外观判定）、≥44px；聚能/战报在位；更换页每行给名字/属性/⭐/血量；物品页每格写清为什么用不了；逃跑是二次确认。【按人类 2026-09-23 版式：高亮与切屏由 `body[data-b3-tab]` 驱动（不再有 `aria-selected`）；物品页的「说明」由每格 `data-b3-item-note` 承担（旧 `[data-roco-no-item]` 在被收起的旧行动坞里）】",
-   "ok": true,
-   "actual": "选项 [\"skill*\",\"switch\",\"item\",\"escape\"]；聚能「聚能 ⭐ 10 / 10」；更换页 5 行 {\"name\":\"音速犬\",\"types\":\"火系\",\"energy\":\"0\",\"hp\":\"366/366\",\"text\":\"⭐ 0 音速犬 🔥火系 366/366\"}；物品页 2 格（无动作 0）/ 说明「次数与冷却均未登记」；逃跑页 确认=true 取消=true"
-  },
-  {
-   "id": "live-battle-hierarchy",
-   "judge": "战场优先：中间两张出战卡（`[data-b3-stage]`）在片段最上面；「规则口径与未核验项」在战斗页里**一处都不可见**（战斗态整块收起）。【按人类 2026-09-23 版式，原来的「收在战场下面的一处折叠里」由「战斗页根本不出现」承担；口径未放松：可见一处就红】",
-   "ok": true,
-   "actual": "片段根 top=88；战场 top=157；规则折叠可见=false；未核验标签可见=false；战斗页可见「未核验/规则」文本 0 处"
-  },
-  {
-   "id": "live-lineup-and-log",
-   "judge": "顶栏给出双方存活点数（我方 6 只 + 对手只给点数、不给名字：上场才亮明），右列战报按回合分组、最新一回合在最上面、框内滚动。【按人类 2026-09-23 版式，原来的「开局前双方阵容短暂展示 `#lineup-reveal`」由**顶栏存活点**承担；战报由右列 `.b3-log-scroll` 承担（旧 `#events` 在被收起的旧战报面板里）】",
-   "ok": true,
-   "actual": "顶栏存活点 我方「●●●●●●」对手「●●●●●●」；战报「战报」[{\"turn\":\"1\",\"latest\":\"yes\",\"label\":\"第 1 回合（最新）\",\"rows\":3}]（DOM 顺序 [\"1\"]，框内溢出 auto）"
-  },
-  {
-   "id": "live-battle-info",
-   "judge": "双方出战信息：两张镜像卡各给名字/属性/血量（**带百分比**，且与「生命 x / y」和血条宽度一致）+ 顶栏双方存活点数（与公开视图一致）。【按人类 2026-09-23 版式，原来的 `#self-panel`/`#foe-panel` 与「还能打 N/N」那一行由 `[data-b3-self-card]`/`[data-b3-foe-card]` 与 `#b3-dots-self`/`#b3-dots-foe` 承担】",
-   "ok": true,
-   "actual": "我方「铠甲虫 生命 445 / 445 100% 虫系」对手「朔夜伊芙 生命 391 / 391 100% 恶系」；存活点 {\"txt\":\"●●●●●●\",\"alive\":6,\"down\":0} / {\"txt\":\"●●●●●●\",\"alive\":6,\"down\":0}；视图 self=6 foe=6"
-  },
-  {
-   "id": "live-settle",
-   "judge": "从开局一路打到结算（引擎给出结果、结算区可见、局末教学入口出现、页眉回合与引擎一致、右列战报最新一回合有内容）。【按人类 2026-09-23 版式，原来的 `#last-event`「最新一条事件」由**右列战报**承担（框内滚动、最新回合在上）；`#last-event` 所在的 `#b3-sink` 是隐藏接收槽，不再作读数点。另：引擎拒绝一步推进会让页面清空 `state.view`（HTTP 200 + `{ok:false}`，见 known_limits），脚本按玩家的做法重试这一步 / 最多整局重开一次 —— 断言没有放松】",
-   "ok": true,
-   "actual": "result=win 回合=44 页眉回合「第 44 回合」结算区可见=true 教学=shown 战报回合块=44 最新块=第 44 回合（8 条）；存活点 ●●●●○○/○○○○●●；点了 45 次自动推进（最后回合 44，停滞 0 次）；当时 {\"turn\":44,\"mana\":{\"self\":2,\"opponent\":0},\"selfLiving\":4,\"foeLiving\":2,\"status\":\"\"}；正文「关键转折在第 3 回合（这一局 44 个回合）。」"
-  },
-  {
-   "id": "live-lesson-migration",
-   "judge": "换局迁移：第二局的教学必须**接着上一课**（同一课时做核对，不同课时不许逐字重讲第一局那一课），复盘正文带局面信息，且换局把 v3h 顶栏归零（页眉回合回到第 1 回合、双方存活点回到 6/6）。【按人类 2026-09-23 版式，「换了一局」在战斗页上的可见证据由顶栏承担（旧版式读的是开局前的阵容展示块）】",
-   "ok": true,
-   "actual": "第一局 stop-attacking-into-resistance/first-faint → 第二局 stop-attacking-into-resistance/first-faint；repeat=yes checked=yes；核对「上一次那一课的核对：「我方打在属性抵抗上」这一局又出现了。对比第 15 回合（上一次：连续回合都打在抵抗上）与第 15 」；第二局顶栏「第 1 回合」存活点 ●●●●●●/●●●●●●"
-  },
-  {
-   "id": "live-narrow-390",
-   "judge": "390×844：不横向溢出、六宠主操作在首屏可点（≥44px）、小芽那一栏能打开且输入框在首屏",
-   "ok": true,
-   "actual": "clientW/scrollW=390/390 route=six-pet 主操作 top=759 h=72；小芽 {\"open\":true,\"viewport\":{\"width\":390,\"height\":844},\"card\":{\"top\":0,\"bottom\":844,\"left\":0,\"right\":390},\"form\":{\"top\":173,\"bottom\":217,\"left\":23,\"right\":297},\"input\":{\"top\":173,\"bottom\":217,\"left\":23,\"right\":220},\"reply\":null,\"replyHidden\":true,\"inputInView\":true,\"replyInView\":null,\"formInView\":true,\"bottombar\":0,\"actionCap\":253,\"actionPanel\":null,\"bothOnScreen\":true}"
-  },
-  {
-   "id": "live-model-status",
-   "judge": "模型连接状态与实际一致（未连接时明说 + 给连接入口），不冒充模型。【按人类 2026-09-23 版式（页头右上角只留「✦ 小芽」），连接状态那一行由**小芽面板**承担；读取点 = 打开小芽面板后的 `#model-chip`】",
-   "ok": true,
-   "actual": "chip「模型：未连接（只给规则事实）」hook=offline 入口=connect.html 高=26px"
-  },
-  {
-   "id": "live-chat",
-   "judge": "主动问一句非预设问题：有模型就走真 Agent 并标出来源；没有模型就明说能力边界（不装成自由聊天），且给出接模型的入口",
-   "ok": true,
-   "actual": "来源=offline 边界=no-model 路由=null；回复「我在。想聊哪一只伙伴，或者刚才那一手？（现在没接模型：我只能给规则事实与主动提示。想自由问答——规则、阵容、战术、复盘——请点右上角「小芽 → 设置 → 连接模型」配置密钥；配置后」"
-  },
-  {
-   "id": "live-visual-spec",
-   "judge": "视觉规格：标题不竖排、无横向溢出、玩家层零工程词、同屏不重复徽记、小芽/底栏与技能和 HP 不相交、桌面技能区在视口内",
-   "ok": true,
-   "actual": "视口 1440×900；标题 1 行；技能 0 张（底 null）；工程词 []；重复徽记 0"
-  },
-  {
-   "id": "live-mobile-e2e",
-   "judge": "手机 390×844 整条 E2E：URL 带锁定进来 → 补满六只 → 开局 → 打到结算 → 教学入口，每一步都不横向溢出，且战斗页那一档必须是 v3h（页眉回合、顶栏 6 个存活点、底栏四个大选项、聚能 ≥44px）。【按人类 2026-09-23 版式，窄屏战斗页的「行动区在首屏」由**底栏四选项 + 左列四格技能**承担（旧 `#action-panel` 在战斗态收起）；右列战报在 ≤760px 按设计**整列收起**（「单列、战报不占首屏」），所以窄屏那一档要求「在位就得分组、否则必须整列收起」，并用 `data-roco-log-turns` 兜住内容】",
-   "ok": true,
-   "actual": "轨迹 m-url-handoff:3只/390 → m-six-picked:6只/390 → m-battle:6只/390；战斗页 回合「第 1 回合」存活点「●●●●●●」选项 4 个；结算 result=win 回合=44 教学=shown 战报 44 块（右列收起=true）"
-  },
-  {
-   "id": "live-trial-labels",
-   "judge": "试玩时按钮写「试玩一局（理论阵容…）」、六个槽位逐只标「图鉴 · 按需推算（可试玩，未核验）」、说明行没有 markdown 星号（人类实测 Q2 补）",
-   "ok": true,
-   "actual": "按钮「试玩一局（理论阵容 · 含未核验按需推算）」（mode=trial）；槽位标样例「图鉴 · 按需推算（可试玩，未核验）」×6；说明无星号"
-  },
-  {
-   "id": "live-trial-energy-gate",
-   "judge": "真实试玩（六只按需推算）：左列永远四格技能；首回合 0 合法技能时灰置配招 + 逐格给出 ⭐ 消耗（不够的标红）+ 底栏有可见的聚能入口，聚能攒够之后技能出现且灰置消失；有合法技能时不得出现灰置块。【按人类 2026-09-23 版式，原来的「还差几点能量」长文案与 `#act-charge` 由左列每格的 ⭐ 消耗/标红与底栏 `#b3-charge` 承担（旧行动坞在战斗态收起）】",
-   "ok": true,
-   "actual": "试玩 6 只 / trialReady=yes / 模式=pvp-standard-six-pet（页眉「PVP · AI模拟」）；首回合能量 10/10 合法技能 4 灰置 0 费用 []（标红 0）；聚能入口 true「聚能 ⭐ 10 / 10」；聚能后能量 10 合法技能 4 灰置 0"
-  },
-  {
-   "id": "live-console",
-   "judge": "整个过程没有 console.error / 未捕获异常",
-   "ok": true,
-   "actual": "consoleErrors=[]"
+   "id": "fatal",
+   "judge": "整条真机流程必须跑完",
+   "ok": false,
+   "actual": "异常：Error: 找不到可点的元素：#compare-lock-team\n    at mouseClick (file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-live-acceptance.mjs:237:19)\n    at async main (file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-live-acceptance.mjs:425:5)"
   }
  ],
  "counterproofs": [
@@ -183,209 +45,6 @@
    "ok": true,
    "hit": "「脚本没加载成功」兜底横幅还在（模块没跑起来） | 主流程 dataset.rocoRoute=\"legacy-3v3\" | 「双方各 3 只」旧主入口默认可见（路线冲突）",
    "actual": "{\"fallbackVisible\":true,\"route\":\"legacy-3v3\"}"
-  },
-  {
-   "id": "live-box-lock-entry",
-   "judge": "按钮把 lock 漏掉（只带 team）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "URL 没带 lock：?team=own-0001 | 带过去的那一只没有显示「锁定」",
-   "actual": "{\"url\":\"?team=own-0001\"}"
-  },
-  {
-   "id": "live-lock-handoff",
-   "judge": "服务端接受了锁定却不回传（页面看不到锁）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "第 1 格没有显示「锁定」（服务端回传的锁定丢了？）",
-   "actual": "{\"lock1\":false}"
-  },
-  {
-   "id": "live-pick-six",
-   "judge": "只选到 4 只（或开局按钮还禁用）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "服务端回执的已选数 4（钩子 data-tw-selected） | 页面记的队伍 4 只（开局要发的是这一份） | 开局按钮还是禁用（team=6） | 槽位上有名字的只有 4/6 个",
-   "actual": "{\"hook\":4,\"team\":4}"
-  },
-  {
-   "id": "live-mine-owned",
-   "judge": "把 mine 卡的状态标成「图鉴·按需推算」（用户实测的那个错）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "1/1 张卡不是「持有」：圣凯布米龙|on_demand|mine | 1 张卡没带个体 id（点进去会没反应） | 状态标里没有「持有」这一档",
-   "actual": "{\"status\":\"on_demand\"}"
-  },
-  {
-   "id": "live-mine-add",
-   "judge": "点了不变（用户实测的那个错）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "0→0（点了没加上）",
-   "actual": "0→0"
-  },
-  {
-   "id": "live-catalog-to-analysis",
-   "judge": "把图鉴条目当成持有队伍（状态标写成 held）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "候选卡上没有「图鉴·按需推算」的状态标（点击前看不出能不能用） | 格子状态 held | 格子出战判定 field（按需推算应当只能试玩）",
-   "actual": "{\"row\":{\"status\":\"held\"}}"
-  },
-  {
-   "id": "live-start",
-   "judge": "开局后模式被换成练习局、或动作表里混进道具必须被同一条判据抓住",
-   "ok": true,
-   "hit": "模式 \"demo-training-3v3\" | 页面上渲染了道具入口",
-   "actual": "{\"modeId\":\"demo-training-3v3\",\"rendered\":\"skill,item\"}"
-  },
-  {
-   "id": "live-energy-gate",
-   "judge": "把配招全藏起来（没有灰置块也没有说明）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "没有合法技能，却没把配招灰置出来（玩家会以为坏了） | 没有「还差几点能量」的说明",
-   "actual": "{\"greyed\":[]}"
-  },
-  {
-   "id": "live-battle-hierarchy",
-   "judge": "把规则/未核验挪回战场上方必须被同一条判据抓住",
-   "ok": true,
-   "hit": "战斗页里还有可见的「未核验/规则」文本：unverified-note",
-   "actual": "{\"rulesTop\":10,\"stageTop\":400,\"visibleRuleText\":[\"unverified-note\"]}"
-  },
-  {
-   "id": "live-lineup-and-log",
-   "judge": "把对手整队名字亮出来、或把战报倒过来（最新在最后）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "顶栏对手存活点不是 6 个纯点数（「●●喵喵●●」——是不是把名字画出来了？） | 战报不是最新回合在上（回合号没有倒序） | 战报最新一回合不在最上面",
-   "actual": "{\"dotsFoe\":\"●●喵喵●●\",\"order\":[1,2]}"
-  },
-  {
-   "id": "live-battle-info",
-   "judge": "百分比与血量不一致（例如写死 100%）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "我方百分比 100% 与 100/445 不一致",
-   "actual": "{\"hpText\":\"生命 100 / 445\",\"pctText\":\"100%\"}"
-  },
-  {
-   "id": "live-act-tabs",
-   "judge": "逃跑没有二次确认（首层直接摆投降）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "大选项 0 个（规格是 4 个） | 缺「skill」选项 | 缺「item」选项 | 缺「switch」选项 | 缺「escape」选项 | 聚能按钮上没有文字 | 逃跑页没打开 | 逃跑没有二次确认（确认 + 取消两个入口） | 逃跑页的「确认投降」不在位（点不到） | 首层直接摆了「投降」动作（应当走逃跑页二次确认） | 物品页 2 格没写清为什么用不了/未核验 | 这一手没有物品动作，页面却渲染了物品入口",
-   "actual": "{\"confirm\":false,\"direct\":true}"
-  },
-  {
-   "id": "live-battle-spec(星不够不标红)",
-   "judge": "星不够却标成不红（或星够却标红）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "技能格 1 个（规格是永远四格） | 技能格合法 0 个 ≠ 引擎给的合法技能 1 个（只许渲染本回合合法动作） | 消耗 6 / 现有 2，红标应为 yes，实际 no",
-   "actual": "{\"cost\":\"6\",\"short\":\"no\",\"energy\":2}"
-  },
-  {
-   "id": "live-battle-spec",
-   "judge": "把「聚能」混进技能区（没有独立入口）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "底栏没有可见的「聚能」入口（#b3-charge） | 渲染了道具/逃跑入口 | 引擎这一手给了道具/逃跑动作（标准 PVP 不该有）",
-   "actual": "{\"chargeShown\":false,\"rendered\":\"skill,item\"}"
-  },
-  {
-   "id": "live-battle-spec(示例数据没解除)",
-   "judge": "技能格还挂着版面示例数据（没被真数据填上）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "技能格 1 个（规格是永远四格） | 技能格还挂着示例数据（data-b3-pending 没解除） | 引擎没给伤害样本，这一格却写了「预期伤害 128」（不编） | 消耗 5 / 现有 10，红标应为 no，实际 yes",
-   "actual": "{\"pending\":\"yes\",\"dmg\":\"预期伤害 128\"}"
-  },
-  {
-   "id": "live-settle",
-   "judge": "没打到结算（没有结果 / 结算区没出现 / 教学入口没出现 / 战报最新回合空）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "引擎没给出对局结果 | 结算区没出现 | 局末教学入口没出现 | 右列战报最新一回合没有内容 | 整局战报一个回合块都没有（最新一条事件没进战报）",
-   "actual": "{\"result\":null}"
-  },
-  {
-   "id": "live-settle(引擎中途丢局)",
-   "judge": "引擎推进到一半把 view 弄丢（状态变 null）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "引擎中途丢了这一局（state.view 变 null，battleId=null，状态行「自动推进失败：HTTP 500」，战报已有 7 个回合块） | 结算区没出现 | 局末教学入口没出现 | 页眉回合「未开局」与引擎回合 null 不一致 | 右列战报不在位",
-   "actual": "{\"hasView\":false,\"turn\":null,\"logTurns\":7}"
-  },
-  {
-   "id": "live-lesson-migration",
-   "judge": "第二局把同一课当新知识再讲一遍（repeat=yes 但没做核对）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "同一课重复出现，却没有做「上一次那一课的核对」 | 核对说明是空的（说了核对却没内容）",
-   "actual": "{\"repeat\":\"yes\",\"checked\":\"no\"}"
-  },
-  {
-   "id": "live-lesson-migration(换局没归零)",
-   "judge": "第二局还挂着上一局的回合数/残员必须被同一条判据抓住",
-   "ok": true,
-   "hit": "第二局页眉回合「第 30 回合」不是第 1 回合（换局没归零） | 第二局又拎出与第一局完全相同的一课（稳态/defense-branch）",
-   "actual": "{\"round\":\"第 30 回合\",\"dotsSelf\":\"●●●●○○\"}"
-  },
-  {
-   "id": "live-narrow-390",
-   "judge": "把六宠主操作推到视口外、或让页面横向溢出，必须被同一条判据抓住",
-   "ok": true,
-   "hit": "横向溢出（420 > 390） | 六宠主操作不在首屏（top=1500） | 小芽的输入框不在首屏",
-   "actual": "{\"startTop\":1500,\"scrollW\":+30,\"inputInView\":false}"
-  },
-  {
-   "id": "live-model-status",
-   "judge": "没连模型却标成 connected 必须被同一条判据抓住",
-   "ok": true,
-   "hit": "没连模型却标 connected | 未连接时没有明说",
-   "actual": "{\"hook\":\"connected\"}"
-  },
-  {
-   "id": "live-chat",
-   "judge": "没有模型却装作自由聊天（不给边界说明）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "没有模型也没说边界（boundary=null） | 边界说明里没说清怎么接上模型",
-   "actual": "{\"boundary\":null}"
-  },
-  {
-   "id": "live-visual-spec(竖排+工程词)",
-   "judge": "标题竖排 + 玩家层出现 item/escape/RC-306 必须被同一条判据抓住",
-   "ok": true,
-   "hit": "标题竖排（1 行高度） | 玩家层出现工程词：item、escape、RC-306",
-   "actual": "{\"titleVertical\":true,\"bannedHits\":[\"item\",\"escape\",\"RC-306\"]}"
-  },
-  {
-   "id": "live-visual-spec(遮挡+重复)",
-   "judge": "小芽压住技能、且徽记重复两次必须被同一条判据抓住",
-   "ok": true,
-   "hit": "同屏重复徽记「候选规则（待实机核对）」×2 | 小芽那一栏压住了技能",
-   "actual": "{\"hitCoachSkill\":true,\"dupBadge\":2}"
-  },
-  {
-   "id": "live-mobile-e2e",
-   "judge": "手机上没选满六只（只选到 4 只）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "手机上没选满六只（4）",
-   "actual": "{\"selected\":4}"
-  },
-  {
-   "id": "live-mobile-e2e(战斗页不成版式)",
-   "judge": "窄屏战斗页没渲染出 v3h（选项不足/聚能点不到）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "手机战斗页页眉回合「未开局」 | 手机战斗页大选项 0 个（规格是 4 个） | 手机战斗页聚能入口不可点（{\"shown\":false,\"h\":0}）",
-   "actual": "{\"tabs\":0,\"charge\":{\"shown\":false}}"
-  },
-  {
-   "id": "live-mobile-e2e(战报半吊子)",
-   "judge": "窄屏战报既不显示、又没按设计整列收起（且整局没分组）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "手机上整局战报一个回合块都没有（没有按引擎事件分组） | 手机右列战报既不可见、又没按窄屏设计整列收起（半吊子）",
-   "actual": "{\"logShown\":false,\"rightColHidden\":false,\"logTurns\":0}"
-  },
-  {
-   "id": "live-trial-labels",
-   "judge": "试玩却把按钮写成「开一局（标准 PVP · 六宠）」必须被同一条判据抓住",
-   "ok": true,
-   "hit": "槽位只有 1 个 | 试玩时按钮没写「试玩」：「开一局（标准 PVP · 六宠）」 | 说明行漏出了 markdown 星号",
-   "actual": "{\"buttonText\":\"开一局\"}"
-  },
-  {
-   "id": "live-trial-energy-gate",
-   "judge": "首回合把配招藏起来（0 合法技能却没有灰置块 / 不标红 / 没有聚能入口）必须被同一条判据抓住",
-   "ok": true,
-   "hit": "技能格 0 个（规格是永远四格） | 首回合 0 合法技能，却没灰置配招 | 灰置卡没有一格标红（星不够看不出来） | 首回合没有可见的聚能入口（#b3-charge） | 引擎这一手没给聚能动作（那就真的没路可走了） | 聚能 2 → 2 之后技能仍没出现",
-   "actual": "{\"greyed\":0,\"chargeShown\":false}"
   }
  ],
  "steps": [
@@ -423,7 +82,7 @@
       "team_size": 3,
       "ruleset_id": "roco-world-s4-2026-09-10"
      },
-     "sources_count": 5,
+     "sources_count": 6,
      "unknowns_count": 7,
      "microcase_ids": [
       "MC-BM01",
@@ -490,69 +149,198 @@
        "value": "allowed_candidate",
        "classification": "pvp_magic_special_action",
        "confidence": "RECORDED_IN_GAME",
-       "evidence_id": "EV-PVP-BOSS-FORM-STANDARD",
+       "evidence_id": "EV-PVP-WISH-POWER-UP",
        "evidence_role": "supports",
-       "reason": "愿力强化 / 共鸣魔法等 PVP 魔法是**特殊行动**，不是普通道具。旧标准 PVP 口径里的 `item:0` **不**意味着它们不存在 —— 那正是这次要修掉的错误。本条只登记「它们算哪一类、是被允许的候选」，具体语义未核验。",
+       "evidence_id_prior": "EV-PVP-BOSS-FORM-STANDARD",
+       "reason": "愿力强化 / 共鸣魔法等 PVP 魔法是**特殊行动**，不是普通道具。旧标准 PVP 口径里的 `item:0` **不**意味着它们不存在 —— 那正是这次要修掉的错误。2026-09-23 人类口述把「愿力强化」的语义与数值补齐（台账 EV-PVP-WISH-POWER-UP，RECORDED_IN_GAME），因此本策略不再是 all_unverified：**已登记的字段**写进 registered，**仍未核验的**留在 unknowns（引擎对它们一律 fail closed）。**2026-09-25 人类更正**：「愿力强化不占行动，就是这样，**背包物品都不占行动**」（台账 EV-PVP-WISH-POWER-UP 的第二条 2026-09-25 来源）—— 于是 `occupies_action` 从 `true` 改成 **`false`**：这一类是**自由动作**（用掉之后回合不变、还能照常出这一手），「『愿力冲击』就是个技能，这个算行动」说的是换上来的那个技能本身照常占一手。这条取值就是**能力声明**：引擎只认 `false`（`RuleConfig.magic_occupies_action`），没声明 / 未核验一律 fail closed。",
        "kinds": [
         "愿力强化",
         "共鸣魔法"
        ],
-       "occupies_action": null,
-       "occupies_action_status": "UNVERIFIED",
        "is_item": false,
-       "all_unverified": true,
+       "occupies_action": false,
+       "occupies_action_status": "RECORDED_IN_GAME",
+       "all_unverified": false,
+       "registered": [
+        {
+         "kind": "愿力强化",
+         "action_class": "magic",
+         "occupies_action": false,
+         "occupies_action_status": "RECORDED_IN_GAME",
+         "occupies_action_note": "自由动作（人类 2026-09-25：「不占行动，自由动作」）：用掉之后 `state.turn` 不变、对手这一手还没结算、我方仍可照常出一手技能（引擎入口 `env.step_free`；服务端点 `/battle/free`）。**旧口径「占一次行动」已被这一条取代**（2026-09-23 口述），历史留在台账里，不抹掉。",
+         "per_battle_uses": 2,
+         "cooldown_turns": 3,
+         "target": "self_active",
+         "target_note": "只能对自己**场上那只**用（人类：这点和首领化一致）。",
+         "effect": "把目标精灵的**最上面（第一个）技能**替换成「愿力冲击」。",
+         "removal": "再在背包里用一次「愿力强化」解除这次替换、还原原来的第一个技能；**不消耗次数**，但**自动进入冷却**。两次都是**自由动作**（不占行动）。",
+         "visibility": {
+          "skill_visible_to_opponent": true,
+          "magic_visible_to_opponent": false,
+          "status": "RECORDED_IN_GAME",
+          "note": "人类原话：「能看见你使用这个技能，道具应该看不见吧」——后半句带「吧」，页面上按**不揭示**处理，不写成断言。"
+         },
+         "purpose": "反制「对方拿克制自己阵容的精灵」（人类原话）。",
+         "wish_impact": {
+          "name": "愿力冲击",
+          "energy": 2,
+          "power": 80,
+          "element": "pet.wish_element",
+          "element_note": "该精灵的**愿力属性**：默认取它的第一个属性；培养页可用道具改成任意属性（本系统里直接改即可）。按属性分形态（同族出处：特性「裁决」「滋养」的『首个技能替换为光系/草系/火系愿力冲击』）。",
+          "damage_class": "atk >= spa ? 物攻 : 魔攻",
+          "damage_class_note": "取该精灵物攻 / 魔攻里更高的那一项（人类：后面也得做进培养系统）。",
+          "respond_bonus": {
+           "condition": "应对状态",
+           "power_multiplier": 2.5,
+           "human_wording": "额外造成150%伤害",
+           "reading": "按 +150% = 总倍率 2.5 实现；若口径是「变为 150%」则改 1.5。",
+           "condition_basis": "本仓术语 1015/1016/1017：技能 desc 写「应对状态」= 对手这一手是**状态**类动作时应对成功（roco/src/roco_env/effects.py::respond_to / env.py::_respond_success）。人类表示不确定，让本仓自行确认。"
+          },
+          "other_effects": "无（人类：没别的效果了）。"
+         },
+         "confidence": "RECORDED_IN_GAME",
+         "status": "READY_TO_IMPLEMENT"
+        }
+       ],
        "unknowns": [
         {
-         "field": "per_battle_uses",
+         "field": "wish_element_reitem",
          "value": null,
          "status": "UNVERIFIED",
-         "why": "次数上限，未核验。"
+         "why": "愿力属性的改名道具、消耗与是否可反复改，未核验（本系统按「直接改」处理）。"
         },
         {
-         "field": "cooldown",
+         "field": "cooldown_interaction",
          "value": null,
          "status": "UNVERIFIED",
-         "why": "冷却，未核验。"
+         "why": "冷却与换人 / 外层回合的交互，未核验（本实现按自己的回合递减）。"
         },
         {
-         "field": "removal",
+         "field": "swap_persistence",
          "value": null,
          "status": "UNVERIFIED",
-         "why": "解除方式，未核验。"
-        },
-        {
-         "field": "occupies_action",
-         "value": null,
-         "status": "UNVERIFIED",
-         "why": "是否占行动，未核验（因此单独写 occupies_action=null，不默认 true/false）。"
+         "why": "被替换掉的第一个技能在换下场 / 再次上场之后还原成什么，未核验。"
         },
         {
          "field": "duration",
          "value": null,
          "status": "UNVERIFIED",
-         "why": "持续时间，未核验。"
+         "why": "替换的持续时间（是否持续到本局结束）—— 人类口径只说「再用一次解除」，没有说自动到期，故按「持续到解除」实现，但仍记为未核验。"
         },
         {
          "field": "stat_multipliers",
          "value": null,
          "status": "UNVERIFIED",
-         "why": "倍率，未核验。"
+         "why": "除愿力冲击本身外没有别的倍率（人类：没别的效果了），保留此条以便将来登记。"
         }
        ]
       },
       "team_size_policy": {
        "min": 1,
        "max": 6,
-       "fill_required": null,
-       "fill_required_status": "UNVERIFIED",
-       "value": "candidate_1_to_6",
-       "confidence": "CROSS_SOURCE_SUPPORTED",
-       "evidence_id": "EV-PVP-STANDARD-TEAM-SIZE",
+       "fill_required": true,
+       "fill_required_status": "RECORDED_IN_GAME",
+       "value": "recorded_six",
+       "confidence": "RECORDED_IN_GAME",
+       "evidence_id": "EV-PVP-STANDARD-FILL-SIX",
        "evidence_role": "supports",
        "microcase_id": "MC-E07",
        "microcase_status": "NOT_RECORDED",
-       "value_status": "CANDIDATE_HYPOTHESIS",
-       "reason": "上下界：**最多** 6 只（官方转载原文「最多可携带 6 只随机精灵」+ 社区「六只」口径），下界 1（只带 1 只仍然是一套阵容）。「必须选满 6 只」没有任何来源支持 → fill_required=null + UNVERIFIED，引擎遇到「没填满算不算合法」必须 fail closed，不许替玩家补满。"
+       "value_status": "RECORDED_IN_GAME",
+       "reason": "上下界仍是 1～6（最多 6 只有官方转载与社区口径支撑）。「**是否必须选满 6 只**」这一格在 2026-09-25 由**人类实机口径**给出：「闪耀大赛就是6v6 4魔力v4魔力的pvp啊，不是随机6只啊，自己配队」⇒ fill_required=**true**、value=recorded_six、confidence=RECORDED_IN_GAME，台账条目 EV-PVP-STANDARD-FILL-SIX。**原口径（改钉不删）**：此前这里是 fill_required=null + UNVERIFIED，理由是\"「必须选满 6 只」没有任何来源支持\" —— 那条理由在当时成立（没有任何官方/社区文本支持），现在被人类实机口径取代；**张力**：官方一手的措辞是「最多可携带 6 只」（上限），与\"必须编入 6 只\"的措辞不同，已登记在 disputed_with 里。引擎遇到\"没填满算不算合法\"时**不再** fail closed 到\"未知\"，而是按 true（必须 6 只）判定；若将来拿到官方\"可以少于 6 只\"的条文，改这一格（原值已留在 fill_required_prior）。",
+       "evidence_id_prior": "EV-PVP-STANDARD-TEAM-SIZE",
+       "fill_required_prior": null,
+       "fill_required_prior_status": "UNVERIFIED",
+       "disputed_with": [
+        {
+         "ref": "https://news.qq.com/rain/a/20260414A0644900",
+         "kind": "official_first_party",
+         "claim": "官方一手措辞是「每人**最多**可携带6只随机精灵进行对战」= **上限**，没有逐字写过\"必须编入 6 只\"。",
+         "how_resolved": "按本仓效力等级取**人类实机口径**（owner 2026-09-25：「闪耀大赛就是6v6…自己配队」）⇒ fill_required=true；张力原样留在这里，不许抹平，也不许写成\"官方已确认必须 6 只\"。"
+        }
+       ]
+      },
+      "weather_policy": {
+       "name": "weather",
+       "value": "enabled",
+       "confidence": "OFFICIAL_CURRENT",
+       "evidence_id": "EV-WEATHER-STANDARD-PVP",
+       "evidence_role": "supports",
+       "microcase_id": null,
+       "reason": "官方一手（腾讯新闻·官方号《洛个明白》闪耀大赛入门篇 2026-04-14，正文全文精读）在整篇讲闪耀大赛的语境下专设「07 对战基础：印记与天气效果」一节，逐字：「天气是常驻在全场的效果，让对战双方都能获得相应的加成，但天气只能存在一种。」2026-09-25 人类据此**推翻**此前「天气仅存在于 PvE ⇒ 引擎删掉天气层」的口径（旧口径原话逐字留在 superseded_ruling 里，不抹掉）。四种天气的效果与数值以**当前规则集（S4 术语表 terms.json）**为准：3008 雨天水系技能威力 +75% / 3006 沙暴地系技能能耗减半 / 3007 暴风雪双方回合末 +2 层冻结（冰系免疫）/ 3021 雷鸣双方回合末 +1 层引电（电系免疫）；官方 4/14 那篇写雨天 +50%，属**更早版本**，逐字登记在 unknowns。回合数限制与「只能存在一种」同出官方 4/14；持续 8 回合由造天气技能的冻结描述给出（见 duration_note）。",
+       "superseded_ruling": "旧口径原话（改钉不删）：「人类核实天气**仅存在于 PvE** ⇒ 这个天气系统可以删掉」（引擎侧曾据此回滚天气层）。2026-09-25 人类以官方一手 4/14 那篇推翻它，原话：「那你就做！」",
+       "scope": "standard_pvp_field_effect",
+       "max_concurrent": 1,
+       "max_concurrent_reason": "官方 4/14 逐字「但天气只能存在一种」⇒ 新天气**替换**旧天气，不叠加。",
+       "duration_turns": 8,
+       "duration_source": "skill_desc",
+       "duration_note": "引擎从**技能描述**里读回合数，不写死常量：四条造天气技能的冻结描述逐字都是「将天气改为X，持续8回合。」（skills.json：skill_000427 落雨 / skill_000507 沙涌 / skill_000555 冬至 / skill_000605 惊雷）。官方万字公告（2026-03-13）另有「落雨：技能能耗8→5，将天气改为雨天，持续8回合」（见台账 notes）。",
+       "settlement": "end_turn_after_declared_stages",
+       "settlement_note": "天气的回合末效果（暴风雪 / 雷鸣）**不是** `turn_order.end_turn.order` 里声明的逐宠阶段 —— 那个清单的语义是「每一只在场精灵内部」的结算顺序（见 env.py 的注释），而天气是**场地级、双方一起**结算。引擎在声明阶段跑完之后、天气回合数递减之前结算它。这条顺序**没有一手证据**，登记为 unknowns 里的一条。",
+       "effects": {
+        "雨天": {
+         "element": "水系",
+         "kind": "skill_power_multiplier",
+         "value": 1.75,
+         "term_id": "3008",
+         "text": "天气为雨天时，双方的水系技能威力+75%。"
+        },
+        "沙暴": {
+         "element": "地系",
+         "kind": "skill_energy_cost_multiplier",
+         "value": 0.5,
+         "term_id": "3006",
+         "text": "天气为沙暴时，双方的地系技能能耗减半。"
+        },
+        "暴风雪": {
+         "kind": "end_turn_status",
+         "status": "冻结",
+         "layers": 2,
+         "immune_element": "冰系",
+         "term_id": "3007",
+         "text": "天气为暴风雪时，双方每回合结束获得2层冻结。（冰系精灵免疫此效果）"
+        },
+        "雷鸣": {
+         "kind": "end_turn_status",
+         "status": "引电",
+         "layers": 1,
+         "immune_element": "电系",
+         "term_id": "3021",
+         "text": "天气为雷鸣时，双方每回合结束获得1层引电。（电系精灵免疫此效果）"
+        }
+       },
+       "unknowns": [
+        {
+         "field": "energy_cost_halving_rounding",
+         "value": null,
+         "status": "UNVERIFIED",
+         "why": "「能耗减半」遇到**奇数**能耗怎么取整（1 能耗 → 0 还是 1）没有任何来源；引擎按**向下取整**实现并登记，等人类裁决（不要以为这是规则）。"
+        },
+        {
+         "field": "freeze_tick",
+         "value": null,
+         "status": "UNVERIFIED",
+         "why": "冻结层数的结算（术语 1004「冻结5%生命，若当前生命低于冻结比例，则力竭」）**未实现**：本轮只做「获得层数」。引擎照既有做法把未实现的回合末状态登记进 unsupported（不静默、不猜伤害）。"
+        },
+        {
+         "field": "shock_two_layer_trigger",
+         "value": null,
+         "status": "UNVERIFIED",
+         "why": "术语 3022「获得2层引电时，立即受到25%生命的电系伤害，并失去2层引电」—— 雷鸣每回合 +1 层，两层时**该不该立刻结算**没有来源；引擎不实现它，只在层数达到 2 时登记 unsupported。"
+        },
+        {
+         "field": "end_turn_order_vs_status_tick",
+         "value": null,
+         "status": "UNVERIFIED",
+         "why": "天气的回合末效果与 status_tick / regen 的先后顺序没有一手证据（官方只说「每回合结束时」）；引擎选「声明阶段之后」并登记。"
+        },
+        {
+         "field": "rain_power_percent",
+         "value": null,
+         "status": "UNVERIFIED",
+         "why": "官方 4/14 逐字「双方水系技能威力提升50%」，而仓内 S4 术语表 3008 逐字「双方的水系技能威力+75%」。**版本差异**：人类裁决取**当前规则集（S4 术语表）= +75%**，+50% 作为更早版本逐字留在台账 EV-WEATHER-STANDARD-PVP 的 notes 里。本条登记的是「两个数都真实存在过」，不是「随便取一个」。"
+        }
+       ]
       }
      },
      "entry_gate": {
@@ -608,663 +396,10 @@
     },
     "consoleErrors": 0
    }
-  },
-  {
-   "at": "pick-six",
-   "picked": [
-    "铠甲虫",
-    "音速犬",
-    "仪式巨像",
-    "雪影娃娃",
-    "朔夜伊芙",
-    "多多"
-   ],
-   "afterPick": {
-    "state": "ok",
-    "hook": 6,
-    "team": 6,
-    "slots": 12,
-    "slotNames": [
-     "铠甲虫",
-     "音速犬",
-     "仪式巨像",
-     "雪影娃娃",
-     "朔夜伊芙",
-     "多多"
-    ],
-    "startDisabled": false,
-    "startTeam": "6"
-   }
-  },
-  {
-   "at": "team-ids",
-   "teamIds": [
-    "own-0001",
-    "own-0003",
-    "own-0005",
-    "own-0007",
-    "own-0013",
-    "own-0015"
-   ],
-   "wanted": [
-    {
-     "name": "铠甲虫",
-     "select": "own-0001"
-    },
-    {
-     "name": "音速犬",
-     "select": "own-0003"
-    },
-    {
-     "name": "仪式巨像",
-     "select": "own-0005"
-    },
-    {
-     "name": "雪影娃娃",
-     "select": "own-0007"
-    },
-    {
-     "name": "皇家狮鹫",
-     "select": "own-0009"
-    },
-    {
-     "name": "化蝶",
-     "select": "own-0011"
-    },
-    {
-     "name": "朔夜伊芙",
-     "select": "own-0013"
-    },
-    {
-     "name": "多多",
-     "select": "own-0015"
-    },
-    {
-     "name": "古啦多",
-     "select": "own-0017"
-    },
-    {
-     "name": "花魁蜂后",
-     "select": "own-0018"
-    },
-    {
-     "name": "雪蛮人",
-     "select": "own-0019"
-    },
-    {
-     "name": "雪巨人",
-     "select": "own-0021"
-    },
-    {
-     "name": "瑰眼仔",
-     "select": "own-0022"
-    },
-    {
-     "name": "耳翎瑰魅",
-     "select": "own-0023"
-    },
-    {
-     "name": "电咩咩",
-     "select": "own-0025"
-    },
-    {
-     "name": "闪电环",
-     "select": "own-0027"
-    },
-    {
-     "name": "海豹船长",
-     "select": "own-0029"
-    },
-    {
-     "name": "呼呼猪",
-     "select": "own-0031"
-    },
-    {
-     "name": "獠牙猪",
-     "select": "own-0033"
-    },
-    {
-     "name": "寂灭骨龙",
-     "select": "own-0035"
-    },
-    {
-     "name": "丢丢",
-     "select": "own-0037"
-    },
-    {
-     "name": "卡卡虫",
-     "select": "own-0039"
-    },
-    {
-     "name": "蹦蹦种子",
-     "select": "own-0041"
-    },
-    {
-     "name": "深蓝鲸",
-     "select": "own-0042"
-    },
-    {
-     "name": "声波缇塔",
-     "select": "own-0044"
-    },
-    {
-     "name": "权杖-V",
-     "select": "own-0046"
-    },
-    {
-     "name": "圆号鱼",
-     "select": "own-0048"
-    },
-    {
-     "name": "黑猫巫师",
-     "select": "own-0050"
-    },
-    {
-     "name": "爆焰喷喷",
-     "select": "own-0052"
-    },
-    {
-     "name": "混乱鱿彩",
-     "select": "own-0053"
-    },
-    {
-     "name": "秩序鱿墨",
-     "select": "own-0055"
-    },
-    {
-     "name": "十字蝌蚪",
-     "select": "own-0057"
-    },
-    {
-     "name": "深渊蛙",
-     "select": "own-0059"
-    },
-    {
-     "name": "画间法师手",
-     "select": "own-0060"
-    }
-   ]
-  },
-  {
-   "at": "catalog-to-analysis",
-   "catalogPick": {
-    "pick": "喵喵",
-    "row": {
-     "status": "on_demand",
-     "tag": "图鉴 · 按需推算（未核验）",
-     "name": "喵喵"
-    },
-    "after": {
-     "state": "ok",
-     "errorRaw": null,
-     "analysis": 1,
-     "analysisSlots": [
-      {
-       "status": "on_demand",
-       "canBattle": "trial",
-       "name": "喵喵"
-      }
-     ],
-     "head": "理论阵容 1 / 6（其中可正式出战 0 只；还差 5 只）"
-    }
-   }
-  },
-  {
-   "at": "battle-start",
-   "battle": {
-    "modeText": "PVP · AI模拟",
-    "modeId": "pvp-standard-six-pet",
-    "dotsSelf": 6,
-    "dotsFoe": 6,
-    "chargeText": "聚能 ⭐ 10 / 10",
-    "groups": "skill:4,charge:1,switch:5,surrender:1,item:0,escape:0",
-    "rendered": "skill,charge,switch,surrender",
-    "skillCards": "4",
-    "energy": 10,
-    "energyMax": 10,
-    "turn": 1
-   }
-  },
-  {
-   "at": "battle-start-diag",
-   "startDiag": {
-    "plan": "",
-    "engine": "规则服务：已连接",
-    "view": "ready",
-    "btn": {
-     "disabled": false,
-     "text": "开一局（标准 PVP · 六宠）",
-     "team": "6"
-    }
-   },
-   "planStatus": null
-  },
-  {
-   "at": "battle-spec",
-   "spec": {
-    "vh": 900,
-    "clientW": 1440,
-    "scrollW": 1440,
-    "rootTop": 88,
-    "rootBottom": 830,
-    "stageTop": 157,
-    "skillCards": [
-     {
-      "w": 232,
-      "h": 146,
-      "pending": null,
-      "legal": true,
-      "short": "no",
-      "cost": "0",
-      "name": "啃咬",
-      "cat": "攻击",
-      "elName": "虫系",
-      "dmg": "预期伤害 —",
-      "rel": "none"
-     },
-     {
-      "w": 232,
-      "h": 146,
-      "pending": null,
-      "legal": true,
-      "short": "no",
-      "cost": "1",
-      "name": "防御",
-      "cat": "防御",
-      "elName": "普通系",
-      "dmg": "预期伤害 —",
-      "rel": "none"
-     },
-     {
-      "w": 232,
-      "h": 146,
-      "pending": null,
-      "legal": true,
-      "short": "no",
-      "cost": "3",
-      "name": "翅刃",
-      "cat": "攻击",
-      "elName": "虫系",
-      "dmg": "预期伤害 —",
-      "rel": "none"
-     },
-     {
-      "w": 232,
-      "h": 146,
-      "pending": null,
-      "legal": true,
-      "short": "no",
-      "cost": "1",
-      "name": "风隐",
-      "cat": "状态",
-      "elName": "翼系",
-      "dmg": "预期伤害 —",
-      "rel": "none"
-     }
-    ],
-    "legalSkillCount": 4,
-    "legalSwitchCount": 5,
-    "switchLegalCount": 5,
-    "switchRows": [
-     {
-      "legal": true,
-      "name": "音速犬",
-      "hp": "366/366",
-      "cost": "0",
-      "elName": "火系"
-     },
-     {
-      "legal": true,
-      "name": "仪式巨像",
-      "hp": "401/401",
-      "cost": "1",
-      "elName": "地系"
-     },
-     {
-      "legal": true,
-      "name": "雪影娃娃",
-      "hp": "442/442",
-      "cost": "2",
-      "elName": "冰系"
-     },
-     {
-      "legal": true,
-      "name": "皇家狮鹫",
-      "hp": "403/403",
-      "cost": "1",
-      "elName": "翼系"
-     },
-     {
-      "legal": true,
-      "name": "化蝶",
-      "hp": "311/311",
-      "cost": "3",
-      "elName": "虫系"
-     }
-    ],
-    "charge": {
-     "shown": true,
-     "text": "聚能 ⭐ 10 / 10"
-    },
-    "switchTab": true,
-    "escapeTab": true,
-    "escapeConfirm": true,
-    "escapeCancel": true,
-    "rendered": "skill,charge,switch,surrender",
-    "legalKinds": [
-     "skill",
-     "skill",
-     "skill",
-     "skill",
-     "charge",
-     "switch",
-     "switch",
-     "switch",
-     "switch",
-     "switch",
-     "surrender"
-    ],
-    "logTurns": 0,
-    "energy": 10,
-    "samples": 0,
-    "turn": 1,
-    "foeDots": "●●●●●●",
-    "foeCardText": "60 级 😈恶系 朔夜伊芙 100% 生命 391 / 391 ⭐ 10"
-   }
-  },
-  {
-   "at": "auto-play",
-   "clicks": 45,
-   "lastTurn": 44,
-   "stalled": 0,
-   "viewDrops": 0,
-   "restarts": 0
-  },
-  {
-   "at": "settled",
-   "settled": {
-    "result": "win",
-    "turn": 44,
-    "resultVisible": true,
-    "lessonShown": "shown",
-    "lessonText": "关键转折在第 3 回合（这一局 44 个回合）。",
-    "round": "第 44 回合",
-    "logShown": true,
-    "logLatest": {
-     "turn": "44",
-     "lines": 8
-    },
-    "logTurns": 44,
-    "hasView": true,
-    "battleId": "s1-n73ytkhf",
-    "plan": "",
-    "dots": {
-     "self": "●●●●○○",
-     "foe": "○○○○●●"
-    }
-   }
-  },
-  {
-   "at": "second-match-play",
-   "clicks": 46,
-   "lastTurn": 44,
-   "stalled": 0,
-   "viewDrops": 0,
-   "restarts": 0,
-   "result": {
-    "result": "win",
-    "turn": 44,
-    "hasView": true,
-    "phase": "ended",
-    "selfLiving": 4,
-    "foeLiving": 2
-   }
-  },
-  {
-   "at": "second-match-teacher",
-   "m1": {
-    "goal": "stop-attacking-into-resistance",
-    "point": "first-faint",
-    "repeat": "no"
-   },
-   "second": {
-    "result": "ready",
-    "lesson": "shown",
-    "goal": "stop-attacking-into-resistance",
-    "point": "first-faint",
-    "repeat": "yes",
-    "checked": "yes",
-    "improved": "no",
-    "progress": "上一次那一课的核对：「我方打在属性抵抗上」这一局又出现了。对比第 15 回合（上一次：连续回合都打在抵抗上）与第 15 回合（这一次：连续回合都打在抵抗上）。两次的处理方式一样，所以这一局看不到变化。",
-    "lessonText": "关键转折在第 3 回合（这一局 44 个回合）。",
-    "round": "第 1 回合",
-    "dotsSelf": "●●●●●●",
-    "dotsFoe": "●●●●●●",
-    "tab": "skill"
-   }
-  },
-  {
-   "at": "narrow",
-   "narrow": {
-    "clientW": 390,
-    "scrollW": 390,
-    "startTop": 759,
-    "startH": 72,
-    "route": "six-pet",
-    "coach": {
-     "open": true,
-     "viewport": {
-      "width": 390,
-      "height": 844
-     },
-     "card": {
-      "top": 0,
-      "bottom": 844,
-      "left": 0,
-      "right": 390
-     },
-     "form": {
-      "top": 173,
-      "bottom": 217,
-      "left": 23,
-      "right": 297
-     },
-     "input": {
-      "top": 173,
-      "bottom": 217,
-      "left": 23,
-      "right": 220
-     },
-     "reply": null,
-     "replyHidden": true,
-     "inputInView": true,
-     "replyInView": null,
-     "formInView": true,
-     "bottombar": 0,
-     "actionCap": 253,
-     "actionPanel": null,
-     "bothOnScreen": true
-    }
-   }
-  },
-  {
-   "at": "mobile-play",
-   "clicks": 46,
-   "lastTurn": 44,
-   "stalled": 0,
-   "viewDrops": 0,
-   "restarts": 0,
-   "result": {
-    "result": "win",
-    "turn": 44,
-    "hasView": true,
-    "phase": "ended",
-    "selfLiving": 4,
-    "foeLiving": 2
-   }
-  },
-  {
-   "at": "mobile-e2e",
-   "trace": [
-    {
-     "stage": "m-url-handoff",
-     "clientW": 390,
-     "scrollW": 390,
-     "selected": 3,
-     "round": "未开局",
-     "dotsSelf": "○○○○○○",
-     "tabs": 0,
-     "charge": {
-      "shown": false,
-      "h": 0,
-      "text": "聚能 ⭐ —"
-     }
-    },
-    {
-     "stage": "m-six-picked",
-     "clientW": 390,
-     "scrollW": 390,
-     "selected": 6,
-     "round": "未开局",
-     "dotsSelf": "○○○○○○",
-     "tabs": 0,
-     "charge": {
-      "shown": false,
-      "h": 0,
-      "text": "聚能 ⭐ —"
-     }
-    },
-    {
-     "stage": "m-battle",
-     "clientW": 390,
-     "scrollW": 390,
-     "selected": 6,
-     "round": "第 1 回合",
-     "dotsSelf": "●●●●●●",
-     "tabs": 4,
-     "charge": {
-      "shown": true,
-      "h": 44,
-      "text": "聚能 ⭐ 10 / 10"
-     }
-    }
-   ],
-   "settled": {
-    "result": "win",
-    "lesson": "shown",
-    "clientW": 390,
-    "scrollW": 390,
-    "turn": 44,
-    "round": "第 44 回合",
-    "logGroups": 44,
-    "logTurns": 44,
-    "logLatestLines": 8,
-    "rightColHidden": true,
-    "logShown": false
-   }
-  },
-  {
-   "at": "trial-energy-gate",
-   "trialFacts": {
-    "analysis": 6,
-    "trialReady": "yes",
-    "disabled": false,
-    "mode": "trial"
-   },
-   "first": {
-    "legal": 4,
-    "greyed": 0,
-    "slots": [
-     {
-      "legal": true,
-      "costShort": "no",
-      "cost": "6",
-      "shown": true
-     },
-     {
-      "legal": true,
-      "costShort": "no",
-      "cost": "4",
-      "shown": true
-     },
-     {
-      "legal": true,
-      "costShort": "no",
-      "cost": "3",
-      "shown": true
-     },
-     {
-      "legal": true,
-      "costShort": "no",
-      "cost": "7",
-      "shown": true
-     }
-    ],
-    "costs": [],
-    "greyedShort": 0,
-    "chargeShown": true,
-    "chargeText": "聚能 ⭐ 10 / 10",
-    "charge": "yes",
-    "energy": 10,
-    "energyMax": 10,
-    "mode": "pvp-standard-six-pet",
-    "modeText": "PVP · AI模拟",
-    "turn": 1
-   },
-   "after": {
-    "legal": 4,
-    "greyed": 0,
-    "slots": [
-     {
-      "legal": true,
-      "costShort": "no",
-      "cost": "6",
-      "shown": true
-     },
-     {
-      "legal": true,
-      "costShort": "no",
-      "cost": "4",
-      "shown": true
-     },
-     {
-      "legal": true,
-      "costShort": "no",
-      "cost": "3",
-      "shown": true
-     },
-     {
-      "legal": true,
-      "costShort": "no",
-      "cost": "7",
-      "shown": true
-     }
-    ],
-    "costs": [],
-    "greyedShort": 0,
-    "chargeShown": true,
-    "chargeText": "聚能 ⭐ 10 / 10",
-    "charge": "yes",
-    "energy": 10,
-    "energyMax": 10,
-    "mode": "pvp-standard-six-pet",
-    "modeText": "PVP · AI模拟",
-    "turn": 1
-   }
   }
  ],
  "screenshots": [
-  "live-01-1440-selection.png",
-  "live-02-1440-six-picked.png",
-  "live-03-1440-battle.png",
-  "live-04-1440-settled.png",
-  "live-05-390-coach.png",
-  "live-06-battle-after-turn-1440x900.png",
-  null,
-  "live-07-battle-coach-open-1440x900.png",
-  null,
-  "live-08-battle-coach-390x844.png",
-  null
+  "live-01-1440-selection.png"
  ],
  "console_errors": [],
  "known_limits": [
@@ -1275,5 +410,33 @@
   "v3h 底栏的 `#b3-charge` 与逃跑页的 `[data-b3-escape-confirm]`/`[data-b3-escape-cancel]`目前**只渲染、没有点击绑定**（有 onclick 的还是战斗态收起的 `#act-charge` 等）；脚本推进走 `window.rocoDemo.playAction()`，入口本身只断言「可见 + 文案/数值来自引擎」",
   "⚠ 已知产品缺陷（本轮只取证、不改 src）：`POST /api/roco/battle/advance` 在引擎拒绝这一步（`{ok:false,error:…}`，例如「没有任何可选行动」那一帧）时**仍回 HTTP 200**；页面的 `api()` 只在非 2xx 时抛、`applyResult()` 也不校验 `data.view` → `state.view` 被清成 null，页眉变「未开局」、右列战报不在位，而 `state.battleId` 还在（**整局假死**，状态行一个字都不说）。实测 5 次真机里中 2 次（第 6／第 7 回合）。脚本按玩家会做的「重试」处理：先重试这一步，连续不恢复就整局重开一次（`steps.auto-play.viewDrops/restarts` 有如实记账），`live-settle` 的断言一条没放松（仍要求结果 + 结算区 + 教学 + 页眉回合 + 战报）"
  ],
- "ok": true
+ "ok": false,
+ "probe": {
+  "profileDir": "/Users/serendizc/Developer/roco-coach/tmp/browser-profile",
+  "base": "http://127.0.0.1:8765/",
+  "session": {
+   "origin": "http://127.0.0.1:8765",
+   "localStorageCleared": true,
+   "cookieCleared": true,
+   "recovered": null,
+   "engine": {
+    "ok": true,
+    "status": 200,
+    "waitedMs": 4,
+    "body": {
+     "ok": null,
+     "available": true,
+     "ruleset_id": "roco-world-s4-2026-09-10"
+    }
+   },
+   "bootstrap": {
+    "status": 200,
+    "csrf": true,
+    "hasCookie": true,
+    "kind": "ok"
+   },
+   "capability": "tools=ok;model=off;server=ok"
+  },
+  "clicks": []
+ }
 }

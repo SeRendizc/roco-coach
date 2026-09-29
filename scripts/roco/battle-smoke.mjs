@@ -34,6 +34,8 @@ const argOf = (n) => {
 };
 const has = (n) => argv.includes(`--${n}`);
 const SETTLE = argOf('settle') ?? 'all';
+// 需要浏览器锁的那一条（task-9）默认**不跑**：它要抢 tmp/browser-lock。
+const WITH_DOCK_PARITY = has('dock-parity');
 const BASE = argOf('base') ?? process.env.ROCO_BASE ?? 'http://127.0.0.1:8765';
 
 const run = (label, cmd, args, opts = {}) => {
@@ -52,6 +54,11 @@ const run = (label, cmd, args, opts = {}) => {
 mkdirSync(OUT_DIR, {recursive: true});
 const started = Date.now();
 const steps = [];
+if (WITH_DOCK_PARITY) {
+  steps.push({name: 'dock-parity',
+    ...run('⑧ 旧行动坞 vs b3 实时配招一致（要浏览器锁；含必红反证 + 端到端）', 'node',
+      [join('scripts', 'roco', 'battle-smoke-dock-parity.mjs')])});
+}
 
 if (!has('skip-engine')) {
   steps.push({name: 'engine-sweep',

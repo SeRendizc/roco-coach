@@ -112,6 +112,11 @@ async function main(){
  await new Promise((res,rej)=>{ws.addEventListener('open',res);ws.addEventListener('error',rej);});
  const cdp=new Cdp(ws);
  await cdp.send('Page.enable');await cdp.send('Runtime.enable');await cdp.send('Log.enable');
+ // ⚠ 2026-09-30：**禁用浏览器缓存**。改完 `src/client/xiaoya.js` 重跑，读数与改前**逐字相同** ——
+ //   排查下来是 Chrome 复用了上一次的**模块缓存**（页面刷新了，但 `/src/client/*.js` 走了缓存）。
+ //   "改了没生效"最容易被误判成"修法不对"，所以探针一律禁用缓存。
+ await cdp.send('Network.enable');
+ await cdp.send('Network.setCacheDisabled',{cacheDisabled:true});
 
  const consoleErrors=[];const pageErrors=[];
  cdp.on('Runtime.consoleAPICalled',(p)=>{if(p.type==='error')consoleErrors.push(p.args.map((a)=>a.value??a.description??'').join(' '));});
@@ -455,29 +460,130 @@ async function main(){
  // ── 场景 6：玩家抱怨时陪练先回应情绪 ────────────────────────────────
  // 2026-09-22：`say()` 改成异步（主动提问要等真 Agent 回话），所以这里要 `await` ——
  // 第一版直接取返回值，拿到的是 Promise，判据读到 undefined。
+ // ⚠ 2026-09-30 **改钉**（task-13 甲④-2：`#companion-card` 已退役，小芽只剩 `xiaoya.js` 一套实现）。
+ // 旧写法（原文留档，别再改回来）：
+ //   const reply=await js(`(async()=>{const r=await window.rocoDemo.say('好烦，又输了');
+ //     return {register:r.register,reply:r.reply,source:r.source,
+ //       shown:(document.getElementById('say-reply').textContent||'').trim()};})()`);
+ //   await sleep(200);
+ //   const replyShown=await js(`!document.getElementById('say-reply').hidden`);
+ // 为什么改：`#say-reply` 是**旧面板**的元素，现在页面上不存在（`getElementById` 返回 null ⇒
+ //   这一行**直接抛** NotFoundError/TypeError；实测复现原文见交付文档）。
+ // **判据的意图一个字没松**，而且拆成两层、各量各的：
+ //   ① 语域（register R2/R3）——`rocoDemo.say()` 仍然是那条**本地陪练**实现，数据层照旧可量；
+ //   ② **玩家实际读到的那句话**——改从**活着的那一处**（浮层 `#xiaoya-log .xy-entry`）读，
+ //      这才是"屏幕上是不是人话"这条判据真正要守的东西（不是 `rocoDemo` 的返回值）。
  const reply=await js(`(async()=>{const r=await window.rocoDemo.say('好烦，又输了');
-   return {register:r.register,reply:r.reply,source:r.source,
-     shown:(document.getElementById('say-reply').textContent||'').trim()};})()`);
- await sleep(200);
- const replyShown=await js(`!document.getElementById('say-reply').hidden`);
+   return {register:r.register,reply:r.reply,source:r.source};})()`);
+ // ② 屏幕上那一句：开入口 → 在浮层里真打字 → 真发出去 → 读最后一条小芽气泡。
+ await js(`document.getElementById('coach-entry')?.click()`);
+ await sleep(400);
+ const complained=await js(`(()=>{const el=document.getElementById('xiaoya-input');
+   if(!el)return 'no-input';el.focus();return el.id;})()`);
+ if (complained==='xiaoya-input') {
+   // 脚本里只有 `mouseClick`（没有 `typeText`）⇒ 先真点一下输入框拿焦点，再用 CDP 真打字。
+   await mouseClick('#xiaoya-input');
+   await cdp.send('Input.insertText',{text:'好烦，又输了'});
+   await sleep(150);
+   await mouseClick('#xiaoya-send');
+   await sleep(2500);
+ }
+ const shownText=await js(`(()=>{const rows=[...document.querySelectorAll('#xiaoya-log .xy-entry')];
+   const last=rows.at(-1); if(!last) return '';
+   const copy=last.cloneNode(true); copy.querySelectorAll('details,strong').forEach((n)=>n.remove());
+   return (copy.textContent||'').trim();})()`);
+ // 「屏幕上真的显示了」= 浮层开着 **且** 里面有至少一条小芽气泡（与旧面板那条 `!hidden` 同一个意思）。
+ const replyShown=await js(`(()=>{const pop=document.getElementById('xiaoya-pop');
+   return Boolean(pop)&&!pop.hidden&&document.querySelectorAll('#xiaoya-log .xy-entry').length>0;})()`);
+ Object.assign(reply,{shown:shownText});
  // 第 64 轮补：**玩家实际读到的那句话**必须是人话。`chatReply` 返回的是结构
  // （`{text, parts, ...}`），页面原来把整个结构塞进 `textContent`，于是气泡上印的是
  // `[object Object]`——原来的判据只看语域与「气泡显示了吗」，两条都能过。
- check('玩家抱怨时陪练先回应情绪（R2/R3），且回话是一句中文（不是 [object Object]）',
-  // 2026-09-22：`say()` 现在还会**追加一句能力边界**（没有模型时明说不能自由问答 + 怎么接模型），
-  // 所以「气泡内容 === 回复原文」这条旧等式不再成立；改成量它**包含**那句情绪回应，
-  // 且气泡里没有一个 `[object`（那条真正要守的东西没变）。
+ check('玩家抱怨时陪练先回应情绪（R2/R3），且**屏幕上那句**是一句接住情绪的中文（不是 [object Object]）',
+  // ⚠ 2026-09-30 **改钉**（task-13 甲④-2；Lead 拍板选 A）。旧写法原文留档，别再改回来：
+  //     ['R2','R3'].includes(reply.register)&&replyShown && /[\u4e00-\u9fff]/.test(reply.reply)
+  //     && !/\[object/.test(reply.shown) && String(reply.shown).includes(String(reply.reply).trim())
+  // 为什么改（Lead 给的两条理由，我照录）：
+  //   1. 屏幕上那句「烦啊——烦就先搁着，不聊对局也行。」**确实接住了情绪**、也是人话
+  //      ⇒ 判据要的是**这个意图**，不是**某一句具体文案**；
+  //   2. 要求"屏幕必须出现本地 `chatReply` 那句"= **把判据钉死在一个实现上**（判据挑字眼），
+  //      而且**服务端答的那条路正是 P0-01 要的架构** —— 让判据要求"必须走本地那一支"等于把好架构钉回去。
+  // **意图一个字没松**：语域照旧量 `rocoDemo.say()`（本地陪练实现还在），屏幕那句照旧必须是人话、且接住情绪。
   ['R2','R3'].includes(reply.register)&&replyShown
   &&/[\u4e00-\u9fff]/.test(reply.reply)&&!/\[object/.test(reply.shown)
-  &&String(reply.shown).includes(String(reply.reply).trim()),
-  `${reply.register}: ${String(reply.reply).slice(0,60)}｜气泡「${String(reply.shown).slice(0,90)}」`);
+  &&/[\u4e00-\u9fff]/.test(String(reply.shown))
+  &&String(reply.shown).length>=6
+  &&/烦|不顺|歇|搁|不在|没关系|输了|复盘/.test(String(reply.shown)),
+  `语域 ${reply.register}（本地那一句「${String(reply.reply).slice(0,40)}」）｜屏幕「${String(reply.shown).slice(0,90)}」`);
  shots.push(await shoot('06-companion-emotion'));
 
  // ── P1-3：她记住了什么，玩家看得见、也能一条条忘掉 ──────────────────────
- await js(`(async()=>{await window.rocoDemo.say('以后叫我老王');return true;})()`);
+ // ⚠ 2026-09-30 **改钉**（task-13 甲④-2）。旧写法原文留档：
+ //     await js(`(async()=>{await window.rocoDemo.say('以后叫我老王');return true;})()`);
+ //     const memAdded=...{hook:document.body.dataset.rocoMemory, rows:[...#memory-list li .mem-label...]}
+ // 为什么改：① `#companion-card` 已退役 ⇒ `rocoDemo.say()` 写的是**替身**（不上屏、`data-roco-memory` 也没人写）；
+ //   ② Lead 要求**先把"是哪一种"量清楚**：走**活着的那条链**（浮层），**等服务端那次回答结束**再读
+ //      `xiaoya-memory-v1` 的 `stated` 与屏幕行 —— 用来分辨"**探针读早了（时序）**"还是"**真功能丢失**"。
+ // ⚠ 入口是 **toggle**：浮层已经开着时再点一次会把它**关掉**（前一版就是这么把第二条闷掉的）。
+ //   所以只在"关着"时才点 —— 这是"探针有没有把话发出去"的第一个前提。
+ await js(`(()=>{const pop=document.getElementById('xiaoya-pop');
+   if(!pop||pop.hidden)document.getElementById('coach-entry')?.click();return true})()`);
+ await sleep(400);
+ // ⚠ **先等上一条问完**：浮层在飞时 `#xiaoya-send` 是 disabled，而提交守卫会**保留输入**并把这一条挡回去
+ //   （这正是审计高 11 那条口径）⇒ 上一版没等，第二条 `以后叫我老王` **根本没发出去**，
+ //   于是"stated=0"那个读数分不清是"没写进去"还是"**根本没问**"。先等发送键恢复可用再打字。
+ let sendReady=false;
+ for(let i=0;i<40;i+=1){
+   sendReady=await js(`(()=>{const b=document.getElementById('xiaoya-send');return Boolean(b)&&!b.disabled;})()`);
+   if(sendReady)break;
+   await sleep(500);
+ }
+ // 前置读数（Lead 要求）：**这一条必须先真的发出去**，否则后面所有记忆读数都不成立。
+ // `--red-proof`：**故意不点发送** ⇒ 前置必须判"本轮无效"（不是报产品红）。
+ const RED_PROOF = process.argv.includes('--red-proof');
+ const beforeBubbles=await js(`document.querySelectorAll('#xiaoya-log .xy-entry').length`);
+ await mouseClick('#xiaoya-input');
+ await cdp.send('Input.insertText',{text:'以后叫我老王'});
  await sleep(150);
- const memAdded=JSON.parse(await js(`JSON.stringify({hook:document.body.dataset.rocoMemory,
+ if (!RED_PROOF) await mouseClick('#xiaoya-send');
+ // 等**这一条真的落屏**（气泡数增加），再读记忆 —— 这一步是"读早了"的判据。
+ let afterBubbles=beforeBubbles;
+ for(let i=0;i<40;i+=1){
+   afterBubbles=await js(`document.querySelectorAll('#xiaoya-log .xy-entry').length`);
+   if(afterBubbles>beforeBubbles)break;
+   await sleep(500);
+ }
+ // 等**回答落屏**（有界）：这是"时序"那一半的关键 —— 不能读完就下结论。
+ let memWait=null;
+ for(let i=0;i<40;i+=1){
+   memWait=JSON.parse(await js(`(()=>{let stored=null;
+     try{stored=JSON.parse(localStorage.getItem('xiaoya-memory-v1')||'null');}catch{}
+     const stated=Array.isArray(stored?.stated)?stored.stated:[];
+     return JSON.stringify({entries:document.querySelectorAll('#xiaoya-log .xy-entry').length,
+       statedCount:stated.length,labels:stated.map((x)=>x.label??x.value??null)});})()`));
+   if(memWait.statedCount>0||/叫我|称呼/.test(await js(`(()=>{const r=[...document.querySelectorAll('#xiaoya-log .xy-entry')].at(-1);
+     return r?(r.textContent||''):'';})()`))) break;
+   await sleep(500);
+ }
+ // ⚠ `memWait` 是 **Node 侧**变量，不能写进页面求值表达式里（第一版就是这么写的，
+ //   页面里报 `ReferenceError: memWait is not defined`）—— 页面那一侧只读 DOM，Node 侧再合。
+ // ⓪ **前置读数**：气泡数必须涨。没涨 ⇒ 这轮**读数无效**（不许拿下面的 `stated=0` 下任何结论）。
+ check('⓪ 前置：这一条真的发出去了（气泡数必须涨）—— 没涨 ⇒ 本轮记忆读数一律无效',
+  afterBubbles>beforeBubbles,
+  `气泡 ${beforeBubbles}→${afterBubbles}${RED_PROOF?'（--red-proof：故意不点发送）':''}`);
+ if (afterBubbles<=beforeBubbles) {
+   log('本轮记忆读数**无效**（前置不成立）—— 不报"功能丢失"，也不改产品');
+   await shoot('07-memory-precondition-invalid');
+   for (const f of ['记录本轮结果并退出（避免用无效读数下结论）']) log(f);
+   process.exit(3);
+ }
+ const memAdded=JSON.parse(await js(`JSON.stringify({hook:document.body.dataset.xyMemory,
    rows:[...document.querySelectorAll('#memory-list li .mem-label')].map((e)=>e.textContent)})`));
+ memAdded.stated=memWait.statedCount;
+ memAdded.statedLabels=memWait.labels;
+ log(`记忆时序读数：屏幕行=${JSON.stringify(memAdded.rows)}｜xiaoya-memory-v1 stated=${memWait.statedCount}`
+   + `｜气泡 ${beforeBubbles}→${afterBubbles}（**必须先看这一对数**：没涨就说明这条根本没发出去，`
+   + `"stated=0" 就不是功能丢失而是探针没问到）｜浮层总数=${memWait.entries}`);
  check('玩家说过的话会出现在「她记住了什么」里（记忆可见）',
   memAdded.hook!=='none'&&memAdded.rows.some((t)=>t.includes('老王')),JSON.stringify(memAdded));
  check('记忆面板只列偏好，不把对局记录混进来（摘要不等于记忆）',
@@ -488,7 +594,10 @@ async function main(){
    rows:[...document.querySelectorAll('#memory-list li .mem-label')].map((e)=>e.textContent)})`));
  check('忘掉一条之后列表里真的没有了（删除落到记忆里，不是只改界面）',
   memAfter.hook==='none'&&memAfter.rows.length===0,JSON.stringify(memAfter));
- const stillGone=await js(`(()=>{window.rocoDemo.render();return document.body.dataset.rocoMemory;})()`);
+ // ⚠ 同一处改钉：`data-roco-memory` 属旧面板 ⇒ 改读 `data-xy-memory`，重画走 `renderCompanion()`
+ //（甲④-1 按 (i) 保留的同名出口，真的触发浮层重画）。旧写法原文留档：
+ //   const stillGone=await js(`(()=>{window.rocoDemo.render();return document.body.dataset.rocoMemory;})()`);
+ const stillGone=await js(`(()=>{window.rocoDemo.renderCompanion();return document.body.dataset.xyMemory;})()`);
  check('重画一次也不会把刚忘掉的那条捡回来',stillGone==='none',String(stillGone));
 
  // ── P0-3 产品判据：阵容选择要能用、要真数据 ──────────────────────────

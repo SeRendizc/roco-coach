@@ -1,0 +1,148 @@
+{
+ "header": {
+  "format": "roco-agent-trajectory-v1",
+  "set_id": "agent-trajectories-v1",
+  "built_by": "scripts/roco/build-agent-trajectories.mjs",
+  "task_set": "agent-tasks-v1",
+  "task_set_digest": "f0b5d51a9142b09e43138e4dcf924698880c032bc8f9650cc5db77abc52ef975",
+  "model_identity": {
+   "model": "/Users/serendizc/Developer/roco-coach/.models/mlx/Qwen3.5-4B-4bit",
+   "adapter": "/Users/serendizc/Developer/roco-coach/.models/adapters/qwen35-4b-tool-v8",
+   "adapter_sha256": "176ff412f5d14904707b7c131a8fef46e785554930841014f6bac191e228d2a9",
+   "gateway_reachable": true,
+   "ready": true,
+   "adapter_file": "adapters.safetensors",
+   "adapter_basename": "qwen35-4b-tool-v8",
+   "identity_digest": "29e534701f697fa34997ae4aec965df2a65d8f7a2e2a2510668b8a0d6e9e2ac0",
+   "prompt_digest": "a5cb0fbcc53fbecd356b86f921030dac1954d737dfa1af731b452b2f04a6654d"
+  },
+  "prompt_digest": "a5cb0fbcc53fbecd356b86f921030dac1954d737dfa1af731b452b2f04a6654d",
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "worlds_per_task": 1,
+  "arms": [
+   "local_4b"
+  ],
+  "provenance": {
+   "policy_first": false,
+   "arms": [
+    "local_4b"
+   ],
+   "limits": {
+    "local_4b": 3
+   },
+   "engine": {
+    "ruleset_id": "roco-world-s4-2026-09-10",
+    "snapshot_fingerprint": "4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc",
+    "protocol_version": 1,
+    "service_version": "0.1.0",
+    "loaded": true,
+    "engine_modules": null
+   },
+   "source": {
+    "head": "6692b6653a106142df889f66d3dd5efc538a7f27",
+    "dirty": true,
+    "dirty_files": [
+     "scripts/roco/agent-trajectories.mjs",
+     "scripts/roco/build-agent-trajectories.mjs"
+    ],
+    "files": {
+     "scripts/roco/agent-trajectories.mjs": "1922d647cb369754",
+     "scripts/roco/build-agent-trajectories.mjs": "4296555233d0aa97",
+     "src/coach/roco-client.js": "559157faf12d34d6",
+     "roco/src/roco_env/env.py": "b51f5cc7cd1767e6",
+     "roco/src/roco_env/service.py": "85f05fd03c999706",
+     "roco/src/roco_env/data.py": "d92786ef8c1a9584"
+    },
+    "note": "源码 hash = 前 16 位；`dirty=true` 表示这份产物是用**未提交**的工作区跑出来的（口径仍有效，只是复现时要对上同一份工作区）。"
+   }
+  },
+  "categories": [
+   "brief_explain",
+   "continue_stop",
+   "evidence_conflict",
+   "roster_constraint",
+   "rules_lookup",
+   "silence",
+   "stale_state",
+   "tool_failure"
+  ],
+  "checkable": [
+   "tool",
+   "args_must_match",
+   "max_tool_calls",
+   "max_reply_chars",
+   "must_not_fabricate",
+   "must_mention_limitation",
+   "must_keep_locked",
+   "must_not_claim_winrate",
+   "must_surface_conflict",
+   "must_not_use_stale",
+   "must_not_speak"
+  ],
+  "totals": {
+   "trajectories": 288,
+   "passed": 283,
+   "engine_refused": 48,
+   "cases": 288,
+   "worlds": 23
+  },
+  "disciplines": [
+   "轨迹只记公开输入与工具回执摘要；回执全文不落盘，摘要是剔除延迟后的规范化摘要",
+   "正文只用回执里真的出现过的字段生成，不从任务期望抄答案",
+   "失败轨迹原样保留（stopped 记明原因），不做「重试到成功」的清洗",
+   "产物确定性：无时间戳、无随机（随机只来自固定 seed 的哈希）；**登记** HEAD 与源码 hash（`provenance`，只登记不参与计算）",
+   "**模型臂这一份不声称字节可复现**：同一份权重重跑也可能逐条不同。它靠 `model_identity`（适配器 sha256 + 提示摘要）钉住，而不是靠重跑一致。"
+  ],
+  "arms_summary": {
+   "local_4b": {
+    "kind": "model",
+    "note": "本机 Qwen3.5-4B-4bit + LoRA 适配器：真模型自己选工具（需网关）",
+    "limit": 3,
+    "total": 288,
+    "passed": 283,
+    "pass_rate": 0.9826,
+    "per_category": {
+     "brief_explain": {
+      "total": 36,
+      "passed": 36
+     },
+     "continue_stop": {
+      "total": 36,
+      "passed": 36
+     },
+     "evidence_conflict": {
+      "total": 36,
+      "passed": 36
+     },
+     "roster_constraint": {
+      "total": 24,
+      "passed": 21
+     },
+     "rules_lookup": {
+      "total": 72,
+      "passed": 70
+     },
+     "silence": {
+      "total": 12,
+      "passed": 12
+     },
+     "stale_state": {
+      "total": 36,
+      "passed": 36
+     },
+     "tool_failure": {
+      "total": 36,
+      "passed": 36
+     }
+    },
+    "stopped": {
+     "complete": 251,
+     "receipt-budget": 12,
+     "invalid-arguments": 13,
+     "policy": 12
+    }
+   }
+  }
+ },
+ "rows": 288
+}

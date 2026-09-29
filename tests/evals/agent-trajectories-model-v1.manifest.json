@@ -22,6 +22,40 @@
   "arms": [
    "local_4b"
   ],
+  "provenance": {
+   "policy_first": false,
+   "arms": [
+    "local_4b"
+   ],
+   "limits": {
+    "local_4b": 3
+   },
+   "engine": {
+    "ruleset_id": "roco-world-s4-2026-09-10",
+    "snapshot_fingerprint": "4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc",
+    "protocol_version": 1,
+    "service_version": "0.1.0",
+    "loaded": true,
+    "engine_modules": null
+   },
+   "source": {
+    "head": "278cd978a9ba5811d0cfa05a4177ecffc5557cd0",
+    "dirty": true,
+    "dirty_files": [
+     "scripts/roco/agent-trajectories.mjs",
+     "scripts/roco/build-agent-trajectories.mjs"
+    ],
+    "files": {
+     "scripts/roco/agent-trajectories.mjs": "1922d647cb369754",
+     "scripts/roco/build-agent-trajectories.mjs": "4296555233d0aa97",
+     "src/coach/roco-client.js": "559157faf12d34d6",
+     "roco/src/roco_env/env.py": "b51f5cc7cd1767e6",
+     "roco/src/roco_env/service.py": "85f05fd03c999706",
+     "roco/src/roco_env/data.py": "d92786ef8c1a9584"
+    },
+    "note": "源码 hash = 前 16 位；`dirty=true` 表示这份产物是用**未提交**的工作区跑出来的（口径仍有效，只是复现时要对上同一份工作区）。"
+   }
+  },
   "categories": [
    "brief_explain",
    "continue_stop",
@@ -56,7 +90,7 @@
    "轨迹只记公开输入与工具回执摘要；回执全文不落盘，摘要是剔除延迟后的规范化摘要",
    "正文只用回执里真的出现过的字段生成，不从任务期望抄答案",
    "失败轨迹原样保留（stopped 记明原因），不做「重试到成功」的清洗",
-   "产物确定性：无时间戳、无 HEAD、无随机（随机只来自固定 seed 的哈希）",
+   "产物确定性：无时间戳、无随机（随机只来自固定 seed 的哈希）；**登记** HEAD 与源码 hash（`provenance`，只登记不参与计算）",
    "**模型臂这一份不声称字节可复现**：同一份权重重跑也可能逐条不同。它靠 `model_identity`（适配器 sha256 + 提示摘要）钉住，而不是靠重跑一致。"
   ],
   "arms_summary": {

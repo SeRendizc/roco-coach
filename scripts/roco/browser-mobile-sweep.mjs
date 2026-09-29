@@ -20,11 +20,15 @@
 //   reports/roco/rc505/*.png
 
 import {spawn} from 'node:child_process';
-import {existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
-import {tmpdir} from 'node:os';
+import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createCoachServer} from '../../src/server/index.js';
+// ⭐ task-18：探针**生命周期**的共用工具（专用 profile / 会话握手 / 宿主 API 就绪 / 命中测试）。
+// 为什么必须共用：这一程三次"探针自己的问题伪装成产品故障"（会话表满 429、旧 cookie 跨实例 403、
+// 宿主 API 还没挂上就调）都是**每个脚本各写一份启动逻辑**造成的。
+import {launchProbeChrome, probeSessionHandshake, probeSessionProblemText,
+  clickWithHitTest, PROBE_PROFILE_DIR} from './lib/probe-session.mjs';
 // 工程黑话词表：与单元判据、真机探针**同一份**（`src/coach/plain-words.js`）。
 import {speakHits} from '../../src/coach/plain-words.js';
 
@@ -112,37 +116,20 @@ async function startServer() {
 }
 
 async function launchChrome() {
-  const profile = mkdtempSync(join(tmpdir(), 'roco-mobile-'));
-  const chrome = spawn(CHROME, [
-    '--headless=new', '--no-sandbox', '--disable-gpu', '--no-first-run',
-    '--disable-crash-reporter', '--hide-scrollbars', `--user-data-dir=${profile}`,
-    '--remote-debugging-port=0', 'about:blank',
-  ], {stdio: ['ignore', 'ignore', 'pipe']});
-  let chromeErr = '';
-  chrome.stderr?.on('data', (chunk) => { chromeErr = (chromeErr + String(chunk)).slice(-800); });
-  let port = null;
-  for (let i = 0; i < 240 && !port; i += 1) {
-    await sleep(250);
-    try { port = readFileSync(join(profile, 'DevToolsActivePort'), 'utf8').split('\n')[0].trim(); } catch { /* 还没写 */ }
-    if (chrome.exitCode !== null || chrome.signalCode) break;
-  }
-  if (!port) {
-    chrome.kill('SIGKILL');
-    rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120});
-    throw new Error(`Chrome 没起来：${chromeErr}`);
-  }
-  const list = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
-  const target = list.find((t) => t.type === 'page');
-  if (!target) throw new Error('找不到可用的页面 target');
-  const ws = new WebSocket(target.webSocketDebuggerUrl);
+  // ⭐ task-18 改钉：原来这里每轮新建一个**临时 profile**（`mkdtempSync` + 系统临时目录）
+  // ⇒ 每轮在服务端烧一个会话位（100 格烧满就 429，正是 task-15 那条）。现在用**共用的专用 profile**：
+  // `<repo>/tmp/browser-profile`（持久；`tmp/` 已 gitignore）。`localStorage` 每轮在握手时清掉，
+  // **cookie 保留** —— 清了就等于又新占一格。
+  // 旧写法留档（2026-09-29）：每轮一个临时 profile、收尾做一次不带重试的删除；
+  //   两样都不要再写回来（前者烧会话位、后者会因 ENOTEMPTY 把绿判据变红）。
+  const chrome = await launchProbeChrome({windowSize: '390,844'});
+  const ws = new WebSocket(chrome.wsUrl);
   await new Promise((resolve, reject) => { ws.addEventListener('open', resolve); ws.addEventListener('error', reject); });
   return {
     cdp: new Cdp(ws),
-    close: async () => {
-      try { ws.close(); } catch { /* 已经关了 */ }
-      chrome.kill('SIGKILL');
-      rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120});
-    },
+    profileDir: chrome.profileDir,
+    // ⚠ 收尾**不删 profile**（持久 profile 就是要留着 cookie）；只关 Chrome。
+    close: async () => { try { ws.close(); } catch { /* 已经关了 */ } chrome.close(); },
   };
 }
 
@@ -265,22 +252,33 @@ async function main() {
     return `${name}.png`;
   };
   /** 真实鼠标点一下（移到 → 按下 → 松开；少了移动这一步，`:hover` 与指针位置相关的实现拿到的状态与真人不同）。 */
+  // ⭐ task-18：点按钮**先命中测试**，并把"走的是真鼠标还是 element.click()"记下来
+  //（原来这里是直接派发鼠标事件、不做命中测试：被测元素被浮层盖住时，事件打在别人身上，
+  //  症状正是"点了没反应"）。
+  const clickLog = [];
   const mouseClick = async (selector) => {
-    const rect = await js(`(()=>{const el=document.querySelector(${JSON.stringify(selector)});
-      if(!el)return null;el.scrollIntoView({block:'center'});const r=el.getBoundingClientRect();
-      return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)};})()`);
-    if (!rect) throw new Error(`找不到可点的元素：${selector}`);
-    await sleep(160);
-    await cdp.send('Input.dispatchMouseEvent', {type: 'mouseMoved', x: rect.x, y: rect.y});
-    for (const type of ['mousePressed', 'mouseReleased']) {
-      await cdp.send('Input.dispatchMouseEvent', {type, x: rect.x, y: rect.y, button: 'left', clickCount: 1});
-    }
+    const result = await clickWithHitTest({send: cdp.send.bind(cdp), js, selector, record: clickLog});
+    if (!result.ok) throw new Error(`点不动 ${selector}：${result.detail ?? '未知原因'}`);
     await sleep(200);
+    return result;
   };
   const setViewport = async (w, h) => {
     await cdp.send('Emulation.setDeviceMetricsOverride', {width: w, height: h, deviceScaleFactor: 1, mobile: true});
     await sleep(320);
   };
+  // ⭐ task-18：**开跑前的握手**（三个脚本同一处）。这一步之前没有 ⇒ 会话失效/表满时，
+  // 探针会把 429/403 一路读成"页面坏了"。现在：只清 localStorage（保留 cookie）→ 等
+  // `/api/roco/status` 真的 ok → 真发一次 `/api/bootstrap`，并把形状分开。
+  const handshake = await probeSessionHandshake({base, send: cdp.send.bind(cdp), js, freshSession: true});
+  if (handshake.bootstrap.kind !== 'ok') {
+    console.error('[mobile-sweep] 会话握手失败：', probeSessionProblemText(handshake));
+    process.exitCode = 2;
+    throw new Error(probeSessionProblemText(handshake));
+  }
+  // ⭐ task-18：把**探针自己的生命周期**打在屏幕上（每次跑都看得见 profile / 会话形状 / 引擎等多久）。
+  log(`[probe] profile=${PROBE_PROFILE_DIR} 会话=${handshake.bootstrap.kind}`
+    + `（引擎等 ${handshake.engine.waitedMs}ms；清 localStorage=${handshake.localStorageCleared}；`
+    + `清 cookie=${handshake.cookieCleared}${handshake.recovered ? `；自愈=${handshake.recovered}` : ''}）`);
 
   const measurements = [];
   const shots = [];
@@ -457,6 +455,8 @@ async function main() {
     ],
   };
   mkdirSync(OUT, {recursive: true});
+  // ⭐ task-18：把**探针自己的生命周期**也写进报告（会话握手 + 每次点击走的是真鼠标还是 js-click）
+  report.probe = {profileDir: PROBE_PROFILE_DIR, session: handshake, clicks: clickLog};
   writeFileSync(join(OUT, 'mobile-sweep.json'), `${JSON.stringify(report, null, 1)}\n`);
   await browser.close();
   await close();

@@ -24,7 +24,7 @@ import {configureRocoTools, resetRocoTools} from '../../src/coach/toolbox.js';
 import {
   FORMAT, ARM_NAMES, ARMS, armLimit, canonical, digest, finalAnswer, makePlanner,
   runArm, runInput, receiptSummary, worldsFor, CHECKABLE, refusalsIn, checkTask,
-  LOCAL_TOOL_SYSTEM,
+  LOCAL_TOOL_SYSTEM, buildProvenance, engineProvenance, sourceProvenance,
 } from './agent-trajectories.mjs';
 import {gatewayAsk} from './local-model-ask.mjs';
 import {modelIdentity} from './model-identity.mjs';
@@ -203,8 +203,12 @@ async function main() {
   const client = new RocoClient({port, rulesetId: RULESET_ID, timeoutMs: 20000, startTimeoutMs: 30000});
   const rows = [];
   const worldCache = new Map();
+  // 2026-09-29（task-17）：引擎身份要在**客户端还活着**的时候抓（`/health` 只留确定性字段）。
+  let engineIdentity = null;
   try {
     await client.startService();
+    const health = await client.health().catch(() => null);
+    engineIdentity = engineProvenance(health);
     const prepared = [];
     for (const task of tasks) {
       for (const world of worldsFor(task, WORLDS_PER_TASK)) {
@@ -269,7 +273,9 @@ async function main() {
   }
 
   const manifest = buildManifest(tasks, rows, arms,
-    {identity: modelArms.length ? modelIdentity(gateway) : null});
+    {identity: modelArms.length ? modelIdentity(gateway) : null,
+      // 2026-09-29（task-17）：口径与引擎身份一起进 header（以前这两样一个都没记）。
+      policyFirst, engine: engineIdentity});
   // 模型臂的产物写到自己那份路径上（默认仍是规则臂那份）。理由：规则臂那份是
   // **字节可复现**的门禁，模型臂做不到（同一份权重重跑也可能逐条不同），
   // 混进同一个文件会让「字节可复现」这个性质变成假的。
@@ -318,7 +324,7 @@ function summarise(rows) {
 }
 
 /** 头部与清单：只放稳定字段（没有时间戳、没有 HEAD）。 */
-function buildManifest(tasks, rows, arms, {identity = null} = {}) {
+function buildManifest(tasks, rows, arms, {identity = null, policyFirst = false, engine = null} = {}) {
   const categories = [...new Set(rows.map((row) => row.category))].sort();
   const byArm = {};
   for (const arm of arms) {
@@ -352,6 +358,23 @@ function buildManifest(tasks, rows, arms, {identity = null} = {}) {
     ruleset_id: RULESET_ID,
     worlds_per_task: WORLDS_PER_TASK,
     arms,
+    // 2026-09-29（task-17）：口径 + 版本 + 源码 hash。
+    // 改前这里**一个字段都没有** ⇒ 「哪份产物是哪个口径/哪个版本跑的」查不出来，
+    // B5 那一轮就是因为这个把两个口径的产物拿去互比。
+    provenance: buildProvenance({
+      policyFirst,
+      arms,
+      limits: Object.fromEntries(arms.map((a) => [a, armLimit(a)])),
+      engine,
+      sources: sourceProvenance([
+        'scripts/roco/agent-trajectories.mjs',
+        'scripts/roco/build-agent-trajectories.mjs',
+        'src/coach/roco-client.js',
+        'roco/src/roco_env/env.py',
+        'roco/src/roco_env/service.py',
+        'roco/src/roco_env/data.py',
+      ]),
+    }),
     categories,
     checkable: CHECKABLE.slice(),
     totals: {
@@ -365,7 +388,12 @@ function buildManifest(tasks, rows, arms, {identity = null} = {}) {
       '轨迹只记公开输入与工具回执摘要；回执全文不落盘，摘要是剔除延迟后的规范化摘要',
       '正文只用回执里真的出现过的字段生成，不从任务期望抄答案',
       '失败轨迹原样保留（stopped 记明原因），不做「重试到成功」的清洗',
-      '产物确定性：无时间戳、无 HEAD、无随机（随机只来自固定 seed 的哈希）',
+      // 2026-09-29（task-17）改口径：旧原文是「产物确定性：无时间戳、无 HEAD、无随机（随机只来自
+      // 固定 seed 的哈希）」。加上 `provenance` 之后「无 HEAD」不再成立 —— **不静默改掉**，
+      // 如实写成「无时间戳、无随机，但**登记** HEAD 与源码 hash」：登记的是事实，不是挂钟，
+      // 同一份代码 + 同一个 HEAD 跑两次这一块逐字节相同。
+      '产物确定性：无时间戳、无随机（随机只来自固定 seed 的哈希）；**登记** HEAD 与源码 hash'
+        + '（`provenance`，只登记不参与计算）',
       ...(rows.some((row) => ARMS[row.arm]?.kind === 'model')
         ? ['**模型臂这一份不声称字节可复现**：同一份权重重跑也可能逐条不同。'
           + '它靠 `model_identity`（适配器 sha256 + 提示摘要）钉住，而不是靠重跑一致。']

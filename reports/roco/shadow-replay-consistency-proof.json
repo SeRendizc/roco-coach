@@ -1,0 +1,30 @@
+{
+ "keys": 288,
+ "missing": 0,
+ "mismatched": 0,
+ "proof_passed": 283,
+ "shadow_passed": 283,
+ "proof_head": "6692b6653a106142df889f66d3dd5efc538a7f27",
+ "shadow_head": "6692b6653a106142df889f66d3dd5efc538a7f27",
+ "mismatched_keys": [],
+ "after_rebuild": {
+  "artifact": "tests/evals/agent-trajectories-model-v1.jsonl",
+  "artifact_head": "278cd978a9ba5811d0cfa05a4177ecffc5557cd0",
+  "shadow_head": "6692b6653a106142df889f66d3dd5efc538a7f27",
+  "rows": 1752,
+  "totals_passed": 1695,
+  "aligned_windows": 288,
+  "mismatched": 0,
+  "artifact_passed_on_those": 283,
+  "shadow_passed_on_those": 283,
+  "note": "重建之后，两份产物在影子那 288 个窗口上逐条一致（这条判据的原始断言 assert.equal(mismatched.length,0) 就是这么绿的，断言一个字没改）。",
+  "policy_first": {
+   "artifact": false,
+   "shadow": false
+  },
+  "engine_snapshot_fingerprint": {
+   "artifact": "4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc",
+   "shadow": "4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc"
+  }
+ }
+}

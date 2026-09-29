@@ -569,3 +569,55 @@ addCandidate ok ｜ 装满六只后开局按钮 disabled=false ｜ 入口点一�
 **与主服务分开写**：以上**全部在独立实例**上取得（本次端口随机、进程内 `createCoachServer` + `listen(0)`）；
 **8765 未被触碰**。8765 的新会话已由 8h TTL 自然到期恢复 200（`started_at` 未变 ⇒ 未重启），
 但 `task-15` 的会话层修复**尚未部署**到 8765（跑的是旧代码）⇒ 仍需优先独立实例。
+
+## 十、甲④-2 第一件：审计高 11 的行为**接回活着的那一处**（不是放宽断言）
+
+Lead 报的新红（**不在原卡列的三处里**）：`tests/roco-battle-panel-static.test.js` 6/7，
+`assert.match(html, /id="say-send"/)` —— 那是**旧面板的发送按钮**，④-1 已移除。
+
+**先查"逻辑还在不在"**（这一步决定是"改钉"还是"报功能丢失"）：
+```
+roco.js:4394/4399  state.coachInFlight = true / finally = false
+roco.js:4637/4638  if (state.coachInFlight) { sayStatus('上一条还在查，等它出来我马上答这一条（你打的字还在）。') }
+```
+⇒ 逻辑**还在，但只剩在死绑定里**（绑的是已退役元素的替身表单）；而**活着的那一处**（`xiaoya.js` 浮层）
+当时用的是**另一种**守卫：把**输入框一起禁用**（玩家打不了第二条）。
+⇒ 这不叫"还在"，是审计高 11 的行为在退役时**被换成了另一种**（"禁输入"代替"说一句人话 + 保留原文"）。
+
+**处理（按"功能不许丢"）**：
+1. `xiaoya.js`（活着的那一处）把口径接回来：提交时**先判断在飞** ⇒ 说一句人话
+   「上一条还在查，等它出来我马上答这一条（你打的字还在）。」⇒ **不清空输入框**；
+   在飞时**只禁发送按钮**、**输入框保持可用**（玩家可以先打第二条）。
+2. `roco-battle-panel-static.test.js` **改钉不删**：旧断言（`#say-send` / `state.coachInFlight` / `#say-form` 顺序）
+   **原文留在注释** + 日期 + 依据 + "审计高 11 的意图一个字没松"；新钉指向 `#xiaoya-send` / `state.asking`，
+   并**保留那条反证**（守卫必须排在清空输入框之前）。
+读数：该文件 **7/7**；相关六族 **118/118**。
+
+⚠ **同类钉可能还有**（凡是指名 `#say-*` / `#model-*` / `#companion-*` 的结构钉）⇒
+④-2 会**全仓扫一遍**再动，不再一处一处撞。
+
+## 十一、甲④-2 开工：`demo-acceptance.mjs` 的复现证据 + 替身缺陷（2026-09-30）
+
+Lead 要求"改之前先跑一次、把抛出的原文贴出来"。**改动之前的原文**：
+```
+[demo-acceptance] 失败： 页面求值失败：NotFoundError: Failed to execute 'insertBefore' on 'Node':
+  The node before which the new node is to be inserted is not a child of this node.
+    at sayWritePlayerLine (roco.js:1710:10)
+    at sayOnce (roco.js:4433:3)
+    at Object.say (roco.js:4397:18)
+```
+**根因是 ④-1 的 `retiredStub` 替身**：`sayWritePlayerLine()` 里 `body.insertBefore(me, reply)` 要求 `reply`
+是 `body` 的**子节点**，而第一版给**每个 id 各建了一个互不相干的游离 div** ⇒ 抛 `NotFoundError`。
+⇒ 替身比"静默 no-op"更糟：**它会抛**；这也印证了"替身必须在 ④-2 真的删掉"。
+**修**：替身改成**同一棵游离树**（`#companion-body` 的替身是容器，其余挂它下面，与真实 DOM 的父子关系一致）。
+修后脚本继续往下跑，下一个失败是**脚本自己**读 `#say-reply`（`null.textContent`）——那才是"退役后断链"的另一半。
+
+**脚本改钉（不删）**：场景 6 旧写法（`rocoDemo.say` + `#say-reply.textContent` + `!hidden`）原文留注释；
+新写法拆两层：① 语域 `register` 仍走 `rocoDemo.say()`（本地陪练实现还在）；
+② **屏幕上那一句**改从浮层读（点 `#coach-entry` → 真键鼠打「好烦，又输了」→ 读 `#xiaoya-log .xy-entry`）。
+
+**这一改暴露两件待 Lead 定的**（**不自行拍板**）：
+1. 陪练那句的**屏幕文案换了来源**：屏幕上是服务端答的「烦啊——烦就先搁着，不聊对局也行。」，
+   旧面板那句（本地 `chatReply`）只在 `rocoDemo.say()` 的返回值里（不再上屏）⇒ 改钉成新语义 vs 把本地那一支接回浮层；
+2. 「玩家说过的话会出现在『她记住了什么』里」现在红（`{"rows":[]}`）：旧面板 `sayOnce()` 会调
+   `rememberPreference()`，浮层这条链**不写 `stated`** ⇒ 可能是**真功能丢失**（不是判据过时）。

@@ -19,6 +19,8 @@
 // 语言：Node ESM（.mjs）。项目其余部分是零依赖原生 ESM，这里不引入任何依赖。
 
 import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+import {existsSync, readFileSync} from 'node:fs';
 import {TOOL_CONTRACTS, validToolArgs, executeTool, configureRocoTools, resetRocoTools} from '../../src/coach/toolbox.js';
 import {policyFor, resolveEvidenceTurn, defaultArgsFor} from '../../src/coach/runtime.js';
 // 名册要用**真名字**（政策靠名字认得出"这确实是在问整队"）。名字表来自仓库里那份 622 条图鉴名单，
@@ -694,6 +696,70 @@ export const ARMS = Object.freeze({
 export const ARM_NAMES = Object.freeze(Object.keys(ARMS));
 
 /** 每次运行的工具预算。默认 3——和 `gatherAgentEvidence` 的默认一致。 */
+/**
+ * 产物身份（2026-09-29 · task-17）：**口径与版本必须随产物一起存档**。
+ *
+ * 为什么要有它：B5 那一整轮乌龙（Lead 定位错 → 我的「噪声底」结论错 → 真因是产物过期）
+ * 的根子就是**两个口径/两个版本的产物被拿来互比**，而 header 里查不到任何一条能区分它们的东西。
+ * 所以：`policy_first`、arm 与 limit、适配器身份、**引擎版本**、**源码 hash** 全部写进 header。
+ *
+ * 两份产物（生成器 `build-agent-trajectories.mjs` / 影子回放 `shadow-replay.mjs`）都调**这一个**
+ * 函数 —— 各写一份必然漂，而漂了之后连「哪份是哪份」都说不清（本仓反复踩过的同一个坑）。
+ *
+ * 纪律：这里只写**事实**，不写挂钟（没有 `generated_at`）——同一份代码 + 同一个 HEAD 跑两次，
+ * 这一块逐字节相同。
+ */
+export function sourceProvenance(paths, {root = null} = {}) {
+  const repo = root || new URL('../..', import.meta.url).pathname.replace(/\/$/, '');
+  const git = (args) => {
+    try {
+      return execFileSync('git', args, {cwd: repo, encoding: 'utf8', timeout: 20000}).trim();
+    } catch { return null; }
+  };
+  const files = {};
+  for (const rel of paths) {
+    const abs = `${repo}/${rel}`;
+    files[rel] = existsSync(abs)
+      ? createHash('sha256').update(readFileSync(abs)).digest('hex').slice(0, 16)
+      : null;
+  }
+  const dirtyList = paths.length
+    ? (git(['status', '--porcelain', '--', ...paths]) || '').split('\n').filter((l) => l.trim())
+    : [];
+  return {
+    head: git(['rev-parse', 'HEAD']),
+    dirty: dirtyList.length > 0,
+    dirty_files: dirtyList.map((l) => l.trim().split(/\s+/).pop()),
+    files,
+    note: '源码 hash = 前 16 位；`dirty=true` 表示这份产物是用**未提交**的工作区跑出来的（口径仍有效，只是复现时要对上同一份工作区）。',
+  };
+}
+
+/** 引擎侧身份：只留**确定性**字段（`/health` 里的 `pid`/`uptime_s` 一律不抄，那会变成挂钟）。 */
+export function engineProvenance(health) {
+  const h = health?.result ?? health ?? {};
+  return {
+    ruleset_id: h.ruleset_id ?? health?.ruleset_id ?? null,
+    snapshot_fingerprint: h.snapshot_fingerprint ?? health?.snapshot_fingerprint ?? null,
+    protocol_version: health?.protocol_version ?? h.protocol_version ?? null,
+    service_version: health?.service_version ?? h.service_version ?? null,
+    loaded: typeof h.loaded === 'boolean' ? h.loaded : null,
+    engine_modules: Array.isArray(h.engine_modules) ? h.engine_modules : null,
+  };
+}
+
+/** 两份产物共用的身份块（口径 + 版本 + 源码）。 */
+export function buildProvenance({policyFirst = false, arms = null, limits = null,
+  engine = null, sources = null} = {}) {
+  return {
+    policy_first: Boolean(policyFirst),
+    arms: arms ? [...arms] : null,
+    limits: limits ?? null,
+    engine: engine ?? null,
+    source: sources ?? null,
+  };
+}
+
 export function armLimit(arm) {
   return ARMS[arm]?.limit ?? 3;
 }

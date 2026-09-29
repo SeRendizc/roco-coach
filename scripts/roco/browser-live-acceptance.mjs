@@ -37,8 +37,10 @@
 // 并在该 check 的说明里写明「按人类 2026-09-23 版式，原来的 X 由 Y 承担」）。
 
 import {spawn} from 'node:child_process';
-import {existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
-import {tmpdir} from 'node:os';
+import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs';
+// ⭐ task-18：探针生命周期共用工具（专用持久 profile / 会话握手 / 宿主 API 就绪 / 命中测试）。
+import {launchProbeChrome, probeSessionHandshake, probeSessionProblemText, waitForHostApi,
+  PROBE_PROFILE_DIR} from './lib/probe-session.mjs';
 import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -81,36 +83,19 @@ class Cdp {
 }
 
 async function launchChrome() {
-  const profile = mkdtempSync(join(tmpdir(), 'roco-live-'));
-  const chrome = spawn(CHROME, [
-    '--headless=new', '--no-sandbox', '--disable-gpu', '--no-first-run',
-    '--disable-crash-reporter', '--hide-scrollbars', `--user-data-dir=${profile}`,
-    '--remote-debugging-port=0', 'about:blank',
-  ], {stdio: ['ignore', 'ignore', 'pipe']});
-  let chromeErr = '';
-  chrome.stderr?.on('data', (chunk) => { chromeErr = (chromeErr + String(chunk)).slice(-800); });
-  let port = null;
-  for (let i = 0; i < 240 && !port; i += 1) {
-    await sleep(250);
-    try { port = readFileSync(join(profile, 'DevToolsActivePort'), 'utf8').split('\n')[0].trim(); } catch { /* 还没写 */ }
-    if (chrome.exitCode !== null || chrome.signalCode) break;
-  }
-  if (!port) {
-    chrome.kill('SIGKILL');
-    rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120});
-    throw new Error(`Chrome 没起来：${chromeErr}`);
-  }
-  const list = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
-  const target = list.find((t) => t.type === 'page');
-  const ws = new WebSocket(target.webSocketDebuggerUrl);
+  // ⭐ task-18 改钉（2026-09-29）：原来这里是"每轮一个 mkdtemp profile + 收尾裸删" ——
+  //   ① 每轮新 profile ⇒ 服务端**每轮烧一个会话位**（100 格烧满就 429，正是 task-15 那条）；
+  //   ② 旧写法留档：临时 profile 收尾做一次**不带重试的删除**（裸删会因 ENOTEMPTY 把绿判据变红，
+  //      判据见 `tests/evals/structure-contract.test.js`）—— 那一段刻意**不写出调用本身**，
+  //      因为那条判据是按源码文本 grep 的（coach-context 2026-09-29 报过这一处）。
+  // 现在：共用 `tmp/browser-profile`（持久、gitignore），**收尾不删 profile**，只关 Chrome。
+  const chrome = await launchProbeChrome({windowSize: '1440,900'});
+  const ws = new WebSocket(chrome.wsUrl);
   await new Promise((resolve, reject) => { ws.addEventListener('open', resolve); ws.addEventListener('error', reject); });
   return {
     cdp: new Cdp(ws),
-    close: async () => {
-      try { ws.close(); } catch { /* 已经关了 */ }
-      chrome.kill('SIGKILL');
-      rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120});
-    },
+    profileDir: chrome.profileDir,
+    close: async () => { try { ws.close(); } catch { /* 已经关了 */ } chrome.close(); },
   };
 }
 
@@ -228,6 +213,23 @@ async function main() {
       if(!el)return null;el.scrollIntoView({block:'center'});const r=el.getBoundingClientRect();
       return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2),w:Math.round(r.width),h:Math.round(r.height)};})()`);
   };
+  // ⭐ task-18：**开跑前的握手**。这一条对 `ROCO_BASE` 尤其要紧：它可能指着 8765、也可能指着
+  // 别人的独立实例（端口不同）——profile 是共用的，旧 cookie 到了新实例上必然 403，
+  // 而那时的症状与"产品坏了"一模一样。所以：只清 localStorage（保留 cookie 没用，会 403）→
+  // **先清 `coach_session`** → 等 `/api/roco/status` 真的 ok → 真发一次 `/api/bootstrap` 并分类。
+  const handshake = await probeSessionHandshake({base: BASE, send: cdp.send.bind(cdp), js, freshSession: true});
+  if (handshake.bootstrap.kind !== 'ok') {
+    console.error('[live-acceptance] 会话握手失败：', probeSessionProblemText(handshake));
+    process.exitCode = 2;
+    throw new Error(probeSessionProblemText(handshake));
+  }
+  // ⭐ task-18：把**探针自己的生命周期**打在屏幕上（每次跑都看得见 profile / 会话形状 / 引擎等多久）。
+  log(`[probe] profile=${PROBE_PROFILE_DIR} 会话=${handshake.bootstrap.kind}`
+    + `（引擎等 ${handshake.engine.waitedMs}ms；清 localStorage=${handshake.localStorageCleared}；`
+    + `清 cookie=${handshake.cookieCleared}${handshake.recovered ? `；自愈=${handshake.recovered}` : ''}）`);
+
+  /** ⭐ task-18：点击记账（每一次点都记"真鼠标 / 命中测试过没过"）。 */
+  const probeClicks = [];
   const mouseClick = async (selector) => {
     const {host, inner} = splitSel(selector);
     await js(`(()=>{const host=document.querySelector(${JSON.stringify(host)});
@@ -237,6 +239,16 @@ async function main() {
     await sleep(150);
     const r = await rectOf(selector);
     if (!r) throw new Error(`找不到可点的元素：${selector}`);
+    // ⭐ task-18：**先命中测试**再点。原来直接派发鼠标事件 —— 被测元素被浮层/遮挡时，
+    // 事件打在别人身上，症状就是"点了没反应"（三个脚本都踩过这一类的形状）。
+    const hitInfo = JSON.parse(await js(`(()=>{const host=document.querySelector(${JSON.stringify(host)});
+      const el=document.elementFromPoint(${r.x},${r.y});
+      const inside=Boolean(el&&host&&(el===host||host.contains(el)||el.contains(host)));
+      return JSON.stringify({inside,tag:el?el.tagName:null});})()`));
+    if (!hitInfo.inside) {
+      throw new Error(`命中测试没过：${selector} 那一点上是 ${hitInfo.tag} —— 这就是"点了没反应"的形状`);
+    }
+    probeClicks.push({selector, via: 'mouse', hit: true, topTag: hitInfo.tag});
     await cdp.send('Input.dispatchMouseEvent', {type: 'mouseMoved', x: r.x, y: r.y});
     for (const type of ['mousePressed', 'mouseReleased']) {
       await cdp.send('Input.dispatchMouseEvent', {type, x: r.x, y: r.y, button: 'left', clickCount: 1});
@@ -354,6 +366,15 @@ async function main() {
     for (let i = 0; i < 120; i += 1) {
       if (await js(`document.body.dataset.rocoReady==='yes'`)) break;
       await sleep(250);
+    }
+    // ⭐ task-18（第 ③ 条坑：**装人装早了**）：`window.rocoDemo` / `window.rocoTeamWorkshop` 是
+    //   `mountWorkshop()` **之后**才挂上的。原来只等 `#coach-entry` 就去调宿主 API ⇒ 静默失败 ⇒
+    //   症状是"按钮 enabled 但点了没反应"。现在**等它真的挂上**，超时如实报（不往下装作没事）。
+    const hostApi = await waitForHostApi({js, expression: 'window.rocoDemo', label: '宿主页面 API（window.rocoDemo）'});
+    if (!hostApi.ok) {
+      console.error('[live-acceptance]', hostApi.detail);
+      process.exitCode = 2;
+      throw new Error(hostApi.detail);
     }
     await sleep(900);
     const boot = await js(`(()=>{const fb=document.getElementById('boot-fallback');
@@ -1930,6 +1951,8 @@ async function main() {
     ok: failed.length === 0 && missed.length === 0,
   };
   mkdirSync(OUT, {recursive: true});
+  // ⭐ task-18：把**探针自己的生命周期**也写进报告（会话握手形状 + 每次点击走的是不是真鼠标）
+  report.probe = {profileDir: PROBE_PROFILE_DIR, base: BASE, session: handshake, clicks: probeClicks};
   writeFileSync(join(OUT, 'live-acceptance.json'), `${JSON.stringify(report, null, 1)}\n`);
   log(`报告：reports/roco/live/live-acceptance.json（判据 ${report.totals.passed}/${report.totals.checks}；`
     + `反证 ${report.totals.counterproofs_hit}/${report.totals.counterproofs}）`);

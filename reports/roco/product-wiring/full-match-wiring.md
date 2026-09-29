@@ -15,7 +15,7 @@
 - ✔ **② 老师：局末真的自动出现复盘卡片，并且钩子给出了「一个关键转折」**
   - data-roco-teacher-point="first-faint"；关键转折在第 4 回合（这一局 17 个回合）。
 - ✔ **② 老师：给了「下一局练一件事」，并且写进了教学账本（journal 里的 teach 行）**
-  - data-roco-teacher-goal=「read-the-replacement-first」；teach 行 1；学习点「这一局学到一件事：对面补上新的一只之后，先确认它是谁、什么系，再决定这一手打谁。」
+  - data-roco-teacher-goal=「read-the-replacement-first」；teach 行 1；学习点「这一局学到一件事：对面补上新的一只之后，先确认它是谁、什么系，再决定这一手打谁。 下一次再遇到第 7 回合那种局面（对方」
 - ✖ **③ 陪练：说一句话后拿到真实语域（R0—R3），并且回的是一句中文（不是 [object Object]）**
   - data-roco-companion=null（why=null，seen=null）：
 - ✖ **③ 陪练：偏好记忆真的进了「她记住了什么」（页面 + localStorage 都写进去了）**
@@ -27,7 +27,7 @@
 - ✔ **⑤ RAG：规则检索的证据（事件回执里的 evidence 行号）真的到了浏览器，并且在开发者抽屉里可见**
   - 这一局 118 条事件，其中 51 条带 evidence；样例 {"kind":"defense","text":"我方使用防御，本回合减伤约 70%。","evidence":["1015","1016","1017"]}；原始 JSON 里含 "evidence"=true
 - ✔ **⑤ RAG：精灵/技能级证据串（evidence_ids）真的到了浏览器（逐只 pets.json#…、逐招 skills.json#…）**
-  - 引擎回执 evidence_ids=["ev:roco-world-s4-2026-09-10:roster#total=48;offset=0;limit=2"]；/api/roco/roster 的键是 ["ok","total","offset","limit","count","usable_count","team_size","note","pets","evidence_ids"]，样例 ["ev:roco-world-s4-2026-09-10:pets.json#pet_000012"] / ["ev:roco-world-s4-2026-09-10:skills.json#skill_000632"]
+  - 引擎回执 evidence_ids=["ev:roco-world-s4-2026-09-10:roster#total=542;offset=0;limit=2"]；/api/roco/roster 的键是 ["ok","total","offset","limit","count","usable_count","team_size","note","pets","evidence_ids"]，样例 ["ev:roco-world-s4-2026-09-10:pets.json#pet_000001"] / ["ev:roco-world-s4-2026-09-10:skills.json#skill_000246"]
 - ✔ **⑤ 反证：把 pets[].evidence_ids 剥掉，上面那条判据必须变红（判据有牙）**
   - 剥掉 pets[].evidence_ids 之后判据=变红
 - ✖ **⑤ Memory：偏好（stated）与账本（journal）都被页面真实读写（内存 + localStorage）**
@@ -40,4 +40,4 @@
 ## 没做到 / 缺口
 
 - RL 判定层：页面侧 mode="off" active=false reason="flag-off"，typeof process=undefined（这正是它在浏览器里算不成的直接原因）——**这一层当前没有生效**；Node 侧同一模块 mode=on 时 `suppresses_by=only`（只抑制、不新增）。
-- RAG 精灵/技能级证据（第 61 轮 A65-16 **已修**）：引擎回执带 evidence_ids=["ev:roco-world-s4-2026-09-10:roster#total=48;offset=0;limit=2"]，`/api/roco/roster` 的顶层键含 evidence_ids=true；逐只样例 ["ev:roco-world-s4-2026-09-10:pets.json#pet_000012"]、逐招样例 ["ev:roco-world-s4-2026-09-10:skills.json#skill_000632"]；判据（逐只/逐招精确比对）=true，反证（剥掉字段必红）=true。
+- RAG 精灵/技能级证据（第 61 轮 A65-16 **已修**）：引擎回执带 evidence_ids=["ev:roco-world-s4-2026-09-10:roster#total=542;offset=0;limit=2"]，`/api/roco/roster` 的顶层键含 evidence_ids=true；逐只样例 ["ev:roco-world-s4-2026-09-10:pets.json#pet_000001"]、逐招样例 ["ev:roco-world-s4-2026-09-10:skills.json#skill_000246"]；判据（逐只/逐招精确比对）=true，反证（剥掉字段必红）=true。

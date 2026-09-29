@@ -1,0 +1,116 @@
+{
+ "generated": "2026-09-29T02:04:17.589Z",
+ "command": "node reports/roco/build-snapshot/verify-probe-session-tool.mjs",
+ "steps": {
+  "guard": {
+   "rejected": [
+    {
+     "path": "/tmp/evil-profile",
+     "rejected": true,
+     "reason": "探针 profile 只允许放在 /Users/serendizc/Developer/roco-coach/tmp 下面（不许碰用户当前浏览器 profile"
+    },
+    {
+     "path": "/Users/serendizc/Library/Application Support/Google/Chrome/Default",
+     "rejected": true,
+     "reason": "探针 profile 只允许放在 /Users/serendizc/Developer/roco-coach/tmp 下面（不许碰用户当前浏览器 profile"
+    }
+   ],
+   "allowed": "/Users/serendizc/Developer/roco-coach/tmp/browser-profile"
+  },
+  "normal": {
+   "kind": "ok",
+   "engineOk": true,
+   "engineWaitedMs": 234,
+   "localStorageCleared": true,
+   "cookieCleared": true,
+   "csrf": true,
+   "csrfProbe": {
+    "status": 400,
+    "sentToken": true,
+    "kind": "ok"
+   }
+  },
+  "staleCookie": {
+   "kind": "session-invalid",
+   "status": 200,
+   "csrfProbe": {
+    "status": 403,
+    "sentToken": true,
+    "kind": "session-invalid"
+   },
+   "cookieCleared": false,
+   "text": "会话无效（403）：带 CSRF 的 POST 被拒 —— profile 里的 `coach_session`/csrf 与当前实例对不上（cookie 不分端口）。清掉那个 cookie 再跑，别把它读成\"开局失败\"。（注意：bootstrap 本身会自愈，所以这个形状**只在 POST 上**出现。）｜原始：{\"origin\":\"http://127.0.0.1:61507\",\"engine\":{\"ok\":true,\"status\":200,\"waitedMs\":257,\"body\":{\"ok\":null,\"available\":true,\"ruleset_id\":\"roco-world-s4-2026-09-10\"}},\"bootstrap\":{\"status\":200,\"csrf\":true,\"hasCookie\":false,\"fromPage\":true,\"kind\":\"session-invalid\"},\"recovered\":null}"
+  },
+  "recovered": {
+   "kind": "ok",
+   "recovered": "stale-cookie-cleared",
+   "cookieCleared": true,
+   "csrfProbe": {
+    "status": 400,
+    "kind": "ok",
+    "sentToken": true,
+    "afterRecover": true
+   }
+  },
+  "warm": {
+   "kind": "ok",
+   "cookieCleared": false,
+   "csrfProbe": {
+    "status": 400,
+    "sentToken": true,
+    "kind": "ok"
+   }
+  },
+  "hostApiTimeout": {
+   "ok": false,
+   "waitedMs": 712,
+   "detail": "宿主 API 在 700ms 内没有挂上（window.__not_there__）—— 这时\"点了没反应\"是**探针太早**，不是产品坏了"
+  },
+  "coveredClick": {
+   "selector": "#probe-btn",
+   "ok": true,
+   "via": "js-click",
+   "hit": false,
+   "point": {
+    "x": 100,
+    "y": 60
+   },
+   "hitTag": "DIV",
+   "detail": "命中测试没过 ⇒ 退回 element.click()（**不是真鼠标**，读数要照这个说）"
+  },
+  "normalClick": {
+   "selector": "#probe-btn",
+   "ok": true,
+   "via": "mouse",
+   "hit": true,
+   "point": {
+    "x": 100,
+    "y": 60
+   }
+  },
+  "clickLog": [
+   {
+    "selector": "#probe-btn",
+    "ok": true,
+    "via": "js-click",
+    "hit": false,
+    "point": {
+     "x": 100,
+     "y": 60
+    },
+    "hitTag": "DIV",
+    "detail": "命中测试没过 ⇒ 退回 element.click()（**不是真鼠标**，读数要照这个说）"
+   },
+   {
+    "selector": "#probe-btn",
+    "ok": true,
+    "via": "mouse",
+    "hit": true,
+    "point": {
+     "x": 100,
+     "y": 60
+    }
+   }
+  ]
+ }
+}

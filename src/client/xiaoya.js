@@ -16,7 +16,8 @@ import {requestCoach, connectionStatus, readChatStore, serializeChatStore,
   activeChatSession, chatConversation, appendChatTurn, startChatSession, emptyChatStore,
   beginNewChatSession, clearActiveChatSession} from '../coach/client.js';
 import {buildContext} from '../coach/runtime.js';
-import {freshMemory, readMemory, memoryItems, deleteMemoryItem, MEMORY_GROUPS} from '../coach/memory.js';
+import {freshMemory, readMemory, memoryItems, deleteMemoryItem, MEMORY_GROUPS,
+  rememberPreference} from '../coach/memory.js';
 // 培养那几样（性格 / 六项资质 / 天分档位）的**唯一**投影：页面读它，小芽也读它 ——
 // 刷新/回滚之后两边必须一起变（Codex 监工第 2 条；A7 之后页面上那一栏就是从这条读的）。
 import {cultivationOf} from '../coach/individuals.js';
@@ -840,6 +841,15 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
       const answer = await requestCoach({message, role: state.role, context, memory: state.memory,
         conversation: state.conversation.slice(-8), stateToken: epoch});
       if (epoch !== state.epoch) return;                        // 又开了一段对话：这条回答作废
+      // ⚠ 2026-09-30 **撤回一处抢跑的修改**（task-13 甲④-2），把审计过程留档在这里：
+      //   我一度在**这一支**补了 `rememberPreference(state.memory, message)`（+ 与服务端那份合并），
+      //   依据是 `demo-acceptance` 的「她记住了什么」读到 `{"rows":[]}` ⇒ 判定"真功能丢失"。
+      //   但把探针的时序补上之后，同一轮的读数是 **`气泡 3→3`** —— 第二条句
+      //   「以后叫我老王」**根本没发出去**（不是"发出去了没记住"）⇒ 那个红色读数**不成立**，
+      //   我据此改产品是**抢跑**。按"别让同一件东西有两份 remembered"的纪律**撤回**：
+      //   记忆的写入者仍然只有**服务端那一份回执**（下面这一句）。
+      //   ⇒ 下一步是把探针真的把第二条发出去（浮层开着 + 输入框聚焦 + 发送键可用 + 气泡数必须涨），
+      //     再决定"到底有没有丢"。**没量到之前不再动记忆这条链。**
       state.memory = answer.memory ?? state.memory;
       writeStored(MEMORY_KEY, JSON.stringify(state.memory));
       const entry = addEntry('小芽', answer.text || '（这次没有拿到回答）', answer);

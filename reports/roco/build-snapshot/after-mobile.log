@@ -1,0 +1,23 @@
+[roco-mobile] [probe] profile=/Users/serendizc/Developer/roco-coach/tmp/browser-profile 会话=ok（引擎等 179ms；清 localStorage=true；清 cookie=true）
+[roco-mobile] ✔ [mobile-index.html-390] — scrollW 390 = clientW 390；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 34 个（只记账，见 known_limits）
+[roco-mobile] ✔ [mobile-index.html-360] — scrollW 360 = clientW 360；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 34 个（只记账，见 known_limits）
+[roco-mobile] ✔ [mobile-connect.html-390] — scrollW 390 = clientW 390；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 2 个（只记账，见 known_limits）
+[roco-mobile] ✔ [mobile-connect.html-360] — scrollW 360 = clientW 360；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 2 个（只记账，见 known_limits）
+[roco-mobile] ✖ [mobile-roco.html-390] — 声明的可点范围只匹配到 3 个元素（下限 4）——区域被删/改名/藏起来了，这条判据会静默变成空集合；小芽那一栏必须能打开且输入框在首屏，实际 {}
+[roco-mobile] ✖ [mobile-roco.html-360] — 声明的可点范围只匹配到 3 个元素（下限 4）——区域被删/改名/藏起来了，这条判据会静默变成空集合；小芽那一栏必须能打开且输入框在首屏，实际 {}
+[roco-mobile] ✔ [mobile-box.html-390] — scrollW 390 = clientW 390；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 0 个（只记账，见 known_limits）
+[roco-mobile] ✔ [mobile-box.html-360] — scrollW 360 = clientW 360；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 0 个（只记账，见 known_limits）
+[roco-mobile] ✔ [mobile-workshop.html-390] — scrollW 390 = clientW 390；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 0 个（只记账，见 known_limits）
+[roco-mobile] ✔ [mobile-workshop.html-360] — scrollW 360 = clientW 360；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 0 个（只记账，见 known_limits）
+[roco-mobile] ✔ [反证 横向溢出] — 横向溢出 20px（clientW=390 scrollW=410）
+[roco-mobile] ✔ [反证 触控目标] — 1 个**声明的**可点控件小于 44×44：button.tiny 30×30 | 声明的可点范围只匹配到 1 个元素（下限 4）——区域被删/改名/藏起来了，这条判据会静默变成空集合
+[roco-mobile] ✔ [反证 声明范围不能是空的] — 声明的可点范围只匹配到 0 个元素（下限 4）——区域被删/改名/藏起来了，这条判据会静默变成空集合
+[roco-mobile] ✔ [反证 主流程不能是旧的] — 主流程应当是 six-pet，实际 "legacy-3v3"（旧入口没藏住？）
+[roco-mobile] ✔ [反证 首屏主操作] — 主操作「开一局」不在首屏（top=1500 > 844）
+[roco-mobile] ✔ [反证 白屏] — 可见文本只有 5 字（这一页可能没渲染出来）
+[roco-mobile] ✔ [反证 控制台报错] — 控制台有 1 条报错
+[roco-mobile] ✔ [反证 培养入口指向] — 「培养」入口应当指向 /box.html，实际 href="/nurture.html"
+[roco-mobile] ✔ [反证 页面黑话] — 页面可见文本里有工程黑话 ["口径"]：「要不要在引擎侧补一个培养模型（补了才有「加点后」这个数），等口径定了再算。」（共 1 处） | 页面可见文本里有工程黑话 ["口径"]：「等实机录制确认之后才会补上（登记在用户口径 D5）。」（共 1 处） | 页面可见文本里有工程黑话 ["src/game/",".js"]：
+[roco-mobile] 报告：reports/roco/rc505/mobile-sweep.json（判据 8/10；反证 9/9）
+[roco-mobile] 2 条判据失败：mobile-roco.html-390, mobile-roco.html-360
+EXIT=1

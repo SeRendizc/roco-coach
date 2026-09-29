@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-28T14:19:36.158Z",
-  "runStarted": "2026-09-28T14:19:35.959Z",
-  "runEnded": "2026-09-28T14:19:35.960Z",
+  "generatedAt": "2026-09-29T02:06:39.618Z",
+  "runStarted": "2026-09-29T02:06:39.423Z",
+  "runEnded": "2026-09-29T02:06:39.423Z",
   "target": "http://127.0.0.1:8765",
   "model": "deepseek-flash",
-  "provider": "local",
-  "serverConfigured": false,
-  "serverVerified": false,
+  "provider": "deepseek",
+  "serverConfigured": true,
+  "serverVerified": true,
   "scope": "Real DeepSeek calls through the running app server. One request per case, no retries, no simulated provider.",
   "caseSetSize": 54,
   "executed": 1,
@@ -100,7 +100,7 @@
     "outputOffPeak": 0.6,
     "outputPeak": 1.2,
     "peakWindowUTC": "01:00-04:00 and 06:00-10:00 UTC, Monday-Friday",
-    "runBand": "off-peak"
+    "runBand": "peak"
   },
   "metrics": {
     "casesExecuted": 1,
@@ -272,10 +272,10 @@
       "apiOutput": 70
     },
     "costUSD": {
-      "band": "off-peak",
-      "inputRatePer1M": 0.15,
-      "outputRatePer1M": 0.6,
-      "estimated": 0.0006886499999999999,
+      "band": "peak",
+      "inputRatePer1M": 0.3,
+      "outputRatePer1M": 1.2,
+      "estimated": 0.0013772999999999997,
       "peakBound": 0.0013772999999999997,
       "offPeakBound": 0.0006886499999999999
     },

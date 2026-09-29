@@ -1,7 +1,7 @@
 {
  "generated_by": "scripts/roco/browser-box-acceptance.mjs",
  "page": "box.html",
- "judged_at": "2026-09-28T16:13:38.551Z",
+ "judged_at": "2026-09-28T18:15:21.206Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|licence|pack_id|ruleset_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "screenshots": [
   "reports/roco/box-acceptance/box-01-mine-1440x900.png",
@@ -84,7 +84,7 @@
    "id": "06-玩家层无工程话",
    "judge": "展开的玩家可见文本里不出现 pet_id / state_version / coverage / provenance / unknown_fields / 裸 JSON",
    "ok": true,
-   "actual": "扫过 834 字；卡片首层「喵喵 🌿草系 定位：回复」"
+   "actual": "扫过 916 字；卡片首层「喵喵 🌿草系 定位：回复」"
   },
   {
    "id": "07-键盘搜索",
@@ -114,13 +114,13 @@
    "id": "10-详情也不说工程话",
    "judge": "个体详情二级页（玩家点得到的）同样不出现工程字段",
    "ok": true,
-   "actual": "扫过 877 字"
+   "actual": "扫过 952 字"
   },
   {
    "id": "10b-资质要摊成六维数值（own-0001）",
    "judge": "真鼠标打开 own-0001 的详情：资质那一栏是「生命 10 / 物攻 3 / …」这样的六维数值，整页不出现 [object Object]",
    "ok": true,
-   "actual": "喵喵 · 详情：资质 =「生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9」（数出 6 个数值；[object Object] 0 处）｜pet-view 内命中元素 26 个 [\"BUTTON.nav-btn primary@pet-back html=<button class=\\\"nav-btn primary\\\" id=\\\"pet-back\\\">← 返回精灵盒子</button>\",\"H2.@pet-title html=<h2 id=\\\"pet-title\\\">喵喵 · 详情</h2>\",\"BUTTON.refresh-btn@pet-actions html=<button class=\\\"refresh-btn\\\" data-refresh=\\\"nature\\\" data-individual=\\\"own-0001\\\">刷新性格（还剩 3 次）</button>\",\"BUTTON.refresh-btn@pet-actions html=<button class=\\\"refresh-btn\\\" data-refresh=\\\"talent\\\" data-individual=\\\"own-0001\\\">刷新天分（还剩 3 次）</button>\",\"SPAN.bl-no@pet-loadout html=<span class=\\\"bl-no\\\">第 1 个</span>\"]｜资质原样「」｜本机记录 nature=\"稳重\"｜按容器拆：pet=131 list=1728 compare=-1 dev=0"
+   "actual": "喵喵 · 详情：资质 =「生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9」（数出 6 个数值；[object Object] 0 处）｜pet-view 内命中元素 25 个 [\"BUTTON.nav-btn primary@pet-back html=<button class=\\\"nav-btn primary\\\" id=\\\"pet-back\\\">← 返回精灵盒子</button>\",\"H2.@pet-title html=<h2 id=\\\"pet-title\\\">喵喵 · 详情</h2>\",\"BUTTON.refresh-btn@pet-actions html=<button class=\\\"refresh-btn\\\" data-refresh=\\\"nature\\\" data-individual=\\\"own-0001\\\">刷新性格（还剩 3 次）</button>\",\"BUTTON.refresh-btn@pet-actions html=<button class=\\\"refresh-btn\\\" data-refresh=\\\"talent\\\" data-individual=\\\"own-0001\\\">刷新天分（还剩 3 次）</button>\",\"SPAN.bl-no@pet-loadout html=<span class=\\\"bl-no\\\">第 1 个</span>\"]｜资质原样「生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9」｜本机记录 nature=\"稳重\"｜按容器拆：pet=143 list=1728 compare=-1 dev=0"
   },
   {
    "id": "11-两个体比较",
@@ -288,7 +288,13 @@
    "id": "41-官方立绘：有图的画图、没图的照旧 emoji",
    "judge": "人类 2026-09-28：「我抓包出来的地方是不是有精灵立绘？你把迪莫的实装一下我看看」⇒ 带 `art=true` 的卡必须在**屏幕上真的画出那张立绘**（懒加载也要加载完：naturalWidth > 0），而没有立绘的卡照旧画系别 emoji —— **不许留空框**",
    "ok": true,
-   "actual": "这一页 24 张卡：带立绘 24 张、屏幕上 24 个 img （都加载出来了：256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、384×512、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256）；其余 0 个照旧画 emoji"
+   "actual": "这一页 24 张卡：带立绘 24 张、屏幕上 24 个 img （都加载出来了：256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256）；其余 0 个照旧画 emoji"
+  },
+  {
+   "id": "42-默认档也要能点进详情",
+   "judge": "两套渲染（`.individual[data-detail]` 与 `.card`）**都必须**带 `data-detail` —— 它是契约选择器（`box-drawer.js:128`：不许换掉，上一版就是因为重写丢了它而把详情功能弄丢）。在**不切页签**的默认档点第一张卡，二级详情必须真的打开",
+   "ok": true,
+   "actual": "切到图鉴=true｜网格读数={\"kind\":\"catalog\",\"grouped\":\"no\",\"cards\":24,\"withDetail\":24,\"faces\":24,\"individualFaces\":0,\"firstCardCls\":\"card\",\"rows\":24}｜可点目标=\"#box-grid .card[data-detail] .card-face\"｜目标那一只=\"pet_000001\"｜点完详情打开了=true"
   },
   {
    "id": "22-控制台干净",
@@ -616,11 +622,11 @@
     "value": "生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9",
     "statCount": 6,
     "objectObject": 0,
-    "inPet": 131,
+    "inPet": 143,
     "inList": 1728,
     "inCompare": -1,
     "inDev": 0,
-    "leakElements": 26,
+    "leakElements": 25,
     "leakWhere": [
      "BUTTON.nav-btn primary@pet-back html=<button class=\"nav-btn primary\" id=\"pet-back\">← 返回精灵盒子</button>",
      "H2.@pet-title html=<h2 id=\"pet-title\">喵喵 · 详情</h2>",
@@ -628,9 +634,9 @@
      "BUTTON.refresh-btn@pet-actions html=<button class=\"refresh-btn\" data-refresh=\"talent\" data-individual=\"own-0001\">刷新天分（还剩 3 次）</button>",
      "SPAN.bl-no@pet-loadout html=<span class=\"bl-no\">第 1 个</span>"
     ],
-    "talentRaw": "",
+    "talentRaw": "生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9",
     "storeOne": "稳重",
-    "petVisibleObject": 131,
+    "petVisibleObject": 143,
     "petLeakOuter": [
      "SPAN.trait# kids=0 文字=「性格 稳重」",
      "SPAN.trait# kids=0 文字=「性格 稳重」",
@@ -924,8 +930,8 @@
      },
      {
       "src": "/api/roco/sprite?id=pet_000012&v=default",
-      "w": 384,
-      "h": 512
+      "w": 256,
+      "h": 256
      },
      {
       "src": "/api/roco/sprite?id=pet_000013&v=default",
@@ -990,6 +996,23 @@
     ],
     "plainEmoji": 0
    }
+  },
+  {
+   "at": "catalog-card-click",
+   "onCatalog": true,
+   "diag": {
+    "kind": "catalog",
+    "grouped": "no",
+    "cards": 24,
+    "withDetail": 24,
+    "faces": 24,
+    "individualFaces": 0,
+    "firstCardCls": "card",
+    "rows": 24
+   },
+   "target": "#box-grid .card[data-detail] .card-face",
+   "detailId": "pet_000001",
+   "opened": true
   }
  ],
  "ok": true
