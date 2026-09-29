@@ -1194,6 +1194,24 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
 
   // 模块图完整才跑得到这里：撤掉「脚本没加载成功」的兜底横幅。
   document.getElementById('boot-fallback')?.remove();
+
+  // 甲④-1：给宿主页一个**真实**的把手（旧面板退役后，`rocoDemo.companionVisibility()/renderCompanion()`
+  // 那三个验收脚本要用它 —— 同名同语义，不改判据）。三条都对着"真实状态"，不许常量、不许空转：
+  //   · `isOpen()` 读真实 DOM 可见性（浮层没挂/被 hidden 都算不可见）；
+  //   · `open()/close()` **复用真按钮的 handler**（点 `#xiaoya-open` / `#xiaoya-close`），不另写一套开关；
+  //   · `render()` 调**真的那几个画法**（历史 + 记忆 + 能力状态 + 焦点），不是空函数。
+  const handle = {
+    isOpen: () => { const pop = document.getElementById('xiaoya-pop'); return Boolean(pop) && pop.hidden === false; },
+    open: () => { if (!handle.isOpen()) document.getElementById('xiaoya-open')?.click(); },
+    close: () => { if (handle.isOpen()) document.getElementById('xiaoya-close')?.click(); },
+    render: () => {
+      drawHistory();
+      renderMemoryList();
+      void refreshCapability(true);
+      updateFocusChip(focusProvider.getContext());
+    },
+  };
+  return handle;
   return {ask, state};
 }
 
