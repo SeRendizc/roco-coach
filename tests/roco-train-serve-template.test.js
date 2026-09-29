@@ -190,3 +190,43 @@ test('⚠ **训练链还没接上**：`train_v9.sh` 仍走**未包装**入口（
   assert.match(sh, /-m mlx_lm lora/, '训练脚本的入口变了 ⇒ 这条判据要跟着改，并重新确认包装是否被用上');
   assert.doesNotMatch(sh, /train_v9_aligned/, '训练脚本**已经**改用包装入口了 ⇒ 这是好事，但必须改这条判据并留档');
 });
+
+// ── 入口参数**兼容**（Codex 要的"入口集成验证"再往前一步）───────────────────────
+//
+// `train_v9.sh` 真正传的那套旗标，`mlx_lm` 的解析器收不收？
+// ⚠ **只 parse、不训练**；而且旗标**从脚本里抽**（不是抄一份）—— 脚本改了判据就知道。
+test('入口参数兼容：`train_v9.sh` 里真正用到的旗标，`mlx_lm` 解析器全部认（**不训练，只 parse**）', (t) => {
+  if (!existsSync(PY) || !existsSync(TRAIN)) { t.skip('缺 venv / 训练脚本'); return; }
+  const sh = readFileSync(TRAIN, 'utf8');
+  // ⚠ 只抽 **`mlx_lm lora` 那一段**的旗标 —— 第一版抽了**整个脚本**，把
+  // `audit_dataset.mjs --new-data` 也算进来了（那是**另一个命令**的旗标，mlx_lm 当然不认）⇒
+  // **判据自己造了一个假阳**。这类错这一程已经犯过多次：**先问"是不是我判据量错了"。**
+  const lines = sh.split('\n');
+  const start = lines.findIndex((l) => /-m\s+mlx_lm\s+lora/.test(l));
+  assert.ok(start >= 0, '训练脚本里找不到 `-m mlx_lm lora` 那一段 —— 抽取逻辑失效了');
+  const segment = [];
+  for (let i = start; i < lines.length; i += 1) {
+    segment.push(lines[i]);
+    if (!/\\\s*$/.test(lines[i])) break;    // 行尾没有续行符 ⇒ 这条命令结束
+  }
+  const flags = [...new Set([...segment.join('\n').matchAll(/--[a-z][a-z0-9-]+/g)].map((m) => m[0]))];
+  assert.ok(flags.length >= 5, `没从 \`mlx_lm lora\` 那一段抽到旗标（抽到 ${flags.length} 个）—— 抽取逻辑失效了`);
+  assert.ok(!flags.includes('--new-data'), '`--new-data` 是 audit_dataset 那个命令的旗标，不该被抽进来（抽错了说明段落切分失效）');
+  const probe = [
+    'import mlx_lm.lora as m',
+    'p = m.build_parser()',
+    'known = set()',
+    'for a in p._actions:',
+    '    known.update(a.option_strings)',
+    `want = ${JSON.stringify(flags)}`,
+    'missing = [f for f in want if f not in known]',
+    'print("FLAGS" + ",".join(want))',
+    'print("MISSING" + ",".join(missing))',
+  ].join('\n');
+  const out = execFileSync(PY, ['-c', probe], {cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']});
+  const missing = (/MISSING(.*)/.exec(out)?.[1] ?? '').trim();
+  assert.equal(missing, '',
+    `训练脚本用了 mlx_lm **不认**的旗标：${missing} ⇒ 换成包装入口也会在解析阶段就失败（**还没开始训练就挂**）`);
+  // 明确：这一步**没有训练**（只是 build_parser + 比对 option_strings）
+  assert.match(out, /FLAGS/, '探针要真的把旗标列出来（否则这条判据可能什么都没查）');
+});
