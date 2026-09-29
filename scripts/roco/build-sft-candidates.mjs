@@ -131,6 +131,19 @@ for (const row of rows) {
   // ── 逐行审查标记（**这些就是"待审"的理由**）────────────────────────────
   const flags = [];
   if (FAILURE_REPLY.test(reply)) flags.push('reply_is_failure');
+  // ⚠ 2026-09-29 补（**我的"干净"分类漏了这条信号**）：源里 `checks.items.limitation_words`
+  // 非空 ⇒ 这条回复**自己承认"没核验过 / 没有端点 / 拿不到"**（例：`["未核验","没有端点"]`）。
+  // ⚠ **我第一版在这里写错了一个数字**（错版留档，别再抄）：
+  //     「`零调用 + 回复正常` 的 1801 条源里 **1801 条**都带 limitation_words」—— **那是我没量就写的**。
+  //   实测（可复跑）：
+  //     · `limitation_words` 非空：**864** 条；
+  //     · `零调用 + 回复正常`：**1801** 条（**另一个集合**，不等于带 limitation_words 的）；
+  //     · **两者都满足：792** 条。
+  //   ⇒ 教训与这一程其余几次一样：**别把"看起来应该"写成"实测"**。
+  // 我原来只按"回复是不是失败句"分流 ⇒ 其中进来的那些被算成了"干净"。
+  // ⇒ **不排除**（对 `stop` 目标"如实说没核验"可能就是正确行为），但**必须标出来让人先看**。
+  const limitationWords = Array.isArray(row.checks?.items?.limitation_words) ? row.checks.items.limitation_words : [];
+  if (limitationWords.length) flags.push('reply_admits_unverified');
   const targetId = target.tool ? String(target.args?.pet_id ?? '') : '';
   if (targetId) {
     // `pet_id` 指的那只，**名字有没有出现在问句里**？没有 ⇒ 疑似错标。
@@ -284,9 +297,17 @@ const report = {
   candidates: picked.length,
   per_split: perSplit,
   semantic_family_overlap_across_splits: sharedFamilies,
+  limitation_words_evidence: {
+    note: '源里 `checks.items.limitation_words` 非空 = 回复**自己承认**"没核验过/没有端点/拿不到"。',
+    measured_corrected: {limitation_words_nonempty: 864, zero_call_and_normal_reply: 1801, both: 792},
+    wrong_first_version: '「零调用+回复正常的 1801 条里 1801 条都带 limitation_words」—— **没量就写的**，实为 864 / 1801 / 792。',
+    why_it_matters: '我原来只按"回复是不是失败句"分流 ⇒ 其中进来的那些被算成"干净"。'
+      + '⇒ **不排除**（对 `stop` 目标"如实说没核验"可能就是正确行为），但**必须标出来让人先看**。',
+  },
   flagged: {
     reply_is_failure: picked.filter((c) => c.flags.includes('reply_is_failure')).length,
     target_entity_not_in_question: picked.filter((c) => c.flags.includes('target_entity_not_in_question')).length,
+    reply_admits_unverified: picked.filter((c) => c.flags.includes('reply_admits_unverified')).length,
     clean: picked.filter((c) => c.flags.length === 0).length,
   },
   polarity: {positive: picked.filter((c) => c.polarity === 'positive').length, negative: picked.filter((c) => c.polarity === 'negative').length,

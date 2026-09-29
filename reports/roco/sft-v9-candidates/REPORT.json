@@ -22,9 +22,20 @@
   "test": 17
  },
  "semantic_family_overlap_across_splits": [],
+ "limitation_words_evidence": {
+  "note": "源里 `checks.items.limitation_words` 非空 = 回复**自己承认**\"没核验过/没有端点/拿不到\"。",
+  "measured_corrected": {
+   "limitation_words_nonempty": 864,
+   "zero_call_and_normal_reply": 1801,
+   "both": 792
+  },
+  "wrong_first_version": "「零调用+回复正常的 1801 条里 1801 条都带 limitation_words」—— **没量就写的**，实为 864 / 1801 / 792。",
+  "why_it_matters": "我原来只按\"回复是不是失败句\"分流 ⇒ 其中进来的那些被算成\"干净\"。⇒ **不排除**（对 `stop` 目标\"如实说没核验\"可能就是正确行为），但**必须标出来让人先看**。"
+ },
  "flagged": {
   "reply_is_failure": 24,
   "target_entity_not_in_question": 0,
+  "reply_admits_unverified": 0,
   "clean": 69
  },
  "polarity": {
