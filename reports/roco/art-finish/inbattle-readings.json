@@ -1,0 +1,715 @@
+{
+ "started_at": "2026-09-29T01:43:41.637Z",
+ "team6": [
+  "own-0001",
+  "own-0002",
+  "own-0003",
+  "own-0004",
+  "own-0005",
+  "own-0006"
+ ],
+ "source_snapshot": {
+  "roco_js": "637edf4a77fb",
+  "xiaoya_js": "b2b25036bb6c",
+  "team_workshop_js": "eaac58061da5",
+  "roco_html": "f1cc3e814d72"
+ },
+ "steps": {
+  "② 六只→应用→开局": {
+   "workshopReady": true,
+   "handoffSlots": [
+    {
+     "i": "1",
+     "inst": "own-0001",
+     "name": "喵喵"
+    },
+    {
+     "i": "2",
+     "inst": "own-0002",
+     "name": "水蓝蓝"
+    },
+    {
+     "i": "3",
+     "inst": "own-0003",
+     "name": "火花"
+    },
+    {
+     "i": "4",
+     "inst": "own-0004",
+     "name": "迪莫"
+    },
+    {
+     "i": "5",
+     "inst": "own-0005",
+     "name": "水灵"
+    },
+    {
+     "i": "6",
+     "inst": "own-0006",
+     "name": "火神"
+    }
+   ],
+   "afterApply": {
+    "configState": "applied",
+    "note": "已应用：屏幕上的这一套 == 开局会用的那一套 == 重新打开这一页读回来的那一套。",
+    "problemsHidden": true,
+    "problems": "",
+    "startDisabled": false,
+    "startTeam": "6"
+   },
+   "startEnabled": true,
+   "inBattle": true,
+   "atBattleStart": {
+    "hasView": true,
+    "turn": 1,
+    "turnDom": "1",
+    "self": [
+     {
+      "name": "喵喵",
+      "hp": 332,
+      "alive": true
+     },
+     {
+      "name": "水蓝蓝",
+      "hp": 348,
+      "alive": true
+     },
+     {
+      "name": "火花",
+      "hp": 340,
+      "alive": true
+     },
+     {
+      "name": "迪莫",
+      "hp": 425,
+      "alive": true
+     },
+     {
+      "name": "水灵",
+      "hp": 434,
+      "alive": true
+     },
+     {
+      "name": "火神",
+      "hp": 420,
+      "alive": true
+     }
+    ],
+    "activeIndex": 0,
+    "foe": {
+     "name": "魔力猫",
+     "hp": 405
+    },
+    "hintVisible": "no",
+    "hintHidden": true,
+    "hintText": ""
+   }
+  },
+  "③ 局中正例": {
+   "turn": 1,
+   "turnDom": "1",
+   "coachRequestCount": 1,
+   "allRequests": [
+    {
+     "status": 200,
+     "message": "我现在该换谁？\n回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释。游戏按回合结算，不按秒；不要编造技能冷却。道具名称只能使用回复药、净化药、能量果，不要把它们叫作解药或以太。双方同时决定，不能先看对手本回合出招再决定自己的行动。复盘中hpBefore是回合开始、hpAfter是结束，不能把行动前生命称作打完还剩。逐回合核对实际事件：行动取消不能说成打出了伤害，事前预测和事后结算必须分开。"
+    }
+   ],
+   "onFieldNames": [
+    "喵喵",
+    "水蓝蓝",
+    "火花",
+    "迪莫",
+    "水灵",
+    "火神",
+    "魔力猫"
+   ],
+   "answer": "说一下你的队伍和对手，我按相性挑。依据：本回合的规划（引擎算的） · 你的名单",
+   "requestBodyKeys": [
+    "evidenceIndex",
+    "mode",
+    "focus",
+    "stageId",
+    "profile",
+    "lastMatch",
+    "evidenceRulesVersion",
+    "requestedTurn",
+    "lastTurn",
+    "battle",
+    "roco_battle",
+    "roco_plan",
+    "coachAllowed",
+    "focusDetail"
+   ],
+   "rocoBattle": {
+    "turn": 1,
+    "battle_id": "s1-vu9ppxzo",
+    "state_version": 0,
+    "phase": "battle",
+    "result": null,
+    "self": [
+     {
+      "pet_id": "pet_000001",
+      "name": "喵喵",
+      "hp": 332,
+      "max_hp": 332,
+      "energy": 10,
+      "alive": true
+     },
+     {
+      "pet_id": "pet_000002",
+      "name": "水蓝蓝",
+      "hp": 348,
+      "max_hp": 348,
+      "energy": 10,
+      "alive": true
+     },
+     {
+      "pet_id": "pet_000003",
+      "name": "火花",
+      "hp": 340,
+      "max_hp": 340,
+      "energy": 10,
+      "alive": true
+     },
+     {
+      "pet_id": "pet_000004",
+      "name": "迪莫",
+      "hp": 425,
+      "max_hp": 425,
+      "energy": 10,
+      "alive": true
+     },
+     {
+      "pet_id": "pet_000005",
+      "name": "水灵",
+      "hp": 434,
+      "max_hp": 434,
+      "energy": 10,
+      "alive": true
+     },
+     {
+      "pet_id": "pet_000006",
+      "name": "火神",
+      "hp": 420,
+      "max_hp": 420,
+      "energy": 10,
+      "alive": true
+     }
+    ],
+    "self_active": 0,
+    "self_energy_max": 10,
+    "foe": [
+     {
+      "pet_id": "pet_000007",
+      "name": "魔力猫",
+      "hp": 405,
+      "max_hp": 405,
+      "energy": 10,
+      "alive": true
+     }
+    ],
+    "foe_living_count": 6,
+    "foe_bench": [
+     {
+      "slot": 1,
+      "fainted": false
+     },
+     {
+      "slot": 2,
+      "fainted": false
+     },
+     {
+      "slot": 3,
+      "fainted": false
+     },
+     {
+      "slot": 4,
+      "fainted": false
+     },
+     {
+      "slot": 5,
+      "fainted": false
+     }
+    ],
+    "legal": [
+     {
+      "label": "抓挠",
+      "kind": "skill"
+     },
+     {
+      "label": "防御",
+      "kind": "skill"
+     },
+     {
+      "label": "仙人掌刺击",
+      "kind": "skill"
+     },
+     {
+      "label": "腐化",
+      "kind": "skill"
+     },
+     {
+      "label": "聚能",
+      "kind": "charge"
+     },
+     {
+      "label": "换上第2位",
+      "kind": "switch"
+     },
+     {
+      "label": "换上第3位",
+      "kind": "switch"
+     },
+     {
+      "label": "换上第4位",
+      "kind": "switch"
+     },
+     {
+      "label": "换上第5位",
+      "kind": "switch"
+     },
+     {
+      "label": "换上第6位",
+      "kind": "switch"
+     },
+     {
+      "label": "愿力强化",
+      "kind": "magic"
+     },
+     {
+      "label": "投降",
+      "kind": "surrender"
+     }
+    ]
+   },
+   "httpStatus": 200,
+   "failures": [
+    "④ 回答看不出与当前局面有关（没提到场上任何一只、也没提当前回合或任何血量数字）"
+   ],
+   "detail": {
+    "answerLen": 39,
+    "battlePresent": true,
+    "turn": 1,
+    "screenTurn": 1,
+    "nameHits": [],
+    "turnHit": false,
+    "hpHits": [],
+    "appendedInstruction": "\n回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释。游戏按回合结算，不按秒；不要编造技能冷",
+    "requestMessageHead": "我现在该换谁？\n回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释"
+   }
+  },
+  "③ 必红反证（藏掉 state.view）": {
+   "answer": "说一下你的队伍和对手，我按相性挑。依据：你的名单",
+   "httpStatus": 200,
+   "rocoBattle": null,
+   "failures": [
+    "③ 请求体里没有 context.roco_battle",
+    "④ 回答看不出与当前局面有关（没提到场上任何一只、也没提当前回合或任何血量数字）"
+   ],
+   "detail": {
+    "answerLen": 24,
+    "battlePresent": false,
+    "turn": null,
+    "screenTurn": null,
+    "nameHits": [],
+    "turnHit": false,
+    "hpHits": [],
+    "appendedInstruction": "\n回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释。游戏按回合结算，不按秒；不要编造技能冷",
+    "requestMessageHead": "我现在该换谁？\n回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释"
+   },
+   "loudness": "2/4 条判据变红"
+  },
+  "③ 局中截图": "docs/roco/review-2026-09-28/shots/art-finish/inbattle-01-coach-ask.png",
+  "④ 介入链路（自动气泡）": {
+   "samples": [
+    {
+     "when": "开局后立刻",
+     "hintVisible": "no",
+     "hintHidden": true,
+     "hintText": "",
+     "gate": "below-threshold",
+     "action": "silent",
+     "rocoHint": "hidden",
+     "hasPlan": true,
+     "lastDetail": {
+      "gate": null,
+      "action": "silent",
+      "reason": "below-threshold",
+      "value": 0.6,
+      "floor": 1.2,
+      "decisive": false,
+      "budget": null,
+      "layer": {
+       "mode": "off",
+       "model_status": "pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）",
+       "suppresses_by": "only",
+       "active": false,
+       "suppress": false,
+       "probability": null,
+       "threshold": null,
+       "reason": "flag-off"
+      },
+      "advice": {
+       "text": "它速度 55 快过你 33：别硬对拼，先换人或者用「防御」顶这一下",
+       "why": "对面的速度比你高，同档对拼是它先出手",
+       "risk": "硬拼的话这一下会先落在你身上",
+       "kind": "speed-decides",
+       "evidence": {
+        "mySpe": 33,
+        "foeSpe": 55,
+        "foe": "魔力猫",
+        "defendLegal": true
+       }
+      },
+      "advice_error": null
+     },
+     "dismissed": false,
+     "turn": 1,
+     "autoTurnBtn": false,
+     "autoTurnHidden": null
+    },
+    {
+     "when": "开局后 5s",
+     "hintVisible": "no",
+     "hintHidden": true,
+     "hintText": "",
+     "gate": "below-threshold",
+     "action": "silent",
+     "rocoHint": "hidden",
+     "hasPlan": true,
+     "lastDetail": {
+      "gate": null,
+      "action": "silent",
+      "reason": "below-threshold",
+      "value": 0.6,
+      "floor": 1.2,
+      "decisive": false,
+      "budget": null,
+      "layer": {
+       "mode": "off",
+       "model_status": "pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）",
+       "suppresses_by": "only",
+       "active": false,
+       "suppress": false,
+       "probability": null,
+       "threshold": null,
+       "reason": "flag-off"
+      },
+      "advice": {
+       "text": "它速度 55 快过你 33：别硬对拼，先换人或者用「防御」顶这一下",
+       "why": "对面的速度比你高，同档对拼是它先出手",
+       "risk": "硬拼的话这一下会先落在你身上",
+       "kind": "speed-decides",
+       "evidence": {
+        "mySpe": 33,
+        "foeSpe": 55,
+        "foe": "魔力猫",
+        "defendLegal": true
+       }
+      },
+      "advice_error": null
+     },
+     "dismissed": false,
+     "turn": 1,
+     "autoTurnBtn": false,
+     "autoTurnHidden": null
+    },
+    {
+     "when": "开局后 10s",
+     "hintVisible": "no",
+     "hintHidden": true,
+     "hintText": "",
+     "gate": "below-threshold",
+     "action": "silent",
+     "rocoHint": "hidden",
+     "hasPlan": true,
+     "lastDetail": {
+      "gate": null,
+      "action": "silent",
+      "reason": "below-threshold",
+      "value": 0.6,
+      "floor": 1.2,
+      "decisive": false,
+      "budget": null,
+      "layer": {
+       "mode": "off",
+       "model_status": "pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）",
+       "suppresses_by": "only",
+       "active": false,
+       "suppress": false,
+       "probability": null,
+       "threshold": null,
+       "reason": "flag-off"
+      },
+      "advice": {
+       "text": "它速度 55 快过你 33：别硬对拼，先换人或者用「防御」顶这一下",
+       "why": "对面的速度比你高，同档对拼是它先出手",
+       "risk": "硬拼的话这一下会先落在你身上",
+       "kind": "speed-decides",
+       "evidence": {
+        "mySpe": 33,
+        "foeSpe": 55,
+        "foe": "魔力猫",
+        "defendLegal": true
+       }
+      },
+      "advice_error": null
+     },
+     "dismissed": false,
+     "turn": 1,
+     "autoTurnBtn": false,
+     "autoTurnHidden": null
+    },
+    {
+     "when": "开局后 15s",
+     "hintVisible": "no",
+     "hintHidden": true,
+     "hintText": "",
+     "gate": "below-threshold",
+     "action": "silent",
+     "rocoHint": "hidden",
+     "hasPlan": true,
+     "lastDetail": {
+      "gate": null,
+      "action": "silent",
+      "reason": "below-threshold",
+      "value": 0.6,
+      "floor": 1.2,
+      "decisive": false,
+      "budget": null,
+      "layer": {
+       "mode": "off",
+       "model_status": "pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）",
+       "suppresses_by": "only",
+       "active": false,
+       "suppress": false,
+       "probability": null,
+       "threshold": null,
+       "reason": "flag-off"
+      },
+      "advice": {
+       "text": "它速度 55 快过你 33：别硬对拼，先换人或者用「防御」顶这一下",
+       "why": "对面的速度比你高，同档对拼是它先出手",
+       "risk": "硬拼的话这一下会先落在你身上",
+       "kind": "speed-decides",
+       "evidence": {
+        "mySpe": 33,
+        "foeSpe": 55,
+        "foe": "魔力猫",
+        "defendLegal": true
+       }
+      },
+      "advice_error": null
+     },
+     "dismissed": false,
+     "turn": 1,
+     "autoTurnBtn": false,
+     "autoTurnHidden": null
+    }
+   ],
+   "turnsPlayed": [
+    {
+     "round": 1,
+     "clickedActionCard": true,
+     "hintVisible": "no",
+     "hintHidden": true,
+     "hintText": "",
+     "gate": "below-threshold",
+     "action": "silent",
+     "rocoHint": "hidden",
+     "hasPlan": true,
+     "lastDetail": {
+      "gate": null,
+      "action": "silent",
+      "reason": "below-threshold",
+      "value": 0.6,
+      "floor": 1.2,
+      "decisive": false,
+      "budget": null,
+      "layer": {
+       "mode": "off",
+       "model_status": "pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）",
+       "suppresses_by": "only",
+       "active": false,
+       "suppress": false,
+       "probability": null,
+       "threshold": null,
+       "reason": "flag-off"
+      },
+      "advice": {
+       "text": "它速度 55 快过你 33：别硬对拼，先换人或者用「防御」顶这一下",
+       "why": "对面的速度比你高，同档对拼是它先出手",
+       "risk": "硬拼的话这一下会先落在你身上",
+       "kind": "speed-decides",
+       "evidence": {
+        "mySpe": 33,
+        "foeSpe": 55,
+        "foe": "魔力猫",
+        "defendLegal": true
+       }
+      },
+      "advice_error": null
+     },
+     "dismissed": false,
+     "turn": 2,
+     "autoTurnBtn": false,
+     "autoTurnHidden": null
+    },
+    {
+     "round": 2,
+     "clickedActionCard": true,
+     "hintVisible": "no",
+     "hintHidden": true,
+     "hintText": "你只剩 4% 血，换「水蓝蓝」上来：它还厚，别把「喵喵」白送掉",
+     "gate": "critical-risk",
+     "action": "silent",
+     "rocoHint": "hidden",
+     "hasPlan": true,
+     "lastDetail": {
+      "gate": null,
+      "action": "action_hint",
+      "reason": "critical-risk",
+      "value": 2.4,
+      "floor": 1.2,
+      "decisive": true,
+      "budget": null,
+      "layer": {
+       "mode": "off",
+       "model_status": "pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）",
+       "suppresses_by": "only",
+       "active": false,
+       "suppress": false,
+       "probability": null,
+       "threshold": null,
+       "reason": "flag-off"
+      },
+      "advice": null,
+      "advice_error": null
+     },
+     "dismissed": false,
+     "turn": 3,
+     "autoTurnBtn": false,
+     "autoTurnHidden": null
+    },
+    {
+     "round": 3,
+     "clickedActionCard": true,
+     "hintVisible": "yes",
+     "hintHidden": false,
+     "hintText": "这一手值得留到局后看一眼。现在先按你的判断走。",
+     "gate": "",
+     "action": "defer_to_review",
+     "rocoHint": "defer_to_review",
+     "hasPlan": true,
+     "lastDetail": {
+      "gate": null,
+      "action": "defer_to_review",
+      "reason": "cooldown",
+      "value": 3,
+      "floor": 1.2,
+      "decisive": true,
+      "budget": "cooldown",
+      "advice": {
+       "text": "「喵喵」倒了，换「水蓝蓝」顶上：对面「魔力猫」还在场，补位别一上来就挨打",
+       "why": "场上的伙伴已经倒下，这一手只能补位，没有别的选择",
+       "risk": "补上来的这只这一轮就要接对面的手（魔力猫）",
+       "kind": "replace-required",
+       "evidence": {
+        "fainted": "喵喵",
+        "bench": [
+         {
+          "name": "水蓝蓝",
+          "hp": 348,
+          "maxHp": 348
+         },
+         {
+          "name": "火花",
+          "hp": 340,
+          "maxHp": 340
+         },
+         {
+          "name": "迪莫",
+          "hp": 425,
+          "maxHp": 425
+         },
+         {
+          "name": "水灵",
+          "hp": 434,
+          "maxHp": 434
+         },
+         {
+          "name": "火神",
+          "hp": 420,
+          "maxHp": 420
+         }
+        ],
+        "foe": "魔力猫",
+        "foeHp": 369
+       }
+      },
+      "advice_error": null
+     },
+     "dismissed": false,
+     "turn": 3,
+     "autoTurnBtn": false,
+     "autoTurnHidden": null
+    }
+   ],
+   "displayEndProbe": null,
+   "shownOnScreen": "这一手值得留到局后看一眼。现在先按你的判断走。",
+   "manualEntryGone": {
+    "plan": false,
+    "autoTurn": false,
+    "hint": true
+   },
+   "reading": "气泡在屏幕上出现过（取证见 samples/turnsPlayed/displayEndProbe 的哪一条为真）"
+  },
+  "④ 对战截图": "docs/roco/review-2026-09-28/shots/art-finish/inbattle-02-battle-hint.png",
+  "⑤ 三屏与异常计数": {
+   "培养（首页训练场）": {
+    "ready": true,
+    "url": "http://127.0.0.1:56813/index.html",
+    "exceptions": 0,
+    "shot": "docs/roco/review-2026-09-28/shots/art-finish/inbattle-03-nurture.png",
+    "visible": {
+     "title": "小兽训练场 · 小芽陪你成长",
+     "bodyH": 1270,
+     "overflow": false
+    }
+   },
+   "配队（roco.html 工作台）": {
+    "ready": true,
+    "url": "http://127.0.0.1:56813/roco.html?team=own-0001,own-0002,own-0003,own-0004,own-0005,own-0006",
+    "exceptions": 0,
+    "shot": "docs/roco/review-2026-09-28/shots/art-finish/inbattle-04-workshop.png",
+    "visible": {
+     "title": "小芽 · 洛克王国：世界（训练场）",
+     "bodyH": 757,
+     "overflow": false
+    }
+   },
+   "对战（本轮的局中那一屏）": {
+    "ready": true,
+    "url": "http://127.0.0.1:56813/roco.html#battle",
+    "exceptions": null,
+    "shot": "docs/roco/review-2026-09-28/shots/art-finish/inbattle-02-battle-hint.png",
+    "note": "对战那一屏就是上面局中那一次；异常计数见 exceptionsDuringRun"
+   }
+  }
+ },
+ "problems": [
+  "③ 局中正例没全过：④ 回答看不出与当前局面有关（没提到场上任何一只、也没提当前回合或任何血量数字）"
+ ],
+ "notes": [
+  "③ 反证响度：2/4 条变红（③ 、④ ）",
+  "④ 现版 DOM 里 `#plan` / `#auto-turn` 都不存在（roco.js 里对它们是死绑定）⇒ 玩家没有\"手动叫出提示\"的入口"
+ ],
+ "own_server": {
+  "base": "http://127.0.0.1:56813/",
+  "port": 56813,
+  "note": "独立实例（不是 8765）：进程内 createCoachServer + listen(0)；引擎是它自己的 Python 子进程（--port 0）"
+ },
+ "exceptionsDuringRun": [],
+ "finished_at": "2026-09-29T01:44:28.835Z"
+}
