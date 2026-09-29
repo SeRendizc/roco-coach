@@ -121,6 +121,30 @@ def main():
         print(f"    训练：{tail(tok, span_train, 12)}")
         print(f"    服务：{tail(tok, span_serve, 12)}")
 
+    # ── 包装档（Codex 第 4 项的**可运行对齐方案**）─────────────────────────────
+    # `train_v9_aligned.py` 在训练入口把 `apply_chat_template` 包一层，默认补
+    # `enable_thinking=False`。这里**独立验一次**：包装后的渲染是否与服务侧**逐 token 相同**。
+    if "--with-wrapper" in sys.argv:
+        import importlib.util as _ilu
+        spec = _ilu.spec_from_file_location("tva", REPO / "scripts" / "model" / "train_v9_aligned.py")
+        tva = _ilu.module_from_spec(spec)
+        spec.loader.exec_module(tva)
+        tok2 = AutoTokenizer.from_pretrained(str(MODEL_DIR))
+        tva.align_tokenizer(tok2)
+        wrapped = render(tok2, messages, {})          # 注意：**不传** enable_thinking，靠包装补
+        same_as_serve = wrapped["prompt"] == serve["prompt"]
+        span_wrapped = wrapped["full"][len(wrapped["prompt"]):]
+        print()
+        print(f"  [包装档] 训练侧经 `train_v9_aligned.py` 包装后 prompt={len(wrapped['prompt'])} tok")
+        print(f"  [包装档] 与服务侧前缀**逐 token 相同**：{same_as_serve}")
+        print(f"  [包装档] 被 mask 的答案区间与服务侧相同：{span_wrapped == span_serve}"
+              f"（{len(span_wrapped)} vs {len(span_serve)} tok）")
+        if same_as_serve and span_wrapped == span_serve:
+            print("  [包装档] ✔ **训练侧已对齐到服务侧**（`--with-wrapper` 退出码 0）")
+            return 0
+        print("  [包装档] ✖ 仍未对齐 —— 不要开始正式训练")
+        return 2
+
     verdict = "一致" if (same_prefix and ans_same) else "**不一致**"
     print()
     print(f"[模板核验] 结论：训练侧与服务侧 {verdict}")

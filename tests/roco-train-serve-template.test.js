@@ -99,3 +99,34 @@ test('反证：把服务侧默认值改回 True（与训练一致）⇒ 结构�
   assert.doesNotMatch(asIfChanged, /enable_thinking\s*=\s*bool\(request\.get\("enable_thinking",\s*False\)\)/,
     '把默认值改成 True 之后，结构钉的匹配必须不再成立（否则它抓不到这个改动）');
 });
+
+// ── 对齐方案（Codex 第 4 项的**可运行修法**，2026-09-29 阶段 3）──────────────────
+//
+// 上面那条钉的是**未对齐的事实**（训练 99 / 服务 101）。这一条钉**修法有效**：
+// `scripts/model/train_v9_aligned.py` 在训练入口把 `apply_chat_template` 包一层，
+// 默认补 `enable_thinking=False` —— **不改 mlx_lm 源码、不动主服务**。
+//
+// ⚠ **本判据不训练任何东西**，只做 token/mask 层面的独立验证（Codex 要求"独立 token/mask 验证"）。
+test('对齐方案（包装档）：训练侧经包装后与服务侧**逐 token 相同**，且答案区间一致', (t) => {
+  if (!existsSync(PY) || !existsSync(SCRIPT)) { t.skip('缺 .venv-mlx 或核验脚本'); return; }
+  const wrapper = join(ROOT, 'scripts', 'model', 'train_v9_aligned.py');
+  if (!existsSync(wrapper)) { t.skip('还没有对齐包装'); return; }
+  let out = ''; let code = 0;
+  try {
+    out = execFileSync(PY, [SCRIPT, '--with-wrapper'], {cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']});
+  } catch (error) { out = String(error.stdout ?? ''); code = Number(error.status ?? 1); }
+  assert.equal(code, 0, `包装档没有对齐（退出码 ${code}）—— **不要开始正式训练**：\n${out.slice(-500)}`);
+  assert.match(out, /与服务侧前缀\*\*逐 token 相同\*\*：True/);
+  assert.match(out, /被 mask 的答案区间与服务侧相同：True/);
+  assert.match(out, /训练侧已对齐到服务侧/);
+});
+
+test('反证：**不**加包装时仍然不一致（否则上面那条是假绿）', (t) => {
+  if (!existsSync(PY) || !existsSync(SCRIPT)) { t.skip('缺 .venv-mlx 或核验脚本'); return; }
+  let out = ''; let code = 0;
+  try {
+    out = execFileSync(PY, [SCRIPT], {cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']});
+  } catch (error) { out = String(error.stdout ?? ''); code = Number(error.status ?? 1); }
+  assert.equal(code, 2, '不带包装时应当仍然是"不一致"（退出码 2）—— 否则说明对齐判据量错了东西');
+  assert.match(out, /训练侧与服务侧 \*\*不一致\*\*/);
+});
