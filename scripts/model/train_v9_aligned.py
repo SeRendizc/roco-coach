@@ -64,6 +64,7 @@ def align_tokenizer(tokenizer):
 
 
 def main(argv=None):
+    saved_argv_probe = list(sys.argv)
     args = list(sys.argv[1:] if argv is None else argv)
     if args and args[0] == "--self-check":
         # 只验证"包得上、幂等、且真的改了前缀"，**不训练、不加载权重**
@@ -83,7 +84,52 @@ def main(argv=None):
         print(f"[包装自检] 包装确实改了前缀：{ids(before) != ids(after)}")
         return 0
 
-    # 真正训练时的入口：先包 tokenizer，再把参数原样交给 mlx_lm
+    if args and args[0] == '--entry-check':
+        # **入口集成检查**（Codex 要求）：不加载权重、不训练，只验"参数能不能真的到 `main`、
+        # tokenizer 替身会不会被调上"。做法：把 `load` 与 `main` 都换成替身。
+        import mlx_lm.lora as lora_mod
+
+        seen = {'argv': None, 'load_called': False, 'aligned': False}
+
+        def fake_load(*a, **kw):
+            seen['load_called'] = True
+            class _Tok:
+                def apply_chat_template(self, *aa, **kk):
+                    return [1, 2, 3]
+            tok = _Tok()
+            seen['aligned'] = bool(getattr(align_tokenizer(tok).apply_chat_template, '__roco_aligned__', False))
+            return object(), tok
+
+        def fake_main():
+            seen['argv'] = list(sys.argv[1:])
+            # 走 `load` 那条路，确认替身接得上（真实 `lora.py:329` 就是裸名调用 `load(...)`）
+            _m, tok = lora_mod.load('fake-model')
+            tok.apply_chat_template([{'role': 'user', 'content': 'x'}])
+            return 0
+
+        original_main, original_load = lora_mod.main, lora_mod.load
+        lora_mod.main, lora_mod.load = fake_main, fake_load
+        try:
+            rc = main(['--config', 'x.yaml', '--data', 'd', '--train'])
+        finally:
+            lora_mod.main, lora_mod.load = original_main, original_load
+        ok = rc == 0 and seen['argv'] == ['--config', 'x.yaml', '--data', 'd', '--train'] \
+            and seen['load_called'] and seen['aligned'] and sys.argv == saved_argv_probe
+        print(f"[入口检查] 参数到达 main：{seen['argv']}")
+        print(f"[入口检查] 替身 load 被调用：{seen['load_called']}｜tokenizer 已被包装：{seen['aligned']}")
+        print(f"[入口检查] sys.argv 已还原：{sys.argv == saved_argv_probe}")
+        print(f"[入口检查] {'✔ 通过' if ok else '✖ 不通过'}")
+        return 0 if ok else 2
+
+    # 真正训练时的入口：先包 tokenizer，再把参数原样交给 mlx_lm。
+    #
+    # ⚠ 2026-09-29 修（**Codex 09:38 复核抓到的真 bug**）：
+    # 本机依赖里 `mlx_lm.lora.main` 的签名是 **`()`（无参）**，内部走 `parser.parse_args()`
+    # **从 `sys.argv` 读**（实测：`.venv-mlx/.../mlx_lm/lora.py:350 def main():`、`:353 parser.parse_args()`）。
+    # 我上一版写的是 `lora_mod.main(args)` ⇒ **会 TypeError**，而当时的"包装验证"只验了 **token 前缀**、
+    # **没覆盖真实入口调用** ⇒ 那条验证通过**不等于**入口能用。**Codex 说得对。**
+    #
+    # ⇒ 按本机实际依赖改：**临时换 `sys.argv`、`finally` 原样恢复**。
     import mlx_lm.lora as lora_mod
 
     original_load = lora_mod.load
@@ -94,8 +140,16 @@ def main(argv=None):
         align_tokenizer(tokenizer)
         return model, tokenizer
 
+    # `lora.py` 是 `from .utils import … load …` 且以**裸名** `load(...)` 调用（`:24` / `:329`）
+    # ⇒ 替换模块属性**确实能替上**（这一点单独核过，不是想当然）。
     lora_mod.load = load_aligned
-    return lora_mod.main(args)
+    saved_argv = sys.argv
+    try:
+        sys.argv = [saved_argv[0], *args]
+        return lora_mod.main()           # ← **不传参**：它自己读 sys.argv
+    finally:
+        sys.argv = saved_argv            # 参数环境原样还原
+        lora_mod.load = original_load    # 替身也还原，别污染同进程的后续调用
 
 
 if __name__ == "__main__":

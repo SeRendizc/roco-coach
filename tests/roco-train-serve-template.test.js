@@ -130,3 +130,63 @@ test('反证：**不**加包装时仍然不一致（否则上面那条是假绿�
   assert.equal(code, 2, '不带包装时应当仍然是"不一致"（退出码 2）—— 否则说明对齐判据量错了东西');
   assert.match(out, /训练侧与服务侧 \*\*不一致\*\*/);
 });
+
+// ── 入口集成检查（Codex 09:38 复核抓到真 bug 之后补的）──────────────────────────
+//
+// ⚠ **来历**：Codex 复核指出 `train_v9_aligned.py` 里 `lora_mod.main(args)` 与本机依赖不匹配 ——
+// 本机 `mlx_lm/lora.py:350` 是 `def main():`（**无参**），`:353 parser.parse_args()` **从 `sys.argv` 读**。
+// 而我上一版的"包装验证"**只验了 token 前缀，没覆盖真实入口调用** ⇒
+// **那条验证通过 ≠ 入口能用**。这一组判据补上入口层。
+test('入口集成：参数能真的到达 `main`、tokenizer 替身被调上、`sys.argv` 原样还原（不加载权重、不训练）', (t) => {
+  if (!existsSync(PY)) { t.skip('缺 .venv-mlx'); return; }
+  const wrapper = join(ROOT, 'scripts', 'model', 'train_v9_aligned.py');
+  if (!existsSync(wrapper)) { t.skip('还没有对齐包装'); return; }
+  const out = execFileSync(PY, [wrapper, '--entry-check'], {cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']});
+  // 实际输出逗号后有空格，用宽松匹配（别让判据因为空格挑字眼 —— 这一程已经栽过几次）
+  assert.match(out, /\[入口检查\] 参数到达 main：\['--config', 'x\.yaml', '--data', 'd', '--train'\]/);
+  assert.match(out, /替身 load 被调用：True/);
+  assert.match(out, /tokenizer 已被包装：True/);
+  assert.match(out, /sys\.argv 已还原：True/);
+  assert.match(out, /✔ 通过/);
+});
+
+test('入口集成**反证**：本机依赖的 `main` 确实是**无参**的 —— 旧写法 `main(args)` 必 TypeError', (t) => {
+  if (!existsSync(PY)) { t.skip('缺 .venv-mlx'); return; }
+  // 直接问本机依赖要签名，再证明"传参"确实不合法 ⇒ 证明那条入口检查不是摆设
+  const probe = [
+    'import inspect, mlx_lm.lora as m',
+    'sig = str(inspect.signature(m.main))',
+    'print("SIG" + sig)',
+    'try:',
+    '    m.main(["--config", "x"])',
+    '    print("NOERROR")',
+    'except TypeError as e:',
+    '    print("TYPEERROR")',
+    'except Exception as e:',
+    '    print("OTHER:" + type(e).__name__)',
+  ].join('\n');
+  const out = execFileSync(PY, ['-c', probe], {cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']});
+  assert.match(out, /SIG\(\)/, `本机 mlx_lm.lora.main 的签名变了（实测 ${out.split('\n')[0]}）—— 包装要跟着改`);
+  assert.match(out, /TYPEERROR/, '`main(args)` 竟然不报错 ⇒ 本判据的前提失效，要重新核依赖');
+});
+
+test('入口集成：`--help` 退出码 0（可用环境下）', (t) => {
+  if (!existsSync(PY)) { t.skip('缺 .venv-mlx'); return; }
+  const wrapper = join(ROOT, 'scripts', 'model', 'train_v9_aligned.py');
+  if (!existsSync(wrapper)) { t.skip('还没有对齐包装'); return; }
+  try {
+    execFileSync(PY, [wrapper, '--help'], {cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']});
+  } catch (error) {
+    // 环境缺 Metal / 依赖时 `mlx.core` 会在 import 阶段就 ImportError —— 那是**环境**不是入口契约，
+    // 如实跳过（Codex 的监工沙箱就是这样），不伪装成通过。
+    const err = String(error.stdout ?? '') + String(error.stderr ?? '');
+    if (/ImportError|Metal|No module named/.test(err)) { t.skip(`环境不支持（如实跳过）：${err.slice(0, 80)}`); return; }
+    assert.fail(`--help 退出码非 0：${err.slice(0, 200)}`);
+  }
+});
+
+test('⚠ **训练链还没接上**：`train_v9.sh` 仍走**未包装**入口（不许说成"整个训练链已验证"）', () => {
+  const sh = readFileSync(TRAIN, 'utf8');
+  assert.match(sh, /-m mlx_lm lora/, '训练脚本的入口变了 ⇒ 这条判据要跟着改，并重新确认包装是否被用上');
+  assert.doesNotMatch(sh, /train_v9_aligned/, '训练脚本**已经**改用包装入口了 ⇒ 这是好事，但必须改这条判据并留档');
+});
