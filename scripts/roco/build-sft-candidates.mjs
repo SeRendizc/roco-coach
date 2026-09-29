@@ -161,6 +161,13 @@ for (const row of rows) {
     // ⇒ 这类**绝不能当正向目标**分开训 —— 那等于**把失败教成正确决策**。
     // 它们单独进 `contrast.jsonl`，只能用于**对比/拒答**用途，且必须人来定怎么用。
     polarity: flags.includes('reply_is_failure') ? 'negative' : 'positive',
+    // ⚠⚠ **2026-09-29 重大发现**：源里有一大批**评测自己判过、回复却是失败句**的轨迹。
+    // 实测（8664 条源）：**2244 条** `checks.passed===true` 而 `reply` 是「没查到可用的规则事实」这类；
+    // 其中 **2153 条 `tool_calls === 0`**。
+    // 例（348 条同族）：「为什么这一手要防御？」→ `{"passed":true,"violations":[],"items":{"tool_calls":0,"reply_chars":34}}`。
+    // ⇒ **不只是"模型输出不是黄金"，评测自己的 `passed` 对这批也不是黄金。**
+    // 这正是 Codex 第一轮那句「按族分割/逐条核语义」背后的更深一层。⇒ 逐条标出来，**不许当正向**。
+    eval_passed_but_reply_is_failure: row.checks?.passed === true && flags.includes('reply_is_failure'),
     review_status: 'candidate-pending-human-review',
     reviewed: false,
     contract_version: contractVersion,
@@ -308,6 +315,20 @@ const report = {
         + '点名具体 `pet_id` 的目标，输入里只能靠问句文本推 ⇒ **这是真实局限，不编**。',
     },
   },
+  eval_judgment_contradiction: {
+    note: '**不只是模型输出不能当黄金 —— 评测自己的 `passed` 对这批也不能。**',
+    measured_on_source: {
+      total_source_rows: 8664,
+      passed_but_reply_is_failure: 2244,
+      of_which_zero_tool_calls: 2153,
+      failed_and_reply_is_failure: 873,
+      passed_and_reply_ok: 5299,
+    },
+    example: '348 条同族的「为什么这一手要防御？」→ checks = {"passed":true,"violations":[],'
+      + '"items":{"tool_calls":0,"reply_chars":34}}',
+    verdict: '⇒ 这批**逐条标出来**（`eval_passed_but_reply_is_failure`），**不许当正向目标**；'
+      + '要用必须先让人看"这一问到底该不该调工具"。',
+  },
   key_tool_coverage: {
     note: '关键工具覆盖（Codex 要求"补关键工具任务，不用扩大条数掩盖"）—— 已用**第二份录制**补上。',
     first_attempt_error: '第一版只读一个文件，于是报告里写"evaluate_team 这批给不出"——**那句话是错的**。',
@@ -344,6 +365,7 @@ if (write) {
         contract_version: c.contract_version, ruleset_id: c.ruleset_id,
         reviewed: false, review_status: c.review_status, review_flags: c.flags,
         polarity: c.polarity,
+        eval_passed_but_reply_is_failure: Boolean(c.eval_passed_but_reply_is_failure),
         reply_excerpt: c.reply,
       },
   });

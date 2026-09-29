@@ -82,6 +82,18 @@
    "focus": "**源里就没有 `focus`**（这一份录制没记\"玩家正在看哪一只\"）⇒ 对 `query_rules` 那类点名具体 `pet_id` 的目标，输入里只能靠问句文本推 ⇒ **这是真实局限，不编**。"
   }
  },
+ "eval_judgment_contradiction": {
+  "note": "**不只是模型输出不能当黄金 —— 评测自己的 `passed` 对这批也不能。**",
+  "measured_on_source": {
+   "total_source_rows": 8664,
+   "passed_but_reply_is_failure": 2244,
+   "of_which_zero_tool_calls": 2153,
+   "failed_and_reply_is_failure": 873,
+   "passed_and_reply_ok": 5299
+  },
+  "example": "348 条同族的「为什么这一手要防御？」→ checks = {\"passed\":true,\"violations\":[],\"items\":{\"tool_calls\":0,\"reply_chars\":34}}",
+  "verdict": "⇒ 这批**逐条标出来**（`eval_passed_but_reply_is_failure`），**不许当正向目标**；要用必须先让人看\"这一问到底该不该调工具\"。"
+ },
  "key_tool_coverage": {
   "note": "关键工具覆盖（Codex 要求\"补关键工具任务，不用扩大条数掩盖\"）—— 已用**第二份录制**补上。",
   "first_attempt_error": "第一版只读一个文件，于是报告里写\"evaluate_team 这批给不出\"——**那句话是错的**。",

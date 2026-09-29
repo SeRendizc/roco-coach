@@ -236,6 +236,35 @@ test('候选集：输入**必须带决策所需的局面**（Codex 反复点的�
     '被否决的判据尝试要留档（含"为什么否决"），否则后人会重复踩');
 });
 
+test('候选集：**评测自己判过、回复却是失败句**的样本不许当正向（源级 2244 条）', (t) => {
+  if (!existsSync(join(CAND, 'train.jsonl'))) { t.skip('还没跑过 build-sft-candidates.mjs --write'); return; }
+  // 这一条的来历（**比"模型输出不是黄金"更深一层**）：
+  //   实测 8664 条源里 **2244 条** `checks.passed===true` 而 `reply` 是「没查到可用的规则事实」这类，
+  //   其中 **2153 条 `tool_calls === 0`**。例：348 条同族的「为什么这一手要防御？」→
+  //   `{"passed":true,"violations":[],"items":{"tool_calls":0,"reply_chars":34}}`
+  //   ⇒ **评测自己的 `passed` 对这批也不是黄金。**
+  const rows = readCand();
+  for (const {split, row} of rows) {
+    assert.notEqual(row.meta.eval_passed_but_reply_is_failure, true,
+      `${split} 里混进了"评测判过但回复是失败句"的样本 —— 它不该当正向目标`);
+  }
+  const report = JSON.parse(readFileSync(join(CAND, 'REPORT.json'), 'utf8'));
+  const c = report.eval_judgment_contradiction;
+  assert.ok(c, '这个矛盾必须如实写进报告（不许省略）');
+  assert.ok(c.measured_on_source.passed_but_reply_is_failure > 0, '源级矛盾数要如实记着');
+  assert.ok(c.measured_on_source.of_which_zero_tool_calls > 0, '其中零调用的那一部分也要记着');
+  assert.ok(c.example, '要给出可复验的例子');
+  // 负向集里必须**每条都带这个标记**（两者应当重合）
+  const contrastPath = join(CAND, 'contrast.jsonl');
+  if (existsSync(contrastPath)) {
+    for (const line of readFileSync(contrastPath, 'utf8').split('\n')) {
+      if (!line.trim()) continue;
+      assert.equal(JSON.parse(line).meta.eval_passed_but_reply_is_failure, true,
+        '负向集里的每条都该带"评测判过但回复是失败句"标记（否则两套口径不一致）');
+    }
+  }
+});
+
 test('候选集：**回复是失败句的轨迹不许当正向目标** —— 单独进 contrast.jsonl', (t) => {
   if (!existsSync(join(CAND, 'train.jsonl'))) { t.skip('还没跑过 build-sft-candidates.mjs --write'); return; }
   const rows = readCand();
