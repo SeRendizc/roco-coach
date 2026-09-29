@@ -23,6 +23,14 @@
   "contract_fresh": true,
   "ruleset_fresh": true
  },
+ "checked_and_REJECTED": [
+  {
+   "what": "想用 `world.expect_silence` **反向校验标签**：world 说该说话而目标是 `stop` ⇒ 疑似错标",
+   "got": "189 条里算出 36 条\"矛盾\"",
+   "why_rejected": "**两层都错**：① `expect_silence` 在这份数据里**恒为 `false`**（189/189） ⇒ **它不携带任何信息**，拿它当判据只会产出噪声；② 就算它变化，**`stop`（不调工具）与 `silence`（不出声）也不是一回事** —— `stop` 只是\"不调工具、直接给最终回答\"，而 `silence` 是\"整轮不说话\"。**我一开始把这两个概念混了。**",
+   "lesson": "这一程第 **四** 次同一类错：**判据挑字眼 / 拿常量当信号**。**先问三句**：这个字段真的会变吗？我理解的概念与它定义的概念是同一个吗？反证会响吗？"
+  }
+ ],
  "heuristic_false_positive_found": {
   "what": "KIND_HINTS 第一版把「能量和威力是什么关系？」（问**概念关系**）判成\"该查 kind=skill\"",
   "how_many": 14,

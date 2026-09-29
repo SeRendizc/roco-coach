@@ -216,6 +216,14 @@ test('候选集：输入**必须带决策所需的局面**（Codex 反复点的�
   assert.ok(report.input_context, '报告要如实写"源里有什么 / 缺什么"');
   assert.ok(report.input_context.source_input_keys_census, '源的 input 键清点要落进报告（可证伪）');
   assert.ok(report.input_context.still_missing?.focus, '源里缺 focus 这件事要如实记着，不许省略');
+  // 假阳也要留档：这一程已经四次栽在"判据挑字眼 / 拿常量当信号"上 ⇒ 被否决的检查必须写下来，
+  // 否则下一个人会把同一件事再"发现"一遍。
+  // ⚠ `checked_and_REJECTED` 在**审核脚本**的产物里（`REVIEW-AUDIT.json`），不在构建器的 `REPORT.json`。
+  const auditPath = join(CAND, 'REVIEW-AUDIT.json');
+  assert.ok(existsSync(auditPath), '审查产物不存在 —— 先跑 `node scripts/roco/review-candidates.mjs`');
+  const audit = JSON.parse(readFileSync(auditPath, 'utf8'));
+  assert.ok(Array.isArray(audit.checked_and_REJECTED) && audit.checked_and_REJECTED.length,
+    '被否决的判据尝试要留档（含"为什么否决"），否则后人会重复踩');
 });
 
 test('候选集：**回复是失败句的轨迹不许当正向目标** —— 单独进 contrast.jsonl', (t) => {
