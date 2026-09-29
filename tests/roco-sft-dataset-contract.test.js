@@ -277,3 +277,21 @@ test('严格档审计**应当报错**（这是**有意的**：候选还不是已
     '严格档现在**必须**报错（缺 reviewed=true）—— 报 0 说明有人在候选上虚填了 ready 标记');
   assert.ok(report.errors.some((e) => /reviewed/.test(e)), `报的应当是缺 reviewed：${report.errors.slice(0, 2)}`);
 });
+
+// ── 跨模块整合：候选带 `team` 的目标过**真引擎**（不是 JS 侧校验器）────────────────
+//
+// 起因：候选一直只过了产品自己的 JS 校验器 `validToolArgs`，引擎侧**没量过**。
+// 这一程因为「看着应该对」栽过多次 ⇒ 加一条量真引擎的。
+test('候选集：带 team 的目标**真引擎**接受（33/33；不是"看着应该对"）', (t) => {
+  const py = join(ROOT, '.venv-mlx', 'bin', 'python');
+  const script = join(ROOT, 'scripts', 'roco', 'verify-candidate-teams.py');
+  if (!existsSync(py) || !existsSync(script) || !existsSync(join(CAND, 'train.jsonl'))) { t.skip('缺 venv / 脚本 / 候选'); return; }
+  let out = ''; let code = 0;
+  try {
+    out = execFileSync(py, [script], {cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']});
+  } catch (error) { out = String(error.stdout ?? ''); code = Number(error.status ?? 1); }
+  assert.equal(code, 0, `有候选被**真引擎**拒了 —— 那些标签不可用：\n${out.slice(-400)}`);
+  assert.match(out, /被引擎接受的: (\d+) \/ \1/, '接受数必须等于带 team 的总数');
+  // 反证的意义：这条判据必须**真的在问引擎**，不是把 JS 校验器包一层
+  assert.match(out, /\[引擎验\]/);
+});
