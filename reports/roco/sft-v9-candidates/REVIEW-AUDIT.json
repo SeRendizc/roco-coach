@@ -11,6 +11,18 @@
  "mechanical_failures": 0,
  "needs_human_review": 0,
  "findings": [],
+ "staleness": {
+  "contract_version_now": "tools:97a79a115da6",
+  "contract_version_in_rows": [
+   "tools:97a79a115da6"
+  ],
+  "ruleset_now": "roco-world-s4-2026-09-10",
+  "ruleset_in_rows": [
+   "roco-world-s4-2026-09-10"
+  ],
+  "contract_fresh": true,
+  "ruleset_fresh": true
+ },
  "heuristic_false_positive_found": {
   "what": "KIND_HINTS 第一版把「能量和威力是什么关系？」（问**概念关系**）判成\"该查 kind=skill\"",
   "how_many": 14,

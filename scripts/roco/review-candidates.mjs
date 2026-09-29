@@ -24,10 +24,12 @@
 import {existsSync, readFileSync, writeFileSync} from 'node:fs';
 import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {TOOL_CONTRACTS, validToolArgs} from '../../src/coach/toolbox.js';
+import {TOOL_CONTRACTS, LOCAL_PLAN_TOOLS, validToolArgs} from '../../src/coach/toolbox.js';
 
 const ROOT = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
 const CAND = join(ROOT, 'reports', 'roco', 'sft-v9-candidates');
+// 当前规则集 id（`data/roco/normalized/` 下唯一那个目录名）
+const RULESET_NOW = 'roco-world-s4-2026-09-10';
 
 /** 问句意图 → 该用的 `query_rules.kind`。**只做"明显对不上"的判定**，不做语义推断。 */
 const KIND_HINTS = Object.freeze([
@@ -113,6 +115,19 @@ for (const [a, b] of [['train', 'valid'], ['train', 'test'], ['valid', 'test']])
   if (shared.length) add(`${a}/${b}`, 'FAIL', '语义族跨分片重叠', shared.slice(0, 5).join('、'));
 }
 
+// ⑦ **陈旧性**（跨模块整合）：标签是不是在"契约/规则集变了之后"还挂着旧身份？
+//   这一程已经因为"两个口径的产物互比"演过一整轮乌龙 ⇒ 样本必须**自带身份且能当场核**。
+const {createHash} = await import('node:crypto');
+const currentContract = `tools:${createHash('sha256')
+  .update(JSON.stringify({contract: Object.keys(TOOL_CONTRACTS), localPlan: [...LOCAL_PLAN_TOOLS]}))
+  .digest('hex').slice(0, 12)}`;
+const staleness = {contract_version_now: currentContract, contract_version_in_rows: [...new Set(rows.map(({row}) => row.meta.contract_version))],
+  ruleset_now: RULESET_NOW, ruleset_in_rows: [...new Set(rows.map(({row}) => row.meta.ruleset_id))]};
+staleness.contract_fresh = staleness.contract_version_in_rows.every((v) => v === currentContract);
+staleness.ruleset_fresh = staleness.ruleset_in_rows.every((v) => v === RULESET_NOW);
+if (!staleness.contract_fresh) add('全部', 'FAIL', '契约指纹已漂 —— 样本是在旧契约下生成的，必须重做', staleness.contract_version_in_rows.join('、'));
+if (!staleness.ruleset_fresh) add('全部', 'FAIL', '规则集已漂 —— 样本可能过期', staleness.ruleset_in_rows.join('、'));
+
 const kinds = rows.reduce((acc, {row}) => {
   const t = JSON.parse(row.messages.find((m) => m.role === 'assistant').content);
   const k = t.stop ? 'stop' : t.tool;
@@ -127,6 +142,7 @@ const report = {
   mechanical_failures: findings.filter((f) => f.level === 'FAIL').length,
   needs_human_review: findings.filter((f) => f.level === 'REVIEW').length,
   findings,
+  staleness,
   heuristic_false_positive_found: {
     what: 'KIND_HINTS 第一版把「能量和威力是什么关系？」（问**概念关系**）判成"该查 kind=skill"',
     how_many: 14,
@@ -150,6 +166,7 @@ else {
   for (const f of fails.slice(0, 8)) console.log(`  ✖ ${f.id}｜${f.what}｜${String(f.detail).slice(0, 50)}`);
   const rev = findings.filter((f) => f.level === 'REVIEW');
   for (const f of rev.slice(0, 5)) console.log(`  ⚠ ${f.id}｜${f.what}｜${String(f.detail).slice(0, 40)}`);
+  console.log(`[逐条审核] 陈旧性：契约指纹 ${report.staleness.contract_fresh ? '一致' : '**已漂**'}（${report.staleness.contract_version_now}）｜规则集 ${report.staleness.ruleset_fresh ? '一致' : '**已漂**'}`);
   console.log('  机器**核不了**的：', report.cannot_check_by_machine.length, '类（见 REPORT 的 cannot_check_by_machine）');
 }
 process.exit(report.mechanical_failures ? 1 : 0);
