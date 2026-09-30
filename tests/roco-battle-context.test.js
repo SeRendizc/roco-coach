@@ -272,3 +272,32 @@ test('⑧ 结构性：客户端快照真的带编号、服务端真的注入读�
   const toolbox = readFileSync(join(ROOT, 'src/coach/toolbox.js'), 'utf8');
   assert.match(toolbox, /context\.rocoPreview\(battleId\)/, '工具要真的调用它');
 });
+
+// ── P1-A 附带项（**潜在健壮性**，不是 P1-A 的成因）：**战况更新只许一种写法** ────────────
+// 现场：同一个语义「用响应里的 view 更新 state.view」在客户端有两份实现 ——
+//   `:3591` 有条件（响应不带 view ⇒ 保留旧局面）；`applyResult` 里原来**无条件**。
+// 两份写法不一致就是隐患：一旦守卫被挪走，`view:null` 的响应会把**活着的局面**清掉。
+// ⚠⚠ **它已经被真机证据排除为 P1-A 的成因**（Codex 在隔离实例 8877 的只读探针：`battle/new` 回
+//   `viewType=object`、turn=1，局内画面正常，两个真实 UI 请求里 `battle=null` 而 `roco_battle` 有值
+//   ⇒ 不是 state.view 丢失；O-59）。所以这条判据守的是**口径统一**（潜在健壮性），**不是** P1-A 的守卫。
+// 现状复核（写进注释，免得后人误读）：今天那一行**到不了 null** —— `b3RejectGuard()` 先 return 并保留旧局面。
+test('⑨ 结构性：`state.view` 只许被条件式覆盖（响应不带 view ⇒ 保留当前局面）', () => {
+  // ⚠ 先剥注释再扫：这条判据的说明里逐字提到了旧写法，不剥就会先匹配到注释（把留档当成代码；
+  //   `plan02-front` 在 2026-10-01 05:1x 正是这样看到一次假阳性 —— 那次是修之前的版本）。
+  const client = readFileSync(join(ROOT, 'src/client/roco.js'), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  const scanner = (text) => text.split('\n').map((line, index) => ({line: line.trim(), no: index + 1}))
+    .filter((row) => /state\.view\s*=\s*data\??\.view\s*;/.test(row.line))
+    .filter((row) => !/^if\s*\(/.test(row.line) && !/data\?\.view\)\s*state\.view/.test(row.line));
+  const assignments = client.split('\n').map((line, index) => ({line: line.trim(), no: index + 1}))
+    .filter((row) => /state\.view\s*=\s*data\??\.view\s*;/.test(row.line));
+  assert.ok(assignments.length >= 2, `要能找到那两处赋值（实际 ${assignments.length} 处）：${JSON.stringify(assignments)}`);
+  assert.deepEqual(scanner(client), [],
+    `state.view 的覆盖必须带条件（否则 view:null 会把活着的局面清掉）：${JSON.stringify(scanner(client))}`);
+  assert.match(client, /if \(data\?\.view\) state\.view = data\.view;/,
+    '两处写法必须统一成同一句（改回无条件 ⇒ 这条红）');
+  // 反证：探测器对"无条件"那种写法必须为真（否则上面那条是恒真的）
+  assert.deepEqual(scanner('  state.view = data.view;'), [{line: 'state.view = data.view;', no: 1}],
+    '探测器本身必须能红');
+  assert.deepEqual(scanner('  if (data?.view) state.view = data.view;'), []);
+});

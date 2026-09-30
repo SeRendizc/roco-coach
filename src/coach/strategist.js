@@ -4,9 +4,72 @@ import {isLiveMatch} from './policy.js';
 export {RULES_VERSION};
 export const cards=[...TACTIC_CARDS,...REFERENCE_CARDS];
 import {rankEnemyActions,active,actionName,SKILLS,damage,legalActions,effectiveSpeed,TYPES,TYPE_ADVANTAGES} from '../game/engine.js';
+/**
+ * 六宠局（`context.roco_battle`）这一支怎么说话 —— **P1-A（2026-10-01）**。
+ *
+ * 现场（跨机伙伴 lead-mac 的玩家可见读数）：六宠局里追问「喵喵光系承伤 0.5 与缇塔 1 如何比较」，
+ * 玩家拿到的却是「**开一局之后**，我才能按当前生命、能量和队伍比较这一手。」—— 明明已经在局里。
+ * 根因是**两个字段名并存**：生产端写 `context.roco_battle`（公开切片，`roco.js:5830/:6131`），
+ * 而 `strategist()` 读的是旧的 `context.battle`（引擎整局对象）—— 六宠档它在 `coachCampContext()`
+ * 里**恒为 `null`**（理由逐字见 `roco.js:5225-5230`：旧合同要求每方恰好 3 只，塞六宠就是伪造）。
+ * 还有第二条链：云端档那句兜底会作为**回退草稿**（`packet.text`）在守卫拒绝时**端给玩家**
+ * （实测：模型提了「承伤 0.5」⇒ `rejected=ungrounded` ⇒ 回退正文就是这句假话）。
+ *
+ * 为什么不是「把公开切片映射成引擎对象」：切片**没有**技能 id / 面板（atk/def/speed）/ 道具 /
+ * 对手后备身份与血量 / 规则版本 ⇒ `legalActions`、`damage`、`effectiveSpeed`、`rankEnemyActions`
+ * 一个都跑不了；硬补那几个字段就是伪造数据结构（`roco.js:5225-5230` 明令禁止）。
+ * 所以这一支**只吃公开事实**：回合、双方公开读数、这一轮的合法动作标签；
+ * 拿不到的（相性倍率、技能面板、对手后备身份）**如实写「读不到」**，既不编、也不再拿「开一局之后」顶。
+ */
+function sixPetSituation(view) {
+  const asText = (value) => (typeof value === 'string' && value.trim() ? value.trim() : null);
+  const hpOf = (row) => (Number.isFinite(row?.hp)
+    ? `${row.hp}${Number.isFinite(row?.max_hp) ? `/${row.max_hp}` : ''} 血` : null);
+  const energyOf = (row) => (Number.isFinite(row?.energy) ? `${row.energy} 能量` : null);
+  const whoOf = (row, prefix = '') => {
+    if (!row || typeof row !== 'object') return null;
+    const name = asText(row.name) ?? asText(row.pet_id);
+    if (!name) return null;
+    const bits = [hpOf(row), energyOf(row)].filter(Boolean);
+    return `${prefix}${name}${bits.length ? `（${bits.join('、')}）` : ''}`;
+  };
+  // 局末：那句兜底在结算后同样是假的（「这一手」已经不存在了）⇒ 只说事实 + 指路复盘。
+  if (view.result) {
+    return {text: '这一局已经结束了。要复盘就说「复盘这一局」，我按当时的信息讲关键回合。',
+      evidence: ['这一局的公开快照里已经有结算结果 —— 局内建议在这里不再适用。']};
+  }
+  const turn = Number.isInteger(view.turn) ? view.turn : null;
+  const self = Array.isArray(view.self) ? view.self : [];
+  const activeIndex = Number.isInteger(view.self_active) ? view.self_active : 0;
+  const me = self[activeIndex] ?? null;
+  const foe = Array.isArray(view.foe) ? view.foe[0] ?? null : null;
+  const opening = `${turn === null ? '' : `第 ${turn} 回合：`}`
+    + [whoOf(me), whoOf(foe, '对手是')].filter(Boolean).join('；');
+  const legal = (Array.isArray(view.legal) ? view.legal : [])
+    .map((one) => asText(one?.label)).filter(Boolean).slice(0, 6);
+  const lines = [];
+  if (opening) lines.push(`${opening}。`);
+  if (legal.length) lines.push(`这一轮能做的是：${legal.join('、')}。`);
+  lines.push('我这一层只读得到双方的公开读数与这一轮的合法动作；'
+    + '相性倍率与技能面板不在这一局的公开快照里 —— 那两样我读不到，不编。');
+  const evidence = [
+    `战况来源：这一局的公开快照（${turn === null ? '回合数没给' : `第 ${turn} 回合`}；`
+      + `我方 ${self.length} 只、对手场上 ${whoOf(foe) ?? '读不到'}）。`,
+    '这一支只吃公开事实：回合、双方血量与能量、合法动作标签；'
+      + '相性倍率 / 技能面板 / 对手后备不在公开切片里，拿不到就不说。',
+  ];
+  return {text: lines.join(''), evidence};
+}
+
 export function strategist(context){
  const g=context.battle;
  if(isLiveMatch(context))return {text:'线上竞技 PVP 赛中不提供战术建议，结束后再复盘。',evidence:[]};
+ // P1-A：六宠档只有 `roco_battle`（旧 `context.battle` 恒为 null）⇒ 走只吃公开事实的那一支。
+ // ⚠ 必须放在下面那句兜底**之前**：否则玩家在局里会听到「开一局之后…」这句假话
+ //   （它同时是守卫拒绝时的回退草稿 ⇒ 会真的端到玩家面前）。
+ // 有 `battle` 时仍然走 legacy 那条路，一个字不变。
+ const sixPet=context?.roco_battle&&typeof context.roco_battle==='object'?context.roco_battle:null;
+ if(!g&&sixPet)return sixPetSituation(sixPet);
  // ⚠ 2026-09-29（第三轮要求③）：这句是**旧练习局的词汇**（「PVE 对战」），玩家认不出——
  //   判据也把它列进 legacy smell（`scripts/roco/regression-key-questions.mjs` 的 forbid、
  //   `reports/roco/xiaoya-context/browser-capability-acceptance.mjs` 的 LEGACY_SMELL）。

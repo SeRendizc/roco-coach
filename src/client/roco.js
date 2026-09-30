@@ -4228,7 +4228,18 @@ function applyResult(data) {
   }
   if (nowSelf !== null || nowFoe !== null) state.lastMana = {self: nowSelf, opponent: nowFoe};
   if (b3RejectGuard(data)) return;   // 引擎拒绝这一步时的守卫（见下）
-  state.view = data.view;
+  // ⚠ P1-A（2026-10-01，lead-mac 的静态链分析 + Codex 的真机证据）：**同一个语义有两份写法**。
+  //   上面 `:3591` 那一处是 `if (data?.view) state.view = data.view;`（响应不带 view ⇒ 保留旧局面），
+  //   而这里原来是**无条件** `state.view = data.view;` —— 两处写法不一致本身就是隐患：
+  //   一旦谁把上面那道守卫挪走/改条件，`view:null` 的响应就会把**活着的局面**清掉。
+  // **它已经被真机证据排除为 P1-A 的主因**（Codex 在隔离实例 8877 的只读探针实测：`battle/new` 回
+  //   `viewType=object`、turn=1，局内画面正常，两个真实 UI 请求的 `context` 里 `battle=null` 而
+  //   `roco_battle` 有值 ⇒ **不是 state.view 丢失**）。所以这一改登记为**潜在健壮性对齐**
+  //   （口径统一到与 `:3591` 一致），**不是** P1-A 的成因，也不阻塞 B1；P1-A 的两处在
+  //   `strategist.js`（六宠分支）+ 回退草稿（同一处）。
+  // 现状复核（如实登记）：今天这一行**到不了 null** —— `b3RejectGuard()`（上一行）在 `!data?.view`
+  //   时已经提前 return 并保留旧局面。
+  if (data?.view) state.view = data.view;
   // U10（2026-09-29）：把**这一回合的合法行动表**记下来（复盘要用"当时还能选什么"）。
   // 只记**真有的**：`legal` 不是数组就不写这一回合（缺表 ⇒ 复盘如实写"查不到"，不编）。
   if (Number.isInteger(data.view?.turn) && Array.isArray(data.view?.legal)) {

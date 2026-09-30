@@ -566,3 +566,76 @@ test('军师的兜底正文要摆出**两种走法各自的结果**（目标 ②
  const empty = strategist({profile: {}, battle: null, query: '这回合该怎么打'});
  assert.doesNotMatch(String(empty.text), /多数情况/, '没有对局时不许编分数');
 });
+
+// ── P1-A（2026-10-01，跨机伙伴 lead-mac 的玩家可见读数）：六宠局的战术上下文契约 ──────
+//
+// 现场：六宠局里追问「喵喵光系承伤 0.5 与缇塔 1 如何比较」⇒ 玩家拿到
+// 「**开一局之后**，我才能按当前生命、能量和队伍比较这一手。」—— 明明已经在局里。
+// 根因两条（只修一条会漏）：
+//   ① 生产端写 `context.roco_battle`（公开切片，`roco.js:5830/:6131`），而 `strategist()` 读旧的
+//      `context.battle`（六宠档恒为 `null`，理由见 `roco.js:5225-5230`）⇒ 落进兜底句；
+//   ② 那句兜底同时是**守卫拒绝时的回退草稿**（`packet.text`）⇒ 会真的端到玩家面前
+//      （实测：模型提了「承伤 0.5」⇒ `rejected=ungrounded` ⇒ 回退正文就是这句假话）。
+const SIX_VIEW = {
+  battle_id: 'match-p1a', state_version: 12, turn: 1, phase: 'battle', result: null,
+  self: [
+    {pet_id: 'pet_000001', name: '喵喵', hp: 366, max_hp: 366, energy: 4, alive: true},
+    {pet_id: 'pet_000417', name: '缇塔', hp: 345, max_hp: 345, energy: 6, alive: true}],
+  self_active: 0, self_energy_max: 6,
+  foe: [{pet_id: 'pet_000112', name: '雪影娃娃', hp: 380, max_hp: 380, energy: 5, alive: true}],
+  legal: [{label: '抓挠', kind: 'skill'}, {label: '防御', kind: 'skill'}, {label: '换上第2位', kind: 'switch'}],
+  needs_replacement: [],
+};
+const SIX_CTX = (over = {}) => ({mode: 'camp', roco_battle: {...SIX_VIEW, ...over},
+  query: '这回合喵喵光系承伤 0.5 与缇塔 1 怎么比？'});
+
+test('P1-A ①：六宠局（只有 roco_battle）⇒ 正文必须引用当前局面，且不许出现「开一局之后」', () => {
+  const out = strategist(SIX_CTX());
+  assert.ok(out && typeof out.text === 'string' && out.text.trim(), '要有正文');
+  assert.match(out.text, /第 1 回合|366\/366 血|4 能量|380\/380 血/,
+    `正文必须引用当前局面（回合/血量/能量）：${out.text}`);
+  assert.doesNotMatch(out.text, /开一局之后/, `在局里说"开一局之后"是假话：${out.text}`);
+  // 反面自证：探测器对旧兜底句必须为真（否则上面那条是恒真的）
+  const OLD = '开一局之后，我才能按当前生命、能量和队伍比较这一手。';
+  assert.match(OLD, /开一局之后/);
+  assert.doesNotMatch(OLD, /第 \d+ 回合|366\/366 血/, '旧句子里没有任何当前局面');
+});
+
+test('P1-A ②：无战况才允许那句兜底（保留这一档，防止"一刀删掉"把它变成恒真）', () => {
+  const out = strategist({mode: 'camp', query: '这手怎么打？'});
+  assert.match(String(out.text), /开一局之后/, `没有战况时才说这句：${out.text}`);
+});
+
+test('P1-A ②b：局末（roco_battle.result 已给）也不许说「开一局之后」，也不许再谈"这一手"', () => {
+  const out = strategist(SIX_CTX({result: 'win'}));
+  assert.doesNotMatch(String(out.text), /开一局之后/);
+  assert.doesNotMatch(String(out.text), /这一手/, `局已经结束了：${out.text}`);
+  assert.match(String(out.text), /结束|复盘/, `要如实说已结束并指路复盘：${out.text}`);
+});
+
+test('P1-A ②c：legacy 三宠（context.battle 在位）行为不变 —— 有真战况就不许说那句', () => {
+  const g = createGame(17);
+  const out = strategist({mode: 'camp', battle: g});
+  assert.ok(String(out.text).trim().length > 0, 'legacy 路径要有正文');
+  assert.doesNotMatch(String(out.text), /开一局之后/, `legacy 局里有真战况：${out.text}`);
+});
+
+test('P1-A ③：正文里的数字必须真的来自那一份公开快照（换读数跟着变）', () => {
+  const a = strategist(SIX_CTX());
+  const b = strategist(SIX_CTX({turn: 9,
+    self: [{...SIX_VIEW.self[0], hp: 100, energy: 1}, SIX_VIEW.self[1]]}));
+  assert.match(a.text, /第 1 回合/);
+  assert.match(b.text, /第 9 回合/, `回合要跟着快照走：${b.text}`);
+  assert.match(b.text, /100\/366 血、1 能量/, `读数要跟着快照走：${b.text}`);
+  assert.doesNotMatch(b.text, /366\/366 血/, '旧读数不许留在新句子里');
+});
+
+test('P1-A ④：拿不到的层如实说「读不到」，且正文过玩家文本门禁五类', () => {
+  const out = strategist(SIX_CTX());
+  assert.match(out.text, /读不到/, `拿不到的层要如实说：${out.text}`);
+  assert.doesNotMatch(out.text, /0\.5|倍率是|面板是/, '不许编一个倍率/面板');
+  // 门禁三类顺手钉住（真语料那一份在 `tests/roco-player-text-gate.test.js`）
+  assert.doesNotMatch(out.text, /state_version|match_id|rules_version|battle_id/);
+  assert.doesNotMatch(out.text, /\b(?:skill|pet|trait)_\d{6}\b/);
+  assert.doesNotMatch(out.text, /\bHP\b|生命|豆/);
+});
