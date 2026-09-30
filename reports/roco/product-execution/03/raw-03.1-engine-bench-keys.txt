@@ -1,0 +1,177 @@
+== cmd: PYTHONPATH=roco/src python3 /mnt/e/roco-scratch/plan03/bench-keys-no-preview.py ==
+{
+ "no_preview": {
+  "has_opening_reveal_key": false,
+  "obs_opponent_keys": [
+   "active",
+   "field",
+   "living_count",
+   "pets"
+  ],
+  "obs_pets_row_keys": [
+   "active",
+   "energy",
+   "fainted",
+   "field",
+   "hp",
+   "marks",
+   "max_hp",
+   "name",
+   "pet_id",
+   "slot",
+   "statuses"
+  ],
+  "public_bench_n": 2,
+  "public_bench_row_keys": [
+   "fainted",
+   "slot"
+  ],
+  "public_bench_sample": [
+   {
+    "fainted": false,
+    "slot": 1
+   },
+   {
+    "fainted": false,
+    "slot": 2
+   }
+  ],
+  "public_revealed_key_present": false,
+  "status": 200,
+  "turn": 1,
+  "ui_bench_n": 2,
+  "ui_bench_row_keys": [
+   "fainted",
+   "slot"
+  ],
+  "ui_bench_sample": [
+   {
+    "fainted": false,
+    "slot": 1
+   },
+   {
+    "fainted": false,
+    "slot": 2
+   }
+  ],
+  "ui_revealed_key_present": false
+ },
+ "with_preview": {
+  "has_opening_reveal_key": true,
+  "obs_opponent_keys": [
+   "active",
+   "field",
+   "living_count",
+   "pets"
+  ],
+  "obs_pets_row_keys": [
+   "active",
+   "energy",
+   "fainted",
+   "field",
+   "hp",
+   "marks",
+   "max_hp",
+   "name",
+   "pet_id",
+   "slot",
+   "statuses"
+  ],
+  "public_bench_n": 2,
+  "public_bench_row_keys": [
+   "fainted",
+   "pet_id",
+   "revealed_event_seq",
+   "revealed_turn",
+   "revealed_via",
+   "slot"
+  ],
+  "public_bench_sample": [
+   {
+    "fainted": false,
+    "pet_id": "pet_000112",
+    "revealed_event_seq": 0,
+    "revealed_turn": 1,
+    "revealed_via": "opening_preview",
+    "slot": 1
+   },
+   {
+    "fainted": false,
+    "pet_id": "pet_000062",
+    "revealed_event_seq": 0,
+    "revealed_turn": 1,
+    "revealed_via": "opening_preview",
+    "slot": 2
+   }
+  ],
+  "public_revealed_key_present": false,
+  "status": 200,
+  "turn": 1,
+  "ui_bench_n": 2,
+  "ui_bench_row_keys": [
+   "class",
+   "fainted",
+   "name",
+   "pet_id",
+   "revealed_event_seq",
+   "revealed_turn",
+   "revealed_via",
+   "slot",
+   "stage",
+   "stats",
+   "stats_source",
+   "types"
+  ],
+  "ui_bench_sample": [
+   {
+    "class": null,
+    "fainted": false,
+    "name": "\u96ea\u5f71\u5a03\u5a03",
+    "pet_id": "pet_000112",
+    "revealed_event_seq": 0,
+    "revealed_turn": 1,
+    "revealed_via": "opening_preview",
+    "slot": 1,
+    "stage": null,
+    "stats": {
+     "atk": 103,
+     "def": 66,
+     "hp": 130,
+     "spa": 98,
+     "spd": 130,
+     "spe": 90
+    },
+    "stats_source": "species-race",
+    "types": [
+     "\u51b0\u7cfb",
+     "\u840c\u7cfb"
+    ]
+   },
+   {
+    "class": null,
+    "fainted": false,
+    "name": "\u97f3\u901f\u72ac",
+    "pet_id": "pet_000062",
+    "revealed_event_seq": 0,
+    "revealed_turn": 1,
+    "revealed_via": "opening_preview",
+    "slot": 2,
+    "stage": null,
+    "stats": {
+     "atk": 116,
+     "def": 101,
+     "hp": 85,
+     "spa": 38,
+     "spd": 82,
+     "spe": 120
+    },
+    "stats_source": "species-race",
+    "types": [
+     "\u706b\u7cfb"
+    ]
+   }
+  ],
+  "ui_revealed_key_present": false
+ }
+}
+== EXIT=0 ==

@@ -8,38 +8,59 @@
     "tests/roco-opponent-belief.test.js（复跑比对磁盘字节）"
   ],
   "input_sources": [
-    "data/roco/game-data-pack/v2/pack.json#sections.distributable.entities[group=pet]（622 个图鉴物种：属性 / 指针）",
-    "data/roco/owned/owned-pets.json#instances（48 个箱子实例；物种与 pack 的交集 = 48 ⇒ 实测并集 = 622）",
-    "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json（速度 stats.spe，622 只全有）",
+    "data/roco/game-data-pack/v2/pack.json#sections.distributable.entities[group=pet]（图鉴物种：属性 / 指针）",
+    "data/roco/owned/owned-pets.json#instances（箱子实例；数量从数据现数 —— 本模块不写死 48 / 542）",
+    "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json（速度 stats.spe）",
     "data/roco/normalized/roco-world-s4-2026-09-10/types.json（属性相性表：唯一实现在 RC-302/303 的 buildGapIndex()）",
-    "data/roco/meta-prior/v1.json#distribution[]（版本先验：全部 source=unknown + value=null ⇒ 没有频次可用）",
-    "roco/src/roco_env/env.py#public_planner_state（公开性口径：对手后备只有位次 / id / 是否倒下）"
+    "data/roco/meta-prior/v1.json#distribution[]（版本先验：全部 source=assumption + 均匀假设 ⇒ 没有频次可用）",
+    "roco/src/roco_env/env.py#_bench_public_row() + #foe_field_pet()（公开性口径**实测**：未亮明的后备只有 {slot, fainted}；场上那只的 hp/max_hp/energy/statuses/marks 公开）",
+    "reports/roco/product-execution/03/raw-03.1-engine-public-keys.txt + raw-03.1-engine-bench-keys.txt（真引擎三公开面 dump：键路径与「speed / speed_band 零命中」的原始读数）"
   ],
   "public_fact_boundary": {
     "allowed": {
       "opponent_active": [
+        "pet_id",
         "species_id",
+        "name",
+        "slot",
         "types",
-        "speed",
-        "speed_band",
+        "stats",
+        "stats_source",
+        "spe",
+        "spe_source",
+        "hp",
+        "max_hp",
+        "energy",
+        "statuses",
+        "marks",
+        "fainted",
         "source"
       ],
       "opponent_revealed": [
+        "pet_id",
         "species_id",
+        "name",
+        "slot",
         "types",
-        "speed",
-        "speed_band",
-        "source",
-        "revealed_as",
+        "stats",
+        "stats_source",
+        "spe",
+        "spe_source",
+        "revealed_via",
         "revealed_turn",
-        "fainted"
+        "revealed_event_seq",
+        "fainted",
+        "source"
       ],
       "own_team": [
         "key",
+        "pet_id",
         "species_id",
         "types",
-        "speed",
-        "speed_band",
+        "stats",
+        "stats_source",
+        "spe",
+        "spe_source",
         "source",
         "slot"
       ],
@@ -47,6 +68,11 @@
         "team_size",
         "battle_mode",
         "ruleset_config_id"
+      ],
+      "provenance": [
+        "match_id",
+        "rules_version",
+        "decision_id"
       ]
     },
     "hidden": {
@@ -61,16 +87,21 @@
         "talent",
         "specialty",
         "bloodline",
-        "hp",
-        "max_hp",
-        "energy",
-        "bench_details",
-        "bench_moves",
-        "stats",
         "panel_stats",
         "derived_stats",
         "build",
-        "builds"
+        "builds",
+        "speed",
+        "speed_band",
+        "individual_id",
+        "individual_level",
+        "panel",
+        "panel_projection",
+        "buffs",
+        "entered_turn",
+        "bench",
+        "bench_details",
+        "bench_moves"
       ],
       "opponent_revealed": [
         "moves",
@@ -86,11 +117,18 @@
         "hp",
         "max_hp",
         "energy",
-        "stats",
         "panel_stats",
         "derived_stats",
         "build",
-        "builds"
+        "builds",
+        "speed",
+        "speed_band",
+        "individual_id",
+        "individual_level",
+        "panel",
+        "panel_projection",
+        "buffs",
+        "entered_turn"
       ],
       "own_team": [
         "moves",
@@ -103,14 +141,15 @@
         "talent",
         "specialty",
         "bloodline",
-        "hp",
-        "max_hp",
-        "energy",
-        "stats",
         "panel_stats",
         "derived_stats",
         "build",
-        "builds"
+        "builds",
+        "speed",
+        "speed_band",
+        "individual_id",
+        "panel",
+        "panel_projection"
       ],
       "root": [
         "opponent_bench",
@@ -126,8 +165,28 @@
         "foe_bench"
       ]
     },
-    "policy": "隐藏字段出现 ⇒ **拒绝整个输入**（available:false + 点名路径），不静默过滤：过滤会让泄漏查不出来。口径与引擎 public_planner_state 对齐。",
-    "source": "roco/src/roco_env/env.py#public_planner_state（对手场上公开；后备只有位次 / id / 是否倒下）"
+    "species_level_sources": [
+      "species-panel",
+      "species-race"
+    ],
+    "own_speed_sources": [
+      "individual-snapshot",
+      "species-panel",
+      "species-race"
+    ],
+    "reveal_sources": [
+      "opening_preview",
+      "switch",
+      "replacement"
+    ],
+    "policy": "隐藏字段出现 / 「已亮明」缺来源事件 / 速度带个体口径出处 ⇒ **拒绝整个输入**（available:false + 逐条点名 code:path），不静默过滤：过滤会让泄漏查不出来。",
+    "source": "roco/src/roco_env/env.py#_bench_public_row()（未亮明 ⇒ {slot, fainted}，**没有 pet_id**） + #foe_field_pet()（场上那只是公开面板）；`speed` / `speed_band` 三面零命中（工程现算，不是游戏字段）"
+  },
+  "provenance": {
+    "match_id": "m-fixture0301",
+    "rules_version": "roco-world-s4-2026-09-10/mobile_s4_candidate_v3",
+    "decision_id": "m-fixture0301:v1",
+    "policy": "01.2 观察契约三件套（match_id / rules_version / decision_id）**原样转发**：缺就是 null 并在 unverified 里点名，本模块不自己派生一个「看起来像」的版本号。"
   },
   "universe": {
     "size": 622,
@@ -150,21 +209,21 @@
     {
       "id": "filter.opponent_speed_tier",
       "kind": "filter",
-      "label": "按对手**已亮明**的那只的速度档分层",
+      "label": "按对手**已亮明**的那只的**物种速度**现算速度档，再分层",
       "reads": [
-        "opponent_active.speed",
-        "opponent_revealed.speed"
+        "opponent_active.spe+spe_source",
+        "opponent_revealed.spe+spe_source"
       ],
-      "basis": "速度档来自 RC-303 的 `speedBandFor()`（在候选宇宙内按三分位分档），本模块不另立分档。应用口径：**只亮明单一档**时才收窄到同档；一条都没亮明、或快慢两端都亮明时都**不应用**（两端亮明 ⇒ 速度对「他会出什么」不再有区分度；实测照两端留会把 mid 档 237 只全剔掉）。速度值缺失 ⇒ 不应用（记 `not_applied`），池子因此更宽 —— 宽是安全的，窄才是编的。"
+      "basis": "**亮明的那只的物种速度**（`spe`，出处必须是 `species-panel` / `species-race`）是公开的（引擎 `pet_public()` 的 `stats_source` 词表）；**速度档不是引擎字段** —— 三条公开投影里 `speed_band` 零命中（探针 token_scan），它是本模块调 RC-303 `speedBandFor()` 在候选宇宙内按三分位**现算**的工程构造（换一份图鉴，分位与档位都会变，所以账本里连着阈值一起留痕）。应用口径：**只亮明单一档**时才收窄到同档；一条都没亮明、或快慢两端都亮明时都**不应用**（两端亮明 ⇒ 速度对「他会出什么」不再有区分度；实测照两端留会把 mid 档 237 只全剔掉）。速度值缺失 ⇒ 不应用（记 `not_applied`），池子因此更宽 —— 宽是安全的，窄才是编的。"
     },
     {
       "id": "weight.own_speed_tier_match",
       "kind": "weight",
-      "label": "按**我方阵容**已有的速度档给候选加权",
+      "label": "按**我方阵容**已有的速度档给候选**降权**（不排除）",
       "reads": [
-        "own_team.speed"
+        "own_team.spe+spe_source"
       ],
-      "basis": "这是玩家自己的信息（自家阵容的速度层次），与对手无关；用它把候选池按速度档**分层**（同一层的候选等权），权重只有 0 / 1 两种取值，不引入任何「哪种速度更好」的强度判断。"
+      "basis": "这是玩家自己的信息（自家阵容的速度层次），与对手无关；用它把候选池按速度档**分层**。⚠ 2026-09-30（03.1 · R4 裁决）：本规则**只降权、不把候选压 0** —— 「我方速度层次」不构成任何一只对手候选「不可能上场」的证据，压 0 等于声称不可能，与「同一伤害由两种配置都能解释时两者都留」直接冲突。权重是**声明过的假设**（选中层 : 其它层 = 2 : 1，写进规则的 `assumption`），层内仍然等权。真正允许**排除**候选的只有公开证据（已出技能 / 先手关系 / 可见伤害等）与它的证据 ID，见 `evidence_exclusions`。"
     }
   ],
   "beliefs": [
@@ -196,7 +255,10 @@
         },
         "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
         "candidate_count": 622,
-        "entries_omitted": "per-candidate 明细（等权时逐条列 622 行只是噪声；需要明细就调 weightsFor()）"
+        "entries_omitted": "per-candidate 明细（等权时逐条列 622 行只是噪声；需要明细就调 weightsFor()）",
+        "basis": "non_informative_uniform_baseline",
+        "is_probability": false,
+        "baseline_declaration": "均匀分布的 1/N **是无信息基线**（每条候选一样重），它**不是**强度判断、不是胜率、不是「谁更该带」：它唯一的用途是当对照基线，让「加了公开事实之后权重变了多少」这件事可被量出来。"
       },
       "declared_semantics": "均匀分布的 1/N **是无信息基线**（每条候选一样重），它**不是**强度判断、不是胜率、不是「谁更该带」：它唯一的用途是当对照基线，让「加了公开事实之后权重变了多少」这件事可被量出来。",
       "red_lines": [
@@ -288,19 +350,31 @@
           "id": "filter.opponent_speed_tier",
           "kind": "filter",
           "reads": [
-            "opponent_active.speed",
-            "opponent_revealed.speed"
+            "opponent_active.spe+spe_source",
+            "opponent_revealed.spe+spe_source"
           ],
           "inputs": [
             {
+              "revealed": [
+                {
+                  "species_id": "pet_000002",
+                  "spe": 51,
+                  "spe_source": "species-race",
+                  "band": "slow",
+                  "revealed_via": "field_on_screen"
+                }
+              ],
               "speed_bands": [
                 "slow"
               ],
-              "species": [
-                "pet_000002"
-              ],
-              "applied_when": "恰好亮明单一速度档",
-              "not_applied_when": "一条都没亮明 / 快慢两端都亮明"
+              "band_source": {
+                "implementation": "RC-303 speedBandFor()（候选宇宙内三分位，工程构造）",
+                "universe_values": 622,
+                "is_game_field": false,
+                "note": "`speed_band` 在三条公开投影里零命中（探针 token_scan）：它是本模块现算的工程分档，换一份图鉴，分位与档位都会变"
+              },
+              "applied_when": "恰好算得出单一速度档",
+              "not_applied_when": "一个档都算不出来 / 快慢两端都亮明"
             }
           ],
           "output": {
@@ -309,19 +383,25 @@
             "after": 146,
             "kept_bands": [
               "slow"
-            ]
+            ],
+            "band_thresholds": {
+              "implementation": "RC-303 speedBandFor()（候选宇宙内三分位，工程构造）",
+              "universe_values": 622,
+              "is_game_field": false,
+              "note": "`speed_band` 在三条公开投影里零命中（探针 token_scan）：它是本模块现算的工程分档，换一份图鉴，分位与档位都会变"
+            }
           },
-          "basis": "速度档来自 RC-303 的 `speedBandFor()`（在候选宇宙内按三分位分档），本模块不另立分档。应用口径：**只亮明单一档**时才收窄到同档；一条都没亮明、或快慢两端都亮明时都**不应用**（两端亮明 ⇒ 速度对「他会出什么」不再有区分度；实测照两端留会把 mid 档 237 只全剔掉）。速度值缺失 ⇒ 不应用（记 `not_applied`），池子因此更宽 —— 宽是安全的，窄才是编的。",
+          "basis": "**亮明的那只的物种速度**（`spe`，出处必须是 `species-panel` / `species-race`）是公开的（引擎 `pet_public()` 的 `stats_source` 词表）；**速度档不是引擎字段** —— 三条公开投影里 `speed_band` 零命中（探针 token_scan），它是本模块调 RC-303 `speedBandFor()` 在候选宇宙内按三分位**现算**的工程构造（换一份图鉴，分位与档位都会变，所以账本里连着阈值一起留痕）。应用口径：**只亮明单一档**时才收窄到同档；一条都没亮明、或快慢两端都亮明时都**不应用**（两端亮明 ⇒ 速度对「他会出什么」不再有区分度；实测照两端留会把 mid 档 237 只全剔掉）。速度值缺失 ⇒ 不应用（记 `not_applied`），池子因此更宽 —— 宽是安全的，窄才是编的。",
           "applied": true,
           "unverified": [
-            "未核实：速度档本身 —— 档位来自 RC-303 的 speedBandFor()（候选宇宙内三分位），是工程分档，不是官方档位表"
+            "未核实：速度档本身 —— 档位来自 RC-303 speedBandFor()（候选宇宙内三分位），是工程分档，不是官方档位表"
           ]
         },
         {
           "id": "weight.own_speed_tier_match",
           "kind": "weight",
           "reads": [
-            "own_team.speed"
+            "own_team.spe+spe_source"
           ],
           "inputs": [
             {
@@ -331,28 +411,45 @@
                 "slow": 2
               },
               "own_team_size": 6,
+              "own_team_species_level_spe": 6,
+              "mixed_scale_spe_excluded": 0,
               "pool_bands": {
                 "slow": 146
               },
               "usable_bands": [
                 "slow"
               ],
+              "weight_ratio": [
+                2,
+                1
+              ],
               "tie_break": [
                 "own_team_band_count desc",
                 "band_name asc"
-              ]
+              ],
+              "band_source": {
+                "implementation": "RC-303 speedBandFor()（候选宇宙内三分位，工程构造）",
+                "universe_values": 622,
+                "is_game_field": false,
+                "note": "`speed_band` 在三条公开投影里零命中（探针 token_scan）：它是本模块现算的工程分档，换一份图鉴，分位与档位都会变"
+              }
             }
           ],
           "output": {
             "stratum": "slow",
             "stratum_size": 146,
             "before": 146,
-            "after": 146
+            "after": 146,
+            "weight_ratio": [
+              2,
+              1
+            ]
           },
-          "basis": "这是玩家自己的信息（自家阵容的速度层次），与对手无关；用它把候选池按速度档**分层**（同一层的候选等权），权重只有 0 / 1 两种取值，不引入任何「哪种速度更好」的强度判断。",
+          "basis": "这是玩家自己的信息（自家阵容的速度层次），与对手无关；用它把候选池按速度档**分层**。⚠ 2026-09-30（03.1 · R4 裁决）：本规则**只降权、不把候选压 0** —— 「我方速度层次」不构成任何一只对手候选「不可能上场」的证据，压 0 等于声称不可能，与「同一伤害由两种配置都能解释时两者都留」直接冲突。权重是**声明过的假设**（选中层 : 其它层 = 2 : 1，写进规则的 `assumption`），层内仍然等权。真正允许**排除**候选的只有公开证据（已出技能 / 先手关系 / 可见伤害等）与它的证据 ID，见 `evidence_exclusions`。",
+          "assumption": "对手出场的那只的速度层，与我方阵容里最常见的一层相同 —— **声明过的工程假设**，不是证据：它只把该层候选的相对权重调到 2 : 1，**不排除**任何候选（权重都不为 0）",
           "applied": true,
           "unverified": [
-            "未核实：为什么以我方**最多且池子里存在**的速度档为层 —— 这是工程假设（对齐自家最常见、并且真的还有候选可挑的那一层），不是强度结论；并列时按档名定序（tie-break 写在 inputs 里）"
+            "未核实：为什么以我方**最多且池子里存在**的速度档为层 —— 这是工程假设（对齐自家最常见、并且真的还有候选可挑的那一层），不是强度结论；并列时按档名定序（tie-break 写在 inputs 里）。它只降权，不排除任何候选"
           ]
         }
       ],
@@ -370,6 +467,18 @@
         },
         "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
         "candidate_count": 146,
+        "basis": "own_speed_tier_downweight",
+        "uniform_within": "stratum",
+        "weight_ratio": [
+          2,
+          1
+        ],
+        "weight_total": 292,
+        "stratum_size": 146,
+        "other_size": 0,
+        "is_probability": false,
+        "assumption": "假设：对手这一只要出场的速度层，与我方阵容里最常见的那一层相同。这是**声明过的工程假设**，不是证据；它只把该层候选的相对权重调到 2:1，**不排除**任何候选。",
+        "baseline_declaration": "这些权重**仅作基线**：它们是「公开事实筛出的池子 + 一条声明过的分层假设」的归一化结果，**不是**「他会出哪只」的把握度，也不是概率预测；层内候选完全等权。",
         "rows": [
           {
             "key": "pet_000001",
@@ -377,7 +486,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000002",
@@ -385,7 +494,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000007",
@@ -393,7 +502,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000012",
@@ -401,7 +510,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000016",
@@ -409,7 +518,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000017",
@@ -417,7 +526,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000022",
@@ -425,7 +534,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000023",
@@ -433,7 +542,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000024",
@@ -441,7 +550,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000026",
@@ -449,7 +558,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000027",
@@ -457,7 +566,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000030",
@@ -465,7 +574,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000031",
@@ -473,7 +582,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000035",
@@ -481,7 +590,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000040",
@@ -489,7 +598,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000042",
@@ -497,7 +606,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000045",
@@ -505,7 +614,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000047",
@@ -513,7 +622,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000048",
@@ -521,7 +630,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000049",
@@ -529,7 +638,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000050",
@@ -537,7 +646,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000051",
@@ -545,7 +654,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000052",
@@ -553,7 +662,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000063",
@@ -561,7 +670,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000064",
@@ -569,7 +678,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000065",
@@ -577,7 +686,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000066",
@@ -585,7 +694,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000084",
@@ -593,7 +702,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000087",
@@ -601,7 +710,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000088",
@@ -609,7 +718,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000090",
@@ -617,7 +726,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000091",
@@ -625,7 +734,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000101",
@@ -633,7 +742,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000102",
@@ -641,7 +750,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000104",
@@ -649,7 +758,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000110",
@@ -657,7 +766,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000111",
@@ -665,7 +774,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000113",
@@ -673,7 +782,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000116",
@@ -681,7 +790,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000119",
@@ -689,7 +798,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000122",
@@ -697,7 +806,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000125",
@@ -705,7 +814,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000128",
@@ -713,7 +822,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000131",
@@ -721,7 +830,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000132",
@@ -729,7 +838,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000133",
@@ -737,7 +846,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000134",
@@ -745,7 +854,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000135",
@@ -753,7 +862,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000140",
@@ -761,7 +870,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000143",
@@ -769,7 +878,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000144",
@@ -777,7 +886,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000146",
@@ -785,7 +894,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000147",
@@ -793,7 +902,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000151",
@@ -801,7 +910,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000152",
@@ -809,7 +918,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000153",
@@ -817,7 +926,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000154",
@@ -825,7 +934,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000159",
@@ -833,7 +942,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000162",
@@ -841,7 +950,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000167",
@@ -849,7 +958,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000172",
@@ -857,7 +966,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000188",
@@ -865,7 +974,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000193",
@@ -873,7 +982,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000196",
@@ -881,7 +990,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000204",
@@ -889,7 +998,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000205",
@@ -897,7 +1006,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000206",
@@ -905,7 +1014,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000207",
@@ -913,7 +1022,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000210",
@@ -921,7 +1030,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000215",
@@ -929,7 +1038,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000216",
@@ -937,7 +1046,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000218",
@@ -945,7 +1054,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000224",
@@ -953,7 +1062,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000225",
@@ -961,7 +1070,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000229",
@@ -969,7 +1078,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000230",
@@ -977,7 +1086,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000231",
@@ -985,7 +1094,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000239",
@@ -993,7 +1102,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000247",
@@ -1001,7 +1110,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000248",
@@ -1009,7 +1118,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000249",
@@ -1017,7 +1126,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000250",
@@ -1025,7 +1134,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000251",
@@ -1033,7 +1142,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000252",
@@ -1041,7 +1150,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000258",
@@ -1049,7 +1158,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000261",
@@ -1057,7 +1166,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000262",
@@ -1065,7 +1174,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000266",
@@ -1073,7 +1182,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000267",
@@ -1081,7 +1190,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000268",
@@ -1089,7 +1198,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000269",
@@ -1097,7 +1206,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000272",
@@ -1105,7 +1214,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000275",
@@ -1113,7 +1222,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000278",
@@ -1121,7 +1230,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000281",
@@ -1129,7 +1238,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000282",
@@ -1137,7 +1246,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000283",
@@ -1145,7 +1254,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000285",
@@ -1153,7 +1262,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000288",
@@ -1161,7 +1270,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000291",
@@ -1169,7 +1278,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000296",
@@ -1177,7 +1286,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000300",
@@ -1185,7 +1294,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000303",
@@ -1193,7 +1302,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000305",
@@ -1201,7 +1310,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000306",
@@ -1209,7 +1318,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000307",
@@ -1217,7 +1326,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000308",
@@ -1225,7 +1334,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000314",
@@ -1233,7 +1342,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000317",
@@ -1241,7 +1350,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000320",
@@ -1249,7 +1358,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000368",
@@ -1257,7 +1366,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000376",
@@ -1265,7 +1374,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000387",
@@ -1273,7 +1382,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000394",
@@ -1281,7 +1390,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000401",
@@ -1289,7 +1398,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000402",
@@ -1297,7 +1406,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000409",
@@ -1305,7 +1414,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000410",
@@ -1313,7 +1422,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000418",
@@ -1321,7 +1430,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000419",
@@ -1329,7 +1438,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000420",
@@ -1337,7 +1446,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000426",
@@ -1345,7 +1454,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000427",
@@ -1353,7 +1462,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000428",
@@ -1361,7 +1470,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000444",
@@ -1369,7 +1478,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000445",
@@ -1377,7 +1486,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000449",
@@ -1385,7 +1494,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000450",
@@ -1393,7 +1502,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000456",
@@ -1401,7 +1510,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000459",
@@ -1409,7 +1518,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000462",
@@ -1417,7 +1526,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000471",
@@ -1425,7 +1534,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000475",
@@ -1433,7 +1542,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000494",
@@ -1441,7 +1550,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000495",
@@ -1449,7 +1558,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000520",
@@ -1457,7 +1566,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000521",
@@ -1465,7 +1574,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000522",
@@ -1473,7 +1582,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000530",
@@ -1481,7 +1590,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000531",
@@ -1489,7 +1598,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000536",
@@ -1497,7 +1606,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000540",
@@ -1505,7 +1614,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000548",
@@ -1513,7 +1622,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000602",
@@ -1521,7 +1630,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000603",
@@ -1529,7 +1638,7 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           },
           {
             "key": "pet_000609",
@@ -1537,20 +1646,49 @@
             "denominator": 146,
             "value": 0.006849315068,
             "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
-            "note": "落在速度层 slow 内"
+            "note": "落在速度层 slow 内（假设层：相对权重 2:1）"
           }
         ]
       },
-      "declared_semantics": "这些权重只由**已公开**的事实决定（对手已亮明的那只的系别 / 速度档、我方阵容、模式规模），是「筛 + 分层」的计数结果，不是强度排序、不是胜率：同一层内的候选**完全等权**，本模块不区分它们的强弱。",
+      "declared_semantics": "这些权重只由**已公开**的事实决定（对手已亮明的那只的系别 / 物种速度、我方阵容、模式规模），是「筛 + 分层」的计数结果，不是强度排序、不是胜率：同一层内的候选**完全等权**；层与层之间只有一条**声明过的假设**造成的降权（2 : 1），**没有任何候选被压到 0**（假设不是证据）。",
       "public_facts": {
+        "active": {
+          "species_id": "pet_000002",
+          "name": null,
+          "slot": null,
+          "types": [
+            "水系"
+          ],
+          "spe": 51,
+          "spe_source": "species-race",
+          "hp": null,
+          "max_hp": null,
+          "energy": null,
+          "statuses": null,
+          "marks": null,
+          "fainted": false,
+          "revealed_via": "field_on_screen",
+          "revealed_turn": null,
+          "source": "injected:publicFacts.opponent.active"
+        },
         "revealed_pets": [
           {
             "species_id": "pet_000002",
+            "name": null,
+            "slot": null,
             "types": [
               "水系"
             ],
-            "speed": 51,
-            "speed_band": "slow",
+            "spe": 51,
+            "spe_source": "species-race",
+            "hp": null,
+            "max_hp": null,
+            "energy": null,
+            "statuses": null,
+            "marks": null,
+            "fainted": false,
+            "revealed_via": "field_on_screen",
+            "revealed_turn": null,
             "source": "injected:publicFacts.opponent.active"
           }
         ],
@@ -1561,8 +1699,9 @@
             "types": [
               "草系"
             ],
-            "speed": 33,
-            "speed_band": "slow"
+            "spe": 33,
+            "spe_source": "species-race",
+            "slot": null
           },
           {
             "key": "instance:own-0002",
@@ -1570,8 +1709,9 @@
             "types": [
               "水系"
             ],
-            "speed": 51,
-            "speed_band": "slow"
+            "spe": 51,
+            "spe_source": "species-race",
+            "slot": null
           },
           {
             "key": "instance:own-0003",
@@ -1579,8 +1719,9 @@
             "types": [
               "火系"
             ],
-            "speed": 78,
-            "speed_band": "mid"
+            "spe": 78,
+            "spe_source": "species-race",
+            "slot": null
           },
           {
             "key": "instance:own-0004",
@@ -1588,8 +1729,9 @@
             "types": [
               "光系"
             ],
-            "speed": 92,
-            "speed_band": "mid"
+            "spe": 92,
+            "spe_source": "species-race",
+            "slot": null
           },
           {
             "key": "instance:own-0005",
@@ -1597,8 +1739,9 @@
             "types": [
               "水系"
             ],
-            "speed": 85,
-            "speed_band": "mid"
+            "spe": 85,
+            "spe_source": "species-race",
+            "slot": null
           },
           {
             "key": "instance:own-0006",
@@ -1606,28 +1749,40 @@
             "types": [
               "火系"
             ],
-            "speed": 130,
-            "speed_band": "fast"
+            "spe": 130,
+            "spe_source": "species-race",
+            "slot": null
           }
         ],
         "mode": {
           "team_size": 6,
           "battle_mode": "pvp-standard-six-pet",
           "ruleset_config_id": null
+        },
+        "provenance": {
+          "match_id": "m-fixture0301",
+          "rules_version": "roco-world-s4-2026-09-10/mobile_s4_candidate_v3",
+          "decision_id": "m-fixture0301:v1"
         }
       },
       "ignored_public_keys": [],
       "red_lines": [
-        "只看公开面：对手**场上 / 已亮明**的那只的属性与速度档、我方阵容、模式规模",
-        "不看隐藏面：对手后备、配招、道具、体力数值、性格天赋一律不进输入（传进来即拒绝）",
+        "只看公开面：对手**场上**那只的可见面板与所属物种、**已亮明**的成员与来源事件、我方阵容、模式规模",
+        "不看隐藏面：对手配招 / 道具 / 天赋性格 / 个体面板 / 后备身份与血量一律不进输入（传进来即拒绝；缺来源的「已亮明」也拒绝）",
         "不给强度结论：过滤与分层是计数，不是排序；层内等权",
+        "**不把候选压 0**：只有公开证据（已出技能 / 先手关系 / 可见伤害）才能排除候选，且必须写清证据 ID；仅凭我方速度层次只降权",
         "不产出胜率 / 概率 / 百分数：权重合计 1 只是归一化，不是「赢面」"
       ],
-      "criteria": "公开事实的键必须落在 `PUBLIC_FACT_FIELDS` 白名单里；出现 `HIDDEN_FACT_FIELDS`（对手配招 / 后备 / 道具 / 体力数值 / 性格天赋 / 构建）里任何一个键 ⇒ **拒绝整个输入**（`available:false` + 点名路径）⇒ `PUBLIC_FACTS_BOUNDARY`（红）。静默忽略也算红：「忽略」在产出里看不出来，「拒绝」才看得出来。",
+      "criteria": "公开事实的键必须落在 `PUBLIC_FACT_FIELDS` 白名单里；出现 `HIDDEN_FACT_FIELDS`（对手配招 / 后备身份 / 道具 / 性格天赋 / 构建 / 裸速度值）里任何一个键 ⇒ **拒绝整个输入**（`available:false` + 点名路径）⇒ `PUBLIC_FACTS_BOUNDARY`（红）。静默忽略也算红：「忽略」在产出里看不出来，「拒绝」才看得出来。口径不是抄来的：见 `03.1` 的真引擎三面 dump。",
       "available": true,
       "informativeness": "public_fact_conditioned",
       "stratum": "slow",
       "stratum_size": 146,
+      "provenance": {
+        "match_id": "m-fixture0301",
+        "rules_version": "roco-world-s4-2026-09-10/mobile_s4_candidate_v3",
+        "decision_id": "m-fixture0301:v1"
+      },
       "leaked_fields": [],
       "unknown_reason": null,
       "missing": [],
@@ -1655,12 +1810,25 @@
         },
         {
           "source_file": "injected:publicFacts",
-          "pointer": "publicFacts.opponent",
+          "pointer": "publicFacts.opponent.revealed_pets",
           "field": "revealed_pets",
           "value": [
             "pet_000002"
           ],
-          "note": "对手**已亮明**的精灵（场上那只 + 已换上来过的）：只有位次性的事实 —— 属性、速度档，没有配招 / 道具 / 后备详情"
+          "note": "对手**已亮明**的精灵（场上那只 + 预览 / 换人亮明的）：身份 + 来源事件（revealed_via / revealed_turn） + 物种级属性与速度（带 spe_source），**没有**配招 / 道具 / 后备血量"
+        },
+        {
+          "source_file": "injected:publicFacts",
+          "pointer": "publicFacts.opponent.active",
+          "field": "visible_panel",
+          "value": {
+            "hp": null,
+            "max_hp": null,
+            "energy": null,
+            "statuses": null,
+            "marks": null
+          },
+          "note": "场上那只的**可见面板**（血条 / 能量 / 异常 / 印记）：三公开投影里都属于公开面（`raw-03.1-engine-public-keys.txt`）；这里只登记读数，本模块不用它做任何强度判断"
         },
         {
           "source_file": "injected:publicFacts",
@@ -1675,6 +1843,13 @@
           "field": "team_size",
           "value": 6,
           "note": "模式规模（公开规则常量）：六宠口径来自调用方，不在本模块写死"
+        },
+        {
+          "source_file": "injected:publicFacts",
+          "pointer": "publicFacts.provenance",
+          "field": "rules_version",
+          "value": "roco-world-s4-2026-09-10/mobile_s4_candidate_v3",
+          "note": "01.2 观察契约的规则版本（还有 match_id / decision_id）：原样转发，缺就是 null（不自己造）"
         },
         {
           "source_file": "injected:publicFacts",
@@ -1700,15 +1875,24 @@
           "field": "pool_size",
           "value": 146,
           "note": "候选池 146 / 宇宙 622（分母来自数据；规则逐条可复算，见 rule_ledger）"
+        },
+        {
+          "source_file": "injected:publicFacts",
+          "pointer": "publicFacts.provenance",
+          "field": "rules_version",
+          "value": "roco-world-s4-2026-09-10/mobile_s4_candidate_v3",
+          "note": "这些候选属于哪一局 / 哪份规则 / 哪一次决策（01.2 契约三件套，原样转发）"
         }
       ],
       "confidence": "ENGINE_HYPOTHESIS",
       "unverified": [
         "未核实：候选之间的强弱 —— 条件化只按公开事实筛 / 分层，层内等权，不含强度判断",
-        "未核实：对手**后备**要出什么 —— 后备不在公开面里，本模块明确说不知道（这也是 available 的原因不是「我们很确定」）",
+        "未核实：层间的 2:1 降权 —— 它来自**声明过的假设**（我方最常见的速度层更可能出场），不是从对局频次估出来的；也没有任何证据因此被排除",
+        "未核实：对手**后备**要出什么 —— 后备（未亮明时只有位次与是否倒下）不在公开面里，本模块明确说不知道（这也是 available 的原因不是「我们很确定」）",
+        "未核实：速度档本身 —— 它是 RC-303 `speedBandFor()` 在候选宇宙内按三分位**现算**的工程构造（阈值见规则账本 `output.band_thresholds`），不是官方档位表；换一份图鉴它会变",
         "未核实：候选能不能真的接住 —— 判定只看**属性相性表**（冻结数据），不看具体配招 / 特性（那些不在公开面，也不在候选宇宙的属性数据里）",
-        "未核实：速度档本身 —— 档位来自 RC-303 的 speedBandFor()（候选宇宙内三分位），是工程分档，不是官方档位表",
-        "未核实：为什么以我方**最多且池子里存在**的速度档为层 —— 这是工程假设（对齐自家最常见、并且真的还有候选可挑的那一层），不是强度结论；并列时按档名定序（tie-break 写在 inputs 里）"
+        "未核实：速度档本身 —— 档位来自 RC-303 speedBandFor()（候选宇宙内三分位），是工程分档，不是官方档位表",
+        "未核实：为什么以我方**最多且池子里存在**的速度档为层 —— 这是工程假设（对齐自家最常见、并且真的还有候选可挑的那一层），不是强度结论；并列时按档名定序（tie-break 写在 inputs 里）。它只降权，不排除任何候选"
       ]
     },
     {
@@ -1813,6 +1997,9 @@
         },
         "unit": "信念权重（0～1 的**非负权重**，同一份信念内合计恰好 1；不是胜率、不是概率预测）",
         "candidate_count": 2,
+        "basis": "measured_frequency_distribution",
+        "is_probability": false,
+        "baseline_declaration": "这些权重是**实测频次占比**（带来源的计数比）：不是胜率、不是本局预测，也不是「没出现过的候选不可能上场」——样本里没有的候选不在权重表里，不等于它的概率是 0。",
         "rows": [
           {
             "key": "pet_000001",
@@ -1843,6 +2030,824 @@
     },
     "lights_up": true
   },
+  "candidate_protocol": {
+    "version": "rc604-opponent-candidates/v1",
+    "fields": [
+      "candidate_id",
+      "species_id",
+      "name",
+      "basis",
+      "types",
+      "spe",
+      "spe_source",
+      "spe_status",
+      "speed_band",
+      "band_source",
+      "in_filtered_pool",
+      "inferred_rank",
+      "observed",
+      "skills",
+      "individual_range",
+      "actions",
+      "sources",
+      "unknowns",
+      "rules_version",
+      "evidence"
+    ],
+    "bases": [
+      "observed",
+      "inferred"
+    ],
+    "grades": [
+      "FULL_VERIFIED",
+      "SIMULATABLE_UNVERIFIED",
+      "UNKNOWN"
+    ],
+    "grade_legend": "FULL_VERIFIED（冻结学招表 learnsets.json + layer-playable-48 覆盖） > SIMULATABLE_UNVERIFIED（on-demand-builds 的工程启发式，**未实机核验**） > UNKNOWN（没有池，可学技能不知道）—— 未验证的不与已验证的同权呈现",
+    "four_skill_limit": 4,
+    "default_budget": {
+      "limit": 24,
+      "rule": "observed_first（按 slot 升序）→ inferred（①有冻结学招表 ②与已亮明速度档同档 ③species_id 升序）"
+    },
+    "degrade_policy": "输入越界 / 缺来源 ⇒ available:false 且**一个候选都不生成**（不拿空数组冒充「没有威胁」）；候选为空或与观察矛盾 ⇒ 明确降级并逐条写 `contradictions[]`（不静默丢）"
+  },
+  "candidate_sample": {
+    "protocol": "rc604-opponent-candidates/v1",
+    "available": true,
+    "unknown_reason": null,
+    "universe_size": 622,
+    "provenance": {
+      "match_id": "m-fixture0301",
+      "rules_version": "roco-world-s4-2026-09-10/mobile_s4_candidate_v3",
+      "decision_id": "m-fixture0301:v1"
+    },
+    "budget": {
+      "limit": 24,
+      "rule": "observed_first（按 slot 升序）→ inferred（①有冻结学招表 ②与已亮明速度档同档 ③species_id 升序）",
+      "kept": 24,
+      "observed_kept": 1,
+      "inferred_kept": 23,
+      "truncated": true,
+      "dropped_count": 122,
+      "pool_summary": {
+        "by_band": {
+          "slow": 146
+        },
+        "observed": 1,
+        "inferred_available": 145,
+        "dropped_by_band": {
+          "slow": 122
+        }
+      }
+    },
+    "candidates": [
+      {
+        "candidate_id": "cand:pet_000002",
+        "species_id": "pet_000002",
+        "name": "水蓝蓝",
+        "basis": "observed",
+        "types": [
+          "水系"
+        ],
+        "spe": 51,
+        "spe_source": "catalog:species-race（冻结图鉴的物种值）",
+        "spe_status": "validated",
+        "speed_band": "slow",
+        "band_source": "RC-303 speedBandFor()（工程三分位构造，不是游戏字段）",
+        "in_filtered_pool": true,
+        "inferred_rank": null,
+        "observed": {
+          "slots": [],
+          "reveals": [
+            {
+              "revealed_via": "field_on_screen",
+              "revealed_turn": null,
+              "source": "injected:publicFacts.opponent.active"
+            }
+          ],
+          "visible_panel": {
+            "hp": null,
+            "max_hp": null,
+            "energy": null,
+            "statuses": null,
+            "marks": null,
+            "fainted": false
+          }
+        },
+        "skills": {
+          "known_used": [],
+          "possible": [
+            {
+              "skill_id": "skill_000255",
+              "name": "突袭",
+              "grade": "FULL_VERIFIED",
+              "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
+              "pointer": "learnsets.pet_000002"
+            },
+            {
+              "skill_id": "skill_000265",
+              "name": "魔能爆",
+              "grade": "FULL_VERIFIED",
+              "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
+              "pointer": "learnsets.pet_000002"
+            },
+            {
+              "skill_id": "skill_000272",
+              "name": "魔法增效",
+              "grade": "FULL_VERIFIED",
+              "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
+              "pointer": "learnsets.pet_000002"
+            },
+            {
+              "skill_id": "skill_000286",
+              "name": "防御",
+              "grade": "FULL_VERIFIED",
+              "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
+              "pointer": "learnsets.pet_000002"
+            },
+            {
+              "skill_id": "skill_000287",
+              "name": "防反",
+              "grade": "FULL_VERIFIED",
+              "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
+              "pointer": "learnsets.pet_000002"
+            },
+            {
+              "skill_id": "skill_000290",
+              "name": "借用",
+              "grade": "FULL_VERIFIED",
+              "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
+              "pointer": "learnsets.pet_000002"
+            }
+          ],
+          "possible_count": 45,
+          "pool_tier": "frozen_learnset",
+          "grade": "FULL_VERIFIED",
+          "grade_legend": "FULL_VERIFIED（冻结学招表）> SIMULATABLE_UNVERIFIED（工程启发式，未实机核验）> UNKNOWN（没有池）",
+          "legality": {
+            "ok": true,
+            "limit": 4,
+            "kept": [],
+            "excluded": [],
+            "proposed": []
+          },
+          "possible_omitted": 39,
+          "possible_omitted_note": "报告里只贴前 6 条可学技能（省体积）；完整池在 buildOpponentCandidates() 的返回值里"
+        },
+        "individual_range": {
+          "known": false,
+          "observed_stats_source": "species-race",
+          "observed_spe": 51,
+          "individual_values_visible": false,
+          "scenarios": [
+            {
+              "id": "species-race",
+              "stats_source": "species-race",
+              "source": "injected:publicFacts.opponent.active",
+              "note": "这是**物种级**数值（引擎公开投影给的），不是这只的个体真值"
+            }
+          ],
+          "note": "个体面板 / 天赋 / 性格不在公开面：同一份可见伤害可能由多种个体配置解释 ⇒ 保留多解（03.3）"
+        },
+        "actions": {
+          "observed": [],
+          "plausible_kinds": [
+            "skill",
+            "switch"
+          ],
+          "note": "对手**下一手**不在公开面：这里只登记已打出来的技能与可能出现的动作类别，不预测具体动作"
+        },
+        "sources": [
+          {
+            "source_file": "injected:catalog",
+            "pointer": "catalog.featureFor(pet_000002)",
+            "field": "types/spe",
+            "value": {
+              "types": [
+                "水系"
+              ],
+              "spe": 51
+            },
+            "note": "物种级属性与速度：冻结图鉴（公开数据）"
+          },
+          {
+            "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
+            "pointer": "learnsets.pet_000002",
+            "field": "skill_pool",
+            "value": [
+              "skill_000255",
+              "skill_000265",
+              "skill_000272",
+              "skill_000286",
+              "skill_000287",
+              "skill_000290",
+              "skill_000303",
+              "skill_000326",
+              "skill_000327",
+              "skill_000328",
+              "skill_000354",
+              "skill_000391",
+              "skill_000418",
+              "skill_000419",
+              "skill_000420",
+              "skill_000421",
+              "skill_000423",
+              "skill_000424",
+              "skill_000427",
+              "skill_000428",
+              "skill_000429",
+              "skill_000432",
+              "skill_000440",
+              "skill_000441",
+              "skill_000443",
+              "skill_000458",
+              "skill_000477",
+              "skill_000524",
+              "skill_000539",
+              "skill_000540",
+              "skill_000542",
+              "skill_000547",
+              "skill_000551",
+              "skill_000553",
+              "skill_000566",
+              "skill_000591",
+              "skill_000621",
+              "skill_000644",
+              "skill_000664",
+              "skill_000706",
+              "skill_000726",
+              "skill_000757",
+              "skill_000780",
+              "skill_000808",
+              "skill_000821"
+            ],
+            "note": "可学技能池（等级 FULL_VERIFIED）：冻结学招表（native + blood + stones 的并集）：判据最硬的一份"
+          }
+        ],
+        "unknowns": [
+          "未核实：这只的个体面板 / 天赋 / 性格 / 真实六维 —— 不在公开面（对手只展示物种级数值）"
+        ],
+        "rules_version": "roco-world-s4-2026-09-10/mobile_s4_candidate_v3",
+        "evidence": [
+          {
+            "source_file": "injected:publicFacts",
+            "pointer": "publicFacts.opponent.revealed_pets",
+            "field": "basis",
+            "value": {
+              "species_id": "pet_000002",
+              "revealed_via": "field_on_screen",
+              "revealed_turn": null
+            },
+            "note": "这条候选来自**公开史**（已亮明 / 场上）"
+          },
+          {
+            "source_file": "injected:catalog",
+            "pointer": "catalog.featureFor(pet_000002)",
+            "field": "types/spe",
+            "value": {
+              "types": [
+                "水系"
+              ],
+              "spe": 51
+            },
+            "note": "物种级属性与速度：冻结图鉴（公开数据）"
+          },
+          {
+            "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
+            "pointer": "learnsets.pet_000002",
+            "field": "skill_pool",
+            "value": [
+              "skill_000255",
+              "skill_000265",
+              "skill_000272",
+              "skill_000286",
+              "skill_000287",
+              "skill_000290",
+              "skill_000303",
+              "skill_000326",
+              "skill_000327",
+              "skill_000328",
+              "skill_000354",
+              "skill_000391",
+              "skill_000418",
+              "skill_000419",
+              "skill_000420",
+              "skill_000421",
+              "skill_000423",
+              "skill_000424",
+              "skill_000427",
+              "skill_000428",
+              "skill_000429",
+              "skill_000432",
+              "skill_000440",
+              "skill_000441",
+              "skill_000443",
+              "skill_000458",
+              "skill_000477",
+              "skill_000524",
+              "skill_000539",
+              "skill_000540",
+              "skill_000542",
+              "skill_000547",
+              "skill_000551",
+              "skill_000553",
+              "skill_000566",
+              "skill_000591",
+              "skill_000621",
+              "skill_000644",
+              "skill_000664",
+              "skill_000706",
+              "skill_000726",
+              "skill_000757",
+              "skill_000780",
+              "skill_000808",
+              "skill_000821"
+            ],
+            "note": "可学技能池（等级 FULL_VERIFIED）：冻结学招表（native + blood + stones 的并集）：判据最硬的一份"
+          }
+        ]
+      },
+      {
+        "candidate_id": "cand:pet_000001",
+        "species_id": "pet_000001",
+        "name": "喵喵",
+        "basis": "inferred",
+        "types": [
+          "草系"
+        ],
+        "spe": 33,
+        "spe_source": "catalog:species-race（冻结图鉴的物种值）",
+        "spe_status": "validated",
+        "speed_band": "slow",
+        "band_source": "RC-303 speedBandFor()（工程三分位构造，不是游戏字段）",
+        "in_filtered_pool": true,
+        "inferred_rank": 1,
+        "observed": null,
+        "skills": {
+          "known_used": [],
+          "possible": [
+            {
+              "skill_id": "skill_000246",
+              "name": "抓挠",
+              "grade": "FULL_VERIFIED",
+              "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
+              "pointer": "learnsets.pet_000001"
+            },
+            {
+              "skill_id": "skill_000249",
+              "name": "扫尾",
+              "grade": "FULL_VERIFIED",
+              "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
+              "pointer": "learnsets.pet_000001"
+            },
+            {
+              "skill_id": "skill_000264",
+              "name": "重击",
+              "grade": "FULL_VERIFIED",
+              "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
+              "pointer": "learnsets.pet_000001"
+            },
+            {
+              "skill_id": "skill_000273",
+              "name": "休息回复",
+              "grade": "FULL_VERIFIED",
+              "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
+              "pointer": "learnsets.pet_000001"
+            },
+            {
+              "skill_id": "skill_000282",
+              "name": "应激反应",
+              "grade": "FULL_VERIFIED",
+              "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
+              "pointer": "learnsets.pet_000001"
+            },
+            {
+              "skill_id": "skill_000284",
+              "name": "精神扰乱",
+              "grade": "FULL_VERIFIED",
+              "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
+              "pointer": "learnsets.pet_000001"
+            }
+          ],
+          "possible_count": 51,
+          "pool_tier": "frozen_learnset",
+          "grade": "FULL_VERIFIED",
+          "grade_legend": "FULL_VERIFIED（冻结学招表）> SIMULATABLE_UNVERIFIED（工程启发式，未实机核验）> UNKNOWN（没有池）",
+          "legality": {
+            "ok": true,
+            "limit": 4,
+            "kept": [],
+            "excluded": [],
+            "proposed": []
+          },
+          "possible_omitted": 45,
+          "possible_omitted_note": "报告里只贴前 6 条可学技能（省体积）；完整池在 buildOpponentCandidates() 的返回值里"
+        },
+        "individual_range": {
+          "known": false,
+          "observed_stats_source": null,
+          "observed_spe": null,
+          "individual_values_visible": false,
+          "scenarios": [],
+          "note": "个体面板 / 天赋 / 性格不在公开面：同一份可见伤害可能由多种个体配置解释 ⇒ 保留多解（03.3）"
+        },
+        "actions": {
+          "observed": [],
+          "plausible_kinds": [
+            "skill",
+            "switch"
+          ],
+          "note": "对手**下一手**不在公开面：这里只登记已打出来的技能与可能出现的动作类别，不预测具体动作"
+        },
+        "sources": [
+          {
+            "source_file": "injected:catalog",
+            "pointer": "catalog.featureFor(pet_000001)",
+            "field": "types/spe",
+            "value": {
+              "types": [
+                "草系"
+              ],
+              "spe": 33
+            },
+            "note": "物种级属性与速度：冻结图鉴（公开数据）"
+          },
+          {
+            "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
+            "pointer": "learnsets.pet_000001",
+            "field": "skill_pool",
+            "value": [
+              "skill_000246",
+              "skill_000249",
+              "skill_000264",
+              "skill_000273",
+              "skill_000282",
+              "skill_000284",
+              "skill_000286",
+              "skill_000290",
+              "skill_000306",
+              "skill_000325",
+              "skill_000331",
+              "skill_000339",
+              "skill_000340",
+              "skill_000342",
+              "skill_000343",
+              "skill_000344",
+              "skill_000345",
+              "skill_000348",
+              "skill_000350",
+              "skill_000351",
+              "skill_000352",
+              "skill_000353",
+              "skill_000359",
+              "skill_000361",
+              "skill_000363",
+              "skill_000367",
+              "skill_000387",
+              "skill_000425",
+              "skill_000458",
+              "skill_000460",
+              "skill_000461",
+              "skill_000483",
+              "skill_000506",
+              "skill_000535",
+              "skill_000566",
+              "skill_000588",
+              "skill_000609",
+              "skill_000614",
+              "skill_000616",
+              "skill_000620",
+              "skill_000621",
+              "skill_000622",
+              "skill_000624",
+              "skill_000640",
+              "skill_000663",
+              "skill_000667",
+              "skill_000705",
+              "skill_000723",
+              "skill_000756",
+              "skill_000775",
+              "skill_000810"
+            ],
+            "note": "可学技能池（等级 FULL_VERIFIED）：冻结学招表（native + blood + stones 的并集）：判据最硬的一份"
+          }
+        ],
+        "unknowns": [
+          "未核实：这只的个体面板 / 天赋 / 性格 / 真实六维 —— 不在公开面（对手只展示物种级数值）",
+          "未核实：这只是否真的在对手队里 —— 公开史里没有它（规则推的）"
+        ],
+        "rules_version": "roco-world-s4-2026-09-10/mobile_s4_candidate_v3",
+        "evidence": [
+          {
+            "source_file": "injected:publicFacts",
+            "pointer": "publicFacts.opponent.revealed_pets",
+            "field": "basis",
+            "value": null,
+            "note": null
+          },
+          {
+            "source_file": "injected:catalog",
+            "pointer": "catalog.featureFor(pet_000001)",
+            "field": "types/spe",
+            "value": {
+              "types": [
+                "草系"
+              ],
+              "spe": 33
+            },
+            "note": "物种级属性与速度：冻结图鉴（公开数据）"
+          },
+          {
+            "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
+            "pointer": "learnsets.pet_000001",
+            "field": "skill_pool",
+            "value": [
+              "skill_000246",
+              "skill_000249",
+              "skill_000264",
+              "skill_000273",
+              "skill_000282",
+              "skill_000284",
+              "skill_000286",
+              "skill_000290",
+              "skill_000306",
+              "skill_000325",
+              "skill_000331",
+              "skill_000339",
+              "skill_000340",
+              "skill_000342",
+              "skill_000343",
+              "skill_000344",
+              "skill_000345",
+              "skill_000348",
+              "skill_000350",
+              "skill_000351",
+              "skill_000352",
+              "skill_000353",
+              "skill_000359",
+              "skill_000361",
+              "skill_000363",
+              "skill_000367",
+              "skill_000387",
+              "skill_000425",
+              "skill_000458",
+              "skill_000460",
+              "skill_000461",
+              "skill_000483",
+              "skill_000506",
+              "skill_000535",
+              "skill_000566",
+              "skill_000588",
+              "skill_000609",
+              "skill_000614",
+              "skill_000616",
+              "skill_000620",
+              "skill_000621",
+              "skill_000622",
+              "skill_000624",
+              "skill_000640",
+              "skill_000663",
+              "skill_000667",
+              "skill_000705",
+              "skill_000723",
+              "skill_000756",
+              "skill_000775",
+              "skill_000810"
+            ],
+            "note": "可学技能池（等级 FULL_VERIFIED）：冻结学招表（native + blood + stones 的并集）：判据最硬的一份"
+          }
+        ]
+      }
+    ],
+    "contradictions": [],
+    "rule_ledger": [
+      {
+        "id": "filter.revealed_types",
+        "kind": "filter",
+        "reads": [
+          "opponent_active.types",
+          "opponent_revealed.types"
+        ],
+        "inputs": [
+          {
+            "species_id": "pet_000002",
+            "types": [
+              "水系"
+            ],
+            "source": "injected:publicFacts.opponent.active"
+          }
+        ],
+        "output": {
+          "matched": 461,
+          "before": 622,
+          "after": 461
+        },
+        "basis": "对手场上那只的属性是屏幕上写着的公开信息；候选的属性来自冻结图鉴。「能不能接住」沿用 RC-302/303 的防御倍率表（整数标度 ×4，未登记的组合键 = unknown，不猜成 1）。",
+        "applied": true,
+        "unverified": [
+          "未核实：候选能不能真的接住 —— 判定只看**属性相性表**（冻结数据），不看具体配招 / 特性（那些不在公开面，也不在候选宇宙的属性数据里）"
+        ]
+      },
+      {
+        "id": "filter.opponent_speed_tier",
+        "kind": "filter",
+        "reads": [
+          "opponent_active.spe+spe_source",
+          "opponent_revealed.spe+spe_source"
+        ],
+        "inputs": [
+          {
+            "revealed": [
+              {
+                "species_id": "pet_000002",
+                "spe": 51,
+                "spe_source": "species-race",
+                "band": "slow",
+                "revealed_via": "field_on_screen"
+              }
+            ],
+            "speed_bands": [
+              "slow"
+            ],
+            "band_source": {
+              "implementation": "RC-303 speedBandFor()（候选宇宙内三分位，工程构造）",
+              "universe_values": 622,
+              "is_game_field": false,
+              "note": "`speed_band` 在三条公开投影里零命中（探针 token_scan）：它是本模块现算的工程分档，换一份图鉴，分位与档位都会变"
+            },
+            "applied_when": "恰好算得出单一速度档",
+            "not_applied_when": "一个档都算不出来 / 快慢两端都亮明"
+          }
+        ],
+        "output": {
+          "matched": 146,
+          "before": 461,
+          "after": 146,
+          "kept_bands": [
+            "slow"
+          ],
+          "band_thresholds": {
+            "implementation": "RC-303 speedBandFor()（候选宇宙内三分位，工程构造）",
+            "universe_values": 622,
+            "is_game_field": false,
+            "note": "`speed_band` 在三条公开投影里零命中（探针 token_scan）：它是本模块现算的工程分档，换一份图鉴，分位与档位都会变"
+          }
+        },
+        "basis": "**亮明的那只的物种速度**（`spe`，出处必须是 `species-panel` / `species-race`）是公开的（引擎 `pet_public()` 的 `stats_source` 词表）；**速度档不是引擎字段** —— 三条公开投影里 `speed_band` 零命中（探针 token_scan），它是本模块调 RC-303 `speedBandFor()` 在候选宇宙内按三分位**现算**的工程构造（换一份图鉴，分位与档位都会变，所以账本里连着阈值一起留痕）。应用口径：**只亮明单一档**时才收窄到同档；一条都没亮明、或快慢两端都亮明时都**不应用**（两端亮明 ⇒ 速度对「他会出什么」不再有区分度；实测照两端留会把 mid 档 237 只全剔掉）。速度值缺失 ⇒ 不应用（记 `not_applied`），池子因此更宽 —— 宽是安全的，窄才是编的。",
+        "applied": true,
+        "unverified": [
+          "未核实：速度档本身 —— 档位来自 RC-303 speedBandFor()（候选宇宙内三分位），是工程分档，不是官方档位表"
+        ]
+      },
+      {
+        "id": "weight.own_speed_tier_match",
+        "kind": "weight",
+        "reads": [
+          "own_team.spe+spe_source"
+        ],
+        "inputs": [
+          {
+            "own_team_bands": {
+              "fast": 1,
+              "mid": 3,
+              "slow": 2
+            },
+            "own_team_size": 6,
+            "own_team_species_level_spe": 6,
+            "mixed_scale_spe_excluded": 0,
+            "pool_bands": {
+              "slow": 146
+            },
+            "usable_bands": [
+              "slow"
+            ],
+            "weight_ratio": [
+              2,
+              1
+            ],
+            "tie_break": [
+              "own_team_band_count desc",
+              "band_name asc"
+            ],
+            "band_source": {
+              "implementation": "RC-303 speedBandFor()（候选宇宙内三分位，工程构造）",
+              "universe_values": 622,
+              "is_game_field": false,
+              "note": "`speed_band` 在三条公开投影里零命中（探针 token_scan）：它是本模块现算的工程分档，换一份图鉴，分位与档位都会变"
+            }
+          }
+        ],
+        "output": {
+          "stratum": "slow",
+          "stratum_size": 146,
+          "before": 146,
+          "after": 146,
+          "weight_ratio": [
+            2,
+            1
+          ]
+        },
+        "basis": "这是玩家自己的信息（自家阵容的速度层次），与对手无关；用它把候选池按速度档**分层**。⚠ 2026-09-30（03.1 · R4 裁决）：本规则**只降权、不把候选压 0** —— 「我方速度层次」不构成任何一只对手候选「不可能上场」的证据，压 0 等于声称不可能，与「同一伤害由两种配置都能解释时两者都留」直接冲突。权重是**声明过的假设**（选中层 : 其它层 = 2 : 1，写进规则的 `assumption`），层内仍然等权。真正允许**排除**候选的只有公开证据（已出技能 / 先手关系 / 可见伤害等）与它的证据 ID，见 `evidence_exclusions`。",
+        "assumption": "对手出场的那只的速度层，与我方阵容里最常见的一层相同 —— **声明过的工程假设**，不是证据：它只把该层候选的相对权重调到 2 : 1，**不排除**任何候选（权重都不为 0）",
+        "applied": true,
+        "unverified": [
+          "未核实：为什么以我方**最多且池子里存在**的速度档为层 —— 这是工程假设（对齐自家最常见、并且真的还有候选可挑的那一层），不是强度结论；并列时按档名定序（tie-break 写在 inputs 里）。它只降权，不排除任何候选"
+        ]
+      }
+    ],
+    "leaked_fields": [],
+    "kind": "public_fact_conditioned",
+    "evidence": [
+      {
+        "source_file": "injected:catalog",
+        "pointer": "catalog.universeSpecies",
+        "field": "universe_size",
+        "value": 622,
+        "note": "均匀基线的分母：从注入数据现数（pack 物种 ∪ owned 物种，按物种去重），不是写死的 48 / 600 / 622"
+      },
+      {
+        "source_file": "injected:catalog",
+        "pointer": "catalog.featureFor()",
+        "field": "members_with_types",
+        "value": 622,
+        "note": "带属性数据的候选数（属性相性规则只能在这部分上判；缺属性的候选按「不知道」处理，不猜成 1 倍）"
+      },
+      {
+        "source_file": "injected:catalog",
+        "pointer": "catalog.featureFor()",
+        "field": "members_with_speed",
+        "value": 622,
+        "note": "带速度值的候选数（速度规则只能在这部分上分层；缺速度的候选不进速度层）"
+      },
+      {
+        "source_file": "injected:publicFacts",
+        "pointer": "publicFacts.opponent.revealed_pets",
+        "field": "revealed_pets",
+        "value": [
+          "pet_000002"
+        ],
+        "note": "对手**已亮明**的精灵（场上那只 + 预览 / 换人亮明的）：身份 + 来源事件（revealed_via / revealed_turn） + 物种级属性与速度（带 spe_source），**没有**配招 / 道具 / 后备血量"
+      },
+      {
+        "source_file": "injected:publicFacts",
+        "pointer": "publicFacts.opponent.active",
+        "field": "visible_panel",
+        "value": {
+          "hp": null,
+          "max_hp": null,
+          "energy": null,
+          "statuses": null,
+          "marks": null
+        },
+        "note": "场上那只的**可见面板**（血条 / 能量 / 异常 / 印记）：三公开投影里都属于公开面（`raw-03.1-engine-public-keys.txt`）；这里只登记读数，本模块不用它做任何强度判断"
+      },
+      {
+        "source_file": "injected:publicFacts",
+        "pointer": "publicFacts.own_team.pets",
+        "field": "own_team_size",
+        "value": 6,
+        "note": "我方阵容（自己的信息）：信念用它做速度档分层，不用它推断对手"
+      },
+      {
+        "source_file": "injected:publicFacts",
+        "pointer": "publicFacts.mode",
+        "field": "team_size",
+        "value": 6,
+        "note": "模式规模（公开规则常量）：六宠口径来自调用方，不在本模块写死"
+      },
+      {
+        "source_file": "injected:publicFacts",
+        "pointer": "publicFacts.provenance",
+        "field": "rules_version",
+        "value": "roco-world-s4-2026-09-10/mobile_s4_candidate_v3",
+        "note": "01.2 观察契约的规则版本（还有 match_id / decision_id）：原样转发，缺就是 null（不自己造）"
+      },
+      {
+        "source_file": "injected:publicFacts",
+        "pointer": "publicFacts",
+        "field": "ignored_public_keys",
+        "value": [],
+        "note": "白名单外的未知键：不进信念（记在这里，不静默丢弃）"
+      },
+      {
+        "source_file": "injected:publicFacts",
+        "pointer": "publicFacts",
+        "field": "candidate_counts",
+        "value": {
+          "observed": 1,
+          "inferred": 23,
+          "dropped": 122
+        },
+        "note": "候选集合：已见（observed）与推出来的（inferred）分开计数；缩减只按 budget.rule，且留下被丢那部分的分布"
+      }
+    ],
+    "unverified": [
+      "未核实：对手**下一手** —— 动作不在公开面，候选只说明「可能是谁 / 可能带什么」，不预测出招",
+      "未核实：候选之间的强弱 —— 本协议不给排序、不给权重（权重在 `revealedConditioned()` 里，且只是基线）",
+      "未核实：被预算裁掉的 122 只（按 observed_first（按 slot 升序）→ inferred（①有冻结学招表 ②与已亮明速度档同档 ③species_id 升序））—— 它们的分布留在 budget.pool_summary.dropped_by_band 里，没有消失"
+    ],
+    "sample_note": "报告只贴前 2 条候选（共 24 条）：完整候选集合由 buildOpponentCandidates() 返回，报告不复制整份（否则 24 × 45 条技能会把报告变成噪声）"
+  },
   "criteria": [
     {
       "label": "均匀基线的分母来自数据（改数据 ⇒ 分母与 1/N 跟着变）",
@@ -1858,18 +2863,36 @@
     },
     {
       "label": "公开事实越界（隐藏字段）必须拒绝整个输入",
-      "criteria": "公开事实的键必须落在 `PUBLIC_FACT_FIELDS` 白名单里；出现 `HIDDEN_FACT_FIELDS`（对手配招 / 后备 / 道具 / 体力数值 / 性格天赋 / 构建）里任何一个键 ⇒ **拒绝整个输入**（`available:false` + 点名路径）⇒ `PUBLIC_FACTS_BOUNDARY`（红）。静默忽略也算红：「忽略」在产出里看不出来，「拒绝」才看得出来。",
+      "criteria": "公开事实的键必须落在 `PUBLIC_FACT_FIELDS` 白名单里；出现 `HIDDEN_FACT_FIELDS`（对手配招 / 后备身份 / 道具 / 性格天赋 / 构建 / 裸速度值）里任何一个键 ⇒ **拒绝整个输入**（`available:false` + 点名路径）⇒ `PUBLIC_FACTS_BOUNDARY`（红）。静默忽略也算红：「忽略」在产出里看不出来，「拒绝」才看得出来。口径不是抄来的：见 `03.1` 的真引擎三面 dump。",
       "actual": "available=true、applied=3 条规则",
       "ok": true
     },
     {
-      "label": "每条规则给出 {输入 → 输出 → 依据}，且可复算",
+      "label": "公开事实条件化的每条规则都可复算（输入 → 输出 → 依据）",
       "criteria": "每条规则必须给出 `{id, kind, reads[], inputs[], output, basis, applied}`；`applied:true` 的规则必须给出非空的 `output`（匹配数 / 层大小）。规则账本缺字段、或 `applied:true` 却没有输出 ⇒ `RULE_LEDGER_INCOMPLETE`（红）。",
       "actual": [
         "filter.revealed_types: applied=true matched=461",
         "filter.opponent_speed_tier: applied=true matched=146",
         "weight.own_speed_tier_match: applied=true matched=146"
       ],
+      "ok": true
+    },
+    {
+      "label": "「已亮明」必带来源事件、速度必带物种级出处（缺来源即拒绝）",
+      "criteria": "公开事实里每一条「已亮明」的成员都必须带**来源事件**（`revealed_via` ∈ opening_preview / switch / replacement + 整数 `revealed_turn`），速度必须带**物种级出处**（`spe_source` / `stats_source` ∈ species-panel / species-race）。缺来源 ⇒ 拒绝整个输入（`REVEALED_NO_PROVENANCE` / `REVEALED_INDIVIDUAL_FACTS`）。为什么：输入形状上「公开亮明的整队」与「从私有 state 直读的整队」长得一模一样，只有来源能区分它们。",
+      "actual": "available=true、provenance={\"match_id\":\"m-fixture0301\",\"rules_version\":\"roco-world-s4-2026-09-10/mobile_s4_candidate_v3\",\"decision_id\":\"m-fixture0301:v1\"}、已亮明 1 只（各带 revealed_via / spe_source）",
+      "ok": true
+    },
+    {
+      "label": "假设不许把候选压 0；权重必须声明它是基线还是假设",
+      "criteria": "条件化信念的逐条权重**不许出现 0**：仅凭「我方阵容的速度层次」这类假设把候选压 0 = 声称这只「不可能上场」，而假设不是证据。允许的排除只有**公开证据**（已出技能 / 先手关系 / 可见伤害…）并必须把证据 ID 写进排除理由；违反 ⇒ `ASSUMPTION_ZEROES_CANDIDATE`（红）。权重还必须显式声明它是哪种基线（`weights.basis` ∈ own_speed_tier_downweight / uniform_over_pool），缺声明 ⇒ `WEIGHT_BASIS_NOT_DECLARED`（红）。",
+      "actual": "basis=own_speed_tier_downweight、zero_rows=0、ratio=[2,1]",
+      "ok": true
+    },
+    {
+      "label": "候选不许带已知不合法的技能组合（独立复算 legality）",
+      "criteria": "候选里的技能组合必须**合法**：`skills.legality.kept` 不超过四技能、无重复、每条都在这只的可学池里，而且与 `legalSkillLoadout()` 的独立复算一致；违反 ⇒ `ILLEGAL_LOADOUT_IN_CANDIDATES`（红）。已知不合法的组合**一个都不许进候选**，被排除的必须逐条写出理由（不静默丢）。",
+      "actual": "候选 24 条、不合法组合 0 条（都不进 kept）",
       "ok": true
     },
     {
@@ -1929,37 +2952,37 @@
     {
       "where": "beliefs.revealed_conditioned（输入含 opponent.revealed_pets[0].moves）",
       "mutation": "把越界输入静默过滤掉、仍然 available:true 并给出权重",
-      "criterion": "公开事实的键必须落在 `PUBLIC_FACT_FIELDS` 白名单里；出现 `HIDDEN_FACT_FIELDS`（对手配招 / 后备 / 道具 / 体力数值 / 性格天赋 / 构建）里任何一个键 ⇒ **拒绝整个输入**（`available:false` + 点名路径）⇒ `PUBLIC_FACTS_BOUNDARY`（红）。静默忽略也算红：「忽略」在产出里看不出来，「拒绝」才看得出来。",
+      "criterion": "公开事实的键必须落在 `PUBLIC_FACT_FIELDS` 白名单里；出现 `HIDDEN_FACT_FIELDS`（对手配招 / 后备身份 / 道具 / 性格天赋 / 构建 / 裸速度值）里任何一个键 ⇒ **拒绝整个输入**（`available:false` + 点名路径）⇒ `PUBLIC_FACTS_BOUNDARY`（红）。静默忽略也算红：「忽略」在产出里看不出来，「拒绝」才看得出来。口径不是抄来的：见 `03.1` 的真引擎三面 dump。",
       "expect_code": "PUBLIC_FACTS_BOUNDARY",
-      "actual": "[\"[AVAILABILITY_SHAPE] beliefs.revealed_conditioned.unknown_reason：available:true 却带着 unknown_reason：可用与未知不能同时声明\",\"[PUBLIC_FACTS_BOUNDARY] beliefs.revealed_conditioned.leaked_fields：公开事实越界（opponent.revealed_pets[0].moves）却仍然 available:true：越界必须拒绝整个输入，不许静默过滤后照样出权重\",\"[RULE_LEDGER_INCOMPLETE] beliefs.revealed_conditioned.rule_ledger：规则账本必须逐条列出 3 条规则（含 not_applied 的），实际 0 条\"]"
+      "actual": "[\"[AVAILABILITY_SHAPE] beliefs.revealed_conditioned.unknown_reason：available:true 却带着 unknown_reason：可用与未知不能同时声明\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.basis：权重依据 undefined 不在 non_informative_uniform_baseline / uniform_over_pool_baseline / own_speed_tier_downweight / measured_frequency_distribution：凡带 weights 的产出都必须声明它是哪种基线 / 假设 / 实测（否则读的人只能自己猜那串小数是什么）\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.is_probability：权重必须显式声明 is_probability:false（权重合计 1 只是归一化，不是‹概率›预测）\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.baseline_declaration：权重必须带一句人读的边界声明（baseline_declaration）：这份权重能用来做什么、不能用来做什么\",\"[PUBLIC_FACTS_BOUNDARY] beliefs.revealed_conditioned.leaked_fields：公开事实越界（HIDDEN_FIELD:opponent.revealed_pets[0].moves）却仍然 available:true：越界必须拒绝整个输入，不许静默过滤后照样出权重\",\"[RULE_LEDGER_INCOMPLETE] beliefs.revealed_conditioned.rule_ledger：规则账本必须逐条列出 3 条规则（含 not_applied 的），实际 0 条\",\"[PROVENANCE_MISSING] beliefs.revealed_conditioned.provenance：条件化信念必须带 provenance（match_id / rules_version / decision_id，缺就是 null）：每项候选都要能说清它属于哪一局、哪份规则\"]"
     },
     {
       "where": "beliefs.revealed_conditioned（输入含 opponent.active.loadout）",
       "mutation": "把越界输入静默过滤掉、仍然 available:true 并给出权重",
-      "criterion": "公开事实的键必须落在 `PUBLIC_FACT_FIELDS` 白名单里；出现 `HIDDEN_FACT_FIELDS`（对手配招 / 后备 / 道具 / 体力数值 / 性格天赋 / 构建）里任何一个键 ⇒ **拒绝整个输入**（`available:false` + 点名路径）⇒ `PUBLIC_FACTS_BOUNDARY`（红）。静默忽略也算红：「忽略」在产出里看不出来，「拒绝」才看得出来。",
+      "criterion": "公开事实的键必须落在 `PUBLIC_FACT_FIELDS` 白名单里；出现 `HIDDEN_FACT_FIELDS`（对手配招 / 后备身份 / 道具 / 性格天赋 / 构建 / 裸速度值）里任何一个键 ⇒ **拒绝整个输入**（`available:false` + 点名路径）⇒ `PUBLIC_FACTS_BOUNDARY`（红）。静默忽略也算红：「忽略」在产出里看不出来，「拒绝」才看得出来。口径不是抄来的：见 `03.1` 的真引擎三面 dump。",
       "expect_code": "PUBLIC_FACTS_BOUNDARY",
-      "actual": "[\"[AVAILABILITY_SHAPE] beliefs.revealed_conditioned.unknown_reason：available:true 却带着 unknown_reason：可用与未知不能同时声明\",\"[PUBLIC_FACTS_BOUNDARY] beliefs.revealed_conditioned.leaked_fields：公开事实越界（opponent.active[0].loadout）却仍然 available:true：越界必须拒绝整个输入，不许静默过滤后照样出权重\",\"[RULE_LEDGER_INCOMPLETE] beliefs.revealed_conditioned.rule_ledger：规则账本必须逐条列出 3 条规则（含 not_applied 的），实际 0 条\"]"
+      "actual": "[\"[AVAILABILITY_SHAPE] beliefs.revealed_conditioned.unknown_reason：available:true 却带着 unknown_reason：可用与未知不能同时声明\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.basis：权重依据 undefined 不在 non_informative_uniform_baseline / uniform_over_pool_baseline / own_speed_tier_downweight / measured_frequency_distribution：凡带 weights 的产出都必须声明它是哪种基线 / 假设 / 实测（否则读的人只能自己猜那串小数是什么）\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.is_probability：权重必须显式声明 is_probability:false（权重合计 1 只是归一化，不是‹概率›预测）\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.baseline_declaration：权重必须带一句人读的边界声明（baseline_declaration）：这份权重能用来做什么、不能用来做什么\",\"[PUBLIC_FACTS_BOUNDARY] beliefs.revealed_conditioned.leaked_fields：公开事实越界（HIDDEN_FIELD:opponent.active.loadout）却仍然 available:true：越界必须拒绝整个输入，不许静默过滤后照样出权重\",\"[RULE_LEDGER_INCOMPLETE] beliefs.revealed_conditioned.rule_ledger：规则账本必须逐条列出 3 条规则（含 not_applied 的），实际 0 条\",\"[PROVENANCE_MISSING] beliefs.revealed_conditioned.provenance：条件化信念必须带 provenance（match_id / rules_version / decision_id，缺就是 null）：每项候选都要能说清它属于哪一局、哪份规则\"]"
     },
     {
       "where": "beliefs.revealed_conditioned（输入含 opponent.revealed_pets[0].hp）",
       "mutation": "把越界输入静默过滤掉、仍然 available:true 并给出权重",
-      "criterion": "公开事实的键必须落在 `PUBLIC_FACT_FIELDS` 白名单里；出现 `HIDDEN_FACT_FIELDS`（对手配招 / 后备 / 道具 / 体力数值 / 性格天赋 / 构建）里任何一个键 ⇒ **拒绝整个输入**（`available:false` + 点名路径）⇒ `PUBLIC_FACTS_BOUNDARY`（红）。静默忽略也算红：「忽略」在产出里看不出来，「拒绝」才看得出来。",
+      "criterion": "公开事实的键必须落在 `PUBLIC_FACT_FIELDS` 白名单里；出现 `HIDDEN_FACT_FIELDS`（对手配招 / 后备身份 / 道具 / 性格天赋 / 构建 / 裸速度值）里任何一个键 ⇒ **拒绝整个输入**（`available:false` + 点名路径）⇒ `PUBLIC_FACTS_BOUNDARY`（红）。静默忽略也算红：「忽略」在产出里看不出来，「拒绝」才看得出来。口径不是抄来的：见 `03.1` 的真引擎三面 dump。",
       "expect_code": "PUBLIC_FACTS_BOUNDARY",
-      "actual": "[\"[AVAILABILITY_SHAPE] beliefs.revealed_conditioned.unknown_reason：available:true 却带着 unknown_reason：可用与未知不能同时声明\",\"[PUBLIC_FACTS_BOUNDARY] beliefs.revealed_conditioned.leaked_fields：公开事实越界（opponent.revealed_pets[0].hp / opponent.revealed_pets[0].max_hp）却仍然 available:true：越界必须拒绝整个输入，不许静默过滤后照样出权重\",\"[RULE_LEDGER_INCOMPLETE] beliefs.revealed_conditioned.rule_ledger：规则账本必须逐条列出 3 条规则（含 not_applied 的），实际 0 条\"]"
+      "actual": "[\"[AVAILABILITY_SHAPE] beliefs.revealed_conditioned.unknown_reason：available:true 却带着 unknown_reason：可用与未知不能同时声明\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.basis：权重依据 undefined 不在 non_informative_uniform_baseline / uniform_over_pool_baseline / own_speed_tier_downweight / measured_frequency_distribution：凡带 weights 的产出都必须声明它是哪种基线 / 假设 / 实测（否则读的人只能自己猜那串小数是什么）\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.is_probability：权重必须显式声明 is_probability:false（权重合计 1 只是归一化，不是‹概率›预测）\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.baseline_declaration：权重必须带一句人读的边界声明（baseline_declaration）：这份权重能用来做什么、不能用来做什么\",\"[PUBLIC_FACTS_BOUNDARY] beliefs.revealed_conditioned.leaked_fields：公开事实越界（HIDDEN_FIELD:opponent.revealed_pets[0].hp / HIDDEN_FIELD:opponent.revealed_pets[0].max_hp）却仍然 available:true：越界必须拒绝整个输入，不许静默过滤后照样出权重\",\"[RULE_LEDGER_INCOMPLETE] beliefs.revealed_conditioned.rule_ledger：规则账本必须逐条列出 3 条规则（含 not_applied 的），实际 0 条\",\"[PROVENANCE_MISSING] beliefs.revealed_conditioned.provenance：条件化信念必须带 provenance（match_id / rules_version / decision_id，缺就是 null）：每项候选都要能说清它属于哪一局、哪份规则\"]"
     },
     {
       "where": "beliefs.revealed_conditioned（输入含 opponent_bench）",
       "mutation": "把越界输入静默过滤掉、仍然 available:true 并给出权重",
-      "criterion": "公开事实的键必须落在 `PUBLIC_FACT_FIELDS` 白名单里；出现 `HIDDEN_FACT_FIELDS`（对手配招 / 后备 / 道具 / 体力数值 / 性格天赋 / 构建）里任何一个键 ⇒ **拒绝整个输入**（`available:false` + 点名路径）⇒ `PUBLIC_FACTS_BOUNDARY`（红）。静默忽略也算红：「忽略」在产出里看不出来，「拒绝」才看得出来。",
+      "criterion": "公开事实的键必须落在 `PUBLIC_FACT_FIELDS` 白名单里；出现 `HIDDEN_FACT_FIELDS`（对手配招 / 后备身份 / 道具 / 性格天赋 / 构建 / 裸速度值）里任何一个键 ⇒ **拒绝整个输入**（`available:false` + 点名路径）⇒ `PUBLIC_FACTS_BOUNDARY`（红）。静默忽略也算红：「忽略」在产出里看不出来，「拒绝」才看得出来。口径不是抄来的：见 `03.1` 的真引擎三面 dump。",
       "expect_code": "PUBLIC_FACTS_BOUNDARY",
-      "actual": "[\"[AVAILABILITY_SHAPE] beliefs.revealed_conditioned.unknown_reason：available:true 却带着 unknown_reason：可用与未知不能同时声明\",\"[PUBLIC_FACTS_BOUNDARY] beliefs.revealed_conditioned.leaked_fields：公开事实越界（opponent_bench）却仍然 available:true：越界必须拒绝整个输入，不许静默过滤后照样出权重\",\"[RULE_LEDGER_INCOMPLETE] beliefs.revealed_conditioned.rule_ledger：规则账本必须逐条列出 3 条规则（含 not_applied 的），实际 0 条\"]"
+      "actual": "[\"[AVAILABILITY_SHAPE] beliefs.revealed_conditioned.unknown_reason：available:true 却带着 unknown_reason：可用与未知不能同时声明\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.basis：权重依据 undefined 不在 non_informative_uniform_baseline / uniform_over_pool_baseline / own_speed_tier_downweight / measured_frequency_distribution：凡带 weights 的产出都必须声明它是哪种基线 / 假设 / 实测（否则读的人只能自己猜那串小数是什么）\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.is_probability：权重必须显式声明 is_probability:false（权重合计 1 只是归一化，不是‹概率›预测）\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.baseline_declaration：权重必须带一句人读的边界声明（baseline_declaration）：这份权重能用来做什么、不能用来做什么\",\"[PUBLIC_FACTS_BOUNDARY] beliefs.revealed_conditioned.leaked_fields：公开事实越界（HIDDEN_FIELD:opponent_bench）却仍然 available:true：越界必须拒绝整个输入，不许静默过滤后照样出权重\",\"[RULE_LEDGER_INCOMPLETE] beliefs.revealed_conditioned.rule_ledger：规则账本必须逐条列出 3 条规则（含 not_applied 的），实际 0 条\",\"[PROVENANCE_MISSING] beliefs.revealed_conditioned.provenance：条件化信念必须带 provenance（match_id / rules_version / decision_id，缺就是 null）：每项候选都要能说清它属于哪一局、哪份规则\"]"
     },
     {
       "where": "beliefs.revealed_conditioned（输入含 own_team.pets[0].nature）",
       "mutation": "把越界输入静默过滤掉、仍然 available:true 并给出权重",
-      "criterion": "公开事实的键必须落在 `PUBLIC_FACT_FIELDS` 白名单里；出现 `HIDDEN_FACT_FIELDS`（对手配招 / 后备 / 道具 / 体力数值 / 性格天赋 / 构建）里任何一个键 ⇒ **拒绝整个输入**（`available:false` + 点名路径）⇒ `PUBLIC_FACTS_BOUNDARY`（红）。静默忽略也算红：「忽略」在产出里看不出来，「拒绝」才看得出来。",
+      "criterion": "公开事实的键必须落在 `PUBLIC_FACT_FIELDS` 白名单里；出现 `HIDDEN_FACT_FIELDS`（对手配招 / 后备身份 / 道具 / 性格天赋 / 构建 / 裸速度值）里任何一个键 ⇒ **拒绝整个输入**（`available:false` + 点名路径）⇒ `PUBLIC_FACTS_BOUNDARY`（红）。静默忽略也算红：「忽略」在产出里看不出来，「拒绝」才看得出来。口径不是抄来的：见 `03.1` 的真引擎三面 dump。",
       "expect_code": "PUBLIC_FACTS_BOUNDARY",
-      "actual": "[\"[AVAILABILITY_SHAPE] beliefs.revealed_conditioned.unknown_reason：available:true 却带着 unknown_reason：可用与未知不能同时声明\",\"[PUBLIC_FACTS_BOUNDARY] beliefs.revealed_conditioned.leaked_fields：公开事实越界（own_team.pets[0].nature）却仍然 available:true：越界必须拒绝整个输入，不许静默过滤后照样出权重\",\"[RULE_LEDGER_INCOMPLETE] beliefs.revealed_conditioned.rule_ledger：规则账本必须逐条列出 3 条规则（含 not_applied 的），实际 0 条\"]"
+      "actual": "[\"[AVAILABILITY_SHAPE] beliefs.revealed_conditioned.unknown_reason：available:true 却带着 unknown_reason：可用与未知不能同时声明\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.basis：权重依据 undefined 不在 non_informative_uniform_baseline / uniform_over_pool_baseline / own_speed_tier_downweight / measured_frequency_distribution：凡带 weights 的产出都必须声明它是哪种基线 / 假设 / 实测（否则读的人只能自己猜那串小数是什么）\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.is_probability：权重必须显式声明 is_probability:false（权重合计 1 只是归一化，不是‹概率›预测）\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.baseline_declaration：权重必须带一句人读的边界声明（baseline_declaration）：这份权重能用来做什么、不能用来做什么\",\"[PUBLIC_FACTS_BOUNDARY] beliefs.revealed_conditioned.leaked_fields：公开事实越界（HIDDEN_FIELD:own_team.pets[0].nature）却仍然 available:true：越界必须拒绝整个输入，不许静默过滤后照样出权重\",\"[RULE_LEDGER_INCOMPLETE] beliefs.revealed_conditioned.rule_ledger：规则账本必须逐条列出 3 条规则（含 not_applied 的），实际 0 条\",\"[PROVENANCE_MISSING] beliefs.revealed_conditioned.provenance：条件化信念必须带 provenance（match_id / rules_version / decision_id，缺就是 null）：每项候选都要能说清它属于哪一局、哪份规则\"]"
     },
     {
       "where": "beliefs.revealed_conditioned.rule_ledger[1].basis",
@@ -1987,28 +3010,28 @@
       "mutation": "把没有来源的频次数据改成 available:true + kind=measured_frequency（用均匀冒充频次）",
       "criterion": "`frequencyBelief()` 只在注入的频次数据**带可核对来源**（顶层实测声明 + 每行 url / 仓内文件 + 日期 + scope + revision）时才 `available:true`；没有来源 / 没有行标签的一律**拒绝**并在 `unknown_reason` 里写清「缺什么、去哪拿」。用均匀分布冒充频次 ⇒ `FREQUENCY_FAKED`（红）—— 这是本 RC 最想防的那一个错误。",
       "expect_code": "FREQUENCY_FAKED",
-      "actual": "[\"[AVAILABILITY_SHAPE] beliefs.frequency.weights.rows：逐条权重合计必须恰好 = 1（分数），实际 1/4\",\"[AVAILABILITY_SHAPE] beliefs.frequency.unknown_reason：available:true 却带着 unknown_reason：可用与未知不能同时声明\",\"[FREQUENCY_FAKED] beliefs.frequency.declared_source：频次信念可用却没有来源声明：没有来源的频次就是编的数据\",\"[FREQUENCY_FAKED] beliefs.frequency.total_count：频次信念必须给出正整数样本量，实际 null\"]"
+      "actual": "[\"[AVAILABILITY_SHAPE] beliefs.frequency.weights.rows：逐条权重合计必须恰好 = 1（分数），实际 1/4\",\"[AVAILABILITY_SHAPE] beliefs.frequency.unknown_reason：available:true 却带着 unknown_reason：可用与未知不能同时声明\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.frequency.weights.basis：权重依据 undefined 不在 non_informative_uniform_baseline / uniform_over_pool_baseline / own_speed_tier_downweight / measured_frequency_distribution：凡带 weights 的产出都必须声明它是哪种基线 / 假设 / 实测（否则读的人只能自己猜那串小数是什么）\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.frequency.weights.is_probability：权重必须显式声明 is_probability:false（权重合计 1 只是归一化，不是‹概率›预测）\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.frequency.weights.baseline_declaration：权重必须带一句人读的边界声明（baseline_declaration）：这份权重能用来做什么、不能用来做什么\",\"[FREQUENCY_FAKED] beliefs.frequency.declared_source：频次信念可用却没有来源声明：没有来源的频次就是编的数据\",\"[FREQUENCY_FAKED] beliefs.frequency.total_count：频次信念必须给出正整数样本量，实际 null\"]"
     },
     {
       "where": "beliefs.revealed_conditioned.weights",
       "mutation": "unknown 的信念带上 weights",
       "criterion": "`available:true` 的信念必须给出精确权重（分子 / 分母整数对），归一化后必须**恰好**合计 1（分数运算，不是浮点近似）；`available:false` 的信念必须 `weights:null` 且没有任何数值 / 量纲 ⇒ `AVAILABILITY_SHAPE`（红）。unknown 不许拿一个数（含 0）顶替。",
       "expect_code": "UNKNOWN_BELIEF_HAS_VALUE",
-      "actual": "[\"[UNKNOWN_BELIEF_HAS_VALUE] beliefs.revealed_conditioned.weights：available:false 却给了权重：unknown 不许拿一个数（含 0）顶替\"]"
+      "actual": "[\"[UNKNOWN_BELIEF_HAS_VALUE] beliefs.revealed_conditioned.weights：available:false 却给了权重：unknown 不许拿一个数（含 0）顶替\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.basis：权重依据 undefined 不在 non_informative_uniform_baseline / uniform_over_pool_baseline / own_speed_tier_downweight / measured_frequency_distribution：凡带 weights 的产出都必须声明它是哪种基线 / 假设 / 实测（否则读的人只能自己猜那串小数是什么）\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.is_probability：权重必须显式声明 is_probability:false（权重合计 1 只是归一化，不是‹概率›预测）\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.baseline_declaration：权重必须带一句人读的边界声明（baseline_declaration）：这份权重能用来做什么、不能用来做什么\",\"[PROVENANCE_MISSING] beliefs.revealed_conditioned.provenance：条件化信念必须带 provenance（match_id / rules_version / decision_id，缺就是 null）：每项候选都要能说清它属于哪一局、哪份规则\"]"
     },
     {
       "where": "beliefs.revealed_conditioned.weights=0",
       "mutation": "unknown 的信念带上 weights=0",
       "criterion": "`available:true` 的信念必须给出精确权重（分子 / 分母整数对），归一化后必须**恰好**合计 1（分数运算，不是浮点近似）；`available:false` 的信念必须 `weights:null` 且没有任何数值 / 量纲 ⇒ `AVAILABILITY_SHAPE`（红）。unknown 不许拿一个数（含 0）顶替。",
       "expect_code": "UNKNOWN_BELIEF_HAS_VALUE",
-      "actual": "[\"[UNKNOWN_BELIEF_HAS_VALUE] beliefs.revealed_conditioned.weights：available:false 却给了权重：unknown 不许拿一个数（含 0）顶替\"]"
+      "actual": "[\"[UNKNOWN_BELIEF_HAS_VALUE] beliefs.revealed_conditioned.weights：available:false 却给了权重：unknown 不许拿一个数（含 0）顶替\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.basis：权重依据 undefined 不在 non_informative_uniform_baseline / uniform_over_pool_baseline / own_speed_tier_downweight / measured_frequency_distribution：凡带 weights 的产出都必须声明它是哪种基线 / 假设 / 实测（否则读的人只能自己猜那串小数是什么）\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.is_probability：权重必须显式声明 is_probability:false（权重合计 1 只是归一化，不是‹概率›预测）\",\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.baseline_declaration：权重必须带一句人读的边界声明（baseline_declaration）：这份权重能用来做什么、不能用来做什么\",\"[PROVENANCE_MISSING] beliefs.revealed_conditioned.provenance：条件化信念必须带 provenance（match_id / rules_version / decision_id，缺就是 null）：每项候选都要能说清它属于哪一局、哪份规则\"]"
     },
     {
       "where": "beliefs.revealed_conditioned.pool_ratio",
       "mutation": "unknown 的信念带上 pool_ratio",
       "criterion": "`available:true` 的信念必须给出精确权重（分子 / 分母整数对），归一化后必须**恰好**合计 1（分数运算，不是浮点近似）；`available:false` 的信念必须 `weights:null` 且没有任何数值 / 量纲 ⇒ `AVAILABILITY_SHAPE`（红）。unknown 不许拿一个数（含 0）顶替。",
       "expect_code": "UNKNOWN_BELIEF_HAS_VALUE",
-      "actual": "[\"[UNKNOWN_BELIEF_HAS_VALUE] beliefs.revealed_conditioned.pool_ratio：available:false 却给了池子占比\"]"
+      "actual": "[\"[UNKNOWN_BELIEF_HAS_VALUE] beliefs.revealed_conditioned.pool_ratio：available:false 却给了池子占比\",\"[PROVENANCE_MISSING] beliefs.revealed_conditioned.provenance：条件化信念必须带 provenance（match_id / rules_version / decision_id，缺就是 null）：每项候选都要能说清它属于哪一局、哪份规则\"]"
     },
     {
       "where": "beliefs.revealed_conditioned.weights.rows[0]",
@@ -2051,6 +3074,76 @@
       "criterion": "把 `src/coach/opponent-belief.mjs` 的在线段（`ONLINE_SECTION_MARKER` 之前）逐行取出、剥掉行注释与块注释，再对每行做 `FORBIDDEN_ONLINE_PATTERNS[].pattern` 的子串匹配：命中即 `ONLINE_ENGINE_CALL` / `ONLINE_SUBPROCESS_CALL`（红）。判据是**源码结构**，不是注释声明。",
       "expect_code": "ONLINE_ENGINE_CALL",
       "actual": "[\"ONLINE_ENGINE_CALL:step_joint\"]"
+    },
+    {
+      "where": "publicFacts.opponent.revealed_pets[]",
+      "mutation": "把对手隐藏整队（6 只、无来源事件）当「已亮明」传进来",
+      "criterion": "公开事实里每一条「已亮明」的成员都必须带**来源事件**（`revealed_via` ∈ opening_preview / switch / replacement + 整数 `revealed_turn`），速度必须带**物种级出处**（`spe_source` / `stats_source` ∈ species-panel / species-race）。缺来源 ⇒ 拒绝整个输入（`REVEALED_NO_PROVENANCE` / `REVEALED_INDIVIDUAL_FACTS`）。为什么：输入形状上「公开亮明的整队」与「从私有 state 直读的整队」长得一模一样，只有来源能区分它们。",
+      "expect_code": "REVEALED_NO_PROVENANCE",
+      "actual": "{\"reason\":\"缺**亮明来源**：某条「已亮明」的成员没有 `revealed_via`（合法值：opening_preview / switch / r\",\"leaked\":[\"NO_PROVENANCE:injected:publicFacts.opponent.revealed_pets[0].revealed_via\",\"NO_PROVENANCE:injected:publicFacts.opponent.revealed_pets[1].revealed_via\",\"NO_PROVENANCE:injected:publicFacts.opponent.revealed_pets[2].revealed_via\",\"NO_PROVENANCE:injected:publicFacts.opponent.revealed_pets[3].revealed_via\",\"NO_PROVENANCE:injected:publicFacts.opponent.revealed_pets[4].revealed_via\",\"NO_PROVENANCE:injected:publicFacts.opponent.revealed_pets[5].revealed_via\"]}"
+    },
+    {
+      "where": "publicFacts.opponent.active.spe_source",
+      "mutation": "把个体面板速度（individual-snapshot）当公开速度传进来",
+      "criterion": "公开事实里每一条「已亮明」的成员都必须带**来源事件**（`revealed_via` ∈ opening_preview / switch / replacement + 整数 `revealed_turn`），速度必须带**物种级出处**（`spe_source` / `stats_source` ∈ species-panel / species-race）。缺来源 ⇒ 拒绝整个输入（`REVEALED_NO_PROVENANCE` / `REVEALED_INDIVIDUAL_FACTS`）。为什么：输入形状上「公开亮明的整队」与「从私有 state 直读的整队」长得一模一样，只有来源能区分它们。",
+      "expect_code": "REVEALED_INDIVIDUAL_FACTS",
+      "actual": "**个体真值越界**：注入的速度 / 面板带的是个体口径的出处（`stats_source` / `spe_source` 为 `indiv"
+    },
+    {
+      "where": "publicFacts.opponent.bench[0].pet_id",
+      "mutation": "未亮明的后备行补一个 pet_id",
+      "criterion": "公开事实里每一条「已亮明」的成员都必须带**来源事件**（`revealed_via` ∈ opening_preview / switch / replacement + 整数 `revealed_turn`），速度必须带**物种级出处**（`spe_source` / `stats_source` ∈ species-panel / species-race）。缺来源 ⇒ 拒绝整个输入（`REVEALED_NO_PROVENANCE` / `REVEALED_INDIVIDUAL_FACTS`）。为什么：输入形状上「公开亮明的整队」与「从私有 state 直读的整队」长得一模一样，只有来源能区分它们。",
+      "expect_code": "PUBLIC_FACTS_BOUNDARY",
+      "actual": "[\"BENCH_IDENTITY:opponent.bench[0].pet_id\"]"
+    },
+    {
+      "where": "beliefs.revealed_conditioned.weights.rows[0]",
+      "mutation": "把一条候选的权重压成 0/1（声称它不可能上场）",
+      "criterion": "条件化信念的逐条权重**不许出现 0**：仅凭「我方阵容的速度层次」这类假设把候选压 0 = 声称这只「不可能上场」，而假设不是证据。允许的排除只有**公开证据**（已出技能 / 先手关系 / 可见伤害…）并必须把证据 ID 写进排除理由；违反 ⇒ `ASSUMPTION_ZEROES_CANDIDATE`（红）。权重还必须显式声明它是哪种基线（`weights.basis` ∈ own_speed_tier_downweight / uniform_over_pool），缺声明 ⇒ `WEIGHT_BASIS_NOT_DECLARED`（红）。",
+      "expect_code": "ASSUMPTION_ZEROES_CANDIDATE",
+      "actual": "[\"[AVAILABILITY_SHAPE] beliefs.revealed_conditioned.weights.rows：逐条权重合计必须恰好 = 1（分数），实际 808/809\",\"[ASSUMPTION_ZEROES_CANDIDATE] beliefs.revealed_conditioned.weights.rows：有 1 条候选权重为 0（例如 \\\"pet_000001\\\"）：仅凭假设（我方速度层次等）把候选压 0 = 声称这只不可能上场；排除只能来自公开证据并写明证据 ID\"]"
+    },
+    {
+      "where": "beliefs.revealed_conditioned.weights.basis",
+      "mutation": "把「这份权重是基线还是假设」这一栏删掉",
+      "criterion": "条件化信念的逐条权重**不许出现 0**：仅凭「我方阵容的速度层次」这类假设把候选压 0 = 声称这只「不可能上场」，而假设不是证据。允许的排除只有**公开证据**（已出技能 / 先手关系 / 可见伤害…）并必须把证据 ID 写进排除理由；违反 ⇒ `ASSUMPTION_ZEROES_CANDIDATE`（红）。权重还必须显式声明它是哪种基线（`weights.basis` ∈ own_speed_tier_downweight / uniform_over_pool），缺声明 ⇒ `WEIGHT_BASIS_NOT_DECLARED`（红）。",
+      "expect_code": "WEIGHT_BASIS_NOT_DECLARED",
+      "actual": "[\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.revealed_conditioned.weights.basis：权重依据 undefined 不在 non_informative_uniform_baseline / uniform_over_pool_baseline / own_speed_tier_downweight / measured_frequency_distribution：凡带 weights 的产出都必须声明它是哪种基线 / 假设 / 实测（否则读的人只能自己猜那串小数是什么）\"]"
+    },
+    {
+      "where": "beliefs.revealed_conditioned.provenance.rules_version",
+      "mutation": "把观察契约三件套整个拿掉",
+      "criterion": "公开事实里每一条「已亮明」的成员都必须带**来源事件**（`revealed_via` ∈ opening_preview / switch / replacement + 整数 `revealed_turn`），速度必须带**物种级出处**（`spe_source` / `stats_source` ∈ species-panel / species-race）。缺来源 ⇒ 拒绝整个输入（`REVEALED_NO_PROVENANCE` / `REVEALED_INDIVIDUAL_FACTS`）。为什么：输入形状上「公开亮明的整队」与「从私有 state 直读的整队」长得一模一样，只有来源能区分它们。",
+      "expect_code": "PROVENANCE_MISSING",
+      "actual": "[\"[PROVENANCE_MISSING] beliefs.revealed_conditioned.provenance.rules_version：没有规则版本（01.2 契约的 rules_version）：候选无法绑定到具体规则版本 ⇒ 必须在 unverified 里点名\"]"
+    },
+    {
+      "where": "candidates[pet_000417].skills.legality.kept",
+      "mutation": "把重复技能塞回 kept（不合法组合进候选）",
+      "criterion": "候选里的技能组合必须**合法**：`skills.legality.kept` 不超过四技能、无重复、每条都在这只的可学池里，而且与 `legalSkillLoadout()` 的独立复算一致；违反 ⇒ `ILLEGAL_LOADOUT_IN_CANDIDATES`（红）。已知不合法的组合**一个都不许进候选**，被排除的必须逐条写出理由（不静默丢）。",
+      "expect_code": "ILLEGAL_LOADOUT_IN_CANDIDATES",
+      "actual": "[\"[ILLEGAL_LOADOUT_IN_CANDIDATES] candidates.cand:pet_000417：kept 里有重复技能 / legality.kept 与独立复算不一致（可复算性失败）：已知不合法的技能组合不得进入候选\"]"
+    },
+    {
+      "where": "beliefs.uniform.weights",
+      "mutation": "均匀基线：删掉 weights.basis（带 weights 却不声明依据）",
+      "criterion": "条件化信念的逐条权重**不许出现 0**：仅凭「我方阵容的速度层次」这类假设把候选压 0 = 声称这只「不可能上场」，而假设不是证据。允许的排除只有**公开证据**（已出技能 / 先手关系 / 可见伤害…）并必须把证据 ID 写进排除理由；违反 ⇒ `ASSUMPTION_ZEROES_CANDIDATE`（红）。权重还必须显式声明它是哪种基线（`weights.basis` ∈ own_speed_tier_downweight / uniform_over_pool），缺声明 ⇒ `WEIGHT_BASIS_NOT_DECLARED`（红）。",
+      "expect_code": "WEIGHT_BASIS_NOT_DECLARED",
+      "actual": "[\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.uniform.weights.basis：权重依据 undefined 不在 non_informative_uniform_baseline / uniform_over_pool_baseline / own_speed_tier_downweight / measured_frequency_distribution：凡带 weights 的产出都必须声明它是哪种基线 / 假设 / 实测（否则读的人只能自己猜那串小数是什么）\"]"
+    },
+    {
+      "where": "beliefs.uniform.weights",
+      "mutation": "均匀基线：把 is_probability 改成 true（带 weights 却不声明依据）",
+      "criterion": "条件化信念的逐条权重**不许出现 0**：仅凭「我方阵容的速度层次」这类假设把候选压 0 = 声称这只「不可能上场」，而假设不是证据。允许的排除只有**公开证据**（已出技能 / 先手关系 / 可见伤害…）并必须把证据 ID 写进排除理由；违反 ⇒ `ASSUMPTION_ZEROES_CANDIDATE`（红）。权重还必须显式声明它是哪种基线（`weights.basis` ∈ own_speed_tier_downweight / uniform_over_pool），缺声明 ⇒ `WEIGHT_BASIS_NOT_DECLARED`（红）。",
+      "expect_code": "WEIGHT_BASIS_NOT_DECLARED",
+      "actual": "[\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.uniform.weights.is_probability：权重必须显式声明 is_probability:false（权重合计 1 只是归一化，不是‹概率›预测）\"]"
+    },
+    {
+      "where": "beliefs.uniform.weights",
+      "mutation": "均匀基线：抹掉 baseline_declaration（带 weights 却不声明依据）",
+      "criterion": "条件化信念的逐条权重**不许出现 0**：仅凭「我方阵容的速度层次」这类假设把候选压 0 = 声称这只「不可能上场」，而假设不是证据。允许的排除只有**公开证据**（已出技能 / 先手关系 / 可见伤害…）并必须把证据 ID 写进排除理由；违反 ⇒ `ASSUMPTION_ZEROES_CANDIDATE`（红）。权重还必须显式声明它是哪种基线（`weights.basis` ∈ own_speed_tier_downweight / uniform_over_pool），缺声明 ⇒ `WEIGHT_BASIS_NOT_DECLARED`（红）。",
+      "expect_code": "WEIGHT_BASIS_NOT_DECLARED",
+      "actual": "[\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.uniform.weights.baseline_declaration：权重必须带一句人读的边界声明（baseline_declaration）：这份权重能用来做什么、不能用来做什么\"]"
     }
   ],
   "audit": {
@@ -2060,7 +3153,9 @@
   },
   "does_not_do": [
     "不产出胜率 / 概率 / 百分数 / 强度分 / 榜单名次：本模块的权重是信念权重与计数比",
-    "不偷看：对手后备、配招、道具、体力数值、性格天赋不进输入（传进来即拒绝）",
+    "不偷看：对手配招 / 道具 / 天赋性格 / 个体面板 / 后备身份与血量不进输入（传进来即拒绝）",
+    "不吃没来源的「已亮明」：`revealed_via` + `revealed_turn` 缺一个就拒绝整个输入（那可能是私有 state 直读）",
+    "不用假设排除候选：只有公开证据（已出技能 / 先手关系 / 可见伤害）能排除且要写证据 ID；我方速度层次只降权（2 : 1），权重一个都不为 0",
     "不用均匀分布冒充频次：没有真实对局数据就 available:false + 点名缺什么",
     "不在线跑模拟 / 不调引擎 / 不起子进程：信念只读注入的公开数据（结构判据扫源码）",
     "不训练、不假装有学出来的模型：小型 learned model 属于后续 RC（不在本轮）"

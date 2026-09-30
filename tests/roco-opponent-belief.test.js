@@ -29,12 +29,13 @@ import {dirname, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 import {
-  BANNED_CLAIM_KEYS, BANNED_CLAIM_WORDS, BELIEF_IDS, BELIEF_KINDS, FAIL_CLOSED_REASONS,
-  FORBIDDEN_ONLINE_PATTERNS, HIDDEN_FACT_FIELDS, NON_INFORMATIVE_DECLARATION, PUBLIC_FACT_FIELDS,
-  RC604_REPORT_PATH, RULES, RULE_IDS, STRUCTURAL_CRITERIA, auditOpponentBelief, beliefReport,
-  buildCandidateUniverse, buildMeasuredFrequencySample, exact, formatAuditProblem, frequencyBelief,
-  normalizeFrequencyInput, onlineSectionOf, readPublicFacts, revealedConditioned, scanForbiddenPatterns,
-  uniformBelief, weightsFor,
+  BANNED_CLAIM_KEYS, BANNED_CLAIM_WORDS, BELIEF_IDS, BELIEF_KINDS, CANDIDATE_BASES,
+  FAIL_CLOSED_REASONS, FORBIDDEN_ONLINE_PATTERNS, HIDDEN_FACT_FIELDS, NON_INFORMATIVE_DECLARATION,
+  PUBLIC_FACT_FIELDS, RC604_REPORT_PATH, RULES, RULE_IDS, SKILL_POOL_GRADES, STRUCTURAL_CRITERIA,
+  auditOpponentBelief, beliefReport, buildCandidateUniverse, buildMeasuredFrequencySample,
+  buildOpponentCandidates, exact, formatAuditProblem, frequencyBelief, legalSkillLoadout,
+  normalizeFrequencyInput, onlineSectionOf, readOpponentView, readPublicFacts, revealedConditioned,
+  scanForbiddenPatterns, uniformBelief, weightsFor,
 } from '../src/coach/opponent-belief.mjs';
 import {CONFIDENCE_LEVELS} from '../src/coach/team-gaps.js';
 import {buildCandidateIndex, loadTeamCandidatesInputs, speedBandFor} from '../src/coach/team-candidates.mjs';
@@ -76,14 +77,20 @@ const index = buildCandidateIndex(inputs);
 const UNIVERSE = index.universeSpecies.size;
 const SOURCE = readFileSync(join(ROOT, 'src', 'coach', 'opponent-belief.mjs'), 'utf8');
 
-/** 一个**公开事实**形状的精灵：属性 + 速度档都从索引现取（不手写系别/档位）。 */
+/**
+ * 一个**公开事实**形状的精灵：物种级属性 + 物种级速度（**带出处**）。
+ *
+ * ⚠ 2026-09-30（03.1）：旧夹具写的是裸 `speed` + `speed_band`。实测三条公开投影里
+ * **都没有**这两个字段（`raw-03.1-engine-public-keys.txt` 的 token_scan 零命中），而裸速度
+ * 可能是个体真值 ⇒ 现在只收 `spe` + `spe_source`（物种级），档位由模块调 RC-303 现算。
+ */
 const publicPet = (speciesId, extra = {}) => {
   const feature = index.featureFor(speciesId);
   return {
-    species_id: speciesId,
+    pet_id: speciesId,
     types: feature.types,
-    speed: feature.spe,
-    speed_band: speedBandFor(index, feature.spe),
+    spe: feature.spe,
+    spe_source: 'species-race',
     ...extra,
   };
 };
@@ -95,21 +102,35 @@ const OWN_TEAM = [...index.instances.values()]
   .map((row) => ({key: `instance:${row.instance_id}`, ...publicPet(row.species_id)}));
 assert.equal(OWN_TEAM.length, 6, '样例阵容必须是六只');
 
+/** 01.2 观察契约三件套（真值取自 01/02 的留档读数形状；没有它 candidates 无法绑定规则版本）。 */
+const PROVENANCE = Object.freeze({
+  match_id: 'm-fixture0301',
+  rules_version: 'roco-world-s4-2026-09-10/mobile_s4_candidate_v3',
+  decision_id: 'm-fixture0301:v1',
+});
+
 /** 三个真实公开事实形状：单一慢档 / 单一快档 / 快慢两端都亮明。 */
 const FACTS_SINGLE_SLOW = Object.freeze({
   opponent: {active: publicPet('pet_000002'), revealed_pets: []},
   own_team: {pets: OWN_TEAM},
   mode: {team_size: 6, battle_mode: 'pvp-standard-six-pet'},
+  provenance: PROVENANCE,
 });
 const FACTS_SINGLE_FAST = Object.freeze({
   opponent: {active: publicPet('pet_000006'), revealed_pets: []},
   own_team: {pets: OWN_TEAM},
   mode: {team_size: 6, battle_mode: 'pvp-standard-six-pet'},
+  provenance: PROVENANCE,
+});
+/** 亮明过的成员必须带**来源事件**（`revealed_via` + `revealed_turn`）：这是「公开史」的唯一凭据。 */
+const revealedPet = (speciesId, extra = {}) => publicPet(speciesId, {
+  revealed_via: 'opening_preview', revealed_turn: 1, ...extra,
 });
 const FACTS_BOTH_EXTREMES = Object.freeze({
-  opponent: {active: publicPet('pet_000002'), revealed_pets: [publicPet('pet_000006')]},
+  opponent: {active: publicPet('pet_000002'), revealed_pets: [revealedPet('pet_000006')]},
   own_team: {pets: OWN_TEAM},
   mode: {team_size: 6, battle_mode: 'pvp-standard-six-pet'},
+  provenance: PROVENANCE,
 });
 
 /** 报告正文的伪精确扫描（键名不受豁免；判据正文与反证留痕另行豁免）。 */
@@ -261,7 +282,8 @@ test('RC-604 判据③：带对手后备 / 配招的输入必须被拒绝，且�
   const leaks = [
     ['opponent.revealed_pets[0].moves', {
       ...FACTS_SINGLE_SLOW,
-      opponent: {active: publicPet('pet_000002'), revealed_pets: [publicPet('pet_000006', {moves: ['skill_000246']})]},
+      opponent: {active: publicPet('pet_000002'),
+        revealed_pets: [revealedPet('pet_000006', {moves: ['skill_000246']})]},
     }],
     ['opponent.active.loadout', {
       ...FACTS_SINGLE_SLOW,
@@ -270,7 +292,7 @@ test('RC-604 判据③：带对手后备 / 配招的输入必须被拒绝，且�
     ['opponent.revealed_pets[0].hp', {
       ...FACTS_SINGLE_SLOW,
       opponent: {active: publicPet('pet_000002'),
-        revealed_pets: [publicPet('pet_000006', {hp: 88, max_hp: 120})]},
+        revealed_pets: [revealedPet('pet_000006', {hp: 88, max_hp: 120})]},
     }],
     ['opponent_bench', {
       ...FACTS_SINGLE_SLOW,
@@ -283,7 +305,8 @@ test('RC-604 判据③：带对手后备 / 配招的输入必须被拒绝，且�
   ];
   for (const [where, leakedFacts] of leaks) {
     const leakRead = readPublicFacts(leakedFacts);
-    raw(`③ 越界输入 ${where}`, {ok: leakRead.ok, leaked: leakRead.leaked.map((row) => row.path)});
+    raw(`③ 越界输入 ${where}`, {ok: leakRead.ok,
+      leaked: leakRead.leaked.map((row) => `${row.code}:${row.path}`)});
     assert.equal(leakRead.ok, false, `③ ${where} 必须被拒绝`);
 
     const conditioned = revealedConditioned({catalog: index, publicFacts: leakedFacts});
@@ -346,12 +369,38 @@ test('RC-604 判据④：公开事实条件化的每条规则都可复算（输�
     }
   }
 
-  // 独立复算：权重 = 层内 1/层大小，合计**恰好** 1（分数运算，不是浮点容差）
+  // 独立复算：层内等权（层外按声明过的假设降权）、合计**恰好** 1（分数运算，不是浮点容差）。
+  //
+  // ⚠ 2026-09-30（03.1 · R4 裁决）**最小改钉**，原断言逐字留档（`03.1-wrapup.md` §2）：
+  //     const inStratum = rows.filter((row) => row.numerator === 1);
+  //     assert.equal(inStratum.length, belief.stratum_size);
+  //     for (const row of inStratum) assert.equal(row.denominator, belief.stratum_size);
+  //   为什么改：权重从「层内 1/N、层外 **0**」改成「层内 2 份、层外 1 份」（R4：仅凭我方速度层次
+  //   把候选压 0 = 声称它不可能上场）。于是「分子为 1」不再等价于「在选中层里」。
+  //   意图一条没松：层内等权、可独立复算、合计恰 1；**并且新增「没有一行是 0」**（R4 要钉的）。
   const rows = belief.weights.rows;
   assert.equal(rows.length, belief.pool_size);
-  const inStratum = rows.filter((row) => row.numerator === 1);
+  assert.ok(rows.every((row) => Number.isInteger(row.numerator) && row.numerator > 0),
+    'R4：任何候选都不许被压 0（假设不是证据）');
+  const rowValue = (row) => row.numerator / row.denominator;
+  const maxValue = Math.max(...rows.map(rowValue));
+  const inStratum = rows.filter((row) => rowValue(row) === maxValue);
   assert.equal(inStratum.length, belief.stratum_size);
-  for (const row of inStratum) assert.equal(row.denominator, belief.stratum_size);
+  const distinctWeights = (list) => [...new Set(list.map((row) => `${row.numerator}/${row.denominator}`))];
+  assert.equal(distinctWeights(inStratum).length, 1, '层内必须等权（一个分数对）');
+  const outside = rows.filter((row) => rowValue(row) !== maxValue);
+  if (outside.length > 0) {
+    assert.equal(distinctWeights(outside).length, 1, '层外必须等权（一个分数对）');
+    assert.deepEqual(belief.weights.weight_ratio, [2, 1], '层间相对权重必须是声明过的 2 : 1');
+    for (const row of outside) {
+      assert.equal(inStratum[0].numerator * row.denominator,
+        2 * row.numerator * inStratum[0].denominator,
+        '层内权重必须是层外的 2 倍（假设层，不排除任何候选）');
+    }
+  }
+  raw('④ 权重分组（层内 / 层外）', {stratum: belief.stratum, stratum_size: belief.stratum_size,
+    basis: belief.weights.basis, ratio: belief.weights.weight_ratio, total: belief.weights.total,
+    in_stratum: inStratum.length, outside: outside.length});
   const sum = rows.reduce((acc, row) => exact(acc.numerator * row.denominator + row.numerator * acc.denominator,
     acc.denominator * row.denominator), exact(0, 1));
   raw('④ 逐条权重合计（分数）', {sum, total: belief.weights.total, stratum: belief.stratum, stratum_size: belief.stratum_size});
@@ -682,12 +731,400 @@ test('RC-604 结构：在线段没有引擎 / 子进程调用（判据落在源�
 });
 
 // ─────────────────────────────────────────────────────────────────────────
+// 03.1 · H1/H2/H4/H5：来源必填 / 个体口径拒绝 / 可见面板公开 / 契约三件套
+// ─────────────────────────────────────────────────────────────────────────
+
+test('03.1-H1：没有来源的「已亮明」= 私有 state 直读 ⇒ 拒绝；隐藏真值进不来', () => {
+  // ① 反例：把隐藏的**整队**（6 只，带 id，无来源事件）当 `revealed_pets` 传 ⇒ 必须拒绝。
+  const hiddenTeam = OWN_TEAM.map((row) => ({pet_id: row.pet_id, types: row.types,
+    spe: row.spe, spe_source: row.spe_source}));
+  const leakedFacts = {...FACTS_SINGLE_SLOW,
+    opponent: {active: publicPet('pet_000002'), revealed_pets: hiddenTeam}};
+  const leak = readPublicFacts(leakedFacts);
+  raw('H1 隐藏整队当「已亮明」', {ok: leak.ok, leaked: leak.leaked.map((row) => `${row.code}:${row.path}`)});
+  assert.equal(leak.ok, false, 'H1 没有 revealed_via 的整队必须被拒绝');
+  assert.ok(leak.leaked.length > 0 && leak.leaked.every((row) => row.code === 'NO_PROVENANCE'));
+  const belief = revealedConditioned({catalog: index, publicFacts: leakedFacts});
+  assert.equal(belief.available, false);
+  assert.equal(belief.unknown_reason, FAIL_CLOSED_REASONS.REVEALED_NO_PROVENANCE);
+  proof('publicFacts.opponent.revealed_pets[]', '把对手隐藏整队（6 只、无来源事件）当「已亮明」传进来',
+    STRUCTURAL_CRITERIA.provenance_required, 'REVEALED_NO_PROVENANCE',
+    raw('H1 拒绝读数', {reason: String(belief.unknown_reason).slice(0, 70),
+      leaked: belief.leaked_fields.map((row) => `${row.code}:${row.path}`)}));
+
+  // ② 正向：**公开史相同、隐藏真值不同 ⇒ 候选一模一样**（两局的真值都只在被拒绝的通道里）
+  const seenRoster = [revealedPet('pet_000006'),
+    revealedPet('pet_000007', {revealed_via: 'switch', revealed_turn: 3})];
+  const publicFacts = {...FACTS_SINGLE_SLOW,
+    opponent: {active: publicPet('pet_000002'), revealed_pets: seenRoster}};
+  const worldA = revealedConditioned({catalog: index,
+    publicFacts: {...publicFacts, opponent_team: [{pet_id: 'pet_000010'}, {pet_id: 'pet_000011'}]}});
+  const worldB = revealedConditioned({catalog: index,
+    publicFacts: {...publicFacts, opponent_team: [{pet_id: 'pet_000020'}, {pet_id: 'pet_000021'}]}});
+  const clean = revealedConditioned({catalog: index, publicFacts});
+  raw('H1 隐藏真值不同（都被拒绝）与干净公开史的读数', {
+    worldA: {available: worldA.available, reason: String(worldA.unknown_reason).slice(0, 24)},
+    worldB: {available: worldB.available, reason: String(worldB.unknown_reason).slice(0, 24)},
+    clean: {available: clean.available, pool: clean.pool_size,
+      revealed: clean.public_facts.revealed_pets.map((row) => row.species_id)}});
+  assert.equal(worldA.available, false, 'H1 带隐藏真值的输入整个被拒绝');
+  assert.equal(worldB.available, false);
+  assert.equal(JSON.stringify(worldA.unknown_reason), JSON.stringify(worldB.unknown_reason));
+  assert.equal(clean.available, true);
+  assert.deepEqual(clean.public_facts.revealed_pets.map((row) => `${row.species_id}:${row.revealed_via}:${row.revealed_turn}`),
+    ['pet_000006:opening_preview:1', 'pet_000007:switch:3', 'pet_000002:field_on_screen:null'],
+    'H1 候选只由公开史（来源事件 + 回合）决定；场上那只是 field_on_screen，不需要亮明事件');
+  assert.equal(JSON.stringify(clean), JSON.stringify(revealedConditioned({catalog: index, publicFacts})),
+    'H1 同一份公开史两次调用逐字节相同（隐藏真值不经任何通道进来）');
+});
+
+test('03.1-H2：个体口径的速度 / 面板 ⇒ 拒绝；物种级出处 ⇒ 收（连反例一起钉）', () => {
+  // ① 反例：个体面板速度（同一个物种的两套量纲：种族 51 vs 面板 153.108）⇒ 拒绝
+  const individual = {...FACTS_SINGLE_SLOW,
+    opponent: {active: publicPet('pet_000002', {spe: 153.108, spe_source: 'individual-snapshot'}),
+      revealed_pets: []}};
+  const readIndividual = readPublicFacts(individual);
+  raw('H2 个体口径速度', {ok: readIndividual.ok,
+    leaked: readIndividual.leaked.map((row) => `${row.code}:${row.path}`)});
+  assert.equal(readIndividual.ok, false);
+  const beliefIndividual = revealedConditioned({catalog: index, publicFacts: individual});
+  assert.equal(beliefIndividual.unknown_reason, FAIL_CLOSED_REASONS.REVEALED_INDIVIDUAL_FACTS);
+  proof('publicFacts.opponent.active.spe_source', '把个体面板速度（individual-snapshot）当公开速度传进来',
+    STRUCTURAL_CRITERIA.provenance_required, 'REVEALED_INDIVIDUAL_FACTS',
+    String(beliefIndividual.unknown_reason).slice(0, 70));
+
+  // ② 反例：旧夹具形状的裸 `speed` / `speed_band`（三公开面里零命中）⇒ 拒绝
+  const bare = readPublicFacts({...FACTS_SINGLE_SLOW,
+    opponent: {active: {pet_id: 'pet_000002', types: ['水系'], speed: 51, speed_band: 'slow'},
+      revealed_pets: []}});
+  raw('H2 裸 speed / speed_band', {ok: bare.ok, leaked: bare.leaked.map((row) => `${row.code}:${row.field}`)});
+  assert.equal(bare.ok, false);
+  assert.ok(bare.leaked.some((row) => row.field === 'speed' && row.code === 'HIDDEN_FIELD'));
+  assert.ok(bare.leaked.some((row) => row.field === 'speed_band' && row.code === 'HIDDEN_FIELD'));
+
+  // ③ 反向控制：物种级 `stats` + `stats_source: species-panel` 是**合法**的（不许把合法的也拒了）
+  const speciesLevel = readPublicFacts({...FACTS_SINGLE_SLOW,
+    opponent: {active: {pet_id: 'pet_000002', types: ['水系'], stats: {spe: 153.108},
+      stats_source: 'species-panel'}, revealed_pets: []}});
+  raw('H2 物种级面板', {ok: speciesLevel.ok, active: speciesLevel.facts.active});
+  assert.equal(speciesLevel.ok, true);
+  assert.equal(speciesLevel.facts.active.spe, 153.108);
+  assert.equal(speciesLevel.facts.active.spe_source, 'species-panel');
+});
+
+test('03.1-H4：场上那只的可见面板是公开的；未亮明的后备身份不是', () => {
+  const active = {...publicPet('pet_000002'), slot: 0, hp: 298, max_hp: 298, energy: 9,
+    statuses: {中毒: 2}, marks: {}, fainted: false};
+  const read = readPublicFacts({...FACTS_SINGLE_SLOW, opponent: {active, revealed_pets: []}});
+  raw('H4 场上那只见页面板', {ok: read.ok, active_panel: {
+    hp: read.facts.active.hp, max_hp: read.facts.active.max_hp,
+    energy: read.facts.active.energy, statuses: read.facts.active.statuses}});
+  assert.equal(read.ok, true, 'H4 血条 / 能量 / 异常 / 印记属于公开面（三公开投影都有）');
+  assert.deepEqual({hp: read.facts.active.hp, max_hp: read.facts.active.max_hp,
+    energy: read.facts.active.energy, statuses: read.facts.active.statuses},
+  {hp: 298, max_hp: 298, energy: 9, statuses: {中毒: 2}});
+
+  // 反例：后备行带上身份 / 面板 ⇒ BENCH_IDENTITY 拒绝（`_bench_public_row()` 未亮明时没有 pet_id）
+  const benchLeak = readPublicFacts({...FACTS_SINGLE_SLOW,
+    opponent: {active, revealed_pets: [], bench: [{slot: 1, fainted: false, pet_id: 'pet_000010'}]}});
+  raw('H4 后备带身份', {ok: benchLeak.ok, leaked: benchLeak.leaked.map((row) => `${row.code}:${row.path}`)});
+  assert.equal(benchLeak.ok, false);
+  assert.ok(benchLeak.leaked.some((row) => row.code === 'BENCH_IDENTITY'));
+  proof('publicFacts.opponent.bench[0].pet_id', '未亮明的后备行补一个 pet_id',
+    STRUCTURAL_CRITERIA.provenance_required, 'PUBLIC_FACTS_BOUNDARY',
+    JSON.stringify(benchLeak.leaked.map((row) => `${row.code}:${row.path}`)));
+
+  // 反向控制：只有 {slot, fainted} 的后备是合法的（那是实测形状）
+  const benchOk = readPublicFacts({...FACTS_SINGLE_SLOW,
+    opponent: {active, revealed_pets: [], bench: [{slot: 1, fainted: false}]}});
+  assert.equal(benchOk.ok, true, 'H4 {slot, fainted} 的后备不许被误拒');
+});
+
+test('03.1-R4/R2：假设只降权不压 0；权重必须显式声明是基线还是假设', () => {
+  const both = revealedConditioned({catalog: index, publicFacts: FACTS_BOTH_EXTREMES});
+  raw('R4 多档池子的权重分组', {available: both.available, pool: both.pool_size,
+    stratum: both.stratum, stratum_size: both.stratum_size, basis: both.weights?.basis,
+    ratio: both.weights?.weight_ratio, zero_rows: both.weights?.rows.filter((row) => row.numerator === 0).length});
+  assert.equal(both.available, true);
+  assert.ok(both.stratum_size > 0 && both.stratum_size < both.pool_size, 'R4 夹具必须让池子跨多档');
+  assert.ok(both.weights.rows.every((row) => row.numerator > 0), 'R4 任何候选都不许被压 0');
+  assert.equal(both.weights.basis, 'own_speed_tier_downweight');
+  assert.deepEqual(both.weights.weight_ratio, [2, 1]);
+  assert.equal(both.weights.is_probability, false, 'R2 权重必须显式声明不是概率');
+  assert.ok(typeof both.weights.baseline_declaration === 'string' && both.weights.baseline_declaration.length > 0);
+
+  // 必红 1：把一条候选压 0 ⇒ ASSUMPTION_ZEROES_CANDIDATE
+  const zeroed = clone(both);
+  zeroed.weights.rows[0] = {...zeroed.weights.rows[0], numerator: 0, denominator: 1};
+  const auditZero = auditOpponentBelief({beliefs: [zeroed]});
+  raw('R4 把一条候选压 0 的审计', {ok: auditZero.ok, problems: auditRaw(auditZero).slice(0, 2)});
+  proof('beliefs.revealed_conditioned.weights.rows[0]', '把一条候选的权重压成 0/1（声称它不可能上场）',
+    STRUCTURAL_CRITERIA.no_assumption_zeroing, 'ASSUMPTION_ZEROES_CANDIDATE', auditRaw(auditZero).slice(0, 2));
+  assert.ok(auditZero.problems.some((p) => p.code === 'ASSUMPTION_ZEROES_CANDIDATE'));
+
+  // 必红 2：把权重依据（是基线还是假设）抹掉 ⇒ WEIGHT_BASIS_NOT_DECLARED
+  const noBasis = clone(both);
+  delete noBasis.weights.basis;
+  const auditBasis = auditOpponentBelief({beliefs: [noBasis]});
+  raw('R2 抹掉 weights.basis 的审计', {ok: auditBasis.ok, problems: auditRaw(auditBasis).slice(0, 2)});
+  proof('beliefs.revealed_conditioned.weights.basis', '把「这份权重是基线还是假设」这一栏删掉',
+    STRUCTURAL_CRITERIA.no_assumption_zeroing, 'WEIGHT_BASIS_NOT_DECLARED', auditRaw(auditBasis).slice(0, 2));
+  assert.ok(auditBasis.problems.some((p) => p.code === 'WEIGHT_BASIS_NOT_DECLARED'));
+});
+
+test('03.1-H5：契约三件套原样转发；缺 rules_version ⇒ 明确降级（不自己造版本号）', () => {
+  const withProv = revealedConditioned({catalog: index, publicFacts: FACTS_SINGLE_SLOW});
+  raw('H5 契约三件套', withProv.provenance);
+  assert.deepEqual(withProv.provenance, PROVENANCE);
+  assert.ok(auditOpponentBelief({beliefs: [withProv]}).ok, 'H5 三件套齐时审计要干净');
+
+  const noProv = revealedConditioned({catalog: index, publicFacts: {...FACTS_SINGLE_SLOW, provenance: undefined}});
+  raw('H5 缺契约字段', {available: noProv.available, provenance: noProv.provenance,
+    unverified_hit: noProv.unverified.filter((line) => line.includes('规则版本')).length});
+  assert.equal(noProv.available, true, 'H5 缺规则版本不 fail closed：候选仍出，但必须点名');
+  assert.deepEqual(noProv.provenance, {match_id: null, rules_version: null, decision_id: null});
+  assert.ok(noProv.unverified.some((line) => line.includes('规则版本')), '缺版本必须在 unverified 里点名');
+  const audit = auditOpponentBelief({beliefs: [noProv]});
+  raw('H5 缺版本的审计', {ok: audit.ok, problems: auditRaw(audit).slice(0, 2)});
+  proof('beliefs.revealed_conditioned.provenance.rules_version', '把观察契约三件套整个拿掉',
+    STRUCTURAL_CRITERIA.provenance_required, 'PROVENANCE_MISSING', auditRaw(audit).slice(0, 2));
+  assert.ok(audit.problems.some((p) => p.code === 'PROVENANCE_MISSING'));
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// 03.2 · 候选协议：三个可复现局面（真引擎 view）+ 手工 publicFacts 分栏
+// ─────────────────────────────────────────────────────────────────────────
+
+/** 技能池：冻结学招表 + on-demand-builds 补充（判据两栏都不混）。 */
+const ON_DEMAND_BUILDS = readJson('data/roco/derived/on-demand-builds.json');
+const SKILL_POOL = Object.freeze({
+  learnsets: index.learnsets,
+  skills: index.skills,
+  onDemandBuilds: ON_DEMAND_BUILDS,
+});
+/** 真引擎 view（01/02 留档的原始回执，**不是**手写夹具）。 */
+const REAL_VIEW = Object.freeze({
+  s1_preview: readJson('reports/roco/product-execution/02/raw-view-preview.json'),
+  s2_no_preview: readJson('reports/roco/product-execution/02/raw-view-no-preview.json'),
+  s3_after_switch: readJson('reports/roco/product-execution/02/raw-view-after-switch.json'),
+  s3_multi_source: readJson('reports/roco/product-execution/02/raw-view-multi-source.json'),
+});
+
+test('03.2-S1（真 view · 开局预览六只）：适配器只搬公开字段，候选 observed/inferred 分栏可追溯', () => {
+  const view = REAL_VIEW.s1_preview;
+  const adapted = readOpponentView(view);
+  raw('S1 适配器形状', adapted.shapes);
+  raw('S1 契约三件套', adapted.publicFacts.provenance);
+  raw('S1 已见阵容', adapted.publicFacts.opponent.revealed_pets.map((row) => `${row.slot}:${row.pet_id}:${row.revealed_via}`));
+  assert.equal(adapted.shapes.has_seen_roster, true);
+  assert.equal(adapted.publicFacts.opponent.revealed_pets.length, view.seen_roster.length);
+  assert.deepEqual(adapted.publicFacts.opponent.revealed_pets.map((row) => row.pet_id),
+    view.seen_roster.map((row) => row.pet_id), 'S1 适配器不许重排 / 补行');
+  // `seen_roster` 实测没有 types / stats ⇒ 适配器**不许**替它补（补了就是编）
+  assert.ok(adapted.publicFacts.opponent.revealed_pets.every((row) => row.types === undefined || row.types === null),
+    'S1 已见阵容行不许自带 types（真 view 里没有）');
+  assert.deepEqual(adapted.publicFacts.provenance, {
+    match_id: view.match_id, rules_version: view.rules_version, decision_id: view.decision_id});
+  // 适配器的产出必须能过 `readPublicFacts()`（来源必填等判据都在那里）
+  const read = readPublicFacts(adapted.publicFacts);
+  raw('S1 公开事实读取', {ok: read.ok, leaked: read.leaked.length, ignored: read.ignored.length});
+  assert.equal(read.ok, true, `S1 适配器产出必须合法：${JSON.stringify(read.leaked)}`);
+
+  const built = buildOpponentCandidates({catalog: index, view, skillPool: SKILL_POOL});
+  raw('S2→S1 候选预算', built.budget);
+  raw('S1 首条候选（截断字段）', {candidate_id: built.candidates[0].candidate_id,
+    basis: built.candidates[0].basis, skills_possible: built.candidates[0].skills.possible_count,
+    grade: built.candidates[0].skills.grade, constraints: built.candidates[0].unknowns.length});
+  assert.equal(built.available, true);
+  assert.equal(built.budget.observed_kept, view.seen_roster.length, 'S1 六只已见都必须进候选');
+  for (const candidate of built.candidates) {
+    assert.ok(CANDIDATE_BASES.includes(candidate.basis));
+    assert.ok(candidate.evidence.length > 0, `${candidate.candidate_id} 缺证据`);
+    assert.ok(candidate.unknowns.length > 0, `${candidate.candidate_id} 缺未知项声明`);
+    assert.equal(candidate.rules_version, view.rules_version, `${candidate.candidate_id} 缺规则版本`);
+    assert.ok(SKILL_POOL_GRADES.includes(candidate.skills.grade));
+    assert.equal(candidate.individual_range.known, false);
+    assert.ok(candidate.individual_range.note.includes('多解'), '个体范围必须声明「保留多解」');
+  }
+  const observed = built.candidates.filter((candidate) => candidate.basis === 'observed');
+  assert.equal(observed.length, view.seen_roster.length);
+  assert.ok(observed.every((candidate) => candidate.observed.reveals[0].revealed_via === 'opening_preview'));
+});
+
+test('03.2-S2（真 view · 无预览）：observed=0 且如实说明；候选仍出但标注全是推的', () => {
+  const view = REAL_VIEW.s2_no_preview;
+  const adapted = readOpponentView(view);
+  raw('S2 适配器形状', adapted.shapes);
+  raw('S2 说明与未知项', {notes: adapted.notes, unknowns: adapted.unknowns});
+  assert.equal(adapted.shapes.has_seen_roster, false);
+  assert.equal(adapted.publicFacts.opponent.revealed_pets.length, 0);
+  assert.ok(adapted.notes.some((line) => line.includes('seen_roster')), 'S2 必须如实说「没有已见阵容」');
+  const built = buildOpponentCandidates({catalog: index, view, skillPool: SKILL_POOL});
+  raw('S2 预算与首条来源', {budget: built.budget,
+    first: built.candidates[0].species_id, first_via: built.candidates[0].observed?.reveals?.[0]?.revealed_via});
+  assert.equal(built.available, true);
+  // 无预览**不等于**没有观察：场上那只的身份与血条本来就画在屏幕上（`field_on_screen`），
+  // 所以 observed=1 是**如实**的；`seen_roster` 那一路一行都没有。
+  assert.equal(built.budget.observed_kept, adapted.publicFacts.opponent.active ? 1 : 0);
+  assert.ok(built.candidates.filter((candidate) => candidate.basis === 'observed')
+    .every((candidate) => candidate.observed.reveals[0].revealed_via === 'field_on_screen'));
+  assert.ok(built.candidates.filter((candidate) => candidate.basis === 'inferred')
+    .every((candidate) => candidate.unknowns.some((line) => line.includes('公开史里没有它'))));
+});
+
+test('03.2-S3（真 view · 已出招 / 换人来源）：已打出来的技能挂到对应候选上，来源保留', () => {
+  const view = REAL_VIEW.s3_after_switch;
+  const adapted = readOpponentView(view);
+  raw('S3 已出招', adapted.revealed_skills);
+  assert.ok(Object.keys(adapted.revealed_skills).length > 0);
+  const built = buildOpponentCandidates({catalog: index, view, skillPool: SKILL_POOL});
+  const [petId, rows] = Object.entries(adapted.revealed_skills)[0];
+  const candidate = built.candidates.find((row) => row.species_id === petId);
+  raw('S3 已出招挂载', {species_id: petId, known_used: candidate.skills.known_used,
+    actions: candidate.actions.observed});
+  assert.ok(candidate, 'S3 已出招的那只必须在候选里');
+  assert.equal(candidate.skills.known_used.length, rows.length);
+  assert.equal(candidate.skills.known_used[0].skill_id, rows[0].skill_id);
+  assert.equal(candidate.skills.known_used[0].source, 'view.opponent.revealed_skills');
+  assert.equal(candidate.actions.observed[0].kind, 'skill');
+  assert.ok(candidate.actions.note.includes('不在公开面'));
+  // 另一份真 view：换人（replacement）来源的亮明行也要保留来源
+  const adaptedMulti = readOpponentView(REAL_VIEW.s3_multi_source);
+  raw('S3 多来源局已见阵容', adaptedMulti.publicFacts.opponent.revealed_pets
+    .map((row) => `${row.pet_id}:${row.revealed_via}:${row.revealed_turn}`));
+  assert.ok(adaptedMulti.publicFacts.opponent.revealed_pets.some((row) => row.revealed_via === 'replacement'));
+});
+
+test('03.2-手工栏：同一份公开事实（手工 publicFacts）下候选可复算、确定、按预算可解释缩减', () => {
+  const built = buildOpponentCandidates({catalog: index, publicFacts: FACTS_SINGLE_SLOW, skillPool: SKILL_POOL});
+  const again = buildOpponentCandidates({catalog: index, publicFacts: FACTS_SINGLE_SLOW, skillPool: SKILL_POOL});
+  raw('手工栏候选预算', built.budget);
+  assert.equal(built.available, true);
+  assert.equal(JSON.stringify(built), JSON.stringify(again), '手工栏同一输入两次调用逐字节相同');
+  assert.equal(built.budget.kept, built.candidates.length);
+  assert.ok(built.budget.kept <= built.budget.limit);
+  if (built.budget.truncated) {
+    assert.ok(built.budget.dropped_count > 0);
+    assert.ok(Object.keys(built.budget.pool_summary.dropped_by_band).length > 0,
+      '被裁掉的部分必须留下分布（不隐去）');
+  }
+  // 已见候选永远保留 + 与规则池的矛盾必须报出来（不静默丢）
+  const seenFixtures = {...FACTS_SINGLE_SLOW,
+    opponent: {active: publicPet('pet_000002'),
+      revealed_pets: [revealedPet('pet_000017', {revealed_via: 'switch', revealed_turn: 2})]}};
+  const withContradiction = buildOpponentCandidates({catalog: index, publicFacts: seenFixtures,
+    skillPool: SKILL_POOL, budget: {limit: 3}});
+  raw('手工栏 反例：已见候选被预算/规则处理后的读数', {observed_kept: withContradiction.budget.observed_kept,
+    contradictions: withContradiction.contradictions.map((row) => row.code)});
+  // 已见 = 场上那只（field_on_screen）+ 换人亮明的那只 = 2，**都不受预算裁剪**
+  assert.equal(withContradiction.budget.observed_kept, 2, '已见候选不受预算裁剪');
+  assert.ok(withContradiction.candidates.some((row) => row.species_id === 'pet_000017'));
+});
+
+test('03.2-反例②：已知不合法的技能组合一个都不进 kept（并独立复算 + 必红）', () => {
+  const species = 'pet_000417';
+  const legalPool = [...(index.learnsets.get(species)?.skill_ids ?? [])].sort();
+  assert.ok(legalPool.length >= 6, '夹具物种必须有足够的可学技能');
+  const illegalCases = [
+    ['不在可学池里的技能', [...legalPool.slice(0, 3), 'skill_999999'], '不在'],
+    ['同一个技能带两次', [legalPool[0], legalPool[0], legalPool[1], legalPool[2]], '两次'],
+    ['五技能（超上限）', legalPool.slice(0, 5), '上限'],
+  ];
+  const facts = {...FACTS_SINGLE_SLOW,
+    opponent: {active: publicPet('pet_000002'),
+      revealed_pets: [revealedPet(species, {revealed_via: 'switch', revealed_turn: 2})]}};
+  for (const [label, proposed, whyFragment] of illegalCases) {
+    const single = legalSkillLoadout({pool: legalPool, proposed});
+    const built = buildOpponentCandidates({catalog: index, publicFacts: facts, skillPool: SKILL_POOL,
+      proposedLoadouts: {[species]: proposed}});
+    const candidate = built.candidates.find((row) => row.species_id === species);
+    raw(`反例② ${label}`, {legality: candidate.skills.legality});
+    assert.equal(single.ok, false, `反例② ${label} 必须被 legalSkillLoadout 判不合法`);
+    assert.ok(single.kept.length <= 4);
+    assert.equal(new Set(single.kept).size, single.kept.length, 'kept 不许有重复');
+    assert.ok(single.kept.every((id) => legalPool.includes(id)), 'kept 只许留在可学池里');
+    assert.equal(candidate.skills.legality.ok, false);
+    assert.ok(candidate.skills.legality.excluded.some((row) => row.why.includes(whyFragment)));
+    // 独立复算：候选里的 legality 必须与直接调用一致
+    assert.deepEqual(candidate.skills.legality.kept, single.kept);
+    assert.deepEqual(candidate.skills.legality.excluded, single.excluded);
+  }
+
+  // 必红：把一条不合法技能塞回 kept ⇒ ILLEGAL_LOADOUT_IN_CANDIDATES
+  const built = buildOpponentCandidates({catalog: index, publicFacts: facts, skillPool: SKILL_POOL,
+    proposedLoadouts: {[species]: [legalPool[0], legalPool[0], legalPool[1], legalPool[2]]}});
+  const mutated = clone(built);
+  const target = mutated.candidates.find((row) => row.species_id === species);
+  target.skills.legality.kept = [legalPool[0], legalPool[0], legalPool[1]];
+  const audit = auditOpponentBelief({beliefs: [uniformBelief({catalog: index})], candidates: mutated.candidates});
+  raw('反例② 把不合法组合塞回 kept 的审计', {ok: audit.ok, problems: auditRaw(audit).slice(0, 2)});
+  proof('candidates[pet_000417].skills.legality.kept', '把重复技能塞回 kept（不合法组合进候选）',
+    STRUCTURAL_CRITERIA.no_illegal_loadouts, 'ILLEGAL_LOADOUT_IN_CANDIDATES', auditRaw(audit).slice(0, 2));
+  assert.equal(audit.ok, false);
+  assert.ok(audit.problems.some((p) => p.code === 'ILLEGAL_LOADOUT_IN_CANDIDATES'));
+  // 反向控制：合法候选不许被误判
+  assert.equal(auditOpponentBelief({beliefs: [uniformBelief({catalog: index})],
+    candidates: built.candidates}).ok, true, '合法的候选集合不许被判红');
+});
+
+test('03.2-反例①（协议前提）：个体真值不可见 ⇒ 候选保留多解，不收敛成单点', () => {
+  const built = buildOpponentCandidates({catalog: index, publicFacts: FACTS_SINGLE_SLOW, skillPool: SKILL_POOL});
+  const sample = built.candidates[0];
+  raw('反例① 个体范围字段', {known: sample.individual_range.known,
+    individual_values_visible: sample.individual_range.individual_values_visible,
+    scenarios: sample.individual_range.scenarios.length, note: sample.individual_range.note.slice(0, 60)});
+  assert.equal(sample.individual_range.known, false);
+  assert.equal(sample.individual_range.individual_values_visible, false);
+  assert.ok(built.candidates.every((row) => !('nature' in row) && !('talent' in row) && !('panel' in row)),
+    '候选里不许出现个体真值字段');
+  // 同一份公开伤害由两种个体配置解释 ⇒ 两者都留：这件事在 03.3 的 evidence 更新里落，
+  // 这里先钉住协议的**前提**（个体真值不可见 + 保留多解声明）。
+  assert.ok(sample.unknowns.some((line) => line.includes('个体面板')));
+});
+
+test('03.2-R2（扩展）：**任何**带 weights 的信念都必须声明依据 —— uniform 改坏必红', () => {
+  // Lead 裁决（2026-09-30）：R2 原先只挂在「rows 非空」分支里 ⇒ uniform 信念（有 weights、无 rows）
+  // 改坏 basis 不触发。那是缺口：凡带 weights 的产出都要说清「这串小数是拿什么算出来的」。
+  const uniform = uniformBelief({catalog: index});
+  raw('R2 uniform 的声明', {basis: uniform.weights.basis, is_probability: uniform.weights.is_probability,
+    declaration: String(uniform.weights.baseline_declaration).slice(0, 48)});
+  assert.equal(uniform.weights.basis, 'non_informative_uniform_baseline');
+  assert.equal(uniform.weights.is_probability, false);
+  assert.ok(uniform.weights.baseline_declaration.length > 0);
+
+  // 反向控制：三条基线（含带来源的频次对照）一起审，**不许**被判红
+  const clean = auditOpponentBelief({beliefs: [
+    uniformBelief({catalog: index}),
+    revealedConditioned({catalog: index, publicFacts: FACTS_SINGLE_SLOW}),
+    frequencyBelief({frequencyData: buildMeasuredFrequencySample({rows: [{species_id: 'pet_000001', count: 3}]})}),
+  ]});
+  raw('R2 反向控制：三条基线一起审', {ok: clean.ok, problems: auditRaw(clean).slice(0, 2)});
+  assert.equal(clean.ok, true, `R2 三条基线都不许被判红：${auditRaw(clean).join(' | ')}`);
+
+  for (const [label, mutate] of [
+    ['删掉 weights.basis', (belief) => { delete belief.weights.basis; }],
+    ['把 is_probability 改成 true', (belief) => { belief.weights.is_probability = true; }],
+    ['抹掉 baseline_declaration', (belief) => { belief.weights.baseline_declaration = null; }],
+  ]) {
+    const mutated = clone(uniform);
+    mutate(mutated);
+    const audit = auditOpponentBelief({beliefs: [mutated]});
+    raw(`R2 uniform ${label} 的审计`, {ok: audit.ok, problems: auditRaw(audit).slice(0, 1)});
+    proof('beliefs.uniform.weights', `均匀基线：${label}（带 weights 却不声明依据）`,
+      STRUCTURAL_CRITERIA.no_assumption_zeroing, 'WEIGHT_BASIS_NOT_DECLARED', auditRaw(audit).slice(0, 1));
+    assert.equal(audit.ok, false, `R2 ${label} 必须判红`);
+    assert.ok(audit.problems.some((p) => p.code === 'WEIGHT_BASIS_NOT_DECLARED'));
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────
 // 产物：reports/roco/rc604/opponent-belief.json
 // ─────────────────────────────────────────────────────────────────────────
 
 test('RC-604 报告：机器可读产物与生成逻辑逐字节一致', () => {
   const report = beliefReport({
     catalog: index, publicFacts: FACTS_SINGLE_SLOW, source: SOURCE, red_proofs: RED_PROOFS,
+    skillPool: SKILL_POOL,
   });
   raw('报告：三条基线的可用性', report.beliefs.map((belief) => `${belief.belief}=${belief.available ? 'available' : 'unknown'}`));
   raw('报告：unknown 逐条原因', report.unknown_reasons.map((row) => `${row.belief}: ${row.reason_code}`));
@@ -725,9 +1162,28 @@ test('RC-604 报告：机器可读产物与生成逻辑逐字节一致', () => {
   assert.ok(report.does_not_do.length >= 4);
   assert.equal(report.measured_control.lights_up, true, '报告必须带「有来源时会亮」的对照');
 
+  // 03.2 候选协议：机器可读声明 + 样本必须都在
+  raw('报告：候选协议与样本', {protocol: report.candidate_protocol.version,
+    sample_available: report.candidate_sample?.available,
+    kept: report.candidate_sample?.budget?.kept, limit: report.candidate_sample?.budget?.limit,
+    contradictions: report.candidate_sample?.contradictions?.length});
+  assert.equal(report.candidate_protocol.version, 'rc604-opponent-candidates/v1');
+  assert.ok(report.candidate_protocol.fields.includes('skills'));
+  assert.deepEqual(report.candidate_protocol.grades, SKILL_POOL_GRADES);
+  assert.equal(report.candidate_sample.available, true);
+  assert.ok(report.candidate_sample.candidates.length > 0, '报告必须带候选样本（否则协议只是空话）');
+  assert.ok(report.candidate_sample.budget.kept <= report.candidate_sample.budget.limit);
+  assert.ok(report.candidate_sample.sample_note.includes('只贴'));
+  for (const candidate of report.candidate_sample.candidates) {
+    assert.ok(candidate.evidence.length > 0 && candidate.unknowns.length > 0,
+      '样本候选也要带证据与未知项');
+    assert.ok(candidate.skills.legality.ok !== undefined);
+  }
+
   // 同一份输入两次调用逐字节相同
   const again = beliefReport({
     catalog: index, publicFacts: FACTS_SINGLE_SLOW, source: SOURCE, red_proofs: RED_PROOFS,
+    skillPool: SKILL_POOL,
   });
   assert.equal(JSON.stringify(report), JSON.stringify(again), '报告生成必须是纯函数');
 
@@ -810,16 +1266,31 @@ test('RC-604 判据⑩（注入式）：没有速度值时不许自己算档位�
   for (const rule of belief.rule_ledger.filter((row) => !row.applied)) {
     assert.ok(rule.reason && rule.reason.length > 0);
   }
-  // 池子没有被速度规则收窄：唯一的收窄来自属性规则（对手已亮明系别）
+  // 池子只由**已应用**的规则决定：不应用的规则不许偷偷收窄
+  //
+  // ⚠ 2026-09-30（03.1 · R4 裁决）**最小改钉**，原断言逐字留档（`03.1-wrapup.md` §2）：
+  //     if (belief.available) {
+  //       assert.equal(belief.pool_size, UNIVERSE, '⑩ 速度规则都不应用时池子不许被收窄');
+  //     } else {
+  //       assert.equal(belief.unknown_reason, FAIL_CLOSED_REASONS.REVEALED_EMPTY_STRATUM);
+  //       assert.equal(belief.weights, null);
+  //     }
+  //   为什么改：两处都不成立了两处都要说清 ——（a）R4 之后「我方没有速度数据」不再 fail closed，
+  //   而是**池内等权基线**（显式标记 `uniform_over_pool_baseline`，权重无 0）；（b）池子被**属性规则**
+  //   收窄到 461（< 622）是应该的，原断言把「速度规则不应用」误写成「池子不许被任何规则收窄」。
+  //   意图保留并加强：速度规则不应用 ⇒ 池子**只能**等于已应用规则的输出（没有规则偷偷收窄）。
   raw('⑩ 实际 available 与池子', {available: belief.available, pool: belief.pool_size, universe: UNIVERSE,
-    stratum: belief.stratum, reason: String(belief.unknown_reason ?? '').slice(0, 50)});
-  if (belief.available) {
-    assert.equal(belief.pool_size, UNIVERSE, '⑩ 速度规则都不应用时池子不许被收窄');
-  } else {
-    // 缺速度 → 分层规则不应用 → 选中层为空 ⇒ 必须是「非空速度层」这条，而不是「筛空池子」
-    assert.equal(belief.unknown_reason, FAIL_CLOSED_REASONS.REVEALED_EMPTY_STRATUM);
-    assert.equal(belief.weights, null);
-  }
+    stratum: belief.stratum, basis: belief.weights?.basis ?? null,
+    reason: String(belief.unknown_reason ?? '').slice(0, 50)});
+  assert.equal(belief.available, true, '⑩ 缺速度 ⇒ 退回池内等权基线（不 fail closed，也不编一个档）');
+  assert.equal(belief.pool_size, belief.rule_ledger[0].output.after,
+    '⑩ 池子只能由已应用的规则决定（这里只有属性规则应用了）');
+  assert.ok(belief.pool_size < UNIVERSE, '⑩ 已亮明系别这条规则确实收窄了池子');
+  assert.equal(belief.stratum, null, '⑩ 缺我方/对手速度 ⇒ 没有选中层，不许补一个默认档');
+  assert.equal(belief.weights.basis, 'uniform_over_pool_baseline', '⑩ 池内等权必须显式标成基线');
+  assert.equal(belief.weights.is_probability, false);
+  assert.ok(belief.weights.rows.every((row) => row.numerator > 0), '⑩ 基线也不许有 0 权重行');
+  assert.equal(belief.weights.candidate_count, belief.pool_size);
 
   // 另一支：对手连属性都没亮明、双方也都没有速度值 ⇒ 一条规则都驱动不起来
   const nothing = {

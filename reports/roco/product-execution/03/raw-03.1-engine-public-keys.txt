@@ -1,0 +1,219 @@
+== cmd: PYTHONPATH=roco/src python3 /mnt/e/roco-scratch/plan03/public-keys-probe.py ==
+{
+ "obs_opponent_field_keys": [
+  "active",
+  "energy",
+  "fainted",
+  "field",
+  "hp",
+  "marks",
+  "max_hp",
+  "name",
+  "pet_id",
+  "slot",
+  "statuses"
+ ],
+ "observation_for.opponent": {
+  "bench_n": 0,
+  "bench_row_keys": [],
+  "field_keys": [
+   "active",
+   "energy",
+   "fainted",
+   "field",
+   "hp",
+   "marks",
+   "max_hp",
+   "name",
+   "pet_id",
+   "slot",
+   "statuses"
+  ],
+  "field_shape": {
+   "active": "bool",
+   "energy": "number",
+   "fainted": "bool",
+   "field": "bool",
+   "hp": "number",
+   "marks": [],
+   "max_hp": "number",
+   "name": "str",
+   "pet_id": "str",
+   "slot": "number",
+   "statuses": []
+  },
+  "side_keys": [
+   "active",
+   "field",
+   "living_count",
+   "pets"
+  ]
+ },
+ "observation_for.opponent.bench_row_keys": [
+  "active",
+  "energy",
+  "fainted",
+  "field",
+  "hp",
+  "marks",
+  "max_hp",
+  "name",
+  "pet_id",
+  "slot",
+  "statuses"
+ ],
+ "observed_roster_n": 0,
+ "public_opponent_field_keys": [
+  "charging",
+  "defense_cooldown",
+  "energy",
+  "fainted",
+  "hp",
+  "marks",
+  "max_hp",
+  "pet_id",
+  "slot",
+  "statuses"
+ ],
+ "public_planner_state.opponent": {
+  "bench_n": 2,
+  "bench_row_keys": [
+   "fainted",
+   "pet_id",
+   "revealed_event_seq",
+   "revealed_turn",
+   "revealed_via",
+   "slot"
+  ],
+  "field_keys": [
+   "charging",
+   "defense_cooldown",
+   "energy",
+   "fainted",
+   "hp",
+   "marks",
+   "max_hp",
+   "pet_id",
+   "slot",
+   "statuses"
+  ],
+  "field_shape": {
+   "charging": "bool",
+   "defense_cooldown": "number",
+   "energy": "number",
+   "fainted": "bool",
+   "hp": "number",
+   "marks": "dict",
+   "max_hp": "number",
+   "pet_id": "str",
+   "slot": "number",
+   "statuses": "dict"
+  },
+  "side_keys": [
+   "active",
+   "bench",
+   "field",
+   "living_count"
+  ]
+ },
+ "revealed_skills_pets": [],
+ "status_battle_advance": 200,
+ "status_battle_new": 200,
+ "token_scan": {
+  "observation_for": {
+   "speed": [],
+   "speed_band": []
+  },
+  "public_planner_state": {
+   "speed": [],
+   "speed_band": []
+  },
+  "ui_public_view": {
+   "speed": [],
+   "speed_band": []
+  }
+ },
+ "turn": 2,
+ "ui_opponent_field_keys": [
+  "charging",
+  "class",
+  "defense_cooldown",
+  "energy",
+  "fainted",
+  "hp",
+  "marks",
+  "max_hp",
+  "name",
+  "pet_id",
+  "slot",
+  "stage",
+  "stats",
+  "stats_source",
+  "statuses",
+  "types"
+ ],
+ "ui_public_view.opponent": {
+  "bench_n": 2,
+  "bench_row_keys": [
+   "class",
+   "fainted",
+   "name",
+   "pet_id",
+   "revealed_event_seq",
+   "revealed_turn",
+   "revealed_via",
+   "slot",
+   "stage",
+   "stats",
+   "stats_source",
+   "types"
+  ],
+  "field_keys": [
+   "charging",
+   "class",
+   "defense_cooldown",
+   "energy",
+   "fainted",
+   "hp",
+   "marks",
+   "max_hp",
+   "name",
+   "pet_id",
+   "slot",
+   "stage",
+   "stats",
+   "stats_source",
+   "statuses",
+   "types"
+  ],
+  "field_shape": {
+   "charging": "bool",
+   "class": "null",
+   "defense_cooldown": "number",
+   "energy": "number",
+   "fainted": "bool",
+   "hp": "number",
+   "marks": "dict",
+   "max_hp": "number",
+   "name": "str",
+   "pet_id": "str",
+   "slot": "number",
+   "stage": "null",
+   "stats": "dict",
+   "stats_source": "str",
+   "statuses": "dict",
+   "types": [
+    "str"
+   ]
+  },
+  "side_keys": [
+   "active",
+   "bench",
+   "energy_charge",
+   "energy_max",
+   "field",
+   "living_count"
+  ]
+ }
+}
+== EXIT=0 ==
