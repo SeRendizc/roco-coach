@@ -202,9 +202,19 @@ export function resolvePointer(doc, pointer) {
   return {found: cursor !== undefined, value: cursor};
 }
 
-/** artifact_path 必须是仓库内的相对路径：绝对路径与 `..` 一律判红。 */
+/** artifact_path 必须是仓库内的相对路径：绝对路径与 `..` 一律判红。
+ *
+ * task-47b：旧写法 `!path.startsWith('/') && !path.split('/').includes('..')` 是 **POSIX-only** ——
+ * 在 Windows 上 `..\..\x.json`、`data\..\..\x.json`、`E:\…`、`E:/…` **四种越界输入全部放行**
+ * （谓词放行 ⇒ 下游 L754 会照该值解析仓库外文件，而 C13 仍报 `0 失配` ⇒ 验证脚本给
+ * 「provenance 指向禁区」开绿灯，属 **fail-open 守卫**）。
+ * 这里**不用 `isAbsolute`**：它本身平台相关（Linux 上 `isAbsolute('E:\\x') === false`，
+ * 反斜杠 Windows 路径照样溜过）⇒ 用它修等于换一个更隐蔽的假修。改用平台无关的正则 + 两种分隔符切分。
+ */
 function isSafeArtifactPath(path) {
-  return typeof path === 'string' && path.length > 0 && !path.startsWith('/') && !path.split('/').includes('..');
+  return typeof path === 'string' && path.length > 0
+    && !/^([A-Za-z]:[\\/]|[\\/])/.test(path)
+    && !path.split(/[\\/]/).includes('..');
 }
 
 // ── 冻结目录的只读装载 ──────────────────────────────────────────────────────

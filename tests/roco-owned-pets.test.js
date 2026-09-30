@@ -70,6 +70,43 @@ const reportText = readFileSync(RC203_REPORT_PATH, 'utf8');
 const report = JSON.parse(reportText);
 
 const clone = () => JSON.parse(JSON.stringify(dataset));
+
+// ── task-47b：artifact_path 守卫必须**往紧的方向**坏 ──────────────────────────
+//
+// 为什么这条要有：旧写法 `!path.startsWith('/') && !path.split('/').includes('..')` 是 POSIX-only，
+// 在 Windows 上 `..\..\x.json` / `data\..\..\x.json` / `E:\…` / `E:/…` **四种越界输入全部放行**。
+// **只测谓词不算修好**：谓词放行 ⇒ 下游会照该值解析仓库外文件，而 C13 仍报 `0 失配` ⇒ 验证脚本
+// 对「provenance 指向禁区」开绿灯。所以这里两件事都要钉：① 四种越界都判红；② 后果真的进 C13 计数。
+test('task-47b：artifact_path 越界一律判红，且真的进 C13（不许 0 失配）', () => {
+  const FORBIDDEN = [
+    ['..\\..\\secret.json', '反斜杠 Windows 相对穿越'],
+    ['data\\..\\..\\secret.json', '反斜杠穿越（带前缀）'],
+    ['E:\\roco-coach\\data\\roco\\owned\\owned-pets.json', 'Windows 盘符绝对路径'],
+    ['E:/roco-coach/data/roco/owned/owned-pets.json', 'Windows 盘符 + 正斜杠'],
+  ];
+  const ALLOWED = [
+    ['data/roco/derived/frozen/full-catalog.json', '正常仓内相对路径'],
+    ['data\\roco\\derived\\frozen\\full-catalog.json', 'Windows 分隔符的**仓内**相对路径（应放行）'],
+  ];
+  for (const [value, why] of FORBIDDEN) {
+    const doc = clone();
+    doc.provenance[0] = {...doc.provenance[0], artifact_path: value};
+    const result = judge(resign(doc));
+    const hit = result.problems.some((p) => p.includes('[provenance_on_disk]') && p.includes('不是仓库内相对路径'));
+    log(`[实际] 越界 ${why} ⇒ ${hit ? '判红 ✓' : '放行 ✗'}；C13 失配计数 = ${result.facts.provenanceMismatches}`);
+    assert.ok(hit, `artifact_path=${JSON.stringify(value)}（${why}）必须判红，实际问题：${showCheck(result.problems, 'provenance_on_disk') || '(无)'}`);
+    assert.ok(result.facts.provenanceMismatches >= 1,
+      `越界必须进 C13 计数（不许 0 失配），实际 ${result.facts.provenanceMismatches}`);
+  }
+  for (const [value, why] of ALLOWED) {
+    const doc = clone();
+    doc.provenance[0] = {...doc.provenance[0], artifact_path: value};
+    const result = judge(resign(doc));
+    const hit = result.problems.some((p) => p.includes('[provenance_on_disk]') && p.includes('不是仓库内相对路径'));
+    log(`[实际] 合法 ${why} ⇒ ${hit ? '误判红 ✗' : '放行 ✓'}`);
+    assert.equal(hit, false, `artifact_path=${JSON.stringify(value)}（${why}）不该被判红`);
+  }
+});
 /** 反证要跑十几遍 runChecks：只读磁盘，所以复用同一份缓存是安全的（也不改磁盘）。 */
 const caches = createCaches();
 const judge = (doc) => runChecks(doc, {schema, caches});
