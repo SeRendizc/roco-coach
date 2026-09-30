@@ -1,8 +1,8 @@
 {
   "schema": "roco-dsh-execution/v1",
-  "updated_at": "2026-09-30T19:25:00+08:00",
-  "active_plan": "01",
-  "next_action": "① 等 harness-verifier 的三组权威副本读数（`2e30a4f` 847·1F/totals 306 · `5002433` 872·1F/totals 306 · `59e55df` 872·1F/totals 309）；若与预期一致 ⇒ 01 标 passed、active_plan 切 02（00 已 passed，见 plans.00）。② plan02-front 已起，正在只读勘察（02.1 模式—可见字段矩阵）+ 浏览器夹具 bring-up；我收到它的勘察报告后给「go」，它才允许改 `src/client/**`。③ 02 的五步与反例见 task-7；写域 src/client/{roco.js,roco.html,roco.css,battle-v3.css,app.js} + reports/roco/product-execution/02/。④ 之后 02→…→12 依次，每步切片提交 + 推 Gitee 并核对远端 SHA。⑤ 常驻登记：O-4（反证 5>=8 已登记偏差）、O-6（damage_global_skill_mod_text 死门 + 531/534 方向丢失）、O-8（迸发两链不同源）留待后续专项；8765 本机未运行 ⇒ player 栏只登记。⑥ 每次要用户裁决前先 pushplus 通知（用户远程连接）。",
+  "updated_at": "2026-09-30T19:05:00+08:00",
+  "active_plan": "02",
+  "next_action": "① plan02-front 完成只读勘察（02.1 模式—可见字段矩阵）+ 浏览器夹具 bring-up 后回报我；我审完给「go」，它才允许改 `src/client/{roco.js,roco.html,roco.css,battle-v3.css}`（task-7 五步 + 两条反例：无预览模式不得有完整阵容入口/后台泄漏；新局不同阵容不得出现旧局卡片或旧 Coach 引用）。② 02 每步留证据到 reports/roco/product-execution/02/（含桌面与 390px 截图、事件时间、跨局/刷新快照）；要入库的截图必须我 `git add -f` 明确指定。③ 02 收口后 active_plan=03，依次 03→…→12；每项切片提交 + 推 Gitee 并核对远端 SHA。④ 常驻登记：O-4（反证 5>=8 已登记偏差）· O-6（damage_global_skill_mod_text 死门 + 531/534 方向丢失）· O-8（迸发两链不同源）· O-7（文档失真，已三例）。⑤ 8765 本机未运行 ⇒ player 栏只登记，不许自行启动。⑥ 每次要用户裁决前先 pushplus 通知（用户远程连接）。",
   "plan_order": [
     "00",
     "01",
@@ -87,20 +87,20 @@
     },
     "01": {
       "title": "公开观察与决策快照契约",
-      "status": "in_progress",
-      "step": "A–E 完成并入库（5002433）；剩：前端预览/「已见阵容」回看入口 + 本项收尾验收",
-      "code": "fixed_for_A-E",
-      "isolated": "pending_clean_archive_run",
-      "player": "unverified",
-      "evidence": "reports/roco/product-execution/01/{01.3-reveal-and-contract.md,README-INDEX.md,raw-contract.json,raw-preview.json,raw-regression-*,unittest-targeted-01ABCDE.txt,unittest-full-01ABCDE.txt,verify-01-*}+ tests/roco-observation-contract.test.js",
-      "commit": "5002433",
-      "remote_sha": "5002433309be2f902498a15a74c7522a02d04353",
+      "status": "passed",
+      "step": "A–E + 收尾件全部完成并入库；前端预览/「已见阵容」回看入口已按 Lead 裁决划归 02",
+      "code": "fixed",
+      "isolated": "passed（三切片权威副本：`5002433` 全量 Ran 872 · 1F + 0E · skipped=2，唯一红 = 00 已登记反证；定向 122 OK；浅/深契约 CONTRACT_FAILS 0 / DEEP_FAILS 0；公开面差分 FAILS 0；Node 28/28 + server 26/26 + ROCO_PYTHON 下真引擎端到端 15/15；隔离验收 6/6）",
+      "player": "unavailable（本机 8765 未运行，curl -m5 → http=000 · exit 7；不许自行启动 ⇒ 不写通过）",
+      "evidence": "reports/roco/product-execution/01/{result.json,acceptance.md,01-STEPS-MAP.md,01.1-field-matrix.md,01.3-reveal-and-contract.md,01.4-decision-trace.md,README-INDEX.md,raw-*,unittest-*} + harness/{verify-slice-5002433.txt,verify-01-surface-5002433.json,full-5002433.*,targeted-5002433.*}",
+      "commit": "5002433（代码）+ 3589f73（收尾件）",
+      "remote_sha": "f81209d72d2f0b5456c293218a154abc8b45a968（分支 tip，含两者）",
       "note": "【本轮 2026-09-30 18:3x】(a) 观察契约：match_id/rules_version/decision_id 由**公开开局事实**确定性派生（observation_contract 唯一实现；不进 serialize()，故真实 seed 不影响公开面 —— 与 test_public_planner:120 的不变式相容），event_seq = state.events 的 0-based 追加序号（由 state_version 口径派生，无新计数器）；battle_plan 原样回吐。(b) opening_roster_revealed 发在 service.battle_new（请求 opening_preview:true），state.events 同源留一条，回执 opening_reveal 就是那一条；只含实际展示字段（slot/pet_id/name），hp/energy/loadout/panel/talent/nature/stats 断言不在事件里。(c) schema.revealed_facts 从事件流折出「已出场/已出招」，三公开面共用 revealed 块；无预览 ⇒ 零事件、公开面逐字节不变。(d) Node：publicView 转发契约字段 + seen_roster/revealed_skills；roco-client.js 白名单加 openingPreview；session 绑 (match_id, battle_id, state_version, rules_version)，串局 ⇒ 409 match_mismatch（两条反向用例真跑 28/28）。(e) 01.6 反例：固定公开史改隐藏真值（配招/后备资源/隐藏面板）⇒ 公开快照逐字段相同；改已展示物种/已公开技能 ⇒ 观察变化。(f) 指纹：六局+短局结算与事件指纹逐位不变，只 history 单独改钉（原值留档）；regression.py state_digest 剔除 history + 另立 history_digest，三次构建证明「只有 history 动」。(g) **更正一条此前不准确的表述**（harness-verifier 的 O-7 案例2）：『三条投影已对齐为 {slot,fainted}』字面不成立 —— 实质性质（后备不含身份字段）成立，但 observation_for 的键集是 ['active','fainted','field','slot']，实现者自己的 raw-align-verified-after.json 里写着 all_three_aligned:false；已按实测改写，勿再引用旧表述。未做：前端预览/「已见阵容」入口（不在写域，Node 已备好数据）；opponent-belief.mjs 公开性注释未同步；起真服务的 Node 端到端用例本机跑不了（Windows Node 找不到 WSL 的 python3，roco-standard-pvp-battle.test.js 8 条因此红，属环境限制）。U1 仍 blocked:needs_injection_entry。"
     },
     "02": {
       "title": "开局预览与已见阵容回看",
-      "status": "pending",
-      "step": null,
+      "status": "in_progress",
+      "step": "02.1 只读勘察 + 浏览器夹具 bring-up（plan02-front；写代码待 Lead 放行）",
       "code": "unverified",
       "isolated": "unverified",
       "player": "unverified",
@@ -274,7 +274,7 @@
     {
       "id": "O-7",
       "what": "文档性失真（文档声明 ≠ 自身产物读数）：会让后续读者按不存在的机制推理",
-      "evidence": "harness-verifier 报告 verify-doc-drift-observations.md 两例：① coverage.py 迸发注释称 313/581「有 effect ⇒ 被 evidence 盖住、不记缺口」，实测两者都 diagnostic_shape_gaps=['迸发'] + PARTIAL（parse 对它们 0 条 effect ⇒ evidence 范围为空，注释的因果不存在）；已由 plan00-closer 在缺陷 B 中改成与实测一致（保留对的那半：运行时 power_used 60→90/80→120/35→55、reason=\"迸发 → 威力 +N\"）。② 交接 §9 与旧 STATE 称「三条投影已对齐为 {slot,fainted}」，而实现者自己的 raw-align-verified-after.json 写着 all_three_aligned:false、observation_for 键集 ['active','fainted','field','slot'] —— 实质性质成立、字面声明不成立；STATE 已按实测改写（见 plans.01.note (g)）",
+      "evidence": "harness-verifier 报告 verify-doc-drift-observations.md 两例：① coverage.py 迸发注释称 313/581「有 effect ⇒ 被 evidence 盖住、不记缺口」，实测两者都 diagnostic_shape_gaps=['迸发'] + PARTIAL（parse 对它们 0 条 effect ⇒ evidence 范围为空，注释的因果不存在）；已由 plan00-closer 在缺陷 B 中改成与实测一致（保留对的那半：运行时 power_used 60→90/80→120/35→55、reason=\"迸发 → 威力 +N\"）。② 交接 §9 与旧 STATE 称「三条投影已对齐为 {slot,fainted}」，而实现者自己的 raw-align-verified-after.json 写着 all_three_aligned:false、observation_for 键集 ['active','fainted','field','slot'] —— 实质性质成立、字面声明不成立；STATE 已按实测改写（见 plans.01.note (g)）。③（切片复验时新增）`01.3` §8 #11 自称 `roco/src` 树 hash `cb7e5c39…`，而切片副本实测 `6dc07a83…`（`roco/tests` 的 `7e9859d0…` 两边一致）⇒ 那个数字取自当时工作树、不是切片内容；**以切片实测为准**，权威读数见 harness/verify-slice-5002433.txt / verify-three-slices-summary.md",
       "owner": "lead（STATE 侧已改）· plan00-closer（注释已改）",
       "status": "closed_for_two_known_cases",
       "rule": "以后凡「文档/状态里的声明」与「自身产物读数」不一致，一律以产物为准并当场改正；这类问题 harness-verifier 见到就报，不必等 lead 问"
