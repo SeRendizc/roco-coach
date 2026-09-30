@@ -1,0 +1,60 @@
+{
+ "advance_events_seq": [
+  [
+   "turn_start",
+   0
+  ],
+  [
+   "defense",
+   1
+  ],
+  [
+   "defense",
+   2
+  ],
+  [
+   "energy_regen",
+   3
+  ],
+  [
+   "energy_regen",
+   4
+  ]
+ ],
+ "advance_len_events": 5,
+ "advance_state_version": 5,
+ "advance_status": 200,
+ "battle_new_events": [],
+ "battle_new_status": 200,
+ "battle_plan_status": 200,
+ "decision_id_follows_state_version": true,
+ "decision_id_form": true,
+ "match_id_differs_on_own_team": true,
+ "match_id_same_across_real_seeds": true,
+ "observation_has_contract": false,
+ "plan_contract_echoed": {
+  "decision_id": "m-f3a4c9affd66ef3d:v5",
+  "match_id": "m-f3a4c9affd66ef3d",
+  "rules_version": "roco-world-s4-2026-09-10/legacy_sim_v1"
+ },
+ "public_contract": {
+  "decision_id": "m-f3a4c9affd66ef3d:v0",
+  "match_id": "m-f3a4c9affd66ef3d",
+  "rules_version": "roco-world-s4-2026-09-10/legacy_sim_v1"
+ },
+ "receipt_contract": {
+  "decision_id": "m-f3a4c9affd66ef3d:v0",
+  "match_id": "m-f3a4c9affd66ef3d",
+  "rules_version": "roco-world-s4-2026-09-10/legacy_sim_v1"
+ },
+ "receipt_contract_after_advance": {
+  "decision_id": "m-f3a4c9affd66ef3d:v5",
+  "match_id": "m-f3a4c9affd66ef3d",
+  "rules_version": "roco-world-s4-2026-09-10/legacy_sim_v1"
+ },
+ "receipt_matches_public": true,
+ "roundtrip_decision_id_stable": true,
+ "roundtrip_match_id_stable": true,
+ "seq_equals_index": true,
+ "ui_matches_public": true
+}

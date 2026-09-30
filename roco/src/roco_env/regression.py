@@ -16,8 +16,19 @@
 2. **不可达要如实登记**：某条机制在引擎里根本驱动不了（或数据里没有能学到它的精灵），
    就进 `unreachable[]` 并写明原因——「没有出现在报告里」与「登记为不可达」是两件事。
 
-指纹：`state_digest`（终局序列化摘要）+ `event_kinds`（计数）+ `key_events`（前若干条关键事件）。
-`--check` 用它做回归比对（改了引擎却忘了看这批场景，这里会红）。
+指纹：`state_digest`（终局序列化摘要）+ `history_digest`（决策前观察载荷）+ `event_kinds`（计数）
++ `key_events`（前若干条关键事件）。`--check` 用它做回归比对（改了引擎却忘了看这批场景，这里会红）。
+
+**2026-09-30（分计划 01.3）把 `state_digest` 的口径收窄为「`serialize()` 剔除 `history`」**：
+`history` 装的是**决策前观察载荷**的哈希（`env.step_joint` 里 `observation_for` 的
+`pre_observation_hash`），它属于「公开面长什么样」，不属于「引擎结算成了什么样」。
+两者混在一枚指纹里，就会出现「改了观察边界 ⇒ 引擎回归整批变红」的假警报
+（分计划 01 已经发生过一次：后备身份收窄；01.3 又发生一次：`revealed_facts` 记录已出场/已出招）。
+处置与 `roco/tests/test_turn_order_fail_closed.py` 同一条纪律：**收窄 + 另立一枚**
+（`history_digest`，`check_against` 同样比对它）—— 收窄不制造盲区，只是让红出现在该红的那一枚上。
+证据：`reports/roco/product-execution/01/raw-regression-narrowing.json`
+（开/关 `revealed_facts` 两次构建，「剔除 history」的指纹 **29/29 逐条相同**；
+关掉新块后重建，与磁盘产物**一条都不差**）。
 """
 
 from __future__ import annotations
@@ -44,6 +55,23 @@ LEGACY = "legacy_sim_v1"
 
 def _ids(rs, names: List[str]) -> List[str]:
     return [rs.pets_by_name(n)[0].pet_id for n in names]
+
+
+def _state_without_history(state) -> Dict[str, Any]:
+    """`serialize()` 但**剔除 `history`**（观察载荷），并当场证明只剔了这一个键。
+
+    口径理由见模块 docstring。这**不是**「少测一点」：`history` 仍由 `history_digest`
+    单独盯着，`check_against` 两个都比。
+    """
+    full = env_mod.serialize(state)
+    narrowed = {k: v for k, v in full.items() if k != "history"}
+    assert set(full) - set(narrowed) == {"history"}, "收窄指纹时不许顺手丢掉别的字段"
+    return narrowed
+
+
+def _digest(obj: Any) -> str:
+    return hashlib.sha256(
+        json.dumps(obj, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
 
 
 def _find_lead(rs: Any, wanted: Any, exclude: List[str]) -> "tuple[Optional[str], Optional[str]]":
@@ -281,8 +309,10 @@ def run_scenario(rs: Any, scenario: Dict[str, Any]) -> Dict[str, Any]:
         "type_multipliers": type_multipliers,
         "first_damage_by_turn": {str(k): v for k, v in sorted(first_damage_by_turn.items())},
         "event_kinds": dict(sorted(kinds.items())),
-        "state_digest": hashlib.sha256(
-            json.dumps(env_mod.serialize(state), ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest(),
+        # 结算状态（剔除观察载荷）：这才是「引擎结算有没有变」的量。
+        "state_digest": _digest(_state_without_history(state)),
+        # 观察载荷**单独一枚**（口径收窄不得制造盲区）：决策前观察变了，这一枚会红。
+        "history_digest": _digest((env_mod.serialize(state).get("history") or [])),
         "key_events": key_events,
         "pick_hit_rate": round(picks_hit / picks_total, 4) if picks_total else None,
         "problems": problems,
@@ -424,8 +454,17 @@ def check_against(regression: Dict[str, Any], fresh: Dict[str, Any]) -> List[str
     for added in sorted(set(new) - set(old)):
         problems.append(f"场景 {added} 是新的：请重新生成指纹表")
     for sid in sorted(set(old) & set(new)):
+        # 结算指纹（剔除 history）
         if old[sid]["state_digest"] != new[sid]["state_digest"]:
             problems.append(f"场景 {sid} 的终局指纹变了：{old[sid]['state_digest'][:12]} → {new[sid]['state_digest'][:12]}")
+        # 观察载荷指纹：**单独一枚**，旧产物没有这一栏时如实说明（不是静默跳过）
+        old_history = old[sid].get("history_digest")
+        new_history = new[sid].get("history_digest")
+        if old_history is None:
+            problems.append(f"场景 {sid} 的旧产物没有 history_digest 一栏：请重新生成指纹表"
+                            "（2026-09-30 起观察载荷单独一枚）")
+        elif old_history != new_history:
+            problems.append(f"场景 {sid} 的决策前观察载荷变了：{old_history[:12]} → {new_history[:12]}")
         if old[sid]["event_kinds"] != new[sid]["event_kinds"]:
             problems.append(f"场景 {sid} 的事件分布变了：{old[sid]['event_kinds']} → {new[sid]['event_kinds']}")
     # 不可达清单也是结论：某条从「可达」变「不可达」必须红，不能悄悄留在旧表里。

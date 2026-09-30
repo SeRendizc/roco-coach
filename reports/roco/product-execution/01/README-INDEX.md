@@ -20,6 +20,24 @@
 | `unittest-after-01AB.txt` | 全量 Python 套件日志 | Ran 847 · 2 failures（均为 00 既有欠账） |
 | `regression-rebuild.log` | 回归产物重建日志 | exit=0 |
 
+### 01.2 / 01.3 / 01.6（引擎侧 + Node 转发，2026-09-30 傍晚）
+
+| 文件 | 是什么 | 关键数字 |
+|---|---|---|
+| `01.3-reveal-and-contract.md` | **本轮的读数与证据主文**（契约字段 / 开局预览事件 / 01.6 反例 / 指纹处置 / Node 转发 / 未做项） | — |
+| `raw-contract.json` | 契约字段探针（`match_id`/`rules_version`/`decision_id`/`event_seq`） | 三面同源 `true`；`match_id` 与真实 seed 无关 `true`；同队同规则两局**相同**（已知性质） |
+| `raw-preview.json` | 开局预览探针（无预览 / 有预览 / 推进后 / 重复登记） | 无预览：无 `opening_reveal` 键、后备 `['fainted','slot']`；有预览：后备带 `pet_id`+来源、`revealed_skills` |
+| `raw-regression-narrowing.json` | 证明「本轮只有 `history` 动」的三次构建对照 | 关掉新块重建 29 场景与磁盘产物**一条不差**；开/关的「剔除 history」指纹 **29/29 相同** |
+| `raw-regression-before-after.json` | 回归集重建前后逐场景对照（审计用） | `state_digest_moved=29`（口径本身）·**其它字段 0 个变** |
+| `regression-rebuild-01-3.log` / `regression-check-01-3.log` | 收窄 `state_digest` 后的产物重建与校验 | exit=0 / exit=0（`✔ 一致`） |
+| `unittest-targeted-01ABCDE.txt` | 定向 5 模块（Lead 指定命令） | **Ran 122 · OK**（基线 99 ⇒ +23 全是新增用例） |
+| `unittest-full-01ABCDE.txt` | 全量（收尾树：`TREE 2c5da5f9…`） | **Ran 872 · 1F** · skipped=2（唯一红 = 00 既有欠账 `tier_verdict`） |
+| `probe-07-regression-narrowing.py` / `probe-08-regression-before-after.py` | 上面两份对照的**可复跑**探针 | — |
+
+> **作废/不要引用**：`raw-align-*.json` 等三条作废件同上（见下一节）。
+> `unittest-after-01AB.txt` 是**步骤 A/B 之前**的那一轮读数，只用于「那 2 条 00 欠账当时就是红的」这条对照。
+
+
 ### ⚠ 关于 `raw-foe-legal-leak.json` 的 1.000
 
 那个 1.000 是**镜像队伍**（对手 = 己方六只的排列）下的读数。它本身没错，但**不可与

@@ -1,0 +1,31 @@
+场景 29 条，维度 29 个；有问题的场景 0 条
+  ✔ damage-type-advantage（属性/伤害）：{'action_cancelled': 4, 'damage': 28, 'defense': 11, 'effects_registered_unsupported': 3, 'energy_gain': 3, 'faint': 5, 'mana_loss': 5, 'replacement': 5, 'status_unsupported': 7, 'turn_start': 25}
+  ✔ defense-branch（防御）：{'action_cancelled': 4, 'buff_self': 3, 'damage': 27, 'defense': 13, 'effects_registered_unsupported': 2, 'energy_gain': 1, 'faint': 5, 'mana_loss': 5, 'replacement': 5, 'status_unsupported': 6, 'turn_start': 25}
+  ✔ energy-and-charge（资源（能量/聚能））：{'action_cancelled': 2, 'charge': 16, 'damage': 16, 'defense': 2, 'faint': 2, 'mana_loss': 2, 'replacement': 2, 'turn_start': 18}
+  ✔ faint-and-mana（力竭/魔力）：{'action_cancelled': 5, 'damage': 41, 'defense': 17, 'effects_registered_unsupported': 8, 'energy_gain': 8, 'faint': 6, 'game_end': 1, 'mana_loss': 6, 'replacement': 5, 'status_unsupported': 7, 'turn_start': 35}
+  ✔ replacement（换入离场）：{'action_cancelled': 5, 'damage': 41, 'defense': 17, 'effects_registered_unsupported': 8, 'energy_gain': 8, 'faint': 6, 'game_end': 1, 'mana_loss': 6, 'replacement': 5, 'status_unsupported': 7, 'turn_start': 35}
+  ✔ mark（印记）：{'action_cancelled': 2, 'damage': 31, 'defense': 10, 'effects_registered_unsupported': 9, 'energy_gain': 9, 'faint': 3, 'mana_loss': 3, 'replacement': 2, 'status_unsupported': 3, 'turn_start': 23}
+  ✔ weather（天气）：{'action_cancelled': 1, 'buff_self_flat': 6, 'damage': 21, 'defense': 9, 'effects_registered_unsupported': 4, 'energy_gain': 4, 'faint': 3, 'mana_loss': 3, 'position_shift': 6, 'replacement': 3, 'slot_condition_applied': 3, 'status_applied': 6, 'status_unsupported': 7, 'turn_start': 22}
+  ✔ status（持续状态）：{'action_cancelled': 3, 'damage': 23, 'defense': 6, 'effects_registered_unsupported': 1, 'energy_gain': 1, 'faint': 4, 'heal': 4, 'mana_loss': 4, 'replacement': 4, 'status_applied': 4, 'status_unsupported': 6, 'turn_start': 21}
+  ✔ speed-order（速度层次）：{'action_cancelled': 2, 'damage': 32, 'defense': 10, 'effects_registered_unsupported': 12, 'energy_gain': 4, 'faint': 3, 'mana_loss': 3, 'replacement': 3, 'status_added': 8, 'status_tick': 16, 'turn_start': 22}
+  ✔ speed-tie（同速平手（候选口径））：{'action_cancelled': 2, 'damage': 16, 'defense': 4, 'faint': 4, 'mana_loss': 4, 'replacement': 4, 'status_unsupported': 10, 'turn_start': 16}
+  ✔ legacy-practice-3v3（迁移夹具（legacy 逐位不变））：{'damage': 19, 'defense': 12, 'effects_registered_unsupported': 4, 'energy_gain': 4, 'energy_regen': 34, 'faint': 2, 'replacement': 2, 'status_unsupported': 5, 'turn_start': 18}
+  ✔ type-sweep-光系（属性·光系）：{'action_cancelled': 1, 'damage': 19, 'defense': 2, 'faint': 2, 'mana_loss': 2, 'replacement': 1, 'turn_start': 11}
+  ✔ type-sweep-冰系（属性·冰系）：{'action_cancelled': 1, 'damage': 19, 'defense': 2, 'effects_registered_unsupported': 10, 'energy_gain': 10, 'faint': 1, 'mana_loss': 1, 'replacement': 1, 'turn_start': 11}
+  ✔ type-sweep-地系（属性·地系）：{'action_cancelled': 1, 'damage': 19, 'defense': 2, 'effects_registered_unsupported': 2, 'energy_gain': 2, 'faint': 1, 'mana_loss': 1, 'replacement': 1, 'turn_start': 11}
+  ✔ type-sweep-幻系（属性·幻系）：{'action_cancelled': 2, 'damage': 18, 'defense': 2, 'effects_registered_unsupported': 9, 'energy_gain': 9, 'faint': 2, 'mana_loss': 2, 'replacement': 1, 'turn_start': 11}
+  ✔ type-sweep-幽系（属性·幽系）：{'damage': 18, 'defense': 2, 'effects_registered_unsupported': 1, 'energy_gain': 1, 'faint': 2, 'mana_loss': 2, 'replacement': 2, 'turn_start': 10}
+  ✔ type-sweep-恶系（属性·恶系）：{'action_cancelled': 1, 'damage': 16, 'defense': 3, 'effects_registered_unsupported': 9, 'energy_gain': 9, 'faint': 2, 'mana_loss': 2, 'replacement': 2, 'turn_start': 10}
+  ✔ type-sweep-普通系（属性·普通系）：{'action_cancelled': 1, 'damage': 18, 'defense': 3, 'effects_registered_unsupported': 9, 'energy_gain': 9, 'faint': 1, 'mana_loss': 1, 'replacement': 1, 'turn_start': 11}
+  ✔ type-sweep-机械系（属性·机械系）：{'action_cancelled': 1, 'damage': 16, 'defense': 3, 'effects_registered_unsupported': 1, 'energy_gain': 1, 'faint': 2, 'mana_loss': 2, 'replacement': 2, 'turn_start': 10}
+  ✔ type-sweep-武系（属性·武系）：{'action_cancelled': 1, 'damage': 19, 'defense': 2, 'effects_registered_unsupported': 3, 'energy_gain': 3, 'faint': 1, 'mana_loss': 1, 'replacement': 1, 'turn_start': 11}
+  ✔ type-sweep-毒系（属性·毒系）：{'action_cancelled': 2, 'damage': 11, 'defense': 3, 'effects_registered_unsupported': 3, 'energy_gain': 1, 'faint': 2, 'mana_loss': 2, 'replacement': 2, 'status_added': 2, 'status_tick': 6, 'status_unsupported': 4, 'turn_start': 10}
+  ✔ type-sweep-水系（属性·水系）：{'action_cancelled': 1, 'damage': 19, 'defense': 2, 'effects_registered_unsupported': 10, 'energy_gain': 10, 'faint': 1, 'mana_loss': 1, 'replacement': 1, 'turn_start': 11}
+  ✔ type-sweep-火系（属性·火系）：{'action_cancelled': 1, 'damage': 19, 'defense': 2, 'effects_registered_unsupported': 10, 'energy_gain': 10, 'faint': 1, 'mana_loss': 1, 'replacement': 1, 'turn_start': 11}
+  ✔ type-sweep-电系（属性·电系）：{'action_cancelled': 1, 'damage': 19, 'defense': 2, 'effects_registered_unsupported': 3, 'energy_gain': 3, 'faint': 1, 'mana_loss': 1, 'replacement': 1, 'turn_start': 11}
+  ✔ type-sweep-翼系（属性·翼系）：{'action_cancelled': 1, 'damage': 19, 'defense': 2, 'effects_registered_unsupported': 10, 'energy_gain': 1, 'faint': 1, 'mana_loss': 1, 'replacement': 1, 'turn_start': 11}
+  ✔ type-sweep-草系（属性·草系）：{'action_cancelled': 1, 'damage': 19, 'defense': 2, 'effects_registered_unsupported': 9, 'energy_gain': 9, 'faint': 1, 'mana_loss': 1, 'replacement': 1, 'turn_start': 11}
+  ✔ type-sweep-萌系（属性·萌系）：{'action_cancelled': 1, 'damage': 19, 'defense': 2, 'effects_registered_unsupported': 2, 'energy_gain': 2, 'faint': 1, 'mana_loss': 1, 'replacement': 1, 'turn_start': 11}
+  ✔ type-sweep-虫系（属性·虫系）：{'damage': 22, 'defense': 2, 'effects_registered_unsupported': 12, 'turn_start': 12}
+  ✔ type-sweep-龙系（属性·龙系）：{'action_cancelled': 2, 'damage': 15, 'defense': 3, 'effects_registered_unsupported': 5, 'energy_gain': 5, 'faint': 2, 'mana_loss': 2, 'replacement': 2, 'turn_start': 10}
+指纹表 → reports/roco/rc404/regression-set.json

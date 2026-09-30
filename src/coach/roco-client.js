@@ -946,13 +946,16 @@ export class RocoClient {
   //   但在我加这一行之前，它**到这里就没了**（实测：不改这一行，开局照常成功、快照无声消失）。
   //   ⇒ 把 `individuals` 加进白名单转发；引擎那一半（`_make_pet` 用它）在 task-17。
   async battleNew({ team, enemyTeam, seed = 1, strategy = 'greedy_damage', loadouts = null, stateVersion = 0,
-    rulesetConfigId = null, unverifiedOverrides = null, individuals = null } = {}) {
+    rulesetConfigId = null, unverifiedOverrides = null, individuals = null, openingPreview = false } = {}) {
     const body = { team, seed, strategy };
     if (enemyTeam) body.enemy_team = enemyTeam;
     if (loadouts) body.loadouts = loadouts;
     if (individuals) body.individuals = individuals;
     if (rulesetConfigId) body.ruleset_config_id = rulesetConfigId;
     if (Array.isArray(unverifiedOverrides) && unverifiedOverrides.length) body.unverified_overrides = unverifiedOverrides;
+    // 01.3：**本模式展示了开局预览**时由页面/服务端显式说出来（省略 = 不展示）。
+    // 引擎只把这句话当成「预览实际展示过」的事实来记账；不说话 ⇒ `state.events` 一条不多。
+    if (openingPreview === true) body.opening_preview = true;
     return this._request('POST', '/battle/new', this._payload(body, { stateVersion }), { stateVersion });
   }
 

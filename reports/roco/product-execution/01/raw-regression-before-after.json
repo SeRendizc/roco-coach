@@ -1,0 +1,192 @@
+{
+ "per_scenario": {
+  "damage-type-advantage": {
+   "new_history_digest": "8f318c5de6d8a50ffcab9bcc86fb3fc2e30e40136ff1890d14276d1d8037ef92",
+   "new_state_digest_no_history": "430386b0b0ed693c49c01f047f9f3198c97ad365d956de6ba26ed87713c53247",
+   "old_state_digest_wide": "0f70c03ba6f2c24006598f603e9abdc8c5b56509b939022a7758132ced3c81dc",
+   "other_fields_changed": []
+  },
+  "defense-branch": {
+   "new_history_digest": "d7ffed9a3023305ba6a7dd4761df3347c443eefa415f7ca72520c7dbe4ca933a",
+   "new_state_digest_no_history": "ac62ffa303d55fa89640d2edbf7533fc785441989b4ed24cbdd46595406af3e2",
+   "old_state_digest_wide": "fd64c7e928b1ae8efa037d74b8e7646970659288a1985c965548c0573b5caed2",
+   "other_fields_changed": []
+  },
+  "energy-and-charge": {
+   "new_history_digest": "bcec5a40e6de957227e7789c59b188f61fbe0891f4858d2ad800f95419f6cefe",
+   "new_state_digest_no_history": "252692e46312b11d44fafb1464e95239ce3a50d63b04e08a3dc93765e70ddb65",
+   "old_state_digest_wide": "64a5594679a0914a7293490e6ee7713cfe7b5f14c0b8fef0892d18e8d3641f0d",
+   "other_fields_changed": []
+  },
+  "faint-and-mana": {
+   "new_history_digest": "8cf91cc24f31a65502238ac1a023c6e72433da9f4d5f89e1689cd514b2c17ae9",
+   "new_state_digest_no_history": "f1ad746f7399eab09f3c49b79b9108a47e64100cdfd83bda12fe4e879bc1b388",
+   "old_state_digest_wide": "43b25544c094b5a1d095315cc200272b39e4ff53588cd798cf373e82616bc9c6",
+   "other_fields_changed": []
+  },
+  "legacy-practice-3v3": {
+   "new_history_digest": "2231e4029609c414a53102cbfb25693b9ffb857b229928ef77cd5928fe956429",
+   "new_state_digest_no_history": "57b1beb8196791dc6c496a6f6599ab9da530655c89b0df28a2bbf1e7208bc56f",
+   "old_state_digest_wide": "57ad5035d4e12218e93647ad2b689e4ce2aac8dde7d78d94beed69e9e4e90ba4",
+   "other_fields_changed": []
+  },
+  "mark": {
+   "new_history_digest": "ac0a3213deb33c7dbb53cb8d06604dc4c74e5f4621b5697193d9e2406c68bcda",
+   "new_state_digest_no_history": "68f956a453c6668b34d4d38fa534d71497825292a6abecab594cef9bd70e1619",
+   "old_state_digest_wide": "214a4564a4f6865b8087af9b2efdbe2022bde46ea23b16b3bfab34d9d8c7ff8f",
+   "other_fields_changed": []
+  },
+  "replacement": {
+   "new_history_digest": "8cf91cc24f31a65502238ac1a023c6e72433da9f4d5f89e1689cd514b2c17ae9",
+   "new_state_digest_no_history": "df27612cbed39b4ef8abe8aef1f3f7c3fa5c304fa76914244b573035867bef0a",
+   "old_state_digest_wide": "eabb2ee3d2b1a47ff440e84514ba31c34e481ee5cf3683e2f83b543b693509c6",
+   "other_fields_changed": []
+  },
+  "speed-order": {
+   "new_history_digest": "35cfa9c11926b9f06be3cd934243820bccc41d7773ed25db1b133c5763dd4343",
+   "new_state_digest_no_history": "a0cda158f138a4f0270504822b056ac8b78767007f25119e6416a02652d23c94",
+   "old_state_digest_wide": "4730f3a03c6be7bb5a845fa2bfd2d506b9572768e64666be614fbbc296c5b01a",
+   "other_fields_changed": []
+  },
+  "speed-tie": {
+   "new_history_digest": "60f68297962a6c3642377c9b89ea733ca40eb51f480039d5d5ddeb1cf892da74",
+   "new_state_digest_no_history": "490ca59daf4dd61c7e1b26b74684c328664fd657c73d550491949be8ef4bf21f",
+   "old_state_digest_wide": "add035b928d0fc9afca958507f2897a2a97dc393946052d9bf64e6fd5bddba08",
+   "other_fields_changed": []
+  },
+  "status": {
+   "new_history_digest": "5cc452070aae6d7af1805222c4c9b00cbaa0975ea623772c61ccfb78a333d11d",
+   "new_state_digest_no_history": "566c79aadff168b507581351386c20bb6200c8fc8a566ef2fea6c66848f622e1",
+   "old_state_digest_wide": "23eb4776255e9dbb8bf03037615982f98a163df761fc985e078f904e2797f1b8",
+   "other_fields_changed": []
+  },
+  "type-sweep-光系": {
+   "new_history_digest": "22c690b8e47fff272c338f46503a9b29d2c4ab79ec4a0e14c2dc9db0c9deb204",
+   "new_state_digest_no_history": "423dc6ced72b45d422c558997fed99d9d92f1813c447550dd41020c088b15579",
+   "old_state_digest_wide": "01cf3c463d7b53a38daf5c5d167c8424929cea9b51131873af1acc24844ba633",
+   "other_fields_changed": []
+  },
+  "type-sweep-冰系": {
+   "new_history_digest": "d5ae6ff2b66330495d06b47ad1abfb8de742805ef0504d80300c77edf4369566",
+   "new_state_digest_no_history": "7b0306590cac2a5ff43d3b531dca974c283c1ce5ef6fcc25436dfabf1eb86196",
+   "old_state_digest_wide": "53ed447f03ac6a66b648602920a570816c12deb6e8270243dd092057d5089aab",
+   "other_fields_changed": []
+  },
+  "type-sweep-地系": {
+   "new_history_digest": "82aab6ac13fb418329e8dcacd1ea5b4d4b97ecef785dd98395699b955832deff",
+   "new_state_digest_no_history": "84715dd2f1daf8c3e13679d49d72a2ef3aaab4fc0cb5641681ecde78a0e851f9",
+   "old_state_digest_wide": "e243f07b0a3eefa33b5a65ec5b9b5ec383e257f73ea9b602806db84ae889af93",
+   "other_fields_changed": []
+  },
+  "type-sweep-幻系": {
+   "new_history_digest": "d5f59421194e570866405df49abe8ebbe7ab018f119be7376a6b243d74b22a5c",
+   "new_state_digest_no_history": "4b5a4c153b721c4d3bad8f8198deced4bc609103093ce49151ce4b5b1abb4d14",
+   "old_state_digest_wide": "519f44d0f0c6fccaabcc5514143934452e5e8b5927414c5f73c617ee7d7cf799",
+   "other_fields_changed": []
+  },
+  "type-sweep-幽系": {
+   "new_history_digest": "32fc0a100cb8dc2471222030005a85ae32207f3585c220073ae149a845b3a07b",
+   "new_state_digest_no_history": "2c2b235233ab242f6a41bbd0233a26cb851186f5d44f2eb2e63598af3a59d9fe",
+   "old_state_digest_wide": "645f891cba21e6c6c8fa54b9d308049ad039e134755037a38f1bf43ab0804ab3",
+   "other_fields_changed": []
+  },
+  "type-sweep-恶系": {
+   "new_history_digest": "fa42a0d58b5f279ec8010211d8ae725bcd202d4a4f62632cfd0f145e7bd94ce6",
+   "new_state_digest_no_history": "8bbecbe36015b1381a3e5f0e81900359434a82be7e912db7bebc6a95269628e5",
+   "old_state_digest_wide": "72dd79b5595f1ae1636d6ca7fc1b016d14cc2e407375f198c9e5cb56bc977834",
+   "other_fields_changed": []
+  },
+  "type-sweep-普通系": {
+   "new_history_digest": "36f1c520d407d0e8fc346c947b8da7ccde98cf174265cdfaf4bb9b391e0b6bf2",
+   "new_state_digest_no_history": "44444d7c47be33f8cb464544f423b999ab14197318daa7bc0d5fff6b59aa9e32",
+   "old_state_digest_wide": "95b72ea8ab15f301abf2ba0b9064bbe8e0a95c99dd015aaf2bc672289bffeffa",
+   "other_fields_changed": []
+  },
+  "type-sweep-机械系": {
+   "new_history_digest": "990150e7e703cb264da0d853ae4748f2d7d3f0a0c6d081b43464ec7bcb9c1d2f",
+   "new_state_digest_no_history": "294e99fac709f40833174723859db28a0aab68ac15f989b5c9c63729021df5aa",
+   "old_state_digest_wide": "b2af64651e1ac867e94f862c619ef42d7ce69c71be3419925ad2580e393ffb50",
+   "other_fields_changed": []
+  },
+  "type-sweep-武系": {
+   "new_history_digest": "738febbdcda317be87dfa9156c191d6c5af3aa008220837982c6073e44effdc0",
+   "new_state_digest_no_history": "cdc3be859f242deb7d026d477402c6035bdd0df1f51d326105c6b3db205f6356",
+   "old_state_digest_wide": "957fbf0ce3c970192e9a1188b219f270f55294dbc0e6bc96dfe3932d1e78cd88",
+   "other_fields_changed": []
+  },
+  "type-sweep-毒系": {
+   "new_history_digest": "213dcc770bdae79bf26c80167eed6415059306ebeccd4cc9d2bb7b665c9cc1e6",
+   "new_state_digest_no_history": "62ba25414fa7caae23d5e72e7e763eb61f10c14c201cd13955810698d4d957cd",
+   "old_state_digest_wide": "9289cab464d6bf77f2be10b7e64b803e8d402c59e80b540bbeab8060df069262",
+   "other_fields_changed": []
+  },
+  "type-sweep-水系": {
+   "new_history_digest": "52d11ae77c3ed4ff0b2220118f04d4025a2dfd8f2fffb78b1a65a998920c0f4b",
+   "new_state_digest_no_history": "9682f70587504033e91072933b8921916177226ba8dce42e870d9a3fe4b807eb",
+   "old_state_digest_wide": "92346c01b5f0b6ac6adeae23222c041a9931dffc5d8f82f91ace1f96ca9e170e",
+   "other_fields_changed": []
+  },
+  "type-sweep-火系": {
+   "new_history_digest": "b4ecd10e0c99b905230b23d34181308ee9cfe1e68c86691533c0a476765cedee",
+   "new_state_digest_no_history": "1b4815bc96b9d7fc9fb99b00fe1ccf78d3f56d1d63641f524c747eb4e0872476",
+   "old_state_digest_wide": "76ba2b1f14a1a8d1d1c2315c7dddd926c46d40996a99bfdef07d90aa69ea1d51",
+   "other_fields_changed": []
+  },
+  "type-sweep-电系": {
+   "new_history_digest": "5b4f554959ed1e7e8fd061891521dc94685da83de2c06137ef7f164602fa027a",
+   "new_state_digest_no_history": "df1ed7ab18e60884944019e4da4fd86d5557568c29d8b46ade5a3646cd5d7908",
+   "old_state_digest_wide": "290dd6deb44c1580686bfdeb61a7e71667937c070753cd04e602f28277ab5930",
+   "other_fields_changed": []
+  },
+  "type-sweep-翼系": {
+   "new_history_digest": "95e4356846f26cf1aab52c2dd0eb553f114a9fa5b8c173211506fa60e71b6b4f",
+   "new_state_digest_no_history": "18956d32bd5107ef745af73c83f5b460b5cc8b32d8f2b0856578340cf46f5dde",
+   "old_state_digest_wide": "13b58c6b5ed994735242a56b71c780f97a972add5b06fa97c64bb8f66a3c58ab",
+   "other_fields_changed": []
+  },
+  "type-sweep-草系": {
+   "new_history_digest": "d9fdb344f9cb5dc15d17d4c6f73a464f00484f5d8193ac9d720ae9dde2b261cb",
+   "new_state_digest_no_history": "eb963cc4bf1617b147172cb5e889900b95963304917fad2f570ea1bdda418213",
+   "old_state_digest_wide": "085b5dedc6aa000b181d264158e364d4e8eaae82d99556fa68fd8e14cf2cdf0b",
+   "other_fields_changed": []
+  },
+  "type-sweep-萌系": {
+   "new_history_digest": "1f00fb39523c0c0a148fc11e713401a072c7b270be1ae4635adee9b29019dbf0",
+   "new_state_digest_no_history": "ad39636bc1095629b0686736419213955535efab665d2b66dc493685b6cda4dd",
+   "old_state_digest_wide": "c785c21be0f95c2981bfdce3b0bd0ab23cd09cd282ff5a2755b0df8eb3f4d2cb",
+   "other_fields_changed": []
+  },
+  "type-sweep-虫系": {
+   "new_history_digest": "d09201c078ea44b806f4f41e4af04623e9b63329a3c63efcf93e940c1c17dfd9",
+   "new_state_digest_no_history": "61ee4497bc53ff31ee3028f37cb5b623e35363c4055e708dcf6a1ab138cc3847",
+   "old_state_digest_wide": "20b153afc8edccd502b88207f936f28bc0fd68c9b3ea7548d483439bfe8321d4",
+   "other_fields_changed": []
+  },
+  "type-sweep-龙系": {
+   "new_history_digest": "01bbdb9cb236ee7bf541c56bb742ca64bdf4742b055a530cc21cc79e6bf21344",
+   "new_state_digest_no_history": "b6b55818211938bc2dfc18a394c989b5db3c6c6cd593ee2a6037809df45b778c",
+   "old_state_digest_wide": "1e82b0d81d74dee441c3b1514630516bbbec3006516221a0318cccd3f73ad9f8",
+   "other_fields_changed": []
+  },
+  "weather": {
+   "new_history_digest": "4e2ffc540a9703fbb6bb333117ecc190a7f3e32d307d71acf27b9d2c2c825897",
+   "new_state_digest_no_history": "3bf6ee4e522930da40e0d39040682031511a64ef692fcdd4463a0599af9be0dd",
+   "old_state_digest_wide": "8c4200197408869ee956b3f8f03268c13c9979a098eafcec632bc3c45e12dce8",
+   "other_fields_changed": []
+  }
+ },
+ "summary": {
+  "after": "reports/roco/rc404/regression-set.json",
+  "before": "/mnt/e/roco-coach/reports/roco/product-execution/01/.work-backup/regression-set.before-01-3.json",
+  "dimensions_unchanged": true,
+  "event_kinds_unchanged": true,
+  "old_artifact_had_history_digest": false,
+  "other_fields_changed_scenarios": [],
+  "problems_unchanged": true,
+  "scenarios": 29,
+  "state_digest_moved": 29,
+  "totals_unchanged": true,
+  "unreachable_unchanged": true,
+  "why_unchanged": true
+ }
+}

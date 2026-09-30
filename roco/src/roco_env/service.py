@@ -2242,6 +2242,11 @@ class RocoService:
 
         payload = {
             "schema_version": public.get("schema_version"),
+            # 01.2：契约字段**原样回吐**调用方给的那份公开面里的三个键（缺就不出现）。
+            # 为什么不在这里重算：规划侧手里只有公开面，没有对局状态，重算只能靠猜；
+            # 回吐才能保证「同一 decision_id 的 UI、工具输入与回放」是同一个键。
+            **{k: public[k] for k in ("match_id", "rules_version", "decision_id")
+               if k in public},
             "state_version": public.get("state_version"),
             "turn": public.get("turn"),
             "analysis_seeds": raw_seeds,
@@ -2428,6 +2433,21 @@ class RocoService:
             # 机制未核验（例如 v3 的 energy.initial 是 UNKNOWN 且没给覆盖）：
             # 这不是请求写错了，而是引擎没有依据 —— 422，不是 400。
             return self._answer_envelope(_unsupported("unverified_rule_value", str(exc)), body, started)
+
+        # 01.3：**本模式展示了开局预览**时，调用方显式说出来（省略 / false = 不展示）。
+        #
+        # 为什么由调用方说、引擎不自己决定：页面有没有弹那个 5–6 秒的预览层，
+        # 只有页面/Node 知道；引擎替它猜，就等于把「没展示」说成「展示了」（或反过来）。
+        # 说了之后引擎做的事很小：把**预览实际展示的那一份**（位次 + 物种 id + 名字）
+        # 记成 `opening_roster_revealed` 事件 —— 于是它同时进入
+        # `state.events`（同源记录）、下一个回执、以及三个公开面的「已亮明」块。
+        opening_preview = body.get("opening_preview", False)
+        if not isinstance(opening_preview, bool):
+            return self._answer_envelope(
+                _bad_request("opening_preview 必须是布尔值（省略 = 本模式不展示开局预览）"),
+                body, started)
+        if opening_preview:
+            env_mod.opening_roster_reveal(state, rs)
 
         strategy, why = self._sim_strategy(body, started)
         if why is not None:
@@ -2885,6 +2905,23 @@ class RocoService:
                 "entries": list(state.unsupported)[:20],
             })
 
+        # 01.3：开局预览事件**同源**带出 —— 回执里这一份就是 `state.events` 里那条事件
+        # （同一个对象序列化而来，`seq` 由同一口径派生），不是另造一份。
+        # 为什么单独给一个键而不是塞进 `events`：`events` 只在推进类端点下发（见下面），
+        # 而预览发生在 `battle_new`；且这条事实要在**之后每一份回执**里都还在
+        # （页面「已见阵容」入口要读它），所以按「有才出现」的键一路带着。
+        # 没有预览 ⇒ 没有这个键（不补空占位）。
+        opening_reveal: Optional[Dict[str, Any]] = None
+        # ⚠ 循环变量**不许**叫 `event`：那会遮住本函数的参数 `event`（端点名），
+        # 于是下面的 `if event in (...)` 恒假、事件列表整批变空，而 `"event"` 那一格
+        # 会变成一个 `Event` 对象（实测踩到：预览局推进后 `events == []`）。
+        for index, row_event in enumerate(state.events):
+            if row_event.kind == env_mod.OPENING_REVEAL_KIND:
+                opening_reveal = dict(row_event.to_dict(),
+                                      seq=env_mod.event_seq_of(state, index))
+                opening_reveal["text"] = events_text.event_text(opening_reveal, rs)
+                break
+
         return self._answer_envelope(Answer(
             trust_domain=PRIVATE_TRUST_DOMAIN,
             result={
@@ -2899,6 +2936,12 @@ class RocoService:
                 "phase": state.phase,
                 "turn": state.turn,
                 "result": state.result,
+                # 01.2 观察契约：与 `public` / `ui` 里那三个字段**同一份派生**
+                # （`env.observation_contract` 是唯一实现），这里只是把它们也放到
+                # 回执顶层，让 Node 不必先钻进投影里取。
+                **env_mod.observation_contract(state, rs),
+                # 01.3：开局预览的「实际展示字段」（有才出现）。
+                **({"opening_reveal": opening_reveal} if opening_reveal else {}),
                 "public": env_mod.public_planner_state(state, rs, "player"),
                 # **并行**的 UI 视图：带真名与系别。刻意**不**给 `public` 加名字——
                 # 那是交给模型规划的最小协议，名字对搜索没用、只是白烧 token。
@@ -2910,8 +2953,13 @@ class RocoService:
                 # 句子在 Python 侧生成：只有引擎知道每个 detail 键是什么意思，
                 # 放到浏览器里再抄一份必然漂移。原始 JSON 一并带出去，
                 # 但页面把它收进默认隐藏的调试区（玩家只该看到句子）。
-                "events": [dict(e.to_dict(), text=events_text.event_text(e.to_dict(), rs))
-                           for e in state.events[events_from:]]
+                # 01.2：每行带 `seq`（= 它在 `state.events` 里的 0-based 追加序号）。
+                # 为什么必须写进事件行：`events_from` 会把事件**切片**下发，
+                # 消费方按数组位置猜序号，一过滤/一分页就与真实序号脱钩。
+                # 序号由 `env.event_seq_of` 从既有 `state_version` 口径派生（不新造计数器）。
+                "events": [dict(e.to_dict(), seq=env_mod.event_seq_of(state, i),
+                                text=events_text.event_text(e.to_dict(), rs))
+                           for i, e in enumerate(state.events) if i >= events_from]
                           if event in ("battle_advance", "battle_free") else [],
                 "strategy": {"name": strategy.name, "version": strategy.version},
                 "unsupported_seen": list(state.unsupported),

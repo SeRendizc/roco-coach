@@ -31,6 +31,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 
 from roco_env import data as rdata          # noqa: E402
 from roco_env import env as renv            # noqa: E402
+from roco_env.schema import ACTION_SKILL, ACTION_SWITCH  # noqa: E402
 
 RS = rdata.load_ruleset()
 A_TEAM = [RS.pets_by_name(n)[0].pet_id for n in ("寂灭骨龙", "海豹船长", "黑猫巫师")]
@@ -273,6 +274,122 @@ class OpponentBenchFollowsRevealRules(unittest.TestCase):
             self.assertEqual(pet.fainted, bool(b["fainted"]), "存活情况必须还原")
         # 假设必须被标注出来（不是静默填数）
         self.assertIn("opponent_bench", public["assumptions"])
+
+
+class OpeningRevealFollowsTheDisplayedFields(unittest.TestCase):
+    """分计划 01.3：预览发生前不给六只；预览事件只含**实际展示**的字段；
+    已出场 / 已出招 / 可见状态与资源要记录在案。
+
+    口径落在**事件**上（`env.opening_roster_reveal` → `opening_roster_revealed`），
+    三个公开面都从事件流折出「已经亮明的对手事实」（`schema.revealed_facts`）：
+    没有这类事件的对局，公开面**一个键都不多**（见下面的 no-preview 用例）。
+    """
+
+    def _previewed(self, *, preview: bool = True, enemy=None):
+        st = renv.reset(A_TEAM, enemy or B_TEAM, seed=20260930, rs=RS)
+        if preview:
+            renv.opening_roster_reveal(st, RS)
+        return st
+
+    def test_before_any_preview_the_opponent_six_are_not_there(self):
+        st = self._previewed(preview=False)
+        self.assertEqual([e.kind for e in st.events], [], "没预览却发了事件")
+        for view in (renv.public_planner_state(st, RS), renv.ui_public_view(st, RS)):
+            bench = view["opponent"]["bench"]
+            self.assertTrue(bench, "后备是空的：这条检查会空过")
+            for entry in bench:
+                self.assertEqual(set(entry.keys()), {"slot", "fainted"},
+                                 "尚未亮明的后备只许有位次与是否倒下")
+            self.assertNotIn("pet_", json.dumps(bench, ensure_ascii=False))
+            self.assertNotIn("revealed", view, "没有亮明事件却出现了已亮明块")
+        self.assertNotIn("revealed", renv.observation_for(st, RS, "player"))
+
+    def test_preview_event_carries_only_what_the_preview_shows(self):
+        st = self._previewed()
+        self.assertEqual(len(st.events), 1)
+        event = st.events[0]
+        self.assertEqual(event.kind, "opening_roster_revealed")
+        self.assertEqual(set(event.detail), {"source", "viewer", "revealed_side", "roster"})
+        self.assertEqual(event.detail["revealed_side"], "enemy")
+        self.assertEqual(event.detail["source"], "opening_preview")
+        self.assertEqual([row["slot"] for row in event.detail["roster"]], [0, 1, 2],
+                         "预览里的顺序就是展示顺序")
+        for row in event.detail["roster"]:
+            self.assertEqual(set(row), {"slot", "pet_id", "name"},
+                             "预览只展示位次/物种/名字；血量、配招、天分、六维都不展示")
+        blob = json.dumps(event.detail, ensure_ascii=False)
+        for hidden in ("hp", "max_hp", "energy", "loadout", "skill_", "panel",
+                       "talent", "nature", "stats"):
+            self.assertNotIn(hidden, blob, f"预览事件里出现了没展示的东西：{hidden}")
+
+    def test_after_preview_both_faces_and_the_observation_carry_the_roster(self):
+        st = self._previewed()
+        pub = renv.public_planner_state(st, RS)
+        ui = renv.ui_public_view(st, RS)
+        obs = renv.observation_for(st, RS, "player")
+        for view in (pub, ui):
+            bench = view["opponent"]["bench"]
+            self.assertEqual({b["pet_id"] for b in bench}, set(B_TEAM[1:]),
+                             "预览已展示 ⇒ 后备的身份是公开事实")
+            for b in bench:
+                self.assertEqual(b["revealed_via"], "opening_preview")
+                self.assertEqual(b["revealed_turn"], 1)
+                self.assertEqual(b["revealed_event_seq"], 0, "来源事件序号必须指回那条预览事件")
+        self.assertEqual({row["pet_id"] for row in obs["revealed"]["opponent_roster"]}, set(B_TEAM))
+        # 三个公开面读**同一个** `revealed` 块（名字也在里面）；规划协议仍然不给展示字段。
+        for view in (pub, ui):
+            self.assertEqual({row["pet_id"] for row in view["revealed"]["opponent_roster"]},
+                             set(B_TEAM))
+            self.assertTrue(all(row["name"] for row in view["revealed"]["opponent_roster"]))
+        self.assertNotIn("name", json.dumps(pub["opponent"]["bench"], ensure_ascii=False))
+        self.assertTrue(all(b["name"] for b in ui["opponent"]["bench"]), "UI 面后备没有名字")
+
+    def test_preview_cannot_be_recorded_twice(self):
+        st = self._previewed()
+        with self.assertRaises(ValueError) as ctx:
+            renv.opening_roster_reveal(st, RS)
+        self.assertIn("已经记录过", str(ctx.exception))
+
+    def test_a_pet_that_enters_the_field_stays_revealed(self):
+        """已出场：换上场的那一只成为公开事实，**换下去之后仍然留在名单里**。"""
+        st = renv.reset(A_TEAM, B_TEAM, seed=5, rs=RS)
+        switch = next(a for a in renv.legal_actions(st, RS, "enemy") if a.kind == ACTION_SWITCH)
+        mine = next(a for a in renv.legal_actions(st, RS, "player") if a.kind == ACTION_SKILL)
+        renv.step_joint(st, RS, mine, switch)
+        entered = B_TEAM[switch.target_index]
+        revealed = renv.observation_for(st, RS, "player")["revealed"]
+        roster = {row["pet_id"]: row for row in revealed["opponent_roster"]}
+        self.assertIn(entered, roster, "换上场的那一只没有进「已亮明」名单")
+        self.assertEqual(roster[entered]["revealed_via"], "switch")
+        # 开局就在场上的那只**不进**名单（它的身份本来就在 opponent.field 里）
+        self.assertNotIn(B_TEAM[0], roster)
+        # 换下场之后**仍然**在名单里（它已经被看见过）
+        back = next(a for a in renv.legal_actions(st, RS, "enemy") if a.kind == ACTION_SWITCH)
+        mine2 = next(a for a in renv.legal_actions(st, RS, "player") if a.kind == ACTION_SKILL)
+        renv.step_joint(st, RS, mine2, back)
+        roster2 = {row["pet_id"]: row
+                   for row in renv.observation_for(st, RS, "player")["revealed"]["opponent_roster"]}
+        self.assertIn(entered, roster2, "已亮明的成员换下去之后从名单里消失了")
+
+    def test_a_skill_the_opponent_used_becomes_public(self):
+        """已出招：对手真的打出来的那一招成为公开事实；没出过的招不出现。"""
+        st = renv.reset(A_TEAM, B_TEAM, seed=5, rs=RS)
+        theirs = next(a for a in renv.legal_actions(st, RS, "enemy")
+                      if a.kind == ACTION_SKILL and a.skill_id)
+        mine = next(a for a in renv.legal_actions(st, RS, "player") if a.kind == ACTION_SKILL)
+        renv.step_joint(st, RS, mine, theirs)
+        obs = renv.observation_for(st, RS, "player")["revealed"]
+        used = obs["opponent_skills"][B_TEAM[0]]
+        self.assertIn(theirs.skill_id, used, "对手打出来的那一招没有登记成公开事实")
+        # 反向：对手配招里**没打出来**的招不许出现（那是隐藏真值）
+        for hidden in set(RS.candidate_moveset(B_TEAM[0])) - set(used):
+            self.assertNotIn(hidden, json.dumps(obs["opponent_skills"], ensure_ascii=False))
+        # 两个公开面读同一份（块名与 `observation_for` 相同）
+        pub = renv.public_planner_state(st, RS)["revealed"]["opponent_skills"]
+        ui = renv.ui_public_view(st, RS)["revealed"]["opponent_skills"]
+        self.assertEqual(pub[B_TEAM[0]], [theirs.skill_id])
+        self.assertEqual(ui[B_TEAM[0]][0]["skill_id"], theirs.skill_id)
+        self.assertTrue(ui[B_TEAM[0]][0]["skill"]["name"], "UI 面的已出招没有名字")
 
 
 if __name__ == "__main__":

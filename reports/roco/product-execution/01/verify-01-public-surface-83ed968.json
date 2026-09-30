@@ -1,0 +1,203 @@
+{
+  "A_leak_rows": [
+    {
+      "foe_real_n": 17,
+      "observation_for_foe_leaked": [],
+      "private_enemy_legal_recovered_n": 4,
+      "public_planner_state_foe_leaked": [],
+      "seed": 11,
+      "ui_public_view_foe_leaked": []
+    },
+    {
+      "foe_real_n": 17,
+      "observation_for_foe_leaked": [],
+      "private_enemy_legal_recovered_n": 4,
+      "public_planner_state_foe_leaked": [],
+      "seed": 29,
+      "ui_public_view_foe_leaked": []
+    },
+    {
+      "foe_real_n": 17,
+      "observation_for_foe_leaked": [],
+      "private_enemy_legal_recovered_n": 4,
+      "public_planner_state_foe_leaked": [],
+      "seed": 47,
+      "ui_public_view_foe_leaked": []
+    },
+    {
+      "foe_real_n": 17,
+      "observation_for_foe_leaked": [],
+      "private_enemy_legal_recovered_n": 4,
+      "public_planner_state_foe_leaked": [],
+      "seed": 222,
+      "ui_public_view_foe_leaked": []
+    },
+    {
+      "foe_real_n": 17,
+      "observation_for_foe_leaked": [],
+      "private_enemy_legal_recovered_n": 4,
+      "public_planner_state_foe_leaked": [],
+      "seed": 519,
+      "ui_public_view_foe_leaked": []
+    },
+    {
+      "foe_real_n": 17,
+      "observation_for_foe_leaked": [],
+      "private_enemy_legal_recovered_n": 4,
+      "public_planner_state_foe_leaked": [],
+      "seed": 646,
+      "ui_public_view_foe_leaked": []
+    },
+    {
+      "foe_real_n": 17,
+      "observation_for_foe_leaked": [],
+      "private_enemy_legal_recovered_n": 4,
+      "public_planner_state_foe_leaked": [],
+      "seed": 758,
+      "ui_public_view_foe_leaked": []
+    },
+    {
+      "foe_real_n": 17,
+      "observation_for_foe_leaked": [],
+      "private_enemy_legal_recovered_n": 4,
+      "public_planner_state_foe_leaked": [],
+      "seed": 900,
+      "ui_public_view_foe_leaked": []
+    },
+    {
+      "foe_real_n": 17,
+      "observation_for_foe_leaked": [],
+      "private_enemy_legal_recovered_n": 4,
+      "public_planner_state_foe_leaked": [],
+      "seed": 991,
+      "ui_public_view_foe_leaked": []
+    }
+  ],
+  "A_total_leaked_ids": 0,
+  "B_bench": {
+    "bench_keys_two_projections_aligned": true,
+    "field_has_pet_id": true,
+    "identity_free": true,
+    "keys_aligned_literally": false,
+    "obs_active_row_has_pet_id": true,
+    "observation_for_keys": [
+      "active",
+      "fainted",
+      "field",
+      "slot"
+    ],
+    "public_planner_state_keys": [
+      "fainted",
+      "slot"
+    ],
+    "ui_public_view_keys": [
+      "fainted",
+      "slot"
+    ]
+  },
+  "C_invariance": {
+    "bench_hp_energy_change_identical": [
+      true,
+      true,
+      true
+    ],
+    "seed_change_public_identical": true,
+    "surfaces": [
+      "public_planner_state",
+      "ui_public_view",
+      "observation_for"
+    ]
+  },
+  "D_receipt": {
+    "event_kinds": [],
+    "has_decision_id": false,
+    "has_event_seq": false,
+    "has_match_id": false,
+    "has_opening_roster_revealed": false,
+    "has_rules_version": false,
+    "http_status": 200,
+    "ok": true,
+    "state_events_n": 0,
+    "state_version": 0,
+    "top_level_keys": [
+      "coverage",
+      "error",
+      "error_type",
+      "evidence_ids",
+      "latency_ms",
+      "ok",
+      "protocol_version",
+      "result",
+      "ruleset_id",
+      "service",
+      "service_version",
+      "snapshot_fingerprint",
+      "state_version",
+      "unsupported"
+    ]
+  },
+  "config": "mobile_s4_candidate_v3",
+  "controls": {
+    "own_loadout_n": 19,
+    "own_skill_ids_found_in_public_ui": [
+      "skill_000251",
+      "skill_000286",
+      "skill_000294",
+      "skill_000305",
+      "skill_000321",
+      "skill_000378",
+      "skill_000392",
+      "skill_000408",
+      "skill_000418",
+      "skill_000429",
+      "skill_000483",
+      "skill_000529",
+      "skill_000576",
+      "skill_000591",
+      "skill_000673",
+      "skill_000678",
+      "skill_000717",
+      "skill_000744",
+      "skill_000750"
+    ],
+    "private_enemy_legal_expected_n": 17,
+    "private_enemy_legal_recovered": [
+      "skill_000248",
+      "skill_000286",
+      "skill_000670",
+      "skill_000741"
+    ],
+    "synthetic_ids_scanner_finds": [
+      "skill_900001",
+      "skill_900002"
+    ]
+  },
+  "label": "verify01",
+  "seeds": [
+    11,
+    29,
+    47,
+    222,
+    519,
+    646,
+    758,
+    900,
+    991
+  ],
+  "team_foe": [
+    "pet_000474",
+    "pet_000451",
+    "pet_000124",
+    "pet_000608",
+    "pet_000601",
+    "pet_000611"
+  ],
+  "team_player": [
+    "pet_000225",
+    "pet_000190",
+    "pet_000445",
+    "pet_000417",
+    "pet_000112",
+    "pet_000062"
+  ]
+}

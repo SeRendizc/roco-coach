@@ -130,6 +130,27 @@ class TestHiddenInformationBoundary(unittest.TestCase):
                 for hidden in ("hp", "max_hp", "energy", "buffs", "statuses", "marks"):
                     self.assertNotIn(hidden, pet, "对手后备不该暴露 " + hidden)
 
+    def test_observation_bench_rows_have_no_species_identity(self):
+        """X3（01 勘察登记）：`observation_for` 的**默认**后备行不带 `pet_id` / `name`。
+
+        为什么必须补这一条：本函数的 docstring 自称「隐藏信息的唯一边界」「只看得到…
+        后备的存活与否」，改前却把对手**整队物种与真名**返回给双方策略 ——
+        而 `opponents.py` 的白名单是按返回结构**自动展开**的，「观察里有什么，策略就能读什么」。
+        已有的判据只禁了后备的 `hp/max_hp/energy/buffs/statuses/marks`，**没禁身份**。
+
+        已亮明的（本模式预览展示过 / 换上场过）走另一个块（`revealed.opponent_roster`，
+        见 `test_ui_public_view.OpeningRevealFollowsTheDisplayedFields`）——
+        这里的「默认」= 一局里还没有任何亮明事件。
+        """
+        obs = observation_for(fresh(), RS, "player")
+        bench = [pet for pet in obs["opponent"]["pets"] if not pet.get("field")]
+        self.assertTrue(bench, "没有后备：这条检查会空过")
+        for pet in bench:
+            self.assertNotIn("pet_id", pet, "对手后备不该暴露物种身份")
+            self.assertNotIn("name", pet, "对手后备不该暴露真名")
+        self.assertNotIn("pet_", json.dumps(bench, ensure_ascii=False))
+        self.assertNotIn("revealed", obs, "没有亮明事件却出现了已亮明块")
+
     def test_forbidden_read_raises_and_is_recorded(self):
         """A+B：越界读取必须立刻失败，并留下路径。"""
         ropp.reset_hidden_reads()

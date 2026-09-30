@@ -150,7 +150,34 @@ GOLDEN_STATE_NO_HISTORY_DIGESTS = {
 #: 补充：`history` 在改动前是 `{上面那六个数}`（逐位见
 #: `reports/roco/product-execution/01/raw-legacy-athead.json` 的 `F4_history_digest`），
 #: 改动后变成下面这六个数 —— **只有它动了**。
+#:
+#: ── 2026-09-30（分计划 01.3）第二次改钉：`opening_roster_revealed` / 已出场 / 已出招 ──
+#: **原值逐字留档在 `GOLDEN_HISTORY_PRIOR_2026_09_30_REVEAL`**（改钉不删）。
+#: 为什么它必须再动一次（独立证据，不是为了让测试绿）：
+#:   01.3 要求「记录已出场、已出招、可见状态与资源」。实现落点是
+#:   `schema.revealed_facts`：从**事件流**折出「已经亮明的对手事实」
+#:   （`opening_roster_revealed` / `switch` / `replacement` / 带 `(side, skill_id)` 的事件），
+#:   并且**只在真的有这类事件时**才往观察里加 `revealed` 块。六局里都有换人（`replacement`），
+#:   所以观察载荷按设计变了 ⇒ `history` 的哈希变。
+#: **实测证明「变的只有观察载荷」**（`reports/roco/product-execution/01/probe-07-regression-narrowing.py`
+#: + `raw-regression-narrowing.json`，三次构建）：
+#:   · 关掉 `revealed_facts`（= 01.3 之前的观察载荷）后重建 29 场景回归集：
+#:     与磁盘产物**一条都不差**（`B problems: []`）⇒ 本轮其它改动没碰 `serialize()`；
+#:   · 开/关 `revealed_facts` 两次构建，按「`serialize()` 剔除 `history`」取指纹：
+#:     **29/29 逐条相同**（`C identical: true`）⇒ 新块只动 `history`；
+#:   · 本文件六局的**结算指纹与事件指纹**在改动前后**逐位相同**（本次跑出
+#:     `settlement_unchanged=True / events_unchanged=True` × 6 + 短局）。
+#: ⇒ 结论：收窄后的结算指纹没有掩盖任何结算变化；观察载荷的变化如实红在**这一枚**上。
 GOLDEN_HISTORY_DIGESTS = {
+    "1000": "5b2d20fc64ace7ab1f0211a62ef564396e22784385621c1cd707615f32d6b4a5",
+    "1001": "dc124685ff3da9c4fc1837ef31231b489607cb2c77911a695ba5867df704378d",
+    "1002": "3b6da93e466159c7f6eebfce522c6c041650ab6ed44d740ffa29a8eb88e6ecfd",
+    "1003": "1b39bd9d57d510eed8366dbccc0a6e12aba034f1fde75bf3f9922c00c7ffba26",
+    "1004": "9e384860acc776d5975808f09f13e2a9a33fc6d91834cb21f50d44c6d019618b",
+    "1005": "12db5f10c81c7d7246a72d370a7b9b97be9758894990bf445f3a7a5ad575f828",
+}
+#: 第一次改钉（步骤 A：后备身份收窄）之后、**01.3 之前**的那六个数。留档用。
+GOLDEN_HISTORY_PRIOR_2026_09_30_REVEAL = {
     "1000": "5e1ac1c1f610d66e15bc0d62cbff5b84fc4f3d1cf8bd547a6bdc2477e2f0ebae",
     "1001": "f3bcf4d6d7bec60946ee8d402cc016e18e2068571c133ccb4237b85e3ccc98e5",
     "1002": "4c29d91620617cf7599aef9229b0ef95f9c8412027586ef697fbd32276cb5033",
@@ -167,7 +194,10 @@ GOLDEN_HISTORY_PRIOR_2026_09_30 = {
     "1005": "712aaf92624fae43cd55d060d76dad5a50fe787697e80d136080ecd063c7be79",
 }
 GOLDEN_SHORT_STATE_NO_HISTORY = "1edc27e721ffc47863cc6f2087c16d42c22383fb171a619dd806a09e1fa5a6f1"
-GOLDEN_SHORT_HISTORY = "16b7d4f4f55b9149bcc3ea6507ef52df92cb0c5e9653b143f99fabe48ce658fb"
+#: 短局 `history`：01.3 之后的值（原值见 `GOLDEN_SHORT_HISTORY_PRIOR_2026_09_30_REVEAL`）。
+#: 短局里有换人（`replacement`）⇒ 观察载荷按设计变；结算指纹与事件指纹逐位不变（实测）。
+GOLDEN_SHORT_HISTORY = "bdc7bcc37d5684ec7584e618da1386a90a73b9d882c8681a434f57d383d18445"
+GOLDEN_SHORT_HISTORY_PRIOR_2026_09_30_REVEAL = "16b7d4f4f55b9149bcc3ea6507ef52df92cb0c5e9653b143f99fabe48ce658fb"
 GOLDEN_SHORT_HISTORY_PRIOR_2026_09_30 = "8216fd9100b0aefbcdcbca2e8b86271911f899b18e6293ca3ca013b7d08a6d54"
 
 

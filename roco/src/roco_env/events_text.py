@@ -505,6 +505,25 @@ def event_text(event: Dict[str, Any], rs: Any = None) -> str:
             head += f"（累计 {total}）"
         return head + "。"
 
+    # ── 开局预览：对手阵容**实际展示**过（01.3，2026-09-30）───────────────────
+    # `env.opening_roster_reveal` 的 detail：{source, viewer, revealed_side,
+    # roster:[{slot, pet_id, name}]} —— 只有预览层真的展示过才会有这条事件。
+    #
+    # 句子口径：
+    #   · 只说**展示过什么**（哪几只、什么顺序），不写血量 / 配招 / 天分 / 六维
+    #     —— 预览层不展示它们，写出来就是把没展示的说成已观察；
+    #   · 名字从 detail 取；有行缺名字时**不逐位猜名**，只说「亮明了 N 只」；
+    #   · 绝不把 `pet_000123` 这类内部 id 印到屏幕上。
+    if kind == "opening_roster_revealed":
+        rows = [row for row in (detail.get("roster") or []) if isinstance(row, dict)]
+        who = _side(detail.get("revealed_side"))
+        names = [str(row.get("name") or "").strip() for row in rows]
+        if not rows:
+            return f"{who}的阵容在开局预览里亮明了（引擎没给是哪些只）。"
+        if any(not name for name in names):
+            return f"开局预览：{who}的阵容亮明了 {len(rows)} 只。"
+        return f"开局预览：{who}的 {'、'.join(names)} 亮明了（共 {len(rows)} 只）。"
+
     # 未知 kind **不静默**：交给测试去红，运行时给一句诚实的兜底
     return f"发生了一件事（引擎事件 {kind or '未知'}，本页还没有它的中文说法）。"
 
@@ -542,4 +561,12 @@ KNOWN_EVENT_KINDS = frozenset({
     # 玩家看到的是兜底话「发生了一件事（引擎事件 per_use_ramp…）」（用户截图 6 点名）。
     # 补模板的同时登记进来 —— 这样「真对局收 kind」那条判据才咬得住它。
     "per_use_ramp",
+    # 2026-09-30（分计划 01.3）：开局预览实际展示的对手阵容
+    # （`env.opening_roster_reveal` ← `service.battle_new` 的 `opening_preview`）。
+    # ⚠ `test_event_text.py` 那句「真对局收到的 kind 必须已声明」**照不到它**：
+    #   它的采集器（`collect_all`）跑的是 env 级对局，没有 `service.battle_new`
+    #   这一跳，而预览事件只在那一跳里产生。所以它的样例句在
+    #   `test_event_text.py` 的 `SAMPLE_EVENTS` 里**显式**给（抄自真跑 battle_new
+    #   收到的事件原文），并另有一条 `test_opening_reveal_*` 从真对局取值。
+    "opening_roster_revealed",
 })

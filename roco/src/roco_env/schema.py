@@ -482,6 +482,107 @@ class GameState:
 # ── 观察（隐藏信息边界）──────────────────────────────────────────────────
 
 
+# ── 已经亮明的对手事实（分计划 01.3）───────────────────────────────────────
+#
+# 「对手什么时候变成公开事实」这条边界落在**事件**上，不落在某个开关变量上：
+#
+#   · `opening_roster_revealed`（`env.opening_roster_reveal` 产出）＝ 本模式的开局预览
+#     **实际展示过**的对手阵容（只有位次 / 物种 id / 名字 —— 预览不展示血量、配招、天分）；
+#   · `switch` / `replacement`（对手侧）＝ 换上来的那一只，它已经站在场上；
+#   · 带 `(side, skill_id)` 的其它事件 ＝ 那一招真的打出去了，成为公开事实。
+#
+# 没有这些事件的对局 ⇒ `revealed_facts` 返回 `{}` ⇒ 三个公开面**一个键都不加**
+# （逐字节不变，golden 指纹不受影响）。这是「预览发生前 / 无预览模式没有提前泄漏阵容」
+# （`docs/roco/execution/01-PLAN.md:38`）在实现里的落点。
+
+OPENING_REVEAL_KIND = "opening_roster_revealed"
+OPENING_REVEAL_SOURCE = "opening_preview"
+
+#: `action_cancelled` **不算**「已出招」：那一手没有结算（能耗解不出 / 精灵已倒下），
+#: 把它算成公开技能会把「他本来想出、但没出成」说成「他用过」。
+REVEAL_SKILL_KINDS_EXCLUDED = frozenset({"action_cancelled"})
+
+#: 让一只精灵**上场**的事件；两者的位次键不同（`switch` 用 `to_slot`，`replacement` 用 `slot`）。
+FIELD_ENTRY_KINDS = ("switch", "replacement")
+
+
+def _pet_id_at(side_state: "SideState", slot: int, *, why: str) -> str:
+    """把事件里的**位次**还原成精灵 id（位次在一局内稳定，不会换位）。
+
+    越界就抛错：那说明事件流与队伍对不上，猜一个 id 会让「谁亮明了」变成编的。
+    """
+    if not 0 <= slot < len(side_state.pets):
+        raise ValueError(
+            f"事件里的位次 {slot} 超出 {side_state.name} 的队伍规模"
+            f"（{len(side_state.pets)} 只；来源：{why}）")
+    return side_state.pets[slot].pet_id
+
+
+def revealed_facts(state: "GameState", rs: Ruleset, *, side: str = "player") -> Dict[str, Any]:
+    """从事件流折出「已经亮明的**对手**事实」：已出场成员 + 已出招技能（01.3）。
+
+    返回 `{}` = 什么都还没亮明（没有预览、也没人上场/出招）⇒ 调用方一个键都不加。
+    「来源事件与可见范围」（01.2）写在返回值里：`revealed_via` / `revealed_turn` /
+    `revealed_event_seq`（序号口径见 `env.event_seq_of`：由 `state_version` 派生）。
+
+    ⚠ 开局就在场上的那只**不进** `opponent_roster`：它的身份本来就在 `opponent.field`
+    里（血条与名字画在屏幕上）。列进「亮明名单」会让「无预览时也有阵容」看起来成立。
+    """
+    other = "enemy" if side == "player" else "player"
+    foe = getattr(state, other)
+    active_slot = 0                      # reset 之后首发就是 0（两份公开面的 active 同源）
+    roster: Dict[str, Dict[str, Any]] = {}
+    skills: Dict[str, List[str]] = {}
+
+    def mark(pet_id: str, *, via: str, turn: int, seq: int) -> None:
+        roster.setdefault(pet_id, {
+            "slot": next(p.slot for p in foe.pets if p.pet_id == pet_id),
+            "pet_id": pet_id,
+            "name": rs.pet(pet_id).name,
+            "revealed_via": via,
+            "revealed_turn": turn,
+            "revealed_event_seq": seq,
+        })
+
+    for index, event in enumerate(state.events):
+        detail = event.detail or {}
+        if event.kind == OPENING_REVEAL_KIND:
+            if detail.get("revealed_side") != other:
+                continue                 # 那是「别人看到的」，不是我这一侧的对手
+            for row in detail.get("roster") or []:
+                pet_id = row.get("pet_id")
+                if not pet_id:
+                    raise ValueError(f"预览事件 #{index} 的 roster 行没有 pet_id：{row!r}")
+                mark(pet_id, via=str(detail.get("source") or OPENING_REVEAL_SOURCE),
+                     turn=event.turn, seq=index)
+            continue
+        if detail.get("side") != other:
+            continue
+        if event.kind in FIELD_ENTRY_KINDS:
+            key = "to_slot" if event.kind == "switch" else "slot"
+            slot = detail.get(key)
+            if slot is None:
+                raise ValueError(f"{event.kind} 事件 #{index} 没有位次键 {key}：{detail!r}")
+            active_slot = int(slot)
+            mark(_pet_id_at(foe, active_slot, why=f"事件 #{index} 的 {event.kind}"),
+                 via=event.kind, turn=event.turn, seq=index)
+            continue
+        skill_id = detail.get("skill_id")
+        if skill_id and event.kind not in REVEAL_SKILL_KINDS_EXCLUDED:
+            pet_id = _pet_id_at(foe, active_slot, why=f"事件 #{index} 的 {event.kind}")
+            used = skills.setdefault(pet_id, [])
+            if skill_id not in used:
+                used.append(skill_id)
+
+    out: Dict[str, Any] = {}
+    if roster:
+        out["opponent_roster"] = [roster[k]
+                                  for k in sorted(roster, key=lambda k: roster[k]["slot"])]
+    if skills:
+        out["opponent_skills"] = skills
+    return out
+
+
 def observation_for(state: GameState, rs: Ruleset, side: str) -> Dict[str, Any]:
     """返回 `side` 那一方**可以看到**的状态。
 
@@ -575,6 +676,11 @@ def observation_for(state: GameState, rs: Ruleset, side: str) -> Dict[str, Any]:
     if me.mana is not None or foe.mana is not None:
         mana_block = {"self": me.mana, "opponent": foe.mana}
 
+    # 01.3：已经亮明的对手事实（预览展示过的成员 / 已出招技能）。
+    # **没有 ⇒ 一个键都不加**：观察哈希（`state.history` 的 `pre_observation_hash`）
+    # 因此逐字节不变，golden 指纹不受影响。
+    revealed = revealed_facts(state, rs, side=side)
+
     return {
         "side": side,
         "turn": state.turn,
@@ -582,6 +688,9 @@ def observation_for(state: GameState, rs: Ruleset, side: str) -> Dict[str, Any]:
         "result": state.result,
         "state_version": state.state_version,
         "ruleset_id": state.ruleset_id,
+        # 01.3：**已经亮明**的对手事实（预览展示过的成员 / 已出招技能 / 来源事件）。
+        # 没有就一个键都不加（`{}`）——见 `revealed_facts`。
+        **({"revealed": revealed} if revealed else {}),
         **({"mana": mana_block} if mana_block is not None else {}),
         # 2026-09-25：天气同样是**公开**事实（官方：「常驻在全场…双方都能获得相应的加成」、
         # 「对局战报查看当前天气的剩余回合数」）⇒ 观察里给双方一样的当前天气与剩余回合数。

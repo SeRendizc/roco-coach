@@ -112,6 +112,18 @@ SAMPLE_EVENTS = {
     # 所以句子必须**不写主语**，也不许把 `None` 漏到屏幕上。
     "per_use_ramp": {"kind": "per_use_ramp", "turn": 6, "detail": {
         "side": None, "skill_id": "skill_000365", "field": "power", "delta": -30, "total": -30}},
+    # 2026-09-30（分计划 01.3）：本模式的开局预览**实际展示**的对手阵容。
+    # 样例**逐字抄自真跑** `service.battle_new(opening_preview=True)` 收到的事件原文
+    # （`reports/roco/product-execution/01/raw-preview.json` 的 `on_opening_reveal`，
+    # `seq=0` / `evidence=["3010"]`；这里按其它样例的形状只留 kind/turn/detail）。
+    # ⚠ 通用采集器 `collect_all()` **照不到**这个 kind：它跑的是 env 级对局，
+    #   而预览事件只在 `service.battle_new` 那一跳产生。**如实登记**，不去改采集阈值 /
+    #   CORE_KINDS；由下面的 `OpeningRevealSentenceTest` 从真跑 battle_new 取值来咬。
+    "opening_roster_revealed": {"kind": "opening_roster_revealed", "turn": 1, "detail": {
+        "source": "opening_preview", "viewer": "player", "revealed_side": "enemy",
+        "roster": [{"slot": 0, "pet_id": "pet_000417", "name": "圆号鱼"},
+                   {"slot": 1, "pet_id": "pet_000112", "name": "雪影娃娃"},
+                   {"slot": 2, "pet_id": "pet_000062", "name": "音速犬"}]}},
     "drain_energy": {"kind": "drain_energy", "turn": 2, "detail": {"side": "enemy", "taken": 2}},
     "item": {"kind": "item", "turn": 5, "detail": {"side": "player", "item": "potion", "healed": 50}},
     "switch": {"kind": "switch", "turn": 5, "detail": {"side": "player", "to_slot": 1}},
@@ -549,6 +561,54 @@ class SkillNameNeverRepeatsTheTemplateTest(unittest.TestCase):
             if _FORBIDDEN.search(text):
                 leaked.append((skill.name, text))
         self.assertEqual(leaked, [], f"技能名渲染出了内部标识符：{leaked}")
+
+
+class OpeningRevealSentenceTest(unittest.TestCase):
+    """01.3：开局预览那条事件必须有**人话**，而且取自**真跑** `service.battle_new`。
+
+    为什么单独一条（而不是靠 `collect_all`）：采集器跑的是 env 级对局，而预览事件只在
+    `service.battle_new(opening_preview=True)` 那一跳产生 —— 通用采集器**照不到它**。
+    这一条从真正的服务回执里取事件原文，再走与其它 kind 相同的三道检查
+    （有中文 / 不含内部标识符 / 有收尾）。
+    """
+
+    def _reveal(self):
+        from roco_env.service import RocoService       # 局部导入：只在服务那一跳才有它
+        svc = RocoService()
+        status, env = svc.battle_new({
+            "ruleset_id": RS.ruleset_id, "team": A_TEAM, "enemy_team": B_TEAM,
+            "seed": 5, "state_version": 0, "opening_preview": True,
+        })
+        self.assertEqual(status, 200, env.get("error"))
+        reveal = env["result"].get("opening_reveal")
+        self.assertIsNotNone(reveal, "预览局的开局回执里没有 opening_reveal")
+        return reveal
+
+    def test_real_battle_new_reveal_reads_as_chinese(self):
+        reveal = self._reveal()
+        # 事件原文：kind / detail 形状与 `env.opening_roster_reveal` 一致
+        self.assertEqual(reveal["kind"], "opening_roster_revealed")
+        self.assertEqual(reveal["detail"]["revealed_side"], "enemy")
+        self.assertEqual(len(reveal["detail"]["roster"]), len(B_TEAM))
+        text = events_text.event_text(reveal, RS)
+        self.assertTrue(text and text.strip(), "开局预览生成了空句子")
+        self.assertTrue(re.search(r"[\u4e00-\u9fff]", text), f"句子里没有中文：{text}")
+        self.assertIsNone(_FORBIDDEN.search(text), f"句子里出现内部标识符：{text}")
+        self.assertTrue(text.endswith("。") or text.endswith("）"), f"句子没有收尾：{text}")
+        for pet_id in B_TEAM:
+            self.assertIn(RS.pet(pet_id).name, text, f"{pet_id} 的真名没出现在句子里")
+
+    def test_reveal_without_names_does_not_invent_identifiers(self):
+        """反向：拿不到展示名单 / 名字缺失时，只说「亮明了 N 只」，**不许**印 id。"""
+        blind = events_text.event_text(
+            {"kind": "opening_roster_revealed", "turn": 1,
+             "detail": {"revealed_side": "enemy", "roster": [{"slot": 0, "pet_id": "pet_000417"}]}},
+            RS)
+        self.assertIn("1 只", blind)
+        self.assertNotIn("pet_", blind)
+        empty = events_text.event_text(
+            {"kind": "opening_roster_revealed", "turn": 1, "detail": {"revealed_side": "enemy"}}, RS)
+        self.assertIsNone(_FORBIDDEN.search(empty), empty)
 
 
 if __name__ == "__main__":

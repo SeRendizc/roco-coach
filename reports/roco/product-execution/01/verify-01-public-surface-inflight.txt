@@ -1,0 +1,7 @@
+CONTROLS {"private_enemy_legal_recovered": ["skill_000248", "skill_000286", "skill_000670", "skill_000741"], "private_enemy_legal_expected_n": 17, "synthetic_ids_scanner_finds": ["skill_900001", "skill_900002"], "own_skill_ids_found_in_public_ui": ["skill_000251", "skill_000286", "skill_000294", "skill_000305", "skill_000321", "skill_000378", "skill_000392", "skill_000408", "skill_000418", "skill_000429", "skill_000483", "skill_000529", "skill_000576", "skill_000591", "skill_000673", "skill_000678", "skill_000717", "skill_000744", "skill_000750"], "own_loadout_n": 19}
+A_total_leaked_ids 0
+B_keys_aligned_literally False identity_free True obs_keys=['active', 'fainted', 'field', 'slot']
+C_invariance {"seed_change_public_identical": true, "bench_hp_energy_change_identical": [true, true, true], "surfaces": ["public_planner_state", "ui_public_view", "observation_for"]}
+D_receipt {"http_status": 200, "ok": true, "has_match_id": true, "has_event_seq": false, "has_decision_id": true, "has_rules_version": true, "has_opening_roster_revealed": false, "state_events_n": 0, "state_version": 0, "event_kinds": [], "top_level_keys": ["coverage", "error", "error_type", "evidence_ids", "latency_ms", "ok", "protocol_version", "result", "ruleset_id", "service", "service_version", "snapshot_fingerprint", "state_version", "unsupported"]}
+FAILS 0
+WROTE ../reports/roco/product-execution/01/verify-01-public-surface-inflight.json

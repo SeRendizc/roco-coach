@@ -68,12 +68,15 @@ from .schema import (
     ACTION_SKILL,
     ACTION_SURRENDER,
     ACTION_SWITCH,
+    OPENING_REVEAL_KIND,
+    OPENING_REVEAL_SOURCE,
     Action,
     Event,
     GameState,
     PetState,
     SideState,
     observation_for,
+    revealed_facts,
 )
 
 # ── 规则常量：**唯一事实源是 data/roco/rulesets/*.json**（RC-101）──────────
@@ -4075,6 +4078,178 @@ PUBLIC_PLANNER_SCHEMA_VERSION = 1
 OPPONENT_BENCH_ASSUMPTION = "full_hp_nominal_loadout"
 
 
+# ── 观察契约：match_id / rules_version / decision_id / event_seq（01.2）─────────
+#
+# 分计划 01.2 要求把「同一次决策看到的公开事实」说成一份**可追溯的契约**：
+#
+#   · `match_id`      —— 这是**哪一局**；
+#   · `event_seq`     —— 这条事实是这一局的**第几件**事（0-based 追加序号，见
+#                        `event_seq_of`：序号由既有的 `state_version` 口径派生，
+#                        **不新造计数器**）；
+#   · `state_version` —— 这条事实对应哪个状态（既有钉子，
+#                        `service._coerce_state_version` 一直在用它判过期）；
+#   · `decision_id`   —— 上面两者拼成的「这一次决策」的键（UI / 教练请求 / 回放
+#                        对照同一次决策时该比这个，而不是各自记的 turn）；
+#   · `rules_version` —— 这一局按**哪份规则**算的。
+#
+# 为什么这几个字段是**派生**的，而不是加进 `GameState`：
+#
+#   1. `serialize()` 是 golden 指纹的被测对象（`test_turn_order_fail_closed` 的六局
+#      状态指纹 + `roco_env.regression` 的 29 场景 `state_digest`）。往里加一个字段，
+#      就要把「默认路径逐位不变」这条判据再改钉一轮 —— 而它测的是**结算**，不是身份。
+#   2. `match_id` 若由 `seed` 或随机源生成，会直接判红
+#      `test_public_planner.test_public_state_is_identical_across_internal_seeds`：
+#      不同**真实 seed** 的公开面必须逐字节相同（真实 seed 是隐藏信息）。
+#   ⇒ 身份**只由公开的开局事实**派生，并且随时可以从状态重算：
+#      序列化往返、回放、`state_from_public_planner` 重建都不会丢身份。
+#
+# **代价如实登记**（不掩饰）：同规则 + 同己方队伍的两局会得到同一个 `match_id`。
+# 引擎是确定性状态机，**不伪造唯一性**；「每局不同」的会话 id 由调用方叠加
+# （Node 侧 `roco-service.js` 的 `battle_id`，形如 `s1-xxxxxxxx`）。
+
+
+def rules_version_of(state: "GameState", rs: Ruleset) -> str:
+    """这一局的规则身份：`<ruleset_id>/<ruleset_config_id>`。
+
+    规则配置 id 为空（老存档 / 手工构造的状态）时如实写当前默认配置 id ——
+    不编一个看起来具体的名字。规则**数据**快照由回执信封的 `snapshot_fingerprint`
+    钉死（`service._envelope`），两者合起来才说得清「当时按哪份规则算的」。
+    """
+    cfg_id = state.ruleset_config_id or _rule_config.default_ruleset_config_id()
+    return f"{rs.ruleset_id}/{cfg_id}"
+
+
+def match_id_of(state: "GameState", rs: Ruleset) -> str:
+    """这一局的**确定性**身份。只吃公开的开局事实：规则 + 己方队伍。
+
+    三条「不吃」各有理由，不是随手省略：
+
+      · 不吃 `seed`：公开面必须与真实 seed 无关
+        （`test_public_state_is_identical_across_internal_seeds` 就是钉这条）；
+      · 不吃对手队伍：那等于把「对手六只」写成一个可枚举的哈希 —— 候选宇宙里
+        12 选 6 只有 924 种，预览之前就把阵容交出去了；
+      · 不吃随机源：同一局的回放/反序列化会变成另一个 id。
+
+    己方队伍（`state.player`）是**自己的信息**，可以当身份的一部分。
+    """
+    import hashlib
+    import json
+    payload = json.dumps({
+        "ruleset_id": rs.ruleset_id,
+        "ruleset_config_id": state.ruleset_config_id or _rule_config.default_ruleset_config_id(),
+        "own_team": [p.pet_id for p in state.player.pets],
+    }, ensure_ascii=False, sort_keys=True)
+    return "m-" + hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+
+def decision_id_of(state: "GameState", rs: Ruleset, *, match_id: Optional[str] = None) -> str:
+    """同一次决策的观察快照标识：`<match_id>:v<state_version>`。
+
+    `state_version` 是**既有**口径（「这条事实对应哪个状态」），这里不新造计数器，
+    只是把它与局身份拼成一个可直接当键用的字符串。
+    """
+    return f"{match_id or match_id_of(state, rs)}:v{state.state_version}"
+
+
+def observation_contract(state: "GameState", rs: Ruleset) -> Dict[str, str]:
+    """三个公开面与 service 回执**共用**的契约字段（唯一实现；各写一份必然漂）。"""
+    mid = match_id_of(state, rs)
+    return {
+        "match_id": mid,
+        "rules_version": rules_version_of(state, rs),
+        "decision_id": decision_id_of(state, rs, match_id=mid),
+    }
+
+
+def event_seq_of(state: "GameState", index: int) -> int:
+    """事件在 `state.events` 里的 0-based **追加序号**。
+
+    `event_seq` 不新造计数器：`state_version` 的唯一写入点是 `_bump`（每追加一条事件
+    就 +1，实测恒等于 `len(state.events)`），所以第 `index` 条事件的序号就是 `index`，
+    它发生后的 `state_version` 是 `index + 1`。**在这里当场校验那条不变式**：
+    谁绕过 `_bump` 直接 append，序号就会与版本脱钩 —— 那时抛错，而不是给一个错的序号。
+    """
+    if state.state_version != len(state.events):
+        raise ValueError(
+            f"事件序号口径被破坏：state_version={state.state_version} 而 "
+            f"len(state.events)={len(state.events)} —— state_version 的唯一写入点是 "
+            "_bump，不许绕过它 append 事件")
+    if not 0 <= index < len(state.events):
+        raise ValueError(f"事件序号越界：{index}（本局共 {len(state.events)} 条事件）")
+    return index
+
+
+# ── 开局预览：opening_roster_revealed（01.3）─────────────────────────────────
+#
+# 「对手阵容什么时候变成公开事实」这条边界，落在**一条事件**上，而不是落在某个开关变量上：
+#
+#   · 本模式**展示了开局预览** ⇒ 调用方（`service.battle_new`，见它的 `opening_preview`）
+#     明确说出来，引擎把「预览**实际展示**的那一份」记成事件；
+#   · 没有预览 / 预览还没发生 ⇒ 谁都不调用 ⇒ `state.events` 一条都不多，
+#     两个公开面与观察载荷**逐字节不变**（legacy 判据、golden 指纹因此不受影响）。
+#
+# 为什么事件里只放物种身份：预览展示的是「哪六只、什么形象、什么顺序」，
+# **不展示**血量 / 能量 / 配招 / 天分 / 个体六维。往事件里塞这些就是把没展示的东西
+# 说成已观察（`docs/roco/PRODUCT-VISION-AND-ROADMAP.md:53`）。
+
+# 事件名与「哪些事件算亮明」的常量住在 `schema.py`（`observation_for` 就在那里，
+# 三个公开面必须读**同一份**口径）；本模块只负责产出这条事件与消费它。
+
+
+def opening_roster_reveal(state: "GameState", rs: Ruleset, *,
+                          viewer: str = "player",
+                          source: str = OPENING_REVEAL_SOURCE) -> Event:
+    """把「开局预览实际展示的对手阵容」记成一条公开事件（01.3）。
+
+    调用方**必须**已经确认预览真的展示了（本模式 + 这一次开局）；引擎不替谁决定这件事。
+    重复登记同一侧会抛错：两条预览事件会让「哪一份才是展示过的」有歧义，
+    而「亮明」这件事一旦有歧义，后面所有「已观察 / 未观察」的判断都不成立。
+    """
+    revealed = "enemy" if viewer == "player" else "player"
+    for index, event in enumerate(state.events):
+        if event.kind == OPENING_REVEAL_KIND \
+                and (event.detail or {}).get("revealed_side") == revealed:
+            raise ValueError(
+                f"开局预览已经记录过（事件 #{index}）—— 不许重复登记同一侧（{revealed}）的阵容")
+    foe = getattr(state, revealed)
+    roster = [
+        {"slot": p.slot, "pet_id": p.pet_id, "name": rs.pet(p.pet_id).name}
+        for p in foe.pets
+    ]
+    _bump(state, OPENING_REVEAL_KIND, {
+        "source": source,
+        "viewer": viewer,
+        "revealed_side": revealed,
+        # 只放**实际展示**的字段：位次、物种 id、名字。预览不展示血量/配招/天分。
+        "roster": roster,
+    }, evidence=("3010",))
+    return state.events[-1]
+
+
+def _bench_public_row(pet: "PetState", revealed_row: Optional[Dict[str, Any]], *,
+                      with_name: bool) -> Dict[str, Any]:
+    """对手后备的一行。
+
+    **尚未亮明** ⇒ 只有位次与是否倒下（物种身份、血量、配招都不给）；
+    **已经亮明**（预览展示过 / 换上场过）⇒ 带上物种身份与**来源事件**
+    （`revealed_via` / `revealed_turn` / `revealed_event_seq`，01.2 的「来源事件与可见范围」）。
+
+    两个公开面共用这一份实现：口径各写一份必然漂（分计划 01 前面已经踩过一次）。
+    `with_name=False` 给规划协议用——它刻意不含展示字段（名字对搜索没用、只是烧 token）。
+    """
+    row: Dict[str, Any] = {"slot": pet.slot, "fainted": pet.fainted}
+    if revealed_row:
+        row.update({
+            "pet_id": revealed_row["pet_id"],
+            "revealed_via": revealed_row["revealed_via"],
+            "revealed_turn": revealed_row["revealed_turn"],
+            "revealed_event_seq": revealed_row["revealed_event_seq"],
+        })
+        if with_name:
+            row["name"] = revealed_row["name"]
+    return row
+
+
 def public_planner_state(state: "GameState", rs: Ruleset, side: str = "player") -> Dict[str, Any]:
     """把对局状态裁剪成**可以安全交给教练**的规划输入。
 
@@ -4089,6 +4264,9 @@ def public_planner_state(state: "GameState", rs: Ruleset, side: str = "player") 
     """
     me = getattr(state, side)
     foe = getattr(state, "enemy" if side == "player" else "player")
+    # 01.3：已经亮明的对手事实（预览展示过的成员 / 已出招技能）。没有 ⇒ `{}` ⇒ 一个键都不加。
+    revealed = revealed_facts(state, rs, side=side)
+    revealed_roster = {row["pet_id"]: row for row in (revealed.get("opponent_roster") or [])}
 
     def own_pet(p: PetState) -> Dict[str, Any]:
         row = {
@@ -4158,6 +4336,9 @@ def public_planner_state(state: "GameState", rs: Ruleset, side: str = "player") 
     cfg = _rule_config.get_rule_config(state.ruleset_config_id or None)
     return {
         "schema_version": PUBLIC_PLANNER_SCHEMA_VERSION,
+        # 01.2 观察契约：这是哪一局、按哪份规则、这是哪一次决策。三个字段与
+        # `ui_public_view` 及 service 回执**同源**（`observation_contract` 是唯一实现）。
+        **observation_contract(state, rs),
         "ruleset_id": state.ruleset_id,
         # RC-106：这一局的规则配置也是公开事实（页面渲染模式徽记要用，规划侧要靠它选口径）。
         "ruleset_config_id": state.ruleset_config_id or None,
@@ -4195,9 +4376,11 @@ def public_planner_state(state: "GameState", rs: Ruleset, side: str = "player") 
             "active": foe.active,
             "living_count": len(foe.living()),
             "field": foe_field_pet(foe.field_pet),
-            # 后备：**只有位次与是否倒下**。没有血量、没有配招、**也没有物种身份**。
+            # 后备：**只有位次与是否倒下**。没有血量、没有配招、**也没有物种身份** ——
+            # 除非它**已经亮明**（本模式的开局预览展示过，或它换上场过）：那时按
+            # `_bench_public_row` 带上物种身份与来源事件。没有亮明事件的对局逐字节不变。
             #
-            # 2026-09-30（分计划 01 步骤 A）：这里原先给 `pet_id`，与 `ui_public_view`
+            # 2026-09-30（分计划 01 步骤 A）：这里原先无条件给 `pet_id`，与 `ui_public_view`
             # 的同名字段（那里从第 42 轮起就只给 `slot` + `fainted`）**长期不一致**。
             # 三处协议现在统一到同一条公开性口径：
             #   · `docs/roco/PRODUCT-VISION-AND-ROADMAP.md:53`——「开局对方阵容：可以知道
@@ -4211,11 +4394,18 @@ def public_planner_state(state: "GameState", rs: Ruleset, side: str = "player") 
             # 以前之所以能填出具体物种，靠的正是这个字段泄漏出来的身份；去掉之后
             # `state_from_public_planner` 走它**本来就有**的占位分支（该函数的
             # `fallback_id`），从「假装知道是哪只」变成「如实说不知道」。
+            # 预览之后：已亮明的那些**用真的物种**（见 `state_from_public_planner`）。
             "bench": [
-                {"slot": p.slot, "fainted": p.fainted}
+                _bench_public_row(p, revealed_roster.get(p.pet_id), with_name=False)
                 for i, p in enumerate(foe.pets) if i != foe.active
             ],
         },
+        # 01.3：**已经亮明**的对手事实（预览展示过的成员 / 换上场过的成员 / 已出招技能）。
+        # 与 `observation_for` 的 `revealed` **同形同源**（`revealed_facts` 是唯一实现）：
+        # 三个公开面各带一份的字段集可以不同，但边界必须是同一份。
+        # `bench` 行上的身份是**逐行渲染/重建**用的形状（见 `_bench_public_row`），
+        # 这里的名单是**汇总**（含换上场后仍留在名单里的那些）。
+        **({"revealed": revealed} if revealed else {}),
         "assumptions": {
             "opponent_bench": OPPONENT_BENCH_ASSUMPTION,
             "note": "对手后备的血量、配招与物种都不在公开信息里，重建搜索状态时按满血 + "
@@ -4417,14 +4607,34 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
     foe_panel["energy_max"] = energy_max
     foe_panel["energy_charge"] = getattr(cfg, "energy_charge", None)
     foe_panel["field"] = decorate(view["opponent"]["field"]) if view["opponent"]["field"] else None
-    # 后备：**只给位次与是否倒下**，连 `pet_id` 都不给。
+    # 后备：**尚未亮明**的只给位次与是否倒下（连 `pet_id` 都不给）。
     #
     # 2026-09-30（分计划 01 步骤 A）：规划协议**也**已经改成同一形状（原先它带
     # `pet_id`，与本视图长期不一致）。这里保留这次显式重建而不是直接照抄
-    # `view["opponent"]["bench"]`，是为了让「UI 面只出这两个键」这件事在本函数里
+    # `view["opponent"]["bench"]`，是为了让「UI 面未亮明时只出这两个键」这件事在本函数里
     # 仍然**看得见**——直接照抄会让公开性口径隐式依赖另一个函数。
-    foe_panel["bench"] = [{"slot": b.get("slot"), "fainted": b.get("fainted")}
-                          for b in view["opponent"]["bench"]]
+    #
+    # 01.3：**已经亮明**的那些（本模式预览展示过 / 换上场过）带上物种身份与来源事件，
+    # 并走与场上那只**同一个** `decorate`（名字、系别、来源标注都一致）。
+    foe_panel["bench"] = [
+        (decorate(b) if b.get("pet_id")
+         else {"slot": b.get("slot"), "fainted": b.get("fainted")})
+        for b in view["opponent"]["bench"]
+    ]
+    # 01.3：**已经亮明**的对手事实（名单 + 已出招技能）放在**同一个 `revealed` 块**里，
+    # 与 `observation_for` / 规划协议同形 —— 区别只在技能行被装饰过（技能本体在 `.skill`
+    # 下，与 `ui.self.skills` 同形状）：字段集可以不同，公开边界必须相同。
+    # 没有亮明事件 ⇒ 这个键不出现（legacy 对局逐字节不变）。
+    revealed_block = view.get("revealed")
+    revealed_public = None
+    if revealed_block:
+        revealed_public = dict(revealed_block)
+        skills = revealed_block.get("opponent_skills")
+        if skills:
+            revealed_public["opponent_skills"] = {
+                pet_id: [ui_action_public({"skill_id": sid, "kind": "skill"}, rs) for sid in ids]
+                for pet_id, ids in skills.items()
+            }
 
     # RC-106：未核验覆盖在 UI 面里**两处都写**：机器可读的那份（与规划协议逐字相同）
     # 与一句可直接渲染的话（`notes.unverified_overrides`），后者让页面不必自己拼
@@ -4438,6 +4648,11 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
 
     return {
         "schema_version": UI_PUBLIC_VIEW_SCHEMA_VERSION,
+        # 01.2：与规划协议**逐字相同**的三个契约字段（同一时刻的同一局）。
+        # 直接取 `view` 里的那一份，不在这里另算 —— 另算就有分叉的可能。
+        "match_id": view["match_id"],
+        "rules_version": view["rules_version"],
+        "decision_id": view["decision_id"],
         "ruleset_id": view["ruleset_id"],
         # RC-106：模式徽记与规划口径都要它（与规划协议那一份逐字相同）。
         "ruleset_config_id": view.get("ruleset_config_id"),
@@ -4447,6 +4662,9 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
         "phase": view["phase"],
         "result": view["result"],
         "side": side,
+        # 01.3：已经亮明的对手事实（名单 + 已出招技能；技能行**多一层** `.skill` 装饰）。
+        # 与规划协议、`observation_for` 同一个块名、同一份来源；没有亮明事件 ⇒ 没有这个键。
+        **({"revealed": revealed_public} if revealed_public else {}),
         # RC-105：魔力（若这份配置声明了它）。两个视图描述同一时刻的同一局，
         # 所以这一块照抄规划协议那一份，不另算一遍。
         **({"mana": view["mana"]} if "mana" in view else {}),
@@ -4526,14 +4744,17 @@ def state_from_public_planner(
         p.entered_turn = None
         return p
 
-    # 2026-09-30（分计划 01 步骤 A）：公开面**不再给后备物种身份** ⇒ 这里对每一只后备
-    # 都只能用占位物种。这与 `OPPONENT_BENCH_ASSUMPTION` 是同一条口径：后备是未知量，
+    # 2026-09-30（分计划 01 步骤 A）：公开面**不再无条件给后备物种身份** ⇒ 尚未亮明的
+    # 每一只后备只能用占位物种。这与 `OPPONENT_BENCH_ASSUMPTION` 是同一条口径：未知量，
     # 规划只给取舍建议，任何依赖后备精确构成的结论都会被 `limitations` 标注为偏乐观。
     #
     # 为什么占位物种用**规范配招表里的第一只**而不是抛错：重建必须能给规划器一个
     # 可搜索的队列（它要按位次与存活情况推演换人）。抛错会让「公开面缺身份」变成
-    # 「规划不可用」——那是把信息边界变成功能故障，方向错了。等第 02 分计划做了
-    # 开局预览、`revealed_*` 身份真的公开之后，这里的每一只用**已亮明的**物种。
+    # 「规划不可用」——那是把信息边界变成功能故障，方向错了。
+    #
+    # 01.3 起：**已经亮明**的那些（预览展示过 / 换上场过）在公开面上带真的 `pet_id`
+    # （`_bench_public_row`）⇒ 下面 `b.get("pet_id")` 那一支用**真的物种**重建；
+    # 只有仍未亮明的才落到占位。两条路都不猜：一条是公开事实，一条是如实标注的假设。
     fallback_id = (next(iter(rs.candidate_movesets)) if rs.candidate_movesets else None)
     if fallback_id is None:
         raise ValueError("无法重建对手队伍：规则集没有规范配招可用作后备占位")

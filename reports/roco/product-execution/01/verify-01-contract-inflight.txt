@@ -1,0 +1,10 @@
+CONTROL_SCANNER ['skill_900001']
+HTTP 200 ok=True
+C1 match_id {"result": "m-5454100e863ec5f4", "public": "m-5454100e863ec5f4", "ui": "m-5454100e863ec5f4"}
+C2 decision_id='m-5454100e863ec5f4:v0' state_version=0 derived='m-5454100e863ec5f4':v0
+C3 rules_version='roco-world-s4-2026-09-10/mobile_s4_candidate_v3' (ruleset_id='roco-world-s4-2026-09-10')
+C4 state_version=0 len(state.events)=0
+C6 kinds receipt=[] state=[]
+C7 preview_emitted=False bench_identity_free=True bench_keys=['fainted', 'slot']
+ABSENT（尚未实现，冻结时对照）['event_seq', 'opening_roster_revealed']
+CONTRACT_FAILS 0

@@ -194,6 +194,42 @@ export function publicView(result,{modeId=null,rulesetConfigId=null}={}){
  const selfState=ui?.self??publicState?.self??null;
  const foeState=ui?.opponent??publicState?.opponent??null;
  const foeField=foeState?.field??null;
+ // ── 01.2 观察契约（match_id / rules_version / decision_id）──────────────────
+ // 引擎是**唯一**产出者（`env.observation_contract`）：UI 视图 → 规划协议 → 回执顶层，
+ // 取第一个能读到的；Node **不自己算** —— 算一份就一定会与引擎漂。
+ // 读不到就不出现这个键（旧 fixture 的形状一个字节都不变）。
+ // ⚠ `match_id` 由**公开的开局事实**确定性派生，**不是**每局唯一的会话 id
+ //   （同规则 + 同己方队伍的两局相同）；会话唯一性由 `battle_id` 负责（见 startBattle）。
+ const contractOf=(key)=>{
+  const candidates=[ui?.[key],publicState?.[key],result?.[key]];
+  for(const value of candidates){ if(typeof value==='string'&&value)return value; }
+  return null;
+ };
+ const matchId=contractOf('match_id');
+ const rulesVersion=contractOf('rules_version');
+ const decisionId=contractOf('decision_id');
+ // ── 01.3 已经亮明的对手事实（引擎的 `revealed` 块，与 observation_for 同形同源）──
+ //   · `opponent_roster` ⇒ 页面「已见阵容」要的东西（含换上场后仍在名单里的那些）；
+ //   · `opponent_skills` ⇒ 对手**已经打出来**的技能（公开事实）。
+ // **没有亮明事件 ⇒ 这个键一个都不出现**（不是空数组）——与「没天气不出现 weather」同口径。
+ const revealedBlock=(ui?.revealed&&typeof ui.revealed==='object')?ui.revealed
+  :((publicState?.revealed&&typeof publicState.revealed==='object')?publicState.revealed:null);
+ const seenRoster=Array.isArray(revealedBlock?.opponent_roster)
+  ?revealedBlock.opponent_roster.filter((row)=>row&&typeof row.pet_id==='string'&&row.pet_id)
+   .map((row)=>({slot:row.slot??null,pet_id:row.pet_id,name:row.name??null,
+    revealed_via:row.revealed_via??null,revealed_turn:row.revealed_turn??null}))
+  :[];
+ const usedSkills=(()=>{
+  const raw=revealedBlock?.opponent_skills;
+  if(!raw||typeof raw!=='object')return null;
+  const out={};
+  for(const [petId,rows] of Object.entries(raw)){
+   if(!Array.isArray(rows))continue;
+   const mapped=rows.map((row)=>skillRow(row)).filter((row)=>row.skill_id);
+   if(mapped.length)out[petId]=mapped;
+  }
+  return Object.keys(out).length?out:null;
+ })();
  return {
   schema_version:1,
   ruleset_id:publicState?.ruleset_id??null,
@@ -201,6 +237,12 @@ export function publicView(result,{modeId=null,rulesetConfigId=null}={}){
   turn:Number.isInteger(result.turn)?result.turn:null,
   phase:typeof result.phase==='string'?result.phase:null,
   battle_result:result.result??null,
+  // 01.2 契约（引擎给才给；旧 fixture 的形状一个字节都不变）
+  ...(matchId?{match_id:matchId}:{}),
+  ...(rulesVersion?{rules_version:rulesVersion}:{}),
+  ...(decisionId?{decision_id:decisionId}:{}),
+  // 01.3 已见阵容（有亮明事件才出现；不是空数组）
+  ...(seenRoster.length?{seen_roster:seenRoster}:{}),
   self:{active:selfState?.active??null,
    // 能量上限来自**规则配置**（引擎 `ui_public_view` 读当前生效配置后带出来）。
    // 教练层用它判断「对面离满还差多少」；这里不透出去，那一类建议就只能沉默。
@@ -226,9 +268,14 @@ export function publicView(result,{modeId=null,rulesetConfigId=null}={}){
    // 所以它和己方一样带展示字段。手写一份字段清单的结果就是这里漏掉 name
    // （第 42 轮第一次改就漏了，界面上对手仍然是无名）。
    field:foeField?pets([foeField])[0]:null,
-   // 后备：UI 视图**只给位次与是否倒下**（手游里上场前不亮明），所以这里也不带 id。
+   // 后备：UI 视图**只给位次与是否倒下**（手游里上场前不亮明），所以这里也不带 id；
+   // **已经亮明**的（本模式预览展示过 / 换上场过）由引擎在 `revealed.opponent_roster`
+   // 里给出（见下面的 `seen_roster`）——那一条路带上身份，不走这个数组。
    bench:(Array.isArray(foeState?.bench)?foeState.bench:[]).map(b=>({
     slot:b?.slot??null,fainted:b?.fainted===true})),
+   // 01.3 对手**已经打出来**的技能（引擎的 `revealed.opponent_skills`，公开事实）。
+   // 没打过 ⇒ 没有这个键（不补空对象）。
+   ...(usedSkills?{revealed_skills:usedSkills}:{}),
   },
   // UI 的合法动作优先（`ui.legal.player` 带技能说明）；没有就退回协议那份。
   legal:(Array.isArray(ui?.legal?.player)?ui.legal.player
@@ -1978,6 +2025,31 @@ function engineAlive() {
   return `s${counters.sessions}-${Math.random().toString(36).slice(2,10)}`;
  }
 
+ /**
+  * 01.5：回执里的 `match_id` 必须与这一局 session 绑定的一致 —— 不一致就是「两局的事实串了」。
+  *
+  * 为什么需要它：Node 的 session 是**唯一**把状态带过回合的地方（`battle_id` → state）。
+  * 只按 session id 绑定还不够说清「这条事实属于哪一局、哪一版状态、哪份规则」，
+  * 所以 `startBattle` 里存四元组 `(match_id, session_id, state_version, rules_version)`，
+  * 这里校验其中**能与回执对照**的那两个：`match_id`。
+  * 读不到（老 fixture / 老引擎）时**不放行也不拒绝**，如实跳过 —— 不给老协议安一个假守卫。
+  */
+ function matchMismatch(session,result){
+  const bound=typeof session?.match_id==='string'?session.match_id:null;
+  const got=typeof result?.match_id==='string'?result.match_id:null;
+  if(bound&&got&&bound!==got){
+   return `这一局的标识对不上（本地记录 ${bound}，引擎回执 ${got}）：`
+    +'不把两局的事实混在一起，请重新开一局。';
+  }
+  const boundRules=typeof session?.rules_version==='string'?session.rules_version:null;
+  const gotRules=typeof result?.rules_version==='string'?result.rules_version:null;
+  if(boundRules&&gotRules&&boundRules!==gotRules){
+   return `这一局的规则版本对不上（本地记录 ${boundRules}，引擎回执 ${gotRules}）：`
+    +'规则变了之后旧建议不适用，请重新开一局。';
+  }
+  return null;
+ }
+
  /** 内部：把一次服务调用收成「成功就是 result，失败就是结构化原因」。 */
  function unwrap(envelope){
   if(!envelope||typeof envelope!=='object')return {ok:false,reason:'游戏服务返回的内容读不出来'};
@@ -2304,10 +2376,14 @@ async function attachSkillSupport(view){
     if(Object.keys(map).length)individuals=map;
    }
   }catch(error){ console.error('[roco] 个体快照没取到（不拦开局）:', error?.message||error); }
+  // 01.3：本模式是否展示开局预览。**由调用方显式说**（省略 = 不展示）——
+  // 页面有没有弹那个预览层只有页面知道，引擎替它猜就等于把「没展示」说成「展示了」。
+  const openingPreview=body.opening_preview===true;
   const envelope=await client.battleNew({team:resolved.ids,enemyTeam:resolvedEnemy?resolvedEnemy.ids:undefined,
    seed,strategy,stateVersion:0,rulesetConfigId,unverifiedOverrides,
    ...(individuals?{individuals}:{}),
-   ...(loadouts?{loadouts}:{})});
+   ...(loadouts?{loadouts}:{}),
+   ...(openingPreview?{openingPreview:true}:{})});
   const out=unwrap(envelope);
   // 2026-09-25（换招判据当场抓到）：这里原来一律回 **502**，但开局失败几乎都是**请求数据的问题**
   // （引擎的 `validate_team` 逐条判：队伍不合规模、配招里有学不到的技能……），
@@ -2320,8 +2396,15 @@ async function attachSkillSupport(view){
    status:out.error_type==='unavailable'?503:(out.error_type==='unsupported_effect'?422:400)};
   const id=newSessionId();
   if(enemyIsSample)out.result.enemy_source=enemySource??'sample';
+  // 01.2/01.5：把这一局的**四元组**绑进 session —— `(match_id, session_id, state_version, rules_version)`。
+  // 只有 session id 的键不足以说清「这条事实属于哪一局、哪一版状态、哪份规则」，
+  // 那正是「新局继承旧局事实」的入口。`match_id` 由引擎按公开开局事实派生
+  // （**不是**每局唯一；同规则同己方队伍的两局相同 ⇒ 唯一性仍由 `battle_id` 负责）。
   sessions.set(id,{state:out.result.state,strategy,seed,turn:out.result.turn,
-   mode_id:modeId,ruleset_config_id:rulesetConfigId});
+   mode_id:modeId,ruleset_config_id:rulesetConfigId,
+   match_id:typeof out.result.match_id==='string'?out.result.match_id:null,
+   rules_version:typeof out.result.rules_version==='string'?out.result.rules_version:null,
+   decision_id:typeof out.result.decision_id==='string'?out.result.decision_id:null});
   const base=publicView(out.result,{modeId,rulesetConfigId});
   // task-6：把「这一手引擎会不会结算」标在动作上（**只读**引擎已有的逐技能档位）。
   await attachSkillSupport(base);
@@ -2393,6 +2476,8 @@ async function attachSkillSupport(view){
    // 被显示成「你的请求不合法」，而「规则服务挂了」也被算进 400。
    // 与 `startBattle` / `freeAction` 对齐：unavailable→503、unsupported_effect→422、其余 400。
    status:out.error_type==='unavailable'?503:(out.error_type==='unsupported_effect'?422:400)};
+  const mismatch=matchMismatch(session,out.result);
+  if(mismatch)return {ok:false,status:409,error:mismatch,error_type:'match_mismatch'};
   session.state=out.result.state;
   session.turn=out.result.turn;
   counters.advances+=1;
@@ -2429,6 +2514,8 @@ async function attachSkillSupport(view){
   const out=unwrap(envelope);
   if(!out.ok)return {ok:false,error:out.reason,error_type:out.error_type,
    status:out.error_type==='unavailable'?503:(out.error_type==='unsupported_effect'?422:400)};
+  const mismatchFree=matchMismatch(session,out.result);
+  if(mismatchFree)return {ok:false,status:409,error:mismatchFree,error_type:'match_mismatch'};
   session.state=out.result.state;
   session.turn=out.result.turn;      // 自由动作**不**改回合数（照抄引擎回执，不自己加）
   counters.freeActions=(counters.freeActions??0)+1;
@@ -2839,6 +2926,8 @@ async function attachSkillSupport(view){
   const legal=await client.battleLegal({state:session.state,strategy:session.strategy,stateVersion});
   const out=unwrap(legal);
   if(!out.ok)return {ok:false,status:502,error:out.reason,error_type:out.error_type};
+  const mismatchPlan=matchMismatch(session,out.result);
+  if(mismatchPlan)return {ok:false,status:409,error:mismatchPlan,error_type:'match_mismatch'};
   const pub=plannerPublicOf(out.result);
   if(!pub)return {ok:false,status:502,error:'服务端没有给出公开 planner state'};
   const envelope=await client.planActions(pub,{

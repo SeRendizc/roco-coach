@@ -1,0 +1,197 @@
+{
+ "adv_decision_id": "m-f3a4c9affd66ef3d:v6",
+ "adv_events_seq": [
+  [
+   "turn_start",
+   1
+  ],
+  [
+   "defense",
+   2
+  ],
+  [
+   "defense",
+   3
+  ],
+  [
+   "energy_regen",
+   4
+  ],
+  [
+   "energy_regen",
+   5
+  ]
+ ],
+ "adv_opening_reveal_still_there": true,
+ "adv_public_revealed_skills": {
+  "pet_000417": [
+   "skill_000286"
+  ]
+ },
+ "adv_status": 200,
+ "duplicate_reveal_raises": true,
+ "off_bench_keys": [
+  [
+   "fainted",
+   "slot"
+  ],
+  [
+   "fainted",
+   "slot"
+  ]
+ ],
+ "off_blob_has_pet_": false,
+ "off_has_opening_reveal_key": false,
+ "off_has_revealed_skills": false,
+ "off_revealed_in_observation": false,
+ "off_status": 200,
+ "off_ui_bench_keys": [
+  [
+   "fainted",
+   "slot"
+  ],
+  [
+   "fainted",
+   "slot"
+  ]
+ ],
+ "on_opening_reveal": {
+  "detail": {
+   "revealed_side": "enemy",
+   "roster": [
+    {
+     "name": "圆号鱼",
+     "pet_id": "pet_000417",
+     "slot": 0
+    },
+    {
+     "name": "雪影娃娃",
+     "pet_id": "pet_000112",
+     "slot": 1
+    },
+    {
+     "name": "音速犬",
+     "pet_id": "pet_000062",
+     "slot": 2
+    }
+   ],
+   "source": "opening_preview",
+   "viewer": "player"
+  },
+  "evidence": [
+   "3010"
+  ],
+  "kind": "opening_roster_revealed",
+  "seq": 0,
+  "text": "开局预览：对方的 圆号鱼、雪影娃娃、音速犬 亮明了（共 3 只）。",
+  "turn": 1
+ },
+ "on_public_bench": [
+  {
+   "fainted": false,
+   "pet_id": "pet_000112",
+   "revealed_event_seq": 0,
+   "revealed_turn": 1,
+   "revealed_via": "opening_preview",
+   "slot": 1
+  },
+  {
+   "fainted": false,
+   "pet_id": "pet_000062",
+   "revealed_event_seq": 0,
+   "revealed_turn": 1,
+   "revealed_via": "opening_preview",
+   "slot": 2
+  }
+ ],
+ "on_revealed_in_observation": {
+  "opponent_roster": [
+   {
+    "name": "圆号鱼",
+    "pet_id": "pet_000417",
+    "revealed_event_seq": 0,
+    "revealed_turn": 1,
+    "revealed_via": "opening_preview",
+    "slot": 0
+   },
+   {
+    "name": "雪影娃娃",
+    "pet_id": "pet_000112",
+    "revealed_event_seq": 0,
+    "revealed_turn": 1,
+    "revealed_via": "opening_preview",
+    "slot": 1
+   },
+   {
+    "name": "音速犬",
+    "pet_id": "pet_000062",
+    "revealed_event_seq": 0,
+    "revealed_turn": 1,
+    "revealed_via": "opening_preview",
+    "slot": 2
+   }
+  ]
+ },
+ "on_state_events": [
+  [
+   0,
+   "opening_roster_revealed"
+  ]
+ ],
+ "on_state_version": 1,
+ "on_status": 200,
+ "on_ui_bench_first": {
+  "class": null,
+  "fainted": false,
+  "name": "雪影娃娃",
+  "pet_id": "pet_000112",
+  "revealed_event_seq": 0,
+  "revealed_turn": 1,
+  "revealed_via": "opening_preview",
+  "slot": 1,
+  "stage": null,
+  "stats": {
+   "atk": 103,
+   "def": 66,
+   "hp": 130,
+   "spa": 98,
+   "spd": 130,
+   "spe": 90
+  },
+  "stats_source": "species-race",
+  "types": [
+   "冰系",
+   "萌系"
+  ]
+ },
+ "on_ui_bench_keys": [
+  [
+   "class",
+   "fainted",
+   "name",
+   "pet_id",
+   "revealed_event_seq",
+   "revealed_turn",
+   "revealed_via",
+   "slot",
+   "stage",
+   "stats",
+   "stats_source",
+   "types"
+  ],
+  [
+   "class",
+   "fainted",
+   "name",
+   "pet_id",
+   "revealed_event_seq",
+   "revealed_turn",
+   "revealed_via",
+   "slot",
+   "stage",
+   "stats",
+   "stats_source",
+   "types"
+  ]
+ ]
+}
