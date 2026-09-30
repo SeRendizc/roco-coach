@@ -343,6 +343,14 @@
       "owner": "lead",
       "status": "closed",
       "rule": "**STATE.json 每次提交前必须先跑 `python3 E:\\roco-scratch\\state-lint.py`（或等价 json.load）并把输出留在当轮记录里**；改大块 JSON 时不要在替换串里留尾逗号 —— 先把要替换的整段读完再改"
+    },
+    {
+      "id": "O-15",
+      "what": "流程缺口（Lead 侧）：**实现没先冻结就进下一步** ⇒ 03.1 的三项读数无法在 03.1 版本上独立复验",
+      "evidence": "harness-verifier 实测 mtime：`03.1-wrapup.md` 20:46:58 · `src/coach/opponent-belief.mjs` 20:51:03 · `tests/roco-opponent-belief.test.js` 20:52:43（它跑到一半被改写）；`test(` 数量 现状 24 / raw 记的 18 / git HEAD 13 ⇒ 它跑出的 `24 tests · 22 pass · 2 fail` 是 03.2 中间态、**未被计入 03.1 的问题**。⇒ 03.1 的「18✔/0✖ 在本版本复现」「新断言非恒真」「报告只由生成器写/改前后数据面 0 差异」三项只能记为**有 raw 留档、未经独立复现**（**不许**写成「已独立复验」）",
+      "owner": "lead（立规矩）· plan03-belief（执行）",
+      "status": "closed_by_D-16",
+      "rule": "**每一步实现完成 ⇒ 先报冻结（附 git status --porcelain + 涉及文件 sha256）⇒ Lead 提交 ⇒ 才允许动下一步**；改钉/改实现前必须先冻结"
     }
   ],
   "handoff": {
@@ -446,6 +454,12 @@
       "id": "D-15",
       "what": "03.1 勘察提出的四问 + Lead 追加的三条要求",
       "decision": "Q1 批准 plan03-belief 临时写 `reports/roco/rc604/opponent-belief.json`（只许生成器写；须给重生成前后逐路径 diff，证明数据面一致、只差 2 条 basis 文案）。Q2 批准放行 `opponent.active` 的 hp/max_hp/energy/statuses/marks，但口径收紧为「**引擎自己的公开投影里已有的字段**」而非「游戏里看得见」：每个放行字段须附 ui_public_view/public_planner_state 的**确切键路径**；不在公开投影里的不许由信念模块自行放行，登记为引擎侧缺口。`stats/types` 只在 stats_source ∈ {species-panel, species-race} 收，individual-* 拒绝。Q3 批准技能池组合：冻结 learnsets+overlay（542）为主、on-demand-builds（622）为**带等级**补充，未验证不许与已验证同权呈现。Q4 批准真引擎 view 与手工 publicFacts **两者都要**，但分栏取证、不许混成一份读数。追加：① **禁止仅凭「我方阵容速度层次」把候选压 0 权重**（可与公开证据矛盾时排除，并写证据 ID），R4 必须改；② H3 的规则账本自述与实现不一致必须修到一致；③ R2/R5/R7 按 03.4/03.5 补显式标记（层内等权标「仅作基线」、speed_band 标「工程三分位构造」、返回里带候选上限与截断信息）；G-03-a 不实文案照实改",
+      "by": "lead"
+    },
+    {
+      "id": "D-16",
+      "what": "为什么会有「实现没冻结就进下一步」以及怎么防（O-15）",
+      "decision": "立规矩：**每一步实现完成 ⇒ 先报冻结（附 `git status --porcelain` + 涉及文件 sha256）⇒ Lead 提交并回「已冻结在 <sha>」⇒ 才允许动下一步**；改钉/改实现前必须先冻结。已同步给 plan03-belief 与 harness-verifier。同时把 R2 口径定为「**任何带 `weights` 的对象**都必须有 basis + is_probability:false + baseline_declaration」（原检查只覆盖 `weights.rows` 非空分支，uniform 信念漏检 ⇒ 补 red-proof）",
       "by": "lead"
     }
   ]
