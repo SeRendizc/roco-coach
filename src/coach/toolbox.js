@@ -352,6 +352,40 @@ const stableId=x=>safeText(x,1,64)&&/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(x);
 const typeName=x=>safeText(x,1,16)&&!/\s/.test(x);
 const idList=(x,count)=>Array.isArray(x)&&x.length===count&&x.every(stableId);
 const stateVersionArg=x=>Number.isInteger(x)&&x>=0;
+//: **已知契约字段**的字符串白名单（04 · C-2 裁决）。
+//:
+//: 为什么需要：`rules_version` 合法地带着 `/`（`<ruleset_id>/<config_id>`，见
+//: `env.rules_version_of`），而通用字符串规则把**任何含 `/` 的串**当路径拒掉 ⇒
+//: 真机上 `plan_actions` **完全不可调用**（实测唯一拒绝点 `$.rules_version`，
+//: `json bytes=1804 < 8000`、`max depth=4` 都已排除）。
+//:
+//: 纪律（一条都不许松）：
+//:   ① **只白名单这几个键** —— 其余键照旧 fail closed；
+//:   ② 值必须匹配**各自格式**且不含 `..`；
+//:   ③ 通用规则（路径穿越防护）**不放宽**：非白名单字段含 `/` 照旧拒；
+//:   ④ 白名单只影响**字符串叶子**，不改变深度/字节/隐藏键/危险键的任何一条。
+const CONTRACT_STRING_KEYS=new Map([
+ // `rules_version` = `<ruleset_id>/<config_id>`：**恰好一个**斜杠，两侧都是 id 形状
+ ['rulesversion',/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}\/[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/],
+ // `ruleset_id`：规则集 id（`roco-world-s4-2026-09-10` 这种）
+ ['rulesetid',/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/],
+ // `match_id`：`m-<sha256 前16>`（`env.match_id_of`）
+ ['matchid',/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/],
+ // `decision_id`：`<match_id>:v<state_version>` ⇒ 比 match_id 多一个冒号
+ ['decisionid',/^[A-Za-z0-9][A-Za-z0-9._:-]{0,79}$/],
+]);
+/** 返回 `true`=按契约放行 / `false`=契约键但格式不对（拒） / `null`=交给通用规则。
+ *
+ * 关键：**只有带分隔符（`/` 或 `\`）的值才走契约闸**。不带分隔符的值本来就是通用规则的
+ * 管辖范围（短串 `rv-1` 这类历史 fixture 一直合法）—— 契约闸只负责「合法地含 `/` 的形式」，
+ * 不去新增拒绝面（第一次写严了，把 `rules_version:'rv-1'` 的既有夹具全拒了，实测 8 红）。
+ */
+function contractStringOk(normalized,value){
+ const pattern=CONTRACT_STRING_KEYS.get(normalized);
+ if(!pattern)return null;
+ if(!/[\\/]/.test(value))return null;
+ return pattern.test(value)&&!value.includes('..');
+}
 function safeObject(value,{maxBytes=2000,maxDepth=4}={}){
  if(!value||typeof value!=='object'||Array.isArray(value))return false;
  let encoded;try{encoded=JSON.stringify(value);}catch{return false;}
@@ -369,6 +403,12 @@ function safeObject(value,{maxBytes=2000,maxDepth=4}={}){
    if(UNSAFE_KEYS.has(normalized))return false;
    // 隐藏信息（MC-013）在到达引擎之前就拦一次；引擎那一侧也会拦，两层都要。
    if(ROCO_HIDDEN_KEYS.has(normalized))return false;
+   // 04 · C-2：契约字段按「键 + 格式」放行（只有白名单键 + 格式对得上才放行）
+   if(typeof item==='string'){
+    const contract=contractStringOk(normalized,item);
+    if(contract===false)return false;
+    if(contract===true)continue;
+   }
    if(!walk(item,depth+1))return false;
   }
   return true;

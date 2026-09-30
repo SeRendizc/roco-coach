@@ -34,7 +34,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 import { RocoClient, ROCO_ERROR, RULESET_ID, HIDDEN_KEYS, PRIVATE_PLANE_PATHS, findHiddenKeys } from '../../../src/coach/roco-client.js';
-import { executeTool, configureRocoTools, resetRocoTools } from '../../../src/coach/toolbox.js';
+import { executeTool, configureRocoTools, resetRocoTools, validToolArgs } from '../../../src/coach/toolbox.js';
 import { createRocoService } from '../../../src/server/roco-service.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -140,11 +140,47 @@ test('公开 planner state 由引擎产出：无 seed/pending，对手后备只�
   assert.ok(Number.isInteger(priv.seed), '私有 serialize() 应当带真实 seed');
   assert.ok(findHiddenKeys(priv).length > 0, '私有 serialize() 必须能被隐藏信息检测认出（否则反证无意义）');
 
-  // 对手后备只暴露位次/id/是否倒下 + 场上那只的公开面板
+  // 对手后备只暴露位次/是否倒下（+ **已亮明时**才有 id）—— 血量与配招是隐藏信息。
+  //
+  // ⚠ 改钉（2026-10-01 · 04 · C-1，**原断言逐字留档**）：
+  //     原断言：assert.deepEqual(Object.keys(entry).sort(), ['fainted','pet_id','slot'],
+  //               '对手后备只应有位次/id/是否倒下；血量与配招是隐藏信息');
+  //   独立运行时报据（`ROCO_PYTHON=<…Python310> node --test tests/evals/roco/plan-e2e.test.js`）：
+  //     actual = ['fainted','slot']   expected = ['fainted','pet_id','slot'] ⇒ 原断言必红。
+  //   为什么是**改钉**而不是改产品：01.3（2026-09-30）起「**未亮明的后备不给身份**」是正确行为
+  //     （`env._bench_public_row` 只在有亮明事件时才带 `pet_id`；`docs/roco/executive/01-PLAN.md:38`
+  //      「预览发生前不许提前泄漏阵容」）。原断言写在 01.3 之前，把「总会带 id」当成契约了。
+  //   最小修订：`fainted` + `slot` 为**必选**；`pet_id` 只在亮明时**允许**出现；隐藏键照旧**一律禁止**
+  //     （下面同时钉住这两头，且用一个「种了 hp 的副本」做反向控制 —— 证明放宽后仍然抓得住泄漏）。
+  const benchKeys = (row) => Object.keys(row).sort().filter((key) => key !== 'pet_id');
   for (const entry of pub.opponent.bench) {
-    assert.deepEqual(Object.keys(entry).sort(), ['fainted', 'pet_id', 'slot'],
-      '对手后备只应有位次/id/是否倒下；血量与配招是隐藏信息');
+    assert.deepEqual(benchKeys(entry), ['fainted', 'slot'],
+      '对手后备必须有位次与是否倒下（`pet_id` 只在已亮明时允许出现）');
+    if ('pet_id' in entry) assert.equal(typeof entry.pet_id, 'string', '有 id 就必须是字符串');
+    for (const hidden of ['hp', 'max_hp', 'energy', 'loadouts', 'loadout', 'moveset']) {
+      assert.ok(!(hidden in entry), `对手后备不许带 ${hidden}（隐藏信息）`);
+    }
   }
+  // 反向控制：同一把尺子必须**抓得住**泄漏（否则上面的「不许带」只是没查）
+  const leaked = {...pub, opponent: {...pub.opponent,
+    bench: pub.opponent.bench.map((row) => ({...row, hp: 999}))}};
+  assert.throws(() => {
+    for (const entry of leaked.opponent.bench) {
+      for (const hidden of ['hp', 'max_hp', 'energy', 'loadouts', 'loadout', 'moveset']) {
+        assert.ok(!(hidden in entry), `对手后备不许带 ${hidden}（隐藏信息）`);
+      }
+    }
+  }, /不许带 hp/, '种了 hp 的副本必须被同一把尺子抓住');
+  // 04 · C-2 正：真公开面必须**能过工具参数校验**（修前 `rules_version` 的 `/` 让它必红）
+  assert.equal(validToolArgs('plan_actions', {state: pub, state_version: pub.state_version}), true,
+    `真公开面必须能过 validToolArgs（rules_version=${JSON.stringify(pub.rules_version)}）——`
+    + '修前它被安全守卫的「含 / 即路径」规则拒掉，plan_actions 在真机上完全不可调用');
+  assert.equal(pub.rules_version, `${pub.ruleset_id}/${pub.ruleset_config_id}`,
+    'rules_version 的契约形状是 <ruleset_id>/<config_id>');
+  // 04 · C-2 负：同一形状里塞穿越样式 ⇒ 仍必红
+  assert.equal(validToolArgs('plan_actions', {
+    state: {...pub, rules_version: '../../etc/passwd'}, state_version: pub.state_version}), false,
+  '穿越样式的 rules_version 必须仍被拒');
   assert.equal(typeof pub.opponent.field.hp, 'number', '对手**场上**的面板是公开的（屏幕上写着）');
   assert.ok(pub.opponent.field.max_hp > 0);
 });

@@ -28,6 +28,7 @@ import {createRocoClient, findHiddenKeys, ROCO_ERROR} from '../src/coach/roco-cl
 import {
   planActionsViaPlanner, executeTool, configureRocoTools, resetRocoTools,
   readFirstSecondMargin, rocoPlanCacheKey, rocoPlanCacheSize, normalizeOpponentScenarioRows,
+  validToolArgs,
 } from '../src/coach/toolbox.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -831,4 +832,41 @@ test('⑨c 超过引擎上限（64）⇒ 按 scenario_id 定序截断并逐条�
   } finally {
     viaProvider.done();
   }
+});
+
+// ── ⑩ C-2：契约字段的「键 + 格式」白名单（真机上 plan_actions 曾被 rules_version 的 `/` 拒）──
+//
+// 为什么单列：`rules_version` 合法地带 `/`（`<ruleset_id>/<config_id>`），而通用字符串规则把
+// 含 `/` 的串一律当路径拒 ⇒ **模型真机上完全调不动 plan_actions**。修法是**只**给四个契约键
+// 按格式放行；通用规则（穿越防护）**不放宽**，非白名单字段含 `/` 照旧拒。
+test('⑩ C-2：契约键按格式放行；穿越样式与非白名单字段含 / 仍必拒', () => {
+  const REAL_RULES_VERSION = 'roco-world-s4-2026-09-10/legacy_sim_v1';
+  const state = (extra) => ({...PUBLIC_PLANNER_STATE, rules_version: REAL_RULES_VERSION, ...extra});
+  // ① 正：真公开面（含带 `/` 的 rules_version）必须通过 —— 这是 e2e 从红转绿的那一条
+  assert.equal(validToolArgs('plan_actions', {state: state({}), state_version: 7}), true,
+    '真公开面的 rules_version 必须能过（否则 plan_actions 在真机上不可调用）');
+  assert.ok(JSON.stringify(state({})).includes(REAL_RULES_VERSION), '夹具里必须真的是带斜杠的那个值');
+  // ② 负（穿越样式）：白名单键也必须**格式对**，`..`/多斜杠/反斜杠/绝对路径一律拒
+  for (const bad of ['../../etc/passwd', '/etc/passwd', 'a/b/c', 'a/..', '..', 'x\\y', 'a\\..\\b']) {
+    assert.equal(validToolArgs('plan_actions', {state: state({rules_version: bad}), state_version: 7}),
+      false, `rules_version=${JSON.stringify(bad)} 必须被拒`);
+  }
+  // ③ 负（非白名单字段含 `/`）⇒ 通用规则没放宽
+  assert.equal(validToolArgs('plan_actions', {state: state({note: 'a/b'}), state_version: 7}), false,
+    '非白名单字段含 / 必须被拒（通用穿越防护不许放宽）');
+  assert.equal(validToolArgs('plan_actions', {
+    state: state({self: {...PUBLIC_PLANNER_STATE.self,
+      loadouts: {pet_000225: ['skill/000246']}}}), state_version: 7}), false,
+  '数组里的字符串含 / 也必须被拒');
+  // ④ 另三个契约键同样按格式放行 / 按格式拒
+  assert.equal(validToolArgs('plan_actions', {state: state({match_id: 'm-abc123',
+    decision_id: 'm-abc123:v3', ruleset_id: 'roco-world-s4-2026-09-10'}), state_version: 7}), true);
+  assert.equal(validToolArgs('plan_actions', {state: state({match_id: 'm/abc'}), state_version: 7}), false);
+  assert.equal(validToolArgs('plan_actions', {state: state({decision_id: 'm-abc:v3/x'}), state_version: 7}), false);
+  assert.equal(validToolArgs('plan_actions', {state: state({ruleset_id: '../x'}), state_version: 7}), false);
+  // ⑤ 白名单**不许**改变其它守卫：字节/深度/隐藏键照旧
+  assert.equal(validToolArgs('plan_actions', {
+    state: state({blob: 'x'.repeat(9000)}), state_version: 7}), false, '字节上限照旧');
+  assert.equal(validToolArgs('plan_actions', {state: state({seed: 5}), state_version: 7}), false,
+    '隐藏键照旧（白名单只认那四个契约键）');
 });
