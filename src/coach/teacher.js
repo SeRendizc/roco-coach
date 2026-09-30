@@ -3,6 +3,10 @@ import {SPECIES,createGame,SKILLS,damage,rankEnemyActions,actionName,active,lega
 // 2026-09-27：加点退役 ⇒ 不再需要 `trainingCapacity` / `MAX_STAT_TRAINING`（等级与经验还用得上）。
 import {MAX_LEVEL} from '../game/progression.js';
 import {trainingSaveOf,trainingSaveMissing} from './profile-shape.js';
+// 面向玩家的数字与单位：**唯一口径**（task-33 建的共用件，task-35 把本模块迁过来）。
+// 本文件原来有一个本地 `showNumber()`（同口径的第二份实现）—— 已删，改用共用件：
+// 口径只留一处，才不会再出现"同一个数两种写法"（横切审计 H3）。
+import {PLAYER_UNITS,playerNumber,playerQuantity} from './player-text.js';
 // `pets` 必须是**养成存档那个对象**（`{id:{level,xp,points}}`）—— 公开层的名单数组里没有 level/points。
 // 调用方先过 `trainingSaveOf()`，所以这一支只会收到对象；数组形状根本走不到这里（见 profile-shape.js）。
 /**
@@ -20,19 +24,16 @@ function focusIdOf(context){
  return SPECIES.some((species)=>species.id===wanted)?wanted:'fox';
 }
 /**
- * 数字写成玩家读得懂的样子（D-31 精度口径 / 横切审计 H3）：
+ * 数字写成玩家读得懂的样子 —— **口径已搬到共用件** `./player-text.js` 的 `playerNumber()`：
  * **整数原样、非整数 1 位小数；取不到就显式占位「未登记」**。
  *
- * 与 `coach-advice.js:106-110` 的 `show()` 同一套口径（那边脏值写 `—`，这里写「未登记」——
- * 两处都是显式占位，不装成 0）。为什么不用裸 `toFixed(1)`：它把整数写成 `930.0`，
- * 而同一屏别处（军师、复盘统计）写 `930` ⇒ 同一个数两种写法。
- * 只用于**显示**，不用于判断（判断一律走原始数值）。
+ * 这里只留为什么这么定的来龙去脉（原实现 `showNumber()` 在 task-35 删除：
+ * 同一口径的第二份实现留着，就是下一个"两种写法"的来源）：
+ *   · 2026-09-30 D-31：复盘正文原来直接内插 `decision.gap` ⇒ 玩家读到「评分差 6523.247662596753」；
+ *   · 横切审计 H3：`toFixed(1)` 会把整数写成 `930.0`，而 `coach-advice.js` 的 `show()` 写 `930`
+ *     ⇒ 同一屏两种写法。共用件与 `show()` 同一套（脏值那边写 `—`，这边写「未登记」）。
+ *   · 只用于**显示**，不用于判断（判断一律走原始数值）。
  */
-function showNumber(value){
- const v=value===null||value===undefined||value===''?NaN:Number(value);
- if(!Number.isFinite(v))return '未登记';
- return Number.isInteger(v)?String(v):String(Math.round(v*10)/10);
-}
 function pet(context,save){const id=focusIdOf(context);return createGame(0,[id,...SPECIES.filter(p=>p.id!==id).slice(0,2).map(p=>p.id)],{pets:save.pets}).player.pets[0];}
 export function teacher(context){
  // 2026-09-27（人类：「加点不要了，按照洛手的机制来，根本没有这些，不要了」）：
@@ -133,9 +134,9 @@ export function skillLesson(game,action){
  const p=active(game,'player'),q=active(game,'enemy');if(!p||!q)return null;
  const hit=sk.power?damage(p,q,sk):null,guarded=sk.power?damage(p,q,sk,true):null;
  const desc=/[。！？]$/.test(sk.desc)?sk.desc:sk.desc+'。';   // SKILLS 的 desc 不保证带句号
- const head=`「${sk.name}」是${TYPES[sk.type]||'普通'}系技能，消耗 ${sk.cost} 豆${sk.power?`，对当前目标算 ${hit} 伤害（对方防御时 ${guarded}）`:''}${sk.priority?`，优先级 ${sk.priority}，同回合里先结算`:''}。${desc}`;
+ const head=`「${sk.name}」是${TYPES[sk.type]||'普通'}系技能，消耗 ${playerQuantity(sk.cost,'energy')}${sk.power?`，对当前目标算 ${playerNumber(hit)} 伤害（对方防御时 ${playerNumber(guarded)}）`:''}${sk.priority?`，优先级 ${sk.priority}，同回合里先结算`:''}。${desc}`;
  const left=p.energy-sk.cost;
- const energy=sk.cost===0?`它零消耗，所以只剩 ${p.energy} 豆时也还能继续出招。`:left<=1?`打完这一手只剩 ${left} 豆，下一回合大概只能出零消耗技能或防御。`:`打完还剩 ${left} 豆。`;
+ const energy=sk.cost===0?`它零消耗，所以只剩 ${playerQuantity(p.energy,'energy')}时也还能继续出招。`:left<=1?`打完这一手只剩 ${playerQuantity(left,'energy')}，下一回合大概只能出零消耗技能或防御。`:`打完还剩 ${playerQuantity(left,'energy')}。`;
  // 什么时候更合适：全部读 SKILLS 的字段，不凭印象补文案。
  const notes=[];
  if(sk.status==='burn')notes.push('灼烧由它挂上：之后带灼烧加成的招式才吃得到增伤。');
@@ -152,10 +153,10 @@ export function skillLesson(game,action){
  if(sk.clearEnvironment)notes.push('它只移除环境（细雨/山风），不造成伤害，也不清异常。');
  if(!notes.length)notes.push('它是常规伤害选择：合适与否主要看这一下够不够把对手推到下一个血线。');
  const others=game.phase==='battle'?legalActions(game).filter(a=>a.kind==='skill'&&a.id!==action.id).map(a=>{
-  const s=SKILLS[a.id],bits=[`${s.cost} 豆`];
-  if(s.power)bits.push(`当前 ${damage(p,q,s)} 伤害`);
+  const s=SKILLS[a.id],bits=[playerQuantity(s.cost,'energy')];
+  if(s.power)bits.push(`当前 ${playerNumber(damage(p,q,s))} 伤害`);
   if(s.priority)bits.push('先制');
-  if(s.heal)bits.push(`回 ${s.heal} HP`);
+  if(s.heal)bits.push(`回 ${playerQuantity(s.heal,'hp')}`);
   return `${s.name}（${bits.join('、')}）`;
  }):[];
  const compare=others.length?`手里同时可选：${others.join('、')}。同一回合只能出一手，要抢先后看优先级，要续航看恢复，要压血线就比当前伤害。`:'';
@@ -164,11 +165,11 @@ export function skillLesson(game,action){
  //   「伤害来自 engine.damage（不防御 null／防御 null）」——玩家读到两个 `null`。
  //   现在按 `sk.power` 分岔：有威力才谈伤害面板；无威力就说这一手不按伤害面板算（别的照旧）。
  const damageLine=sk.power&&hit!==null&&guarded!==null
-  ? `伤害来自 engine.damage（不防御 ${showNumber(hit)}／防御 ${showNumber(guarded)}），只按当前面板计算，不预测对手这一回合做什么。`
+  ? `伤害来自 engine.damage（不防御 ${playerNumber(hit)}／防御 ${playerNumber(guarded)}），只按当前面板计算，不预测对手这一回合做什么。`
   : '它不造成伤害：这一手没有威力，不按伤害面板计算，也不预测对手这一回合做什么。';
  return {id:`skill:${action.id}`,lesson:decisionLesson(game,action),text,
-  evidence:[`技能字段：${sk.name}，${TYPES[sk.type]||'普通'}系，消耗 ${sk.cost} 豆${sk.power?`，威力 ${sk.power}`:'，不造成伤害'}${sk.priority?`，优先级 ${sk.priority}`:'，优先级与普通技能相同'}。`,
-   `当前局面：${p.name} ${p.hp}HP、${p.energy} 豆；对手 ${q.name} ${q.hp}HP${q.status?`、异常 ${q.status.kind}`:''}。`,
+  evidence:[`技能字段：${sk.name}，${TYPES[sk.type]||'普通'}系，消耗 ${playerQuantity(sk.cost,'energy')}${sk.power?`，威力 ${playerNumber(sk.power)}`:'，不造成伤害'}${sk.priority?`，优先级 ${sk.priority}`:'，优先级与普通技能相同'}。`,
+   `当前局面：${p.name} ${playerQuantity(p.hp,'hp')}、${playerQuantity(p.energy,'energy')}；对手 ${q.name} ${playerQuantity(q.hp,'hp')}${q.status?`、异常 ${q.status.kind}`:''}。`,
    damageLine],
   method:'读取技能字段与当前局面 → 解释这一招 → 不替你决定'};
 }
@@ -237,12 +238,12 @@ export function analyzeTurn(h,{rulesVersion='0.6'}={}){
   // 2026-09-30 防御性守卫（本段内原无校验）：`a.target` 越界 ⇒ `incoming` 为 undefined ⇒ 下一行取属性
   // 会抛 TypeError，整条复盘文案崩掉。上游是否保证 target 合法性**未核** ⇒ 按「稳赚不赔」加一行。
   if(!incoming)return '这次换人的记录不完整（找不到换上来的那名伙伴），这一回合就不推算了。';
-  return `换上${incoming.name}占用了整回合，生命从${incoming.hp}到${after.hp}。这次用当回合输出机会换取新对位；还要看它是否承担后续反制职责，不能只因最后赢了就说这次换宠正确。`;
+  return `换上${incoming.name}占用了整回合，${PLAYER_UNITS.hp}量从${playerNumber(incoming.hp)}到${playerNumber(after.hp)}。这次用当回合输出机会换取新对位；还要看它是否承担后续反制职责，不能只因最后赢了就说这次换宠正确。`;
  }
- if(a.kind==='item')return `这一回合用道具取代出招，随后仍给对手行动机会。${p.name}回合前${p.hp}HP，结束时${h.after.player.pets[h.before.player.active].hp}HP；要比较恢复带来的生存空间与放弃进攻的成本。`;
- if(a.id==='guard')return `这次防御用了整回合输出机会换减伤与回能；回合前${p.energy}豆。下回合不能连续防御，要提前留攻击、换宠或道具的接续。`;
+ if(a.kind==='item')return `这一回合用道具取代出招，随后仍给对手行动机会。${p.name}回合前${playerQuantity(p.hp,'hp')}，结束时${playerQuantity(h.after.player.pets[h.before.player.active].hp,'hp')}；要比较恢复带来的生存空间与放弃进攻的成本。`;
+ if(a.id==='guard')return `这次防御用了整回合输出机会换减伤与回能；回合前${playerQuantity(p.energy,'energy')}。下回合不能连续防御，要提前留攻击、换宠或道具的接续。`;
  const sk=SKILLS[a.id];if(!sk)return '当前规则已无法识别该技能，保留原始记录，不补造计算。';
- if(sk.power){const hit=damage(p,q,sk),guarded=damage(p,q,sk,true);return `${sk.name}对当时${q.name}的直接伤害：不防御${hit}、防御${guarded}，目标当时${q.hp}HP，这一下${hit>=q.hp?'够收尾':'不足以收尾'}。`;}
+ if(sk.power){const hit=damage(p,q,sk),guarded=damage(p,q,sk,true);return `${sk.name}对当时${q.name}的直接伤害：不防御${playerNumber(hit)}、防御${playerNumber(guarded)}，目标当时${playerQuantity(q.hp,'hp')}，这一下${hit>=q.hp?'够收尾':'不足以收尾'}。`;}
  return `选择${sk.name}时要承担放弃本回合攻击的成本；结合原始记录核对实际恢复与后续承伤。`;
 }
 // 整局统计说成人话。
@@ -281,7 +282,7 @@ export function reviewMatch(context){
  // 没有就走下面那条如实支——**不编回合** ✓
  const storedTurns=Array.isArray(m.turnLog)?m.turnLog.filter((r)=>r&&Number.isInteger(r.turn)):[];
  const nameOf=(side)=>side?.name??'（名字未登记）';
- const hpOf=(side)=>Number.isFinite(side?.hp)?`${side.hp} 血`:'血量未登记';
+ const hpOf=(side)=>Number.isFinite(side?.hp)?playerQuantity(side.hp,'hp'):'血量未登记';
  const didOf=(row)=>{
   const kind=row?.action?.kind??null;
   if(kind==='switch')return '换了人';
@@ -297,8 +298,8 @@ export function reviewMatch(context){
  //   现在的口径：**正文只给四段**（关键回合 → 当时合法替代 → 下一局试哪一手 → 风险），
  //   逐回合流水**整段移进 `evidence`（依据折叠）** —— 事实一条不少，只是不再淹没正文 ✓
  const turnLines=storedTurns.map((row)=>{
-  const you=`${nameOf(row.you)} ${hpOf(row.you)}→${Number.isFinite(row.you?.hpAfter)?`${row.you.hpAfter} 血`:'未登记'}`;
-  const foe=`${nameOf(row.foe)} ${hpOf(row.foe)}→${Number.isFinite(row.foe?.hpAfter)?`${row.foe.hpAfter} 血`:'未登记'}`;
+  const you=`${nameOf(row.you)} ${hpOf(row.you)}→${Number.isFinite(row.you?.hpAfter)?playerQuantity(row.you.hpAfter,'hp'):'未登记'}`;
+  const foe=`${nameOf(row.foe)} ${hpOf(row.foe)}→${Number.isFinite(row.foe?.hpAfter)?playerQuantity(row.foe.hpAfter,'hp'):'未登记'}`;
   return `第${row.turn}回合：你这边 ${you}；对面 ${foe}；你${didOf(row)}${row.events?.length?`（${row.events.join('；')}）`:''}`;
  });
  const span=storedTurns.length?(storedTurns.length===1?`第${storedTurns[0].turn}回合`
@@ -319,7 +320,7 @@ export function reviewMatch(context){
  const brief=decision?decisionBrief(decision):lesson||(storedTurns.length?`上一局${span}，我先挑一个最值得看的回合。`:`${m.stage}，${outcome}。先回看第${key?.turn||1}回合，比较当时的其他选择。`);
  // ── 正文四段（task-27：默认只给这四段，事件流水进依据）──────────────────────
  //  ① 关键回合：先用手上的**事前**读点（decision 的当时快照）；没有 decision 时，从逐回合摘要里
- //     挑「生命变化/倒下」最大的那一回合 —— 这是**事实挑选**，不是事后倒推结论 ✓
+ //     挑「血量变化/倒下」最大的那一回合 —— 这是**事实挑选**，不是事后倒推结论 ✓
  //  ② 当时合法替代：decision.options（去掉实际所选）；**没有候选记录就明说缺哪一项** ✓
  //  ③ 下一局试哪一手：一句可执行（有练习题用练习题，否则用课程/通用一句）
  //  ④ 风险：事前评分 ≠ 结果；**没有分支证据时不许断言「换人必胜」** ✓
@@ -337,12 +338,12 @@ export function reviewMatch(context){
   if(decision){
    const sit=decision.situation;
    const alts=decision.options.filter(o=>JSON.stringify(o.action)!==JSON.stringify(decision.chosen.action));
-   return `第${decision.turn}回合：当时${sit.playerPet??'你的伙伴'} ${sit.playerHp??'?'} 血`
-    +(Number.isInteger(sit.playerEnergy)?`、${sit.playerEnergy} 豆`:'')
-    +`，对面${sit.enemyPet??'对手'} ${sit.enemyHp??'?'} 血；你选了「${decision.chosen.name}」`
+   return `第${decision.turn}回合：当时${sit.playerPet??'你的伙伴'} ${playerQuantity(sit.playerHp,'hp',{fallback:'?'})}`
+    +(Number.isInteger(sit.playerEnergy)?`、${playerQuantity(sit.playerEnergy,'energy')}`:'')
+    +`，对面${sit.enemyPet??'对手'} ${playerQuantity(sit.enemyHp,'hp',{fallback:'?'})}；你选了「${decision.chosen.name}」`
     +(alts.length?`，当时还能选「${alts[0].name}」。`:'。');
   }
-  if(biggest)return `第${biggest.turn}回合：${nameOf(biggest.you)} ${hpOf(biggest.you)}→${Number.isFinite(biggest.you?.hpAfter)?`${biggest.you.hpAfter} 血`:'未登记'}，对面${nameOf(biggest.foe)} ${hpOf(biggest.foe)}→${Number.isFinite(biggest.foe?.hpAfter)?`${biggest.foe.hpAfter} 血`:'未登记'}；你${didOf(biggest)}。`;
+  if(biggest)return `第${biggest.turn}回合：${nameOf(biggest.you)} ${hpOf(biggest.you)}→${Number.isFinite(biggest.you?.hpAfter)?playerQuantity(biggest.you.hpAfter,'hp'):'未登记'}，对面${nameOf(biggest.foe)} ${hpOf(biggest.foe)}→${Number.isFinite(biggest.foe?.hpAfter)?playerQuantity(biggest.foe.hpAfter,'hp'):'未登记'}；你${didOf(biggest)}。`;
   return '这一局我这边没有可点名的关键回合（逐回合摘要里没有血量读数）。';
  })();
  const alternativesLine=(()=>{
@@ -351,10 +352,10 @@ export function reviewMatch(context){
   if(!alts.length)return `这一个回合引擎没有给出可排序的候选（撤退或规则版本不匹配），只保留实际选择「${decision.chosen.name}」。`;
   // D-31（2026-09-30，lead-mac 全功能审核）：这里原来直接内插 `decision.gap`
   //   ⇒ 玩家读到「评分差 6523.247662596753」（13 位小数）。
-  //   精度口径见 `showNumber()`（文件上方）：**整数原样、非整数 1 位**、取不到写「未登记」——
-  //   与 `coach-advice.js:106-110` 的 `show()` 同一套，避免同一屏出现 `930` 与 `930.0` 两种写法。
-  //   （横切审计 H3 登记的正是这一点；裸 `toFixed(1)` 会把整数写成 `930.0`。）
-  return `当时可比较的两个候选动作：${alts.slice(0,2).map(o=>`「${o.name}」`).join('与')}；评分差 ${showNumber(decision.gap)}（事前一回合的公开信息，不是结果反推）。`;
+  //   精度口径见共用件 `./player-text.js` 的 `playerNumber()`：**整数原样、非整数 1 位**、
+  //   取不到写「未登记」—— 与 `coach-advice.js:106-110` 的 `show()` 同一套，
+  //   避免同一屏出现 `930` 与 `930.0` 两种写法。（横切审计 H3 登记的正是这一点。）
+  return `当时可比较的两个候选动作：${alts.slice(0,2).map(o=>`「${o.name}」`).join('与')}；评分差 ${playerNumber(decision.gap)}（事前一回合的公开信息，不是结果反推）。`;
  })();
  const nextLine=(()=>{
   if(practice?.question)return `${practice.question.replace(/^假设练习（参数已改动）：/,'')}（${practice.answer}）`;
@@ -404,9 +405,9 @@ export function keyDecisionOf(match){
 // 不带括号、不带回合 ID、不念统计——玩家先读到的是「这一局最值得看的那一下」。
 function decisionBrief(d){
  const s=d.situation,alts=d.options.filter(o=>JSON.stringify(o.action)!==JSON.stringify(d.chosen.action));
- const bits=[`第${d.turn}回合最值得看：当时${s.playerPet??'你的伙伴'} ${s.playerHp??'?'} 血`];
- if(Number.isInteger(s.playerEnergy))bits.push(`、${s.playerEnergy} 豆`);
- bits.push(`，对面${s.enemyPet??'对手'} ${s.enemyHp??'?'} 血；你选了「${d.chosen.name}」`);
+ const bits=[`第${d.turn}回合最值得看：当时${s.playerPet??'你的伙伴'} ${playerQuantity(s.playerHp,'hp',{fallback:'?'})}`];
+ if(Number.isInteger(s.playerEnergy))bits.push(`、${playerQuantity(s.playerEnergy,'energy')}`);
+ bits.push(`，对面${s.enemyPet??'对手'} ${playerQuantity(s.enemyHp,'hp',{fallback:'?'})}；你选了「${d.chosen.name}」`);
  if(alts.length)bits.push(`，当时还能选「${alts[0].name}」`);
  if(d.consequence.enemyFallen.length)bits.push(`，这一下打倒了${d.consequence.enemyFallen.join('、')}`);
  bits.push('。');
@@ -416,9 +417,9 @@ function decisionBrief(d){
 // 所以「折叠说过的不在展开区再说一遍」这条判据照样成立。
 function decisionEvidence(d){
  const s=d.situation,c=d.consequence;
- const info=`第${d.turn}回合开始时的信息：${s.playerPet??'我方'} ${s.playerHp??'?'} 血、${s.playerEnergy??'?'} 豆；${s.enemyPet??'对手'} ${s.enemyHp??'?'} 血、${s.enemyEnergy??'?'} 豆（来源：回合开始前的公开快照）。`;
+ const info=`第${d.turn}回合开始时的信息：${s.playerPet??'我方'} ${playerQuantity(s.playerHp,'hp',{fallback:'?'})}、${playerQuantity(s.playerEnergy,'energy',{fallback:'?'})}；${s.enemyPet??'对手'} ${playerQuantity(s.enemyHp,'hp',{fallback:'?'})}、${playerQuantity(s.enemyEnergy,'energy',{fallback:'?'})}（来源：回合开始前的公开快照）。`;
  const opts=d.optionsComplete?`当时可比较的两个候选动作：${d.options.slice(0,2).map(o=>`「${o.name}」`).join('与')}；你实际选了「${d.chosen.name}」。`:`这一个回合引擎没有给出可排序的候选（撤退或规则版本不匹配），只保留实际选择「${d.chosen.name}」。`;
- const outcomeText=`结算后的结果：${s.playerPet??'我方'} ${s.playerHp??'?'} → ${c.playerHp??'?'} 血，${s.enemyPet??'对手'} ${s.enemyHp??'?'} → ${c.enemyHp??'?'} 血${c.playerFallen.length?`，${c.playerFallen.join('、')}倒下`:''}${c.enemyFallen.length?`，${c.enemyFallen.join('、')}倒下`:''}${c.cancelled?'（这一手因伙伴倒下被取消）':''}。`;
+ const outcomeText=`结算后的结果：${s.playerPet??'我方'} ${playerQuantity(s.playerHp,'hp',{fallback:'?'})} → ${playerQuantity(c.playerHp,'hp',{fallback:'?'})}，${s.enemyPet??'对手'} ${playerQuantity(s.enemyHp,'hp',{fallback:'?'})} → ${playerQuantity(c.enemyHp,'hp',{fallback:'?'})}${c.playerFallen.length?`，${c.playerFallen.join('、')}倒下`:''}${c.enemyFallen.length?`，${c.enemyFallen.join('、')}倒下`:''}${c.cancelled?'（这一手因伙伴倒下被取消）':''}。`;
  return `关键决策：${info}${opts}${outcomeText}`;
 }
 // ── C01：相似练习（参数已改动）───────────────────────────────────────────────
@@ -426,7 +427,7 @@ function decisionEvidence(d){
 // 算出来，不靠回忆。参数改了但题型没变，所以它是「相似的练习题」，不是「同一道题」：
 //   ① 有伤害数字时 → 改对手当时剩下的血，问这一手还够不够收尾；
 //   ② 换宠时      → 改换上来的那只当时的血，问它扛不扛得住这一回合真实的伤害；
-//   ③ 能量取舍时  → 改当时的豆数，问打完还剩几豆、下一回合还能不能再出同一手；
+//   ③ 能量取舍时  → 改当时的能量数，问打完还剩多少能量、下一回合还能不能再出同一手；
 //   ④ 防御节奏时  → 参数=上一回合是否已经防御过（规则的硬边界）。
 // 凑不出任何一条时返回 null：宁可这道练习题不出，也不编一道与本局无关的题。
 export const PRACTICE_DELTAS=[8,-6,15,-11,3,-18];
@@ -438,24 +439,24 @@ export function practiceQuestion({keyDecision:d=null,variant=0}={}){
  const n=d.numbers||{};
  if(n.chosen&&Number.isInteger(n.chosen.enemyHp)&&Number.isInteger(n.chosen.hit)&&n.chosen.enemyHp>0){
   const assumed=Math.max(1,n.chosen.enemyHp+pick),enough=n.chosen.hit>=assumed;
-  return wrap({question:`${d.situation.playerPet??'你的伙伴'}用「${n.chosen.name}」打出 ${n.chosen.hit} 伤害（对方防御时 ${n.chosen.guarded}）。当时对手剩 ${n.chosen.enemyHp} 血，这里改成 ${assumed} 血，这一手够不够收尾？`,
+  return wrap({question:`${d.situation.playerPet??'你的伙伴'}用「${n.chosen.name}」打出 ${playerNumber(n.chosen.hit)} 伤害（对方防御时 ${playerNumber(n.chosen.guarded)}）。当时对手剩 ${playerQuantity(n.chosen.enemyHp,'hp')}，这里改成 ${playerQuantity(assumed,'hp')}，这一手够不够收尾？`,
    answer:enough?'够收尾':'不够收尾',other:enough?'不够收尾':'够收尾',
-   explanation:`伤害 ${n.chosen.hit} 比假定的 ${assumed} 血${enough?'多，所以够':'少，所以不够'}（真实那一局对手剩 ${n.chosen.enemyHp} 血）。对手这一回合防御时只有 ${n.chosen.guarded}，所以「够」只在它不防御时成立。`,
+   explanation:`伤害 ${playerNumber(n.chosen.hit)} 比假定的 ${playerQuantity(assumed,'hp')}${enough?'多，所以够':'少，所以不够'}（真实那一局对手剩 ${playerQuantity(n.chosen.enemyHp,'hp')}）。对手这一回合防御时只有 ${playerNumber(n.chosen.guarded)}，所以「够」只在它不防御时成立。`,
    lesson:'收尾判断只比较「这一手打出的伤害」与「对手当时剩下的血」。'});
  }
  if(n.incoming&&Number.isInteger(n.incoming.hp)&&Number.isInteger(n.incoming.taken)&&n.incoming.taken>0){
   const assumed=Math.max(1,n.incoming.hp-pick),survives=assumed-n.incoming.taken>0;
-  return wrap({question:`换上的${n.incoming.name}这一回合挨了 ${n.incoming.taken} 伤害。当时它剩 ${n.incoming.hp} 血，这里改成 ${assumed} 血，它还站得住吗？`,
+  return wrap({question:`换上的${n.incoming.name}这一回合挨了 ${playerNumber(n.incoming.taken)} 伤害。当时它剩 ${playerQuantity(n.incoming.hp,'hp')}，这里改成 ${playerQuantity(assumed,'hp')}，它还站得住吗？`,
    answer:survives?'站得住':'会倒下',other:survives?'会倒下':'站得住',
-   explanation:`${assumed} 减去 ${n.incoming.taken} 等于 ${assumed-n.incoming.taken}，${survives?'大于 0，所以还剩着':'不大于 0，所以会倒下'}（真实那一局它剩 ${n.incoming.after??'?'} 血）。`,
+   explanation:`${playerNumber(assumed)} 减去 ${playerNumber(n.incoming.taken)} 等于 ${playerNumber(assumed-n.incoming.taken)}，${survives?'大于 0，所以还剩着':'不大于 0，所以会倒下'}（真实那一局它剩 ${n.incoming.after===null||n.incoming.after===undefined?'?':playerQuantity(n.incoming.after,'hp')}）。`,
    lesson:'换上来的伙伴能不能承伤，要看它当时的血与这一回合实际承受的伤害。'});
  }
  if(n.chosen&&Number.isInteger(n.chosen.cost)&&Number.isInteger(n.chosen.energy)){
   const assumed=Math.max(0,n.chosen.energy+pick),left=assumed-n.chosen.cost,again=left>=n.chosen.cost;
-  return wrap({question:`出「${n.chosen.name}」要 ${n.chosen.cost} 豆。当时你手里 ${n.chosen.energy} 豆，这里改成 ${assumed} 豆，打完以后下一回合还能不能再出它一次？`,
+  return wrap({question:`出「${n.chosen.name}」要 ${playerQuantity(n.chosen.cost,'energy')}。当时你手里 ${playerQuantity(n.chosen.energy,'energy')}，这里改成 ${playerQuantity(assumed,'energy')}，打完以后下一回合还能不能再出它一次？`,
    answer:again?'还能再出一次':'下一回合出不了',other:again?'下一回合出不了':'还能再出一次',
-   explanation:`${assumed} 减 ${n.chosen.cost} 等于 ${left}，${again?`不少于 ${n.chosen.cost}，所以还能再出一次`:`少于 ${n.chosen.cost}，所以下一回合出不了`}（真实那一局你有 ${n.chosen.energy} 豆）。`,
-   lesson:'能量够不够，是「打完剩下的豆」与「这一手要的豆」比大小。'});
+   explanation:`${playerNumber(assumed)} 减去 ${playerNumber(n.chosen.cost)} 等于 ${playerNumber(left)}，${again?`不少于 ${playerNumber(n.chosen.cost)}，所以还能再出一次`:`少于 ${playerNumber(n.chosen.cost)}，所以下一回合出不了`}（真实那一局你有 ${playerQuantity(n.chosen.energy,'energy')}）。`,
+   lesson:'能量够不够，是「打完剩下的能量」与「这一手要的能量」比大小。'});
  }
  if(d.chosen.action?.id==='guard'||d.lesson==='防御节奏')return wrap({question:`这一局你选了防御（减伤并回能）。假设上一回合也已经防御过，这一回合再想防御一次，成不成立？`,
   answer:'不成立',other:'成立',

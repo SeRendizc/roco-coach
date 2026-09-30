@@ -40,7 +40,12 @@ test('正：switch 且 target 越界 ⇒ 走兜底句，不得抛 TypeError', as
 test('正②：switch 且 target 合法 ⇒ 文案逐字不变（回归）', async () => {
   const {analyzeTurn} = await import('../src/coach/teacher.js');
   const text = analyzeTurn(mkTurn(1, PETS));
-  assert.match(text, /^换上水蓝蓝占用了整回合，生命从50到50。/, `回归：${text.slice(0, 40)}`);
+  // 2026-10-01 改钉（task-35 文本口径迁移 · 原断言逐字留档）：
+  //   原：assert.match(text, /^换上水蓝蓝占用了整回合，生命从50到50。/, `回归：${text.slice(0, 40)}`);
+  //   改：血量类单位统一到共用词表 `src/coach/player-text.js`（PLAYER_UNITS.hp='血'），
+  //       「生命从…」⇒「血量从…」；语义不变（仍是「换上后血量 50→50」这条回归）。
+  //   独立读数：node --test tests/roco-teacher-review-text.test.js ⇒ 见 task-35 冻结报告。
+  assert.match(text, /^换上水蓝蓝占用了整回合，血量从50到50。/, `回归：${text.slice(0, 40)}`);
 });
 
 test('反证：兜底句若被删掉 ⇒ 本判据必须红（越界调用会抛 TypeError）', async () => {
@@ -63,7 +68,11 @@ test('正：active 越界 ⇒ 走兜底句，不得抛 TypeError', async () => {
 });
 test('正②：active 合法 ⇒ 防御文案逐字不变（回归）', async () => {
   const {analyzeTurn} = await import('../src/coach/teacher.js');
-  assert.match(analyzeTurn(mkTurnB(0)), /^这次防御用了整回合输出机会换减伤与回能；回合前4豆。/, '回归');
+  // 2026-10-01 改钉（task-35 文本口径迁移 · 原断言逐字留档）：
+  //   原：assert.match(analyzeTurn(mkTurnB(0)), /^这次防御用了整回合输出机会换减伤与回能；回合前4豆。/, '回归');
+  //   改：能量类统一叫「能量」（PLAYER_UNITS.energy），间距口径 = 数字 + 半角空格 + 单位
+  //       ⇒ 「回合前4豆。」变成「回合前4 能量。」；语义不变（仍是防御那一手的回合前能量读数）。
+  assert.match(analyzeTurn(mkTurnB(0)), /^这次防御用了整回合输出机会换减伤与回能；回合前4 能量。/, '回归');
 });
 test('反证：守卫若被删 ⇒ 越界调用抛 TypeError ⇒ 本判据红', async () => {
   const {analyzeTurn} = await import('../src/coach/teacher.js');

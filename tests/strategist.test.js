@@ -303,7 +303,14 @@ test('长停留：停的就是推荐解 → 老师只讲解这一招，军师闭
  assert.equal(cue.lesson,decisionLesson(g,ember),'课的标识与军师记账用的是同一套词');
  assert.match(cue.text,/火花/);
  assert.match(cue.text,/\d+ 伤害/,'伤害数字来自 engine.damage，不是编的');
- assert.match(cue.text,/豆/);
+ // 2026-10-01 改钉（task-35 文本口径迁移 · 原断言逐字留档）：
+ //   原：assert.match(cue.text,/豆/);
+ //   改：能量类统一叫「能量」（`src/coach/player-text.js` 的 PLAYER_UNITS.energy）；
+ //       并按 Lead 采纳的加强，把「正向钉词」升级成「正向 + 退役词守卫」——
+ //       退役词回来（`豆`）必须红，否则这次迁移会在下一次改动里被无声退回。
+ //   独立读数：node --test tests/strategist.test.js ⇒ 见 task-35 冻结报告。
+ assert.match(cue.text,/能量/);
+ assert(!/豆/.test(cue.text),'退役词不许回来：老师讲解里的能量单位必须叫「能量」');
  assert.match(cue.text,/手里同时可选/,'要交代和手里别的选项比什么时候更合适');
  assert.match(cue.text,/由你决定/);
  assert(!/你应该|你必须|选错|点这个/.test(cue.text),'老师只解释这一招，不催出招');
