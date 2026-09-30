@@ -77,8 +77,11 @@ def classify_skill_declared(skill: Any, caps: Optional[Dict[str, bool]] = None) 
       **`resolved ⇒ SUPPORT_SIMULATABLE_UNVERIFIED` · 否则 `SUPPORT_PARTIAL`** ✓
       ⇒ 所以本体内**直接调 `settlement_verdict`**（**不另立一套判定** ✓ —— 那正是过去"同一招两处两个说法"的根因 ✗）。
     """
-    if caps is None:
-        caps = declared_capabilities_of()          # #145：一参调用点 ⇒ 自取 ✓
+    # 🔴 #164（Lead 2026-09-30 修正 ✓）：**`caps=None` 不产生筛选** —— 它只是"没有筛选信息" ✓。
+    #   ⚠ 我上一版按 `#145` 写成"一参 ⇒ 自取 `declared_capabilities_of()`" ✗ —— 那是错的：
+    #     自取的是 `get_rule_config(None)`＝legacy ⇒ 全 False ⇒ 触发"关位进 unsettled" ⇒ 全变 PARTIAL ✗。
+    #   正解由 **`:123-124` 的期望值**定（`#111`）：`classify_skill_declared(sk)`（一参）要 `SIMULATABLE_UNVERIFIED` ✓
+    #     ⇒ 一参 = **不筛** ✓（与 `#159`：`settlement_verdict` 的 `None` = 不筛，逐字同一条 ✓）。
     v = settlement_verdict(skill, declared=caps)
     un = list(v.get("unsettled") or [])
     return {"support": (SUPPORT_SIMULATABLE_UNVERIFIED if v["resolved"] else SUPPORT_PARTIAL),
