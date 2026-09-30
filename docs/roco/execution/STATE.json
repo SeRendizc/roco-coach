@@ -55,7 +55,7 @@
     "docs/roco/PRODUCT-VISION-AND-ROADMAP.md": "codex-planner",
     "docs/roco/execution/STATE.json": "lead（单独更新）",
     "_git_index_and_commits": "lead 独占（成员禁止 git 写命令，避免 index 竞争）",
-    "_跨机复验（只读）": "lead-mac（macOS + Python 3.9.6 · agent-coop lead-mac）：拉指定 commit → 独立跑判据 → 报差异；**只读、只报、不改本仓库任何写域、不推产品分支**（见 D-19）",
+    "_跨机复验（只读）": "lead-mac（macOS + Python 3.9.6 · agent-coop lead-mac）：拉指定 commit → 独立跑判据 → 报差异；**只读、只报、不改本仓库任何写域、不推产品分支**（见 D-19）"
   },
   "blockers": [
     {
