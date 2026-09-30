@@ -386,7 +386,21 @@ export function validateChat(b){
   for(const key of ['recommendation','main_counter']){
    if(rp[key]!==undefined&&(typeof rp[key]!=='string'||!rp[key]||rp[key].length>60))throw fail(400,`本回合规划无效：${key}`);
   }
-  for(const key of ['expected','worst','first_second_margin','branches_evaluated','depth_searched']){
+  // D-27（2026-09-30）：`expected` / `worst` / `best` / `first_second_margin` 的契约形状是
+  // **区间对象** `{min,max,mean(,scale,note)}` —— 引擎 `/battle/plan` 的真实回执就是对象
+  // （跨分析种子聚合），页面侧 `src/coach/roco-experience.js:131-158` 也早按对象读；
+  // 只有这一处与教练投影还在按标量收，于是真回执会在这里被 400。
+  // 这里**同时接受**旧的标量写法（历史夹具 / 旧客户端），但真正非法的形状（字符串、数组、
+  // 布尔、缺 min 或 max 的对象）依旧 400 —— 「接受对象形」不是把校验放宽成不校验。
+  const rangeShape=(v)=>Boolean(v)&&typeof v==='object'&&!Array.isArray(v)
+    &&Number.isFinite(v.min)&&Number.isFinite(v.max);
+  for(const key of ['expected','worst','best','first_second_margin']){
+   if(rp[key]===undefined||rp[key]===null)continue;
+   if(Number.isFinite(rp[key]))continue;
+   if(rangeShape(rp[key]))continue;
+   throw fail(400,`本回合规划无效：${key}（要是数字，或 {min,max} 区间对象）`);
+  }
+  for(const key of ['branches_evaluated','depth_searched']){
    if(rp[key]!==undefined&&!Number.isFinite(rp[key]))throw fail(400,`本回合规划无效：${key}`);
   }
   for(const key of ['recommendation_stable','timed_out']){
@@ -395,10 +409,15 @@ export function validateChat(b){
   if(rp.damage_preview!==undefined){
    const d=rp.damage_preview;
    if(!d||typeof d!=='object'||Array.isArray(d)||typeof d.available!=='boolean')throw fail(400,'本回合规划无效：damage_preview.available');
-   if(d.reason!==undefined&&(typeof d.reason!=='string'||d.reason.length>80))throw fail(400,'本回合规划无效：damage_preview.reason');
-   if(d.best_label!==undefined&&(typeof d.best_label!=='string'||d.best_label.length>40))throw fail(400,'本回合规划无效：damage_preview.best_label');
+   // D-27 追加（Lead 裁决③）：**`null` = 「引擎没给这一项」**，与 `undefined` 同等放行 ——
+   // 页面那一侧的回执对这些可选字段**恒写 `?? null`**（`src/server/roco-service.js:2979` reason ·
+   // `:2980-2981` min/max · `:2982` best_label · `:2985` foe_hp），今天不可达不代表以后不可达：
+   // 谁照着 `/api/roco/plan` 的回执原样送，都会撞上「本回合规划无效」。
+   // ⚠ 只放行 `null`：对象/数组/数字/布尔**仍然 400**（非法形状不许蒙混）。
+   if(d.reason!==undefined&&d.reason!==null&&(typeof d.reason!=='string'||d.reason.length>80))throw fail(400,'本回合规划无效：damage_preview.reason');
+   if(d.best_label!==undefined&&d.best_label!==null&&(typeof d.best_label!=='string'||d.best_label.length>40))throw fail(400,'本回合规划无效：damage_preview.best_label');
    if(d.lethal!==undefined&&typeof d.lethal!=='boolean')throw fail(400,'本回合规划无效：damage_preview.lethal');
-   for(const key of ['min','max','foe_hp'])if(d[key]!==undefined&&!Number.isFinite(d[key]))throw fail(400,`本回合规划无效：damage_preview.${key}`);
+   for(const key of ['min','max','foe_hp'])if(d[key]!==undefined&&d[key]!==null&&!Number.isFinite(d[key]))throw fail(400,`本回合规划无效：damage_preview.${key}`);
    if(d.samples!==undefined){
     if(!Array.isArray(d.samples)||d.samples.length>8)throw fail(400,'本回合规划无效：damage_preview.samples 最多 8 条');
     for(const item of d.samples){

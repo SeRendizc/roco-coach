@@ -5574,49 +5574,168 @@ function coachRocoBattle() {
  *
  * 只带**引擎真给了的键**：名字类字段裁长，数字类字段只在 `Number.isFinite` 时才写。
  */
+/**
+ * 引擎本回合规划的**契约投影**（D-27，2026-09-30）。
+ *
+ * 为什么要有这一个纯函数：同一批字段在这条链上曾经有**三种形状说法** ——
+ *   · 引擎的真回执（`/battle/plan`）是**区间对象**：`expected{min,max,mean}`、
+ *     `worst{min,max}`、`first_second_margin{min,max,mean,scale,note}`；
+ *   · 本文件的教练投影按 `Number.isFinite` 过滤 ⇒ 三个对象**静默全丢**；
+ *   · 服务端 `validateChat` 只收标量 ⇒ 真回执会被 400「本回合规划无效：expected」。
+ * 裁决（D-27）：**保留区间对象**，三层统一到它（与 03/04 的「范围 + 尾部」口径一致）。
+ * 页面那一侧早就知道真形状是对象（`src/coach/roco-experience.js:131-158` 逐字写着
+ * 「第 21、30 轮之后同一形状问题的第三次复现」）—— 投影层是最后一个不知道的。
+ *
+ * 三条纪律：
+ *   ① **数字键**仍用 `Number.isFinite`；**区间对象按形状搬**（缺 `mean` 不补、
+ *      缺 `scale/note` 不编）；
+ *   ② 拿不到的字段**不许伪造**：`plan_capabilities` 逐字段标 `present` / `absent` / `invalid`
+ *      （`absent` = 源回执里没有这一项；`invalid` = 有但形状不合契约 ⇒ **不搬、不猜**）。
+ *      尤其：04.4 的 `is_probability` 还没落地时只能标 `absent`，**绝不许写 false**；
+ *   ③ 这个函数**自包含**（不读 `state`、不碰 DOM），判据从源码里整段抽出来直接跑
+ *      （`tests/roco-plan-projection.test.js`，与 `roco-page-ux` 的抽法同一条）。
+ */
+function projectRocoPlan(plan) {
+  const source = plan && typeof plan === 'object' && !Array.isArray(plan) ? plan : null;
+  const out = {};
+  const caps = {};
+  const has = (key) => Boolean(source) && Object.hasOwn(source, key)
+    && source[key] !== undefined && source[key] !== null;
+  const textOf = (value, max) => (typeof value === 'string' && value.trim() ? value.trim().slice(0, max) : null);
+  /** D-27 的区间形状：`{min, max, mean(, scale, note)}`；`min/max` 缺一不可，其余可选。 */
+  const rangeOf = (value) => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+    if (!Number.isFinite(value.min) || !Number.isFinite(value.max)) return null;
+    const row = {min: value.min, max: value.max};
+    if (Number.isFinite(value.mean)) row.mean = value.mean;
+    for (const key of ['scale', 'note']) {
+      if (typeof value[key] === 'string' && value[key]) row[key] = value[key];
+    }
+    return row;
+  };
+  // ── 区间对象（D-27 点名的四个字段）────────────────────────────────────────
+  for (const key of ['expected', 'worst', 'best', 'first_second_margin']) {
+    if (!has(key)) { caps[key] = 'absent'; continue; }
+    const row = rangeOf(source[key]);
+    if (!row) { caps[key] = 'invalid'; continue; }
+    out[key] = row;
+    caps[key] = 'present';
+  }
+  // ── 标量键：仍然只认有限数 ───────────────────────────────────────────────
+  for (const key of ['branches_evaluated', 'depth_searched']) {
+    if (!has(key)) { caps[key] = 'absent'; continue; }
+    if (!Number.isFinite(source[key])) { caps[key] = 'invalid'; continue; }
+    out[key] = source[key];
+    caps[key] = 'present';
+  }
+  for (const key of ['recommendation_stable', 'timed_out']) {
+    if (!has(key)) { caps[key] = 'absent'; continue; }
+    if (typeof source[key] !== 'boolean') { caps[key] = 'invalid'; continue; }
+    out[key] = source[key];
+    caps[key] = 'present';
+  }
+  for (const key of ['recommendation', 'main_counter']) {
+    if (!has(key)) { caps[key] = 'absent'; continue; }
+    const value = textOf(source[key], 60);
+    if (!value) { caps[key] = 'invalid'; continue; }
+    out[key] = value;
+    caps[key] = 'present';
+  }
+  if (!has('state_version') || !Number.isInteger(source.state_version) || source.state_version < 0) {
+    caps.state_version = has('state_version') ? 'invalid' : 'absent';
+  } else { out.state_version = source.state_version; caps.state_version = 'present'; }
+  // ── D-27 追加进白名单的字段（原来到达不了教练层的那些）──────────────────
+  if (!has('coverage')) caps.coverage = 'absent';
+  else if (Number.isFinite(source.coverage)) { out.coverage = source.coverage; caps.coverage = 'present'; }
+  else caps.coverage = 'invalid';
+  for (const key of ['limitations', 'unsupported']) {
+    if (!has(key)) { caps[key] = 'absent'; continue; }
+    if (!Array.isArray(source[key])) { caps[key] = 'invalid'; continue; }
+    out[key] = source[key].filter(Boolean).slice(0, 8);
+    caps[key] = 'present';
+  }
+  if (!has('analysis_seeds')) caps.analysis_seeds = 'absent';
+  else if (Array.isArray(source.analysis_seeds)) {
+    out.analysis_seeds = source.analysis_seeds.filter((one) => Number.isInteger(one)).slice(0, 8);
+    caps.analysis_seeds = 'present';
+  } else caps.analysis_seeds = 'invalid';
+  if (!has('recommended_by_seed')) caps.recommended_by_seed = 'absent';
+  else if (typeof source.recommended_by_seed === 'object' && !Array.isArray(source.recommended_by_seed)) {
+    out.recommended_by_seed = source.recommended_by_seed;
+    caps.recommended_by_seed = 'present';
+  } else caps.recommended_by_seed = 'invalid';
+  // ── 04.3/04.4 的机器判据：**只搬，绝不伪造** ──────────────────────────────
+  // `is_probability` 现在（04.4 之前）拿不到 ⇒ 只能是 `absent`；
+  // 写一个 `false` 就等于替 04 声称「已经声明过这不是概率了」——那是不实回执。
+  if (!has('is_probability')) caps.is_probability = 'absent';
+  else if (typeof source.is_probability === 'boolean') {
+    out.is_probability = source.is_probability;
+    caps.is_probability = 'present';
+  } else caps.is_probability = 'invalid';
+  if (!has('truncation')) caps.truncation = 'absent';
+  else if (typeof source.truncation === 'object' && !Array.isArray(source.truncation)) {
+    out.truncation = source.truncation;
+    caps.truncation = 'present';
+  } else caps.truncation = 'invalid';
+  if (!has('basis')) caps.basis = 'absent';
+  else if (Array.isArray(source.basis)) { out.basis = source.basis.slice(0, 8); caps.basis = 'present'; }
+  else caps.basis = 'invalid';
+  // ── damage_preview（补 `formula_verified`：页面回执里有、教练投影此前丢了）──
+  if (!has('damage_preview') || typeof source.damage_preview !== 'object' || Array.isArray(source.damage_preview)
+    || typeof source.damage_preview.available !== 'boolean') {
+    caps.damage_preview = has('damage_preview') ? 'invalid' : 'absent';
+  } else {
+    const preview = source.damage_preview;
+    const row = {available: preview.available === true};
+    const reason = textOf(preview.reason, 80);
+    if (reason) row.reason = reason;
+    for (const key of ['min', 'max', 'foe_hp']) if (Number.isFinite(preview[key])) row[key] = preview[key];
+    const best = textOf(preview.best_label, 40);
+    if (best) row.best_label = best;
+    if (preview.lethal === true) row.lethal = true;
+    if (typeof preview.formula_verified === 'boolean') row.formula_verified = preview.formula_verified;
+    const samples = (Array.isArray(preview.samples) ? preview.samples : []).slice(0, 8)
+      .map((sample) => {
+        const label = textOf(sample?.label, 40);
+        if (!label) return null;
+        const item = {label};
+        if (Number.isFinite(sample?.min)) item.min = sample.min;
+        if (Number.isFinite(sample?.max)) item.max = sample.max;
+        return item;
+      })
+      .filter(Boolean);
+    if (samples.length) row.samples = samples;
+    out.damage_preview = row;
+    caps.damage_preview = 'present';
+  }
+  // ── risk（补 `threshold` 与 `top_risks`：产品阈值 / 最差种子的对手动作）──────
+  if (!has('risk') || typeof source.risk !== 'object' || Array.isArray(source.risk)) {
+    caps.risk = has('risk') ? 'invalid' : 'absent';
+  } else {
+    const risk = source.risk;
+    const row = {};
+    if (risk.fragile === true) row.fragile = true;
+    for (const key of ['downside_min', 'downside_max', 'threshold']) {
+      if (Number.isFinite(risk[key])) row[key] = risk[key];
+    }
+    if (Array.isArray(risk.top_risks) && risk.top_risks.length) row.top_risks = risk.top_risks.slice(0, 3);
+    if (Object.keys(row).length) { out.risk = row; caps.risk = 'present'; }
+    else caps.risk = 'invalid';
+  }
+  out.plan_capabilities = caps;
+  return out;
+}
+
 function coachRocoPlan() {
   const plan = state.plan;
   const view = state.view;
   if (!plan || !view) return null;
   if (!rocoPlanFreshness({plan, view}).usable) return null;
-  const text = (value, max) => (typeof value === 'string' && value.trim() ? value.trim().slice(0, max) : null);
-  const out = {state_version: plan.state_version};
-  const recommendation = text(plan.recommendation, 40);
-  if (recommendation) out.recommendation = recommendation;
-  const counter = text(plan.main_counter, 60);
-  if (counter) out.main_counter = counter;
-  for (const key of ['expected', 'worst', 'first_second_margin', 'branches_evaluated', 'depth_searched']) {
-    if (Number.isFinite(plan[key])) out[key] = plan[key];
-  }
-  if (typeof plan.recommendation_stable === 'boolean') out.recommendation_stable = plan.recommendation_stable;
-  if (plan.timed_out === true) out.timed_out = true;
-  const preview = plan.damage_preview;
-  if (preview && typeof preview === 'object') {
-    const row = {available: preview.available === true};
-    const reason = text(preview.reason, 80);
-    if (reason) row.reason = reason;
-    for (const key of ['min', 'max', 'foe_hp']) if (Number.isFinite(preview[key])) row[key] = preview[key];
-    const best = text(preview.best_label, 40);
-    if (best) row.best_label = best;
-    if (preview.lethal === true) row.lethal = true;
-    const samples = (Array.isArray(preview.samples) ? preview.samples : []).slice(0, 8)
-      .map((s) => ({
-        ...(text(s?.label, 40) ? {label: text(s.label, 40)} : {}),
-        ...(Number.isFinite(s?.min) ? {min: s.min} : {}),
-        ...(Number.isFinite(s?.max) ? {max: s.max} : {}),
-      }))
-      .filter((s) => s.label);
-    if (samples.length) row.samples = samples;
-    out.damage_preview = row;
-  }
-  const risk = plan.risk;
-  if (risk && typeof risk === 'object') {
-    const row = {};
-    if (risk.fragile === true) row.fragile = true;
-    for (const key of ['downside_min', 'downside_max']) if (Number.isFinite(risk[key])) row[key] = risk[key];
-    if (Object.keys(row).length) out.risk = row;
-  }
-  return out;
+  const projected = projectRocoPlan(plan);
+  // 服务端 `validateChat` 要求规划自带 `state_version`：拿不到就**整条不送**
+  // （fail closed，而不是送一份必然 400 的规划）。`rocoPlanFreshness` 正常情况下已经保证了它。
+  if (!Number.isInteger(projected.state_version)) return null;
+  return projected;
 }
 
 async function say(text) {
