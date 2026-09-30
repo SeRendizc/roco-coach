@@ -466,6 +466,22 @@
       "owner": "plan00-closer（发现）· lead（D-23 Q4 已批 fail closed）",
       "status": "registered",
       "rule": "**「试用/交付」前必须消除可重复改状态的敞口**（缺新鲜度校验 ⇒ fail closed）；界面展示 `state_version` 必须注明它是**事件计数**而非回合数"
+    },
+    {
+      "id": "O-28",
+      "what": "04.2 的「缺省逐位不变」**准确口径**（我们前期转述压缩过头，由 verifier 逐字对照后更正）",
+      "evidence": "verifier 在 `git archive da6e970` 副本上实测：**planner 级** `PlanResult.to_dict()` 缺省 n=20 == `DEFAULT_KEYS`（多出 `[]`/缺 `[]`），注入 n=21 且**新键只有 `opponent_model_detail`**、丢键 `[]`；**service 级**不注入 = **26 键（没有 `opponent_basis`）**，注入**空数组** = 27 键（多出的正是 `opponent_basis = {source:\"default_candidate_moveset\", scenario_driven:null, is_probability:false, …}`），其余数值逐字段相同。⇒ 准确写法：**「不带该键 ⇒ 与 04.2 之前逐字段相同（26 键）；带空数组 ⇒ 数值相同 + 多一栏 `opponent_basis`」**；原话「注入空数组 == 不注入逐字段相同」**不准确**（键集多 1）",
+      "owner": "harness-verifier（发现并更正）· lead（登记）",
+      "status": "closed",
+      "rule": "「逐位/逐字段不变」这类断言必须**同时说明键集与数值**；只要调用方**显式**多传一个字段，就允许键集变化，但**默认路径**（不传）必须逐字节相同 —— 转述别人的读数时不许压缩到这个精度以下"
+    },
+    {
+      "id": "O-29",
+      "what": "O-21 的两处措辞由 verifier **按实测更正**（安全属性成立，但描述要精确）",
+      "evidence": "① 本地拒绝**存在**，在 `src/coach/roco-client.js:574-585` 的 `_request`（`findHiddenKeys` + `HIDDEN_INFORMATION`），**不在** `planActions`/`_payload`；实测 5 种隐藏键形状（`public.seed` / 深层 `self.seed` / `history[0].seed` / `opponent._pending_enemy` / `rng_seed` 别名）⇒ 全部 `code=hidden_information` 且 **HTTP 次数 = 0**（连发都不发）。② **测试本来就有** seed/请求体断言，在 `tests/evals/roco/plan-e2e.test.js`（③客户端拦截 + HTTP 0 次；④两个不同内部 seed 的公开面逐字节一致），本机 5 条 skip 是「无 python3 时明确 skip 并给原因」，不是假装通过。⇒ 新增 ⑦ 的真实增量 = **不需 python3、永不 skip、钉键集白名单、两个入口都钉**。verifier 自曝「上轮只读了 `planActions`+`_payload`、只 grep 了 `tests/*.test.js` 一层」",
+      "owner": "harness-verifier（自查更正）",
+      "status": "closed",
+      "rule": "**断言「某处没有」之前必须说明查了哪几层**（函数级 ≠ 调用链级；`tests/*.test.js` ≠ `tests/**`）；把「没转发」写成「主动拒绝」这类压缩会造成误导（O-21 的教训）"
     }
   ],
   "handoff": {
