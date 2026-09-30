@@ -1,7 +1,7 @@
 {
   "schema": "roco-dsh-execution/v1",
   "updated_at": "2026-09-30T22:05:00+08:00",
-  "active_plan": "04",
+  "active_plan": "05",
   "next_action": "**用户裁决 D-34：先推 05–11 的实现，试用材料往后放。** 当前关键路径与在飞（按优先级）：① **04 收口**（`04.3b`/`04.4`/`04.5` 均已冻结并通过同机独立复验；**04.6 在飞**＝保守回退 + 非有限数不得进 JSON + timeout 命名分开 + 扫面表第⑦格补真记录）⇒ 04.6 冻结后点名 verifier 复验、发 lead-mac 跨机切片、把 04 标 passed。② **三条玩家可见缺陷（Codex 真实 UI 发现 → lead-mac 收窄 → 我方修）**：**P1-A**（task-44 `plan05-recon`，契约断裂 `strategist.js` 读 `battle` 而真战况在 `roco_battle` + **守卫回退草稿说假话**；`roco.js:4216` 已按 O-59 降级为潜在项）· **P1-C**（task-45 `plan06-recon`，**数据层已入库 `540fccc`**，UI 两处收口等 `roco.js` 解锁）· **P1-B**（task-46 `plan00-closer`，根因 `runtime.js:56` 上一局优先；分三步冻结：runtime → companion/teacher → xiaoya 等 task-43 解锁）。③ **门禁修复**：task-43（`src/client/**` 30 处退役词 + 生产者清单，`plan02-front`）· task-47（路径家族第 14/15 例，`plan03-belief`）· 文本口径真源链已完成（O-49/O-52 结案）。④ **随后按门槛**：**05**（`plan05-recon`，勘察与裁决已就绪）→ **06**（`plan06-recon`，re-pin 43 条 + 12 小步设计 + P1-C 已折入）→ **07**（`plan02-front`，设计 07.2 就绪）→ **08**（`plan01-engine`，设计 08.2 就绪）→ **09**（`plan06-recon`?? 见 09.2-design）→ **10**（`plan00-closer`）→ **11** → **12**（`waiting_external`）。⑤ **常驻登记**：O-27（试用前必须消除的重复结算敞口）· O-42（本机 `test:unit` 基线 87 红/30 文件，**「套件绿」必须指明入口与子集**）· O-38（全量只在工作树跑）· O-40（别在别人在写的文件上跑冻结判据）· O-59（**静态可达 ≠ 已证根因**，任务里要标「候选/已证」）。⑥ 纪律：每步冻结（git status + sha256）→ Lead 提交 → 核远端 SHA；STATE 提交前 lint；要用户裁决前 pushplus。",
   "plan_order": [
     "00",
