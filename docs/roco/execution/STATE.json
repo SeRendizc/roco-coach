@@ -201,14 +201,16 @@
     },
     "04": {
       "title": "有限分支比较与稳健动作排序",
-      "status": "in_progress",
-      "step": "04.1 勘察完成（同时行动红线成立 · 现有对手依据=规范配招假设 · 缺截断留痕）→ 04.2 情景注入进行中（D-21）",
-      "code": "unverified",
-      "isolated": "unverified",
-      "player": "unverified",
-      "evidence": "reports/roco/product-execution/04/04.1-recon.md（规划路径/目标函数 · 隐藏值读点 P1–P6 · 伪概率风险 R1–R8 · 04.2 接口草案 · 04.2–04.6 顺序）",
-      "commit": null,
-      "remote_sha": null
+      "status": "passed",
+      "step": "**全部分步骤完成并各自冻结**：04.1 勘察（同时行动红线）· 04.2 情景注入（D-27/D-28）· 04.3 预算字段与缓存（R3/R5/R8 + P6 七元组）· 04.3b 消费 03b 动作级情景（D-33 + 前置闸 fail-closed）· 04.4 稳健排序（MATERIAL_LOSS + plan_clock 接缝）· 04.5 七类场景 + **独立于评分函数的规则基线** + 真实结算复核 · 04.6 保守回退 + **非有限数不得进 JSON** + 预算命名分开；外加 **C-1/C-2/C-3 三条缺陷修复**（bench 行键改钉 / 契约字符串白名单 / 作用域白名单 + 扫面表常驻）",
+      "code": "verified（冻结件逐个核 sha：planner.py c83660ee6ab66095 · service.py 54c2d129a46b4a1c · toolbox.js 242cebe61cad524f · test_plan_conservative 844ea7ffb22546e9 · test_plan_seven 0eed11e30823444a · plan-context 75a3049657a2ebb1 · plan-e2e 24c317aec9069dd7）",
+      "isolated": "verified（harness-verifier 同机不可变副本复验：04.2 7/7 · 04.3 7/7 · 04.4 6/6 · 04.3b 6/6 · 04.6 重点1/3/5/6 合格 + 重点4 半条（静态）+ 重点2 落定为有效结论（硬超时下 by_seed=null ⇒ 该子判据不适用）· ② d4cdef8 真源→产物链 ①②③⑤ 合格（④ alias 0/14 独立复算登记为半条））",
+      "player": "verified（**跨机 lead-mac 独立复验 @ e761b62：node 123/123 · 反例① 319/318 · python 932·1F·0E·skip2 · guard 9/9 · diffs=[]**；Lead 本机同读数 `Ran 932 · 1 failure + 2 skipped`，唯一红＝已登记反证 `test_counter_proof_disabling_the_shared_gates_brings_them_back`）+ `/api/coach` 真 HTTP 取到 200 且 `executeTool(plan_actions)` 真跑通（取证阶段触发 0 次，登记为残留）",
+      "evidence": "reports/roco/product-execution/04/ 下的 04.1–04.6 与 04.c2 证据件 + verify-04.2 / 04.3 / 04.3b / 04.4 / 04.5-and-safeobject / 04.6 / 04.6b-supplement / 04.6c-cell7 / 04.6d-d4cdef8-chain",
+      "closed_at": "2026-10-01（用户休息期间由 Lead 收口）",
+      "commit": "0a05ca4（04 全链最后一笔产品提交 e761b62 + 04.6 e520848）",
+      "remote_sha": "0a05ca4b23baadbd32e2ef1c4280f89f8cec826f",
+      "residual": "① `/api/coach` 取证阶段未触发（诊断入口＝响应体 `toolPolicy`/`toolTrace`/`agentStop`）· ② alias 0/14 的独立复算（半条）· ③ 04.5 三条残留（同速不稳定分支未用真实抖动夹具 / coach 200 用离线本地档 / C-2·C-3 白名单只覆盖已实测形状，扫面表为探测网）"
     },
     "05": {
       "title": "局内建议路由与真实交互",
