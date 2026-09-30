@@ -514,6 +514,22 @@
       "owner": "plan06-recon（按裁决改）· lead（裁决）",
       "status": "fix_in_flight",
       "rule": "**判据冲突时按「产品规则 > 旧文案钉子」裁决**：面向玩家的禁用词/大白话规则优先，被钉住的旧文案按改钉规矩更新（原断言逐字留档 + 独立运行时报据 + 最小修订理由 + 两向变异），并要求**两条判据同时绿**才算闭环"
+    },
+    {
+      "id": "O-34",
+      "what": "`structure-contract` 的孤儿问题**有两种成因**：①「判据文件未登记进执行入口」（11 个，task-27 处理）；②「判据**指向不存在的目标**」（`skill-support-fact.judge.js -> ../src/server/roco-service.js`）",
+      "evidence": "plan01-engine 在 task-31 的副作用复跑里点名（`reports/roco/product-execution/09/D-31-freeze.md`）：`tests/evals/structure-contract.test.js` 报 `docs/roco/review-2026-09-28/pending-judge/skill-support-fact.judge.js -> ../src/server/roco-service.js` **不存在**；同文件另有 `tests/roco-player-number-precision.test.js` 未登记（归 task-27 的 11 个之一）",
+      "owner": "plan05-recon（task-27 内一并查清并分类）",
+      "status": "fix_in_flight",
+      "rule": "元判据报「孤儿」时必须**分类**（未登记 / 指向不存在 / 目标改名），**分类不同、修法不同**；「指向不存在的目标」不许靠新建一个空文件变绿（那是刷绿），要么修路径指向、要么按「判据过期」处置并给理由"
+    },
+    {
+      "id": "O-35",
+      "what": "**本机 WSL 里没有 node**（`command -v node` ⇒ `NO_NODE_IN_WSL`）⇒ 跨平台验证时「在 POSIX 侧跑 Node 判据」这条路走不通，必须换等价读数",
+      "evidence": "plan01-engine 在 task-31 里实测并**如实登记**：`NO_NODE_IN_WSL`，因此改用**说明符等价读数**（python3 按 `join()` 语义 + `Path.as_uri()` 等价 `pathToFileURL().href`）证明修法两平台都产出合法 URL；对照：Windows 侧 Node v24.19/24.21 可用",
+      "owner": "lead（登记）· 全队（读数口径）",
+      "status": "closed",
+      "rule": "**跨平台读数必须写明在哪个 OS/解释器上跑的**；某一侧无法真跑时，用**等价读数**并标明性质（不许假装跑过）；Node 判据在本机只能在 Windows 侧跑，POSIX 等价性由 lead-mac 的跨机复验覆盖"
     }
   ],
   "handoff": {
