@@ -741,7 +741,25 @@
       "evidence": "plan02-front 实测依赖链：`box.js:740` 用 `STAT_LABELS` 反向建 `STAT_KEY_OF_LABEL` ⇒ `box.js:954`（与 `xiaoya.js:190`）拿**服务端给的** `row.label` 去查它 ⇒ 那个 label 来自 `roco-service.js:418`（`:661`/`:1847` 做成 `metrics`，`box.js:953` 直接渲染进 DOM）。撞钉：`tests/roco-box-drawer.test.js:394` 逐字钉 `'生命 10 / 物攻 3 / …'`；`tests/roco-box-redo.test.js` 的标签来自 `scripts/roco/browser-box-acceptance.mjs:232`。Lead 裁决 **(A) 扩权一次对齐** + **必须新增「两侧绑定」判据**（详情页渲染出的标签**逐字等于**服务端提供的那一组）",
       "owner": "plan02-front（修 + 绑定判据）· lead（裁决）",
       "status": "fix_in_flight",
-      "rule": "**同一个词表出现在两侧时，必须有一条把两侧绑起来的判据**（否则任一侧单独改词都会静默分叉）；改这类词表前先把「谁产出、谁消费、谁反查」三链列出来（本例的反查链就是只改一侧会炸的原因）"
+      "rule": "**同一个词表出现在两侧时，必须有一条把两侧绑起来的判据**（否则任一侧单独改词都会静默分叉）；改这类词表前先把「谁产出、谁消费、谁反查」三链列出来（本例的反查链就是只改一侧会炸的原因）",
+      "closed_by": "**已修并加绑定判据**（`c5cf648`）：client 面板标签（`app.js`/`xiaoya.js`/`box.js`/`box-drawer.js`）+ **服务端两处**标签表（`roco-service.js:418 BOX_STAT_FIELDS` **与他自己新发现的 `:755 order`**）+ 验收脚本 `browser-box-acceptance.mjs` 一次对齐；改钉 2 条（逐字留档）；**新增判据 ㉑**（`STAT_ORDER ≡ BOX_STAT_FIELDS` 逐字逐序 + 服务端 label 能反查回 key + 渲染串逐字用服务端标签 + `box.js`/`xiaoya.js` 源码级兜底）；**两向变异终于有牙**：客户端单侧换回 ⇒ `roco-box-drawer` 红 ⑰+㉑、服务端单侧换回 ⇒ 红 ㉑、还原后 sha 逐位回原值"
+    },
+    {
+      "id": "O-62",
+      "what": "**同一字段名在不同层形状不同**（O-23 的延伸）：规划器级 `expected`/`worst`/`best`/`first_second_margin` 是**标量**，而 service 级投影才是 `{min,max,mean}`",
+      "evidence": "harness-verifier 在 04.6 复验里踩到：探针第一版按**对象**构造那四个字段 ⇒ `to_dict()` 抛 `TypeError: type dict doesn't define __round__`；改成标量后正常通过（自造 `inf/-inf/nan` ⇒ 全清成 `None` + 逐路径 `non_finite_sanitized` + `allow_nan=False` 不抛 ✓）",
+      "owner": "harness-verifier（发现）· lead（登记）",
+      "status": "closed",
+      "rule": "**造夹具前先确认字段在哪一层、什么形状**（同一名字在规划器级与 service 级可以不同）；跨层对比或注入时，形状错了会伪装成「产品抛异常」",
+      "note": "与 O-23（三层形状矛盾：客户端投影 / 服务端校验 / 教练读侧）合看：形状问题在本仓已出现三次，凡涉及 `expected/worst/first_second_margin` 的改动都要先点名层级"
+    },
+    {
+      "id": "O-63",
+      "what": "**同族「门外文案」还剩三处已登记未处理**（本轮不动，留待后续切片）",
+      "evidence": "① `src/client/roco.js:471` `STAT_FIELDS=[['hp','生命']]` → `statBlockHtml`（页面「基础面板」六维）——**归 05**；一动须**同刀**改钉 `tests/roco-page-ux.test.js:294`（逐字钉着 `['生命',…]`）；② `src/coach/runtime.js:255` `FOCUS_STAT_ORDER=[['hp','生命'],…]` → `focusFactAnswer`（小芽事实回答里的「资质 **生命** 0 / 物攻 7」，**玩家可见**），逐字钉在 `tests/roco-xiaoya-context.test.js:155`；③ `src/server/opponent.js:35/36`（服务端产出的 `消耗 N 豆` / `…/${maxHp} HP｜…`）——`plan03-belief` 待做**只读评估**（产出路径 / 撞钉清单 / 与 `roco-service.js:418` 标签的关系）。另：`src/coach/player-text.js:83` 的 `hp: ['HP','生命']` 是**退役词表本身**，**本来就该保留**（不是漏网）",
+      "owner": "plan05-recon（①）· lead（②③ 排期）· plan03-belief（③ 评估）",
+      "status": "registered",
+      "rule": "**「门外文案」清单要逐条带 owner 与撞钉点**（否则接线时才发现判据逐字钉着旧词）；**退役词表本身不算漏网**（那是判据的数据源）"
     }
   ],
   "handoff": {
