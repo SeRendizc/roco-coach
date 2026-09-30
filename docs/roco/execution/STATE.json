@@ -42,6 +42,7 @@
     "src/coach/opponent-belief.mjs": "plan03-belief（03）",
     "tests/roco-opponent-belief.test.js": "plan03-belief",
     "reports/roco/rc604/opponent-belief.json": "plan03-belief（仅生成器写，见 D-15 Q1）",
+    "docs/roco/RC-604-OPPONENT-BELIEF.md": "plan03-belief（03.1 文档同步，仅改与实测不符段）",
     "reports/roco/product-execution/03/**": "plan03-belief（verify-* 归 harness-verifier）",
     "roco/src/roco_env/service.py": "plan00-closer（P0 task-9：_watch_parent Windows 分支）",
     "roco/tests/**（P0 task-9 相关）": "plan00-closer",
