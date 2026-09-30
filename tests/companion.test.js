@@ -91,7 +91,12 @@ const greetWordNow=()=>dayPartAt(Date.now()).greet.replace(/。$/,'');
 // **时钟固定**：回放里的「现在」永远是当地的 22:00，而不是墙钟。有了时段那几条之后，
 // 「现在几点」「上一局是不是刚打完」会真的改变陪练先说哪一类（凌晨会先说「这么晚了」），
 // 断言不该因此随运行时刻变色——跑在凌晨三点和跑在下午三点必须是同一份结果。
-const REPLAY_NOW=(()=>{const d=new Date();d.setHours(22,0,0,0);return d.getTime();})();
+// 2026-10-01（task-49 / P1 时间耦合）：改成**固定本地 22:00**（`atClock(22)` = 2026-09-18 22:00 本地）。
+// 旧写法取的是"**今天** 22:00" ⇒ 回放结果随运行日/时区漂（跨本地午夜、跨时区都会变），
+// 而探针层 `companionEvents` 的默认 `now=Date.now()` 会把凌晨那一支（D-31 的 late-night）带进来 ⇒
+// moment 1/3 之类的高光/血皮场景在凌晨跑就说不出来。各机器本地墙上时间一致 ⇒ 结论才一致。
+// 旧写法留档（改钉不删）：const REPLAY_NOW=(()=>{const d=new Date();d.setHours(22,0,0,0);return d.getTime();})();
+const REPLAY_NOW=atClock(22);
 function replay(seed,memory,{strategy='random',difficulty='normal',smart=false}={}){
  const profile=newProfile(),session=companionSession(memory),said=new Set(),lines=[];
  let g=createGame(seed,undefined,{difficulty,stageName:STAGE,stageId:'summit'});g.id='replay-'+seed+strategy;
@@ -101,7 +106,7 @@ function replay(seed,memory,{strategy='random',difficulty='normal',smart=false}=
    :(strategy==='guard'&&n%2===0?actions.find(a=>a.id==='guard'):null)||actions.find(a=>a.kind==='skill'&&a.id!=='guard')||actions[0];
   g=step(g,action);
   const context=coachContext(g,profile,memory,REPLAY_NOW);
-  for(const event of companionEvents(g,{said,session,winStreak:context.winStreak,lossStreak:context.lossStreak,cross:context.cross,signals:context.signals})){
+  for(const event of companionEvents(g,{said,session,winStreak:context.winStreak,lossStreak:context.lossStreak,cross:context.cross,signals:context.signals,now:REPLAY_NOW})){
    // 先留一份开口前的账，再用同一份账把「这句话由哪几句组成」取回来：
    // 断言要落在句子的来源上，而不是只落在拼出来的字符串上。
    const before={ids:new Set(session.readings),topics:new Set(session.topics)};
@@ -449,23 +454,25 @@ test('player preferences survive matches and change the reply',()=>{
 
 // ── 触发与预算 ──────────────────────────────────────────────────────────────
 test('each companion event fires once per match, and stops when the facts stop',()=>{
- const events=companionEvents(play(1),{said:[]});
+ const events=companionEvents(play(1),{said:[],now:REPLAY_NOW});
  assert(events.length<=1,'一次调用最多一个事件');
  // 结算只提一个事件（重复由 coachEvent 的 session.said 拦住，见预算那条）
- assert.deepEqual(companionEvents(play(1),{said:[]}).length,1);
- assert.deepEqual(companionEvents(play(1),{said:[]}),['result']);
+ assert.deepEqual(companionEvents(play(1),{said:[],now:REPLAY_NOW}).length,1);
+ assert.deepEqual(companionEvents(play(1),{said:[],now:REPLAY_NOW}),['result']);
  // 已结束的对局只报结算
  const ended={...play(1),result:'win'};
- assert.deepEqual(companionEvents(ended,{said:[],winStreak:0,lossStreak:0}),['result']);
- assert.deepEqual(companionEvents(ended,{said:[],winStreak:2,lossStreak:0}),['streak-win']);
- assert.deepEqual(companionEvents({...ended,result:'loss'},{said:[],winStreak:0,lossStreak:3}),['streak-loss']);
+ assert.deepEqual(companionEvents(ended,{said:[],winStreak:0,lossStreak:0,now:REPLAY_NOW}),['result']);
+ assert.deepEqual(companionEvents(ended,{said:[],winStreak:2,lossStreak:0,now:REPLAY_NOW}),['streak-win']);
+ assert.deepEqual(companionEvents({...ended,result:'loss'},{said:[],winStreak:0,lossStreak:3,now:REPLAY_NOW}),['streak-loss']);
  // 没有任何真实素材的合成局面：一个事件都提不出来（说不出话就不占窗口）
- assert.deepEqual(companionEvents({history:[],player:{pets:[{hp:50}]},enemy:{pets:[{hp:50}]},turn:1},{}),[]);
+ // 2026-10-01（task-49）：**必须注入固定时刻** —— 这一条的"没有素材"是相对**白天**说的；
+ // 凌晨那支（D-31 的 late-night）按设计**会**开口说「这么晚了。」⇒ 不注入就随运行时刻变色。
+ assert.deepEqual(companionEvents({history:[],player:{pets:[{hp:50}]},enemy:{pets:[{hp:50}]},turn:1},{now:REPLAY_NOW}),[]);
  // 触发层只提议「现在真的有话可说」的那一类：提议了就必须真的说得出来，
  // 否则它会白占一个回合的窗口。这里用 app.js 的真实上下文（coachContext）验证。
  const g=play(1);
- const ctx=coachContext(g,newProfile(),history([play(2),play(3)]));
- const proposal=companionEvents(g,{said:[],cross:ctx.cross,signals:ctx.signals,winStreak:ctx.winStreak,lossStreak:ctx.lossStreak});
+ const ctx=coachContext(g,newProfile(),history([play(2),play(3)]),REPLAY_NOW);
+ const proposal=companionEvents(g,{said:[],cross:ctx.cross,signals:ctx.signals,winStreak:ctx.winStreak,lossStreak:ctx.lossStreak,now:REPLAY_NOW});
  assert.equal(proposal.length,1,'结算这一回合必须有一个事件');
  assert(proactiveText(proposal[0],ctx,eventRegister(proposal[0],{lossStreak:ctx.lossStreak})),'提议了却说不出来，等于占着窗口说废话');
  assert.equal(ctx.result,'loss');
@@ -484,8 +491,8 @@ test('every reading the trigger proposes can actually be said out loud',()=>{
   for(let n=0;n<300&&!g.result;n++){
    const actions=legalActions(g);
    g=step(g,(n%3===0?actions.find(a=>a.id==='guard'):null)||actions.find(a=>a.kind==='skill'&&a.id!=='guard')||actions[0]);
-   const context=coachContext(g,profile,memory);
-   for(const event of companionEvents(g,{said,session,winStreak:context.winStreak,lossStreak:context.lossStreak,cross:context.cross,signals:context.signals})){
+   const context=coachContext(g,profile,memory,REPLAY_NOW);
+   for(const event of companionEvents(g,{said,session,winStreak:context.winStreak,lossStreak:context.lossStreak,cross:context.cross,signals:context.signals,now:REPLAY_NOW})){
     proposals++;
     const register=eventRegister(event,{lossStreak:context.lossStreak||0});
     assert(proactiveReading(event,context,register,{used:{ids:session.readings,topics:session.topics}}),
@@ -500,12 +507,12 @@ test('every reading the trigger proposes can actually be said out loud',()=>{
 test('the companion budget is its own: the strategist going quiet never silences it, and the other way round',()=>{
  const profile=newProfile(),memory=history([winGame()]);
  const {game}=replay(1,memory);
- const ctx=coachContext(game,profile,memory);
+ const ctx=coachContext(game,profile,memory,REPLAY_NOW);
  const strategist=strategistSession();strategist.hints=3;strategist.dismissed=true;
  const attention=attentionState(0);attention.dismissed=true;attention.count=2;
  assert.equal(strategistTrigger({game,attention,session:strategist,now:1,turn:'t',mode:'gentle',inMatch:true}),null,'军师这时确实已经闭嘴');
  const session=companionSession(memory);
- const first=companionEvents(game,{said:[],session,winStreak:0,lossStreak:0,cross:ctx.cross,signals:ctx.signals})[0];
+ const first=companionEvents(game,{said:[],session,winStreak:0,lossStreak:0,cross:ctx.cross,signals:ctx.signals,now:REPLAY_NOW})[0];
  assert(first,'军师闭嘴不该让陪练也闭嘴');
  assert(coachEvent(first,ctx,session));
  assert.equal(session.count,1);
@@ -685,10 +692,20 @@ test('the proactive path stays silent when the screen is the only thing to repea
  assert.equal(context.opponent,win.enemy.pets[win.enemy.active].name);
  assert.deepEqual(context.fallen,win.player.pets.filter(p=>p.hp<=0).map(p=>p.name));
  assert(context.cross,'主动侧必须拿到跨局账本');
- // 没有记忆、也没有回合统计时，一个事件都说不出来
- const bare={turn:4,result:null,signals:companionSignals(null),cross:companionLedger({},null,Date.now())};
- for(const event of COMPANION_EVENTS)assert.equal(proactiveText(event,bare,eventRegister(event,{lossStreak:1})),null,`${event} 在没有真实素材时不该说话`);
- assert.equal(proactiveText('unknown-event',context,'R4'),null);
+ // 没有记忆、也没有回合统计时，一个事件都说不出来（**白天**口径，时刻显式注入：见下面的两向断言）
+ const bare={turn:4,result:null,signals:companionSignals(null),cross:companionLedger({},null,REPLAY_NOW)};
+ for(const event of COMPANION_EVENTS)assert.equal(proactiveText(event,bare,eventRegister(event,{lossStreak:1}),{now:REPLAY_NOW}),null,`${event} 在没有真实素材时不该说话`);
+ assert.equal(proactiveText('unknown-event',context,'R4',{now:REPLAY_NOW}),null);
+ // 2026-10-01（task-49 / D-31 裁决 A）：**两向都要有断言**，否则等于把 D-31 测掉（"深夜那支"是刻意行为，不是缺陷）。
+ // 深夜（本地 02:00，显式注入）⇒ 按设计**会**开口，但只说「这么晚了。」+许可句（不夹带战术/复盘/劝睡）；
+ // 白天（本地 15:00）⇒ 同一份输入一个字都不说。两向都注入固定本地时刻 ⇒ 不再随运行时刻/时区变色。
+ const night=atClock(2,10),day=atClock(15,30);
+ const nightText=proactiveText('late-night',bare,'R4',{now:night});
+ assert(nightText,`深夜按 D-31 必须有话说（刻意的产品行为）：${nightText}`);
+ assert.match(nightText,/这么晚了/,'深夜那支说的是「这么晚了。」');
+ assert.match(nightText,/到这儿也行/,'给的是许可，不是命令');
+ assert(!/该睡|该休息|早点睡|快去睡|别熬夜/.test(nightText),`不许劝睡：${nightText}`);
+ assert.equal(proactiveText('late-night',bare,'R4',{now:day}),null,'白天：没有真实素材 ⇒ 一个字都不说');
  assert.equal(eventRegister('first-faint'),'R4');
  assert.equal(eventRegister('habit'),'R4');
  assert.equal(eventRegister('live'),'R4');

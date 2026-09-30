@@ -20,7 +20,7 @@ import {freshMemory} from '../src/coach/memory.js';
 import {createGame, legalActions, step, SPECIES} from '../src/game/engine.js';
 
 // 固定时钟：判据不依赖"跑的时候是几点" ✓
-const NOW = Date.parse('2026-09-21T14:00:00.000Z');
+const NOW = new Date(2026, 8, 21, 22, 0, 0).getTime();   // 按【本地】墙上时间构造 ⇒ 各时区本地小时一致（原来固定 UTC 瞬时，本地小时随机器变）
 
 /** 与 `tests/evals/companion-contract.test.js` 同形状的记忆（逐局：结果/时间/对手/倒下/回合数）。 */
 function memoryWith(results) {
