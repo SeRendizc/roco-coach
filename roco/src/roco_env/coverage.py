@@ -1359,6 +1359,12 @@ def unsettled_mechanic_gaps(skill: Any, parsed: Any, claimed_words: Any = (),
     claimed = {str(x) for x in (claimed_words or ())}
     ranges = _evidence_ranges(skill, parsed)
     out: List[str] = list(respond_clause_gaps(skill, parsed))
+    # 2026-09-30：**复合子句那条闸也要接上** —— 「一个子句里两条机制、只结算了一条」是
+    # `test_respond_reduction_to_heal:test_tier_flips_to_partial_when_ramp_is_undeclared`
+    # 钉的假绿：关掉 `triggered_ramp` 而 `respond_reduction_to_heal` 还开着时，
+    # `resolve_respond_override` 仍可能把整条子句的 evidence 盖住 ⇒ 只看"有没有被覆盖"
+    # 会漏掉"另一半没结算"。两把尺子都必须看见它。
+    out.extend(compound_clause_gaps(skill, parsed))
     out.extend(diagnostic_shape_gaps(skill, parsed))
     _kinds = {getattr(e, "kind", "") for e in getattr(parsed, "effects", []) or []}
     for kind in UNSETTLED_EFFECT_KINDS:
