@@ -70,8 +70,20 @@ _RESOLVER_BY_CAPABILITY: Dict[str, Any] = {
 
 
 def classify_skill_declared(skill: Any, caps: Optional[Dict[str, bool]] = None) -> Dict[str, Any]:
-    """唯一分类器（一参/两参两处调用点合并 ✓ #145）⇒ 返回含 support/why/unparsed ✓。"""
-    raise NotImplementedError("classify_skill_declared 本体未写（#138）")
+    """唯一分类器（`service.py:112` import ✓ · `:843` 两参数 ✓ · `test_*:123` 一参数 ✓ ⇒ `caps` 可缺省 ✓ #145）。
+
+    返回含 `support` / `why` / `unparsed`（`service.py:843-846` 逐字 ✓）。
+    🔑 **正解 = "两把尺子是一把"**（`test_cond_self_debuff_power:123-124` 要求它与 `settlement_verdict` 一致 ✓）：
+      **`resolved ⇒ SUPPORT_SIMULATABLE_UNVERIFIED` · 否则 `SUPPORT_PARTIAL`** ✓
+      ⇒ 所以本体内**直接调 `settlement_verdict`**（**不另立一套判定** ✓ —— 那正是过去"同一招两处两个说法"的根因 ✗）。
+    """
+    if caps is None:
+        caps = declared_capabilities_of()          # #145：一参调用点 ⇒ 自取 ✓
+    v = settlement_verdict(skill, declared=caps)
+    un = list(v.get("unsettled") or [])
+    return {"support": (SUPPORT_SIMULATABLE_UNVERIFIED if v["resolved"] else SUPPORT_PARTIAL),
+            "why": (un[0] if un else "描述被完整读出，且没有未认领片段"),
+            "unparsed": un}
 
 
 def settlement_verdict(skill: Any, *, declared: Optional[Dict[str, bool]] = None) -> Dict[str, Any]:
