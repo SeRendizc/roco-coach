@@ -62,6 +62,7 @@ export async function collectCorpus() {
   const sessionMod = await imp('src/coach/session.js');
   const progression = await imp('src/game/progression.js');
   const runtimeMod = await imp('src/coach/runtime.js');
+  const rulesMod = await imp('src/game/rules.js');
 
   const entries = [];
   const failures = [];
@@ -157,6 +158,14 @@ export async function collectCorpus() {
     return typeof r === 'string' ? r : [r?.text, r?.headline, ...(r?.lines || [])].filter(Boolean);
   });
   tryRender('indistinguishableAdviceText', 'runtime.js', () => runtimeMod.indistinguishableAdviceText?.(BATTLE));
+
+  // 规则页（`src/game/rules.js` 的 `rulesSections()`）：玩家能直接点开读的说明文本，
+  // 也是「同一事实两种叫法」的高发区 —— task-36 之前它自己另写了一份「HP / 豆 / 生命」。
+  // 收进语料，第 5 类判据（退役单位词）才能覆盖到它。
+  tryRender('rulesSections', 'rules.js', () => {
+    const sections = rulesMod.rulesSections?.() ?? [];
+    return sections.flatMap((s) => (Array.isArray(s?.lines) ? s.lines : [])).filter((x) => typeof x === 'string');
+  });
 
   return { entries, failures };
 }

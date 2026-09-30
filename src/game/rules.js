@@ -81,10 +81,12 @@ export function ruleFacts(){
 // 一条技能的数值行，全部从字段派生。
 export function skillLine(id){
   const s=SKILLS[id];
-  const parts=[`${TYPES[s.type]||'普通'}系`,'消耗 '+s.cost+' 豆'];
+  // task-36：单位词统一（词表唯一事实源见 `src/coach/player-text.js`）——能量不再叫「豆」，
+  // 血量在行文里叫「血」、在面板/属性名里叫「血量」。
+  const parts=[`${TYPES[s.type]||'普通'}系`,'消耗 '+s.cost+' 能量'];
   parts.push(s.power?`威力 ${s.power}`:'无直接伤害');
   if(s.priority)parts.push('优先级 '+s.priority);
-  if(s.heal)parts.push(`恢复 ${s.heal} HP`);
+  if(s.heal)parts.push(`恢复 ${s.heal} 血`);
   if(s.buff)parts.push(`${s.buff==='atk'?'攻击':'防御'}强化`);
   if(s.dispel)parts.push('驱散攻防强化');
   if(s.pierce)parts.push('穿透防御减伤');
@@ -104,7 +106,7 @@ export const statusSkills=()=>Object.entries(SKILLS).filter(([,s])=>s.status).ma
 // 规则说明的完整文本。UI（app.js/index.html）与测试都读这里，不再各自手写。
 export function rulesSections(){
   const f=ruleFacts(),{damage:d,buff,guard,energy,status,slow}=RULES;
-  const items=Object.entries(ITEMS).map(([id,it])=>`${it.name}×${it.count}${it.heal?`（恢复 ${it.heal} HP）`:it.restore?`（恢复 ${it.restore} 能量）`:'（清除异常）'}`).join('、');
+  const items=Object.entries(ITEMS).map(([id,it])=>`${it.name}×${it.count}${it.heal?`（恢复 ${it.heal} 血）`:it.restore?`（恢复 ${it.restore} 能量）`:'（清除异常）'}`).join('、');
   const held=Object.entries(HELD_ITEMS).map(([id,it])=>`${it.name}：${it.desc}`).join('；');
   const envs=Object.entries(ENVIRONMENTS).map(([id,e])=>`${e.name}（持续 ${e.turns} 回合）：${e.desc}`).join('；');
   const rw=f.rewards||{};
@@ -151,10 +153,10 @@ export function rulesSections(){
     ]},
     {title:'道具与携带物',lines:[
       `${items}。可用于任意存活队友，但占用本方当回合行动，优先级 ${RULES.priority.item}（高于防御与攻击）；给后备用药时场上伙伴仍可能挨打。`,
-      `恢复量是标称值与缺失量的较小者：回复药不会超过生命上限，能量果不会超过 ${energy.max} 点。`,
+      `恢复量是标称值与缺失量的较小者：回复药不会超过血量上限，能量果不会超过 ${energy.max} 点。`,
       `每人一件携带物，每局只触发一次：${held}。`,
     ]},
-    {title:'伙伴面板',lines:SPECIES.map(p=>`${p.name}（${TYPES[p.type]}系）：生命 ${p.maxHp} / 攻击 ${p.atk} / 防御 ${p.def} / 速度 ${p.speed}，${p.bio}。${p.trait}。`)},
+    {title:'伙伴面板',lines:SPECIES.map(p=>`${p.name}（${TYPES[p.type]}系）：血量 ${p.maxHp} / 攻击 ${p.atk} / 防御 ${p.def} / 速度 ${p.speed}，${p.bio}。${p.trait}。`)},
     {title:'技能数值',lines:Object.keys(SKILLS).map(id=>`${SKILLS[id].name}：${skillLine(id)}。${SKILLS[id].desc}`)},
     {title:'关卡与难度',lines:[
       `关卡对手有固定等级与培养配置，不随玩家自动缩放；每个关卡都能直接挑战，赢过就记通关。`,
@@ -167,7 +169,7 @@ export function rulesSections(){
       rw.win&&rw.draw&&rw.loss?`胜利 经验 +${rw.win.xp}；平局 经验 +${rw.draw.xp}；失利 经验 +${rw.loss.xp}。撤退没有奖励。`:null,
       f.swiftTurnLimit?`每关首次在 ${f.swiftTurnLimit} 回合内获胜有额外经验，重复挑战不再给；打得慢不扣基础奖励。`:null,
       f.xpPerLevel?`升级需要的总经验是当前等级 × ${f.xpPerLevel}，最高 Lv.${f.maxLevel}。`: `最高 Lv.${f.maxLevel}。`,
-      f.growth?`每升一级基础生命 +${f.growth.level.hp}、攻防各 +${f.growth.level.atk}。`:null,
+      f.growth?`每升一级基础血量 +${f.growth.level.hp}、攻防各 +${f.growth.level.atk}。`:null,
       '这一版**没有加点**：培养就是改**性格**与**改天分** —— 在我的盒子里按种类点开个体，每只各能刷 3 次。',
       `达到 ${RULES.turnLimit} 回合仍未分出胜负记平局。`,
     ]},

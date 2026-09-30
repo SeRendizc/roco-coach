@@ -137,15 +137,22 @@ test('energy, item and turn-limit numbers shown on the rules page match the engi
   assert.deepEqual(fresh.player.items,Object.fromEntries(Object.entries(ITEMS).map(([k,v])=>[k,v.count])));
   const hurt={...fresh,player:{...fresh.player,items:{...fresh.player.items},pets:fresh.player.pets.map((p,i)=>i?p:{...p,hp:p.maxHp-60})}};
   const healed=resolveTurn(hurt,{kind:'item',id:'potion',target:0},enemySwitch,{tieFirst:'player'});
-  const healedAmount=Number(healed.log.find(l=>l.includes('使用回复药')).match(/恢复 (\d+) HP/)[1]);
+  // 2026-10-01 改钉（task-36 退役词清零 · 原断言逐字留档）：
+  //   原：const healedAmount=Number(healed.log.find(l=>l.includes('使用回复药')).match(/恢复 (\d+) HP/)[1]);
+  //   改：血量类单位统一到共用词表（`src/coach/player-text.js` 的 PLAYER_UNITS.hp='血'）
+  //       ⇒ 战斗日志「恢复 N HP」变成「恢复 N 血」；语义不变（仍是"日志里的回复量 = ITEMS.potion.heal"）。
+  //   独立读数：node --test tests/rules.test.js ⇒ 见 task-36 冻结报告。
+  const healedAmount=Number(healed.log.find(l=>l.includes('使用回复药')).match(/恢复 (\d+) 血/)[1]);
   assert.equal(healedAmount,ITEMS.potion.heal,'实际回复量与文案里的数值不符');
   assert.equal(healed.player.pets[0].hp,hurt.player.pets[0].hp+ITEMS.potion.heal);
   // 但回复量不会超过生命上限：只缺 10 血时只能回 10。
   const nearlyFull={...hurt,player:{...hurt.player,pets:hurt.player.pets.map((p,i)=>i?p:{...p,hp:p.maxHp-10})}};
   const cappedHeal=resolveTurn(nearlyFull,{kind:'item',id:'potion',target:0},enemySwitch,{tieFirst:'player'});
-  assert.equal(Number(cappedHeal.log.find(l=>l.includes('使用回复药')).match(/恢复 (\d+) HP/)[1]),10);
+  // 2026-10-01 改钉（task-36 · 原断言逐字留档）：原 …match(/恢复 (\d+) HP/)[1]),10); ⇒ 单位换「血」。
+  assert.equal(Number(cappedHeal.log.find(l=>l.includes('使用回复药')).match(/恢复 (\d+) 血/)[1]),10);
   assert.equal(cappedHeal.player.pets[0].hp,nearlyFull.player.pets[0].maxHp);
-  assert.ok(body().includes(`恢复 ${ITEMS.potion.heal} HP`));
+  // 2026-10-01 改钉（task-36 · 原断言逐字留档）：原 assert.ok(body().includes(`恢复 ${ITEMS.potion.heal} HP`));
+  assert.ok(body().includes(`恢复 ${ITEMS.potion.heal} 血`));
   const drained={...fresh,player:{...fresh.player,items:{...fresh.player.items},pets:fresh.player.pets.map((p,i)=>i?p:{...p,energy:0})}};
   const charged=resolveTurn(drained,{kind:'item',id:'ether',target:0},enemySwitch,{tieFirst:'player'});
   assert.equal(charged.player.pets[0].energy,RULES.energy.perTurn+ITEMS.ether.restore);
@@ -201,7 +208,9 @@ test('reward, xp and training numbers shown on the rules page match a real settl
   }
   assert.ok(rulesText.includes('这一版**没有加点**') || rulesText.includes('没有加点'),
     '规则面板要主动说清"没有加点"');
-  assert.ok(rulesText.includes('每升一级基础生命 +'+f.growth.level.hp), '等级成长照旧写在面板上');
+  // 2026-10-01 改钉（task-36 · 原断言逐字留档）：原 …includes('每升一级基础生命 +'+f.growth.level.hp)…
+  //   词表口径：面板/属性名用「血量」（Lead 2026-10-01 确认）⇒ 基础生命 → 基础血量。
+  assert.ok(rulesText.includes('每升一级基础血量 +'+f.growth.level.hp), '等级成长照旧写在面板上');
 });
 
 test('swift-win threshold shown on the rules page matches settle()',()=>{
@@ -226,16 +235,21 @@ test('every skill description states the same numbers as its own data fields',()
   assert.ok(SKILLS.flare.desc.includes(percent(SKILLS.flare.recoil)));
   assert.ok(SKILLS.drain.desc.includes(percent(SKILLS.drain.drain)));
   assert.ok(SKILLS.pursuit.desc.includes(`+${SKILLS.pursuit.burnBonus}`));
-  assert.ok(SKILLS.moss.desc.includes(`${SKILLS.moss.heal} HP`));
+  // 2026-10-01 改钉（task-36 · 原断言逐字留档）：原 …includes(`${SKILLS.moss.heal} HP`)；
+  //   苔息 desc 现在走 playerQuantity(heal,'hp') ⇒ 「28 血」。
+  assert.ok(SKILLS.moss.desc.includes(`${SKILLS.moss.heal} 血`));
   assert.ok(SKILLS.staticbolt.desc.includes(`${SKILLS.staticbolt.slow}`));
   assert.ok(SKILLS.guard.desc.includes(percent(RULES.guard.reduction))&&SKILLS.guard.desc.includes(`${RULES.guard.energy} 能量`));
   assert.ok(SKILLS.focus.desc.includes(percent(RULES.buff.perStack))&&SKILLS.focus.desc.includes(`最多${RULES.buff.maxStacks}层`));
   // 技能数值行（界面上的技能卡）也必须由字段派生。
-  assert.ok(skillLine('tide').includes(`威力 ${SKILLS.tide.power}`)&&skillLine('tide').includes(`消耗 ${SKILLS.tide.cost} 豆`));
-  assert.ok(skillLine('guard').includes(`消耗 0 豆`));
+  // 2026-10-01 改钉（task-36 · 原断言逐字留档）：原 …&&skillLine('tide').includes(`消耗 ${SKILLS.tide.cost} 豆`));
+  assert.ok(skillLine('tide').includes(`威力 ${SKILLS.tide.power}`)&&skillLine('tide').includes(`消耗 ${SKILLS.tide.cost} 能量`));
+  // 2026-10-01 改钉（task-36 · 原断言逐字留档）：原 assert.ok(skillLine('guard').includes(`消耗 0 豆`));
+  assert.ok(skillLine('guard').includes(`消耗 0 能量`));
   // 每个技能都要能在界面上说清消耗与威力。
   for(const [id,s] of Object.entries(SKILLS)){
-    assert.ok(skillLine(id).includes(`消耗 ${s.cost} 豆`),`${id} 的数值行缺少消耗`);
+    // 2026-10-01 改钉（task-36 · 原断言逐字留档）：原 assert.ok(skillLine(id).includes(`消耗 ${s.cost} 豆`),…)
+  assert.ok(skillLine(id).includes(`消耗 ${s.cost} 能量`),`${id} 的数值行缺少消耗`);
     if(s.power)assert.ok(skillLine(id).includes(`威力 ${s.power}`),`${id} 的数值行缺少威力`);
     assert.ok(body().includes(s.desc),`规则页缺少 ${s.name} 的说明`);
   }

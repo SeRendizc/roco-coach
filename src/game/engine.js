@@ -1,3 +1,11 @@
+// 单位词（task-36）：本文件的玩家可见文案统一用「血 / 能量」，不再出现退役写法 HP / 生命 / 豆。
+// ⚠ 为什么是**内联**而不是 import 词表：`tests/offline.test.js:36-38` 是硬判据 ——
+//   `importClosure('src/game/engine.js')` 必须**恰好等于** `['src/game/engine.js']`
+//   （引擎是零依赖叶子：断网、无教练模块时规则与结算照样自足）。我第一版 import 了
+//   `../coach/player-text.js`，当场被这条判据抓住 ⇒ 改回内联。
+//   口径的**唯一事实源**仍是 `src/coach/player-text.js` 的 `PLAYER_UNITS`；引擎这一侧的
+//   一致性由判据兜（见 task-36 报告：退役词扫描 + 建议补进 rules.test.js 的守卫）。
+//   本文件的数值全是整数（Math.min/round/ceil 与整数字段），所以只需要词，不需要格式化。
 export const RULES_VERSION='0.6';
 // ── 统一规则数据源（P05）───────────────────────────────────────────────────────
 // 结算函数与界面文案都从这里取数。数值只在本对象里写一次：
@@ -48,8 +56,8 @@ export const SKILLS = Object.fromEntries(Object.entries({
  pursuit: {name:'余烬追猎',type:'fire',power:24,cost:2,burnBonus:18,desc:s=>`对灼烧目标威力 +${s.burnBonus}，适合火花后追击`},
  dash: {name:'疾爪',type:'normal',power:16,cost:0,priority:1,desc:()=>'先制攻击，优先于普通攻击'},
  crush: {name:'破甲重击',type:'normal',power:30,cost:3,pierce:true,desc:()=>'无视防御技能减伤，不施加灼烧'},
- drain: {name:'生息藤',type:'leaf',power:24,cost:2,drain:.4,desc:s=>`吸取实际伤害 ${percent(s.drain)} 的生命`},
- moss: {name:'苔息',cost:3,heal:28,desc:s=>`恢复自身 ${s.heal} HP，按速度行动`},
+ drain: {name:'生息藤',type:'leaf',power:24,cost:2,drain:.4,desc:s=>`吸取实际伤害 ${percent(s.drain)} 的血量`},
+ moss: {name:'苔息',cost:3,heal:28,desc:s=>`恢复自身 ${s.heal} 血，按速度行动`},
  wave: {name:'水流弹',type:'water',power:29,cost:2,desc:()=>'水系攻击'},
  tide: {name:'潮汐重击',type:'water',power:42,cost:4,desc:()=>'高伤害水系攻击'},
  vine: {name:'藤鞭',type:'leaf',power:29,cost:2,desc:()=>'草系攻击'},
@@ -58,7 +66,7 @@ export const SKILLS = Object.fromEntries(Object.entries({
 }).map(([id,s])=>[id,withDesc(s)]));
 export const SPECIES = [
   {id:'fox',name:'烬尾狐',icon:'🦊',type:'fire',maxHp:98,atk:27,def:17,speed:38,skills:['dash','ember','pursuit','guard'],bio:'高速游击',trait:'火花挂灼烧，追猎增伤；疾爪先制收尾'},
-  {id:'turtle',name:'潮甲龟',icon:'🐢',type:'water',maxHp:132,atk:22,def:30,speed:13,skills:['strike','wave','tide','guard'],bio:'守势水盾',trait:'防御时额外恢复 8 HP，适合承接换入伤害',guardHeal:8},
+  {id:'turtle',name:'潮甲龟',icon:'🐢',type:'water',maxHp:132,atk:22,def:30,speed:13,skills:['strike','wave','tide','guard'],bio:'守势水盾',trait:'防御时额外恢复 8 血，适合承接换入伤害',guardHeal:8},
   {id:'deer',name:'芽角鹿',icon:'🦌',type:'leaf',maxHp:108,atk:27,def:21,speed:29,skills:['strike','vine','drain','guard'],bio:'吸血续航',trait:'生息藤吸血；速度与持续作战兼顾'},
   {id:'lion',name:'炽鬃狮',icon:'🦁',type:'fire',maxHp:116,atk:34,def:18,speed:19,skills:['strike','crush','flare','guard'],bio:'破防重炮',trait:'重击穿过防御技能减伤；烈焰高爆发但反伤，无灼烧'},
   {id:'otter',name:'溪刃獭',icon:'🦦',type:'water',maxHp:100,atk:30,def:17,speed:34,skills:['dash','wave','tide','guard'],bio:'先制速攻',trait:'疾爪抢先收尾，水流与潮汐负责爆发'},
@@ -86,7 +94,7 @@ export const HELD_ITEMS={
 };
 export const ENVIRONMENTS={rain:withDesc({name:'细雨',turns:4,multipliers:{water:1.1,fire:.9},desc:o=>`前${o.turns}回合${Object.entries(o.multipliers).map(([t,m])=>`${TYPES[t]}系伤害×${m}`).join('、')}；清风可提前移除`}),gale:withDesc({name:'山风',turns:4,multipliers:{wind:1.1,rock:.9},desc:o=>`前${o.turns}回合${Object.entries(o.multipliers).map(([t,m])=>`${TYPES[t]}系伤害×${m}`).join('、')}；清风可提前移除`})};
 export const ITEMS = {
-  potion:withDesc({name:'回复药',heal:45,count:3,desc:o=>`为任意存活队友恢复 ${o.heal} HP`}),
+  potion:withDesc({name:'回复药',heal:45,count:3,desc:o=>`为任意存活队友恢复 ${o.heal} 血`}),
   cleanse:withDesc({name:'净化药',count:2,desc:'清除任意存活队友的异常'}),
   ether:withDesc({name:'能量果',restore:4,count:2,desc:o=>`为任意存活队友恢复 ${o.restore} 能量`}),
 };
@@ -281,23 +289,24 @@ export function resolveTurn(original,action,opponent,options={}) {
     if(a.kind==='switch') {active(g,side).buffs={};s.active=a.target;g.log.push(`${label}换上了${active(g,side).name}。`);continue;}
     if(a.kind==='item') {
       const target=s.pets[a.target];s.items[a.id]--;
-      if(a.id==='potion') {const healed=Math.min(ITEMS.potion.heal,target.maxHp-target.hp);target.hp+=healed;g.log.push(`${label}对${target.name}使用回复药，恢复 ${healed} HP。`);}
+      if(a.id==='potion') {const healed=Math.min(ITEMS.potion.heal,target.maxHp-target.hp);target.hp+=healed;g.log.push(`${label}对${target.name}使用回复药，恢复 ${healed} 血。`);}
       if(a.id==='ether') {const recovered=Math.min(ITEMS.ether.restore,RULES.energy.max-target.energy);target.energy+=recovered;g.log.push(`${label}对${target.name}使用能量果，恢复 ${recovered} 能量。`);}
       if(a.id==='cleanse') {target.status=null;g.log.push(`${label}净化了${target.name}的异常。`);}
       continue;
     }
     const p=active(g,side), q=active(g,other), sk=SKILLS[a.id];p.energy-=sk.cost;
-    if(a.id==='guard') {guards[side]=true;p.lastGuard=true;p.energy=Math.min(RULES.energy.max,p.energy+RULES.guard.energy);if(p.guardHeal){const n=Math.min(p.guardHeal,p.maxHp-p.hp);p.hp+=n;g.log.push(`${p.name}的守势特性恢复 ${n} HP。`);}g.log.push(`${label}的${p.name}防御：本回合减伤 ${percent(RULES.guard.reduction)}，阻挡新异常，额外恢复 ${RULES.guard.energy} 能量。`);continue;}
+    if(a.id==='guard') {guards[side]=true;p.lastGuard=true;p.energy=Math.min(RULES.energy.max,p.energy+RULES.guard.energy);if(p.guardHeal){const n=Math.min(p.guardHeal,p.maxHp-p.hp);p.hp+=n;g.log.push(`${p.name}的守势特性恢复 ${n} 血。`);}g.log.push(`${label}的${p.name}防御：本回合减伤 ${percent(RULES.guard.reduction)}，阻挡新异常，额外恢复 ${RULES.guard.energy} 能量。`);continue;}
     if(sk.buff){p.buffs??={};p.buffs[sk.buff]={stacks:Math.min(RULES.buff.maxStacks,(p.buffs[sk.buff]?.stacks||0)+1),remaining:RULES.buff.turns};g.log.push(`${p.name}使用${sk.name}，${sk.buff==='atk'?'攻击':'防御'}强化${p.buffs[sk.buff].stacks}层。`);continue;}
     if(sk.clearEnvironment){g.environment=null;for(const team of ['player','enemy'])for(const pet of g[team].pets)pet.environment=null;g.log.push(`${p.name}使用清风，场地环境已移除。`);continue;}
-    if(sk.heal){const n=Math.min(sk.heal,p.maxHp-p.hp);p.hp+=n;g.log.push(`${label}的${p.name}使用${sk.name}，恢复 ${n} HP。`);continue;}
+    if(sk.heal){const n=Math.min(sk.heal,p.maxHp-p.hp);p.hp+=n;g.log.push(`${label}的${p.name}使用${sk.name}，恢复 ${n} 血。`);continue;}
     if(q.hp<=0) {g.log.push(`${label}失去攻击目标。`);continue;}
     const hit=damage(p,q,sk,guards[other]), actual=Math.min(q.hp,hit);q.hp-=actual;
     if(q.heldItem==='shellCharm'&&!q.heldUsed&&q.hp+actual===q.maxHp){q.heldUsed=true;g.log.push(`${q.name}的守心石触发一次减伤。`);}
     if(sk.dispel&&!guards[other]){q.buffs={};g.log.push(`${q.name}的攻防强化被清除。`);}
     g.log.push(`${label}的${p.name}使用${sk.name}，对${q.name}造成 ${actual} 伤害${multiplier(sk.type,q.type)>1?'（属性克制）':''}${guards[other]?(sk.pierce?'（穿透防御）':'（防御减伤）'):''}。`);
     if(sk.recoil){const n=Math.min(p.hp,RULES.recoil.rounding==='ceil'?Math.ceil(actual*sk.recoil):Math.round(actual*sk.recoil));p.hp-=n;g.log.push(`${p.name}受到 ${n} 反伤。`);}
-    if(sk.drain){const n=Math.min(p.maxHp-p.hp,RULES.drain.rounding==='ceil'?Math.ceil(actual*sk.drain):Math.round(actual*sk.drain));p.hp+=n;g.log.push(`${p.name}吸取生命，恢复 ${n} HP。`);}
+    // 吸血的两层语义都要在：**对对手造成伤害** + **补回自己身上**（Lead 2026-10-01 复核要求）。
+    if(sk.drain){const n=Math.min(p.maxHp-p.hp,RULES.drain.rounding==='ceil'?Math.ceil(actual*sk.drain):Math.round(actual*sk.drain));p.hp+=n;g.log.push(`${p.name}从${q.name}身上吸取了 ${n} 血，补到自己身上。`);}
     if(sk.slow&&q.hp>0&&!guards[other]){q.speedDown={amount:sk.slow,remaining:RULES.slow.turns};g.log.push(`${q.name}速度降低 ${sk.slow}，下一回合生效。`);}
     if(guards[other]&&q.guardCounter&&q.hp>0&&p.hp>0){const n=Math.min(p.hp,q.guardCounter);p.hp-=n;g.log.push(`${q.name}的守势反击造成 ${n} 伤害。`);}
     if(sk.status && q.hp>0 && !guards[other] && !q.status) {q.status={kind:sk.status,remaining:RULES.status[sk.status].turns};g.log.push(`${q.name}陷入${sk.status==='burn'?'灼烧':'中毒'}。`);}

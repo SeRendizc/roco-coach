@@ -29,6 +29,11 @@ export const TEXT_GATE = [
   { id: 'nullish', why: '程序内部值字面', re: /\b(?:null|undefined|NaN|Infinity)\b|\[object Object\]/g },
   { id: 'internal-id', why: '内部 ID', re: /\b(?:skill|pet|trait)_\d{6}\b/g },
   { id: 'internal-term', why: '内部术语/字段名', re: /\b(?:state_version|match_id|rules_version|decision_id|event_seq|replace_queue|foe_max)\b/g },
+  // 第 5 类（2026-10-01 task-36 加，Lead 批准）：退役单位词。
+  // 词表唯一事实源 = `src/coach/player-text.js` 的 `PLAYER_UNITS`：血量类「血/血量」、能量类「能量」；
+  // `HP`/`生命`/`豆` 一律不许再出现在玩家可见文本里。这一类以前只靠零散钉子
+  // （`strategist.test.js` 的 `!豆`、`rules.test.js` 的单位断言）守，现在进闸门 ⇒ 以后自动发现。
+  { id: 'retired-unit', why: '退役单位词（HP/生命/豆）', re: /\bHP\b|生命|豆/g },
 ];
 
 /** 扫一段玩家可见文本；`classes` 可选，用来只跑某一类（非恒真自证要按类两向对照）。 */
@@ -48,6 +53,7 @@ const FAKE = {
   nullish: { bad: '伤害来自 engine.damage（不防御 null／防御 undefined）。', good: '这一招不造成伤害，不适用伤害估算。' },
   'internal-id': { bad: 'skill_000123 打在 pet_000007 身上。', good: '「齿轮扭矩」打在「潮甲龟」身上。' },
   'internal-term': { bad: 'state_version=7 时 match_id 变了。', good: '局面推进到第 7 步时换了一局。' },
+  'retired-unit': { bad: '回复药×3（恢复 45 HP）；当时潮甲龟 4 血、4 豆。', good: '回复药×3（恢复 45 血）；当时潮甲龟 4 血、4 能量。' },
 };
 
 // ── ① 共用口径：playerNumber ────────────────────────────────────────────────
@@ -98,8 +104,8 @@ test('③ 渲染语料有效：条数/生产者够多、没有渲染失败（防
   assert(corpus.entries.every((e) => typeof e.text === 'string' && e.text.trim()), '语料里不许有空串条目');
 });
 
-// ── ④ 四类判据跑在真语料上 ─────────────────────────────────────────────────
-test('④ 渲染语料里不许有：长浮点 / 脏值 / 内部 ID / 内部术语', () => {
+// ── ④ 五类判据跑在真语料上 ─────────────────────────────────────────────────
+test('④ 渲染语料里不许有：长浮点 / 脏值 / 内部 ID / 内部术语 / 退役单位词', () => {
   const injected = Object.entries(FAKE).filter(([cls]) => INJECT.has(cls)).map(([cls, v]) => ({ cls, ...v.bad ? { text: v.bad } : {} }));
   const all = [...corpus.entries, ...injected.map((x) => ({ file: `（注入样本:${x.cls}）`, api: 'injected', text: x.text }))];
   const hits = all.flatMap((e) => scanPlayerText(e.text).map((h) => `${e.api}@${e.file} ⇒ ${describe(h)}`));
@@ -107,7 +113,7 @@ test('④ 渲染语料里不许有：长浮点 / 脏值 / 内部 ID / 内部术�
 });
 
 // ── ⑤ 非恒真自证：每类都要"坏样本必红、好样本不红"（不依赖环境变量）──────────
-test('⑤ 非恒真自证：四类判据对坏样本必红、对好样本不红', () => {
+test('⑤ 非恒真自证：五类判据对坏样本必红、对好样本不红', () => {
   for (const gate of TEXT_GATE) {
     const { bad, good } = FAKE[gate.id];
     const badHits = scanPlayerText(bad, { classes: [gate.id] });
@@ -118,9 +124,19 @@ test('⑤ 非恒真自证：四类判据对坏样本必红、对好样本不红'
   }
 });
 
-// ── ⑥ 回归样本：审计 H1 现场那句必须仍在判据覆盖内（即使 H1 已修）───────────
-test('⑥ 审计 H1 的原句仍被判据抓到（历史样本不许"修完就从判据里消失"）', () => {
+// ── ⑥ 回归样本：审计 H1/H2 的原句必须仍在判据覆盖内（即使它们已修）──────────
+test('⑥ 审计 H1/H2 的原句仍被判据抓到（历史样本不许"修完就从判据里消失"）', () => {
   const h1 = '伤害来自 engine.damage（不防御 null／防御 null），只按当前面板计算，不预测对手这一回合做什么。';
   const hits = scanPlayerText(h1, { classes: ['nullish'] });
   assert.equal(hits.length, 2, `H1 原句里两个 null 都要被抓到：${JSON.stringify(hits)}`);
+  // H2（审计 §H2「同一事实三种叫法」）的三条原句，逐条钉住命中数：
+  const h2 = [
+    ['当时潮甲龟 4 血、4 豆，对面芽角鹿 44 血；你选了「潮汐重击」。', 1, '复盘里「4 豆」'],
+    ['吸取实际伤害 40% 的生命', 1, 'engine.js 生息藤 desc 的「生命」'],
+    ['回复药×3（恢复 45 HP）', 1, 'rules.js 道具行的「HP」'],
+  ];
+  for (const [text, want, label] of h2) {
+    const got = scanPlayerText(text, { classes: ['retired-unit'] });
+    assert.equal(got.length, want, `${label} 必须被退役词判据抓到：${JSON.stringify(got)}`);
+  }
 });
