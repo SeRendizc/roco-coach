@@ -144,7 +144,7 @@ function camp(){
  $('camp-roster').innerHTML=filteredSpecies().map(base=>{const p=grown(base.id),order=selected.indexOf(p.id);
   // 徽标槽同样走 orderSlot()：营地页的徽标是绝对定位（不占行），但两侧用同一个槽，
   // 免得「有的页面占位、有的页面不占位」这种差别以后又变成一张卡高一张卡矮。
-  return `<article class="pet-option ${order>=0?'chosen':''}">${orderSlot(order)}<div class="pet-top"><span class="pet-icon">${p.icon}</span><div><h3>${p.name}</h3>${badge(p)} <span class="muted">Lv.${p.level}</span></div></div><p><strong>${p.bio}</strong> · ${p.trait}</p><div class="stats"><span>生命 ${p.maxHp}</span><span>攻击 ${p.atk}</span><span>防御 ${p.def}</span><span>速度 ${p.speed}</span></div><div class="buttons"><button data-focus="${p.id}" class="primary">培养</button>${order>=0?`<button data-pet="${p.id}">移出队伍</button>`:''}</div></article>`;}).join('');
+  return `<article class="pet-option ${order>=0?'chosen':''}">${orderSlot(order)}<div class="pet-top"><span class="pet-icon">${p.icon}</span><div><h3>${p.name}</h3>${badge(p)} <span class="muted">Lv.${p.level}</span></div></div><p><strong>${p.bio}</strong> · ${p.trait}</p><div class="stats"><span>血量 ${p.maxHp}</span><span>攻击 ${p.atk}</span><span>防御 ${p.def}</span><span>速度 ${p.speed}</span></div><div class="buttons"><button data-focus="${p.id}" class="primary">培养</button>${order>=0?`<button data-pet="${p.id}">移出队伍</button>`:''}</div></article>`;}).join('');
  document.querySelectorAll('#camp-roster [data-focus]').forEach(b=>b.onclick=()=>{advanceContext();focus=b.dataset.focus;showCamp();cultivation();});
  document.querySelectorAll('#camp-roster [data-pet]').forEach(b=>b.onclick=()=>{const id=b.dataset.pet;selected=selected.filter(x=>x!==id);camp();});
  cultivation();
@@ -188,7 +188,7 @@ function petCard(base,{order=-1,level=1,action='',stats=null}={}){
   +orderSlot(order)
   +`<div class="pet-top"><span class="pet-icon">${p.icon}</span><div><h3>${p.name}</h3>${badge(p)} <span class="muted">Lv.${p.level}</span></div></div>`
   +`<p><strong>${p.bio}</strong> · ${p.trait}</p>`
-  +`<div class="stats"><span>生命 ${p.maxHp}</span><span>攻击 ${p.atk}</span><span>防御 ${p.def}</span><span>速度 ${p.speed}</span></div>`
+  +`<div class="stats"><span>血量 ${p.maxHp}</span><span>攻击 ${p.atk}</span><span>防御 ${p.def}</span><span>速度 ${p.speed}</span></div>`
   +`<div class="buttons">${action}</div></article>`;
 }
 function deployView(){
@@ -311,7 +311,7 @@ function cultivation(){
  $('cultivation').innerHTML=`<h3>${p.icon} ${p.name}<small>Lv.${v.level}</small></h3>`
   +`<p class="pet-trait">${p.bio} · ${p.trait}</p>`
   +`<div class="xp-track"><div style="width:${v.level===5?100:v.xp/(v.level*30)*100}%"></div></div>`
-  +`<p class="muted xp-line">${xpLine} · 升级 生命+${ruleFacts().growth.level.hp} 攻防+${ruleFacts().growth.level.atk}</p>`
+  +`<p class="muted xp-line">${xpLine} · 升级 血量+${ruleFacts().growth.level.hp} 攻防+${ruleFacts().growth.level.atk}</p>`
   +'<div id="loadout-editor"></div>'
   +'<p class="hint">这一档没有加点：培养就是<strong>改性格、改天分</strong>，'
   +'在<a href="/box.html">我的盒子</a>里按种类点开个体就能刷。本机自动保存。</p>';
@@ -332,7 +332,7 @@ function renderLoadout(){
   return;
  }
  const cards=p.learnset.map(id=>{const s=SKILLS[id],on=draft.includes(id);
-  return `<button type="button" class="skill-card${on?' on':''}" data-skill="${id}" aria-pressed="${on}" ${!on&&full?'disabled':''}><span class="skill-top"><strong>${s.name}</strong>${s.priority?`<em class="tag">先制 +${s.priority}</em>`:''}</span><span class="skill-meta">${s.power?`威力 ${s.power}`:'变化'} · ${s.cost} 豆</span><small>${s.desc}</small></button>`;}).join('');
+  return `<button type="button" class="skill-card${on?' on':''}" data-skill="${id}" aria-pressed="${on}" ${!on&&full?'disabled':''}><span class="skill-top"><strong>${s.name}</strong>${s.priority?`<em class="tag">先制 +${s.priority}</em>`:''}</span><span class="skill-meta">${s.power?`威力 ${s.power}`:'变化'} · ${s.cost} 能量</span><small>${s.desc}</small></button>`;}).join('');
  box.innerHTML=`<div class="loadout"><div class="loadout-head"><strong>配招 · 6 选 4</strong><span class="muted">已选 ${draft.length}/4</span></div><p class="loadout-note">选 4 个技能带入下一局，防御也占一个技能槽。</p><div class="skill-grid">${cards}</div><p class="skill-count">已选 <strong>${draft.length}</strong> / 4${draft.length<4?` · 还差 ${4-draft.length} 个`:''}</p><label class="held-row">携带物 <select id="held-item">${Object.entries(HELD_ITEMS).map(([k,x])=>`<option value="${k}" ${held===k?'selected':''}>${x.name}</option>`).join('')}</select></label><p class="loadout-note" id="held-desc">${HELD_ITEMS[held].desc}</p><div class="loadout-actions"><button id="save-loadout" ${draft.length!==4||preview?'disabled':''}>保存配招</button><button id="collapse-loadout">收起</button>${loadoutDraft?'<button id="cancel-loadout">放弃</button>':''}</div><p id="loadout-error" role="status"></p></div>`;
  document.querySelectorAll('[data-skill]').forEach(b=>b.onclick=()=>{const id=b.dataset.skill,cur=loadoutDraft||effectiveLoadout();loadoutDraft=cur.includes(id)?cur.filter(x=>x!==id):(cur.length>=4?cur:[...cur,id]);renderLoadout();});
  $('held-item').onchange=()=>{$('held-desc').textContent=HELD_ITEMS[$('held-item').value].desc;};
@@ -342,7 +342,7 @@ function renderLoadout(){
 }
 // 2026-09-27：加点按钮、重置按钮、「问小芽怎么培养」（加点建议）整块退役（原版没有加点）。
 function hp(p){return `<div class="hp-track"><div class="hp-fill ${p.hp/p.maxHp<.3?'low':''}" style="width:${p.hp/p.maxHp*100}%"></div></div>`;}
-function sideView(state,side){const s=state[side],p=active(state,side);return `<div class="pet-active"><div class="pet-heading"><span class="pet-icon">${p.icon}</span><h3>${p.name}</h3>${badge(p)}<small>Lv.${p.level}</small></div><p class="stats">${p.bio} · 攻 ${p.atk} / 防 ${p.def} / 速 ${effectiveSpeed(p)}${p.speedDown?`（减速${p.speedDown.amount}）`:""}${Object.entries(p.buffs||{}).map(([stat,b])=>` · ${stat==='atk'?'攻击':'防御'}+${Math.round(ruleFacts().buff.perStack*b.stacks*100)}%/${b.remaining}回合`).join('')}${p.heldItem&&p.heldItem!=='none'?` · ${HELD_ITEMS[p.heldItem].name}${p.heldUsed?'（已触发）':''}`:''}</p><div class="hp-line"><span>${p.hp<=0?'已倒下 · 等待补位':p.status?`${p.status.kind==='burn'?'灼烧':'中毒'} ${p.status.remaining} 回合`:'生命'}</span><strong>${p.hp} / ${p.maxHp}</strong></div>${hp(p)}<div class="energy">${'●'.repeat(p.energy)}${'○'.repeat(Math.max(0,ruleFacts().energy.max-p.energy))} <small>${p.energy}/${ruleFacts().energy.max} · 在场存活回合末 +${ruleFacts().energy.perTurn}</small></div></div><div class="bench">${s.pets.map((p,i)=>`<div class="bench-pet ${i===s.active?'current':''} ${p.hp<=0?'fainted':''}">${p.name}<div class="stats">${p.hp<=0?'已倒下':`${p.hp}HP · ${p.energy}能量`}${p.status?' · 异常':''}</div>${hp(p)}</div>`).join('')}</div><p class="inventory">回复药 ${s.items.potion} · 净化药 ${s.items.cleanse} · 能量果 ${s.items.ether}</p>`;}
+function sideView(state,side){const s=state[side],p=active(state,side);return `<div class="pet-active"><div class="pet-heading"><span class="pet-icon">${p.icon}</span><h3>${p.name}</h3>${badge(p)}<small>Lv.${p.level}</small></div><p class="stats">${p.bio} · 攻 ${p.atk} / 防 ${p.def} / 速 ${effectiveSpeed(p)}${p.speedDown?`（减速${p.speedDown.amount}）`:""}${Object.entries(p.buffs||{}).map(([stat,b])=>` · ${stat==='atk'?'攻击':'防御'}+${Math.round(ruleFacts().buff.perStack*b.stacks*100)}%/${b.remaining}回合`).join('')}${p.heldItem&&p.heldItem!=='none'?` · ${HELD_ITEMS[p.heldItem].name}${p.heldUsed?'（已触发）':''}`:''}</p><div class="hp-line"><span>${p.hp<=0?'已倒下 · 等待补位':p.status?`${p.status.kind==='burn'?'灼烧':'中毒'} ${p.status.remaining} 回合`:'血量'}</span><strong>${p.hp} / ${p.maxHp}</strong></div>${hp(p)}<div class="energy">${'●'.repeat(p.energy)}${'○'.repeat(Math.max(0,ruleFacts().energy.max-p.energy))} <small>${p.energy}/${ruleFacts().energy.max} · 在场存活回合末 +${ruleFacts().energy.perTurn}</small></div></div><div class="bench">${s.pets.map((p,i)=>`<div class="bench-pet ${i===s.active?'current':''} ${p.hp<=0?'fainted':''}">${p.name}<div class="stats">${p.hp<=0?'已倒下':`${p.hp} 血 · ${p.energy} 能量`}${p.status?' · 异常':''}</div>${hp(p)}</div>`).join('')}</div><p class="inventory">回复药 ${s.items.potion} · 净化药 ${s.items.cleanse} · 能量果 ${s.items.ether}</p>`;}
 const available=a=>!busy&&legalActions(game).some(b=>a.kind===b.kind&&a.id===b.id&&a.target===b.target);
 function button(a,title,desc,extra=''){return `<button class="action" data-action='${JSON.stringify(a)}' ${available(a)?'':'disabled'}><div class="action-heading"><span>${title}</span>${extra?`<em>${extra}</em>`:''}</div><small>${desc}</small></button>`;}
 function renderSides(state){$('player').innerHTML=sideView(state,'player');$('enemy').innerHTML=sideView(state,'enemy');}
@@ -394,8 +394,8 @@ function actionPanelHtml(side,whichTab){
  // 对手一侧固定由 AI 出招：面板保留（界面与真人对战一致）但明确只读。
  const ok=a=>(side==='player'||humanOpponent())&&!busy&&!g.result&&legal.some(b=>a.kind===b.kind&&a.id===b.id&&a.target===b.target);
  const btn=(a,title,desc,extra='')=>`<button class="action" data-side="${side}" data-action='${JSON.stringify(a)}' ${ok(a)?'':'disabled'}><div class="action-heading"><span>${escape(title)}</span>${extra?`<em>${escape(extra)}</em>`:''}</div><small>${escape(desc)}</small></button>`;
- if(whichTab==='skill')return p.skills.map(id=>{const sk=SKILLS[id];return btn({kind:'skill',id},sk.name,sk.desc,`${sk.power?'威力 '+sk.power+' · ':''}${sk.priority===1?'先制 · ':''}消耗 ${sk.cost} 豆`);}).join('');
- if(whichTab==='switch')return s.pets.map((q,target)=>btn({kind:'switch',target},q.name,`${TYPES[q.type]}系 · ${q.hp}/${q.maxHp} HP · ${q.energy} 能量`,q.hp<=0?'已倒下':target===s.active?'正在场上':(g.phase==='replace'&&replaceOwner(g)===side)?'免费补位':'换宠占用整回合')).join('');
+ if(whichTab==='skill')return p.skills.map(id=>{const sk=SKILLS[id];return btn({kind:'skill',id},sk.name,sk.desc,`${sk.power?'威力 '+sk.power+' · ':''}${sk.priority===1?'先制 · ':''}消耗 ${sk.cost} 能量`);}).join('');
+ if(whichTab==='switch')return s.pets.map((q,target)=>btn({kind:'switch',target},q.name,`${TYPES[q.type]}系 · ${q.hp}/${q.maxHp} 血 · ${q.energy} 能量`,q.hp<=0?'已倒下':target===s.active?'正在场上':(g.phase==='replace'&&replaceOwner(g)===side)?'免费补位':'换宠占用整回合')).join('');
  if(whichTab==='item')return Object.entries(ITEMS).map(([id,item])=>`<div class="item-group"><p>${item.name} ×${s.items[id]}<br><span class="muted">${escape(item.desc)}</span></p><div class="targets">${s.pets.map((q,target)=>`<button data-side="${side}" data-action='${JSON.stringify({kind:'item',id,target})}' ${ok({kind:'item',id,target})?'':'disabled'}>${escape(q.name)}</button>`).join('')}</div></div>`).join('');
  // 认输只对本地玩家开放：对手认输会走另一条结算（引擎的 escape 语义属于我方撤退）。
  return `<div class="item-group"><p>认输立即结束本场，不获得经验。</p><button data-side="${side}" data-action='{"kind":"escape"}' ${side==='player'&&ok({kind:'escape'})?'':'disabled'}>确认撤退</button></div>`;
@@ -430,7 +430,7 @@ function actionLabel(a,side){
  return a.kind;
 }
 function actionDetail(a){
- if(a.kind==='skill'){const sk=SKILLS[a.id];return (sk.power?`威力 ${sk.power} · `:'')+(sk.priority?'先制 · ':'')+`消耗 ${sk.cost} 豆`;}
+ if(a.kind==='skill'){const sk=SKILLS[a.id];return (sk.power?`威力 ${sk.power} · `:'')+(sk.priority?'先制 · ':'')+`消耗 ${sk.cost} 能量`;}
  if(a.kind==='switch')return '换宠占用整回合';
  if(a.kind==='item')return ITEMS[a.id]?.desc||'';
  if(a.kind==='escape')return '立即结束本场';

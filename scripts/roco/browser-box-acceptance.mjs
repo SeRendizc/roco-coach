@@ -229,7 +229,7 @@ export function levelDisplayProblems(facts){
  * 二级详情页（地址 `?pet=<个体>`）要**一条不落地**给出完整六维（生命/物攻/物防/魔攻/魔防/速度），
  * 以及性格、天分档位、资质六维、等级、四个技能；地址里带这一只（刷新/后退/书签回到同一屏）。
  */
-export const PET_STAT_LABELS = ['生命', '物攻', '物防', '魔攻', '魔防', '速度'];
+export const PET_STAT_LABELS = ['血量', '物攻', '物防', '魔攻', '魔防', '速度'];
 
 export function petPageProblems(facts){
   const problems = [];

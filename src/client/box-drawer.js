@@ -46,7 +46,7 @@ const esc = (value) => String(value ?? '').replace(/[&<>"']/g,
   (ch) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[ch]));
 
 /** 六维的显示顺序与说法（与 `src/server/roco-service.js` 的 `BOX_STAT_FIELDS` 同一套）。 */
-export const STAT_ORDER = Object.freeze([['hp', '生命'], ['atk', '物攻'], ['def', '物防'],
+export const STAT_ORDER = Object.freeze([['hp', '血量'], ['atk', '物攻'], ['def', '物防'],
   ['spa', '魔攻'], ['spd', '魔防'], ['spe', '速度']]);
 
 /**
@@ -56,7 +56,7 @@ export const STAT_ORDER = Object.freeze([['hp', '生命'], ['atk', '物攻'], ['
  * 当时页面上那一栏写着「游戏数据里没有这一项」）：接口里「资质」的值是**一张六维表**
  * （`{hp,atk,def,spa,spd,spe}`），不是字符串。原来这里的对象直接 `String(value)`，
  * 页面就印出 `[object Object]` —— 数据早就有了，只是页面看不懂。
- * 现在按六维顺序摊成「生命 10 / 物攻 3 / …」：**缺的维度不写**（不补 0），
+ * 现在按六维顺序摊成「血量 10 / 物攻 3 / …」：**缺的维度不写**（不补 0），
  * 一个数都没有就如实算「没有」（返回 `''`，由调用方显示"待导出/没有这一项"）。
  */
 export function formatTraitValue(value) {

@@ -705,7 +705,7 @@ function petUrl(select) {
 
 /**
  * 二级详情页的正文。玩家语言，一个工程词都不出现；
- * 「资质」那一栏是**六维表**（`{hp,atk,…}`）⇒ 走 `formatTraitValue` 摊成「生命 10 / 物攻 3 / …」，
+ * 「资质」那一栏是**六维表**（`{hp,atk,…}`）⇒ 走 `formatTraitValue` 摊成「血量 10 / 物攻 3 / …」，
  * 绝不把对象直接印成 `[object Object]`。
  */
 function petTraitRow(label, trait) {
@@ -730,13 +730,13 @@ function petTraitRow(label, trait) {
  *
  * 人类 2026-09-28 的原话是「这里写成 一个区域，比如物防 种族值+个体值，个体值用黄色 eg 101 + 10」。
  * ⚠ 但 `101 + 10` **不等于**面板值：60 级公式是「(种族 + 3×天分) × 1.1，取整后 +10，
- * 再乘性格，最后 +50」（生命那条形状不同）。把 `101 + 10` 印成"等于面板"就是编数字。
+ * 再乘性格，最后 +50」（血量那条形状不同）。把 `101 + 10` 印成"等于面板"就是编数字。
  * 所以这一格给的是**两个真数**：主数（换算结果）+ 输入（种族值、天分），谁都不冒充谁。
  */
 // 六维的显示名（详情页各处共用一张表）。
-const STAT_LABELS = Object.freeze({hp: '生命', atk: '物攻', def: '物防', spa: '魔攻', spd: '魔防', spe: '速度'});
+const STAT_LABELS = Object.freeze({hp: '血量', atk: '物攻', def: '物防', spa: '魔攻', spd: '魔防', spe: '速度'});
 
-const STAT_NAMES_OF_KEY = Object.freeze({hp: '生命', atk: '物攻', def: '物防', spa: '魔攻', spd: '魔防', spe: '速度'});
+const STAT_NAMES_OF_KEY = Object.freeze({hp: '血量', atk: '物攻', def: '物防', spa: '魔攻', spd: '魔防', spe: '速度'});
 const STAT_KEY_OF_LABEL = Object.freeze(Object.fromEntries(
   Object.entries(STAT_LABELS).map(([key, label]) => [label, key])));
 

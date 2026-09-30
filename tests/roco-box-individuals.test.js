@@ -246,7 +246,12 @@ test('⑳ A7：培养快照随刷新当场变、随回滚逐值还原（且服�
   assert.equal(after.talent[moved[0]] - before.talent[moved[0]], 10, '天分每级 +10（人类口径）');
   assert.notEqual(formatTraitValue(after.talent), formatTraitValue(before.talent),
     '`formatTraitValue` 印出来的那串字（二级页用的就是它）必须变 —— 这才是玩家看得见的东西');
-  assert.match(formatTraitValue(before.talent), /^生命 \d+ \/ 物攻 \d+ \/ 物防 \d+ \/ 魔攻 \d+ \/ 魔防 \d+ \/ 速度 \d+$/,
+  // 2026-10-01（task-43 文本口径 S4）**改钉**：面板/属性名 `生命` ⇒ `血量`（键名 `hp` 未动）。
+  // 原断言逐字留档（改钉不删）：
+  //   assert.match(formatTraitValue(before.talent), /^生命 \d+ \/ 物攻 \d+ \/ 物防 \d+ \/ 魔攻 \d+ \/ 魔防 \d+ \/ 速度 \d+$/,
+  //     `资质那一栏的印法（真机截图里逐字就是这个形状）：${formatTraitValue(before.talent)}`);
+  // 判据语义未变：仍是「六维按固定顺序逐字印出来」；只换了第一个展示标签。
+  assert.match(formatTraitValue(before.talent), /^血量 \d+ \/ 物攻 \d+ \/ 物防 \d+ \/ 魔攻 \d+ \/ 魔防 \d+ \/ 速度 \d+$/,
     `资质那一栏的印法（真机截图里逐字就是这个形状）：${formatTraitValue(before.talent)}`);
 
   // ④ 同屏那份 60 级面板与资质**同一批数** ⇒ 资质变了，面板也必须变（至少一项）。

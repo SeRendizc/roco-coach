@@ -415,7 +415,7 @@ export const BOX_SUPPORT_LABELS=Object.freeze({
 export const BOX_SLOT_LABELS=Object.freeze({free_attack:'自由位',reactive_defense:'应对位',
  main_attack:'主攻位',mechanism_support:'机制位'});
 /** 六维的中文名与固定顺序。 */
-export const BOX_STAT_FIELDS=Object.freeze([['hp','生命'],['atk','物攻'],['def','物防'],
+export const BOX_STAT_FIELDS=Object.freeze([['hp','血量'],['atk','物攻'],['def','物防'],
  ['spa','魔攻'],['spd','魔防'],['spe','速度']]);
 /** 逐字段比较的三种状态。 */
 export const BOX_STATUS_LABELS=Object.freeze({same:'相同',different:'不同',unknown:'未知'});
@@ -752,7 +752,7 @@ function sameSpeciesLabel(index,i){
   const talent=row?.talent??null;
   const top=talent?Object.entries(talent).filter(([,v])=>Number.isFinite(v))
    .sort((a,b)=>b[1]-a[1]||STAT_ORDER.indexOf(a[0])-STAT_ORDER.indexOf(b[0])).slice(0,2):[];
-  const order={hp:'生命',atk:'物攻',def:'物防',spa:'魔攻',spd:'魔防',spe:'速度'};
+  const order={hp:'血量',atk:'物攻',def:'物防',spa:'魔攻',spd:'魔防',spe:'速度'};
   const talentText=top.map(([k,v])=>`${order[k]??k} ${v}`).join(' / ');
   return {
    ...(group.length>1?{same_species_count:group.length}:{}),

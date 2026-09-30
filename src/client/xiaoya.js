@@ -128,7 +128,7 @@ async function loadMobileProfile(fetchImpl = globalThis.fetch?.bind(globalThis))
 // 这一层只**读**它们已经画在 DOM 上的钩子（`[data-tw-instance]`、`window.rocoDemo`），
 // 一个字节都不改它们。
 //: 六维标签 → 键（与 `box.js` 的 `STAT_KEY_OF_LABEL` 同一张表：页面画什么，这里就读什么）。
-const FOCUS_STAT_BY_LABEL = Object.freeze({生命: 'hp', 物攻: 'atk', 物防: 'def',
+const FOCUS_STAT_BY_LABEL = Object.freeze({血量: 'hp', 物攻: 'atk', 物防: 'def',
   魔攻: 'spa', 魔防: 'spd', 速度: 'spe'});
 export const FOCUS_KEY = 'xiaoya-focus-v1';
 //: 跨页广播聚焦变化的**唯一**事件名。别的页面只要 `dispatchEvent(new CustomEvent('xiaoya:focus'))`
@@ -1224,7 +1224,7 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
       const turn = Number.isFinite(Number(view.turn)) ? Number(view.turn) : null;
       const head = turn === null ? '这一局' : `这一局第 ${turn} 回合`;
       return `我是小芽。${head}，你有 ${skills} 个技能可以点`
-        + '：问「现在怎么办」，我按当前生命、能量和队伍比这一手。';
+        + '：问「现在怎么办」，我按当前血量、能量和队伍比这一手。';
     } catch { return null; }
   };
   //   ⚠ 第一版写成 `const OPENING = …`（**挂载时算一次**）⇒ 实测**没生效**：面板在**开局前**就挂载了，

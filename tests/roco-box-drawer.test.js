@@ -8,7 +8,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {groupCards, traitChips, individualHtml, drawerHtml, drawerListHtml, rollNote, formatTraitValue,
-  refreshButton, undoButton, addButton} from '../src/client/box-drawer.js';
+  refreshButton, undoButton, addButton, STAT_ORDER} from '../src/client/box-drawer.js';
+import {BOX_STAT_FIELDS} from '../src/server/roco-service.js';
 import {REFRESH_LIMIT, TALENT_BOOST_LIMIT, refresh, undoLastRefresh, canUndo, individualsFromDataset} from '../src/coach/individuals.js';
 // ⑳：被拒时给玩家的那句「真实原因」是这一层包装出来的（`refresh()` 抛 `boost-limit` → 原样交出 message）。
 import {refreshIndividual} from '../src/client/box-individuals.js';
@@ -391,7 +392,11 @@ test('⑰ 资质是**六维表**，页面要摊成一行数值（不许印 [obje
   // 「游戏数据里没有这一项」）。查下来的真相是**接口早就有数**（`traits` 里 `资质` = `{hp,atk,…}`），
   // 是页面把对象直接 `String()` 了 ⇒ 印出 `[object Object]`。这条钉住"摊开"的规则。
   const real = {hp: 10, spa: 7, spe: 10, atk: 3, spd: 3, def: 1};   // 抓包 own-0001 的真实资质
-  assert.equal(formatTraitValue(real), '生命 10 / 物攻 3 / 物防 1 / 魔攻 7 / 魔防 3 / 速度 10',
+  // 2026-10-01（task-43 文本口径 S4）**改钉**：面板/属性名 `生命` ⇒ `血量`（键名 `hp` 未动）。
+  // 原断言逐字留档（改钉不删）：assert.equal(formatTraitValue(real), '生命 10 / 物攻 3 / 物防 1 / 魔攻 7 / 魔防 3 / 速度 10',
+  //   六维要按固定顺序摊成一行（顺序与 roco-service 的 BOX_STAT_FIELDS 同一套）');
+  // 判据语义未变：仍是「按固定顺序摊成一行、不许 [object Object]」；只换了一个展示标签。
+  assert.equal(formatTraitValue(real), '血量 10 / 物攻 3 / 物防 1 / 魔攻 7 / 魔防 3 / 速度 10',
     '六维要按固定顺序摊成一行（顺序与 roco-service 的 BOX_STAT_FIELDS 同一套）');
   assert.doesNotMatch(String(formatTraitValue(real)), /\[object /, '绝不许可印出 [object Object]');
   // 缺的维度不写（不补 0 —— 补 0 就是编数据）
@@ -517,4 +522,35 @@ test('⑳ 刷新被拒：详情页要说出**真实原因**（不是"操作失�
   assert.match(src, /state\.refreshFailed = '';\s*\/\/ 成功一次/, '成功一次要把上一次的失败提示收掉（反证）');
   assert.ok((src.match(/state\.refreshFailed = '';/g) ?? []).length >= 3,
     '换一只/重进这一屏也要清（不然失败提示会跟着跑到别的精灵上）');
+});
+
+test('㉑ 两侧绑定：详情页的六维标签 === 服务端 BOX_STAT_FIELDS 提供的那一组（任一侧单独改词必红）', () => {
+  // 2026-10-01（task-43）：这条是**根因守卫**。详情页的标签有两个来源，必须逐字一致：
+  //   ① 服务端 `BOX_STAT_FIELDS` ⇒ `metrics` 的 `[key,label]` ⇒ `box.js:953` 直接渲染进 DOM；
+  //   ② 客户端 `STAT_ORDER` / `box.js` 的 `STAT_LABELS` / `xiaoya.js` 的 `FOCUS_STAT_BY_LABEL`
+  //      —— 它们还要拿**服务端给的 label** 反查 key（`box.js:954`、`xiaoya.js:190`）。
+  // 只改一侧的后果不是"文案不一致"那么轻：反查落空 ⇒ 详情页那一格的数值**不显示**（功能回归）。
+  const serverPairs = BOX_STAT_FIELDS.map(([key, label]) => [key, label]);
+  assert.deepEqual(STAT_ORDER.map(([key, label]) => [key, label]), serverPairs,
+    '客户端 STAT_ORDER 必须与服务端 BOX_STAT_FIELDS **逐字逐序**相同（改一侧就必须同刀改另一侧）');
+  // 服务端给的每个 label 都要能落回正确的 key（这正是 box.js:954 / xiaoya.js:190 的路径）
+  const clientKeys = Object.fromEntries(STAT_ORDER.map(([key, label]) => [label, key]));
+  for (const [key, label] of BOX_STAT_FIELDS) {
+    assert.equal(clientKeys[label], key, `服务端 label「${label}」在客户端反查表里必须落回 ${key}`);
+    assert.doesNotMatch(label, /\bHP\b|生命|豆/, `面板/属性名不许用退役词：${label}`);
+  }
+  // 渲染层：那一行必须逐字用服务端提供的那组标签（formatTraitValue 就是 box.js 详情页用的渲染器）
+  const probe = {hp: 1, atk: 2, def: 3, spa: 4, spd: 5, spe: 6};
+  assert.equal(formatTraitValue(probe), BOX_STAT_FIELDS.map(([key, label]) => `${label} ${probe[key]}`).join(' / '),
+    '渲染出来的那一行必须用服务端提供的那组标签');
+  // 页面级脚本（没有导出）走源码级绑定：两侧的词表必须同时出现，任一侧回退退役词就红
+  const boxSrc = readFileSync(new URL('../src/client/box.js', import.meta.url), 'utf8');
+  const xySrc = readFileSync(new URL('../src/client/xiaoya.js', import.meta.url), 'utf8');
+  for (const [, label] of BOX_STAT_FIELDS) {
+    assert.ok(boxSrc.includes(`'${label}'`), `box.js 的六维表要与服务端同词，缺「${label}」`);
+    assert.ok(xySrc.includes(`${label}: '`), `xiaoya.js 的标签→键表要与服务端同词，缺「${label}」`);
+  }
+  assert.doesNotMatch(boxSrc, /hp:\s*'生命'/, 'box.js 的 hp 标签不许回退成退役词');
+  assert.doesNotMatch(xySrc, /生命:\s*'hp'/, 'xiaoya.js 的标签→键表不许回退成退役词');
+  assert.doesNotMatch(boxSrc, /hp',\s*'生命'/, 'box.js 不许再出现 `[\'hp\',\'生命\']` 这种旧词表');
 });
