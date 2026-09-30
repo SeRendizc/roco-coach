@@ -1,6 +1,6 @@
 {
   "schema": "roco-dsh-execution/v1",
-  "updated_at": "2026-09-30T17:02:53+08:00",
+  "updated_at": "2026-09-30T17:06:21+08:00",
   "active_plan": "01",
   "next_action": "接手后：① 读交接文档与 START-HERE；② 复跑三条命令确认基线（import / 847·2F / 并集 0 · totals 313 / harness 6-6 exit 0）；③ 按族②→族③收窄 00 残余（每族跑 并集0 + totals + 全量）；④ 01 继续：先灭 ui.legal.enemy 泄漏，再对齐三协议，两条 pet_id 断言一起改钉。",
   "plan_order": [
@@ -28,7 +28,8 @@
     "roco/tests/**": "仅确证判据陈旧时，附独立证据+最小修订理由",
     "README.md": "codex-planner",
     "docs/roco/PRODUCT-VISION-AND-ROADMAP.md": "codex-planner",
-    "docs/roco/execution/STATE.json": "lead（单独更新）"
+    "docs/roco/execution/STATE.json": "lead（单独更新）",
+    "roco/src/roco_env/regression.py": "plan01-recon（Lead 已授权：state_digest 剔除 history）"
   },
   "blockers": [
     {
@@ -72,14 +73,14 @@
     "01": {
       "title": "公开观察与决策快照契约",
       "status": "in_progress",
-      "step": "01.1/01.2",
-      "code": "unverified",
+      "step": "A/B 完成（泄漏已灭 + 三判据改钉 + 协议对齐）",
+      "code": "partial",
       "isolated": "unverified",
       "player": "unverified",
-      "evidence": "reports/roco/product-execution/01/recon.md（428 行）+ raw-*.json + probe-*.py",
+      "evidence": "reports/roco/product-execution/01/{step-log.md,README-INDEX.md,raw-legacy-*.json,raw-align-verified-*.json,unittest-after-01AB.txt}",
       "commit": "9717e5c",
       "remote_sha": null,
-      "note": "三条公开协议不一致（public_planner_state / ui_public_view / observation_for）；最大泄漏 ui.legal.enemy（9/9 seed 复原对手真实四招 1.000）优先修；opening_roster_revealed/match_id/event_seq 全仓 0 命中；event_seq 可由 state_version=len(state.events) 派生；U3 已裁决（battle_new 发 + state.events 留同源记录）；待改钉的 4 条历史断言见 recon §5。"
+      "note": "ui.legal.enemy 泄漏已灭（回收率 0.75→0.00，含有效性控件）；三协议对齐（后备 {slot,fainted}，场上带 pet_id）；observation_for 去 pet_id/name；两条矛盾 pet_id 断言一起改钉 + 新增反向证明；定向 99 跑 OK、regression --check exit 0。未做：opening_roster_revealed/match_id/event_seq/decision_id、Node 转发、前端预览；U1 blocked:needs_injection_entry。"
     },
     "02": {
       "title": "开局预览与已见阵容回看",
@@ -222,5 +223,19 @@
       "当前 active_plan 分计划",
       "交接文档"
     ]
-  }
+  },
+  "decisions": [
+    {
+      "id": "D-1",
+      "what": "regression.py 的 state_digest 是否剔除 history",
+      "decision": "批准（同一设计病）",
+      "by": "lead"
+    },
+    {
+      "id": "D-2",
+      "what": "误入库的 5 份含假绿读数的探针产物",
+      "decision": "git rm + 删除，README-INDEX 保留作废登记",
+      "by": "lead"
+    }
+  ]
 }

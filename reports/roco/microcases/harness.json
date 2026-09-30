@@ -172,8 +172,8 @@
       "observed": "结算前先为双方各存一份 observation 哈希写进 history，所以「后出手的一方偷看对手选择」这类实现错误可以从回放里查出来。",
       "fields": {
         "hashes": {
-          "pre_observation_hash": "f7e0891eeda095bc",
-          "pre_observation_opponent_hash": "98ae65d8c4c32fc8"
+          "pre_observation_hash": "bdeb59849f00aa9e",
+          "pre_observation_opponent_hash": "8e0cca23b052263d"
         },
         "observation_pet_count": 3
       },

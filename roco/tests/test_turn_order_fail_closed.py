@@ -98,6 +98,86 @@ GOLDEN_EVENT_DIGESTS = {
 GOLDEN_SHORT_STATE = "244e53d35370f824cfd7352d52413bf8956ced9b2996353c96eee4052b8f70e6"
 GOLDEN_SHORT_EVENTS = "1458c52ee892de4b5806d761186569fbcb155f7627b0c06ab32c940147a42a87"
 
+# ── 2026-09-30（分计划 01）：把「结算状态」与「决策时观察载荷」拆成两枚指纹 ─────────────
+#
+# **原断言（逐字，改钉不删）**：
+#     self.assertEqual(_digest(renv.serialize(state)), GOLDEN_STATE_DIGESTS[str(seed)],
+#                      f"seed={seed} 的最终状态与 RC-103 之前不一致 —— 默认路径被改动了")
+#     self.assertEqual(_digest([e.to_dict() for e in state.events]), GOLDEN_EVENT_DIGESTS[str(seed)],
+#                      f"seed={seed} 的事件序列与 RC-103 之前不一致")
+#
+# **为什么它与当前有效规则冲突（独立证据，不是"为了让测试绿"）**：
+# `serialize()` 里除了结算状态，还有 `history` —— 而 `history` 装的是**决策前的观察载荷**
+# （`env.step_joint` 里 `observation_for(state, rs, side)` 的返回值，见 `env.py` 的
+# `pre_player` / `pre_enemy`）。分计划 01 修掉了 `observation_for` 的一处真泄漏：
+# 对手**后备**原先返回 `pet_id` + `name`，等于把对手整队物种交给双方策略；按
+# `docs/roco/PRODUCT-VISION-AND-ROADMAP.md:53`（对手物种只在**预览实际展示**后才成为
+# 公开事实）与 `docs/roco/execution/01-PLAN.md:38`（预览前/无预览模式不得提前泄漏阵容），
+# 后备改为只给 `slot` / `fainted`。于是 `history` 的字节必然变 —— **但那是投影边界变了，
+# 不是引擎结算变了**。
+#
+# 实测（`reports/roco/product-execution/01/probe-05-legacy-evidence.py`，六局 + 短局）：
+#   · 双方**决策序列**：逐位相同（`F1_decision_digest` 六局全同）；
+#   · `state.events`：逐位相同（六局全同）；
+#   · `serialize()` **剔除 history 后**：逐位相同（六局全同）；
+#   · 只有 `history`（决策前观察载荷）变了。
+# 也就是说这条断言原来的口径把「观察载荷」也算进了「结算状态」，**量错了东西**。
+#
+# 处置：指纹**收窄**到「结算状态（剔除 history）」，各枚原值逐字留在
+# `*_PRIOR_2026_09_30` 里；同时**另立**一枚 `history` 指纹，保证这次收窄
+# **没有静默丢字段**（历史载荷再变仍然会红，只是红在该红的那一枚上）。
+GOLDEN_STATE_DIGESTS_PRIOR_2026_09_30 = {
+    "1000": "dd760c5f8d2d868909381339314bd1c1c8226c283a53a4d26a229076be8d1ac2",
+    "1001": "0c218971216b86a713ea3f94af49e0a43ecd14d92b53cc73cda9dbff2cebab55",
+    "1002": "cd4d136fbdbc0bf0714db7b082d9cd160dd84e7f164afb74e1dbead455fe8895",
+    "1003": "ab3dd5f379783dee763cb185b5555e19b1c5112cdbe748fedd2bb6f8e7870554",
+    "1004": "1b1006848e80c330b21099c8fa841b9d21e755719549bc0721070fb84fc94119",
+    "1005": "e156ca566a1f7b4f1ac2234e5835227a30bb36e7b51159e45d5d65078fce5adf",
+}
+GOLDEN_SHORT_STATE_PRIOR_2026_09_30 = "244e53d35370f824cfd7352d52413bf8956ced9b2996353c96eee4052b8f70e6"
+
+#: 结算状态指纹（`serialize()` **剔除 `history`**）。六局的 `events` 指纹未变，沿用上面那份。
+#: 六局的这一枚在改动前后**逐位相同** —— 这正是「引擎没被改」的直接读数。
+GOLDEN_STATE_NO_HISTORY_DIGESTS = {
+    "1000": "ac26753a3ced6015191848b40b0bad89c4888544a7dde49840578f480b9fc8d2",
+    "1001": "f370a7d53fc14e99b59caecfc8783c784dd1075390d7977d1559bd7aa271e449",
+    "1002": "f219b32f022bdfcb6da46248156e3951d276e97f0c4262006fb7339151f69cea",
+    "1003": "ecc4aa55497f603acb0f84c9e6bcddd32677a479de829f9f1fc4fd6df5162450",
+    "1004": "87503137163ca9da0ee6c4467e8839b41086c33d52f6265c4e4065134194d4de",
+    "1005": "f62878439d467165cefa2735a871663227c3c402fec86071406029df5bc8d393",
+}
+#: `history`（**决策前观察载荷**）单独一枚：口径收窄不得掩盖它的变化。
+#: 补充：`history` 在改动前是 `{上面那六个数}`（逐位见
+#: `reports/roco/product-execution/01/raw-legacy-athead.json` 的 `F4_history_digest`），
+#: 改动后变成下面这六个数 —— **只有它动了**。
+GOLDEN_HISTORY_DIGESTS = {
+    "1000": "5e1ac1c1f610d66e15bc0d62cbff5b84fc4f3d1cf8bd547a6bdc2477e2f0ebae",
+    "1001": "f3bcf4d6d7bec60946ee8d402cc016e18e2068571c133ccb4237b85e3ccc98e5",
+    "1002": "4c29d91620617cf7599aef9229b0ef95f9c8412027586ef697fbd32276cb5033",
+    "1003": "099fd3e0217f324cfa7ad5404f2909fb5cd53a6d723b16c2b4c55838ac68b184",
+    "1004": "069d580f72b972b120e8e12ecd2079580d9685eed659340c4713a9a45ffe346e",
+    "1005": "6d7fb771aa2ebb57b9e6987b3d8fab5acc0e89a66b4bf8a6bccfff91e29131f3",
+}
+GOLDEN_HISTORY_PRIOR_2026_09_30 = {
+    "1000": "4efacdbb77d70a7bf6bf6cbdef29c033d6a7b95271220502622c3fd9710fd48a",
+    "1001": "e41aceb819e1b33dccfe2ab49f0e489e3ce4fb5c0cca297fdb3bdd54ff57062f",
+    "1002": "7b366f971e29a15e3ba83a8176cc90d13d1717bfd97f6f53e0002365fa52881c",
+    "1003": "06a67903660916a8cfa1293acad4ade2b26451bd248b2b74059787345256a994",
+    "1004": "7b69ea3aafc275e9bc49c16d90e11f5632585f3fa3a72fa3fe9da87d8713e9c8",
+    "1005": "712aaf92624fae43cd55d060d76dad5a50fe787697e80d136080ecd063c7be79",
+}
+GOLDEN_SHORT_STATE_NO_HISTORY = "1edc27e721ffc47863cc6f2087c16d42c22383fb171a619dd806a09e1fa5a6f1"
+GOLDEN_SHORT_HISTORY = "16b7d4f4f55b9149bcc3ea6507ef52df92cb0c5e9653b143f99fabe48ce658fb"
+GOLDEN_SHORT_HISTORY_PRIOR_2026_09_30 = "8216fd9100b0aefbcdcbca2e8b86271911f899b18e6293ca3ca013b7d08a6d54"
+
+
+def _state_without_history(state) -> dict:
+    """`serialize()` 但剔除 `history`。**只剔这一个键**，并当场证明没多剔。"""
+    full = renv.serialize(state)
+    narrowed = {k: v for k, v in full.items() if k != "history"}
+    assert set(full) - set(narrowed) == {"history"}, "收窄指纹时不许顺手丢掉别的字段"
+    return narrowed
+
 
 def _digest(obj) -> str:
     return hashlib.sha256(json.dumps(obj, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
@@ -359,10 +439,18 @@ class LegacyBitExactGoldenTest(unittest.TestCase):
             record = ropp.play_match(RS, team_a, team_b, names[index % len(names)],
                                      names[(index + 2) % len(names)], seed=seed)
             state = renv.replay(record.replay_plan(), RS)
-            self.assertEqual(_digest(renv.serialize(state)), GOLDEN_STATE_DIGESTS[str(seed)],
-                             f"seed={seed} 的最终状态与 RC-103 之前不一致 —— 默认路径被改动了")
+            # ① 结算状态（剔除 `history`）：这才是「默认路径有没有被改」的量。
+            #    2026-09-30（分计划 01）收窄口径的理由与实测见上面 GOLDEN_*_PRIOR_2026_09_30 的注释块。
+            self.assertEqual(_digest(_state_without_history(state)),
+                             GOLDEN_STATE_NO_HISTORY_DIGESTS[str(seed)],
+                             f"seed={seed} 的**结算状态**与 RC-103 之前不一致 —— 默认路径被改动了"
+                             f"（口径：serialize() 剔除 history；原全量口径原值见 "
+                             f"GOLDEN_STATE_DIGESTS_PRIOR_2026_09_30）")
             self.assertEqual(_digest([e.to_dict() for e in state.events]), GOLDEN_EVENT_DIGESTS[str(seed)],
                              f"seed={seed} 的事件序列与 RC-103 之前不一致")
+            # ② `history`（决策前观察载荷）**单独一枚**：口径收窄不得掩盖它的变化。
+            self.assertEqual(_digest(state.history), GOLDEN_HISTORY_DIGESTS[str(seed)],
+                             f"seed={seed} 的决策前观察载荷变了（原值见 GOLDEN_HISTORY_PRIOR_2026_09_30）")
 
     def test_short_scripted_game_is_bit_identical(self):
         state = _fresh_state(seed=3)
@@ -374,11 +462,17 @@ class LegacyBitExactGoldenTest(unittest.TestCase):
                 renv.step_replace(state, RS, side, getattr(state, side).bench_indices()[0])
                 continue
             renv.step_joint(state, RS, pick_action(state, "player", 0), pick_action(state, "enemy", 1))
-        self.assertEqual(_digest(renv.serialize(state)), GOLDEN_SHORT_STATE)
+        self.assertEqual(_digest(_state_without_history(state)), GOLDEN_SHORT_STATE_NO_HISTORY)
         self.assertEqual(_digest([e.to_dict() for e in state.events]), GOLDEN_SHORT_EVENTS)
+        self.assertEqual(_digest(state.history), GOLDEN_SHORT_HISTORY,
+                         f"短局的决策前观察载荷变了（原值 {GOLDEN_SHORT_HISTORY_PRIOR_2026_09_30}）")
 
     def test_golden_digest_would_move_if_the_engine_changed(self):
-        """必红反证：篡改一个事件字段后，指纹必须变 —— 否则上面两条可能是恒真的。"""
+        """必红反证：篡改一个事件字段后，指纹必须变 —— 否则上面两条可能是恒真的。
+
+        2026-09-30（分计划 01）扩充：口径收窄成 `_state_without_history` 之后，
+        必须证明**收窄没有把状态指纹变成恒真**。这里对三种篡改各判一次。
+        """
         state = _fresh_state(seed=3)
         renv._end_of_turn(state, RS)
         events = [e.to_dict() for e in state.events]
@@ -387,6 +481,25 @@ class LegacyBitExactGoldenTest(unittest.TestCase):
         self.assertTrue(mutated, "必须至少有一个事件才谈得上篡改")
         mutated[-1]["kind"] = mutated[-1]["kind"] + "-被篡改"
         self.assertNotEqual(_digest(mutated), before)
+
+        # 反证②：结算状态指纹对**结算状态**的变化必须敏感（收窄不得变成恒真）。
+        state2 = _fresh_state(seed=3)
+        renv._end_of_turn(state2, RS)
+        state_before = _digest(_state_without_history(state2))
+        state2.turn += 1                       # 篡改一个结算字段
+        self.assertNotEqual(_digest(_state_without_history(state2)), state_before,
+                            "收窄后的结算状态指纹是恒真的 —— 那它就守不住「引擎没被改」")
+
+        # 反证③：`history` 那枚指纹对 history 的变化必须敏感；而**同一次** history 变化
+        # 不应影响结算状态指纹（这正是把两者拆开的目的）。
+        state3 = _fresh_state(seed=3)
+        renv._end_of_turn(state3, RS)
+        s_before, h_before = _digest(_state_without_history(state3)), _digest(state3.history)
+        state3.history = list(state3.history) + [{"turn": -1, "probe": "篡改"}]
+        self.assertNotEqual(_digest(state3.history), h_before,
+                            "history 指纹是恒真的 —— 那口径收窄就成了掩盖")
+        self.assertEqual(_digest(_state_without_history(state3)), s_before,
+                         "改 history 却动了结算状态指纹 —— 说明剔除没生效")
 
 
 class RegistryConfigShapeTest(unittest.TestCase):

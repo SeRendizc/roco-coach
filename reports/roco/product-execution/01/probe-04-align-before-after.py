@@ -50,37 +50,57 @@ def main() -> int:
     # 整个公开载荷里出现过的所有 skill_* 形状的字符串**，再看对手真实配招有多少个
     # 能在里面找到。⇒ 换路径、改字段名、嵌套到别处都躲不过这条度量。
     def all_skill_ids(node, acc):
+        """递归收集载荷里所有 `skill_*` 形状的字符串。
+
+        ⚠ 第一版**只在 dict 分支**里判定字符串，递归进 list 元素时那个元素是 `str`，
+        两个分支都不命中 ⇒ 恒返回空集 ⇒ 度量恒为 0（假绿）。现在把「判定字符串」
+        提到最前面，任何位置的字符串都算。
+        """
+        if isinstance(node, str):
+            if node.startswith("skill_"):
+                acc.add(node)
+            return acc
         if isinstance(node, dict):
-            for k, v in node.items():
-                if isinstance(v, str) and v.startswith("skill_"):
-                    acc.add(v)
+            for v in node.values():
                 all_skill_ids(v, acc)
-        elif isinstance(node, list):
+            return acc
+        if isinstance(node, (list, tuple)):
             for item in node:
                 all_skill_ids(item, acc)
+            return acc
         return acc
 
     rows = []
     # 控：证明这条度量**能**发现泄漏（否则「0 个泄漏」可能只是度量死了）。
-    # 把对手技能 id 手动放进一个副本里，度量必须报「全部可见」。
+    #
+    # 用**合成**的技能 id 注入，而不是真实配招里的 id —— 真实 id 可能与己方技能撞名，
+    # 于是 `- own_all` 会把它扣掉，「控」自己就先失真了（第一版就是这么写的，
+    # 结果 `metric_can_detect_leak=False`，看起来像度量坏了）。
     _ctl = renv.reset(team, foe, seed=11, rs=rs, config=cfg)
     _ctl_ui = renv.ui_public_view(_ctl, rs, "player")
-    _ctl_id = _ctl.enemy.field_pet.pet_id
-    _ctl_real = sorted(set(_ctl.enemy.loadouts.get(_ctl_id) or []))
+    _synth = ["skill_900001", "skill_900002"]
+    _ctl_real = sorted(set(_ctl.enemy.loadouts.get(_ctl.enemy.field_pet.pet_id) or []))
     _ctl_own = {s for ids in (_ctl.player.loadouts or {}).values() for s in ids}
 
     def _visible(blob, real_ids, own_ids):
-        got = all_skill_ids(blob, set())
-        return sorted((set(real_ids) & got) - own_ids)
+        """公开载荷里出现的**对手**技能 id。
 
-    _injected = dict(_ctl_ui)
-    _injected["__control__"] = _ctl_real
+        ⚠ 括号是必须的：`set(a) & got - own` 会先算 `&` 再算 `-`，
+        但写成一串时极易看错；这里显式分组，避免再次写出「恒为空」的假绿。
+        """
+        got = all_skill_ids(blob, set())
+        return sorted((set(real_ids) - set(own_ids)) & got)
+
     control = {
+        "synthetic_ids_found_in_injected_blob": _visible({"x": _synth}, _synth, set()),
+        "synthetic_ids_absent_from_uninjected": _visible(_ctl_ui, _synth, set()),
         "real_foe_active_skills_n": len(_ctl_real),
-        "visible_without_injection": len(_visible(_ctl_ui, _ctl_real, _ctl_own)),
-        "visible_with_injection": len(_visible(_injected, _ctl_real, _ctl_own)),
-        "metric_can_detect_leak": len(_visible(_injected, _ctl_real, _ctl_own)) == len(_ctl_real),
+        "real_visible_without_injection": len(_visible(_ctl_ui, _ctl_real, _ctl_own)),
     }
+    control["metric_can_detect_leak"] = (
+        control["synthetic_ids_found_in_injected_blob"] == _synth
+        and control["synthetic_ids_absent_from_uninjected"] == []
+    )
 
     for seed in seeds:
         st = renv.reset(team, foe, seed=seed, rs=rs, config=cfg)

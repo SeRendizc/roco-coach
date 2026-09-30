@@ -1,12 +1,16 @@
 {
   "A_foe_loadout_recovery": {
     "control": {
-      "metric_can_detect_leak": false,
+      "metric_can_detect_leak": true,
       "real_foe_active_skills_n": 4,
-      "visible_with_injection": 3,
-      "visible_without_injection": 3
+      "real_visible_without_injection": 0,
+      "synthetic_ids_absent_from_uninjected": [],
+      "synthetic_ids_found_in_injected_blob": [
+        "skill_900001",
+        "skill_900002"
+      ]
     },
-    "mean_recovery_ratio": 0.75,
+    "mean_recovery_ratio": 0.0,
     "metric": "递归扫描整个 blob 里出现的 skill_* 字符串，与对手真实配招取交集（扣掉己方技能）",
     "rows": [
       {
@@ -14,10 +18,10 @@
         "foe_all_skills_n": 17,
         "foe_real_loadout_n": 4,
         "foe_skills_visible_in_public_planner_n": 0,
-        "foe_skills_visible_in_ui_n": 3,
+        "foe_skills_visible_in_ui_n": 0,
         "own_skills_visible_in_ui_n": 19,
-        "recovered_active_n": 3,
-        "recovery_ratio_active": 0.75,
+        "recovered_active_n": 0,
+        "recovery_ratio_active": 0.0,
         "seed": 11
       },
       {
@@ -25,10 +29,10 @@
         "foe_all_skills_n": 17,
         "foe_real_loadout_n": 4,
         "foe_skills_visible_in_public_planner_n": 0,
-        "foe_skills_visible_in_ui_n": 3,
+        "foe_skills_visible_in_ui_n": 0,
         "own_skills_visible_in_ui_n": 19,
-        "recovered_active_n": 3,
-        "recovery_ratio_active": 0.75,
+        "recovered_active_n": 0,
+        "recovery_ratio_active": 0.0,
         "seed": 29
       },
       {
@@ -36,10 +40,10 @@
         "foe_all_skills_n": 17,
         "foe_real_loadout_n": 4,
         "foe_skills_visible_in_public_planner_n": 0,
-        "foe_skills_visible_in_ui_n": 3,
+        "foe_skills_visible_in_ui_n": 0,
         "own_skills_visible_in_ui_n": 19,
-        "recovered_active_n": 3,
-        "recovery_ratio_active": 0.75,
+        "recovered_active_n": 0,
+        "recovery_ratio_active": 0.0,
         "seed": 47
       },
       {
@@ -47,10 +51,10 @@
         "foe_all_skills_n": 17,
         "foe_real_loadout_n": 4,
         "foe_skills_visible_in_public_planner_n": 0,
-        "foe_skills_visible_in_ui_n": 3,
+        "foe_skills_visible_in_ui_n": 0,
         "own_skills_visible_in_ui_n": 19,
-        "recovered_active_n": 3,
-        "recovery_ratio_active": 0.75,
+        "recovered_active_n": 0,
+        "recovery_ratio_active": 0.0,
         "seed": 222
       },
       {
@@ -58,10 +62,10 @@
         "foe_all_skills_n": 17,
         "foe_real_loadout_n": 4,
         "foe_skills_visible_in_public_planner_n": 0,
-        "foe_skills_visible_in_ui_n": 3,
+        "foe_skills_visible_in_ui_n": 0,
         "own_skills_visible_in_ui_n": 19,
-        "recovered_active_n": 3,
-        "recovery_ratio_active": 0.75,
+        "recovered_active_n": 0,
+        "recovery_ratio_active": 0.0,
         "seed": 519
       },
       {
@@ -69,10 +73,10 @@
         "foe_all_skills_n": 17,
         "foe_real_loadout_n": 4,
         "foe_skills_visible_in_public_planner_n": 0,
-        "foe_skills_visible_in_ui_n": 3,
+        "foe_skills_visible_in_ui_n": 0,
         "own_skills_visible_in_ui_n": 19,
-        "recovered_active_n": 3,
-        "recovery_ratio_active": 0.75,
+        "recovered_active_n": 0,
+        "recovery_ratio_active": 0.0,
         "seed": 646
       },
       {
@@ -80,10 +84,10 @@
         "foe_all_skills_n": 17,
         "foe_real_loadout_n": 4,
         "foe_skills_visible_in_public_planner_n": 0,
-        "foe_skills_visible_in_ui_n": 3,
+        "foe_skills_visible_in_ui_n": 0,
         "own_skills_visible_in_ui_n": 19,
-        "recovered_active_n": 3,
-        "recovery_ratio_active": 0.75,
+        "recovered_active_n": 0,
+        "recovery_ratio_active": 0.0,
         "seed": 758
       },
       {
@@ -91,10 +95,10 @@
         "foe_all_skills_n": 17,
         "foe_real_loadout_n": 4,
         "foe_skills_visible_in_public_planner_n": 0,
-        "foe_skills_visible_in_ui_n": 3,
+        "foe_skills_visible_in_ui_n": 0,
         "own_skills_visible_in_ui_n": 19,
-        "recovered_active_n": 3,
-        "recovery_ratio_active": 0.75,
+        "recovered_active_n": 0,
+        "recovery_ratio_active": 0.0,
         "seed": 900
       },
       {
@@ -102,61 +106,51 @@
         "foe_all_skills_n": 17,
         "foe_real_loadout_n": 4,
         "foe_skills_visible_in_public_planner_n": 0,
-        "foe_skills_visible_in_ui_n": 3,
+        "foe_skills_visible_in_ui_n": 0,
         "own_skills_visible_in_ui_n": 19,
-        "recovered_active_n": 3,
-        "recovery_ratio_active": 0.75,
+        "recovered_active_n": 0,
+        "recovery_ratio_active": 0.0,
         "seed": 991
       }
     ],
     "seeds_with_full_recovery": 0,
     "total_seeds": 9,
-    "ui_legal_enemy_key_present": true
+    "ui_legal_enemy_key_present": false
   },
   "B_bench_keys": {
     "all_three_aligned": false,
     "field_still_has_pet_id": true,
-    "obs_bench_id_free": false,
-    "obs_bench_name_free": false,
+    "obs_bench_id_free": true,
+    "obs_bench_name_free": true,
     "obs_bench_raw": [
       {
         "active": false,
         "fainted": false,
         "field": false,
-        "name": "秩序鱿墨",
-        "pet_id": "pet_000451",
         "slot": 1
       },
       {
         "active": false,
         "fainted": false,
         "field": false,
-        "name": "化蝶",
-        "pet_id": "pet_000124",
         "slot": 2
       },
       {
         "active": false,
         "fainted": false,
         "field": false,
-        "name": "银月狼王",
-        "pet_id": "pet_000608",
         "slot": 3
       },
       {
         "active": false,
         "fainted": false,
         "field": false,
-        "name": "圣凯布米龙",
-        "pet_id": "pet_000601",
         "slot": 4
       },
       {
         "active": false,
         "fainted": false,
         "field": false,
-        "name": "月使鹭纳",
-        "pet_id": "pet_000611",
         "slot": 5
       }
     ],
@@ -164,41 +158,33 @@
       "active",
       "fainted",
       "field",
-      "name",
-      "pet_id",
       "slot"
     ],
-    "public_bench_id_free": false,
+    "public_bench_id_free": true,
     "public_bench_raw": [
       {
         "fainted": false,
-        "pet_id": "pet_000451",
         "slot": 1
       },
       {
         "fainted": false,
-        "pet_id": "pet_000124",
         "slot": 2
       },
       {
         "fainted": false,
-        "pet_id": "pet_000608",
         "slot": 3
       },
       {
         "fainted": false,
-        "pet_id": "pet_000601",
         "slot": 4
       },
       {
         "fainted": false,
-        "pet_id": "pet_000611",
         "slot": 5
       }
     ],
     "public_planner_state": [
       "fainted",
-      "pet_id",
       "slot"
     ],
     "ui_public_view": [
@@ -218,7 +204,7 @@
     "D3_individual_panel_change": "blocked:needs_injection_entry",
     "D3_why": "`reset(individuals=...)` 只按玩家位次解析（env.py:249 resolve_snapshots(individuals, list(team))），对手侧 panel 恒为 {}（实测 Q4c）。引擎没有对局内改对手个体的入口 ⇒ 不猜、不静默跳过。"
   },
-  "label": "before-v3",
+  "label": "verified-after",
   "ruleset_config_id": "mobile_s4_candidate_v3",
   "seeds": [
     11,

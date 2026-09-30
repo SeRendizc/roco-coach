@@ -4082,8 +4082,10 @@ def public_planner_state(state: "GameState", rs: Ruleset, side: str = "player") 
       - 回合、阶段、结果、规则集 id、状态版本
       - 双方**场上**面板（生命、能量、公开状态与印记、防御冷却、蓄力与否、增益）
       - 己方后备的完整面板与配招（自己的信息）
-      - 对手后备**只有**位次、精灵 id、是否倒下、现在的 active 位（术语 3010 的公开部分）
-    绝不包含：seed、随机源、`_pending_*`、对手后备血量/能量/配招。
+      - 对手后备**只有**位次与是否倒下（术语 3010 的公开部分）。**不含物种身份**：
+        按 `PRODUCT-VISION-AND-ROADMAP.md:53`，对手物种属于「预览实际展示」的公开面，
+        在预览尚未发生时不是公开事实（见 01-PLAN:38、Codex 修订计划 2026-09-30）。
+    绝不包含：seed、随机源、`_pending_*`、对手后备的血量/能量/配招/物种。
     """
     me = getattr(state, side)
     foe = getattr(state, "enemy" if side == "player" else "player")
@@ -4193,16 +4195,32 @@ def public_planner_state(state: "GameState", rs: Ruleset, side: str = "player") 
             "active": foe.active,
             "living_count": len(foe.living()),
             "field": foe_field_pet(foe.field_pet),
-            # 后备：只有位次 / id / 是否倒下。**没有血量、没有配招。**
+            # 后备：**只有位次与是否倒下**。没有血量、没有配招、**也没有物种身份**。
+            #
+            # 2026-09-30（分计划 01 步骤 A）：这里原先给 `pet_id`，与 `ui_public_view`
+            # 的同名字段（那里从第 42 轮起就只给 `slot` + `fainted`）**长期不一致**。
+            # 三处协议现在统一到同一条公开性口径：
+            #   · `docs/roco/PRODUCT-VISION-AND-ROADMAP.md:53`——「开局对方阵容：可以知道
+            #     预览**实际展示**的物种…；不可以假定看见物种就知道天分/性格/真实六维与四技能」；
+            #   · `docs/roco/execution/01-PLAN.md:38`——「预览发生前及无预览模式**没有提前泄漏阵容**」；
+            #   · Codex 修订计划（2026-09-30）——「预览**尚未出现**时不许提前读阵容」。
+            # ⇒ 在一局**尚未发生预览**时，后备的物种身份不是公开事实，规划面也不该有。
+            #
+            # 为什么这是**安全**而不是**功能缩水**：重建搜索状态本来就把对手后备当
+            # 「我们不知道」的未知量（`OPPONENT_BENCH_ASSUMPTION`，见下面 `assumptions`）。
+            # 以前之所以能填出具体物种，靠的正是这个字段泄漏出来的身份；去掉之后
+            # `state_from_public_planner` 走它**本来就有**的占位分支（该函数的
+            # `fallback_id`），从「假装知道是哪只」变成「如实说不知道」。
             "bench": [
-                {"slot": p.slot, "pet_id": p.pet_id, "fainted": p.fainted}
+                {"slot": p.slot, "fainted": p.fainted}
                 for i, p in enumerate(foe.pets) if i != foe.active
             ],
         },
         "assumptions": {
             "opponent_bench": OPPONENT_BENCH_ASSUMPTION,
-            "note": "对手后备的血量与配招不在公开信息里，重建搜索状态时按满血 + 规范配招建模；"
-                    "任何依赖对手后备精确血量的结论都会因此偏乐观。",
+            "note": "对手后备的血量、配招与物种都不在公开信息里，重建搜索状态时按满血 + "
+                    "规范配招 + 占位物种建模；任何依赖对手后备精确构成或精确血量的结论"
+                    "都会因此偏乐观。",
         },
     }
 
@@ -4265,6 +4283,8 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
 
     正确的修法**不是**给规划协议加 `name`（那会为了 UI 扩大模型协议，且每个 token 都要付钱），
     而是让 UI 有自己的视图：两边都从同一份权威状态生成，各自只带自己需要的东西。
+    两条视图的**字段集可以不同**（一个为渲染、一个为省 token），但**公开性边界必须相同**——
+    2026-09-30（分计划 01）把「对手后备」与「对手合法动作」两处对齐到了同一条边界。
 
     公开性口径（按手游里**屏幕上能看到的**）
     --------------------------------------
@@ -4272,6 +4292,7 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
       · 对手**场上**：名字、系别、血/能量、异常、印记——血条与名字就画在屏幕上；
       · 对手**后备**：**只有位次与是否倒下**。手游里后备直到上场才亮明，
         所以这里不给名字、不给血、不给配招（与 `public_planner_state` 同一条公开性规则）；
+      · 对手的**合法动作表**：**不给**（见本函数里 `ui_legal` 的注释——那是真值泄漏）；
       · `state_version` / `turn` / `phase` / `result` 与规划协议**必须一致**——
         两个视图描述的是同一时刻的同一局，不一致就是 bug。
     """
@@ -4374,9 +4395,21 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
     self_panel["magic"] = dict(me.magic) if isinstance(me.magic, dict) else None
     # UI 自己的合法动作表（带技能说明）。协议那份 `legal` 在 service 里，
     # 字段一个都不变——两条链各取所需。
+    #
+    # 2026-09-30（分计划 01）：**只给己方**。
+    #
+    # 这里原先还算一份 `enemy`（`ui_legal_actions(state, rs, "enemy")`）。那是本视图里
+    # **最大的隐藏真值泄漏**：`ui_action_public` 会把每个技能动作补上
+    # `skill_id` / `skill_name` / `skill{desc,power,energy,element,…}`，于是「对手
+    # 场上那只是哪四招」被完整写进了公开载荷。实测（`probe-03-foe-legal.py`，
+    # 六宠模式 × 9 个 seed）：**回收率 1.000（9/9）**，可见集合恰好等于对手真实配招。
+    # 那条链的下游是 `src/server/roco-service.js` 的 `result.ui`（Node 内存里），
+    # 今天浏览器拿不到——但 `docs/roco/PRODUCT-VISION-AND-ROADMAP.md:60` 的口径是
+    # 「任何一层泄漏，边界都不成立」，而本函数按签名与 docstring 就是**公开**视图。
+    # ⇒ 公开视图不该承载它；需要「对手有几个合法动作」的调用方读回执私有域里的
+    #   `result.legal.enemy`（`service._sim_envelope`，那里本来就有一份，形状未变）。
     ui_legal = {
         "player": ui_legal_actions(state, rs, "player"),
-        "enemy": ui_legal_actions(state, rs, "enemy"),
     }
 
     foe_panel = dict(view["opponent"])
@@ -4386,11 +4419,10 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
     foe_panel["field"] = decorate(view["opponent"]["field"]) if view["opponent"]["field"] else None
     # 后备：**只给位次与是否倒下**，连 `pet_id` 都不给。
     #
-    # 规划协议里后备是带 `pet_id` 的（重建搜索状态要用），但 UI 不该拿它：
-    #   ① 手游里后备直到上场才亮明，提前给 id 等于泄露对手阵容；
-    #   ② 就算给了，页面上也只能渲染成 `pet_000190` —— 又一个 ID 占位。
-    # 所以 UI 这一侧只保留「这个位次还在不在」。这条是**公开性假设**，
-    # 写进 `notes` 而不是当成既定事实。
+    # 2026-09-30（分计划 01 步骤 A）：规划协议**也**已经改成同一形状（原先它带
+    # `pet_id`，与本视图长期不一致）。这里保留这次显式重建而不是直接照抄
+    # `view["opponent"]["bench"]`，是为了让「UI 面只出这两个键」这件事在本函数里
+    # 仍然**看得见**——直接照抄会让公开性口径隐式依赖另一个函数。
     foe_panel["bench"] = [{"slot": b.get("slot"), "fainted": b.get("fainted")}
                           for b in view["opponent"]["bench"]]
 
@@ -4494,6 +4526,18 @@ def state_from_public_planner(
         p.entered_turn = None
         return p
 
+    # 2026-09-30（分计划 01 步骤 A）：公开面**不再给后备物种身份** ⇒ 这里对每一只后备
+    # 都只能用占位物种。这与 `OPPONENT_BENCH_ASSUMPTION` 是同一条口径：后备是未知量，
+    # 规划只给取舍建议，任何依赖后备精确构成的结论都会被 `limitations` 标注为偏乐观。
+    #
+    # 为什么占位物种用**规范配招表里的第一只**而不是抛错：重建必须能给规划器一个
+    # 可搜索的队列（它要按位次与存活情况推演换人）。抛错会让「公开面缺身份」变成
+    # 「规划不可用」——那是把信息边界变成功能故障，方向错了。等第 02 分计划做了
+    # 开局预览、`revealed_*` 身份真的公开之后，这里的每一只用**已亮明的**物种。
+    fallback_id = (next(iter(rs.candidate_movesets)) if rs.candidate_movesets else None)
+    if fallback_id is None:
+        raise ValueError("无法重建对手队伍：规则集没有规范配招可用作后备占位")
+
     own = public["self"]
     foe = public["opponent"]
 
@@ -4506,7 +4550,9 @@ def state_from_public_planner(
     foe_slots[int(field.slot)] = field
     for b in foe.get("bench", []):
         slot = int(b["slot"])
-        assumed = mk_bench_assumed(b["pet_id"], slot)
+        # 兼容两种形状：新形状没有 `pet_id`（= 尚未亮明，用占位）；老 fixture / 老
+        # 调用方仍可能带它（那时按它建模，行为与改动前逐位相同）。
+        assumed = mk_bench_assumed(b.get("pet_id") or fallback_id, slot)
         if b.get("fainted"):
             assumed.hp = 0
             assumed.fainted = True
@@ -4517,10 +4563,7 @@ def state_from_public_planner(
         if i in foe_slots:
             foe_pets.append(foe_slots[i])
         else:
-            # 公开信息里连位次都没给全时，用规范配招补一个占位（仍会被标注为假设）
-            fallback_id = rs.candidate_movesets and next(iter(rs.candidate_movesets)) or None
-            if fallback_id is None:
-                raise ValueError("无法重建对手队伍：公开信息缺位次且规则集没有规范配招")
+            # 公开信息里连位次都没给全时，同样用占位（仍会被标注为假设）
             foe_pets.append(mk_bench_assumed(fallback_id, i))
 
     state = GameState(

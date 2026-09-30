@@ -119,7 +119,7 @@
     "status_unsupported": 7,
     "turn_start": 25
    },
-   "state_digest": "677955ff7e89a870655134f578b1dbb7b8a5716d7c0a59b6fc8173b6e194d274",
+   "state_digest": "0f70c03ba6f2c24006598f603e9abdc8c5b56509b939022a7758132ced3c81dc",
    "key_events": [
     {
      "kind": "turn_start",
@@ -253,7 +253,7 @@
     "status_unsupported": 6,
     "turn_start": 25
    },
-   "state_digest": "3ec41e47133aa64e143c1836e9e25cfcc9b60f68ccc60ad12c5417be8b93e2a1",
+   "state_digest": "fd64c7e928b1ae8efa037d74b8e7646970659288a1985c965548c0573b5caed2",
    "key_events": [
     {
      "kind": "damage",
@@ -360,7 +360,7 @@
     "replacement": 2,
     "turn_start": 18
    },
-   "state_digest": "9bbfbaa2cecac70ab927dc462c67efdddc9576a88de225a7bf023c6b03a7f608",
+   "state_digest": "64a5594679a0914a7293490e6ee7713cfe7b5f14c0b8fef0892d18e8d3641f0d",
    "key_events": [
     {
      "kind": "charge",
@@ -511,7 +511,7 @@
     "status_unsupported": 7,
     "turn_start": 35
    },
-   "state_digest": "04ca5f3ddf9beda8d653e3583ec95b007658cb4adca2f910063b072fc4e5f2b0",
+   "state_digest": "43b25544c094b5a1d095315cc200272b39e4ff53588cd798cf373e82616bc9c6",
    "key_events": [
     {
      "kind": "faint",
@@ -662,7 +662,7 @@
     "status_unsupported": 7,
     "turn_start": 35
    },
-   "state_digest": "786a0681116ef87269f99889b0f8d83eb6caec490ef64796377a50856a01a32c",
+   "state_digest": "eabb2ee3d2b1a47ff440e84514ba31c34e481ee5cf3683e2f83b543b693509c6",
    "key_events": [
     {
      "kind": "replacement",
@@ -761,7 +761,7 @@
     "status_unsupported": 3,
     "turn_start": 23
    },
-   "state_digest": "639c9b3ef4c7a672ba7c407a17713a68d3d031323478e9be5ee628fb71bfe002",
+   "state_digest": "214a4564a4f6865b8087af9b2efdbe2022bde46ea23b16b3bfab34d9d8c7ff8f",
    "key_events": [
     {
      "kind": "damage",
@@ -887,7 +887,7 @@
     "status_unsupported": 7,
     "turn_start": 22
    },
-   "state_digest": "8c393aa9560e9e05c487fbdf2006ca6791c0f7070868a481cf2a83e17b5e4ba5",
+   "state_digest": "8c4200197408869ee956b3f8f03268c13c9979a098eafcec632bc3c45e12dce8",
    "key_events": [
     {
      "kind": "damage",
@@ -1016,7 +1016,7 @@
     "status_unsupported": 6,
     "turn_start": 21
    },
-   "state_digest": "ac3418e564ce0df5e01d653033c416a0bca0b7a206a3bcc2220d0c3de4894f08",
+   "state_digest": "23eb4776255e9dbb8bf03037615982f98a163df761fc985e078f904e2797f1b8",
    "key_events": [
     {
      "kind": "damage",
@@ -1155,7 +1155,7 @@
     "status_tick": 16,
     "turn_start": 22
    },
-   "state_digest": "c55136a82c51047d3c4ea0f24474c84cbf5598f031d3107cb3429087e0309cbc",
+   "state_digest": "4730f3a03c6be7bb5a845fa2bfd2d506b9572768e64666be614fbbc296c5b01a",
    "key_events": [
     {
      "kind": "damage",
@@ -1273,7 +1273,7 @@
     "status_unsupported": 10,
     "turn_start": 16
    },
-   "state_digest": "a77aa0dd799e9726cfa28bdc2c4e64e164c249a1f8d989eafd73978b697811d0",
+   "state_digest": "add035b928d0fc9afca958507f2897a2a97dc393946052d9bf64e6fd5bddba08",
    "key_events": [
     {
      "kind": "damage",
@@ -1394,7 +1394,7 @@
     "status_unsupported": 5,
     "turn_start": 18
    },
-   "state_digest": "141aed9b3ed862694830cac6774e4029342bcbafdf1da567b1c089df48e7e7d6",
+   "state_digest": "57ad5035d4e12218e93647ad2b689e4ce2aac8dde7d78d94beed69e9e4e90ba4",
    "key_events": [
     {
      "kind": "turn_start",
@@ -1508,7 +1508,7 @@
     "replacement": 1,
     "turn_start": 11
    },
-   "state_digest": "d95e998a86475d476339e63f0bf6db7b8291f4e66b99b07b71e6b44dd0acf816",
+   "state_digest": "01cf3c463d7b53a38daf5c5d167c8424929cea9b51131873af1acc24844ba633",
    "key_events": [
     {
      "kind": "damage",
@@ -1625,7 +1625,7 @@
     "replacement": 1,
     "turn_start": 11
    },
-   "state_digest": "64cae53b6690503b0fb5c36f6517add40de95b0d6cb297ac12c2f46627f57bb8",
+   "state_digest": "53ed447f03ac6a66b648602920a570816c12deb6e8270243dd092057d5089aab",
    "key_events": [
     {
      "kind": "damage",
@@ -1742,7 +1742,7 @@
     "replacement": 1,
     "turn_start": 11
    },
-   "state_digest": "5be37bcc2605b8935524c4c2e3cbe62d9af85a23b6e2ab232b0aa60acda8e643",
+   "state_digest": "e243f07b0a3eefa33b5a65ec5b9b5ec383e257f73ea9b602806db84ae889af93",
    "key_events": [
     {
      "kind": "damage",
@@ -1858,7 +1858,7 @@
     "replacement": 1,
     "turn_start": 11
    },
-   "state_digest": "bfb28837039907b9dc8c4b1b9a5c0a95347356050ae92ebf220fc255c64ed6c4",
+   "state_digest": "519f44d0f0c6fccaabcc5514143934452e5e8b5927414c5f73c617ee7d7cf799",
    "key_events": [
     {
      "kind": "damage",
@@ -1973,7 +1973,7 @@
     "replacement": 2,
     "turn_start": 10
    },
-   "state_digest": "b64fd4fb1e6b8485ed9b67f36b450f2c674e8ee47dec23aa1dd58b4eba2b5f76",
+   "state_digest": "645f891cba21e6c6c8fa54b9d308049ad039e134755037a38f1bf43ab0804ab3",
    "key_events": [
     {
      "kind": "damage",
@@ -2088,7 +2088,7 @@
     "replacement": 2,
     "turn_start": 10
    },
-   "state_digest": "1ff7902974e4310240bd8221795192b6344c5fcbb84d83b1a2c5b29aa9477300",
+   "state_digest": "72dd79b5595f1ae1636d6ca7fc1b016d14cc2e407375f198c9e5cb56bc977834",
    "key_events": [
     {
      "kind": "damage",
@@ -2205,7 +2205,7 @@
     "replacement": 1,
     "turn_start": 11
    },
-   "state_digest": "804f6dfab9f21d403d97392c014641c608de48fcfe14f86b675f902796a928f7",
+   "state_digest": "95b72ea8ab15f301abf2ba0b9064bbe8e0a95c99dd015aaf2bc672289bffeffa",
    "key_events": [
     {
      "kind": "damage",
@@ -2320,7 +2320,7 @@
     "replacement": 2,
     "turn_start": 10
    },
-   "state_digest": "e363e698548612d4c2bfafff5998e60779fe796ea66c52e27b19ac06891a34bc",
+   "state_digest": "b2af64651e1ac867e94f862c619ef42d7ce69c71be3419925ad2580e393ffb50",
    "key_events": [
     {
      "kind": "damage",
@@ -2437,7 +2437,7 @@
     "replacement": 1,
     "turn_start": 11
    },
-   "state_digest": "8539c92e1b64703ce7b23601e9a87be16e7212c6efae521e72f6f2fd75be14e1",
+   "state_digest": "957fbf0ce3c970192e9a1188b219f270f55294dbc0e6bc96dfe3932d1e78cd88",
    "key_events": [
     {
      "kind": "damage",
@@ -2551,7 +2551,7 @@
     "status_unsupported": 4,
     "turn_start": 10
    },
-   "state_digest": "4a3a656742bfd5d13a6989d61859a9c64aa55bf1650cfb0ec4bc497f1086de43",
+   "state_digest": "9289cab464d6bf77f2be10b7e64b803e8d402c59e80b540bbeab8060df069262",
    "key_events": [
     {
      "kind": "damage",
@@ -2663,7 +2663,7 @@
     "replacement": 1,
     "turn_start": 11
    },
-   "state_digest": "008fcb6e78d3d2b26f165c14b44c888ca814d4f84972cb8bba6b29d92158deb4",
+   "state_digest": "92346c01b5f0b6ac6adeae23222c041a9931dffc5d8f82f91ace1f96ca9e170e",
    "key_events": [
     {
      "kind": "damage",
@@ -2780,7 +2780,7 @@
     "replacement": 1,
     "turn_start": 11
    },
-   "state_digest": "24e6c2e801bff430e36880d8d705e09a62981b2ef957bea221bdb8bbe19a5b10",
+   "state_digest": "76ba2b1f14a1a8d1d1c2315c7dddd926c46d40996a99bfdef07d90aa69ea1d51",
    "key_events": [
     {
      "kind": "damage",
@@ -2897,7 +2897,7 @@
     "replacement": 1,
     "turn_start": 11
    },
-   "state_digest": "d0488cfcbe76407b0ccf6ecc5f98ffabd8003093a3667ef5b5ce3477cef983e7",
+   "state_digest": "290dd6deb44c1580686bfdeb61a7e71667937c070753cd04e602f28277ab5930",
    "key_events": [
     {
      "kind": "damage",
@@ -3014,7 +3014,7 @@
     "replacement": 1,
     "turn_start": 11
    },
-   "state_digest": "726af7d0781b3db3f6e8b544ea3a4d18eaa9083a04d38a84af22ee6dceace0e0",
+   "state_digest": "13b58c6b5ed994735242a56b71c780f97a972add5b06fa97c64bb8f66a3c58ab",
    "key_events": [
     {
      "kind": "damage",
@@ -3131,7 +3131,7 @@
     "replacement": 1,
     "turn_start": 11
    },
-   "state_digest": "b93a90684478635253ba7cade943d613d0d179ba4cfe503637ad61e6c31315ad",
+   "state_digest": "085b5dedc6aa000b181d264158e364d4e8eaae82d99556fa68fd8e14cf2cdf0b",
    "key_events": [
     {
      "kind": "damage",
@@ -3248,7 +3248,7 @@
     "replacement": 1,
     "turn_start": 11
    },
-   "state_digest": "e429eb6df450cebc62145ba9730b41cc422484491728c64ec5dc97c507fccd66",
+   "state_digest": "c785c21be0f95c2981bfdce3b0bd0ab23cd09cd282ff5a2755b0df8eb3f4d2cb",
    "key_events": [
     {
      "kind": "damage",
@@ -3362,7 +3362,7 @@
     "effects_registered_unsupported": 12,
     "turn_start": 12
    },
-   "state_digest": "5a983d9d3c4e9a08ca8caf147d8e162df705a7a333953c86cb85eb44beca1e06",
+   "state_digest": "20b153afc8edccd502b88207f936f28bc0fd68c9b3ea7548d483439bfe8321d4",
    "key_events": [
     {
      "kind": "damage",
@@ -3477,7 +3477,7 @@
     "replacement": 2,
     "turn_start": 10
    },
-   "state_digest": "e9551ef8df86847acdc1925409b77b5ffcd5b8c11eebc0da483de95457367264",
+   "state_digest": "1e82b0d81d74dee441c3b1514630516bbbec3006516221a0318cccd3f73ad9f8",
    "key_events": [
     {
      "kind": "damage",

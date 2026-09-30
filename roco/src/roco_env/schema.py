@@ -488,11 +488,19 @@ def observation_for(state: GameState, rs: Ruleset, side: str) -> Dict[str, Any]:
     这是隐藏信息的唯一边界，规则：
 
     - 只看得到**双方场上面板**（生命、能量、公开状态、印记）与**后备的存活与否**。
-    - 看不到对手的待执行动作、看不到对手后备的具体生命/技能。
+    - 看不到对手的待执行动作、看不到对手后备的具体生命/技能/**物种身份**。
     - 看不到真实随机种子（只给 seed 派生的公开编号）。
     - 术语 3024/3025 说明游戏本身有「隐藏精灵信息」状态；那种状态下连面板都不给。
 
-    依据：产品红线「教练只分析公开信息，不得读取电脑下一手」。
+    ⚠ 2026-09-30（分计划 01 步骤 A）：上面第二行里的「**物种身份**」是**新补上**的。
+    在此之前本函数虽然自称「唯一边界」，却把对手后备的 `pet_id` 与 `name` 一并返回
+    （见 `foe_bench_pet` 的注释）——文档承诺与实现不符。现在三处公开面
+    （本函数 / `public_planner_state` / `ui_public_view`）的后备行统一为
+    `{slot, fainted}`（本函数另带 `field` / `active` 供分层判定）。
+
+    依据：产品红线「教练只分析公开信息，不得读取电脑下一手」+
+    `docs/roco/PRODUCT-VISION-AND-ROADMAP.md:53`（对手物种只在**预览实际展示**后
+    才成为公开事实）+ `docs/roco/execution/01-PLAN.md:38`（预览前不得提前泄漏阵容）。
     """
     other = "enemy" if side == "player" else "player"
     me = getattr(state, side)
@@ -538,11 +546,23 @@ def observation_for(state: GameState, rs: Ruleset, side: str) -> Dict[str, Any]:
         }
 
     def foe_bench_pet(p: PetState, is_active: bool = False) -> Dict[str, Any]:
-        """对手后备：只有位次 / id / 是否倒下。血量、能量、配招都不给。"""
+        """对手后备：**只有位次与是否倒下**。血量、能量、配招、物种身份都不给。
+
+        2026-09-30（分计划 01 步骤 A）：这里原先还给 `pet_id` 与 `name`。那与本函数
+        所在模块的自我声明矛盾——`observation_for` 的 docstring 写着「这是隐藏信息的
+        唯一边界」「只看得到…后备的存活与否」，而它同时把对手**整队物种与真名**交给了
+        双方策略（`opponents.py:1064`/`:1080` 的 `obs` 就是这个返回值；`opponents.py`
+        的白名单是按这个结构**自动展开**的，所以「观察里有什么，策略就能读什么」）。
+
+        依据：`docs/roco/PRODUCT-VISION-AND-ROADMAP.md:53`（对手物种属于「预览实际
+        展示」的公开面）+ `docs/roco/execution/01-PLAN.md:38`（预览前/无预览模式不得
+        提前泄漏阵容）。⇒ 尚未亮明的后备不提供物种身份。
+
+        `field` / `active` 两个键保留：它们不是在描述**物种**，而是让消费方能区分
+        「场上那只」与「后备」——去掉它们会让上层无法判断该按哪条公开性规则读。
+        """
         return {
             "slot": p.slot,
-            "pet_id": p.pet_id,
-            "name": rs.pet(p.pet_id).name,
             "fainted": p.fainted,
             "field": False,
             "active": is_active,

@@ -41,15 +41,41 @@ class TestPublicSchemaHasNoSecrets(unittest.TestCase):
                                  f"公开 planner state 里出现了 {forbidden}（seed={seed}）")
 
     def test_opponent_bench_exposes_only_public_facts(self):
-        st = renv.reset(A_TEAM, A_TEAM, seed=5, rs=RS)
-        pub = renv.public_planner_state(st, RS)
-        for entry in pub["opponent"]["bench"]:
+        """对手后备只给位次与是否倒下。
+
+        **原断言（逐字，改钉不删）**：
             self.assertEqual(set(entry.keys()), {"slot", "pet_id", "fainted"},
                              "对手后备只应有位次/id/是否倒下；血量与配招是隐藏信息")
-        # 场上那只的面板是公开的（屏幕上就写着）
+
+        **为什么它与当前有效规则冲突（独立证据）**：
+        `pet_id` 是**物种身份**，不是「位次/存活」那种结构性事实。按当前口径：
+          · `docs/roco/PRODUCT-VISION-AND-ROADMAP.md:53`——「开局对方阵容」一栏里，
+            **可以**知道的是「预览实际展示的物种、形象、属性及明确可见的顺序」；
+            **不可以**假定看见物种就知道天分/性格/真实六维与四技能；
+          · `docs/roco/execution/01-PLAN.md:38`——通过条件之一：「预览发生前及无预览模式
+            **没有提前泄漏阵容**」；
+          · Codex 修订计划（2026-09-30）——「预览**尚未出现**时不许提前读阵容」。
+        在**尚未发生预览**的一局里给出后备 `pet_id`，就是把整队物种身份提前交出去。
+        实测（`reports/roco/product-execution/01/raw-align-before.json`）：
+        改前 `public_planner_state.opponent.bench_pet_ids == ['pet_000112','pet_000062',…]`
+        ——对手**整队六只**的身份可读。
+
+        ⇒ 新口径：后备只有 `slot` / `fainted`；物种身份等第 02 分计划做出「开局预览」
+        之后，按**实际亮明的**那一份带 `revealed_*` 字段进来。
+        """
+        st = renv.reset(A_TEAM, A_TEAM, seed=5, rs=RS)
+        pub = renv.public_planner_state(st, RS)
+        self.assertTrue(pub["opponent"]["bench"], "后备是空的：这条检查会空过")
+        for entry in pub["opponent"]["bench"]:
+            self.assertEqual(set(entry.keys()), {"slot", "fainted"},
+                             "对手后备只应有位次与是否倒下；物种身份、血量、配招都是隐藏信息")
+        # 物种身份不得从任何别的地方漏出来
+        self.assertNotIn("pet_", json.dumps(pub["opponent"]["bench"], ensure_ascii=False))
+        # 场上那只的面板是公开的（屏幕上就写着）——**包括身份**，因为它已经亮明了
         field = pub["opponent"]["field"]
         self.assertIn("hp", field)
         self.assertIn("energy", field)
+        self.assertIn("pet_id", field, "场上那只已经亮明，身份是公开的")
 
     def test_assumptions_are_declared(self):
         st = renv.reset(A_TEAM, A_TEAM, seed=5, rs=RS)

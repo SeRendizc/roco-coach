@@ -198,7 +198,38 @@ class BothViewsDescribeTheSameMoment(unittest.TestCase):
 
 
 class OpponentBenchFollowsRevealRules(unittest.TestCase):
-    """判据 4：对手后备直到上场才亮明。"""
+    """判据 4：对手后备直到上场才亮明。**两条视图同一条口径。**
+
+    ── 2026-09-30（分计划 01）改钉记录 ───────────────────────────────────────
+    这里原来是**一对方向相反**的断言：
+
+      · `test_ui_bench_has_no_identity_and_no_panel`（保留，未改）：
+        断言 `ui_public_view` 的后备键集 == `{"slot", "fainted"}` —— **今天仍然成立**；
+      · `test_planner_bench_keeps_pet_id_for_reconstruction`（**已改钉**），原断言逐字：
+            public = renv.public_planner_state(fresh(), RS, "player")
+            for entry in public["opponent"]["bench"]:
+                self.assertIn("pet_id", entry)
+        它的注释写着：「反向：规划协议**必须**留着 pet_id（重建搜索状态要用）。
+        两条视图口径不同是有意的，不是漏改。」
+
+    **为什么它必须撤（独立证据，不是为了让测试绿）**：
+    这条断言把「两条视图**公开性口径不同**」当成了设计意图，而当前有效规则要求的是
+    **字段集可以不同、公开边界必须相同**：
+      · `docs/roco/PRODUCT-VISION-AND-ROADMAP.md:53`（对手物种只在预览实际展示后公开）；
+      · `docs/roco/execution/01-PLAN.md:38`（预览前 / 无预览模式不得提前泄漏阵容）；
+      · Codex 修订计划（2026-09-30）：「预览尚未出现时不许提前读阵容」。
+    实测（`reports/roco/product-execution/01/raw-align-before.json`）：改前规划协议给出
+    对手**整队六只**的 `pet_id`；`observation_for` 更是连 `name` 一起给（整队真名）。
+    而 `src/coach/game-adapter.js:74` 的 `FOE_BENCH_FIELDS = ['slot','fainted']` 说明
+    **下游早就按「后备无身份」在守** —— 是规划协议这一侧落单了。
+
+    那么「重建搜索状态要用 pet_id」怎么办？重建**不需要**对手后备的身份：它本来就按
+    `OPPONENT_BENCH_ASSUMPTION`（满血 + 规范配招）把后备当未知量建模。去掉身份之后
+    `state_from_public_planner` 走它**本来就有**的占位分支，从「假装知道是哪只」变成
+    「如实说不知道」。这一条由下面的
+    `test_planner_reconstruction_still_works_without_bench_identity` 直接钉住
+    （不只是「应该还能跑」）。
+    """
 
     def test_ui_bench_has_no_identity_and_no_panel(self):
         ui = renv.ui_public_view(fresh(), RS, "player")
@@ -209,12 +240,39 @@ class OpponentBenchFollowsRevealRules(unittest.TestCase):
                              "对手后备只该给位次与是否倒下")
         self.assertNotIn("pet_", json.dumps(bench, ensure_ascii=False))
 
-    def test_planner_bench_keeps_pet_id_for_reconstruction(self):
-        # 反向：规划协议**必须**留着 pet_id（重建搜索状态要用）。两条视图
-        # 口径不同是有意的，不是漏改。
+    def test_planner_bench_has_no_identity_either(self):
+        """规划协议与 UI 视图**同一条公开性边界**（方向已从"相反"统一为"相同"）。"""
         public = renv.public_planner_state(fresh(), RS, "player")
-        for entry in public["opponent"]["bench"]:
-            self.assertIn("pet_id", entry)
+        bench = public["opponent"]["bench"]
+        self.assertTrue(bench, "后备是空的：这条检查会空过")
+        for entry in bench:
+            self.assertEqual(set(entry.keys()), {"slot", "fainted"},
+                             "规划协议的后备也不许带物种身份（与 UI 视图同一条边界）")
+        self.assertNotIn("pet_", json.dumps(bench, ensure_ascii=False))
+        # 场上那只**已经亮明** ⇒ 身份是公开的。这条防止上面被误读成「一律不给身份」。
+        self.assertIn("pet_id", public["opponent"]["field"])
+
+    def test_planner_reconstruction_still_works_without_bench_identity(self):
+        """撤掉重建依据之后，重建必须**仍然能跑**，且如实标注这是假设。
+
+        为什么必须有这一条：改钉的理由之一是「重建不需要后备身份」。那是**主张**，
+        主张要被跑一遍才算数。
+        """
+        public = renv.public_planner_state(fresh(), RS, "player")
+        back = renv.state_from_public_planner(public, RS, analysis_seed=4242)
+        self.assertEqual(back.seed, 4242, "重建必须用 analysis_seed，不是真实 seed")
+        # 场上那只**逐字还原**（它是公开的）
+        self.assertEqual(back.enemy.field_pet.pet_id, public["opponent"]["field"]["pet_id"])
+        self.assertEqual(back.enemy.field_pet.hp, public["opponent"]["field"]["hp"])
+        # 后备：位次与存活要对，身份**允许是占位**（公开信息里没有）
+        bench_slots = sorted(int(b["slot"]) for b in public["opponent"]["bench"])
+        self.assertEqual(len(back.enemy.pets), max(bench_slots) + 1,
+                         "重建出来的对手队列长度必须覆盖到最后一个后备位次")
+        for b in public["opponent"]["bench"]:
+            pet = back.enemy.pets[int(b["slot"])]
+            self.assertEqual(pet.fainted, bool(b["fainted"]), "存活情况必须还原")
+        # 假设必须被标注出来（不是静默填数）
+        self.assertIn("opponent_bench", public["assumptions"])
 
 
 if __name__ == "__main__":

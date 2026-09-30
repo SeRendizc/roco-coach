@@ -119,3 +119,24 @@ curl -s localhost:8765/api/roco/status
 - `harness-verifier` → `scripts/roco/isolated-acceptance.py` + `reports/roco/product-execution/harness/**`
 - `plan01-recon` → 01 勘察；已获 `env.py`/`schema.py`/`service.py` 写域
 - 写域总表见 `STATE.json.write_owners`（Lead 独占 `STATE.json`）
+
+---
+
+## 9 · 补记（交接前最后一刻，来自 01 执行者步骤 A/B）
+
+**01 步骤 A/B 已完成并入库**（`env.py` / `schema.py` / 三条判据 / `regression-set.json` 产物）：
+- **最大泄漏已灭**：`env.py` 的 `ui.legal` 删掉 `"enemy"` 公开副本 ⇒ 递归扫描整个 UI 载荷，**对手技能可见回收率 0.75 → 0.00**，且**控件证明度量有效**（合成 id 能被扫到，不是恒 0 假绿）。`ui.legal` 键 `['enemy','player'] → ['player']`；`cpu_legal_count` 读的是私有域，Node 20/20 通过。
+- **四条判据按规矩改钉**（原断言逐字 + 独立证据 + 最小修订）：
+  1. `test_turn_order_fail_closed` 两条黄金指纹：**根因不是 legacy 被误改** —— 指纹钉的 `serialize()` 里**含 `history`**，而 `history` 装的正是决策前观察载荷；A/B/A 六局读数：**实际动作序列全同 · `state.events` 全同 · 剔除 `history` 后 `serialize()` 全同**，只有 `history`/`observation_for` 变（预期）。处置：结算指纹收窄为剔除 `history`（原值留档 `GOLDEN_*_PRIOR_2026_09_30`），**另立**一枚 `history` 指纹 ⇒ 收窄没制造盲区；并加强必红反证（新增 3 条敏感性断言）。
+  2. `test_regression_set`：先证明 **29/29 场景只有 `state_digest` 变、其余字段 0 变化** ⇒ 产物过期而非引擎变；按测试指路重建后 `--check` exit=0。
+  3. 两条**互相矛盾**的 `pet_id` 断言：一起改钉到同一口径（**后备 `{slot, fainted}`；场上那只仍带 `pet_id`**），并新增一条测试正面证明「重建不需要后备身份」。
+  4. `observation_for` 后备去掉 `pet_id`/`name`。
+- 证据：`reports/roco/product-execution/01/step-log.md`（**含它自己写错的四处自查**）· `README-INDEX.md`（哪些读数权威、哪些作废）· `raw-legacy-{athead,withchange}.json` · `raw-align-verified-{before,after}.json`。
+- 命令：`cd roco && PYTHONPATH=src python3 -m unittest tests.test_public_planner tests.test_ui_public_view tests.test_turn_order_fail_closed tests.test_regression_set tests.test_opponents -q` → **exit 0 · Ran 99 · OK**；`PYTHONPATH=roco/src python3 -m roco_env.regression --check` → **exit 0**。
+
+**Lead 已裁决两件**：
+- **A（授权）**：`roco/src/roco_env/regression.py` 写域**批准**给 01 执行者 —— 其 `:284` 的 `state_digest` 同样吸收了 `history`，属同一设计病；应像判据那样**剔除 `history`**（否则改观察边界就要重建产物，真正的引擎回归会淹没在噪声里）。⚠ 改时要留「剔除前后 29 场景对照」读数，证明**只有 `history` 相关项变**。
+- **B（已执行）**：Lead 此前误入库的 5 份**早期有缺陷探针产物**（含恒 0 的假绿度量）**已 `git rm` 并删除**；`README-INDEX.md` 里保留"作废、不要引用"的登记。
+- ⚠ **不要入库** `reports/roco/product-execution/01/.work-backup/`（A/B 对照副本，含 `env.py.head`/`schema.py.head`/`regression-set.json.before`）。
+
+**01 仍未开始**（下一台电脑的 01 待办）：`opening_roster_revealed` 事件（已裁决发在 `service.battle_new` + `state.events` 留同源记录）· `match_id`/`event_seq`/`decision_id` 契约字段 · Node 转发 · 前端开局预览与"已见阵容"回看入口 · 反作弊对照（`U1` 仍 `blocked:needs_injection_entry`：引擎没有对局内改对手个体的入口，**不猜**）。
