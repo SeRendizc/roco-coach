@@ -55,7 +55,9 @@
     "docs/roco/PRODUCT-VISION-AND-ROADMAP.md": "codex-planner",
     "docs/roco/execution/STATE.json": "lead（单独更新）",
     "_git_index_and_commits": "lead 独占（成员禁止 git 写命令，避免 index 竞争）",
-    "_跨机复验（只读）": "lead-mac（macOS + Python 3.9.6 · agent-coop lead-mac）：拉指定 commit → 独立跑判据 → 报差异；**只读、只报、不改本仓库任何写域、不推产品分支**（见 D-19）"
+    "_跨机复验（只读）": "lead-mac（macOS + Python 3.9.6 · agent-coop lead-mac）：拉指定 commit → 独立跑判据 → 报差异；**只读、只报、不改本仓库任何写域、不推产品分支**（见 D-19）",
+    "src/coach/toolbox.js": "plan03-belief（D-21 ③：仅 plan 回执组装段的 truncation / is_probability / 情景依据字段）",
+    "reports/roco/product-execution/04/**": "plan03-belief（verify-* 归 harness-verifier 与 lead-mac 复核）"
   },
   "blockers": [
     {
@@ -133,11 +135,11 @@
     "04": {
       "title": "有限分支比较与稳健动作排序",
       "status": "in_progress",
-      "step": "04.1 只读勘察（待派 owner）",
+      "step": "04.1 勘察完成（同时行动红线成立 · 现有对手依据=规范配招假设 · 缺截断留痕）→ 04.2 情景注入进行中（D-21）",
       "code": "unverified",
       "isolated": "unverified",
       "player": "unverified",
-      "evidence": null,
+      "evidence": "reports/roco/product-execution/04/04.1-recon.md（规划路径/目标函数 · 隐藏值读点 P1–P6 · 伪概率风险 R1–R8 · 04.2 接口草案 · 04.2–04.6 顺序）",
       "commit": null,
       "remote_sha": null
     },
@@ -520,6 +522,13 @@
       "id": "D-20",
       "what": "04 的开工作法与跨机切片节奏",
       "decision": "① 04 先派 **04.1 只读勘察**（规划器现有深度/合法动作/对手选择时机/评估函数；明确同时行动规则，禁止「先看对手选择再决定我方动作」）；② 04 的**跨机切片在 04.2 冻结后**再给 lead-mac（一次给可复跑的判据，避免半成品）；③ 之后每完成一个分计划给一个跨机切片；④ 给对方的指令必须逐条自测路径（见 O-20），探针不写死绝对路径、产物不进产品仓库",
+      "by": "lead",
+      "outcome": "04.1 已完成（见 D-21）"
+    },
+    {
+      "id": "D-21",
+      "what": "04.1 勘察结论与三件裁决（同时行动红线 / 03 接口 / 写域）",
+      "decision": "**04.1 结论**：① 同时行动红线**成立**（`planner.py` 全文 `_pending` 0 命中；对手按分布枚举；搜索跑在 `state_from_public_planner` 的公开重建状态上，真实 seed 不进；`/battle/plan` 强制 public+schema_version；Node 带 seed 本地拒绝）；② 但「对手可能出什么」的依据目前是**规则集规范配招**（`env.py:4817 candidate_moveset`，即 OPPONENT_BENCH_ASSUMPTION），不是 03 的候选协议 —— 这正是 04.2 要接的口；③ 输出已有 expected/worst/best 与 risk/coverage，但**缺截断逐类留痕**、且「启发式不是胜率」只在人读 limitations 里。**裁决**：① 04.2 接口走 **Node 注入 outlook**（不批准引擎侧自建 —— 会复制 03 口径，违反「不另造平行信念系统」）；硬要求：缺省逐位不变（判据+两向变异）· 显式类型化注入 + 形状校验 fail closed · 按 scenario_id 定序、禁止排序/当概率 · 回执须能看出用的是注入情景还是缺省假设 · 注入不得让引擎读到隐藏真值（同形判据）。② `planner.py` 情景枚举器走**加性可选路径**（缺省不变），且 **R1 同批处理**（`opponent_distribution` 的 `expected` 要落 `is_probability:false` + `basis` 到机器可检字段）；缺省路径在回执里**显式点名**「配招依据=规范配招假设」。③ 批准 `src/coach/toolbox.js` 切片（**仅** plan 回执组装段的 truncation/is_probability/情景依据字段；给确切行、改前后回执 diff、不注入时不变）。R/P 清单归位：R3/R5/R8/P6 → 04.3；R1/R2 → 04.2/04.4；P3 若被情景取代须显式登记哪条假设被替换",
       "by": "lead"
     }
   ]
