@@ -1,8 +1,8 @@
 {
   "schema": "roco-dsh-execution/v1",
-  "updated_at": null,
+  "updated_at": "2026-09-30T16:35:33+08:00",
   "active_plan": "00",
-  "next_action": "复核 DSH 当前 P0 修复，导入现有证据后继续 00 的未完成步骤",
+  "next_action": "修 00 残余 4 红（顺序）：① test_effect_coverage.test_report_has_no_simulatable_with_unclaimed_mechanic_spans—— 逐行取 residual_mechanic_spans 与 claimed_words 对照，属「未支持机制不得被当作完整支持」红线；② test_respond_override.test_static_one_hit_is_credited_under_v3（257「应对状态：本技能变为3连击」认领链未闭合）；③ test_respond_reduction_to_heal.test_tier_flips_to_partial_when_ramp_is_undeclared（289 compound 子句）；④ test_tier_verdict_agreement.test_counter_proof（关两闸后 6 条 < 8：先查漏抓的是哪两类，不拟合数字）。四项全绿且隔离复跑通过后：00 记 passed，commit+push，随即读 01-PLAN.md 第一步。",
   "plan_order": [
     "00",
     "01",
@@ -18,19 +18,36 @@
     "11",
     "12"
   ],
-  "write_owners": {},
-  "blockers": [],
+  "write_owners": {
+    "roco/src/roco_env/coverage.py": "lead",
+    "roco/src/roco_env/service.py": "lead",
+    "scripts/roco/smoke-service-import.py": "lead",
+    "reports/roco/product-execution/**": "lead",
+    "roco/tests/**": "lead（仅在确证判据陈旧时，附独立证据与最小修订理由）",
+    "docs/roco/execution/STATE.json": "lead（单独更新）",
+    "README.md": "codex-planner",
+    "docs/roco/PRODUCT-VISION-AND-ROADMAP.md": "codex-planner"
+  },
+  "blockers": [
+    {
+      "id": "B1",
+      "what": "玩家常驻版本与整局验收",
+      "status": "waiting_external",
+      "reason": "不得重启用户服务；只能只读探活。8765 available:true 只证明探活，不足以宣称常驻代码版本或整局验收。"
+    }
+  ],
   "plans": {
     "00": {
       "title": "服务恢复与规则契约收口",
-      "status": "pending",
-      "step": null,
-      "code": "unverified",
-      "isolated": "unverified",
-      "player": "unverified",
-      "evidence": null,
-      "commit": null,
-      "remote_sha": null
+      "status": "in_progress",
+      "step": "00.6",
+      "code": "fixed",
+      "isolated": "passed",
+      "player": "observed_healthy_pending_resident_version",
+      "evidence": "reports/roco/product-execution/00/result.json（+ acceptance.md / union-mismatch.txt / isolated-http.txt / skill-detail-http.txt / unittest-full.txt）",
+      "commit": "9a0a573",
+      "remote_sha": "9a0a5732f8981c4f899303bc5434a613a53419f5",
+      "note": "修复前 Ran 669·2F+83E（12 模块 import 挂）⇒ 修复后 Ran 846·4F+0E；427 并集打架 0；隔离 :8899 全链路通过；烟测反证 exit=1"
     },
     "01": {
       "title": "公开观察与决策快照契约",
