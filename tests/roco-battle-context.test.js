@@ -265,8 +265,26 @@ test('⑧ 结构性：客户端快照真的带编号、服务端真的注入读�
   // 变成 `{...attachIndividualsToContext(b.context),rocoPreview}`。
   // **判据的意图一个字没变**：注入必须真的合成"这一次请求的上下文"，而不是挂在别的对象上 ——
   // 所以这里改成允许前面套一层补字段的调用，但**要求 `b.context` 仍然是基底**。
-  assert.match(server, /const coachedContext=\{\.\.\.(?:attachIndividualsToContext\(b\.context\)|b\.context),rocoPreview\}/,
-    '注入要真的合成这次上下文（可以套补字段，但基底必须是 b.context）');
+  // ⚠ 2026-10-01 改钉（Lead 授权；**原断言逐字留档**，别再改回来）：
+  //     assert.match(server, /const coachedContext=\{\.\.\.(?:attachIndividualsToContext\(b\.context\)|b\.context),rocoPreview\}/,
+  //       '注入要真的合成这次上下文（可以套补字段，但基底必须是 b.context）');
+  // 为什么改：`1af54e2`（04.3b 收尾）把 `rocoActionView` 也加进了这个对象字面量 ⇒ 它从
+  //   **单行**变成**跨行 + 多一个键**（`...(rocoActionView?{rocoActionView}:{})`），旧正则只认单行形状 ⇒ 红。
+  // **意图一个字没改**：基底必须仍是 `b.context`（可套补字段），且必须注入 `rocoPreview`；
+  //   后面**允许**再有加性键（新注入只能加，不许把基底换掉）。
+  // 反证见下：删掉 `rocoPreview` / 把基底换掉 ⇒ 必红（`p44-mut` 的 M18/M19 实测过）。
+  assert.match(server, /const coachedContext=\{\.\.\.(?:attachIndividualsToContext\(b\.context\)|b\.context),\s*rocoPreview[\s\S]{0,240}?\};/,
+    '注入要真的合成这次上下文（可以套补字段，但基底必须是 b.context；加性键允许跟在 rocoPreview 之后）');
+  // 探测器反向自证：缺 `rocoPreview`、或基底不是 `b.context` ⇒ 同一条正则必须**不**匹配。
+  const coachedContextLiteral = (text) => new RegExp(
+    /const coachedContext=\{\.\.\.(?:attachIndividualsToContext\(b\.context\)|b\.context),\s*rocoPreview[\s\S]{0,240}?\};/
+      .source).test(text);
+  assert.equal(coachedContextLiteral('const coachedContext={...b.context,rocoActionView};'), false,
+    '缺 rocoPreview 必须判为不匹配（否则这条判据只是"有没有这个字面量"）');
+  assert.equal(coachedContextLiteral('const coachedContext={...otherThing,rocoPreview};'), false,
+    '基底不是 b.context 必须判为不匹配');
+  assert.equal(coachedContextLiteral('const coachedContext={...b.context,rocoPreview, ...extra};'), true,
+    '加性键跟在后面是允许的（04.3b 的 rocoActionView 就是这一类）');
   assert.match(server, /attachIndividualsToContext\(b\.context\)/, '个体层要接在这一条链上');
   assert.match(server, /context:coachedContext/, 'runCoach 要拿到注入了读口的那一份');
   const toolbox = readFileSync(join(ROOT, 'src/coach/toolbox.js'), 'utf8');
