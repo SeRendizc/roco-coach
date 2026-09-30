@@ -346,8 +346,21 @@ const DEPTH_EFFECT_POINTS = Object.freeze({
   drain_energy: {field: 'taken', unit: '点能量'},
 });
 
-/** 「下一步」的候选规则，按这个次序问，先够得上的赢（次序＝产品口径：挨打最贵）。 */
-const DEPTH_NEXT_STEP_ORDER = Object.freeze(['enemy-type-advantage-hit', 'our-resist-repeat', 'enemy-replacement-first']);
+/**
+ * 「下一步」的候选规则，按这个次序问，先够得上的赢（次序＝产品口径：**挑错优先、正面殿后**）。
+ *
+ *   ① 挑错向（先说该改的）：`enemy-type-advantage-hit` → `our-resist-repeat` → `enemy-replacement-first`
+ *   ② 正面向（P1-C，2026-10-01）：`our-switch-then-hit` → `our-finish-ko`
+ *
+ * 为什么补正面向：只有挑错向时，**打得好的一局一条都不中** ⇒ `next_step=null` ⇒ 页面那一栏
+ * 「下一局练一件事」只剩静态标签（lead-mac 报的玩家可见缺陷：换宠打出 288 点后撤退）。
+ * 复核读数见 `reports/roco/product-execution/06/P1C-next-step-review.md`：
+ * 同一份输入里 `facts` 有料（`player_switches=1` + 最重一击 288），而三条挑错规则全不中。
+ */
+const DEPTH_NEXT_STEP_ORDER = Object.freeze([
+  'enemy-type-advantage-hit', 'our-resist-repeat', 'enemy-replacement-first',
+  'our-switch-then-hit', 'our-finish-ko',
+]);
 /** 连着几个回合没换人才值得说一句（1 个回合不叫「连着」）。 */
 const DEPTH_MIN_NO_SWITCH_STREAK = 2;
 /** 「第 1、2、3…回合」这串最多列几个，多了只报个数（数字仍可核对，见 fields.turns）。 */
@@ -723,13 +736,31 @@ function depthEffectLedger(facts, rows) {
 }
 
 /**
+ * 我方**可读伤害**里最重的那一次（拿不到伤害数字的不参与；并列时取先发生的那一次 ⇒ 次序稳定）。
+ *
+ * P1-C：正面向的两条规则都要「本局我方最重的一击」这个锚点，抽出来避免两份实现漂移。
+ */
+function depthHeaviestPlayerBlow(facts) {
+  const mine = facts.blows.filter((blow) => blow.side === DEPTH_SIDE_PLAYER
+    && depthNumberOf(blow.damage) !== null && blow.damage > 0);
+  if (!mine.length) return null;
+  return mine.reduce((a, b) => (b.damage > a.damage ? b : a));
+}
+
+/**
  * 一条**有条件**的下一步：条件必须来自这一局真的出现过的事件。
  *
- * 三条规则按 `DEPTH_NEXT_STEP_ORDER` 的次序问，先够得上的赢：
+ * 五条规则按 `DEPTH_NEXT_STEP_ORDER` 的次序问，先够得上的赢：
  *   ① `enemy-type-advantage-hit`：对面打出过属性克制的一击（最贵的那一次）→ 下次先换掉挨打的那一只；
  *   ② `our-resist-repeat`：我方连着两个回合打在抵抗上 → 下次换一个系别的技能或换人；
- *   ③ `enemy-replacement-first`：对面补过位 → 下次补位之后先确认它是谁再决定打谁。
- * 一条都不成立就返回 null：没有本局事实支撑的「下次要……」就是套话。
+ *   ③ `enemy-replacement-first`：对面补过位 → 下次补位之后先确认它是谁再决定打谁；
+ *   ④ `our-switch-then-hit`（P1-C 正面向）：我方**主动换人之后**（同回合或紧接的下一回合）打出过
+ *      这一局我方最重的一击 → 下次换上来的那一只先按对位打一手，换人前先想好「上来先打谁」；
+ *   ⑤ `our-finish-ko`（P1-C 正面向）：我方那一手在**同回合**把对方某一位打到倒下（目标位次对得上）
+ *      → 下次对手剩这么点血时先算够不够收尾再出手（这一局算对了）。
+ *
+ * 一条都不成立就返回 null：没有本局事实支撑的「下次要……」就是套话（页面据此**隐藏整行**，不填占位句）。
+ * ④⑤ 只在三条挑错规则都不中时才轮到 —— 「先讲要改的」这条产品口径不变。
  */
 function depthNextStep({facts, game}) {
   const order = DEPTH_NEXT_STEP_ORDER;
@@ -782,6 +813,53 @@ function depthNextStep({facts, game}) {
           : '下一次对面补位之后，先确认它是谁、什么系，再决定这一手打谁。',
         anchors: [replacement.index],
         fields: {turn: replacement.turn, slot: replacement.slot},
+      };
+    }
+    // ── P1-C 正面向 ④：换人之后打出我方最重的一击 ──────────────────────────
+    //   命中条件全部是**本局真发生过的事件对**：换人在那一击之前、且在同一回合或紧接的下一回合。
+    //   两处都拿不到回合号就不命中（宁可少命中，也不写一句读不通的「有一回合」下一步）。
+    if (rule === 'our-switch-then-hit') {
+      const best = depthHeaviestPlayerBlow(facts);
+      if (!best || !Number.isInteger(best.turn)) continue;
+      const after = facts.switches.filter((row) => row.side === DEPTH_SIDE_PLAYER
+        && Number.isInteger(row.turn) && Number.isInteger(row.index)
+        && row.index < best.index
+        && (row.turn === best.turn || row.turn === best.turn - 1));
+      if (!after.length) continue;
+      const last = after[after.length - 1];    // `facts.switches` 按 index 稳定排序 ⇒ 取最近的那一次
+      const target = depthTargetSuffix(best, game);
+      return {
+        rule,
+        condition: `${depthTurnText(last.turn)}主动换人之后，那一手打出过这一局我方最重的一击（约 ${best.damage} 点${target}）`,
+        action: '下一次换上来的那一只，先按它的对位打出一手——就像这一局这样；换人之前先把「上来先打谁」想好。',
+        text: `下一次换上新的一只之后，先按对位打出一手（这一局第 ${last.turn} 回合换上来，就打出了约 ${best.damage} 点）；换人前先把「上来先打谁」想好。`,
+        anchors: [last.index, best.index],
+        fields: {turn: last.turn, damage: best.damage, skill_id: best.skillId ?? null, to_slot: last.toSlot ?? null},
+      };
+    }
+    // ── P1-C 正面向 ⑤：这一手把对方打到倒下（同回合 + 目标位次对得上）──────
+    //   ⚠ 拿不到 `slot` 或 `target_slot` 就**不放宽**：宁可这条不命中，也不把「谁倒的」猜一个出来。
+    if (rule === 'our-finish-ko') {
+      const ko = facts.faints
+        .filter((row) => row.side === DEPTH_SIDE_ENEMY && Number.isInteger(row.slot) && Number.isInteger(row.turn))
+        .map((faint) => {
+          const blow = facts.blows.filter((one) => one.side === DEPTH_SIDE_PLAYER
+            && one.index < faint.index && one.turn === faint.turn
+            && one.targetSlot === faint.slot
+            && depthNumberOf(one.damage) !== null && one.damage > 0).pop() ?? null;
+          return blow ? {faint, blow} : null;
+        })
+        .filter(Boolean)
+        .pop() ?? null;
+      if (!ko) continue;
+      const {faint, blow} = ko;
+      return {
+        rule,
+        condition: `${depthTurnText(faint.turn)}我方那一手把对方第 ${faint.slot + 1} 位打到倒下（约 ${blow.damage} 点）`,
+        action: '下一次对手剩这么一点血时，先算一下够不够收尾再出手——这一局你算对了，把这个习惯留住。',
+        text: `下一次对手剩这么一点血时，先算够不够收尾再出手（这一局第 ${faint.turn} 回合你算对了：约 ${blow.damage} 点收掉对方第 ${faint.slot + 1} 位）。`,
+        anchors: [blow.index, faint.index],
+        fields: {turn: faint.turn, damage: blow.damage, slot: faint.slot},
       };
     }
   }

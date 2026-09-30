@@ -179,3 +179,48 @@ UI 那一条若要做，需要页面层判据（`tests/roco-experience.test.js` 
 4. 报冻结（每次改动都给 hash + 命令 + 退出码 + 变异读数）。
 
 **阻塞**：`roco.js` 被 task-44 占用（我按你指示先不动）；`roco-experience.js` 是否批准我动，等你一句话。
+
+---
+
+# §7 · 实施记录（数据层已落地 · 2026-10-01，Lead 三件全批之后）
+
+## 7.1 改了什么（`src/coach/roco-experience.js`，只动 `depthNextStep` 与其常量段）
+
+1. `DEPTH_NEXT_STEP_ORDER`：三条挑错向**之后**追加 `'our-switch-then-hit', 'our-finish-ko'`（次序＝**挑错优先、正面殿后**）；
+2. 新 helper `depthHeaviestPlayerBlow(facts)`：我方可读伤害里最重的一次（并列取先发生的 ⇒ 次序稳定）；
+3. 规则 ④ `our-switch-then-hit`：我方**主动换人**（`index < 那一击`、`turn ∈ {hit.turn, hit.turn−1}`、两者回合号都得是整数）
+   之后打出**这一局我方最重的一击** ⇒ 下一步「换上新的一只先按对位打一手，换人前先想好『上来先打谁』」；
+   `anchors=[switch.index, hit.index]`、`fields={turn, damage, skill_id, to_slot}`；
+4. 规则 ⑤ `our-finish-ko`：我方那一手**同回合**把对方某一位打到倒下，且 `target_slot === faint.slot`
+   （**拿不到 slot 就不放宽**）⇒ 下一步「对手剩这么点血时先算够不够收尾（这一局你算对了）」；
+   `anchors=[hit.index, faint.index]`、`fields={turn, damage, slot}`；
+5. 一条都不中仍然 `return null`（**没有**在数据层加占位句；隐藏整行是 UI 的事）。
+
+## 7.2 读数（命令 + 退出码）
+
+| # | 命令 | 退出码 | 原文 |
+|---|---|---|---|
+| 1 | `node reports/roco/product-execution/06/probe-06.5-p1c-next-step.mjs`（**改后**） | 0 | P1-C 夹具：`next_step_rule: "our-switch-then-hit"` · `next_step_text: "下一次换上新的一只之后，先按对位打出一手（这一局第 1 回合换上来，就打出了约 288 点）；换人前先把「上来先打谁」想好。"` · `row_empty_review_branch: false` · `row_empty_fallback_branch: false`（**改前两条都是 true**）；两局真引擎对照仍走 `enemy-type-advantage-hit`（次序未变） |
+| 2 | `node --test --test-concurrency=1 tests/roco-match-review-depth.test.js` | **0** | `ℹ tests 14 / pass 13 / fail 0 / skipped 1`；新增三条用例：`P1-C ①`（正面局面必须给相关下一步）· `P1-C ②`（四条反证：删掉那一击/换人在后/目标位次对不上/只有换人 ⇒ 都不许命中）· `P1-C ④`（次序 + 既有三条**逐字**产出回归） |
+| 3 | 同组回归：`tests/roco-match-review-depth.test.js tests/roco-experience.test.js tests/roco-review-u10.test.js tests/roco-review-body-fallback.test.js` | **0** | `ℹ tests 50 / pass 49 / fail 0 / skipped 1` |
+
+## 7.3 两向变异（临时副本 `E:\roco-scratch\plan07\p1c`，`git archive HEAD src tests scripts package.json`）
+
+| 变异 | 做了什么 | 读数 |
+|---|---|---|
+| ① 副本基线 | 未变异 | **exit 0 · 14/13/0/1** |
+| ② **A 退回单向** | `DEPTH_NEXT_STEP_ORDER` 删掉两条正面向规则 | **exit 1 · 12 pass / 1 fail**，红的是 `P1-C ①`（正面局面给不出下一步） |
+| ③ **B 兜底硬编码套话** | `depthNextStep` 末尾 `return null` → 恒返回「下一局继续加油。」 | **exit 1 · 10 pass / 3 fail**，红的是 `P1-C ②` + 既有两条 fail-closed 判据 |
+| ④ **C 正面规则插到最前** | 次序改成 `our-*` 在前 | **exit 1 · 11 pass / 2 fail**，红的是**既有 ①**（三条规则次序）+ `P1-C ④`（次序回归判据有牙） |
+| ⑤ 还原 | 把工作树那份覆盖回去 | **exit 0 · 14/13/0/1** |
+
+## 7.4 状态与未竟事项
+
+- **数据层（本步）**：已落地 + 判据 + 三向变异，全部绿。
+- **UI 层（未做，等解锁）**：`src/client/roco.js` 的 `:5166-5170`（review 分支）与 `:5201`（兜底分支）改成同一收口
+  「内容为空 ⇒ `$('lesson-learning').closest('.result-goal').hidden = true`，有内容才显示」；
+  **副标题与 HTML 不动**（Lead 已批）。改完补页面层判据（静态正则 / 或 `roco-experience.test.js` 那族）。
+- **折进 06.2** 已完成：§2.6 加了「下一局练一件事」一栏的取值行 + 必做反例 **E-X3**（三向判据 + 变异 B 已验红）。
+- **不在本刀范围**（留给 task-33 的共用件迁移）：`roco-experience.js` 的玩家可见数字仍走内联整数插值
+  （与既有 5 条规则的写法一致）；迁移到 `playerNumber/playerQuantity` 时应与整个深度层一起做，避免同一文件两套口径。
+- **未跑**：浏览器级验收（`roco.js` 未改，且 8765 不重启）——留给 Lead 的玩家侧复验。

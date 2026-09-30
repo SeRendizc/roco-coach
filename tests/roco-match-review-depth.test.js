@@ -371,6 +371,131 @@ test('① 下一步：三条规则各由本局真实事件触发，条件是事�
   assert.ok(depthC.next_step.anchors.every((index) => c.events[index].kind === 'replacement'));
 });
 
+// ── P1-C（2026-10-01）：「下一步」的**正面向**两条规则 ────────────────────────
+//
+// 缺陷（lead-mac 玩家可见）：换宠打出 288 点伤害后撤退 ⇒ 三条挑错规则一条都不中 ⇒ `next_step=null`
+// ⇒ 页面「下一局练一件事」只剩静态标签。复核读数：
+// `reports/roco/product-execution/06/P1C-next-step-review.md`（同一份输入 `facts` 有料、三规则全不中）。
+//
+// 新增两条**正面向**规则（`our-switch-then-hit` / `our-finish-ko`），次序**排在三条挑错规则之后**
+// —— 有该改的地方时仍然先讲该改的（产品口径不变）。
+
+/** 夹具 D：主动换人之后打出我方最重的一击（正面局面——三条挑错规则全不中）。 */
+function matchSwitchHit() {
+  const events = [
+    ev(1, 'turn_start', {turn: 1}, '第 1 回合开始。'),
+    ev(1, 'switch', {side: 'player', to_slot: 1}, '我方换上了海豹船长。'),
+    ev(1, 'damage', {side: 'player', skill_id: 'skill_000673', target_slot: 0, damage: 288, type_multiplier: 1, formula_verified: false}, '我方的「气波」命中，造成约 288 点伤害。'),
+    ev(2, 'turn_start', {turn: 2}, '第 2 回合开始。'),
+    ev(2, 'damage', {side: 'enemy', skill_id: 'skill_000310', target_slot: 1, damage: 30, type_multiplier: 1, formula_verified: false}, '对方的「潮涌」命中，造成约 30 点伤害。'),
+    ev(2, 'escape', {side: 'player'}, '我方主动撤退结束。'),
+  ];
+  const view = viewOf({result: 'escaped', turn: 2, pets: PETS, skills: SKILLS});
+  return {events, turns: 2, view, game: rocoGameView(view, {matchId: 'm-p1c-switch'})};
+}
+
+/** 夹具 E：我方那一手**同回合**把对方打到倒下（正面局面——同样不该被挑错规则抢走）。 */
+function matchFinishKo() {
+  const events = [
+    ev(1, 'turn_start', {turn: 1}, '第 1 回合开始。'),
+    ev(1, 'damage', {side: 'player', skill_id: 'skill_000673', target_slot: 0, damage: 210, type_multiplier: 1, formula_verified: false}, '我方的「气波」命中，造成约 210 点伤害。'),
+    ev(1, 'faint', {side: 'enemy', slot: 0}, '对方的精灵倒下了。'),
+    ev(2, 'turn_start', {turn: 2}, '第 2 回合开始。'),
+    ev(2, 'damage', {side: 'enemy', skill_id: 'skill_000310', target_slot: 1, damage: 20, type_multiplier: 1, formula_verified: false}, '对方的「潮涌」命中，造成约 20 点伤害。'),
+  ];
+  const view = viewOf({result: 'win', turn: 2, pets: PETS, skills: SKILLS});
+  return {events, turns: 2, view, game: rocoGameView(view, {matchId: 'm-p1c-ko'})};
+}
+
+test('P1-C ① 正面局面：换人之后打出最重的一击 ⇒ 必须给出**与本局事实相关**的下一步', () => {
+  const d = matchSwitchHit();
+  const depth = rocoMatchDepth({events: d.events, game: d.game, turns: d.turns});
+  assert.ok(depth.next_step, '换宠打伤害这类事件必须给得出下一步（这就是 P1-C 的缺陷）');
+  assert.equal(depth.next_step.rule, 'our-switch-then-hit');
+  // 相关性：锚点必须指向**真实存在的那两个事件**（换人 + 那一击），而不是一个常量
+  assert.deepEqual(depth.next_step.anchors, [1, 2]);
+  assert.equal(d.events[depth.next_step.anchors[0]].kind, 'switch');
+  assert.equal(d.events[depth.next_step.anchors[1]].kind, 'damage');
+  // 文本必须带**本局**的回合号与伤害数字（可核对），不是套话
+  assert.match(depth.next_step.text, /第 1 回合换上来/);
+  assert.match(depth.next_step.text, /约 288 点/);
+  assert.equal(depth.next_step.fields.damage, 288);
+  assert.equal(depth.next_step.fields.turn, 1);
+  assertNoForbidden(depth.next_step.text + depth.next_step.action, '下一步（正面）');
+
+  const e = matchFinishKo();
+  const depthE = rocoMatchDepth({events: e.events, game: e.game, turns: e.turns});
+  assert.equal(depthE.next_step.rule, 'our-finish-ko');
+  assert.deepEqual(depthE.next_step.anchors, [1, 2]);
+  assert.equal(e.events[depthE.next_step.anchors[1]].kind, 'faint');
+  assert.match(depthE.next_step.text, /第 1 回合你算对了/);
+  assert.match(depthE.next_step.text, /约 210 点/);
+
+  // 非恒真：两个**不同**的正面局面不能得到同一句话（否则就是万金油）
+  assert.notEqual(depth.next_step.text, depthE.next_step.text, '不同局面不许给同一句下一步');
+});
+
+test('P1-C ② 没有本局事实支撑 ⇒ 仍然一条都不给（新规则不许放宽 fail closed）', () => {
+  const d = matchSwitchHit();
+  // 反证 1：把「最重的一击」删掉 ⇒ 换人规则不许再命中（换人是事实，但**没有那一击**就不是这个局面）
+  const noHit = rocoMatchDepth({events: d.events.filter((event) => event.kind !== 'damage' || event.detail?.side === 'enemy'), game: d.game, turns: d.turns});
+  assert.notEqual(noHit.next_step?.rule, 'our-switch-then-hit', `没有那一击就不许报「换上来打出一手」：${JSON.stringify(noHit.next_step)}`);
+  // 反证 2：换人挪到那一击**之后**（隔了两个回合）⇒ 也不算「换上来就打」
+  const lateSwitch = rocoMatchDepth({
+    events: [d.events[0], d.events[2], d.events[3], d.events[4], ev(3, 'switch', {side: 'player', to_slot: 1}, '我方换上了海豹船长。')],
+    game: d.game, turns: 3,
+  });
+  assert.notEqual(lateSwitch.next_step?.rule, 'our-switch-then-hit', '换人在那一击之后就不叫「换上来打出的」');
+
+  // 反证 3：目标位次对不上 ⇒ 收尾规则不许命中（宁可少命中，不许猜谁倒的）
+  const e = matchFinishKo();
+  const wrongSlot = rocoMatchDepth({
+    events: e.events.map((event, index) => (index === 1 ? {...event, detail: {...event.detail, target_slot: 2}} : event)),
+    game: e.game, turns: e.turns,
+  });
+  assert.notEqual(wrongSlot.next_step?.rule, 'our-finish-ko', '目标位次对不上就不许说「这一手收掉了它」');
+
+  // 反证 4：夹具 C（只有换人、没有伤害）—— 仍然不许编一句
+  const quiet = rocoMatchDepth({
+    events: [ev(1, 'turn_start', {turn: 1}, '第 1 回合开始。'), ev(1, 'switch', {side: 'player', to_slot: 1}, '我方换上了海豹船长。')],
+    game: null, turns: 1,
+  });
+  assert.equal(quiet.next_step, null, '只有换人、没有任何后续事实 ⇒ 不许给下一步');
+});
+
+test('P1-C ④ 回归：三条挑错规则的**次序与产出逐字不变**（新规则只许殿后）', () => {
+  // ① 次序：一局里同时有「挑错事件」与「正面事件」时，必须先讲该改的那一处
+  const d = matchSwitchHit();
+  const mixed = [
+    ...d.events,
+    ev(2, 'damage', {side: 'enemy', skill_id: 'skill_000310', target_slot: 1, damage: 150, type_multiplier: 2, formula_verified: false}, '对方的「潮涌」命中，造成约 150 点伤害，属性克制。'),
+  ];
+  const mixedDepth = rocoMatchDepth({events: mixed, game: d.game, turns: 2});
+  assert.equal(mixedDepth.next_step.rule, 'enemy-type-advantage-hit', '有该改的地方时，正面向规则不许抢先');
+
+  // ② 产出逐字不变（钉住既有三条的输出，插规则的人必须看见这里红）
+  const a = matchA();
+  const depthA = rocoMatchDepth({events: a.events, game: a.game, turns: a.turns});
+  assert.equal(depthA.next_step.rule, 'enemy-type-advantage-hit');
+  assert.equal(depthA.next_step.text,
+    '下一次再遇到第 2 回合那种局面（对方打出属性克制的一击），先换掉挨打的那一只再打。');
+  assert.deepEqual(depthA.next_step.fields, {turn: 2, damage: 96, multiplier: 2, target_slot: 0});
+
+  const b = matchB();
+  const depthB = rocoMatchDepth({events: b.events, game: b.game, turns: b.turns});
+  assert.equal(depthB.next_step.rule, 'our-resist-repeat');
+  assert.equal(depthB.next_step.text,
+    '下一次再遇到连着两回合打在抵抗上（这一局第 2、3 回合就是），先换一个系别的技能或者换人。');
+  assert.deepEqual(depthB.next_step.fields, {from: 2, to: 3});
+
+  const c = matchC();
+  const depthC = rocoMatchDepth({events: c.events, game: c.game, turns: c.turns});
+  assert.equal(depthC.next_step.rule, 'enemy-replacement-first');
+  assert.equal(depthC.next_step.text,
+    '下一次对面补位之后（这一局第 2 回合就补过一次），先确认它是谁、什么系，再决定这一手打谁。');
+  assert.deepEqual(depthC.next_step.fields, {turn: 2, slot: 1});
+});
+
 // ── ② fail closed：没有事件支撑就不许出现 ───────────────────────────────────
 
 test('② 一条支撑事件都没有 → 一条事实都不产生（不补默认值、不编）', () => {
