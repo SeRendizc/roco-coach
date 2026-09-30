@@ -1,0 +1,10 @@
+GET /health 200 fingerprint 4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc
+POST /battle/new 200 ok True legal 12 first skill_000576 turn 1 phase battle
+POST /battle/legal 200 ok True legal 12
+POST /battle/advance 200 ok True events ['turn_start', 'defense', 'damage']
+Traceback (most recent call last):
+  File "<stdin>", line 26, in <module>
+AttributeError: 'str' object has no attribute 'get'
+Traceback (most recent call last):
+  File "<stdin>", line 8, in <module>
+AttributeError: 'str' object has no attribute 'get'

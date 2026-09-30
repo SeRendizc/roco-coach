@@ -1,0 +1,106 @@
+{
+  "plan": "00",
+  "title": "服务恢复与规则契约收口",
+  "step": "00.6",
+  "status": "in_progress",
+  "updated_at": "2026-09-30T16:27:09+08:00",
+  "baseline": {
+    "HEAD": "f418fda6995901f2b839e66da5d7698b75114bec",
+    "branch": "wip/roco-coach-2026-09-30-1418",
+    "coverage_py_sha256_prefix_before": "cc3de2ba",
+    "coverage_py_equals_HEAD_blob": "0c9f6f14bab2",
+    "dirty_at_start": 0,
+    "python": "/usr/bin/python3 3.9.6"
+  },
+  "root_causes": [
+    {
+      "id": "R1",
+      "what": "service.py 在 b5a8d51 提交了新写法，同一批 coverage.py 新写法未提交",
+      "missing_names": [
+        "settlement_verdict",
+        "classify_skill_declared",
+        "_CAPABILITY_TO_FLAG",
+        "residual_mechanic_spans",
+        "RESPOND_POWER_SETTLED_RE",
+        "compound_clause_gaps",
+        "respond_clause_gaps",
+        "UNSETTLED_WORDS"
+      ],
+      "evidence": "ImportError at service.py:112；交接文档写 5 个，实测 8 个"
+    },
+    {
+      "id": "R2",
+      "what": "coverage.py 硬读 parsed.initiative_power['pct']，parse.py:2096 已新增 hits 形状",
+      "evidence": "KeyError:'pct' x9；build_coverage 整体不可跑"
+    },
+    {
+      "id": "R3",
+      "what": "declared_capabilities_of 缺 element_use_ramp 等新叶子",
+      "evidence": "KeyError:'element_use_ramp'"
+    }
+  ],
+  "impact_before": {
+    "unittest": "Ran 669 · 2 failures + 83 errors · skipped=1",
+    "unimportable_modules": 12,
+    "api_roco_status": "available:false"
+  },
+  "impact_after": {
+    "unittest": "Ran 846 · 4 failures + 0 errors · skipped=1",
+    "union_427_tier_verdict_mismatches": 0,
+    "targeted": {
+      "test_sim_endpoints": "36 ran 0F",
+      "test_six_pet_battle": "38 ran 0F",
+      "test_cond_self_debuff_power": "7 ran 0F",
+      "test_effect_coverage": "21 ran 1F",
+      "test_tier_verdict_agreement": "8 ran 1F"
+    }
+  },
+  "acceptance_three_columns": {
+    "code": "fixed（coverage.py 增量补回 8 个名字 + 2 个独立缺陷）",
+    "isolated": "passed（自起 :8899：health / battle_new 12 合法动作 / legal 12 / advance 事件 turn_start,defense,damage / kind=skill 详情 tier+mechanics.resolved）",
+    "player": "observed_healthy_pending_resident_version（8765 available:true health:true last_error:null；但未重启、未确认常驻版本，不宣称整局验收）"
+  },
+  "smoke_test": {
+    "script": "scripts/roco/smoke-service-import.py",
+    "normal": "exit=0",
+    "fault_injected": "exit=1（临时副本改名 classify_skill_declared，未动共享源码）"
+  },
+  "residual_failures": [
+    {
+      "test": "test_report_has_no_simulatable_with_unclaimed_mechanic_spans",
+      "why": "台账里仍有 SIM 行带残余片段（首个 skill_000252）",
+      "next": "逐行取 residual 与 claimed_words 对照；属'未支持机制不得被当作完整支持'红线"
+    },
+    {
+      "test": "test_static_one_hit_is_credited_under_v3",
+      "why": "257 追打「1连击」认领链未闭合",
+      "next": "核对 resolve_respond_override 对「应对状态：本技能变为3连击」是否产出 effect"
+    },
+    {
+      "test": "test_tier_flips_to_partial_when_ramp_is_undeclared",
+      "why": "289 compound 子句在 triggered_ramp=False 时必须 PARTIAL",
+      "next": "compound_clause_gaps + 认领链对齐"
+    },
+    {
+      "test": "test_counter_proof_disabling_the_shared_gates_brings_them_back",
+      "why": "关两闸后打架 6 条，判据要求 ≥8",
+      "next": "按读数补齐闸的覆盖面（不拟合数字，先查是哪两类漏抓）"
+    }
+  ],
+  "blockers": [
+    {
+      "id": "B1",
+      "what": "玩家常驻版本/整局验收",
+      "status": "waiting_external",
+      "reason": "不得重启用户服务；只能只读探活"
+    }
+  ],
+  "constraints_respected": [
+    "未重启 8765",
+    "未清理数据",
+    "未训练",
+    "未联系试用者",
+    "未改 roco/tests 断言",
+    "未动 README 与 PRODUCT-VISION-AND-ROADMAP"
+  ]
+}

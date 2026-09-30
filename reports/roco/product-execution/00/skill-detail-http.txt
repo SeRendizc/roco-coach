@@ -1,0 +1,26 @@
+status 200 result type dict
+  record: str = skill
+  skill_id: str = skill_000724
+  name: str = 破罐破摔
+  category: str = 攻击
+  element: str = 萌系
+  energy: int = 3
+  damage_class: str = 魔攻
+  power: int = 80
+  power_status: str = static_value_present
+  has_static_power: bool = True
+  is_trait: bool = False
+  effect_support: str = unsupported
+  desc: str = 造成魔伤，自己有减益时，本次技能威力+60。
+  effective_power: NoneType = None
+  damage: NoneType = None
+  mechanics: dict = {'resolved': True, 'coverage': 1.0, 'reason': None}
+  support_tier: str = SIMULATABLE_UNVERIFIED
+  support_why: str = 描述被完整读出（1 条效果），且没有未认领片段
+  support_unparsed: list = []
+--- 同一读数走进程内同一入口（判据 test_effect_coverage:330-349 用的那条）---
+  skill_000724: tier=SIMULATABLE_UNVERIFIED unparsed=[]
+  skill_000252: tier=SIMULATABLE_UNVERIFIED unparsed=[]
+  skill_000325: tier=SIMULATABLE_UNVERIFIED unparsed=[]
+  skill_000463: tier=SIMULATABLE_UNVERIFIED unparsed=[]
+  skill_000689: tier=SIMULATABLE_UNVERIFIED unparsed=[]

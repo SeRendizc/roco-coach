@@ -1,0 +1,125 @@
+/Users/serendizc/Developer/roco-coach/roco/tests/test_agent_tasks.py:141: ResourceWarning: unclosed file <_io.TextIOWrapper name='/Users/serendizc/Developer/roco-coach/tests/evals/agent-tasks-v1.jsonl' mode='r' encoding='utf-8'>
+  committed = [
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/Users/serendizc/Developer/roco-coach/roco/tests/test_trait_worklist.py:55: ResourceWarning: unclosed file <_io.TextIOWrapper name='/Users/serendizc/Developer/roco-coach/roco/src/roco_env/traits.py' mode='r' encoding='utf-8'>
+  source = open(tr.__file__, "r", encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+======================================================================
+FAIL: test_report_has_no_simulatable_with_unclaimed_mechanic_spans (test_effect_coverage.UnclaimedSpanBlocksSimulatableTest)
+台账里每一条「可模拟」都必须**没有**未被引擎结算的机制片段（非循环：从解析层重算）。
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/serendizc/Developer/roco-coach/roco/tests/test_effect_coverage.py", line 584, in test_report_has_no_simulatable_with_unclaimed_mechanic_spans
+    self.assertEqual(bad, [], f"可模拟里仍有未认领片段：{bad[:5]}")
+AssertionError: Lists differ: [('skill_000252', ['回合：回合结束时']), ('skill_0[1718 chars]记'])] != []
+
+First list contains 47 additional elements.
+First extra element 0:
+('skill_000252', ['回合：回合结束时'])
+
+Diff is 1911 characters long. Set self.maxDiff to None to see it. : 可模拟里仍有未认领片段：[('skill_000252', ['回合：回合结束时']), ('skill_000257', ['连击：1连击']), ('skill_000261', ['连击：1连击']), ('skill_000270', ['每：每使用1次其他普通系技能']), ('skill_000277', ['获得：敌方获得物防和魔防-120%'])]
+
+======================================================================
+FAIL: test_static_one_hit_is_credited_under_v3 (test_respond_override.RespondHitCountOverride)
+**改钉**：描述里明写「1连击」时，N=1 也算已结算（此前被判未结算 = 假免责）。
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/serendizc/Developer/roco-coach/roco/tests/test_respond_override.py", line 376, in test_static_one_hit_is_credited_under_v3
+    self.assertTrue(rcov.settlement_verdict(RS.skills[sid], declared=caps3)["resolved"],
+AssertionError: False is not true : skill_000514 明写 1连击却没被认领
+
+======================================================================
+FAIL: test_tier_flips_to_partial_when_ramp_is_undeclared (test_respond_reduction_to_heal.CompoundClauseNeedsBothClaimsTest)
+**验收条件**：关 `triggered_ramp`（新叶子仍开）⇒ 289 必须翻 **PARTIAL** ✓。
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/serendizc/Developer/roco-coach/roco/tests/test_respond_reduction_to_heal.py", line 162, in test_tier_flips_to_partial_when_ramp_is_undeclared
+    self.assertEqual(C.classify_skill(sk, **flags)["support"], C.SUPPORT_PARTIAL,
+AssertionError: 'SIMULATABLE_UNVERIFIED' != 'PARTIAL'
+- SIMULATABLE_UNVERIFIED
++ PARTIAL
+ : 关掉 ramp 能力位后，289 的档位必须说 PARTIAL ✗（那条假绿的回归钉）
+
+======================================================================
+FAIL: test_counter_proof_disabling_the_shared_gates_brings_them_back (test_tier_verdict_agreement.TierAndVerdictAgreeTest)
+**反证（必红方向）**：把本批抽出来的两个共用闸关掉 ⇒ 打架必须**重新出现**。
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/serendizc/Developer/roco-coach/roco/tests/test_tier_verdict_agreement.py", line 99, in test_counter_proof_disabling_the_shared_gates_brings_them_back
+    self.assertGreaterEqual(len(bad), 8,
+AssertionError: 5 not greater than or equal to 8 : 关掉两道共用闸之后必须重新出现打架（否则这条判据是空的）
+
+----------------------------------------------------------------------
+Ran 846 tests in 44.110s
+
+FAILED (failures=4, skipped=1)
+
+[实际] 图鉴 622 只；抽样 30 只；重名名字 62 个，涉及 180 只
+
+[实际] 全库抗龙系 38 只；限 3 个 id 后 0 只；给 3 个已知命中 ⇒ 3 只
+
+[实际] 全部 622 份学习表：最大紧凑回执 7516 字节（pet_000433）
+
+[实际] 与旧快照不同的 41 格（全部 3.0 → 4.0）：
+  · 光系|地系 受 草系：快照 ×3.0 → 裁决 ×4.0
+  · 光系|水系 受 草系：快照 ×3.0 → 裁决 ×4.0
+  · 冰系|地系 受 机械系：快照 ×3.0 → 裁决 ×4.0
+  · 冰系|地系 受 武系：快照 ×3.0 → 裁决 ×4.0
+  · 冰系|电系 受 地系：快照 ×3.0 → 裁决 ×4.0
+  · 冰系|草系 受 火系：快照 ×3.0 → 裁决 ×4.0
+  · 冰系|萌系 受 机械系：快照 ×3.0 → 裁决 ×4.0
+  · 地系|光系 受 草系：快照 ×3.0 → 裁决 ×4.0
+  · 地系|恶系 受 武系：快照 ×3.0 → 裁决 ×4.0
+  · 地系|水系 受 草系：快照 ×3.0 → 裁决 ×4.0
+  · 地系|翼系 受 冰系：快照 ×3.0 → 裁决 ×4.0
+  · 地系|草系 受 冰系：快照 ×3.0 → 裁决 ×4.0
+  · 幻系|光系 受 幽系：快照 ×3.0 → 裁决 ×4.0
+  · 幻系|幽系 受 幽系：快照 ×3.0 → 裁决 ×4.0
+  · 幽系|光系 受 幽系：快照 ×3.0 → 裁决 ×4.0
+  · 幽系|幻系 受 幽系：快照 ×3.0 → 裁决 ×4.0
+  · 幽系|恶系 受 光系：快照 ×3.0 → 裁决 ×4.0
+  · 幽系|毒系 受 恶系：快照 ×3.0 → 裁决 ×4.0
+  · 幽系|萌系 受 恶系：快照 ×3.0 → 裁决 ×4.0
+  · 恶系|冰系 受 武系：快照 ×3.0 → 裁决 ×4.0
+  · 恶系|地系 受 武系：快照 ×3.0 → 裁决 ×4.0
+  · 普通系|机械系 受 武系：快照 ×3.0 → 裁决 ×4.0
+  · 机械系|地系 受 武系：快照 ×3.0 → 裁决 ×4.0
+  · 机械系|地系 受 水系：快照 ×3.0 → 裁决 ×4.0
+  · 机械系|火系 受 水系：快照 ×3.0 → 裁决 ×4.0
+  · 机械系|草系 受 火系：快照 ×3.0 → 裁决 ×4.0
+  · 机械系|虫系 受 火系：快照 ×3.0 → 裁决 ×4.0
+  · 毒系|萌系 受 恶系：快照 ×3.0 → 裁决 ×4.0
+  · 水系|翼系 受 电系：快照 ×3.0 → 裁决 ×4.0
+  · 火系|冰系 受 地系：快照 ×3.0 → 裁决 ×4.0
+  · 火系|毒系 受 地系：快照 ×3.0 → 裁决 ×4.0
+  · 翼系|水系 受 电系：快照 ×3.0 → 裁决 ×4.0
+  · 草系|冰系 受 火系：快照 ×3.0 → 裁决 ×4.0
+  · 草系|地系 受 冰系：快照 ×3.0 → 裁决 ×4.0
+  · 草系|幻系 受 虫系：快照 ×3.0 → 裁决 ×4.0
+  · 草系|武系 受 翼系：快照 ×3.0 → 裁决 ×4.0
+  · 草系|萌系 受 毒系：快照 ×3.0 → 裁决 ×4.0
+  · 萌系|毒系 受 恶系：快照 ×3.0 → 裁决 ×4.0
+  · 虫系|草系 受 火系：快照 ×3.0 → 裁决 ×4.0
+  · 虫系|草系 受 翼系：快照 ×3.0 → 裁决 ×4.0
+  · 龙系|翼系 受 冰系：快照 ×3.0 → 裁决 ×4.0
+[实际] 涉及 31 个组合（按去重计）、34 个「组合×攻击属性」对（41 格是**按 102 条键逐格数**的结果，16 对反写各算一次）
+
+[实际] 快照给出 86 个双属性组合；缺 67 个 ⇒ 一律不可查
+
+[实际] 反证：旧实现（读快照封顶行）与快照的差异 = 0 格 ⇒ 判据③（要求 41）必红；真实现 = 41 格
+[实际] 手写清单里那 41 格：旧实现给 [3.0]，真实现给 [4.0]
+
+[实际] 火系克制：['冰系', '机械系', '草系', '虫系']（共 4 系）
+
+[实际] 替换：雨天（7 回合）→ 沙暴
+
+[实际] 8 回合递减轨迹（含出场那一回合的回合末）：[7, 6, 5, 4, 3, 2, 1, None]
+
+[实际] 模式 pvp-standard-six-pet → 配置 mobile_s4_candidate_v3；雨天：天气为雨天时，双方的水系技能威力+75%。
+
+[实际] 雨天：天气为雨天时，双方的水系技能威力+75%。（value=1.75，术语 3008）
+
+[实际] 雨天：水炮 232 → 406（系数 1.75，雨天：水系系技能威力 ×1.75（术语 3008））；普通系 38 → 38（系数 1.0）
+
+[实际] 沙暴：地系技能能耗 2 → 1；普通系 4 → 4
+[实际] 「能耗减半」遇奇数：扬沙 1 → 0（下取整；口径未核验，见 unknowns）

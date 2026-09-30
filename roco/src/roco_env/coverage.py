@@ -69,7 +69,7 @@ def resolve_claims(skill: Any, capabilities: Optional[Dict[str, bool]] = None,
             claimed.append(f"传动×{parsed.position_shift}")
     if caps.get("initiative_condition") and getattr(parsed, "initiative_power", None):
         parsed = parse_mod.resolve_initiative_condition(skill, declared=True, parsed=parsed)
-        claimed.append(f"先手条件（威力+{int(parsed.initiative_power['pct'])}%）")
+        claimed.append(_initiative_claim_label(parsed))
     if caps.get("foe_switch_condition") and getattr(parsed, "foe_switch_effects", None) \
             and not getattr(parsed, "foe_switch_leftover", ""):
         parsed = parse_mod.resolve_foe_switch_condition(skill, declared=True, parsed=parsed)
@@ -100,7 +100,11 @@ def classify_skill(skill: Any, *, foe_energy_loss_declared: bool = False,
                    per_layer_cost_declared: bool = False,
                    foe_switch_condition_declared: bool = False,
                    per_use_ramp_declared: bool = False,
-                   on_hit_ramp_declared: bool = False) -> Dict[str, Any]:
+                   on_hit_ramp_declared: bool = False,
+                   # 2026-09-30：扩展族能力位。判据按 `_CAPABILITY_TO_FLAG` 展开后
+                   # splat 进来（`classify_skill(sk, **flags)`，九处），所以这里用兜底
+                   # 形参收下任意族，**不逐族再抄一遍形参名**（抄一遍就又多一处漂移点）。
+                   **declared_flags: bool) -> Dict[str, Any]:
     """一条战斗技能的支持等级。判据只看**解析结果 + 已声明的能力**，不看名字或人工名单。
 
     `multi_hit_declared`：当前规则配置有没有声明连击能力（RC-401 的第一条增量）。
@@ -131,7 +135,7 @@ def classify_skill(skill: Any, *, foe_energy_loss_declared: bool = False,
     # 它的 evidence 正好盖住那段原文，于是"已认领"由**同一把尺子**（`unclaimed_mechanic_spans`）算出来。
     if initiative_declared and getattr(parsed, "initiative_power", None):
         parsed = parse_mod.resolve_initiative_condition(skill, declared=True, parsed=parsed)
-        claimed.append(f"先手条件（威力+{int(parsed.initiative_power['pct'])}%）")
+        claimed.append(_initiative_claim_label(parsed))
     # RC-401 批次九（2026-09-25）：「敌方每有 N 层中毒效果，本技能能耗 -M」（动态能耗修正）。
     # 同上：声明了能力才补 `per_layer_cost` 效果 —— 它的 evidence 覆盖整条子句，
     # 于是「每」「层」两个机制词由**同一把尺子**判为已认领。
@@ -162,6 +166,51 @@ def classify_skill(skill: Any, *, foe_energy_loss_declared: bool = False,
         if len(kept) != len(parsed.unparsed):
             claimed.append(f"连击×{parsed.hit_count}")
         parsed.unparsed = kept
+    # 2026-09-30 **扩展族**：每个能力位挂一个 `parse` 里已有的 resolver（唯一映射表
+    # `_RESOLVER_BY_CAPABILITY`）。与自己上面九步**同一套口径**：声明了才产出、
+    # 产出的效果自带 `evidence` ⇒ 那段文本自然从"未认领"里消失（不另抄词表）。
+    # 能力读数（能力位名 → 有没有声明）。九条既有形参**覆盖**同名 flag，这样
+    # `classify_skill(sk, multi_hit_declared=True)` 这种直接调用也与表展开同值。
+    _caps_now = {name: bool(declared_flags.get(flag, False))
+                 for name, flag in _CAPABILITY_TO_FLAG.items()}
+    _caps_now.update({
+        "multi_hit": bool(multi_hit_declared),
+        "slot_condition": bool(slot_condition_declared),
+        "position_shift": bool(position_shift_declared),
+        "foe_energy_loss": bool(foe_energy_loss_declared),
+        "initiative_condition": bool(initiative_declared),
+        "per_layer_cost": bool(per_layer_cost_declared),
+        "foe_switch_condition": bool(foe_switch_condition_declared),
+        "per_use_ramp": bool(per_use_ramp_declared),
+        "on_hit_ramp": bool(on_hit_ramp_declared),
+    })
+    parsed, _family_claimed = _apply_capability_resolvers(
+        skill,
+        _caps_now,
+        parsed)
+    claimed.extend(_family_claimed)
+
+    # ── 两把尺子的**共用读数**（2026-09-30 收口）────────────────────────────
+    # 认领词表 / 残余片段 / 逐句应对缺口 + 没拉起的原语，全部只在这里算一次，
+    # 判据（`settlement_verdict`）调**同一对函数** ⇒ 不会再出现"同一招两处两个说法"。
+    _flags_now = dict(declared_flags)
+    _flags_now.update({
+        "multi_hit_declared": multi_hit_declared,
+        "slot_condition_declared": slot_condition_declared,
+        "position_shift_declared": position_shift_declared,
+        "foe_energy_loss_declared": foe_energy_loss_declared,
+        "initiative_declared": initiative_declared,
+        "per_layer_cost_declared": per_layer_cost_declared,
+        "foe_switch_condition_declared": foe_switch_condition_declared,
+        "per_use_ramp_declared": per_use_ramp_declared,
+        "on_hit_ramp_declared": on_hit_ramp_declared,
+    })
+    _claimed_words = claimed_mechanic_words(parsed, _flags_now)
+    _residual_spans = residual_mechanic_spans(skill, parsed, _claimed_words)
+    _gates = unsettled_mechanic_gaps(skill, parsed, _claimed_words, _caps_now)
+    # 「已结算的类」（与判据**同一个** `SETTLED_PATTERNS`）—— 下面那个"三空"出口要它。
+    _settled_classes = [name for name, words in SETTLED_PATTERNS
+                        if any(w and w in str(getattr(skill, "desc", "") or "") for w in words)]
     # 2026-09-25（第 31 轮实测）：**纯防御技能**（描述里只有「减伤 N%」与「应对X」标记）由
     # 另一条路径结算 —— `effects.parse_defense_reduction()` 读减伤比例、`effects.respond_to()`
     # 读应对类别（`env._execute` 的防御分支就是这两条）。`parse_skill` 对它们**没有 effect**，
@@ -173,7 +222,9 @@ def classify_skill(skill: Any, *, foe_energy_loss_declared: bool = False,
         _residual = _re.sub(r"应对(?:状态|攻击|防御)", "", _residual)
         _residual = _re.sub(r"[，。；、,;:：\s]", "", _residual)
         _has_reduction = bool(_re.search(r"减伤\s*\d+(?:\.\d+)?%", _desc))
-        if _has_reduction and not _residual:
+        # 2026-09-30：共用闸（逐句应对 / 没拉起的原语）**也必须放行**才准说可模拟 ——
+        # 防御技能那条路同样不许绕开它们（否则「应对状态：下次…」这类没实现的分句会被放过）。
+        if _has_reduction and not _residual and not _residual_spans and not _gates:
             return {
                 "support": SUPPORT_SIMULATABLE_UNVERIFIED,
                 "why": "防御技能：减伤比例由 effects.parse_defense_reduction() 读、应对类别由"
@@ -194,44 +245,48 @@ def classify_skill(skill: Any, *, foe_energy_loss_declared: bool = False,
     # 所以这一档现在多一个**必要条件**：`unclaimed_mechanic_spans()` 里没有残余片段。
     # 「已声明能力」覆盖的那些词（连击 / 号位 / 传动 / 先手条件 / 敌方失能）不算残余 ——
     # 认领口径与 `env.py` / 服务端**同一份读数**。档位只会因此**变保守**，不会变宽松。
-    _claimed_words = set()
-    if multi_hit_declared and parsed.hit_count and parsed.hit_count > 1:
-        _claimed_words.add("连击")
-    if slot_condition_declared and parsed.slot_conditions:
-        _claimed_words.add("号位")
-    if position_shift_declared and parsed.position_shift is not None:
-        _claimed_words.add("传动")
-    if initiative_declared and getattr(parsed, "initiative_power", None):
-        _claimed_words.add("若")
-    if foe_energy_loss_declared:
-        _claimed_words.add("能量")
-    if per_layer_cost_declared and getattr(parsed, "per_layer_cost", None):
-        # 「敌方每有 N 层中毒效果」里的两个机制词：整条子句都被 `per_layer_cost` 效果覆盖了。
-        _claimed_words.update(("每", "层"))
-    if foe_switch_condition_declared and getattr(parsed, "foe_switch_effects", None) \
-            and not getattr(parsed, "foe_switch_leftover", ""):
-        # 「若敌方本回合更换精灵」里的两个机制词（若 / 回合）同理。
-        _claimed_words.update(("若", "回合"))
-    if per_use_ramp_declared and getattr(parsed, "per_use_ramp", None):
-        _claimed_words.add("每")
-    if on_hit_ramp_declared and getattr(parsed, "on_hit_ramp", None):
-        # 认领「每」与「连击」两个词：`微型斥候`/`绞轮` 的「（不含连击）」也在这条效果的 evidence 里。
-        _claimed_words.update(("每", "连击"))
-    _residual_spans = [span for span in parse_mod.unclaimed_mechanic_spans(skill, parsed=parsed)
-                       if str(span).split("：")[0] not in _claimed_words]
-    if _residual_spans:
+    # （认领词表 / 残余片段 / 共用闸已在上面算过，见「两把尺子的**共用读数**」。）
+    if _residual_spans or _gates:
         # ⚠ 这里**不要**往 `claimed` 里塞"缺口"：`claimed_by_capability` 的语义是
         # 「被哪条已声明能力认领了」，塞进未认领片段会让那一栏自相矛盾。
+        _gap_all = list(_residual_spans) + list(_gates)
         return {
             "support": SUPPORT_PARTIAL,
             "why": ("读出了 " + str(len(parsed.effects)) + " 条效果，但描述里还有 "
-                    + str(len(_residual_spans)) + " 段机制**引擎没结算**（会被写进 unsupported）："
-                    + "、".join(str(x) for x in _residual_spans[:2])),
+                    + str(len(_gap_all)) + " 段机制**引擎没结算**（会被写进 unsupported）："
+                    + "、".join(str(x) for x in _gap_all[:2])),
             "effects": [e.kind for e in parsed.effects],
-            "unparsed": [str(x) for x in _residual_spans],
+            "unparsed": [str(x) for x in _gap_all],
             "claimed_by_capability": claimed,
         }
-    if parsed.effects and not parsed.unparsed:
+    # 2026-09-29（task-24）**改钉**：新增一条**同样有依据**的可结算形态 ——
+    # 「**有静态威力的纯伤害 + 已结算的应对子句**」。实测 8 条（`255 突袭` / `259 偷袭` /
+    # `379 闪燃`…）：描述里有「应对状态」⇒ `plain_attack=False`，但那一句引擎**真的结算**
+    # （`effects.effective_power()` 按倍率改这一手的威力）—— 过去它们掉进匿名桶判 PARTIAL，
+    # 是**假保守**。判据的意图一个字没松：可结算仍然必须**说得出来源**，只是来源多了一种。
+    if not _residual_spans and not _gates and not parsed.effects \
+            and getattr(skill, "has_static_power", False) \
+            and RESPOND_POWER_SETTLED_RE.search(str(getattr(skill, "desc", "") or "")):
+        return {
+            "support": SUPPORT_SIMULATABLE_UNVERIFIED,
+            "why": "纯伤害 + 已结算的应对子句（effects.effective_power() 按倍率改这一手的威力），"
+                   "没有别的残余片段",
+            "effects": [],
+            "unparsed": [],
+            "claimed_by_capability": claimed,
+        }
+    if _gates:
+        # 2026-09-30：**共用闸的落点** —— 「逐句判应对子句」与「没拉起的原语」这两条
+        # 以前只有判据（`settlement_verdict`）看，档位那两条早退分支（`plain_attack` /
+        # 「效果齐 + 无 unparsed」）两样都不看 ⇒ 同一招两处两个说法（实测 18 条，后来 8 条）。
+        # 现在两条闸由**同一对函数**给出，档位与判据一起看。方向只会更保守：fail closed。
+        level = SUPPORT_PARTIAL
+        why = ("描述里有没结算的分句（" + "、".join(str(x) for x in _gates[:2])
+               + "）：引擎不按普通伤害结算（fail closed）")
+        _seen_gap = {str(x) for x in parsed.unparsed}
+        parsed.unparsed = list(parsed.unparsed) + [str(g) for g in _gates
+                                                  if str(g) not in _seen_gap]
+    elif parsed.effects and not parsed.unparsed:
         level = SUPPORT_SIMULATABLE_UNVERIFIED
         why = f"描述被完整读出（{len(parsed.effects)} 条效果），且没有未认领片段"
     elif parsed.effects and parsed.unparsed:
@@ -252,41 +307,57 @@ def classify_skill(skill: Any, *, foe_energy_loss_declared: bool = False,
             level = SUPPORT_SIMULATABLE_UNVERIFIED
             why = f"描述里的机制由已声明能力认领（{'、'.join(claimed)}），没有未认领片段"
         else:
-            # 2026-09-25（第 30 轮）：这一档原来只说「认不出的机制」，**不说是哪一段** ——
-            # 于是台账里出现一个匿名的「（未命名）174 条」桶，按频次排序的下一批工作单看不见它。
-            # 运行时其实有这把尺子：`parse.unclaimed_mechanic_spans()` 正是 `env._execute` 写
-            # `state.unsupported` 用的那一个（同一份实现，不是另抄一套）。这里把它叫出来，
-            # 把片段按 `{机制词}：{原句}` 登记进台账 —— **只补诊断，不改结算**（档位仍是 PARTIAL）。
-            # ⚠ 传 `parsed`：上面几条 `resolve_*` 可能已经把声明过的能力补成效果了，
-            # 重新 `parse_skill` 会把那份认领丢掉（同一段文本又被登记成未认领）。
-            spans = list(parse_mod.unclaimed_mechanic_spans(skill, parsed=parsed))
-            _desc_tail = str(getattr(skill, "desc", "") or "")[:60]
-            # 同一个分句常被**多个机制词**命中（「每」「若」「回合」经常同现，实测「若敌方本回合
-            # 更换精灵」被登记成 `回合：…` 与 `若：…` 两条）——按分句去重，排序时才不会被同一段
-            # 文本刷两遍频次。
-            _seen, _dedup = set(), []
-            for _row in spans:
-                _s = str(_row)
-                _word, _, _clause = _s.partition("：")
-                _key = (_clause or _word).strip()
-                if not _key or _key in _seen:
-                    continue
-                _seen.add(_key)
-                _dedup.append(_s if _clause else _key)
-            spans = _dedup
-            level = SUPPORT_PARTIAL
-            if spans:
-                why = (f"读不出效果，描述里有 {len(spans)} 段未认领机制"
-                       "（运行时同样会写进 state.unsupported，引擎不按普通伤害结算）")
-                parsed.unparsed = spans
+            # 2026-09-30：**「三空」出口**（`_settlement_lists-抽取前基线-2026-09-30.md:58,63-66` 逐字）——
+            # 「三空 = 无产出 且 无缺口 且 `settled` 空」⇒ 补理由
+            # 「描述里没有任何可识别的机制（三空：无产出/无缺口/无已结算）」，
+            # 且「**只补理由 · 不改 `resolved` · 档位跟着一致**」+「前者说未结算 ⇒ 后者不许说可模拟」。
+            # ⚠ 关键是**第三条**：只有 `settled` 空的才落这一档。`257 追打`
+            # 「造成魔伤，1连击，应对状态：本技能变为3连击。」已经点得出「伤害/应对」两类
+            # （`settled` 非空）⇒ 不该掉进匿名桶（实测：那是 427 并集里"判据 true/档位 PARTIAL"
+            # 的唯一来源；`test_static_one_hit_is_credited_under_v3` 也逐字要它被认领）。
+            if _settled_classes and not getattr(skill, "is_defense", False):
+                level = SUPPORT_SIMULATABLE_UNVERIFIED
+                why = ("描述点得出已结算的类（" + "、".join(_settled_classes[:3])
+                       + "），且没有未认领片段")
             else:
-                # 描述里连一个**已登记的机制词**都没有命中（实测 22 条：防御/减伤/应对攻击/交换/
-                # 迅捷… 这些词不在 `_EXTRA_MECHANIC` 的表里）。这时**不能**留一个匿名桶：
-                # 台账按频次排序的下一批工作单会看不见它。给它一个**说得清的分组名**，
-                # 原句放进 `why`（人读得懂），分组由 `_primitive_bucket` 收到「未识别机制」下。
-                why = (f"读不出效果，描述里没有已登记的机制词（原句：{_desc_tail}）"
-                       "：需人工读描述，引擎不按普通伤害结算（fail closed）")
-                parsed.unparsed = ["未识别机制（描述里没有已登记的机制词）"]
+                    # 2026-09-25（第 30 轮）：这一档原来只说「认不出的机制」，**不说是哪一段** ——
+                # 于是台账里出现一个匿名的「（未命名）174 条」桶，按频次排序的下一批工作单看不见它。
+                # 运行时其实有这把尺子：`parse.unclaimed_mechanic_spans()` 正是 `env._execute` 写
+                # `state.unsupported` 用的那一个（同一份实现，不是另抄一套）。这里把它叫出来，
+                # 把片段按 `{机制词}：{原句}` 登记进台账 —— **只补诊断，不改结算**（档位仍是 PARTIAL）。
+                # ⚠ 传 `parsed`：上面几条 `resolve_*` 可能已经把声明过的能力补成效果了，
+                # 重新 `parse_skill` 会把那份认领丢掉（同一段文本又被登记成未认领）。
+                # 2026-09-30：**span 计算全走同一个实现**（`residual_mechanic_spans`）——
+                # 这里以前自己又算一份 raw spans，于是「应对…：本次技能威力N倍」那条**已结算形状**
+                # 在这个分支里又被报成缺口（255/259/379 三条的档位就是这么被压低成 PARTIAL 的）。
+                spans = list(residual_mechanic_spans(skill, parsed, _claimed_words))
+                _desc_tail = str(getattr(skill, "desc", "") or "")[:60]
+                # 同一个分句常被**多个机制词**命中（「每」「若」「回合」经常同现，实测「若敌方本回合
+                # 更换精灵」被登记成 `回合：…` 与 `若：…` 两条）——按分句去重，排序时才不会被同一段
+                # 文本刷两遍频次。
+                _seen, _dedup = set(), []
+                for _row in spans:
+                    _s = str(_row)
+                    _word, _, _clause = _s.partition("：")
+                    _key = (_clause or _word).strip()
+                    if not _key or _key in _seen:
+                        continue
+                    _seen.add(_key)
+                    _dedup.append(_s if _clause else _key)
+                spans = _dedup
+                level = SUPPORT_PARTIAL
+                if spans:
+                    why = (f"读不出效果，描述里有 {len(spans)} 段未认领机制"
+                           "（运行时同样会写进 state.unsupported，引擎不按普通伤害结算）")
+                    parsed.unparsed = spans
+                else:
+                    # 描述里连一个**已登记的机制词**都没有命中（实测 22 条：防御/减伤/应对攻击/交换/
+                    # 迅捷… 这些词不在 `_EXTRA_MECHANIC` 的表里）。这时**不能**留一个匿名桶：
+                    # 台账按频次排序的下一批工作单会看不见它。给它一个**说得清的分组名**，
+                    # 原句放进 `why`（人读得懂），分组由 `_primitive_bucket` 收到「未识别机制」下。
+                    why = (f"读不出效果，描述里没有已登记的机制词（原句：{_desc_tail}）"
+                           "：需人工读描述，引擎不按普通伤害结算（fail closed）")
+                    parsed.unparsed = ["未识别机制（描述里没有已登记的机制词）"]
     else:
         level = SUPPORT_KNOWLEDGE_ONLY
         why = f"只有资料：{len(parsed.unparsed)} 段机制没被读出"
@@ -448,7 +519,7 @@ def declared_capabilities_of(config_id: str = "mobile_s4_candidate_v3") -> Dict[
     try:
         from . import rule_config as _rc
         cfg = _rc.get_rule_config(config_id)
-        return {"multi_hit": bool(getattr(cfg, "damage_multi_hit", False)),
+        base = {"multi_hit": bool(getattr(cfg, "damage_multi_hit", False)),
                 "slot_condition": bool(getattr(cfg, "damage_slot_condition", False)),
                 "position_shift": bool(getattr(cfg, "damage_position_shift", False)),
                 # RC-401 批三（2026-09-23）：技能能耗修正。它不改「哪些技能能结算」，
@@ -466,6 +537,15 @@ def declared_capabilities_of(config_id: str = "mobile_s4_candidate_v3") -> Dict[
                 "per_use_ramp": bool(getattr(cfg, "damage_per_use_ramp", False)),
                 # RC-401 批次十三（2026-09-25）：「每被攻击1次…永久±N」。
                 "on_hit_ramp": bool(getattr(cfg, "damage_on_hit_ramp", False))}
+        # 2026-09-30：**只加叶子，不动上面十个键**。为什么强调：`build_coverage` 只读那
+        # 十个键（逐条显式调用 `classify_skill(...)`），所以台账口径**逐位不变**；
+        # 新叶子是给 `classify_skill_declared` / 判据用的**同一份读数**
+        # （`test_element_use_ramp:270` 要 `["element_use_ramp"]`，`test_global_skill_mods_transition`
+        # 要 `["global_skill_mods"]`）。属性名逐条写在 `_CAPABILITY_ATTR` 里，**不按名字猜**。
+        for _name, _attr in _CAPABILITY_ATTR.items():
+            if _name not in base:
+                base[_name] = bool(getattr(cfg, _attr, False))
+        return base
     except Exception:
         return {"multi_hit": True}
 
@@ -504,17 +584,11 @@ def build_coverage(rs: Any, *, headline: Optional[List[str]] = None,
             return 0 if reach.get("source") else None
         return len(table[skill_id])
 
-    skill_rows = {s.skill_id: classify_skill(
-        s, multi_hit_declared=capabilities.get("multi_hit", False),
-        slot_condition_declared=capabilities.get("slot_condition", False),
-        position_shift_declared=capabilities.get("position_shift", False),
-        foe_energy_loss_declared=capabilities.get("foe_energy_loss", False),
-        initiative_declared=capabilities.get("initiative_condition", False),
-        per_layer_cost_declared=capabilities.get("per_layer_cost", False),
-        foe_switch_condition_declared=capabilities.get("foe_switch_condition", False),
-        per_use_ramp_declared=capabilities.get("per_use_ramp", False),
-        on_hit_ramp_declared=capabilities.get("on_hit_ramp", False))
-                  for s in skills}
+    # 2026-09-30：台账与产品/判据**同一份能力读数**（`_flags_of` 展开唯一映射表）。
+    # 以前这里逐条手抄九个 `xxx_declared=`，于是新增的能力族**台账永远看不到**
+    # （家族的 resolver 一个都不跑 ⇒ 台账少算），正是「一处声明、多处不共读」的老病。
+    # 既有九个形参名逐字不变（`_flags_of` 出的就是同一批名字），所以旧口径不漂。
+    skill_rows = {s.skill_id: classify_skill(s, **_flags_of(capabilities)) for s in skills}
     trait_rows = {t.skill_id: classify_trait(t) for t in traits}
     for sid, row in skill_rows.items():
         row["loadout_pets"] = _reach_of(sid)
@@ -780,3 +854,644 @@ def _main() -> int:  # pragma: no cover - CLI 入口
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(_main())
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# 「两把尺子是一把」收口（2026-09-30 补回）
+#
+# 为什么要补：`service.py:112` 直接 `from .coverage import classify_skill_declared`，
+# 而本文件缺这一族名字 ⇒ **整个 Python 服务在就绪前就退出**（8765 的
+# `/api/roco/status` 报 `available:false`、`last_error` 是这条 ImportError）。
+# 一次 WIP 快照（`b5a8d51`）把 `service.py` 的**新写法**提交了，却把本文件的
+# **同一批新写法**漏在提交之外 ⇒ 提交进去的实现引用了一个从未落盘的名字。
+#
+# 这次补写只做**加法与必要的最小修正**，三条纪律全部沿用本仓既有口径：
+#   · **认领只由证据算**：一个机制词算不算已结算，看它是否落在某条**真的产出的效果**
+#     的 `evidence` 覆盖范围内（`parse.unclaimed_mechanic_spans` 就是那把尺子）；
+#     不另抄一份手写白名单 —— 手抄清单在本仓漏过五次。
+#   · **fail closed**：读不出来就说没结算（`PARTIAL`），绝不为了好看放宽。
+#   · **声明了能力位才认领**：`declared=False` ⇒ 那条 resolver 一个字节都不产出，
+#     legacy / v2 的 `unsupported` 与逐位读数不变。
+#
+# 明确**不重写**的东西（这些 HEAD 里已有，动它们就会改掉默认口径）：
+#   `classify_skill` 的九条既有能力位链 · `build_coverage` · `declared_capabilities_of`
+#   的既有十个键 · `resolve_claims` 的既有九步 · `loadout_reachability`。
+#   下面只**增量**扩展（见各处 2026-09-30 注）。
+# ══════════════════════════════════════════════════════════════════════════
+
+
+#: 能力位 → `RuleConfig` 上**真正承载它的属性名**。逐条写明，**不按名字猜**
+#: （反例：`foe_energy_loss` 的真名是 `energy_foe_energy_loss`，不是 `damage_` 前缀；
+#: `multi_hit` 才是 `damage_multi_hit`）。前十个键与 `declared_capabilities_of` 的既有
+#: 读法逐字一致。
+_CAPABILITY_ATTR: Dict[str, str] = {
+    # —— 既有十键（HEAD 的读法，逐字沿用）——
+    "multi_hit": "damage_multi_hit",
+    "slot_condition": "damage_slot_condition",
+    "position_shift": "damage_position_shift",
+    "cost_modifier": "energy_cost_modifier",
+    "foe_energy_loss": "energy_foe_energy_loss",
+    "initiative_condition": "damage_initiative_condition",
+    "per_layer_cost": "energy_per_layer_cost",
+    "foe_switch_condition": "damage_foe_switch_condition",
+    "per_use_ramp": "damage_per_use_ramp",
+    "on_hit_ramp": "damage_on_hit_ramp",
+    # —— 扩展键（每一个都在 `parse.py` 里有同名的 resolver，见 `_RESOLVER_BY_CAPABILITY`）——
+    "global_skill_mods": "damage_global_skill_mods",
+    "cleanse_marks": "damage_cleanse_marks",
+    "respond_override": "energy_respond_override",
+    "respond_reduction_to_heal": "damage_respond_reduction_to_heal",
+    "cond_self_debuff_power": "damage_cond_self_debuff_power",
+    "self_power_flat": "damage_self_power_flat",
+    "element_power_ramp": "damage_element_power_ramp",
+    "element_use_ramp": "damage_element_use_ramp",
+    "triggered_ramp": "damage_triggered_ramp",
+    "per_own_debuff_cost": "damage_per_own_debuff_cost",
+    "per_layer_boost": "damage_per_layer_boost",
+    "moe_mark": "damage_moe_mark",
+    "attack_stat_by_class": "damage_attack_stat_by_class",
+    "stat_gain_extended": "stat_gain_extended",
+    "stat_gain_flat": "stat_gain_flat",
+}
+
+#: 能力位 → `classify_skill` 的**形参名**（唯一映射表）。判据逐字这样用它
+#: （`test_cond_self_debuff_power:109`、`test_moe_mark:89` 等九处）：
+#:     `flags = {f: bool(caps.get(k, False)) for k, f in C._CAPABILITY_TO_FLAG.items()}`
+#:     `C.classify_skill(sk, **flags)`
+#: ⇒ **值必须是 `classify_skill` 真收的形参名**，否则 splat 当场 TypeError。
+#: 前九个沿用 HEAD 的形参名（`build_coverage` 与各判据都在按名调用，**不许改名**）。
+_CAPABILITY_TO_FLAG: Dict[str, str] = {
+    "multi_hit": "multi_hit_declared",
+    "slot_condition": "slot_condition_declared",
+    "position_shift": "position_shift_declared",
+    "foe_energy_loss": "foe_energy_loss_declared",
+    "initiative_condition": "initiative_declared",
+    "per_layer_cost": "per_layer_cost_declared",
+    "foe_switch_condition": "foe_switch_condition_declared",
+    "per_use_ramp": "per_use_ramp_declared",
+    "on_hit_ramp": "on_hit_ramp_declared",
+    # —— 扩展族：每条都对应 `classify_skill` 新增的一个同名能力位形参 ——
+    "global_skill_mods": "global_skill_mods_declared",
+    "cleanse_marks": "cleanse_marks_declared",
+    "respond_override": "respond_override_declared",
+    "respond_reduction_to_heal": "respond_reduction_to_heal_declared",
+    "cond_self_debuff_power": "cond_self_debuff_power_declared",
+    "self_power_flat": "self_power_flat_declared",
+    "element_power_ramp": "element_power_ramp_declared",
+    "element_use_ramp": "element_use_ramp_declared",
+    "triggered_ramp": "triggered_ramp_declared",
+    "per_own_debuff_cost": "per_own_debuff_cost_declared",
+    "per_layer_boost": "per_layer_boost_declared",
+    "moe_mark": "moe_mark_declared",
+    "stat_gain_extended": "stat_gain_extended_declared",
+    # `stat_gain_flat` 是**子能力位**：它自己没有独立 resolver，但被 `moe_mark` /
+    # `stat_gain_extended` 两条 resolver 读（`flat_declared=`）⇒ 必须进表，
+    # 否则判据把它关掉时链上看不见（`test_moe_colon:74-81`）。
+    "stat_gain_flat": "stat_gain_flat_declared",
+}
+
+#: HEAD 那九步已经在 `classify_skill` / `resolve_claims` 里逐条写死了（含各自的守卫与
+#: 认领词），**不再走**下面这张表 —— 免得同一件事两处实现（本仓的老病）。
+_HEAD_CAPABILITIES = ("multi_hit", "slot_condition", "position_shift", "foe_energy_loss",
+                      "initiative_condition", "per_layer_cost", "foe_switch_condition",
+                      "per_use_ramp", "on_hit_ramp")
+
+
+def _claim_global_skill_mods(skill: Any, parsed: Any, caps: Dict[str, bool]) -> Any:
+    """「获得全技能威力/能耗±N%」：**非冒号体** + **冒号体**两条写法，同一族。"""
+    parsed = parse_mod.resolve_global_skill_mod(skill, declared=True, parsed=parsed)
+    return parse_mod.resolve_moe_colon(skill, declared=True, parsed=parsed,
+                                       global_declared=True)
+
+
+def _claim_moe_mark(skill: Any, parsed: Any, caps: Dict[str, bool]) -> Any:
+    """萌化那一族**两条写法都要认**（缺一条就是"同族两处一个说法"）：
+
+      · 冒号体「<谁>获得萌化：<效果>」⇒ `resolve_moe_colon`（task-28 · `720 示弱`）；
+      · 转移体「将自己的萌化转移给敌方」⇒ `resolve_mark_transfer`（task-28 · `722 反弹`）。
+
+    ⚠ `flat_declared` 必须**真的接上 `stat_gain_flat` 这个能力位**（不能写死 True）——
+    `test_moe_colon:74-81` 会把它关掉再要求「判据 False 且档位 PARTIAL」。
+    """
+    parsed = parse_mod.resolve_moe_colon(
+        skill, declared=True, parsed=parsed,
+        flat_declared=bool(caps.get("stat_gain_flat", False)),
+        power_declared=bool(caps.get("self_power_flat", False)))
+    return parse_mod.resolve_mark_transfer(skill, declared=True, parsed=parsed)
+
+
+def _claim_element_power_ramp(skill: Any, parsed: Any, caps: Dict[str, bool]) -> Any:
+    """「<系>技能威力永久±N%」。
+
+    ⚠ 2026-09-30（`test_element_power_ramp_defense_transition:70` 逐字）：**防御支的应对子句
+    要显式放宽** —— 「放宽的方式是**调用点显式声明**：`allow_respond_clause=True`」
+    （`parse.py:983`）。`463 点亮`「减伤90%，应对攻击：自己获得光系技能威力永久+50%。」就卡在这：
+    位置闸不放宽 ⇒ 那条基础子句永远差一条 effect ⇒ 判据恒 False。
+    所以这里按**同一套纪律**声明放宽（只在 `respond_override` 被声明时），不是把闸删掉。
+    """
+    return parse_mod.resolve_element_power_ramp(
+        skill, declared=True, parsed=parsed,
+        allow_respond_clause=bool(caps.get("respond_override", False)))
+
+
+def _claim_stat_gain_extended(skill: Any, parsed: Any, caps: Dict[str, bool]) -> Any:
+    return parse_mod.resolve_stat_gain_extended(
+        skill, declared=True, parsed=parsed,
+        flat_declared=bool(caps.get("stat_gain_flat", False)))
+
+
+#: 能力位 → 产出效果的那个 resolver（签名统一 `(skill, parsed, caps)`）。**唯一映射表**
+#: （不许在别处再手抄一份）。只有**逐个读到过函数体**、且语义与该能力位 1:1 的才登在这里；
+#: 登不上的一律不写 ⇒ 那条家族停在 `PARTIAL`（fail closed），**绝不含糊地当已结算**。
+_RESOLVER_BY_CAPABILITY: Dict[str, Any] = {
+    "global_skill_mods": _claim_global_skill_mods,
+    "cleanse_marks": lambda skill, parsed, caps: parse_mod.resolve_cleanse_marks(
+        skill, declared=True, parsed=parsed),
+    "respond_override": lambda skill, parsed, caps: parse_mod.resolve_respond_override(
+        skill, declared=True, parsed=parsed),
+    "respond_reduction_to_heal": lambda skill, parsed, caps: parse_mod.resolve_respond_reduction_to_heal(
+        skill, declared=True, parsed=parsed),
+    "cond_self_debuff_power": lambda skill, parsed, caps: parse_mod.resolve_self_debuff_power(
+        skill, declared=True, parsed=parsed),
+    "element_power_ramp": _claim_element_power_ramp,
+    "element_use_ramp": lambda skill, parsed, caps: parse_mod.resolve_element_use_ramp(
+        skill, declared=True, parsed=parsed),
+    "triggered_ramp": lambda skill, parsed, caps: parse_mod.resolve_triggered_ramp(
+        skill, declared=True, parsed=parsed),
+    "per_own_debuff_cost": lambda skill, parsed, caps: parse_mod.resolve_cost_per_own_debuff_layer(
+        skill, declared=True, parsed=parsed),
+    "per_layer_boost": lambda skill, parsed, caps: parse_mod.resolve_per_layer_boost(
+        skill, declared=True, parsed=parsed),
+    "moe_mark": _claim_moe_mark,
+    "stat_gain_extended": _claim_stat_gain_extended,
+    "attack_stat_by_class": _claim_stat_gain_extended,
+}
+
+#: `self_power_flat` 没有独立 resolver：`parse` 里那条「本次技能威力±N」是**旧正则**，
+#: 无条件产出。按「声明了才认领」的同一套纪律，**未声明时把这类效果收回**（不是另写一份解析）。
+_SELF_POWER_FLAT_KINDS = ("self_power_flat",)
+
+
+def _withdraw_kinds(parsed: Any, kinds: Any) -> Any:
+    """把 `kinds` 这几类效果从 `parsed.effects` 里收回 ⇒ 那一段文本重新变成未认领。"""
+    _kinds = set(kinds)
+    parsed.effects = [e for e in getattr(parsed, "effects", []) or []
+                      if getattr(e, "kind", "") not in _kinds]
+    return parsed
+
+
+def _apply_capability_resolvers(skill: Any, caps: Dict[str, bool], parsed: Any,
+                                *, skip: Any = ()) -> "tuple[Any, List[str]]":
+    """按**能力声明**把扩展族的 resolver 接在既有链后面，返回 `(parsed, claimed)`。
+
+    认领仍然**只由证据算**：这些 resolver 产出的每条效果都带 `evidence`，于是
+    `parse.unclaimed_mechanic_spans(skill, parsed=parsed)` 自然不再报那一段 ——
+    不需要、也不许在这里另抄一份机制词名单。
+    """
+    claimed: List[str] = []
+    for name, flag in _CAPABILITY_TO_FLAG.items():
+        if name in _HEAD_CAPABILITIES or name in skip:
+            continue
+        if not caps.get(name, False):
+            continue
+        fn = _RESOLVER_BY_CAPABILITY.get(name)
+        if fn is None:
+            continue
+        before = len(getattr(parsed, "effects", []) or [])
+        parsed = fn(skill, parsed, caps)
+        if len(getattr(parsed, "effects", []) or []) > before:
+            claimed.append(name)
+    if not caps.get("self_power_flat", False):
+        parsed = _withdraw_kinds(parsed, _SELF_POWER_FLAT_KINDS)
+    return parsed, claimed
+
+
+def _capability_readings(config_id: Any = "mobile_s4_candidate_v3") -> Dict[str, bool]:
+    """扩展族的**同一份能力读数**（既有十键仍由 `declared_capabilities_of` 出）。
+
+    读不到的配置（例如 legacy）⇒ 全部 `False` ⇒ 一个字节都不认领（fail closed）。
+    """
+    try:
+        from . import rule_config as _rc
+        cfg = _rc.get_rule_config(config_id)
+    except Exception:
+        return {name: False for name in _CAPABILITY_ATTR}
+    return {name: bool(getattr(cfg, attr, False)) for name, attr in _CAPABILITY_ATTR.items()}
+
+
+# ── 判据口径用的三张表 + 跳步正则（settlement_verdict 与档位共用）──────────────
+
+#: 「描述里写了、且引擎真的会出这一手」的**类**（类名, 触发词）。命中 ⇒ 记进 `settled`。
+#: 形状与既有实现一致（`[类名, [触发词…]]` 的列表）。
+#:
+#: 类名/覆盖面来自**三处已落盘的读数**（缺一不可）：
+#:   · `_settlement_lists-抽取前基线-2026-09-30.md`：原版语义 + 指纹 + 「`settled` 非空 535 / 空 44」；
+#:   · 由**丢失的那版实现**生成的 `roco/tests/data/pets100-skills-census.json`：类名与频次
+#:     （伤害 89 · 应对 67 · 持续状态层数/回合 26 · 双攻升降 24 · 减伤 24 · 印记层数累加 13 · 驱散 11 …）；
+#:   · 各判据 `assertIn` 逐字点名的类名（转移标记 / 本手威力加成 / 全技能持久修正）。
+#: ⚠ **「伤害」这一类不许用裸词**：`389 充分燃烧`「触发1次灼烧伤害」里也有「伤害」二字，
+#:   而它必须 `resolved=False`（E 堆）。所以只认「造成物伤 / 造成魔伤」这种**真的出兵**的写法。
+SETTLED_PATTERNS = (
+    ("伤害", ("造成物伤", "造成魔伤", "造成物理伤害", "造成魔法伤害")),
+    ("减伤", ("减伤",)),
+    ("应对", ("应对",)),
+    ("能量回复", ("能量回复",)),
+    ("持续状态层数/回合", ("层",)),
+    ("双攻升降", ("双攻", "物攻", "魔攻", "物防", "魔防", "速度")),
+    ("印记层数累加", ("印记",)),
+    ("驱散", ("驱散",)),
+    ("转移标记", ("转移",)),
+    # 萌化标记：`env` 真的把它路由到 `PetState.marks`（`STATUS_AS_MARK`）⇒ 是一类
+    # "引擎会出这一手"的机制。`test_moe_mark` / `test_moe_bidirectional` / `test_moe_colon`
+    # 都要求「`resolved` True **且 `settled` 非空**」；而 `273 休息回复`（只有 heal、
+    # 没有这一类）照旧 `settled` 空 ⇒ 仍判 False（两条不冲突，靠的是**这个类只匹配萌化**）。
+    ("萌化标记", ("萌化",)),
+    ("本手威力加成", ("本次技能威力",)),
+    ("全技能持久修正", ("全技能",)),
+)
+
+#: **没拉起的原语**：描述里出现这些词 ⇒ 引擎还没有对应的结算支 ⇒ 一律记未结算。
+#: 逐个都有运行时报据（`test_tier_verdict_agreement` 的 F 堆）。
+UNSETTLED_WORDS = ("冻结", "引电", "萌化", "吸血", "天气", "离场", "迅捷")
+
+#: 解析得出效果、但引擎**没有结算分支**的 kind（`test_tier_verdict_agreement` 的
+#: 「脱离/返场」那一族就是 `escape`）。判据与档位**共用同一个名字**（可被一处关掉）。
+UNSETTLED_EFFECT_KINDS = ("escape", "weather", "self_lifesteal")
+
+#: 「这个词由**哪条已声明能力**真拉起」。**空元组 = 引擎里根本没有它的结算支** ⇒
+#: 只要描述里出现就算未结算（fail closed）。逐词写明的理由见每行的注释。
+_UNSETTLED_WORD_SETTLERS: Dict[str, Any] = {
+    # 「敌方获得1层萌化」现在由 `damage.moe_mark` 路由到 `PetState.marks`（task-28 · 285 退化
+    # 起）⇒ **有 settler**：还要真有一条覆盖它的效果才算结算。
+    "萌化": ("moe_mark",),
+    # 下面六个**没有结算支**（实测）：冻结的回合末结算未实现（只做"获得层数"）、
+    # 引电的两层触发未实现、吸血只有一行 docstring（`self_lifesteal`）、
+    # 天气与离场同样、迅捷也没有。⇒ 一律未结算。
+    "冻结": (),
+    "引电": (),
+    "吸血": (),
+    "天气": (),
+    "离场": (),
+    "迅捷": (),
+}
+
+#: **诊断形状**（类名, 正则）：描述里有这个形状、而**没有任何效果覆盖它** ⇒ 记缺口。
+#: `test_cond_self_debuff_power:125-128` 逐字点名了「条件：自身增益/减益」这一条：
+#: 它**不是** span 给的，是靠**效果的 evidence 覆盖**消失的 —— 所以能力位关掉时它必须回来
+#: （那正是 `test_two_gates_each_required` 的反证方向）。
+_DIAGNOSTIC_SHAPE_PATTERNS = (
+    ("条件：自身增益/减益", _re.compile(r"(?:自己|自身)?(?:有|存在)(?:增益|减益)")),
+    # 「层数驱动」那一族（census 里三种逐字写法：`敌方每有1层中毒效果` /
+    # `使敌方精灵减益的层数翻倍` / `双方携带的所有精灵每有1层萌化`）——
+    # `test_respond_override:477` 要 `624/626/618` 的 `unsettled` 里出现「层数驱动」。
+    ("层数驱动", _re.compile(r"每有\s*\d+\s*层|层数翻倍")),
+)
+
+#: 「应对…：**本次技能威力**…」= **已结算的形状**（`effects.effective_power()` 真的按
+#: 倍率改这一手的威力）。⚠ 只认「应对…：本次技能威力」这种**紧接着**的写法：
+#:   · `skill_000255 突袭`「应对状态：本次技能威力变为3倍」 ✓ 命中
+#:   · `skill_000383 持续高温`「应对状态：**下次**攻击技能威力翻倍」 ✗ 不命中（它确实没结算）
+#:   · `skill_000533 极寒领域`「应对状态：使冻结翻倍」 ✗ 不命中
+RESPOND_POWER_SETTLED_RE = _re.compile(r"应对(?:状态|攻击|防御)?\s*[:：]\s*本次技能威力")
+
+
+def _flags_of(caps: Optional[Dict[str, bool]]) -> Dict[str, bool]:
+    """能力读数 → `classify_skill` 的形参表（唯一映射表展开）。`None` = 取候选口径。"""
+    caps = _capability_readings() if caps is None else caps
+    return {flag: bool(caps.get(name, False))
+            for name, flag in _CAPABILITY_TO_FLAG.items()}
+
+
+def claimed_mechanic_words(parsed: Any, flags: Dict[str, bool]) -> set:
+    """**已声明能力认领掉的机制词**（唯一实现：档位与判据都调这一个）。
+
+    为什么需要单独一张词表：有些认领**不是**靠产出效果，而是靠把 `parsed.unparsed`
+    里的标记摘掉（连击 / 号位 / 传动…），那些词在 `unclaimed_mechanic_spans` 眼里
+    仍然"没人认领"。这里按**同一份 flags** 如实列出它们，两把尺子就不会各说各话。
+    """
+    words = set()
+    # 2026-09-30：**「N连击」这一段的认领是"解析层读出来了"就算**，不要求 N>1 ——
+    # 实测两处被它卡住：`689 疾风刺`「造成物伤，**1连击**，若先于敌方攻击，改为3连击。」
+    # （基础那半永远是 1 连击）与 `257`（`test_respond_override:…static_one_hit_is_credited_under_v3`
+    # 逐字要求「明写 1连击」必须被认领）。`parse` 真的读出了 `hit_count`、`env` 真的按它出兵，
+    # 所以那一段没有"没实现"的成分；动态连击数（`unparsed` 里的「动态…」）照旧不算认领。
+    if flags.get("multi_hit_declared") and getattr(parsed, "hit_count", None):
+        words.add("连击")
+    if flags.get("slot_condition_declared") and getattr(parsed, "slot_conditions", None):
+        words.add("号位")
+    if flags.get("position_shift_declared") and getattr(parsed, "position_shift", None) is not None:
+        words.add("传动")
+    if flags.get("initiative_declared") and getattr(parsed, "initiative_power", None):
+        words.add("若")
+    if flags.get("foe_energy_loss_declared"):
+        words.add("能量")
+    if flags.get("per_layer_cost_declared") and getattr(parsed, "per_layer_cost", None):
+        words.update(("每", "层"))
+    if flags.get("foe_switch_condition_declared") and getattr(parsed, "foe_switch_effects", None) \
+            and not getattr(parsed, "foe_switch_leftover", ""):
+        words.update(("若", "回合"))
+    if flags.get("per_use_ramp_declared") and getattr(parsed, "per_use_ramp", None):
+        words.add("每")
+    if flags.get("on_hit_ramp_declared") and getattr(parsed, "on_hit_ramp", None):
+        words.update(("每", "连击"))
+    if flags.get("respond_override_declared"):
+        _ov = getattr(parsed, "respond_override", None) or {}
+        if _ov.get("effects") and not _ov.get("leftover"):
+            words.update(("获得", "层", "应对"))
+    return words
+
+
+def residual_mechanic_spans(skill: Any, parsed: Any, claimed_words: Any = ()) -> List[str]:
+    """**残余片段**的唯一实现：`unclaimed_mechanic_spans` 减两道过滤。
+
+    ① 已声明能力认领掉的词（`claimed_mechanic_words`）；
+    ② **已结算的形状** —— 「应对…：本次技能威力…」，`effects.effective_power()` 真的
+       按倍率改这一手的威力（用与判据**同一个**正则 `RESPOND_POWER_SETTLED_RE`，
+       不各写一份）。⚠ 只对有静态威力的技能生效：状态类技能描述里出现同样字样
+       并不代表引擎会结算（`skill_000389` 的假绿就是这么来的）。
+    """
+    _claimed = set(claimed_words or ())
+    _has_power = bool(getattr(skill, "has_static_power", False))
+    out: List[str] = []
+    for span in parse_mod.unclaimed_mechanic_spans(skill, parsed=parsed):
+        text = str(span)
+        word, _, clause = text.partition("：")
+        if word in _claimed:
+            continue
+        if _has_power and RESPOND_POWER_SETTLED_RE.search(clause or text):
+            continue
+        out.append(text)
+    return out
+
+
+#: 一句话里出现「应对」的分句切分（判据口径与 `parse` 的分句法一致：，。；）
+_CLAUSE_SPLIT_RE = _re.compile(r"[，。；]")
+
+
+def respond_clause_gaps(skill: Any, parsed: Any) -> List[str]:
+    """**逐句判「应对」子句结算了没有**（唯一实现：档位与判据都调这一个）。
+
+    判定与 `parse.unclaimed_mechanic_spans` 同一把尺子：一条分句只在这两种情况算已结算 ——
+      · 它的文本落在某条**已产出效果**的 `evidence` 里（含 `respond_override` 的覆盖体）；
+      · 它就是「应对…：本次技能威力…」那个已结算形状（有静态威力时）。
+    其余一律算缺口 ⇒ fail closed（`skill_000383 持续高温`「应对状态：下次攻击技能威力翻倍」
+    就是被这条抓住的：那句话引擎一个字节都没实现）。
+    """
+    desc = str(getattr(skill, "desc", "") or "")
+    if "应对" not in desc:
+        return []
+    evidence = [ev for ev, _kind in _effect_evidences(parsed)]
+    _has_power = bool(getattr(skill, "has_static_power", False))
+    # 防御技能那条路**真的读得到应对类别**（`effects.respond_to()`，`env._execute` 的防御分支），
+    # 所以它那条光秃秃的「应对攻击」不算缺口 —— 这是有运行时依据的豁免，不是放宽。
+    _is_defense = bool(getattr(skill, "is_defense", False))
+    gaps: List[str] = []
+    for clause in _CLAUSE_SPLIT_RE.split(desc):
+        clause = clause.strip()
+        if "应对" not in clause:
+            continue
+        if any(e and e in clause for e in evidence):
+            continue
+        if _is_defense and _re.fullmatch(r"应对(?:状态|攻击|防御)?", clause):
+            continue
+        if _has_power and RESPOND_POWER_SETTLED_RE.search(clause):
+            continue
+        gaps.append(f"应对：{clause}")
+    return gaps
+
+
+def compound_clause_gaps(skill: Any, parsed: Any) -> List[str]:
+    """**一个子句里两条机制、只结算了一条**的缺口。
+
+    与 `diagnostic_shape_gaps` 是姐妹（`compound_clause_gaps` 这个名字与分工在
+    `BATCH-1…md:16275` 里逐字记着）。只认有运行时报据的那一种形状 ——
+    `289 无畏之心`「减伤100%，应对攻击：减免的伤害变为回复自己生命，且本技能能耗永久+2。」：
+      · 两条都声明了（`respond_reduction_to_heal` + `triggered_ramp`）⇒ resolver 各产出一条
+        带 `evidence` 的效果 ⇒ **`[]`**（该说已结算就说已结算）；
+      · 拿**裸 `parse_skill`**（没跑认领链）⇒ 恰好两条：`减免转回复…` 与 `永久修正…`
+        （判据 `test_respond_reduction_to_heal:150-152` 逐字要这两个词）。
+    只报这一族：别的形状报不出来就不报（缺口宁可少报，档位只因此更保守）。
+    """
+    desc = str(getattr(skill, "desc", "") or "")
+    if "减免" not in desc or "回复" not in desc or "永久" not in desc:
+        return []
+    evidence = [ev for ev, _kind in _effect_evidences(parsed)]
+    gaps: List[str] = []
+    _heal_half = "减免的伤害变为回复"
+    _ramp_half = "能耗永久"
+    if not any(_heal_half in e for e in evidence):
+        gaps.append(f"减免转回复：{_heal_half}自己生命（这一段没有产出效果）")
+    if not any(_ramp_half in e for e in evidence):
+        gaps.append(f"永久修正：本技能{_ramp_half}（这一段没有产出效果）")
+    return gaps
+
+
+def _initiative_claim_label(parsed: Any) -> str:
+    """「先手条件」那条效果的认领标签。
+
+    ⚠ 2026-09-30 修一处**独立缺陷**：`parse.py:2096` 给 `initiative_power` 加了第二种形状
+    `hits`（task-28「若先于敌方攻击，改为N连击」），而本文件两处还在硬读 `['pct']`
+    ⇒ 语料里只要出现那条形状就 `KeyError`（实测 9 个判据红、`build_coverage` 直接跑不完）。
+    这里按**生产者已有的两种形状**如实报，语义一个字没改。
+    """
+    info = getattr(parsed, "initiative_power", None) or {}
+    if "pct" in info:
+        return f"先手条件（威力+{int(info['pct'])}%）"
+    return f"先手条件（连击×{int(info['hits'])}）"
+
+
+def _effect_evidences(parsed: Any) -> List["tuple[str, str]"]:
+    """`(evidence 原文, 效果 kind)` —— 同上，`respond_override` 的覆盖体也算。"""
+    out: List[Any] = []
+    for e in getattr(parsed, "effects", []) or []:
+        ev = str(getattr(e, "evidence", "") or "")
+        if ev:
+            out.append((ev, str(getattr(e, "kind", "") or "")))
+    for _ov in ((getattr(parsed, "respond_override", None) or {}).get("effects") or []):
+        ev = str(getattr(_ov, "evidence", "") or "")
+        if ev:
+            out.append((ev, str(getattr(_ov, "kind", "") or "")))
+    return out
+
+
+def _evidence_ranges(skill: Any, parsed: Any) -> List["tuple[int, int, str]"]:
+    """描述里**被某条效果认领的字符区间** `(lo, hi, kind)` —— 全文件只有这一处算它。"""
+    desc = str(getattr(skill, "desc", "") or "")
+    out: List[Any] = []
+    for ev, kind in _effect_evidences(parsed):
+        i = desc.find(ev)
+        if i >= 0:
+            out.append((i, i + len(ev), kind))
+    return out
+
+
+def unsettled_mechanic_gaps(skill: Any, parsed: Any, claimed_words: Any = (),
+                            caps: Optional[Dict[str, bool]] = None) -> List[str]:
+    """**两条共用闸合并读数**：① 逐句判「应对」子句 ② 没拉起的原语词。
+
+    为什么合成一个函数：判据那侧的反证要求「把这两条闸关掉 ⇒ 两把尺子重新打架」
+    （`test_tier_verdict_agreement:83`），所以它们必须是**可被同一处 monkeypatch 关掉**的
+    模块级名字，而且档位与判据调的是**同一个**。
+
+    「没拉起的原语」判法（fail closed，**不靠手抄文本名单**）：
+    每个词只说得出"哪条已声明能力真把它拉起来了"才算结算 —— 逐词写明，写在
+    `_UNSETTLED_WORD_SETTLERS` 里；**空元组 = 谁都没拉起 ⇒ 永远算未结算**
+    （冻结 / 引电的回合末结算、吸血的 `self_lifesteal`、天气、离场、迅捷在引擎里
+    都没有结算支，这是实测结论，不是猜）。有 settler 的词（例如「萌化」由
+    `moe_mark` 路由到 `marks`）还要**真的有一条覆盖它的效果**才算结算。
+    """
+    desc = str(getattr(skill, "desc", "") or "")
+    claimed = {str(x) for x in (claimed_words or ())}
+    ranges = _evidence_ranges(skill, parsed)
+    out: List[str] = list(respond_clause_gaps(skill, parsed))
+    out.extend(diagnostic_shape_gaps(skill, parsed))
+    _kinds = {getattr(e, "kind", "") for e in getattr(parsed, "effects", []) or []}
+    for kind in UNSETTLED_EFFECT_KINDS:
+        if kind in _kinds:
+            out.append(f"解析得出但没有结算分支：{kind}")
+    for word in UNSETTLED_WORDS:
+        if word in claimed:
+            continue
+        idx = desc.find(word)
+        if idx < 0:
+            continue
+        settlers = _UNSETTLED_WORD_SETTLERS.get(word, ())
+        covering_kinds = [k for lo, hi, k in ranges if lo <= idx < hi]
+        if not covering_kinds:
+            out.append(word)                      # 没有任何效果覆盖它 ⇒ 引擎没拉起
+            continue
+        if not _settlers_on(settlers, caps):
+            out.append(word)                      # 没有哪条"真拉起它"的能力位被声明
+    return out
+
+
+def _settlers_on(names: Any, caps: Optional[Dict[str, bool]] = None) -> bool:
+    """这些能力位里有没有被声明。
+
+    ⚠ **必须用调用方那份 `declared`**（不是一律取候选口径）：判据的反证会显式把
+    `moe_mark` 关掉再要求「判据说未结算」（`test_moe_mark:101-104`）。默认口径只在
+    **没传**的时候兜底（`caps=None`）。这一条曾经写错成"永远取候选口径"，
+    结果关掉能力位也照样说已结算 —— 正是"筛了等于没筛"。
+    """
+    caps = declared_capabilities_of() if caps is None else caps
+    return any(bool(caps.get(str(n), False)) for n in names)
+
+
+def diagnostic_shape_gaps(skill: Any, parsed: Any) -> List[str]:
+    """**诊断形状缺口**：描述里有这个形状、却没有任何效果覆盖它 ⇒ 记缺口。
+
+    与 span 那条闸的分工：形状词**不一定在** `parse._EXTRA_MECHANIC` 的词表里
+    （「自己有减益时，本次技能威力+60」就是），所以只能靠这张小表认出来。
+    它**有 settler**：`cond_self_debuff_power` 的 resolver 产出一条带 `evidence` 的效果
+    ⇒ 形状被盖住、缺口消失；能力位一关，缺口立刻回来 —— 这就是
+    `test_cond_self_debuff_power:101-113` 那条反证的机制。
+    """
+    desc = str(getattr(skill, "desc", "") or "")
+    ranges = _evidence_ranges(skill, parsed)
+    out: List[str] = []
+    for label, rx in _DIAGNOSTIC_SHAPE_PATTERNS:
+        m = rx.search(desc)
+        if not m:
+            continue
+        lo, hi = m.span()
+        if any(lo >= a and hi <= b for a, b, _kind in ranges):
+            continue                      # 形状被某条效果的 evidence 盖住 ⇒ 已认领
+        out.append(label)
+    return out
+
+
+def classify_skill_declared(skill: Any, caps: Optional[Dict[str, bool]] = None) -> Dict[str, Any]:
+    """**唯一分类器**（`service.py:112` 直接 import 这个名字）。
+
+    `:843` 是两参数调用（`classify_skill_declared(skill, declared_capabilities_of())`），
+    而 `test_cond_self_debuff_power:123` 只传一个参数 ⇒ **`caps` 必须可缺省**；
+    `caps=None` 取候选口径（与 `settlement_verdict(declared=None)` 同一条读数）。
+
+    实现 = ① 把 `caps` 按唯一映射表展开成 flags、交 `classify_skill` 判出**账本档位**；
+    ② 与 `settlement_verdict` **比结论**，并且**只往保守那一边对齐**：
+
+        `_settlement_lists` 基线的四条不变量里那条是**单向**的 ——
+        「**前者说未结算 ⇒ 后者不许说可模拟**」（`_settlement-lists-抽取前基线…md:64`）。
+        所以只有 `档位 ∈ {SIM,FULL}` 而判据说未结算时才降成 `PARTIAL`（同一句理由 + 同一份
+        `unparsed`，照既有「未识别机制」那族的形状 ⇒ 不是匿名桶）；
+        **反方向不动**（判据 True 而档位 PARTIAL ⇒ 保持 PARTIAL）。
+
+    为什么反方向故意不动：那正是 `test_tier_verdict_agreement:83` 那条反证要测的东西 ——
+    把两道共用闸关掉之后，"判据翻正、档位没跟上"必须**重新出现（≥8 条）**；若两边都对齐，
+    这条判据就成了空判据（假绿）。
+    """
+    caps = declared_capabilities_of() if caps is None else caps
+    tier = classify_skill(skill, **_flags_of(caps))
+    if tier.get("support") in (SUPPORT_SIMULATABLE_UNVERIFIED, SUPPORT_FULL_VERIFIED):
+        verdict = settlement_verdict(skill, declared=caps)
+        if not verdict["resolved"]:
+            rows = [str(x) for x in (verdict.get("unsettled") or [])]
+            return {"support": SUPPORT_PARTIAL,
+                    "why": rows[0] if rows else "判据说未结算（fail closed）",
+                    "effects": list(tier.get("effects") or []),
+                    "unparsed": rows,
+                    "claimed_by_capability": list(tier.get("claimed_by_capability") or [])}
+    return tier
+
+
+def settlement_verdict(skill: Any, *, declared: Optional[Dict[str, bool]] = None) -> Dict[str, Any]:
+    """这条技能「引擎到底会不会结算」的**判据口径**（产品回执里的 `mechanics.resolved`）。
+
+    契约（消费方逐个读出来的，见 `test_tier_verdict_agreement` / `test_cond_self_debuff_power`
+    / `test_slot_reduction` / `test_foe_switch_moe` 等）：
+
+      · `resolved: bool` —— 与档位（`classify_skill_declared`）**必须同值**：
+        427 条并集零打架是本文件最硬的一条判据（改前 18 条打架）。
+      · `settled: list[str]` —— 描述里写了、且引擎真的会出兵的那几**类**（`SETTLED_PATTERNS`；
+        `test_tier_verdict_agreement:117` 逐字要 `"驱散" in v["settled"]`）。
+      · `unsettled: list[str]` —— 没结算的分句/原语，字符串，给人看。
+      · `parsed` —— 判据自己那份解析结果（`:121` 有消费方拿它去算 spans）。
+
+    `declared=None` ⇒ **取候选口径**（`declared_capabilities_of()`）。⚠ **不是**
+    `get_rule_config(None)`：那是 legacy，`damage_*` 全 False ⇒ 已结算的招会被一律说成
+    未结算（前任实测踩过这一脚：724 必红）。
+
+    显式传 `declared={…}` 时**照旧逐位筛**（`test_slot_reduction:51` 的反证靠它）。
+    """
+    declared = declared_capabilities_of() if declared is None else declared
+    parsed = parse_mod.parse_skill(skill)
+    parsed, _head_claimed = resolve_claims(skill, declared, parsed=parsed)
+    parsed, _family_claimed = _apply_capability_resolvers(skill, declared, parsed)
+    desc = str(getattr(skill, "desc", "") or "")
+    flags = _flags_of(declared)
+    claimed_words = claimed_mechanic_words(parsed, flags)
+
+    unsettled: List[str] = []
+    unsettled.extend(residual_mechanic_spans(skill, parsed, claimed_words))
+    unsettled.extend(str(x) for x in (getattr(parsed, "unparsed", None) or []))
+    unsettled.extend(unsettled_mechanic_gaps(skill, parsed, claimed_words, declared))
+    _kinds = {getattr(e, "kind", "") for e in getattr(parsed, "effects", []) or []}
+    for kind in UNSETTLED_EFFECT_KINDS:
+        if kind in _kinds:
+            unsettled.append(f"解析得出但没有结算分支：{kind}")
+
+    # 去重但**保持顺序**（同一段文本会被多条闸点到；顺序稳定才可比对、可复盘）
+    _seen, _rows = set(), []
+    for row in unsettled:
+        text = str(row)
+        if text and text not in _seen:
+            _seen.add(text)
+            _rows.append(text)
+
+    # 与档位那个保守出口**同一条口径**（`classify_skill` 的 else 分支）：没读出效果、
+    # 也不是「纯伤害」、又没有能力位认领 ⇒ 引擎只会写 `status_unsupported`，
+    # **绝不许说已结算**（`test_tier_verdict_agreement` 的 E 堆：`389 充分燃烧`
+    # 「使敌方身上的灼烧翻倍，并触发1次灼烧伤害」——文本里有「伤害」二字 ≠ 引擎会结算伤害）。
+    if not _rows and not claimed_words \
+            and not (getattr(parsed, "effects", None) or []) \
+            and not getattr(parsed, "plain_attack", False):
+        _rows.append("读不出效果：描述里没有已登记的机制词（引擎不按普通伤害结算，fail closed）")
+
+    settled = [name for name, words in SETTLED_PATTERNS
+               if any(word and word in desc for word in words)]
+    # 原版口径（`_settlement_lists-抽取前基线-2026-09-30.md` L17 + BATCH-1 引的 `:713-719`）：
+    # **`resolved` = `settled` 非空 且 `unsettled` 为空**。`settled` 是那把"安全阀"：
+    # 描述里连一类"引擎真的会出这一手"的机制都点不出来 ⇒ 不许说已结算
+    # （`389 充分燃烧` 就是靠它红的：`unsettled` 为空、`settled` 也为空）。
+    return {"resolved": bool(settled) and not _rows,
+            "settled": settled, "unsettled": _rows, "parsed": parsed}
