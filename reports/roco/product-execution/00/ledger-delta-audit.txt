@@ -1,0 +1,108 @@
+totals current: 328 | HEAD(+pct兼容): 302
+翻正: 59 | 翻负: 33 | 翻正里在 427 并集内: 52
+  skill_000252 冲撞 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，回合结束时，本技能能耗永久-1。
+  skill_000255 突袭 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成魔伤，应对状态：本次技能威力变为3倍。
+  skill_000256 连续爪击 | HEAD=KNOWLEDGE_ONLY -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，2连击，应对状态：本次技能连击数翻倍。
+  skill_000257 追打 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成魔伤，1连击，应对状态：本技能变为3连击。
+  skill_000259 偷袭 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，应对状态：本次技能威力变为3倍。
+  skill_000261 乘胜追击 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，1连击，每次使用后，本技能连击数永久+1。
+  skill_000270 蓄能轰击 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成魔伤，每使用1次其他普通系技能，本技能能耗永久-2。
+  skill_000277 锐利眼神 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 敌方获得物防和魔防-120%。
+  skill_000289 无畏之心 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 减伤100%，应对攻击：减免的伤害变为回复自己生命，且本技能能耗永久+2。
+  skill_000304 音波弹 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成魔伤，1连击。
+  skill_000322 消毒法 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=False | 造成魔伤，驱散敌方5层增益。
+  skill_000343 光能聚集 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成魔伤，每次使用其他草系技能后，本技能威力永久+60。
+  skill_000347 氧输送 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 自己回复4能量，并获得魔攻+70%。
+  skill_000379 闪燃 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，应对状态：本次技能威力变为4倍。
+  skill_000382 流星火雨 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，每次击败敌方，本技能威力永久+85。
+  skill_000390 天火 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 敌方获得10层灼烧，应对防御：改为获得30层。
+  skill_000403 炎打 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成高额魔法伤害，自己获得物防-40%。
+  skill_000407 焚毁 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=False | 造成魔伤，驱散敌方所有印记，每驱散1层，获得物攻+20%。
+  skill_000408 焚烧烙印 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 驱散双方所有印记，每驱散1层，敌方获得5层灼烧。
+  skill_000409 除厄 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成魔伤，驱散自己的减益。
+  skill_000415 焚尽 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 驱散自己所有印记，每驱散1层，获得物攻+50%。巧变：火系攻击技能。
+  skill_000430 水环 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 减伤60%，应对攻击：自己获得全技能能耗-2。
+  skill_000432 水波术 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成魔伤，回合结束时，本技能威力永久+20。
+  skill_000441 洗礼 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 驱散自己的减益，并获得全技能能耗-1。
+  skill_000450 过曝 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成魔伤，每使用过1个其他系别技能，本技能威力永久+30。
+  skill_000463 点亮 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=False | 减伤90%，应对攻击：自己获得光系技能威力永久+50%。
+  skill_000503 抛石 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，回合结束时，本技能能耗永久-5。
+  skill_000514 落石 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，1连击。
+  skill_000531 冰晶坠 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=False | 造成物伤，敌方获得全技能能耗+1。
+  skill_000532 冰雹 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，应对状态：额外使敌方获得全技能能耗+3。
+  skill_000534 冰冻光线 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=False | 造成魔伤，敌方获得全技能能耗+2。
+  skill_000546 丢冰块 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=False | 造成物伤，敌方获得速度-30。
+  skill_000548 雪球 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 敌方获得速度-90。
+  skill_000597 超导加速 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=False | 造成魔伤，自己获得速度+30。
+  skill_000611 毒囊 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，敌方获得2层中毒，应对状态：改为获得6层。
+  skill_000616 剧毒 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 敌方获得3层中毒，应对防御：改为获得8层。
+  skill_000628 溶解 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 减伤90%，应对攻击：驱散敌方1种增益。
+  skill_000637 虫击 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，应对状态：本次技能威力变为2倍，无视敌方系别抵抗。
+  skill_000652 食腐 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 驱散敌方印记，每层印记回复自己10%生命。
+  skill_000661 散手 | HEAD=KNOWLEDGE_ONLY -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，2连击，应对状态：本技能改为6连击。
+  skill_000662 无影脚 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，应对状态：本次技能威力变为2倍。
+  skill_000665 技巧打击 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，应对状态：本次技能威力变为10倍。
+  skill_000667 化劲 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 自己获得全技能威力+40。
+  skill_000674 爆冲 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，应对状态：本次技能威力变为5倍。
+  skill_000680 提气 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 自己获得全技能威力+40，若敌方本回合更换精灵，额外获得威力+50。
+  skill_000682 防御反击 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 减伤80%，应对攻击：自己获得全技能威力+40。
+  skill_000689 疾风刺 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，1连击，若先于敌方攻击，改为3连击。
+  skill_000691 乘风 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 自己获得速度+120。
+  skill_000717 超级糖果 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，自己获得萌化：本次技能威力+60。
+  skill_000719 生日蛋糕 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 驱散自己的减益，自己的增益翻倍。
+  skill_000720 示弱 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 自己获得萌化：速度永久+130。
+  skill_000721 赤子之心 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 自己获得萌化：全技能能耗永久-2。
+  skill_000722 反弹 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 将自己的萌化转移给敌方。
+  skill_000723 甜心续航 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 自己和敌方获得萌化：回复40%生命。
+  skill_000728 撒娇 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成魔伤，3连击。自己获得萌化：全技能威力永久+10。
+  skill_000776 力量吞噬 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 敌方获得全技能威力-20，自己获得全技能威力+20。
+  skill_000792 趁火打劫 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，2连击，若击败敌方，本技能连击数永久+2。
+  skill_000808 多维击打 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成魔伤，1连击，敌方每有1层星陨印记，本次技能连击数+1。
+  skill_000825 天体吸积 | HEAD=PARTIAL -> now=SIMULATABLE_UNVERIFIED | union=True | 造成物伤，敌方每有1层印记，本次攻击威力+20。
+  [翻负] skill_000262 阻断 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 造成魔伤，应对状态：额外打断被应对技能。
+  [翻负] skill_000328 吓退 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 减伤60%，应对攻击：敌方脱离。
+  [翻负] skill_000351 移花接木 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 自己回复15%生命，随后脱离。
+  [翻负] skill_000355 汲取 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 造成魔伤，并吸血100%。
+  [翻负] skill_000383 持续高温 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 造成魔伤，应对状态：下次攻击技能威力翻倍。
+  [翻负] skill_000385 高温回火 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 造成魔伤，自己脱离。
+  [翻负] skill_000428 泡沫幻影 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 减伤80%，应对攻击：自己脱离。
+  [翻负] skill_000467 闪光弹 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 造成物伤，自己脱离。
+  [翻负] skill_000488 铁蒺藜 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 造成魔伤，应对状态：本次伤害翻倍。
+  [翻负] skill_000499 地刺 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 造成物伤，应对状态：额外打断被应对技能。
+  [翻负] skill_000506 泥浆铠甲 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 自己获得物攻和物防+60%，应对防御：额外使自己的增益翻倍。
+  [翻负] skill_000511 遁地 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 减伤50%并脱离，应对攻击。
+  [翻负] skill_000528 砂石冲撞 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 造成物伤，若敌方本回合更换精灵，自己获得物防+100%。
+  [翻负] skill_000530 暴风雪 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 造成物伤，敌方获得1层冻结。
+  [翻负] skill_000535 霜降 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 敌方获得4层冻结。
+  [翻负] skill_000540 冰墙 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 减伤80%，应对攻击：敌方获得2层冻结。
+  [翻负] skill_000585 闪击折返 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 造成物伤，2连击，自己脱离。
+  [翻负] skill_000600 远程访问 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 使敌方精灵返场。
+  [翻负] skill_000606 通电 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 造成物伤，敌方获得1层引电。
+  [翻负] skill_000663 斩断 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 造成物伤，应对状态：额外打断被应对技能。
+  [翻负] skill_000688 翼击 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 造成魔伤，迅捷。
+  [翻负] skill_000704 风隐 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 敌方和自己均脱离，先手-1。
+  [翻负] skill_000715 无风 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 减伤50%，应对攻击：敌方和自己均脱离。
+  [翻负] skill_000730 击鼓传花 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 自己脱离，下个入场精灵继承自己增益。
+  [翻负] skill_000765 离魂术 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 偷取敌方2能量，脱离。
+  [翻负] skill_000768 蝙蝠 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 造成物伤，并吸血100%。
+  [翻负] skill_000769 撕裂 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 造成物伤，应对状态：本次攻击吸血100%。
+  [翻负] skill_000771 暗突袭 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 造成物伤，吸血50%，应对状态：本次技能威力翻倍。
+  [翻负] skill_000773 灾厄 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 对自己造成物伤，应对状态：改为对敌方造成物伤，且本次技能威力+120。
+  [翻负] skill_000775 贪婪 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 自己获得100%吸血。
+  [翻负] skill_000778 恶意逃离 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 脱离，应对防御：额外使敌方攻击技能能耗+4。
+  [翻负] skill_000780 等价交换 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 减伤90%，应对攻击：自己获得50%吸血。
+  [翻负] skill_000830 观测者效应 | HEAD=SIMULATABLE_UNVERIFIED -> now=PARTIAL | 自己脱离，更换入场的精灵以月陨星状态登场。
+
+=== 翻正 59 行的消费一致性 ===
+判据说未结算的翻正行数: 0 []
+==> 若为 0：台账每一条翻正都与判据一致（并集内更是必须 SIM）
+按认领来源归类（前 8 类）:
+    13  ('连击×1',)
+     8  ('cleanse_marks', '连击×1')
+     8  ('global_skill_mods', '连击×1')
+     7  ('stat_gain_extended', '连击×1')
+     4  ('triggered_ramp', '连击×1')
+     3  ('element_use_ramp', '连击×1')
+     3  ('moe_mark', '连击×1')
+     2  ('连击×2',)
+翻正中在 427 并集外者: ['skill_000322', 'skill_000407', 'skill_000463', 'skill_000531', 'skill_000534', 'skill_000546', 'skill_000597']

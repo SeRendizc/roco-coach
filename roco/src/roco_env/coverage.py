@@ -105,6 +105,15 @@ def resolve_claims(skill: Any, capabilities: Optional[Dict[str, bool]] = None,
     # 「可模拟却还有残余片段」。所以扩展族接在九步之后，**同一条链、同一份证据尺子**。
     parsed, _family_claimed = _apply_capability_resolvers(skill, caps, parsed)
     claimed.extend(_family_claimed)
+    # 2026-09-30（按逐行审计修第二处**假阴性**）：号位/传动的**认领 effect 要在链尾补一次**。
+    # 中间任一族 resolver 会重建 `effects`，把先前那条 claim effect 冲掉 —— 实测
+    # `483 啮合传递`「本技能位于1号或3号位时额外获得物攻+80%」：真打一手 1 号位会发
+    # `slot_condition_applied` + `buffs={'atk':80}`，但残余片段「获得：…」还在 ⇒ 档位被压成 PARTIAL。
+    if caps.get("slot_condition") or caps.get("position_shift"):
+        parsed = parse_mod.resolve_position_mechanics(
+            skill, slot_declared=bool(caps.get("slot_condition")),
+            shift_declared=bool(caps.get("position_shift")),
+            claim_effects=True, parsed=parsed)
     return parsed, claimed
 
 
@@ -211,6 +220,14 @@ def classify_skill(skill: Any, *, foe_energy_loss_declared: bool = False,
         _caps_now,
         parsed)
     claimed.extend(_family_claimed)
+    # ⚠ 与 `resolve_claims` 的那一步**必须成对**：两把尺子读同一份 `parsed` 才谈得上
+    # 一致（少一边 ⇒ 并集就会出现"判据 true / 档位 PARTIAL"的打架）。号位/传动的认领
+    # effect 在链尾补一次，防中间族 resolver 重建 effects 时冲掉（实测 `483 啮合传递`）。
+    if _caps_now.get("slot_condition") or _caps_now.get("position_shift"):
+        parsed = parse_mod.resolve_position_mechanics(
+            skill, slot_declared=bool(_caps_now.get("slot_condition")),
+            shift_declared=bool(_caps_now.get("position_shift")),
+            claim_effects=True, parsed=parsed)
 
     # ── 两把尺子的**共用读数**（2026-09-30 收口）────────────────────────────
     # 认领词表 / 残余片段 / 逐句应对缺口 + 没拉起的原语，全部只在这里算一次，
@@ -323,9 +340,13 @@ def classify_skill(skill: Any, *, foe_energy_loss_declared: bool = False,
         if getattr(parsed, "plain_attack", False):
             level = SUPPORT_SIMULATABLE_UNVERIFIED
             why = "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理"
-        elif claimed:
-            # 描述里的机制被**已声明能力**认领了（例如候选口径声明了连击，
-            # 静态「3连击」就不算未实现）——这时它同样没有未认领片段，可结算。
+        elif claimed and (parsed.effects or _settled_classes or
+                          getattr(parsed, "plain_attack", False)):
+            # 2026-09-30（按逐行审计收窄）：**光有认领标记不算结算** —— 实测
+            # `473 轴承支撑` / `489 减压阀`（「被动：…，传动1。」）只认领到 `传动×1`
+            # 这一个**位移标记**就被这一支放行，而引擎自己还在写 `status_unsupported`
+            # ⇒ 那是"把未结算说成已结算"。收窄口径：要有**产出**、或是**纯伤害**、
+            # 或点得出**已结算的类**，三者之一（`ledger-delta-audit.txt` 第 ④ 族）。
             level = SUPPORT_SIMULATABLE_UNVERIFIED
             why = f"描述里的机制由已声明能力认领（{'、'.join(claimed)}），没有未认领片段"
         else:
@@ -1062,6 +1083,16 @@ def _withdraw_kinds(parsed: Any, kinds: Any) -> Any:
     return parsed
 
 
+#: 扩展族的**执行顺序**（⚠ 顺序有意义）：能产出"基础子句"的族排在**覆盖体**（`respond_override`）
+#: 之前 —— 覆盖体需要"被覆盖的对象"已经存在（`parse.py:1124` 的纪律；`462 放晴` 就是栽在这）。
+_FAMILY_CLAIM_ORDER = (
+    "element_power_ramp", "moe_mark", "cleanse_marks", "global_skill_mods",
+    "respond_reduction_to_heal", "triggered_ramp", "element_use_ramp",
+    "per_layer_boost", "per_own_debuff_cost", "cond_self_debuff_power",
+    "stat_gain_extended", "attack_stat_by_class", "respond_override",
+)
+
+
 def _apply_capability_resolvers(skill: Any, caps: Dict[str, bool], parsed: Any,
                                 *, skip: Any = ()) -> "tuple[Any, List[str]]":
     """按**能力声明**把扩展族的 resolver 接在既有链后面，返回 `(parsed, claimed)`。
@@ -1071,7 +1102,14 @@ def _apply_capability_resolvers(skill: Any, caps: Dict[str, bool], parsed: Any,
     不需要、也不许在这里另抄一份机制词名单。
     """
     claimed: List[str] = []
-    for name, flag in _CAPABILITY_TO_FLAG.items():
+    # 2026-09-30（按逐行审计修一处**假阴性**）：**"基础子句"要排在"覆盖体"之前跑**。
+    # `462 放晴`「光系技能威力永久+50%，应对防御：改为永久+100%」：`resolve_element_power_ramp`
+    # 必须先产出基础 effect，`resolve_respond_override` 的覆盖体才有"被覆盖的对象"可摘
+    # （`parse.py:1124` 逐字写着这条纪律）。以前按表顺序跑、`respond_override` 在前
+    # ⇒ 基础认领不到 ⇒ 判据恒 False（而真打一手：对手出防御时
+    # `respond_override_applied` + `element_power_ramp(delta=100)` 都真的发）。
+    _ordered = [n for n in _FAMILY_CLAIM_ORDER if n not in skip]
+    for name in list(_ordered) + [n for n in _CAPABILITY_TO_FLAG if n not in _ordered]:
         if name in _HEAD_CAPABILITIES or name in skip:
             continue
         if not caps.get(name, False):
