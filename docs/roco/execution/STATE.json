@@ -57,7 +57,22 @@
     "_git_index_and_commits": "lead 独占（成员禁止 git 写命令，避免 index 竞争）",
     "_跨机复验（只读）": "lead-mac（macOS + Python 3.9.6 · agent-coop lead-mac）：拉指定 commit → 独立跑判据 → 报差异；**只读、只报、不改本仓库任何写域、不推产品分支**（见 D-19）",
     "src/coach/toolbox.js": "plan03-belief（D-21 ③：仅 plan 回执组装段的 truncation / is_probability / 情景依据字段）",
-    "reports/roco/product-execution/04/**": "plan03-belief（verify-* 归 harness-verifier 与 lead-mac 复核）"
+    "reports/roco/product-execution/04/**": "plan03-belief（verify-* 归 harness-verifier 与 lead-mac 复核）",
+    "reports/roco/product-execution/05/**": "plan05-recon（verify-* 归 harness-verifier）",
+    "reports/roco/product-execution/06/**": "plan06-recon",
+    "reports/roco/product-execution/07/**": "plan02-front",
+    "reports/roco/product-execution/08/**": "plan01-engine",
+    "reports/roco/product-execution/09/**": "plan01-engine（recon）",
+    "reports/roco/product-execution/10/**": "plan00-closer",
+    "reports/roco/product-execution/11/**": "plan00-closer（recon）",
+    "_05 写域（D-26）": "src/client/roco.js · roco.css · roco.html · xiaoya.js · src/coach/client.js · roco-experience.js · runtime.js · experience.js · strategist.js（仅 G-05-03 措辞）→ plan05-recon（实现阶段）；⚠ roco.js 08.5 与 10.1-c 要用时**先向 lead 申请切片**",
+    "_coach-advice.js 归属": "现在仍归 04（task-12：04.4/04.5 要用）；**04 passed 后转给 05**",
+    "_05 新增测试（D-26 Q10）": "tests/roco-plan-projection.test.js · roco-advice-basis.test.js · roco-advice-three-paths.test.js · roco-advice-consumer.test.js · roco-hint-visibility.test.js · roco-advice-latency.test.js → plan05-recon",
+    "scripts/roco/browser-advice-acceptance.mjs": "plan05-recon（新文件；不动 harness-verifier 既有件）",
+    "src/client/loadout-store.js": "plan01-engine（08-S1 窄例外，D-25）",
+    "tests/roco-workshop.test.js": "plan01-engine（08-S1；改钉须原断言留档+两向变异）",
+    "tests/roco-box-loadout.test.js": "plan01-engine（08-S1；同上）",
+    "_10 写域（task-18，门槛后生效）": "src/coach/roco-client.js · src/server/roco-service.js · 新增 session-snapshot 模块 · src/client/roco.js（仅恢复提示段，改前回报）· tests/roco-session-restore.test.js · tests/roco-server-side-guard.test.js → plan00-closer"
   },
   "blockers": [
     {
@@ -555,6 +570,18 @@
       "id": "D-24",
       "what": "08（配队打法与目标培养闭环）勘察裁决：6 条（写域/迁移口径/阈值口径/测试 profile/跨页入口/档位）",
       "decision": "勘察 `reports/roco/product-execution/08/08.1-recon.md`（22 条缺口 G01–G10/C1–C6/U1–U6 + 9 条伪最优风险；实测 **G01 配招键是物种级**：`loadout-store.js:13-16` 按 `pet_…` 存、`team-workshop.js:1885/2003` 写 `row.species`、`box-loadout.js:752/1007` 读 `state.species` 写 `state.petId` ⇒ **同物种两只个体共用一份配招**，正是 08 反例②；另实测不设 `ROCO_PYTHON` 时 `tests/roco-loadout-ui.test.js` 6/9、设了 9/9）。裁决：**Q1** 批准单独一轮只碰 `src/client/loadout-store.js`+`box-loadout.js`+`team-workshop.js`，**G01 最先冻结**；**Q2** 老记录**新键 + 兼容读取、不删旧键**，读旧记录须**如实标注「物种级（未区分个体）」**，下次编辑写个体级新键（幂等），个体级优先；**Q3** 阈值**只给档位 + 区间 + 未核验标注**（`formula_verified:false` 传到 UI 大白话 + 机器可检字段），点估计 ⇒ 必红；**Q4** 专用测试 profile = **验收口径**，只在测试脚本，不得产品化；**Q5** 08.5 **不新增页面/路由**，用 query 参数，不得显示上一局当本局，改 `src/client/roco.js` 先回报；**Q6** `goal` **维持两档**，加档单独立项。顺序 S1 个体级键 → S2 可比较尺子 → S3 可撤销与偏好 → S4 跨页链路 → S5 伪最优可检字段。任务 task-19",
+      "by": "lead"
+    },
+    {
+      "id": "D-25",
+      "what": "**门槛纪律与一次自我纠正**：各分计划进入条件是严格链（05←04 · 06←05 · 07←06 · 08←07 · 09←08 · 10←09 · 11←10 · 12←11），并行只允许发生在**勘察/审计/验收/跨机复验**层",
+      "decision": "Lead 曾错误地把 08 与 10 的**实现**提前派出（违反 07/09 未通过的进入条件），**已纠正**：① 10 的实现**整体暂停**（其 10.1-a 行为契约文档作为设计证据保留入库；10.1-b 起不动）；② 08 **只放行 S1**（G01 个体级键 + 旧记录兼容）作为**登记在案的窄例外**——理由：这是**现有行为的数据正确性缺陷**（同物种两只个体共用一份配招，正是 08 反例②）、**不消费 05/06/07 任何产物**、且改动为纯新增（165 行新增/1 行注释替换）；08 的 S2–S5（可比较尺子 / 可撤销与偏好 / 08.5 跨页链路 / 伪最优可检字段）**继续受门槛约束**，等 07 通过再放行；③ 已核工作树无半成品：`src/client/loadout-store.js` 之外的 08/10 文件当时全为 clean。**规则**：今后任何「提前开工」必须先由 Lead 在 `STATE.json` 登记例外与理由，不得静默进行",
+      "by": "lead"
+    },
+    {
+      "id": "D-26",
+      "what": "05（局内建议路由与真实交互）勘察裁决：Q1–Q10 十条",
+      "decision": "勘察 `reports/roco/product-execution/05/05.1-recon.md`（23 条缺口；**最贵三条**：问句—阶段—路由断裂（局中「有啥可以改进」答「开一局之后」）· `expected/worst` 的**区间对象**被 `roco.js:5588` 的 `Number.isFinite` **静默丢弃** ⇒ 05.2 拿不到范围与尾部 · 「采用只一次」「查看不行动」「时延采集」**实现了但零判据**）。裁决：**Q1** 批准写域按文件细分（`src/client/{roco.js,roco.css,roco.html,xiaoya.js}` → 05；⚠ 08.5 与 10.1-c 以后要用 `roco.js` 时**先向 lead 申请切片**）；**Q2** `src/coach/{client.js,roco-experience.js,runtime.js,experience.js}` → 05，`strategist.js` 仅限 G-05-03 措辞，**`coach-advice.js` 暂留 04、04 passed 后转 05**；**Q3** P3 不归 05（归 04.2b 专项，引擎写域 + 隐藏真值判据）；**Q4** 两步走：先 `plan_capabilities:{is_probability:'absent'}` 如实登记（不许伪造 `false`），04.4 落地后**接上而不是覆盖**（04 值优先、两处口径都断言）；**Q5** 按问句意图作答**但不动 `primaryFromFacts` 次序**，引擎推荐作为对照明确标注；**Q6** 局末只说「已结束 + 去复盘」，**不做复盘**（06 写域）；**Q7** 两套意图表合并为一份导出表（旧名作别名），可改钉 `roco-local-output-contract` / `roco-ask-coverage` 但须列清单 + 改钉规矩；**Q8** 新夹具 `scripts/roco/browser-advice-acceptance.mjs` 归 05（新文件，不动 verifier 既有件）；**Q9** 时延采集走页面内存 + `body.dataset` + 证据文件，回执只加**可选**字段（缺省逐字节不变 + 反证）；**Q10** 6 个新测试文件逐个点名给 05（见 write_owners）。**实现仍受门槛约束**（05 进入条件 = 04 通过）",
       "by": "lead"
     }
   ]
