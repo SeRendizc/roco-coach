@@ -1,8 +1,8 @@
 {
   "schema": "roco-dsh-execution/v1",
-  "updated_at": "2026-09-30T18:40:00+08:00",
+  "updated_at": "2026-09-30T19:25:00+08:00",
   "active_plan": "01",
-  "next_action": "① plan00-closer 落地 D-8（迸发已结算形状豁免 + test_effect_coverage:869 改钉 306→309，原值留档）→ 我切片提交并推送 → harness-verifier 在 git archive 副本做权威复验（预期恰好 3 行翻正 313/581/584 · totals 309 · union 0 · 反证仍 5 · 583/587/598/607 仍 PARTIAL · 全量仍只红反证那条）→ 归档 00 为 passed。② 01 剩最后一块：前端开局预览与「已见阵容」回看入口（Node 已备好 seen_roster/revealed_skills；新写域，需先立写域再派）+ 01 自己补 result.json/acceptance.md 收尾（01 的通过条件另需「同一决策的 UI/Coach/回放可追溯到同一观察序列」的对照读数）。③ 01 收尾后 active_plan=02，依次 02→…→12；O-4（反证 5>=8）保留为已登记偏差，O-6（damage_global_skill_mod_text 死门 + 531/534 方向丢失）与 O-8（迸发两链不同源）留待后续专项。④ 8765 在本机没在跑（curl exit 7）⇒ player 栏只登记，不许自行启动。⑤ 每次推送后核对远端 SHA；每次要用户裁决前先 pushplus 通知（用户远程连接）。",
+  "next_action": "① 等 harness-verifier 的三组权威副本读数（`2e30a4f` 847·1F/totals 306 · `5002433` 872·1F/totals 306 · `59e55df` 872·1F/totals 309）；若与预期一致 ⇒ 01 标 passed、active_plan 切 02（00 已 passed，见 plans.00）。② plan02-front 已起，正在只读勘察（02.1 模式—可见字段矩阵）+ 浏览器夹具 bring-up；我收到它的勘察报告后给「go」，它才允许改 `src/client/**`。③ 02 的五步与反例见 task-7；写域 src/client/{roco.js,roco.html,roco.css,battle-v3.css,app.js} + reports/roco/product-execution/02/。④ 之后 02→…→12 依次，每步切片提交 + 推 Gitee 并核对远端 SHA。⑤ 常驻登记：O-4（反证 5>=8 已登记偏差）、O-6（damage_global_skill_mod_text 死门 + 531/534 方向丢失）、O-8（迸发两链不同源）留待后续专项；8765 本机未运行 ⇒ player 栏只登记。⑥ 每次要用户裁决前先 pushplus 通知（用户远程连接）。",
   "plan_order": [
     "00",
     "01",
@@ -58,13 +58,13 @@
     "00": {
       "title": "服务恢复与规则契约收口",
       "status": "passed",
-      "step": "00.6 · 已收口（A 批「584 迸发豁免 + 改钉 306→309」落地中，落地复验后补 commit/remote_sha）",
+      "step": "00.6 · 全部收口（A 批 D-8 已落地：totals 309；权威副本复验收尾中）",
       "code": "fixed",
-      "isolated": "passed（clean archive 78766db：Ran 847 · 1F + 0E · skipped=2 · union 0 · totals 306 · harness 6/6 · tests 树逐字节未改；唯一红 = R-00-b 已登记偏差）",
+      "isolated": "passed（clean archive 78766db：Ran 847 · 1F + 0E · skipped=2 · union 0 · totals 306 · harness 6/6 · tests 树逐字节未改；唯一红 = R-00-b 已登记偏差。A 批 59e55df 的权威副本读数在 verifier 手上复跑）",
       "player": "observed_healthy_pending_resident_version",
-      "evidence": "reports/roco/product-execution/00/{ledger-delta-audit.txt,plan00-family2.md,plan00-family3.md,plan00-settled-patterns-gap.md,plan00-584-burst-evidence.md,verify-*,verify-counterproof-rootcause.md} + harness/{verify-slice-78766db.md,verify-slice-78766db-log.txt,verify-ledger-delta-313.txt,ledger-delta-313-vs-306.json,verify-doc-drift-observations.md}",
-      "commit": "2e30a4f",
-      "remote_sha": "5002433309be2f902498a15a74c7522a02d04353（分支 tip，含 2e30a4f）",
+      "evidence": "reports/roco/product-execution/00/{ledger-delta-audit.txt,plan00-family2.md,plan00-family3.md,plan00-settled-patterns-gap.md,plan00-584-burst-evidence.md,plan00-burst-exemption.md,verify-*,verify-counterproof-rootcause.md} + harness/{verify-slice-*.md|txt,verify-ledger-delta-313.txt,ledger-delta-*-vs-306.json,readings-*-all.json,verify-doc-drift-observations.md}",
+      "commit": "59e55df",
+      "remote_sha": "59e55df2fa1a32d18ceb816f591e06ee82b18ed1",
       "note": "【新机接手 2026-09-30 17:2x~17:5x】(a) 三条命验逐条对上：import OK · Ran 847·2F+0E · union 0 · totals 313 · harness 6/6 · 远端 SHA=本地 HEAD。(b) 族②③ 由 plan00-closer 收口：RESPOND 跳步从「前缀命中 search()」收窄成「整条分句都是那个形状」（RESPOND_POWER_SETTLED_RE 本体不动）；global_skill_mods 改为要求 env 真有写点（选 A：六条技能 × 6 敌手动作 = 36 组真打一手，global_skill_mod_applied 0 次，mods 恒 {}；对照 721/728 每组都发）。⇒ union 0 · totals 313→306，与 rc401 基线逐桶一致（battle SIM 298 == 基线 298）· test_effect_coverage 由红转绿 · tests/** 一行未动（由 verifier 独立核对 git diff）。(c) 族②③ 都有 harness-verifier 的独立复验（自写正则 12/12 同判定 + 只改敌方出招的差分夹具 + 正域 22 次写点对照），非自证。(d) **改正派工里的一处事实**：637 在动手前已是 PARTIAL（b78474b 诊断形状一并修掉）⇒ 族②真实翻正只有 398 一行。(e) 306 的账 = +762（合法，判据侧陈旧）−584（假阴性，诊断形状「迸发」）恰好抵平，属**外部两行**，不是拟合 —— 见 O-5 待裁决。(f) 全量 5F+0E 中 4 条属 plan01-engine 在飞中间态，已按切片提交隔离，干净副本读数待 verifier。",
       "residuals": [
         {
@@ -282,9 +282,16 @@
     {
       "id": "O-8",
       "what": "「迸发」两条链不同源：parse 对 584 产出 0 条 effect，而运行时 effects.effective_power() 是**读 desc** 加威力的",
-      "evidence": "harness-verifier verify-584-and-762-runtime.md：584 引雷 parse 0 effect，运行时 power_used=55.0（35+20）、conditional_reason='迸发 → 威力 +20.0'，窗口过后回 35.0 ⇒ 引擎真结算，但解析链看不见它。本轮 D-8 只在 coverage 侧做「已结算形状豁免」；**把两条链真正同源**（让 parse 也产出该 effect）属 parse.py 域，未做",
+      "evidence": "harness-verifier verify-584-and-762-runtime.md：584 引雷 parse 0 effect，运行时 power_used=55.0（35+20）、conditional_reason='迸发 → 威力 +20.0'，窗口过后回 35.0 ⇒ 引擎真结算，但解析链看不见它。D-8（59e55df）只在 coverage 侧做「已结算形状豁免」：`_burst_power_is_settled()` 直接调 `fx.effective_power()`（与 env.py:1380 结算调同一个函数、同一个 `_burst_active` 标志）+ `has_static_power` 守卫 + 异常 fail closed。**把两条链真正同源**（让 parse 也产出该 effect）属 parse.py 域，未做",
       "owner": "未派（建议 02 或专项）",
       "status": "open"
+    },
+    {
+      "id": "O-9",
+      "what": "本机（Windows + WSL）跑真链路的两个必需环境变量（缺失时会被误记成「环境限制」）",
+      "evidence": "① `ROCO_PYTHON=C:\\Users\\ASUS\\AppData\\Local\\Programs\\Python\\Python310\\python.exe`（3.10.5）—— Windows 没有 `python3`；设置后 `node --test tests/roco-standard-pvp-battle.test.js` ⇒ tests 15 · pass 15 · exit 0（plan01-engine 原先记成「本机跑不了」，已在 01 acceptance 更正）。② 浏览器验收走零依赖 CDP：`CHROME_PATH=C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe` + `--headless=new --remote-debugging-port=0 --user-data-dir=<独立 profile>`，端口读 profile 内 DevToolsActivePort；Lead 烟测 `E:\\roco-scratch\\cdp-smoke.mjs` ⇒ `CDP_SMOKE_OK`（Chrome 153.0.8010.53，/json/version http=200）。③ 仓库 Node 零依赖（无 node_modules），Python 侧只需标准库",
+      "owner": "lead（已写进 task-7 与 01 acceptance）",
+      "status": "closed"
     }
   ],
   "handoff": {
