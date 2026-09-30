@@ -417,6 +417,14 @@
       "owner": "harness-verifier（发现）· plan04-engine（同批修：改措辞 + 补假客户端抓 body 的断言 + 两向变异）",
       "status": "fix_in_flight",
       "rule": "**安全属性必须由断言守护，不能只靠「当前没人那么写」**：凡「某个字段不进请求体/不进回执」这类红线，都要有「假客户端抓包断言白名单键 + 两向变异」；描述机制时**不许**把「没转发」写成「主动拒绝」（O-21 就是范本）"
+    },
+    {
+      "id": "O-22",
+      "what": "**Windows 侧 Node 判据并非全绿**：9 个判据文件用 `dirname(new URL(import.meta.url).pathname)` 取路径，在 Windows 上得到 `/E:/…` ⇒ `join` 出 `E:\\E:\\…` ⇒ `ENOENT` 而红（POSIX 侧正常，所以长期没被发现）",
+      "evidence": "plan02-front 逐文件真跑分类（`reports/roco/product-execution/07/07.1-recon.md` §1.3）：**已修** `tests/roco-memory-three-classes.test.js`（改前 Windows `exit 1 · 17/14 pass/3 fail` ⇒ 改后 `exit 0 · 17/17`；WSL 侧零回归；sha16 `625bcf3e5b031953`→`cd45e9cd74edb44f`）。**待修 8 个**（task-24）：`roco-planner-attribution:20` · `roco-citation-grounding:18` · `roco-agent-metrics:23` · `roco-agent-stops:18` · `roco-corpus-verification:21` · `roco-reward-hacking-invariant:26` · `roco-single-agent-invariant:20` · `roco-tool-contract-drift:18`。**Lead 自己抽验两条确认**：`tests/roco-planner-attribution.test.js` ⇒ `ENOENT … open 'E:\\E:\\roco-coach\\src\\coach\\runtime.js'`；`tests/roco-single-agent-invariant.test.js` ⇒ `ENOENT … scandir 'E:\\E:\\roco-coach\\src\\coach'`。另有 2 个文件写法相同但**红因不同**（`roco-pvp-fairness:23` 缺 `docs/roco/PVP-FAIRNESS-RULES.md`；`roco-individuals-context:15` 断言「真数据集也要补得出天分」未满足）—— 单列待裁决",
+      "owner": "plan02-front（修）· lead（抽验 + 登记）",
+      "status": "fix_in_flight",
+      "rule": "**判据文件取自身路径一律用 `fileURLToPath(import.meta.url)`**（不许 `.pathname`）；「套件在 Windows 上能跑」是前提条件（用户实际环境是 Windows，而跨机复验跑 POSIX ⇒ 两边都必须绿）；任何「套件全绿」的声称必须**声明跑在哪个 OS**"
     }
   ],
   "handoff": {
