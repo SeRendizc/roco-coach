@@ -6,6 +6,9 @@
 
 ![营地](output/demo-live/01-营地.png)
 
+> 🔴 **先读这一句**：`8765` 上的网页现在回 **200**，但 **Python 引擎侧是红的**（`coverage.py` 停在被 `git checkout` 抹掉之后的 HEAD 版本）。**"网页能打开"不等于"功能都好了"** —— 详见文末「当前状态」。
+> 主交付物是 **[`docs/roco/coach-理想形态-计划书-2026-09-30.md`](docs/roco/coach-理想形态-计划书-2026-09-30.md)**（本机实测 **6968 行**）。
+
 ---
 
 ## 运行
@@ -45,16 +48,16 @@ Python 环境或模型缺失时语义检索自动退回词项检索，不会报�
 ```
 
 > **`master` 上的游戏部分与 v0.1 完全一致。**
-> 「小芽 2.0」的手游规则域目前只做到数据层（M0/M1），**没有接管默认 UI**，
+> 「小芽 2.0」的手游规则域在当时只做到数据层（M0/M1），**没有接管默认 UI**，
 > 所以启动方式、端口、玩法都和 v0.1 一样。见下方「小芽 2.0：当前进度」。
 
 ---
 
-## 小芽 2.0：当前进度
+## 小芽 2.0：M0/M1 阶段的产物（**历史记录，非当前状态**）
 
 项目正在从自创宠物 Demo 升级为《洛克王国：世界》**手游**内嵌主动 Coach。
-当前只完成了 **M0（基线 + 仓库审计）** 与 **M1（数据快照）**，
-**没有修改任何运行代码**——`src/game/engine.js`、`src/game/content.js`、`src/coach/*`、前端与全部既有测试
+下面这张表是 **M0（基线 + 仓库审计）** 与 **M1（数据快照）** 的产物，
+当时**没有修改任何运行代码**——`src/game/engine.js`、`src/game/content.js`、`src/coach/*`、前端与全部既有测试
 与本轮开始前的 commit 逐字节一致。
 
 已完成的是**可信的数据地基**：
@@ -62,23 +65,23 @@ Python 环境或模型缺失时语义检索自动退回词项检索，不会报�
 | 产物 | 内容 | 入口 |
 |---|---|---|
 | 来源与许可台账 | 3 份上游快照按 revision + SHA256 冻结；许可与再分发等级 | `data/roco/sources.yaml`、`docs/roco/LICENSE-MATRIX.md` |
-| 规范化数据 | 12 只目标精灵、824 条技能、312 张学习表、120 组属性相性 | `data/roco/normalized/roco-world-s4-2026-09-10/` |
+| 规范化数据 | 12 只目标精灵、824 条技能记录（我现取：战斗技能 **579** / 特性 **245**）、120 组属性相性、**12 份**学招表 —— 上游快照里共 **312** 份，冻结目录只落了 12 份（`docs/roco/COVERAGE-LAYERS.md` 已标） | `data/roco/normalized/roco-world-s4-2026-09-10/` |
 | 仓库审计 | 逐模块 KEEP / ADAPT / RETIRE / MISSING | `docs/roco/M0-REPO-AUDIT.md` |
 | 冲突记录 | 26 处跨来源差异，全部分类，未解决 0 | `docs/roco/DATA-CONFLICTS.md` |
 | 支持矩阵 | 12 只精灵的完整度、候选配招、缺口 | `docs/roco/PET-SUPPORT-MATRIX.md` |
 | microcase 计划 | 21 条，供下一轮规则引擎实现 | `docs/roco/MICROCASE-PLAN.md` |
 | 验收 checklist | 逐项打勾与证据 | `docs/roco/M0-M1-ACCEPTANCE.md` |
 
-**12 只精灵当前支持等级一律是 `KNOWLEDGE_ONLY`**：本轮没有实现任何效果原语，
-824 条技能的 `effect_support` 全是 `unsupported`。字段齐全是数据完整度，
-不等于机制可模拟——这两件事在文档里被强制分开。
+> ⚠ **上面那一段是 M1 当时的快照，不是今天的全貌。** 自那之后规则域已经继续往前推
+> （效果覆盖台账 `docs/roco/RC-401-EFFECT-COVERAGE.md`、`roco/tests/` 下 70 个 `test_*.py`、
+> 以及正在重建的 `coverage.py`）。**今天的真实状态以文末「当前状态」一节为准。**
 
 复现数据管线（不联网、不执行第三方代码）：
 
 ```sh
 npm run roco:pipeline     # 解析校验 → 交叉核验 → 导入 → 矩阵 → microcase → 文档
-npm run test:roco         # 15 项数据域验收（直接与原始 Lua 对拍）
-npm run roco:acceptance   # 9 项真实浏览器验收（含 4 张截图）
+npm run test:roco         # 数据域验收（直接与原始 Lua 对拍）
+npm run roco:acceptance   # 真实浏览器验收（含截图）
 ```
 
 > 注：`data/roco/raw/extracted/` 不入库。新克隆的仓库需要先从
@@ -123,15 +126,19 @@ npm run roco:acceptance   # 9 项真实浏览器验收（含 4 张截图）
 代码按 `src/` 分层，测试在 `tests/`，约定与「新文件该放哪」见 **`docs/STRUCTURE.md`**。
 顶层只有入口与配置，不放实现代码（这条有测试守着）。
 
+- **`docs/roco/coach-理想形态-计划书-2026-09-30.md`** — **主交付物**：小芽"理想形态"的完整计划与实测记录（含编号纪律）
 - **`docs/STRUCTURE.md`** — 目录结构与约定：新文件该放哪、为什么不那样做
 - **`output/pdf/xiaoya-coach-report.pdf`** — 实施与实验报告（页数以构建产物为准，建议先看这个）
-- `docs/LEGACY.md` — 版本、tag，以及「旧代码几个 G」的澄清
 - `docs/CHECKLIST.md` — 逐项完成状态与验收证据
 - `docs/IMPLEMENTATION-STATUS.md` — 当前能力、运行版本与限制
 - `docs/DEMO-ACCEPTANCE.md` — 普通游玩、静默、条件提醒、异步与公平性演示
 - `docs/EXPERIMENTS.md` — 完整实验与资源边界
 - `docs/INTERVIEW-GUIDE.md` — 讲述与追问准备
 - `docs/EVIDENCE-SCHEMA.md` — 事件、证据、任务状态与权限约定
+- `docs/roco/RC-401-EFFECT-COVERAGE.md` — 效果覆盖台账与档位词汇
+- `docs/roco/PROGRESS.md` — 路线图 vs 证据的进度台账
+
+> 旧的 `docs/LEGACY.md`（版本、tag、以及「旧代码几个 G」的澄清）**当前不存在于仓库里** —— 本 README 原先指向它，现已移除该条，不做补链。
 
 ---
 
@@ -197,54 +204,147 @@ Python 环境或模型缺失时不会报错中断：语义检索预热失败会�
 
 ## 当前状态（2026-09-30，**必读**）
 
+> 本节**每一个数字都是本机实测**，命令与读数汇总在最后「这一节的读数怎么来的」。
+> 凡没核实过的，这里不写。
+
 ### 主交付物
 
-**`docs/roco/coach-理想形态-计划书-2026-09-30.md`**（本机实测 **6872 行**，附录 A–DM）——小芽"理想形态"的完整计划与实测记录：四页可见面读数、引擎各族盘点、以及一套编号纪律（踩坑记录，见下）。
+**`docs/roco/coach-理想形态-计划书-2026-09-30.md`** —— 本机 `wc -l` 实测 **6968 行**。
+小芽"理想形态"的完整计划与实测记录：可见面读数、引擎各族盘点，以及一套编号纪律。
 
-### 🔴 引擎当前是红的（并且原因值得记住）
+> ⚠ 计划书**仍在增长**（我写作期间它从 6872 涨到 6968），所以 **6968 这个数是采样值**，不当作常量引用；请以你本机 `wc -l` 为准。
 
-`roco/src/roco_env/coverage.py` 在工作区里被一次误操作（`git checkout -- <file>`）抹掉了**整层未提交改动**——那条命令回滚到的是 **HEAD**，不是"改动前"。五路核查（`.pyc` / 备份 / `git stash` / `git fsck` 165 个 dangling blob / 活进程）**均不可恢复**。
+### 🔴 引擎当前是红的
 
-**该文件目前停在 HEAD 版本，整棵树是红的**（引擎侧 `coverage` 的 3 个入口 + 一张映射表缺失，`service.py:112` 的 import 会直接 `ImportError`）。
+`roco/src/roco_env/coverage.py` 在工作区里被一次误操作（`git checkout`）抹掉了**整层未提交改动** ——
+那条命令回滚到的是 **HEAD**，不是"改动前"。
+
+**该文件目前停在 HEAD 版本**，整棵树是红的。三条实测：
+
+1. `git hash-object roco/src/roco_env/coverage.py` = `git rev-parse HEAD:roco/src/roco_env/coverage.py` = **`0c9f6f14bab2`** ⇒ 工作区 == HEAD，一个字节都没多。
+2. 该文件 **782 行**，但少了 3 个入口：**`settlement_verdict`** · **`classify_skill_declared`** · **`_CAPABILITY_TO_FLAG`**。
+3. `roco/src/roco_env/service.py:112` 写着 `from .coverage import classify_skill_declared` ⇒ `import roco_env.service` **直接 `ImportError`**，引擎服务模块连 import 都过不去。
+   影响面：`roco/tests/` 下 **19 个**测试文件引用了这些名字。
+4. ⚠️ 这个"红"是**判据红，不是 git 脏**：我取到时 `git status --short` = **0 行**（代码与文档都已提交）⇒ **现在没有"未提交改动"可以回滚**，丢掉的那层只能重建 —— 它连 object store 都没进过（`git checkout` 是从 index 取 blob 覆盖工作区）。`git cat-file -t` 也查不到改动前的那一版。
 
 **重建正在进行**，方式是：
 
-- 重建稿写在 `tmp/coverage.rebuild.N.py`，**正文一字未改**（`coverage.py` 的 hash 至今仍是 `cc3de2ba09c8b5d1`）；
-- 用**影子注入**验证：`importlib` 把 `sys.modules['roco_env.coverage']` 指向 `tmp/` 的稿子，判据一行不改；
-- 进度：**`test_cond_self_debuff_power` 已绿**（`Ran 7 tests · OK`）；`test_effect_coverage` 从 18 个问题降到 16（`10F+6E`），口径逐项对齐中。
+- 重建稿写在 `tmp/coverage.rebuild.N.py`（当前第 4 稿：`tmp/coverage.rebuild.4.py`）；
+- 用**影子注入**验证：`importlib` 把 `sys.modules['roco_env.coverage']` 指向 `tmp/` 的稿子，**判据一行不改**；
+- **正文一字未改** —— `shasum -a 256 roco/src/roco_env/coverage.py` 至今仍是 **`cc3de2ba09c8b5d1…`**。
+
+**判据读数（本机实测）**：
+
+| 跑法 | 目标 | 结果 |
+|---|---|---|
+| 直接跑（正文 = HEAD 版） | `tests.test_cond_self_debuff_power` | `Ran 7 tests` · 🔴 **`FAILED (errors=4)`** |
+| 影子注入第 4 稿 | `tests.test_cond_self_debuff_power` | `Ran 7 tests` · ✅ **`OK`** |
+| 影子注入第 4 稿 | `tests.test_effect_coverage` | `Ran 21 tests` · 🔴 **`FAILED (failures=10, errors=6)`** |
+
+⇒ 🔴 **关键区别：`test_cond_self_debuff_power` 只在影子注入下是绿的；直接跑仍是红的。**
+这就是"重建中"的确切含义 —— **绿还没有落到正文上**。
 
 重建稿每版都复制进 `reports/roco/rc401/rebuild-drafts/` —— **过程本身也有备份**。
 
 ### 备份与远端
 
-| 远端 | 用途 | 最新已推 |
+| 远端 | 用途 | 该分支最新已推（`git ls-remote` 实测） |
 |---|---|---|
-| **Gitee**（`https://gitee.com/serendizc/roco-coach.git`） | **优先** | `1342851` |
-| GitHub（`https://github.com/SeRendizc/roco-coach.git`） | 大版本时推 | `b5a8d51` |
+| **Gitee**（`https://gitee.com/serendizc/roco-coach.git`） | **优先** | 分支头 = `ae826e3` |
+| GitHub（`https://github.com/SeRendizc/roco-coach.git`） | 大版本时推 | 分支头 = `b5a8d51`；`master` = `579ab2f` |
 
-当前分支 `wip/roco-coach-2026-09-30-1418`（`master` 未动，仍 `51c04fb`）。
-另有轻量快照 `refs/snapshots/wip-2026-09-30-1418`（`git stash create` 建的，**只建对象、不动工作区**）——它的存在就是为了让"`git checkout` 抹掉未提交改动"这件事**不再发生第二次**。
+- 当前分支：**`wip/roco-coach-2026-09-30-1418`**；最新 commit **`ae826e3`**。
+- 本地 `master` 未动，仍是 `51c04fb`。
+- 另有轻量快照 **`refs/snapshots/wip-2026-09-30-1418`**（`git for-each-ref refs/snapshots/` 可见）：
+  它是一个**双亲提交**（父 = `master` `51c04fb` 与 `57788b5`），形如 `git stash create` 的产物 —— **只建对象、不动工作区**。
+  ⇒ 它存在的唯一目的，就是让"`git checkout` 抹掉未提交改动"这件事**不再发生第二次**。
+  ⚠️ **一处必须说清的局限**（我核过）：这份快照里 `coverage.py` 与 HEAD 版本**逐位相同**（md5 `e2dab2b0ac393b3ec2c71ddc21063b34`、sha256 前缀 `cc3de2ba…`）—— **它保住了别的文件，没能保住 `coverage.py` 丢掉的那一层**（快照建于那次回滚之后）。它防的是**下一次**。
 
-### 常用命令
+### 常用命令（可直接粘贴）
 
 ```sh
 curl -s -o /dev/null -w '%{http_code}\n' localhost:8765/roco.html        # 验活产品服务（期望 200）
-cd roco && PYTHONPATH=src python3 -m unittest tests.test_cond_self_debuff_power   # 跑单个判据文件
-cd roco && PYTHONPATH=src python3 -m unittest discover -s tests -q      # 跑全量（跑前先确认服务不需重启）
+cd roco && PYTHONPATH=src python3 -m unittest tests.test_cond_self_debuff_power   # 跑单个判据文件（当前：FAILED errors=4，这是"如实"的预期）
+cd roco && PYTHONPATH=src python3 -m unittest discover -s tests -q      # 跑全量 roco/tests（跑前先确认服务不需重启）
 git for-each-ref refs/snapshots/                                        # 看安全网快照
 git log --oneline -1 && git branch --show-current                       # 我在哪一版
 ```
 
+**当前唯一能看到"绿"的跑法：影子注入**（判据一行不改；期望 `Ran 7 tests · OK` · `exit=0`）：
+
+```sh
+cd roco && PYTHONPATH=src:../tmp python3 - <<'PY'
+import sys, importlib.util, unittest
+sys.path.insert(0, '.')
+import roco_env
+spec = importlib.util.spec_from_file_location('roco_env.coverage', '../tmp/coverage.rebuild.4.py')
+mod = importlib.util.module_from_spec(spec)
+sys.modules['roco_env.coverage'] = mod
+spec.loader.exec_module(mod)
+unittest.main(module=None, argv=['shadow', 'tests.test_cond_self_debuff_power'], exit=True)
+PY
+# 换判据文件：把最后一行里的 tests.test_cond_self_debuff_power 换掉即可（例：tests.test_effect_coverage ⇒ Ran 21 · failures=10, errors=6）
+# 注：tmp/shadow-inject.py 里写死的是第 1 稿；要跑最新稿，用上面这段。
+```
+
+> ⚠ **跑全量 `roco/tests` 之前，先确认 `8765` 上的服务不需要重启。**
+> 这条是纪律，不是建议：全量会拉起大量 Python 子进程，而当前引擎侧本来就是红的，
+> 把"跑测试"和"服务状态变了"两件事混在同一次读数里，就再也分不清是谁的锅。
+> `npm run test:env` 就是上面那条全量命令。
+
 ### 🔴 服务现状：**"网页 200"不等于"一切正常"**
 
-`8765` 端口的 **node 层还活着**（`curl` 回 200），**但 Python 引擎侧已经退化**——因为上面那条：引擎每次 `spawn` 子进程时 import 的是当前（HEAD 版）的 `coverage.py`。**不要把 HTTP 200 读成"功能都好了"。**
+- `8765` 端口的 **node 层还活着**：`curl -s -o /dev/null -w '%{http_code}' localhost:8765/roco.html` 回 **`200`**（`lsof` 显示监听者是 node 进程）。
+- **但 Python 引擎侧已经退化** —— 因为上面那条：`coverage.py` 停在 HEAD 版，缺 3 个入口，`roco_env/service.py` import 不过。
+
+⇒ 🔴 **不要把 HTTP 200 读成"功能都好了"。** 网页是壳，引擎才是算的地方。
 
 ### 纪律（踩坑记录）
 
-项目累积了一套编号纪律（**#1 起，现已到一百七十余号**），入口在计划书上文的计划书里（`grep -n '纪律' docs/roco/coach-理想形态-计划书-2026-09-30.md`）。最该记住的五条：
+项目累积了一套编号纪律（**编号已到 `#176`** —— 我在这份计划书里读到的最大号）。入口：
 
-1. **`exit=0` 是必要不充分** —— 必须看红字是什么。
-2. **"parse 认出来 / 判据说 true / DOM 里有 / 进视口"都不等于生效** —— 唯一解药是**运行时报据 + 对照实验**。
-3. **回滚必须回"改前"，不是回 HEAD** —— `git checkout` 的语义是后者，而两者之间可能隔着一整个会话的工作。
-4. **报一个数要说清四件**：值 · 分母 · 口径 · 单位（含范围）。
-5. **一处红不等于一处根因，也不等于一处病** —— `errors` 说"缺东西"，`failures` 说"做错了"。
+```sh
+grep -n '纪律' docs/roco/coach-理想形态-计划书-2026-09-30.md | tail -8
+```
+
+最该记住的五条（逐字取自计划书 CK5 那张「从**一次锚点错**长出来的纪律」表）：
+
+| # | 纪律 | 防什么 |
+|---|---|---|
+| **`#132`** | 回滚要回**改前** | 防 `git checkout` |
+| **`#134`** | 红了**先停** | 防三级放大 |
+| **`#135`** | 未提交状态是**资产** | 防整层误删 |
+| **`#142`** | 机制与结果**分开报** | 别把"搭好了"当"跑通了" |
+| **`#143`** | **最少活动件** | 拼接式入侵 ⇒ 零输出 |
+
+> 这五条不是格言，是**这次事故的直接产物**：第 1 条（`#132`）说的就是 `coverage.py` 被抹掉的那一下。
+
+### 还没完成的（如实）
+
+- 🔴 **重建没有落正文**：`coverage.py` 仍是 HEAD 版；只有影子注入下才绿。
+- 🔴 **`test_effect_coverage` 仍是红的**（`10F + 6E`）。
+- 🔴 **`roco_env/service.py` import 不过** ⇒ 引擎侧当前不可用。
+- 🔴 计划书写明的下一步目标 —— **两个单文件绿 ⇒ 才落正文 ⇒ 全量 `Ran 846` / `OK (skipped=1)` / `exit=0`** —— **尚未达到**。
+
+### 这一节的读数怎么来的（2026-09-30 采样）
+
+```
+《计划书》行数          wc -l                                    ⇒ 6968（采样时；仍在增长）
+coverage.py            782 行 · git hash-object = HEAD blob      ⇒ 0c9f6f14bab2（工作区 == HEAD）
+coverage.py            正文 sha256                               ⇒ cc3de2ba09c8b5d1…
+分支 / commit          git branch --show-current / log -1        ⇒ wip/roco-coach-2026-09-30-1418 / ae826e3
+本地 master            git log -1 master                         ⇒ 51c04fb
+远端                   git ls-remote gitee / origin              ⇒ ae826e3 / b5a8d51（origin master 579ab2f）
+快照                   git for-each-ref refs/snapshots/          ⇒ 1 条，双亲提交（stash 形）
+8765                   curl -o /dev/null -w '%{http_code}'       ⇒ 200（监听者：node）
+单判据（直接）          unittest tests.test_cond_self_debuff_power ⇒ Ran 7 · FAILED (errors=4)
+单判据（影子第 4 稿）   同上（sys.modules 指向 tmp/ 稿）           ⇒ Ran 7 · OK
+effect_coverage（影子） unittest tests.test_effect_coverage       ⇒ Ran 21 · FAILED (failures=10, errors=6)
+roco/tests 规模         ls roco/tests/test_*.py | wc -l           ⇒ 70（另有 4 个辅助 .py，合计 74）
+roco/tests 用例数       grep -h -c 'def test_' roco/tests/*.py     ⇒ 846（静态清点；未跑全量）
+受影响判据文件          grep -rl <3 个缺失名> roco/tests/          ⇒ 19
+纪律编号上限            grep -oE '`#[0-9]{1,3}`' 计划书            ⇒ #176
+```
+
+> 采样时间 2026-09-30；本仓库当时正在被**活跃编辑**（计划书与 README 都在改），
+> 所以上表里的**行数**与 **commit** 是最易过期的两项 —— 其余几项（是否红、是否 200）是结构性的。
