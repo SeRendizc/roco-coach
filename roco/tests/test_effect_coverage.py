@@ -850,5 +850,21 @@ class UnclaimedSpanBlocksSimulatableTest(unittest.TestCase):
         #     · `settlement_verdict(skill_000491)`：`resolved` **False → True** ∧ `unsettled` **非空 → `[]`** ✓
         #     · **回归**：`skill_000481`（0 号位能耗那条）**仍 `True`** ✓（同一次读数里验的 ✓）
         #   ⚠ **旧值 `305` 与更早的 `304` 均逐字留档**（改钉不删）✓
-        self.assertEqual(report["totals"]["simulatable_entities"], 306,
+        # ── 2026-09-30（分计划 00 · Lead）**改钉 306 → 328** ──────────────────
+        #   🔑 **先核对、后改数**（这就是本行注释要求的那一步）：逐行审计见
+        #     `reports/roco/product-execution/00/ledger-delta-audit.txt`（可复跑命令在该文件里）。
+        #   读数（影子注入 `coverage.head-cc3de2ba.bak.py`，只把 `initiative_power['pct']`
+        #   改成兼容 `hits` 形状，语义不动）：
+        #     · `simulatable_entities`：HEAD 口径 **302** → 当前 **328**（**59 翻正 / 33 翻负**）
+        #     · **59 条翻正逐条与判据一致**：`settlement_verdict(...)["resolved"]` 说未结算的 = **0 条**
+        #     · 其中 **52 条落在 427 并集内** ⇒ 并集那条「档位 ↔ 判据零打架」**强制**它们为可模拟
+        #       （否则并集判据必红）⇒ 306 这个数**在并集判据成立的前提下不可能维持**
+        #     · 33 条翻负全部是**有依据的降档**：脱离/返场（`escape` 无结算分支）·
+        #       冻结/引电（回合末未实现）· 吸血（`self_lifesteal` 只有 docstring）· 迅捷 ·
+        #       以及「应对子句没结算」那一族（383/506/771…，与 `test_tier_verdict_agreement` 的
+        #       A/B/F 三堆同源，那些判据**要求**它们不是可模拟）
+        #     · 红线未松：`test_report_has_no_simulatable_with_unclaimed_mechanic_spans` 的
+        #       **实质断言**（SIM 行不得带残余片段）同一轮里 **bad 4 → 0** ✓
+        #   ⚠ **旧值 `306`（及更早的 305/304）逐字留档**（改钉不删）✓
+        self.assertEqual(report["totals"]["simulatable_entities"], 328,
           "可模拟总数变了，先核对再改这条")
