@@ -96,7 +96,10 @@ test('the rules page can be read without opening the coach, and in-battle cards 
   assert.match(html,/id="rules-body"/);
   // 出招面板上就带消耗/威力/说明，不必先问教练。
   assert.match(app,/sk\.desc/, '出招按钮必须内联技能说明');
-  assert.match(app,/消耗 \$\{sk\.cost\} 豆/,'出招按钮必须内联消耗');
+  // 2026-10-01（task-43 文本口径 S4）**改钉**：出招面板的消耗单位 `豆` ⇒ `能量`（键名/内部字段未动）。
+  // 原断言逐字留档（改钉不删）：assert.match(app,/消耗 \$\{sk\.cost\} 豆/,'出招按钮必须内联消耗');
+  // 判据语义未变：仍在钉「出招按钮必须**内联**消耗」；只换了那个展示单位。
+  assert.match(app,/消耗 \$\{sk\.cost\} 能量/,'出招按钮必须内联消耗');
   assert.match(app,/\$\{sk\.power\?'威力 '\+sk\.power/,'出招按钮必须内联威力');
   // 规则页与技能说明同源：都读 SKILLS。
   // 只断言「app 确实 import 了 rules 模块」，不写死相对路径——
