@@ -7,6 +7,8 @@ import {trainingSaveOf,trainingSaveMissing} from './profile-shape.js';
 // 本文件原来有一个本地 `showNumber()`（同口径的第二份实现）—— 已删，改用共用件：
 // 口径只留一处，才不会再出现"同一个数两种写法"（横切审计 H3）。
 import {PLAYER_UNITS,playerNumber,playerQuantity} from './player-text.js';
+// P1-B（task-46 第 2 步）：这一次复盘依据的是**哪一局**，判定只有一份，在零依赖的叶子模块里。
+import {readsAsPreviousMatch} from './match-scope.js';
 // `pets` 必须是**养成存档那个对象**（`{id:{level,xp,points}}`）—— 公开层的名单数组里没有 level/points。
 // 调用方先过 `trainingSaveOf()`，所以这一支只会收到对象；数组形状根本走不到这里（见 profile-shape.js）。
 /**
@@ -263,7 +265,26 @@ export function matchStatsLine(m,{lead=true}={}){
  // lead=false：调用方（结论那句）已经说过回合数，这里再说一遍就是同一句里自我重复。
  return `${lead?`这一局打了${m.rounds}回合，`:''}${did.length?`你${did.join('、')}。`:''}${potion}`;
 }
+/**
+ * P1-B（task-46 第 2 步）：复盘入口。
+ *
+ * 这一层只做一件事：**这一次复盘讲的到底是哪一局，正文里说清**。
+ * 判定来自 `match-scope.js`（当前局优先；只有"没有当前局"或"玩家明确问上一局"才是 `previous`）。
+ * 依据是上一局时，正文第一句写「上一局：」—— 不许让玩家自己从内容里猜（改前一个字都不说）。
+ * 正文本身**一个字没改**，只在前面加标注；`matchId` 等字段原样透传。
+ */
 export function reviewMatch(context){
+ const out=reviewBody(context);
+ if(!out||typeof out.text!=='string')return out;
+ const hasMatch=context?.lastMatch&&typeof context.lastMatch==='object';
+ // 没有记录可复盘那一支**不加标注**：那里说的是「暂时没有…」，加「上一局：」反而读不通。
+ if(!hasMatch||!readsAsPreviousMatch(context)||out.text.startsWith('暂时没有可用的完整对局记录'))return out;
+ // 正文自己已经用「这一局」开头时，把那个词换成「上一局」—— 避免「上一局：这一局…」这种自相矛盾的写法
+ //（`tests/roco-teacher-review-text.test.js` 的兜底钉原本断的就是这个位置，改钉理由见文件内注释）。
+ if(out.text.startsWith('这一局'))return {...out,text:`上一局${out.text.slice(3)}`};
+ return {...out,text:`上一局：${out.text}`};
+}
+function reviewBody(context){
  const m=context.lastMatch;if(!m)return {text:'暂时没有可用的完整对局记录。旧版只存了最后一回合的历史无法还原整局。新版本会保存完整对局；如果当前对局还在页面里，可直接从现有记录复盘。',evidence:[],scope:'match'};
  const outcome={win:'胜利',loss:'失利',draw:'平局',escaped:'撤退',ongoing:'尚未结束'}[m.result]||m.result;
  // ⚠ 2026-09-29 修（人类实测的真实 500：`/api/coach` 回 500「本地服务无法完成请求」，

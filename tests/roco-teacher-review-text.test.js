@@ -13,13 +13,21 @@ const turnLog = [
 
 test('正：完整输入 ⇒ 正文不得含裸 JS 值字面量（undefined/null/NaN）', () => {
   const r = reviewMatch({lastMatch: {result: 'loss', stage: '营地训练局', keyTurns: [], counts: {}, turnLog}});
-  assert.match(r.text, /^营地训练局，共2回合，失利。/, `前缀应读 stage，实际：${r.text.slice(0, 40)}`);
+  // 2026-10-01 改钉（task-46 第 2 步 · 原断言逐字留档）：
+  //   原：assert.match(r.text, /^营地训练局，共2回合，失利。/, `前缀应读 stage，实际：${r.text.slice(0, 40)}`);
+  //   理由：P1-B 要求"这一次复盘讲的是哪一局，正文里说清"。这份 context 没有实时局面 ⇒ 依据是**上一局**
+  //        ⇒ 正文按新口径以「上一局：」开头；`stage` 仍是第一个词之后的那个词，裸 JS 值字面量那条断言不变。
+  assert.match(r.text, /^上一局：营地训练局，共2回合，失利。/);
   assert.ok(!BARE_JS.test(r.text), `正文不该出现裸 JS 字面量：${r.text.slice(0, 80)}`);
 });
 
-test('反证：故意去掉 lastMatch.stage ⇒ 必须被兜底成「这一局」，不许印 undefined', () => {
+test('反证：故意去掉 lastMatch.stage ⇒ 必须被兜底成「上一局」，不许印 undefined', () => {
   const r = reviewMatch({lastMatch: {result: 'loss', keyTurns: [], counts: {}, turnLog}});
-  assert.match(r.text, /^这一局，共2回合，失利。/, `应兜底成「这一局」，实际：${r.text.slice(0, 40)}`);
+  // 2026-10-01 改钉（task-46 第 2 步 · 原断言逐字留档）：
+  //   原：assert.match(r.text, /^这一局，共2回合，失利。/, `应兜底成「这一局」，实际：${r.text.slice(0, 40)}`);
+  //   理由：这一支的兜底词原本是「这一局」，但这一问依据的是**上一局**（无实时局面）⇒ 说「这一局」是假话。
+  //        现在把兜底的那个词直接换成「上一局」（不叠成「上一局：这一局…」）。裸 JS 值字面量那条不变。
+  assert.match(r.text, /^上一局，共2回合，失利。/);
   assert.ok(!BARE_JS.test(r.text), `兜底后仍出现裸 JS 字面量：${r.text.slice(0, 80)}`);
 });
 

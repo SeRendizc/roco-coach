@@ -184,6 +184,9 @@ import {isLiveMatch} from './policy.js';
 // 两张表的词表（拒绝、本命、称呼）同源于 memory.js，所以「陪练听懂了什么」与
 // 「记住了什么」不会变成两套说法。
 import {playerWishes,moodHypothesis,statedTurn} from './memory.js';
+// P1-B（task-46 第 2 步）：「本问句依据哪一局」的判定只有一份，在零依赖的叶子模块里
+// （`runtime.js` 已经 import 本文件 ⇒ 不能反向 import runtime.js，会成环）。
+import {effectiveMatchScope,readsAsPreviousMatch} from './match-scope.js';
 
 const DAY=86400000;
 
@@ -466,11 +469,21 @@ function ago(days){return !days||days<=0?'今天':`${days}天前`;}
 export function companionFacts(memory={},context={},now=Date.now()){
  const history=(memory.events||[]).filter(e=>e&&typeof e.result==='string');
  const last=history.at(-1)||null;
+ // ── P1-B（task-46 第 2 步）：这一份事实要**说清自己依据的是哪一局** ─────────────────────
+ // `context.lastMatch` 是"本问句依据的那一局"（**当前局优先**，见 `match-scope.js`）；
+ // 而 `memory.events` 的最后一条永远是"上一局"。两者**不许混着当同一局用**：
+ // 作用域是当前局时，凡"两边都有"的字段一律先取 `summary`（当前局），memory 那条只当兜底。
+ const scope=effectiveMatchScope(context);
  const summary=context.lastMatch&&typeof context.lastMatch==='object'?context.lastMatch:null;
- const items=last?.items&&typeof last.items==='object'?last.items:summary?.remainingItems&&typeof summary.remainingItems==='object'?summary.remainingItems:null;
- const rawStage=last?.stage||summary?.stage||null;
- const rawTurns=Number.isInteger(last?.turns)?last.turns:Number.isInteger(summary?.rounds)?summary.rounds:null;
- const rawResult=last?.result||summary?.result||null;
+ const itemsOf=x=>x?.items&&typeof x.items==='object'?x.items:x?.remainingItems&&typeof x.remainingItems==='object'?x.remainingItems:null;
+ // current 优先：`summary` 先、memory 兜底；其余作用域维持原来的 memory 优先（老行为不变）。
+ // ⚠ 末尾的 `??null` 是**契约**：缺字段只能是 `null`，绝不许变成 `undefined`（`tests/companion.test.js`
+ //   的「degrade to null instead of default values」钉的就是这个 —— 我第一版漏了它，当场被抓）。
+ const preferCurrent=(fromMemory,fromContext)=>(scope==='current'?(fromContext??fromMemory):(fromMemory??fromContext))??null;
+ const items=preferCurrent(itemsOf(last),itemsOf(summary));
+ const rawStage=preferCurrent(last?.stage,summary?.stage);
+ const rawTurns=preferCurrent(Number.isInteger(last?.turns)?last.turns:null,Number.isInteger(summary?.rounds)?summary.rounds:null);
+ const rawResult=preferCurrent(last?.result,summary?.result);
  const lessons=(memory.lessons||[]).filter(x=>typeof x==='string');
  const favorite=SPECIES.find(p=>p.id===memory.favorite)||null;
  const time=Date.parse(last?.time||'');
@@ -481,6 +494,8 @@ export function companionFacts(memory={},context={},now=Date.now()){
  return {history,last,summary,live:liveFacts(context),
   stage:cleanStage(rawStage),turns:rawTurns,result:rawResult,
   source:last?'memory.events':summary?'context.lastMatch':null,
+  // 这一份事实依据的是"哪一局"：`previous` ⇒ 下游**必须显式标注**「这是上一局」。
+  scope:readsAsPreviousMatch(context)?'previous':scope,
   enemy:names(last?.enemy),faints:names(last?.faints),
   firstLossTurn:Number.isInteger(last?.firstLossTurn)?last.firstLossTurn:null,
   // 首个减员必须用成对记录的 firstFallen：faints[0] 是队伍顺序里的第一只，
@@ -845,6 +860,12 @@ export function companionReadings({cross=null,signals=null,context={},now=Date.n
  const l=cross||emptyLedger();
  const sg=signals||emptySignals();
  const turn=Number.isInteger(context.turn)&&context.turn>0?context.turn:null;
+ // ── P1-B（task-46 第 2 步）：**通道选择**（不是删句子）─────────────────────────────────
+ // 这一局还在打的时候，"上一局整段回顾"（⑧）不该当开口素材 —— 玩家正在这一手，最该说的是这一手。
+ // 判据：有实时局面（legacy `battle` 的活体事实 / `roco_battle` / 已知回合数）就算"局中"。
+ // ⑨ 的**跨局对比**（「上一局你第N回合就收了，这一局已经到第M回合」）不受影响：它就是对比，
+ // 而且正文逐字写了「上一局」。C 桶那 9+3 条渲染指纹是这条规则的护栏（改前=改后必须逐字节相同）。
+ const inLiveMatch=Boolean(l.live)||Boolean(context?.roco_battle)||Number.isInteger(turn);
  const goal=['稳健','速攻'].includes(context.goal)?context.goal:null;
  const out=[];
  // 一条观察至少要两句、至少一句是跨局记录或跨回合统计，且最多三句（2–3 句是人能读完的长度）。
@@ -1102,7 +1123,8 @@ export function companionReadings({cross=null,signals=null,context={},now=Date.n
    `跨局账本：最近 ${p.matches} 局结束时回复药都剩 ${p.left} 瓶（来源：memory.events.items.potion）。`]});
  }
  // ⑧ 上一局：被动通道与结算的最小真实素材（没有别的可核对的事实时才用）。
- if(l.lastMatch){
+ //    P1-B：这一局还在打（`inLiveMatch`）时不开这一段 —— 通道选择，见上面 `inLiveMatch` 的注。
+ if(l.lastMatch&&!inLiveMatch){
   // 「第?回合」是程序的口径，不是人话：回合数缺失时整段不说，别把问号念给玩家听。
   const m=l.lastMatch,sentences=[SENT(`你上一局在${m.stage||'训练场'}${m.turns?`打到第${m.turns}回合`:''}，${playerResultWord(m.result)||'结束'}。`,'memory','memory.events')];
   if(m.firstFallen&&m.firstLossTurn)sentences.push(SENT(`最先倒下的是${m.firstFallen}，第${m.firstLossTurn}回合。`,'memory','memory.events.firstFallen'));

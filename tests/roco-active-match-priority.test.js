@@ -20,6 +20,7 @@ import assert from 'node:assert/strict';
 import { activeMatchIdOf, activeMatchOf, assembleContext, buildContext, effectiveMatchScope, readsAsPreviousMatch, runCoach } from '../src/coach/runtime.js';
 import { createGame, legalActions, step } from '../src/game/engine.js';
 import { archiveRound } from '../src/coach/experience.js';
+import { companionFacts } from '../src/coach/companion.js';
 import { freshMemory, rememberBattle } from '../src/coach/memory.js';
 import { newProfile } from '../src/game/progression.js';
 
@@ -69,7 +70,7 @@ test('① 新局 + 上一局都在（面板路径：宿主没给 game）⇒ 只�
   }
 });
 
-test('② 无当前局 + 有上一局 ⇒ 允许回落，但判定必须标成 previous（正文标注在第 2 步落地）', async () => {
+test('② 无当前局 + 有上一局 ⇒ 允许回落，且**正文必须显式标注「上一局」**', async () => {
   const { archive, memory } = fixture();
   const profile = newProfile();
   const noCurrent = { version: archive.version, lastTurn: archive.lastTurn, stage: archive.stage,
@@ -78,9 +79,30 @@ test('② 无当前局 + 有上一局 ⇒ 允许回落，但判定必须标成 p
   assert.equal(context.matchScope, 'previous', '没有当前局时回落上一局，且必须标成 previous');
   assert.equal(context.lastMatch?.id, 'PREV-MATCH-ID');
   assert.equal(readsAsPreviousMatch(context), true, '下游据此显式标注「这是上一局」');
-  // 反向：有当前局时**不许**标成 previous
-  const withCurrent = buildContext(null, profile, 'fox', archive, 'g_new', '这一手该怎么打');
+  // 正文标注（task-46 第 2 步落地）：回落时正文第一句必须写明是哪一局
+  const answer = await runCoach({ message: '上一局打得怎么样', role: 'auto', context: JSON.parse(JSON.stringify(context)), memory, conversation: [] });
+  assert.match(String(answer?.text ?? ''), /^上一局：/, `回落复盘的正文必须以「上一局：」开头，实际：${String(answer?.text ?? '').slice(0, 60)}`);
+  // 反向：有当前局时**不许**标成 previous，也不许加这个标注
+  const withCurrent = buildContext(null, profile, 'fox', archive, 'g_new', '帮我复盘');
   assert.equal(readsAsPreviousMatch(withCurrent), false);
+  const current = await runCoach({ message: '帮我复盘', role: 'auto', context: JSON.parse(JSON.stringify(withCurrent)), memory, conversation: [] });
+  assert.ok(!/^上一局：/.test(String(current?.text ?? '')), '当前局复盘不许标成「上一局：」');
+});
+
+test('⑤ `companionFacts` 也走同一个判定：作用域写清 + 当前局字段优先', () => {
+  const { archive, memory, fresh } = fixture();
+  // 有实时局面 ⇒ 不是 previous（Codex 的第二条入口：`roco_battle` 也要算）
+  const liveContext = buildContext(fresh, newProfile(), 'fox', archive, 'g_new', '现在该出什么招');
+  const withBattle = { ...liveContext, roco_battle: { turn: 1, state_version: 0 } };
+  assert.notEqual(companionFacts(memory, withBattle).scope, 'previous');
+  // 真的在讲上一局 ⇒ facts 自己标出来，下游据此标注
+  const previousContext = buildContext(null, newProfile(), 'fox',
+    { ...archive, current: { ...archive.current, result: 'loss' } }, 'g_new', '上一局打得怎么样');
+  assert.equal(companionFacts(memory, previousContext).scope, 'previous');
+  // 当前局作用域下，"两边都有"的字段取当前局（memory 里那局 16 回合，当前局 2 回合）
+  const facts = companionFacts(memory, { ...withBattle, lastMatch: { stage: 'NEW[stage]', rounds: 2, result: null } });
+  assert.equal(facts.turns, 2, `当前局作用域下回合数要取当前局，实际 ${facts.turns}`);
+  assert.equal(facts.stage, 'NEW[stage]');
 });
 
 test('④ `roco_battle` 有值 ⇒ 也算"当前局存在"（Codex 报的第二条入口）', () => {
