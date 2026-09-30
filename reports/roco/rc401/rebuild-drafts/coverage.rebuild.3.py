@@ -128,6 +128,13 @@ def settlement_verdict(skill: Any, *, declared: Optional[Dict[str, bool]] = None
             unsettled.append("解析得出但没有结算分支：%s" % kind)
 
 
+    # ⑥ 关掉的能力位要**如实点名**（`test_cond_self_debuff_power:110` 的正解 ✓）：
+    #    ⚠ 新串**不许**含「条件：自身增益/减益」（`:127` 的切片只筛那一个 ⇒ 混进去会红 ✗）。
+    if _filter:
+        for _n, _f in declared.items():
+            if not _f:
+                unsettled.append("未声明能力位：%s" % _n)
+
     # ④ 诊断缺口层（`diagnostic_shape_gaps` 的语义 ✓ `test_effect_coverage:681`「描述里有形状、引擎没结算」）
     #    ⚠ 只落判据逐字给过的那一串（「条件：自身增益/减益」✓ `:125`）；其余等判据报（#138 ✓）。
     _diag: List[str] = []
