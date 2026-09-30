@@ -1,0 +1,242 @@
+{
+ "loadout_store": {
+  "key": "roco.workshop.loadouts.v1",
+  "wrote": true,
+  "storage_after_write": {
+   "roco.workshop.loadouts.v1": "{\"pet_000417\":[\"skill_000286\",\"skill_000305\",\"skill_000418\",\"skill_000483\"]}"
+  },
+  "read_by_species": [
+   "skill_000286",
+   "skill_000305",
+   "skill_000418",
+   "skill_000483"
+  ],
+  "read_by_individual_instance": null,
+  "individual_dimension_present": false,
+  "two_individuals_same_species_share_one_record": true,
+  "shape_rule_ok": true
+ },
+ "request_contract": {
+  "ok": true,
+  "request_keys": [
+   "favourites_only",
+   "locked",
+   "max_replacements",
+   "mode",
+   "preference",
+   "ruleset_config_id",
+   "selected",
+   "team_size",
+   "visibility"
+  ],
+  "locked": [
+   "own-0001"
+  ],
+  "favourites_only": false,
+  "preference": "brief",
+  "constraints": null,
+  "locked_not_selected_rejected": true,
+  "locked_not_selected_codes": [
+   "UNKNOWN_INSTANCE_ID",
+   "LOCKED_NOT_SELECTED"
+  ],
+  "unknown_field_rejected": true,
+  "unknown_field_codes": [
+   "UNKNOWN_FIELD"
+  ]
+ },
+ "compare": {
+  "axis_ids": [
+   "environment_value",
+   "worst_archetype",
+   "matchup_spread",
+   "execution_tolerance",
+   "coverage_confidence"
+  ],
+  "teams_ok": 2,
+  "unknown_prior": {
+   "environment_value": {
+    "available": false,
+    "value": null,
+    "unknown_reason": "缺**可识别体系**：注入的分布里一条体系都没有，分母是空的，这一轴无定义。"
+   },
+   "worst_archetype": {
+    "available": false,
+    "value": null,
+    "unknown_reason": "缺**可识别体系**：注入的分布里一条体系都没有，分母是空的，这一轴无定义。"
+   },
+   "matchup_spread": {
+    "available": false,
+    "value": null,
+    "unknown_reason": "缺**可识别体系**：注入的分布里一条体系都没有，分母是空的，这一轴无定义。"
+   },
+   "execution_tolerance": {
+    "available": false,
+    "value": null,
+    "unknown_reason": "缺**可识别体系**：注入的分布里一条体系都没有，分母是空的，这一轴无定义。"
+   },
+   "coverage_confidence": {
+    "available": true,
+    "value": 0.809524,
+    "unknown_reason": null
+   }
+  },
+  "real_prior": {
+   "environment_value": {
+    "available": true,
+    "value": {
+     "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+     "delta": 0.110077,
+     "winner": "probe-team-a"
+    },
+    "unknown_reason": null
+   },
+   "worst_archetype": {
+    "available": true,
+    "value": {
+     "archetype_id": "wing_king_flyer",
+     "label": "翼王飞翼",
+     "relative_score": 0.37963,
+     "weight": 0.142857,
+     "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+     "structural": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
+    },
+    "unknown_reason": null
+   },
+   "matchup_spread": {
+    "available": true,
+    "value": {
+     "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+     "delta": -0.166666,
+     "winner": "probe-team-a"
+    },
+    "unknown_reason": null
+   },
+   "execution_tolerance": {
+    "available": true,
+    "value": {
+     "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+     "delta": 0.178427,
+     "winner": "probe-team-a"
+    },
+    "unknown_reason": null
+   },
+   "coverage_confidence": {
+    "available": true,
+    "value": 0.809524,
+    "unknown_reason": null
+   }
+  },
+  "result_keys": [
+   "availability",
+   "available_axis_count",
+   "axes",
+   "axis_order",
+   "distribution",
+   "no_win_rate",
+   "online_path",
+   "ranker",
+   "schema",
+   "unknown_axis_count",
+   "unverified"
+  ]
+ },
+ "minimal_replacement": {
+  "keys": [
+   "confidence",
+   "confirmed_by_distribution",
+   "criteria",
+   "evidence",
+   "replacement",
+   "schema",
+   "team_id",
+   "unverified",
+   "why"
+  ],
+  "proposals": null,
+  "sample": "{\"schema\":\"roco-minimal-replacement/v1\",\"team_id\":\"probe-team-a\",\"replacement\":null,\"confirmed_by_distribution\":false,\"why\":\"注入的候选里没有一只声明能接住队里无人承接的 幽系 / 普通系 / 武系 / 毒系 / 翼系 / 龙系：给不出一个能改结构的最小替换。结构理由之外的结论（换谁更强）现在**没有**依据：版本对手分布是 unknown，所以这里明确说不知道，不编一个「更优」结论\",\"evidence\":[{\"source_file\":\"injected:gapsByTeam\",\"pointer\":\"gapsByTeam[probe-team-a].gaps\",\"field\":\"length\",\"value\":21,\"note\":\"最小替换的结构输入是 RC-302 的缺口诊断\"},{\"source_file\":\"data/roco/meta-prior/v1.json\",\"pointer\":\"distribution[]\",\"field\":\"kind\",\"value\":\"unknown\",\"note\":\"注入分布是 unknown：**不能**据此判哪个候选更好，只能给结构理由（fail closed）\"},{\"source_file\":\"injecte"
+ },
+ "nurture": {
+  "race_found": true,
+  "race_stats": {
+   "hp": 113,
+   "atk": 31,
+   "spa": 95,
+   "def": 95,
+   "spd": 110,
+   "spe": 105
+  },
+  "compare_ok": true,
+  "compared_dimensions": [
+   "天分",
+   "性格"
+  ],
+  "diff_keys": [
+   "hp",
+   "atk",
+   "spa",
+   "def",
+   "spd",
+   "spe"
+  ],
+  "diff": {
+   "hp": 0,
+   "atk": 44,
+   "spa": 0,
+   "def": 0,
+   "spd": 0,
+   "spe": -28
+  },
+  "caveats": [],
+  "text": "第一个个体在物攻上更高，在速度上更低。",
+  "advice_rows": [
+   {
+    "nature": "急躁",
+    "gain": {
+     "stat": "spe",
+     "from": 334,
+     "to": 362,
+     "delta": 28
+    },
+    "cost": {
+     "stat": "def",
+     "from": 363,
+     "to": 332,
+     "delta": -31
+    }
+   },
+   {
+    "nature": "莽撞",
+    "gain": {
+     "stat": "spe",
+     "from": 334,
+     "to": 362,
+     "delta": 28
+    },
+    "cost": {
+     "stat": "spd",
+     "from": 419,
+     "to": 382,
+     "delta": -37
+    }
+   },
+   {
+    "nature": "胆小",
+    "gain": {
+     "stat": "spe",
+     "from": 334,
+     "to": 362,
+     "delta": 28
+    },
+    "cost": {
+     "stat": "atk",
+     "from": 490,
+     "to": 446,
+     "delta": -44
+    }
+   }
+  ],
+  "thresholds_present": false,
+  "opponent_context_required": false
+ }
+}

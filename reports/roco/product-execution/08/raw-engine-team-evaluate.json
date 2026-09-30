@@ -1,0 +1,797 @@
+{
+ "alt_features": [
+  {
+   "detail": {
+    "offence_count": 5,
+    "offence_elements": [
+     "幽系",
+     "普通系",
+     "武系",
+     "水系",
+     "龙系"
+    ],
+    "per_pet_weak": {
+     "pet_000190": [
+      "幻系",
+      "电系",
+      "翼系",
+      "草系",
+      "萌系"
+     ],
+     "pet_000225": [
+      "光系",
+      "冰系",
+      "幽系",
+      "恶系",
+      "萌系",
+      "龙系"
+     ],
+     "pet_000445": [
+      "武系"
+     ]
+    },
+    "weak_count": 11,
+    "weak_to": [
+     "光系",
+     "冰系",
+     "幻系",
+     "幽系",
+     "恶系",
+     "武系",
+     "电系",
+     "翼系",
+     "草系",
+     "萌系",
+     "龙系"
+    ]
+   },
+   "evidence": [
+    "skill_000251",
+    "skill_000259",
+    "skill_000260",
+    "skill_000271",
+    "skill_000272",
+    "skill_000274",
+    "skill_000278",
+    "skill_000279",
+    "skill_000280",
+    "skill_000284",
+    "skill_000286",
+    "skill_000303",
+    "skill_000305",
+    "skill_000312",
+    "skill_000321",
+    "skill_000327",
+    "skill_000420",
+    "skill_000422",
+    "skill_000425",
+    "skill_000429",
+    "skill_000434",
+    "skill_000438",
+    "skill_000576",
+    "skill_000663",
+    "skill_000667",
+    "skill_000672",
+    "skill_000673",
+    "skill_000678",
+    "skill_000682",
+    "skill_000744",
+    "skill_000750"
+   ],
+   "name": "types",
+   "value": 0.4545
+  },
+  {
+   "detail": {
+    "covered": {
+     "回复": [],
+     "增益": [
+      "pet_000190",
+      "pet_000445"
+     ],
+     "承伤": [
+      "pet_000190",
+      "pet_000225",
+      "pet_000445"
+     ],
+     "控制": [],
+     "输出": [
+      "pet_000190",
+      "pet_000225",
+      "pet_000445"
+     ],
+     "驱散": []
+    },
+    "missing": [
+     "控制",
+     "回复",
+     "驱散"
+    ]
+   },
+   "evidence": [
+    "pet_000190",
+    "pet_000225",
+    "pet_000445"
+   ],
+   "name": "roles",
+   "value": 0.5
+  },
+  {
+   "detail": {
+    "fastest": [
+     "海豹船长",
+     228.4
+    ],
+    "median": 178.2,
+    "slowest": [
+     "寂灭骨龙",
+     161.5
+    ],
+    "spread": 66.9
+   },
+   "evidence": [
+    "pet_000225",
+    "pet_000190",
+    "pet_000445"
+   ],
+   "name": "speed",
+   "value": 0.2929
+  },
+  {
+   "detail": {
+    "counts": {
+     "物攻": 9,
+     "魔攻": 7
+    },
+    "minority_share": 0.438,
+    "total_attacks": 16
+   },
+   "evidence": [
+    "skill_000251",
+    "skill_000259",
+    "skill_000260",
+    "skill_000303",
+    "skill_000305",
+    "skill_000312",
+    "skill_000321",
+    "skill_000420",
+    "skill_000422",
+    "skill_000434",
+    "skill_000438",
+    "skill_000663",
+    "skill_000673",
+    "skill_000678",
+    "skill_000744",
+    "skill_000750"
+   ],
+   "name": "damage",
+   "value": 0.875
+  },
+  {
+   "detail": {
+    "cheap_skills": 19,
+    "max_cost": 5,
+    "min_cost": 0,
+    "total_skills": 32
+   },
+   "evidence": [
+    "skill_000251",
+    "skill_000259",
+    "skill_000260",
+    "skill_000271",
+    "skill_000272",
+    "skill_000274",
+    "skill_000278",
+    "skill_000279",
+    "skill_000280",
+    "skill_000284",
+    "skill_000286",
+    "skill_000303",
+    "skill_000305",
+    "skill_000312",
+    "skill_000321",
+    "skill_000327",
+    "skill_000420",
+    "skill_000422",
+    "skill_000425",
+    "skill_000429",
+    "skill_000434",
+    "skill_000438",
+    "skill_000576",
+    "skill_000663",
+    "skill_000667",
+    "skill_000672",
+    "skill_000673",
+    "skill_000678",
+    "skill_000682",
+    "skill_000744",
+    "skill_000750"
+   ],
+   "name": "energy",
+   "value": 0.5938
+  },
+  {
+   "detail": {
+    "gaps": [
+     "缺职责：控制、回复、驱散",
+     "没有光/恶/幻系技能，对幽系等目标缺少针对性"
+    ]
+   },
+   "evidence": [],
+   "name": "gaps",
+   "value": 2.0
+  }
+ ],
+ "alt_result_keys": [
+  "calibration",
+  "coverage",
+  "features",
+  "note",
+  "strengths",
+  "team",
+  "weaknesses"
+ ],
+ "alt_status": 200,
+ "alt_strengths": [
+  "19 个低能耗技能，能量循环稳"
+ ],
+ "alt_weaknesses": [
+  "缺职责：控制、回复、驱散",
+  "没有光/恶/幻系技能，对幽系等目标缺少针对性",
+  "被 11 种属性克制，对位面偏窄"
+ ],
+ "base_features": [
+  {
+   "detail": {
+    "offence_count": 5,
+    "offence_elements": [
+     "幽系",
+     "普通系",
+     "武系",
+     "水系",
+     "龙系"
+    ],
+    "per_pet_weak": {
+     "pet_000190": [
+      "幻系",
+      "电系",
+      "翼系",
+      "草系",
+      "萌系"
+     ],
+     "pet_000225": [
+      "光系",
+      "冰系",
+      "幽系",
+      "恶系",
+      "萌系",
+      "龙系"
+     ],
+     "pet_000445": [
+      "武系"
+     ]
+    },
+    "weak_count": 11,
+    "weak_to": [
+     "光系",
+     "冰系",
+     "幻系",
+     "幽系",
+     "恶系",
+     "武系",
+     "电系",
+     "翼系",
+     "草系",
+     "萌系",
+     "龙系"
+    ]
+   },
+   "evidence": [
+    "skill_000251",
+    "skill_000260",
+    "skill_000271",
+    "skill_000272",
+    "skill_000274",
+    "skill_000278",
+    "skill_000279",
+    "skill_000280",
+    "skill_000284",
+    "skill_000286",
+    "skill_000303",
+    "skill_000305",
+    "skill_000312",
+    "skill_000321",
+    "skill_000327",
+    "skill_000420",
+    "skill_000422",
+    "skill_000425",
+    "skill_000429",
+    "skill_000434",
+    "skill_000438",
+    "skill_000563",
+    "skill_000564",
+    "skill_000567",
+    "skill_000569",
+    "skill_000574",
+    "skill_000575",
+    "skill_000576",
+    "skill_000663",
+    "skill_000667",
+    "skill_000672",
+    "skill_000673",
+    "skill_000678",
+    "skill_000682",
+    "skill_000744",
+    "skill_000746",
+    "skill_000750",
+    "skill_000751",
+    "skill_000757"
+   ],
+   "name": "types",
+   "value": 0.4545
+  },
+  {
+   "detail": {
+    "covered": {
+     "回复": [
+      "pet_000225"
+     ],
+     "增益": [
+      "pet_000190",
+      "pet_000445"
+     ],
+     "承伤": [
+      "pet_000190",
+      "pet_000225",
+      "pet_000445"
+     ],
+     "控制": [],
+     "输出": [
+      "pet_000190",
+      "pet_000225",
+      "pet_000445"
+     ],
+     "驱散": []
+    },
+    "missing": [
+     "控制",
+     "驱散"
+    ]
+   },
+   "evidence": [
+    "pet_000190",
+    "pet_000225",
+    "pet_000445"
+   ],
+   "name": "roles",
+   "value": 0.6667
+  },
+  {
+   "detail": {
+    "fastest": [
+     "海豹船长",
+     228.4
+    ],
+    "median": 178.2,
+    "slowest": [
+     "寂灭骨龙",
+     161.5
+    ],
+    "spread": 66.9
+   },
+   "evidence": [
+    "pet_000225",
+    "pet_000190",
+    "pet_000445"
+   ],
+   "name": "speed",
+   "value": 0.2929
+  },
+  {
+   "detail": {
+    "counts": {
+     "物攻": 14,
+     "魔攻": 7
+    },
+    "minority_share": 0.333,
+    "total_attacks": 21
+   },
+   "evidence": [
+    "skill_000251",
+    "skill_000260",
+    "skill_000303",
+    "skill_000305",
+    "skill_000312",
+    "skill_000321",
+    "skill_000420",
+    "skill_000422",
+    "skill_000434",
+    "skill_000438",
+    "skill_000563",
+    "skill_000564",
+    "skill_000567",
+    "skill_000574",
+    "skill_000663",
+    "skill_000673",
+    "skill_000678",
+    "skill_000744",
+    "skill_000750",
+    "skill_000751"
+   ],
+   "name": "damage",
+   "value": 0.6667
+  },
+  {
+   "detail": {
+    "cheap_skills": 25,
+    "max_cost": 5,
+    "min_cost": 0,
+    "total_skills": 41
+   },
+   "evidence": [
+    "skill_000251",
+    "skill_000260",
+    "skill_000271",
+    "skill_000272",
+    "skill_000274",
+    "skill_000278",
+    "skill_000279",
+    "skill_000280",
+    "skill_000284",
+    "skill_000286",
+    "skill_000303",
+    "skill_000305",
+    "skill_000312",
+    "skill_000321",
+    "skill_000327",
+    "skill_000420",
+    "skill_000422",
+    "skill_000425",
+    "skill_000429",
+    "skill_000434",
+    "skill_000438",
+    "skill_000563",
+    "skill_000564",
+    "skill_000567",
+    "skill_000569",
+    "skill_000574",
+    "skill_000575",
+    "skill_000576",
+    "skill_000663",
+    "skill_000667",
+    "skill_000672",
+    "skill_000673",
+    "skill_000678",
+    "skill_000682",
+    "skill_000744",
+    "skill_000746",
+    "skill_000750",
+    "skill_000751",
+    "skill_000757"
+   ],
+   "name": "energy",
+   "value": 0.6098
+  },
+  {
+   "detail": {
+    "gaps": [
+     "缺职责：控制、驱散",
+     "没有光/恶/幻系技能，对幽系等目标缺少针对性"
+    ]
+   },
+   "evidence": [],
+   "name": "gaps",
+   "value": 2.0
+  }
+ ],
+ "base_result_keys": [
+  "calibration",
+  "coverage",
+  "features",
+  "note",
+  "strengths",
+  "team",
+  "weaknesses"
+ ],
+ "base_status": 200,
+ "base_strengths": [
+  "25 个低能耗技能，能量循环稳"
+ ],
+ "base_weaknesses": [
+  "缺职责：控制、驱散",
+  "没有光/恶/幻系技能，对幽系等目标缺少针对性",
+  "被 11 种属性克制，对位面偏窄"
+ ],
+ "lead_skill_after": {
+  "calibration": "rule-baseline-no-simulation",
+  "coverage": {
+   "damage_balance": 0.875,
+   "energy": 0.594,
+   "roles": 0.5,
+   "speed": 0.293,
+   "types": 0.455
+  },
+  "features": [
+   {
+    "detail": {
+     "offence_count": 5,
+     "offence_elements": [
+      "幽系",
+      "普通系",
+      "武系",
+      "水系",
+      "龙系"
+     ],
+     "per_pet_weak": {
+      "pet_000190": [
+       "幻系",
+       "电系",
+       "翼系",
+       "草系",
+       "萌系"
+      ],
+      "pet_000225": [
+       "光系",
+       "冰系",
+       "幽系",
+       "恶系",
+       "萌系",
+       "龙系"
+      ],
+      "pet_000445": [
+       "武系"
+      ]
+     },
+     "weak_count": 11,
+     "weak_to": [
+      "光系",
+      "冰系",
+      "幻系",
+      "幽系",
+      "恶系",
+      "武系",
+      "电系",
+      "翼系",
+      "草系",
+      "萌系",
+      "龙系"
+     ]
+    },
+    "evidence": [
+     "skill_000251",
+     "skill_000259",
+     "skill_000260",
+     "skill_000271",
+     "skill_000272",
+     "skill_000274",
+     "skill_000278",
+     "skill_000279",
+     "skill_000280",
+     "skill_000284",
+     "skill_000286",
+     "skill_000303",
+     "skill_000305",
+     "skill_000312",
+     "skill_000321",
+     "skill_000327",
+     "skill_000420",
+     "skill_000422",
+     "skill_000425",
+     "skill_000429",
+     "skill_000434",
+     "skill_000438",
+     "skill_000576",
+     "skill_000663",
+     "skill_000667",
+     "skill_000672",
+     "skill_000673",
+     "skill_000678",
+     "skill_000682",
+     "skill_000744",
+     "skill_000750"
+    ],
+    "name": "types",
+    "value": 0.4545
+   },
+   {
+    "detail": {
+     "covered": {
+      "回复": [],
+      "增益": [
+       "pet_000190",
+       "pet_000445"
+      ],
+      "承伤": [
+       "pet_000190",
+       "pet_000225",
+       "pet_000445"
+      ],
+      "控制": [],
+      "输出": [
+       "pet_000190",
+       "pet_000225",
+       "pet_000445"
+      ],
+      "驱散": []
+     },
+     "missing": [
+      "控制",
+      "回复",
+      "驱散"
+     ]
+    },
+    "evidence": [
+     "pet_000190",
+     "pet_000225",
+     "pet_000445"
+    ],
+    "name": "roles",
+    "value": 0.5
+   },
+   {
+    "detail": {
+     "fastest": [
+      "海豹船长",
+      228.4
+     ],
+     "median": 178.2,
+     "slowest": [
+      "寂灭骨龙",
+      161.5
+     ],
+     "spread": 66.9
+    },
+    "evidence": [
+     "pet_000225",
+     "pet_000190",
+     "pet_000445"
+    ],
+    "name": "speed",
+    "value": 0.2929
+   },
+   {
+    "detail": {
+     "counts": {
+      "物攻": 9,
+      "魔攻": 7
+     },
+     "minority_share": 0.438,
+     "total_attacks": 16
+    },
+    "evidence": [
+     "skill_000251",
+     "skill_000259",
+     "skill_000260",
+     "skill_000303",
+     "skill_000305",
+     "skill_000312",
+     "skill_000321",
+     "skill_000420",
+     "skill_000422",
+     "skill_000434",
+     "skill_000438",
+     "skill_000663",
+     "skill_000673",
+     "skill_000678",
+     "skill_000744",
+     "skill_000750"
+    ],
+    "name": "damage",
+    "value": 0.875
+   },
+   {
+    "detail": {
+     "cheap_skills": 19,
+     "max_cost": 5,
+     "min_cost": 0,
+     "total_skills": 32
+    },
+    "evidence": [
+     "skill_000251",
+     "skill_000259",
+     "skill_000260",
+     "skill_000271",
+     "skill_000272",
+     "skill_000274",
+     "skill_000278",
+     "skill_000279",
+     "skill_000280",
+     "skill_000284",
+     "skill_000286",
+     "skill_000303",
+     "skill_000305",
+     "skill_000312",
+     "skill_000321",
+     "skill_000327",
+     "skill_000420",
+     "skill_000422",
+     "skill_000425",
+     "skill_000429",
+     "skill_000434",
+     "skill_000438",
+     "skill_000576",
+     "skill_000663",
+     "skill_000667",
+     "skill_000672",
+     "skill_000673",
+     "skill_000678",
+     "skill_000682",
+     "skill_000744",
+     "skill_000750"
+    ],
+    "name": "energy",
+    "value": 0.5938
+   },
+   {
+    "detail": {
+     "gaps": [
+      "缺职责：控制、回复、驱散",
+      "没有光/恶/幻系技能，对幽系等目标缺少针对性"
+     ]
+    },
+    "evidence": [],
+    "name": "gaps",
+    "value": 2.0
+   }
+  ],
+  "note": "这是规则 baseline 的分项特征，**不是胜率**，也不是天梯强度。没有指定对手池时，任何整体分数都只是队内自洽性的度量。",
+  "strengths": [
+   "19 个低能耗技能，能量循环稳"
+  ],
+  "team": [
+   "pet_000225",
+   "pet_000190",
+   "pet_000445"
+  ],
+  "weaknesses": [
+   "缺职责：控制、回复、驱散",
+   "没有光/恶/幻系技能，对幽系等目标缺少针对性",
+   "被 11 种属性克制，对位面偏窄"
+  ]
+ },
+ "lead_skill_before": [
+  "skill_000750",
+  "skill_000576",
+  "skill_000744",
+  "skill_000591"
+ ],
+ "limitations": [
+  "不输出胜率：没有样本量、段位与版本可信的真人数据",
+  "特征由规则与数据算出，不经过模拟对局",
+  "面板值换算与伤害公式仍属未核验假设（MC-010/MC-011）"
+ ],
+ "note": "只读：不写盘、不训练、不动 data/**",
+ "result_shape": {
+  "calibration": "str",
+  "coverage": {
+   "damage_balance": "float",
+   "energy": "float",
+   "roles": "float",
+   "speed": "float",
+   "types": "float"
+  },
+  "features": [
+   "dict"
+  ],
+  "note": "str",
+  "strengths": [
+   "str"
+  ],
+  "team": [
+   "str"
+  ],
+  "weaknesses": [
+   "str"
+  ]
+ },
+ "same_response_when_only_loadout_changes": false,
+ "top_level_diff": {
+  "calibration": "same",
+  "coverage": "different",
+  "features": "different",
+  "note": "same",
+  "strengths": "different",
+  "team": "same",
+  "weaknesses": "different"
+ }
+}
