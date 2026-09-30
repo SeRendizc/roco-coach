@@ -60,6 +60,22 @@
 
 > `verify-01-*.json` 属于 **harness-verifier**（写域不在实现者），本目录出现时不要当成实现者证据。
 
+### 回归修复（task-10：plain-speak 棘轮 2 → 4）
+
+| 文件 | 是什么 | 关键数字 |
+|---|---|---|
+| `plain-speak-fix.md` | **回归修复证据**：改前/改后原始输出、根因、确切行、结构化 `error_context` 读数、验收清单缺口 | 一句话结论：改文案、不动棘轮 |
+| `plain-speak-before.txt` | 改前 `node --test tests/roco-plain-speak.test.js` 原始输出 | exit **1** · tests 12 · pass 11 · fail 1（棘轮 2→4） |
+| `plain-speak-after.txt` | 改后同一命令原始输出 | exit **0** · **tests 12 · pass 12 · fail 0** |
+| `node-contract-after-plain-speak.txt` | 改后 5 个 Node 件（4 契约 + server）原始输出 | exit **0** · tests 54 · pass 54 · fail 0 |
+| `raw-match-mismatch.json` | 串局守卫的**文案 + 结构化字段**读数（`probe-12`） | `error` 无硬禁词/工程语气词、无原始 id；`error_context={field,local,engine}` 带全 id |
+| `raw-tone-count.json` | 逐文件工程语气/硬禁词计数（`probe-13`，与判据 ② 同一份词表） | `roco-service.js` **soft=2**（登记欠账 `:552/:667`）· hard=0 |
+| `probe-12-match-mismatch-plain.mjs` / `probe-13-tone-count.mjs` | 上面两份读数的**可复跑**探针 | exit 0 / exit 0 |
+
+> 验收清单修正（本次起）：凡是改 `src/server/roco-service.js` 的提交，
+> **必须**把 `node --test tests/roco-plain-speak.test.js`（12/12）纳入 Node 验收 —— 01 当时漏了这条轴，
+> 才让这次回归漏到 plan02-front。完整清单见 `plain-speak-fix.md` §6。
+
 ---
 
 ## 二、作废件（**不要引用**，保留只为留痕）

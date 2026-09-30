@@ -1,0 +1,149 @@
+{
+ "summary": {
+  "same_match_ok": true,
+  "other_match": {
+   "ok": false,
+   "status": 409,
+   "error_type": "match_mismatch",
+   "error": "这一局和本地记的对不上：不把两局混在一起，请重新开一局。",
+   "error_context": {
+    "field": "match_id",
+    "local": "m-one",
+    "engine": "m-two"
+   },
+   "jargon": {
+    "hard": [],
+    "soft": []
+   },
+   "mentions_raw_ids": false
+  },
+  "other_rules": {
+   "ok": false,
+   "status": 409,
+   "error_type": "match_mismatch",
+   "error": "这一局用的规则版本和本地记的对不上：规则变了以后旧建议不适用，请重新开一局。",
+   "error_context": {
+    "field": "rules_version",
+    "local": "roco-world-s4-2026-09-10/legacy_sim_v1",
+    "engine": "roco-world-s4-2026-09-10/legacy_sim_v1-changed"
+   },
+   "jargon": {
+    "hard": [],
+    "soft": []
+   }
+  },
+  "legacy_no_match_id": {
+   "ok": true,
+   "note": "老引擎/老 fixture 读不到 match_id ⇒ 跳过守卫（不假装知道）"
+  }
+ },
+ "raw": {
+  "same_match": {
+   "ok": true,
+   "battle_id": "s1-il28679e",
+   "view": {
+    "schema_version": 1,
+    "ruleset_id": "roco-world-s4-2026-09-10",
+    "state_version": 3,
+    "turn": 2,
+    "phase": "battle",
+    "battle_result": null,
+    "match_id": "m-one",
+    "rules_version": "roco-world-s4-2026-09-10/legacy_sim_v1",
+    "self": {
+     "active": 0,
+     "energy_max": 10,
+     "energy_charge": 5,
+     "pets": [],
+     "skills": []
+    },
+    "opponent": {
+     "active": 0,
+     "living_count": 1,
+     "energy_max": 10,
+     "field": null,
+     "bench": []
+    },
+    "legal": [],
+    "cpu_legal_count": 0,
+    "needs_replacement": [],
+    "events": [],
+    "strategy": {
+     "name": "greedy_damage",
+     "version": 1
+    },
+    "assumptions": {},
+    "unsupported_count": 0,
+    "mana": null,
+    "unverified_overrides": [],
+    "unverified_notes": [],
+    "mode_id": null,
+    "ruleset_config_id": "legacy_sim_v1"
+   }
+  },
+  "other_match": {
+   "ok": false,
+   "status": 409,
+   "error": "这一局和本地记的对不上：不把两局混在一起，请重新开一局。",
+   "error_context": {
+    "field": "match_id",
+    "local": "m-one",
+    "engine": "m-two"
+   },
+   "error_type": "match_mismatch"
+  },
+  "other_rules": {
+   "ok": false,
+   "status": 409,
+   "error": "这一局用的规则版本和本地记的对不上：规则变了以后旧建议不适用，请重新开一局。",
+   "error_context": {
+    "field": "rules_version",
+    "local": "roco-world-s4-2026-09-10/legacy_sim_v1",
+    "engine": "roco-world-s4-2026-09-10/legacy_sim_v1-changed"
+   },
+   "error_type": "match_mismatch"
+  },
+  "legacy_no_match_id": {
+   "ok": true,
+   "battle_id": "s1-oxre72s3",
+   "view": {
+    "schema_version": 1,
+    "ruleset_id": "roco-world-s4-2026-09-10",
+    "state_version": 3,
+    "turn": 2,
+    "phase": "battle",
+    "battle_result": null,
+    "rules_version": "roco-world-s4-2026-09-10/legacy_sim_v1",
+    "self": {
+     "active": 0,
+     "energy_max": 10,
+     "energy_charge": 5,
+     "pets": [],
+     "skills": []
+    },
+    "opponent": {
+     "active": 0,
+     "living_count": 1,
+     "energy_max": 10,
+     "field": null,
+     "bench": []
+    },
+    "legal": [],
+    "cpu_legal_count": 0,
+    "needs_replacement": [],
+    "events": [],
+    "strategy": {
+     "name": "greedy_damage",
+     "version": 1
+    },
+    "assumptions": {},
+    "unsupported_count": 0,
+    "mana": null,
+    "unverified_overrides": [],
+    "unverified_notes": [],
+    "mode_id": null,
+    "ruleset_config_id": "legacy_sim_v1"
+   }
+  }
+ }
+}

@@ -2038,14 +2038,18 @@ function engineAlive() {
   const bound=typeof session?.match_id==='string'?session.match_id:null;
   const got=typeof result?.match_id==='string'?result.match_id:null;
   if(bound&&got&&bound!==got){
-   return `这一局的标识对不上（本地记录 ${bound}，引擎回执 ${got}）：`
-    +'不把两局的事实混在一起，请重新开一局。';
+   // 玩家读的是 `error` 那句话，所以句子里**不印内部 id**；可调试性挪进
+   // `error_context`（结构化字段，日志/调试台照读，调用方也能自己比对）。
+   // 2026-09-30（task-10）：这两句原来把 id 直接拼进句子，被 plain-speak 棘轮
+   // 当场拦下（本文件的工程语气计数 2 → 4）。
+   return {error:'这一局和本地记的对不上：不把两局混在一起，请重新开一局。',
+    error_context:{field:'match_id',local:bound,engine:got}};
   }
   const boundRules=typeof session?.rules_version==='string'?session.rules_version:null;
   const gotRules=typeof result?.rules_version==='string'?result.rules_version:null;
   if(boundRules&&gotRules&&boundRules!==gotRules){
-   return `这一局的规则版本对不上（本地记录 ${boundRules}，引擎回执 ${gotRules}）：`
-    +'规则变了之后旧建议不适用，请重新开一局。';
+   return {error:'这一局用的规则版本和本地记的对不上：规则变了以后旧建议不适用，请重新开一局。',
+    error_context:{field:'rules_version',local:boundRules,engine:gotRules}};
   }
   return null;
  }
@@ -2477,7 +2481,7 @@ async function attachSkillSupport(view){
    // 与 `startBattle` / `freeAction` 对齐：unavailable→503、unsupported_effect→422、其余 400。
    status:out.error_type==='unavailable'?503:(out.error_type==='unsupported_effect'?422:400)};
   const mismatch=matchMismatch(session,out.result);
-  if(mismatch)return {ok:false,status:409,error:mismatch,error_type:'match_mismatch'};
+  if(mismatch)return {ok:false,status:409,...mismatch,error_type:'match_mismatch'};
   session.state=out.result.state;
   session.turn=out.result.turn;
   counters.advances+=1;
@@ -2515,7 +2519,7 @@ async function attachSkillSupport(view){
   if(!out.ok)return {ok:false,error:out.reason,error_type:out.error_type,
    status:out.error_type==='unavailable'?503:(out.error_type==='unsupported_effect'?422:400)};
   const mismatchFree=matchMismatch(session,out.result);
-  if(mismatchFree)return {ok:false,status:409,error:mismatchFree,error_type:'match_mismatch'};
+  if(mismatchFree)return {ok:false,status:409,...mismatchFree,error_type:'match_mismatch'};
   session.state=out.result.state;
   session.turn=out.result.turn;      // 自由动作**不**改回合数（照抄引擎回执，不自己加）
   counters.freeActions=(counters.freeActions??0)+1;
@@ -2927,7 +2931,7 @@ async function attachSkillSupport(view){
   const out=unwrap(legal);
   if(!out.ok)return {ok:false,status:502,error:out.reason,error_type:out.error_type};
   const mismatchPlan=matchMismatch(session,out.result);
-  if(mismatchPlan)return {ok:false,status:409,error:mismatchPlan,error_type:'match_mismatch'};
+  if(mismatchPlan)return {ok:false,status:409,...mismatchPlan,error_type:'match_mismatch'};
   const pub=plannerPublicOf(out.result);
   if(!pub)return {ok:false,status:502,error:'服务端没有给出公开 planner state'};
   const envelope=await client.planActions(pub,{
