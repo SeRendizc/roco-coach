@@ -3172,14 +3172,102 @@ ROUTES = ("/health", "/rules/query", "/team/evaluate", "/team/compare", "/battle
 # ── 进程入口 ────────────────────────────────────────────────────────────
 
 
+#: Windows 探测用到的常量：`OpenProcess` 的访问权 / `WaitForSingleObject` 的返回码 /
+#: 「pid 不存在」的 `GetLastError`。
+_WIN_SYNCHRONIZE = 0x00100000
+_WIN_WAIT_OBJECT_0 = 0x00000000
+_WIN_WAIT_TIMEOUT = 0x00000102
+_WIN_ERROR_INVALID_PARAMETER = 87
+_WIN_KERNEL32: Optional[Tuple[Any, Any]] = None
+
+
+def _win_kernel32() -> Tuple[Any, Any]:
+    """惰性加载 kernel32，并**一次性钉死参数/返回类型**（返回 `(kernel32, ctypes)`）。
+
+    ⚠ 必须设 `restype`：`OpenProcess` 返回的是 `HANDLE`（指针量纲），不设时 ctypes 默认按
+    `c_int`（32 位）截断 ⇒ 句柄失效 ⇒ `WaitForSingleObject` 恒 `WAIT_FAILED`
+    ⇒ 探测**永远"问不出来"**（那会让看门狗要么恒活、要么恒死，两种都是假读数）。
+    """
+    global _WIN_KERNEL32
+    if _WIN_KERNEL32 is None:
+        import ctypes
+        from ctypes import wintypes
+
+        k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        k32.OpenProcess.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.DWORD)
+        k32.OpenProcess.restype = wintypes.HANDLE
+        k32.WaitForSingleObject.argtypes = (wintypes.HANDLE, wintypes.DWORD)
+        k32.WaitForSingleObject.restype = wintypes.DWORD
+        k32.CloseHandle.argtypes = (wintypes.HANDLE,)
+        k32.CloseHandle.restype = wintypes.BOOL
+        _WIN_KERNEL32 = (k32, ctypes)
+    return _WIN_KERNEL32
+
+
+def _win_parent_is_alive(parent_pid: int) -> bool:
+    """Windows 存活探测：`OpenProcess(SYNCHRONIZE)` 取句柄 + `WaitForSingleObject(h, 0)` 看有没有 signal。
+
+    **零副作用**：只开/等/关一个进程句柄，不发任何控制台事件、不碰目标进程。
+
+    判定（只在**拿到明确证据**时才敢说"死"）：
+      · 句柄打不开且 `GetLastError == ERROR_INVALID_PARAMETER`(87) ⇒ 这个 pid 不存在 ⇒ **已死**；
+      · 句柄打不开的其它错误（如 `ERROR_ACCESS_DENIED`）⇒ **当作还活着**（问不出来就不误杀）；
+      · `WAIT_OBJECT_0` ⇒ 进程对象已 signal（进程已结束）⇒ **已死**；
+      · `WAIT_TIMEOUT` ⇒ 还在跑 ⇒ **活着**；
+      · `WAIT_FAILED` ⇒ **当作还活着**（同上）。
+    """
+    k32, ctypes = _win_kernel32()
+    handle = k32.OpenProcess(_WIN_SYNCHRONIZE, False, int(parent_pid))
+    if not handle:
+        return int(ctypes.get_last_error()) != _WIN_ERROR_INVALID_PARAMETER
+    try:
+        rc = int(k32.WaitForSingleObject(handle, 0))
+    finally:
+        k32.CloseHandle(handle)
+    if rc == _WIN_WAIT_TIMEOUT:
+        return True
+    if rc == _WIN_WAIT_OBJECT_0:
+        return False
+    return True                       # WAIT_FAILED 等：问不出来 ⇒ 不误杀
+
+
+def _parent_is_alive(parent_pid: int) -> bool:
+    """父进程还在吗？——**平台必须分开**，这不是优化，是正确性。
+
+    ⚠ **为什么 Windows 上不能写 `os.kill(pid, 0)`**（P0 · 2026-09-30 实测 + A/B）：
+    CPython 在 Windows 上把 `sig=0` 当作 `signal.CTRL_C_EVENT`（**它的值就是 0**）⇒ 走
+    `GenerateConsoleCtrlEvent(CTRL_C_EVENT, pid)` ⇒ **向同 console 的进程组广播 Ctrl+C**
+    ⇒ 整棵树以 `0xC000013A`（`STATUS_CONTROL_C_EXIT`）退出。
+    服务是 `src/coach/roco-client.js:381` 用 `--parent-pid <node pid>` 起的 ⇒
+    Windows 侧**任何经它起服务的调用方都会被误杀**（就是 02 夹具"跑到开一局整树原子中断"的真因）。
+    ⇒ Windows 走 `_win_parent_is_alive()`（`OpenProcess`+`WaitForSingleObject`，零副作用）。
+
+    POSIX 分支**逐字保留原行为**（`os.kill(pid, 0)` 只探测；任何 `OSError` ⇒ 视为父进程没了）。
+    """
+    if os.name == "nt":
+        return _win_parent_is_alive(parent_pid)
+    try:
+        os.kill(parent_pid, 0)
+        return True
+    except OSError:
+        return False
+
+
 def _watch_parent(parent_pid: int) -> None:
-    """父进程（Node）死掉后自己退出，避免留下孤儿监听进程。"""
+    """父进程（Node）死掉后自己退出，避免留下孤儿监听进程。
+
+    ⚠ 探测**必须走 `_parent_is_alive()`**：Windows 上原来的 `os.kill(parent_pid, 0)`
+    不是探测，是**广播 Ctrl+C**（见那个函数的注释与 `plan02-p0-watch-parent.md` 的 A/B 读数）。
+    探测本身出异常 ⇒ **当作还活着**（不误杀），下一轮再试 —— 看门狗线程不许因此死掉。
+    """
 
     while True:
         time.sleep(1.0)
         try:
-            os.kill(parent_pid, 0)
-        except OSError:
+            alive = _parent_is_alive(parent_pid)
+        except Exception:                       # noqa: BLE001 —— 不误杀优先
+            alive = True
+        if not alive:
             os._exit(0)
 
 
