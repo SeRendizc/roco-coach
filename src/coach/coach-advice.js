@@ -1035,15 +1035,9 @@ export function rocoAdviceAsk(message) {
     || /(出招|进攻|打)还是(防御|守|换)|(防御|守)还是(出招|进攻|换)|要不要换(人|宠|只)|该攻还是该守|怎么选/.test(text)
     || /(接下来|下一步|下面)(该)?(做什么|干什么|怎么办|怎么打|该干嘛|怎么走)/.test(text)
     || /(给|来|出)(我)?(个|条|点)?建议|有什么建议|帮我(选|挑|定)|我该怎么选/.test(text)
-    // 第 8 组（2026-10-01，B2/P1-A 同族）：**比较类**问句 —— 「谁更耐打 / 承伤怎么比 / 扛不扛得住」。
-    //   现场：玩家在六宠局里问「喵喵光系承伤 0.5 与缇塔 1 如何比较」，旧词表一条都不命中 ⇒
-    //   落到陪伴层回「说清你问的是哪一块（配招/先手/队伍），我按事实答。」——**答非所问**。
-    //   为什么仍然必须是窄表：**比较词与承伤/生存词必须同现**。只说「承伤是什么」是机制题，
-    //   归事实层；带上「更 / 哪个 / 比」才是真的拿两只看。下面三条各管一种说法。
-    || (/(谁|哪(?:一)?只|哪个|这两只|这两个)/.test(text) && /(更|比较)/.test(text)
-      && /(承伤|挨打|耐打|抗打|扛得住|顶得住|站得住)/.test(text))
-    || /(承伤|挨打|耐打|抗打).{0,16}(更低|更少|更小|怎么比|如何比|比较一下|比较|哪个更好)/.test(text)
-    || /(扛得住|顶得住|站得住).{0,6}(吗|么|这一下|这一手|这一招)/.test(text)
+    // 第 8 组（2026-10-01，B2/P1-A 同族）：**比较类**问句 —— 见 `isCompareAsk()`（**单一出处**，
+    //   `rocoAdviceAsk()` 与 `rocoAdviceKind()` 都引用它，两处口径不许各自漂移）。
+    || isCompareAsk(text)
     // 第 9 组（2026-10-01，05.1b）：**合法性/机制缺口**问句 —— 「这招能不能用」。
     //   现场：这一格旧词表一条都不命中 ⇒ 落 `companion` 回「说清你问的是哪一块（配招/先手/队伍），我按事实答。」
     //   —— 而**合法性正是本层的看家本事**（行动必须在当前合法集合里、带 `legalActionId`：
@@ -1051,6 +1045,36 @@ export function rocoAdviceAsk(message) {
     //   这类主语 + 用不用的疑问**，不是泛指（「能不能用这个思路打」不许被吞）。
     || /(这一?招|这一?手|这个?技能|这招|大招).{0,6}(能不能用|能不能出|能用吗|能用么|出得来吗|可用吗|管用吗|有用吗|划不划算)/.test(text)
     || /(能不能|可以|能).{0,4}(用|出).{0,2}(这一?招|这一?手|这个?技能)/.test(text);
+}
+
+/**
+ * **比较类**问句（2026-10-01，B2）：比较词与承伤/生存词**同现**才算。**单一出处** ——
+ * `rocoAdviceAsk()` 与 `rocoAdviceKind()` 都引用它（05.1c 的"两套口径只许一处定义"在本文件内先落地）。
+ *
+ * 为什么必须窄：文件头逐字写着「宽一个词，事实问句（火系克制什么属性）就会被吞掉，玩家得到一段
+ * 答非所问的战术建议 —— 这比沉默更糟」。只说「承伤是什么」是机制题，归事实层。
+ */
+function isCompareAsk(text) {
+  return (/(谁|哪(?:一)?只|哪个|这两只|这两个)/.test(text) && /(更|比较)/.test(text)
+      && /(承伤|挨打|耐打|抗打|扛得住|顶得住|站得住)/.test(text))
+    || /(承伤|挨打|耐打|抗打).{0,16}(更低|更少|更小|怎么比|如何比|比较一下|比较|哪个更好)/.test(text)
+    || /(扛得住|顶得住|站得住).{0,6}(吗|么|这一下|这一手|这一招)/.test(text);
+}
+
+/**
+ * 问句分类（2026-10-01，task-51 第 3 步；口径来自 lead-mac 的 `FIXPACK-coach-comparison-question`）：
+ * `'compare'`（比较 / 哪个更 / 差多少）· `'recommend'`（现在该出什么 / 这手怎么打 / 换谁）· `'fact'`（其余）。
+ *
+ * 为什么需要它：`runtime.js` 的**强制层没有"问句类型"概念** —— 它把比较类回答按
+ * 「一个首选 + 理由 + 风险」的推荐契约校验，不合格就**替换成通用首选稿** ⇒ 玩家问「0.5 与 1 怎么比」，
+ * 拿到的却是「首选换缇塔上场」（真机确证）。分类是那条修法的**唯一入口**：调用方按
+ * `kind==='compare'` 跳过强制（跨文件 API 已冻结：`enforceBattleAdvice(advice, text, {kind})`）。
+ */
+export function rocoAdviceKind(message) {
+  const text = String(message ?? '');
+  if (!text) return 'fact';
+  if (isCompareAsk(text)) return 'compare';
+  return rocoAdviceAsk(text) ? 'recommend' : 'fact';
 }
 
 /**
@@ -1378,7 +1402,67 @@ function situationLine(pos) {
  * }}
  */
 export function battleAdvice({battle = null, plan = null, message = null} = {}) {
+  // 比较类问句**不走推荐契约**（见 `rocoAdviceKind` 的注释）：它要的是"比一比"，不是"出哪一手"。
+  if (rocoAdviceKind(message) === 'compare') return compareAdvice(battle, message);
   return withAffinityLimits(adviceForPosition(positionFromSnapshot(battle, plan), plan), battle);
+}
+
+/**
+ * **比较类**建议（2026-10-01，task-51 第 3 步 / lead-mac 的 FIXPACK）：
+ * 玩家问「A 与 B 的承伤怎么比」，回答就**真的做比较** —— 引用 B3 送上来、**有出处**的倍率，
+ * 说出谁更扛，并如实交代读不到的那几层。
+ *
+ * 三条纪律：
+ *   ① **不是推荐**：本函数产出的正文**不许出现「首选行动」**（玩家问的不是"出哪一手"）；
+ *   ② **倍率有出处**：数字**只**来自 `battle.affinity.rows`（页面用 `incomingAffinity()` 从生成产物算的），
+ *      本层**不重算**；拿不到 ⇒ 正文写「读不到」，**一个数字都不编**；
+ *   ③ 结构化字段照旧给（`kind:'compare'`），调用方按 `kind` 跳过强制层（跨文件 API 已冻结）。
+ */
+function compareAdvice(battle, message) {
+  const view = battle && typeof battle === 'object' ? battle : {};
+  const self = Array.isArray(view.self) ? view.self : [];
+  const foe = Array.isArray(view.foe) ? view.foe[0] : null;
+  const turn = Number.isInteger(view.turn) ? view.turn : null;
+  const nameOf = new Map(self.filter((row) => row && typeof row.pet_id === 'string')
+    .map((row) => [row.pet_id, typeof row.name === 'string' && row.name ? row.name : '场上一只']));
+  const rows = (Array.isArray(view.affinity?.rows) ? view.affinity.rows : [])
+    .filter((row) => row && Number.isFinite(row.multiplier))
+    .map((row) => ({name: nameOf.get(row.pet_id) ?? '场上一只', multiplier: row.multiplier,
+      vsType: typeof row.vs_type === 'string' ? row.vs_type : null}));
+  const unknown = [];
+  for (const row of (Array.isArray(view.affinity?.unavailable) ? view.affinity.unavailable : [])) {
+    if (row && typeof row.reason === 'string' && row.reason) {
+      unknown.push(`「${nameOf.get(row.pet_id) ?? '场上一只'}」这一只的承伤相性我没有：${row.reason}`);
+    }
+  }
+  const head = `${turn === null ? '' : `第 ${turn} 回合。`}${foe?.name ? `对手场上：${foe.name}。` : ''}`;
+  if (!rows.length) {
+    // 拿不到倍率 ⇒ **如实说读不到**（不许编），但仍要把"能比的"说清楚：没有可比的两个数。
+    return {kind: 'compare', headline: '比一比', reason: '这一局送上来的承伤相性读数里没有可比的两个倍率',
+      upside: null, risk: null, alternates: [], unknown,
+      evidence: {turn, compared: [], source: null}, actionLabel: null, legalActionId: null, legalIndex: null,
+      text: `${head}要比承伤，我**读不到**这一局的承伤倍率（它不在送上来的公开快照里）——`
+        + '我不编数字。要是你先开一局、或告诉我这两只分别对什么系挨打，我按公开属性给你算得出来的那部分。'
+        + (unknown.length ? `另外：${unknown.join('；')}。` : '')};
+  }
+  const sorted = [...rows].sort((a, b) => a.multiplier - b.multiplier);
+  const best = sorted[0];
+  const worst = sorted[sorted.length - 1];
+  const pairs = rows.map((row) => `${row.name} 承伤 ${row.multiplier}`
+    + (row.vsType ? `（${row.vsType}）` : '')).join('、');
+  const meaning = best.multiplier < worst.multiplier
+    ? `${best.name} 只吃 ${best.multiplier} 倍，${worst.name} 是 ${worst.multiplier} 倍 —— 同样挨这一手，`
+      + `**${best.name} 更扛**（倍率越小越抗打）。`
+    : `两只的倍率一样（都是 ${best.multiplier}）—— 挨同一手掉得差不多。`;
+  // 公开面之外的必须点名（不许让玩家以为我连"对手要出什么"也算了）
+  unknown.push('对手这一手具体出什么系、我方技能面板与道具，都不在这一局的公开快照里 —— 上面只按**对手场上属性**推承伤。');
+  return {kind: 'compare', headline: '比一比：' + pairs, reason: meaning, upside: null, risk: null,
+    alternates: [], unknown,
+    evidence: {turn, compared: rows, source: typeof view.affinity?.source === 'string' ? view.affinity.source : null},
+    actionLabel: null, legalActionId: null, legalIndex: null, phase: 'compare',
+    text: `${head}比一比：${pairs}。${meaning}`
+      + (typeof view.affinity?.source === 'string' ? `倍率来自这一局送上来的承伤相性读数（源：${view.affinity.source}）。` : '')
+      + `我这里读不到的：${unknown.join('；')}。`};
 }
 
 /**

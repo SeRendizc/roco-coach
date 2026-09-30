@@ -463,8 +463,10 @@ test('⑪ B2②：页面读数里「读不到的那几只」并进建议的「�
   assert.match(unknown, /属性组合不在冻结相性表里/, '理由要逐字带上');
   assert.doesNotMatch(unknown, /pet_\d+/, '内部 id 不许端给玩家');
   assert.match(battleAdviceText(advice), /我这里不知道的/, '走既有的「不知道」通道');
-  // 加性：没有 affinity 时 `unknown` 一个字都不变
+  // 加性：没有 affinity 时，**那一只的**「不知道」不许凭空多出。
+  // ⚠ 2026-10-01（第 3 步）：这句话现在是**比较类** ⇒ 走 `compareAdvice`，它自己也会写「读不到的那几层」，
+  //   所以这里只钉"那一只（潮甲龟）"这一条，不再逐字比较整份 `unknown`（那是另一条分支的产物）。
   const plain = battleAdvice({battle: SNAPSHOT, message: '喵喵和缇塔哪个更耐打？'});
-  assert.deepEqual(plain.unknown ?? [], advice.unknown.filter((line) => !/潮甲龟/.test(line)),
-    '没有读数时不许凭空多出「不知道」');
+  assert.equal((plain.unknown ?? []).some((line) => /潮甲龟/.test(line)), false,
+    '没有读数时不许凭空多出「这一只读不到」');
 });

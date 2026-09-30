@@ -101,3 +101,60 @@ test('05.1c（结构）：两套建议词表不许各自漂移 —— 局中建�
     assert.equal(rocoAdviceAsk(q), false, `不许吞掉事实题：${q}`);
   }
 });
+
+// ── 第 3 步（2026-10-01，lead-mac 的 FIXPACK-coach-comparison-question）：问句分类 + 比较类真的做比较 ──
+// 现场（真机确证）：玩家问「喵喵光系承伤 0.5 与缇塔 1 如何比较」⇒ 拿到的是「首选换缇塔上场」的通用稿
+// —— 机制是**强制层没有"问句类型"概念**，把比较类回答按「一个首选 + 理由 + 风险」校验，不合格就替换。
+// 冻结的跨文件 API：`rocoAdviceKind(text) -> 'recommend'|'compare'|'fact'`；
+// `runtime.js` 侧按 `kind==='compare'` 跳过强制（`enforceBattleAdvice(advice, text, {kind})`，归 plan00-closer）。
+const COMPARE_BATTLE = {
+  ...MID,
+  affinity: {source: 'src/client/type-affinity.data.js@x', vs_types: ['火系'],
+    rows: [{pet_id: 'pet_000001', multiplier: 0.5, vs_type: '火系', known: true},
+      {pet_id: 'pet_000417', multiplier: 1, vs_type: '火系', known: true}],
+    unavailable: [{pet_id: 'pet_000190', reason: '属性组合不在冻结相性表里'}]},
+};
+
+test('第3步 ①：`rocoAdviceKind` 三态分类（比较 / 推荐 / 事实）', async () => {
+  const {rocoAdviceKind} = await import('../src/coach/coach-advice.js');
+  for (const q of ['喵喵光系承伤 0.5 与缇塔 1 如何比较', '喵喵和缇塔哪个更耐打？', '谁更抗打？',
+    '这两只谁的承伤更低？', '缇塔扛得住这一下吗？']) {
+    assert.equal(rocoAdviceKind(q), 'compare', `比较类必须分到 compare：${q}`);
+  }
+  for (const q of ['现在怎么办？', '现在该换谁？', '这一手该怎么打？', '这招能不能用？']) {
+    assert.equal(rocoAdviceKind(q), 'recommend', `推荐类必须分到 recommend：${q}`);
+  }
+  for (const q of ['火系克制什么属性？', '承伤是什么意思？', '能量上限是多少？']) {
+    assert.equal(rocoAdviceKind(q), 'fact', `事实题必须分到 fact：${q}`);
+  }
+});
+
+test('第3步 ②：比较类回答**真的做比较** —— 两个有出处的倍率 + 谁更扛 + 不出现「首选行动」', async () => {
+  const {battleAdvice} = await import('../src/coach/coach-advice.js');
+  const advice = battleAdvice({battle: COMPARE_BATTLE, message: '喵喵光系承伤 0.5 与缇塔 1 如何比较'});
+  assert.equal(advice.kind, 'compare', '要标成比较类（调用方据此跳过强制层）');
+  assert.doesNotMatch(advice.text, /首选行动/, `比较类不许出现推荐契约那套：${advice.text}`);
+  // 两个数都要在，且与送上来**有出处**的读数逐字一致（本层不重算）
+  for (const row of COMPARE_BATTLE.affinity.rows) {
+    assert.ok(advice.text.includes(String(row.multiplier)), `要引用有出处的倍率 ${row.multiplier}：${advice.text}`);
+  }
+  assert.match(advice.text, /更扛|倍率越小/, `要说清谁更扛（0.5 < 1 的含义）：${advice.text}`);
+  assert.match(advice.text, /第 1 回合|第 3 回合/, '要引用当前局面');
+  assert.match(advice.text, /源：src\/client\/type-affinity\.data\.js@/, '倍率要带出处');
+  // 登记缺口：反向对照（推荐类仍必须被强制）在 `runtime.js` 的 `enforceBattleAdvice`，
+  // 归 plan00-closer 的半步 —— 本文件不替它背书。
+});
+
+test('第3步 ④：诚实性 —— 拿不到倍率必须写「读不到」且**一个数字都不编**', async () => {
+  const {battleAdvice} = await import('../src/coach/coach-advice.js');
+  const bare = {...MID, affinity: undefined};
+  const advice = battleAdvice({battle: bare, message: '喵喵和缇塔哪个更耐打？'});
+  assert.match(advice.text, /读不到|不在.*快照/, `拿不到要如实说：${advice.text}`);
+  // ⚠ 断言要够狠：只查小数抓不住"编一个整数倍率"（M33 变异首跑就是 GREEN —— 它塞了 `1 倍`）。
+  //   口径：拿不到读数时，正文里**不许出现任何"×倍"形式的数字**（`1 倍`/`0.5 倍` 都算）。
+  // 实测两次都不够狠：只查小数抓不住 `1 倍`；只查 `N 倍` 抓不住 `承伤 1`（本句的实际措辞）。
+  // ⇒ 口径写成**任何"倍率形状"的数字主张**都不许出现：`N 倍` / `承伤 N` / `都是 N`。
+  assert.doesNotMatch(advice.text, /[0-9]+(\.[0-9]+)?\s*倍/, `不许编倍率：${advice.text}`);
+  assert.doesNotMatch(advice.text, /(承伤|倍率|都是)\s*[0-9]/, `不许用"承伤 N"的形式编数：${advice.text}`);
+  assert.doesNotMatch(advice.text, /首选行动/, `比较类永远是比较类：${advice.text}`);
+});
