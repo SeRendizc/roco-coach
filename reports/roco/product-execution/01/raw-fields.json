@@ -1,0 +1,303 @@
+{
+  "bench_key_diff": {
+    "obs_minus_ui": [
+      "active",
+      "field",
+      "name",
+      "pet_id"
+    ],
+    "observation_for.opponent.bench[0]": [
+      "active",
+      "fainted",
+      "field",
+      "name",
+      "pet_id",
+      "slot"
+    ],
+    "public_first_row": {
+      "fainted": false,
+      "pet_id": "pet_000190",
+      "slot": 1
+    },
+    "public_minus_ui": [
+      "pet_id"
+    ],
+    "public_planner_state.opponent.bench[0]": [
+      "fainted",
+      "pet_id",
+      "slot"
+    ],
+    "ui_first_row": {
+      "fainted": false,
+      "slot": 1
+    },
+    "ui_public_view.opponent.bench[0]": [
+      "fainted",
+      "slot"
+    ]
+  },
+  "foe_bench_identity_leak": {
+    "observation_for.opponent.bench_names": [
+      "海豹船长",
+      "黑猫巫师"
+    ],
+    "observation_for.opponent.bench_pet_ids": [
+      "pet_000190",
+      "pet_000445"
+    ],
+    "public_planner_state.opponent.bench_pet_ids": [
+      "pet_000190",
+      "pet_000445"
+    ],
+    "ui_public_view.opponent.bench_pet_ids": [
+      null,
+      null
+    ]
+  },
+  "hidden_leak_scan": {
+    "observation_for": [],
+    "public_planner_state": [],
+    "ui_public_view": []
+  },
+  "hidden_probe": {
+    "foe_bench_real_hp": [
+      425,
+      374,
+      474
+    ],
+    "foe_bench_real_loadout": {
+      "pet_000190": [
+        "skill_000673",
+        "skill_000429",
+        "skill_000678",
+        "skill_000294"
+      ],
+      "pet_000225": [
+        "skill_000750",
+        "skill_000576",
+        "skill_000744",
+        "skill_000591"
+      ],
+      "pet_000445": [
+        "skill_000321",
+        "skill_000286",
+        "skill_000251",
+        "skill_000483"
+      ]
+    },
+    "foe_field_real_hp": 425,
+    "foe_pending": {},
+    "real_seed": 20260930
+  },
+  "opponent_keys": {
+    "observation_for.opponent": [
+      "active",
+      "field",
+      "living_count",
+      "pets"
+    ],
+    "public_planner_state.opponent": [
+      "active",
+      "bench",
+      "field",
+      "living_count"
+    ],
+    "ui_public_view.opponent": [
+      "active",
+      "bench",
+      "energy_charge",
+      "energy_max",
+      "field",
+      "living_count"
+    ]
+  },
+  "pet_row_keys": {
+    "obs.opponent.field": [
+      "active",
+      "energy",
+      "fainted",
+      "field",
+      "hp",
+      "marks",
+      "max_hp",
+      "name",
+      "pet_id",
+      "slot",
+      "statuses"
+    ],
+    "obs.opponent.pets[0]": [
+      "active",
+      "energy",
+      "fainted",
+      "field",
+      "hp",
+      "marks",
+      "max_hp",
+      "name",
+      "pet_id",
+      "slot",
+      "statuses"
+    ],
+    "obs.self.pets[0]": [
+      "buffs",
+      "charge",
+      "defense_cooldown",
+      "energy",
+      "fainted",
+      "hp",
+      "marks",
+      "max_hp",
+      "name",
+      "pet_id",
+      "slot",
+      "statuses"
+    ],
+    "public.opponent.bench[0]": [
+      "fainted",
+      "pet_id",
+      "slot"
+    ],
+    "public.opponent.field": [
+      "charging",
+      "defense_cooldown",
+      "energy",
+      "fainted",
+      "hp",
+      "marks",
+      "max_hp",
+      "pet_id",
+      "slot",
+      "statuses"
+    ],
+    "public.self.pets[0]": [
+      "buffs",
+      "charging",
+      "defense_cooldown",
+      "energy",
+      "entered_turn",
+      "fainted",
+      "hp",
+      "marks",
+      "max_hp",
+      "pet_id",
+      "slot",
+      "statuses"
+    ],
+    "ui.opponent.bench[0]": [
+      "fainted",
+      "slot"
+    ],
+    "ui.opponent.field": [
+      "charging",
+      "class",
+      "defense_cooldown",
+      "energy",
+      "fainted",
+      "hp",
+      "marks",
+      "max_hp",
+      "name",
+      "pet_id",
+      "slot",
+      "stage",
+      "stats",
+      "stats_source",
+      "statuses",
+      "types"
+    ],
+    "ui.self.pets[0]": [
+      "buffs",
+      "charging",
+      "class",
+      "defense_cooldown",
+      "energy",
+      "entered_turn",
+      "fainted",
+      "hp",
+      "marks",
+      "max_hp",
+      "name",
+      "pet_id",
+      "slot",
+      "stage",
+      "stats",
+      "stats_source",
+      "statuses",
+      "types"
+    ]
+  },
+  "phase": "battle",
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "seed_used": 20260930,
+  "self_keys": {
+    "observation_for.self": [
+      "active",
+      "items",
+      "pets"
+    ],
+    "public_planner_state.self": [
+      "active",
+      "items",
+      "loadouts",
+      "pets"
+    ],
+    "ui_public_view.self": [
+      "active",
+      "energy_charge",
+      "energy_max",
+      "items",
+      "loadouts",
+      "magic",
+      "pets",
+      "skills"
+    ]
+  },
+  "sizes_bytes_utf8": {
+    "observation_for": 1463,
+    "public_planner_state": 1748,
+    "ui_public_view": 9898
+  },
+  "state_version": 0,
+  "top_keys": {
+    "observation_for": [
+      "opponent",
+      "phase",
+      "result",
+      "ruleset_id",
+      "self",
+      "side",
+      "state_version",
+      "turn"
+    ],
+    "public_planner_state": [
+      "assumptions",
+      "opponent",
+      "phase",
+      "result",
+      "ruleset_config_id",
+      "ruleset_id",
+      "schema_version",
+      "self",
+      "side",
+      "state_version",
+      "turn",
+      "unverified_overrides"
+    ],
+    "ui_public_view": [
+      "legal",
+      "notes",
+      "opponent",
+      "phase",
+      "result",
+      "ruleset_config_id",
+      "ruleset_id",
+      "schema_version",
+      "self",
+      "side",
+      "state_version",
+      "turn",
+      "unverified_overrides"
+    ]
+  },
+  "turn": 1
+}

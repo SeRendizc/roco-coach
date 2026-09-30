@@ -1,0 +1,254 @@
+{
+  "mean_recovery_ratio": 1.0,
+  "note": "`ui_public_view` 随 `_sim_envelope` 的 `result.ui` 下发到 Node，`publicView()` 只取 `ui.legal.player`，但 `result.ui` 整份在 Node 内存里；`/battle/new` 的回执把裁剪后的 view 给浏览器，原始 result.ui 不出浏览器。",
+  "rows": [
+    {
+      "browser_visible": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "extra_not_in_loadout": [],
+      "foe_active": "pet_000062",
+      "foe_active_name": "音速犬",
+      "real_loadout": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "recovered": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "recovery_ratio": 1.0,
+      "seed": 11,
+      "turn": 1
+    },
+    {
+      "browser_visible": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "extra_not_in_loadout": [],
+      "foe_active": "pet_000062",
+      "foe_active_name": "音速犬",
+      "real_loadout": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "recovered": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "recovery_ratio": 1.0,
+      "seed": 29,
+      "turn": 1
+    },
+    {
+      "browser_visible": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "extra_not_in_loadout": [],
+      "foe_active": "pet_000062",
+      "foe_active_name": "音速犬",
+      "real_loadout": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "recovered": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "recovery_ratio": 1.0,
+      "seed": 47,
+      "turn": 1
+    },
+    {
+      "browser_visible": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "extra_not_in_loadout": [],
+      "foe_active": "pet_000062",
+      "foe_active_name": "音速犬",
+      "real_loadout": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "recovered": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "recovery_ratio": 1.0,
+      "seed": 222,
+      "turn": 1
+    },
+    {
+      "browser_visible": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "extra_not_in_loadout": [],
+      "foe_active": "pet_000062",
+      "foe_active_name": "音速犬",
+      "real_loadout": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "recovered": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "recovery_ratio": 1.0,
+      "seed": 519,
+      "turn": 1
+    },
+    {
+      "browser_visible": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "extra_not_in_loadout": [],
+      "foe_active": "pet_000062",
+      "foe_active_name": "音速犬",
+      "real_loadout": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "recovered": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "recovery_ratio": 1.0,
+      "seed": 646,
+      "turn": 1
+    },
+    {
+      "browser_visible": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "extra_not_in_loadout": [],
+      "foe_active": "pet_000062",
+      "foe_active_name": "音速犬",
+      "real_loadout": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "recovered": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "recovery_ratio": 1.0,
+      "seed": 758,
+      "turn": 1
+    },
+    {
+      "browser_visible": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "extra_not_in_loadout": [],
+      "foe_active": "pet_000062",
+      "foe_active_name": "音速犬",
+      "real_loadout": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "recovered": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "recovery_ratio": 1.0,
+      "seed": 900,
+      "turn": 1
+    },
+    {
+      "browser_visible": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "extra_not_in_loadout": [],
+      "foe_active": "pet_000062",
+      "foe_active_name": "音速犬",
+      "real_loadout": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "recovered": [
+        "skill_000286",
+        "skill_000378",
+        "skill_000392",
+        "skill_000408"
+      ],
+      "recovery_ratio": 1.0,
+      "seed": 991,
+      "turn": 1
+    }
+  ],
+  "ruleset_config_id": "mobile_s4_candidate_v3",
+  "seeds": [
+    11,
+    29,
+    47,
+    222,
+    519,
+    646,
+    758,
+    900,
+    991
+  ],
+  "seeds_with_full_recovery": 9,
+  "total_seeds": 9
+}

@@ -1,0 +1,155 @@
+{
+  "Q1_enemy_legal_vs_real_loadout": {
+    "foe_active_pet_id": "pet_000417",
+    "foe_public_state_has_loadouts_key": false,
+    "note": "ui.legal.enemy 在浏览器可见载荷里；含 skill_id/skill_name/skill.desc/power/energy",
+    "overlap": [
+      "skill_000286",
+      "skill_000418",
+      "skill_000483"
+    ],
+    "real_loadout_leaked_fully": false,
+    "real_loadout_of_foe_active": [
+      "skill_000286",
+      "skill_000305",
+      "skill_000418",
+      "skill_000483"
+    ],
+    "ui_field_has_skills_key": false,
+    "ui_legal_enemy_rows_sample": [
+      {
+        "item_id": null,
+        "kind": "skill",
+        "skill_id": "skill_000286",
+        "skill_name": "防御",
+        "target_index": null
+      },
+      {
+        "item_id": null,
+        "kind": "skill",
+        "skill_id": "skill_000418",
+        "skill_name": "甩水",
+        "target_index": null
+      },
+      {
+        "item_id": null,
+        "kind": "skill",
+        "skill_id": "skill_000483",
+        "skill_name": "啮合传递",
+        "target_index": null
+      },
+      {
+        "item_id": null,
+        "kind": "switch",
+        "skill_id": null,
+        "skill_name": null,
+        "target_index": 1
+      },
+      {
+        "item_id": null,
+        "kind": "switch",
+        "skill_id": null,
+        "skill_name": null,
+        "target_index": 2
+      },
+      {
+        "item_id": "净化药",
+        "kind": "item",
+        "skill_id": null,
+        "skill_name": null,
+        "target_index": 0
+      },
+      {
+        "item_id": "回复药",
+        "kind": "item",
+        "skill_id": null,
+        "skill_name": null,
+        "target_index": 0
+      },
+      {
+        "item_id": "能量果",
+        "kind": "item",
+        "skill_id": null,
+        "skill_name": null,
+        "target_index": 0
+      }
+    ],
+    "ui_legal_enemy_skill_ids": [
+      "skill_000286",
+      "skill_000418",
+      "skill_000483"
+    ]
+  },
+  "Q1b_ui_opponent_bench_rows": [
+    {
+      "fainted": false,
+      "slot": 1
+    },
+    {
+      "fainted": false,
+      "slot": 2
+    }
+  ],
+  "Q2_bench_identity": {
+    "public_leaks_pet_id": true,
+    "public_planner_state": [
+      {
+        "fainted": false,
+        "pet_id": "pet_000112",
+        "slot": 1
+      },
+      {
+        "fainted": false,
+        "pet_id": "pet_000062",
+        "slot": 2
+      }
+    ],
+    "ui_leaks_pet_id": false,
+    "ui_public_view": [
+      {
+        "fainted": false,
+        "slot": 1
+      },
+      {
+        "fainted": false,
+        "slot": 2
+      }
+    ]
+  },
+  "Q3_observation_for_leaks": {
+    "bench_rows": [
+      {
+        "active": false,
+        "fainted": false,
+        "field": false,
+        "name": "雪影娃娃",
+        "pet_id": "pet_000112",
+        "slot": 1
+      },
+      {
+        "active": false,
+        "fainted": false,
+        "field": false,
+        "name": "音速犬",
+        "pet_id": "pet_000062",
+        "slot": 2
+      }
+    ],
+    "leaks_name": true,
+    "leaks_pet_id": true
+  },
+  "Q4a_seed_change_public_identical": true,
+  "Q4b_hidden_bench_hp_change": {
+    "changed_slot": 1,
+    "public_planner_state_identical": true,
+    "ui_legal_enemy_identical": true,
+    "ui_public_view_identical": true
+  },
+  "Q4c_individual_panel_entry": {
+    "PetState_has_panel_field": true,
+    "foe_field_panel_value": {},
+    "note": "对手侧 panel 由 reset 的 individuals 注入决定；对局内没有改它的入口（未找到）"
+  },
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "state_version": 0
+}

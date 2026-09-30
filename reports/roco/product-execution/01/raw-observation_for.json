@@ -1,0 +1,108 @@
+{
+  "opponent": {
+    "active": 0,
+    "field": {
+      "active": true,
+      "energy": 2,
+      "fainted": false,
+      "field": true,
+      "hp": 425,
+      "marks": [],
+      "max_hp": 425,
+      "name": "寂灭骨龙",
+      "pet_id": "pet_000225",
+      "slot": 0,
+      "statuses": []
+    },
+    "living_count": 3,
+    "pets": [
+      {
+        "active": true,
+        "energy": 2,
+        "fainted": false,
+        "field": true,
+        "hp": 425,
+        "marks": [],
+        "max_hp": 425,
+        "name": "寂灭骨龙",
+        "pet_id": "pet_000225",
+        "slot": 0,
+        "statuses": []
+      },
+      {
+        "active": false,
+        "fainted": false,
+        "field": false,
+        "name": "海豹船长",
+        "pet_id": "pet_000190",
+        "slot": 1
+      },
+      {
+        "active": false,
+        "fainted": false,
+        "field": false,
+        "name": "黑猫巫师",
+        "pet_id": "pet_000445",
+        "slot": 2
+      }
+    ]
+  },
+  "phase": "battle",
+  "result": null,
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "self": {
+    "active": 0,
+    "items": {
+      "净化药": 2,
+      "回复药": 3,
+      "能量果": 2
+    },
+    "pets": [
+      {
+        "buffs": {},
+        "charge": false,
+        "defense_cooldown": 0,
+        "energy": 2,
+        "fainted": false,
+        "hp": 425,
+        "marks": [],
+        "max_hp": 425,
+        "name": "寂灭骨龙",
+        "pet_id": "pet_000225",
+        "slot": 0,
+        "statuses": []
+      },
+      {
+        "buffs": {},
+        "charge": false,
+        "defense_cooldown": 0,
+        "energy": 0,
+        "fainted": false,
+        "hp": 374,
+        "marks": [],
+        "max_hp": 374,
+        "name": "海豹船长",
+        "pet_id": "pet_000190",
+        "slot": 1,
+        "statuses": []
+      },
+      {
+        "buffs": {},
+        "charge": false,
+        "defense_cooldown": 0,
+        "energy": 0,
+        "fainted": false,
+        "hp": 474,
+        "marks": [],
+        "max_hp": 474,
+        "name": "黑猫巫师",
+        "pet_id": "pet_000445",
+        "slot": 2,
+        "statuses": []
+      }
+    ]
+  },
+  "side": "player",
+  "state_version": 0,
+  "turn": 1
+}

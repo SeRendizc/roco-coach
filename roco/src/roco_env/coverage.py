@@ -84,12 +84,19 @@ def resolve_claims(skill: Any, capabilities: Optional[Dict[str, bool]] = None,
         parsed = parse_mod.resolve_per_layer_cost(skill, declared=True, parsed=parsed)
         claimed.append(f"动态能耗修正（每 {int(parsed.per_layer_cost['layer_step'])} 层 "
                        f"{int(parsed.per_layer_cost['delta'])} 能量）")
-    if caps.get("multi_hit") and parsed.hit_count:
-        # 同上（`classify_skill` 那一处）：N=1 也算认领，动态连击标记照旧留着。
-        kept = [row for row in parsed.unparsed if "动态" in str(row) or "连击" not in str(row)]
-        if len(kept) != len(parsed.unparsed):
-            claimed.append(f"连击×{parsed.hit_count}")
-        parsed.unparsed = kept
+    if caps.get("multi_hit"):
+        # 2026-09-30（按只读诊断的读数改，替换"自己摘标记"那版）：**跑 env 跑的那同一个
+        # resolver**。`parse.resolve_hit_count(declared=True)` 对 N=1 也会补一条带出处的
+        # `hit_count` effect（`evidence='1连击'`，见 `parse.py:1758-1766`，task-20 批二），
+        # 于是 `unclaimed_mechanic_spans` 的**证据尺子**自然把「1连击」那一段算作已认领
+        # —— 不必再手抄第二份词表（手抄的都会漂：判据侧那份就还写着 `hit_count > 1`）。
+        # 运行时依据（实测）：V3 下真打一手，这四条技能的 `state.unsupported` 里
+        # 「连击」相关行数为 0；legacy（`damage_multi_hit=False`）同样一手写 2 条，
+        # 其中一条逐字是「连击：1连击」⇒ 这道闸真实且双向。
+        # 动态连击标记（「改为3连击」那类）照旧留着：`resolve_hit_count` 自己不动它。
+        _hits, parsed = parse_mod.resolve_hit_count(skill, declared=True, parsed=parsed)
+        if _hits:
+            claimed.append(f"连击×{_hits}")
     # 2026-09-30（协作链对齐）：**扩展族也必须在这条链里认领** ——
     # `resolve_claims` 的 docstring 写着它是「唯一实现，`classify_skill` 与判据都调它」，
     # 而 `test_effect_coverage:534-578` 正是拿**它的**输出去算 `residual_mechanic_spans`，

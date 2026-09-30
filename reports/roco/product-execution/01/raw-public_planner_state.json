@@ -1,0 +1,115 @@
+{
+  "assumptions": {
+    "note": "对手后备的血量与配招不在公开信息里，重建搜索状态时按满血 + 规范配招建模；任何依赖对手后备精确血量的结论都会因此偏乐观。",
+    "opponent_bench": "full_hp_nominal_loadout"
+  },
+  "opponent": {
+    "active": 0,
+    "bench": [
+      {
+        "fainted": false,
+        "pet_id": "pet_000190",
+        "slot": 1
+      },
+      {
+        "fainted": false,
+        "pet_id": "pet_000445",
+        "slot": 2
+      }
+    ],
+    "field": {
+      "charging": false,
+      "defense_cooldown": 0,
+      "energy": 2,
+      "fainted": false,
+      "hp": 425,
+      "marks": {},
+      "max_hp": 425,
+      "pet_id": "pet_000225",
+      "slot": 0,
+      "statuses": {}
+    },
+    "living_count": 3
+  },
+  "phase": "battle",
+  "result": null,
+  "ruleset_config_id": "legacy_sim_v1",
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "schema_version": 1,
+  "self": {
+    "active": 0,
+    "items": {
+      "净化药": 2,
+      "回复药": 3,
+      "能量果": 2
+    },
+    "loadouts": {
+      "pet_000190": [
+        "skill_000673",
+        "skill_000429",
+        "skill_000678",
+        "skill_000294"
+      ],
+      "pet_000225": [
+        "skill_000750",
+        "skill_000576",
+        "skill_000744",
+        "skill_000591"
+      ],
+      "pet_000445": [
+        "skill_000321",
+        "skill_000286",
+        "skill_000251",
+        "skill_000483"
+      ]
+    },
+    "pets": [
+      {
+        "buffs": {},
+        "charging": false,
+        "defense_cooldown": 0,
+        "energy": 2,
+        "entered_turn": 1,
+        "fainted": false,
+        "hp": 425,
+        "marks": {},
+        "max_hp": 425,
+        "pet_id": "pet_000225",
+        "slot": 0,
+        "statuses": {}
+      },
+      {
+        "buffs": {},
+        "charging": false,
+        "defense_cooldown": 0,
+        "energy": 0,
+        "entered_turn": null,
+        "fainted": false,
+        "hp": 374,
+        "marks": {},
+        "max_hp": 374,
+        "pet_id": "pet_000190",
+        "slot": 1,
+        "statuses": {}
+      },
+      {
+        "buffs": {},
+        "charging": false,
+        "defense_cooldown": 0,
+        "energy": 0,
+        "entered_turn": null,
+        "fainted": false,
+        "hp": 474,
+        "marks": {},
+        "max_hp": 474,
+        "pet_id": "pet_000445",
+        "slot": 2,
+        "statuses": {}
+      }
+    ]
+  },
+  "side": "player",
+  "state_version": 0,
+  "turn": 1,
+  "unverified_overrides": []
+}

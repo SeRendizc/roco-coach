@@ -1,0 +1,15 @@
+# U5 读数：state_version 唯一写入点 + 恒等于 len(state.events)
+# 生成于 2026-09-30T16:44:37+0800  ·  cwd=/Users/serendizc/Developer/roco-coach
+
+$ grep -rn 'state_version\s*+=' roco/src/roco_env/*.py
+roco/src/roco_env/env.py:829:    state.state_version += 1
+
+$ cd roco && PYTHONPATH=src python3 -c '<reset + step_joint 逐回合>'
+after reset: state_version= 0 len(events)= 0
+turn 2 state_version= 5 len(events)= 5 equal= True
+turn 3 state_version= 10 len(events)= 10 equal= True
+turn 4 state_version= 15 len(events)= 15 equal= True
+turn 5 state_version= 20 len(events)= 20 equal= True
+turn 6 state_version= 25 len(events)= 25 equal= True
+turn 6 state_version= 30 len(events)= 30 equal= True
+stop: ValueError 补位局面请用 step_replace

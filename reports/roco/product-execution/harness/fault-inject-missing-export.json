@@ -1,0 +1,197 @@
+{
+  "tool": "scripts/roco/isolated-acceptance.py",
+  "generated_at": "2026-09-30T16:44:51+08:00",
+  "fault": "missing-export",
+  "fault_what": "复刻 b5a8d51 缺导出：coverage.classify_skill_declared 不在位 ⇒ service 在就绪行之前 ImportError 退出",
+  "fault_file": "roco_env/coverage.py",
+  "expected_failure": "service_not_ready",
+  "tmp_copy": "/var/folders/c5/hc8ntlx52wd8h5kl14zml4bm0000gn/T/roco-fault-inject-2hc53kni",
+  "shared_source_untouched": true,
+  "injection": {
+    "target": "/var/folders/c5/hc8ntlx52wd8h5kl14zml4bm0000gn/T/roco-fault-inject-2hc53kni/roco/src/roco_env/coverage.py",
+    "anchor_occurrences": 1,
+    "anchor_sha256": "0d3648a1b5536bf50ec5c80a3cb6930881fea5261a5014097141c8cd4592a463",
+    "applied": true
+  },
+  "child": {
+    "argv": [
+      "/Library/Developer/CommandLineTools/usr/bin/python3",
+      "/Users/serendizc/Developer/roco-coach/scripts/roco/isolated-acceptance.py",
+      "--src",
+      "/var/folders/c5/hc8ntlx52wd8h5kl14zml4bm0000gn/T/roco-fault-inject-2hc53kni/roco/src",
+      "--repo-root",
+      "/Users/serendizc/Developer/roco-coach",
+      "--out",
+      "/var/folders/c5/hc8ntlx52wd8h5kl14zml4bm0000gn/T/roco-fault-inject-2hc53kni/child-last-run.json",
+      "--quiet"
+    ],
+    "exit_code": 2,
+    "stdout_tail": []
+  },
+  "child_last_run": {
+    "tool": "scripts/roco/isolated-acceptance.py",
+    "tool_version": 1,
+    "generated_at": "2026-09-30T16:44:51+08:00",
+    "finished_at": "2026-09-30T16:44:51+08:00",
+    "git": {
+      "branch": "wip/roco-coach-2026-09-30-1418",
+      "head": "4345045f348b4c8a50b403017dcdafd6fc13d395",
+      "dirty": [
+        "?? reports/roco/product-execution/01/",
+        "?? reports/roco/product-execution/harness/",
+        "?? scripts/roco/isolated-acceptance.py"
+      ],
+      "error": null
+    },
+    "src": "/var/folders/c5/hc8ntlx52wd8h5kl14zml4bm0000gn/T/roco-fault-inject-2hc53kni/roco/src",
+    "src_is_repo_default": false,
+    "repo_root": "/Users/serendizc/Developer/roco-coach",
+    "coverage_file_sha256": "7623d8449b7be463699f630d3cd1f1cdf1e47ad6c6ac77dc0bb782d36b5b7608",
+    "coverage_file_sha256_at_end": "7623d8449b7be463699f630d3cd1f1cdf1e47ad6c6ac77dc0bb782d36b5b7608",
+    "source_stable_during_run": true,
+    "fault_inject": null,
+    "ruleset_config_id": "mobile_s4_candidate_v3",
+    "seed": 11,
+    "strategy": "greedy_damage",
+    "service": {
+      "argv": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "-m",
+        "roco_env.service",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "0",
+        "--repo-root",
+        "/Users/serendizc/Developer/roco-coach",
+        "--parent-pid",
+        "27682"
+      ],
+      "src": "/var/folders/c5/hc8ntlx52wd8h5kl14zml4bm0000gn/T/roco-fault-inject-2hc53kni/roco/src",
+      "repo_root": "/Users/serendizc/Developer/roco-coach",
+      "requested_port": 0,
+      "pid": 27683,
+      "port": null,
+      "host": null,
+      "ready": false,
+      "ready_raw": null,
+      "ready_line": null,
+      "startup_error": {
+        "error_type": "service_exited_before_ready",
+        "error": "服务进程在写出 ROCO_SERVICE_READY 之前就退出了（import 期炸掉会这样）",
+        "exit_code": 1
+      },
+      "exit_code": 1,
+      "log_tail": [
+        "Traceback (most recent call last):",
+        "  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py\", line 197, in _run_module_as_main",
+        "    return _run_code(code, main_globals, None,",
+        "  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py\", line 87, in _run_code",
+        "    exec(code, run_globals)",
+        "  File \"/var/folders/c5/hc8ntlx52wd8h5kl14zml4bm0000gn/T/roco-fault-inject-2hc53kni/roco/src/roco_env/service.py\", line 112, in <module>",
+        "    from .coverage import classify_skill_declared",
+        "ImportError: cannot import name 'classify_skill_declared' from 'roco_env.coverage' (/var/folders/c5/hc8ntlx52wd8h5kl14zml4bm0000gn/T/roco-fault-inject-2hc53kni/roco/src/roco_env/coverage.py)"
+      ]
+    },
+    "port": null,
+    "snapshot_fingerprint": null,
+    "steps": [
+      {
+        "name": "health",
+        "path": null,
+        "method": null,
+        "http_status": null,
+        "ok": false,
+        "status": "skipped",
+        "skipped_because": "服务没有就绪（ROCO_SERVICE_READY 未出现或规则集未加载）",
+        "checks": [],
+        "reading": {},
+        "error": null
+      },
+      {
+        "name": "fixtures_pet_ids",
+        "path": null,
+        "method": null,
+        "http_status": null,
+        "ok": false,
+        "status": "skipped",
+        "skipped_because": "服务没有就绪（ROCO_SERVICE_READY 未出现或规则集未加载）",
+        "checks": [],
+        "reading": {},
+        "error": null
+      },
+      {
+        "name": "battle_new",
+        "path": null,
+        "method": null,
+        "http_status": null,
+        "ok": false,
+        "status": "skipped",
+        "skipped_because": "服务没有就绪（ROCO_SERVICE_READY 未出现或规则集未加载）",
+        "checks": [],
+        "reading": {},
+        "error": null
+      },
+      {
+        "name": "battle_legal",
+        "path": null,
+        "method": null,
+        "http_status": null,
+        "ok": false,
+        "status": "skipped",
+        "skipped_because": "服务没有就绪（ROCO_SERVICE_READY 未出现或规则集未加载）",
+        "checks": [],
+        "reading": {},
+        "error": null
+      },
+      {
+        "name": "battle_advance",
+        "path": null,
+        "method": null,
+        "http_status": null,
+        "ok": false,
+        "status": "skipped",
+        "skipped_because": "服务没有就绪（ROCO_SERVICE_READY 未出现或规则集未加载）",
+        "checks": [],
+        "reading": {},
+        "error": null
+      },
+      {
+        "name": "skill_detail",
+        "path": null,
+        "method": null,
+        "http_status": null,
+        "ok": false,
+        "status": "skipped",
+        "skipped_because": "服务没有就绪（ROCO_SERVICE_READY 未出现或规则集未加载）",
+        "checks": [],
+        "reading": {},
+        "error": null
+      }
+    ],
+    "legal_actions": null,
+    "event_kinds": null,
+    "skill_tier": null,
+    "summary": {
+      "steps_total": 6,
+      "steps_passed": 0,
+      "steps_failed": 0,
+      "steps_skipped": 6,
+      "failed_steps": []
+    },
+    "ok": false,
+    "exit_code": 2
+  },
+  "observed_failure": "service_not_ready",
+  "negative_control_ok": true,
+  "expected_nonzero_exit": true,
+  "ok": true,
+  "exit_code": 2,
+  "notes": [],
+  "injected_tree": {
+    "src": "/var/folders/c5/hc8ntlx52wd8h5kl14zml4bm0000gn/T/roco-fault-inject-2hc53kni/roco/src",
+    "data_symlink": "/var/folders/c5/hc8ntlx52wd8h5kl14zml4bm0000gn/T/roco-fault-inject-2hc53kni/data",
+    "data_target": "/Users/serendizc/Developer/roco-coach/data"
+  },
+  "tmp_copy_removed": true
+}
