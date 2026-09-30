@@ -36,7 +36,7 @@
  * 这台浏览器上。回执没到、或回执里缺任何一个，都**不报成功**（fail closed）。
  */
 
-import {readSharedLoadout, writeSharedLoadout} from './loadout-store.js';
+import {SPECIES_SCOPE_NOTE, resolveLoadout, writeIndividualLoadout} from './loadout-store.js';
 
 /** 与引擎、工坊同格数（`LOADOUT_SLOTS`，src/server/roco-service.js 的配招格数）。 */
 export const LOADOUT_SLOTS = 4;
@@ -52,6 +52,17 @@ const STORE_KEY = 'roco.box.loadout.v1';
  * 两处用同一句（种子那一步、以及读池子收尾时把它放回来），不许各写一份文案。
  */
 const SEED_NOTE = '这一只的配招是你在开局那一页（配队工坊）选的，在这里接着改就行。';
+
+/**
+ * 「这份配招来自开局那一页」那句话的**唯一实现**。
+ *
+ * 2026-09-30（分计划 08 · S1 / G01）：来源是**旧的物种级**记录时，必须带上那句如实标注
+ * （`SPECIES_SCOPE_NOTE` →「物种级（未区分个体）」）。两处各拼一份的后果是**真实存在过的**：
+ * 读一次学习表（`loadPool()` 收尾）就会把标注洗掉，只剩前半句 —— 所以这句话只在这里拼。
+ */
+const seedNoteText = (state) => (state?.seedNote
+  ? `${SEED_NOTE}（这份是${state.seedNote}）`
+  : SEED_NOTE);
 const STYLE_ID = 'box-loadout-style';
 
 /** 池子请求：与工坊**同一个端点、同一套查询参数**，不另造口径。 */
@@ -745,19 +756,27 @@ function createController(host, props, request) {
     }
     if (next.species !== undefined) {
       state.species = textOf(next.species);
-      // 盒子里没记过这一只、但**开局那一页记过**（在工坊换的招）⇒ 把那一份摆成草稿：
+      // 盒子里没记过这一只、但**共用记录**里有一份 ⇒ 把那一份摆成草稿：
       // 两边看到的是同一件事（人类 ④：换技能要真的实装）。盒子的本机记录优先 ——
       // 那是玩家在**这一页**最后一次保存的，`prefilled` 为真时这里不覆盖。
+      //
+      // 2026-09-30（分计划 08 · S1 / G01）：共用记录分**两代** ——
+      //   · 个体级（v2，键 = 这一只的 `own-…`）⇒ 这份配招就是这一只的，直接摆上来；
+      //   · 旧的物种级（v1，键 = `pet_…`）⇒ **同物种每只个体都读得到同一份**，
+      //     所以必须**如实标注**（`SPECIES_SCOPE_NOTE`），不许静默当成个体级（Lead 裁决 Q2）。
+      // 「个体级优先」由 `resolveLoadout()` 一处决定，这一层不自己判。
       if (!state.prefilled && state.species) {
-        const shared = readSharedLoadout(storageOf(), state.species);
+        const shared = resolveLoadout(storageOf(), {instanceId: state.select, speciesId: state.species});
         if (shared) {
-          state.draft = shared.slice();
+          state.draft = shared.ids.slice();
           state.prefilled = true;
           // ⚠ 这一句要**活得比读池子久**：`loadPool()` 收尾时会重设 `state.status`
           // （原来是无条件设成 null），那样这句"这份配招是从哪儿来的"读一次学习表就没了。
           // 所以另记一个标记，读池子那一步见到它就把这句放回去（见下面 `SEED_NOTE`）。
           state.seededFrom = true;
-          state.status = {kind: 'ok', text: SEED_NOTE};
+          state.seedScope = shared.scope;
+          state.seedNote = shared.note ?? null;
+          state.status = {kind: 'ok', text: seedNoteText(state)};
         }
       }
     }
@@ -936,8 +955,9 @@ function createController(host, props, request) {
       prefill();
       const missed = unmatchedNote();
       // 对不上名字优先说（那是玩家要马上处理的）；否则把"这份配招来自开局那一页"那句放回去。
+      // S1（G01）：放回去的必须是**同一句**（含旧物种级那句标注）—— 见 `seedNoteText()` 的注释。
       state.status = missed ? {kind: 'error', text: missed}
-        : (state.seededFrom ? {kind: 'ok', text: SEED_NOTE} : null);
+        : (state.seededFrom ? {kind: 'ok', text: seedNoteText(state)} : null);
     } catch (error) {
       if (seq !== state.seq) return;
       state.pool = null;
@@ -1002,16 +1022,21 @@ function createController(host, props, request) {
       // 2026-09-28（人类 ④ 逐字：「换技能还是没实装是吧？实装一下」）：
       // **光记在盒子这一页不算实装** —— 开局那一页（配队工坊）读的是另一份记录，
       // 而它开局时会把那份交给服务端（`battle/new` 的 `loadouts`）。两边现在共用
-      // `loadout-store.js` 那一把钥匙，所以这里**同时写一份**：键是引擎回执里的 `pet_id`，
-      // 与工坊的键**同一个 id 空间**（真机核过）。写失败就照实说，不许乐观 UI。
-      const shared = writeSharedLoadout(storageOf(), state.petId, ids);
+      // `loadout-store.js` 那一把钥匙，所以这里**同时写一份**。
+      //
+      // 2026-09-30（分计划 08 · S1 / G01）：这一份写的是**个体级**记录（键 = 这一只的
+      // `own-…`）—— **不再写旧的物种级键**。理由：物种级键上的一份记录会被**同物种的
+      // 另一只个体**从兼容读取里继承过去，同种互相覆盖（G01）就从后门回来了。
+      // 旧键**只读不删**（它可能装着玩家以前配过的历史），个体级新键存在时个体级优先。
+      // 写失败就照实说，不许乐观 UI。
+      const shared = writeIndividualLoadout(storageOf(), state.select, ids);
       const receipt = `引擎确认这四个都学得到（它能学 ${rows.length} 个）：`
         + names.map((name, i) => `第 ${i + 1} 个 ${name}`).join('、') + '。';
       state.status = (stored && shared)
         ? {kind: 'ok', text: `已保存：${receipt}开局那一页（配队工坊）会直接带上这四个。`}
         : {kind: 'warn', text: `引擎确认过这四个都学得到，但没能全部记下来`
           + `${stored ? '' : '（这台浏览器不让记盒子这一份，可能是隐私模式）'}`
-          + `${shared ? '' : '（没能交给开局那一页：浏览器不让记，或引擎回执里没带 pet_id）'}`
+          + `${shared ? '' : '（没能交给开局那一页：浏览器不让记，或这一只没有个体编号）'}`
           + '：刷新之后、或去开局那一页时，这份选择可能丢。'};
     } catch (error) {
       state.status = {kind: 'error', text: `没保存：${playerReasonOf(error?.message ?? error)}`};

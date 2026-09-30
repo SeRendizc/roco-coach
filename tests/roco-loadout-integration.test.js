@@ -22,8 +22,9 @@ import {dirname, join} from 'node:path';
 import test from 'node:test';
 import {fileURLToPath} from 'node:url';
 import {
-  LOADOUT_STORE_KEY, SHARED_LOADOUT_SLOTS, isSharedLoadout,
-  readSharedLoadout, readSharedLoadouts, writeSharedLoadout,
+  LOADOUT_STORE_KEY, LOADOUT_STORE_INDIVIDUAL_KEY, SPECIES_SCOPE_NOTE, SHARED_LOADOUT_SLOTS,
+  isSharedLoadout, readIndividualLoadout, readSharedLoadout, readSharedLoadouts,
+  resolveLoadout, teamLoadouts, writeIndividualLoadout, writeSharedLoadout,
 } from '../src/client/loadout-store.js';
 import {battleLoadouts} from '../src/coach/roco-experience.js';
 
@@ -43,13 +44,17 @@ const fakeStorage = () => {
 // ── ① 唯一事实源（结构钉）────────────────────────────────────────────────────
 test('① 配招的存储键**只在** loadout-store.js 里出现（别处再写一份就是第二个事实源）', () => {
   const key = 'roco.workshop.loadouts.v1';
+  const individualKey = 'roco.workshop.loadouts.v2';
   assert.equal(LOADOUT_STORE_KEY, key);
+  assert.equal(LOADOUT_STORE_INDIVIDUAL_KEY, individualKey,
+    'S1 的个体级键也只有一处定义（`loadout-store.js`）');
   const offenders = [];
   for (const file of ['src/client/box-loadout.js', 'src/client/team-workshop.js',
     'src/client/roco.js', 'src/client/box.js', 'src/client/xiaoya.js']) {
     const src = read(file);
     // 只禁止**字面量**：import 常量是正确用法
-    if (src.includes(`'${key}'`) || src.includes(`"${key}"`)) offenders.push(file);
+    if (src.includes(`'${key}'`) || src.includes(`"${key}"`)) offenders.push(`${file}（v1）`);
+    if (src.includes(`'${individualKey}'`) || src.includes(`"${individualKey}"`)) offenders.push(`${file}（v2）`);
   }
   assert.deepEqual(offenders, [], `这些文件里又出现了配招键的字面量（应当 import 常量）：${offenders.join('、')}`);
   // 而且两个消费方都确实是从那一个模块 import 的
@@ -125,4 +130,90 @@ test('③ 结构钉：roco.js 开局时确实走这条链（工作台的 loadout
   // 反证：不许在这个位置又手写一份 loadout 过滤
   assert.doesNotMatch(src, /body\.loadouts = state\.teamWorkshop/,
     '不许绕过 battleLoadouts 直接把内存那份塞进请求体');
+});
+
+// ── ④ S1（分计划 08 · 缺口 G01）：配招记录**按个体**，旧物种级记录只读兼容 ──────────
+//
+// 缺口原状：v1 的键是**物种**（`pet_…`）⇒ 同物种两只个体共用一份记录，A 配的招会出现在 B 身上。
+// 08 的必做反例②就是「同物种不同个体不能相互覆盖配招」。处置（Lead 裁决 Q2）：
+//   · 新键 v2（个体级 `own-…`）+ **兼容读取**旧 v1 键，**不删旧键**；
+//   · 读到旧记录必须如实标注「物种级（未区分个体）」；
+//   · 下一次编辑写个体级（单向迁移、幂等）；两条同时在 ⇒ **个体级优先**。
+// 下面每条都带**两向变异**（把正确的做法改坏 ⇒ 必须红）。
+
+test('④ S1：同物种两只个体**不共用**一份配招（个体级键是正主）', () => {
+  const storage = fakeStorage();
+  const a = ['skill_A1', 'skill_A2', 'skill_A3', 'skill_A4'];
+  const b = ['skill_B1', 'skill_B2', 'skill_B3', 'skill_B4'];
+  assert.equal(writeIndividualLoadout(storage, 'own-0001', a), true);
+  assert.equal(writeIndividualLoadout(storage, 'own-0002', b), true);
+  assert.deepEqual(readIndividualLoadout(storage, 'own-0001'), a);
+  assert.deepEqual(readIndividualLoadout(storage, 'own-0002'), b,
+    '同物种的第二只必须是它自己的四个 —— 这是 G01 的判据本体');
+  // **两向变异①**：写成**物种级**（旧行为）⇒ 同种的另一只必然继承同一份
+  const bad = fakeStorage();
+  writeSharedLoadout(bad, 'pet_000004', a);
+  assert.deepEqual(resolveLoadout(bad, {instanceId: 'own-0002', speciesId: 'pet_000004'}).ids, a,
+    '物种级记录会被同种的另一只继承 —— 这就是产品不许再写旧键的理由');
+});
+
+test('④b S1：旧物种级记录**读得到、标注得出、不被改写**；个体级优先；兼容分支不是装饰', () => {
+  const storage = fakeStorage();
+  const legacy = ['skill_L1', 'skill_L2', 'skill_L3', 'skill_L4'];
+  const own = ['skill_N1', 'skill_N2', 'skill_N3', 'skill_N4'];
+  writeSharedLoadout(storage, 'pet_000004', legacy);        // 玩家**以前**配的（旧键，只读）
+  const onlyLegacy = resolveLoadout(storage, {instanceId: 'own-0001', speciesId: 'pet_000004'});
+  assert.equal(onlyLegacy.scope, 'species');
+  assert.equal(onlyLegacy.note, SPECIES_SCOPE_NOTE,
+    '读到旧记录必须**如实标注**「物种级（未区分个体）」，不许静默当成个体级');
+  assert.deepEqual(onlyLegacy.ids, legacy);
+  // 下一次编辑 ⇒ 写个体级新键（单向迁移）
+  assert.equal(writeIndividualLoadout(storage, 'own-0001', own), true);
+  const after = resolveLoadout(storage, {instanceId: 'own-0001', speciesId: 'pet_000004'});
+  assert.equal(after.scope, 'individual');
+  assert.equal(after.note, null, '个体级是自己的记录，不需要那句免责说明');
+  assert.deepEqual(after.ids, own, '两条同时存在时**个体级优先**');
+  assert.deepEqual(readSharedLoadout(storage, 'pet_000004'), legacy,
+    '旧键**只读不删**：内容一个字都不许被这次编辑改掉');
+  // **两向变异②**：把兼容读取关掉（只看个体级）⇒ 旧记录读不到。用它证明那条分支是**必需的**
+  const fresh = fakeStorage();
+  writeSharedLoadout(fresh, 'pet_000004', legacy);
+  assert.equal(readIndividualLoadout(fresh, 'own-0001'), null,
+    '（模拟"关掉兼容读取"的读数：个体级里什么都没有）');
+  assert.deepEqual(resolveLoadout(fresh, {instanceId: 'own-0001', speciesId: 'pet_000004'}).ids, legacy,
+    '开着兼容读取才读得到旧记录 —— 这一条不是装饰（关了它这里就红）');
+});
+
+test('④c S1：单向迁移**幂等**（同样的键集合写成同样的字节）+ 队级解析只带配过的', () => {
+  const a = fakeStorage();
+  const b = fakeStorage();
+  const ids = ['skill_N1', 'skill_N2', 'skill_N3', 'skill_N4'];
+  writeIndividualLoadout(a, 'own-0001', ids);
+  const first = a.getItem(LOADOUT_STORE_INDIVIDUAL_KEY);
+  writeIndividualLoadout(a, 'own-0001', ids.slice());       // 再写一次同样的内容
+  assert.equal(a.getItem(LOADOUT_STORE_INDIVIDUAL_KEY), first, '同样内容重复写 ⇒ 字节相同（幂等）');
+  // 键顺序不影响字节（先写 own-0002 再写 own-0001 与反过来结果一致）
+  writeIndividualLoadout(b, 'own-0002', ids);
+  writeIndividualLoadout(b, 'own-0001', ids);
+  const c = fakeStorage();
+  writeIndividualLoadout(c, 'own-0001', ids);
+  writeIndividualLoadout(c, 'own-0002', ids);
+  assert.equal(b.getItem(LOADOUT_STORE_INDIVIDUAL_KEY), c.getItem(LOADOUT_STORE_INDIVIDUAL_KEY),
+    '落盘前按键排序 ⇒ 写入顺序不影响字节');
+  // 队级解析：引擎要的仍是**物种键**（个体维度只活在本机记录这一层）
+  const team = fakeStorage();
+  writeIndividualLoadout(team, 'own-0001', ids);
+  const out = teamLoadouts(team, [{instance: 'own-0001', species: 'pet_000004'},
+    {instance: 'own-0007', species: 'pet_000271'}]);
+  assert.deepEqual(out.loadouts, {pet_000004: ids}, '只有配过的那一只进 loadouts（没配的走引擎规范配招）');
+  assert.equal(out.sources.pet_000004.scope, 'individual');
+  assert.equal(out.sources.pet_000004.instance_id, 'own-0001');
+  assert.deepEqual(out.conflicts, []);
+  // **两向变异③**：把队级解析的输入换成"旧物种级" ⇒ 来源标注必须变成 species + 那句话
+  const legacyTeam = fakeStorage();
+  writeSharedLoadout(legacyTeam, 'pet_000004', ids);
+  const legacyOut = teamLoadouts(legacyTeam, [{instance: 'own-0001', species: 'pet_000004'}]);
+  assert.equal(legacyOut.sources.pet_000004.scope, 'species');
+  assert.equal(legacyOut.sources.pet_000004.note, SPECIES_SCOPE_NOTE,
+    '队级解析也要把来源如实带出来（界面靠它写那句话）');
 });

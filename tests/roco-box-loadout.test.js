@@ -21,7 +21,7 @@ import assert from 'node:assert/strict';
 
 import {LOADOUT_SLOTS, LOADOUT_STYLE, loadoutOptionsPath, loadoutPanelHtml, mountLoadout,
   playerReasonOf} from '../src/client/box-loadout.js';
-import {LOADOUT_STORE_KEY} from '../src/client/loadout-store.js';
+import {LOADOUT_STORE_KEY, LOADOUT_STORE_INDIVIDUAL_KEY} from '../src/client/loadout-store.js';
 
 // ── 夹具：盒子详情页给的那四个（**没有 skill_id**，形状照抄 roco-service.js:707-721）───
 
@@ -503,17 +503,27 @@ test('③e 保存要把这四个写进共用记录（开局那一页读的就是
   assert.equal(picked[0], 'skill_000645', '第 1 个要真的换成玩家点的那个');
   click(root, {loadoutSave: '1'});
   await flush();
-  const shared = JSON.parse(storage.getItem(LOADOUT_STORE_KEY) ?? '{}');
-  assert.deepEqual(shared[REPLY.pet_id], picked,
-    `共用记录里要有 ${REPLY.pet_id} → 玩家挑的四个（实际 ${JSON.stringify(shared)}）`);
+  // ⚠ 2026-09-30（分计划 08 · S1 / G01）**改钉**。旧断言逐字留档（别删）：
+  //     const shared = JSON.parse(storage.getItem(LOADOUT_STORE_KEY) ?? '{}');
+  //     assert.deepEqual(shared[REPLY.pet_id], picked,
+  //       `共用记录里要有 ${REPLY.pet_id} → 玩家挑的四个（实际 ${JSON.stringify(shared)}）`);
+  //   为什么改：**物种级**键（`pet_…`）上的一份记录会被**同物种的另一只个体**从兼容读取里
+  //   继承过去 —— 08 反例②「同物种不同个体不能相互覆盖配招」正指着这一条。现在写的是
+  //   **个体级**键（`own-…`）；旧键**只读不删**（下一句同时断言它没被这次保存写坏）。
+  //   判据的**意图一个字没变**：保存必须把四个技能交给开局那一页能读到的那份记录。
+  const shared = JSON.parse(storage.getItem(LOADOUT_STORE_INDIVIDUAL_KEY) ?? '{}');
+  assert.deepEqual(shared['own-0001'], picked,
+    `个体级共用记录里要有 own-0001 → 玩家挑的四个（实际 ${JSON.stringify(shared)}）`);
+  assert.equal(storage.getItem(LOADOUT_STORE_KEY), null,
+    '旧的物种级键**不许**被这次保存写入（写进去 = 同种的另一只会继承这份配招）');
   // 盒子自己那一份还在（两把钥匙并存，各管各的读者）
   assert.ok(JSON.parse(storage.getItem('roco.box.loadout.v1') ?? '{}')['own-0001'],
     '盒子那份也还要写（详情页自己读它）');
   // 反证：**只写盒子那份、没写共用记录**的坏样本，必须被同一条判据抓住
   const bad = fakeStorage({});
   bad.setItem('roco.box.loadout.v1', JSON.stringify({'own-0001': {ids: picked}}));
-  const badShared = JSON.parse(bad.getItem(LOADOUT_STORE_KEY) ?? '{}');
-  assert.notDeepEqual(badShared[REPLY.pet_id], picked,
+  const badShared = JSON.parse(bad.getItem(LOADOUT_STORE_INDIVIDUAL_KEY) ?? '{}');
+  assert.notDeepEqual(badShared['own-0001'], picked,
     '反证要真的缺这一条 —— 否则它什么都验不了');
 });
 
@@ -534,6 +544,11 @@ test('③f 工坊里配过的招，盒子这一页接着改（不是各记各的
   const line = statusLine(root.innerHTML);
   assert.equal(line.kind, 'ok');
   assert.match(line.text, /开局那一页/, `要说清这份配招是从哪儿来的：${line.text}`);
+  // 2026-09-30（分计划 08 · S1 / G01）**新增**（不是改钉）：这里读的是**旧的物种级记录**
+  // （`roco.workshop.loadouts.v1`，键 = `pet_…`）⇒ 界面必须如实说清「这份是物种级（未区分个体）」，
+  // 不许静默当成这一只自己的记录（Lead 裁决 Q2 ①）。
+  assert.match(line.text, /物种级（未区分个体）/,
+    `旧物种级记录必须如实标注，不许静默当成个体级：${line.text}`);
   for (const id of fromWorkshop) {
     assert.match(root.innerHTML, new RegExp(`data-loadout-pick="${id}"[^>]*aria-pressed="true"`),
       `${id} 应当是"已挑中"的样子（工坊记过的那一份）`);

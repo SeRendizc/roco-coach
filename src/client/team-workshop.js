@@ -355,7 +355,7 @@ import {defenceMultiplier} from './type-affinity.js';
 // 但这一行**只导入了另外两个**、漏了它 ⇒ `ReferenceError: SHARED_LOADOUT_SLOTS is not defined`，
 // 抛在 `renderTeam → legalityRowHtml` 上 ⇒ **点候选项什么都不发生、六槽永远空**（真机实测）。
 // 定义本来就在 `loadout-store.js:26`（`export const SHARED_LOADOUT_SLOTS = 4;`），补进导入即可。
-import {readSharedLoadouts, writeSharedLoadout, clearSharedLoadout, SHARED_LOADOUT_SLOTS} from './loadout-store.js';
+import {SHARED_LOADOUT_SLOTS, clearIndividualLoadout, readSharedLoadouts, teamLoadouts, writeIndividualLoadout} from './loadout-store.js';
 
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => (
   {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
@@ -1026,7 +1026,13 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   // 2026-09-28（人类 ④ 逐字：「换技能还是没实装是吧？实装一下」）：这一份原来是**纯内存**的
   // ⇒ 换完招一刷新就没了（而盒子那一页配的四个又从来不进对局）。现在两边共用
   // `loadout-store.js` 那一把钥匙：开局时先把**上次存下的**读进来（盒子里配的也在里面），
-  // 保存时再写回去。键与盒子写下去的是同一个 id 空间（引擎回执里的 `pet_id`）。
+  // 保存时再写回去。
+  //
+  // 2026-09-30（分计划 08 · S1 / G01）两处改动：
+  //   ① **写**：改到**个体级**键（`own-…`，`writeIndividualLoadout`）—— 一个物种一条记录会让
+  //      同种的另一只个体把这份配招继承过去（08 反例②）；旧物种级键**只读不删**。
+  //   ② **读**：旧的物种级记录仍然读（兼容），但**队里每一只个体**自己的记录优先 ——
+  //      由 `teamLoadouts()` 一处判定（个体级优先），本文件不自己判。
   const loadouts = new Map(readSharedLoadouts());
   // ⭐ 「应用这套配置」里的技能那一半也要能**重新读取**：记录里的 current 对**这一队的物种**是权威 ——
   //    有就盖过共用记录；没有就是"玩家没配过"，走引擎规范配招（所以先把这几个键删掉，
@@ -1041,6 +1047,37 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   }
   /** 技能 id → 名字：读过学习表就记下来。标签里要显示**名字**（显示 id 等于让玩家读内部串）。 */
   const skillNames = new Map();
+
+  /**
+   * 这个物种**在队里**的那一只实例（S1：个体级记录要用它当键）。
+   *
+   * 同一个物种在队里不可能有两只（RC-301 判 `DUPLICATE_SPECIES_IN_TEAM`）⇒ 这个解析唯一。
+   * 找不到就回 `null` —— 那时**不写**任何记录（宁可不写，也不写一条物种级的去污染同种的另一只）。
+   */
+  function instanceForSpecies(speciesId) {
+    if (!speciesId) return null;
+    return state.selected.find((id) => (state.ownedByInstance.get(id)?.speciesId ?? null) === speciesId) ?? null;
+  }
+
+  /**
+   * 把**队里每一只个体**的个体级记录叠到内存 Map 上（个体级优先于旧物种级）。
+   *
+   * 为什么要在 `load()` 之后再叠：`ownedByInstance`（实例 → 物种）是那一步才有的；
+   * 在那之前叠等于把六只都解析成"没有物种"。这也正是"读侧兼容"的落点：
+   * 旧物种级记录仍然在 Map 里（`readSharedLoadouts()` 读进来的），只有这一只**自己**
+   * 有记录时才盖掉它。
+   */
+  function overlayIndividualLoadouts() {
+    if (!state.ownedByInstance || !state.ownedByInstance.size) return;
+    const members = state.selected.map((id) => ({
+      instance: id, species: state.ownedByInstance.get(id)?.speciesId ?? null,
+    }));
+    const resolved = teamLoadouts(null, members);
+    for (const [speciesId, ids] of Object.entries(resolved.loadouts)) {
+      loadouts.set(speciesId, ids.slice());
+    }
+    state.loadoutSources = resolved.sources;
+  }
   /** 引擎给每只的学习表：`species → 技能 id 数组`（读过才在；没读过是 undefined，**不假装查过**）。 */
   const learnableBySpecies = new Map();
   /** 正在编辑哪一只 + 它的可学池（`/api/roco/loadout/options` 的回执）+ 草稿。 */
@@ -1364,8 +1401,11 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     loadouts.set(editor.petId ?? editor.species, editor.draft.slice());
     // 写回共用记录（`loadout-store.js`）：不写回去的话，换完招一刷新就丢，
     // 盒子那一页也读不到（人类 ④：「换技能还是没实装是吧？实装一下」）。
+    // S1（G01）：写的是**个体级**键（这一队的哪一只实例）—— 写物种级会让同种的另一只继承。
+    // 找不到实例（理论上不该发生：编辑器是从槽位开的）就**不写**，只留在内存里当次生效。
     // 写失败不拦着这一步 —— 当次开局照样带着这四个（`emit()` 走的是上面那个 Map）。
-    writeSharedLoadout(null, editor.petId ?? editor.species, editor.draft.slice());
+    const target = instanceForSpecies(editor.petId ?? editor.species);
+    if (target) writeIndividualLoadout(null, target, editor.draft.slice());
     editor = null;
     refreshSlots();
     // ⚠ 2026-09-29 U04（真机探针抓到）：换完招**必须重画配置那一行** —— 否则状态行还停在
@@ -1882,7 +1922,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       const ids = (row.skills ?? []).map((s) => s.skill_id).filter(Boolean).slice(0, SHARED_LOADOUT_SLOTS);
       if (!row.species || ids.length !== SHARED_LOADOUT_SLOTS) continue;
       loadouts.set(row.species, ids.slice());
-      writeSharedLoadout(null, row.species, ids.slice());
+      // S1（G01）：写**个体级**键（`row.instance` 就是这一只）—— 不再写物种级。
+      if (row.instance) writeIndividualLoadout(null, row.instance, ids.slice());
     }
     state.error = null;
     state.replaceIncoming = null;
@@ -1991,16 +2032,22 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       if (Array.isArray(ids) && ids.length === SHARED_LOADOUT_SLOTS) {
         if (explicit && !explicit.includes(speciesId)) {
           // ⚠ 2026-09-29（U04 的**真实残留**，T4 报、Lead 落）：内存不装回来**还不够** ——
-          // `writeSharedLoadout()` 当初往共用记录里写过这六个键，而那个模块原来**只有读/写两个口**，
+          // `loadout-store.js` 当初往共用记录里写过这六个键，而那个模块原来**只有读/写两个口**，
           // 删不掉。后果（T4 实测）：撤销之后**手动整页刷新 + 带 `?team=`** 时，
           // 这几只的来源又显示成「你选的」，而它们明明是「默认」（四个技能名不变，只是来源说错了）。
           // 这里补删：**同一个循环、同一个判据**，不多一套。
-          clearSharedLoadout(null, speciesId);
+          // S1（G01）：删的是**个体级**键（这一队的这一只）；旧物种级键**不动**（它装着历史）。
+          const target = instanceForSpecies(speciesId);
+          if (target) clearIndividualLoadout(null, target);
           continue;
         }
         loadouts.set(speciesId, ids.slice());
         // 共用记录也写一份：这样**别的页**（盒子 / 下一次开局）读到的与这一份一致。
-        writeSharedLoadout(null, speciesId, ids.slice());
+        // S1（G01）：写**个体级**键（这一队的这一只），不再写物种级。
+        {
+          const target = instanceForSpecies(speciesId);
+          if (target) writeIndividualLoadout(null, target, ids.slice());
+        }
       }
     }
     state.error = null;
@@ -2084,7 +2131,9 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     for (const [speciesId, ids] of Object.entries(snap.loadouts)) {
       if (!speciesId || !Array.isArray(ids) || ids.length !== SHARED_LOADOUT_SLOTS) continue;
       loadouts.set(speciesId, ids.slice());
-      writeSharedLoadout(null, speciesId, ids.slice());
+      // S1（G01）：写**个体级**键（这一队的这一只），不再写物种级。
+      const target = instanceForSpecies(speciesId);
+      if (target) writeIndividualLoadout(null, target, ids.slice());
     }
     state.config.applied = snap;
     state.config.previous = previous;
@@ -2344,6 +2393,9 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       }
       state.ownedBySpecies = bySpecies;
       state.ownedByInstance = byInstance;
+      // S1（G01）：实例 → 物种 的关系**到这里才有** ⇒ 个体级配招记录在这里叠一次
+      // （个体级优先于上面那份旧物种级记录；判定在 `loadout-store.js` 的 `teamLoadouts()`）。
+      overlayIndividualLoadouts();
       // ── 2026-09-30 真 bug 修：**数据到了就把「选对手」下拉补填一次** ────────────────────
       // 这条下拉挂载时（`:3457`）就绑好了，但那时 `ownedBySpecies` 还是空的（本行是 `/api/roco/box`
       // 异步回来之后才执行）⇒ 原来"只绑一次就 return"⇒ 选项永远只有占位那一个 ✗。

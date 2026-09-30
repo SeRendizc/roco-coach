@@ -990,24 +990,44 @@ test('换招要读共用记录、也要写回去（否则刷新丢、盒子里�
   //   （`loadout-store.js` 原来只有读/写两个口）⇒ 手动整页刷新 + 带 `?team=` 时来源又显示成
   //   「你选的」。为此给那个模块补了第四个口 `clearSharedLoadout`，工坊要用它。
   //   **意图一个字没变**：钥匙只能从那一个模块引，不许自己拼键名 —— 现在是四个名字。
+  // ⚠ 2026-09-30（分计划 08 · S1 / G01）**第三次改钉**。旧断言逐字留档（别删）：
+  //     assert.match(src,
+  //       /import \{readSharedLoadouts, writeSharedLoadout, clearSharedLoadout, SHARED_LOADOUT_SLOTS\} from '\.\/loadout-store\.js'/,
+  //       '工坊必须用共用的那一把钥匙，不许自己再拼一个键名（四个名字都要从那一个模块引）');
+  //   为什么改：配招的记录从**物种级**（`pet_…`）换成**个体级**（`own-…`，见
+  //   `loadout-store.js` 的 v2 小节与 08 反例②）⇒ 工坊要引的是新那一套口：
+  //   `writeIndividualLoadout`（写个体级）/ `clearIndividualLoadout`（撤销时删个体级）/
+  //   `teamLoadouts`（队级解析：个体级优先、旧的物种级只读兜底）/ `readSharedLoadouts`（旧键兼容读）。
+  //   **意图一个字没变**：钥匙只能从那一个模块引，不许自己拼键名。
   assert.match(src,
-    /import \{readSharedLoadouts, writeSharedLoadout, clearSharedLoadout, SHARED_LOADOUT_SLOTS\} from '\.\/loadout-store\.js'/,
-    '工坊必须用共用的那一把钥匙，不许自己再拼一个键名（四个名字都要从那一个模块引）');
+    /import \{SHARED_LOADOUT_SLOTS, clearIndividualLoadout, readSharedLoadouts, teamLoadouts, writeIndividualLoadout\} from '\.\/loadout-store\.js'/,
+    '工坊必须用共用的那一把钥匙，不许自己再拼一个键名（S1 起引的是新那一套口）');
   assert.match(src, /const loadouts = new Map\(readSharedLoadouts\(\)\)/,
-    '开局时要把共用记录读进 loadouts（键 = pet_id）');
+    '开局时要把**旧物种级**记录读进 loadouts（兼容读取；个体级由 `teamLoadouts()` 叠上去）');
   // ② 保存时写回去
-  assert.match(src, /writeSharedLoadout\(null, editor\.petId \?\? editor\.species, editor\.draft\.slice\(\)\)/,
-    '保存时要把这四个写回共用记录');
+  // ⚠ 2026-09-30（分计划 08 · S1 / G01）**改钉**。旧断言逐字留档（别删）：
+  //     assert.match(src, /writeSharedLoadout\(null, editor\.petId \?\? editor\.species, editor\.draft\.slice\(\)\)/,
+  //       '保存时要把这四个写回共用记录');
+  //   为什么改：写物种级键会让**同种的另一只个体**从兼容读取里继承这份配招（G01 / 08 反例②）
+  //   ⇒ 保存改到**个体级**键（`own-…`），实例由 `instanceForSpecies()` 按物种唯一解析
+  //   （同一个物种在队里不可能有两只：RC-301 判重复）。找不到实例就不写，只留在内存里当次生效。
+  assert.match(src,
+    /const target = instanceForSpecies\(editor\.petId \?\? editor\.species\);\s*\n\s*if \(target\) writeIndividualLoadout\(null, target, editor\.draft\.slice\(\)\);/,
+    '保存时要把这四个写回**这一只个体**的共用记录（物种级键会让同种的另一只继承）');
   // ③ 交给服务端那条链一个字没动（能进对局靠的就是它）
   assert.match(src, /loadouts: Object\.fromEntries\(\[\.\.\.loadouts\.entries\(\)\]/,
     '开局时仍然要把 loadouts 交给服务端 —— 这才是"进对局"');
-  // ④ 反证：共用的键只有一处定义
+  // ④ 反证：共用的键只有一处定义（**两代键都要**）
   const store = read(new URL('../src/client/loadout-store.js', import.meta.url), 'utf8');
   assert.match(store, /export const LOADOUT_STORE_KEY = 'roco\.workshop\.loadouts\.v1'/);
+  assert.match(store, /export const LOADOUT_STORE_INDIVIDUAL_KEY = 'roco\.workshop\.loadouts\.v2'/,
+    'S1 的个体级键也只许在这一处定义');
   for (const f of ['../src/client/team-workshop.js', '../src/client/box-loadout.js']) {
     const one = read(new URL(f, import.meta.url), 'utf8');
     assert.doesNotMatch(one, /'roco\.workshop\.loadouts\.v1'/,
       `${f} 不许自己写死这个键名（只能从 loadout-store.js 引）`);
+    assert.doesNotMatch(one, /'roco\.workshop\.loadouts\.v2'/,
+      `${f} 不许自己写死个体级键名（只能从 loadout-store.js 引）`);
   }
 });
 
@@ -1181,8 +1201,13 @@ test('阵容配置：接线（应用/撤销/再读取三个落点 + 三个 datas
   assert.match(src, /const kept = state\.selected\.filter\(\(id\) => state\.locked\.includes\(id\)\)/,
     '「清空阵容」要留着锁定的那一只（不许把玩家的约束悄悄丢了）');
   // ⑤ 应用之后配招必须是**显式**的（否则进战斗那一份不带 loadouts，只能靠"引擎恰好一样"对齐）
-  assert.match(src, /loadouts\.set\(speciesId, ids\.slice\(\)\);\s*\n\s*writeSharedLoadout\(null, speciesId, ids\.slice\(\)\);/,
-    '应用时要把六个物种的四个技能写进内存 Map 与共用记录');
+  // ⚠ 2026-09-30（分计划 08 · S1 / G01）**改钉**。旧断言逐字留档（别删）：
+  //     assert.match(src, /loadouts\.set\(speciesId, ids\.slice\(\)\);\s*\n\s*writeSharedLoadout\(null, speciesId, ids\.slice\(\)\);/,
+  //       '应用时要把六个物种的四个技能写进内存 Map 与共用记录');
+  //   为什么改：与保存那一处同一个理由（物种级键 ⇒ 同种另一只继承）⇒ 写**个体级**键，
+  //   实例按物种唯一解析（`instanceForSpecies()`）。内存 Map 仍然是物种键 —— 引擎要的就是它。
+  assert.match(src, /loadouts\.set\(speciesId, ids\.slice\(\)\);[\s\S]{0,220}writeIndividualLoadout\(null, target, ids\.slice\(\)\);/,
+    '应用时要把四个技能写进内存 Map 与**这一只个体**的共用记录');
   // ⑥ 反证：槽位 ↔ 个体**不许再按 `state.selected` 的下标**取（服务端槽位顺序与它无关，真机六格全错位）
   assert.doesNotMatch(src, /const slotInstance = state\.selected\[slot\.index - 1\]/,
     '反证：槽位实例不许按 selected 下标取（那正是错位的老写法）');
