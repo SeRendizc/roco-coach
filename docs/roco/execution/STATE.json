@@ -685,6 +685,14 @@
       "owner": "plan04-engine（发现）· lead（登记）",
       "status": "registered",
       "rule": "**单次不可复现的红如实登记、不当噪声忽略、也不急着「加判据治抖动」**；两次以上同形态出现 ⇒ 升级为独立任务（含「跑前检测并发」这类方案的可行性评估）"
+    },
+    {
+      "id": "O-55",
+      "what": "**共享守卫 `safeObject` 过度拒绝（同根因第二次）**：`UNSAFE_KEYS` 含 `path`，而**模式对局** `pvp-standard-six-pet` 的真公开面有 `unverified_overrides[0].path = \"turn_order.speed_tie\"` ⇒ `validToolArgs('plan_actions') = false` ⇒ **模式对局仍调不动 `plan_actions`**",
+      "evidence": "plan04-engine 在 04.5 里用真模式公开面实测（排除法：`bytes=2984 < 8000`；`rules_version='roco-world-s4-2026-09-10/mobile_s4_candidate_v3'` 已被 C-2 白名单放行；**唯一剩余拒绝点 `$.unverified_overrides[0].path`**）。**为什么 C-2 没抓到**：生成器那条路 `unverified_overrides=[]` ⇒ 该字段为空、不在视野内 ⇒ **这是 C-2 的盲区**。修法（Lead 已批）：只对 `unverified_overrides[]` 元素内的 `path` 按**点分路径**格式放行（`^[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*$`，禁 `/`、`\\`、`..`），通用 `path` 与其它字段照旧 fail closed",
+      "owner": "plan04-engine（修 + 系统性扫面）· lead（裁决）",
+      "status": "fix_in_flight",
+      "rule": "① 同一根因**出现第二次就不是个例** ⇒ 必须做**系统性扫面**（本次要求：`工具 × 真公开面` 逐格断言 `validToolArgs === true`，真公开面至少含「生成器普通对局」与「模式对局」两种形态，**并成为常驻判据**）；② 修参数校验类缺陷时，**必须找一条与单元测试不同的真实入口来验**（C-2/C-3 都是只有真公开面才暴露）；③ **空数组/缺省字段是盲区**（`unverified_overrides=[]` 让 C-3 躲过了 C-2 的验证）"
     }
   ],
   "handoff": {
