@@ -375,6 +375,122 @@ def _unsupported(code: str, reason: str, **extra: Any) -> Answer:
     )
 
 
+# ── 04.2：对手依据分开写（scenario-driven vs assumption-driven）──────────────
+#
+# 为什么必须分两栏：注入的情景目前只**筛**可枚举技能/位次，
+# `OPPONENT_BENCH_ASSUMPTION`（对手后备满血 + 规范配招 + 未亮明用占位物种）
+# 仍然生效。把两者混写成一句「对手按情景建模」，读者会以为对手侧已经按可学池
+# 重建了 —— 那是**没做**的事。这里一栏一栏分开写，并把没做的登记成残留（P3）。
+
+#: 显式残留登记（P3）：**不做**「用情景可学池替换对手配招假设」，只登记 + 自带两条判据。
+OPPONENT_BASIS_RESIDUALS: List[Dict[str, Any]] = [
+    {
+        "id": "P3",
+        "what": "用情景可学池（03 的 buildOpponentCandidates → skills.possible）替换对手配招假设",
+        "replaces": "rs.candidate_moveset(pet_id)（重建状态里对手的 loadouts）",
+        "status": "not_done",
+        "planned": "04.2b 或 05 专项（另开切片，需 Lead 裁决）",
+        "why_not_here": "替换会改**对手侧结算语义**（对手能出什么 = 我方估值的分母与合法动作集），"
+                        "与「把情景当筛子」不是一个量级；04.2 的边界是只筛不改假设。",
+        "criteria": [
+            "判据①（隐藏真值不变）：固定同一份公开面，只改隐藏的真实对手配招/后备血量 ⇒ "
+            "确定性推荐逐字段不变；",
+            "判据②（只吃公开面）：注入的可学池必须来自公开事实（已见技能 / 冻结学招表）；替换后"
+            "引擎枚举出的对手技能集合 ⊆ 可学池 ∪ 公开已见技能；任何 private serialize() 字段仍被 400 拒绝。",
+        ],
+    },
+]
+
+
+def _dedup_rows(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """按 canonical JSON 去重（同一缺项会在多个分析种子下重复出现）。"""
+    out: List[Dict[str, Any]] = []
+    seen = set()
+    for row in rows:
+        key = json.dumps(row, ensure_ascii=False, sort_keys=True)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(row)
+    return out
+
+
+def opponent_basis_block(
+    per_seed: List[Dict[str, Any]],
+    seeds: List[int],
+    parsed: List[Any],
+    *,
+    public_assumptions: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """04.2：「本次对手依据」写成机器可检的一栏，**两类依据分开**。
+
+    只在请求显式带了 `opponent_scenarios` 时调用 —— 不带这个键的缺省路径回执
+    与 04.2 之前**逐字段相同**（键集金标在 `roco/tests/test_plan_scenarios.py`）。
+
+    四栏：
+      · `source` / `label`  —— 本次用的是哪种依据（注入情景 / 规范配招假设缺省）；
+      · `scenario_driven`   —— **情景点名**并在重建状态里枚举出来的动作（逐种子）+ 截断 + 缺项；
+      · `assumption_driven` —— 本步**仍然生效**的假设（后备满血 + 规范配招 + 占位物种）；
+      · `residuals`         —— 显式残留登记（P3：还没用可学池替换规范配招假设）。
+    两类依据都不产出概率：`is_probability` 一律 false。
+    """
+    details = [(p.get("opponent_model_detail") or {}) for p in per_seed]
+    first = details[0] if details else {}
+    injected = bool(parsed)
+    scenario_driven: Optional[Dict[str, Any]] = None
+    if injected:
+        actions_by_seed: Dict[str, List[Dict[str, Any]]] = {}
+        enumerated_by_seed: Dict[str, Any] = {}
+        enumerated_by_scenario: Dict[str, Any] = {}
+        unavailable: List[Dict[str, Any]] = []
+        dropped: List[Dict[str, Any]] = []
+        for sv, detail in zip(seeds, details):
+            key = str(sv)
+            actions_by_seed[key] = [dict(row) for row in (detail.get("enumerated_actions") or [])]
+            enumerated_by_seed[key] = detail.get("enumerated", 0)
+            enumerated_by_scenario[key] = dict(detail.get("enumerated_by_scenario") or {})
+            unavailable.extend(detail.get("unavailable") or [])
+            dropped.extend(detail.get("dropped") or [])
+        scenario_driven = {
+            "scenario_ids": list(first.get("scenario_ids") or []),
+            "kinds": list(first.get("kinds") or []),
+            "actions_by_seed": actions_by_seed,
+            "enumerated_by_seed": enumerated_by_seed,
+            "enumerated_by_scenario": enumerated_by_scenario,
+            "dropped": _dedup_rows(dropped),
+            "unavailable": _dedup_rows(unavailable),
+            "evidence_ids": sorted({e for d in details for e in (d.get("evidence_ids") or [])}),
+            "weights": first.get("weights") or "uniform_baseline",
+            "basis": first.get("basis") or "",
+            "is_probability": False,
+            "note": ("scenario-driven = 情景点名、并在重建状态里枚举出来的动作；只筛、按 scenario_id "
+                     "定序、不当概率；枚举不出来的在 unavailable[] 里逐条点名"),
+        }
+    return {
+        "source": "injected_scenarios" if injected else "default_candidate_moveset",
+        "label": ("本次对手依据 = 注入情景" if injected
+                  else "本次对手依据 = 规范配招假设(缺省)"),
+        "is_probability": False,
+        "scenario_driven": scenario_driven,
+        "assumption_driven": {
+            "opponent_bench": env_mod.OPPONENT_BENCH_ASSUMPTION,
+            "opponent_moveset": "rs.candidate_moveset(pet_id)（规范配招假设）",
+            "unrevealed_species": "占位物种（未亮明的后备不含物种身份）",
+            "still_in_effect": True,
+            "public_assumptions": (dict(public_assumptions)
+                                   if isinstance(public_assumptions, dict) else None),
+            # 键名与 scenario_driven 的 `note` **不同名**：两栏的键集必须互不相交，
+            # 这样「有没有把两类依据混写」可以被机器判死（见 test_p3_separates_*）。
+            "assumption_note": ("注入情景只**筛**可枚举技能/位次：对手后备仍按满血 + 规范配招 + "
+                                "占位物种建模。情景点名但枚举不出来的技能/位次/物种如实记在 "
+                                "scenario_driven.unavailable[]"),
+        },
+        "residuals": [dict(row) for row in OPPONENT_BASIS_RESIDUALS],
+        "note": ("两类依据分开写：scenario_driven 是情景点名并枚举出来的，assumption_driven 是"
+                 "本步仍然生效的假设；两者都不是概率、不是频率"),
+    }
+
+
 # ── 服务本体 ────────────────────────────────────────────────────────────
 
 
@@ -2203,6 +2319,23 @@ class RocoService:
                 return self._answer_envelope(
                     _bad_request(f"{name} 必须是 {lo}..{hi} 之间的整数"), body, started)
 
+        # 04.2：**可选**的对手情景注入（来自 03 的 `buildScenarioOutlook`，协议
+        # `rc604-opponent-outlook/v1`）。两条纪律：
+        #   ① **加性可选**：不带 `opponent_scenarios` 这个键 ⇒ 缺省路径逐字段不变；
+        #   ② **形状不对就 400 fail closed**，错误里点名坏在哪一条（不猜一个）。
+        # 概率性字段一律拒绝：情景集合没有频次数据，不许长得像概率分布。
+        scenarios_given = "opponent_scenarios" in body
+        raw_scenarios = body.get("opponent_scenarios")
+        try:
+            parsed_scenarios = pm.parse_opponent_scenarios(
+                raw_scenarios if scenarios_given else None)
+        except pm.ScenarioShapeError as exc:
+            return self._answer_envelope(_bad_request(
+                f"opponent_scenarios 形状不合法：{exc}。"
+                "情景集合只描述「对手可能做什么」，不许带 probability/weight/share/p；"
+                "形状不对就拒绝，不猜一个"
+            ), body, started)
+
         # 跨种子聚合：每个 analysis seed 重建一次搜索状态
         per_seed = []
         previews: List[Dict[str, Any]] = []
@@ -2218,7 +2351,8 @@ class RocoService:
                     result=None, coverage=1.0,
                     unsupported=[{"reason": "对局已结束，没有可规划的动作"}],
                 ), body, started)
-            plan = pm.plan_actions(state, rs, depth=depth, beam=beam, budget_ms=budget)
+            plan = pm.plan_actions(state, rs, depth=depth, beam=beam, budget_ms=budget,
+                                   opponent_scenarios=(raw_scenarios if parsed_scenarios else None))
             unsupported_total += plan.unsupported_seen
             per_seed.append(plan.to_dict())
             if damage_preview:
@@ -2239,6 +2373,12 @@ class RocoService:
         bests = [p["best"] for p in per_seed]
         timed_out = any(p["timed_out"] for p in per_seed)
         coverage = sum(p["coverage"] for p in per_seed) / len(per_seed)
+
+        # 04.2：只有在请求**显式带了** `opponent_scenarios` 时才组装「本次对手依据」，
+        # 于是缺省回执的键集与 04.2 之前逐字段相同（金标比对在 test_plan_scenarios）。
+        opponent_basis = (opponent_basis_block(per_seed, raw_seeds, parsed_scenarios,
+                                              public_assumptions=public.get("assumptions"))
+                          if scenarios_given else None)
 
         payload = {
             "schema_version": public.get("schema_version"),
@@ -2277,6 +2417,8 @@ class RocoService:
             "timed_out": timed_out,
             "unsupported_seen": unsupported_total,
             "opponent_model": per_seed[0]["opponent_model"],
+            # 04.2：只在请求带 `opponent_scenarios` 时出现（缺省键集逐字段不变）
+            **({"opponent_basis": opponent_basis} if opponent_basis else {}),
             # 风险分支（W3-04）：把每个分析种子的 downside 聚成区间，
             # 并给出最差的那个种子的 top_risks（它们描述的才是真实的对手动作名）。
             "risk": {
@@ -2303,24 +2445,40 @@ class RocoService:
                                 "coverage": coverage})
         if unsupported_total:
             unsupported.append({"reason": f"搜索中共遇到 {unsupported_total} 条未核验机制登记（fail closed）"})
+        if opponent_basis and opponent_basis["scenario_driven"]:
+            missing = opponent_basis["scenario_driven"]["unavailable"]
+            if missing:
+                unsupported.append({
+                    "reason": f"注入情景里有 {len(missing)} 条点名的技能/位次/物种在重建状态里"
+                              "枚举不出来（不假装能算；逐条见 result.opponent_basis）",
+                    "unavailable": missing,
+                })
         if len(labels) != 1:
             unsupported.append({
                 "reason": "推荐动作随 analysis seed 变化，说明它不是一个稳健结论；请把 expected/worst 区间当作结论",
                 "labels": sorted(labels),
             })
 
+        limitations = [
+            "估值是启发式局面分，**不是胜率**；expected 不能读成「赢的概率」",
+            "对手后备血量与配招不在公开信息里，按满血+规范配招建模（见 public.assumptions）",
+            "随机性用与真实对局无关的 analysis_seeds，并跨种子聚合；结论不依赖真实 seed",
+            "对手按启发式分布建模，不是真实对手行为模型",
+            "这是**分析**状态，不是权威对局状态；实际结算以游戏内为准",
+        ]
+        if opponent_basis:
+            limitations.append(
+                "本次对手依据见 result.opponent_basis：scenario-driven（情景点名的技能/位次）与 "
+                "assumption-driven（后备满血 + 规范配招）**分开写**；注入情景只当筛子（等权基线，"
+                "不是概率），对手配招假设**仍然生效**，P3 残留在 residuals 里显式登记"
+            )
+
         return self._answer_envelope(Answer(
             result=payload,
             coverage=coverage,
             evidence_ids=[f"ev:{rs.ruleset_id}:public-state@{public.get('state_version')}"],
             unsupported=unsupported,
-            extra={"limitations": [
-                "估值是启发式局面分，**不是胜率**；expected 不能读成「赢的概率」",
-                "对手后备血量与配招不在公开信息里，按满血+规范配招建模（见 public.assumptions）",
-                "随机性用与真实对局无关的 analysis_seeds，并跨种子聚合；结论不依赖真实 seed",
-                "对手按启发式分布建模，不是真实对手行为模型",
-                "这是**分析**状态，不是权威对局状态；实际结算以游戏内为准",
-            ]},
+            extra={"limitations": limitations},
         ), body, started)
 
     # ── 本地对局驱动（与教练规划属于**两个信任域**）─────────────────────

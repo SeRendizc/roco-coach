@@ -24,6 +24,8 @@ import {newProfile} from '../src/game/progression.js';
 import {runCoach, buildContext, checkGroundedAnswer} from '../src/coach/runtime.js';
 import {freshMemory} from '../src/coach/memory.js';
 import {validateChat} from '../src/server/index.js';
+import {createRocoClient, findHiddenKeys, ROCO_ERROR} from '../src/coach/roco-client.js';
+import {planActionsViaPlanner} from '../src/coach/toolbox.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CLIENT_SRC = readFileSync(join(ROOT, 'src', 'client', 'roco.js'), 'utf8');
@@ -169,4 +171,141 @@ test('⑥ 规划进包时附一条**来源说明**（只在有规划时出现，
   });
   assert.equal((without.evidence || []).some((line) => /rocoPlan/.test(String(line))), false,
     '没有规划时不许出现这条说明（营地/三宠那两条老路一字不变）');
+});
+
+// ── ⑦ 教练域请求体白名单（2026-09-30 · 04.2 补；守的是 MC-013 的**桥侧**那一半）─────
+//
+// 这条断言守的红线：`planActions` 属于教练域 ⇒ 请求体里**不许**出现真实 seed 与对手
+// 待执行动作（`seed` / `_pending_enemy` / `replace_queue` …）。
+//
+// 为什么必须单独钉住：这条红线此前**没有任何断言**（04.1 勘察复核时发现）。当前安全
+// 属性成立靠三件事：
+//   ① `planActions`（roco-client.js:899-921）的 body 是**逐键白名单**拼的：只读
+//      depth / beam / budgetMs / analysisSeeds / damagePreview —— `options.seed` 根本
+//      不读，所以 seed 进不了请求体（实测 body 键集见下）；
+//   ② 桥的传输层 `_request`（574-585）对 payload 做 `findHiddenKeys` 扫描：命中隐藏键
+//      就**本地拒绝、连发都不发**；
+//   ③ 引擎侧 `/battle/plan` 命中隐藏键 ⇒ 400 hidden_information（service.py）。
+// 将来有人给 `planActions` 加一句「透传 options」，① 会**静默**失守；②③ 只在真的有键
+// 时才拦得住，那时已经晚了一层。⇒ 这里要的是「**发出去的 body 恰好只有白名单键**」。
+//
+// 两向变异（实测必红，见 reports/roco/product-execution/04/04.2-scenarios.md §5）：
+//   · `const body = {public: publicState, ...options}` ⇒ ⑦ 红（body 多出 seed 等键）；
+//   · `const body = {public: {...publicState, seed: 424242}}` ⇒ ⑦ 红（隐藏键深度扫描）。
+
+//: `planActions` / `planActionsViaPlanner` 允许出现在请求体里的**全部**键。
+//: ⚠ 白名单变更必须显式改这一行 —— 新字段是新契约，不许静默透传。
+const PLAN_BODY_KEYS = ['analysis_seeds', 'beam', 'budget_ms', 'damage_preview', 'depth',
+  'public', 'ruleset_id', 'state_version'];
+
+//: 一份**公开** planner state 夹具（形状取自 `env.public_planner_state()`：
+//: 不含真实 seed、不含对手待执行动作、对手后备只有 slot/fainted）。
+const PUBLIC_PLANNER_STATE = {
+  schema_version: 1, ruleset_id: 'roco-world-s4-2026-09-10', ruleset_config_id: 'cfg-default',
+  side: 'player', turn: 3, state_version: 7, match_id: 'm-fixture', decision_id: 'm-fixture:v7',
+  self: {
+    active: 0, items: {},
+    pets: [{pet_id: 'pet_000225', slot: 0, hp: 120, max_hp: 180, energy: 4,
+      statuses: {}, marks: {}, buffs: {}}],
+    loadouts: {pet_000225: ['skill_000246']},
+  },
+  opponent: {
+    active: 0,
+    field: {pet_id: 'pet_000417', slot: 0, hp: 100, max_hp: 160, energy: 3, statuses: {}, marks: {}, buffs: {}},
+    bench: [{slot: 1, fainted: false}, {slot: 2, fainted: false}],
+  },
+  assumptions: {opponent_bench: 'full_hp_nominal_loadout'},
+};
+
+/** 下划线开头 / `state.` 私有容器开头的键（`state_version` 是契约字段，显式放行）。 */
+function suspiciousKeyPaths(value, prefix = '', out = []) {
+  if (Array.isArray(value)) {
+    value.forEach((item, i) => suspiciousKeyPaths(item, `${prefix}[${i}]`, out));
+    return out;
+  }
+  if (value && typeof value === 'object') {
+    for (const [key, child] of Object.entries(value)) {
+      const path = prefix ? `${prefix}.${key}` : key;
+      if (key.startsWith('_') || /^state\./.test(key)) out.push(path);
+      suspiciousKeyPaths(child, path, out);
+    }
+  }
+  return out;
+}
+
+/** 抓请求体的假桥：只替换 `_http`（最后一跳），其余逻辑全走真代码。 */
+function capturingClient(calls) {
+  const client = createRocoClient({baseUrl: 'http://127.0.0.1:9',
+    rulesetId: 'roco-world-s4-2026-09-10'});
+  const envelope = {
+    ok: true, protocol_version: 1, service: 'roco-engine', service_version: 'fixture',
+    ruleset_id: 'roco-world-s4-2026-09-10', state_version: 7, snapshot_fingerprint: null,
+    coverage: 1, evidence_ids: [], unsupported: [], latency_ms: 1, error_type: null, error: null,
+    result: {recommended_label: '啃咬'},
+  };
+  client._http = async (method, path, body) => {
+    calls.push({method, path, body: body ? JSON.parse(body.toString('utf8')) : null});
+    return {status: 200, text: JSON.stringify(envelope)};
+  };
+  return client;
+}
+
+test('⑦ 请求体白名单：planActions 只发公开面，seed/隐藏字段一个都进不去', async () => {
+  const calls = [];
+  const res = await capturingClient(calls).planActions(PUBLIC_PLANNER_STATE, {
+    stateVersion: 7, depth: 2, beam: 4, budgetMs: 800, analysisSeeds: [11, 29], damagePreview: true,
+    // 故意把**不该进请求体**的东西塞进 options：将来真有人加透传，这里必须红。
+    seed: 424242, pendingEnemy: 'PLANTED', replaceQueue: 'PLANTED', privateState: {seed: 1},
+  });
+  assert.equal(res.ok, true, JSON.stringify(res));
+  assert.equal(calls.length, 1, '只发一次请求');
+  const {method, path, body} = calls[0];
+  assert.equal(method, 'POST');
+  assert.equal(path, '/battle/plan');
+  assert.deepEqual(Object.keys(body).sort(), PLAN_BODY_KEYS,
+    '请求体键集必须**恰好**是白名单：多一个键就说明有字段被静默透传（白名单变更要显式改这条断言）');
+  assert.deepEqual(body.public, PUBLIC_PLANNER_STATE, 'public 必须原样发（不改写、不合并）');
+  assert.deepEqual(findHiddenKeys(body), [], '请求体任何深度都不许出现隐藏键');
+  assert.deepEqual(suspiciousKeyPaths(body), [], '不许有下划线开头 / `state.` 私有容器键');
+  assert.equal(JSON.stringify(body).includes('424242'), false, '真实 seed 的值不许出现在请求体里');
+  for (const key of ['seed', '_pending_enemy', 'pending_enemy', 'replace_queue']) {
+    assert.equal(key in body, false, `${key} 不许出现在请求体顶层`);
+  }
+  // 白名单里的键确实被发出来了（不是「什么都没发」把断言骗过去的）
+  assert.equal(body.state_version, 7);
+  assert.equal(body.depth, 2);
+  assert.equal(body.beam, 4);
+  assert.equal(body.budget_ms, 800);
+  assert.deepEqual(body.analysis_seeds, [11, 29]);
+  assert.equal(body.damage_preview, true);
+});
+
+test('⑦b 工具层同样只发公开面（planActionsViaPlanner 不给请求体加料）', async () => {
+  const calls = [];
+  const res = await planActionsViaPlanner({client: capturingClient(calls), state: PUBLIC_PLANNER_STATE,
+    state_version: 7, timeoutMs: 200});
+  assert.equal(res.ok, true, JSON.stringify(res));
+  assert.equal(calls.length, 1);
+  assert.deepEqual(Object.keys(calls[0].body).sort(), ['public', 'ruleset_id', 'state_version'],
+    '工具层只该把公开 state 放进 public，不额外加字段');
+  assert.deepEqual(calls[0].body.public, PUBLIC_PLANNER_STATE);
+  assert.deepEqual(findHiddenKeys(calls[0].body), []);
+  assert.deepEqual(suspiciousKeyPaths(calls[0].body), []);
+});
+
+test('⑦c 反证：隐藏字段混进 public ⇒ 桥本地拒绝且**连发都不发**', async () => {
+  const calls = [];
+  const res = await capturingClient(calls).planActions({...PUBLIC_PLANNER_STATE, seed: 424242},
+    {stateVersion: 7});
+  assert.equal(res.ok, false);
+  assert.equal(res.code, ROCO_ERROR.HIDDEN_INFORMATION);
+  assert.deepEqual(res.details?.hidden_paths, ['public.seed'], '要指名道姓说是哪个路径');
+  assert.equal(calls.length, 0, '命中隐藏键时一次网络都不发（这是「连发都不发」的判据）');
+  // 正控：扫描器本身不是空的 —— 同一份扫描必须在**种了键**时报出来，
+  // 否则上面两条 `deepEqual(..., [])` 只是「什么都没查」。
+  assert.deepEqual(findHiddenKeys({public: PUBLIC_PLANNER_STATE}), []);
+  assert.deepEqual(findHiddenKeys({...PUBLIC_PLANNER_STATE, replace_queue: []}), ['replace_queue']);
+  assert.deepEqual(findHiddenKeys({public: {...PUBLIC_PLANNER_STATE, seed: 1}}), ['public.seed']);
+  assert.deepEqual(suspiciousKeyPaths({public: {_pending_enemy: 'x', 'state.seed': 1}}),
+    ['public._pending_enemy', 'public.state.seed']);
 });

@@ -17,6 +17,13 @@
   03.2（候选协议 + 三个可复现局面）、03.3（证据更新 + 反例①）、03.4（情景集合与范围 + 两条降级）、
   03.5（候选上限 + 截断信息 + 威胁点名），外加 F-03-1/F-03-2/F-03-3/F-03-4 四条判据修补。
   收口复跑：`node --test tests/roco-opponent-belief.test.js` ⇒ 37 ✔ / 0 ✖。
+- 下游进度（2026-09-30 · 04.2）：**`outlook` 已被引擎侧消费**（注入式、**加性可选**）——
+  `/battle/plan` 新增可选字段 `opponent_scenarios`（只当**无序集合**：按 `scenario_id` 定序、集合内等权、
+  `is_probability:false`；带 `probability/weight/share/p` 一律 **400 fail closed**）；不给这个键 ⇒ 回执与
+  04.2 之前**逐字段相同**（值级金标，两种 beam 分位数）。回执把 **scenario-driven**（情景点名的技能/位次）
+  与 **assumption-driven**（后备满血 + 规范配招假设，**仍然生效**）**分两栏**写，情景点名但枚举不出来的
+  技能/位次/物种逐条进 `unavailable[]` 并升级进 `unsupported[]`。**未做**（显式残留 P3）：用可学池替换
+  `rs.candidate_moveset()`。读数、变异与残留判据见 `reports/roco/product-execution/04/04.2-scenarios.md`。
 
 ---
 

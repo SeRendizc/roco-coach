@@ -347,8 +347,16 @@ def opponent_scenario_distribution(state: GameState, rs: Ruleset, *, beam: int,
       · `stay_defense`    ⇒ 场上那只的**防御类**技能动作；
       · `switch_in_seen`  ⇒ 换到该情景 `slots` 里的任一存活后备（已见威胁通常在 `species_ids` 里点名）。
 
-    情景里点名、但**当前重建状态枚举不出来**的技能/位次 ⇒ 记进 `unavailable[]`（不假装能算）。
+    **情景点名、但重建状态给不出**的一律记进 `unavailable[]`（不假装能算），四类都登记：
+      ① 技能不在规范配招/当前可学面里 ⇒ 枚举不出来；
+      ② 技能枚举得出但**类别与情景不符**（`stay_attack` 点了防御技等）⇒ 不混用；
+      ③ 换人位次换不了（倒下 / 不是合法换人）、或点名的**物种不在重建队列**里
+         （未亮明 ⇒ 占位物种建模，换人动作可枚举但物种对不上）；
+      ④ **整条情景一个动作都没枚举出来**（含「点名的动作全被束宽截断」——两种原因分开写）。
+
     权重 = `SCENARIO_WEIGHT_BASIS`（集合内等权），按 `scenario_id` 定序后取前 `beam` 条。
+    逐条留痕：`enumerated_actions[]`（情景点名并枚举出来的**具体动作**）、
+    `enumerated_by_scenario{}`（逐情景计数）、`dropped[]`（束宽之外，逐条点名）。
     """
     legal = [a for a in renv.legal_actions(state, rs, "enemy") if a.kind != "escape"]
     if not legal:
@@ -356,10 +364,14 @@ def opponent_scenario_distribution(state: GameState, rs: Ruleset, *, beam: int,
                     "enumerated": 0, "dropped": [], "unavailable": [], "weights": "uniform_baseline"}
     by_skill = {a.skill_id: a for a in legal if a.kind == ACTION_SKILL and a.skill_id}
     by_slot = {a.target_index: a for a in legal if a.kind == ACTION_SWITCH and a.target_index is not None}
+    #: 重建队列里**实际存在**的对手物种（场上 + 后备）。未亮明的后备用占位物种 ⇒
+    #: 情景点名的真实物种匹配不上，必须如实登记（不假装能算）。
+    present_species = {p.pet_id for p in state.enemy.pets}
     picked: List[Tuple[Action, str]] = []
     unavailable: List[Dict[str, Any]] = []
     for sc in scenarios:
         if sc.kind in ("stay_attack", "stay_defense"):
+            want_defense = sc.kind == "stay_defense"
             wanted = list(sc.skill_ids) if sc.skill_ids else None
             for skill_id in (wanted if wanted is not None else sorted(by_skill)):
                 action = by_skill.get(skill_id)
@@ -370,10 +382,15 @@ def opponent_scenario_distribution(state: GameState, rs: Ruleset, *, beam: int,
                 sk = rs.skills.get(skill_id)
                 if sk is None:
                     continue
-                want_defense = sc.kind == "stay_defense"
-                if bool(getattr(sk, "is_defense", False)) != want_defense:
-                    continue
-                if wanted is None and want_defense and not getattr(sk, "is_defense", False):
+                is_defense = bool(getattr(sk, "is_defense", False))
+                if is_defense != want_defense:
+                    # 情景点名了、技能也枚举得出，但**类别不符**：不许混用，如实登记。
+                    if wanted is not None:
+                        unavailable.append({
+                            "scenario_id": sc.scenario_id, "skill_id": skill_id,
+                            "why": f"技能可枚举，但它是{'防御' if is_defense else '攻击/状态'}类，"
+                                   f"与情景 kind={sc.kind} 不符（类别不混用）",
+                        })
                     continue
                 picked.append((action, sc.scenario_id))
             continue
@@ -384,6 +401,15 @@ def opponent_scenario_distribution(state: GameState, rs: Ruleset, *, beam: int,
                                     "why": "重建状态里这个位次换不了（倒下 / 不是合法换人）"})
                 continue
             picked.append((action, sc.scenario_id))
+        # 情景点名的物种在这一侧的建模里**根本不存在**（典型原因：后备尚未亮明、
+        # 按占位物种建模）⇒ 换人动作本身可枚举，但物种对不上，必须如实登记。
+        for species_id in sc.species_ids:
+            if species_id not in present_species:
+                unavailable.append({
+                    "scenario_id": sc.scenario_id, "species_id": species_id,
+                    "why": "重建队列里没有这个物种（尚未亮明 ⇒ 按占位物种/规范配招假设建模）："
+                           "换人动作可枚举，但物种对不上",
+                })
     # 去重（同一动作可能被多条情景点到），保持 scenario_id 定序 ⇒ 动作序也确定
     seen_actions: List[Tuple[Action, str]] = []
     for action, sid in picked:
@@ -393,6 +419,22 @@ def opponent_scenario_distribution(state: GameState, rs: Ruleset, *, beam: int,
     dropped = [{"action": _label(rs, a), "scenario_id": sid,
                 "why": f"束宽 {beam} 之外（按 scenario_id 定序截断，不按权重）"}
                for a, sid in seen_actions[max(1, beam):]]
+    # 逐情景统计**最终真的被枚举**的动作数（截断之后）：
+    # 只报总数 `enumerated` 时，「3 条情景里 2 条什么都没算出来」在回执里看不出来。
+    counts: Dict[str, int] = {sc.scenario_id: 0 for sc in scenarios}
+    for _a, sid in kept:
+        if sid in counts:
+            counts[sid] += 1
+    picked_ids = {sid for _a, sid in picked}
+    for sc in scenarios:
+        if counts.get(sc.scenario_id):
+            continue
+        unavailable.append({
+            "scenario_id": sc.scenario_id, "kind": sc.kind,
+            "why": ("这条情景点名到的动作都在束宽外（按 scenario_id 定序截断，不按权重）"
+                    if sc.scenario_id in picked_ids else
+                    "这条情景在重建状态里一个动作都枚举不出来（不假装能算）"),
+        })
     total = len(kept) or 1
     dist = [(a, 1.0 / total) for a, _sid in kept]
     detail = {
@@ -402,11 +444,17 @@ def opponent_scenario_distribution(state: GameState, rs: Ruleset, *, beam: int,
         "is_probability": False,
         "weights": "uniform_baseline",
         "enumerated": len(kept),
+        #: 情景点名并被枚举出来的**具体动作**（scenario-driven 一侧的可见面）
+        "enumerated_actions": [
+            {"action": _label(rs, a), "scenario_id": sid, "kind": "scenario"}
+            for a, sid in kept
+        ],
+        "enumerated_by_scenario": counts,
         "dropped": dropped,
         "unavailable": unavailable,
         "evidence_ids": sorted({e for sc in scenarios for e in sc.evidence_ids}),
         "note": ("注入情景只当**无序集合**用：按 scenario_id 定序、不按 range 排序、"
-                 "不把任何权重当概率；情景里枚举不出来的技能/位次如实记在 unavailable 里"),
+                 "不把任何权重当概率；情景点名但枚举不出来的技能/位次/物种如实记在 unavailable 里"),
     }
     return dist, detail
 
