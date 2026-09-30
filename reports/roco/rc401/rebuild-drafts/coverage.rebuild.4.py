@@ -199,7 +199,12 @@ def build_coverage(rs: Any, declared_capabilities: Optional[Dict[str, bool]] = N
               and not getattr(s, "derived", False)]
     traits = [s for s in skills.values() if getattr(s, "is_trait", False)
               and not getattr(s, "derived", False)]
-    levels: Dict[str, Dict[str, int]] = {"battle_skills": {}, "traits": {}}
+    # 预置五档为 0（判据 `:42-45` 直接取 `levels[key][SUPPORT_*]` ⇒ 缺键即 KeyError ✓）。
+    # 🔑 也让"求和 == totals"恒成立（空档位也有 0 ✓ `:34`）。
+    _ALL_TIERS = (SUPPORT_REFUSED, SUPPORT_KNOWLEDGE_ONLY, SUPPORT_PARTIAL,
+                  SUPPORT_SIMULATABLE_UNVERIFIED, SUPPORT_FULL_VERIFIED)
+    levels: Dict[str, Dict[str, int]] = {"battle_skills": {k: 0 for k in _ALL_TIERS},
+                                         "traits": {k: 0 for k in _ALL_TIERS}}
     for name, rows in (("battle_skills", battle), ("traits", traits)):
         for s in rows:
             sup = classify_skill_declared(s)["support"]
