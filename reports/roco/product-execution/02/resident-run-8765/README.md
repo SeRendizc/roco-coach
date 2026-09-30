@@ -57,3 +57,18 @@ node E:\roco-scratch\plan02-realrun\browser-fixture-realrun.mjs --battle `
 ## 5 · 复跑
 
 见 §2 两条命令；`fixture-run.json` 每次覆盖本目录下这一份（不影响 `02/fixture-run.json` 那份权威件）。
+
+## 6 · ⚠ 路径口径（harness-verifier 复验时发现的悬挂引用，照实登记）
+
+`fixture-run.json` 里每条 `shots[].file` 是**按夹具的 `REPO` 常量拼出来的**（`REPO/reports/roco/product-execution/02/shots/<name>.png`），
+**不是本次截图真实落盘的位置**。本次为了不覆盖已入库的权威证据，输出被重定向到 `E:\roco-scratch\plan02-realrun\out\`，
+于是：
+
+- 9 张图**全部**在 `E:\roco-scratch\plan02-realrun\out\shots\`（9 个唯一 sha256，见 §3 表）；
+- 其中 **6 张**与 `02/shots/` 下同名文件**逐字节相同**（因此按 JSON 路径去读也对得上）；
+- 另 **3 张**（`desktop-01-lobby`、`flow-desktop-01-preview`、`narrow-390-00-lobby`）在 `02/shots/` 下是**隔离那次的另一张图**（哈希不同）；
+- `flow-desktop-04-after-refresh` 在 `02/shots/` 下**已不存在**（权威件里改名成了 `flow-390-04-after-refresh.png`）。
+
+⇒ **权威映射以本目录 §3 的哈希表为准**，不要按 JSON 里的 `file` 字段直接取文件。
+本目录只入库被引用的 2 张（`flow-desktop-01-preview.png`、`flow-390-02-seen-roster.png`）＋`fixture-run.json`＋本说明；
+其余 7 张按 §2 命令可复跑重生（其 sha256 已记录在 JSON 里，可用于核对重跑是否一致）。
