@@ -4080,7 +4080,7 @@
       "label": "在线段没有引擎 / 子进程调用，**而且判据真的覆盖到在线入口**（F-03-1）",
       "criteria": "把 `src/coach/opponent-belief.mjs` 的在线段（`ONLINE_SECTION_MARKER` **定义行之后**、`OFFLINE_SECTION_MARKER` **之前**）逐行取出、剥掉行注释与块注释，再对每行做 `FORBIDDEN_ONLINE_PATTERNS[].pattern` 的子串匹配：命中即 `ONLINE_ENGINE_CALL` / `ONLINE_SUBPROCESS_CALL`（红）。判据是**源码结构**，不是注释声明。⚠ 2026-09-30（F-03-1）：旧口径取的是标记串**第一次出现之前**的正文 —— 那正是定义行自己，于是「在线段」只剩 69 行文件头，判据**覆盖为空**却显示干净（假绿）。现在还要查**覆盖**：在线段必须定义全部 `ONLINE_ENTRYPOINTS`，缺一个 ⇒ `ONLINE_COVERAGE_INCOMPLETE`（红）。",
       "actual": {
-        "online_lines": 2803,
+        "online_lines": 3036,
         "scanned_online_entrypoints": 14,
         "missing_online_entrypoints": [],
         "hits": []
@@ -4409,6 +4409,41 @@
       "criterion": "候选被预算裁剪时，产出必须带**完整的截断信息**：候选总数 / 可用总数 / 保留数 / 被截断数与其分布 / 截断依据（可解释规则）；缺项或与 `budget` 不一致 ⇒ `TRUNCATION_INFO_MISSING`（红）。**被裁掉的重大威胁必须逐条点名**（candidate_id + threat_level + why + evidence_ids）：缩减可以裁，但不许隐去重大威胁 ⇒ `THREAT_HIDDEN_BY_TRUNCATION`（红）。「重大威胁」的口径只用公开数据（候选系别 × 我方阵容系别 × 冻结相性表），见 `THREAT_RULE`。",
       "expect_code": "THREAT_HIDDEN_BY_TRUNCATION",
       "actual": "[\"[THREAT_HIDDEN_BY_TRUNCATION] budget.truncation.dropped_threats.cand:pet_000242：点名的重大威胁必须带 why 与 evidence_ids（没有依据的「点名」等于没点）\"]"
+    },
+    {
+      "where": "action_scenarios（03b）",
+      "mutation": "塌缩成只剩留场",
+      "criterion": "动作级情景判据",
+      "expect_code": "ACTION_SCENARIOS_COLLAPSED",
+      "actual": "[\"ACTION_SCENARIOS_COLLAPSED@counts.switch\"]"
+    },
+    {
+      "where": "action_scenarios（03b）",
+      "mutation": "可学池冒充观察",
+      "criterion": "动作级情景判据",
+      "expect_code": "POOL_AS_OBSERVED",
+      "actual": "[\"POOL_AS_OBSERVED@scenarios.stay:pool:pet_000239.evidence_basis\"]"
+    },
+    {
+      "where": "action_scenarios（03b）",
+      "mutation": "observed 却没有证据",
+      "criterion": "动作级情景判据",
+      "expect_code": "ACTION_SCENARIO_UNTRACEABLE",
+      "actual": "[\"ACTION_SCENARIO_UNTRACEABLE@scenarios.stay:attack:pet_000007:skill_000340.evidence_ids\"]"
+    },
+    {
+      "where": "action_scenarios（03b）",
+      "mutation": "换人情景没有位次",
+      "criterion": "动作级情景判据",
+      "expect_code": "ACTION_SCENARIO_SHAPE",
+      "actual": "[\"ACTION_SCENARIO_SHAPE@scenarios.switch:pet_000008:slot1.slots\"]"
+    },
+    {
+      "where": "action_scenarios（03b）",
+      "mutation": "声明成‹概率›",
+      "criterion": "动作级情景判据",
+      "expect_code": "ACTION_SCENARIO_SHAPE",
+      "actual": "[\"ACTION_SCENARIO_SHAPE@declarations.is_probability\"]"
     }
   ],
   "audit": {

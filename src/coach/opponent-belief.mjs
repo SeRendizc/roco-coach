@@ -2595,6 +2595,259 @@ export function buildScenarioOutlook(input = {}) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// ③‴ 动作级情景（03b）：只把公开面能证明的当观察；留场与换人**并存**
+// ─────────────────────────────────────────────────────────────────────────
+
+/** 03b 动作级情景协议（04 侧消费；与 `buildScenarioOutlook` 的 band 分组**并存、不替代**）。 */
+export const ACTION_SCENARIO_PROTOCOL = 'rc604-opponent-action-scenarios/v1';
+/** 动作级情景的三类（与引擎 `/battle/plan` 的 `kind` 一一对应）。 */
+export const ACTION_SCENARIO_KINDS = Object.freeze(['stay_attack', 'stay_defense', 'switch_in_seen']);
+/** 证据基底：`observed` = 公开面能证明；`learnable_pool_hypothesis` = 假设（**不是**观察）。 */
+export const ACTION_EVIDENCE_BASES = Object.freeze(['observed', 'learnable_pool_hypothesis']);
+
+/**
+ * **动作级情景**（03b）：把「已见阵容 + 已公开动作」翻译成 04 侧要的**动作级**情景。
+ *
+ * 为什么另开一个导出（实测依据见 `reports/roco/product-execution/03/03b-action-scenarios.md`）：
+ *   · `buildScenarioOutlook()` 的 `band:<band>` 是**速度档分组**：同一 band 里既有可留场的成员、
+ *     也有只能靠换人上场的成员（实测 `band:fast` 4 = 已见2/未见2，场上那只只在 `band:slow`）；
+ *     把 band 改名成动作会把「**可能**换人」写成「**必然**留场」⇒ 动作级情景必须两类并存，
+ *     **绝不塌缩**（`ACTION_SCENARIOS_COLLAPSED`）。
+ *
+ * 硬约束：
+ *   ① 只有公开面能证明的才标 `observed`：`used_skills[]`（已出技能 + `evidence_id`）⇒ 留场攻击/防御；
+ *      `seen_roster[].slot` / `active.slot` ⇒ 换人位次。**已见之外的候选一律不落位次**
+ *      （未亮明的后备在公开面上只有 `{slot, fainted}`、没有 `pet_id`）。
+ *   ② 可学池（`candidates[].skills.possible`）只能当**假设** ⇒ `learnable_pool_hypothesis`，
+ *      **不许**当观察（`POOL_AS_OBSERVED`）。
+ *   ③ `declarations.is_probability:false`（与 03 家族一致）。
+ *   ④ 推断候选的位次 / 未出过的技能 / 对手是否换人 / 后备血量配招（P3）/ 区间转概率 ⇒ `unavailable[]`。
+ */
+export function buildActionScenarios(input = {}) {
+  const {catalog = null, publicFacts = null, view = null, observations = null,
+    skillPool = null, pool_limit = 8} = input ?? {};
+  const rawFacts = publicFacts ?? (view !== null ? readOpponentView(view).publicFacts : null);
+  const read = readPublicFacts(rawFacts);
+  const declarations = {
+    is_probability: false,
+    protocol: ACTION_SCENARIO_PROTOCOL,
+    why: '动作级情景没有频率数据：`observed` 是公开面能证明的，`learnable_pool_hypothesis` 是**假设**；'
+      + '情景之间不排序、不给概率、不给最优结论',
+    bases: ACTION_EVIDENCE_BASES,
+  };
+  if (!read.ok) {
+    return {protocol: ACTION_SCENARIO_PROTOCOL, available: false, unknown_reason: read.code,
+      scenarios: [], counts: {stay: 0, switch: 0, observed: 0, hypothesis: 0},
+      sources: {stay_available: false, switch_available: false},
+      unavailable: [{what: 'all_action_scenarios',
+        why: `公开事实输入越界（${read.code}）：fail closed，一条情景都不给`, evidence_ids: []}],
+      declarations, evidence: [], unverified: []};
+  }
+  const facts = read.facts ?? {};
+  const seen = observations ?? (view !== null ? readOpponentEvidence(view).observations : null);
+  // ⚠ `readPublicFacts()` 返回的 `facts` 是**扁平**形状（`{active, revealed_pets, own_team, mode, provenance}`），
+  // 而 `buildOpponentCandidates()` 吃的是**嵌套**形状（`{opponent:{active,revealed_pets}, …}`）⇒ 两处别混。
+  const active = isPlainObject(facts.active) ? facts.active : null;
+  // ⚠ 扁平形状里活跃那只的物种键是 `species_id`（`readPublicFacts` 的输出），不是 `pet_id`。
+  const activeId = active === null ? null
+    : (isNonEmptyString(active.species_id) ? active.species_id : (isNonEmptyString(active.pet_id) ? active.pet_id : null));
+  const activeSlot = Number.isInteger(active?.slot) ? active.slot : null;
+  const slotOf = new Map();
+  for (const row of arr(facts.revealed_pets)) {
+    const id = isNonEmptyString(row?.species_id) ? row.species_id
+      : (isNonEmptyString(row?.pet_id) ? row.pet_id : null);
+    if (id !== null && Number.isInteger(row?.slot)) slotOf.set(id, row.slot);
+  }
+  if (activeId !== null && activeSlot !== null) slotOf.set(activeId, activeSlot);
+  const benchFainted = new Map();
+  for (const row of arr(view?.opponent?.bench)) {
+    if (Number.isInteger(row?.slot)) benchFainted.set(row.slot, row.fainted === true);
+  }
+  const scenarios = [];
+  const unavailable = [];
+
+  // ── A) 已出技能 ⇒ 留场攻击 / 留场防御（**硬证据**）─────────────────────
+  for (const row of arr(seen?.used_skills)) {
+    if (!isNonEmptyString(row?.skill_id)) {
+      unavailable.push({what: 'used_skill_without_id',
+        why: '这条已出技能没有 skill_id（只有名字）：名字不足以定位动作 ⇒ 不进情景，如实报出来',
+        evidence_ids: [row?.evidence_id ?? 'view.opponent.revealed_skills']});
+      continue;
+    }
+    if (activeId === null || row.pet_id !== activeId) {
+      unavailable.push({what: `used_skill_of_non_active:${row.pet_id}:${row.skill_id}`,
+        why: '这只出过招但**当前不在场上**：「它现在能出什么」要等它在场才能算；'
+          + '位次虽有公开证据（seen_roster），也不许替引擎假定它已上场',
+        evidence_ids: [row.evidence_id]});
+      continue;
+    }
+    const skill = isPlainObject(skillPool) ? skillPool.skills?.get?.(row.skill_id) : null;
+    const isDefense = skill?.is_defense === true || skill?.category === '防御';
+    scenarios.push({
+      scenario_id: `stay:${isDefense ? 'defense' : 'attack'}:${activeId}:${row.skill_id}`,
+      kind: isDefense ? 'stay_defense' : 'stay_attack',
+      slots: activeSlot === null ? [] : [activeSlot],
+      species_ids: [activeId],
+      skill_ids: [row.skill_id],
+      evidence_basis: 'observed',
+      evidence_ids: [row.evidence_id],
+      label: `${activeId} 留场使用 ${skill?.name ?? row.name ?? row.skill_id}`,
+    });
+  }
+
+  // ── B) 可学池 ⇒ 留场攻击的**假设**（绝不标 observed）────────────────────
+  let poolCandidates = 0;
+  if (isPlainObject(skillPool)) {
+    const built = buildOpponentCandidates({catalog, publicFacts: rawFacts, skillPool,
+      budget: {limit: Math.max(1, pool_limit)}});
+    for (const candidate of arr(built.candidates)) {
+      if (candidate.basis === 'observed') continue;   // 已见那只的技能面只能靠已出证据
+      const attacks = arr(candidate.skills?.possible)
+        .filter((row) => row?.category !== '防御').map((row) => row?.skill_id)
+        .filter(isNonEmptyString);
+      if (attacks.length === 0) continue;
+      poolCandidates += 1;
+      scenarios.push({
+        scenario_id: `stay:pool:${candidate.species_id}`,
+        kind: 'stay_attack',
+        slots: [],                                   // 位次不可判定 ⇒ 空数组，不是猜一个
+        species_ids: [candidate.species_id],
+        skill_ids: attacks.slice(0, 4),
+        evidence_basis: 'learnable_pool_hypothesis',
+        evidence_ids: [`candidates[${candidate.species_id}].skills.possible`,
+          candidate.skills?.source_file ?? 'learnsets'],
+        label: `${candidate.species_id} 若在场时可能使用的技能（可学池：假设，不是观察）`,
+      });
+    }
+  } else {
+    unavailable.push({what: 'learnable_pool_hypothesis',
+      why: '没有注入技能池 ⇒ 连假设性的可学池情景都给不出', evidence_ids: []});
+  }
+
+  // ── C) 换入**已见**威胁（位次有公开证据才出）────────────────────────────
+  for (const petId of [...slotOf.keys()].sort()) {
+    const slot = slotOf.get(petId);
+    if (slot === activeSlot) continue;               // 已经在场上：那是留场，不是换人
+    if (benchFainted.get(slot) === true) continue;   // 倒下的换不上来（公开证据）
+    scenarios.push({
+      scenario_id: `switch:${petId}:slot${slot}`,
+      kind: 'switch_in_seen',
+      slots: [slot],
+      species_ids: [petId],
+      skill_ids: [],
+      evidence_basis: 'observed',
+      evidence_ids: [`view.seen_roster[slot=${slot}]`],
+      label: `对手换入已见的 ${petId}（第 ${slot} 位）`,
+    });
+  }
+
+  // ── D) 不可判定项（逐条带原因）──────────────────────────────────────────
+  unavailable.push({what: 'inferred_candidate_slots',
+    why: '未亮明的后备在公开面上只有 `{slot, fainted}`、**没有 pet_id** ⇒ 推断候选落到哪个位次'
+      + '不可判定：不许为它们生成 `switch_in_seen` 位次',
+    evidence_ids: ['view.opponent.bench']});
+  unavailable.push({what: 'opponent_will_switch',
+    why: '公开面没有任何「他要换」的证据：换人情景只是**可能**，不是必然（两类动作必须并存）',
+    evidence_ids: []});
+  unavailable.push({what: 'bench_hp_and_moveset',
+    why: 'P3 残留：对手后备按满血 + 规范配招假设建模（引擎 `state_from_public_planner`），不是观察',
+    evidence_ids: []});
+  unavailable.push({what: 'unrevealed_skills_as_actions',
+    why: '未出过的技能只有可学池语义 ⇒ 一律标 `learnable_pool_hypothesis`，不当观察、不落位次',
+    evidence_ids: []});
+  unavailable.push({what: 'range_or_weight_as_probability',
+    why: '03.4 的区间/权重是基线表达（`is_probability:false`）⇒ 不许转成动作概率',
+    evidence_ids: ['rc604-opponent-outlook/v1']});
+
+  scenarios.sort((a, b) => (a.scenario_id < b.scenario_id ? -1 : 1));
+  const counts = {
+    stay: scenarios.filter((row) => row.kind === 'stay_attack' || row.kind === 'stay_defense').length,
+    switch: scenarios.filter((row) => row.kind === 'switch_in_seen').length,
+    observed: scenarios.filter((row) => row.evidence_basis === 'observed').length,
+    hypothesis: scenarios.filter((row) => row.evidence_basis === 'learnable_pool_hypothesis').length,
+  };
+  return {
+    protocol: ACTION_SCENARIO_PROTOCOL,
+    available: true,
+    unknown_reason: null,
+    scenarios,
+    counts,
+    sources: {stay_available: counts.stay > 0, switch_available: counts.switch > 0,
+      pool_candidates: poolCandidates},
+    unavailable,
+    declarations,
+    evidence: [
+      evidence('view', 'view.opponent.revealed_skills', 'action_scenarios_observed', counts.observed,
+        '硬证据：已出技能（留场攻击/防御）+ 已见位次（换人）'),
+      evidence('injected:publicFacts', 'candidates[].skills.possible', 'action_scenarios_hypothesis',
+        counts.hypothesis, '可学池 = 假设（learnable_pool_hypothesis），**不是**观察'),
+      evidence('view', 'view.opponent.bench', 'action_scenarios_unavailable',
+        unavailable.map((row) => row.what), '不可判定项逐条登记：位次 / 是否会换人 / 后备血量配招'),
+    ],
+    unverified: [
+      '未核实：对手**会不会**换人 —— 公开面没有这类证据，换人只是可能情景（两类动作并存，不许塌缩）',
+      '未核实：未出过的技能是否真的在对手配招里 —— 只有可学池假设',
+      '未核实：对手后备的血量与配招（P3：满血 + 规范配招假设）',
+    ],
+    provenance: isPlainObject(seen?.contract) ? seen.contract : null,
+  };
+}
+
+/**
+ * 动作级情景的判据（供 `auditOpponentBelief({action_scenarios})` 使用）。
+ * 每条都对应一个必红场景；`ACTION_SCENARIOS_COLLAPSED` 钉住「绝不塌缩」。
+ */
+export function actionScenarioProblems(doc) {
+  const problems = [];
+  const push = (code, path, detail) => problems.push({code, path, detail});
+  if (!isPlainObject(doc)) return {ok: true, problems};
+  if (doc.protocol !== ACTION_SCENARIO_PROTOCOL) {
+    push('ACTION_SCENARIO_SHAPE', 'protocol', `协议必须是 ${ACTION_SCENARIO_PROTOCOL}`);
+  }
+  if (doc.declarations?.is_probability !== false) {
+    push('ACTION_SCENARIO_SHAPE', 'declarations.is_probability',
+      '动作级情景必须声明 `is_probability:false`（没有频率依据，不许当概率用）');
+  }
+  for (const row of arr(doc.scenarios)) {
+    const at = `scenarios.${row?.scenario_id ?? '?'}`;
+    if (!ACTION_SCENARIO_KINDS.includes(row?.kind)) {
+      push('ACTION_SCENARIO_SHAPE', `${at}.kind`, `kind 必须是 ${ACTION_SCENARIO_KINDS.join(' / ')}`);
+    }
+    if (!ACTION_EVIDENCE_BASES.includes(row?.evidence_basis)) {
+      push('ACTION_SCENARIO_SHAPE', `${at}.evidence_basis`,
+        `evidence_basis 必须是 ${ACTION_EVIDENCE_BASES.join(' / ')}`);
+    }
+    if (row?.evidence_basis === 'observed' && arr(row?.evidence_ids).length === 0) {
+      push('ACTION_SCENARIO_UNTRACEABLE', `${at}.evidence_ids`,
+        '`observed` 情景必须能追到公开载荷里的位置（evidence_ids 不能空）');
+    }
+    const fromPool = arr(row?.evidence_ids).some((id) => String(id).includes('skills.possible'));
+    if (fromPool && row?.evidence_basis !== 'learnable_pool_hypothesis') {
+      push('POOL_AS_OBSERVED', `${at}.evidence_basis`,
+        '证据来自可学池（`skills.possible`）就必须标 `learnable_pool_hypothesis`，不许当观察');
+    }
+    if (row?.kind === 'switch_in_seen' && arr(row?.slots).length === 0) {
+      push('ACTION_SCENARIO_SHAPE', `${at}.slots`, '换人情景必须带位次（位次只能是公开证据给的）');
+    }
+    if (row?.kind === 'switch_in_seen' && arr(row?.slots).length > 0 && arr(row?.evidence_ids).length === 0) {
+      push('ACTION_SCENARIO_UNTRACEABLE', `${at}.evidence_ids`, '换人情景的位次必须有公开证据');
+    }
+  }
+  // **绝不塌缩**：既有留场证据、也有换人证据时，两类都必须出
+  if (doc.sources?.stay_available === true && doc.sources?.switch_available === true
+    && (doc.counts?.stay ?? 0) === 0) {
+    push('ACTION_SCENARIOS_COLLAPSED', 'counts.stay',
+      '既有留场证据也有换人证据，产出里却一条留场情景都没有：动作级情景不许塌缩成单类');
+  }
+  if (doc.sources?.stay_available === true && doc.sources?.switch_available === true
+    && (doc.counts?.switch ?? 0) === 0) {
+    push('ACTION_SCENARIOS_COLLAPSED', 'counts.switch',
+      '既有留场证据也有换人证据，产出里却一条换人情景都没有（= 把「可能换人」写成「必然留场」）');
+  }
+  return {ok: problems.length === 0, problems};
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // ③ 频次信念：需要真实对局数据（本仓没有 ⇒ fail closed）
 // ─────────────────────────────────────────────────────────────────────────
 /**

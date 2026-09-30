@@ -32,7 +32,8 @@ import {
   BANNED_CLAIM_KEYS, BANNED_CLAIM_WORDS, BELIEF_IDS, BELIEF_KINDS, CANDIDATE_BASES,
   FAIL_CLOSED_REASONS, FORBIDDEN_ONLINE_PATTERNS, HIDDEN_FACT_FIELDS, NON_INFORMATIVE_DECLARATION,
   ONLINE_ENTRYPOINTS, PUBLIC_FACT_FIELDS, PUBLIC_FACT_FIELDS_OPTIONAL, RC604_REPORT_PATH, RULES, RULE_IDS,
-  SKILL_POOL_GRADES, STRUCTURAL_CRITERIA, auditOpponentBelief, beliefReport, buildCandidateUniverse,
+  SKILL_POOL_GRADES, STRUCTURAL_CRITERIA, actionScenarioProblems, auditOpponentBelief, beliefReport,
+  buildActionScenarios, buildCandidateUniverse,
   buildMeasuredFrequencySample, buildOpponentCandidates, buildScenarioOutlook, exact, formatAuditProblem,
   frequencyBelief, legalSkillLoadout, normalizeFrequencyInput, onlineSectionCoverage, onlineSectionOf,
   readOpponentEvidence, readOpponentView, readPublicFacts, revealedConditioned, scanForbiddenPatterns,
@@ -1715,6 +1716,109 @@ test('F-03-4：候选集合不可用（fail-closed 输入）也必须逐条给�
   raw('F-03-4 预算截断的降级原因', {degraded: truncated.degraded, reasons: truncated.degrade_reasons});
   assert.equal(truncated.degraded, true);
   assert.ok(truncated.degrade_reasons.some((line) => line.includes('预算裁掉')));
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// 03b · 动作级情景：只把能证明的当观察；留场与换人并存
+// ─────────────────────────────────────────────────────────────────────────
+
+test('03b-A（真 view）：留场与换人并存、observed 可追、可学池只能当假设', () => {
+  const action = buildActionScenarios({catalog: index, view: VIEW_33.pvp, skillPool: SKILL_POOL});
+  raw('03b-A 动作级情景读数', {protocol: action.protocol, available: action.available,
+    counts: action.counts, sources: action.sources,
+    scenarios: action.scenarios.map((row) => [row.scenario_id, row.kind, row.evidence_basis,
+      row.slots, row.skill_ids.length]),
+    unavailable: action.unavailable.map((row) => row.what)});
+  assert.equal(action.protocol, 'rc604-opponent-action-scenarios/v1');
+  assert.equal(action.available, true);
+  assert.equal(action.declarations.is_probability, false);
+  // ② 两种动作**并存**
+  assert.equal(action.sources.stay_available, true);
+  assert.equal(action.sources.switch_available, true);
+  assert.ok(action.counts.stay > 0 && action.counts.switch > 0, '03b 两类动作必须并存，不许塌缩');
+  const seenSlots = new Set(VIEW_33.pvp.seen_roster.map((row) => row.slot));
+  const activeSlot = VIEW_33.pvp.opponent.field.slot;
+  for (const row of action.scenarios) {
+    if (row.evidence_basis === 'observed') {
+      assert.ok(row.evidence_ids.length > 0, `03b ${row.scenario_id} 必须能追到证据`);
+    }
+    if (row.kind === 'switch_in_seen') {
+      assert.equal(row.evidence_basis, 'observed');
+      assert.equal(row.slots.length, 1);
+      assert.ok(seenSlots.has(row.slots[0]), '03b 换人位次必须来自 seen_roster');
+      assert.notEqual(row.slots[0], activeSlot, '03b 场上那只不是换人情景');
+    }
+    if (row.kind === 'stay_attack' && row.evidence_basis === 'learnable_pool_hypothesis') {
+      assert.deepEqual(row.slots, [], '03b 推断候选的位次不可判定 ⇒ slots 必须为空');
+    }
+  }
+  const observedSkills = new Set(action.scenarios.filter((row) => row.evidence_basis === 'observed')
+    .flatMap((row) => row.skill_ids));
+  for (const used of readOpponentEvidence(VIEW_33.pvp).observations.used_skills) {
+    assert.ok(observedSkills.has(used.skill_id), `03b 已出技能 ${used.skill_id} 必须有 observed 情景`);
+  }
+  assert.ok(action.scenarios.some((row) => row.kind === 'stay_defense'), '03b 防御类要落 stay_defense');
+  const unavailableKinds = new Set(action.unavailable.map((row) => row.what));
+  for (const what of ['inferred_candidate_slots', 'opponent_will_switch', 'bench_hp_and_moveset',
+    'unrevealed_skills_as_actions']) {
+    assert.ok(unavailableKinds.has(what), `03b unavailable 必须登记 ${what}`);
+  }
+  const audit = actionScenarioProblems(action);
+  raw('03b-A 判据', {ok: audit.ok, problems: audit.problems.map((row) => row.code)});
+  assert.equal(audit.ok, true, `03b 合法产出必须放行：${JSON.stringify(audit.problems)}`);
+});
+
+test('03b-B：隐藏真值变化不影响动作级情景（相同公开史 ⇒ 逐字段相同）', () => {
+  const base = buildActionScenarios({catalog: index, view: VIEW_33.pvp, skillPool: SKILL_POOL});
+  const dirty = clone(VIEW_33.pvp);
+  dirty.opponent._truth = {loadouts: {pet_000007: ['skill_999999']}, bench_hp: [1, 2, 3]};
+  dirty.hidden_individual = {pet_000007: {atk: 999}};
+  const other = buildActionScenarios({catalog: index, view: dirty, skillPool: SKILL_POOL});
+  raw('03b-B 隐藏真值不变', {base_n: base.scenarios.length, other_n: other.scenarios.length});
+  assert.equal(JSON.stringify(other.scenarios), JSON.stringify(base.scenarios),
+    '03b 隐藏真值变化不许改变动作级情景');
+  assert.equal(JSON.stringify(other.counts), JSON.stringify(base.counts));
+});
+
+test('03b-M：塌缩 / 池冒充观察 / 无证据 三条变异必红（且「没有换人证据」不许误报）', () => {
+  const action = buildActionScenarios({catalog: index, view: VIEW_33.pvp, skillPool: SKILL_POOL});
+  assert.equal(actionScenarioProblems(action).ok, true, '控制组不许红');
+
+  const cases = [
+    ['塌缩成只剩留场', (doc) => {
+      doc.scenarios = doc.scenarios.filter((row) => row.kind !== 'switch_in_seen');
+      doc.counts.switch = 0;
+    }, 'ACTION_SCENARIOS_COLLAPSED'],
+    ['可学池冒充观察', (doc) => {
+      const pool = doc.scenarios.find((row) => row.evidence_basis === 'learnable_pool_hypothesis');
+      pool.evidence_basis = 'observed';
+    }, 'POOL_AS_OBSERVED'],
+    ['observed 却没有证据', (doc) => {
+      doc.scenarios.find((row) => row.evidence_basis === 'observed').evidence_ids = [];
+    }, 'ACTION_SCENARIO_UNTRACEABLE'],
+    ['换人情景没有位次', (doc) => {
+      doc.scenarios.find((row) => row.kind === 'switch_in_seen').slots = [];
+    }, 'ACTION_SCENARIO_SHAPE'],
+    ['声明成概率', (doc) => { doc.declarations.is_probability = true; }, 'ACTION_SCENARIO_SHAPE'],
+  ];
+  for (const [label, mutate, code] of cases) {
+    const mutated = clone(action);
+    mutate(mutated);
+    const audit = actionScenarioProblems(mutated);
+    raw(`03b-M ${label}`, {ok: audit.ok, problems: audit.problems.map((row) => row.code)});
+    proof('action_scenarios（03b）', label, '动作级情景判据', code,
+      audit.problems.map((row) => `${row.code}@${row.path}`).slice(0, 1));
+    assert.equal(audit.ok, false, `03b-M ${label} 必须判红`);
+    assert.ok(audit.problems.some((row) => row.code === code), `03b-M ${label} 必须命中 ${code}`);
+  }
+  // 反向控制：**没有换人证据**时不许误报塌缩
+  const onlyActive = {opponent: {active: clone(VIEW_33.pvp.opponent.field), revealed_pets: []},
+    own_team: {pets: OWN_TEAM}, mode: clone(FACTS_SINGLE_SLOW.mode), provenance: clone(PROVENANCE)};
+  const solo = buildActionScenarios({catalog: index, publicFacts: onlyActive, skillPool: SKILL_POOL});
+  raw('03b-M 反向控制（无换人证据）', {sources: solo.sources, counts: solo.counts,
+    problems: actionScenarioProblems(solo).problems.map((row) => row.code)});
+  assert.equal(solo.sources.switch_available, false);
+  assert.equal(actionScenarioProblems(solo).ok, true, '03b 没有换人证据时不许误报塌缩');
 });
 
 // ─────────────────────────────────────────────────────────────────────────
