@@ -36,6 +36,9 @@
     "src/coach/roco-client.js": "plan01-engine（Lead 授权：battleNew 显式解构白名单，见 D-4）",
     "tests/*.test.js": "plan01-engine（仅实际改动的 Node 契约测试，提交时按路径限定）",
     "src/server/roco-service.js": "plan01-engine",
+    "src/client/**": "plan02-front（02：roco.js/roco.html/roco.css/battle-v3.css/app.js）",
+    "tests/roco-battle-context.test.js": "plan02-front（Lead 授权最小改钉 :124，见 D-11）",
+    "reports/roco/product-execution/02/**": "plan02-front（verify-* 归 harness-verifier）",
     "scripts/roco/**": "harness-verifier",
     "reports/roco/product-execution/harness/**": "harness-verifier",
     "reports/roco/product-execution/00/**": "plan00-closer（verify-* 归 harness-verifier）",
@@ -364,6 +367,18 @@
       "id": "D-10",
       "what": "01 冻结清单里越界产物的归属",
       "decision": "approve：reports/roco/rc404/regression-set.json 是 plan01-engine 被授权改 regression.py 的必然产物（测试指路的 --out 重建），算 01 切片入库；reports/roco/product-execution/*/.work-backup/ 不入库（已加 .gitignore）；提交以成员报告的确切文件清单为准",
+      "by": "lead"
+    },
+    {
+      "id": "D-11",
+      "what": "02 勘察提出的三处影响实现的分叉（客户端看不到预览事件 / seen_roster 缺 types / Node 判据会误伤）",
+      "decision": "① 锚点：批准用 `seen_roster[].revealed_via/revealed_turn` 作为「展示开始与观察事件同源」的锚，客户端不消费（也**不许自造**）event_seq；「不把计时结束当首次看见」= 以渲染那一刻的 shownAt 为准，closedBy∈{auto,button,esc} 分开记。② types：批准页面按 pet_id join 本地物种图鉴（**只物种公开事实**），硬要求「个体面板 stats/天赋/性格/六个体值一个都不许出现在 DOM 或公开载荷」并有断言；不改 src/server。③ `tests/roco-battle-context.test.js:124` 批准最小改钉（仅此文件）：原断言逐字留档 + 独立运行时红因 + 改成结构断言（后备 pet_id 只能来自 view.seen_roster；无预览时不得出现），保留原意图，不许删条目或放宽成恒真",
+      "by": "lead"
+    },
+    {
+      "id": "D-12",
+      "what": "02 报告的浏览器进程树「原子中断」环境阻断怎么处置",
+      "decision": "不定性为环境限制，先按三步重试并留证：① managed 后台作业跑（前台有超时、后台不受限）；② 拆两进程（服务常驻 + CDP 驱动）区分「一次性进程树被杀」与「特定动作触发」；③ 三条都试过仍失败才允许写「未定位根因」。同时让 harness-verifier 独立复现同一路径。在解除前：02.5 记 pending_environment，**不许**用大厅/静态截图冒充「真实操作走完」；收口时若仍未解除，浏览器操作栏如实登记不可得，由 Lead 决定是否按已登记偏差收口",
       "by": "lead"
     }
   ]
