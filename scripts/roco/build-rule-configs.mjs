@@ -685,9 +685,18 @@ export function buildConfigs({ledger, battleModes}) {
       //   「全技能-2」照字面的**必然结果**，不是 bug；若人类改判为"夹到 0"/"抛错" ⇒ **只改
       //   `env.effective_skill_cost` 那一处**。
       global_skill_mods: field(true, 'ENGINE_HYPOTHESIS', null,
-      // ⚠ **默认 false** = 「接线了但还没打开」（#128 ✓）：解析器已接六处，但能力位未开 ⇒ 行为零变化 ✓。
-        '「（并）获得全技能{威力|能耗}±N」——非冒号体（与 global_skill_mods 的冒号体分开；默认关）'),
         '「全技能威力/能耗永久±N」：所有技能的持久修正（威力按百分点、能耗按点；能耗不为负）'),
+      // ⚠ **非冒号体**「（并）获得全技能{威力|能耗}±N」对应的叶子 `damage.global_skill_mod_text`
+      //   **刻意不在这里声明**（默认关）：`env.py:1295`（防御支）/`:1396`（攻击支）/`:1869`（状态支）
+      //   三处挂在 `cfg.damage_global_skill_mod_text` 上，而 `RuleConfig` **没有这个叶子**
+      //   ⇒ `getattr(..., False)` 恒 False ⇒ 那三次 `resolve_global_skill_mod(...)` 永不产出。
+      //   台账口径见 `coverage.py:1004-1029`（分计划 00 · 族③ 收窄：**非冒号体不认领**，
+      //   缺如实登记）；该叶子的接线曾被回退（`docs/roco/coach-理想形态-计划书-2026-09-30.md` §"回退"）。
+      //   ⇒ **「接线」或「删死代码」是 `env.py` 的独立事项**（属 01 写域），不在本文件里顺手打开。
+      //   ⚠ 2026-10-01（Lead 修复）：交接快照 `b5a8d51` 在此处留下**半截编辑**（多一个字符串 + `)`）
+      //   ⇒ `node --check` 失败 ⇒ 本文件无法被解析 ⇒ **4 个导入它的文件级判据永远红**
+      //   （`roco-mana-actions` / `roco-rule-config` / `roco-six-pet-battle` / `roco-weather-pvp`）。
+      //   本次只恢复可解析性、**行为零变化**（不改任何 leaf 的值/声明面）。
       cond_self_debuff_power: field(true, 'ENGINE_HYPOTHESIS', null,
         '「自己有减益时」的条件门：减益 = buffs/buffs_flat 的负值（状态层数不算）'),
       self_power_flat: field(true, 'ENGINE_HYPOTHESIS', null,
