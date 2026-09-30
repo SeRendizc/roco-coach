@@ -329,7 +329,15 @@ export function reviewMatch(context){
   if(!decision)return '缺当时的分支记录：本局只记下了你出了什么，没记下当时还有哪些合法选择 —— 所以我不比较"如果换成别的会怎样"。';
   const alts=decision.options.filter(o=>JSON.stringify(o.action)!==JSON.stringify(decision.chosen.action));
   if(!alts.length)return `这一个回合引擎没有给出可排序的候选（撤退或规则版本不匹配），只保留实际选择「${decision.chosen.name}」。`;
-  return `当时可比较的两个候选动作：${alts.slice(0,2).map(o=>`「${o.name}」`).join('与')}；评分差 ${decision.gap??'未登记'}（事前一回合的公开信息，不是结果反推）。`;
+  // D-31（2026-09-30，lead-mac 全功能审核）：这里原来直接内插 `decision.gap`
+  //   ⇒ 玩家读到「评分差 6523.247662596753」（13 位小数）。同仓给玩家看的分数都有口径
+  //   （`strategist.js:40` `toFixed(1)` · `roco-experience.js:1148/1150` `toFixed(2)` ·
+  //   `coach-advice.js:695/719` `toFixed(3)`），只有这一条露原始浮点。
+  //   取 `toFixed(1)`（不是删掉数字）：改动最小、与军师那一侧同一精度，且这句话本身
+  //   已经写明「事前一回合的公开信息」——数字留着仍可核对；取不到就如实写「未登记」。
+  const gapNumber=decision.gap===null||decision.gap===undefined||decision.gap===''?NaN:Number(decision.gap);
+  const gapText=Number.isFinite(gapNumber)?gapNumber.toFixed(1):'未登记';
+  return `当时可比较的两个候选动作：${alts.slice(0,2).map(o=>`「${o.name}」`).join('与')}；评分差 ${gapText}（事前一回合的公开信息，不是结果反推）。`;
  })();
  const nextLine=(()=>{
   if(practice?.question)return `${practice.question.replace(/^假设练习（参数已改动）：/,'')}（${practice.answer}）`;
