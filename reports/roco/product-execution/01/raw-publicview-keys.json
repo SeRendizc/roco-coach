@@ -1,0 +1,142 @@
+{
+ "engine": {
+  "match_id": "m-f3a4c9affd66ef3d",
+  "rules_version": "roco-world-s4-2026-09-10/legacy_sim_v1",
+  "decision_id": "m-f3a4c9affd66ef3d:v6",
+  "state_version": 6
+ },
+ "view_top_keys": [
+  "assumptions",
+  "battle_result",
+  "cpu_legal_count",
+  "decision_id",
+  "events",
+  "legal",
+  "mana",
+  "match_id",
+  "mode_id",
+  "needs_replacement",
+  "opponent",
+  "phase",
+  "rules_version",
+  "ruleset_config_id",
+  "ruleset_id",
+  "schema_version",
+  "seen_roster",
+  "self",
+  "state_version",
+  "strategy",
+  "turn",
+  "unsupported_count",
+  "unverified_notes",
+  "unverified_overrides"
+ ],
+ "view": {
+  "assumptions": {
+   "note": "string",
+   "opponent_bench": "string"
+  },
+  "battle_result": "null",
+  "cpu_legal_count": "number",
+  "decision_id": "string",
+  "events": [
+   "object"
+  ],
+  "legal": [
+   "object"
+  ],
+  "mana": "null",
+  "match_id": "string",
+  "mode_id": "null",
+  "needs_replacement": [],
+  "opponent": {
+   "active": "number",
+   "bench": "array",
+   "energy_max": "number",
+   "field": "object",
+   "living_count": "number",
+   "revealed_skills": "object"
+  },
+  "phase": "string",
+  "rules_version": "string",
+  "ruleset_config_id": "string",
+  "ruleset_id": "string",
+  "schema_version": "number",
+  "seen_roster": [
+   "object"
+  ],
+  "self": {
+   "active": "number",
+   "energy_charge": "object",
+   "energy_max": "number",
+   "loadouts": "object",
+   "pets": "array",
+   "skills": "array"
+  },
+  "state_version": "number",
+  "strategy": {
+   "name": "string",
+   "version": "number"
+  },
+  "turn": "number",
+  "unsupported_count": "number",
+  "unverified_notes": [
+   "string"
+  ],
+  "unverified_overrides": []
+ },
+ "checks": {
+  "has_private_state": false,
+  "contract_forwarded": true,
+  "seen_roster_present": true,
+  "seen_roster": [
+   {
+    "slot": 0,
+    "pet_id": "pet_000417",
+    "name": "圆号鱼",
+    "revealed_via": "opening_preview",
+    "revealed_turn": 1
+   },
+   {
+    "slot": 1,
+    "pet_id": "pet_000112",
+    "name": "雪影娃娃",
+    "revealed_via": "opening_preview",
+    "revealed_turn": 1
+   },
+   {
+    "slot": 2,
+    "pet_id": "pet_000062",
+    "name": "音速犬",
+    "revealed_via": "opening_preview",
+    "revealed_turn": 1
+   }
+  ],
+  "revealed_skills": {
+   "pet_000417": [
+    {
+     "skill_id": "skill_000286",
+     "name": "防御",
+     "element": "普通系",
+     "category": "防御",
+     "energy": 1,
+     "power": null,
+     "power_status": "not_provided_by_source",
+     "damage_class": null,
+     "desc": "减伤70%，应对攻击。",
+     "is_trait": false
+    }
+   ]
+  },
+  "bench_keys": [
+   [
+    "fainted",
+    "slot"
+   ],
+   [
+    "fainted",
+    "slot"
+   ]
+  ]
+ }
+}

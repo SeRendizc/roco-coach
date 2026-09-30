@@ -1,0 +1,188 @@
+{
+ "battle_advance_status": 200,
+ "battle_new_status": 200,
+ "decision_id": "m-f3a4c9affd66ef3d:v6",
+ "faces": {
+  "observation_for": {
+   "opponent": {
+    "active": "int",
+    "field": "dict",
+    "living_count": "int",
+    "pets": "list"
+   },
+   "phase": "str",
+   "result": "NoneType",
+   "revealed": {
+    "opponent_roster": "list",
+    "opponent_skills": "dict"
+   },
+   "ruleset_id": "str",
+   "self": {
+    "active": "int",
+    "items": "dict",
+    "pets": "list"
+   },
+   "side": "str",
+   "state_version": "int",
+   "turn": "int"
+  },
+  "public_planner_state": {
+   "assumptions": {
+    "note": "str",
+    "opponent_bench": "str"
+   },
+   "decision_id": "str",
+   "match_id": "str",
+   "opponent": {
+    "active": "int",
+    "bench": "list",
+    "field": "dict",
+    "living_count": "int"
+   },
+   "phase": "str",
+   "result": "NoneType",
+   "revealed": {
+    "opponent_roster": "list",
+    "opponent_skills": "dict"
+   },
+   "rules_version": "str",
+   "ruleset_config_id": "str",
+   "ruleset_id": "str",
+   "schema_version": "int",
+   "self": {
+    "active": "int",
+    "items": "dict",
+    "loadouts": "dict",
+    "pets": "list"
+   },
+   "side": "str",
+   "state_version": "int",
+   "turn": "int",
+   "unverified_overrides": []
+  },
+  "ui_public_view": {
+   "decision_id": "str",
+   "legal": {
+    "player": "list"
+   },
+   "match_id": "str",
+   "notes": {
+    "coach_protocol": "str",
+    "opponent_bench": "str",
+    "unverified_overrides": "list"
+   },
+   "opponent": {
+    "active": "int",
+    "bench": "list",
+    "energy_charge": "NoneType",
+    "energy_max": "int",
+    "field": "dict",
+    "living_count": "int"
+   },
+   "phase": "str",
+   "result": "NoneType",
+   "revealed": {
+    "opponent_roster": "list",
+    "opponent_skills": "dict"
+   },
+   "rules_version": "str",
+   "ruleset_config_id": "str",
+   "ruleset_id": "str",
+   "schema_version": "int",
+   "self": {
+    "active": "int",
+    "energy_charge": "NoneType",
+    "energy_max": "int",
+    "items": "dict",
+    "loadouts": "dict",
+    "magic": "NoneType",
+    "pets": "list",
+    "skills": "list"
+   },
+   "side": "str",
+   "state_version": "int",
+   "turn": "int",
+   "unverified_overrides": []
+  }
+ },
+ "legs": {
+  "client_context": "src/client/roco.js coachRocoBattle 快照",
+  "coach_tool": "src/coach/toolbox.js / runtime.js",
+  "node_bridge_public": "src/server/roco-service.js plannerPublicOf → client.planActions",
+  "node_view": "src/server/roco-service.js publicView",
+  "python_observation": "schema.observation_for（env.observe 转发）",
+  "python_public": "env.public_planner_state",
+  "python_ui": "env.ui_public_view",
+  "replay": "env.replay(record.replay_plan())",
+  "session_cache": "src/server/roco-service.js sessions（match_id/battle_id/state_version/rules_version）"
+ },
+ "match_id": "m-f3a4c9affd66ef3d",
+ "private": {
+  "history_entries": 1,
+  "history_entry_keys": [
+   "enemy_action",
+   "events",
+   "player_action",
+   "pre_observation_hash",
+   "pre_observation_opponent_hash",
+   "state_version",
+   "turn"
+  ],
+  "serialize_top_keys": [
+   "enemy",
+   "events",
+   "history",
+   "log",
+   "phase",
+   "player",
+   "replace_queue",
+   "result",
+   "ruleset_config_id",
+   "ruleset_id",
+   "seed",
+   "state_version",
+   "turn",
+   "unsupported"
+  ]
+ },
+ "receipt": {
+  "result_keys": [
+   "decision_id",
+   "event",
+   "events",
+   "legal",
+   "match_id",
+   "needs_replacement",
+   "note",
+   "opening_reveal",
+   "phase",
+   "public",
+   "result",
+   "rules_version",
+   "state",
+   "state_version",
+   "strategy",
+   "trust_domain",
+   "turn",
+   "ui",
+   "unsupported_seen"
+  ],
+  "top_keys": [
+   "coverage",
+   "error",
+   "error_type",
+   "evidence_ids",
+   "latency_ms",
+   "ok",
+   "protocol_version",
+   "result",
+   "ruleset_id",
+   "service",
+   "service_version",
+   "snapshot_fingerprint",
+   "state_version",
+   "unsupported"
+  ]
+ },
+ "rules_version": "roco-world-s4-2026-09-10/legacy_sim_v1"
+}

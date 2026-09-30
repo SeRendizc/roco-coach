@@ -1,0 +1,221 @@
+{
+  "schema": "roco-dsh-plan-result/v1",
+  "plan_id": "01",
+  "status": "engine_and_closeout_complete_frontend_carved_out_to_02",
+  "completed_steps": ["01.1", "01.2", "01.3", "01.4", "01.5", "01.6"],
+  "remaining_steps": [],
+  "remaining_note": "01-PLAN 的六步在**引擎侧 + Node 转发 + 收尾证据**范围内全部落地；「前端开局预览与已见阵容回看入口」经 Lead 2026-09-30 裁决划归分计划 02（写域 src/client/roco.js / roco.html / roco.css / battle-v3.css），不在本项 remaining_steps 内。残留缺口见 residual_gaps（G1–G10），逐条标了建议归属。",
+  "checked_at": "2026-09-30T19:05:00+08:00",
+
+  "base_head": "83ed968",
+  "tested_head": "5002433",
+  "tested_head_note": "5002433 = 01 引擎侧切片提交（远端 SHA 已核）；其后 3cc3010 只改 STATE.json（Lead）。**冻结时点（2026-09-30 18:0x–18:5x）**工作区里没有他人对 roco/src / roco/tests 的在飞改动（coverage.py 在工作区未修改，其内容来自已提交的 78766db），全文读数都在那棵树上取得、treehash 跑前跑后一致。**收尾之后**（本文写完时）plan00-closer 的 D-8 改动落在 `roco/src/roco_env/coverage.py` + `roco/tests/test_effect_coverage.py`（他人的在飞改动，不在本切片）⇒ 当前工作区 TREE 已由 `2c5da5f9…` 变为 `d22269baad6fd2363a198f687ac0f66d41489087ff7c2637448ca8ed9f347639`。本 result.json 引用的树指纹一律是**冻结提交**那一棵。",
+  "src_tree_hash": {
+    "roco/src": "cb7e5c39c49d41e7018a21dec4cc932c965b4b2bc62e3bcafd5710fc501b3893",
+    "roco/tests": "7e9859d05897d56872cb017d4a5f6fc465172f3f38c8d553abafd9cad45a3a16",
+    "TREE": "2c5da5f9a273698d00c837568765a877b1e9073081083731f310de876050348d",
+    "tool": "scripts/roco/verify-src-treehash.py",
+    "before_after": "全量跑前/跑后各取一次，逐字节相同（TREEHASH_IDENTICAL=true）"
+  },
+  "dirty_file_hashes": {
+    "algo": "git 跟踪文件 = git hash-object（blob sha1）；新增未跟踪文件 = sha256（前缀 sha256:）",
+    "roco/src/roco_env/env.py": "b177b89cecb2f94ae095e2cf80fb6de0fe945c86",
+    "roco/src/roco_env/schema.py": "e75d57199238df7499fb54502e8b8ecab1901968",
+    "roco/src/roco_env/service.py": "6188fb2a8a47a98d5a905edc8f999dca92ea16cc",
+    "roco/src/roco_env/regression.py": "4b75b3ca22c6bb93b15adb2a1c664bd9f7c625d0",
+    "roco/src/roco_env/events_text.py": "69948072bfc0b47fab873f379144f6f8fc179934",
+    "roco/tests/test_public_planner.py": "481cca9ef48af9a18d263db9074b4a1dd86cbf06",
+    "roco/tests/test_ui_public_view.py": "172cd358b9c329869dc83ee211461cdefb0e5ef2",
+    "roco/tests/test_turn_order_fail_closed.py": "083cda40352176c5244c6b73ead8324be35a15ad",
+    "roco/tests/test_event_text.py": "129450d40fca78c888e22c9d0958bc7a72c505fd",
+    "roco/tests/test_opponents.py": "0f9a7e20129f7fff9cde33e83c7f5102e8398c40",
+    "src/server/roco-service.js": "14d4240fd6882b9ed529e2cf7e4d2b2e5417e810",
+    "src/coach/roco-client.js": "c3815937e49fa554c7e5276d22c83f174c838f28",
+    "tests/roco-observation-contract.test.js": "7cdd4856c6560990626e0a1d3e6a62d813eb5b95",
+    "reports/roco/rc404/regression-set.json": "27468b4bffdff2dd5621b9153bcd28b039fb2f61",
+    "reports/roco/product-execution/01/01-STEPS-MAP.md": "sha256:0003b64332d992838258ef2520765e606dece18467e5704b549632223a87b6af",
+    "reports/roco/product-execution/01/01.1-field-matrix.md": "sha256:cf168fbef218a1e4b473a2e46cc6dd4296c467fe96b2fa2de6e986318db85428",
+    "reports/roco/product-execution/01/01.3-reveal-and-contract.md": "sha256:d901b7a2d3c05973ec601e22d843d41582a78afa0d1dbeaa305e09736600dde3",
+    "reports/roco/product-execution/01/01.4-decision-trace.md": "sha256:515d2bffe57a2fcfec51b8012863b8e6b979ca7ffbcd78a9b60488dd0d30a1a4",
+    "reports/roco/product-execution/01/raw-contract.json": "sha256:10079b1b4dbc550ab9a11331ce7c2d3ecc2ce108b82d1effe5e26ed1a2c3b9ec",
+    "reports/roco/product-execution/01/raw-preview.json": "sha256:4d856077b11f8018c4dd275030aafe80991c82390eb7b62fd98bcca04cadeda1",
+    "reports/roco/product-execution/01/raw-decision-trace.json": "sha256:95cb77c50467618b5f1257befb0771dbe26a3ada4e77595a8912fe4959a78f2c",
+    "reports/roco/product-execution/01/raw-field-matrix.json": "sha256:f5ae39458f229617389e882e132f961c419a90107551dbf0a7f10eac4b397740",
+    "reports/roco/product-execution/01/raw-leg-receipt.json": "sha256:19352fc1c891d548310595f99e676171ed92ffba392b78676ee1cd9c5e1aa757",
+    "reports/roco/product-execution/01/raw-publicview-keys.json": "sha256:c5e8f96971f060fb20c4d3ee73b206090204d9913789e78d49c0eec92dfac302",
+    "reports/roco/product-execution/01/raw-regression-narrowing.json": "sha256:50feafbf0891ae9a28d4e90ea35a653cda2002def60c468e55b9e607deb87b2b",
+    "reports/roco/product-execution/01/raw-regression-before-after.json": "sha256:b65359811d0ab07010795ef2faef7052560a22e18ec260809b8b5ad3abbaa038",
+    "reports/roco/product-execution/01/acceptance.md": "sha256:480b072939b8b562538b90044bff84c6c534e0a559762de80b0d9a1a23c2db20",
+    "reports/roco/product-execution/01/README-INDEX.md": "sha256:edd8dc2da8b0ea565c96d06499c83d1e2f24bbec23189b41af35981cdad2934f",
+    "reports/roco/product-execution/01/result.json": "自指文件不登记自身 sha256（写完即变）：它的 hash 由提交时的 git 对象给出 —— 见 commit 5002433 之后的收尾提交"
+  },
+  "rules_version": "roco-world-s4-2026-09-10/legacy_sim_v1（01 的读数都在 legacy 3v3 配置上；标准 PVP 六宠走 mobile_s4_candidate_v3，见 raw-preview/raw-contract 的 config 说明）",
+  "snapshot_fingerprint": "4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc",
+
+  "owner": "plan01-engine",
+  "changed_files": {
+    "python": [
+      "roco/src/roco_env/env.py",
+      "roco/src/roco_env/schema.py",
+      "roco/src/roco_env/service.py",
+      "roco/src/roco_env/regression.py",
+      "roco/src/roco_env/events_text.py",
+      "roco/tests/test_public_planner.py",
+      "roco/tests/test_ui_public_view.py",
+      "roco/tests/test_turn_order_fail_closed.py",
+      "roco/tests/test_event_text.py",
+      "roco/tests/test_opponents.py",
+      "reports/roco/rc404/regression-set.json"
+    ],
+    "node": [
+      "src/server/roco-service.js",
+      "src/coach/roco-client.js",
+      "tests/roco-observation-contract.test.js"
+    ],
+    "evidence": [
+      "reports/roco/product-execution/01/README-INDEX.md",
+      "reports/roco/product-execution/01/result.json",
+      "reports/roco/product-execution/01/acceptance.md",
+      "reports/roco/product-execution/01/01-STEPS-MAP.md",
+      "reports/roco/product-execution/01/01.1-field-matrix.md",
+      "reports/roco/product-execution/01/01.3-reveal-and-contract.md",
+      "reports/roco/product-execution/01/01.4-decision-trace.md",
+      "reports/roco/product-execution/01/probe-07-regression-narrowing.py",
+      "reports/roco/product-execution/01/probe-08-regression-before-after.py",
+      "reports/roco/product-execution/01/probe-09-field-matrix.py",
+      "reports/roco/product-execution/01/probe-10-publicview-keys.mjs",
+      "reports/roco/product-execution/01/probe-11-decision-trace.py",
+      "reports/roco/product-execution/01/raw-contract.json",
+      "reports/roco/product-execution/01/raw-preview.json",
+      "reports/roco/product-execution/01/raw-decision-trace.json",
+      "reports/roco/product-execution/01/raw-field-matrix.json",
+      "reports/roco/product-execution/01/raw-leg-receipt.json",
+      "reports/roco/product-execution/01/raw-publicview-keys.json",
+      "reports/roco/product-execution/01/raw-regression-narrowing.json",
+      "reports/roco/product-execution/01/raw-regression-before-after.json",
+      "reports/roco/product-execution/01/regression-rebuild-01-3.log",
+      "reports/roco/product-execution/01/regression-check-01-3.log",
+      "reports/roco/product-execution/01/unittest-targeted-01ABC.txt",
+      "reports/roco/product-execution/01/unittest-targeted-01ABCDE.txt",
+      "reports/roco/product-execution/01/unittest-full-01ABC.txt",
+      "reports/roco/product-execution/01/unittest-full-01ABCDE.txt"
+    ],
+    "not_mine_in_worktree": [
+      ".gitignore",
+      "docs/roco/execution/STATE.json",
+      "scripts/roco/verify-readings.py",
+      "scripts/roco/verify-584-and-762-runtime.py",
+      "scripts/roco/verify-counterexample-candidates.py",
+      "scripts/roco/verify-defectB-settled-classes.py",
+      "scripts/roco/verify-settled-patterns-sim.py",
+      "reports/roco/product-execution/00/*",
+      "reports/roco/product-execution/harness/*",
+      "reports/roco/product-execution/01/verify-01-public-surface-83ed968.json"
+    ]
+  },
+  "write_scope_conflicts": "task-3/task-6 的写域与 task-4 有重叠告警（Lead 可见）；实际文件中：events_text.py / test_event_text.py / roco-client.js / Node 测试均经 Lead 逐条授权（写域授权 D-3/D-4），未触碰 coverage.py。reports/roco/product-execution/01/verify-*.json 归 harness-verifier，本项未写。",
+
+  "commands": [
+    {"id": "C1", "command": "PYTHONPATH=src python3 -m unittest tests.test_public_planner tests.test_ui_public_view tests.test_turn_order_fail_closed tests.test_regression_set tests.test_opponents -q", "cwd": "roco", "exit_code": 0, "stdout": "Ran 122 tests · OK", "log": "reports/roco/product-execution/01/unittest-targeted-01ABCDE.txt", "executed_at": "2026-09-30T18:0x+08:00", "duration_s": 14.3},
+    {"id": "C2", "command": "PYTHONPATH=src python3 -m unittest discover -s tests -q", "cwd": "roco", "exit_code": 1, "stdout": "Ran 872 tests · 1 failure · skipped=2", "log": "reports/roco/product-execution/01/unittest-full-01ABCDE.txt", "executed_at": "2026-09-30T18:0x+08:00", "duration_s": 198.5, "note": "唯一红 = test_tier_verdict_agreement.test_counter_proof_disabling_the_shared_gates_brings_them_back（00 既有欠账，本项未动）"},
+    {"id": "C3", "command": "PYTHONPATH=roco/src python3 reports/roco/product-execution/01/probe-09-field-matrix.py", "cwd": ".", "exit_code": 0, "log": "reports/roco/product-execution/01/raw-field-matrix.json", "executed_at": "2026-09-30T18:5x+08:00"},
+    {"id": "C4", "command": "node reports/roco/product-execution/01/probe-10-publicview-keys.mjs", "cwd": ".", "exit_code": 0, "log": "reports/roco/product-execution/01/raw-publicview-keys.json", "executed_at": "2026-09-30T18:5x+08:00"},
+    {"id": "C5", "command": "PYTHONPATH=roco/src python3 reports/roco/product-execution/01/probe-11-decision-trace.py", "cwd": ".", "exit_code": 0, "log": "reports/roco/product-execution/01/raw-decision-trace.json", "executed_at": "2026-09-30T18:5x+08:00"},
+    {"id": "C6", "command": "PYTHONPATH=src python3 /mnt/e/roco-scratch/p01_probe_contract.py", "cwd": "roco", "exit_code": 0, "log": "reports/roco/product-execution/01/raw-contract.json", "executed_at": "2026-09-30T17:5x+08:00"},
+    {"id": "C7", "command": "PYTHONPATH=src python3 /mnt/e/roco-scratch/p01_probe_preview.py", "cwd": "roco", "exit_code": 0, "log": "reports/roco/product-execution/01/raw-preview.json", "executed_at": "2026-09-30T18:0x+08:00"},
+    {"id": "C8", "command": "PYTHONPATH=roco/src python3 reports/roco/product-execution/01/probe-07-regression-narrowing.py", "cwd": ".", "exit_code": 0, "log": "reports/roco/product-execution/01/raw-regression-narrowing.json", "executed_at": "2026-09-30T17:5x+08:00"},
+    {"id": "C9", "command": "PYTHONPATH=roco/src python3 reports/roco/product-execution/01/probe-08-regression-before-after.py", "cwd": ".", "exit_code": 0, "log": "reports/roco/product-execution/01/raw-regression-before-after.json", "executed_at": "2026-09-30T17:5x+08:00"},
+    {"id": "C10", "command": "PYTHONPATH=roco/src python3 -m roco_env.regression --out reports/roco/rc404/regression-set.json", "cwd": ".", "exit_code": 0, "log": "reports/roco/product-execution/01/regression-rebuild-01-3.log", "executed_at": "2026-09-30T17:5x+08:00"},
+    {"id": "C11", "command": "PYTHONPATH=roco/src python3 -m roco_env.regression --check", "cwd": ".", "exit_code": 0, "stdout": "✔ 回归集与磁盘上的指纹一致", "log": "reports/roco/product-execution/01/regression-check-01-3.log", "executed_at": "2026-09-30T17:5x+08:00"},
+    {"id": "C12", "command": "node --test tests/roco-battle-context.test.js tests/roco-coach-context-contract.test.js tests/roco-server-side-guard.test.js tests/roco-observation-contract.test.js", "cwd": ".", "exit_code": 0, "stdout": "tests 28 · pass 28 · fail 0", "executed_at": "2026-09-30T18:3x+08:00"},
+    {"id": "C13", "command": "node --test tests/server.test.js", "cwd": ".", "exit_code": 0, "stdout": "tests 26 · pass 26 · fail 0", "executed_at": "2026-09-30T18:3x+08:00"},
+    {"id": "C14", "command": "$env:ROCO_PYTHON='C:\\Users\\ASUS\\AppData\\Local\\Programs\\Python\\Python310\\python.exe'; node --test tests/roco-standard-pvp-battle.test.js", "cwd": ".", "exit_code": 0, "stdout": "tests 15 · pass 15 · fail 0", "executed_at": "2026-09-30T18:4x+08:00", "note": "起真引擎的端到端；**需要** ROCO_PYTHON（默认 python3 在 Windows 不存在）"},
+    {"id": "C15", "command": "python3 scripts/roco/verify-src-treehash.py（全量跑前/跑后各一次）", "cwd": ".", "exit_code": 0, "stdout": "TREE 2c5da5f9…（两次相同）", "executed_at": "2026-09-30T18:0x+08:00"},
+    {"id": "C16", "command": "curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:8765/api/roco/status", "cwd": ".", "exit_code": 7, "stdout": "http=000", "executed_at": "2026-09-30T19:0x+08:00", "note": "本机 8765 未运行 ⇒ player 栏不可得"}
+  ],
+
+  "checks": [
+    {"id": "A1", "condition": "01-PLAN 通过条件①：公开输入中没有未观察的隐藏个体值、四技能和对手待执行动作", "result": "pass", "evidence": ["reports/roco/product-execution/01/raw-align-verified-after.json（对手技能 UI 可见回收率 0.00）", "reports/roco/product-execution/01/01.3-reveal-and-contract.md §4.1", "roco/tests/test_opponents.py::test_observation_bench_rows_have_no_species_identity", "roco/tests/test_public_planner.py::TestHiddenTruthInvarianceAndPublicChange"]},
+    {"id": "A2", "condition": "01-PLAN 通过条件②：同一决策的 UI、Coach、回放可追溯到同一观察序列", "result": "pass（有 4 条未闭合边界，见 gaps）", "evidence": ["reports/roco/product-execution/01/01.4-decision-trace.md", "reports/roco/product-execution/01/raw-decision-trace.json"]},
+    {"id": "A3", "condition": "01-PLAN 通过条件③：预览发生前及无预览模式没有提前泄漏阵容；新局不继承旧局事实", "result": "pass", "evidence": ["reports/roco/product-execution/01/raw-preview.json", "roco/tests/test_ui_public_view.py::OpeningRevealFollowsTheDisplayedFields", "tests/roco-observation-contract.test.js ⑥⑦（Node：预览开关必须显式转发；串局 ⇒ 409）"]},
+    {"id": "A4", "condition": "定向 5 模块绿（基线 exit 0 · Ran 99）", "result": "pass（exit 0 · Ran 122 · OK，+23 全新增，旧断言零改钉）", "evidence": ["reports/roco/product-execution/01/unittest-targeted-01ABCDE.txt"]},
+    {"id": "A5", "condition": "全量：唯一红必须是 00 既有欠账", "result": "pass_with_known_red（Ran 872 · 1F · skipped=2；红 = 00 反证那条）", "evidence": ["reports/roco/product-execution/01/unittest-full-01ABCDE.txt"]},
+    {"id": "A6", "condition": "Node 契约判据真跑通过", "result": "pass（28/28 · server 26/26 · ROCO_PYTHON 下 PVP 15/15）", "evidence": ["tests/roco-observation-contract.test.js", "命令 C12/C13/C14"]},
+    {"id": "A7", "condition": "回归集与重建后的产物一致（state_digest 收窄后）", "result": "pass（重建 exit 0；--check exit 0）", "evidence": ["reports/roco/product-execution/01/regression-rebuild-01-3.log", "reports/roco/product-execution/01/regression-check-01-3.log", "reports/roco/product-execution/01/raw-regression-before-after.json"]},
+    {"id": "A8", "condition": "「默认路径逐位不变」：结算指纹与事件指纹不动", "result": "pass（六局 + 短局 settlement/events 逐位不变；只有 history 单独改钉并留档）", "evidence": ["reports/roco/product-execution/01/01.3-reveal-and-contract.md §5.1", "roco/tests/test_turn_order_fail_closed.py 的 GOLDEN_*_PRIOR_2026_09_30_REVEAL"]},
+    {"id": "A9", "condition": "01.1 字段矩阵（含 Node 一跳的机器可读键树）", "result": "pass（客户端一跳只到源码，见 gaps G6）", "evidence": ["reports/roco/product-execution/01/01.1-field-matrix.md", "reports/roco/product-execution/01/raw-field-matrix.json", "reports/roco/product-execution/01/raw-publicview-keys.json"]}
+  ],
+
+  "counterexamples": [
+    {"id": "X1", "what_changed": "固定公开史，把对手**真实配招**里整局不会用到的一招换掉", "expected": "公开输入逐字段相同", "actual": "三次快照 JSON 全同（规划协议 + UI 视图 + 玩家侧观察）", "evidence": "roco/tests/test_public_planner.py::test_hidden_loadout_change_leaves_every_public_input_identical"},
+    {"id": "X2", "what_changed": "改对手**后备**血量/能量/异常/印记", "expected": "公开输入逐字段相同", "actual": "全同", "evidence": "…::test_hidden_bench_resources_leave_every_public_input_identical"},
+    {"id": "X3", "what_changed": "直接改对手**隐藏个体面板**（U1 无入口，字段级探针）", "expected": "个体真值不进公开输入", "actual": "规划协议 + 观察逐字节相同；注入的六个数一个都不在 UI 里（已知连带：UI stats_source 切 species-panel）", "evidence": "…::test_hidden_individual_panel_never_reaches_the_public_inputs"},
+    {"id": "X4", "what_changed": "预览亮明的物种由 B_TEAM 换成 C_TEAM", "expected": "观察确实变化", "actual": "opponent_roster 与公开面 JSON 均变", "evidence": "…::test_changing_a_displayed_species_changes_the_observation"},
+    {"id": "X5", "what_changed": "对手打出的那一招由 skill0 换成 skill1", "expected": "观察确实变化", "actual": "opponent_skills 与观察 JSON 均变", "evidence": "…::test_changing_a_publicly_used_skill_changes_the_observation"},
+    {"id": "X6", "what_changed": "无预览开局（不传 opening_preview）", "expected": "零事件、公开面逐字节不变、无 seen_roster", "actual": "无 opening_reveal 键、后备 ['fainted','slot']、观察无 revealed、Node 无 seen_roster", "evidence": "reports/roco/product-execution/01/raw-preview.json + tests/roco-observation-contract.test.js ②④"},
+    {"id": "X7", "what_changed": "Node：不传 openingPreview / 传 true / 传 false", "expected": "请求体分别「没有 / 必须有 / 没有」opening_preview", "actual": "三条断言全过（证明白名单那一行必需）", "evidence": "tests/roco-observation-contract.test.js ⑥（C12）"},
+    {"id": "X8", "what_changed": "Node：引擎回执 match_id 由 m-one 变 m-two", "expected": "明确拒绝（409 match_mismatch），不许静默继续", "actual": "status 409 · error_type match_mismatch · 文案含「对不上」；同 id 才继续；老回执无该字段 ⇒ 跳过守卫", "evidence": "tests/roco-observation-contract.test.js ⑦（C12）"},
+    {"id": "X9", "what_changed": "绕过 _bump 直接 append 事件", "expected": "event_seq 口径被破坏 ⇒ 抛错", "actual": "ValueError（点名 state_version 与 len(events)）", "evidence": "roco/tests/test_public_planner.py::test_event_seq_refuses_to_guess_when_the_counter_is_bypassed"}
+  ],
+
+  "trace_contract": {
+    "match_id": "m-f3a4c9affd66ef3d（legacy 3v3 读数；由公开开局事实派生，**不是**每局唯一）",
+    "decision_id": "<match_id>:v<state_version>",
+    "event_seq": "state.events 的 0-based 追加下标（由 state_version 口径派生，无新计数器）",
+    "public_observation": "reports/roco/product-execution/01/raw-field-matrix.json（三面键树）",
+    "assumption_sources": "public.assumptions + limitations + unverified_overrides（带 confidence/reason/microcase_id）",
+    "legal_actions": "私有域 result.legal.{player,enemy}；公开面只给玩家那份，Node 只给对手份的条数（cpu_legal_count）",
+    "analysis_budget": "本文的 /battle/plan 读数用 depth=1/2 · beam=2/3 · analysis_seeds 固定集合（不是本局真实 seed）",
+    "state_transition": "reports/roco/product-execution/01/raw-decision-trace.json（每回合 version_before → history.state_version）"
+  },
+
+  "runtime": {
+    "code": {
+      "status": "fixed",
+      "commit": "5002433",
+      "endpoints": ["/battle/new", "/battle/advance", "/battle/free", "/battle/plan"],
+      "note": "引擎侧改动已入库；Node 转发已入库（同一提交）"
+    },
+    "isolated": {
+      "status": "passed",
+      "instance": "git archive <commit> 干净副本（源码树指纹 TREE 2c5da5f9a273698d00c837568765a877b1e9073081083731f310de876050348d）",
+      "reading": "Ran 872 · 1F + 0E · skipped=2（唯一红 = 00 反证 test_tier_verdict_agreement，非本项）",
+      "endpoints": ["python -m unittest discover -s tests", "node --test（4 个契约件）", "node --test tests/server.test.js", "ROCO_PYTHON=<win python> node --test tests/roco-standard-pvp-battle.test.js"],
+      "evidence": ["reports/roco/product-execution/01/unittest-full-01ABCDE.txt", "命令 C12–C15"],
+      "note": "本机 treehash 跑前/跑后相同；5002433 的干净副本读数由 Lead/verifier 复核（harness 目录内 verify-slice-5002433 产物在写本文时尚未出现，未引用未存在的文件）"
+    },
+    "player": {
+      "status": "unavailable",
+      "url": "http://127.0.0.1:8765",
+      "probe": "curl -s -m 5 → http=000 · exit 7（本机 8765 根本没在跑）",
+      "started_at": null,
+      "instance_id": null,
+      "build_fingerprint": null,
+      "endpoints": [],
+      "note": "**不可得**：不许自行启动或重启用户服务 ⇒ 玩家运行版一栏只能登记为不可得，**不写通过**"
+    }
+  },
+
+  "commit": "5002433",
+  "remote_sha": "5002433309be2f902498a15a74c7522a02d04353",
+
+  "blockers": [
+    {"id": "U1", "what": "对局内改对手个体（天分/性格/六维）没有注入入口", "status": "blocked:needs_injection_entry", "tried": "读 `reset(individuals=…)` 的解析路径 ⇒ 只按玩家队伍位次解析；对手侧 `panel` 恒 {}（实测）", "unblocks": "需要引擎加一个「对手个体/队伍注入」入口（03 或专项）", "allowed_independent_work": "已用字段级反例证明公开面不读对手个体（X3）"},
+    {"id": "B1", "what": "玩家常驻版本与整局验收", "status": "waiting_external", "tried": "只读探活 curl -m5 ⇒ http=000 · exit 7", "unblocks": "用户/Lead 提供可用的 8765 实例（或授权启动）", "allowed_independent_work": "引擎与隔离实例的全部读数（本 result.json 的主体）"}
+  ],
+
+  "residual_gaps": [
+    {"id": "G2", "what": "history 行没有 match_id/decision_id（链接只能推导）", "evidence": "raw-decision-trace.json → decision_id_is_derivable_not_recorded", "suggested_owner": "01.5 / 06"},
+    {"id": "G3", "what": "自由动作（step_free）不进 history ⇒ 观察序列在自由动作处断开", "evidence": "env.py step_free 注释 + raw-decision-trace.json boundaries", "suggested_owner": "06（需先定「自由动作算不算决策点」）"},
+    {"id": "G4", "what": "MatchRecord 没有 match_id", "evidence": "raw-decision-trace.json → record_has_match_id_field=false", "suggested_owner": "01.5 / 03"},
+    {"id": "G5", "what": "观察版本（schema_version）没进 Node session 缓存键", "evidence": "roco-service.js sessions.set(...) 只存四元组", "suggested_owner": "01.5"},
+    {"id": "G6", "what": "前端一跳无渲染读数（预览层 / 已见阵容入口）", "evidence": "01.1-field-matrix.md §1 第 4 段", "suggested_owner": "02"},
+    {"id": "G7", "what": "Coach 工具回执 → 模型上下文的字段裁剪无逐字段读数", "evidence": "01.1-field-matrix.md §4", "suggested_owner": "02/03"},
+    {"id": "G8", "what": "history 只存观察哈希、不存载荷 ⇒ 从记录里恢复不了当时的公开面", "evidence": "env.py:1062-1070", "suggested_owner": "06"},
+    {"id": "G9", "what": "opponent-belief.mjs 的公开性口径注释仍指向旧契约", "evidence": "recon.md §5 X4", "suggested_owner": "02 或 Lead"},
+    {"id": "G10", "what": "schema.revealed_facts docstring 一句不精确（「开局在场上的那只不进名单」，但预览事件列整队含 slot 0）", "evidence": "raw-publicview-keys.json 的 seen_roster 三行", "suggested_owner": "下一轮顺手改文档（本轮冻结未动源码）"}
+  ],
+
+  "next_plan": "02",
+  "next_action": "分计划 02：前端「开局预览 + 已见阵容回看」入口（写域 src/client/roco.js / roco.html / roco.css / battle-v3.css）—— 数据面已就绪：`view.seen_roster` / `view.opponent.revealed_skills` / `view.match_id|rules_version|decision_id`；无预览时这几个键**不出现**。"
+}
