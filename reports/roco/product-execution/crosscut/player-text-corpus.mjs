@@ -91,11 +91,29 @@ export async function collectCorpus() {
       const h = turns[1] || turns[0];
       return h ? teacher.compareTurnAlternatives(h) : null;
     });
-    tryRender('practiceQuestion', 'teacher.js:408', () => {
+    tryRender('practiceQuestion', 'teacher.js:434', () => {
       const d = teacher.keyDecisionOf?.(m) ?? m.keyDecision;
-      return teacher.practiceQuestion({ keyDecision: d, variant: 1 });
+      const q = teacher.practiceQuestion({ keyDecision: d, variant: 1 });
+      // ⚠ 2026-10-01（task-40 / Lead 裁决 Q5）：这里原来**直接返回对象**，而下面的 `add()` 只收
+      //   字符串与字符串数组 ⇒ 这一条**静默贡献 0 条语料**（`byApi` 里根本没有 `practiceQuestion`）。
+      //   现在按"玩家真的看得到的那几段"展开：题干 / 讲解 / 课程句 / 选项。
+      return q ? [q.question, q.explanation, q.lesson, ...(q.choices || [])].filter((x) => typeof x === 'string') : null;
     });
   });
+
+  // 出题（07：问答老师的小测）—— `makeQuiz` 的题干/讲解/依据都是玩家可见文本。
+  // 六档变式全渲染：题干模板相同、数字不同，正是"运行期拼出来的句子"那一类。
+  // 为什么收进语料（2026-10-01，Lead 裁决 Q5）：07 要改题面/讲解，改之前它必须在门禁视野内，
+  // 否则新文案是「门外文案」（`grep makeQuiz` 在本文件里当时是 0 命中）。
+  const quizPanel = {id: 'pet_000118', name: '皇家狮鹫', speed: 120, source: '语料夹具'};
+  const quizContext = {mode: 'camp', battle: null, profile: {pets: [
+    {id: 'pet_000118', name: '皇家狮鹫', types: ['风系'], stats: {hp: 107, atk: 116, def: 127, spa: 69, spd: 65, spe: 120}}]}};
+  for (let v = 0; v < 6; v++) {
+    tryRender(`makeQuiz(v${v})`, 'teacher.js:79', () => {
+      const q = teacher.makeQuiz(quizContext, {variant: v, panel: quizPanel});
+      return q ? [q.question, q.explanation, q.lesson, ...(q.evidence || [])].filter((x) => typeof x === 'string') : null;
+    });
+  }
 
   // 局中：老师技能课 / 提示 / 悬停标签
   midGames.forEach((g) => {
