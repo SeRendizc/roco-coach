@@ -55,8 +55,8 @@
     {
       "id": "B1",
       "what": "玩家常驻版本与整局验收",
-      "status": "waiting_external",
-      "reason": "新机 8765 根本没在跑（curl -m5 exit 7 / http=000）⇒ 连探活都拿不到；不许自行启动或重启用户服务；player 栏只能如实登记为不可得"
+      "status": "partially_unblocked_by_user（2026-09-30 20:0x 用户明确授权「可以启动服务」）",
+      "reason": "用户授权后 Lead 已在**真实端口 8765** 启动产品服务（`node src/server/index.js`，ROCO_PYTHON=Windows Python 3.10.5），status=available:true、snapshot_fingerprint=4d5c169f…，并用真 Chrome+真鼠标走完 02 全链路 18/18（证据 reports/roco/product-execution/02/resident-run-8765/）。**仍未证明**的是「用户自己长期部署的那一份 = 我启动的这一份」⇒ 不许把本次读写成「用户常驻版已验收」"
     }
   ],
   "plans": {
@@ -105,13 +105,13 @@
     "02": {
       "title": "开局预览与已见阵容回看",
       "status": "in_progress",
-      "step": "02.1 只读勘察 + 浏览器夹具 bring-up（plan02-front；写代码待 Lead 放行）",
-      "code": "unverified",
-      "isolated": "unverified",
-      "player": "unverified",
-      "evidence": null,
-      "commit": null,
-      "remote_sha": null
+      "step": "02.1–02.5 全部落地；02.5 隔离（8879）与常驻（8765）两次真实验收均 18/18；收口件已入库，待最终归档",
+      "code": "fixed",
+      "isolated": "passed（隔离实例 8879：checks 18/18 · exit 0；16 张截图哈希互异、每张带拍前断言/state_version；Node 客户端相关 10 文件 117/117）",
+      "player": "resident_instance_started_by_lead_passed（用户 2026-09-30 20:0x 授权后，Lead 在真 8765 起服务，真 Chrome+真鼠标走完 18/18、exit 0、18.5s；**用户自有长期部署仍未证明**，不许写成「用户常驻版已验收」）",
+      "evidence": "reports/roco/product-execution/02/{02.2-acceptance.md,02.3-acceptance.md,02.5-acceptance.md,acceptance.md,result.json,README-INDEX.md,recon-02.md,fixture-run.json,preview-run.json,raw-*,test-relaxation.md,verify-02-5-acceptance.md} + shots/（9 张权威截图入库） + resident-run-8765/（常驻实例真操作验收）",
+      "commit": "e446c2d",
+      "remote_sha": "e446c2d（随后随 STATE 提交推送；以分支 tip 为准）",
     },
     "03": {
       "title": "对手候选与证据更新",
@@ -320,8 +320,8 @@
       "what": "截图证据与声称不符（Lead 用「逐张哈希 + 亲自看画面」抓到）：02.5 表格里两张 390px 图 `narrow-390-01-battle.png` / `flow-390-02-seen-roster.png` **字节完全相同**且**画面是配队大厅**（既非对局态也非回看面板）；`flow-desktop-04-after-refresh.png` 与 `flow-desktop-03-after-action.png` 字节相同（后者带悬浮详情，真刷新后不该还在）；`desktop-02-battle.png` 与 `flow-desktop-01-preview.png` 相同（错名）",
       "evidence": "sha256 前缀：0db0c976…（390 两张，78892B）· 3600300c…（after-action/after-refresh，272212B）· ced0170b…（desktop-02-battle/preview，187821B）；对照合格件：preview-390-01-open.png 1e2dd696…（390 单列预览 ✓）· flow-desktop-01-preview.png（1440 预览 + 顶栏「已见阵容 6」✓）· flow-desktop-03-after-action.png（第 2 回合真实推进 ✓）",
       "owner": "lead（发现）· plan02-front（重拍与补断言）· harness-verifier（复验按同口径查）",
-      "status": "fix_in_flight",
-      "rule": "**每张被引用的截图必须在「断言通过的那一刻」拍**，并把「文件名 → 拍前断言 → state_version/turn → sha256」写进 fixture-run.json；**同 sha256 视为同一份证据，不许一张图证明两件事**；复验者必须同时查哈希**并亲自看画面**，不能只看文件名或 JSON"
+      "status": "closed（整改已到位并由 Lead 复核：16 张 16 个唯一 sha256、每张带 assert/sha256_16/bytes/viewport/state_version；两张原问题图我已亲自看画面确认与声称一致；harness-verifier 的 verify-02-5-acceptance.md 是针对 19:52 中间版的判定，已被 19:56 的整改超越，其 §6 的五条整改项已全部落地，仅「统一桌面视口口径 1416×745 vs 1440×900」一条留作建议）",
+      "rule": "**每张被引用的截图必须在「断言通过的那一刻」拍**，并把「文件名 → 拍前断言 → state_version/turn → sha256」写进 fixture-run.json；**同 sha256 视为同一份证据，不许一张图证明两件事**；复验者必须同时查哈希**并亲自看画面**，不能只看文件名或 JSON。补充根因（plan02-front 定位）：headless `Page.captureScreenshot` 会**返回上一帧** ⇒ 必须「拍前断言 + 两次 rAF + 1px 滚动强制出新帧 + 哈希去重」"
     },
     {
       "id": "O-13",
@@ -422,6 +422,12 @@
       "what": "O-10（Windows 误杀整树）的修复口径",
       "decision": "按最小修复 + **保留原意图**执行：Windows 分支改用 `OpenProcess(SYNCHRONIZE)+WaitForSingleObject(INFINITE)`（或等价无副作用方式），父进程已不在则立即 `os._exit(0)`；POSIX 分支一行不动。**接受标准必须含反例**：父 Node 真被杀 ⇒ 服务 ~2s 内自行退出（不许修成孤儿）；父 Node 存活 ⇒ 服务不退；WSL/POSIX 行为不变；`ROCO_PYTHON` 真引擎端到端连跑 3 次稳定。指派 plan00-closer（task-9），由 harness-verifier 独立复验",
       "by": "lead"
+    },
+    {
+      "id": "D-14",
+      "what": "用户授权「可以启动服务」后的边界变化",
+      "decision": "2026-09-30 20:0x 用户明确说「你可以启动服务啊」⇒ 边界从「不许自行启动/重启用户 8765」放宽为：**允许 Lead 在本机启动产品服务实例做真实验收**。执行与限定：① Lead 用 `node src/server/index.js` 在真 8765 起了一个实例（ROCO_PYTHON=Windows Python 3.10.5），并用真 Chrome+真鼠标走完 02 全链路 18/18（证据 `reports/roco/product-execution/02/resident-run-8765/`）；② **不得**把它写成「用户自己长期部署的那一份已验收」—— 那仍未证明；③ 不清理任何真实数据、不改用户配置；④ 该实例由 Lead 自己拥有，可自行停止；⑤ 若用户另有常驻版本，以用户那一份为准复核",
+      "by": "user（Lucas）+ lead（执行与限定）"
     }
   ]
 }
