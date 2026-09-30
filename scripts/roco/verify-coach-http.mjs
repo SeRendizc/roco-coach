@@ -49,9 +49,11 @@ try {
     round += 1;
     const body = args?.body ? JSON.parse(args.body) : {};
     const sys = String(body.messages?.[0]?.content ?? '');
-    const wantsTool = /工具|tool/i.test(sys);
+    // 本仓协议是 **JSON-in-content**（{"tool":…} / {"stop":true}），不是 OpenAI tool_calls。
+    // 判据：提示里**真的贴出了 JSON 协议**才当取证阶段（否则会把普通正文阶段误判成要工具 ⇒ 502）。
+    const wantsTool = /\{"tool"|stop"?\s*:\s*true/.test(sys);
     say(`  [fetchImpl #${round}] messages=${body.messages?.length} tools=${body.tools?.length ?? 0} ` +
-        `含工具词=${wantsTool} head=${sys.slice(0, 40).replace(/\n/g, ' ')}`);
+        `JSON协议=${wantsTool} head=${sys.slice(0, 90).replace(/\n/g, ' ')}`);
     const payload = wantsTool
       ? {choices: [{message: {content: JSON.stringify({tool: 'plan_actions',
           args: {state: pub, state_version: pub.state_version}})}}]}
@@ -60,6 +62,8 @@ try {
   };
 
   // 3) 进程内 coach server + 配置远程模型
+  // 强制开取证循环（默认关）：否则简单提问可能一次生成就结束、根本不问工具。
+  process.env.ROCO_COVERAGE_FORCE = '1';
   server = createCoachServer({fetchImpl});
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   const base = 'http://127.0.0.1:' + server.address().port;
