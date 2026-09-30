@@ -56,10 +56,19 @@ test('③ 无分支证据：不许出现「必胜」类断言，且必须点名�
   const packet = reviewMatch({lastMatch: PLAYER_SEEN_MATCH});
   const text = String(packet.text);
   assert.doesNotMatch(text, /必胜|稳赢|一定赢|肯定赢|必赢/, `无分支证据时出现了胜负断言：${text}`);
-  assert.match(text, /缺当时的分支记录/, '要如实点名"缺当时的分支记录"');
+  // ── 改钉（2026-09-30，Lead 裁决 D-2：产品规则 > 旧文案钉子）────────────────────────
+  //   旧断言原文（**逐字留档，别删**）：
+  //     assert.match(text, /缺当时的分支记录/, '要如实点名"缺当时的分支记录"');
+  //   为什么改：`tests/evals/player-copy.test.js:14-18` 的**玩家禁用词表**里有「分支」，
+  //   而 `src/coach/teacher.js` 的玩家可见文案正是靠这三个字被判红（该判据当时就是红的）。
+  //   两条判据互相打架 ⇒ 按 Lead 裁决把**产品文案**改成「候选记录」（同一个意思，玩家更读得懂），
+  //   本判据随之改钉；**意图一个字没变**：缺口必须如实点名。
+  //   两向变异（必红方向）：把 `teacher.js` 里的「缺当时的候选记录」改回「缺当时的分支记录」
+  //     ⇒ `node --test tests/evals/player-copy.test.js` 立刻变红（禁用词「分支」回来了）。
+  assert.match(text, /缺当时的候选记录/, '要如实点名"缺当时的候选记录"');
   assert.match(text, /缺速度档位/, '要如实点名"缺速度档位"');
   assert.match(text, /不代表换一手就更好|不会说/, '要明确交代"不从事后结果反推"');
-  // 有分支证据时不许再说"缺分支记录"（反证：缺口声明只在真缺的时候出现）
+  // 有分支证据时不许再说"缺候选记录"（反证：缺口声明只在真缺的时候出现）
   const withDecision = reviewMatch({lastMatch: {...PLAYER_SEEN_MATCH, keyTurns: [{
     turn: 10, events: [], analysis: '当时可比较',
     alternatives: {gap: 9, rows: [{name: '换上烈火战神'}], line: '候选：换上烈火战神'},
@@ -72,8 +81,8 @@ test('③ 无分支证据：不许出现「必胜」类断言，且必须点名�
       ],
       numbers: {}, consequence: {playerHp: 0, enemyHp: 160, playerFallen: ['水蓝蓝'], enemyFallen: []}},
   }]}});
-  assert.doesNotMatch(String(withDecision.text), /缺当时的分支记录/,
-    `有 decision 时不许再说"缺分支记录"（谎报缺口与谎报已结算一样糟）：${withDecision.text}`);
+  assert.doesNotMatch(String(withDecision.text), /缺当时的候选记录/,
+    `有 decision 时不许再说"缺候选记录"（谎报缺口与谎报已结算一样糟）：${withDecision.text}`);
 });
 
 test('④ 寒暄仍走 companion（不许整条禁掉），且兜底句按意图给', async () => {

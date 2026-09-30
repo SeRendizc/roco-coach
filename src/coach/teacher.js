@@ -19,6 +19,20 @@ function focusIdOf(context){
  const wanted=context?.focus;
  return SPECIES.some((species)=>species.id===wanted)?wanted:'fox';
 }
+/**
+ * 数字写成玩家读得懂的样子（D-31 精度口径 / 横切审计 H3）：
+ * **整数原样、非整数 1 位小数；取不到就显式占位「未登记」**。
+ *
+ * 与 `coach-advice.js:106-110` 的 `show()` 同一套口径（那边脏值写 `—`，这里写「未登记」——
+ * 两处都是显式占位，不装成 0）。为什么不用裸 `toFixed(1)`：它把整数写成 `930.0`，
+ * 而同一屏别处（军师、复盘统计）写 `930` ⇒ 同一个数两种写法。
+ * 只用于**显示**，不用于判断（判断一律走原始数值）。
+ */
+function showNumber(value){
+ const v=value===null||value===undefined||value===''?NaN:Number(value);
+ if(!Number.isFinite(v))return '未登记';
+ return Number.isInteger(v)?String(v):String(Math.round(v*10)/10);
+}
 function pet(context,save){const id=focusIdOf(context);return createGame(0,[id,...SPECIES.filter(p=>p.id!==id).slice(0,2).map(p=>p.id)],{pets:save.pets}).player.pets[0];}
 export function teacher(context){
  // 2026-09-27（人类：「加点不要了，按照洛手的机制来，根本没有这些，不要了」）：
@@ -146,10 +160,16 @@ export function skillLesson(game,action){
  }):[];
  const compare=others.length?`手里同时可选：${others.join('、')}。同一回合只能出一手，要抢先后看优先级，要续航看恢复，要压血线就比当前伤害。`:'';
  const text=[head,energy,...notes,compare,'以上只是解释这一招，出不出它由你决定。'].filter(Boolean).join('');
+ // H1（2026-09-30，plan00-closer 的横切文本审计）：无威力技能（防御/蓄势/苔息/清风…）原来也照拼
+ //   「伤害来自 engine.damage（不防御 null／防御 null）」——玩家读到两个 `null`。
+ //   现在按 `sk.power` 分岔：有威力才谈伤害面板；无威力就说这一手不按伤害面板算（别的照旧）。
+ const damageLine=sk.power&&hit!==null&&guarded!==null
+  ? `伤害来自 engine.damage（不防御 ${showNumber(hit)}／防御 ${showNumber(guarded)}），只按当前面板计算，不预测对手这一回合做什么。`
+  : '它不造成伤害：这一手没有威力，不按伤害面板计算，也不预测对手这一回合做什么。';
  return {id:`skill:${action.id}`,lesson:decisionLesson(game,action),text,
   evidence:[`技能字段：${sk.name}，${TYPES[sk.type]||'普通'}系，消耗 ${sk.cost} 豆${sk.power?`，威力 ${sk.power}`:'，不造成伤害'}${sk.priority?`，优先级 ${sk.priority}`:'，优先级与普通技能相同'}。`,
    `当前局面：${p.name} ${p.hp}HP、${p.energy} 豆；对手 ${q.name} ${q.hp}HP${q.status?`、异常 ${q.status.kind}`:''}。`,
-   `伤害来自 engine.damage（不防御 ${hit}／防御 ${guarded}），只按当前面板计算，不预测对手这一回合做什么。`],
+   damageLine],
   method:'读取技能字段与当前局面 → 解释这一招 → 不替你决定'};
 }
 
@@ -300,7 +320,7 @@ export function reviewMatch(context){
  // ── 正文四段（task-27：默认只给这四段，事件流水进依据）──────────────────────
  //  ① 关键回合：先用手上的**事前**读点（decision 的当时快照）；没有 decision 时，从逐回合摘要里
  //     挑「生命变化/倒下」最大的那一回合 —— 这是**事实挑选**，不是事后倒推结论 ✓
- //  ② 当时合法替代：decision.options（去掉实际所选）；**没有分支记录就明说缺哪一项** ✓
+ //  ② 当时合法替代：decision.options（去掉实际所选）；**没有候选记录就明说缺哪一项** ✓
  //  ③ 下一局试哪一手：一句可执行（有练习题用练习题，否则用课程/通用一句）
  //  ④ 风险：事前评分 ≠ 结果；**没有分支证据时不许断言「换人必胜」** ✓
  const biggest=(()=>{
@@ -326,18 +346,15 @@ export function reviewMatch(context){
   return '这一局我这边没有可点名的关键回合（逐回合摘要里没有血量读数）。';
  })();
  const alternativesLine=(()=>{
-  if(!decision)return '缺当时的分支记录：本局只记下了你出了什么，没记下当时还有哪些合法选择 —— 所以我不比较"如果换成别的会怎样"。';
+  if(!decision)return '缺当时的候选记录：本局只记下了你出了什么，没记下当时还有哪些合法选择 —— 所以我不比较"如果换成别的会怎样"。';
   const alts=decision.options.filter(o=>JSON.stringify(o.action)!==JSON.stringify(decision.chosen.action));
   if(!alts.length)return `这一个回合引擎没有给出可排序的候选（撤退或规则版本不匹配），只保留实际选择「${decision.chosen.name}」。`;
   // D-31（2026-09-30，lead-mac 全功能审核）：这里原来直接内插 `decision.gap`
-  //   ⇒ 玩家读到「评分差 6523.247662596753」（13 位小数）。同仓给玩家看的分数都有口径
-  //   （`strategist.js:40` `toFixed(1)` · `roco-experience.js:1148/1150` `toFixed(2)` ·
-  //   `coach-advice.js:695/719` `toFixed(3)`），只有这一条露原始浮点。
-  //   取 `toFixed(1)`（不是删掉数字）：改动最小、与军师那一侧同一精度，且这句话本身
-  //   已经写明「事前一回合的公开信息」——数字留着仍可核对；取不到就如实写「未登记」。
-  const gapNumber=decision.gap===null||decision.gap===undefined||decision.gap===''?NaN:Number(decision.gap);
-  const gapText=Number.isFinite(gapNumber)?gapNumber.toFixed(1):'未登记';
-  return `当时可比较的两个候选动作：${alts.slice(0,2).map(o=>`「${o.name}」`).join('与')}；评分差 ${gapText}（事前一回合的公开信息，不是结果反推）。`;
+  //   ⇒ 玩家读到「评分差 6523.247662596753」（13 位小数）。
+  //   精度口径见 `showNumber()`（文件上方）：**整数原样、非整数 1 位**、取不到写「未登记」——
+  //   与 `coach-advice.js:106-110` 的 `show()` 同一套，避免同一屏出现 `930` 与 `930.0` 两种写法。
+  //   （横切审计 H3 登记的正是这一点；裸 `toFixed(1)` 会把整数写成 `930.0`。）
+  return `当时可比较的两个候选动作：${alts.slice(0,2).map(o=>`「${o.name}」`).join('与')}；评分差 ${showNumber(decision.gap)}（事前一回合的公开信息，不是结果反推）。`;
  })();
  const nextLine=(()=>{
   if(practice?.question)return `${practice.question.replace(/^假设练习（参数已改动）：/,'')}（${practice.answer}）`;
@@ -347,7 +364,7 @@ export function reviewMatch(context){
  })();
  const missing=[];
  if(!storedTurns.length)missing.push('缺逐回合摘要（本局没存下 turnLog）');
- if(!decision)missing.push('缺当时的分支记录（keyTurns[].decision 没给候选动作）');
+ if(!decision)missing.push('缺当时的候选记录（keyTurns[].decision 没给候选动作）');
  const hasSpeed=Boolean(decision?.numbers?.speed||Number.isInteger(decision?.situation?.playerSpeed)
   ||Number.isInteger(decision?.situation?.enemySpeed)
   ||storedTurns.some(r=>Number.isFinite(r?.you?.speed)||Number.isFinite(r?.foe?.speed)));
@@ -355,7 +372,7 @@ export function reviewMatch(context){
  // ⚠ 措辞口径（2026-09-30）：**正文里不出现「必胜/稳赢/一定赢」这类词**，哪怕是用来说"不许这么断言" ——
  //   判据是按词扫正文的，出现即被判成断言（真机验收的判据③）⇒ 用「翻盘」这种不含断言词的说法。
  const riskLine='风险：上面比较的是**事前一回合的信息**，不代表换一手就更好；结果已经发生，用它反推结论是错的。'
-  +(decision?'':'尤其这一局**没有当时的分支记录** —— 所以我不会说"换个人就能翻盘"这类事后结论。')
+  +(decision?'':'尤其这一局**没有当时的候选记录** —— 所以我不会说"换个人就能翻盘"这类事后结论。')
   +(missing.length?`这一局缺的依据：${missing.join('；')}。`:'');
  const text=`${safe.stage ?? '这一局'}，共${safe.rounds??storedTurns.length}回合，${outcome}。${matchStatsLine(safe,{lead:false})}`
   +`关键回合：${keyTurnLine}`

@@ -17,8 +17,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import {createGame, legalActions, step} from '../src/game/engine.js';
-import {reviewMatch, summarizeMatch} from '../src/coach/teacher.js';
+import {createGame, legalActions, step, SKILLS} from '../src/game/engine.js';
+import {reviewMatch, summarizeMatch, skillLesson} from '../src/coach/teacher.js';
 import {strategist} from '../src/coach/strategist.js';
 import {rocoMatchReview} from '../src/coach/roco-experience.js';
 import {battleAdvice} from '../src/coach/coach-advice.js';
@@ -27,20 +27,24 @@ import {freshMemory} from '../src/coach/memory.js';
 
 /** 内部精度：≥3 位小数。 */
 const PRECISE = /\d+\.\d{3,}/;
+/** 裸 JS 值字面量（H1）：玩家可见文本里不许出现这三个词。 */
+const DIRTY = /\bnull\b|\bundefined\b|\bNaN\b/;
 
-/** 显式白名单（{surface, pattern/reason}）。目前为空：玩家可见面里没有一处需要 ≥3 位小数。 */
+/** 显式白名单（{surface, test, reason}）。目前为空：玩家可见面里没有一处需要 ≥3 位小数或裸 JS 值。 */
 const ALLOW = [];
 
 function scan(label, strings, hits) {
   for (const value of strings) {
     if (typeof value !== 'string') continue;
-    const hit = value.match(PRECISE);
-    if (!hit) continue;
-    // 白名单：值命中 `pattern` 且 surface 相同 ⇒ 放过（必须写理由）。
-    if (ALLOW.some((row) => row.surface === label && row.test(value))) continue;
-    // 读数只留命中那一段（前后各 24 字），便于人工核对又不至于把整段正文刷出来。
-    const at = hit.index ?? 0;
-    hits.push(`${label}: …${value.slice(Math.max(0, at - 24), at + hit[0].length + 12)}…`);
+    for (const [kind, re] of [['精度', PRECISE], ['脏值', DIRTY]]) {
+      const hit = value.match(re);
+      if (!hit) continue;
+      // 白名单：值命中 `pattern` 且 surface 相同 ⇒ 放过（必须写理由）。
+      if (ALLOW.some((row) => row.surface === label && row.test(value))) continue;
+      // 读数只留命中那一段（前后各 24 字），便于人工核对又不至于把整段正文刷出来。
+      const at = hit.index ?? 0;
+      hits.push(`${label} [${kind}]: …${value.slice(Math.max(0, at - 24), at + hit[0].length + 12)}…`);
+    }
   }
 }
 
@@ -104,6 +108,23 @@ test('② 关键回合那一句的评分差：浮点必须被格式化（D-31 �
   const shown = packet.text.match(/评分差\s*([^\s（(]+)/)?.[1] ?? null;
   assert.ok(shown, `找不到评分差后面的值：${packet.text.slice(0, 240)}`);
   assert.match(shown, /^\d+\.\d$|^\d+$|^未登记$/, `评分差必须是 1 位小数以内的数（或「未登记」），实际「${shown}」`);
+  assert.equal(shown, '6523.2', `非整数只留 1 位小数，实际「${shown}」`);
+
+  // ── H3（横切审计）：**整数原样** —— 与 `coach-advice.js:106-110` 的 `show()` 同一口径 ──
+  //   裸 `toFixed(1)` 会把整数写成 `930.0`，而同屏别处写 `930` ⇒ 同一个数两种写法。
+  const integerMatch = {...lastMatch, id: 'd31-gap-int',
+    keyTurns: [{...lastMatch.keyTurns[0], alternatives: {gap: 930, line: '候选：换上潮甲龟'},
+      decision: {...decision, gap: 930}}]};
+  const integerPacket = reviewMatch({lastMatch: integerMatch});
+  const shownInt = integerPacket.text.match(/评分差\s*([^\s（(]+)/)?.[1] ?? null;
+  assert.equal(shownInt, '930', `整数场景必须渲染成 930（不是 930.0），实际「${shownInt}」`);
+  assert.doesNotMatch(integerPacket.text, /930\.0/, `整数被写成了 930.0：${integerPacket.text.slice(0, 240)}`);
+  assert.equal(shown, '6523.2', '同一个函数两种输入各自的口径都要对');
+  // 脏值（null/NaN）⇒ 显式占位，不装成 0
+  const dirtyPacket = reviewMatch({lastMatch: {...lastMatch, id: 'd31-gap-dirty',
+    keyTurns: [{...lastMatch.keyTurns[0], alternatives: {gap: null, line: '候选：换上潮甲龟'},
+      decision: {...decision, gap: null}}]}});
+  assert.match(dirtyPacket.text, /评分差\s*未登记/, `脏值要显式占位「未登记」：${dirtyPacket.text.slice(0, 240)}`);
 });
 
 test('③ 军师那一侧（同一类内部评分）：玩家可见面里不许出现 ≥3 位小数', () => {
@@ -170,4 +191,26 @@ test('⑥ 陪练的一句人话：不许出现 ≥3 位小数', () => {
     scan(`陪练「${message}」`, [reply?.text], hits);
   }
   assert.deepEqual(hits, [], `陪练回复里出现了内部精度：\n${hits.join('\n')}`);
+});
+
+test('⑦ 技能讲解（H1）：无威力技能不许拼出 null/undefined/NaN；有威力技能照旧', () => {
+  // 病灶：`skillLesson` 原来无条件拼「伤害来自 engine.damage（不防御 null／防御 null）」
+  // —— 对防御/蓄势/苔息/清风这些**没有威力**的技能，两个 `null` 会一路走到提示展开区
+  //（`src/coach/experience.js:623-629` → `src/client/roco.js:3532` 的 `state.lastAdviceEvidence`）。
+  const game = createGame(17);
+  const hits = [];
+  for (const id of ['guard', 'focus', 'moss', 'clearwind']) {
+    const packet = skillLesson(game, {kind: 'skill', id});
+    assert.ok(packet, `前提：${id} 应当讲得出话`);
+    assert.ok(SKILLS[id] && !SKILLS[id].power, `前提：${id} 必须是无威力技能`);
+    scan(`技能讲解「${SKILLS[id].name}」`, [packet.text, ...(packet.evidence ?? [])], hits);
+    // 那一条依据必须换成「不造成伤害」的说法，不许再出现伤害面板的两个占位
+    assert.match(packet.evidence[2], /不造成伤害/, `无威力技能的依据要说明这一手不算伤害：${packet.evidence[2]}`);
+    assert.doesNotMatch(packet.evidence[2], /不防御/, `无威力技能不该出现「不防御 X」：${packet.evidence[2]}`);
+  }
+  assert.deepEqual(hits, [], `技能讲解里出现了脏值/精度：\n${hits.join('\n')}`);
+  // 正对照（非恒等）：有威力的技能照旧给伤害面板两个数，且是整数（不带小数点）
+  const power = skillLesson(game, {kind: 'skill', id: 'ember'});
+  assert.match(power.evidence[2], /不防御 \d+／防御 \d+/, `有威力技能仍要给两个数：${power.evidence[2]}`);
+  assert.doesNotMatch(power.evidence[2], /\d+\.\d/, `整数伤害不该带小数点：${power.evidence[2]}`);
 });
