@@ -482,6 +482,22 @@
       "owner": "harness-verifier（自查更正）",
       "status": "closed",
       "rule": "**断言「某处没有」之前必须说明查了哪几层**（函数级 ≠ 调用链级；`tests/*.test.js` ≠ `tests/**`）；把「没转发」写成「主动拒绝」这类压缩会造成误导（O-21 的教训）"
+    },
+    {
+      "id": "O-30",
+      "what": "**复盘正文露出 13 位内部浮点**（同一类内部评分在四处是四种精度，只有这一处露原始值）——玩家可见文本的「口径/精度」面还有货",
+      "evidence": "lead-mac 全功能审核第 6 轮（`agent-coop` 提交 `db67b62` + `verification/2026-09-30-全功能审核-第6轮-局内建议与复盘.md`）：复盘（打到 loss、turn 13）正文含 `评分差 6523.247662596753`；根因 `src/coach/teacher.js:332` 直接内插 `decision.gap`（未格式化）；同仓口径 `strategist.js:40 toFixed(1)` · `roco-experience.js:1148/1150 toFixed(2)` · `coach-advice.js:695/719 toFixed(3)`。同轮**正面读数**：局内建议（`route=strategist`、evidence 9 条）**两个动作都在 `legalActions` 里**（实测比对）、正文自述「只用来排序，不是胜率」；复盘自述「事前一回合的公开信息，不是结果反推」、给可执行替代、缺依据如实报",
+      "owner": "lead-mac（发现）· plan06-recon（修 + 加守卫判据，窄例外 D-31）",
+      "status": "fix_in_flight",
+      "rule": "**面向玩家的文本必须统一精度口径**，并加守卫判据 `!/\\d+\\.\\d{3,}/`（≥3 位小数即算露内部精度；确需高精度处必须显式白名单 + 理由）；同一类评分在不同页面用不同精度也算缺陷"
+    },
+    {
+      "id": "O-31",
+      "what": "12（真人试用）**前置条件仍有 3 条硬缺口**，且缺 5 位真实参与者 ⇒ 现状定性 `waiting_external`（**招募试用者需用户决定**，团队不擅自联系）",
+      "evidence": "plan00-closer 勘察（`reports/roco/product-execution/12/12.1-recon.md`，sha16 `d5fcaf01a1c7c44d`；两向对照证明判据非恒真）：**T6 隐私声明/试用同意**（客户端文案 0 处）· **T9 反馈入口**（`/api/feedback` 0 处）· **T11 记忆导出**（09.4 明令，现只有查看+删除）；半有：T3 需在说明里写「设 `ROCO_PYTHON`」· T5 刷新即丢局（10 的 R1/R3 未落地）。**正面**：密钥只在进程内存（写盘调用含 credential/key/secret/token **0 处**）、日志仅 6 处 `console.*` 无密钥、战报导出 ✅ 记忆删除 ✅；**产品里已有非问卷仪器**（`quizLog` 的「≥3 次独立答对 + 2 个不同变式」门槛、`transferAssessment` 的 `distinctSituations/distinctMatches`、提示暴露记账 `hints`/`hint.stateVersion`）⇒ 判定不需要新造评测器",
+      "owner": "plan00-closer（勘察）· lead（裁决 D-32）· **用户**（招募试用者）",
+      "status": "waiting_external",
+      "rule": "涉及真人的事项（招募/联系/采集）**必须由用户决定**，团队只能准备材料与判定设计；记录一律用代号（P1–P5）、保留 ≤30 天、要求即删、不采集无关个人信息/密钥/未匿名原话"
     }
   ],
   "handoff": {
