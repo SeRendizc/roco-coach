@@ -291,9 +291,21 @@ test('P0-4 反证：拿「最狠一招 + 速度档」拼一句当机制，检查
 
 test('P0-4 基础面板单独成组：六维逐项给，冻结数据没有的那一项如实标出', () => {
   const full = box.statBlockHtml({hp: 132, atk: 95, def: 128, spa: 43, spd: 82, spe: 75});
-  for (const label of ['生命', '物攻', '物防', '魔攻', '魔防', '速度']) {
+  // ⚠ 2026-10-01 改钉（05 第 2 步 / O-63 ①，Lead 批准「同刀改钉」）：hp 的标签由「生命」改「血量」。
+  //   原断言逐字留档（改钉不删）：
+  //     for (const label of ['生命', '物攻', '物防', '魔攻', '魔防', '速度']) {
+  //       assert.ok(full.includes(label), `基础面板缺少「${label}」${report('statBlockHtml(完整)', full)}`);
+  //     }
+  //   为什么改：`生命` 是**退役词**（`src/coach/player-text.js` 的词表口径：血量类只许 血/血量）。
+  //   同一条口径早就落在别处 —— `src/client/box.js` 用的就是「血量」，且
+  //   `tests/roco-box-drawer.test.js:553-555` 明令 box.js 不许回退成 `['hp','生命']`；
+  //   `tests/knowledge.test.js:68` 也记着「面板/属性名口径统一叫血量」。
+  //   **判据的意图一个字没改**：六维**逐项**给、缺项如实标出；只是那一格的标签跟上统一口径。
+  for (const label of ['血量', '物攻', '物防', '魔攻', '魔防', '速度']) {
     assert.ok(full.includes(label), `基础面板缺少「${label}」${report('statBlockHtml(完整)', full)}`);
   }
+  // 反证（变异有牙的那一半）：退役词不许借这一格回来
+  assert.ok(!full.includes('生命'), `基础面板不许再出现退役词「生命」${report('statBlockHtml(完整)', full)}`);
   assert.equal((full.match(/<b>/g) ?? []).length, 6,
     `六维应当逐项给数值${report('statBlockHtml(完整)', full)}`);
   const partial = box.statBlockHtml({hp: 132, atk: 95, def: 128, spd: 82});
