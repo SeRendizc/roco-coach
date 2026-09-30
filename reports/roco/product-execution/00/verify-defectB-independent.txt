@@ -1,0 +1,62 @@
+BASELINE_SNAPSHOT ../reports/roco/product-execution/harness/readings-78766db-all.json stamp={"coverage.py": "21b80d3fe4dddf4c249a6a1ee1d53f4f2fe764be867ec9cba99c9885e2631006", "data.py": "d92786ef8c1a9584afbbb7b57640793111d52737be8e97cbc0efee12aa6f9e2a", "service.py": "74f53be59fb01dc19db51dd401dfb25039aea69fc238662991b3484445fcad33"}
+SETTLED_CHANGED_ROWS 38（其中未带动 tier/resolved 的 32）
+   skill_000246 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000273 settled [] -> ['回复生命'] | tier_resolved_changed=True
+   skill_000282 settled ['应对'] -> ['应对', '回复生命'] | tier_resolved_changed=False
+   skill_000337 settled ['双攻升降'] -> ['双攻升降', '回能'] | tier_resolved_changed=False
+   skill_000338 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000342 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000344 settled [] -> ['回能'] | tier_resolved_changed=True
+   skill_000346 settled [] -> ['回复生命'] | tier_resolved_changed=True
+   skill_000347 settled ['双攻升降'] -> ['双攻升降', '回能'] | tier_resolved_changed=False
+   skill_000351 settled [] -> ['回复生命'] | tier_resolved_changed=False
+   skill_000353 settled ['减伤', '应对'] -> ['减伤', '应对', '回复生命'] | tier_resolved_changed=False
+   skill_000365 settled [] -> ['回复生命'] | tier_resolved_changed=False
+   skill_000368 settled ['伤害', '应对'] -> ['伤害', '应对', '回复生命'] | tier_resolved_changed=False
+   skill_000371 settled ['伤害', '应对'] -> ['伤害', '应对', '回复生命'] | tier_resolved_changed=False
+   skill_000372 settled ['伤害'] -> ['伤害', '回复生命'] | tier_resolved_changed=False
+   skill_000373 settled [] -> ['回复生命'] | tier_resolved_changed=False
+   skill_000374 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000375 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000378 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000418 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000472 settled [] -> ['回能'] | tier_resolved_changed=True
+   skill_000529 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000558 settled ['伤害', '持续状态层数/回合'] -> ['伤害', '持续状态层数/回合', '回能'] | tier_resolved_changed=False
+   skill_000569 settled [] -> ['回复生命'] | tier_resolved_changed=False
+   skill_000636 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000640 settled [] -> ['回能'] | tier_resolved_changed=False
+   skill_000641 settled [] -> ['回复生命'] | tier_resolved_changed=False
+   skill_000659 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000670 settled ['应对', '双攻升降'] -> ['应对', '双攻升降', '回复生命'] | tier_resolved_changed=False
+   skill_000683 settled ['双攻升降'] -> ['双攻升降', '回复生命'] | tier_resolved_changed=False
+   skill_000723 settled ['萌化标记'] -> ['萌化标记', '回复生命'] | tier_resolved_changed=False
+   skill_000741 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000756 settled [] -> ['吸取能量'] | tier_resolved_changed=True
+   skill_000762 settled [] -> ['扣能'] | tier_resolved_changed=True
+   skill_000764 settled ['伤害'] -> ['伤害', '吸取能量'] | tier_resolved_changed=False
+   skill_000765 settled [] -> ['吸取能量'] | tier_resolved_changed=False
+   skill_000766 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000807 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+CHANGED_ROWS 6 -> ['skill_000273', 'skill_000344', 'skill_000346', 'skill_000472', 'skill_000756', 'skill_000762']
+EXPECTED      6 -> ['skill_000273', 'skill_000344', 'skill_000346', 'skill_000472', 'skill_000756', 'skill_000762']
+  skill_000273 tier=SIMULATABLE_UNVERIFIED resolved=True settled=['回复生命'] unsettled=[]
+  skill_000344 tier=SIMULATABLE_UNVERIFIED resolved=True settled=['回能'] unsettled=[]
+  skill_000346 tier=SIMULATABLE_UNVERIFIED resolved=True settled=['回复生命'] unsettled=[]
+  skill_000472 tier=SIMULATABLE_UNVERIFIED resolved=True settled=['回能'] unsettled=[]
+  skill_000756 tier=SIMULATABLE_UNVERIFIED resolved=True settled=['吸取能量'] unsettled=[]
+  skill_000762 tier=SIMULATABLE_UNVERIFIED resolved=True settled=['扣能'] unsettled=[]
+GUARD_ROWS（改前有目标类效果但未结算）15 -> 被误翻正 0 []
+GUARD_ROWS_B（改前未结算且 unsettled 非空）274 -> 被误翻正 0 []
+GUARD 269 吞噬 resolved=False unsettled=['回复：回复6能量', '若：若使用本技能击败敌方'] effects=[]
+TOTALS 306（期望 306）
+UNION_MISMATCHES 0 []（期望 0）
+GATES_OFF_COUNT 5 ['skill_000412', 'skill_000510', 'skill_000539', 'skill_000671', 'skill_000694']（期望 5）
+RUNTIME_GUARD {"skill_id": "skill_000269", "desc": "造成物伤，若使用本技能击败敌方，回复6能量。", "tried": 12, "attributed_events": [], "sample_event_kinds": ["turn_start,defense,damage", "turn_start,damage,damage,energy_gain,effects_registered_unsupported"]}
+RUNTIME_GUARD {"skill_id": "skill_000366", "desc": "为场下每个精灵回复3能量。", "tried": 12, "attributed_events": [], "sample_event_kinds": ["turn_start,defense,status_unsupported", "turn_start,damage,energy_gain,effects_registered_unsupported,status_un"]}
+RUNTIME_GUARD {"skill_id": "skill_000369", "desc": "造成魔伤，为场下所有精灵回复1能量。", "tried": 12, "attributed_events": [], "sample_event_kinds": ["turn_start,defense,damage", "turn_start,damage,energy_gain,effects_registered_unsupported,damage"]}
+RUNTIME_GUARD {"skill_id": "skill_000537", "desc": "回复能量，回复值等于敌方技能总能耗的一半。", "tried": 12, "attributed_events": [], "sample_event_kinds": ["turn_start,defense,status_unsupported", "turn_start,damage,energy_gain,effects_registered_unsupported,status_un"]}
+RUNTIME_GUARD {"skill_id": "skill_000745", "desc": "敌方失去3能量，应对防御：改为敌方失去6能量。", "tried": 12, "attributed_events": [], "sample_event_kinds": ["turn_start,respond_override_unsupported,status_unsupported,defense", "turn_start,damage,energy_gain,effects_registered_unsupported,respond_o"]}
+RUNTIME_GUARD {"skill_id": "skill_000760", "desc": "敌方下回合回复的能量-5，冷却2回合。", "tried": 12, "attributed_events": [], "sample_event_kinds": ["turn_start,defense,status_unsupported", "turn_start,damage,energy_gain,effects_registered_unsupported,status_un"]}
+RUNTIME_GUARD {"skill_id": "skill_000793", "desc": "若敌方本回合回复生命，改为失去2倍（含溢出的回复量）。先手+1。", "tried": 12, "attributed_events": [], "sample_event_kinds": ["turn_start,status_unsupported,defense", "turn_start,status_unsupported,damage"]}
+DEFECT_B_FAILS 0

@@ -1,0 +1,4 @@
+LEDGER_VS_PRODUCT_DIVERGENCE 0
+skill            build_coverage             classify_declared          product_tier               verd   base306                    settled
+
+其中 ledger=SIM 而 product 非 SIM 的： 0

@@ -1,0 +1,11 @@
+SIM_PATCH 4 类效果（heal/self_energy/drain_energy/foe_team_energy_loss）识别为已结算
+TOTALS before=306 after=306
+UNION_MISMATCHES before=0 after=0 []
+GATES_OFF_COUNT before=5 after=5
+CHANGED_ROWS 6 -> ['skill_000273', 'skill_000344', 'skill_000346', 'skill_000472', 'skill_000756', 'skill_000762']
+   skill_000273: {'tier': 'PARTIAL', 'resolved': False} -> {'tier': 'SIMULATABLE_UNVERIFIED', 'resolved': True} (休息回复)
+   skill_000344: {'tier': 'PARTIAL', 'resolved': False} -> {'tier': 'SIMULATABLE_UNVERIFIED', 'resolved': True} (徒长)
+   skill_000346: {'tier': 'PARTIAL', 'resolved': False} -> {'tier': 'SIMULATABLE_UNVERIFIED', 'resolved': True} (根吸收)
+   skill_000472: {'tier': 'PARTIAL', 'resolved': False} -> {'tier': 'SIMULATABLE_UNVERIFIED', 'resolved': True} (杠杆置换)
+   skill_000756: {'tier': 'PARTIAL', 'resolved': False} -> {'tier': 'SIMULATABLE_UNVERIFIED', 'resolved': True} (勾魂)
+   skill_000762: {'tier': 'PARTIAL', 'resolved': False} -> {'tier': 'SIMULATABLE_UNVERIFIED', 'resolved': True} (小型打劫)

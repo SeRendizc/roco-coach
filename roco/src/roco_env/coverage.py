@@ -1175,6 +1175,8 @@ def _capability_readings(config_id: Any = "mobile_s4_candidate_v3") -> Dict[str,
 #:   · 各判据 `assertIn` 逐字点名的类名（转移标记 / 本手威力加成 / 全技能持久修正）。
 #: ⚠ **「伤害」这一类不许用裸词**：`389 充分燃烧`「触发1次灼烧伤害」里也有「伤害」二字，
 #:   而它必须 `resolved=False`（E 堆）。所以只认「造成物伤 / 造成魔伤」这种**真的出兵**的写法。
+#: ⚠ 本表**只按文本子串**认类 ⇒ 看不见"文本读不出来、但引擎真有结算支"的那几族；
+#:   那一族走下面 `_SETTLED_EFFECT_CLASSES`（**按效果 kind**，2026-09-30 补）。
 SETTLED_PATTERNS = (
     ("伤害", ("造成物伤", "造成魔伤", "造成物理伤害", "造成魔法伤害")),
     ("减伤", ("减伤",)),
@@ -1192,6 +1194,33 @@ SETTLED_PATTERNS = (
     ("萌化标记", ("萌化",)),
     ("本手威力加成", ("本次技能威力",)),
     ("全技能持久修正", ("全技能",)),
+)
+
+#: **按效果 kind 认的已结算类**（`SETTLED_PATTERNS` 的姊妹表 · 2026-09-30 分计划 00 补）。
+#:
+#: 为什么必须**按 kind** 而不是往上面那张文本表里加词：那张表是**子串匹配**
+#: （`any(word in desc)`），而语料里
+#:   · 「回复N%生命」与「回复N能量」用的是**同一个词**「回复」⇒ 加一个「回复」类，
+#:     两个 kind 混成一个标签；拆成两类则会给「只回能」的技能贴「回复生命」；
+#:   · 「偷取」还出现在「偷取**印记**」（650/655）里；「失去」还出现在「自己每失去5%生命」
+#:     （266/321/406/774/796）里 ⇒ 按宽词加类会给**与能量无关的行贴「扣能」标签**。
+#: 按 kind 则**只有真的产出那条效果的行**才拿到类 —— 与「认领只由证据算、不另抄词表」
+#: 同一条纪律（`_apply_capability_resolvers` 的注释）。
+#:
+#: 四类各自对应 `env._apply_effect_batch` 里**真有写点**的分支（真打一手读数见
+#: `reports/roco/product-execution/00/plan00-settled-patterns-gap.md`）：
+#:   · `heal`                 ⇒ 发 `heal` 事件                 （273 休息回复 / 346 根吸收）
+#:   · `self_energy`          ⇒ 发 `energy_gain` 事件           （344 徒长 / 346 / 472 杠杆置换）
+#:   · `drain_energy`         ⇒ 发 `drain_energy` 事件          （756 勾魂）
+#:   · `foe_team_energy_loss` ⇒ 发 `foe_team_energy_loss` 事件  （762 小型打劫）
+#: ⚠ 只列**这四类**（不少列、也不多列）：多列会让"文本里没有、效果里有"的行多拿标签，
+#:   而它们本来就已经 `resolved=True`（例：747/742/763 的 `foe_energy_loss` 单点扣能）——
+#:   本次的目的是补**假阴性**那六行，不是重建整张表。
+_SETTLED_EFFECT_CLASSES = (
+    ("heal", "回复生命"),
+    ("self_energy", "回能"),
+    ("drain_energy", "吸取能量"),
+    ("foe_team_energy_loss", "扣能"),
 )
 
 #: **没拉起的原语**：描述里出现这些词 ⇒ 引擎还没有对应的结算支 ⇒ 一律记未结算。
@@ -1231,10 +1260,19 @@ _DIAGNOSTIC_SHAPE_PATTERNS = (
     ("层数驱动", _re.compile(r"每有\s*\d+\s*层|层数翻倍")),
     # ── 2026-09-30（按逐行审计补回丢失的形状；`test_effect_coverage:682-690` 逐字点名过这批）──
     # ⚠ **判法是"形状在 desc 里 且 没有任何效果的 evidence 覆盖它"** ⇒ 天然**按半句**：
-    # `313 天旋地转`/`581 电弧` 的「迸发：本次技能威力+N」真有 effect（`effects.py:270`+
-    # `env.py:1263` 已接线，真打一手 power_used=60+30 / 80+40）⇒ 被 evidence 盖住、**不记缺口**；
-    # 而 `583 超导` 的「迸发：本技能能耗-2」、`598 双联脉冲` 的「使用次数+1」没有产出
-    # ⇒ 记缺口。这一条正是审计里「21 行判宽」的第 ① 族（11 行）。
+    # ⚠ 2026-09-30（分计划 00 · **改正与实测不符的注释**；harness-verifier 指出）：
+    #   本注释原文写「`313 天旋地转`/`581 电弧` 的「迸发：本次技能威力+N」**真有 effect** ⇒
+    #   被 evidence 盖住、**不记缺口**」——**那是错的**：解析层对这一段**不产出 effect**
+    #   （`effects.effective_power()` 是结算期读文本，不是解析效果）⇒ 实测两行的
+    #   `diagnostic_shape_gaps` **都是 `['迸发']`**、档位 `PARTIAL`（`verify-family2` 与
+    #   `plan00-584-burst-evidence.md` 的逐项读数）。
+    #   ✅ **运行时那半句是对的**：`effects.py:270-277` + `env.py:1266` 真的按迸发窗口加威力
+    #   —— 真打一手 `power_used` 60→90（313）/ 80→120（581）/ 35→55（584），
+    #   `conditional_reason="迸发 → 威力 +N"`。⇒ 即：**引擎真结算，但诊断形状仍记缺口**，
+    #   这是「306 vs 309」那条**待裁决**的分叉（584 取证件 §5 给了三个选项），**本轮不动结论**。
+    #   而 `583 超导`「迸发：本技能能耗-2」、`598 双联脉冲`「使用次数+1」**运行时也确实不结算**
+    #   （583 真打一手两回合都付 3 点能耗、`power_used` 不变）⇒ 记缺口是对的。
+    #   这一条正是审计里「21 行判宽」的第 ① 族（11 行）。
     ("条件：生命阈值", _re.compile(r"生命\s*(?:大于|小于|高于|低于|不低于|不超过)\s*\d+\s*%")),
     ("体重/吨位条件", _re.compile(r"体重|吨位")),
     ("面板比值条件", _re.compile(r"(?:速度|物防|魔防|攻击|双攻|血量|生命)比")),
@@ -1638,6 +1676,15 @@ def settlement_verdict(skill: Any, *, declared: Optional[Dict[str, bool]] = None
 
     settled = [name for name, words in SETTLED_PATTERNS
                if any(word and word in desc for word in words)]
+    # 2026-09-30（分计划 00 · **补缺失的类**）：文本表看不见的四类走**按 kind** 的姊妹表
+    # （`_SETTLED_EFFECT_CLASSES`）—— 它们各自在 `env._apply_effect_batch` 里真有写点，
+    # 而语料把 heal 与 self_energy 都写成「回复N…」、把扣能写成「…失去N能量」
+    # ⇒ 按文本加词会给无关行贴错标签（见那张表的注释与证据件）。
+    for _kind, _label in _SETTLED_EFFECT_CLASSES:
+        if _label not in settled and any(
+                getattr(e, "kind", "") == _kind
+                for e in (getattr(parsed, "effects", None) or [])):
+            settled.append(_label)
     # 原版口径（`_settlement_lists-抽取前基线-2026-09-30.md` L17 + BATCH-1 引的 `:713-719`）：
     # **`resolved` = `settled` 非空 且 `unsettled` 为空**。`settled` 是那把"安全阀"：
     # 描述里连一类"引擎真的会出这一手"的机制都点不出来 ⇒ 不许说已结算

@@ -67,6 +67,8 @@ def dump(path: str, all_entities: bool = False) -> int:
             "settled": list(v.get("settled") or []),
             "unsettled": [str(x) for x in (v.get("unsettled") or [])],
             "n_effects": len(getattr(parsed, "effects", None) or []),
+            "effects": sorted({getattr(e, "kind", "") for e in
+                               (getattr(parsed, "effects", None) or [])}),
             "unparsed": [str(x) for x in (getattr(parsed, "unparsed", None) or [])],
         }
     out["totals"] = C.build_coverage(rs)["totals"]

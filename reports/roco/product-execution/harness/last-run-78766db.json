@@ -1,0 +1,625 @@
+{
+  "tool": "scripts/roco/isolated-acceptance.py",
+  "tool_version": 1,
+  "generated_at": "2026-09-30T17:53:06+08:00",
+  "finished_at": "2026-09-30T17:53:07+08:00",
+  "git": {
+    "branch": null,
+    "head": null,
+    "dirty": [],
+    "error": null
+  },
+  "src": "/mnt/e/roco-scratch/verify-78766db/roco/src",
+  "src_is_repo_default": true,
+  "repo_root": "/mnt/e/roco-scratch/verify-78766db",
+  "coverage_file_sha256": "21b80d3fe4dddf4c249a6a1ee1d53f4f2fe764be867ec9cba99c9885e2631006",
+  "coverage_file_sha256_at_end": "21b80d3fe4dddf4c249a6a1ee1d53f4f2fe764be867ec9cba99c9885e2631006",
+  "source_stable_during_run": true,
+  "fault_inject": null,
+  "ruleset_config_id": "mobile_s4_candidate_v3",
+  "seed": 11,
+  "strategy": "greedy_damage",
+  "service": {
+    "argv": [
+      "/usr/bin/python3",
+      "-m",
+      "roco_env.service",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "0",
+      "--repo-root",
+      "/mnt/e/roco-scratch/verify-78766db",
+      "--parent-pid",
+      "3966"
+    ],
+    "src": "/mnt/e/roco-scratch/verify-78766db/roco/src",
+    "repo_root": "/mnt/e/roco-scratch/verify-78766db",
+    "requested_port": 0,
+    "pid": 3968,
+    "port": 45802,
+    "host": "127.0.0.1",
+    "ready": true,
+    "ready_raw": "ROCO_SERVICE_READY {\"protocol_version\": 1, \"service\": \"roco_env\", \"service_version\": \"0.1.0\", \"host\": \"127.0.0.1\", \"port\": 45802, \"pid\": 3968, \"ruleset_id\": \"roco-world-s4-2026-09-10\", \"ruleset_ok\": true, \"ruleset_error\": null, \"snapshot_fingerprint\": \"4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc\"}",
+    "ready_line": {
+      "protocol_version": 1,
+      "service": "roco_env",
+      "service_version": "0.1.0",
+      "host": "127.0.0.1",
+      "port": 45802,
+      "pid": 3968,
+      "ruleset_id": "roco-world-s4-2026-09-10",
+      "ruleset_ok": true,
+      "ruleset_error": null,
+      "snapshot_fingerprint": "4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc"
+    },
+    "startup_error": null,
+    "exit_code": 0,
+    "log_tail": [
+      "ROCO_SERVICE_READY {\"protocol_version\": 1, \"service\": \"roco_env\", \"service_version\": \"0.1.0\", \"host\": \"127.0.0.1\", \"port\": 45802, \"pid\": 3968, \"ruleset_id\": \"roco-world-s4-2026-09-10\", \"ruleset_ok\": true, \"ruleset_error\": null, \"snapshot_fingerprint\": \"4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc\"}"
+    ]
+  },
+  "port": 45802,
+  "snapshot_fingerprint": "4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc",
+  "steps": [
+    {
+      "name": "health",
+      "path": "/health",
+      "method": "GET",
+      "http_status": 200,
+      "ok": true,
+      "status": "passed",
+      "latency_ms": 17.1,
+      "request_sha256": null,
+      "error_type": null,
+      "error": null,
+      "checks": [
+        {
+          "name": "HTTP 200",
+          "ok": true,
+          "detail": 200
+        },
+        {
+          "name": "信封 ok=true 且 error_type 为空",
+          "ok": true,
+          "detail": {
+            "ok": true,
+            "error_type": null,
+            "error": null
+          }
+        },
+        {
+          "name": "规则集已加载",
+          "ok": true,
+          "detail": true
+        },
+        {
+          "name": "snapshot_fingerprint 是 64 位小写 hex",
+          "ok": true,
+          "detail": "4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc"
+        },
+        {
+          "name": "ruleset_id 非空",
+          "ok": true,
+          "detail": "roco-world-s4-2026-09-10"
+        },
+        {
+          "name": "capabilities 非空",
+          "ok": true,
+          "detail": 7
+        },
+        {
+          "name": "冻结快照规模 pets/skills 都 > 0",
+          "ok": true,
+          "detail": {
+            "pets": 542,
+            "skills": 824,
+            "learnsets": 542,
+            "type_rows": 104,
+            "terms": 54
+          }
+        }
+      ],
+      "reading": {
+        "loaded": true,
+        "ruleset_id": "roco-world-s4-2026-09-10",
+        "snapshot_fingerprint": "4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc",
+        "counts": {
+          "pets": 542,
+          "skills": 824,
+          "learnsets": 542,
+          "type_rows": 104,
+          "terms": 54
+        },
+        "capabilities": 7,
+        "engine_modules": {
+          "schema": true,
+          "effects": true,
+          "env": true,
+          "ruleset": false
+        },
+        "service_pid": 3968
+      }
+    },
+    {
+      "name": "fixtures_pet_ids",
+      "path": "/rules/query",
+      "method": "POST",
+      "http_status": 200,
+      "ok": true,
+      "status": "passed",
+      "checks": [
+        {
+          "name": "12 个名字都在 /rules/query kind=pet 查到 pet_id",
+          "ok": true,
+          "detail": {
+            "resolved": 12,
+            "failures": []
+          }
+        },
+        {
+          "name": "团队内 id 互不重复",
+          "ok": true,
+          "detail": {
+            "distinct": 12,
+            "total": 12
+          }
+        }
+      ],
+      "reading": {
+        "names": 12,
+        "sub_statuses": {
+          "200": 12
+        },
+        "pet_ids": {
+          "寂灭骨龙": "pet_000225",
+          "海豹船长": "pet_000190",
+          "黑猫巫师": "pet_000445",
+          "圆号鱼": "pet_000417",
+          "雪影娃娃": "pet_000112",
+          "音速犬": "pet_000062",
+          "秩序鱿墨": "pet_000451",
+          "画间沉铁兽": "pet_000474",
+          "月使鹭纳": "pet_000611",
+          "迷迷箱怪": "pet_000484",
+          "权杖-V": "pet_000330",
+          "卡卡虫": "pet_000038"
+        },
+        "ambiguous_names": {
+          "卡卡虫": {
+            "candidates": 4,
+            "picked": "pet_000038"
+          }
+        },
+        "rule": "同名多形态取第一个（与 tests/test_six_pet_battle.py 的 IDS_B 同口径），歧义如实记录不静默"
+      },
+      "error": null,
+      "latency_ms": null,
+      "request_sha256": null,
+      "error_type": null
+    },
+    {
+      "name": "battle_new",
+      "path": "/battle/new",
+      "method": "POST",
+      "http_status": 200,
+      "ok": true,
+      "status": "passed",
+      "latency_ms": 23.0,
+      "request_sha256": "8a417b19b4ed5754d53a0d23a99f116a44532d7762e8268a2da4b4c77a4125b6",
+      "error_type": null,
+      "error": null,
+      "checks": [
+        {
+          "name": "HTTP 200",
+          "ok": true,
+          "detail": 200
+        },
+        {
+          "name": "信封 ok=true 且 error_type 为空",
+          "ok": true,
+          "detail": {
+            "ok": true,
+            "error_type": null,
+            "error": null
+          }
+        },
+        {
+          "name": "trust_domain=local_sim（私有域显式声明）",
+          "ok": true,
+          "detail": "local_sim"
+        },
+        {
+          "name": "每方 6 只",
+          "ok": true,
+          "detail": {
+            "player": 6,
+            "enemy": 6
+          }
+        },
+        {
+          "name": "phase=battle 且 turn=1",
+          "ok": true,
+          "detail": {
+            "phase": "battle",
+            "turn": 1
+          }
+        },
+        {
+          "name": "私有状态里有真实 seed",
+          "ok": true,
+          "detail": 11
+        },
+        {
+          "name": "公开面里没有 seed（信任域边界）",
+          "ok": true,
+          "detail": [
+            "assumptions",
+            "mana",
+            "opponent",
+            "phase",
+            "result",
+            "ruleset_config_id",
+            "ruleset_id",
+            "schema_version",
+            "self",
+            "side",
+            "state_version",
+            "turn"
+          ]
+        },
+        {
+          "name": "玩家侧合法动作 ≥1",
+          "ok": true,
+          "detail": 12
+        },
+        {
+          "name": "每个合法动作都有非空 label 与 kind",
+          "ok": true,
+          "detail": [
+            {
+              "kind": "skill",
+              "label": "龙血"
+            },
+            {
+              "kind": "skill",
+              "label": "集中"
+            },
+            {
+              "kind": "skill",
+              "label": "坟场搏击"
+            },
+            {
+              "kind": "skill",
+              "label": "诡刺"
+            }
+          ]
+        },
+        {
+          "name": "合法动作数 == 基线 12",
+          "ok": true,
+          "detail": {
+            "expected": 12,
+            "actual": 12
+          }
+        },
+        {
+          "name": "state_version 是 int",
+          "ok": true,
+          "detail": 0
+        }
+      ],
+      "reading": {
+        "legal_count": 12,
+        "legal_kinds": [
+          "skill",
+          "skill",
+          "skill",
+          "skill",
+          "charge",
+          "switch",
+          "switch",
+          "switch",
+          "switch",
+          "switch",
+          "magic",
+          "surrender"
+        ],
+        "first_action": {
+          "kind": "skill",
+          "skill_id": "skill_000576",
+          "label": "龙血"
+        },
+        "phase": "battle",
+        "turn": 1,
+        "state_version": 0,
+        "pets": {
+          "player": 6,
+          "enemy": 6
+        },
+        "ruleset_config_id": "mobile_s4_candidate_v3",
+        "unverified_overrides": 0
+      }
+    },
+    {
+      "name": "battle_legal",
+      "path": "/battle/legal",
+      "method": "POST",
+      "http_status": 200,
+      "ok": true,
+      "status": "passed",
+      "latency_ms": 4.6,
+      "request_sha256": "d0ad7fc5dd763514719d5ce0b9e43b3b8021454bb06f04e4a9bfd95e48fe855f",
+      "error_type": null,
+      "error": null,
+      "checks": [
+        {
+          "name": "HTTP 200",
+          "ok": true,
+          "detail": 200
+        },
+        {
+          "name": "信封 ok=true 且 error_type 为空",
+          "ok": true,
+          "detail": {
+            "ok": true,
+            "error_type": null,
+            "error": null
+          }
+        },
+        {
+          "name": "合法动作数与 /battle/new 一致（同一状态同一读数）",
+          "ok": true,
+          "detail": {
+            "battle_new": 12,
+            "battle_legal": 12
+          }
+        },
+        {
+          "name": "合法动作种类多重集一致",
+          "ok": true,
+          "detail": {
+            "battle_new": [
+              "charge",
+              "magic",
+              "skill",
+              "skill",
+              "skill",
+              "skill",
+              "surrender",
+              "switch",
+              "switch",
+              "switch",
+              "switch",
+              "switch"
+            ],
+            "battle_legal": [
+              "charge",
+              "magic",
+              "skill",
+              "skill",
+              "skill",
+              "skill",
+              "surrender",
+              "switch",
+              "switch",
+              "switch",
+              "switch",
+              "switch"
+            ]
+          }
+        },
+        {
+          "name": "state_version 与请求一致",
+          "ok": true,
+          "detail": {
+            "request": 0,
+            "response": 0
+          }
+        }
+      ],
+      "reading": {
+        "legal_count": 12,
+        "legal_kinds": [
+          "skill",
+          "skill",
+          "skill",
+          "skill",
+          "charge",
+          "switch",
+          "switch",
+          "switch",
+          "switch",
+          "switch",
+          "magic",
+          "surrender"
+        ],
+        "state_version": 0,
+        "phase": "battle"
+      }
+    },
+    {
+      "name": "battle_advance",
+      "path": "/battle/advance",
+      "method": "POST",
+      "http_status": 200,
+      "ok": true,
+      "status": "passed",
+      "latency_ms": 8.5,
+      "request_sha256": "4d153fd3038ec2739d206365efdb60b9df9f33e5513d1d6eb6a9ed10a999c8c8",
+      "error_type": null,
+      "error": null,
+      "checks": [
+        {
+          "name": "HTTP 200",
+          "ok": true,
+          "detail": 200
+        },
+        {
+          "name": "信封 ok=true 且 error_type 为空",
+          "ok": true,
+          "detail": {
+            "ok": true,
+            "error_type": null,
+            "error": null
+          }
+        },
+        {
+          "name": "events 是非空数组",
+          "ok": true,
+          "detail": 3
+        },
+        {
+          "name": "每个事件都有非空 kind",
+          "ok": true,
+          "detail": [
+            "turn_start",
+            "defense",
+            "damage"
+          ]
+        },
+        {
+          "name": "事件含基线 turn_start,defense,damage",
+          "ok": true,
+          "detail": {
+            "missing": [],
+            "actual": [
+              "turn_start",
+              "defense",
+              "damage"
+            ]
+          }
+        },
+        {
+          "name": "推进真的发生了（state_version 前进 或 对局已出结果）",
+          "ok": true,
+          "detail": {
+            "before": 0,
+            "after": 3,
+            "battle_result": null
+          }
+        },
+        {
+          "name": "phase 是非空字符串",
+          "ok": true,
+          "detail": "battle"
+        }
+      ],
+      "reading": {
+        "action": {
+          "kind": "skill",
+          "skill_id": "skill_000576"
+        },
+        "event_kinds": [
+          "turn_start",
+          "defense",
+          "damage"
+        ],
+        "events_count": 3,
+        "phase": "battle",
+        "turn": 2,
+        "state_version_before": 0,
+        "state_version_after": 3,
+        "battle_result": null
+      }
+    },
+    {
+      "name": "skill_detail",
+      "path": "/rules/query",
+      "method": "POST",
+      "http_status": 200,
+      "ok": true,
+      "status": "passed",
+      "latency_ms": 2.2,
+      "request_sha256": "a2b2ef2aa32c3ce66f7f9957cdeb5b90710446d4a9d649ea71275042ec2f4611",
+      "error_type": null,
+      "error": null,
+      "checks": [
+        {
+          "name": "HTTP 200",
+          "ok": true,
+          "detail": 200
+        },
+        {
+          "name": "信封 ok=true 且 error_type 为空",
+          "ok": true,
+          "detail": {
+            "ok": true,
+            "error_type": null,
+            "error": null
+          }
+        },
+        {
+          "name": "record=skill 且 skill_id 对得上",
+          "ok": true,
+          "detail": {
+            "record": "skill",
+            "skill_id": "skill_000724"
+          }
+        },
+        {
+          "name": "mechanics.resolved=true（机制真的被算出来，不是只有名字）",
+          "ok": true,
+          "detail": {
+            "resolved": true,
+            "coverage": 1.0,
+            "reason": null
+          }
+        },
+        {
+          "name": "support_tier 是非空字符串",
+          "ok": true,
+          "detail": "SIMULATABLE_UNVERIFIED"
+        },
+        {
+          "name": "support_unparsed 为空（描述被完整读出）",
+          "ok": true,
+          "detail": []
+        },
+        {
+          "name": "support_why 非空",
+          "ok": true,
+          "detail": "描述被完整读出（1 条效果），且没有未认领片段"
+        },
+        {
+          "name": "support_tier == 基线 SIMULATABLE_UNVERIFIED",
+          "ok": true,
+          "detail": {
+            "expected": "SIMULATABLE_UNVERIFIED",
+            "actual": "SIMULATABLE_UNVERIFIED"
+          }
+        }
+      ],
+      "reading": {
+        "skill_id": "skill_000724",
+        "name": "破罐破摔",
+        "support_tier": "SIMULATABLE_UNVERIFIED",
+        "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+        "support_unparsed": [],
+        "mechanics": {
+          "resolved": true,
+          "coverage": 1.0,
+          "reason": null
+        },
+        "power_status": "static_value_present",
+        "unsupported": []
+      }
+    }
+  ],
+  "legal_actions": 12,
+  "event_kinds": [
+    "turn_start",
+    "defense",
+    "damage"
+  ],
+  "skill_tier": "SIMULATABLE_UNVERIFIED",
+  "summary": {
+    "steps_total": 6,
+    "steps_passed": 6,
+    "steps_failed": 0,
+    "steps_skipped": 0,
+    "failed_steps": []
+  },
+  "ok": true,
+  "exit_code": 0
+}
