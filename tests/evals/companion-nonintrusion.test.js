@@ -8,7 +8,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {readFileSync, existsSync} from 'node:fs';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath, pathToFileURL} from 'node:url';
 import {dirname, join} from 'node:path';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -17,7 +17,17 @@ const SCRIPT = join(ROOT, 'scripts', 'roco', 'verify-companion-nonintrusion.mjs'
 const REPORT = join(ROOT, 'reports', 'roco', 'companion-nonintrusion.json');
 const DOC = join(ROOT, 'docs', 'roco', 'COMPANION-NONINTRUSION.md');
 
-const {runAcceptance, criteriaCanFail, THRESHOLDS, hardBoundaryWindows} = await import(SCRIPT);
+// 2026-09-30（task-31 / D-31 · 路径家族第 12 例）：**只修路径，判据语义一字不改**。
+// 旧写法（逐字留档，别删）：
+//     const {runAcceptance, criteriaCanFail, THRESHOLDS, hardBoundaryWindows} = await import(SCRIPT);
+// 为什么改：`SCRIPT` 是 `join()` 出来的**绝对路径**（Windows 上是 `E:\…`）。动态 `import()`
+// 要的是 **URL**，Windows 的 ESM loader 会把 `E:` 当成 URL scheme ⇒
+// `Error [ERR_UNSUPPORTED_ESM_URL_SCHEME]: Received protocol 'e:'`，**测试体一行都跑不到**。
+// `pathToFileURL()` 在两种平台上都给出合法 URL（Windows `file:///E:/…` / POSIX `file:///mnt/e/…`）。
+// 同族先例：`tests/roco-memory-three-classes.test.js:31-37`（task-20）、
+// `tests/roco-rag-tactic-cards.test.js:49`（本来就对的那一份）。
+const {runAcceptance, criteriaCanFail, THRESHOLDS, hardBoundaryWindows} =
+  await import(pathToFileURL(SCRIPT).href);
 const {companionCueSlot, COMPANION_DEFER, companionEvents, companionSession} =
   await import('../../src/coach/companion.js');
 const {freshMemory} = await import('../../src/coach/memory.js');

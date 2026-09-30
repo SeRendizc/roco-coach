@@ -977,16 +977,30 @@ export function companionReadings({cross=null,signals=null,context={},now=Date.n
  // 依据全部来自 memory.events 的 ISO 时间戳：这一波打了几局、其中过了零点几局，
  // 两个数字都是他自己数不出来的。**没有一句出现钟点数字**——那是钟表在说话。
  const night=l.lateNight||null,run=l.run||null;
+ // ⚠ 2026-09-30（task-31 / D-31）**产品缺陷修**：这一支原来只问「现在是不是凌晨」（`nowLate`），
+ // 不问「人还在不在」。于是隔了几天再打开也会拿**陈旧**的 `ledger.run` 说话 —— 判据抓到的真句：
+ // 「这么晚了，这一波你已经打了3局。」，而那一波是 **11 天前**的（`tests/companion.test.js:1817`）。
+ // 读点层本来就有活跃闸（`:446`：`ledger.run.active && part.id==='late'` 才给 `lateNight`；
+ // `active` 的定义在 `:437`：距最后一局 ≤ `SESSION_GAP`），**文案层没跟上**。
+ // 三种情形（下面 `if` 之外的两行**逐字不动**：`tests/roco-companion-contextual.test.js:263-264`
+ // 的判据钉的就是这两行的原文 —— 闸放在里面，免得动到那条判据的锚点）：
+ //   · `night`（读点层已含活跃闸：人还在打、这一波跨了零点）⇒ 说那几局；
+ //   · 凌晨 + **没有任何这一波的记录**（首页打开、还没开始打）⇒ 只说「这么晚了。」（没有数字可引用）；
+ //   · 凌晨 + 记录是**陈旧**的（`run.active!==true`，隔了几小时/几天）⇒ **一个字都不说**（缺陷原状）。
  const nowLate=dayPartAt(now).id==='late';   // 2026-09-30 现实时间这一半：:200 DAY_PARTS.late = 0–6 点
  if(night||nowLate){
-  const n=night?night.count:0;const wave=night?night.inWave:(run?run.count:0);
-  add({id:`late-night:${wave}:${n}`,topic:'night',klass:'late-night',priority:91,tags:[],sentences:[
-   // 时间只说一次：这一波里有过了零点的局，就直接说那几局（比「这么晚了」更实）；
-   // 一局都没有时（整波都在零点前收的，只是人还没走）才用「这么晚了」这一句。
-   SENT(n>=1?`过了零点你已经打了${n}局。`:(wave?`这么晚了，这一波你已经打了${wave}局。`:'这么晚了。'),'memory','memory.events.time'),
-   // 许可句（见 PERMISSION_REQUIRED）：给的是「到这儿也行」，不是「你该睡了」。
-   SENT('这一局打完就到这儿也行。','presence',null)],evidence:[
-   `跨局账本：现在是${dayPartAt(now).label}，最近一波从最后一局往回共 ${wave} 局，其中过了零点打的 ${n} 局，最后一局打完于 ${night?night.at:"（这一波没有跨零点的局）"}（来源：memory.events.time 的 ISO 时间戳）。`]});
+  const staleOnly=!night&&Boolean(run&&run.active!==true);
+  if(!staleOnly){
+   const n=night?night.count:0;
+   const wave=night?night.inWave:(run&&run.active===true?run.count:0);
+   add({id:`late-night:${wave}:${n}`,topic:'night',klass:'late-night',priority:91,tags:[],sentences:[
+    // 时间只说一次：这一波里有过了零点的局，就直接说那几局（比「这么晚了」更实）；
+    // 一局都没有时（整波都在零点前收的，只是人还没走）才用「这么晚了」这一句。
+    SENT(n>=1?`过了零点你已经打了${n}局。`:(wave?`这么晚了，这一波你已经打了${wave}局。`:'这么晚了。'),'memory','memory.events.time'),
+    // 许可句（见 PERMISSION_REQUIRED）：给的是「到这儿也行」，不是「你该睡了」。
+    SENT('这一局打完就到这儿也行。','presence',null)],evidence:[
+    `跨局账本：现在是${dayPartAt(now).label}，最近一波从最后一局往回共 ${wave} 局，其中过了零点打的 ${n} 局，最后一局打完于 ${night?night.at:"（这一波没有跨零点的局）"}（来源：memory.events.time 的 ISO 时间戳）。`]});
+  }
  }else if(run&&run.active&&run.count>=LONG_SESSION){
   add({id:`long-session:${run.count}`,topic:'session',klass:'long-session',priority:89,tags:[],sentences:[
    SENT(`连着第${run.count}局了。`,'memory','memory.events.time'),
