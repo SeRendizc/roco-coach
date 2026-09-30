@@ -98,6 +98,13 @@
       "evidence_role": null,
       "reason": "「敌方失去 N 能量」是技能描述的字面读法（`skill_000747` 报复「应对攻击：敌方失去3能量」、`skill_000762` 小型打劫「敌方队伍中所有精灵失去1能量」），与「偷取敌方 N 能量」不同：没有任何一方获得。声明这条能力时按字面结算（下限 0）；**未声明**（legacy / v2）时效果在解析层被收回，结算与 `unsupported` 逐位不变（RC-401 批次六）。假设（待实机/官方文字）：① 全队读法**包含力竭个体**（描述写「所有精灵」）；② 「应对X：**改为** …」是条件覆盖、不是追加 —— 覆盖语义尚未实现，带「改为」的技能（`skill_000745` 恶作剧）**整条不结算**。"
     },
+    "respond_override": {
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "「应对X：**改为** …」是**条件覆盖**、不是追加（`skill_000745` 恶作剧「敌方失去3能量，应对防御：改为敌方失去6能量」里 3 与 6 互斥）。本能力位把「改为**获得N层**」读成「替换紧邻那条基础效果的层数」：`skill_000616` 剧毒「敌方获得3层中毒，应对防御：改为获得8层」在应对成功那一手从 3 层改判成 8 层。**与原始资料区分**：术语 1017 只记载「应对」的判定类别（应对成功/失败），**没有**写覆盖语义 ⇒ 覆盖读法是**引擎假设**（ENGINE_HYPOTHESIS），不是一手规则；台账里没有对应条目，故 evidence_id 留空。**范围刻意开得很窄**：只认「获得N层」这一种写法（描述里唯一能让层数独立成参数的形式），别的省略写法（「改为威力+60」「改为速度+160」「改为敌方失去6能量」…）一律读不出来 ⇒ 如实登记为未实现，绝不猜一个数。**未声明**（legacy / v2）时解析层连结构都不产出 ⇒ 结算与 `unsupported` 逐位不变（RC-401 批次十四）。"
+    },
     "per_layer_cost": {
       "value": true,
       "confidence": "ENGINE_HYPOTHESIS",
@@ -570,6 +577,83 @@
       "evidence_role": null,
       "reason": "「每次使用后，本技能<属性>永久±N」：按这只精灵用这个技能的累计次数，改本技能的威力/能耗/连击数"
     },
+    "triggered_ramp": {
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "「每应对成功1次 / 应对X：…本技能<属性>永久±N」·「每次击败敌方，本技能<属性>永久±N」·「回合结束时，本技能<属性>永久±N」（批二）：在**真的应对成功** / **真的把对手打倒下** /**回合真的结束时**，把这只精灵身上那条技能的永久修正累加一次"
+    },
+    "respond_reduction_to_heal": {
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "「应对X：减免的伤害变为回复自己生命」：应对成立时，把这一手被减伤挡掉的量（raw − damage）转成对自己回复；残余伤害照旧结算。⚠ 缺参数按人类授权在本地规则里显式定义并与原始资料区分：术语里没有\"减免转回复\"的独立条目，本叶子就是这条本地规则；**若日后要改成\"整下伤害都不吃\"或\"回复按比例\"⇒ 只需改这一处**"
+    },
+    "element_power_ramp": {
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "「<系>技能威力永久±N%」：给该系别的技能加一份持久威力修正（系别名从描述读全名，与读点 key 同一口径）；「应对X：改为永久±N%」是它的覆盖体 ⇒ 应对成功时**替换**而不是相加。⚠ 缺参数按人类授权在本地规则里显式定义并与原始资料区分：术语里没有\"系别级持久威力修正\"的独立条目，本叶子就是这条本地规则；**若日后要改成\"按简写系别\"或\"可叠加不覆盖\"⇒ 只需改这一处**"
+    },
+    "global_skill_mods": {
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "「全技能威力/能耗永久±N」：所有技能的持久修正（威力按百分点、能耗按点；能耗不为负）"
+    },
+    "cond_self_debuff_power": {
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "「自己有减益时」的条件门：减益 = buffs/buffs_flat 的负值（状态层数不算）"
+    },
+    "self_power_flat": {
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "「本次技能威力±N」：本手无条件平值威力加成（直接改这一手的 power）"
+    },
+    "moe_mark": {
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "「萌化」= 带层数的标记（写 PetState.marks）：授予/转移/读层数三种动作共用一个叶子；刻意不做衰减与上限（术语无独立条目 ⇒ 做了就是凭空 tick）"
+    },
+    "element_use_ramp": {
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "「每使用1次其他<本系>技能 / 每使用过1个其他系别技能，本技能<属性>永久±N」：在**真的用出别的技能之后**（本技能自己不算），把这只精灵身上那条技能的永久修正累加一次；口径 = **次数**（见注释里的唯一改点）"
+    },
+    "per_own_debuff_cost": {
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "「自己每有 N 层减益，本技能能耗 -M」：按**自己身上的减益键数**（一层 = 一个值为负的 buff 键，与 `cleanse_self_debuffs` 同一谓词）逐 N 层减费。冻结语料实测一条：`skill_000446 清洗`。**能减多少减多少、但不为负**。"
+    },
+    "cleanse_dispatch": {
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "驱散按 `what` 分派：增益/减益按符号清；认不出的（含「双方所有印记」）不执行并如实登记"
+    },
+    "cleanse_marks": {
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "印记的驱散：按 side(双方/敌方/自己) + scope(所有/一个) 清 `marks`，事件带每名印记的层数；「没有『所有』」时清层数最多的那一个（picked+basis 一起报）；「每驱散 1 层，<效果>」按真实清掉的层数逐层生效。**D 形状**（`703 飞羽`/`628 溶解`「驱散敌方 1 种增益」）也挂这一位：清**绝对增幅最大**的那一个，事件带 `picked`+`basis`（不许悄悄选）。**与原始资料区分**：术语只写「驱散」与「每驱散1层」，没有写\"层数最多优先\"/\"1 种按什么选\" ⇒ 两条选法都是**本地规则**（ENGINE_HYPOTHESIS）；**若日后定为别的选法 ⇒ 只改 parse._CLEANSE_BUFFS_ONE 那一处**"
+    },
     "foe_switch_condition": {
       "value": true,
       "confidence": "ENGINE_HYPOTHESIS",
@@ -583,6 +667,99 @@
       "evidence_id": null,
       "evidence_role": null,
       "reason": "先手条件：若我这一手在结算顺序里排在敌方那一手之前、且敌方那一手是攻击，则本次技能威力按描述里的百分比加成（判据 = order_actions 的执行序列 + 敌方动作类别）"
+    },
+    "per_layer_boost": {
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "「敌方每有 N 层<中毒效果|印记|星陨印记>，本次技能威力/连击数 +M」：按**对手场上那只的当前层数**（读法：当前层数，不是历史累计）逐 N 层加成这一手的威力或连击数。冻结语料实测三条：`skill_000623 鸩毒`（中毒→威力+10/层）· `skill_000825 天体吸积`（印记→威力+20/层）· `skill_000808 多维击打`（星陨印记→连击数+1/层）。**与原始资料区分**：术语 1036 只写「每有 N 层效果」这一类说法，没有写「逐层线性累积」的算式 ⇒ 线性读法是**引擎假设**（ENGINE_HYPOTHESIS），台账无对应条目，evidence_id 留空。**范围刻意开得窄**：只认「敌方每有 N 层{中毒效果,印记,星陨印记} → 本次{技能,攻击}威力/本次技能连击数 +M」这一种写法；`skill_000731 月光合奏` 的「双方携带的所有精灵每有1层萌化」**不认**（萌化本身未实现，属 C 堆）⇒ 如实报不支持。**未声明**（legacy / v2）时解析层连结构都不产出 ⇒ 结算与 `unsupported` 逐位不变（RC-401 批次十六）。"
+    }
+  },
+  "stat_gain": {
+    "extended_shapes": {
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "「获得 属性±N%」的解析形状从「`自己`获得`单/双属性``+`N`%`」放宽到数据里**真实出现的**另外几种：主语可以是 `敌方`（⇒ `foe_stat`，落 `debuff_foe`）；符号可以是 `-`（该属性下降）；`自己` 可以省略（「并获得魔攻+70%」「额外获得物攻+80%」）；「`和`」复合（「敌方获得物防和魔防-120%」）与 `额外` 前缀；另含 `全技能威力` 这个键（`buffs[\"power\"]`）。**范围是量出来的，不是猜的**（task-25 探针，A/B 两族 93 条逐条扫）：未认领的「获得 属性±N」片段共 40 处，形状分布 `自己获得X+N（无%）`11 · `无主语获得X+N%`8 · `自己获得X-N%`4 · `敌方获得X-N%（含和复合）`2 · `敌方获得X-N（无%）`2 · `额外获得`1 · `自己获得速度-N`1。**与原始资料区分**：原始资料没有给这些形状的结算口径 ⇒ 读法是**引擎假设**。**未声明**（legacy / v2）时解析层连这些效果都不产出 ⇒ 结算与 `unsupported` 逐位不变。"
+    },
+    "flat": {
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "「（自己|敌方）获得<属性>±N」（**不带 `%`**）是**面板量纲的绝对值**，写进 `PetState.buffs_flat`，与百分点的 `buffs` **分开记账**（两套量纲混一个字典就是静默错算）。**本地规则（LOCAL_RULE）**：平值直接**加到**该项的读点值上（速度 ⇒ 先手速度 +N 点）。实测范围（全库 `rs.skills` 逐条扫）：平值修正**只出现在速度上** —— 14 处 / 15 条技能（`自己获得速度+50/+30/+60/+70/+80/+120`、`自己获得速度-20`、`敌方获得速度-30/-90/-20`）⇒ 目前唯一读点是 `env.order_speed`。**与原始资料区分**：原始资料没有「平值如何进面板」的口径。**未声明**时那一段继续算未认领机制（`resolve_choice_variants` 里「平值属性修正（出现在：…）」的历史登记照旧），结算逐位不变。⚠ **解析与读点共用这一个能力位**（不像 `speed_buff` 那样拆两个）：拆开就能合法地造出「解析开了、读点没开」的配置 —— 平值效果被解析、写进 `buffs_flat`、然后没有任何东西读它，那正是本任务要根治的假绿。合成一个位之后「声明了就有读点」是结构上成立的，不靠人记得。",
+      "value_status": "LOCAL_RULE"
+    },
+    "speed_buff": {
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "**「自己获得速度±N%」进先手速度**：`env.order_speed()` 在此之前**完全不读 `pet.buffs`** —— 「自己获得速度+30」这类会发出 `buff_self{stat:\"spe\"}` 事件、判据也判 `resolved=True`，但先手顺序一点都不变（**假绿**：事件发了、没人读）。实测改前：`spe` buff 设成 +100% 与不设，`order_actions` 的执行顺序逐字相同。声明为真后：先手速度 ×`(1 + buffs[\"spe\"]/100)`，并在 `turn_start` 的 `speed_provenance` 里登记 `speed_buff_pct`（可归因）。**与原始资料区分**：术语 1020 只写「先手度相同才比速度」，没有写速度增减在先手判定里怎么折 ⇒ 乘算是**引擎假设**（ENGINE_HYPOTHESIS），台账无对应条目，evidence_id 留空。**未声明** ⇒ 先手与 `unsupported` 逐位不变。"
+    }
+  },
+  "status_rules": {
+    "note": "**本地模拟规则**（人类 2026-09-29 逐字：「所有不冲突规则都列为引擎有效规则，不要管真实游戏了」「我本身就是个模拟，不需要那么严谨」）。这一块的数字**不是真游戏数据**：真游戏里没有同等颗粒度的一手材料，这里按产品可玩性显式定义，并与冻结资料区分开（confidence=LOCAL_RULE / evidence_role=reference_only）。未声明这一块的配置（legacy / v2）**行为逐位不变**：仍按 effects.END_OF_TURN_STATUS 的「每回合固定百分比、不看层数、无持续回合」结算。",
+    "end_of_turn": {
+      "中毒": {
+        "value": {
+          "base_percent": 3,
+          "per_layer_percent": 1,
+          "max_layers": 10,
+          "duration_turns": 5,
+          "decays": false,
+          "decay": "none",
+          "tick_damage_basis": "max_hp",
+          "rounding": "floor",
+          "source": "LOCAL_RULE"
+        },
+        "confidence": "ENGINE_HYPOTHESIS",
+        "evidence_id": null,
+        "evidence_role": null,
+        "microcase_id": "MC-008",
+        "reason": "中毒：每回合末按最大生命的百分比扣血。本规则取「基础 3% + 每多 1 层再加 1%」（10 层 = 12%/回合），上限 10 层，持续 5 个回合末，**不衰减层数**（与术语 1001 一致：中毒不衰减）。旧行为：固定 3%、层数只影响它自己的衰减（不衰减 ⇒ 层数永远停在那里）。改动的理由：人类要求「10 层中毒」这种描述在**伤害上**真的成立，否则层数只是一个装饰数字。取整向下、基数取最大生命与 effects.percent_of_max_hp 同一口径（MC-011 仍未核）。真实游戏参考（2026-09-29 查过、**不逐字复刻**）：https://wiki.biligame.com/rocom/以燃薪虫灼烧为例解析洛克王国世界伤害计算机制 ；https://wiki.biligame.com/rocom/中毒 。",
+        "value_status": "LOCAL_RULE"
+      },
+      "灼烧": {
+        "value": {
+          "base_percent": 2,
+          "per_layer_percent": 1,
+          "max_layers": 10,
+          "duration_turns": 4,
+          "decays": true,
+          "decay": "half_ceil",
+          "tick_damage_basis": "max_hp",
+          "rounding": "floor",
+          "source": "LOCAL_RULE"
+        },
+        "confidence": "ENGINE_HYPOTHESIS",
+        "evidence_id": null,
+        "evidence_role": null,
+        "microcase_id": "MC-008",
+        "reason": "灼烧：基础 2% + 每多 1 层再加 1%（10 层 = 11%/回合），上限 10 层，持续 4 个回合末，**层数衰减一半**（术语 1002：向上取整 ⇒ 10→5→3→2→1）。旧行为：固定 2%，且 ceil(1/2)=1 ⇒ **层数永不归零、debuff 永不消失**（本轮实测到的真缺陷）。现在补上两层终止条件：层数归零**或**持续回合用尽即移除 —— 所以「10 层灼烧」真的会打完。真实游戏参考（2026-09-29 查过、**不逐字复刻**）：https://wiki.biligame.com/rocom/以燃薪虫灼烧为例解析洛克王国世界伤害计算机制 ；https://wiki.biligame.com/rocom/中毒 。",
+        "value_status": "LOCAL_RULE"
+      },
+      "寄生": {
+        "value": {
+          "base_percent": 2,
+          "per_layer_percent": 0.5,
+          "max_layers": 10,
+          "duration_turns": 5,
+          "decays": false,
+          "decay": "none",
+          "tick_damage_basis": "max_hp",
+          "rounding": "floor",
+          "source": "LOCAL_RULE"
+        },
+        "confidence": "ENGINE_HYPOTHESIS",
+        "evidence_id": null,
+        "evidence_role": null,
+        "microcase_id": "MC-008",
+        "reason": "寄生：基础 2% + 每多 1 层再加 0.5%（10 层 = 6.5%/回合），上限 10 层，持续 5 个回合末，层数不衰减。旧行为同「中毒」：固定 2%、层数无意义。术语 1008 只写「回合结束时按生命百分比」，没写层数与持续回合 —— 这两项是本规则的显式定义。真实游戏参考（2026-09-29 查过、**不逐字复刻**）：https://wiki.biligame.com/rocom/以燃薪虫灼烧为例解析洛克王国世界伤害计算机制 ；https://wiki.biligame.com/rocom/中毒 。",
+        "value_status": "LOCAL_RULE"
+      }
     }
   },
   "repo_internal_evidence": [

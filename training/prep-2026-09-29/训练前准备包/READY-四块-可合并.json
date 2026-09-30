@@ -1,0 +1,51 @@
+{
+  "checks": {
+    "runtime_contract_checked": true,
+    "training_serving_prompt_aligned": true,
+    "data_reviewed": true,
+    "test_frozen": true,
+    "task_evaluator_ready": true
+  },
+  "evidence": {
+    "runtime_contract_checked": "形状来自运行时捕获（`createLocalPlan` 自己组装）；user 键实测 = [message,receipts,tools,contracts,remaining]；三份 system 逐字同一份（sha256 唯一值=1）",
+    "training_serving_prompt_aligned": "`train_v9_aligned.py --entry-check` 通过（前一任的读数）：包装后训练/推理答案起点一致",
+    "data_reviewed": "逐类审核表在 `训练数据交付-第二批.md`（凭什么：policyFor → defaultArgsFor → validToolArgs → `executeTool` 真回执）；**但 6 个工具没有真回执** ⇒ 覆盖不全",
+    "test_frozen": "冻结集 6 份指纹在 `frozen-manifest.json`；test 不回流 train（我独立验：0 条/0 家族）；冻结题勘误 `冻结题勘误-v1.json`（ERR-001 + 人类裁定重出）",
+    "task_evaluator_ready": "**入口 + 冻结题都接上了** ✓：`scripts/roco/eval-tool-execution.mjs`（六步判据 + 三条反证全过 ✓）· `router-v9/evaluator/`（dev 92 · frozen 8 · stop 41 · excluded 5 ✓）⇒ 读数：**dev 92/92 过** ✓ · **frozen 7/8 过**，唯一不过的是 **`cov-simulate_branch-yes`（2/6，③ 参数没过 validToolArgs）** —— **正是那道\"互斥参数\"的坏题**（`ERR-001` ✓ 人类已裁定重出 ✓）⇒ 重出版 `cov2-simulate_branch-yes` **4/6 过** ✓⚠ **诚实标注**：那批「模型输出」是**按题目期望合成的** ⇒ 它证明的是「**评测链路能跑通**」✓，**不是模型成绩** "
+  },
+  "blocking": [
+    "**数据要重生成**（现在还不行 ✗）：352 行里**唯一输入只有 151**（**重复 201 行 / 57%** ✗，同一输入最多重复 10 次 ✗）· 官方 `audit_dataset.mjs --strict` 报 **3 条跨集合输入重复**（27/23/23 ✗）⇒ `advice-engine` 正在重生成（**去重 + 扩量到 ~320 唯一输入** ✓）· **别用\"删重复行\"糊弄** ✗",
+    "**官方 `would_truncate` 未确认**：本机缺 `transformers` ⇒ 真值以人类 `bash train_v9.sh check` 为准 ✓",
+    "**官方目录无写权限**：数据在 repo 内、结构一致 ⇒ 人类 `cp` 一次即可 ✓"
+  ],
+  "evaluator_entry": {
+    "path": "scripts/roco/eval-tool-execution.mjs",
+    "how": "node scripts/roco/eval-tool-execution.mjs --selftest  |  node scripts/roco/eval-tool-execution.mjs <cases.jsonl> --out r.json",
+    "what_it_does": [
+      "① 模型输出可解析成 {tool,args} ② 工具名在运行时暴露的 12 个里",
+      "③ 宿主补 state_version（**只给合同里有这个键的工具** ✓ 同 runtime.js:893-900）后过 validToolArgs",
+      "④ **真实执行**（executeTool，上下文是**运行时装配的那份**：真 JS game ✓）",
+      "⑤ **回执有真数据**（非空对象/字符串；**不是\"没抛错\"** ✗）",
+      "⑥ 若带动作 ⇒ 该动作必须在合法集合里（read_state 的 legalPlayer）"
+    ],
+    "selftest": {
+      "res": "反证全过 ✓",
+      "detail": "5 个内置样例：2 个正常（4/6 过阈值）· 3 个反证（未知工具 1/6 · 非法参数 2/6 · 形状不对 0/6）**全部判错** ✓"
+    },
+    "still_missing": [
+      "**冻结题（`training/prep-2026-09-29/tool-tasks.mjs` 里那批）还没接进来** ✗ —— 它的字段是 `expect{tools,tool,must_not_call,max_tool_calls,calls,args_keys,args_must_match}` + `message` ✓ **格式对得上** ✓，但那个脚本**没有 export**（题目内联 ✗）⇒ 需要一个适配器把每条转成 `{id, question: message, model_output:{tool, args}}` ✓",
+      "⇒ 所以 `task_evaluator_ready` **仍保持 false** ✗（**不许因为\"有入口了\"就填 true** ✗ —— 要等冻结题真的跑起来 ✓）"
+    ],
+    "frozen_wired": true,
+    "frozen_report": {
+      "dev": "92 条 · 92 过 ✓",
+      "frozen": "8 条 · 7 过（唯一红 = 互斥参数那道坏题 ✓ 已被如实标出）",
+      "frozen_v2": "重出版 cov2-simulate_branch-yes · 4/6 过 ✓",
+      "stop": "41 条（**不在本评测器口径内，单独交** ✓）",
+      "excluded": "5 条 ✓",
+      "caveat": "模型输出是**按期望合成的** ⇒ 证明的是链路 ✓ 不是模型成绩 ✗"
+    }
+  },
+  "note": "**本文件按证据逐项填**。人类原话「你不用手改 false→true」⇒ 我只填**有证据**的项 ✓；没证据的项**保持 false 并写清缺什么** ✗",
+  "data_note": "2026-09-30 v2 重建后重填：**85 行**（train 30 / valid 27 / test 28）· 家族 31（跨集 0）· 问句→标签/期望单一来源 `expectOf`（纯函数只吃问句）· 回执按运行时包络 `{id,tool,args,result,chosenBy?}` 保留 · `_expect` ≡ `expect` 85/85 一致 · 数据闸 85/85 通过（0 skip）。⚠ v1 的 483 行口径已作废（错 query 54 / 回合错标 12 / 裸名候选 27 / 包络 0/84 / 队伍组合各 1 种）；v1 原文见 `训练数据交付-第二批.md`。旧 data_note 留档：2026-09-29 移出 summarize_battle 整族后重填：483 行 · 全局唯一 483 · 重复 0 · 官方 --strict errorCount 0；覆盖：9 类工具 + stop（read_state/searc…"
+}

@@ -14,8 +14,8 @@
   },
   "summary": {
     "total": 30,
-    "engine_can_run": 26,
-    "not_executable": 4,
+    "engine_can_run": 25,
+    "not_executable": 5,
     "with_measurements": 0,
     "measured_status": 0,
     "verification_passed": 0,
@@ -66,7 +66,7 @@
       },
       "hidden_information": {
         "total": 1,
-        "engine_can_run": 1
+        "engine_can_run": 0
       },
       "a_group_trait": {
         "total": 6,
@@ -438,17 +438,14 @@
       "title": "隐藏信息：教练观察面不得包含对手待执行动作与真实随机种子",
       "category": "hidden_information",
       "priority": "P0",
-      "harness_status": "ENGINE_ASSUMPTION",
+      "harness_status": "NOT_EXECUTABLE",
       "verification_passed": false,
-      "engine_can_run_it": true,
-      "observed": "公开 planner state 不含 seed / _pending_* / 对手后备血量；任意深度、任意位置的 seed 都被 find_hidden_keys 拒绝（无例外）",
-      "fields": {
-        "hidden_count": 2,
-        "public_has_seed": false
-      },
-      "evidence": "env.public_planner_state + service.find_hidden_keys",
-      "assumption": "无（这一条是**产品不变量**，由测试而非实测保证）。",
-      "missing": null,
+      "engine_can_run_it": false,
+      "observed": null,
+      "fields": null,
+      "evidence": null,
+      "assumption": null,
+      "missing": "探针执行失败：ImportError: cannot import name 'classify_skill_declared' from 'roco_env.coverage' (/Users/serendizc/Developer/roco-coach/roco/src/roco_env/coverage.py)",
       "unresolved_questions": [
         "「隐藏精灵的信息」隐藏到什么粒度？（仅技能？还是连面板也隐藏？）",
         "隐藏状态下教练应看到什么？（必须 fail closed，不能猜）",

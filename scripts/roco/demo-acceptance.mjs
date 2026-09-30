@@ -1836,6 +1836,10 @@ async function main(){
      roleValue:selRole?selRole.value:null,roleOptions:selRole?[...selRole.options].map((o)=>o.value):[],
      roleLabels:selRole?[...selRole.options].map((o)=>o.textContent):[],
      resetFound:Boolean(reset)};})()`);
+ // ⚠ 2026-09-29 补（U04：默认候选档从「全图鉴」改成「我的精灵」）：
+ //   下面 ④⑤ 两段是拿**服务端 `kind=catalog` 的第一页名单**逐条比对的（原意图：跟全量视野对）。
+ //   默认档改成「我的精灵」（542）之后，不先切档就会拿 542 的页面去比 622 的名单 ⇒ 假红。
+ //   所以在这两段之前**显式切到「全图鉴」档** —— 与判据原本要量的东西一致，不是放宽。
  const wsClick=async(id)=>{
   const r=await js(`(()=>{const host=document.querySelector('#team-workshop');
     const el=host?.shadowRoot?.querySelector(${JSON.stringify(id)});if(!el)return null;
@@ -1878,6 +1882,9 @@ async function main(){
   return {total:Number(j?.player?.total??NaN),names:(j?.player?.cards??[]).map((c)=>String(c.name??''))};};
 
  // ④ 属性筛选
+ // （切到「全图鉴」档 —— 本段要与服务端 `kind=catalog` 的第一页名单逐条比对，见上面那条改钉）
+ await wsClick('#tw-scope-all');
+ await sleep(700);
  const wsBefore=await wsPool();
  let typePick=null;
  for(const value of (wsBefore?.typeOptions??[]).filter((v)=>v!=='')){

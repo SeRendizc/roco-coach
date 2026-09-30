@@ -402,8 +402,13 @@ function pageCopyProblems(source, html) {
   // ② box.html：把默认收起的 `<details class="dev" …>` 整块切掉，剩下的玩家标记里不许有工程词
   const devStart = html.indexOf('<details class="dev"');
   const devEnd = html.indexOf('</details>', devStart);
-  if (devStart < 0 || devEnd < 0) problems.push('box.html 里找不到开发者抽屉，玩家层判据没有排除对象');
-  else {
+  // ⚠ 2026-09-29 **改钉**（第三轮纠偏第 5 条：用户要求删掉页头那个「关于这一页（来源与快照）」抽屉）。
+  //   抽屉不在了 ⇒ **判据不许放宽**：整份 box.html（去掉注释）都必须是干净的玩家标记。
+  //   旧分支留档（改钉不删）：找不到抽屉就报 `box.html 里找不到开发者抽屉，玩家层判据没有排除对象`。
+  if (devStart < 0 || devEnd < 0) {
+    const hitAll = stripComments(html).match(FORBIDDEN_CODE);
+    if (hitAll) problems.push(`box.html 的玩家标记里出现工程词「${hitAll[0]}」`);
+  } else {
     const playerHtml = stripComments(html.slice(0, devStart) + html.slice(devEnd + '</details>'.length));
     const hit = playerHtml.match(FORBIDDEN_CODE);
     if (hit) problems.push(`box.html 的玩家标记里出现工程词「${hit[0]}」`);
@@ -432,6 +437,27 @@ test('玩家层：路由的 player 段没有工程键，页面源码的工程词
   }
   log('[实际] dev 段含 state_version/coverage/provenance/unknown_fields/source_scope/licence；'
     + `player 段扫过 ${JSON.stringify(responses.map((r) => r.json.player)).length} 字节无命中`);
+
+  // ⚠ 2026-09-29（第三轮纠偏第 5 条改钉之后**补的反证**）：抽屉从页面上删掉了，
+  //   `pageCopyProblems` 里那条分支改成"整份 box.html（去注释）都不许有工程词"。
+  //   反证必须走**同一只探测器**（`pageCopyProblems`），不能另写一份正则：
+  //   ① 喂一份**带工程词的假 html**（没抽屉）⇒ 必须报红；
+  //   ② 喂一份**只有注释里带工程词**的假 html ⇒ 不许误报。
+  const badHtml = pageCopyProblems('function renderDev(){ coverage }',
+    '<!doctype html><html><body><div id="box-grid">pet_id</div></body></html>');
+  assert.ok(badHtml.some((one) => one.includes('pet_id')),
+    `反证：没有抽屉时，html 里的工程词必须被同一条判据抓住（实际：${JSON.stringify(badHtml)}）`);
+  // 正例：**JS 注释**里的工程词不算泄漏（`stripComments` 会剥掉；仓库既有口径）。
+  // ⚠ 注意 HTML 注释**不**算"注释"（它会随页面下发，判据当它是玩家可见文本）——
+  //   所以这里不拿 `<!-- pet_id -->` 当正例，那是**故意**被抓的。
+  const commentOnly = pageCopyProblems('// coverage 只写在注释里\nfunction renderDev(){ coverage }',
+    '<!doctype html><html><body><div id="box-grid">喵喵</div></body></html>');
+  assert.deepEqual(commentOnly, [], `正例：JS 注释里的工程词不算泄漏（实际：${JSON.stringify(commentOnly)}）`);
+  const badSource = pageCopyProblems(
+    'function toggleDrawer(){}\nconst playerLine = "coverage:" + 1;\nfunction renderDev(){ coverage }',
+    '<!doctype html><html><body><div id="box-grid">喵喵</div></body></html>');
+  assert.ok(badSource.some((one) => one.includes('玩家区代码')),
+    `反证：box.js 玩家区代码里出现工程词必须被抓（实际：${JSON.stringify(badSource)}）`);
 
   const problems = pageCopyProblems(
     readFileSync(join(ROOT, 'src/client/box.js'), 'utf8'),

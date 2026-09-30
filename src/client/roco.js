@@ -82,6 +82,18 @@ const state = {
   //: 「转折点那一回合当时还能选什么」—— 那份表不攒就永远拿不到（除非引擎改合同）。
   //: 只做搬运：`finishMatch()` 原样交给 `rocoMatchReview`，页面**不解释**它。
   legalByTurn: {},
+  //: 第五轮④（2026-09-29）：**逐回合的前后局面**（每推进一次攒一条 `{type:'turn',before,after,…}`）。
+  //: 为什么客户端要攒：`coach/memory.js` 的 `turnLogOf(game)` 只认 `game.history` 里
+  //: `type==='turn'` 的那些条（它给"复盘上一局"提供「第N回合 / 谁剩多少血 / 你用了哪一手」），
+  //: 而**引擎公开视图里没有 `history`**（实测：`ui` / `events` / `legal` / `mana` 都有，
+  //: 没有 `history`）⇒ 不攒的话 `matchFacts().turnLog` 恒为 null，复盘只能说
+  //: 「没有逐回合记录」（真浏览器实测，见 task-15 验收）。
+  //: 形状与 `rocoGameView()` 一致（`player`/`enemy` 各带 `active` + `pets[{name,hp}]`），
+  //: 因为 `turnLogOf` 就是按这个形状读的；页面只搬数据、不解释。
+  matchHistory: [],
+  //: 第五轮④：**这一手**是什么（`playAction()` 记、`applyResult()` 收进 `matchHistory` 后清空）。
+  //: 只有引擎真给的 `kind` 与技能/物品 id；拿不到就 null（摘要写"行动未登记"，不编）。
+  lastAction: null,
   // **最后一个还能行动的局面**。终局视图里 `legal` 已经空了、对手场上也换成了
   // 补位上来的那一只；拿它做复盘会把「对方倒下的那一只」认成现在场上这只。
   lastLiveView: null,
@@ -313,9 +325,54 @@ function loadMemory() {
     return freshMemory();
   }
 }
+/**
+ * 把记忆写回 localStorage。
+ *
+ * ⚠⚠ 2026-09-29（阶段三 **D4**，T2 独立复验抓到的**数据丢失**）：这里原来是
+ *   `localStorage.setItem(MEMORY_KEY, JSON.stringify(state.memory))` —— **整对象覆盖**。
+ *   而 `MEMORY_KEY`（`xiaoya-memory-v1`）是**页面与小芽面板共用**的（task-13 甲③ 有意合并，
+ *   合并本身没错：一份跨局记忆）；`state.memory` 却是 **boot 时读进来的快照**。
+ *   后果（T2 分步采样定位）：局末 `rememberBattle()+saveMemory()` 用**开局那份旧副本**，
+ *   把面板（`xiaoya.js:1106-1107`）中途写进去的 `goal` / `stated` **整份抹掉** ——
+ *   **训练目标在结算卡出现的那一刻消失**。
+ *
+ * **为什么不是"读回来再展开合并"**：`{...stored, ...state.memory}` **修不好它** ——
+ *   `state.memory` 里**也有 `goal` 这个键**（boot 时是 `null`），展开合并照样覆盖面板的新值。
+ *   缺的不是"合并"，是"**这一份里哪些字段是我改过的**"。所以用**基线对比**：
+ *
+ *   · 相对 `memoryBaseline` **真的变过**的键 ⇒ **以我（页面）为准**（战斗流水/复盘/教训照常落盘）；
+ *   · **我没碰过**的键 ⇒ **以磁盘上那一份为准**（面板写的 `goal`/`stated` 因此保住）。
+ *
+ * 反证（三条，写在 `tests/roco-memory-merge.test.js`）：
+ *   ① 面板写了 goal/stated ⇒ 本函数**不许**抹掉；② 页面自己改过的字段**仍然生效**；
+ *   ③ 两边**同时**改同一个键时的归属**定死**（页面这次改过就以页面为准，且判据钉住）。
+ */
 function saveMemory() {
   try {
-    localStorage.setItem(MEMORY_KEY, JSON.stringify(state.memory));
+    const baseline = state.memoryBaseline ?? {};
+    // 读回**磁盘上现在这一份**（面板可能刚写过）。读不到就退回"整份写我自己这份"。
+    let stored = null;
+    try {
+      const raw = localStorage.getItem(MEMORY_KEY);
+      stored = raw ? readMemory(raw) : null;
+    } catch { stored = null; }
+    if (!stored || typeof stored !== 'object') {
+      localStorage.setItem(MEMORY_KEY, JSON.stringify(state.memory));
+      state.memoryBaseline = JSON.parse(JSON.stringify(state.memory));
+      return;
+    }
+    const out = {};
+    const keys = new Set([...Object.keys(stored), ...Object.keys(state.memory)]);
+    for (const key of keys) {
+      const mine = state.memory?.[key];
+      const changedByMe = JSON.stringify(mine) !== JSON.stringify(baseline?.[key]);
+      if (changedByMe) out[key] = mine;                       // 我改过的：我说话
+      else if (key in stored) out[key] = stored[key];         // 我没碰的：以磁盘为准
+      else out[key] = mine;
+    }
+    state.memory = out;
+    localStorage.setItem(MEMORY_KEY, JSON.stringify(out));
+    state.memoryBaseline = JSON.parse(JSON.stringify(out));
   } catch {
     /* 隐私模式下写不了：这次演示照常进行，只是不跨局记忆 */
   }
@@ -357,6 +414,20 @@ const ROLE_ORDER = ['attacker', 'tank', 'recovery', 'control', 'support'];
 //: 异常状态的中文名（与引擎侧 `events_text._STATUS` 同源口径；这里只做显示）。
 const STATUS_LABEL = {burn: '灼烧', poison: '中毒', paralysis: '麻痹', freeze: '冰冻',
   sleep: '睡眠', confusion: '混乱', seal: '封印'};
+// ⚠ 2026-09-29（人类「各种功能都要更新」+ 引擎刚让**层数真的生效**：10 层灼烧 ⇒ 回合末 37 伤害）：
+//   引擎给的是 `pet.statuses[名] = {"layers": N, …}`（`env.py:1437/1446`），
+//   而这一页以前**只读 `Object.keys`** ⇒ 玩家看到「灼烧」却看不到「10 层」，
+//   而层数现在**决定伤害**（`status_tick.damage` 随层数变）⇒ 玩家看不出这一手值不值。
+//   ⇒ 照**印记那一套的写法**（`marks` 已经是 `名 ×N`）把层数一起画出来（只有 >1 才写 ×N，与本页其它地方一致）。
+//   两处渲染点（战斗卡 `petCard` 与另一处）共用这个助手，免得两处又写不一样。
+function statusText(statuses) {
+  if (!statuses || typeof statuses !== 'object') return '';
+  return Object.entries(statuses).map(([k, v]) => {
+    const label = STATUS_LABEL[k] ?? k;
+    const layers = Number(v && typeof v === 'object' ? v.layers : v);
+    return Number.isFinite(layers) && layers > 1 ? `${label} ×${layers}` : label;
+  }).join('、');
+}
 const RESULT_CN = {win: '我方胜', loss: '我方负', draw: '平局', escaped: '撤退', ongoing: '未结束'};
 //: 技能类别的中文名：数据里给的是中文（攻击/防御/状态），这里只兜一层英文枚举，
 //: 免得将来引擎换成枚举名时页面上出现 `status` 这种工程词。认不出就原样显示。
@@ -635,6 +706,11 @@ function fieldFactsHtml(pet, {energyMax = null} = {}) {
   }
   const statuses = pet?.statuses && typeof pet.statuses === 'object' ? Object.keys(pet.statuses) : [];
   if (statuses.length) {
+    // ⚠ 这里**故意不带层数**：这个钩子是「DOM 与 `state.view` 相互对齐」用的**诊断面**，
+    //   格式被判据钉死（`tests/roco-page-ux.test.js` 的 RC-502：`statuses=burn`）。
+    //   我第一版顺手把层数加进来了 ⇒ **当场把那条判据弄红** ✗ ⇒ 撤回。
+    //   **要看层数的是"玩家看得见的那一行"**（`petCard`，已改成 `statusText()`）✓
+    //   —— 诊断面与展示面**不是一件事**，别顺手一起改。
     rendered.push(`statuses=${statuses.join(',')}`);
   }
   const hook = ` data-roco-field-facts="${escapeAttr(rendered.join(';'))}"`;
@@ -652,7 +728,7 @@ function petCard(pet, {active = false, energyMax = null} = {}) {
   if (!pet) return '';
   const ratio = pet.max_hp > 0 ? pet.hp / pet.max_hp : 0;
   const statuses = pet.statuses && Object.keys(pet.statuses).length
-    ? Object.keys(pet.statuses).map((k) => STATUS_LABEL[k] ?? k).join('、') : '';
+    ? statusText(pet.statuses) : '';   // 旧写法留档（改钉不删）：Object.keys(pet.statuses).map((k) => STATUS_LABEL[k] ?? k).join('、')
   const name = typeof pet.name === 'string' && pet.name ? pet.name : '';
   const slot = Number.isInteger(pet.slot) ? ` data-slot="${pet.slot}"` : '';
   const facts = fieldFactsHtml(pet, {energyMax});
@@ -1453,7 +1529,7 @@ function renderActions(actions, disabled) {
         const name = pet?.name ?? '（名字未登记）';
         const hp = Number.isFinite(pet?.hp) && Number.isFinite(pet?.max_hp) ? `${pet.hp}/${pet.max_hp}` : null;
         const statuses = pet?.statuses && Object.keys(pet.statuses).length
-          ? Object.keys(pet.statuses).map((k) => STATUS_LABEL[k] ?? k).join('、') : null;
+          ? statusText(pet.statuses) : null;   // 旧写法留档（改钉不删）：Object.keys(pet.statuses).map((k) => STATUS_LABEL[k] ?? k).join('、')
         const energy = Number.isFinite(pet?.energy) ? `🌟 ${pet.energy}` : null;
         // R3：更换页每只要给**名字 / 属性 / ⭐ / 血量**（属性从名单数据取，取不到就留空不编）。
         const moveRow = (state.roster ?? []).concat(state.rosterAll ?? [])
@@ -1829,7 +1905,10 @@ function onboardDismissed() {
  * 不能让玩家以为它在自由对话。连上之后也只说「已连接」，不夸口。
  */
 /**
- * 三只模型的**真实状态**（人类 2026-09-22：ds api + qwen3.5-4b + qwen3.8-27b 一起用）。
+ * 模型格子的**真实状态**（人类 2026-09-22 口径：ds api + qwen3.5-4b 一起用）。
+ * ⚠ 2026-09-29（README **R07**）：这里原来还列着 qwen3.8-27b（第三格），已按 R07 移除 ——
+ *   27B 没有任何调用路径（服务端 `localModelReport` 的原注释逐字写着这一点），
+ *   属 R07 点名要移除的「无用占位/探测」。**不删**权重/训练数据，只不再当产品选项画出来。
  *
  * 数据来自 `/api/models`：它只报探测得到的事实（有没有配 key、本地开关与权重目录），
  * **不 ping 模型**（那要拉起一次推理）。所以「已连接」= 可用配置齐了 —— 界面上照实写这一句。
@@ -1839,8 +1918,8 @@ async function renderModelList() {
   // 甲④-1：旧面板已退役（这一页只有 `xiaoya.js` 一套实现）——元素不在就早退，
   // 这些函数留给还在调用它们的验收脚本/历史路径，不再画任何东西。
   if (!$('companion-card')) return;
-  // 人类 2026-09-23：小芽弹窗里**第一排三个框**（等宽等高、**一行字**、放不下就简写）显示
-  // ds api / qwen3.5-4b / qwen3.8-27b 的连接状态。别的（长理由、角色、配置入口）都不在这儿。
+  // 人类 2026-09-23：小芽弹窗里**第一排的框**（等宽等高、**一行字**、放不下就简写）显示
+  // ds api / qwen3.5-4b 的连接状态（R07 后由三格减为两格）。别的（长理由、角色、配置入口）都不在这儿。
   const box = $('model-list');
   if (!box) return;
   let data = null;
@@ -1850,9 +1929,12 @@ async function renderModelList() {
   } catch { data = null; }
   const rows = Array.isArray(data?.models) ? data.models : [];
   // 固定三格 + 简写名（一行放得下）；未知就写「状态未知」，不猜
-  const SHORT = {cloud: 'ds api', local_4b: 'qwen3.5-4b', local_27b: 'qwen3.8-27b'};
-  const cells = rows.length ? rows.slice(0, 3) : [
-    {id: 'cloud', label: 'ds api'}, {id: 'local_4b', label: 'qwen3.5-4b'}, {id: 'local_27b', label: 'qwen3.8-27b'},
+  // ⚠ R07：短名表与占位都不再含 27B（改前原文留档：`local_27b: 'qwen3.8-27b'` 与占位第三项
+  //   `{id: 'local_27b', label: 'qwen3.8-27b'}`）。服务端也已经不再报它 —— 两处一起清，
+  //   免得"服务端不报、前端还留一格空的"。
+  const SHORT = {cloud: 'ds api', local_4b: 'qwen3.5-4b'};
+  const cells = rows.length ? rows.slice(0, 2) : [
+    {id: 'cloud', label: 'ds api'}, {id: 'local_4b', label: 'qwen3.5-4b'},
   ];
   box.innerHTML = cells.map((m) => {
     // 一行放不下就简写：去掉「云端 ·」「本地 ·」前缀，取模型名（人类：不要提行）
@@ -2060,6 +2142,24 @@ const REL_MARK = Object.freeze({threat: 'down', resist: 'up', neutral: 'none', u
 //: `roco:advice-adopt` 的监听**只许注册一次**（`bind()` 每次 render 都会跑）。
 //  2026-09-29 T1 复核抓到的真缺陷：不守卫 ⇒ 开一局之后挂上多个监听 ⇒「采用建议」点一次提交多次。
 let rocoAdviceAdoptWired = false;
+// ⚠ 2026-09-29（阶段三 D1，T2 独立复验 + Lead 读码确认）：**同一条建议只能消费一次**。
+//   上面那个 `rocoAdviceAdoptWired` 管的是"监听器注册几次"，**管不到"这条建议还能不能用"** ——
+//   实测（真 8765、真点击）：重复点「采用建议」、或把同一条 advice 广播两次，**各又提交一手**
+//   （`Δ提交=1`、`turn 2→3`）。玩家侧就是"点一下出了两手"，属对局不公平级别。
+//   建议结构里**本来就有** `stateVersion` 与 `fingerprint`（`coach-advice.js:1394/1419-1420`，
+//   指纹由 turn/phase/stateVersion 拼成）—— 它们就是"这条建议是对哪一版局面说的"的机器可读判据，
+//   客户端此前一个都没用。这里补上：
+//     · 对象身份用 `WeakSet`（同一个 advice 对象重复广播）
+//     · 内容身份用 key（结构相同但**不是同一个对象**的重复广播）
+//   两者命中任一 ⇒ **不再执行**，并如实说一句（不静默吞掉玩家的点击）。
+const rocoAdviceAdopted = new WeakSet();
+const rocoAdviceAdoptedKeys = new Set();
+const rocoAdviceKey = (advice) => [
+  advice?.action?.legalActionId ?? advice?.action?.label ?? '',
+  advice?.stateVersion ?? '',
+  advice?.fingerprint ?? '',
+  state.battleId ?? '',
+].join('\u0000');
 
 /**
  * 战报一行：**主句照常念，未核验说明降级成小字**（U06，2026-09-29）。
@@ -2082,7 +2182,13 @@ let rocoAdviceAdoptWired = false;
  * 为什么是「内容判据」而不是「位置判据」：`（当前 8 点）`「（共 2 层）」「（累计 -30）」
  * 是**数值不是说明**，把它们降级比不降级更糟（一个真实数字被压成小字）。只认标记词。
  */
-const LOG_CAVEAT_MARKER = /未核验|未实机|未核实|不核验|估值|不猜|候选口径|按.{0,8}处理|待确认/;
+// ⚠ 2026-09-29（人类逐字：「**所有不冲突规则都列为引擎有效规则，不要管真实游戏了**」「我本身就是个模拟」）：
+//   引擎那边（task-17 的写域）会把「未核验/社区反推」这类措辞换成「**按本地训练规则 vX**」。
+//   战报的小字降级**靠这张标记表**认句子 ⇒ **引擎一改口，这里不跟着认，降级就会失灵**（那一整句会重新变成正文字号）。
+//   ⇒ 提前把新措辞一并认下（**保留旧词**：旧句子在收尾之前还会出现，删了会漏）。
+//   注意口径没变：**只认"不确定说明"的标记词，不碰真数字**（`（当前 8 点）` 这类是数值，不许压成小字）。
+//   旧写法留档（改钉不删）：/未核验|未实机|未核实|不核验|估值|不猜|候选口径|按.{0,8}处理|待确认/
+const LOG_CAVEAT_MARKER = /未核验|未实机|未核实|不核验|估值|不猜|候选口径|按.{0,8}处理|待确认|本地训练规则|本地规则|训练规则 v|按本地|本机规则|等价于|不保证与真游戏一致/;
 
 function logLineHtml(line) {
   const raw = typeof line === 'string' ? line : '';
@@ -2291,6 +2397,8 @@ function renderB3Panels(view) {
       slot.dataset.b3ActionKind = 'skill';
       if (mv.skill_id) slot.dataset.b3SkillId = String(mv.skill_id);
     }
+    // R01：把这一格的技能详情挂上去（悬停/聚焦/点按都读它；入口绝不出招）
+    b3MountSkillInfo(slot, mv, act);
     b3Show(slot);
   });
 
@@ -2575,6 +2683,9 @@ function renderB3Panels(view) {
   if (root.dataset.b3ClickBound !== 'yes') {
     root.dataset.b3ClickBound = 'yes';
     root.addEventListener('click', (ev) => {
+      // R01 护栏（防线②）：点在**技能详情入口**上时绝不出招 ——
+      // 捕获阶段那道 stopPropagation 是防线①，这里是即使①被绕过也不许误出招。
+      if (ev.target.closest?.('[data-b3-skill-info]')) return;
       const el = ev.target.closest?.('[data-b3-action]');
       if (!el || el.disabled) return;
       const legal = state.view?.legal ?? [];
@@ -2601,6 +2712,56 @@ function renderB3Panels(view) {
       // 定位不到就**如实说**（不许静默什么都不发生——那正是这一条被玩家读成「点了没反应」的原因）
       else sayStatus('局面已经变了，这一下没执行：请重新选一次。');
     });
+  }
+  // ── R01：技能详情的三种触发（悬停 / 键盘聚焦 / 移动端点按）────────────────────
+  // 绑定只做一次；入口按钮是**每帧格子渲染时复用**的，所以事件也委托在 root 上。
+  // ⚠ 必须用**捕获阶段**：出招委托是冒泡阶段读 `closest('[data-b3-action]')`，
+  //   点在格子里的详情入口上必然命中格子 ⇒ 不在这里截住就会把这一手打出去。
+  if (root.dataset.b3SkillInfoBound !== 'yes') {
+    root.dataset.b3SkillInfoBound = 'yes';
+    root.addEventListener('click', (ev) => {
+      const btn = ev.target.closest?.('[data-b3-skill-info]');
+      if (!btn) return;
+      ev.stopPropagation();          // 防线①：截住，别让它冒到出招委托
+      ev.preventDefault();
+      const slot = btn.closest?.('[data-b3-skill-slot]');
+      if (!slot) return;
+      const el = b3SkillDetailNode();
+      const showing = !el.hidden && b3SkillDetailPinned;
+      if (showing) { b3HideSkillDetail(); return; }   // 再点一下收起（移动端唯一出口）
+      b3SkillDetailPinned = true;
+      b3ShowSkillDetail(slot);
+    }, true);
+    // 桌面悬停：进格子就显示，出去就收（除非是点住钉住的）
+    document.addEventListener('mouseover', (ev) => {
+      const slot = ev.target.closest?.('[data-b3-skill-slot]');
+      if (!slot || b3SkillDetailPinned) return;
+      if (ev.relatedTarget && slot.contains(ev.relatedTarget)) return;
+      b3ShowSkillDetail(slot);
+    });
+    document.addEventListener('mouseout', (ev) => {
+      const slot = ev.target.closest?.('[data-b3-skill-slot]');
+      if (!slot || b3SkillDetailPinned) return;
+      if (ev.relatedTarget && slot.contains(ev.relatedTarget)) return;
+      b3HideSkillDetail();
+    });
+    // 键盘聚焦（入口可 Tab 到）与失焦
+    document.addEventListener('focusin', (ev) => {
+      const btn = ev.target.closest?.('[data-b3-skill-info]');
+      if (!btn) return;
+      const slot = btn.closest?.('[data-b3-skill-slot]');
+      if (slot) b3ShowSkillDetail(slot);
+    });
+    document.addEventListener('focusout', (ev) => {
+      if (ev.target.closest?.('[data-b3-skill-info]') && !b3SkillDetailPinned) b3HideSkillDetail();
+    });
+    document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') b3HideSkillDetail(); });
+    document.addEventListener('click', (ev) => {
+      if (b3SkillDetailEl && !b3SkillDetailEl.hidden && b3SkillDetailPinned
+        && !ev.target.closest?.('[data-b3-skill-info]') && !ev.target.closest?.('#b3-skill-detail')) {
+        b3HideSkillDetail();
+      }
+    }, true);
   }
   const chargeBtn = root.querySelector('#b3-charge');
   if (chargeBtn && chargeBtn.dataset.b3Bound !== 'yes') {
@@ -2959,8 +3120,18 @@ function b3RunFxCue(cue, gap) {
  */
 function b3PlayActionFx(events) {
   const cues = b3BuildFxCues(events);
-  b3CancelActionFx();                    // 上一段还没播完就又出招：先撤旧时间线，避免两段交叉
+  // ⚠⚠ G3（2026-09-29 Lead 实测，真 8765）：**没有 cue 的一拍不许撤上一段的时间线。**
+  //   旧写法是「先无条件 `b3CancelActionFx()`，再 `if (!cues.length) return;`」——
+  //   而**对手倒下那一拍**恰好会再来一次「没有可播 cue」的调用：那一拍的形状是
+  //     `damage(player)` 打到对方 → `faint(enemy)` → 对手**同拍补位结算**（`action_cancelled(enemy)`）
+  //   ⇒ 第二次调用把上一段**还在定时器上、还没到点**的拍子全清掉
+  //   ⇒ 屏幕上**对方倒下零飘字**（连那一手的伤害数字也没了）。
+  //   己方倒下那条路**不会**同拍补位（换人是我们自己点的一手，在后面的拍子里）⇒ 不触发这条
+  //   ⇒ 这正是「己方 4/4 全有、对方 0/3 全无」这种**单边缺失**的来源。
+  //   改动本身是**保守**的：有 cue 时照旧先撤再播（防两段交叉那条纪律没变），
+  //   只在**本来就没东西要播**时不撤 —— 那种调用撤掉别的时间线从来只是坏事。
   if (!cues.length) return;
+  b3CancelActionFx();                    // 上一段还没播完就又出招：先撤旧时间线，避免两段交叉
   const gap = cues.length > 1
     ? Math.max(B3_FX_GAP_MIN, Math.min(B3_FX_LEAD, B3_FX_BUDGET / (cues.length - 1)))
     : 0;
@@ -2969,6 +3140,137 @@ function b3PlayActionFx(events) {
     if (at <= 0) b3RunFxCue(cue, gap);
     else b3FxTimers.push(setTimeout(() => b3RunFxCue(cue, gap), at));
   });
+}
+
+// ── R01（第二轮玩家纠偏 user-01）：技能详情 ──────────────────────────────────
+// 玩家的要求：**悬停 / 键盘聚焦 / 移动端点一下**都要能看清「这条技能到底是什么」，
+// 而**绝不许因此出招**。
+// 关键风险：出招委托（本文件后面的 `root.addEventListener('click', …)`）是**冒泡阶段**
+// 读 `closest('[data-b3-action]')`，而详情入口就挂在格子里 ⇒ 不拦的话点它必然命中格子、
+// 把这一手直接打出去。两道防线：
+//   ① 入口的点击绑在**捕获阶段**并 `stopPropagation()`；
+//   ② 出招委托里再加一道显式护栏（`ev.target.closest('[data-b3-skill-info]')` 直接 return）。
+// 内容只写引擎给的字段，**未知不编**：`desc` 是真效果、`power_status` 说清威力有没有来源、
+// `effect_support` 说清引擎结没结算这条效果。
+const B3_SKILL_SUPPORT_TEXT = {
+  unsupported: '引擎没有结算这条效果 —— 本局不把它当作已具备的能力（未核验）。',
+  supported: '引擎会结算这条效果。',
+  partial: '引擎只结算了一部分：没结算的那几段本局不会生效。',
+};
+function b3SkillDetailRows(mv, act) {
+  const sk = act && act.skill ? act.skill : null;
+  const rows = [];
+  const name = (sk && sk.name) || (mv && mv.name) || null;
+  const element = (sk && sk.element) || (mv && mv.element) || null;
+  const category = (sk && sk.category) || (mv && mv.category) || null;
+  const energyRaw = sk && sk.energy !== undefined ? sk.energy : (mv ? mv.energy : null);
+  // ⚠ `Number(null) === 0` 且 `Number.isFinite(0)` 为真 —— 直接这么写会把"没有值"读成 0
+  //（我第一版就栽在这：`sk` 为 null 时去读 `sk.power` 抛 TypeError，且只在"用不到的格子"上暴露）。
+  const energy = energyRaw !== null && energyRaw !== undefined && Number.isFinite(Number(energyRaw))
+    ? Number(energyRaw) : null;
+  if (name) rows.push(['名称', String(name)]);
+  if (category) rows.push(['类别', String(category)]);
+  if (element) rows.push(['属性', String(element)]);
+  if (energy !== null) rows.push(['耗能', `${energy} 点`]);
+  // 威力：**只在来源真的给了**的时候写数。`power_status=not_provided_by_source` 就是
+  // 引擎在说"这一项来源没给"（防御/状态招就是这一类）⇒ 如实写，**不填 0、不填"—"当数**。
+  const power = sk && sk.power !== null && sk.power !== undefined && Number.isFinite(Number(sk.power))
+    ? Number(sk.power) : null;
+  if (power !== null) rows.push(['威力', String(power)]);
+  else rows.push(['威力', (sk && sk.power_status === 'not_provided_by_source')
+    ? '来源里没有这一项（不是 0，也不编）' : '引擎没给（不编）']);
+  const desc = sk && typeof sk.desc === 'string' && sk.desc.trim() ? sk.desc.trim() : null;
+  rows.push(['实际效果', desc || '这条技能在资料里没有效果说明']);
+  // 2026-09-30（P0 矛盾收口）：**优先读服务端挂的正面事实**（`act.support`，可算时带 settled:true），
+  // 缺失才回落静态 `effect_support`（旧字段、旧断言都不动 ✓）。
+  const supportRaw = (act && act.support) ? act.support : (sk ? sk.effect_support : null);
+  // ⚠ 服务端那一半现在是**正面事实对象**（`{tier,settled:true,note}`）⇒ 必须先归一到三档键，
+  //   否则 `B3_SKILL_SUPPORT_TEXT[{{…}}]` 取不到 ⇒ 会印出 `[object Object]` ✗（这一行是必须的 ✓）
+  const support = (supportRaw && typeof supportRaw === 'object')
+    ? (supportRaw.settled === true ? 'supported'
+      : (String(supportRaw.tier ?? '').includes('PARTIAL') ? 'partial' : 'unsupported'))
+    : supportRaw;
+  rows.push(['未实现部分', B3_SKILL_SUPPORT_TEXT[support]
+    || (support ? `引擎标了「${String(support)}」（未核验，不猜）` : '引擎没有标这条效果的结算档位')]);
+  return rows;
+}
+let b3SkillDetailEl = null;
+let b3SkillDetailPinned = false;
+function b3SkillDetailNode() {
+  if (b3SkillDetailEl && b3SkillDetailEl.isConnected) return b3SkillDetailEl;
+  const el = document.createElement('div');
+  el.id = 'b3-skill-detail';
+  el.className = 'b3-skill-detail';
+  el.setAttribute('role', 'dialog');
+  el.setAttribute('aria-label', '技能详情');
+  el.hidden = true;
+  document.body.appendChild(el);
+  b3SkillDetailEl = el;
+  return el;
+}
+function b3HideSkillDetail() {
+  b3SkillDetailPinned = false;
+  if (b3SkillDetailEl) b3SkillDetailEl.hidden = true;
+}
+function b3ShowSkillDetail(slot) {
+  const raw = slot ? slot.dataset.b3SkillDetail : null;
+  if (!raw) return;
+  let payload = null;
+  try { payload = JSON.parse(raw); } catch { return; }
+  const el = b3SkillDetailNode();
+  el.textContent = '';
+  for (const [k, v] of b3SkillDetailRows(payload.mv, payload.act)) {
+    const row = document.createElement('div');
+    row.className = 'b3-skill-detail-row';
+    const b = document.createElement('b');
+    b.textContent = `${k}：`;
+    const span = document.createElement('span');
+    span.textContent = String(v);
+    row.appendChild(b); row.appendChild(span);
+    el.appendChild(row);
+  }
+  el.hidden = false;
+  // 摆位（R01，2026-09-29 修）：**优先两旁，两侧都放不下就放格子上下** ——
+  //   ⚠ 我第一版是「右边放不下就翻到左边」，而窄屏（390）**两侧都放不下**时它会翻到左边
+  //   并**盖住格子本身**：实测点格子中部命中的是 `.b3-skill-detail-row`（面板），
+  //   也就是**提示挡住了出招** —— README 明写「提示不遮挡操作」，而我上一轮只验了
+  //   "在视口内"、**没验遮挡**，是反证②（点中部必须仍然出招）把它抓出来的。
+  //   现在：两旁都放不下就放到**格子下方**（下方也放不下就上方），**绝不与格子重叠**。
+  const r = slot.getBoundingClientRect();
+  const w = el.offsetWidth || 300;
+  const h = el.offsetHeight || 200;
+  const fitsRight = r.right + 8 + w <= window.innerWidth - 8;
+  const fitsLeft = r.left - 8 - w >= 8;
+  let left; let top;
+  if (fitsRight) { left = r.right + 8; top = r.top; }
+  else if (fitsLeft) { left = r.left - 8 - w; top = r.top; }
+  else {
+    // 窄屏：放上下，并把它**推出格子占的那一条带**（下优先、上兜底）
+    left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
+    top = (r.bottom + 6 + h <= window.innerHeight - 8) ? r.bottom + 6
+      : Math.max(8, r.top - 6 - h);
+  }
+  if (top + h > window.innerHeight - 8) top = Math.max(8, window.innerHeight - h - 8);
+  if (top < 8) top = 8;
+  el.style.left = `${Math.round(left)}px`;
+  el.style.top = `${Math.round(top)}px`;
+}
+function b3MountSkillInfo(slot, mv, act) {
+  if (!slot) return;
+  // 引擎这一格到底给了什么，整段存进 dataset：详情只读它，**不另算一份**。
+  slot.dataset.b3SkillDetail = JSON.stringify({ mv: mv ?? null, act: act ?? null });
+  let btn = slot.querySelector('[data-b3-skill-info]');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'b3-skill-info';
+    btn.dataset.b3SkillInfo = 'yes';
+    btn.setAttribute('aria-label', '技能详情');
+    btn.textContent = 'ⓘ';
+    slot.appendChild(btn);
+  }
+  const nm = (act && act.skill && act.skill.name) || (mv && mv.name) || '';
+  btn.setAttribute('aria-label', nm ? `看「${nm}」的技能详情` : '技能详情');
 }
 
 function b3Pulse(sel, cls) {
@@ -3037,7 +3339,7 @@ function renderModelChip() {
   chip.dataset.rocoTools = tools;
   chip.title = configured
     ? '资料查询由本机规则服务提供（与密钥无关）；自由发挥的文字由云端模型生成，模型不可用时自动回落到引擎结论。'
-    : '两件事分开看：资料查询（规则/图鉴/相性表）由本机规则服务提供，**不需要密钥**；'
+    : '两件事分开看：资料查询（规则/图鉴/相性表）由本机规则服务提供，不需要密钥；'
       + '没配密钥只影响"自由发挥的文字"。点这里去连接模型。';
   document.body.dataset.rocoModelConfigured = configured ? 'yes' : 'no';
 }
@@ -3274,6 +3576,72 @@ function applyResult(data) {
   if (Array.isArray(state.view?.legal) && state.view.legal.length) state.lastLiveView = state.view;
   const fresh = Array.isArray(data.view?.events) ? data.view.events : null;
   if (fresh) state.matchEvents = [...state.matchEvents, ...fresh];
+  // ── 第五轮④（2026-09-29）：攒**逐回合的前后局面**（复盘要的 `turnLog` 的唯一来源）────────
+  // 为什么在这儿：`applyResult` 是"这一回合发生了什么"的唯一收口，而**换掉 `state.view`
+  // 之前**手里同时有"打之前"和"打之后"两份局面 —— 过了这一行就再也凑不齐 before/after 了。
+  // 形状照 `rocoGameView()`（`memory.js` 的 `turnLogOf` 就是按它读的），只搬数据、不做解释：
+  // 每条要 `type==='turn'`、`before/after` 带 `player`/`enemy`（各含 `active` 与 `pets[{name,hp}]`）。
+  if (state.view && data.view && state.view !== data.view) {
+    const before = rocoGameView(state.view, {matchId: state.battleId});
+    const after = rocoGameView(data.view, {matchId: state.battleId});
+    if (before && after) {
+      const beforeRow = {turn: before.turn, player: before.player, enemy: before.enemy};
+      const afterRow = {turn: after.turn, player: after.player, enemy: after.enemy};
+      // 事件文本：引擎给的中文句子（`text`），最多两条 —— 与 `turnLogOf` 的 `events` 同一条口径。
+      const events = (Array.isArray(data.view?.events) ? data.view.events : [])
+        .map((one) => (typeof one?.text === 'string' ? one.text : null))
+        .filter(Boolean).slice(0, 2);
+      // 这一手是什么：`autoTurn` 是代打，没有玩家动作 ⇒ 留 null（`turnLogOf` 会写"行动未登记"，
+      // 不编一个 kind）。玩家自己出招那条路（`playAction`）把动作挂在 `state.lastAction` 上。
+      const action = state.lastAction ?? null;
+      // ── 第六轮②（2026-09-29）：**一个回合只留一行** ─────────────────────────────
+      // 引擎一个回合会推进两次：`battle → replace → battle`（有人倒下 ⇒ 先补位，再进下一回合）。
+      // 真局 17 步逐步读数（`tmp/xy-probe-dup.mjs`）：
+      //   `5 -> 6`（battle→battle）· `6 -> 6`（battle→replace）· `6 -> 7`（replace→battle）
+      // 后两次的**回合号不前进**，而 `turnLogOf` 是按 `before.turn` 编号的 ⇒ 两条都记成"第6回合"，
+      // 玩家正文里出现两条「第6回合」（真局 17 步里 5 对：6/8/10/11/13），看起来像打了两回合。
+      // ⇒ 新的这一行若与上一行**同一个 `before.turn`**，并进上一行：
+      //   保留前一段的"打之前"、**事件两段拼起来**、**回合号变了就各自成行**（不许把两个回合并成一个）。
+      // ⚠ 判的是 `before.turn`（不是 `after.turn`）：`replace→battle` 那一步的 `after.turn`
+      //   已经是下一个回合，拿 `after.turn` 比会把**两个回合**并掉（那正是反证要抓的）。
+      const last = state.matchHistory[state.matchHistory.length - 1];
+      if (last && last.type === 'turn' && last.before?.turn === beforeRow.turn) {
+        // "打之后"取哪一段：**场上那只换了人就不能取后一段**。
+        // 真局第 6 回合逐步读数（`tmp/xy-probe-pairs.mjs`，修好投影下标之后）：
+        //   `6 -> 6`（battle→replace）对面 寂灭骨龙 35 → **0**（真倒下）
+        //   `6 -> 7`（replace→battle）对面 寂灭骨龙 0 → **黑猫巫师 474**（补位上来的那只）
+        // `turnLogOf` 的名字取自"打之前"、血量取自"打之后" ⇒ 若取后一段，正文会印成
+        // 「对面 寂灭骨龙 35 血→**474 血**」——那是**假陈述**（474 是换上来的黑猫巫师的血）。
+        // 所以这种情况下保留前一段的"打之后"（寂灭骨龙 35 → 0，它真倒下了），
+        // 换上来的那只从**下一行**的"打之前"照常出现（第 7 回合：对面 黑猫巫师 474 血）；
+        // 补位那句话并进事件里，玩家知道这一回合发生过补位。
+        const onFieldOf = (row, side) => row?.[side]?.pets?.[row[side].active] ?? null;
+        const switched = ['player', 'enemy'].some((side) => {
+          const was = onFieldOf(last.after, side), now = onFieldOf(afterRow, side);
+          return (was?.name ?? null) !== (now?.name ?? null);
+        });
+        // 事件：两段拼起来取**后两条**。`turnLogOf` 只留两条，取前两条的话"对方补上了第 N 位精灵。"
+        // 永远被挤掉（那正是解释下一行为什么换了名字的那一句）。
+        const merged = [...(Array.isArray(last.events) ? last.events : []), ...events].slice(-2);
+        state.matchHistory = [...state.matchHistory.slice(0, -1), {
+          ...last,
+          after: switched ? last.after : afterRow,
+          // 一个回合只报**一个**动作：先记下的那一手是真的出招，补位那一步的换人不算"这一手"。
+          action: last.action ?? action,
+          events: merged,
+        }];
+      } else {
+        state.matchHistory = [...state.matchHistory, {
+          type: 'turn',
+          before: beforeRow,
+          after: afterRow,
+          action,
+          events,
+        }];
+      }
+      state.lastAction = null;   // 一个动作只属于一回合
+    }
+  }
   // 掉心提示（2026-09-23 扩展）：比对**引擎给的魔力**——**两边都看**，谁掉了就说谁，
   // 同时按定稿把两侧心数短暂显形（平时保持 hidden）。数字全部来自 `view.mana`，页面不自己算。
   const beforeMana = state.lastMana ?? null;
@@ -3952,6 +4320,8 @@ async function startBattle() {
     state.matchEvents = [];
     // U10：新的一局从**空的动作表**开始（旧局的回合号会与这一局重号，留着就是错的事实）。
     state.legalByTurn = {};
+    // 第五轮④：逐回合前后局面同理 —— 留着上一局的那份会被当成这一局的记录（复盘就讲错了局面）。
+    state.matchHistory = [];
     state.lastLiveView = null;
     state.pick.open = false;
     $('lesson').textContent = '';
@@ -4009,6 +4379,14 @@ async function playAction(action) {
   // 那是另一件事，见台账「没做到」）。
   if (state.actionInFlight) return;
   state.actionInFlight = true;
+  // 第五轮④：把**玩家这一手**记下来，好让逐回合摘要写出"你用了哪一手"（`turnLogOf` 读
+  // `history[].action.kind`）。只记引擎真给的两样（kind / 技能或物品 id），**不猜**：
+  // 没有 kind 就留 null（摘要里写"行动未登记"，不编一个动作）。
+  state.lastAction = {
+    kind: typeof action.kind === 'string' ? action.kind : null,
+    id: (typeof action.skill_id === 'string' && action.skill_id)
+      || (typeof action.item_id === 'string' && action.item_id) || null,
+  };
   try {
     return await playActionOnce(action);
   } finally {
@@ -4175,7 +4553,14 @@ async function finishMatch() {
   $('result-turns').textContent = `${view.turn} 回合 · 训练场`;
   $('result-stats').textContent = matchStats(state.matchEvents, view);
 
-  const finalGame = rocoGameView(view, {matchId: state.battleId});
+  // 第五轮④（2026-09-29）：`finalGame` 必须带上**逐回合前后局面**，否则 `rememberBattle` →
+  // `matchFacts()` 的 `turnLog` 恒为 null，「复盘上一局」就只能说"没有逐回合记录"（真浏览器实测）。
+  // 优先用引擎视图真给的 `history`（有就用它，别拿自攒的顶替）；没有才用 `state.matchHistory`。
+  const gameBase = rocoGameView(view, {matchId: state.battleId});
+  const engineHistory = Array.isArray(view?.history) ? view.history.filter((h) => h?.type === 'turn') : [];
+  const finalGame = gameBase
+    ? {...gameBase, history: engineHistory.length ? engineHistory : state.matchHistory}
+    : gameBase;
   state.memory = rememberBattle(state.memory, finalGame);
   saveMemory();
 
@@ -4574,6 +4959,12 @@ function coachRocoBattle() {
   const field = row(view.opponent?.field);
   if (field) snapshot.foe = [field];
   if (Number.isInteger(view.opponent?.living_count)) snapshot.foe_living_count = view.opponent.living_count;
+  // U09（2026-09-29，T2 点名）：**「谁要补位」的权威信号只有 `needs_replacement`**。
+  // 为什么必须带进聊天快照：补位阶段引擎对**两边**都只发 switch，于是「phase=replace」和
+  // 「我方合法动作全是换人」在**对手补位**时同样成立 —— 仅凭它们会把对手补位说成「你倒了」。
+  // 真机实测（T2 dump）：同一局 t8 是 `['enemy']`（我方六只全员活着）、t10/t16 才是 `['player']`。
+  // 引擎没给这个键时不写（加性；缺了 coach 层走 fail-closed，不会说错）。
+  if (Array.isArray(view.needs_replacement)) snapshot.needs_replacement = view.needs_replacement.slice();
   const bench = (view.opponent?.bench ?? []).map((b) => ({
     slot: Number.isInteger(b?.slot) ? b.slot : null,
     fainted: b?.fainted === true,
@@ -4789,7 +5180,7 @@ async function sayOnce(message) {
 
 // ── 演示覆盖清单（页面自己说清「这次演示覆盖了什么」）───────────────────────
 const COVERAGE = [
-  ['开局与阵容变化后给出一条**有证据**的建议', 'data-roco-hint="action_hint" 且 hint-body 里有期望区间与分支数'],
+  ['开局与阵容变化后给出一条有证据的建议', 'data-roco-hint="action_hint" 且 hint-body 里有期望区间与分支数'],
   ['危险局面主动短提示（无聊天入口）', 'data-roco-action="action_hint" 或 "micro_hint"'],
   ['该沉默的局面不提示', 'data-roco-action="silent" 且提示条隐藏'],
   ['状态变化撤销旧建议', '推进后 data-roco-hint-version 变大，旧提示先撤下'],
@@ -4932,6 +5323,14 @@ function bind() {
         return;
       }
       // adopt：玩家明确按了「采用建议」才走到这里。
+      // ⚠ D1 修复：**先判这条建议是不是已经用过了**（对象身份 + 内容身份两条都算）。
+      const key = rocoAdviceKey(advice);
+      if (rocoAdviceAdopted.has(advice) || rocoAdviceAdoptedKeys.has(key)) {
+        sayStatus('这条建议已经用过了——同一张卡片只采用一次。想要新的建议，再问一句「现在怎么办」。');
+        return;
+      }
+      rocoAdviceAdopted.add(advice);
+      rocoAdviceAdoptedKeys.add(key);
       if (slot) slot.click();
       else void playAction(resolved.action);
       sayStatus(`按建议走了「${target.display ?? target.label ?? '——'}」。`);
@@ -5141,6 +5540,8 @@ async function startStandardPvp() {
     state.matchEvents = [];
     // U10：新的一局从**空的动作表**开始（旧局的回合号会与这一局重号，留着就是错的事实）。
     state.legalByTurn = {};
+    // 第五轮④：逐回合前后局面同理 —— 留着上一局的那份会被当成这一局的记录（复盘就讲错了局面）。
+    state.matchHistory = [];
     state.lastLiveView = null;
     state.pick.open = false;
     $('lesson').textContent = '';
@@ -5222,6 +5623,8 @@ function returnHome() {
   // U10（2026-09-29）：**逐回合合法表**也随这一局一起清 —— 开下一局时旧局的动作表
   // 留在手里，复盘就会拿"上一局的合法动作"去讲这一局的回合（那是编）。
   state.legalByTurn = {};
+  // 第五轮④：逐回合前后局面同理（与上面两处开新局同一条口径）。
+  state.matchHistory = [];
   state.lastLiveView = null;
   state.lastMana = null;
   state.plan = null;
@@ -5238,6 +5641,9 @@ function returnHome() {
 async function boot() {
   clearBootFallback();
   state.memory = loadMemory();
+  // ⚠ 2026-09-29（阶段三 D4）：boot 时那份记忆的**基线快照** —— `saveMemory()` 靠它判断
+  //   "这一份里哪些字段是我改过的、哪些是别人（小芽面板）后来写进去的"。见下面 `saveMemory()`。
+  state.memoryBaseline = JSON.parse(JSON.stringify(state.memory));
   renderCoverage();
   applyRouteMode();
   bind();

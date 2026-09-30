@@ -16,6 +16,20 @@ import {STAT_KEYS, STAT_NAMES, panelOf, natures, talentTierOf} from './talent.js
 
 export const REFRESH_LIMIT = 3;
 
+/**
+ * 天分加成的**级数上限**：一 / 二 / 三级各把 +10 加到一项**还没加过**的资质上。
+ *
+ * 人类 2026-09-29 逐字：「这个刷新天分，为啥是一直叠加？？？」+「刷新一样要注意是刷新不是叠加」。
+ * 盒子层一直是这个口径（`box-drawer.js` 的「天分 已加成 N/3 级」、
+ * `tests/roco-box-drawer.test.js` 里那条「一/二/三级各 +10 到一个没加过的属性」）。
+ *
+ * ⚠ 两条纪律：
+ *   · **只此一处**（客户端 `box-individuals.js` 从这里 import，别再各写一个 3、各写一句话）；
+ *   · **闸放在这一层**（真值层）—— 客户端那道挡不住"直接调 `refresh()`"，
+ *     实测绕过客户端连调 5 次能加到 5 项 ✗（判据 `tests/roco-individuals.test.js` 的直调反证钉着它）。
+ */
+export const TALENT_BOOST_LIMIT = 3;
+
 /** 一种掷点规则：`uniform-nature/v1` 与 `uniform-talent/v1` —— 都标着"建模的、非实测"。 */
 export const ROLL_RULES = {
   nature: {
@@ -203,6 +217,37 @@ export function panelOfIndividual(individual, race) {
  *
  * 返回的是纯数据（不碰 DOM、不碰 localStorage）⇒ Node 判据可以直接钉它。
  */
+
+/**
+ * 本机掷点里「被激活的那几项」的门槛（两代掷点一致：7–10 给激活项）。
+ * 证据：`talent.js` 的档位表按激活条数分档；旧口径随机三项 7–10、其余 0–6；
+ * 现口径激活几条 7–10、其余恰好 0。所以 ≥7 就是"这一项被激活"。
+ */
+const TIER_ACTIVATION_FLOOR = 7;
+
+/**
+ * R04（2026-09-29）：**同一个体在盒子详情与小芽那一行必须读出同一个档位。**
+ *
+ * 为什么需要它：`talentTierOf` 只认"激活项"（`>0` 即算激活）。本机掷点给**未激活项**的是
+ * 0–6 之间的随机整数（旧口径），于是一份 5 项非零的记录会让它读到 5 条激活 ⇒ 它如实返回
+ * "认不出档位"，而同一个个体在盒子（阈值 ≥7）里读出来是「了不起的天分」—— 同一份数据两个答案。
+ *
+ * 纪律（README R04 的红线）：
+ *   · **六个数一个都不改**：这里只**换读法**（把 <7 的项按 0 参与判档），不写回、不改存档；
+ *   · **缺项不许当 0**：六项不全是数字时**直接返回原读法**，不拿缺数据编档名；
+ *   · 现读法能读出档位时**一个字不动**（`one.label` 有值就直接返回）。
+ */
+function tierWithActivationBand(talentBase, nature) {
+  const one = talentTierOf({talent: talentBase, nature});
+  if (one?.label) return one;                        // 现读法读得出 ⇒ 一个字不改
+  const values = Object.values(talentBase ?? {});
+  if (values.length !== 6 || values.some((v) => !Number.isFinite(Number(v)))) return one;   // 缺项不猜
+  const band = Object.fromEntries(Object.entries(talentBase)
+    .map(([k, v]) => [k, Number(v) >= TIER_ACTIVATION_FLOOR ? Number(v) : 0]));
+  const bandTier = talentTierOf({talent: band, nature});
+  return bandTier?.label ? bandTier : one;
+}
+
 export function cultivationOf(individual) {
   const talent = individual?.talent && typeof individual.talent === 'object' && !Array.isArray(individual.talent)
     ? {...individual.talent} : null;
@@ -225,11 +270,23 @@ export function cultivationOf(individual) {
     nature_source: individual?.nature_source ?? null,
     talent,
     talentBase,
+    // U01（2026-09-29，监工点名）：**来源**必须跟着值一起走。
+    // 本机记录里有一代资质是我方自己掷的（`rolled（…非官方概率）`），它**恰好能对上四档名**
+    // ⇒ 下游（盒子列表 / 小芽焦点行 / 战斗页）会把它读成"这一只的真实天分"。
+    // 只给值不给来源，消费者就没法标注；这一条是加性的（旧键一个没动）。
+    talent_source: individual?.talent_source ?? null,
+    // 一个**布尔**读法，给不方便解析长串的消费者（UI 那一层只想知道"要不要标一句"）。
+    talent_rolled: typeof individual?.talent_source === 'string'
+      && /^rolled/.test(individual.talent_source.trim()),
     boosts: boosts.length,
     // 刷过没有 = 账上有几条加成（`talent_boosts` 只增不减；回滚会把它删回去）
     refreshed: boosts.length > 0,
     // 档位认不出来时 `tier.label` 是 null、`tier.reason` 是那句实话（不猜档名）。
-    tier: talentBase ? talentTierOf({talent: talentBase, nature}) : null,
+    // R04（2026-09-29，Lead 指派的最后一处「四处一致」）：
+    // 盒子详情按**激活档（≥7）**读出「了不起的天分」，而这里原来按 **`>0` 即激活** 读 ——
+    // 两代掷点都把 7–10 给"被激活的那几项"（旧口径随机三项 7–10、其余 0–6；现口径激活几条
+    // 7–10、其余恰好 0），所以"哪几项真激活"**本来就在数据里**。换读法即可一致，**六个数一个都不改**。
+    tier: talentBase ? tierWithActivationBand(talentBase, nature) : null,
     remaining: {...(individual?.refreshes ?? {})},
     rolls: {...(individual?.rolls ?? {})},
     // ⭐ 2026-09-29 新增（Codex 监工要的跨模块那一条，见下）：
@@ -263,9 +320,13 @@ export function cultivationFingerprint(individual) {
   if (!individual || typeof individual !== 'object') return '';
   const talent = individual.talent && typeof individual.talent === 'object' && !Array.isArray(individual.talent)
     ? individual.talent : {};
-  const six = STAT_KEYS.map((stat) => `${stat}${Number(talent[stat] ?? 0)}`).join('.');
+  // 2026-09-30 修（草稿 W-01，人类已裁「准修」）：**缺项不许折叠成 0** ✗ —— 否则「缺 atk」与「atk=0」
+  //   两个状态**生成同一个指纹**（实测逐字相同 ⇒ 指纹失去「比同不同」的用途 ✗）。
+  //   改法照本函数 :327/:328 已有的 `?? '?'` 手法：缺项写 `?` 而不是 `0`。
+  //   旧行留档（改钉不删）：const six = STAT_KEYS.map((stat) => `${stat}${Number(talent[stat] ?? 0)}`).join('.');
+  const six = STAT_KEYS.map((stat) => `${stat}${talent[stat] === undefined || talent[stat] === null ? '?' : Number(talent[stat])}`).join('.');
   const boosts = (Array.isArray(individual.talent_boosts) ? individual.talent_boosts : [])
-    .map((row) => `${Number(row?.tier ?? 0)}:${row?.stat ?? '?'}:${Number(row?.delta ?? 0)}`).join('.');
+    .map((row) => `${row?.tier === undefined || row?.tier === null ? '?' : Number(row.tier)}:${row?.stat ?? '?'}:${row?.delta === undefined || row?.delta === null ? '?' : Number(row.delta)}`).join('.');
   return [
     `id=${individual.individual_id ?? '?'}`,
     `nature=${individual.nature ?? '?'}`,
@@ -322,6 +383,15 @@ const clone = (individual) => ({
  */
 export function refresh(individual, kind, {at = null, salt = ''} = {}) {
   if (kind !== 'nature' && kind !== 'talent') throw new Error(`没有这种刷新：${kind}`);
+  // ⚠ 2026-09-29 硬口径（人类：「刷新天分，为啥是一直叠加？？？」）：**天分加成到 3 级就到顶**。
+  //   卡在这一步是**故意的**：性格刷新不受影响（它换的是性格本身，不改资质）；
+  //   而"次数用完回满"是 2026-09-28 人类自己改的规则（`tests/roco-individuals.test.js` 钉着），
+  //   **不动它** —— 回满之后可以接着刷，但天分这一项不会因为再刷而变高。
+  if (kind === 'talent' && boostedStatsOf(individual).length >= TALENT_BOOST_LIMIT) {
+    throw Object.assign(new Error(`天分加成已经 ${TALENT_BOOST_LIMIT} 级满了`
+      + '（一 / 二 / 三级各加一项，加过的项不会再叠）—— 这一只的资质不会因为再刷而变高'),
+    {code: 'boost-limit'});
+  }
   // 2026-09-28 改钉（人类逐字：「刷新上限达到后可继续刷新，回到 3 次」）：
   // 次数用完**不再锁死** —— 用掉最后一次之后计数**回到 `REFRESH_LIMIT`**，可以接着刷。
   // 于是「还剩 N 次」的含义变成"离下一次回满还有几次"，不再是"这辈子只剩几次"。

@@ -8,8 +8,8 @@
   "battle_skills": 579,
   "traits": 245,
   "entities": 824,
-  "simulatable_entities": 298,
-  "simulatable_ratio": 0.3617
+  "simulatable_entities": 306,
+  "simulatable_ratio": 0.3714
  },
  "declared_capabilities": {
   "multi_hit": true,
@@ -19,16 +19,30 @@
   "foe_energy_loss": true,
   "initiative_condition": true,
   "per_layer_cost": true,
+  "cost_per_own_debuff_layer": true,
   "foe_switch_condition": true,
   "per_use_ramp": true,
-  "on_hit_ramp": true
+  "element_use_ramp": true,
+  "triggered_ramp": true,
+  "on_hit_ramp": true,
+  "respond_override": true,
+  "per_layer_boost": true,
+  "respond_reduction_to_heal": true,
+  "element_power_ramp": true,
+  "moe_mark": true,
+  "self_power_flat": true,
+  "cond_self_debuff_power": true,
+  "global_skill_mods": true,
+  "stat_gain_extended": true,
+  "stat_gain_flat": true,
+  "cleanse_marks": true
  },
  "support_levels": {
   "battle_skills": {
    "FULL_VERIFIED": 0,
-   "SIMULATABLE_UNVERIFIED": 290,
-   "PARTIAL": 277,
-   "KNOWLEDGE_ONLY": 12,
+   "SIMULATABLE_UNVERIFIED": 298,
+   "PARTIAL": 279,
+   "KNOWLEDGE_ONLY": 2,
    "REFUSED": 0
   },
   "traits": {
@@ -48,32 +62,46 @@
    "loadout_pets": 584
   },
   {
-   "primitive": "连击",
-   "skills": 49,
+   "primitive": "未识别机制",
+   "skills": 43,
    "traits": 0,
-   "total": 49,
-   "loadout_pets": 58
+   "total": 43,
+   "loadout_pets": 211
   },
   {
    "primitive": "随机",
    "skills": 42,
    "traits": 0,
    "total": 42,
-   "loadout_pets": 3
+   "loadout_pets": 94
+  },
+  {
+   "primitive": "连击",
+   "skills": 31,
+   "traits": 0,
+   "total": 31,
+   "loadout_pets": 68
   },
   {
    "primitive": "选择",
-   "skills": 21,
+   "skills": 23,
    "traits": 0,
-   "total": 21,
-   "loadout_pets": 15
+   "total": 23,
+   "loadout_pets": 30
   },
   {
-   "primitive": "未识别机制",
-   "skills": 18,
+   "primitive": "解析得出但引擎没有结算分支：escape",
+   "skills": 14,
    "traits": 0,
-   "total": 18,
-   "loadout_pets": 0
+   "total": 14,
+   "loadout_pets": 44
+  },
+  {
+   "primitive": "天气",
+   "skills": 8,
+   "traits": 0,
+   "total": 8,
+   "loadout_pets": 16
   },
   {
    "primitive": "眩晕",
@@ -83,32 +111,32 @@
    "loadout_pets": 3
   },
   {
-   "primitive": "回合：若敌方本回合更换精灵",
-   "skills": 6,
+   "primitive": "应对覆盖",
+   "skills": 7,
    "traits": 0,
-   "total": 6,
-   "loadout_pets": 12
+   "total": 7,
+   "loadout_pets": 0
+  },
+  {
+   "primitive": "回合：若敌方本回合更换精灵",
+   "skills": 5,
+   "traits": 0,
+   "total": 5,
+   "loadout_pets": 10
   },
   {
    "primitive": "若：若敌方本回合更换精灵",
-   "skills": 6,
+   "skills": 5,
    "traits": 0,
-   "total": 6,
-   "loadout_pets": 12
+   "total": 5,
+   "loadout_pets": 10
   },
   {
    "primitive": "蓄力：蓄力",
    "skills": 5,
    "traits": 0,
    "total": 5,
-   "loadout_pets": 15
-  },
-  {
-   "primitive": "号位",
-   "skills": 4,
-   "traits": 0,
-   "total": 4,
-   "loadout_pets": 25
+   "loadout_pets": 20
   },
   {
    "primitive": "回合：持续8回合",
@@ -118,41 +146,6 @@
    "loadout_pets": 0
   },
   {
-   "primitive": "天气",
-   "skills": 4,
-   "traits": 0,
-   "total": 4,
-   "loadout_pets": 16
-  },
-  {
-   "primitive": "层：敌方每有1层中毒效果",
-   "skills": 4,
-   "traits": 0,
-   "total": 4,
-   "loadout_pets": 2
-  },
-  {
-   "primitive": "每：敌方每有1层中毒效果",
-   "skills": 4,
-   "traits": 0,
-   "total": 4,
-   "loadout_pets": 2
-  },
-  {
-   "primitive": "驱散：驱散自己的减益",
-   "skills": 4,
-   "traits": 0,
-   "total": 4,
-   "loadout_pets": 3
-  },
-  {
-   "primitive": "回合：回合结束时",
-   "skills": 3,
-   "traits": 0,
-   "total": 3,
-   "loadout_pets": 33
-  },
-  {
    "primitive": "回合：持续3回合",
    "skills": 3,
    "traits": 0,
@@ -160,60 +153,25 @@
    "loadout_pets": 0
   },
   {
-   "primitive": "层：每驱散1层",
+   "primitive": "层：敌方每有1层中毒效果",
    "skills": 3,
    "traits": 0,
    "total": 3,
-   "loadout_pets": 2
+   "loadout_pets": 12
   },
   {
-   "primitive": "每：每驱散1层",
+   "primitive": "每：敌方每有1层中毒效果",
    "skills": 3,
    "traits": 0,
    "total": 3,
-   "loadout_pets": 2
+   "loadout_pets": 12
   },
   {
-   "primitive": "获得：自己获得全技能威力+20",
+   "primitive": "没拉起的原语：冻结",
    "skills": 3,
    "traits": 0,
    "total": 3,
-   "loadout_pets": 0
-  },
-  {
-   "primitive": "驱散：每驱散1层",
-   "skills": 3,
-   "traits": 0,
-   "total": 3,
-   "loadout_pets": 2
-  },
-  {
-   "primitive": "印记：敌方每有1层印记",
-   "skills": 2,
-   "traits": 0,
-   "total": 2,
-   "loadout_pets": 6
-  },
-  {
-   "primitive": "印记：驱散敌方所有印记",
-   "skills": 2,
-   "traits": 0,
-   "total": 2,
-   "loadout_pets": 9
-  },
-  {
-   "primitive": "变：应对状态：本次技能威力变为2倍",
-   "skills": 2,
-   "traits": 0,
-   "total": 2,
-   "loadout_pets": 17
-  },
-  {
-   "primitive": "变：应对状态：本次技能威力变为3倍",
-   "skills": 2,
-   "traits": 0,
-   "total": 2,
-   "loadout_pets": 32
+   "loadout_pets": 33
   },
   {
    "primitive": "变：此技能位置不会改变",
@@ -241,7 +199,7 @@
    "skills": 2,
    "traits": 0,
    "total": 2,
-   "loadout_pets": 8
+   "loadout_pets": 18
   },
   {
    "primitive": "层：敌方每有1层冻结",
@@ -249,13 +207,6 @@
    "traits": 0,
    "total": 2,
    "loadout_pets": 2
-  },
-  {
-   "primitive": "层：敌方每有1层印记",
-   "skills": 2,
-   "traits": 0,
-   "total": 2,
-   "loadout_pets": 6
   },
   {
    "primitive": "层：获得层数等于敌方印记层数",
@@ -269,7 +220,7 @@
    "skills": 2,
    "traits": 0,
    "total": 2,
-   "loadout_pets": 8
+   "loadout_pets": 18
   },
   {
    "primitive": "每：敌方每有1只力竭精灵",
@@ -286,13 +237,6 @@
    "loadout_pets": 2
   },
   {
-   "primitive": "每：敌方每有1层印记",
-   "skills": 2,
-   "traits": 0,
-   "total": 2,
-   "loadout_pets": 6
-  },
-  {
    "primitive": "每：本技能能耗每-1",
    "skills": 2,
    "traits": 0,
@@ -307,18 +251,88 @@
    "loadout_pets": 3
   },
   {
-   "primitive": "每：每次击败敌方",
-   "skills": 2,
-   "traits": 0,
-   "total": 2,
-   "loadout_pets": 14
-  },
-  {
    "primitive": "每：自己每失去10%生命",
    "skills": 2,
    "traits": 0,
    "total": 2,
    "loadout_pets": 10
+  },
+  {
+   "primitive": "没拉起的原语：吸血",
+   "skills": 2,
+   "traits": 0,
+   "total": 2,
+   "loadout_pets": 0
+  },
+  {
+   "primitive": "没拉起的原语：迅捷",
+   "skills": 2,
+   "traits": 0,
+   "total": 2,
+   "loadout_pets": 0
+  },
+  {
+   "primitive": "消耗：消耗5%生命代替1能量",
+   "skills": 2,
+   "traits": 0,
+   "total": 2,
+   "loadout_pets": 12
+  },
+  {
+   "primitive": "获得：敌方获得3回合禁足",
+   "skills": 2,
+   "traits": 0,
+   "total": 2,
+   "loadout_pets": 0
+  },
+  {
+   "primitive": "获得：敌方获得全技能能耗+1",
+   "skills": 2,
+   "traits": 0,
+   "total": 2,
+   "loadout_pets": 29
+  },
+  {
+   "primitive": "获得：获得1次奉献：敌方获得2层中毒",
+   "skills": 2,
+   "traits": 0,
+   "total": 2,
+   "loadout_pets": 0
+  },
+  {
+   "primitive": "蓄力：下次技能无需蓄力",
+   "skills": 2,
+   "traits": 0,
+   "total": 2,
+   "loadout_pets": 0
+  },
+  {
+   "primitive": "解析得出但引擎没有结算分支：self_lifes",
+   "skills": 2,
+   "traits": 0,
+   "total": 2,
+   "loadout_pets": 0
+  },
+  {
+   "primitive": "「给敌方挂全技能能耗+1」**已经是真机制**",
+   "skills": 0,
+   "traits": 1,
+   "total": 1,
+   "loadout_pets": 3
+  },
+  {
+   "primitive": "「聒噪」的效果在数据里查得到",
+   "skills": 0,
+   "traits": 1,
+   "total": 1,
+   "loadout_pets": 2
+  },
+  {
+   "primitive": "「获得对手的特性」要求引擎在**运行时**把另一",
+   "skills": 0,
+   "traits": 1,
+   "total": 1,
+   "loadout_pets": 3
   }
  ],
  "reachability": {
@@ -326,7 +340,7 @@
   "reason": null,
   "ruleset_pets": 622,
   "derived_builds": 622,
-  "skills_in_loadouts": 279,
+  "skills_in_loadouts": 314,
   "why": "「引擎支持」≠「产品可达」：这一栏数的是**配招里真的带得上的**精灵数（来源取并集：`rs.candidate_moveset` 覆盖规则集里的 622 只，`on-demand-builds.json` 另有 622 条推算配招）。排序只看条数会把「做完产品上没变化」的批次排到前面 —— 第 36 轮实测：「选择」20 条里**读得全的只有 2 条、而这两条一条配招都没带**；真正带得上选择技能的是 15 只，且它们的另一条分支全都要别的机制。",
   "top_blocked_by_reach": [
    {
@@ -337,14 +351,42 @@
     "loadout_pets": 584
    },
    {
-    "primitive": "连击",
-    "skills": 49,
+    "primitive": "未识别机制",
+    "skills": 43,
     "traits": 0,
-    "total": 49,
-    "loadout_pets": 58
+    "total": 43,
+    "loadout_pets": 211
    },
    {
-    "primitive": "回合：回合结束时",
+    "primitive": "随机",
+    "skills": 42,
+    "traits": 0,
+    "total": 42,
+    "loadout_pets": 94
+   },
+   {
+    "primitive": "连击",
+    "skills": 31,
+    "traits": 0,
+    "total": 31,
+    "loadout_pets": 68
+   },
+   {
+    "primitive": "解析得出但引擎没有结算分支：escape",
+    "skills": 14,
+    "traits": 0,
+    "total": 14,
+    "loadout_pets": 44
+   },
+   {
+    "primitive": "回合：应对攻击：自己回合结束返场",
+    "skills": 1,
+    "traits": 0,
+    "total": 1,
+    "loadout_pets": 34
+   },
+   {
+    "primitive": "没拉起的原语：冻结",
     "skills": 3,
     "traits": 0,
     "total": 3,
@@ -358,21 +400,14 @@
     "loadout_pets": 33
    },
    {
-    "primitive": "变：应对状态：本次技能威力变为3倍",
-    "skills": 2,
+    "primitive": "选择",
+    "skills": 23,
     "traits": 0,
-    "total": 2,
-    "loadout_pets": 32
+    "total": 23,
+    "loadout_pets": 30
    },
    {
-    "primitive": "变：应对状态：本次技能威力变为1.5倍",
-    "skills": 1,
-    "traits": 0,
-    "total": 1,
-    "loadout_pets": 31
-   },
-   {
-    "primitive": "获得：自己获得萌化：本次技能威力+60",
+    "primitive": "回合：应对状态：回合结束时使敌方精灵返场",
     "skills": 1,
     "traits": 0,
     "total": 1,
@@ -391,13 +426,6 @@
     "traits": 0,
     "total": 1,
     "loadout_pets": 28
-   },
-   {
-    "primitive": "号位",
-    "skills": 4,
-    "traits": 0,
-    "total": 4,
-    "loadout_pets": 25
    },
    {
     "primitive": "回合：若上回合使用状态技能",
@@ -419,20 +447,6 @@
     "traits": 0,
     "total": 2,
     "loadout_pets": 23
-   },
-   {
-    "primitive": "回合：应对状态：回合结束时使敌方精灵返场",
-    "skills": 1,
-    "traits": 0,
-    "total": 1,
-    "loadout_pets": 22
-   },
-   {
-    "primitive": "获得：敌方获得速度-30",
-    "skills": 1,
-    "traits": 0,
-    "total": 1,
-    "loadout_pets": 20
    }
   ]
  },
@@ -452,11 +466,11 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 26
   },
   "skill_000247": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -464,7 +478,7 @@
   },
   "skill_000248": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -472,7 +486,7 @@
   },
   "skill_000249": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -492,20 +506,22 @@
   },
   "skill_000251": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 19
   },
   "skill_000252": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：回合：回合结束时",
-   "effects": [],
-   "unparsed": [
-    "回合：回合结束时"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "triggered_ramp"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "击败敌方后永久-1"
+   ],
    "loadout_pets": 9
   },
   "skill_000253": {
@@ -530,91 +546,93 @@
    "loadout_pets": 13
   },
   "skill_000255": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为3倍",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "纯伤害技能 + 已结算的应对子句（「本次技能威力变为N倍」由 effects.effective_power 按倍率结算），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "变：应对状态：本次技能威力变为3倍"
-   ],
+   "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 13
   },
   "skill_000256": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：1 段机制没被读出",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述里的机制由已声明能力认领（应对覆盖（状态：本次技能连击数翻倍）、连击×2、hit_count），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "动态连击数（出现在：造成物伤，2连击，应对状态：本次技能连击数翻倍。）"
-   ],
+   "unparsed": [],
    "claimed_by_capability": [
-    "连击×2"
+    "应对覆盖（状态：本次技能连击数翻倍）",
+    "连击×2",
+    "hit_count"
    ],
    "hit_count": 2,
    "loadout_pets": 0
   },
   "skill_000257": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 3 段机制**引擎没结算**（会被写进 unsupported）：连击：1连击、连击：应对状态：本技能变为3连击",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述里的机制由已声明能力认领（应对覆盖（状态：本技能变为3连击）、连击×1、hit_count），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "连击：1连击",
-    "连击：应对状态：本技能变为3连击",
-    "变：应对状态：本技能变为3连击"
+   "unparsed": [],
+   "claimed_by_capability": [
+    "应对覆盖（状态：本技能变为3连击）",
+    "连击×1",
+    "hit_count"
    ],
-   "claimed_by_capability": [],
+   "hit_count": 1,
    "loadout_pets": 13
   },
   "skill_000258": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（连击×3），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（连击×3、hit_count），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×3"
+    "连击×3",
+    "hit_count"
    ],
    "hit_count": 3,
    "loadout_pets": 0
   },
   "skill_000259": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为3倍",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "纯伤害技能 + 已结算的应对子句（「本次技能威力变为N倍」由 effects.effective_power 按倍率结算），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "变：应对状态：本次技能威力变为3倍"
-   ],
+   "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 19
   },
   "skill_000260": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（连击×5），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（连击×5、hit_count），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×5"
+    "连击×5",
+    "hit_count"
    ],
    "hit_count": 5,
    "loadout_pets": 0
   },
   "skill_000261": {
-   "support": "PARTIAL",
-   "why": "读出了 1 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：连击：1连击",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
    "effects": [
     "per_use_ramp"
    ],
-   "unparsed": [
-    "连击：1连击"
-   ],
+   "unparsed": [],
    "claimed_by_capability": [
-    "每次使用后永久+1连击数"
+    "每次使用后永久+1连击数",
+    "连击×1",
+    "hit_count"
    ],
+   "hit_count": 1,
    "loadout_pets": 0
   },
   "skill_000262": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成魔伤，应对状态：额外打断被应对技能。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成魔伤，应对状态：额外打断被应对技能。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 17
   },
@@ -649,7 +667,7 @@
     "消耗：消耗越高"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 1
+   "loadout_pets": 11
   },
   "skill_000266": {
    "support": "PARTIAL",
@@ -694,13 +712,15 @@
    "loadout_pets": 11
   },
   "skill_000270": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：每：每使用1次其他普通系技能",
-   "effects": [],
-   "unparsed": [
-    "每：每使用1次其他普通系技能"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "element_ramp"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "同系技能用过后永久-2能耗"
+   ],
    "loadout_pets": 10
   },
   "skill_000271": {
@@ -766,23 +786,30 @@
    "loadout_pets": 0
   },
   "skill_000277": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：敌方获得物防和魔防-120%",
-   "effects": [],
-   "unparsed": [
-    "获得：敌方获得物防和魔防-120%"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "foe_stat",
+    "foe_stat"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "获得属性×2"
+   ],
    "loadout_pets": 0
   },
   "skill_000278": {
    "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得速度+80",
-   "effects": [],
-   "unparsed": [
-    "获得：自己获得速度+80"
+   "why": "读出一部分（1 条），另有 1 段没认领",
+   "effects": [
+    "self_stat_flat"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [
+    "应对覆盖（出现在：应对防御：改为速度+160）"
+   ],
+   "claimed_by_capability": [
+    "获得属性×1"
+   ],
    "loadout_pets": 0
   },
   "skill_000279": {
@@ -790,7 +817,7 @@
    "why": "读不出效果，描述里没有已登记的机制词（原句：下一次攻击时，技能威力+70。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [
-    "未识别机制（描述里没有已登记的机制词）"
+    "未识别机制（原句：下一次攻击时，技能威力+70。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 0
@@ -866,7 +893,7 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 40
+   "loadout_pets": 496
   },
   "skill_000287": {
    "support": "SIMULATABLE_UNVERIFIED",
@@ -890,15 +917,17 @@
    "loadout_pets": 0
   },
   "skill_000289": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：回复：应对攻击：减免的伤害变为回复自己生命、变：应对攻击：减免的伤害变为回复自己生命",
-   "effects": [],
-   "unparsed": [
-    "回复：应对攻击：减免的伤害变为回复自己生命",
-    "变：应对攻击：减免的伤害变为回复自己生命"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "triggered_ramp",
+    "respond_reduction_to_heal"
    ],
-   "claimed_by_capability": [],
-   "loadout_pets": 1
+   "unparsed": [],
+   "claimed_by_capability": [
+    "应对成功后永久+2"
+   ],
+   "loadout_pets": 4
   },
   "skill_000290": {
    "support": "PARTIAL",
@@ -924,7 +953,7 @@
     "变：每回合随机变成敌方任意精灵的技能"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 2
+   "loadout_pets": 35
   },
   "skill_000298": {
    "support": "PARTIAL",
@@ -937,37 +966,39 @@
     "变：每回合随机变成自己未携带的技能"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 1
+   "loadout_pets": 59
   },
   "skill_000302": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 7
+   "loadout_pets": 20
   },
   "skill_000303": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 31
   },
   "skill_000304": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：连击：1连击",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述里的机制由已声明能力认领（连击×1、hit_count），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "连击：1连击"
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×1",
+    "hit_count"
    ],
-   "claimed_by_capability": [],
+   "hit_count": 1,
    "loadout_pets": 25
   },
   "skill_000305": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -975,7 +1006,7 @@
   },
   "skill_000306": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -983,18 +1014,19 @@
   },
   "skill_000307": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（连击×2、hit_count），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "hit_count": 2,
    "loadout_pets": 16
   },
   "skill_000308": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -1002,7 +1034,7 @@
   },
   "skill_000309": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -1010,7 +1042,7 @@
   },
   "skill_000310": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -1018,7 +1050,7 @@
   },
   "skill_000311": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -1026,33 +1058,39 @@
   },
   "skill_000312": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 25
+   "loadout_pets": 35
   },
   "skill_000313": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成物理伤害，先手+1，迸发：本次技能威力+30。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成物理伤害，先手+1，迸发：本次技能威力+30。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 1
   },
   "skill_000314": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成物伤，敌方体重越低，本次技能威力越高。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成物伤，敌方体重越低，本次技能威力越高。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 20
   },
   "skill_000315": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成物伤，敌方体重越高，本次技能威力越高。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成物伤，敌方体重越高，本次技能威力越高。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 2
   },
@@ -1070,7 +1108,7 @@
   },
   "skill_000317": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -1116,17 +1154,18 @@
     "每：每失去5%生命"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 9
+   "loadout_pets": 10
   },
   "skill_000322": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：驱散：驱散敌方5层增益、层：驱散敌方5层增益",
-   "effects": [],
-   "unparsed": [
-    "驱散：驱散敌方5层增益",
-    "层：驱散敌方5层增益"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "cleanse_buffs_layers"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "驱散（印记 / 自身减益 / 敌方一种增益 / 敌方 N 层增益）"
+   ],
    "loadout_pets": 1
   },
   "skill_000323": {
@@ -1137,10 +1176,11 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×3"
+    "连击×3",
+    "hit_count"
    ],
    "hit_count": 3,
-   "loadout_pets": 0
+   "loadout_pets": 15
   },
   "skill_000324": {
    "support": "PARTIAL",
@@ -1185,12 +1225,14 @@
    "loadout_pets": 0
   },
   "skill_000328": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：解析得出但引擎没有结算分支：escape",
    "effects": [
     "escape"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "解析得出但引擎没有结算分支：escape（原句：减伤60%，应对攻击：敌方脱离。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
@@ -1203,7 +1245,8 @@
     "回合：若敌方本回合更换精灵"
    ],
    "claimed_by_capability": [
-    "连击×3"
+    "连击×3",
+    "hit_count"
    ],
    "loadout_pets": 0
   },
@@ -1233,12 +1276,14 @@
    "support": "PARTIAL",
    "why": "读出了 1 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：若：若本次攻击未被防御技能应对",
    "effects": [
-    "cleanse"
+    "cleanse_marks"
    ],
    "unparsed": [
     "若：若本次攻击未被防御技能应对"
    ],
-   "claimed_by_capability": [],
+   "claimed_by_capability": [
+    "驱散（印记 / 自身减益 / 敌方一种增益 / 敌方 N 层增益）"
+   ],
    "loadout_pets": 4
   },
   "skill_000333": {
@@ -1257,8 +1302,10 @@
   },
   "skill_000334": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
-   "effects": [],
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_power_flat"
+   ],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 4
@@ -1293,7 +1340,7 @@
     "获得：并获得魔攻魔防+10%"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 2
   },
   "skill_000338": {
    "support": "SIMULATABLE_UNVERIFIED",
@@ -1303,11 +1350,11 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 9
   },
   "skill_000339": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -1315,7 +1362,7 @@
   },
   "skill_000340": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -1323,11 +1370,12 @@
   },
   "skill_000341": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（连击×2、hit_count），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "hit_count": 2,
    "loadout_pets": 0
@@ -1343,13 +1391,15 @@
    "loadout_pets": 9
   },
   "skill_000343": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：每：每次使用其他草系技能后",
-   "effects": [],
-   "unparsed": [
-    "每：每次使用其他草系技能后"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "element_ramp"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "同系技能用过后永久+60威力"
+   ],
    "loadout_pets": 13
   },
   "skill_000344": {
@@ -1364,12 +1414,16 @@
   },
   "skill_000345": {
    "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得全技能威力+30",
-   "effects": [],
-   "unparsed": [
-    "获得：自己获得全技能威力+30"
+   "why": "读出一部分（1 条），另有 1 段没认领",
+   "effects": [
+    "self_stat"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [
+    "应对覆盖（出现在：应对防御：改为威力+60）"
+   ],
+   "claimed_by_capability": [
+    "获得属性×1"
+   ],
    "loadout_pets": 0
   },
   "skill_000346": {
@@ -1380,18 +1434,19 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 1
   },
   "skill_000347": {
-   "support": "PARTIAL",
-   "why": "读出了 1 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：并获得魔攻+70%",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
    "effects": [
-    "self_energy"
+    "self_energy",
+    "self_stat"
    ],
-   "unparsed": [
-    "获得：并获得魔攻+70%"
+   "unparsed": [],
+   "claimed_by_capability": [
+    "获得属性×1"
    ],
-   "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000348": {
@@ -1429,15 +1484,17 @@
    "loadout_pets": 0
   },
   "skill_000351": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：解析得出但引擎没有结算分支：escape",
    "effects": [
     "heal",
     "escape"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "解析得出但引擎没有结算分支：escape（原句：自己回复15%生命，随后脱离。）"
+   ],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 11
   },
   "skill_000352": {
    "support": "SIMULATABLE_UNVERIFIED",
@@ -1457,7 +1514,7 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 2
   },
   "skill_000354": {
    "support": "PARTIAL",
@@ -1467,19 +1524,21 @@
     "回复：应对攻击：回复3能量"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 2
   },
   "skill_000355": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成魔伤，并吸血100%。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成魔伤，并吸血100%。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000356": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -1487,18 +1546,19 @@
   },
   "skill_000357": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（连击×2、hit_count），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "hit_count": 2,
    "loadout_pets": 0
   },
   "skill_000358": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -1506,31 +1566,30 @@
   },
   "skill_000359": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 28
   },
   "skill_000360": {
-   "support": "PARTIAL",
-   "why": "读出一部分（1 条），另有 1 段没认领",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
    "effects": [
     "per_use_ramp"
    ],
-   "unparsed": [
-    "动态连击数（出现在：造成物伤，2连击，每次使用后，本技能连击数永久+2。）"
-   ],
+   "unparsed": [],
    "claimed_by_capability": [
     "每次使用后永久+2连击数",
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "hit_count": 2,
    "loadout_pets": 0
   },
   "skill_000361": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -1538,33 +1597,35 @@
   },
   "skill_000362": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 28
   },
   "skill_000363": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成物伤，自己生命大于80%时，本次技能威力+75。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成物伤，自己生命大于80%时，本次技能威力+75。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 12
   },
   "skill_000364": {
    "support": "PARTIAL",
-   "why": "读出了 1 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：每：每次连击自己获得魔攻+60%",
-   "effects": [
-    "self_stat"
-   ],
+   "why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：每次连击自己获得魔攻+60%、每：每次连击自己获得魔攻+60%",
+   "effects": [],
    "unparsed": [
+    "获得：每次连击自己获得魔攻+60%",
     "每：每次连击自己获得魔攻+60%"
    ],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
-   "loadout_pets": 0
+   "loadout_pets": 10
   },
   "skill_000365": {
    "support": "PARTIAL",
@@ -1576,9 +1637,10 @@
     "每：每次连击自己回复8%生命"
    ],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
-   "loadout_pets": 0
+   "loadout_pets": 4
   },
   "skill_000366": {
    "support": "PARTIAL",
@@ -1609,7 +1671,7 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 35
+   "loadout_pets": 46
   },
   "skill_000369": {
    "support": "PARTIAL",
@@ -1692,7 +1754,7 @@
   },
   "skill_000376": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -1700,7 +1762,7 @@
   },
   "skill_000377": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -1714,25 +1776,24 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 1
+   "loadout_pets": 7
   },
   "skill_000379": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为4倍",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "纯伤害技能 + 已结算的应对子句（「本次技能威力变为N倍」由 effects.effective_power 按倍率结算），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "变：应对状态：本次技能威力变为4倍"
-   ],
+   "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 4
   },
   "skill_000380": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（连击×2、hit_count），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "hit_count": 2,
    "loadout_pets": 0
@@ -1750,20 +1811,24 @@
    "loadout_pets": 0
   },
   "skill_000382": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：每：每次击败敌方",
-   "effects": [],
-   "unparsed": [
-    "每：每次击败敌方"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "triggered_ramp"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "击败敌方后永久+85"
+   ],
    "loadout_pets": 11
   },
   "skill_000383": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成魔伤，应对状态：下次攻击技能威力翻倍。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成魔伤，应对状态：下次攻击技能威力翻倍。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 13
   },
@@ -1777,17 +1842,20 @@
     "每：每次连击使敌方获得2层灼烧"
    ],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
-   "loadout_pets": 2
+   "loadout_pets": 19
   },
   "skill_000385": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：解析得出但引擎没有结算分支：escape",
    "effects": [
     "escape"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "解析得出但引擎没有结算分支：escape（原句：造成魔伤，自己脱离。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
@@ -1826,22 +1894,21 @@
    "why": "读不出效果，描述里没有已登记的机制词（原句：使敌方身上的灼烧翻倍，并触发1次灼烧伤害。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [
-    "未识别机制（描述里没有已登记的机制词）"
+    "未识别机制（原句：使敌方身上的灼烧翻倍，并触发1次灼烧伤害。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000390": {
-   "support": "PARTIAL",
-   "why": "读出了 1 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：应对防御：改为获得30层、层：应对防御：改为获得30层",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
    "effects": [
     "foe_status"
    ],
-   "unparsed": [
-    "获得：应对防御：改为获得30层",
-    "层：应对防御：改为获得30层"
+   "unparsed": [],
+   "claimed_by_capability": [
+    "应对覆盖（防御：获得30层）"
    ],
-   "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000391": {
@@ -1856,7 +1923,7 @@
   },
   "skill_000392": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -1864,7 +1931,7 @@
   },
   "skill_000393": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -1872,26 +1939,27 @@
   },
   "skill_000394": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 6
   },
   "skill_000395": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（连击×3），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（连击×3、hit_count），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×3"
+    "连击×3",
+    "hit_count"
    ],
    "hit_count": 3,
    "loadout_pets": 0
   },
   "skill_000396": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -1899,25 +1967,27 @@
   },
   "skill_000397": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 2
   },
   "skill_000398": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：没结算的应对子句：应对：应对状态：本次技能威力和赋予灼烧翻倍",
    "effects": [
     "foe_status"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "没结算的应对子句：应对：应对状态：本次技能威力和赋予灼烧翻倍（原句：造成魔伤，敌方获得4层灼烧，应对状态：本次技能威力和赋予灼烧翻倍。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000399": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -1935,28 +2005,30 @@
   },
   "skill_000401": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 1
+   "loadout_pets": 11
   },
   "skill_000402": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 8
   },
   "skill_000403": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得物防-40%",
-   "effects": [],
-   "unparsed": [
-    "获得：自己获得物防-40%"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "获得属性×1"
+   ],
    "loadout_pets": 4
   },
   "skill_000404": {
@@ -1975,7 +2047,7 @@
    "why": "读不出效果，描述里没有已登记的机制词（原句：减伤80%，应对攻击：下次攻击技能威力翻倍。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [
-    "未识别机制（描述里没有已登记的机制词）"
+    "未识别机制（原句：减伤80%，应对攻击：下次攻击技能威力翻倍。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 0
@@ -1991,43 +2063,42 @@
    "loadout_pets": 3
   },
   "skill_000407": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 6 段机制**引擎没结算**（会被写进 unsupported）：获得：获得物攻+20%、印记：驱散敌方所有印记",
-   "effects": [],
-   "unparsed": [
-    "获得：获得物攻+20%",
-    "印记：驱散敌方所有印记",
-    "驱散：驱散敌方所有印记",
-    "驱散：每驱散1层",
-    "每：每驱散1层",
-    "层：每驱散1层"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "cleanse_marks",
+    "per_cleansed_layer"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "驱散（印记 / 自身减益 / 敌方一种增益 / 敌方 N 层增益）"
+   ],
    "loadout_pets": 0
   },
   "skill_000408": {
-   "support": "PARTIAL",
-   "why": "读出了 2 条效果，但描述里还有 3 段机制**引擎没结算**（会被写进 unsupported）：驱散：每驱散1层、每：每驱散1层",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（3 条效果），且没有未认领片段",
    "effects": [
     "foe_status",
-    "cleanse"
+    "cleanse_marks",
+    "per_cleansed_layer"
    ],
-   "unparsed": [
-    "驱散：每驱散1层",
-    "每：每驱散1层",
-    "层：每驱散1层"
+   "unparsed": [],
+   "claimed_by_capability": [
+    "驱散（印记 / 自身减益 / 敌方一种增益 / 敌方 N 层增益）"
    ],
-   "claimed_by_capability": [],
-   "loadout_pets": 1
+   "loadout_pets": 16
   },
   "skill_000409": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：驱散：驱散自己的减益",
-   "effects": [],
-   "unparsed": [
-    "驱散：驱散自己的减益"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "cleanse_self_debuffs"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "驱散（印记 / 自身减益 / 敌方一种增益 / 敌方 N 层增益）"
+   ],
    "loadout_pets": 3
   },
   "skill_000410": {
@@ -2055,7 +2126,7 @@
    "why": "读不出效果，描述里没有已登记的机制词（原句：减伤70%，应对攻击：下一次攻击时，技能威力+50。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [
-    "未识别机制（描述里没有已登记的机制词）"
+    "未识别机制（原句：减伤70%，应对攻击：下一次攻击时，技能威力+50。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 0
@@ -2084,20 +2155,17 @@
    "loadout_pets": 0
   },
   "skill_000415": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 7 段机制**引擎没结算**（会被写进 unsupported）：获得：获得物攻+50%、印记：驱散自己所有印记",
-   "effects": [],
-   "unparsed": [
-    "获得：获得物攻+50%",
-    "印记：驱散自己所有印记",
-    "驱散：驱散自己所有印记",
-    "驱散：每驱散1层",
-    "每：每驱散1层",
-    "层：每驱散1层",
-    "变：巧变：火系攻击技能"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "cleanse_marks",
+    "per_cleansed_layer"
    ],
-   "claimed_by_capability": [],
-   "loadout_pets": 1
+   "unparsed": [],
+   "claimed_by_capability": [
+    "驱散（印记 / 自身减益 / 敌方一种增益 / 敌方 N 层增益）"
+   ],
+   "loadout_pets": 2
   },
   "skill_000416": {
    "support": "PARTIAL",
@@ -2132,11 +2200,11 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 4
+   "loadout_pets": 24
   },
   "skill_000419": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -2144,7 +2212,7 @@
   },
   "skill_000420": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -2164,18 +2232,26 @@
   },
   "skill_000422": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
-   "effects": [],
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "triggered_ramp"
+   ],
    "unparsed": [],
-   "claimed_by_capability": [],
+   "claimed_by_capability": [
+    "应对成功后永久-3"
+   ],
    "loadout_pets": 19
   },
   "skill_000423": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
-   "effects": [],
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "triggered_ramp"
+   ],
    "unparsed": [],
-   "claimed_by_capability": [],
+   "claimed_by_capability": [
+    "应对成功后永久-6"
+   ],
    "loadout_pets": 24
   },
   "skill_000424": {
@@ -2193,7 +2269,7 @@
    "why": "读不出效果，描述里没有已登记的机制词（原句：下次使用的技能能耗-6。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [
-    "未识别机制（描述里没有已登记的机制词）"
+    "未识别机制（原句：下次使用的技能能耗-6。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 0
@@ -2221,14 +2297,16 @@
    "loadout_pets": 0
   },
   "skill_000428": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：解析得出但引擎没有结算分支：escape",
    "effects": [
     "escape"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "解析得出但引擎没有结算分支：escape（原句：减伤80%，应对攻击：自己脱离。）"
+   ],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 3
   },
   "skill_000429": {
    "support": "SIMULATABLE_UNVERIFIED",
@@ -2238,7 +2316,7 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 1
+   "loadout_pets": 2
   },
   "skill_000430": {
    "support": "PARTIAL",
@@ -2252,33 +2330,35 @@
   },
   "skill_000431": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 13
   },
   "skill_000432": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：回合：回合结束时",
-   "effects": [],
-   "unparsed": [
-    "回合：回合结束时"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "triggered_ramp"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "击败敌方后永久+20"
+   ],
    "loadout_pets": 7
   },
   "skill_000433": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 6
   },
   "skill_000434": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -2286,7 +2366,7 @@
   },
   "skill_000435": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -2294,18 +2374,19 @@
   },
   "skill_000436": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（连击×4），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（连击×4、hit_count），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×4"
+    "连击×4",
+    "hit_count"
    ],
    "hit_count": 4,
    "loadout_pets": 0
   },
   "skill_000437": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -2313,7 +2394,7 @@
   },
   "skill_000438": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -2321,7 +2402,7 @@
   },
   "skill_000439": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -2339,13 +2420,16 @@
   },
   "skill_000441": {
    "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：并获得全技能能耗-1、驱散：驱散自己的减益",
-   "effects": [],
-   "unparsed": [
-    "获得：并获得全技能能耗-1",
-    "驱散：驱散自己的减益"
+   "why": "读出了 1 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：并获得全技能能耗-1",
+   "effects": [
+    "cleanse_self_debuffs"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [
+    "获得：并获得全技能能耗-1"
+   ],
+   "claimed_by_capability": [
+    "驱散（印记 / 自身减益 / 敌方一种增益 / 敌方 N 层增益）"
+   ],
    "loadout_pets": 0
   },
   "skill_000442": {
@@ -2376,31 +2460,36 @@
     "每：本技能能耗每-1"
    ],
    "claimed_by_capability": [
-    "连击×3"
+    "连击×3",
+    "hit_count"
    ],
-   "loadout_pets": 0
+   "loadout_pets": 3
   },
   "skill_000445": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：1 段机制没被读出",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：没拉起的原语：天气",
    "effects": [],
    "unparsed": [
-    "天气（出现在：造成物伤，天气为雨天时，本技能能耗-2。）"
+    "天气（出现在：造成物伤，天气为雨天时，本技能能耗-2。）",
+    "没拉起的原语：天气（原句：造成物伤，天气为雨天时，本技能能耗-2。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 3
   },
   "skill_000446": {
    "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 4 段机制**引擎没结算**（会被写进 unsupported）：驱散：驱散自己的减益、每：自己每有1层减益",
-   "effects": [],
+   "why": "读出了 1 条效果，但描述里还有 3 段机制**引擎没结算**（会被写进 unsupported）：每：自己每有1层减益、层：自己每有1层减益",
+   "effects": [
+    "cleanse_self_debuffs"
+   ],
    "unparsed": [
-    "驱散：驱散自己的减益",
     "每：自己每有1层减益",
     "层：自己每有1层减益",
     "变：巧变：水系攻击技能"
    ],
-   "claimed_by_capability": [],
+   "claimed_by_capability": [
+    "驱散（印记 / 自身减益 / 敌方一种增益 / 敌方 N 层增益）"
+   ],
    "loadout_pets": 0
   },
   "skill_000447": {
@@ -2417,7 +2506,7 @@
   },
   "skill_000448": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -2425,27 +2514,31 @@
   },
   "skill_000449": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 20
   },
   "skill_000450": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：每：每使用过1个其他系别技能",
-   "effects": [],
-   "unparsed": [
-    "每：每使用过1个其他系别技能"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "element_ramp"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "异系技能用过后永久+30威力"
+   ],
    "loadout_pets": 0
   },
   "skill_000451": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成魔伤，携带其他系别技能会给本技能带来不同效果。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成魔伤，携带其他系别技能会给本技能带来不同效果。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
@@ -2467,11 +2560,11 @@
     "变：应对攻击：本技能变为被应对的技能"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 12
   },
   "skill_000454": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -2479,18 +2572,19 @@
   },
   "skill_000455": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（连击×3），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（连击×3、hit_count），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×3"
+    "连击×3",
+    "hit_count"
    ],
    "hit_count": 3,
    "loadout_pets": 0
   },
   "skill_000456": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -2498,15 +2592,15 @@
   },
   "skill_000457": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 15
   },
   "skill_000458": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -2514,47 +2608,50 @@
   },
   "skill_000459": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000460": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：1 段机制没被读出",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：没拉起的原语：天气",
    "effects": [],
    "unparsed": [
-    "天气（出现在：造成魔伤，本技能系别和天气系别相同。）"
+    "天气（出现在：造成魔伤，本技能系别和天气系别相同。）",
+    "没拉起的原语：天气（原句：造成魔伤，本技能系别和天气系别相同。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 7
   },
   "skill_000461": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 4
   },
   "skill_000462": {
-   "support": "PARTIAL",
-   "why": "读不出效果，描述里没有已登记的机制词（原句：光系技能威力永久+50%，应对防御：改为永久+100%。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
-   "effects": [],
-   "unparsed": [
-    "未识别机制（描述里没有已登记的机制词）"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "element_power_ramp"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "应对覆盖（防御：永久+100%）"
+   ],
    "loadout_pets": 0
   },
   "skill_000463": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：应对攻击：自己获得光系技能威力永久+50%",
-   "effects": [],
-   "unparsed": [
-    "获得：应对攻击：自己获得光系技能威力永久+50%"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "element_power_ramp"
    ],
+   "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
@@ -2569,10 +2666,12 @@
    "loadout_pets": 4
   },
   "skill_000465": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成魔伤，对混血精灵造成伤害+50%。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成魔伤，对混血精灵造成伤害+50%。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 2
   },
@@ -2590,12 +2689,14 @@
    "loadout_pets": 0
   },
   "skill_000467": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：解析得出但引擎没有结算分支：escape",
    "effects": [
     "escape"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "解析得出但引擎没有结算分支：escape（原句：造成物伤，自己脱离。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
@@ -2654,10 +2755,12 @@
    "loadout_pets": 0
   },
   "skill_000473": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（传动×1），没有未认领片段",
+   "support": "PARTIAL",
+   "why": "描述里没有任何可识别的机制（两边空：无已结算 / 无未结算）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：主动：本技能被动永久额外-1能耗，被动：两侧技能能耗-1，传动1。）"
+   ],
    "claimed_by_capability": [
     "传动×1"
    ],
@@ -2678,18 +2781,18 @@
    "why": "读不出效果，描述里没有已登记的机制词（原句：减伤80%，应对攻击：两侧技能能耗永久-1。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [
-    "未识别机制（描述里没有已登记的机制词）"
+    "未识别机制（原句：减伤80%，应对攻击：两侧技能能耗永久-1。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000476": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 1
+   "loadout_pets": 2
   },
   "skill_000477": {
    "support": "SIMULATABLE_UNVERIFIED",
@@ -2704,20 +2807,21 @@
   },
   "skill_000478": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（号位条件、传动×1、连击×2），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（号位条件、传动×1、连击×2、hit_count），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
     "号位条件",
     "传动×1",
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "hit_count": 2,
-   "loadout_pets": 0
+   "loadout_pets": 5
   },
   "skill_000479": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -2735,13 +2839,12 @@
    "loadout_pets": 10
   },
   "skill_000481": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：1 段机制没被读出",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述里的机制由已声明能力认领（号位条件、传动×1），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "号位（出现在：造成物伤，本技能位于1号或3号位时能耗-2，传动1。）"
-   ],
+   "unparsed": [],
    "claimed_by_capability": [
+    "号位条件",
     "传动×1"
    ],
    "loadout_pets": 17
@@ -2757,17 +2860,19 @@
    "loadout_pets": 12
   },
   "skill_000483": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得速度+30、获得：本技能位于1号或3号位时额外获得物攻+80%",
-   "effects": [],
-   "unparsed": [
-    "获得：自己获得速度+30",
-    "获得：本技能位于1号或3号位时额外获得物攻+80%"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "slot_stat",
+    "self_stat_flat"
    ],
+   "unparsed": [],
    "claimed_by_capability": [
-    "传动×1"
+    "号位条件",
+    "传动×1",
+    "获得属性×1"
    ],
-   "loadout_pets": 7
+   "loadout_pets": 40
   },
   "skill_000484": {
    "support": "SIMULATABLE_UNVERIFIED",
@@ -2813,18 +2918,22 @@
    "loadout_pets": 2
   },
   "skill_000488": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成魔伤，应对状态：本次伤害翻倍。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成魔伤，应对状态：本次伤害翻倍。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 2
   },
   "skill_000489": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（传动×1），没有未认领片段",
+   "support": "PARTIAL",
+   "why": "描述里没有任何可识别的机制（两边空：无已结算 / 无未结算）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：主动：本技能被动永久额外+20威力，被动：两侧技能威力+10，传动1。）"
+   ],
    "claimed_by_capability": [
     "传动×1"
    ],
@@ -2844,13 +2953,12 @@
    "loadout_pets": 0
   },
   "skill_000491": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：1 段机制没被读出",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述里的机制由已声明能力认领（号位条件、传动×1），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "号位（出现在：减伤50%，本技能位于1号位或3号位时，额外减伤40%，应对攻击，传动1。）"
-   ],
+   "unparsed": [],
    "claimed_by_capability": [
+    "号位条件",
     "传动×1"
    ],
    "loadout_pets": 0
@@ -2891,7 +2999,7 @@
   },
   "skill_000495": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -2911,7 +3019,7 @@
   },
   "skill_000497": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -2919,17 +3027,19 @@
   },
   "skill_000498": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 27
   },
   "skill_000499": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成物伤，应对状态：额外打断被应对技能。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成物伤，应对状态：额外打断被应对技能。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 40
   },
@@ -2967,18 +3077,20 @@
    "loadout_pets": 6
   },
   "skill_000503": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：回合：回合结束时",
-   "effects": [],
-   "unparsed": [
-    "回合：回合结束时"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "triggered_ramp"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "击败敌方后永久-5"
+   ],
    "loadout_pets": 17
   },
   "skill_000504": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -2999,13 +3111,15 @@
    "loadout_pets": 0
   },
   "skill_000506": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：没结算的应对子句：应对：应对防御：额外使自己的增益翻倍",
    "effects": [
     "self_stat",
     "self_stat"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "没结算的应对子句：应对：应对防御：额外使自己的增益翻倍（原句：自己获得物攻和物防+60%，应对防御：额外使自己的增益翻倍。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
@@ -3046,50 +3160,54 @@
    "why": "读不出效果，描述里没有已登记的机制词（原句：减伤90%，应对攻击：防御技能冷却-1。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [
-    "未识别机制（描述里没有已登记的机制词）"
+    "未识别机制（原句：减伤90%，应对攻击：防御技能冷却-1。）"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 3
   },
   "skill_000511": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：解析得出但引擎没有结算分支：escape",
    "effects": [
     "escape"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "解析得出但引擎没有结算分支：escape（原句：减伤50%并脱离，应对攻击。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000512": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 6
   },
   "skill_000513": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 2
   },
   "skill_000514": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：连击：1连击",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述里的机制由已声明能力认领（连击×1、hit_count），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "连击：1连击"
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×1",
+    "hit_count"
    ],
-   "claimed_by_capability": [],
+   "hit_count": 1,
    "loadout_pets": 0
   },
   "skill_000515": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -3097,17 +3215,19 @@
   },
   "skill_000516": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 29
   },
   "skill_000517": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成物伤，物防比敌方越高，本次技能威力越高。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成物伤，物防比敌方越高，本次技能威力越高。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
@@ -3122,10 +3242,12 @@
    "loadout_pets": 9
   },
   "skill_000519": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成物伤，本技能能耗固定为4。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成物伤，本技能能耗固定为4。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 22
   },
@@ -3189,36 +3311,40 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 2
+   "loadout_pets": 3
   },
   "skill_000526": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：1 段机制没被读出",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：没拉起的原语：天气",
    "effects": [],
    "unparsed": [
-    "天气（出现在：造成魔伤，天气为沙暴时，先手+1。）"
+    "天气（出现在：造成魔伤，天气为沙暴时，先手+1。）",
+    "没拉起的原语：天气（原句：造成魔伤，天气为沙暴时，先手+1。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 3
   },
   "skill_000527": {
    "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得速度-20、获得：选择：且额外获得物防+90%或魔防+90%",
-   "effects": [],
+   "why": "读出了 1 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：选择：且额外获得物防+90%或魔防+90%",
+   "effects": [
+    "self_stat_flat"
+   ],
    "unparsed": [
-    "获得：自己获得速度-20",
     "获得：选择：且额外获得物防+90%或魔防+90%"
    ],
-   "claimed_by_capability": [],
+   "claimed_by_capability": [
+    "获得属性×1"
+   ],
    "loadout_pets": 0
   },
   "skill_000528": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
-   "effects": [
-    "self_stat"
+   "support": "PARTIAL",
+   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得物防+100%",
+   "effects": [],
+   "unparsed": [
+    "获得：自己获得物防+100%"
    ],
-   "unparsed": [],
    "claimed_by_capability": [
     "对手换人条件"
    ],
@@ -3232,15 +3358,17 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 1
+   "loadout_pets": 16
   },
   "skill_000530": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：没拉起的原语：冻结",
    "effects": [
     "foe_status"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "没拉起的原语：冻结（原句：造成物伤，敌方获得1层冻结。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 33
   },
@@ -3285,12 +3413,14 @@
    "loadout_pets": 3
   },
   "skill_000535": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：没拉起的原语：冻结",
    "effects": [
     "foe_status"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "没拉起的原语：冻结（原句：敌方获得4层冻结。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
@@ -3334,32 +3464,34 @@
    "why": "读不出效果，描述里没有已登记的机制词（原句：减伤80%，应对攻击：被应对技能能耗+3。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [
-    "未识别机制（描述里没有已登记的机制词）"
+    "未识别机制（原句：减伤80%，应对攻击：被应对技能能耗+3。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000540": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：没拉起的原语：冻结",
    "effects": [
     "foe_status"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "没拉起的原语：冻结（原句：减伤80%，应对攻击：敌方获得2层冻结。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000541": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 10
+   "loadout_pets": 20
   },
   "skill_000542": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -3367,7 +3499,7 @@
   },
   "skill_000543": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -3375,11 +3507,12 @@
   },
   "skill_000544": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（连击×2、hit_count），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "hit_count": 2,
    "loadout_pets": 1
@@ -3398,13 +3531,15 @@
    "loadout_pets": 0
   },
   "skill_000546": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：敌方获得速度-30",
-   "effects": [],
-   "unparsed": [
-    "获得：敌方获得速度-30"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_stat_flat"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "获得属性×1"
+   ],
    "loadout_pets": 20
   },
   "skill_000547": {
@@ -3418,13 +3553,15 @@
    "loadout_pets": 4
   },
   "skill_000548": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：敌方获得速度-90",
-   "effects": [],
-   "unparsed": [
-    "获得：敌方获得速度-90"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_stat_flat"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "获得属性×1"
+   ],
    "loadout_pets": 0
   },
   "skill_000549": {
@@ -3447,9 +3584,10 @@
     "每：每次连击敌方获得全技能能耗+1"
    ],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
-   "loadout_pets": 0
+   "loadout_pets": 3
   },
   "skill_000551": {
    "support": "SIMULATABLE_UNVERIFIED",
@@ -3484,7 +3622,7 @@
   },
   "skill_000554": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -3554,22 +3692,22 @@
   },
   "skill_000560": {
    "support": "PARTIAL",
-   "why": "读出了 1 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：选择：敌方获得物防-30%或敌方获得速度-20",
-   "effects": [
-    "foe_stat"
-   ],
+   "why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：选择：敌方获得物防-30%或敌方获得速度-20、获得：选择：敌方获得物防-30%或敌方获得速度-20",
+   "effects": [],
    "unparsed": [
+    "获得：选择：敌方获得物防-30%或敌方获得速度-20",
     "获得：选择：敌方获得物防-30%或敌方获得速度-20"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000561": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：1 段机制没被读出",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：没拉起的原语：天气",
    "effects": [],
    "unparsed": [
-    "天气（出现在：造成物伤，天气为暴风雪时，本次技能威力+50）"
+    "天气（出现在：造成物伤，天气为暴风雪时，本次技能威力+50）",
+    "没拉起的原语：天气（原句：造成物伤，天气为暴风雪时，本次技能威力+50）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 3
@@ -3584,13 +3722,14 @@
     "每：每次连击敌方获得1层冻结"
    ],
    "claimed_by_capability": [
-    "连击×3"
+    "连击×3",
+    "hit_count"
    ],
-   "loadout_pets": 0
+   "loadout_pets": 13
   },
   "skill_000563": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -3637,7 +3776,7 @@
     "蓄力：蓄力"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 10
+   "loadout_pets": 15
   },
   "skill_000568": {
    "support": "PARTIAL",
@@ -3666,7 +3805,7 @@
   },
   "skill_000570": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -3684,7 +3823,7 @@
   },
   "skill_000572": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -3692,7 +3831,7 @@
   },
   "skill_000573": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -3700,7 +3839,7 @@
   },
   "skill_000574": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -3725,7 +3864,7 @@
     "蓄力：应对攻击：下次技能无需蓄力"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 1
+   "loadout_pets": 2
   },
   "skill_000577": {
    "support": "PARTIAL",
@@ -3763,59 +3902,67 @@
   },
   "skill_000580": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 1
+   "loadout_pets": 12
   },
   "skill_000581": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成物伤，迸发：本次技能威力+40。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成物伤，迸发：本次技能威力+40。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 14
   },
   "skill_000582": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000583": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成魔伤，迸发：本技能能耗-2。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成魔伤，迸发：本技能能耗-2。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 16
   },
   "skill_000584": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（连击×2、hit_count），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "hit_count": 2,
    "loadout_pets": 0
   },
   "skill_000585": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：解析得出但引擎没有结算分支：escape",
    "effects": [
     "escape"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "解析得出但引擎没有结算分支：escape（原句：造成物伤，2连击，自己脱离。）"
+   ],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "hit_count": 2,
-   "loadout_pets": 0
+   "loadout_pets": 3
   },
   "skill_000586": {
    "support": "PARTIAL",
@@ -3848,7 +3995,7 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 8
   },
   "skill_000589": {
    "support": "SIMULATABLE_UNVERIFIED",
@@ -3882,19 +4029,19 @@
     "回合：应对攻击：自己回合结束返场"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 5
+   "loadout_pets": 34
   },
   "skill_000592": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 4
   },
   "skill_000593": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -3902,7 +4049,7 @@
   },
   "skill_000594": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -3910,7 +4057,7 @@
   },
   "skill_000595": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -3918,27 +4065,31 @@
   },
   "skill_000596": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 11
   },
   "skill_000597": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得速度+30",
-   "effects": [],
-   "unparsed": [
-    "获得：自己获得速度+30"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat_flat"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "获得属性×1"
+   ],
    "loadout_pets": 2
   },
   "skill_000598": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成魔伤，迸发：本技能使用次数+1。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成魔伤，迸发：本技能使用次数+1。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 2
   },
@@ -3953,15 +4104,17 @@
     "回合：下回合所选技能使用次数+1"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 1
+   "loadout_pets": 4
   },
   "skill_000600": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：解析得出但引擎没有结算分支：escape",
    "effects": [
     "escape"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "解析得出但引擎没有结算分支：escape（原句：使敌方精灵返场。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
@@ -3985,7 +4138,7 @@
     "回合：应对状态：回合结束时使敌方精灵返场"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 22
+   "loadout_pets": 30
   },
   "skill_000603": {
    "support": "SIMULATABLE_UNVERIFIED",
@@ -3995,10 +4148,11 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "hit_count": 2,
-   "loadout_pets": 1
+   "loadout_pets": 5
   },
   "skill_000604": {
    "support": "PARTIAL",
@@ -4008,7 +4162,7 @@
     "回合：应对攻击：下回合所选技能使用次数+1"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 2
   },
   "skill_000605": {
    "support": "PARTIAL",
@@ -4023,12 +4177,14 @@
    "loadout_pets": 0
   },
   "skill_000606": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：没拉起的原语：引电",
    "effects": [
     "foe_status"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "没拉起的原语：引电（原句：造成物伤，敌方获得1层引电。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 3
   },
@@ -4077,21 +4233,21 @@
     "每：每次连击使敌方获得1层中毒"
    ],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
-   "loadout_pets": 3
+   "loadout_pets": 16
   },
   "skill_000611": {
-   "support": "PARTIAL",
-   "why": "读出了 1 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：应对状态：改为获得6层、层：应对状态：改为获得6层",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
    "effects": [
     "foe_status"
    ],
-   "unparsed": [
-    "获得：应对状态：改为获得6层",
-    "层：应对状态：改为获得6层"
+   "unparsed": [],
+   "claimed_by_capability": [
+    "应对覆盖（状态：获得6层）"
    ],
-   "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000612": {
@@ -4139,30 +4295,28 @@
    "loadout_pets": 0
   },
   "skill_000616": {
-   "support": "PARTIAL",
-   "why": "读出了 1 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：应对防御：改为获得8层、层：应对防御：改为获得8层",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
    "effects": [
     "foe_status"
    ],
-   "unparsed": [
-    "获得：应对防御：改为获得8层",
-    "层：应对防御：改为获得8层"
+   "unparsed": [],
+   "claimed_by_capability": [
+    "应对覆盖（防御：获得8层）"
    ],
-   "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000617": {
    "support": "PARTIAL",
-   "why": "读出了 1 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：每：敌方每有1层中毒效果、层：敌方每有1层中毒效果",
-   "effects": [
-    "self_stat"
-   ],
+   "why": "读出了 0 条效果，但描述里还有 3 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得魔攻+30%、每：敌方每有1层中毒效果",
+   "effects": [],
    "unparsed": [
+    "获得：自己获得魔攻+30%",
     "每：敌方每有1层中毒效果",
     "层：敌方每有1层中毒效果"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 2
   },
   "skill_000618": {
    "support": "PARTIAL",
@@ -4176,15 +4330,15 @@
   },
   "skill_000619": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 5
+   "loadout_pets": 8
   },
   "skill_000620": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -4192,7 +4346,7 @@
   },
   "skill_000621": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -4200,7 +4354,7 @@
   },
   "skill_000622": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -4208,28 +4362,29 @@
   },
   "skill_000623": {
    "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：每：敌方每有1层中毒效果、层：敌方每有1层中毒效果",
-   "effects": [],
-   "unparsed": [
-    "每：敌方每有1层中毒效果",
-    "层：敌方每有1层中毒效果"
+   "why": "读出一部分（1 条），另有 1 段没认领",
+   "effects": [
+    "per_layer_boost"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [
+    "应对覆盖（出现在：应对状态：改为本次威力+40）"
+   ],
+   "claimed_by_capability": [
+    "层数改本手（每 1 层中毒 威力+10）"
+   ],
    "loadout_pets": 0
   },
   "skill_000624": {
    "support": "PARTIAL",
-   "why": "读出了 2 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：每：敌方每有1层中毒效果、层：敌方每有1层中毒效果",
-   "effects": [
-    "foe_stat",
-    "foe_stat"
-   ],
+   "why": "读出了 0 条效果，但描述里还有 3 段机制**引擎没结算**（会被写进 unsupported）：获得：敌方获得双攻-30%、每：敌方每有1层中毒效果",
+   "effects": [],
    "unparsed": [
+    "获得：敌方获得双攻-30%",
     "每：敌方每有1层中毒效果",
     "层：敌方每有1层中毒效果"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 4
   },
   "skill_000625": {
    "support": "SIMULATABLE_UNVERIFIED",
@@ -4251,37 +4406,40 @@
     "层：敌方每有1层中毒效果"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 2
+   "loadout_pets": 8
   },
   "skill_000627": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 3
   },
   "skill_000628": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：驱散：应对攻击：驱散敌方1种增益",
-   "effects": [],
-   "unparsed": [
-    "驱散：应对攻击：驱散敌方1种增益"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "cleanse_buffs_one"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "驱散（印记 / 自身减益 / 敌方一种增益 / 敌方 N 层增益）"
+   ],
    "loadout_pets": 0
   },
   "skill_000629": {
    "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 3 段机制**引擎没结算**（会被写进 unsupported）：连击：1连击、连击：本次技能连击数+2",
+   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：若：若敌方有中毒效果",
    "effects": [],
    "unparsed": [
-    "连击：1连击",
-    "连击：本次技能连击数+2",
     "若：若敌方有中毒效果"
    ],
-   "claimed_by_capability": [],
-   "loadout_pets": 1
+   "claimed_by_capability": [
+    "连击×1",
+    "hit_count"
+   ],
+   "loadout_pets": 2
   },
   "skill_000630": {
    "support": "PARTIAL",
@@ -4306,17 +4464,19 @@
   },
   "skill_000632": {
    "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 5 段机制**引擎没结算**（会被写进 unsupported）：连击：1连击、每：每被影响1次",
+   "why": "读出了 0 条效果，但描述里还有 4 段机制**引擎没结算**（会被写进 unsupported）：每：每被影响1次、影响：本技能会受奉献影响",
    "effects": [],
    "unparsed": [
-    "连击：1连击",
     "每：每被影响1次",
     "影响：本技能会受奉献影响",
     "影响：每被影响1次",
     "奉献：本技能会受奉献影响"
    ],
-   "claimed_by_capability": [],
-   "loadout_pets": 8
+   "claimed_by_capability": [
+    "连击×1",
+    "hit_count"
+   ],
+   "loadout_pets": 18
   },
   "skill_000633": {
    "support": "PARTIAL",
@@ -4339,20 +4499,23 @@
     "奉献：己方队伍获得1次奉献：获得连击数+1"
    ],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "loadout_pets": 0
   },
   "skill_000635": {
    "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 3 段机制**引擎没结算**（会被写进 unsupported）：连击：1连击、影响：本技能会受奉献影响",
+   "why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：影响：本技能会受奉献影响、奉献：本技能会受奉献影响",
    "effects": [],
    "unparsed": [
-    "连击：1连击",
     "影响：本技能会受奉献影响",
     "奉献：本技能会受奉献影响"
    ],
-   "claimed_by_capability": [],
+   "claimed_by_capability": [
+    "连击×1",
+    "hit_count"
+   ],
    "loadout_pets": 0
   },
   "skill_000636": {
@@ -4363,14 +4526,14 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 2
+   "loadout_pets": 8
   },
   "skill_000637": {
    "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2倍",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成物伤，应对状态：本次技能威力变为2倍，无视敌方系别抵抗。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [
-    "变：应对状态：本次技能威力变为2倍"
+    "未识别机制（原句：造成物伤，应对状态：本次技能威力变为2倍，无视敌方系别抵抗。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 15
@@ -4452,7 +4615,7 @@
     "每：每携带1个0能耗技能"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 3
   },
   "skill_000644": {
    "support": "PARTIAL",
@@ -4464,30 +4627,31 @@
     "获得：应对攻击：下个入场精灵获得减伤"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 2
+   "loadout_pets": 3
   },
   "skill_000645": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 3
+   "loadout_pets": 11
   },
   "skill_000646": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（连击×3），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（连击×3、hit_count），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×3"
+    "连击×3",
+    "hit_count"
    ],
    "hit_count": 3,
    "loadout_pets": 0
   },
   "skill_000647": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -4495,7 +4659,7 @@
   },
   "skill_000648": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -4503,7 +4667,7 @@
   },
   "skill_000649": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -4511,14 +4675,16 @@
   },
   "skill_000650": {
    "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 3 段机制**引擎没结算**（会被写进 unsupported）：印记：驱散敌方所有印记、印记：应对状态：改为偷取印记",
-   "effects": [],
-   "unparsed": [
-    "印记：驱散敌方所有印记",
-    "印记：应对状态：改为偷取印记",
-    "驱散：驱散敌方所有印记"
+   "why": "读出了 1 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：印记：应对状态：改为偷取印记",
+   "effects": [
+    "cleanse_marks"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [
+    "印记：应对状态：改为偷取印记"
+   ],
+   "claimed_by_capability": [
+    "驱散（印记 / 自身减益 / 敌方一种增益 / 敌方 N 层增益）"
+   ],
    "loadout_pets": 9
   },
   "skill_000651": {
@@ -4532,18 +4698,16 @@
    "loadout_pets": 11
   },
   "skill_000652": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 6 段机制**引擎没结算**（会被写进 unsupported）：回复：每层印记回复自己10%生命、印记：驱散敌方印记",
-   "effects": [],
-   "unparsed": [
-    "回复：每层印记回复自己10%生命",
-    "印记：驱散敌方印记",
-    "印记：每层印记回复自己10%生命",
-    "驱散：驱散敌方印记",
-    "每：每层印记回复自己10%生命",
-    "层：每层印记回复自己10%生命"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "cleanse_marks",
+    "per_cleansed_layer"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "驱散（印记 / 自身减益 / 敌方一种增益 / 敌方 N 层增益）"
+   ],
    "loadout_pets": 0
   },
   "skill_000653": {
@@ -4631,7 +4795,7 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 1
+   "loadout_pets": 9
   },
   "skill_000660": {
    "support": "SIMULATABLE_UNVERIFIED",
@@ -4644,33 +4808,33 @@
    "loadout_pets": 0
   },
   "skill_000661": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：1 段机制没被读出",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述里的机制由已声明能力认领（应对覆盖（状态：本技能改为6连击）、连击×2、hit_count），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "动态连击数（出现在：造成物伤，2连击，应对状态：本技能改为6连击。）"
-   ],
+   "unparsed": [],
    "claimed_by_capability": [
-    "连击×2"
+    "应对覆盖（状态：本技能改为6连击）",
+    "连击×2",
+    "hit_count"
    ],
    "hit_count": 2,
    "loadout_pets": 0
   },
   "skill_000662": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2倍",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "纯伤害技能 + 已结算的应对子句（「本次技能威力变为N倍」由 effects.effective_power 按倍率结算），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "变：应对状态：本次技能威力变为2倍"
-   ],
+   "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 2
   },
   "skill_000663": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成物伤，应对状态：额外打断被应对技能。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成物伤，应对状态：额外打断被应对技能。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 10
   },
@@ -4682,17 +4846,16 @@
     "若：若后手攻击"
    ],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "loadout_pets": 0
   },
   "skill_000665": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为10倍",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "纯伤害技能 + 已结算的应对子句（「本次技能威力变为N倍」由 effects.effective_power 按倍率结算），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "变：应对状态：本次技能威力变为10倍"
-   ],
+   "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
@@ -4707,13 +4870,15 @@
    "loadout_pets": 8
   },
   "skill_000667": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得全技能威力+40",
-   "effects": [],
-   "unparsed": [
-    "获得：自己获得全技能威力+40"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "获得属性×1"
+   ],
    "loadout_pets": 0
   },
   "skill_000668": {
@@ -4744,15 +4909,17 @@
   },
   "skill_000670": {
    "support": "PARTIAL",
-   "why": "读出了 1 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：获得物攻+130%、每：每次应对后本技能能耗-3",
+   "why": "读出了 2 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：每：每次应对后本技能能耗-3",
    "effects": [
-    "heal"
+    "heal",
+    "self_stat"
    ],
    "unparsed": [
-    "获得：获得物攻+130%",
     "每：每次应对后本技能能耗-3"
    ],
-   "claimed_by_capability": [],
+   "claimed_by_capability": [
+    "获得属性×1"
+   ],
    "loadout_pets": 1
   },
   "skill_000671": {
@@ -4760,7 +4927,7 @@
    "why": "读不出效果，描述里没有已登记的机制词（原句：应对攻击：打断被应对技能，并造成90威力物伤。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [
-    "未识别机制（描述里没有已登记的机制词）"
+    "未识别机制（原句：应对攻击：打断被应对技能，并造成90威力物伤。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 0
@@ -4770,43 +4937,42 @@
    "why": "读不出效果，描述里没有已登记的机制词（原句：减伤60%，应对攻击：对敌方造成武系物理伤害，威力与被应对技能相等。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [
-    "未识别机制（描述里没有已登记的机制词）"
+    "未识别机制（原句：减伤60%，应对攻击：对敌方造成武系物理伤害，威力与被应对技能相等。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000673": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 8
+   "loadout_pets": 40
   },
   "skill_000674": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为5倍",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "纯伤害技能 + 已结算的应对子句（「本次技能威力变为N倍」由 effects.effective_power 按倍率结算），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "变：应对状态：本次技能威力变为5倍"
-   ],
+   "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000675": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（连击×2、hit_count），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "hit_count": 2,
    "loadout_pets": 0
   },
   "skill_000676": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -4814,7 +4980,7 @@
   },
   "skill_000677": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -4822,7 +4988,7 @@
   },
   "skill_000678": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -4836,21 +5002,22 @@
     "每：每成功应对1次"
    ],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "loadout_pets": 0
   },
   "skill_000680": {
-   "support": "PARTIAL",
-   "why": "读出了 1 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得全技能威力+40",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
    "effects": [
-    "foe_switch_power_flat"
+    "foe_switch_power_flat",
+    "self_stat"
    ],
-   "unparsed": [
-    "获得：自己获得全技能威力+40"
-   ],
+   "unparsed": [],
    "claimed_by_capability": [
-    "对手换人条件"
+    "对手换人条件",
+    "获得属性×1"
    ],
    "loadout_pets": 0
   },
@@ -4887,7 +5054,7 @@
     "若：回复60%生命或若自己生命高于80%"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 5
+   "loadout_pets": 20
   },
   "skill_000684": {
    "support": "KNOWLEDGE_ONLY",
@@ -4913,14 +5080,15 @@
   },
   "skill_000686": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（连击×2、hit_count），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "hit_count": 2,
-   "loadout_pets": 1
+   "loadout_pets": 31
   },
   "skill_000687": {
    "support": "SIMULATABLE_UNVERIFIED",
@@ -4935,43 +5103,50 @@
    "loadout_pets": 47
   },
   "skill_000688": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成魔伤，迅捷。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成魔伤，迅捷。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 1
   },
   "skill_000689": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 3 段机制**引擎没结算**（会被写进 unsupported）：连击：1连击、连击：改为3连击",
-   "effects": [],
-   "unparsed": [
-    "连击：1连击",
-    "连击：改为3连击",
-    "若：若先于敌方攻击"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "initiative_power"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "先手条件（改为3连击）",
+    "连击×1",
+    "hit_count"
+   ],
+   "hit_count": 1,
    "loadout_pets": 0
   },
   "skill_000690": {
    "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为1.5倍",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成物伤，迅捷，应对状态：本次技能威力变为1.5倍。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [
-    "变：应对状态：本次技能威力变为1.5倍"
+    "未识别机制（原句：造成物伤，迅捷，应对状态：本次技能威力变为1.5倍。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 31
   },
   "skill_000691": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得速度+120",
-   "effects": [],
-   "unparsed": [
-    "获得：自己获得速度+120"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat_flat"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "获得属性×1"
+   ],
    "loadout_pets": 0
   },
   "skill_000692": {
@@ -5000,14 +5175,14 @@
    "why": "读不出效果，描述里没有已登记的机制词（原句：减伤50%，迅捷，应对攻击。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [
-    "未识别机制（描述里没有已登记的机制词）"
+    "未识别机制（原句：减伤50%，迅捷，应对攻击。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000695": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -5015,15 +5190,15 @@
   },
   "skill_000696": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 2
+   "loadout_pets": 28
   },
   "skill_000697": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -5043,7 +5218,7 @@
   },
   "skill_000699": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -5051,7 +5226,7 @@
   },
   "skill_000700": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -5059,48 +5234,60 @@
   },
   "skill_000701": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 25
   },
   "skill_000702": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成物伤，速度比敌方越高，本次技能威力越高。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成物伤，速度比敌方越高，本次技能威力越高。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 4
   },
   "skill_000703": {
    "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：驱散：驱散敌方1种增益",
-   "effects": [],
-   "unparsed": [
-    "驱散：驱散敌方1种增益"
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：没拉起的原语：迅捷",
+   "effects": [
+    "cleanse_buffs_one"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [
+    "没拉起的原语：迅捷（原句：迅捷，驱散敌方1种增益。）"
+   ],
+   "claimed_by_capability": [
+    "驱散（印记 / 自身减益 / 敌方一种增益 / 敌方 N 层增益）"
+   ],
    "loadout_pets": 0
   },
   "skill_000704": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：解析得出但引擎没有结算分支：escape",
    "effects": [
     "escape"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "解析得出但引擎没有结算分支：escape（原句：敌方和自己均脱离，先手-1。）"
+   ],
    "claimed_by_capability": [],
-   "loadout_pets": 1
+   "loadout_pets": 16
   },
   "skill_000705": {
    "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得全技能威力+20",
-   "effects": [],
-   "unparsed": [
-    "获得：自己获得全技能威力+20"
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：没拉起的原语：迅捷",
+   "effects": [
+    "self_stat"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [
+    "没拉起的原语：迅捷（原句：自己获得全技能威力+20，迅捷。）"
+   ],
+   "claimed_by_capability": [
+    "获得属性×1"
+   ],
    "loadout_pets": 0
   },
   "skill_000706": {
@@ -5112,7 +5299,7 @@
     "连击：应对攻击：自己获得连击数+2"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 1
   },
   "skill_000707": {
    "support": "PARTIAL",
@@ -5145,19 +5332,24 @@
    ],
    "claimed_by_capability": [
     "每次使用后永久+10威力",
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "hit_count": 2,
    "loadout_pets": 0
   },
   "skill_000710": {
    "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得全技能威力+20",
-   "effects": [],
-   "unparsed": [
-    "获得：自己获得全技能威力+20"
+   "why": "读出一部分（1 条），另有 1 段没认领",
+   "effects": [
+    "self_stat"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [
+    "选择（出现在：自己获得全技能威力+20，选择：本次能耗-1或应对防御时改为全技能威力永久+20）"
+   ],
+   "claimed_by_capability": [
+    "获得属性×1"
+   ],
    "loadout_pets": 0
   },
   "skill_000711": {
@@ -5168,13 +5360,14 @@
     "变：巧变：翼系防御技能"
    ],
    "claimed_by_capability": [
-    "连击×3"
+    "连击×3",
+    "hit_count"
    ],
    "loadout_pets": 3
   },
   "skill_000712": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -5190,7 +5383,8 @@
     "回合：若上回合双方有精灵使用幻系技能"
    ],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "loadout_pets": 0
   },
@@ -5206,112 +5400,123 @@
    "loadout_pets": 0
   },
   "skill_000715": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：解析得出但引擎没有结算分支：escape",
    "effects": [
     "escape"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "解析得出但引擎没有结算分支：escape（原句：减伤50%，应对攻击：敌方和自己均脱离。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000716": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 7
   },
   "skill_000717": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得萌化：本次技能威力+60",
-   "effects": [],
-   "unparsed": [
-    "获得：自己获得萌化：本次技能威力+60"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "self_mark",
+    "self_power_flat"
    ],
+   "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 30
   },
   "skill_000718": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成物伤，双方体重差越大，本次技能威力越高。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成物伤，双方体重差越大，本次技能威力越高。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000719": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：驱散：驱散自己的减益",
-   "effects": [],
-   "unparsed": [
-    "驱散：驱散自己的减益"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "cleanse_self_debuffs"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "驱散（印记 / 自身减益 / 敌方一种增益 / 敌方 N 层增益）"
+   ],
    "loadout_pets": 0
   },
   "skill_000720": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得萌化：速度永久+130",
-   "effects": [],
-   "unparsed": [
-    "获得：自己获得萌化：速度永久+130"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "self_mark",
+    "self_stat_flat"
    ],
+   "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000721": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得萌化：全技能能耗永久-2",
-   "effects": [],
-   "unparsed": [
-    "获得：自己获得萌化：全技能能耗永久-2"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "self_mark",
+    "global_cost_delta"
    ],
+   "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000722": {
-   "support": "PARTIAL",
-   "why": "读不出效果，描述里没有已登记的机制词（原句：将自己的萌化转移给敌方。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
-   "effects": [],
-   "unparsed": [
-    "未识别机制（描述里没有已登记的机制词）"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "transfer_mark"
    ],
+   "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000723": {
-   "support": "PARTIAL",
-   "why": "读出了 1 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：自己和敌方获得萌化：回复40%生命",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（3 条效果），且没有未认领片段",
    "effects": [
-    "heal"
+    "heal",
+    "self_mark",
+    "foe_mark"
    ],
-   "unparsed": [
-    "获得：自己和敌方获得萌化：回复40%生命"
-   ],
+   "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000724": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
-   "effects": [],
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_power_flat"
+   ],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 11
   },
   "skill_000725": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 3
+   "loadout_pets": 18
   },
   "skill_000726": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -5319,54 +5524,60 @@
   },
   "skill_000727": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 1
   },
   "skill_000728": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得萌化：全技能威力永久+10",
-   "effects": [],
-   "unparsed": [
-    "获得：自己获得萌化：全技能威力永久+10"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "self_mark",
+    "global_power_pct"
    ],
+   "unparsed": [],
    "claimed_by_capability": [
-    "连击×3"
+    "连击×3",
+    "hit_count"
    ],
-   "loadout_pets": 0
+   "hit_count": 3,
+   "loadout_pets": 1
   },
   "skill_000729": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 23
   },
   "skill_000730": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：解析得出但引擎没有结算分支：escape",
    "effects": [
     "escape"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "解析得出但引擎没有结算分支：escape（原句：自己脱离，下个入场精灵继承自己增益。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000731": {
    "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 4 段机制**引擎没结算**（会被写进 unsupported）：连击：1连击、连击：本次技能连击数+1",
+   "why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：每：双方携带的所有精灵每有1层萌化、层：双方携带的所有精灵每有1层萌化",
    "effects": [],
    "unparsed": [
-    "连击：1连击",
-    "连击：本次技能连击数+1",
     "每：双方携带的所有精灵每有1层萌化",
     "层：双方携带的所有精灵每有1层萌化"
    ],
-   "claimed_by_capability": [],
-   "loadout_pets": 0
+   "claimed_by_capability": [
+    "连击×1",
+    "hit_count"
+   ],
+   "loadout_pets": 3
   },
   "skill_000732": {
    "support": "SIMULATABLE_UNVERIFIED",
@@ -5400,22 +5611,22 @@
   },
   "skill_000735": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 2
   },
   "skill_000736": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 3 段机制**引擎没结算**（会被写进 unsupported）：获得：本次攻击使敌方获得萌化、若：若敌方本回合更换精灵",
-   "effects": [],
-   "unparsed": [
-    "获得：本次攻击使敌方获得萌化",
-    "若：若敌方本回合更换精灵",
-    "回合：若敌方本回合更换精灵"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "对手换人条件"
+   ],
    "loadout_pets": 2
   },
   "skill_000737": {
@@ -5446,7 +5657,8 @@
     "获得：自己获得双攻永久+10%"
    ],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "loadout_pets": 0
   },
@@ -5471,7 +5683,7 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 3
+   "loadout_pets": 15
   },
   "skill_000742": {
    "support": "SIMULATABLE_UNVERIFIED",
@@ -5504,11 +5716,13 @@
    "loadout_pets": 15
   },
   "skill_000745": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：1 段机制没被读出",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：没结算的应对子句：应对：应对防御：改为敌方失去6能量",
    "effects": [],
    "unparsed": [
-    "应对覆盖（出现在：敌方失去3能量，应对防御：改为敌方失去6能量。）"
+    "应对覆盖（出现在：敌方失去3能量，应对防御：改为敌方失去6能量。）",
+    "应对覆盖（出现在：应对防御：改为敌方失去6能量）",
+    "没结算的应对子句：应对：应对防御：改为敌方失去6能量（原句：敌方失去3能量，应对防御：改为敌方失去6能量。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 0
@@ -5535,7 +5749,7 @@
   },
   "skill_000748": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -5543,7 +5757,7 @@
   },
   "skill_000749": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -5551,15 +5765,15 @@
   },
   "skill_000750": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 3
+   "loadout_pets": 17
   },
   "skill_000751": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -5567,18 +5781,19 @@
   },
   "skill_000752": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（连击×5），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（连击×5、hit_count），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×5"
+    "连击×5",
+    "hit_count"
    ],
    "hit_count": 5,
-   "loadout_pets": 0
+   "loadout_pets": 4
   },
   "skill_000753": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -5593,7 +5808,8 @@
     "回合：若敌方本回合更换精灵"
    ],
    "claimed_by_capability": [
-    "连击×3"
+    "连击×3",
+    "hit_count"
    ],
    "loadout_pets": 0
   },
@@ -5643,7 +5859,7 @@
   },
   "skill_000759": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -5675,12 +5891,14 @@
    "loadout_pets": 0
   },
   "skill_000762": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "描述里没有任何可识别的机制（两边空：无已结算 / 无未结算）",
    "effects": [
     "foe_team_energy_loss"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：敌方队伍中所有精灵失去1能量。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
@@ -5710,13 +5928,15 @@
    "loadout_pets": 0
   },
   "skill_000765": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：解析得出但引擎没有结算分支：escape",
    "effects": [
     "drain_energy",
     "escape"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "解析得出但引擎没有结算分支：escape（原句：偷取敌方2能量，脱离。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
@@ -5728,29 +5948,33 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 1
+   "loadout_pets": 14
   },
   "skill_000767": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
    "loadout_pets": 2
   },
   "skill_000768": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成物伤，并吸血100%。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成物伤，并吸血100%。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 7
   },
   "skill_000769": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成物伤，应对状态：本次攻击吸血100%。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成物伤，应对状态：本次攻击吸血100%。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 8
   },
@@ -5762,17 +5986,20 @@
     "若：若自己的生命低于50%"
    ],
    "claimed_by_capability": [
-    "连击×3"
+    "连击×3",
+    "hit_count"
    ],
    "loadout_pets": 0
   },
   "skill_000771": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读不出效果，描述里没有已登记的机制词（原句：造成物伤，吸血50%，应对状态：本次技能威力翻倍。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "未识别机制（原句：造成物伤，吸血50%，应对状态：本次技能威力翻倍。）"
+   ],
    "claimed_by_capability": [],
-   "loadout_pets": 8
+   "loadout_pets": 11
   },
   "skill_000772": {
    "support": "PARTIAL",
@@ -5786,10 +6013,13 @@
    "loadout_pets": 14
   },
   "skill_000773": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：没结算的应对子句：应对：应对状态：改为对敌方造成物伤，且本次技能威力+120",
    "effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "应对覆盖（出现在：应对状态：改为对敌方造成物伤，且本次技能威力+120）",
+    "没结算的应对子句：应对：应对状态：改为对敌方造成物伤，且本次技能威力+120（原句：对自己造成物伤，应对状态：改为对敌方造成物伤，且本次技能威力+120。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
@@ -5804,24 +6034,29 @@
    "loadout_pets": 8
   },
   "skill_000775": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：没拉起的原语：吸血；解析得出但引擎没有结算分支：self_lifesteal",
    "effects": [
     "self_lifesteal"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "没拉起的原语：吸血（原句：自己获得100%吸血。）",
+    "解析得出但引擎没有结算分支：self_lifesteal（原句：自己获得100%吸血。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000776": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：敌方获得全技能威力-20、获得：自己获得全技能威力+20",
-   "effects": [],
-   "unparsed": [
-    "获得：敌方获得全技能威力-20",
-    "获得：自己获得全技能威力+20"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "foe_stat",
+    "self_stat"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "获得属性×2"
+   ],
    "loadout_pets": 0
   },
   "skill_000777": {
@@ -5829,38 +6064,44 @@
    "why": "读不出效果，描述里没有已登记的机制词（原句：与敌方交换增益和减益。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [
-    "未识别机制（描述里没有已登记的机制词）"
+    "未识别机制（原句：与敌方交换增益和减益。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000778": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：解析得出但引擎没有结算分支：escape；没结算的应对子句：应对：应对防御：额外使敌方攻击技能能耗+4",
    "effects": [
     "escape"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "解析得出但引擎没有结算分支：escape（原句：脱离，应对防御：额外使敌方攻击技能能耗+4。）",
+    "没结算的应对子句：应对：应对防御：额外使敌方攻击技能能耗+4（原句：脱离，应对防御：额外使敌方攻击技能能耗+4。）"
+   ],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 11
   },
   "skill_000779": {
    "support": "PARTIAL",
    "why": "读不出效果，描述里没有已登记的机制词（原句：与敌方交换携带的技能。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [
-    "未识别机制（描述里没有已登记的机制词）"
+    "未识别机制（原句：与敌方交换携带的技能。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000780": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：没拉起的原语：吸血；解析得出但引擎没有结算分支：self_lifesteal",
    "effects": [
     "self_lifesteal"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "没拉起的原语：吸血（原句：减伤90%，应对攻击：自己获得50%吸血。）",
+    "解析得出但引擎没有结算分支：self_lifesteal（原句：减伤90%，应对攻击：自己获得50%吸血。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
@@ -5869,22 +6110,22 @@
    "why": "读不出效果，描述里没有已登记的机制词（原句：与敌方交换生命比例。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [
-    "未识别机制（描述里没有已登记的机制词）"
+    "未识别机制（原句：与敌方交换生命比例。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
   "skill_000782": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 1
+   "loadout_pets": 8
   },
   "skill_000783": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -5892,18 +6133,19 @@
   },
   "skill_000784": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（连击×2、hit_count），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
    "hit_count": 2,
    "loadout_pets": 5
   },
   "skill_000785": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -5911,7 +6153,7 @@
   },
   "skill_000786": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -5919,13 +6161,16 @@
   },
   "skill_000787": {
    "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得物攻-50%、获得：应对状态：改为获得物攻+50%",
-   "effects": [],
+   "why": "读出了 1 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：应对状态：改为获得物攻+50%",
+   "effects": [
+    "self_stat"
+   ],
    "unparsed": [
-    "获得：自己获得物攻-50%",
     "获得：应对状态：改为获得物攻+50%"
    ],
-   "claimed_by_capability": [],
+   "claimed_by_capability": [
+    "获得属性×1"
+   ],
    "loadout_pets": 4
   },
   "skill_000788": {
@@ -5950,13 +6195,19 @@
   },
   "skill_000790": {
    "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得双攻和双防-50%、获得：应对防御：改为敌方获得双攻和双防-120%",
-   "effects": [],
+   "why": "读出了 4 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：应对防御：改为敌方获得双攻和双防-120%",
+   "effects": [
+    "self_stat",
+    "self_stat",
+    "self_stat",
+    "self_stat"
+   ],
    "unparsed": [
-    "获得：自己获得双攻和双防-50%",
     "获得：应对防御：改为敌方获得双攻和双防-120%"
    ],
-   "claimed_by_capability": [],
+   "claimed_by_capability": [
+    "获得属性×4"
+   ],
    "loadout_pets": 0
   },
   "skill_000791": {
@@ -5967,18 +6218,21 @@
     "消耗：消耗5%生命代替1能量"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 0
+   "loadout_pets": 3
   },
   "skill_000792": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：若：若击败敌方",
-   "effects": [],
-   "unparsed": [
-    "若：若击败敌方"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "triggered_ramp"
    ],
+   "unparsed": [],
    "claimed_by_capability": [
-    "连击×2"
+    "击败敌方后永久+2",
+    "连击×2",
+    "hit_count"
    ],
+   "hit_count": 2,
    "loadout_pets": 2
   },
   "skill_000793": {
@@ -5992,7 +6246,7 @@
     "回合：若敌方本回合回复生命"
    ],
    "claimed_by_capability": [],
-   "loadout_pets": 3
+   "loadout_pets": 17
   },
   "skill_000794": {
    "support": "PARTIAL",
@@ -6035,11 +6289,12 @@
    "loadout_pets": 3
   },
   "skill_000798": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：1 段机制没被读出",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：没结算的应对子句：条件：血量阈值：己生命-10%或自己生命低于50%时本次技能威力+100。",
    "effects": [],
    "unparsed": [
-    "选择（出现在：造成物伤，选择：本次技能威力+40，使用后自己生命-10%或自己生命低于50%时）"
+    "选择（出现在：造成物伤，选择：本次技能威力+40，使用后自己生命-10%或自己生命低于50%时）",
+    "没结算的应对子句：条件：血量阈值：己生命-10%或自己生命低于50%时本次技能威力+100。（原句：造成物伤，选择：本次技能威力+40，使用后自己生命-10%或自己生命低于50%时本次技能威力+100。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 0
@@ -6077,7 +6332,7 @@
   },
   "skill_000802": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -6085,7 +6340,7 @@
   },
   "skill_000803": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -6103,11 +6358,10 @@
   },
   "skill_000805": {
    "support": "PARTIAL",
-   "why": "读出了 1 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：若：若击败敌方",
-   "effects": [
-    "self_stat"
-   ],
+   "why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得魔攻+70%、若：若击败敌方",
+   "effects": [],
    "unparsed": [
+    "获得：自己获得魔攻+70%",
     "若：若击败敌方"
    ],
    "claimed_by_capability": [],
@@ -6133,21 +6387,22 @@
    ],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 4
+   "loadout_pets": 8
   },
   "skill_000808": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 5 段机制**引擎没结算**（会被写进 unsupported）：连击：1连击、连击：本次技能连击数+1",
-   "effects": [],
-   "unparsed": [
-    "连击：1连击",
-    "连击：本次技能连击数+1",
-    "印记：敌方每有1层星陨印记",
-    "每：敌方每有1层星陨印记",
-    "层：敌方每有1层星陨印记"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "per_layer_boost"
    ],
-   "claimed_by_capability": [],
-   "loadout_pets": 6
+   "unparsed": [],
+   "claimed_by_capability": [
+    "层数改本手（每 1 层星陨印记 连击+1）",
+    "连击×1",
+    "hit_count"
+   ],
+   "hit_count": 1,
+   "loadout_pets": 19
   },
   "skill_000809": {
    "support": "SIMULATABLE_UNVERIFIED",
@@ -6189,9 +6444,10 @@
     "每：每次连击使敌方获得1层星陨印记"
    ],
    "claimed_by_capability": [
-    "连击×2"
+    "连击×2",
+    "hit_count"
    ],
-   "loadout_pets": 0
+   "loadout_pets": 2
   },
   "skill_000813": {
    "support": "PARTIAL",
@@ -6237,15 +6493,15 @@
   },
   "skill_000816": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
-   "loadout_pets": 1
+   "loadout_pets": 14
   },
   "skill_000817": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -6253,7 +6509,7 @@
   },
   "skill_000818": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -6261,18 +6517,19 @@
   },
   "skill_000819": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（连击×3），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（连击×3、hit_count），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
-    "连击×3"
+    "连击×3",
+    "hit_count"
    ],
    "hit_count": 3,
    "loadout_pets": 2
   },
   "skill_000820": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词、且没有未认领片段），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [],
@@ -6324,15 +6581,15 @@
    "loadout_pets": 0
   },
   "skill_000825": {
-   "support": "PARTIAL",
-   "why": "读出了 0 条效果，但描述里还有 3 段机制**引擎没结算**（会被写进 unsupported）：印记：敌方每有1层印记、每：敌方每有1层印记",
-   "effects": [],
-   "unparsed": [
-    "印记：敌方每有1层印记",
-    "每：敌方每有1层印记",
-    "层：敌方每有1层印记"
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "per_layer_boost"
    ],
-   "claimed_by_capability": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "层数改本手（每 1 层印记 威力+20）"
+   ],
    "loadout_pets": 1
   },
   "skill_000826": {
@@ -6352,10 +6609,11 @@
   },
   "skill_000827": {
    "support": "PARTIAL",
-   "why": "读不出效果，描述里没有已登记的机制词（原句：下一次攻击时，额外造成100%幻系伤害，应对防御：改为额外造成300%幻系伤害。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：没结算的应对子句：应对：应对防御：改为额外造成300%幻系伤害",
    "effects": [],
    "unparsed": [
-    "未识别机制（描述里没有已登记的机制词）"
+    "应对覆盖（出现在：应对防御：改为额外造成300%幻系伤害）",
+    "没结算的应对子句：应对：应对防御：改为额外造成300%幻系伤害（原句：下一次攻击时，额外造成100%幻系伤害，应对防御：改为额外造成300%幻系伤害。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 0
@@ -6382,12 +6640,14 @@
    "loadout_pets": 0
   },
   "skill_000830": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "support": "PARTIAL",
+   "why": "读出了效果，但描述里还有**没结算**的机制（运行时同样会写进 state.unsupported）：解析得出但引擎没有结算分支：escape",
    "effects": [
     "escape"
    ],
-   "unparsed": [],
+   "unparsed": [
+    "解析得出但引擎没有结算分支：escape（原句：自己脱离，更换入场的精灵以月陨星状态登场。）"
+   ],
    "claimed_by_capability": [],
    "loadout_pets": 0
   },
@@ -6422,7 +6682,7 @@
    "why": "读不出效果，描述里没有已登记的机制词（原句：减伤80%，应对攻击：以魔法伤害触发敌方的星陨效果。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [
-    "未识别机制（描述里没有已登记的机制词）"
+    "未识别机制（原句：减伤80%，应对攻击：以魔法伤害触发敌方的星陨效果。）"
    ],
    "claimed_by_capability": [],
    "loadout_pets": 0
@@ -7385,21 +7645,21 @@
    "why": "未被 traits.py 登记（引擎不会结算）",
    "hook": null,
    "reason": null,
-   "loadout_pets": 2
+   "loadout_pets": 4
   },
   "skill_000135": {
    "support": "KNOWLEDGE_ONLY",
    "why": "未被 traits.py 登记（引擎不会结算）",
    "hook": null,
    "reason": null,
-   "loadout_pets": 1
+   "loadout_pets": 2
   },
   "skill_000136": {
    "support": "KNOWLEDGE_ONLY",
    "why": "未被 traits.py 登记（引擎不会结算）",
    "hook": null,
    "reason": null,
-   "loadout_pets": 1
+   "loadout_pets": 2
   },
   "skill_000137": {
    "support": "KNOWLEDGE_ONLY",
@@ -7605,21 +7865,21 @@
    "why": "未被 traits.py 登记（引擎不会结算）",
    "hook": null,
    "reason": null,
-   "loadout_pets": 2
+   "loadout_pets": 0
   },
   "skill_000165": {
    "support": "KNOWLEDGE_ONLY",
    "why": "未被 traits.py 登记（引擎不会结算）",
    "hook": null,
    "reason": null,
-   "loadout_pets": 1
+   "loadout_pets": 0
   },
   "skill_000166": {
    "support": "KNOWLEDGE_ONLY",
    "why": "未被 traits.py 登记（引擎不会结算）",
    "hook": null,
    "reason": null,
-   "loadout_pets": 1
+   "loadout_pets": 0
   },
   "skill_000167": {
    "support": "KNOWLEDGE_ONLY",

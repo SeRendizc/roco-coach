@@ -1,0 +1,6898 @@
+{
+ "ruleset_id": "roco-world-s4-2026-09-10",
+ "total_skills": 860,
+ "sets": {
+  "literal": {
+   "limit": 100,
+   "ruleset_id": "roco-world-s4-2026-09-10",
+   "total_skills": 860,
+   "rows": [
+    {
+     "skill_id": "magic_wish_impact__光系__物攻",
+     "name": "光系愿力冲击",
+     "category": "攻击",
+     "element": "光系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__光系__魔攻",
+     "name": "光系愿力冲击",
+     "category": "攻击",
+     "element": "光系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__冰系__物攻",
+     "name": "冰系愿力冲击",
+     "category": "攻击",
+     "element": "冰系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__冰系__魔攻",
+     "name": "冰系愿力冲击",
+     "category": "攻击",
+     "element": "冰系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__地系__物攻",
+     "name": "地系愿力冲击",
+     "category": "攻击",
+     "element": "地系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__地系__魔攻",
+     "name": "地系愿力冲击",
+     "category": "攻击",
+     "element": "地系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__幻系__物攻",
+     "name": "幻系愿力冲击",
+     "category": "攻击",
+     "element": "幻系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__幻系__魔攻",
+     "name": "幻系愿力冲击",
+     "category": "攻击",
+     "element": "幻系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__幽系__物攻",
+     "name": "幽系愿力冲击",
+     "category": "攻击",
+     "element": "幽系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__幽系__魔攻",
+     "name": "幽系愿力冲击",
+     "category": "攻击",
+     "element": "幽系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__恶系__物攻",
+     "name": "恶系愿力冲击",
+     "category": "攻击",
+     "element": "恶系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__恶系__魔攻",
+     "name": "恶系愿力冲击",
+     "category": "攻击",
+     "element": "恶系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__普通系__物攻",
+     "name": "普通系愿力冲击",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__普通系__魔攻",
+     "name": "普通系愿力冲击",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__机械系__物攻",
+     "name": "机械系愿力冲击",
+     "category": "攻击",
+     "element": "机械系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__机械系__魔攻",
+     "name": "机械系愿力冲击",
+     "category": "攻击",
+     "element": "机械系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__武系__物攻",
+     "name": "武系愿力冲击",
+     "category": "攻击",
+     "element": "武系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__武系__魔攻",
+     "name": "武系愿力冲击",
+     "category": "攻击",
+     "element": "武系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__毒系__物攻",
+     "name": "毒系愿力冲击",
+     "category": "攻击",
+     "element": "毒系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__毒系__魔攻",
+     "name": "毒系愿力冲击",
+     "category": "攻击",
+     "element": "毒系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__水系__物攻",
+     "name": "水系愿力冲击",
+     "category": "攻击",
+     "element": "水系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__水系__魔攻",
+     "name": "水系愿力冲击",
+     "category": "攻击",
+     "element": "水系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__火系__物攻",
+     "name": "火系愿力冲击",
+     "category": "攻击",
+     "element": "火系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__火系__魔攻",
+     "name": "火系愿力冲击",
+     "category": "攻击",
+     "element": "火系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__电系__物攻",
+     "name": "电系愿力冲击",
+     "category": "攻击",
+     "element": "电系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__电系__魔攻",
+     "name": "电系愿力冲击",
+     "category": "攻击",
+     "element": "电系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__翼系__物攻",
+     "name": "翼系愿力冲击",
+     "category": "攻击",
+     "element": "翼系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__翼系__魔攻",
+     "name": "翼系愿力冲击",
+     "category": "攻击",
+     "element": "翼系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__草系__物攻",
+     "name": "草系愿力冲击",
+     "category": "攻击",
+     "element": "草系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__草系__魔攻",
+     "name": "草系愿力冲击",
+     "category": "攻击",
+     "element": "草系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__萌系__物攻",
+     "name": "萌系愿力冲击",
+     "category": "攻击",
+     "element": "萌系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__萌系__魔攻",
+     "name": "萌系愿力冲击",
+     "category": "攻击",
+     "element": "萌系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__虫系__物攻",
+     "name": "虫系愿力冲击",
+     "category": "攻击",
+     "element": "虫系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__虫系__魔攻",
+     "name": "虫系愿力冲击",
+     "category": "攻击",
+     "element": "虫系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__龙系__物攻",
+     "name": "龙系愿力冲击",
+     "category": "攻击",
+     "element": "龙系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__龙系__魔攻",
+     "name": "龙系愿力冲击",
+     "category": "攻击",
+     "element": "龙系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000001",
+     "name": "偏振",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "受到自己携带技能系别的攻击伤害-40%。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读不出效果，描述里没有已登记的机制词（原句：受到自己携带技能系别的攻击伤害-40%。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
+     "support_unparsed": [
+      "未识别机制（描述里没有已登记的机制词）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000002",
+     "name": "目空",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "携带的非光系技能，威力+25%。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读不出效果，描述里没有已登记的机制词（原句：携带的非光系技能，威力+25%。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
+     "support_unparsed": [
+      "未识别机制（描述里没有已登记的机制词）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000003",
+     "name": "氧循环",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "使用草系技能后，回复10%生命。",
+     "parsed_kinds": [
+      "heal"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "heal",
+       "value": {
+        "percent": 10
+       },
+       "evidence": "回复10%生命",
+       "term": null
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000004",
+     "name": "勇敢",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "携带的能耗大于3的技能，威力+40%。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读不出效果，描述里没有已登记的机制词（原句：携带的能耗大于3的技能，威力+40%。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
+     "support_unparsed": [
+      "未识别机制（描述里没有已登记的机制词）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000005",
+     "name": "生物碱",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "使用草系技能时，敌方获得2层中毒。",
+     "parsed_kinds": [
+      "foe_status"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "foe_status",
+       "value": {
+        "status": "中毒",
+        "layers": 2
+       },
+       "evidence": "敌方获得2层中毒",
+       "term": "1001"
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000006",
+     "name": "养分重吸收",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "回合结束时，回复3能量。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "回复：回复3能量",
+      "回合：回合结束时"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：回复：回复3能量、回合：回合结束时",
+     "support_unparsed": [
+      "回复：回复3能量",
+      "回合：回合结束时"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「回复：回复3能量」",
+      "描述里有未认领的机制词：「回合：回合结束时」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000007",
+     "name": "诈死",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "自己力竭时，少损失1点魔力。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读不出效果，描述里没有已登记的机制词（原句：自己力竭时，少损失1点魔力。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
+     "support_unparsed": [
+      "未识别机制（描述里没有已登记的机制词）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000008",
+     "name": "木桶戏法",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "离场后，更换入场的精灵以木桶状态登场。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能说明里还有本机训练规则尚未拉起的原语（离场）：本局不会按说明生效",
+     "support_tier": null,
+     "support_why": "读不出效果，描述里没有已登记的机制词（原句：离场后，更换入场的精灵以木桶状态登场。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
+     "support_unparsed": [
+      "未识别机制（描述里没有已登记的机制词）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000009",
+     "name": "腐植循环",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "每回复1能量，同时回复5%生命。",
+     "parsed_kinds": [
+      "heal"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "heal",
+       "value": {
+        "percent": 5
+       },
+       "evidence": "回复5%生命",
+       "term": null
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [
+      "回复：每回复1能量",
+      "每：每回复1能量"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 1 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：回复：每回复1能量、每：每回复1能量",
+     "support_unparsed": [
+      "回复：每回复1能量",
+      "每：每回复1能量"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「回复：每回复1能量」",
+      "描述里有未认领的机制词：「每：每回复1能量」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000010",
+     "name": "营养液泡",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "获得增益时，额外获得层数+2。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "获得：获得增益时",
+      "获得：额外获得层数+2",
+      "层：额外获得层数+2"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 3 段机制**引擎没结算**（会被写进 unsupported）：获得：获得增益时、获得：额外获得层数+2",
+     "support_unparsed": [
+      "获得：获得增益时",
+      "获得：额外获得层数+2",
+      "层：额外获得层数+2"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「获得：获得增益时」",
+      "描述里有未认领的机制词：「获得：额外获得层数+2」",
+      "描述里有未认领的机制词：「层：额外获得层数+2」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000011",
+     "name": "系统发育",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "获得能量或生命时，会将等量的能量或生命随机分配给场下的精灵。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "随机（出现在：获得能量或生命时，会将等量的能量或生命随机分配给场下的精灵。）"
+     ],
+     "unclaimed": [
+      "获得：获得能量或生命时",
+      "随机：会将等量的能量或生命随机分配给场下的精灵"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：获得能量或生命时、随机：会将等量的能量或生命随机分配给场下的精灵",
+     "support_unparsed": [
+      "获得：获得能量或生命时",
+      "随机：会将等量的能量或生命随机分配给场下的精灵"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "解析层没读出：「随机（出现在：获得能量或生命时，会将等量的能量或生命随机分配给场下的精灵。）」",
+      "描述里有未认领的机制词：「获得：获得能量或生命时」",
+      "描述里有未认领的机制词：「随机：会将等量的能量或生命随机分配给场下的精灵」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000012",
+     "name": "生长",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "回合结束时，回复12%生命。",
+     "parsed_kinds": [
+      "heal"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "heal",
+       "value": {
+        "percent": 12
+       },
+       "evidence": "回复12%生命",
+       "term": null
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [
+      "回合：回合结束时"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 1 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：回合：回合结束时",
+     "support_unparsed": [
+      "回合：回合结束时"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「回合：回合结束时」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000013",
+     "name": "挺起胸脯",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "携带的能耗为1的技能，威力+50%。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读不出效果，描述里没有已登记的机制词（原句：携带的能耗为1的技能，威力+50%。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
+     "support_unparsed": [
+      "未识别机制（描述里没有已登记的机制词）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000014",
+     "name": "碰瓷",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "自己使用恶系技能后，敌方失去2能量。",
+     "parsed_kinds": [
+      "foe_energy_loss"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "foe_energy_loss",
+       "value": {
+        "amount": 2
+       },
+       "evidence": "敌方失去2能量",
+       "term": null
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000015",
+     "name": "壮胆",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "队伍存在虫系精灵，自己获得双攻+50%。",
+     "parsed_kinds": [
+      "self_stat"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "self_stat",
+       "value": {
+        "stat": "atk",
+        "delta_pct": 50
+       },
+       "evidence": "自己获得双攻+50%",
+       "term": "3014"
+      },
+      {
+       "kind": "self_stat",
+       "value": {
+        "stat": "spa",
+        "delta_pct": 50
+       },
+       "evidence": "自己获得双攻+50%",
+       "term": "3014"
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "描述被完整读出（2 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000016",
+     "name": "囤积",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "每有1能量，获得双防+10%。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "获得：获得双防+10%",
+      "每：每有1能量"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：获得双防+10%、每：每有1能量",
+     "support_unparsed": [
+      "获得：获得双防+10%",
+      "每：每有1能量"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「获得：获得双防+10%」",
+      "描述里有未认领的机制词：「每：每有1能量」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000017",
+     "name": "警惕",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "回合结束时，若自己能量为0则脱离。",
+     "parsed_kinds": [
+      "escape"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "escape",
+       "value": {
+        "how": "脱离"
+       },
+       "evidence": "脱离",
+       "term": "3009"
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [
+      "若：若自己能量为0则脱离",
+      "回合：回合结束时"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 1 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：若：若自己能量为0则脱离、回合：回合结束时",
+     "support_unparsed": [
+      "若：若自己能量为0则脱离",
+      "回合：回合结束时"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "解析出来但没有结算分支：escape",
+      "描述里有未认领的机制词：「若：若自己能量为0则脱离」",
+      "描述里有未认领的机制词：「回合：回合结束时」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000018",
+     "name": "起飞加速",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "本场战斗首次使用的技能获得迅捷。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "获得：本场战斗首次使用的技能获得迅捷"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：本场战斗首次使用的技能获得迅捷",
+     "support_unparsed": [
+      "获得：本场战斗首次使用的技能获得迅捷"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「获得：本场战斗首次使用的技能获得迅捷」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000019",
+     "name": "保守派",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "总技能能耗小于4时，自己获得双防+80%。",
+     "parsed_kinds": [
+      "self_stat"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "self_stat",
+       "value": {
+        "stat": "def",
+        "delta_pct": 80
+       },
+       "evidence": "自己获得双防+80%",
+       "term": "3014"
+      },
+      {
+       "kind": "self_stat",
+       "value": {
+        "stat": "spd",
+        "delta_pct": 80
+       },
+       "evidence": "自己获得双防+80%",
+       "term": "3014"
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "描述被完整读出（2 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000020",
+     "name": "双向光速",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "在场时，双方回合结束时的效果会额外触发1次。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "回合：双方回合结束时的效果会额外触发1次"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：回合：双方回合结束时的效果会额外触发1次",
+     "support_unparsed": [
+      "回合：双方回合结束时的效果会额外触发1次"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「回合：双方回合结束时的效果会额外触发1次」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000021",
+     "name": "鼓气",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "使用能耗为3的技能时，获得双攻和双防+20%。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "获得：获得双攻和双防+20%"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：获得双攻和双防+20%",
+     "support_unparsed": [
+      "获得：获得双攻和双防+20%"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「获得：获得双攻和双防+20%」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000022",
+     "name": "共鸣",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "携带的「虫鸣」技能威力+20。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读不出效果，描述里没有已登记的机制词（原句：携带的「虫鸣」技能威力+20。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
+     "support_unparsed": [
+      "未识别机制（描述里没有已登记的机制词）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000023",
+     "name": "不移",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "携带的无额外效果的攻击技能，威力+30%。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读不出效果，描述里没有已登记的机制词（原句：携带的无额外效果的攻击技能，威力+30%。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
+     "support_unparsed": [
+      "未识别机制（描述里没有已登记的机制词）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000024",
+     "name": "石头大餐",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "能量不足时，消耗5%生命，代替1能量。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "消耗：消耗5%生命"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：消耗：消耗5%生命",
+     "support_unparsed": [
+      "消耗：消耗5%生命"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「消耗：消耗5%生命」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000025",
+     "name": "地脉",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "初始能量为0，入场前己方精灵每放1次地系技能，回复3能量。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "回复：回复3能量",
+      "每：入场前己方精灵每放1次地系技能"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：回复：回复3能量、每：入场前己方精灵每放1次地系技能",
+     "support_unparsed": [
+      "回复：回复3能量",
+      "每：入场前己方精灵每放1次地系技能"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「回复：回复3能量」",
+      "描述里有未认领的机制词：「每：入场前己方精灵每放1次地系技能」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000026",
+     "name": "刺肤",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "每受到1次攻击伤害，对攻击自己的精灵造成50威力物理伤害。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "每：每受到1次攻击伤害"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：每：每受到1次攻击伤害",
+     "support_unparsed": [
+      "每：每受到1次攻击伤害"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「每：每受到1次攻击伤害」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000027",
+     "name": "石天平",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "若使用技能能耗高于敌方，回合结束敌方失去能耗之差的能量。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "若：若使用技能能耗高于敌方",
+      "回合：回合结束敌方失去能耗之差的能量"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：若：若使用技能能耗高于敌方、回合：回合结束敌方失去能耗之差的能量",
+     "support_unparsed": [
+      "若：若使用技能能耗高于敌方",
+      "回合：回合结束敌方失去能耗之差的能量"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「若：若使用技能能耗高于敌方」",
+      "描述里有未认领的机制词：「回合：回合结束敌方失去能耗之差的能量」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000028",
+     "name": "奔波命",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "使用防御技能后，回合结束时脱离。",
+     "parsed_kinds": [
+      "escape"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "escape",
+       "value": {
+        "how": "脱离"
+       },
+       "evidence": "脱离",
+       "term": "3009"
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [
+      "回合：回合结束时脱离"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 1 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：回合：回合结束时脱离",
+     "support_unparsed": [
+      "回合：回合结束时脱离"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "解析出来但没有结算分支：escape",
+      "描述里有未认领的机制词：「回合：回合结束时脱离」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000029",
+     "name": "观星",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "敌方每有1层星陨印记，自己的地系技能威力+20%。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "印记：敌方每有1层星陨印记",
+      "每：敌方每有1层星陨印记",
+      "层：敌方每有1层星陨印记"
+     ],
+     "resolved": false,
+     "reason": "这条技能说明里还有本机训练规则尚未拉起的原语（印记/星陨）：本局不会按说明生效",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 3 段机制**引擎没结算**（会被写进 unsupported）：印记：敌方每有1层星陨印记、每：敌方每有1层星陨印记",
+     "support_unparsed": [
+      "印记：敌方每有1层星陨印记",
+      "每：敌方每有1层星陨印记",
+      "层：敌方每有1层星陨印记"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「印记：敌方每有1层星陨印记」",
+      "描述里有未认领的机制词：「每：敌方每有1层星陨印记」",
+      "描述里有未认领的机制词：「层：敌方每有1层星陨印记」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000030",
+     "name": "浸润",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "使用水系技能后，全技能能耗-1。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读不出效果，描述里没有已登记的机制词（原句：使用水系技能后，全技能能耗-1。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
+     "support_unparsed": [
+      "未识别机制（描述里没有已登记的机制词）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000031",
+     "name": "缩壳",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "携带的防御技能能耗-2。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读不出效果，描述里没有已登记的机制词（原句：携带的防御技能能耗-2。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
+     "support_unparsed": [
+      "未识别机制（描述里没有已登记的机制词）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000032",
+     "name": "守护者",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "己方其他精灵每有1层萌化，自己入场时全技能能耗-1。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "每：己方其他精灵每有1层萌化",
+      "层：己方其他精灵每有1层萌化"
+     ],
+     "resolved": false,
+     "reason": "这条技能说明里还有本机训练规则尚未拉起的原语（萌化）：本局不会按说明生效",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：每：己方其他精灵每有1层萌化、层：己方其他精灵每有1层萌化",
+     "support_unparsed": [
+      "每：己方其他精灵每有1层萌化",
+      "层：己方其他精灵每有1层萌化"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「每：己方其他精灵每有1层萌化」",
+      "描述里有未认领的机制词：「层：己方其他精灵每有1层萌化」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000033",
+     "name": "水翼推进",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "己方精灵每使用1次水系技能，自己入场时获得全技能能耗-1。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "获得：自己入场时获得全技能能耗-1",
+      "每：己方精灵每使用1次水系技能"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：自己入场时获得全技能能耗-1、每：己方精灵每使用1次水系技能",
+     "support_unparsed": [
+      "获得：自己入场时获得全技能能耗-1",
+      "每：己方精灵每使用1次水系技能"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「获得：自己入场时获得全技能能耗-1」",
+      "描述里有未认领的机制词：「每：己方精灵每使用1次水系技能」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000034",
+     "name": "溶解扩散",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "每携带1个毒系技能进入战斗，水系技能使敌方获得1层中毒。",
+     "parsed_kinds": [
+      "foe_status"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "foe_status",
+       "value": {
+        "status": "中毒",
+        "layers": 1
+       },
+       "evidence": "敌方获得1层中毒",
+       "term": "1001"
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [
+      "每：每携带1个毒系技能进入战斗"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 1 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：每：每携带1个毒系技能进入战斗",
+     "support_unparsed": [
+      "每：每携带1个毒系技能进入战斗"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「每：每携带1个毒系技能进入战斗」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000035",
+     "name": "倾轧",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "携带的技能受能耗变化效果的影响翻倍。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "影响：携带的技能受能耗变化效果的影响翻倍",
+      "变：携带的技能受能耗变化效果的影响翻倍"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：影响：携带的技能受能耗变化效果的影响翻倍、变：携带的技能受能耗变化效果的影响翻倍",
+     "support_unparsed": [
+      "影响：携带的技能受能耗变化效果的影响翻倍",
+      "变：携带的技能受能耗变化效果的影响翻倍"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「影响：携带的技能受能耗变化效果的影响翻倍」",
+      "描述里有未认领的机制词：「变：携带的技能受能耗变化效果的影响翻倍」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000036",
+     "name": "对流",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "自己的能耗增加变为能耗降低；能耗降低变为能耗增加。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：自己的能耗增加变为能耗降低",
+      "变：能耗降低变为能耗增加"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：变：自己的能耗增加变为能耗降低、变：能耗降低变为能耗增加",
+     "support_unparsed": [
+      "变：自己的能耗增加变为能耗降低",
+      "变：能耗降低变为能耗增加"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：自己的能耗增加变为能耗降低」",
+      "描述里有未认领的机制词：「变：能耗降低变为能耗增加」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000037",
+     "name": "洄游",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "每次进入蓄力状态，获得全技能能耗永久-2。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "获得：获得全技能能耗永久-2",
+      "蓄力：每次进入蓄力状态",
+      "每：每次进入蓄力状态"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 3 段机制**引擎没结算**（会被写进 unsupported）：获得：获得全技能能耗永久-2、蓄力：每次进入蓄力状态",
+     "support_unparsed": [
+      "获得：获得全技能能耗永久-2",
+      "蓄力：每次进入蓄力状态",
+      "每：每次进入蓄力状态"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「获得：获得全技能能耗永久-2」",
+      "描述里有未认领的机制词：「蓄力：每次进入蓄力状态」",
+      "描述里有未认领的机制词：「每：每次进入蓄力状态」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000038",
+     "name": "扩散侵蚀",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "使用水系技能后，敌方获得中毒，获得层数等于中毒印记层数的2倍。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "获得：敌方获得中毒",
+      "获得：获得层数等于中毒印记层数的2倍",
+      "印记：获得层数等于中毒印记层数的2倍",
+      "层：获得层数等于中毒印记层数的2倍",
+      "层：获得层数等于中毒印记层数的2倍"
+     ],
+     "resolved": false,
+     "reason": "这条技能说明里还有本机训练规则尚未拉起的原语（印记）：本局不会按说明生效",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 5 段机制**引擎没结算**（会被写进 unsupported）：获得：敌方获得中毒、获得：获得层数等于中毒印记层数的2倍",
+     "support_unparsed": [
+      "获得：敌方获得中毒",
+      "获得：获得层数等于中毒印记层数的2倍",
+      "印记：获得层数等于中毒印记层数的2倍",
+      "层：获得层数等于中毒印记层数的2倍",
+      "层：获得层数等于中毒印记层数的2倍"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「获得：敌方获得中毒」",
+      "描述里有未认领的机制词：「获得：获得层数等于中毒印记层数的2倍」",
+      "描述里有未认领的机制词：「印记：获得层数等于中毒印记层数的2倍」",
+      "描述里有未认领的机制词：「层：获得层数等于中毒印记层数的2倍」",
+      "描述里有未认领的机制词：「层：获得层数等于中毒印记层数的2倍」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000039",
+     "name": "捉迷藏",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "使敌方获得冻结时，也会使其获得全技能能耗+1。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "获得：使敌方获得冻结时",
+      "获得：也会使其获得全技能能耗+1"
+     ],
+     "resolved": false,
+     "reason": "这条技能说明里还有本机训练规则尚未拉起的原语（冻结）：本局不会按说明生效",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：使敌方获得冻结时、获得：也会使其获得全技能能耗+1",
+     "support_unparsed": [
+      "获得：使敌方获得冻结时",
+      "获得：也会使其获得全技能能耗+1"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「获得：使敌方获得冻结时」",
+      "描述里有未认领的机制词：「获得：也会使其获得全技能能耗+1」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000040",
+     "name": "冰钻",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "敌方携带技能总能耗每有1点，自己攻击时威力+10%。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "每：敌方携带技能总能耗每有1点"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：每：敌方携带技能总能耗每有1点",
+     "support_unparsed": [
+      "每：敌方携带技能总能耗每有1点"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「每：敌方携带技能总能耗每有1点」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000041",
+     "name": "结晶水",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "初始能量为0，入场前己方精灵每放1次冰系技能，回复3能量。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "回复：回复3能量",
+      "每：入场前己方精灵每放1次冰系技能"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：回复：回复3能量、每：入场前己方精灵每放1次冰系技能",
+     "support_unparsed": [
+      "回复：回复3能量",
+      "每：入场前己方精灵每放1次冰系技能"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「回复：回复3能量」",
+      "描述里有未认领的机制词：「每：入场前己方精灵每放1次冰系技能」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000042",
+     "name": "冻土",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "每携带1个冰系技能进入战斗，地系技能威力+10%。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "每：每携带1个冰系技能进入战斗"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：每：每携带1个冰系技能进入战斗",
+     "support_unparsed": [
+      "每：每携带1个冰系技能进入战斗"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「每：每携带1个冰系技能进入战斗」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000043",
+     "name": "加个雪球",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "使敌方获得冻结时，也会使其获得2层冻结。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "获得：使敌方获得冻结时",
+      "获得：也会使其获得2层冻结",
+      "层：也会使其获得2层冻结"
+     ],
+     "resolved": false,
+     "reason": "这条技能说明里还有本机训练规则尚未拉起的原语（冻结）：本局不会按说明生效",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 3 段机制**引擎没结算**（会被写进 unsupported）：获得：使敌方获得冻结时、获得：也会使其获得2层冻结",
+     "support_unparsed": [
+      "获得：使敌方获得冻结时",
+      "获得：也会使其获得2层冻结",
+      "层：也会使其获得2层冻结"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「获得：使敌方获得冻结时」",
+      "描述里有未认领的机制词：「获得：也会使其获得2层冻结」",
+      "描述里有未认领的机制词：「层：也会使其获得2层冻结」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000044",
+     "name": "冰封",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "在场时，敌方全技能能耗+1。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读不出效果，描述里没有已登记的机制词（原句：在场时，敌方全技能能耗+1。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
+     "support_unparsed": [
+      "未识别机制（描述里没有已登记的机制词）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000045",
+     "name": "顺风",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "若先于敌方攻击，本次技能威力+50%。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "若：若先于敌方攻击"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「若：若先于敌方攻击」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000046",
+     "name": "咔咔冲刺",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "若先于敌方行动，行动后获得连击数+1。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "动态连击数（出现在：若先于敌方行动，行动后获得连击数+1。）",
+      "连击（出现在：若先于敌方行动，行动后获得连击数+1。）"
+     ],
+     "unclaimed": [
+      "获得：行动后获得连击数+1",
+      "连击：行动后获得连击数+1",
+      "若：若先于敌方行动"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 3 段机制**引擎没结算**（会被写进 unsupported）：获得：行动后获得连击数+1、连击：行动后获得连击数+1",
+     "support_unparsed": [
+      "获得：行动后获得连击数+1",
+      "连击：行动后获得连击数+1",
+      "若：若先于敌方行动"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "解析层没读出：「动态连击数（出现在：若先于敌方行动，行动后获得连击数+1。）」",
+      "解析层没读出：「连击（出现在：若先于敌方行动，行动后获得连击数+1。）」",
+      "描述里有未认领的机制词：「获得：行动后获得连击数+1」",
+      "描述里有未认领的机制词：「连击：行动后获得连击数+1」",
+      "描述里有未认领的机制词：「若：若先于敌方行动」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000047",
+     "name": "洁癖",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "离场后，自己的增益和减益会被更换入场的精灵继承。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能说明里还有本机训练规则尚未拉起的原语（离场）：本局不会按说明生效",
+     "support_tier": null,
+     "support_why": "读不出效果，描述里没有已登记的机制词（原句：离场后，自己的增益和减益会被更换入场的精灵继承。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
+     "support_unparsed": [
+      "未识别机制（描述里没有已登记的机制词）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000048",
+     "name": "展翅",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "在场时，自己携带的普通系技能变为翼系技能，若后于敌方行动，自己受到的伤害+25%。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "若：若后于敌方行动",
+      "变：自己携带的普通系技能变为翼系技能"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：若：若后于敌方行动、变：自己携带的普通系技能变为翼系技能",
+     "support_unparsed": [
+      "若：若后于敌方行动",
+      "变：自己携带的普通系技能变为翼系技能"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「若：若后于敌方行动」",
+      "描述里有未认领的机制词：「变：自己携带的普通系技能变为翼系技能」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000049",
+     "name": "乘风连击",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "使用翼系技能后，获得连击数+1。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "动态连击数（出现在：使用翼系技能后，获得连击数+1。）",
+      "连击（出现在：使用翼系技能后，获得连击数+1。）"
+     ],
+     "unclaimed": [
+      "获得：获得连击数+1",
+      "连击：获得连击数+1"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：获得连击数+1、连击：获得连击数+1",
+     "support_unparsed": [
+      "获得：获得连击数+1",
+      "连击：获得连击数+1"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "解析层没读出：「动态连击数（出现在：使用翼系技能后，获得连击数+1。）」",
+      "解析层没读出：「连击（出现在：使用翼系技能后，获得连击数+1。）」",
+      "描述里有未认领的机制词：「获得：获得连击数+1」",
+      "描述里有未认领的机制词：「连击：获得连击数+1」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000050",
+     "name": "快锤",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "携带的能耗小于3的技能，获得迅捷。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "获得：获得迅捷"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：获得迅捷",
+     "support_unparsed": [
+      "获得：获得迅捷"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「获得：获得迅捷」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000051",
+     "name": "异类",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "携带的翼系攻击技能获得选择：能耗+1，攻击时吸血50%。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "选择（出现在：携带的翼系攻击技能获得选择：能耗+1，攻击时吸血50%。）"
+     ],
+     "unclaimed": [
+      "获得：携带的翼系攻击技能获得选择：能耗+1"
+     ],
+     "resolved": false,
+     "reason": "这条技能说明里还有本机训练规则尚未拉起的原语（吸血）：本局不会按说明生效",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：携带的翼系攻击技能获得选择：能耗+1",
+     "support_unparsed": [
+      "获得：携带的翼系攻击技能获得选择：能耗+1"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "解析层没读出：「选择（出现在：携带的翼系攻击技能获得选择：能耗+1，攻击时吸血50%。）」",
+      "描述里有未认领的机制词：「获得：携带的翼系攻击技能获得选择：能耗+1」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000052",
+     "name": "毒腺",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "使用能耗小于等于1的技能时，敌方获得4层中毒。",
+     "parsed_kinds": [
+      "foe_status"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "foe_status",
+       "value": {
+        "status": "中毒",
+        "layers": 4
+       },
+       "evidence": "敌方获得4层中毒",
+       "term": "1001"
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000053",
+     "name": "虫群鼓舞",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "队伍中每有1只其他的虫系精灵，自己入场时获得攻防速+10%。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "获得：自己入场时获得攻防速+10%",
+      "每：队伍中每有1只其他的虫系精灵"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：自己入场时获得攻防速+10%、每：队伍中每有1只其他的虫系精灵",
+     "support_unparsed": [
+      "获得：自己入场时获得攻防速+10%",
+      "每：队伍中每有1只其他的虫系精灵"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「获得：自己入场时获得攻防速+10%」",
+      "描述里有未认领的机制词：「每：队伍中每有1只其他的虫系精灵」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000054",
+     "name": "振奋虫心",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "主动击败敌方后，己方队伍获得5次随机奉献。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "随机（出现在：主动击败敌方后，己方队伍获得5次随机奉献。）"
+     ],
+     "unclaimed": [
+      "获得：己方队伍获得5次随机奉献",
+      "奉献：己方队伍获得5次随机奉献",
+      "随机：己方队伍获得5次随机奉献"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 3 段机制**引擎没结算**（会被写进 unsupported）：获得：己方队伍获得5次随机奉献、奉献：己方队伍获得5次随机奉献",
+     "support_unparsed": [
+      "获得：己方队伍获得5次随机奉献",
+      "奉献：己方队伍获得5次随机奉献",
+      "随机：己方队伍获得5次随机奉献"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "解析层没读出：「随机（出现在：主动击败敌方后，己方队伍获得5次随机奉献。）」",
+      "描述里有未认领的机制词：「获得：己方队伍获得5次随机奉献」",
+      "描述里有未认领的机制词：「奉献：己方队伍获得5次随机奉献」",
+      "描述里有未认领的机制词：「随机：己方队伍获得5次随机奉献」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000055",
+     "name": "花精灵",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "回合结束时，己方队伍获得1次随机奉献。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "随机（出现在：回合结束时，己方队伍获得1次随机奉献。）"
+     ],
+     "unclaimed": [
+      "获得：己方队伍获得1次随机奉献",
+      "回合：回合结束时",
+      "奉献：己方队伍获得1次随机奉献",
+      "随机：己方队伍获得1次随机奉献"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 4 段机制**引擎没结算**（会被写进 unsupported）：获得：己方队伍获得1次随机奉献、回合：回合结束时",
+     "support_unparsed": [
+      "获得：己方队伍获得1次随机奉献",
+      "回合：回合结束时",
+      "奉献：己方队伍获得1次随机奉献",
+      "随机：己方队伍获得1次随机奉献"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "解析层没读出：「随机（出现在：回合结束时，己方队伍获得1次随机奉献。）」",
+      "描述里有未认领的机制词：「获得：己方队伍获得1次随机奉献」",
+      "描述里有未认领的机制词：「回合：回合结束时」",
+      "描述里有未认领的机制词：「奉献：己方队伍获得1次随机奉献」",
+      "描述里有未认领的机制词：「随机：己方队伍获得1次随机奉献」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000056",
+     "name": "契约的形状",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "根据捕捉所用的咕噜球，入场时获得不同效果。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "获得：入场时获得不同效果"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：入场时获得不同效果",
+     "support_unparsed": [
+      "获得：入场时获得不同效果"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「获得：入场时获得不同效果」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000057",
+     "name": "坚韧铠甲",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "每受到1次攻击伤害，己方队伍获得1次随机奉献。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "随机（出现在：每受到1次攻击伤害，己方队伍获得1次随机奉献。）"
+     ],
+     "unclaimed": [
+      "获得：己方队伍获得1次随机奉献",
+      "每：每受到1次攻击伤害",
+      "奉献：己方队伍获得1次随机奉献",
+      "随机：己方队伍获得1次随机奉献"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 4 段机制**引擎没结算**（会被写进 unsupported）：获得：己方队伍获得1次随机奉献、每：每受到1次攻击伤害",
+     "support_unparsed": [
+      "获得：己方队伍获得1次随机奉献",
+      "每：每受到1次攻击伤害",
+      "奉献：己方队伍获得1次随机奉献",
+      "随机：己方队伍获得1次随机奉献"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "解析层没读出：「随机（出现在：每受到1次攻击伤害，己方队伍获得1次随机奉献。）」",
+      "描述里有未认领的机制词：「获得：己方队伍获得1次随机奉献」",
+      "描述里有未认领的机制词：「每：每受到1次攻击伤害」",
+      "描述里有未认领的机制词：「奉献：己方队伍获得1次随机奉献」",
+      "描述里有未认领的机制词：「随机：己方队伍获得1次随机奉献」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000058",
+     "name": "渴求",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "入场时获得50%吸血。",
+     "parsed_kinds": [
+      "self_lifesteal"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "self_lifesteal",
+       "value": {
+        "percent": 50
+       },
+       "evidence": "获得50%吸血",
+       "term": null
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能说明里还有本机训练规则尚未拉起的原语（吸血）：本局不会按说明生效",
+     "support_tier": null,
+     "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "解析出来但没有结算分支：self_lifesteal"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000059",
+     "name": "悲悯",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "己方队伍中每有1只力竭的精灵，自己获得双攻+30%。",
+     "parsed_kinds": [
+      "self_stat"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "self_stat",
+       "value": {
+        "stat": "atk",
+        "delta_pct": 30
+       },
+       "evidence": "自己获得双攻+30%",
+       "term": "3014"
+      },
+      {
+       "kind": "self_stat",
+       "value": {
+        "stat": "spa",
+        "delta_pct": 30
+       },
+       "evidence": "自己获得双攻+30%",
+       "term": "3014"
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [
+      "每：己方队伍中每有1只力竭的精灵"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 2 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：每：己方队伍中每有1只力竭的精灵",
+     "support_unparsed": [
+      "每：己方队伍中每有1只力竭的精灵"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「每：己方队伍中每有1只力竭的精灵」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000060",
+     "name": "付给恶魔的赎价",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "击败敌方精灵时，敌方额外损失1点魔力。被敌方精灵击败时，自己额外损失1点魔力。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读不出效果，描述里没有已登记的机制词（原句：击败敌方精灵时，敌方额外损失1点魔力。被敌方精灵击败时，自己额外损失1点魔力。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
+     "support_unparsed": [
+      "未识别机制（描述里没有已登记的机制词）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000061",
+     "name": "瞳中倒影",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "自己或其他精灵离场时，自己与更换入场的精灵交换血量百分比。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能说明里还有本机训练规则尚未拉起的原语（离场）：本局不会按说明生效",
+     "support_tier": null,
+     "support_why": "读不出效果，描述里没有已登记的机制词（原句：自己或其他精灵离场时，自己与更换入场的精灵交换血量百分比。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
+     "support_unparsed": [
+      "未识别机制（描述里没有已登记的机制词）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000062",
+     "name": "嫁祸",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "自己每失去25%生命，连击数+2。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "动态连击数（出现在：自己每失去25%生命，连击数+2。）",
+      "连击（出现在：自己每失去25%生命，连击数+2。）"
+     ],
+     "unclaimed": [
+      "连击：连击数+2",
+      "每：自己每失去25%生命"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（特性类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：连击：连击数+2、每：自己每失去25%生命",
+     "support_unparsed": [
+      "连击：连击数+2",
+      "每：自己每失去25%生命"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "解析层没读出：「动态连击数（出现在：自己每失去25%生命，连击数+2。）」",
+      "解析层没读出：「连击（出现在：自己每失去25%生命，连击数+2。）」",
+      "描述里有未认领的机制词：「连击：连击数+2」",
+      "描述里有未认领的机制词：「每：自己每失去25%生命」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000063",
+     "name": "滴眼液",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "天气为雨天时，使用水系攻击技能时吸血50%。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "天气（出现在：天气为雨天时，使用水系攻击技能时吸血50%。）"
+     ],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能说明里还有本机训练规则尚未拉起的原语（吸血/天气）：本局不会按说明生效",
+     "support_tier": null,
+     "support_why": "只有资料：1 段机制没被读出",
+     "support_unparsed": [
+      "天气（出现在：天气为雨天时，使用水系攻击技能时吸血50%。）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "解析层没读出：「天气（出现在：天气为雨天时，使用水系攻击技能时吸血50%。）」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000064",
+     "name": "助燃",
+     "category": "特性",
+     "element": "无系别",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": true,
+     "desc": "使用火系技能后，获得双攻+20%。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "获得：获得双攻+20%"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：获得双攻+20%",
+     "support_unparsed": [
+      "获得：获得双攻+20%"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「获得：获得双攻+20%」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    }
+   ]
+  },
+  "active": {
+   "limit": 100,
+   "ruleset_id": "roco-world-s4-2026-09-10",
+   "total_skills": 860,
+   "rows": [
+    {
+     "skill_id": "magic_wish_impact__光系__物攻",
+     "name": "光系愿力冲击",
+     "category": "攻击",
+     "element": "光系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__光系__魔攻",
+     "name": "光系愿力冲击",
+     "category": "攻击",
+     "element": "光系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__冰系__物攻",
+     "name": "冰系愿力冲击",
+     "category": "攻击",
+     "element": "冰系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__冰系__魔攻",
+     "name": "冰系愿力冲击",
+     "category": "攻击",
+     "element": "冰系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__地系__物攻",
+     "name": "地系愿力冲击",
+     "category": "攻击",
+     "element": "地系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__地系__魔攻",
+     "name": "地系愿力冲击",
+     "category": "攻击",
+     "element": "地系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__幻系__物攻",
+     "name": "幻系愿力冲击",
+     "category": "攻击",
+     "element": "幻系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__幻系__魔攻",
+     "name": "幻系愿力冲击",
+     "category": "攻击",
+     "element": "幻系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__幽系__物攻",
+     "name": "幽系愿力冲击",
+     "category": "攻击",
+     "element": "幽系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__幽系__魔攻",
+     "name": "幽系愿力冲击",
+     "category": "攻击",
+     "element": "幽系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__恶系__物攻",
+     "name": "恶系愿力冲击",
+     "category": "攻击",
+     "element": "恶系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__恶系__魔攻",
+     "name": "恶系愿力冲击",
+     "category": "攻击",
+     "element": "恶系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__普通系__物攻",
+     "name": "普通系愿力冲击",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__普通系__魔攻",
+     "name": "普通系愿力冲击",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__机械系__物攻",
+     "name": "机械系愿力冲击",
+     "category": "攻击",
+     "element": "机械系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__机械系__魔攻",
+     "name": "机械系愿力冲击",
+     "category": "攻击",
+     "element": "机械系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__武系__物攻",
+     "name": "武系愿力冲击",
+     "category": "攻击",
+     "element": "武系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__武系__魔攻",
+     "name": "武系愿力冲击",
+     "category": "攻击",
+     "element": "武系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__毒系__物攻",
+     "name": "毒系愿力冲击",
+     "category": "攻击",
+     "element": "毒系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__毒系__魔攻",
+     "name": "毒系愿力冲击",
+     "category": "攻击",
+     "element": "毒系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__水系__物攻",
+     "name": "水系愿力冲击",
+     "category": "攻击",
+     "element": "水系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__水系__魔攻",
+     "name": "水系愿力冲击",
+     "category": "攻击",
+     "element": "水系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__火系__物攻",
+     "name": "火系愿力冲击",
+     "category": "攻击",
+     "element": "火系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__火系__魔攻",
+     "name": "火系愿力冲击",
+     "category": "攻击",
+     "element": "火系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__电系__物攻",
+     "name": "电系愿力冲击",
+     "category": "攻击",
+     "element": "电系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__电系__魔攻",
+     "name": "电系愿力冲击",
+     "category": "攻击",
+     "element": "电系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__翼系__物攻",
+     "name": "翼系愿力冲击",
+     "category": "攻击",
+     "element": "翼系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__翼系__魔攻",
+     "name": "翼系愿力冲击",
+     "category": "攻击",
+     "element": "翼系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__草系__物攻",
+     "name": "草系愿力冲击",
+     "category": "攻击",
+     "element": "草系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__草系__魔攻",
+     "name": "草系愿力冲击",
+     "category": "攻击",
+     "element": "草系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__萌系__物攻",
+     "name": "萌系愿力冲击",
+     "category": "攻击",
+     "element": "萌系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__萌系__魔攻",
+     "name": "萌系愿力冲击",
+     "category": "攻击",
+     "element": "萌系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__虫系__物攻",
+     "name": "虫系愿力冲击",
+     "category": "攻击",
+     "element": "虫系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__虫系__魔攻",
+     "name": "虫系愿力冲击",
+     "category": "攻击",
+     "element": "虫系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__龙系__物攻",
+     "name": "龙系愿力冲击",
+     "category": "攻击",
+     "element": "龙系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "magic_wish_impact__龙系__魔攻",
+     "name": "龙系愿力冲击",
+     "category": "攻击",
+     "element": "龙系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤。应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 0,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为2.5倍（人类口径：额外造成 150% 伤害）」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000246",
+     "name": "抓挠",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 0,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤，自己回复1能量。",
+     "parsed_kinds": [
+      "self_energy"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "self_energy",
+       "value": {
+        "amount": 1
+       },
+       "evidence": "自己回复1能量",
+       "term": "MC-007"
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 39,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000247",
+     "name": "猛烈撞击",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 1,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "对敌方精灵造成物理伤害。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 85,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000248",
+     "name": "飞踢",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 3,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "对敌方精灵造成物理伤害。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 12,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000249",
+     "name": "扫尾",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "对敌方精灵造成物理伤害。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 27,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000250",
+     "name": "迫近攻击",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 3,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤。每次使用后，本技能威力永久+45。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "每：每次使用后"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 11,
+     "gaps": [
+      "描述里有未认领的机制词：「每：每次使用后」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000251",
+     "name": "音爆",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 4,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "对敌方精灵造成魔法伤害。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 43,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000252",
+     "name": "冲撞",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 7,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤，回合结束时，本技能能耗永久-1。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "回合：回合结束时"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：回合：回合结束时",
+     "support_unparsed": [
+      "回合：回合结束时"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 17,
+     "gaps": [
+      "描述里有未认领的机制词：「回合：回合结束时」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000253",
+     "name": "见招拆招",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤，若上回合使用状态技能，本次技能威力+55。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "若：若上回合使用状态技能",
+      "回合：若上回合使用状态技能"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：若：若上回合使用状态技能、回合：若上回合使用状态技能",
+     "support_unparsed": [
+      "若：若上回合使用状态技能",
+      "回合：若上回合使用状态技能"
+     ],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 55,
+     "gaps": [
+      "描述里有未认领的机制词：「若：若上回合使用状态技能」",
+      "描述里有未认领的机制词：「回合：若上回合使用状态技能」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000254",
+     "name": "触底强击",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 4,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤，使用后若能量耗尽，本次技能威力+120。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "若：使用后若能量耗尽"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：若：使用后若能量耗尽",
+     "support_unparsed": [
+      "若：使用后若能量耗尽"
+     ],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 29,
+     "gaps": [
+      "描述里有未认领的机制词：「若：使用后若能量耗尽」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000255",
+     "name": "突袭",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤，应对状态：本次技能威力变为3倍。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为3倍"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为3倍",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为3倍"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 67,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为3倍」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000256",
+     "name": "连续爪击",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤，2连击，应对状态：本次技能连击数翻倍。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "动态连击数（出现在：造成物伤，2连击，应对状态：本次技能连击数翻倍。）",
+      "连击（出现在：造成物伤，2连击，应对状态：本次技能连击数翻倍。）"
+     ],
+     "unclaimed": [
+      "连击：2连击",
+      "连击：应对状态：本次技能连击数翻倍"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "只有资料：1 段机制没被读出",
+     "support_unparsed": [
+      "动态连击数（出现在：造成物伤，2连击，应对状态：本次技能连击数翻倍。）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 114,
+     "gaps": [
+      "解析层没读出：「动态连击数（出现在：造成物伤，2连击，应对状态：本次技能连击数翻倍。）」",
+      "解析层没读出：「连击（出现在：造成物伤，2连击，应对状态：本次技能连击数翻倍。）」",
+      "描述里有未认领的机制词：「连击：2连击」",
+      "描述里有未认领的机制词：「连击：应对状态：本次技能连击数翻倍」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000257",
+     "name": "追打",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 3,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤，1连击，应对状态：本技能变为3连击。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "动态连击数（出现在：造成魔伤，1连击，应对状态：本技能变为3连击。）",
+      "连击（出现在：造成魔伤，1连击，应对状态：本技能变为3连击。）"
+     ],
+     "unclaimed": [
+      "连击：1连击",
+      "连击：应对状态：本技能变为3连击",
+      "变：应对状态：本技能变为3连击"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 3 段机制**引擎没结算**（会被写进 unsupported）：连击：1连击、连击：应对状态：本技能变为3连击",
+     "support_unparsed": [
+      "连击：1连击",
+      "连击：应对状态：本技能变为3连击",
+      "变：应对状态：本技能变为3连击"
+     ],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 70,
+     "gaps": [
+      "解析层没读出：「动态连击数（出现在：造成魔伤，1连击，应对状态：本技能变为3连击。）」",
+      "解析层没读出：「连击（出现在：造成魔伤，1连击，应对状态：本技能变为3连击。）」",
+      "描述里有未认领的机制词：「连击：1连击」",
+      "描述里有未认领的机制词：「连击：应对状态：本技能变为3连击」",
+      "描述里有未认领的机制词：「变：应对状态：本技能变为3连击」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000258",
+     "name": "旋转突击",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 3,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤，3连击。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "连击（出现在：造成物伤，3连击。）"
+     ],
+     "unclaimed": [
+      "连击：3连击"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "描述里的机制由已声明能力认领（连击×3），没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 40,
+     "gaps": [
+      "解析层没读出：「连击（出现在：造成物伤，3连击。）」",
+      "描述里有未认领的机制词：「连击：3连击」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000259",
+     "name": "偷袭",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 3,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤，应对状态：本次技能威力变为3倍。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "变：应对状态：本次技能威力变为3倍"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：变：应对状态：本次技能威力变为3倍",
+     "support_unparsed": [
+      "变：应对状态：本次技能威力变为3倍"
+     ],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 122,
+     "gaps": [
+      "描述里有未认领的机制词：「变：应对状态：本次技能威力变为3倍」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000260",
+     "name": "乱打",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 4,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤，5连击。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "连击（出现在：造成魔伤，5连击。）"
+     ],
+     "unclaimed": [
+      "连击：5连击"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "描述里的机制由已声明能力认领（连击×5），没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 19,
+     "gaps": [
+      "解析层没读出：「连击（出现在：造成魔伤，5连击。）」",
+      "描述里有未认领的机制词：「连击：5连击」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000261",
+     "name": "乘胜追击",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤，1连击，每次使用后，本技能连击数永久+1。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "动态连击数（出现在：造成物伤，1连击，每次使用后，本技能连击数永久+1。）",
+      "连击（出现在：造成物伤，1连击，每次使用后，本技能连击数永久+1。）"
+     ],
+     "unclaimed": [
+      "连击：1连击",
+      "连击：本技能连击数永久+1",
+      "每：每次使用后"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 1 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：连击：1连击",
+     "support_unparsed": [
+      "连击：1连击"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 35,
+     "gaps": [
+      "解析层没读出：「动态连击数（出现在：造成物伤，1连击，每次使用后，本技能连击数永久+1。）」",
+      "解析层没读出：「连击（出现在：造成物伤，1连击，每次使用后，本技能连击数永久+1。）」",
+      "描述里有未认领的机制词：「连击：1连击」",
+      "描述里有未认领的机制词：「连击：本技能连击数永久+1」",
+      "描述里有未认领的机制词：「每：每次使用后」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000262",
+     "name": "阻断",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤，应对状态：额外打断被应对技能。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 105,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000263",
+     "name": "穿膛",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤，若敌方能量小于等于2，造成5倍伤害。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "若：若敌方能量小于等于2"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：若：若敌方能量小于等于2",
+     "support_unparsed": [
+      "若：若敌方能量小于等于2"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 17,
+     "gaps": [
+      "描述里有未认领的机制词：「若：若敌方能量小于等于2」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000264",
+     "name": "重击",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤，每次使用后，本技能能耗永久+1。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "每：每次使用后"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 22,
+     "gaps": [
+      "描述里有未认领的机制词：「每：每次使用后」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000265",
+     "name": "魔能爆",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 0,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤，使用时消耗所有能量，消耗越高，伤害越高。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "消耗：使用时消耗所有能量",
+      "消耗：消耗越高"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：消耗：使用时消耗所有能量、消耗：消耗越高",
+     "support_unparsed": [
+      "消耗：使用时消耗所有能量",
+      "消耗：消耗越高"
+     ],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 67,
+     "gaps": [
+      "描述里有未认领的机制词：「消耗：使用时消耗所有能量」",
+      "描述里有未认领的机制词：「消耗：消耗越高」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000266",
+     "name": "垂死反击",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 4,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤，自己每失去5%生命，本次技能威力+5。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "每：自己每失去5%生命"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：每：自己每失去5%生命",
+     "support_unparsed": [
+      "每：自己每失去5%生命"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 27,
+     "gaps": [
+      "描述里有未认领的机制词：「每：自己每失去5%生命」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000267",
+     "name": "能量刃",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 3,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤，每应对成功1次，本技能威力永久+90。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "每：每应对成功1次"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：每：每应对成功1次",
+     "support_unparsed": [
+      "每：每应对成功1次"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 29,
+     "gaps": [
+      "描述里有未认领的机制词：「每：每应对成功1次」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000268",
+     "name": "气势一击",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 3,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤，若上回合应对成功，本次技能威力+180。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "若：若上回合应对成功",
+      "回合：若上回合应对成功"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：若：若上回合应对成功、回合：若上回合应对成功",
+     "support_unparsed": [
+      "若：若上回合应对成功",
+      "回合：若上回合应对成功"
+     ],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 22,
+     "gaps": [
+      "描述里有未认领的机制词：「若：若上回合应对成功」",
+      "描述里有未认领的机制词：「回合：若上回合应对成功」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000269",
+     "name": "吞噬",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 6,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤，若使用本技能击败敌方，回复6能量。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "回复：回复6能量",
+      "若：若使用本技能击败敌方"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：回复：回复6能量、若：若使用本技能击败敌方",
+     "support_unparsed": [
+      "回复：回复6能量",
+      "若：若使用本技能击败敌方"
+     ],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 40,
+     "gaps": [
+      "描述里有未认领的机制词：「回复：回复6能量」",
+      "描述里有未认领的机制词：「若：若使用本技能击败敌方」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000270",
+     "name": "蓄能轰击",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 6,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤，每使用1次其他普通系技能，本技能能耗永久-2。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "每：每使用1次其他普通系技能"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：每：每使用1次其他普通系技能",
+     "support_unparsed": [
+      "每：每使用1次其他普通系技能"
+     ],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 18,
+     "gaps": [
+      "描述里有未认领的机制词：「每：每使用1次其他普通系技能」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000271",
+     "name": "力量增效",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 1,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "自己获得物攻+100%。",
+     "parsed_kinds": [
+      "self_stat"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "self_stat",
+       "value": {
+        "stat": "atk",
+        "delta_pct": 100
+       },
+       "evidence": "自己获得物攻+100%",
+       "term": "3014"
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 293,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000272",
+     "name": "魔法增效",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "自己获得魔攻+70%。",
+     "parsed_kinds": [
+      "self_stat"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "self_stat",
+       "value": {
+        "stat": "spa",
+        "delta_pct": 70
+       },
+       "evidence": "自己获得魔攻+70%",
+       "term": "3014"
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 228,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000273",
+     "name": "休息回复",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "自己回复30%生命。",
+     "parsed_kinds": [
+      "heal"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "heal",
+       "value": {
+        "percent": 30
+       },
+       "evidence": "回复30%生命",
+       "term": null
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（状态类）",
+     "support_tier": null,
+     "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 159,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000274",
+     "name": "聒噪",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 3,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "敌方获得全攻击技能能耗+2，持续3回合。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "获得：敌方获得全攻击技能能耗+2",
+      "回合：持续3回合"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（状态类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：获得：敌方获得全攻击技能能耗+2、回合：持续3回合",
+     "support_unparsed": [
+      "获得：敌方获得全攻击技能能耗+2",
+      "回合：持续3回合"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 51,
+     "gaps": [
+      "描述里有未认领的机制词：「获得：敌方获得全攻击技能能耗+2」",
+      "描述里有未认领的机制词：「回合：持续3回合」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000275",
+     "name": "激怒",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 3,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "敌方除本回合使用的技能，其他技能能耗+3，持续3回合。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "回合：敌方除本回合使用的技能",
+      "回合：持续3回合"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（状态类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：回合：敌方除本回合使用的技能、回合：持续3回合",
+     "support_unparsed": [
+      "回合：敌方除本回合使用的技能",
+      "回合：持续3回合"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 41,
+     "gaps": [
+      "描述里有未认领的机制词：「回合：敌方除本回合使用的技能」",
+      "描述里有未认领的机制词：「回合：持续3回合」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000276",
+     "name": "咆哮",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 1,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "敌方获得物攻-60%和速度-60。",
+     "parsed_kinds": [
+      "foe_stat"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "foe_stat",
+       "value": {
+        "stat": "atk",
+        "delta_pct": -60
+       },
+       "evidence": "敌方获得物攻-60%",
+       "term": "3018"
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 33,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000277",
+     "name": "锐利眼神",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "敌方获得物防和魔防-120%。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "获得：敌方获得物防和魔防-120%"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：敌方获得物防和魔防-120%",
+     "support_unparsed": [
+      "获得：敌方获得物防和魔防-120%"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 59,
+     "gaps": [
+      "描述里有未认领的机制词：「获得：敌方获得物防和魔防-120%」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000278",
+     "name": "快速移动",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 1,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "自己获得速度+80，应对防御：改为速度+160。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "获得：自己获得速度+80"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：自己获得速度+80",
+     "support_unparsed": [
+      "获得：自己获得速度+80"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 172,
+     "gaps": [
+      "描述里有未认领的机制词：「获得：自己获得速度+80」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000279",
+     "name": "伺机而动",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 1,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "下一次攻击时，技能威力+70。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（状态类）",
+     "support_tier": null,
+     "support_why": "读不出效果，描述里没有已登记的机制词（原句：下一次攻击时，技能威力+70。）：需人工读描述，引擎不按普通伤害结算（fail closed）",
+     "support_unparsed": [
+      "未识别机制（描述里没有已登记的机制词）"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 98,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000280",
+     "name": "主场优势",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 3,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "自己获得1层攻击印记。",
+     "parsed_kinds": [
+      "self_mark"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "self_mark",
+       "value": {
+        "mark": "攻击印记",
+        "layers": 1
+       },
+       "evidence": "自己获得1层攻击印记",
+       "term": "3010"
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能说明里还有本机训练规则尚未拉起的原语（印记）：本局不会按说明生效；其中「印记层数累加」这一部分引擎照常结算",
+     "support_tier": null,
+     "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 69,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000281",
+     "name": "操控",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 1,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "敌方本回合使用的技能能耗+7，持续3回合。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "回合：敌方本回合使用的技能能耗+7",
+      "回合：持续3回合"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（状态类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：回合：敌方本回合使用的技能能耗+7、回合：持续3回合",
+     "support_unparsed": [
+      "回合：敌方本回合使用的技能能耗+7",
+      "回合：持续3回合"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 46,
+     "gaps": [
+      "描述里有未认领的机制词：「回合：敌方本回合使用的技能能耗+7」",
+      "描述里有未认领的机制词：「回合：持续3回合」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000282",
+     "name": "应激反应",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "自己回复25%生命，应对防御：改为回复50%生命。",
+     "parsed_kinds": [
+      "heal"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "heal",
+       "value": {
+        "percent": 25
+       },
+       "evidence": "回复25%生命",
+       "term": null
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [
+      "回复：应对防御：改为回复50%生命"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 1 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：回复：应对防御：改为回复50%生命",
+     "support_unparsed": [
+      "回复：应对防御：改为回复50%生命"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 143,
+     "gaps": [
+      "描述里有未认领的机制词：「回复：应对防御：改为回复50%生命」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000283",
+     "name": "棘刺",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "敌方获得1层棘刺印记。",
+     "parsed_kinds": [
+      "foe_mark"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "foe_mark",
+       "value": {
+        "mark": "棘刺印记",
+        "layers": 1
+       },
+       "evidence": "敌方获得1层棘刺印记",
+       "term": "3010"
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能说明里还有本机训练规则尚未拉起的原语（印记）：本局不会按说明生效；其中「印记层数累加」这一部分引擎照常结算",
+     "support_tier": null,
+     "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 74,
+     "gaps": [],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000284",
+     "name": "精神扰乱",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "敌方获得全技能能耗+1，应对防御：改为能耗+3。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "获得：敌方获得全技能能耗+1"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：获得：敌方获得全技能能耗+1",
+     "support_unparsed": [
+      "获得：敌方获得全技能能耗+1"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 134,
+     "gaps": [
+      "描述里有未认领的机制词：「获得：敌方获得全技能能耗+1」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000285",
+     "name": "退化",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "敌方获得1层萌化。",
+     "parsed_kinds": [
+      "foe_status"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "foe_status",
+       "value": {
+        "status": "萌化",
+        "layers": 1
+       },
+       "evidence": "敌方获得1层萌化",
+       "term": "3013"
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": false,
+     "reason": "这条技能说明里还有本机训练规则尚未拉起的原语（萌化）：本局不会按说明生效",
+     "support_tier": null,
+     "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 44,
+     "gaps": [
+      "没有回合末实现的状态：萌化"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000286",
+     "name": "防御",
+     "category": "防御",
+     "element": "普通系",
+     "energy": 1,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": true,
+     "is_trait": false,
+     "desc": "减伤70%，应对攻击。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "防御技能：减伤比例由 effects.parse_defense_reduction() 读、应对类别由 effects.respond_to() 读（描述里没有别的子句）",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 613,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000287",
+     "name": "防反",
+     "category": "防御",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": true,
+     "is_trait": false,
+     "desc": "减伤70%，应对攻击：自己获得物攻和魔攻+70%。",
+     "parsed_kinds": [
+      "self_stat"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "self_stat",
+       "value": {
+        "stat": "atk",
+        "delta_pct": 70
+       },
+       "evidence": "自己获得物攻和魔攻+70%",
+       "term": "3014"
+      },
+      {
+       "kind": "self_stat",
+       "value": {
+        "stat": "spa",
+        "delta_pct": 70
+       },
+       "evidence": "自己获得物攻和魔攻+70%",
+       "term": "3014"
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "描述被完整读出（2 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 173,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000288",
+     "name": "血气",
+     "category": "防御",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": true,
+     "is_trait": false,
+     "desc": "减伤60%，应对攻击：本回合受到致命伤害时，保留1生命值。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "回合：应对攻击：本回合受到致命伤害时"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：回合：应对攻击：本回合受到致命伤害时",
+     "support_unparsed": [
+      "回合：应对攻击：本回合受到致命伤害时"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 84,
+     "gaps": [
+      "描述里有未认领的机制词：「回合：应对攻击：本回合受到致命伤害时」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000289",
+     "name": "无畏之心",
+     "category": "防御",
+     "element": "普通系",
+     "energy": 5,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": false,
+     "is_defense": true,
+     "is_trait": false,
+     "desc": "减伤100%，应对攻击：减免的伤害变为回复自己生命，且本技能能耗永久+2。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "回复：应对攻击：减免的伤害变为回复自己生命",
+      "变：应对攻击：减免的伤害变为回复自己生命"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 2 段机制**引擎没结算**（会被写进 unsupported）：回复：应对攻击：减免的伤害变为回复自己生命、变：应对攻击：减免的伤害变为回复自己生命",
+     "support_unparsed": [
+      "回复：应对攻击：减免的伤害变为回复自己生命",
+      "变：应对攻击：减免的伤害变为回复自己生命"
+     ],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 89,
+     "gaps": [
+      "描述里有未认领的机制词：「回复：应对攻击：减免的伤害变为回复自己生命」",
+      "描述里有未认领的机制词：「变：应对攻击：减免的伤害变为回复自己生命」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000290",
+     "name": "借用",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "每回合随机变成己方队伍中其他精灵的技能。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "随机（出现在：每回合随机变成己方队伍中其他精灵的技能。）"
+     ],
+     "unclaimed": [
+      "每：每回合随机变成己方队伍中其他精灵的技能",
+      "回合：每回合随机变成己方队伍中其他精灵的技能",
+      "随机：每回合随机变成己方队伍中其他精灵的技能",
+      "变：每回合随机变成己方队伍中其他精灵的技能"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（状态类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 4 段机制**引擎没结算**（会被写进 unsupported）：每：每回合随机变成己方队伍中其他精灵的技能、回合：每回合随机变成己方队伍中其他精灵的技能",
+     "support_unparsed": [
+      "每：每回合随机变成己方队伍中其他精灵的技能",
+      "回合：每回合随机变成己方队伍中其他精灵的技能",
+      "随机：每回合随机变成己方队伍中其他精灵的技能",
+      "变：每回合随机变成己方队伍中其他精灵的技能"
+     ],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 180,
+     "gaps": [
+      "解析层没读出：「随机（出现在：每回合随机变成己方队伍中其他精灵的技能。）」",
+      "描述里有未认领的机制词：「每：每回合随机变成己方队伍中其他精灵的技能」",
+      "描述里有未认领的机制词：「回合：每回合随机变成己方队伍中其他精灵的技能」",
+      "描述里有未认领的机制词：「随机：每回合随机变成己方队伍中其他精灵的技能」",
+      "描述里有未认领的机制词：「变：每回合随机变成己方队伍中其他精灵的技能」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000294",
+     "name": "取念",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "每回合随机变成敌方任意精灵的技能，且该技能能耗-2。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "随机（出现在：每回合随机变成敌方任意精灵的技能，且该技能能耗-2。）"
+     ],
+     "unclaimed": [
+      "每：每回合随机变成敌方任意精灵的技能",
+      "回合：每回合随机变成敌方任意精灵的技能",
+      "随机：每回合随机变成敌方任意精灵的技能",
+      "变：每回合随机变成敌方任意精灵的技能"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（状态类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 4 段机制**引擎没结算**（会被写进 unsupported）：每：每回合随机变成敌方任意精灵的技能、回合：每回合随机变成敌方任意精灵的技能",
+     "support_unparsed": [
+      "每：每回合随机变成敌方任意精灵的技能",
+      "回合：每回合随机变成敌方任意精灵的技能",
+      "随机：每回合随机变成敌方任意精灵的技能",
+      "变：每回合随机变成敌方任意精灵的技能"
+     ],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 179,
+     "gaps": [
+      "解析层没读出：「随机（出现在：每回合随机变成敌方任意精灵的技能，且该技能能耗-2。）」",
+      "描述里有未认领的机制词：「每：每回合随机变成敌方任意精灵的技能」",
+      "描述里有未认领的机制词：「回合：每回合随机变成敌方任意精灵的技能」",
+      "描述里有未认领的机制词：「随机：每回合随机变成敌方任意精灵的技能」",
+      "描述里有未认领的机制词：「变：每回合随机变成敌方任意精灵的技能」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000298",
+     "name": "复写",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 0,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "每回合随机变成自己未携带的技能，且该技能能耗-2。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "随机（出现在：每回合随机变成自己未携带的技能，且该技能能耗-2。）"
+     ],
+     "unclaimed": [
+      "每：每回合随机变成自己未携带的技能",
+      "回合：每回合随机变成自己未携带的技能",
+      "随机：每回合随机变成自己未携带的技能",
+      "变：每回合随机变成自己未携带的技能"
+     ],
+     "resolved": false,
+     "reason": "这条技能的效果本机训练规则还没有对应原语（状态类）",
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 4 段机制**引擎没结算**（会被写进 unsupported）：每：每回合随机变成自己未携带的技能、回合：每回合随机变成自己未携带的技能",
+     "support_unparsed": [
+      "每：每回合随机变成自己未携带的技能",
+      "回合：每回合随机变成自己未携带的技能",
+      "随机：每回合随机变成自己未携带的技能",
+      "变：每回合随机变成自己未携带的技能"
+     ],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 192,
+     "gaps": [
+      "解析层没读出：「随机（出现在：每回合随机变成自己未携带的技能，且该技能能耗-2。）」",
+      "描述里有未认领的机制词：「每：每回合随机变成自己未携带的技能」",
+      "描述里有未认领的机制词：「回合：每回合随机变成自己未携带的技能」",
+      "描述里有未认领的机制词：「随机：每回合随机变成自己未携带的技能」",
+      "描述里有未认领的机制词：「变：每回合随机变成自己未携带的技能」"
+     ],
+     "verdict": "明确不支持"
+    },
+    {
+     "skill_id": "skill_000302",
+     "name": "落星",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 0,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "对敌方精灵造成物理伤害。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 20,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000303",
+     "name": "拍击",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 1,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "对敌方精灵造成魔法伤害。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 120,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000304",
+     "name": "音波弹",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 1,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤，1连击。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "连击（出现在：造成魔伤，1连击。）"
+     ],
+     "unclaimed": [
+      "连击：1连击"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：连击：1连击",
+     "support_unparsed": [
+      "连击：1连击"
+     ],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 49,
+     "gaps": [
+      "解析层没读出：「连击（出现在：造成魔伤，1连击。）」",
+      "描述里有未认领的机制词：「连击：1连击」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000305",
+     "name": "许愿星",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 3,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "对敌方精灵造成魔法伤害。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 74,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000306",
+     "name": "星星撞击",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "对敌方精灵造成魔法伤害。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 252,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000307",
+     "name": "能量炮",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 3,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成魔伤，2连击。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [
+      "连击（出现在：造成魔伤，2连击。）"
+     ],
+     "unclaimed": [
+      "连击：2连击"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 41,
+     "gaps": [
+      "解析层没读出：「连击（出现在：造成魔伤，2连击。）」",
+      "描述里有未认领的机制词：「连击：2连击」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000308",
+     "name": "压扁",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 5,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "对敌方精灵造成物理伤害。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 31,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000309",
+     "name": "践踏",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 4,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "对敌方精灵造成物理伤害。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 19,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000310",
+     "name": "湮灭",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 5,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "对敌方精灵造成魔法伤害。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 26,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000311",
+     "name": "打鼾",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 6,
+     "damage_class": "魔攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "对敌方精灵造成魔法伤害。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 32,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000312",
+     "name": "先发制人",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物理伤害，先手+1。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 169,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000313",
+     "name": "天旋地转",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 3,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物理伤害，先手+1，迸发：本次技能威力+30。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 19,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000314",
+     "name": "吨位压制",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 3,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤，敌方体重越低，本次技能威力越高。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 20,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000315",
+     "name": "以重制重",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 3,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤，敌方体重越高，本次技能威力越高。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 15,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000316",
+     "name": "当头棒喝",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 3,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物伤，若敌方本回合更换精灵，本次技能威力+100。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [
+      "若：若敌方本回合更换精灵",
+      "回合：若敌方本回合更换精灵"
+     ],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 43,
+     "gaps": [
+      "描述里有未认领的机制词：「若：若敌方本回合更换精灵」",
+      "描述里有未认领的机制词：「回合：若敌方本回合更换精灵」"
+     ],
+     "verdict": "已结算但有未认领片段"
+    },
+    {
+     "skill_id": "skill_000317",
+     "name": "后发制人",
+     "category": "攻击",
+     "element": "普通系",
+     "energy": 3,
+     "damage_class": "物攻",
+     "has_static_power": true,
+     "is_attack": true,
+     "is_status": false,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "造成物理伤害，先手-1。",
+     "parsed_kinds": [],
+     "parsed_effects": [],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": true,
+     "learnable_by_pets": 35,
+     "gaps": [],
+     "verdict": "已结算"
+    },
+    {
+     "skill_id": "skill_000318",
+     "name": "加固",
+     "category": "状态",
+     "element": "普通系",
+     "energy": 2,
+     "damage_class": null,
+     "has_static_power": false,
+     "is_attack": false,
+     "is_status": true,
+     "is_defense": false,
+     "is_trait": false,
+     "desc": "自己获得物防+140%。",
+     "parsed_kinds": [
+      "self_stat"
+     ],
+     "parsed_effects": [
+      {
+       "kind": "self_stat",
+       "value": {
+        "stat": "def",
+        "delta_pct": 140
+       },
+       "evidence": "自己获得物防+140%",
+       "term": "3014"
+      }
+     ],
+     "unparsed": [],
+     "unclaimed": [],
+     "resolved": true,
+     "reason": null,
+     "support_tier": null,
+     "support_why": "描述被完整读出（1 条效果），且没有未认领片段",
+     "support_unparsed": [],
+     "in_any_candidate_moveset": false,
+     "learnable_by_pets": 53,
+     "gaps": [],
+     "verdict": "已结算"
+    }
+   ]
+  }
+ }
+}

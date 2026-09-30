@@ -95,9 +95,14 @@ test('RC-106 v2/v3：区别只有 mana / actions / binding 三处（+ 2026-09-23
   // 2026-09-25（RC-401 批次六）：再登记一个 `foe_energy_loss`（敌方失能类效果的能力开关）。
   const extraEnergyKeys = Object.keys(v3.energy).filter((k) => !(k in v2.energy)).sort();
   // 2026-09-25（RC-401 批次九）：再登记一个 `per_layer_cost`（动态能耗修正）。
+  // 2026-09-29（RC-401 批次十四）：再登记一个 `respond_override`（「应对X：改为…」的**条件覆盖**）。
+  // ⚠ 这一条是**登记新的能力开关**，不是把判据放宽：白名单仍然是 `assert.deepEqual` 的**逐项精确相等**
+  //   （多一个 / 少一个 / 改名都会红），下面「v2 有的每个 key 逐字相同」那一轮一个字没动 ——
+  //   它防的是「v3 悄悄改了 v2 已有叶子的值」。新叶子只在 v3 出现、带 confidence + reason，
+  //   且由 `scripts/roco/build-rule-configs.mjs` 生成（`--check` 是那条守卫；手写进磁盘会被生成器冲掉）。
   assert.deepEqual(extraEnergyKeys,
-    ['cost_modifier', 'foe_energy_loss', 'initial_for_all_pets', 'per_layer_cost'],
-    'v3 的 energy 只允许多出这四个已登记的叶子');
+    ['cost_modifier', 'foe_energy_loss', 'initial_for_all_pets', 'per_layer_cost', 'respond_override'],
+    'v3 的 energy 只允许多出这五个已登记的叶子');
   for (const key of Object.keys(v2.energy)) {
     assert.deepEqual(v3.energy[key], v2.energy[key], `v3 的 energy.${key} 必须逐字沿用 v2`);
   }

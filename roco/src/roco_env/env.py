@@ -57,6 +57,7 @@ from . import traits as tr
 from . import data as _data
 from . import overrides as _overrides
 from . import rule_config as _rule_config
+from . import individuals as _individuals
 from .data import Ruleset, load_ruleset
 from .rule_config import RuleConfig, RuleConfigError
 from .schema import (
@@ -87,6 +88,10 @@ from .schema import (
 #
 # 下面几行是「读配置」，不是「再抄一份常量」：改 JSON 它们就跟着变，所以默认路径
 # 依旧与当前引擎逐位相同（legacy 的 max/regen/initial 恒为 6/1/2）。
+# ⚠ 下面两个常量**有意冻结默认（legacy）配置** = `6` / `1`
+#   （`roco/tests/test_rule_config.py:210-211` 逐字钉着 ✓ —— 15 处读者全在 `roco/tests` ✓）；
+#   v3 是 `10` / `0` ✓（同文件 `:295` 逐字钉着「两者不同」✓）⇒ **它们只服务于「默认 / legacy 口径」** ✓。
+#   ⚠ **若将来在「对局路径」上要用（v3 的 `10`/`0`）⇒ 必须按 #49 从 `cfg` 取** ✗（不许直接读这两个常量 ✗）。
 _RULE_CONFIG: RuleConfig = _rule_config.get_rule_config()
 ENERGY_MAX: int = _RULE_CONFIG.energy_max
 ENERGY_REGEN_PER_TURN: int = _RULE_CONFIG.energy_regen_per_turn
@@ -110,6 +115,12 @@ END_TURN_STAGES_IMPLEMENTED: Tuple[str, ...] = ("status_tick", "regen")
 #: （`SWITCH_PRIORITY`）后进 `priority` 那一维。这个差距如实登记在报告里，别当它不存在。
 ACTION_ORDER_DIMENSIONS: Tuple[str, ...] = ("respond", "switch", "priority", "speed")
 
+#: task-28（H 族 `285 退化`「敌方获得1层萌化」）：**「萌化」是带层数的标记**（`PetState.marks` ✓），
+#: **不是回合末状态** ✗ ⇒ 它**不进** `END_OF_TURN_STATUS`（进了就是"凭空 tick" ⇒ **假绿** ✗）。
+#: 语义依据（语料逐字）：`285`/`732` 都写「**1层**萌化」⇒ 带层数 ✓；10 条里**没有一条**让萌化自己造成效果 ✓
+#: ⚠ 本表**只放"标记化"的状态名**；`foe_status` 里其余的（中毒/灼烧/寄生）**照旧**走 `END_OF_TURN_STATUS` ✓
+STATUS_AS_MARK: Tuple[str, ...] = ("萌化",)
+
 #: RC-105：引擎**真的会产出**的动作类。配置的 `actions.allowed_kinds` 里出现别的名字
 #: （例如 `struggle` —— 它在 `VALID_KINDS` 里，但本引擎不会把它列进合法动作）就抛错：
 #: 声明了一个引擎产不出的动作类，等于把「没实现」说成「已支持」。
@@ -128,30 +139,60 @@ ITEM_EFFECTS = {"回复药": ("heal", 45), "净化药": ("cleanse", 0), "能量�
 # ── 构造 ────────────────────────────────────────────────────────────────
 
 
-def _make_pet(rs: Ruleset, pet_id: str, slot: int, level: int) -> PetState:
-    """按规则集里的种族值造一只。
+def _make_pet(rs: Ruleset, pet_id: str, slot: int, level: int,
+              snapshot: Optional[Dict[str, Any]] = None) -> PetState:
+    """按规则集里的种族值造一只；**有个体快照时**用快照算六维（Q8，2026-09-29）。
 
-    假设：等级 1 时面板 = 种族值。**等级→面板的换算公式未知**（M1 已登记为
-    unknown），所以本引擎只支持 level=1，其它等级抛 UnsupportedEffect。
-    宁可拒绝，也不要编一条成长曲线。
+    两条路径**必须能分辨**（人类逐字：「不许把两种情况说成一样」）：
+
+      · `snapshot is None`（默认，legacy / v2 / 不传 individuals 的调用方）：
+        老路径，逐位不变 —— 等级 1 时面板 = 种族值经 `data.panel_stats` 换算（M1 的
+        「等级→面板」公式未知），所以 **level != 1 一律抛 `UnsupportedEffect`**。
+      · `snapshot` 有值：六维由 `individuals.panel_from_snapshot()` 现算 —— 与列表/详情
+        **同一份投影**（PVP 档：满级 60 + 5 星 ×6；`panel_projection` 带版本号）。
+        等级由**快照**说了算（`individualFromInstance` 默认 60，人类 2026-09-27 拍板
+        「pvp 没有的话就默认都 60 级别吧」），所以这一支**不再按 level=1 拦** ——
+        再拦就等于挡住"同一个体"的唯一正例。
     """
-    if level != 1:
-        raise fx.UnsupportedEffect(
-            f"等级 {level}", "等级→面板换算公式未知，本引擎只支持 level=1（M1 已登记为 unknown）"
-        )
     pet = rs.pet(pet_id)
-    # 关键：pets.json 里的 stats 是**种族值**，实战要用面板值。
-    # 换算依据见 data.PANEL_FORMULAS（从社区快照的 base_*/stat_* 反推，
-    # hp/atk/def 三项精确、其余有残差）。伤害量级完全取决于这一步。
-    panel = _data.panel_stats(pet.stats)
-    hp = int(round(panel.get("hp", float(pet.stats.get("hp", 1)))))
+    if snapshot is None:
+        if level != 1:
+            raise fx.UnsupportedEffect(
+                f"等级 {level}", "等级→面板换算公式未知，本引擎只支持 level=1（M1 已登记为 unknown）；"
+                "要按个体快照的等级结算，请走 `/battle/new` 的 individuals（Q8）"
+            )
+        # 关键：pets.json 里的 stats 是**种族值**，实战要用面板值。
+        # 换算依据见 data.PANEL_FORMULAS（从社区快照的 base_*/stat_* 反推，
+        # hp/atk/def 三项精确、其余有残差）。伤害量级完全取决于这一步。
+        panel = _data.panel_stats(pet.stats)
+        hp = int(round(panel.get("hp", float(pet.stats.get("hp", 1)))))
+        return PetState(pet_id=pet_id, slot=slot, level=1, hp=hp, max_hp=hp, energy=0)
+
+    # ── Q8：按个体快照算六维（与列表/详情同一份投影）─────────────────────
+    result = _individuals.panel_from_snapshot(pet.stats, snapshot)
+    panel = dict(result.get("panel") or {})
+    if "hp" not in panel:
+        raise fx.UnsupportedEffect(
+            f"个体快照的面板（{pet.name}）",
+            "快照 + 种族值算不出生命这一项 ⇒ 开局就没有血量上限；"
+            f"缺什么：{'；'.join(result.get('unknown') or []) or '（未说明）'}",
+        )
+    hp = int(panel["hp"])
+    level_from_snapshot = snapshot.get("level")
+    level_value = int(level_from_snapshot) if isinstance(level_from_snapshot, int) \
+        and not isinstance(level_from_snapshot, bool) else _individuals.PVP_LEVEL
     return PetState(
         pet_id=pet_id,
         slot=slot,
-        level=1,
+        level=level_value,
         hp=hp,
         max_hp=hp,
         energy=0,
+        panel=panel,
+        individual_source="individual-snapshot",
+        individual_id=str(snapshot.get("individual_id") or "") or None,
+        individual_level=level_value,
+        panel_projection=result.get("projection"),
     )
 
 
@@ -164,6 +205,7 @@ def reset(
     loadouts: Optional[Dict[str, Sequence[str]]] = None,
     config: Optional[Any] = None,
     unverified_overrides: Optional[Sequence[Any]] = None,
+    individuals: Optional[Dict[str, Any]] = None,
 ) -> GameState:
     """开始一局。
 
@@ -211,6 +253,13 @@ def reset(
             f"对手也必须是 {team_size} 只（模式 {cfg.battle_mode_id}），实际 {len(enemy)} 只"
         )
 
+    # ── Q8（2026-09-29）：个体快照 → 队伍**位次** ──────────────────────────
+    # 形状问题与"实例对不上位次"都在这里一次性报出来（说清哪里不对，不静默忽略）。
+    # `individuals=None` ⇒ 空字典 ⇒ 每一只都走种族值路径（老行为逐位不变）。
+    snapshots, snapshot_problems = _individuals.resolve_snapshots(individuals, list(team))
+    if snapshot_problems:
+        raise ValueError("individuals 不合法：" + "；".join(snapshot_problems))
+
     # 配招要**同时**对双方校验：`loadouts` 是一份合并的 {pet_id: [...]}，
     # 里面有对手那几只的配招。只按我方队伍校验会把它报成
     # 「配招提到了不在队伍里的 pet_xxx」——记录里带着两边配招时就会炸。
@@ -221,7 +270,8 @@ def reset(
     state = GameState(
         ruleset_id=rs.ruleset_id,
         seed=seed,
-        player=SideState(name="player", pets=[_make_pet(rs, p, i, 1) for i, p in enumerate(team)]),
+        player=SideState(name="player", pets=[
+            _make_pet(rs, p, i, 1, snapshots.get(i)) for i, p in enumerate(team)]),
         enemy=SideState(name="enemy", pets=[_make_pet(rs, p, i, 1) for i, p in enumerate(enemy)]),
     )
     # 这一局绑定的规则配置：写进 state，replay / 序列化 / 报告都读得到。
@@ -564,6 +614,137 @@ def _tie_is_decisive(entries: Sequence[Dict[str, Any]]) -> bool:
     return len(set(keys)) != len(keys)
 
 
+# ── 先手用的速度：**同一个体投影**（Q8 收口，task-23）───────────────────────
+#
+# 人类逐字：「**肯定要按照最终结算出来应该怎么样就怎么样啊，不能偷懒**」。
+# 在这之前 `order_actions` 读的是 `rs.pet(pet_id).stats["spe"]` —— **种族值**
+# （`PetState` 没有 `stats` 字段 ⇒ `hasattr` 恒 False ⇒ 走回落）。
+# 实测同一个体：列表/详情侧速度 **275** · 物种面板 116.29 · 先手判定实际用 **33** ✗。
+#
+# ⚠ 这一处**不能逐只接**（那是"假接上"）：先手是**两侧比大小**，一侧拿面板、另一侧拿种族值
+# 就是两套量纲（实测 275 vs 130 ⇒ 先手被系统性偏向有快照的一方，而且**不报错**）。
+# 所以规则是**整局口径**：
+#   · 本局**任一只**带个体快照 ⇒ 面板口径：有快照的用**个体面板**，同局没快照的用**物种面板**
+#     （`data.panel_stats(race)`）—— 两侧同为"面板"量纲，可以比；
+#   · 整局**没有**快照（legacy / v2 / 回归集 / 产品无实例开局）⇒ **逐字**仍是种族值
+#     ⇒ golden 指纹一个字节不动。
+
+#: 先手速度的来源：个体快照投影（与列表/详情同一份）。
+SPEED_SOURCE_INDIVIDUAL = "individual-panel"
+#: 先手速度的来源：物种面板（本局走面板口径、但这一只没有快照）。
+SPEED_SOURCE_SPECIES_PANEL = "species-panel"
+#: 先手速度的来源：种族值（整局没有快照时的老路径）。
+SPEED_SOURCE_SPECIES_RACE = "species-race"
+
+
+def battle_uses_panel_scale(state: GameState) -> bool:
+    """**这一局**是不是在「面板口径」下结算：双方任一只带个体快照 ⇒ 是。
+
+    「同一个体投影」一旦进了这一局，**所有**速度都得换成面板量纲（见上面那段注释）；
+    整局没有快照就整个口径关掉 —— 这是 legacy / v2 / 回归集逐位不变的前提。
+    """
+    for side in ("player", "enemy"):
+        for pet in getattr(getattr(state, side, None), "pets", None) or ():
+            if getattr(pet, "panel", None):
+                return True
+    return False
+
+
+def order_speed(pet: Any, rs: Ruleset, *, panel_scale: bool,
+                cfg: Optional[RuleConfig] = None) -> Tuple[Any, str]:
+    """先手判定要用的速度 + 它的**来源**（`order_actions` 与回执共用这一处）。
+
+    返回 `(速度, 来源)`，来源取 `SPEED_SOURCE_*` 三态之一。三条路径：
+      · `pet.panel` 非空 ⇒ **个体面板的 spe**（与列表/详情同一份投影）；
+      · 空 + `panel_scale`（本局有快照）⇒ **物种面板** `data.panel_stats(race)["spe"]`；
+      · 空 + 整局没快照 ⇒ **逐字** `species.stats["spe"]`（老路径，种族值）。
+
+    ⚠ 2026-09-29（task-25，A 族「获得 属性±N」的读点）**改钉**：这个函数过去**完全不读
+    `pet.buffs`** ⇒ 「自己获得速度+30」（A 族 53 条里的一整类）会发出 `buff_self{stat:"spe"}`
+    事件、判据也判 `resolved=True`，但**先手顺序一点都不变** = 假绿。
+    实测（改前）：`spe` buff 设成 +100% 与不设，`order_actions` 的执行顺序逐字相同。
+
+    现在按**能力位**读两个来源（没声明就一个都不读 ⇒ legacy / v2 逐位不变）：
+      · `stat_gain.speed_buff` ⇒ `buffs["spe"]` 是**百分点**（`+30` = 先手速度 ×1.30）；
+      · `stat_gain.flat`       ⇒ `buffs_flat["spe"]` 是**面板量纲的绝对值**（`+120` = +120 点）。
+    （平值的**解析与读点共用**`stat_gain.flat`**一个**能力位 —— 拆开就能合法地造出
+      "解析开了、读点没开"的假绿配置，见 `rule_config` 里那条注释。）
+    两条的量纲分开，见 `PetState.buffs_flat` 的 docstring。
+    """
+    panel = getattr(pet, "panel", None)
+    if isinstance(panel, dict) and panel:
+        value = panel.get("spe")
+        # 布尔是 int 的子类 —— 面板里出现 true/false 是形状错误，不许当 1/0 用。
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            return _speed_with_buffs(pet, value, cfg), SPEED_SOURCE_INDIVIDUAL
+    # 老调用方可能传的是**自带 `stats` 的对象**（不是 PetState）⇒ 逐字沿用老读法
+    # （这种对象没有 `buffs`，`_speed_with_buffs` 读到空 ⇒ 值逐字不变）。
+    if hasattr(pet, "stats"):
+        return _speed_with_buffs(pet, pet.stats.get("spe", 1), cfg), SPEED_SOURCE_SPECIES_RACE
+    species = rs.pet(pet.pet_id)
+    if panel_scale:
+        import roco_env.data as _data  # 局部导入：data 与 env 互相引用，模块级会成环
+        species_panel = _data.panel_stats(species.stats)
+        if "spe" in species_panel:
+            return _speed_with_buffs(pet, float(species_panel["spe"]), cfg), SPEED_SOURCE_SPECIES_PANEL
+    # ⚠ 最后这条**也要**过一遍 `_speed_with_buffs`：第一版漏了它，于是"整局没有快照"的
+    # 候选局（v3 + 种族值路径）速度增减照样不生效 —— 读数上表现成 buff 设了没用
+    # （实测 `order_speed(P(spe_buff=100), cfg=v3)` 与不设都返回 `(33, 'species-race')`）。
+    return _speed_with_buffs(pet, species.stats.get("spe", 1), cfg), SPEED_SOURCE_SPECIES_RACE
+
+
+def _speed_with_buffs(pet: Any, value: float, cfg: Optional[RuleConfig]) -> float:
+    """把「获得速度±N%」（`buffs`）与「获得速度±N」（`buffs_flat`）折进先手速度。
+
+    **两个能力位各自独立**：没声明的那一条不生效（`cfg is None` = 两条都不生效 ——
+    判据里的历史调用方就是这么调的，逐位不变）。
+    """
+    if cfg is None:
+        return value
+    if bool(getattr(cfg, "stat_gain_speed_buff", False)):
+        pct = float((getattr(pet, "buffs", None) or {}).get("spe", 0) or 0.0)
+        if pct:
+            value = float(value) * (1.0 + pct / 100.0)
+    if bool(getattr(cfg, "stat_gain_flat", False)):
+        flat = float((getattr(pet, "buffs_flat", None) or {}).get("spe", 0) or 0.0)
+        if flat:
+            value = float(value) + flat
+    return value
+
+
+def order_speed_provenance(state: GameState, rs: Ruleset,
+                           cfg: Optional[RuleConfig] = None) -> Dict[str, Any]:
+    """这一回合**两侧各自用的速度与来源**（进 `turn_start` 回执，只在面板口径下出现）。
+
+    与 `order_actions` 读**同一个** `order_speed()` —— 不是第二份算法，只是把同一份读数
+    登记出来，让「有没有假接上」可审计（人类口径：不许把两种情况说成一样）。
+
+    2026-09-29（task-25）：把**两条速度修正的原始量**也登记出来（只在非零 + 能力位声明时），
+    这样「先手翻了」这个读数可以直接归因到「哪一条修正改了多少」，不用反推。
+    """
+    panel_scale = battle_uses_panel_scale(state)
+    speeds: Dict[str, Any] = {}
+    for side in ("player", "enemy"):
+        pet = getattr(state, side).field_pet
+        value, source = order_speed(pet, rs, panel_scale=panel_scale, cfg=cfg)
+        row: Dict[str, Any] = {
+            "value": value,
+            "source": source,
+            "pet_id": pet.pet_id,
+            # 有快照就把"是哪一只"带上（人类逐字：「实例重复物种时不能只靠 speciesID 推断来源」）。
+            **({"individual_id": pet.individual_id} if source == SPEED_SOURCE_INDIVIDUAL else {}),
+        }
+        if cfg is not None:
+            _pct = float((getattr(pet, "buffs", None) or {}).get("spe", 0) or 0.0)
+            _flat = float((getattr(pet, "buffs_flat", None) or {}).get("spe", 0) or 0.0)
+            if _pct and bool(getattr(cfg, "stat_gain_speed_buff", False)):
+                row["speed_buff_pct"] = _pct
+            if _flat and bool(getattr(cfg, "stat_gain_flat", False)):
+                row["speed_buff_flat"] = _flat
+        speeds[side] = row
+    return {"panel_scale": panel_scale, "speeds": speeds}
+
+
 def order_actions(
     state: GameState,
     rs: Ruleset,
@@ -591,16 +772,24 @@ def order_actions(
     """
     cfg = cfg or _rule_config.get_rule_config()
     require_declared_action_order(cfg)
+    # 这一局的速度口径（Q8 收口，task-23）：整局有任何一只带快照就按"面板"比，否则逐字老路径。
+    panel_scale = battle_uses_panel_scale(state)
     entries = []
     for side, action, opp in (("player", player_action, enemy_action),
                               ("enemy", enemy_action, player_action)):
         pet = getattr(state, side).field_pet
+        # 2026-09-29（task-25）：把 `cfg` 传下去 —— 「获得速度±N% / ±N」两个能力位
+        # 就挂在这一跳上（见 `_speed_with_buffs`）。不传 = 两条都不生效 = 改动前逐位相同。
+        _speed, _speed_source = order_speed(pet, rs, panel_scale=panel_scale, cfg=cfg)
         entries.append({
             "side": side,
             "action": action,
             "respond": _respond_success(action, opp, rs),
             "priority": _priority_of(action, rs),
-            "speed": pet.stats.get("spe", 1) if hasattr(pet, "stats") else rs.pet(pet.pet_id).stats.get("spe", 1),
+            # 2026-09-30（Q8 收口，task-23）：速度也读**同一个体投影**（三态见 `order_speed`）。
+            # 留一栏 `speed_source` 只为可审计/调试；排序键只用 `speed` 本身，没变。
+            "speed": _speed,
+            "speed_source": _speed_source,
             "tie": None,
         })
     if _tie_is_decisive(entries):
@@ -656,7 +845,9 @@ def resolved_skill_cost(state: GameState, side: str, skill, cfg: RuleConfig) -> 
     try:
         return effective_skill_cost(getattr(state, side).field_pet, skill, cfg,
                                     weather=state.weather,
-                                    foe_status_layers=_poison_layers(state, side))
+                                    foe_status_layers=_poison_layers(state, side),
+                                    own_debuff_layers=_own_debuff_layers(state, side),
+                                    slot_cost_delta=_slot_cost_delta(state, side, skill, cfg))
     except RuleConfigError:
         return None
 
@@ -764,7 +955,16 @@ def step_joint(
     pre_enemy = observation_for(state, rs, "enemy")
 
     state.log.append(f"── 第 {state.turn} 回合 ──")
-    _bump(state, "turn_start", {"turn": state.turn})
+    # 2026-09-30（Q8 收口，task-23）：回执里登记**这一回合两侧各自用的速度与来源**
+    # （`individual-panel` / `species-panel` / `species-race`）。为什么要有这一栏：
+    # 「先手按面板比」如果只改排序、不写出来，就没人看得出**有没有假接上**
+    # （一侧面板、一侧种族值 = 两套量纲，先手会被静默带偏）。
+    # **只在面板口径下多这一把键**：整局没快照（legacy / v2 / 回归集）时 `turn_start` 逐位不变。
+    _speed_prov = order_speed_provenance(state, rs, cfg=cfg)
+    _bump(state, "turn_start", {
+        "turn": state.turn,
+        **({"speed_provenance": _speed_prov} if _speed_prov["panel_scale"] else {}),
+    })
 
     # 回合开始时的特性：
     #   · 预警（黑猫巫师）—— 触发条件依赖未核验的伤害公式，只在显式驱动时生效；
@@ -806,6 +1006,10 @@ def step_joint(
             # unsupported 变成可结算的事件 —— 玩家那里「点得动的动作把整局炸掉」不可接受。
             # 搜索/推演那条路（planner / opponents / regression）不传这个开关，
             # 保持「抛异常 ⇒ 这个动作推不动 ⇒ -inf」的既有契约（`test_planner.py` 钉着）。
+            # ⚠ 「这一手真的打出去了吗」= **从事件流里读事实**，不是"代码执行到了" ✗：
+            # `_execute` 的第一道守卫（精灵已倒下）会 `action_cancelled{reason:"fainted"}` 后 return，
+            # 而下面的累加块**照样会被执行到** —— 那些手**没有打出去**，不许计数（人类口径）。
+            _events_before = len(state.events)
             if not tolerate_unsupported:
                 _execute(state, rs, side, action, cfg)
             else:
@@ -821,6 +1025,9 @@ def step_joint(
                         "what": exc.what, "detail": exc.detail,
                     }, evidence=(exc.evidence or "",))
                     continue
+            _went_off = not any(
+                ev.kind == "action_cancelled" and ev.detail.get("side") == side
+                for ev in state.events[_events_before:])
             # RC-401 批次十二：「每次使用后，本技能<属性>永久±N」在**成功出手之后**累加。
             # 放在 `_execute` 之后、且只对技能类动作做（换人/聚能/道具没有这条属性）。
             if action.kind == ACTION_SKILL and action.skill_id:
@@ -829,7 +1036,23 @@ def step_joint(
                     _pet = getattr(state, side).field_pet
                     _parsed_ramp = parse.resolve_per_use_ramp(
                         _skill, declared=bool(getattr(cfg, "damage_per_use_ramp", False)))
-                    _accumulate_per_use_ramp(state, _pet, _skill, _parsed_ramp, cfg)
+                    _accumulate_per_use_ramp(state, _pet, _skill, _parsed_ramp, cfg,
+                                             happened=_went_off)
+                    # task-25 B 族（2026-09-30）：「**每使用1次其他<本系>技能 /
+                    # 每使用过1个其他系别技能**，本技能<属性>永久±N」—— 触发点就在**这一手**：
+                    # 只有"别的技能"打出去了才动 B 族那条技能的永久修正（本技能自己不算 ✗）。
+                    _accumulate_element_use_ramp(state, rs, _pet, _skill, cfg,
+                                                 happened=_went_off)
+                    # RC-401 批次十七（task-26 H 族批一）：「每应对成功1次 / 应对X：…永久±N」。
+                    # ⚠ 触发判据读的是 `_execute` 里设好的 `_respond_succeeded`（**真的应对成功**才为真）——
+                    # 不成立时 `_accumulate_triggered_ramp` 里那条 `trigger` 对不上 ⇒ 什么都不做 ✓
+                    _parsed_trig = parse.resolve_triggered_ramp(
+                        _skill, declared=bool(getattr(cfg, "damage_triggered_ramp", False)))
+                    _accumulate_triggered_ramp(
+                        state, _pet, _skill, _parsed_trig, trigger="respond_success",
+                        # ⚠ **事实从状态里读**，不是"代码执行到了"：`_respond_succeeded` 由 `_execute`
+                        # 按「本技能应对的类别 == 对手那一手的类别」算出（对手不是那一类 ⇒ False）。
+                        happened=bool(getattr(_pet, "_respond_succeeded", False)), cfg=cfg)
 
     _end_of_turn(state, rs, cfg)
 
@@ -1040,7 +1263,11 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
     setattr(pet, "_burst_active", (pet.entered_turn == state.turn and not pet.used_burst))
 
     if skill.is_defense:
-        reduction = fx.parse_defense_reduction(skill)
+        # RC-401 批次十八（F 族第五种形状）：**号位带来的额外减伤** ⇒ 与基础减伤**相加** ✓。
+        # ⚠ **本地规则**：原始资料与代码**均未定义复合口径**（`_defense_reduction` 是单值 ✗）⇒ 本地取**加法** ✓；
+        #   未声明号位能力 ⇒ 额外值为 0 ⇒ 与原行为**逐字相同** ✓（legacy 不变 ✓）。
+        reduction = fx.parse_defense_reduction(skill) \
+            + _slot_extra_reduction(state, side, skill, cfg) / 100.0
         setattr(pet, "_defense_reduction", reduction)
         if fx.defense_cooldown_applies(skill):
             pet.defense_cooldown = 2      # 本回合刚用过，下回合不可用（术语 1016）
@@ -1062,8 +1289,52 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
         # 未声明 ⇒ 效果被解析层收回（连未认领标记也不补），legacy 的 unsupported 与批六之前逐位相同。
         parsed_def = parse.resolve_foe_energy_loss(
             skill, declared=bool(getattr(cfg, "energy_foe_energy_loss", False)))
-        if parsed_def.effects or parsed_def.unparsed:
+        parsed_def = parse.resolve_cleanse_marks(
+            skill, declared=bool(getattr(cfg, "damage_cleanse_marks", False)), parsed=parsed_def)
+        parsed_def = parse.resolve_global_skill_mod(
+            skill, declared=bool(getattr(cfg, "damage_global_skill_mod_text", False)), parsed=parsed_def)
+        # RC-401 批次十四（2026-09-29 task-20）：防御支也接同一条覆盖语义
+        #（描述「…，应对防御：改为…」的技能若本身是防御招，走的就是这一支）。
+        parsed_def = parse.resolve_respond_override(
+            skill, declared=bool(getattr(cfg, "energy_respond_override", False)),
+            parsed=parsed_def)
+        # 2026-09-29（task-25）：A 族「获得 属性±N」的扩展形状 / 平值（同上）。
+        # 这一支的附带效果**只在应对成功那一步**应用（下面 `if succeeded:`），所以
+        # 「应对攻击：自己获得魔防+70%」这类由这一支正确处理。
+        parsed_def = parse.resolve_stat_gain_extended(
+            skill, declared=bool(getattr(cfg, "stat_gain_extended", False)),
+            flat_declared=bool(getattr(cfg, "stat_gain_flat", False)), parsed=parsed_def)
+        # ── task-28（本件）：**补上防御支缺的两个 resolver** ✗（今天第 6 次"只接一半"的形态 ✓）
+        # ⚠ **两个一起接** ✗（别修一个漏一个 ✓）：
+        #   ① `element_power_ramp`（`463 点亮` 落这 ✓）② `moe_colon`（攻击/状态支有、防御支没有 ✗）
+        # ⚠ **顺序照抄上面 4 个的写法与位置** ✓（`grep` 数过它现在正好调 4 个 ✓ 不猜 ✓）
+        # ⚠ **条件门不用新造** ✓ —— 本支的效果**只在应对成功时** `_apply_effect_batch` ✓
+        #   （段内注释逐字：「应对成功 → 真的应用／应对失败 → **登记**为 unsupported，绝不能当成已生效」✓）
+        #   ⇒ ⇒ 但**我没把"结构如此"当成"行为如此"** ✗ —— 真打一手两向**照样做** ✓
+        # ⚠ 2026-09-30 **回滚留档**（改钉不删 ✓）：这里曾传 `allow_respond_clause=True` ✓
+        #   ⇒ 运行时 `463` 真的会在应对成立时加 ✓（真打一手实测：对手出攻击 ⇒ `{'光系': 50}` ✓）
+        #   ⇒ ⚠ **但判据侧没跟上** ✗ ⇒ 变成「**运行时算了、判据说没算**」✗✗（本阶段最不许的方向 ✗）
+        #   ⇒ ⇒ 按纪律**回滚** ✓，恢复"闸在 + 判据 False"的一致状态 ✓
+        #   ▶ 重新放开的前置条件（下一轮就绪后再做 ✓）：
+        #     `coverage` 的**三条链**都要加 `allow_respond_clause=_is_defense_skill(skill)` ✓
+        #     （助手的 docstring 已写好 ✓ 但三处调用**形态不一** ⇒ 我的正则只改到 2 处 ✗ 别再用正则 ✓
+        #      逐处 `grep -n` 手工改 ✓）· 并同步改钉 `test_element_power_ramp_defense_transition.py` ✓
+        # ⚠ 2026-09-30 **已重开** ✓（前置条件已满足 ✓）：`coverage` 三条链已逐处对齐 ✓
+        #   （`allow_respond_clause=_is_defense_skill(skill)` ✓ 链 A/B/C 各一处 ✓）
+        #   ⇒ 现在两边一起认"防御技的应对子句" ✓ ⇒ 不再是「运行时算了、判据说没算」✗
+        parsed_def = parse.resolve_element_power_ramp(
+            skill, declared=bool(getattr(cfg, "damage_element_power_ramp", False)),
+            parsed=parsed_def, allow_respond_clause=True)
+        parsed_def = parse.resolve_moe_colon(
+            skill, declared=bool(getattr(cfg, "damage_moe_mark", False)), parsed=parsed_def,
+            flat_declared=bool(getattr(cfg, "stat_gain_flat", False)),
+            power_declared=bool(getattr(cfg, "damage_self_power_flat", False)),
+            global_declared=bool(getattr(cfg, "damage_global_skill_mods", False)))
+        if parsed_def.effects or parsed_def.unparsed or parsed_def.respond_override:
             if succeeded:
+                if getattr(parsed_def, "respond_override", None) is not None:
+                    parsed_def, _ = _apply_respond_override(
+                        state, rs, side, skill, parsed_def, succeeded=True, cfg=cfg)
                 applied = _apply_effect_batch(state, rs, side, skill, parsed_def, cfg)
                 state.log.append(
                     f"应对成功，{parsed_def.skill_name}的应对效果结算 {applied} 条。"
@@ -1119,6 +1390,10 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
     # RC-401 连击：判据在 `parse.resolve_hit_count`（见那里的注释）。
     hit_count, parsed_atk = parse.resolve_hit_count(
         skill, declared=bool(getattr(cfg, "damage_multi_hit", False)))
+    parsed_atk = parse.resolve_cleanse_marks(
+        skill, declared=bool(getattr(cfg, "damage_cleanse_marks", False)), parsed=parsed_atk)
+    parsed_atk = parse.resolve_global_skill_mod(
+        skill, declared=bool(getattr(cfg, "damage_global_skill_mod_text", False)), parsed=parsed_atk)
     # RC-401 批次八：先手条件（「若先于敌方攻击，本次技能威力+N%」）。
     # **只有配置声明了这条能力**才认领那段文本（未声明时它照旧是"未认领机制"）。
     parsed_atk = parse.resolve_initiative_condition(
@@ -1138,6 +1413,44 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
     # RC-401 批次十一：「若敌方本回合更换精灵，<效果>」——先按条件把条件效果筛一遍，
     # 再把**结构性**的那几条（威力平加/翻倍、连击加成）用到这一手上。
     parsed_atk, _foe_switched = _gate_foe_switch_effects(state, side, skill, parsed_atk, cfg)
+    # RC-401 批次十四（2026-09-29 task-20）：攻击技带「应对X：改为…」时走**同一条覆盖语义**
+    # （实测 `skill_000611 毒囊`「造成物伤，敌方获得2层中毒，应对状态：改为获得6层」——
+    # 基础 foe_status 在**攻击支**的附带效果里结算，所以这一支也必须接，否则应对成功仍是 2 层）。
+    # ⚠ 放在 `_gate_foe_switch_effects` **之后**：`replaces_index` 是解析那一刻在同一个
+    # effects 列表上算出来的，gate 可能摘掉几条，先算下标就会错位。
+    parsed_atk = parse.resolve_respond_override(
+        skill, declared=bool(getattr(cfg, "energy_respond_override", False)), parsed=parsed_atk)
+    # RC-401 批次十六（task-20 批四）：读敌方层数改**本手**威力/连击。
+    parsed_atk = parse.resolve_per_layer_boost(
+        skill, declared=bool(getattr(cfg, "damage_per_layer_boost", False)), parsed=parsed_atk)
+    # task-28（第 2 批 `717`）：「<谁>获得萌化：<效果>」在**攻击支**也要接 ✗
+    # ⚠ 我第一版**只接了状态支** ⇒ 实测 `717`（攻击技）**一个字都没生效** ✗
+    #   （无事件 · `power_used=100` 没加 · `marks={}` ✓ —— 这正是"漏一条链"的形态 ✓ 与 `462` 那次同型 ✓）
+    # task-28（`724`）：**条件式**本手威力（"自己有减益时" ✓ 与 `717` 共用同一 kind ✓ 只多一个条件门 ✓）
+    # ⚠ **三条支都要接** ✗ —— `717` 那次**只接状态支** ⇒ 攻击技一个字没生效 ✗（真打一手才抓到 ✓）
+    parsed_atk = parse.resolve_self_debuff_power(
+        skill, declared=bool(getattr(cfg, "damage_cond_self_debuff_power", False)
+                              and getattr(cfg, "damage_self_power_flat", False)), parsed=parsed_atk)
+    parsed_atk, _ = _gate_self_debuff_effects(state, side, skill, parsed_atk, cfg)
+    parsed_atk = parse.resolve_moe_colon(
+        skill, declared=bool(getattr(cfg, "damage_moe_mark", False)), parsed=parsed_atk,
+        flat_declared=bool(getattr(cfg, "stat_gain_flat", False)),
+        power_declared=bool(getattr(cfg, "damage_self_power_flat", False)),
+        global_declared=bool(getattr(cfg, "damage_global_skill_mods", False)))
+    # 2026-09-29（task-25）：A 族「获得 属性±N」的扩展形状 / 平值（同上，放在覆盖语义之后）。
+    parsed_atk = parse.resolve_stat_gain_extended(
+        skill, declared=bool(getattr(cfg, "stat_gain_extended", False)),
+        flat_declared=bool(getattr(cfg, "stat_gain_flat", False)), parsed=parsed_atk)
+    if getattr(parsed_atk, "respond_override", None) is not None:
+        parsed_atk, _ov_landed = _apply_respond_override(
+            state, rs, side, skill, parsed_atk, succeeded=bool(succeeded), cfg=cfg)
+        # RC-401 批次十五（2026-09-29 task-20 批二）：**连击数覆盖**。
+        # `hit_count` 是这一支的**局部变量**（伤害路径与 `damage` 事件的 `hits` 都读它），
+        # 所以覆盖值由这里取用 —— `_apply_respond_override` 只负责"判条件 + 登记"，
+        # 不越界去改它拿不到的局部量（成功时它在 `applied_hits` 上留数）。
+        _ov_hits = int(parsed_atk.respond_override.get("applied_hits") or 0) if _ov_landed else 0
+        if _ov_hits > 0:
+            hit_count = _ov_hits
     for _eff in parsed_atk.effects:
         if _eff.kind == "foe_switch_power_flat":
             skill = dataclasses.replace(skill, power=int(skill.power or 0) + int(_eff.value["amount"]))
@@ -1147,15 +1460,68 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
             skill = dataclasses.replace(skill, power=int((skill.power or 0) * int(_eff.value["multiplier"])))
             _bump(state, "foe_switch_power_applied", {"side": side, "skill_id": skill.skill_id,
                                                       "kind": "mult", "multiplier": int(_eff.value["multiplier"])})
+    # RC-401 批次十六（2026-09-29 task-20 批四）：「敌方每有 N 层<中毒效果|印记|星陨印记>，
+    # 本次技能威力/连击数 +M」。读的是**对手场上那只的当前层数**（`_foe_layer_count`）。
+    # 加成加在 `power` 或 `hit_count` 上 —— 它们是本仓伤害公式**唯一**读的两个入参。
+    for _eff in parsed_atk.effects:
+        if _eff.kind != "per_layer_boost":
+            continue
+        _src = str(_eff.value.get("source") or "")
+        _step = max(1, int(_eff.value.get("layer_step") or 1))
+        _layers = _foe_layer_count(state, side, _src)
+        _steps = _layers // _step
+        _amt = _steps * int(_eff.value.get("delta") or 0)
+        _field = str(_eff.value.get("field") or "")
+        if _amt and _field == "power":
+            skill = dataclasses.replace(skill, power=int(skill.power or 0) + _amt)
+        elif _amt and _field == "hits":
+            hit_count = (hit_count or 1) + _amt
+        _bump(state, "per_layer_boost_applied" if _amt else "per_layer_boost_skipped", {
+            "side": side, "skill_id": skill.skill_id, "field": _field, "source": _src,
+            "layers": _layers, "steps": _steps, "delta": _amt if _amt else 0,
+            "reason": None if _amt else "no_layers",
+            "evidence": _eff.evidence,
+        })
+    # task-28（第 2 批 `717 超级糖果`）：**本手无条件平值威力** ——
+    # ⚠ **照上面两个先例的同一手法**：直接改 `skill.power`（`foe_switch_power_flat` 就是这么做的 ✓）
+    #   ⇒ **不动伤害公式、不加旋钮** ✗（`power` 是公式唯一读的入参之一 ✓）
+    for _eff in parsed_atk.effects:
+        if _eff.kind != "self_power_flat":
+            continue
+        _amt = int(_eff.value.get("amount") or 0)
+        if _amt:
+            skill = dataclasses.replace(skill, power=int(skill.power or 0) + _amt)
+        _bump(state, "self_power_flat_applied" if _amt else "self_power_flat_skipped", {
+            "side": side, "skill_id": skill.skill_id, "amount": _amt,
+            "power_after": int(skill.power or 0), "evidence": _eff.evidence,
+        })
+    # task-28（`728 撒娇`）：**全技能威力永久+N** 的本手读取 —— 读 `global_skill_mods["power_pct"]` ✓
+    # ⚠ **口径**（Lead 裁决 ✓）：**"永久"指之后 ⇒ 本手不吃自己这次的永久** ✓
+    #   ⇒ 位置在 `compute_damage` **之前**、而**本手自己的写入在伤害之后**（效果在攻击支末尾才施加 ✓）
+    #     ⇒ ⇒ **天然满足**"不吃自己这次的" ✓（不需要额外排除逻辑 ✓）
+    if bool(getattr(cfg, "damage_global_skill_mods", False)):
+        _pct = int((getattr(me.field_pet, "global_skill_mods", None) or {}).get("power_pct", 0) or 0)
+        if _pct:
+            skill = dataclasses.replace(skill, power=int((skill.power or 0) * (1 + _pct / 100.0)))
+            _bump(state, "global_power_applied", {
+                "side": side, "skill_id": skill.skill_id, "power_pct": _pct,
+                "power_after": int(skill.power or 0),
+            })
     _initiative = next((e for e in parsed_atk.effects if e.kind == "initiative_power"), None)
     if _initiative is not None:
         _applied, _why = _initiative_condition_holds(state, rs, side)
         if _applied:
             _pct = int(_initiative.value.get("power_pct") or 0)
+            # task-28（2026-09-30）：**「改为N连击」**（`skill_000689 疾风刺`）—— 与上面同一个 effect kind，
+            # 只多读一个键 ✓。⚠ **条件不成立时这一支根本不会执行** ⇒ 连击数照基础值（1 连击）✓
+            _hits = int(_initiative.value.get("hits") or 0)
+            if _hits:
+                hit_count = _hits
             # 加成加在**威力**上（本仓唯一的伤害公式读 power）。
             skill = dataclasses.replace(skill, power=int((skill.power or 0) * (100 + _pct) / 100))
             _bump(state, "initiative_condition_applied", {
                 "side": side, "skill_id": skill.skill_id, "power_pct": _pct,
+                "hits": _hits,
                 "evidence": _initiative.evidence})
         else:
             # 条件不成立 ⇒ 如实记一条（不是未实现，是**这次没满足**）。
@@ -1183,10 +1549,17 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
                     skill = dataclasses.replace(skill, power=(skill.power or 0) + int(cond["power_delta"]))
                 if cond.get("combo_bonus"):
                     hit_count = (hit_count or 1) + int(cond["combo_bonus"])
+                # task-28（2026-09-30）：第三种形状「额外获得<属性>+N%」（`skill_000483 啮合传递`）——
+                # **读点走现成的 `buffs`**（与 `self_stat` 那一支**同一条写点**：`pet.buffs[key] += delta_pct` ✓
+                # ⇒ 伤害按伤害类别读、先手读 `spe` ✓ 引擎不必新增任何读点 ✓）。
+                if cond.get("stat") and cond.get("delta_pct"):
+                    _key = str(cond["stat"])
+                    _st_pet.buffs[_key] = _st_pet.buffs.get(_key, 0) + int(cond["delta_pct"])
                 _bump(state, "slot_condition_applied", {
                     "side": side, "skill_id": skill.skill_id, "position": position,
                     "power_delta": int(cond.get("power_delta") or 0),
                     "combo_bonus": int(cond.get("combo_bonus") or 0),
+                    "stat": cond.get("stat"), "delta_pct": int(cond.get("delta_pct") or 0),
                     "evidence": cond.get("evidence"),
                 })
                 break
@@ -1237,7 +1610,37 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
         "formula_verified": outcome.verified,
         # RC-401：只在这一手真的按连击结算时才带 `hits`——legacy 的事件一个字节都不动。
         **({"hits": hit_count} if hit_count > 1 else {}),
+        # 2026-09-30（Q8 收口）：伤害用的是哪一套六维（攻/防分别登记，带整份面板）。
+        # **只在真的用了个体快照时出现**这把键 —— 没有快照的老路径事件逐位不变，
+        # 与 `hits` / `energy_cost_mods` 同一条能力位纪律。
+        **({"individual_panel": outcome.panel_provenance}
+           if outcome.individual_panel_used() else {}),
     }, evidence=(skill.skill_id,))
+
+    # ── task-28（2026-09-30 · 427 并集 D 族余项）：`skill_000289 无畏之心` ──────────────
+    # 「减伤100%，**应对攻击：减免的伤害变为回复自己生命**，且本技能能耗永久+2。」
+    # ⚠ 能力位门控（`damage.respond_reduction_to_heal`）：没声明（legacy / v2）⇒ **一段都不产出** ✓
+    # ⚠ **判据与结算共用同一个 resolver**（`parse.resolve_respond_reduction_to_heal`）✓ —— 不各写一份 ✗
+    # ⚠ **只转"被减伤挡掉的那部分"** ✓：`减免量 = outcome.raw − damage`（`effects.py:550` 两个量现成 ✓）；
+    #    **穿过去的那点残余伤害照旧结算** ✓（289 减伤 100% 时仍有 1 的下限 ⇒ 不是"整下都不吃" ✗）。
+    # ⚠ 只在该**防守方这一手真的应对成功**时转 ✓（`_respond_succeeded` 由防御支写 ✓）
+    if bool(getattr(cfg, "damage_respond_reduction_to_heal", False)) and outcome.defense_reduction > 0:
+        _opp = _opponent_action_of(state, side)
+        if (_opp is not None and getattr(_opp, "kind", "") == ACTION_SKILL and _opp.skill_id
+                and bool(getattr(defender, "_respond_succeeded", False))):
+            _dsk = rs.skills.get(_opp.skill_id)
+            if _dsk is not None:
+                _dp = parse.resolve_respond_reduction_to_heal(_dsk, declared=True)
+                if any(getattr(e, "kind", "") == "respond_reduction_to_heal" for e in _dp.effects):
+                    _mitigated = max(0, int(outcome.raw) - int(damage))
+                    _healed = min(_mitigated, max(0, int(defender.max_hp) - int(defender.hp)))
+                    if _healed > 0:
+                        defender.hp += _healed
+                        _bump(state, "heal", {
+                            "side": "enemy" if side == "player" else "player",
+                            "healed": _healed, "skill_id": _dsk.skill_id,
+                            "from": "respond_reduction_to_heal", "mitigated": _mitigated,
+                        })
 
     if defender.hp <= 0:
         defender.hp = 0
@@ -1245,6 +1648,13 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
         defender.charge = None
         state.log.append(f"{defender_pet.name}倒下了。")
         _bump(state, "faint", {"side": foe_side, "slot": defender.slot}, evidence=("3009",))
+        # RC-401 批次十七（task-26 H 族批一）：「**每次击败敌方，本技能<属性>永久±N**」。
+        # 落点就在**真的把对手打倒下**这一支里（`faint` 事件旁边）⇒ 触发器与事实同源 ✓
+        # （`skill_000382 流星火雨` 威力+85 · `skill_000792 趁火打劫` 连击数+2）
+        _parsed_defeat = parse.resolve_triggered_ramp(
+            skill, declared=bool(getattr(cfg, "damage_triggered_ramp", False)))
+        _accumulate_triggered_ramp(state, pet, skill, _parsed_defeat,
+                                   trigger="defeat_foe", happened=True, cfg=cfg)
         # RC-105：力竭 → 那一方扣魔力；归零就立即判负（只在声明了 mana 的配置下发生）
         _settle_faint_mana(state, rs, cfg, foe_side)
 
@@ -1282,6 +1692,108 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
         )
 
 
+def _apply_respond_override(state: GameState, rs: Ruleset, side: str, skill, parsed,
+                            *, succeeded: bool, cfg: Optional[RuleConfig] = None):
+    """RC-401 批次十四（2026-09-29 task-20）：「应对X：**改为** …」的**覆盖语义**落地。
+
+    返回 `(parsed, landed)`。`landed=True` 表示**覆盖真的生效了**：被覆盖的那条基础效果已经
+    从 `parsed.effects` 里**摘掉**，换成「改为」派生的那一条 —— 是**替换**，不是追加
+    （「敌方获得3层中毒，应对防御：改为获得8层」里 3 与 8 互斥；`_RESPOND_OVERRIDE` 的
+    旧注释早就写了这条读法，只是此前没有任何一处真的实现它）。
+
+    没生效的三种情形都要**如实登记**，一条都不许静默（这是本批的全部理由 ——
+    实测 `skill_000616` 应对成功那一手照样读 3 层，而 `unsupported` 里一条都没有）：
+      ① 应对没成功 ⇒ 基础值照旧（「改为」那一支的条件确实没成立，不是"未实现"）；
+      ② 子句在、但本引擎读不出来（`leftover` 非空）⇒ 基础值照旧 + 点名那段原文；
+      ③ 覆盖目标找不到 ⇒ 一条都不动（**绝不"既留基础又加改为"**，那等于把覆盖当追加）。
+    描述里根本没有这条子句时（`respond_override is None`）本函数什么都不做。
+    """
+    ov = getattr(parsed, "respond_override", None)
+    if not ov:
+        return parsed, False
+    evidence_text = str(ov.get("evidence") or "")
+    override_effects = list(ov.get("effects") or [])
+    if not override_effects:
+        # ② 读不出来：基础值照旧，但**点名**这一段，不许静默（fail closed，不猜一个数）。
+        _note_unsupported(
+            state, f"技能「{skill.name}」的应对覆盖子句",
+            f"描述片段「{evidence_text or ov.get('body')}」："
+            f"{ov.get('leftover') or '本引擎还没有实现这一种覆盖写法'}"
+            "—— 该段不结算，基础效果按原文照旧",
+            skill.skill_id,
+        )
+        _bump(state, "respond_override_unsupported", {
+            "side": side, "skill_id": skill.skill_id,
+            "body": ov.get("body"), "reason": str(ov.get("leftover") or "not_implemented"),
+        })
+        return parsed, False
+    if not succeeded:
+        # ① 条件没成立：基础值照旧（这一步的读法与防御支既有那条逐字一致）。
+        _note_unsupported(
+            state, f"技能「{skill.name}」的应对覆盖子句",
+            f"描述片段「{evidence_text}」只在应对成功时生效，这一手没有应对成功"
+            f"（要应对的类别：{ov.get('respond_to')}）⇒ 基础效果照旧结算，「改为」的值未生效",
+            skill.skill_id,
+        )
+        _bump(state, "respond_override_skipped", {
+            "side": side, "skill_id": skill.skill_id,
+            "respond_to": ov.get("respond_to"), "reason": "respond_failed",
+        })
+        return parsed, False
+    # ③ `mode="hits"`（RC-401 批次十五）：覆盖的是**这一手结算几次**，不是某条 Effect ——
+    #    没有"被替换的基础效果"可摘。命中数由调用方（攻击支）从 `applied_hits` 取走，
+    #    这里只负责判条件、留数、登记；**顺序必须在"定位基础效果"之前**，
+    #    否则会被当成"认不出被覆盖的基础效果"而一条都不结算 ✗。
+    if ov.get("mode") == "hits":
+        hits = int(ov.get("hits") or 0)
+        if hits <= 0:
+            _note_unsupported(
+                state, f"技能「{skill.name}」的应对覆盖子句",
+                f"描述片段「{evidence_text}」读出来的连击数是 {hits}（≤0 无意义）⇒ 不结算，等核对",
+                skill.skill_id,
+            )
+            return parsed, False
+        ov["applied_hits"] = hits
+        _bump(state, "respond_override_applied", {
+            "side": side, "skill_id": skill.skill_id,
+            "respond_to": ov.get("respond_to"), "mode": "hits",
+            "replaced": {"hits": int(ov.get("base_hits") or 1)},
+            "with": {"hits": hits, "multiplier": ov.get("hit_multiplier")},
+            "evidence": evidence_text,
+        }, evidence=("1017", "3005"))
+        return parsed, True
+    # ③′ 定位被覆盖的那条基础效果：先用解析时记下的下标（带原文双重校验），退化到按原文找。
+    idx = ov.get("replaces_index")
+    want = str(ov.get("replaces_evidence") or "")
+    removed, where = None, None
+    effects = list(parsed.effects)
+    if isinstance(idx, int) and 0 <= idx < len(effects) and effects[idx].evidence == want:
+        removed, where = effects[idx], idx
+    else:
+        for i, eff in enumerate(effects):
+            if want and eff.evidence == want:
+                removed, where = eff, i
+                break
+    if removed is None:
+        # 一条都不动 —— 找不到被覆盖的那条，就无法把守卫替换掉；"既留基础又加改为"就是追加 ✗
+        _note_unsupported(
+            state, f"技能「{skill.name}」的应对覆盖子句",
+            f"描述片段「{evidence_text}」认不出被覆盖的基础效果"
+            f"（原记：{want!r}）⇒ 基础效果与改为值都不结算，等核对",
+            skill.skill_id,
+        )
+        return parsed, False
+    parsed.effects = effects[:where] + effects[where + 1:] + override_effects
+    _bump(state, "respond_override_applied", {
+        "side": side, "skill_id": skill.skill_id,
+        "respond_to": ov.get("respond_to"),
+        "replaced": {"kind": removed.kind, "value": dict(removed.value)},
+        "with": [{"kind": e.kind, "value": dict(e.value)} for e in override_effects],
+        "evidence": evidence_text,
+    }, evidence=("1017",))
+    return parsed, True
+
+
 def _apply_status_effects(state: GameState, rs: Ruleset, side: str, skill,
                           cfg: Optional[RuleConfig] = None) -> bool:
     cfg = cfg or _rule_config.get_rule_config()
@@ -1293,12 +1805,115 @@ def _apply_status_effects(state: GameState, rs: Ruleset, side: str, skill,
     """
     parsed = parse.resolve_foe_energy_loss(
         skill, declared=bool(getattr(cfg, "energy_foe_energy_loss", False)))
+    # task-28（2026-09-30）：**号位 / 传动**（`483 啮合传递`「本技能位于1号或3号位时额外获得物攻+80%，传动1」）。
+    # 状态链过去**缺这一个 resolver** ⇒ `unparsed` 里永远留着「号位」「传动」两条标记 ⇒
+    # 末尾那道闸 `if not parsed.effects or parsed.unparsed: return False` **整条 bail**
+    # ⇒ 外层报 `status_unsupported`（实测 483 真打一手：零 buff 事件 ✗ —— 连它**已经能算**的
+    # 「自己获得速度+30」也一起被挡住）。
+    # 位置**照 `coverage.resolve_claims` 的顺序**：它是第 2 位（紧跟 `foe_energy_loss` 之后）。
+    # 签名与别的 resolver 不同：**没有 `declared=`**，要传 `slot_declared=` / `shift_declared=` ✓
+    parsed = parse.resolve_position_mechanics(
+        skill, slot_declared=bool(getattr(cfg, "damage_slot_condition", False)),
+        shift_declared=bool(getattr(cfg, "damage_position_shift", False)), parsed=parsed)
+    # task-27：印记的驱散（没声明能力位就什么都不加 ⇒ legacy 逐字不变）
+    # task-28（2026-09-30）**号位消费者**（`483 啮合传递` 的另一半）。
+    # 上一半只让那道闸开了（`unparsed` 被清空），但 `slot_conditions` 在**状态支没有消费者**
+    # ⇒ 位号 1/3 的「额外获得物攻+80%」一个字都不落（实测：只有 `buff_self_flat{spe+30}`）。
+    # 这一节**整段照攻击支（`env.py:1440-1487`）的形状搬**，读法/事件/能力位都与它一致：
+    #   · 位次**只能**从 `me.loadouts[pet_id]` 的 index 读（技能对象上没有"位次"字段 ✓）
+    #   · `stat/delta_pct` ⇒ 走**现成的 `pet.buffs` 写点**（与 `self_stat` 同一处）
+    #   · 两处**状态支特有**的差异如实处理、不静默丢：没有威力/连击可改 ⇒ `power_delta`/`combo_bonus`
+    #     仍照实写进事件（值如实），且**不做** `dataclasses.replace(skill, power=…)`
+    _slot_declared = bool(getattr(cfg, "damage_slot_condition", False))
+    _shift_declared = bool(getattr(cfg, "damage_position_shift", False))
+    if _slot_declared or _shift_declared:
+        # ⚠ 这里**不能**用 `me`/`pet`：它们在 `_apply_status_effects` 里**稍后**才绑定
+        #   （第一版搬过来直接用 ⇒ `UnboundLocalError` 把**所有状态技**打崩 —— `ast.parse` 照样过 ✗，
+        #    靠"真打一手"才抓到 ✓）。所以就地取这一方的状态。
+        _st_side = getattr(state, side)
+        _st_pet = _st_side.field_pet
+        loadout = list(_st_side.loadouts.get(_st_pet.pet_id) or ())
+        try:
+            position = loadout.index(skill.skill_id) + 1
+        except ValueError:
+            position = None
+        if _slot_declared and position is not None:
+            for cond in getattr(parsed, "slot_conditions", ()) or ():
+                if position not in cond.get("slots", []):
+                    continue
+                if cond.get("stat") and cond.get("delta_pct"):
+                    _key = str(cond["stat"])
+                    _st_pet.buffs[_key] = _st_pet.buffs.get(_key, 0) + int(cond["delta_pct"])
+                _bump(state, "slot_condition_applied", {
+                    "side": side, "skill_id": skill.skill_id, "position": position,
+                    "power_delta": int(cond.get("power_delta") or 0),
+                    "combo_bonus": int(cond.get("combo_bonus") or 0),
+                    "stat": cond.get("stat"), "delta_pct": int(cond.get("delta_pct") or 0),
+                    "evidence": cond.get("evidence"),
+                    "note": "状态技没有威力/连击可改 ⇒ 只落 stat/delta_pct（其余字段如实报 0）",
+                })
+                break
+        if _shift_declared and getattr(parsed, "position_shift", None) and loadout:
+            _n = int(parsed.position_shift)
+            if skill.skill_id in loadout:
+                _idx = loadout.index(skill.skill_id)
+                loadout.pop(_idx)
+                loadout.insert((_idx + _n) % (len(loadout) + 1), skill.skill_id)
+                _st_side.loadouts[_st_pet.pet_id] = tuple(loadout)
+                _bump(state, "position_shift", {
+                    "side": side, "skill_id": skill.skill_id, "shift": _n, "order": list(loadout)})
+
+    parsed = parse.resolve_cleanse_marks(
+        skill, declared=bool(getattr(cfg, "damage_cleanse_marks", False)), parsed=parsed)
+    parsed = parse.resolve_global_skill_mod(
+        skill, declared=bool(getattr(cfg, "damage_global_skill_mod_text", False)), parsed=parsed)
     parsed = parse.resolve_foe_switch_condition(
         skill, declared=bool(getattr(cfg, "damage_foe_switch_condition", False)), parsed=parsed)
     parsed = parse.resolve_per_use_ramp(
         skill, declared=bool(getattr(cfg, "damage_per_use_ramp", False)), parsed=parsed)
     # RC-401 批次十一：条件效果先按"对手这回合有没有换人"筛一遍（不成立就摘掉、如实记 skipped）。
     parsed, _ = _gate_foe_switch_effects(state, side, skill, parsed, cfg)
+    # task-28（H 族 `720 示弱`）：「<谁>获得萌化：<效果>」⇒ **两条效果**（各有各的门 ✓）
+    # ⚠ 复用**现成**写点：`self_mark`/`foe_mark`（`marks` ✓）· `self_stat_flat`（`buffs_flat` ✓）—— **不新开分支** ✗
+    # task-28（`724`）：同上（状态支也接 ✓）
+    parsed = parse.resolve_self_debuff_power(
+        skill, declared=bool(getattr(cfg, "damage_cond_self_debuff_power", False)
+                              and getattr(cfg, "damage_self_power_flat", False)), parsed=parsed)
+    parsed, _ = _gate_self_debuff_effects(state, side, skill, parsed, cfg)
+    parsed = parse.resolve_moe_colon(
+        skill, declared=bool(getattr(cfg, "damage_moe_mark", False)), parsed=parsed,
+        flat_declared=bool(getattr(cfg, "stat_gain_flat", False)),
+        power_declared=bool(getattr(cfg, "damage_self_power_flat", False)),
+        global_declared=bool(getattr(cfg, "damage_global_skill_mods", False)))
+    # task-28（`722 反弹`）：**自己有标记才生效**的条件门（与上面那条**同形** ✓）
+    parsed = parse.resolve_mark_transfer(
+        skill, declared=bool(getattr(cfg, "damage_moe_mark", False)), parsed=parsed)
+    parsed, _ = _gate_self_mark_effects(state, side, skill, parsed, cfg)
+    # RC-401 批次十四（2026-09-29 task-20）：**「应对X：改为…」的覆盖语义**。
+    # ⚠ 状态支**以前完全没接这一支** —— 实测 `skill_000616 剧毒`（category=状态、
+    # `is_defense=False` ⇒ 永远进不了防御支）应对成功那一手照样读 `status_added{layers:3}`，
+    # 而说明写的是 8，且 `unsupported` 里一条都没有（静默错值）。
+    # `_respond_succeeded` 在 `_execute` 第 1079 行就已设好，状态支读得到。
+    # task-28（2026-09-30 · D 族 `462 放晴`）：**基础子句**「<系>技能威力永久±N%」先产出一条 effect ✓
+    # ⚠ **必须在 `resolve_respond_override` 之前** —— 覆盖要"有东西可覆盖" ✗
+    #   （既有纪律逐字：「③ 覆盖目标找不到 ⇒ **一条都不动**，绝不'既留基础又加改为'」✓
+    #     顺序反了 ⇒ 覆盖只会留残余 ⇒ 462 永远结算不了 ✗）
+    parsed = parse.resolve_element_power_ramp(
+        skill, declared=bool(getattr(cfg, "damage_element_power_ramp", False)), parsed=parsed)
+    parsed = parse.resolve_respond_override(
+        skill, declared=bool(getattr(cfg, "energy_respond_override", False)), parsed=parsed)
+    # 2026-09-29（task-25）：A 族「获得 属性±N」的扩展形状 / 平值。
+    # ⚠ 放在 `resolve_respond_override` **之后**，与 `coverage.resolve_claims` 同位置 ——
+    # 本解析器会跳过"已被别的效果认领的区间"，覆盖语义先认领掉「应对…：改为…」那一段，
+    # 这里就不会把条件效果当成无条件效果产出（实测 `skill_000790` 的那一段就是它）。
+    parsed = parse.resolve_stat_gain_extended(
+        skill, declared=bool(getattr(cfg, "stat_gain_extended", False)),
+        flat_declared=bool(getattr(cfg, "stat_gain_flat", False)), parsed=parsed)
+    if getattr(parsed, "respond_override", None) is not None:
+        _me = getattr(state, side)
+        parsed, _ = _apply_respond_override(
+            state, rs, side, skill, parsed,
+            succeeded=bool(getattr(_me.field_pet, "_respond_succeeded", False)), cfg=cfg)
     if not parsed.effects or parsed.unparsed:
         return False
 
@@ -1339,6 +1954,8 @@ def _apply_effect_batch(state: GameState, rs: Ruleset, side: str, skill,
     # 而且规划侧必须知道它——否则会拿 legacy 的口径去分析一份 v3 的局面。
     pet = me.field_pet
     applied = 0
+    #: 「每驱散 1 层，<效果>」的层数传递（上一条 `cleanse_marks` 写、下一条消费）
+    pending_cleansed_layers: Optional[int] = None
 
     for eff in parsed.effects:
         v = eff.value
@@ -1355,6 +1972,31 @@ def _apply_effect_batch(state: GameState, rs: Ruleset, side: str, skill,
             applied += 1
             _bump(state, "debuff_foe", {"side": side, "stat": key, "delta_pct": v["delta_pct"]},
                   evidence=(eff.term or "",))
+        # 2026-09-29（task-25）：**平值**属性修正（描述里不带 `%` 的那一类）。
+        # 与 `self_stat` / `foe_stat` **分开记账**：那两个是百分点（`buffs`），
+        # 这两个是面板量纲的绝对值（`buffs_flat`）。目前唯一读点是先手速度
+        # （`order_speed` 的 `_speed_with_buffs`），全库实测平值只出现在速度上。
+        # 事件名也分开（`buff_self_flat` / `debuff_foe_flat`）—— 上层能一眼看出量纲，
+        # 不会把「+120 点速度」读成「+120%」。
+        elif eff.kind in ("self_stat_flat", "foe_stat_flat"):
+            key = str(v["stat"])
+            # ⚠ 2026-09-29（Lead 批准 engin-mechanics 的盘点）：**键白名单 + fail closed**。
+            # 读取方全仓只有 `env.order_speed` 两处、**都只认 `spe`**（见 `parse.BUFFS_FLAT_READ_KEYS`）；
+            # 不筛键地写进去 = **事件发了、状态被静默忽略**（"写了没人读"，与 task-25 的 11 条假绿同一族）。
+            # 未筛键 ⇒ **不静默写**，如实走 `_note_unsupported`（也不静默丢弃 —— 那是另一种假绿）。
+            if key not in parse.BUFFS_FLAT_READ_KEYS:
+                _note_unsupported(
+                    state, f"技能「{skill.name}」的平值属性修正（{key}）",
+                    f"`buffs_flat` 目前只有 {'、'.join(parse.BUFFS_FLAT_READ_KEYS)} 有读点；"
+                    f"把 {key} 写进去会**静默失效**（事件照发、没人读）⇒ 这里 fail closed：不写、如实登记",
+                    skill.skill_id)
+                continue
+            holder = pet if eff.kind == "self_stat_flat" else foe.field_pet
+            holder.buffs_flat[key] = holder.buffs_flat.get(key, 0) + int(v["delta_flat"])
+            applied += 1
+            _bump(state, "buff_self_flat" if eff.kind == "self_stat_flat" else "debuff_foe_flat",
+                  {"side": side, "stat": key, "delta_flat": v["delta_flat"]},
+                  evidence=(eff.term or "",))
         elif eff.kind in ("self_mark", "foe_mark"):
             holder = pet if eff.kind == "self_mark" else foe.field_pet
             name = str(v["mark"])
@@ -1369,8 +2011,47 @@ def _apply_effect_batch(state: GameState, rs: Ruleset, side: str, skill,
             applied += 1
             _bump(state, "mark_added", {"side": side if eff.kind == "self_mark" else "enemy",
                                         "mark": name, "layers": v["layers"]}, evidence=("3010",))
+        elif eff.kind in ("global_cost_delta", "global_power_pct"):
+            # task-28（`721`/`728`）：**全技能级**持久修正 ⇒ 写 `PetState.global_skill_mods` ✓
+            # ⚠ **作用域 = 所有技能** ✗（**不是** `skill_ramps` ✗ 那是逐技能 ✓）
+            _key = "cost_delta" if eff.kind == "global_cost_delta" else "power_pct"
+            _val = int(v.get("delta") or 0)
+            _mods = dict(getattr(pet, "global_skill_mods", None) or {})
+            _before = int(_mods.get(_key, 0) or 0)
+            _mods[_key] = _before + _val
+            pet.global_skill_mods = _mods
+            applied += 1
+            _bump(state, "global_skill_mod_applied", {
+                "side": side, "skill_id": skill.skill_id, "key": _key,
+                "delta": _val, "total": _before + _val, "evidence": eff.evidence,
+            })
+        elif eff.kind == "transfer_mark":
+            # task-28（`722 反弹`）：**搬家** —— `self → foe`，**自己那份清零** ✗ **不是复制** ✗
+            # ⚠ 层数 = "自己现有的层数"（描述没写层数 ✓）；条件门已在 `_gate_self_mark_effects` 里筛过 ✓
+            _mk = str(v.get("mark") or "")
+            _n = int((pet.marks or {}).get(_mk, 0) or 0)
+            if _n > 0:
+                pet.marks[_mk] = 0                      # 自己清零 ✓
+                tgt = foe.field_pet
+                tgt.marks[_mk] = tgt.marks.get(_mk, 0) + _n
+                applied += 1
+                _bump(state, "mark_transferred",
+                      {"side": side, "mark": _mk, "layers": _n}, evidence=("task-28",))
+            continue
         elif eff.kind == "foe_status":
             name = str(v["status"])
+            # task-28（H 族 285）：**标记化的状态**（萌化）路由到 `marks` ✓ —— 复用下面
+            # `self_mark`/`foe_mark` 支**同一写法**（`marks[name] += layers` ✓ 不新造字段 ✗）
+            # ⚠ **能力位门控**：没声明（legacy / v2）⇒ **一个字都不写** ✓（逐位不变 ✓）
+            # ⚠ 顺序：**在** `END_OF_TURN_STATUS` 之前判 ✓ —— 否则 `spec is None` 那条
+            #   `_note_unsupported + continue` 会先把这一手吃掉 ✗（实测：285 现在只登记、空转 ✓）
+            if name in STATUS_AS_MARK and bool(getattr(cfg, "damage_moe_mark", False)):
+                tgt = foe.field_pet
+                tgt.marks[name] = tgt.marks.get(name, 0) + int(v["layers"])
+                applied += 1
+                _bump(state, "mark_added", {"side": "enemy", "mark": name,
+                                            "layers": int(v["layers"])}, evidence=("task-28",))
+                continue
             spec = fx.END_OF_TURN_STATUS.get(name)
             if spec is None:
                 # 未实现的持续状态：登记，不当成生效。
@@ -1380,25 +2061,268 @@ def _apply_effect_batch(state: GameState, rs: Ruleset, side: str, skill,
                 )
                 continue
             tgt = foe.field_pet
-            tgt.statuses[name] = {
-                "layers": tgt.statuses.get(name, {}).get("layers", 0) + int(v["layers"])
-            }
+            prev = tgt.statuses.get(name, {})
+            added = int(v["layers"])
+            # 2026-09-29（第三轮⑥）：**声明了本地规则**的状态才有层数上限与持续回合。
+            # `local_rule=None`（legacy / v2）⇒ 事件 detail 与状态形状**逐位不变**：
+            # 老路径的 `status_added` 只有 `{side, status, layers}` 三个键
+            #（`test_turn_order_fail_closed` 的 golden 指纹就钉着它）。
+            local_rule = (getattr(cfg, "status_end_of_turn", None) or {}).get(name)
+            total = int(prev.get("layers", 0)) + added
+            detail_added: Dict[str, Any] = {"side": "enemy", "status": name, "layers": added}
+            if local_rule is not None:
+                cap = int(local_rule.get("max_layers", total))
+                # RC-401 批次十七（2026-09-29，人类逐字：「为什么不行，**针对这一个技能改一下**不行吗？」）：
+                # 「应对X：**改为获得N层**」是**这一条技能明写的数值** ⇒ 允许突破本地规则的
+                # **全局**层数上限；**普通路径（没有这一支）照旧被夹住** ✓
+                # `cap_override` 只由 `parse.resolve_respond_override` 的派生效果带上，
+                # 而它只在**配置声明了能力位**时才存在 ⇒ legacy / v2 一个字节都不变。
+                cap_override = v.get("cap_override")
+                if cap_override:
+                    tgt.statuses[name] = {"layers": total,
+                                          "turns_left": int(local_rule.get("duration_turns", 1))}
+                    detail_added["layers_total"] = total
+                    detail_added["turns_left"] = int(local_rule.get("duration_turns", 1))
+                    detail_added["damage_rule"] = "LOCAL_RULE"
+                    # 透明记录保留：说清「这个值为什么没被全局上限夹住」。
+                    detail_added["cap_override"] = str(cap_override)
+                    detail_added["max_layers"] = cap
+                else:
+                    capped_from = total if total > cap else None
+                    total = min(total, cap)
+                    # 重复施加：层数继续叠（封顶），**持续回合按新的一次刷新**。
+                    tgt.statuses[name] = {"layers": total,
+                                          "turns_left": int(local_rule.get("duration_turns", 1))}
+                    detail_added["layers_total"] = total
+                    detail_added["turns_left"] = int(local_rule.get("duration_turns", 1))
+                    detail_added["damage_rule"] = "LOCAL_RULE"
+                    if capped_from is not None:
+                        detail_added["capped_from"] = capped_from
+                        detail_added["max_layers"] = int(local_rule.get("max_layers", total))
+            else:
+                tgt.statuses[name] = {"layers": total}
             applied += 1
-            _bump(state, "status_added", {"side": "enemy", "status": name,
-                                          "layers": v["layers"]},
+            _bump(state, "status_added", detail_added,
                   evidence=(spec.get("term", ""),))
-            if name == "冻结":
-                # 特性钩子（捉迷藏）。以前这一支永远不可达（前面的 elif 已经吃掉
-                # 所有 `foe_status`），现在挂在同一个分支里。
-                evs2: List[Dict[str, Any]] = []
-                tr.after_freeze_applied(rs, state, side, evs2)
-                for e in evs2:
-                    _bump(state, e.pop("kind"), e)
+            # ⚠ 2026-09-30（task-28）**删掉了一支死代码，改钉不删**：
+            #   原文逐字（删除前就在这个位置）——
+            #       if name == "冻结":
+            #           # 特性钩子（捉迷藏）。以前这一支永远不可达（前面的 elif 已经吃掉
+            #           # 所有 `foe_status`），现在挂在同一个分支里。
+            #           evs2: List[Dict[str, Any]] = []
+            #           tr.after_freeze_applied(rs, state, side, evs2)
+            #           for e in evs2:
+            #               _bump(state, e.pop("kind"), e)
+            #   **为什么删**（两条，都是实测/裁决，不是"看着没用"）：
+            #     ① **它其实仍不可达** ✗ —— 这一支在 `spec = fx.END_OF_TURN_STATUS.get(name)` 的
+            #        `if spec is None: … continue` **之后**，而 `冻结` 恰恰**不在**那张表里
+            #        （表里只有 中毒/灼烧/寄生）⇒ 技能路径永远到不了这里。
+            #        上一版注释写「以前这一支永远不可达 ⇒ **现在挂在同一个分支里**」是**错的** ✗
+            #        （那次只挪了位置、没注意 `continue` 在前面）—— 留着它就是**第二个陷阱** ✗。
+            #     ② **就算可达，语义也不对** ✗ —— `after_freeze_applied` 是**特性**的钩子
+            #        （`捉迷藏` / `抓到你了`：使敌方获得冻结时自己全技能能耗 +1）。
+            #        **技能施加冻结 ≠ 触发那个特性** ✓ ⇒ 技能路径**不该**调它。
+            #        特性自己的路径在 `traits.py` 里**直调**同一个钩子 ✓（`traits.py:438`，那是对的 ✓）。
+            #   ⚠ 风险留档：谁哪天把 `冻结` 加进 `END_OF_TURN_STATUS`，这一支若还在就会突然变活、
+            #     与特性路径**双触发** ✗ ⇒ 已由 `roco/tests/test_frozen_status.py` 两条判据钉住 ✓
         elif eff.kind == "cleanse":
-            cleared = sorted(foe.field_pet.buffs)
-            foe.field_pet.buffs.clear()
+            # task-26 P0 **止血**（2026-09-30）：**按 `what` 分派** ——
+            # 过去这一支**不看 `what`、无差别清 `foe.field_pet.buffs`** ✗ ⇒
+            # 「驱散**双方所有印记**」（`what=None`）会**清掉敌方的增益**、而**双方 `marks` 一层没动** ✗✗
+            # ⇒ 玩家看到的副作用**与描述无关** ✗（`engine-mechanics` 实测：408 焚烧烙印
+            #    `cleanse{cleared:["spa"]}` + 我方 `{"风起印记":2}` 敌方 `{"星陨印记":3}` 都还在 ·
+            #    332 倾泻 `cleared:[]` 只是"对手当时没有 buffs"**碰巧没副作用** ✗）。
+            # 口径：**认得出的照做；认不出的 fail closed**（不执行 + 如实登记 + **不计 applied**）——
+            # 宁可什么都不做并报不支持，也**不许做错另一件事** ✗。
+            _what = str(v.get("what") or "")
+            if not bool(getattr(cfg, "damage_cleanse_dispatch", False)):
+                # ⚠ **没声明这个能力位**（legacy / v2）⇒ **走原来那一支，逐字不变** ✓
+                # （`test_turn_order_fail_closed` 的 golden 指纹钉着它 ⇒ 不许动 ✗）
+                cleared = sorted(foe.field_pet.buffs)
+                foe.field_pet.buffs.clear()
+                applied += 1
+                _bump(state, "cleanse", {"side": side, "cleared": cleared})
+                continue
+            if _what in ("增益", "减益"):
+                _buffs = dict(getattr(foe.field_pet, "buffs", None) or {})
+                _hit = sorted(k for k, n in _buffs.items()
+                              if (int(n or 0) > 0) == (_what == "增益") and int(n or 0) != 0)
+                for _k in _hit:
+                    _buffs.pop(_k, None)
+                foe.field_pet.buffs = _buffs
+                applied += 1
+                _bump(state, "cleanse", {"side": side, "what": _what, "cleared": _hit})
+            else:
+                _note_unsupported(
+                    state, "驱散",
+                    f"「{eff.evidence}」这一种驱散（`what`={_what or 'None'}）没有实现 ⇒ **不执行**"
+                    "（以免出现与描述无关的副作用）", eff.evidence or "")
+                _bump(state, "cleanse_unsupported", {
+                    "side": side, "what": (_what or None), "evidence": eff.evidence})
+        elif eff.kind == "cleanse_marks":
+            # task-27（2026-09-30）：**印记的驱散**。与上面那一支（清 `buffs` 键名）分开：
+            # 印记有**层数**维度，事件里必须把 `{印记名: 层数}` 带出来 ——
+            # 下游「每驱散 1 层，<效果>」就吃这个层数（`per_cleansed_layer`，紧随其后）。
+            _m_side = str(v.get("side") or "foe")
+            _m_scope = str(v.get("scope") or "all")
+            _targets = []
+            if _m_side in ("foe", "both"):
+                _targets.append(("enemy", foe.field_pet))
+            if _m_side in ("self", "both"):
+                _targets.append((side, pet))
+            _cleared_all = {}
+            for _who, _tg in _targets:
+                _marks = dict(getattr(_tg, "marks", None) or {})
+                if not _marks:
+                    continue
+                if _m_scope == "all":
+                    _hit = {str(k): int(n) for k, n in _marks.items()}
+                    _tg.marks = {}
+                else:   # 「驱散敌方印记」（没有「所有」）⇒ 按**层数最多**的一个（局部规则，见 reason）
+                    _k = max(_marks, key=lambda k: int(_marks[k]))
+                    _hit = {str(_k): int(_marks[_k])}
+                    _marks.pop(_k, None)
+                    _tg.marks = _marks
+                _cleared_all[_who] = _hit
+                applied += 1
+            _total = sum(sum(h.values()) for h in _cleared_all.values())
+            pending_cleansed_layers = _total
+            _bump(state, "marks_cleansed", {
+                "side": side, "marks_side": _m_side, "scope": _m_scope,
+                "cleared": _cleared_all, "total_layers": _total,
+                "picked": ("most_layers" if _m_scope == "one" else "all"),
+                "basis": ("没有「所有」⇒ 清层数最多的那一个（本地规则：ENGINE_HYPOTHESIS，"
+                          "若日后定为别的选法只改这一处）" if _m_scope == "one"
+                          else "描述写「所有」⇒ 全清"),
+            }, evidence=(eff.evidence or "",))
+        elif eff.kind == "per_cleansed_layer":
+            # 「每驱散 1 层，<效果>」的**消费者**：层数来自上一条 `cleanse_marks`
+            # （解析层把它们产出成相邻两条 ⇒ 顺序有意义）。**0 层 ⇒ 一次都不触发** ✓
+            _n = int(pending_cleansed_layers or 0)
+            pending_cleansed_layers = None
+            inner = dict(v.get("effect") or {})
+            if _n <= 0:
+                _bump(state, "per_cleansed_layer_skipped",
+                      {"side": side, "layers": 0, "why": "没有驱散到任何一层 ⇒ 不触发（对照实验）"})
+            elif inner.get("kind") == "foe_status":
+                _name = str(inner.get("status"))
+                _each = int(inner.get("layers") or 0)
+                _give = _each * _n
+                _spec = fx.END_OF_TURN_STATUS.get(_name)
+                if _spec is None:
+                    _note_unsupported(state, f"状态「{_name}」", "该状态没有回合末结算实现（effects.py 未登记）",
+                                      eff.evidence or "")
+                else:
+                    _local = (getattr(cfg, "status_end_of_turn", None) or {}).get(_name)
+                    _tg = foe.field_pet
+                    _prev = int((_tg.statuses.get(_name) or {}).get("layers", 0))
+                    _total_l = _prev + _give
+                    if _local:
+                        _cap = int(_local.get("max_layers", _total_l))
+                        _total_l = min(_total_l, _cap)
+                        _tg.statuses[_name] = {"layers": _total_l,
+                                               "turns_left": int(_local.get("duration_turns", 1))}
+                    else:
+                        _tg.statuses[_name] = {"layers": _total_l}
+                    applied += 1
+                    _bump(state, "status_added", {"side": "enemy", "status": _name, "layers": _give,
+                                                  "layers_total": _total_l,
+                                                  "from": "per_cleansed_layer",
+                                                  "per_layer": _each, "cleansed_layers": _n},
+                          evidence=(_spec.get("term", ""),))
+            elif inner.get("kind") == "self_stat":
+                _delta = int(inner.get("delta_pct") or 0) * _n
+                for _stat in (inner.get("stats") or []):
+                    pet.buffs[_stat] = pet.buffs.get(_stat, 0) + _delta
+                    applied += 1
+                    _bump(state, "buff_self", {"side": side, "stat": _stat, "delta_pct": _delta,
+                                               "from": "per_cleansed_layer",
+                                               "per_layer": int(inner.get("delta_pct") or 0),
+                                               "cleansed_layers": _n})
+            elif inner.get("kind") == "heal":
+                _pct = int(inner.get("percent") or 0) * _n
+                _amount = fx.percent_of_max_hp(pet.max_hp, _pct)
+                _healed = min(_amount, pet.max_hp - pet.hp)
+                pet.hp += _healed
+                applied += 1
+                _bump(state, "heal", {"side": side, "healed": _healed, "from": "per_cleansed_layer",
+                                      "per_layer": int(inner.get("percent") or 0),
+                                      "cleansed_layers": _n})
+            else:
+                _note_unsupported(state, "「每驱散1层」的跟随效果",
+                                  f"认不出这一种跟随效果：{inner!r} ⇒ 不猜、不结算", eff.evidence or "")
+        elif eff.kind == "cleanse_buffs_one":
+            # task-27 D 形状：「驱散敌方 1 种增益」。**量纲是键名**（buffs），不是层数 ⇒ 复用
+            # 既有 `cleanse` 事件并补 `picked`/`basis`（**不许悄悄选** ✗）。
+            # 选法（本地规则，ENGINE_HYPOTHESIS）：清**绝对增幅最大**的那一个 ——
+            # 原始资料只写「驱散 1 种增益」，没写选哪一种；**若日后定为别的选法 ⇒ 只改这一处** ✓
+            _pol = str(v.get("polarity") or "增益")
+            _want_positive = (_pol == "增益")
+            _b = dict(getattr(foe.field_pet, "buffs", None) or {})
+            _cands = [(k, int(n or 0)) for k, n in _b.items()
+                      if int(n or 0) != 0 and (int(n or 0) > 0) == _want_positive]
+            if _cands:
+                _pick = max(_cands, key=lambda kv: abs(kv[1]))
+                _b.pop(_pick[0], None)
+                foe.field_pet.buffs = _b
+                applied += 1
+                _bump(state, "cleanse", {"side": side, "what": _pol, "cleared": [_pick[0]],
+                                         "picked": _pick[0], "picked_delta": _pick[1],
+                                         "basis": "清绝对增幅最大的那一个（本地规则：ENGINE_HYPOTHESIS；"
+                                                  "原始资料只写「1 种」，没写选哪一种 ⇒ 若日后定别的选法只改这一处）",
+                                         "from": "cleanse_buffs_one"})
+            else:
+                # 对照：没有任何可驱散的（增益|减益）⇒ **Δ=0** 且如实说"什么都没发生"
+                _bump(state, "cleanse", {"side": side, "what": _pol, "cleared": [],
+                                         "picked": None, "basis": "对手身上没有这一极性的增益/减益",
+                                         "from": "cleanse_buffs_one"})
+        elif eff.kind == "cleanse_buffs_layers":
+            # RC-401 批次十八（2026-09-30 **E 族缺口一**：322 消毒法「驱散敌方5层增益」）。
+            # **量纲是层数** —— 与上面 `cleanse_buffs_one` 的「N 种」**分开** ✗（那一个量的是**键名**）。
+            # ⚠ 原始资料**没有定义「一层」是多少**（`buffs` 是 `{键名: 百分比}`，没有层数字段）⇒
+            #   **本地规则（ENGINE_HYPOTHESIS）**：**一个非零键 = 一层**，按 `abs(百分比)` 从大到小
+            #   依次清除，最多清 `layers` 层。事件带 `basis` **如实标注、与原始资料区分** ✓
+            #   ⇒ **若日后定为别的定义 ⇒ 只改这一处** ✓
+            _pol = str(v.get("polarity") or "增益")
+            _want_positive = (_pol == "增益")
+            _want_layers = int(v.get("layers") or 0)
+            _b = dict(getattr(foe.field_pet, "buffs", None) or {})
+            _cands = sorted(((k, int(n or 0)) for k, n in _b.items()
+                             if int(n or 0) != 0 and (int(n or 0) > 0) == _want_positive),
+                            key=lambda kv: -abs(kv[1]))
+            _taken = _cands[:_want_layers] if _want_layers > 0 else []
+            if _taken:
+                for _k, _n in _taken:
+                    _b.pop(_k, None)
+                foe.field_pet.buffs = _b
+                applied += 1
+                _bump(state, "cleanse", {"side": side, "what": _pol,
+                                         "cleared": [_k for _k, _n in _taken],
+                                         "layers_requested": _want_layers,
+                                         "layers_cleared": len(_taken),
+                                         "picked_deltas": [_n for _k, _n in _taken],
+                                         "basis": "一层 = 一个非零增益键，按 abs(百分比) 从大到小最多清 N 层"
+                                                  "（本地规则：ENGINE_HYPOTHESIS；原始资料只写「N 层」，"
+                                                  "没定义一层是多少 ⇒ 若日后定别的定义只改这一处）",
+                                         "from": "cleanse_buffs_layers"})
+            else:
+                # 对照（Δ=0）：没有任何可驱散的增益层 ⇒ **一个键都不动**、如实说"什么都没发生" ✓
+                _bump(state, "cleanse", {"side": side, "what": _pol, "cleared": [],
+                                         "layers_requested": _want_layers, "layers_cleared": 0,
+                                         "picked_deltas": [],
+                                         "basis": "对手身上没有这一极性的增益/减益层",
+                                         "from": "cleanse_buffs_layers"})
+        elif eff.kind == "cleanse_self_debuffs":
+            # task-27 C 形状：清**自己**身上值为负的 buffs（减益）。量纲是**键名**，不是层数
+            # （所以复用既有的 `cleanse` 事件 —— 它已经有中文说法、也已登记）。
+            _b = dict(getattr(pet, "buffs", None) or {})
+            _hit = sorted(k for k, n in _b.items() if int(n or 0) < 0)
+            for _k in _hit:
+                _b.pop(_k, None)
+            pet.buffs = _b
             applied += 1
-            _bump(state, "cleanse", {"side": side, "cleared": cleared})
+            _bump(state, "cleanse", {"side": side, "what": "减益", "cleared": _hit,
+                                     "target": "self", "from": "cleanse_self_debuffs"})
         elif eff.kind == "heal":
             pct = int(v["percent"])
             amount = fx.percent_of_max_hp(pet.max_hp, pct)
@@ -1406,6 +2330,26 @@ def _apply_effect_batch(state: GameState, rs: Ruleset, side: str, skill,
             pet.hp += healed
             applied += 1
             _bump(state, "heal", {"side": side, "healed": healed})
+        elif eff.kind == "element_power_ramp":
+            # ── task-28（2026-09-30 · D 族 `462 放晴`）：**系别级持久威力修正** ──────────────
+            # 写点就是这一处：`PetState.element_power_mods[系别] += N` ✓
+            # 读点**已就绪**（`effects.compute_damage` 按 `skill.element` 取 ✓ —— 本批只补写入方 ✓）。
+            # ⚠ 系别名从**解析结果**取（描述里读到的全名，如「光系」）⇒ 与读点 key 同一口径 ✓
+            # ⚠ 事件里带 `delta` 与 `total` 两个量 —— 判据要能**按事件逐条数**
+            #   （"应对成功时只该有一条 delta=100 的事件、**不许有 delta=50 的**" ✓
+            #    只断言最终值会被"先 +50 再覆盖"骗过 ✗）
+            _elem = str(v.get("element") or "")
+            _delta = int(v.get("delta") or 0)
+            _mods = dict(getattr(pet, "element_power_mods", None) or {})
+            _before = int(_mods.get(_elem, 0) or 0)
+            _mods[_elem] = _before + _delta
+            pet.element_power_mods = _mods
+            applied += 1
+            _bump(state, "element_power_ramp", {
+                "side": side, "skill_id": skill.skill_id,
+                "element": _elem, "delta": _delta, "total": _before + _delta,
+                "cap_override": v.get("cap_override", ""),
+            }, evidence=(skill.skill_id,))
         elif eff.kind == "self_energy":
             amount = int(v["amount"])
             before = pet.energy
@@ -1492,7 +2436,8 @@ def _register_parsed_effects(state: GameState, rs: Ruleset, side: str, skill,
     # 重新 `parse_skill` 会把那份认领丢掉，于是已结算的机制**又被登记成未认领**。
     unclaimed = parse.unclaimed_mechanic_spans(skill, parsed=parsed)
     handled_kinds = {
-        "self_stat", "foe_stat", "self_mark", "foe_mark", "cleanse", "heal",
+        "self_stat", "foe_stat", "self_stat_flat", "foe_stat_flat",
+        "self_mark", "foe_mark", "cleanse", "heal",
         "self_energy", "drain_energy",
         # 2026-09-25（RC-401 批次六）：两条"敌方失去能量"也在 `_apply_effect_batch` 里结算了，
         # 漏登记会让它们**每次都被写成 unsupported**（判据 test_energy_loss_effects 会红）。
@@ -1502,12 +2447,21 @@ def _register_parsed_effects(state: GameState, rs: Ruleset, side: str, skill,
         "initiative_power",
         # 2026-09-25（RC-401 批次九）：动态能耗修正在 `effective_skill_cost` 里真的算了。
         "per_layer_cost",
+        # 2026-09-29（task-20 批四）：读敌方层数改**本手**威力/连击，在伤害路径里真的加了。
+        "per_layer_boost",
         # 2026-09-25（RC-401 批次十一）：条件威力加成在伤害路径里真的加了（不是"未实现"）。
         "foe_switch_power_flat", "foe_switch_power_mult",
         # 2026-09-25（RC-401 批次十二）：「每次使用后永久±N」在出手后真的累加了。
         "per_use_ramp",
         # 2026-09-25（RC-401 批次十三）：挨打累加在 `_accumulate_on_hit_ramps` 里真的做了。
         "on_hit_ramp",
+        # 2026-09-29（task-18 A 批）：这两条是**认领标记**，不是新机制 ——
+        # `hit_count` 由 `hit_count` 变量与 `damage` 事件的 `hits` 用掉，
+        # `respond_power_mult` 由 `effects.compute_damage` 的应对分支用掉（power×mult）。
+        # 漏登记会让它们每次都被写成 unsupported（判据 test_parse_claims 会红）。
+        "hit_count",
+        # task-27：印记驱散 + 「每驱散 1 层」消费者（都在本文件新的 `cleanse_marks` 支里结算）
+        "cleanse_marks", "per_cleansed_layer", "cleanse_self_debuffs", "cleanse_buffs_one",
     }
     for eff in parsed.effects:
         if applied and eff.kind in handled_kinds:
@@ -1516,6 +2470,7 @@ def _register_parsed_effects(state: GameState, rs: Ruleset, side: str, skill,
             continue
         label = {
             "self_stat": "自己属性增减", "foe_stat": "敌方属性增减",
+            "self_stat_flat": "自己属性平值增减", "foe_stat_flat": "敌方属性平值增减",
             "self_mark": "自己印记", "foe_mark": "敌方印记",
             "foe_status": "敌方持续状态", "cleanse": "驱散",
             "heal": "回复生命", "self_energy": "自带回能",
@@ -1793,9 +2748,85 @@ def _cost_mod_applies(mod: Dict[str, Any], skill) -> bool:
     return False
 
 
+def _global_cost_delta(pet, cfg: Optional[RuleConfig]) -> int:
+    """`721` 的**全技能能耗永久-N**（task-28）—— 读 `PetState.global_skill_mods["cost_delta"]` ✓。
+
+    ⚠ **唯一读点** ✓（`effective_skill_cost` ✓ —— 而它是 `resolved_skill_cost`（`:834`）的唯一实现 ✓
+      ⇒ ⇒ `:427`/`:869`/`:1228` **三个调用点自动一致** ✓：**预览与真出手读的是同一个数** ✓）。
+    ⚠ **下界口径**（Lead 2026-09-30 裁决 ✓）：**能减多少减多少、但不为负** ⇒ 由调用方 `max(0, …)` ✓
+      ⇒ **不改 MC-018 的既有守卫** ✗（那条守卫是别人立的、明确写了"不猜一个 0" ✓）。
+      ⇒ ⚠ **产品后果如实登记**（不藏在 `max(0,…)` 里 ✓）：全库 **140 条能耗 ≤1 的技能**（**427 内 104 条**）
+        在本叶子声明后会变成 **cost 0** ✓ —— "全技能-2"照字面的必然结果 ✓ 不是 bug ✓。
+    """
+    if not bool(getattr(cfg, "damage_global_skill_mods", False)):
+        return 0
+    return int((getattr(pet, "global_skill_mods", None) or {}).get("cost_delta", 0) or 0)
+
+
+def _slot_extra_reduction(state: GameState, side: str, skill,
+                          cfg: Optional[RuleConfig] = None) -> int:
+    """号位条件带来的**额外减伤百分点**（第五种形状）。未声明号位能力 ⇒ 恒 0 ⇒ legacy 逐字不变 ✓。
+
+    ⚠ **复合口径：原始资料与代码均未定义**（`pet._defense_reduction` 是**单值** ✗）⇒
+    **本地取加法** ✓（人类授权「缺参数在本地规则显式定义并与原始资料区分」✓）。
+    """
+    # ⚠ **#49**：**不许在链路中间无参自取配置**（那会拿到**默认配置（非 v3）**⇒ 表现为**恒 0** ✗）。
+    #   照仓库约定（`_execute`/`effective_skill_cost` 等 20+ 处逐字同形 ✓）：**由调用方传 cfg，缺省才回落** ✓。
+    cfg = cfg or _rule_config.get_rule_config()
+    if not bool(getattr(cfg, "damage_slot_condition", False)):
+        return 0
+    pos = _slot_of(state, side, skill)
+    if not pos:
+        return 0
+    try:
+        p = parse.resolve_position_mechanics(skill, slot_declared=True, shift_declared=False)
+    except Exception:
+        return 0
+    return sum(int(c.get("reduction_pct") or 0) for c in (getattr(p, "slot_conditions", ()) or ())
+               if pos in (c.get("slots") or []))
+
+
+def _slot_of(state: GameState, side: str, skill) -> int:
+    """这个技能在这一方配招里的**号位**（1 起；查不到 0）。照 `loadouts.get(pet_id)` + `index()` 既有读法 ✓。"""
+    try:
+        ss = getattr(state, side)
+        return list(ss.loadouts.get(ss.field_pet.pet_id) or ()).index(skill.skill_id) + 1
+    except Exception:
+        return 0
+
+
+def _slot_cost_delta(state: GameState, side: str, skill, cfg) -> int:
+    """号位条件带来的**能耗修正**（第四种形状）。未声明号位能力 ⇒ 恒 0 ⇒ legacy 逐字不变 ✓。"""
+    if not bool(getattr(cfg, "damage_slot_condition", False)):
+        return 0
+    pos = _slot_of(state, side, skill)
+    if not pos:
+        return 0
+    try:
+        p = parse.resolve_position_mechanics(skill, slot_declared=True, shift_declared=False)
+    except Exception:
+        return 0
+    return sum(int(c.get("cost_delta") or 0) for c in (getattr(p, "slot_conditions", ()) or ())
+               if pos in (c.get("slots") or []))
+
+
+def _own_debuff_layers(state: GameState, side: str) -> int:
+    """**自己**身上值为负的 buff **键数**（= 「一层」的定义）。
+
+    与 `cleanse_self_debuffs` 那一支**逐字同一条谓词**（`int(n or 0) < 0`）—— **不许另立第二套定义** ✗。
+    """
+    try:
+        pet = getattr(state, side).field_pet
+        return sum(1 for _k, _n in dict(getattr(pet, "buffs", None) or {}).items() if int(_n or 0) < 0)
+    except Exception:
+        return 0
+
+
 def effective_skill_cost(pet: PetState, skill, cfg: Optional[RuleConfig] = None,
                          *, weather: Optional[Dict[str, Any]] = None,
-                         foe_status_layers: int = 0) -> int:
+                         foe_status_layers: int = 0,
+                         own_debuff_layers: int = 0,
+                         slot_cost_delta: int = 0) -> int:
     """这一手要付多少能量 = 基础能耗 + 这只精灵身上的能耗修正 + **天气修正**。
 
     **只在配置声明了对应机制时才算**（legacy / v2 两条都不声明 → 原样返回基础值，
@@ -1809,6 +2840,8 @@ def effective_skill_cost(pet: PetState, skill, cfg: Optional[RuleConfig] = None,
       · 只做**加法**（加法可交换，顺序问题不在这里假装解决），天气的乘法**最后**作用；
       · **不设下限** —— 结果为负时返回负数，由调用方 fail closed（`legal_actions` 不提供这一手、
         扣费处抛错），而不是编一个「最低 0 能耗」；
+        ⚠ **本条（"不设下限"）已被 `:2798-2800`（2026-09-30 Lead 裁决：能减多少减多少、但不为负）取代** ——
+        见 task-28（`721`）。**后来者优先**：有日期/署名的那条才是现行裁决；本条只作历史留档，**别照它写** ✗。
       · 「减半」按**向下取整**（奇数值的取整口径未核验，登记在 battle-modes 的 unknowns
         `energy_cost_halving_rounding` 里）。
     """
@@ -1829,6 +2862,23 @@ def effective_skill_cost(pet: PetState, skill, cfg: Optional[RuleConfig] = None,
             step = max(1, int(eff.value.get("layer_step") or 1))
             units = int(foe_status_layers) // step
             total += int(eff.value.get("delta") or 0) * units
+    # RC-401 批次十八（2026-09-30 E 族缺口二 `446 清洗`）：「**自己**每有 N 层减益，本技能能耗 -M」。
+    # 与批次九同形（数层数改费用），但**数自己身上的减益**（状态量 ✓ 算费那刻读得到 ✓）。
+    # ⚠ 摆在天气乘法**之前**（`:2792-2799` 是最后一步 ✓）；**夹照 `:2805-2807` 的纪律**：只对 `total >= 0` 夹。
+    if bool(getattr(cfg, "damage_per_own_debuff_cost", False)) and int(own_debuff_layers) > 0:
+        _parsed_cpod = parse.resolve_cost_per_own_debuff_layer(skill, declared=True)
+        _eff_cpod = next((x for x in _parsed_cpod.effects
+                          if x.kind == "cost_per_own_debuff_layer"), None)
+        if _eff_cpod is not None:
+            _step = max(1, int(_eff_cpod.value.get("layer_step") or 1))
+            _units = int(own_debuff_layers) // _step
+            if total >= 0:
+                total = max(0, total + int(_eff_cpod.value.get("delta") or 0) * _units)
+    # RC-401 批次十八（2026-09-30 F 族第四种形状）：**号位条件带来的能耗修正**。
+    # 由调用方就地算好按名传（照 `own_debuff_layers` 同形 ✓）；**不塞进 `energy_cost_mods`** ✗
+    # （那条是精灵级 + 有 `until_turn` 到期语义；号位条件是每手重算的静态条件）。夹照既有纪律：只对 `total >= 0` 夹 ✓。
+    if int(slot_cost_delta) and total >= 0:
+        total = max(0, total + int(slot_cost_delta))
     if bool(getattr(cfg, "energy_cost_modifier", False)):
         for mod in pet.energy_cost_mods or ():
             if isinstance(mod, dict) and _cost_mod_applies(mod, skill):
@@ -1841,6 +2891,14 @@ def effective_skill_cost(pet: PetState, skill, cfg: Optional[RuleConfig] = None,
                 and str(spec.get("element") or "") == str(getattr(skill, "element", "") or ""):
             factor = float(spec.get("value") or 1.0)
             total = int(math.floor(total * factor))
+    # task-28（`721`）：**全技能能耗永久-N 的唯一读点** ✓（本函数是 `resolved_skill_cost` 的唯一实现 ✓
+    # ⇒ `:427`/`:869`/`:1228` 自动一致 ⇒ **预览与真出手读同一个数** ✓）
+    # ⚠ **下界口径**（Lead 2026-09-30 裁决 ✓）：**能减多少减多少、但不为负** ✓
+    #   ⚠ **只对"total ≥ 0"夹** ✗ —— 若 total 已被**别的**修正压成负数 ⇒ **原样交给下面 MC-018 的既有守卫** ✓
+    #     （**别人的守卫是约束、不是障碍** ✓ 我不把它变宽 ✓）
+    _gd = _global_cost_delta(pet, cfg)
+    if _gd and total >= 0:
+        total = max(0, total + _gd)
     return total
 
 
@@ -1900,14 +2958,61 @@ def _accumulate_on_hit_ramps(state: GameState, rs: Ruleset, defender: PetState,
                                      "resisted": resisted})
 
 
+def _accumulate_triggered_ramp(state: GameState, pet: PetState, skill, parsed, *,
+                               trigger: str, happened: bool,
+                               cfg: Optional[RuleConfig] = None) -> None:
+    """**真的应对成功** / **真的把对手打倒下**之后，把「…本技能<属性>永久±N」累加一次。
+
+    RC-401 批次十七（2026-09-30 task-26 H 族批一）。与 `_accumulate_per_use_ramp` 共用
+    **同一套写点**（`PetState.skill_ramps` ⇒ `_skill_ramp` 在出手读威力/连击、
+    `effective_skill_cost` 读能耗时自动生效），本函数只负责**判触发器**。
+
+    ⚠ `happened` 是**调用方观测到的事实**，不是"这段代码被执行到了"：
+      · `trigger="respond_success"` ⇒ 只有 `pet._respond_succeeded` 为真才算（`_execute` 里设的，
+        判据是 `fx.respond_to(skill) == 对手那一手的类别`）；
+      · `trigger="defeat_foe"`      ⇒ 只有这一手**真的把对手打到 0 血**（`defender.hp <= 0` 那一支）才算。
+    **这一层是刻意的**：第一版把 `trigger=` 直接当事实用（调用方无条件传 `"respond_success"`），
+    实测**对手出攻击招、`_respond_succeeded=False` 也照样累加**（`skill_000422` 对照实验当场抓到 ✗）——
+    那正是"把没发生的说成发生了"。现在事实必须**从状态里读出来再传进来** ⇒ 不成立就什么都不做 ✓
+    """
+    cfg = cfg or _rule_config.get_rule_config()
+    if not bool(getattr(cfg, "damage_triggered_ramp", False)):
+        return
+    if not happened:
+        return
+    eff = next((e for e in getattr(parsed, "effects", ()) if e.kind == "triggered_ramp"), None)
+    if eff is None or str(eff.value.get("trigger") or "") != str(trigger):
+        return
+    field_name = str(eff.value.get("field") or "")
+    delta = int(eff.value.get("delta") or 0)
+    if field_name not in ("power", "cost", "hits") or not delta:
+        return
+    ramps = dict(getattr(pet, "skill_ramps", None) or {})
+    row = dict(ramps.get(skill.skill_id) or {})
+    row[field_name] = int(row.get(field_name) or 0) + delta
+    ramps[skill.skill_id] = row
+    pet.skill_ramps = ramps
+    _bump(state, "triggered_ramp", {"side": None, "skill_id": skill.skill_id,
+                                    "trigger": str(trigger), "field": field_name,
+                                    "delta": delta, "total": row[field_name]})
+
+
 def _accumulate_per_use_ramp(state: GameState, pet: PetState, skill, parsed,
-                             cfg: Optional[RuleConfig] = None) -> None:
+                             cfg: Optional[RuleConfig] = None, *,
+                             happened: bool) -> None:
     """一次**成功出手**之后，把「每次使用后永久±N」累加到这只精灵身上。
 
     只改**这个技能**（不影响同一只精灵的别的技能）；数值来自解析结果，不写死。
+
+    ⚠ `happened` **必传**（task-25 B 族批，2026-09-30 改钉）：它必须是**调用方观测到的事实**
+    （「这一手没被 `action_cancelled` 取消」），不是"这段代码被执行到了" ✗ ——
+    `_execute` 的第一道守卫（精灵已倒下）会 `_bump(action_cancelled{reason:"fainted"})` 后 return，
+    那一手**没有打出去**，不许累加（与 `_accumulate_triggered_ramp` 的 `happened` 同一条纪律）。
     """
     cfg = cfg or _rule_config.get_rule_config()
     if not bool(getattr(cfg, "damage_per_use_ramp", False)):
+        return
+    if not happened:
         return
     eff = next((e for e in getattr(parsed, "effects", ()) if e.kind == "per_use_ramp"), None)
     if eff is None:
@@ -1924,6 +3029,114 @@ def _accumulate_per_use_ramp(state: GameState, pet: PetState, skill, parsed,
     _bump(state, "per_use_ramp", {"side": None, "skill_id": skill.skill_id,
                                   "field": field_name, "delta": delta,
                                   "total": row[field_name]})
+
+
+def _element_ramp_should_fire(prior_uses: int) -> bool:
+    """B 族触发一次的判据 —— **口径的唯一改点**（task-25，2026-09-30）。
+
+    `prior_uses` = **这一手之前**，这一只已经用过多少次「命中该系别」的技能。
+
+    当前口径 = **次数**（人类授权「缺参数就在本地规则里显式定义」；生成器
+    `damage.element_use_ramp` 的 `reason` 里登记 `ENGINE_HYPOTHESIS`）：
+    每匹配一次就加一次 `delta`。
+
+    ⚠ **若日后定为「不同系别个数」**（即 `skill_000450 过曝`「每使用过1个其他系别技能」
+    读成"每多一个**没见过的**系别"）⇒ **只改这一个函数**：`return prior_uses == 0` ✓
+    （`PetState.skill_use_elems` 本来就按系别分开记账 ⇒ 个数口径读得出来 ✓）。
+    """
+    return True
+
+
+def _accumulate_element_use_ramp(state: GameState, rs: Ruleset, pet: PetState, used_skill,
+                                 cfg: Optional[RuleConfig] = None, *,
+                                 happened: bool) -> None:
+    """task-25 B 族：把「**每使用1次其他<本系>技能 / 每使用过1个其他系别技能**，
+    本技能<属性>永久±N」按**触发**累加一次。
+
+    语义核心是**「其他」**（三条技能的共同点）⇒ 两处都必须排除本技能自己：
+      · 记账时：这一手用的就是**它自己** ⇒ 既不加 `skill_ramps[S]`，也不让它进自己的计数；
+      · `scope="same_element"`（270 蓄能轰击 / 343 光能聚集）⇒ 只有**同系**的**别的**技能才算；
+      · `scope="other_element"`（450 过曝）⇒ 只有**异系**技能才算（本技能自己是那个系 ⇒ 天然被排除）。
+
+    `happened=False`（这一手被取消）⇒ **既不记账也不累加** ✓（人类口径：不许把没打出去的算成打出去了）。
+    读数落在**现成**的 `PetState.skill_ramps`（与 `per_use_ramp`/`on_hit_ramp`/`triggered_ramp` 同一个写点），
+    系别计数落在 `PetState.skill_use_elems`（既是审计读数，也是"次数/个数"口径的读点）。
+    """
+    cfg = cfg or _rule_config.get_rule_config()
+    if not bool(getattr(cfg, "damage_element_use_ramp", False)):
+        return
+    if not happened:
+        return
+    used_elem = str(getattr(used_skill, "element", "") or "")
+    if not used_elem:
+        return
+    # ⚠ **先看这只精灵身上到底有没有 B 族技能**：一条都没有 ⇒ **什么都不写** ✓
+    # 为什么（2026-09-30 实测）：记账写在 `PetState` 上 ⇒ 一旦写进去，**序列化摘要就变了** ⇒
+    # 全部 28/29 个回归场景的终局指纹都会动（行为没变，但指纹变了）✗。
+    # 只有"身上真有 B 族技能"的精灵才需要这份账 ⇒ 其余逐位不变（golden 指纹守住 ✓）。
+    loadout_all: Dict[str, list] = {}
+    for _side in ("player", "enemy"):
+        _s = getattr(state, _side, None)
+        for pid, ids in ((getattr(_s, "loadouts", None) or {}).items() if _s else ()):
+            loadout_all.setdefault(str(pid), list(ids or ()))
+    loadout = loadout_all.get(str(pet.pet_id)) or []
+    ramps: List["tuple[str, Dict[str, Any], str]"] = []
+    _seen_sids: set = set()
+    for sid in loadout:
+        sid = str(sid)
+        # ⚠ **同一个技能 id 出现两次也只能加一次**（实测：配招里有重复 id 时过去会加两遍 ✗）——
+        # 这是"每使用1次 ⇒ 加 1 次 delta"的语义底线，按 id 去重。
+        if sid in _seen_sids:
+            continue
+        _seen_sids.add(sid)
+        if sid == str(used_skill.skill_id):
+            continue                      # 「其他」⇒ 本技能自己不算 ✗
+        other = rs.skills.get(sid)
+        if other is None:
+            continue
+        info = getattr(parse.resolve_element_use_ramp(other, declared=True), "element_ramp", None)
+        if info:
+            # ⚠ 元素要**跟着这条 ramp 一起存下来**：过去在匹配循环里读的是**上一个循环残留的
+            # `other`**（stale loop variable）⇒ 比的是"最后一支技能"的元素 ⇒
+            # 用**本系**技能也会触发「其他系别」那条 ✗（实测：用光系的 skill_000448 触发了 450）。
+            ramps.append((sid, info, str(getattr(other, "element", "") or "")))
+    if not ramps:
+        return
+    # ① 记账：这一手用掉的**系别**（按系别累计；「其他」的排除在下面的匹配里做）
+    uses = {str(k): int(v or 0) for k, v in (getattr(pet, "skill_use_elems", None) or {}).items()}
+    prior = int(uses.get(used_elem, 0) or 0)
+    uses[used_elem] = prior + 1
+    pet.skill_use_elems = uses
+    # ② 触发：这一手是不是"别的技能"，让身上某条 B 族技能的永久修正 ±delta
+    for sid, info, own_element in ramps:
+        scope = str(info.get("scope") or "")
+        if scope == "same_element":
+            # 同系：这一手用的系别 == 那条写着 的系别（且上面已排除"本技能自己"✓）
+            if str(info.get("element") or "") != used_elem:
+                continue
+        elif scope == "other_element":
+            # 异系：这一手用的系别 ≠ **这条 ramp 所属技能**的系别（不是别的技能的元素 ✗）
+            if used_elem == own_element:
+                continue
+        else:
+            continue
+        field_name = str(info.get("field") or "")
+        delta = int(info.get("delta") or 0)
+        if field_name not in ("power", "cost", "hits") or not delta:
+            continue
+        if not _element_ramp_should_fire(prior):
+            continue
+        ramps = dict(getattr(pet, "skill_ramps", None) or {})
+        row = dict(ramps.get(sid) or {})
+        row[field_name] = int(row.get(field_name) or 0) + delta
+        ramps[sid] = row
+        pet.skill_ramps = ramps
+        _bump(state, "element_use_ramp", {
+            "side": None, "skill_id": sid, "field": field_name, "delta": delta,
+            "total": row[field_name], "element": used_elem,
+            "by_skill_id": str(used_skill.skill_id), "scope": scope,
+            "uses_of_element": int(uses.get(used_elem, 0) or 0),
+        })
 
 
 def _foe_switched_this_turn(state: GameState, side: str) -> bool:
@@ -1967,6 +3180,73 @@ def _gate_foe_switch_effects(state: GameState, side: str, skill,
     return dataclasses.replace(parsed, effects=kept), False
 
 
+def _gate_self_mark_effects(state: GameState, side: str, skill, parsed, cfg=None):
+    """把「**自己有某个标记**才生效」的效果按条件筛一遍（task-28 · `722 反弹`）。
+
+    与 `_gate_foe_switch_effects` **同形**（同一套"条件效果"与"未实现效果"的区分 ✓）：
+      · 条件成立（自己那个标记**层数 > 0**）⇒ 原样返回 ✓；
+      · 不成立 ⇒ 把它们**摘掉** + 记一条 `self_mark_condition_skipped` ✓（**正常的局面**，
+        不该进 `state.unsupported` ✗）—— 剩下的无条件效果照常结算 ✓。
+    """
+    cfg = cfg or _rule_config.get_rule_config()
+    if not bool(getattr(cfg, "damage_moe_mark", False)):
+        return parsed, False
+    cond = [e for e in parsed.effects
+            if isinstance(getattr(e, "value", None), dict)
+            and e.value.get("requires") == "self_has_mark"]
+    if not cond:
+        return parsed, False
+    me = getattr(state, side)
+    pet = me.field_pet
+    # 一律**逐个效果**判：不同的标记可以有不同的层数 ✓（今天只有「萌化」一种 ✓）
+    kept = []
+    dropped = 0
+    for e in parsed.effects:
+        if (isinstance(getattr(e, "value", None), dict)
+                and e.value.get("requires") == "self_has_mark"
+                and int((pet.marks or {}).get(str(e.value.get("mark") or ""), 0) or 0) <= 0):
+            dropped += 1
+            continue
+        kept.append(e)
+    if not dropped:
+        return parsed, True
+    _bump(state, "self_mark_condition_skipped", {
+        "side": side, "skill_id": skill.skill_id, "dropped": dropped,
+        "reason": "自己身上没有这个标记（0 层）",
+    })
+    return dataclasses.replace(parsed, effects=kept), False
+
+
+def _gate_self_debuff_effects(state: GameState, side: str, skill, parsed, cfg=None):
+    """把「**自己有减益**才生效」的效果按条件筛一遍（task-28 · `724 破罐破摔`）。
+
+    与 `_gate_foe_switch_effects` / `_gate_self_mark_effects` **同形** ✓：
+    条件成立 ⇒ 原样 ✓；不成立 ⇒ **摘掉** + 记 `self_debuff_condition_skipped` ✓（**正常局面** ✓ 不进 unsupported ✗）。
+    ⚠ **"减益"口径**（Lead 2026-09-30 裁决 ✓）：**只算 `buffs`/`buffs_flat` 的负值** ✓ · **状态层数不算** ✓。
+      ⇒ ⚠ **改点**：若人类改判为"含状态层数" ⇒ **只改这一处**（把下面 `any(...)` 扩成也看 `pet.statuses`）✓。
+    """
+    cfg = cfg or _rule_config.get_rule_config()
+    if not bool(getattr(cfg, "damage_cond_self_debuff_power", False)):
+        return parsed, False
+    if not any(isinstance(getattr(e, "value", None), dict)
+               and e.value.get("requires") == "self_has_debuff" for e in parsed.effects):
+        return parsed, False
+    pet = getattr(state, side).field_pet
+    has_debuff = any(float(v or 0) < 0 for v in (pet.buffs or {}).values()) or \
+        any(float(v or 0) < 0 for v in (pet.buffs_flat or {}).values())
+    if has_debuff:
+        return parsed, True
+    kept = [e for e in parsed.effects
+            if not (isinstance(getattr(e, "value", None), dict)
+                    and e.value.get("requires") == "self_has_debuff")]
+    _bump(state, "self_debuff_condition_skipped", {
+        "side": side, "skill_id": skill.skill_id,
+        "dropped": len(parsed.effects) - len(kept),
+        "reason": "自己身上没有减益（buffs/buffs_flat 里没有负值）",
+    })
+    return dataclasses.replace(parsed, effects=kept), False
+
+
 def _poison_layers(state: GameState, side: str) -> int:
     """对手**场上那只**的中毒层数（RC-401 批次九的动态能耗修正要用）。
 
@@ -1982,6 +3262,43 @@ def _poison_layers(state: GameState, side: str) -> int:
         return int(row.get("layers") or 0)
     except (TypeError, ValueError):
         return 0
+
+
+def _foe_layer_count(state: GameState, side: str, source: str) -> int:
+    """对手**场上那只**身上某一类「层数」的当前值（RC-401 批次十六，task-20 批四）。
+
+    三种来源，都只读**公开状态**上的当前值（不是历史累计）：
+      · `中毒`   —— `statuses["中毒"].layers`（与批次九 `_poison_layers` 同一口径）；
+      · `星陨印记` —— `marks["星陨印记"]`（具名印记）；
+      · `印记`   —— **所有**印记层数之和（描述写的是泛指的「印记」）。
+
+    读不到就返回 0（"没有层数" ⇒ 加成 0，由调用方如实记 `per_layer_boost_skipped`）。
+    """
+    foe = getattr(state, "enemy" if side == "player" else "player")
+    pet = getattr(foe, "field_pet", None)
+    if pet is None:
+        return 0
+    if source == "中毒":
+        row = (pet.statuses or {}).get("中毒") or {}
+        try:
+            return int(row.get("layers") or 0)
+        except (TypeError, ValueError):
+            return 0
+    marks = pet.marks or {}
+    if source == "星陨印记":
+        try:
+            return int(marks.get("星陨印记", 0) or 0)
+        except (TypeError, ValueError):
+            return 0
+    if source == "印记":
+        total = 0
+        for value in marks.values():
+            try:
+                total += int(value or 0)
+            except (TypeError, ValueError):
+                continue
+        return total
+    return 0
 
 
 def _settle_sustain(state: GameState, rs: Ruleset, side: str, dealt: int) -> None:
@@ -2451,25 +3768,64 @@ def require_declared_end_turn_stages(cfg: RuleConfig) -> Tuple[str, ...]:
 
 def _end_turn_status_tick(state: GameState, rs: Ruleset, side: SideState, pet: PetState,
                           cfg: Optional[RuleConfig] = None) -> None:
-    """结算一只在场精灵身上的所有状态伤害（术语 1001/1002/1008）。"""
+    """结算一只在场精灵身上的所有状态伤害（术语 1001/1002/1008）。
+
+    ⚠ 2026-09-29（第三轮⑥）：**两条口径按配置分流**，不许混：
+      · 配置声明了 `status.end_of_turn[状态]`（v3）⇒ 走**本地规则**：
+        伤害 = 最大生命 × (base% + per_layer% × (层数−1))，层数按 `decay` 衰减，
+        并**倒数持续回合**；「层数归零**或**回合用尽」即移除。
+        （老口径下 灼烧 的 ceil(1/2)=1 ⇒ **永远不归零**，这是本轮实测到的真缺陷。）
+      · 没声明（legacy / v2）⇒ 走 `fx.status_tick` + `fx.decay_layers` 的**老口径**，逐位不变。
+    """
     cfg = cfg or _rule_config.get_rule_config(state.ruleset_config_id or None)
+    local_rules = getattr(cfg, "status_end_of_turn", None) or {}
     for name in list(pet.statuses.keys()):
-        try:
-            dmg = fx.status_tick(pet.hp, pet.max_hp, name)
-        except fx.UnsupportedEffect as exc:
-            _note_unsupported(state, f"状态「{name}」", str(exc))
-            continue
-        pet.hp = max(0, pet.hp - dmg)
         info = pet.statuses[name]
         layers = int(info.get("layers", 1))
+        rule = local_rules.get(name)
+        if rule is not None:
+            try:
+                dmg = fx.layered_status_tick(pet.hp, pet.max_hp, name, layers, rule)
+            except fx.UnsupportedEffect as exc:
+                _note_unsupported(state, f"状态「{name}」", str(exc))
+                continue
+        else:
+            try:
+                dmg = fx.status_tick(pet.hp, pet.max_hp, name)
+            except fx.UnsupportedEffect as exc:
+                _note_unsupported(state, f"状态「{name}」", str(exc))
+                continue
+        pet.hp = max(0, pet.hp - dmg)
         spec = fx.END_OF_TURN_STATUS.get(name, {})
-        info["layers"] = fx.decay_layers(layers, half=bool(spec.get("decays")))
-        state.log.append(f"{rs.pet(pet.pet_id).name}受到{name}伤害 {dmg}（剩余 {info['layers']} 层）。")
-        _bump(state, "status_tick", {
+        if rule is not None:
+            after = fx.layer_decay_by_rule(layers, rule)
+            turns_after = fx.status_turns_left_after(after, int(info.get("turns_left", rule["duration_turns"])))
+            info["layers"] = after
+            info["turns_left"] = turns_after
+            expired = after <= 0 or turns_after <= 0
+        else:
+            info["layers"] = fx.decay_layers(layers, half=bool(spec.get("decays")))
+            expired = info["layers"] <= 0
+        detail: Dict[str, Any] = {
             "side": side.name, "status": name, "damage": dmg,
             "layers_after": info["layers"],
-        }, evidence=(spec.get("term", ""),))
-        if info["layers"] <= 0:
+        }
+        if rule is not None:
+            detail["turns_left_after"] = int(info.get("turns_left", 0))
+            detail["damage_rule"] = "LOCAL_RULE"
+        if expired:
+            state.log.append(
+                f"{rs.pet(pet.pet_id).name}受到{name}伤害 {dmg}（状态结束）。"
+            )
+        else:
+            state.log.append(
+                f"{rs.pet(pet.pet_id).name}受到{name}伤害 {dmg}"
+                f"（剩余 {info['layers']} 层"
+                + (f"、{int(info.get('turns_left', 0))} 回合" if rule is not None else "")
+                + "）。"
+            )
+        _bump(state, "status_tick", detail, evidence=(spec.get("term", ""),))
+        if expired:
             pet.statuses.pop(name, None)
         if pet.hp <= 0:
             pet.fainted = True
@@ -2531,10 +3887,43 @@ def _end_of_turn(state: GameState, rs: Ruleset,
                     f"规则配置 {cfg.ruleset_config_id} 声明了它，但本引擎没有对应的实现 ——"
                     "不静默跳过",
                 )
+        # RC-401 批次十七（task-26 H 族批二）：「**回合结束时，本技能<属性>永久±N**」。
+        # 触发条件**确定可判**（回合末一定会到）⇒ `happened=True` ✓
+        # 只翻这只精灵**配招里真的带着的**技能（与 `_accumulate_on_hit_ramps` 同一口径）✓
+        # ⚠ 放在**阶段循环之外**：它不是 `turn_order.end_turn.order` 里声明的游戏阶段
+        #   （那是"每只在场精灵内部"的伤害/回能顺序），借它当阶段会改掉那条声明的语义 ✗。
+        if pet.alive:
+            _accumulate_end_of_turn_ramps(state, rs, side, pet, cfg)
     # 天气的回合末结算（场地级，双方一起）：**在声明阶段之后**。
     # 它不算 `turn_order.end_turn.order` 里的阶段（那是「每只在场精灵内部」的顺序），
     # 所以放在这个循环外面；顺序本身没有一手证据，登记在 battle-modes 的 unknowns 里。
     _end_turn_weather(state, rs, cfg)
+
+
+def _accumulate_end_of_turn_ramps(state: GameState, rs: Ruleset, side_state,
+                                  pet: PetState,
+                                  cfg: Optional[RuleConfig] = None) -> None:
+    """回合结束时：把这只精灵配招里带「**回合结束时，本技能<属性>永久±N**」的技能各累加一次。
+
+    RC-401 批次十七（task-26 H 族批二 · 3 条：`skill_000432 水波术` 威力+20 ·
+    `skill_000252 冲撞` 能耗-1 · `skill_000503 抛石` 能耗-5）。
+    与 `_accumulate_triggered_ramp` **共用同一套写点与同一个能力位**（`damage.triggered_ramp`）：
+    这里只负责"回合末到了"这个**确定事实** ⇒ `happened=True` ✓
+
+    ⚠ `side_state` 是 `SideState` **对象**（`_end_of_turn` 的 `for side in (state.player, state.enemy)`
+    里那个 `side`）—— 第一版按字符串用 `getattr(state, side)` 直接 `TypeError`（当场抓到 ✓）。
+    """
+    cfg = cfg or _rule_config.get_rule_config()
+    if not bool(getattr(cfg, "damage_triggered_ramp", False)):
+        return
+    loadout = tuple(side_state.loadouts.get(pet.pet_id) or ())
+    for sid in loadout:
+        skill = rs.skills.get(sid)
+        if skill is None:
+            continue
+        parsed = parse.resolve_triggered_ramp(skill, declared=True)
+        _accumulate_triggered_ramp(state, pet, skill, parsed,
+                                   trigger="end_of_turn", happened=True, cfg=cfg)
 
 
 def _finish(state: GameState) -> None:
@@ -2700,7 +4089,7 @@ def public_planner_state(state: "GameState", rs: Ruleset, side: str = "player") 
     foe = getattr(state, "enemy" if side == "player" else "player")
 
     def own_pet(p: PetState) -> Dict[str, Any]:
-        return {
+        row = {
             "slot": p.slot,
             "pet_id": p.pet_id,
             "hp": p.hp,
@@ -2714,6 +4103,34 @@ def public_planner_state(state: "GameState", rs: Ruleset, side: str = "player") 
             "charging": bool(p.charge),
             "entered_turn": p.entered_turn,
         }
+        # 2026-09-30（Q8 收口，task-22）：己方这一只有个体快照时，把**同一份投影**一并带进公开面。
+        #
+        # 为什么必须带（实测的链条）：`/battle/plan` 的**伤害预告**与规划搜索都跑在
+        # `state_from_public_planner()` 重建出来的状态上 —— 不带这个键，重建出来的
+        # `PetState.panel` 就是空 ⇒ 预告按**种族值**算、真结算按**个体面板**算：
+        # 「页面预告一个数，打出来另一个数」（人类逐字：「肯定要按照最终结算出来应该怎么样
+        # 就怎么样啊，不能偷懒」）。
+        #
+        # 与 `ui_public_view` 的己方那四个键**同一套词**（有快照才出现）：它是**已有事实的转发**
+        # （引擎已经算好的那一份面板 + 实例 id + 投影版本），不是新算的、不是猜的。
+        # **没有快照时这四个键一个都不出现** ⇒ legacy / 无快照对局的协议与推荐逐位不变。
+        #
+        # ⚠ 体积换算（2026-09-30 实测，真实 tokenizer）：六宠全带快照时这条协议
+        #   937 → 1333 token（**+396 / +42.3%**）。**现在不瘦身**：这份协议只走
+        #   **Node→引擎的本地 stdio**（`/battle/plan` 的请求体），不进模型上下文；
+        #   `plan_actions` 的工具契约上限 8000 字节也装得下（实测 3794 字符）。
+        #   ⇒ **若将来把整份 state 发给模型（当工具参数 / 进 prompt）⇒ 必须先瘦身**
+        #     （那时 +396 token 才是真花钱）。可选瘦身：只留 `panel` + `individual_id`、
+        #     去掉 `panel_projection` / `individual_level`、`panel` 压成有序数组（约 +20%）。
+        if p.panel:
+            row.update({
+                "panel": dict(p.panel),
+                "individual_source": p.individual_source or "individual-snapshot",
+                "individual_id": p.individual_id,
+                "panel_projection": p.panel_projection,
+                "individual_level": p.individual_level,
+            })
+        return row
 
     def foe_field_pet(p: PetState) -> Dict[str, Any]:
         # 对手**场上**的面板是公开的：生命条、能量、异常与印记都写在屏幕上
@@ -2861,19 +4278,64 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
     view = public_planner_state(state, rs, side)
     me = getattr(state, side)
     foe = getattr(state, "enemy" if side == "player" else "player")
+    #: 己方这一侧"哪只带了哪个个体快照"（Q8）：有快照的用面板，没快照的用种族值。
+    own_by_pet = {pet.pet_id: pet for pet in me.pets}
+    #: 这一局的速度/伤害口径（Q8 收口，task-23）：整局任一只带快照 ⇒ 面板口径。
+    #: **展示必须跟着它走**：本局按面板结算，屏幕上就不能写种族值
+    #: （否则「对手显示速度 130、先手却按 278.63 比」＝屏幕上两套数）。
+    panel_scale = battle_uses_panel_scale(state)
 
     def pet_public(pet_id: str) -> Dict[str, Any]:
-        """从规则集取展示用的静态信息。查不到就如实留空，不猜。"""
+        """从规则集取展示用的静态信息。查不到就如实留空，不猜。
+
+        2026-09-29（Q8）：**己方**这一只如果有个体快照，六维就用快照算出来的面板
+        （`PetState.panel`，与列表/详情同一份投影），并带 `stats_source` /
+        `individual_id` / `panel_projection` 三个键 —— 让"有快照 / 没快照"两种情况
+        **能分辨**（人类逐字：「不许把两种情况说成一样」）。
+
+        2026-09-30（Q8 收口，task-23）：**这一局走面板口径时，没快照的那一侧展示的也是面板**
+        （`data.panel_stats(race)`，`stats_source='species-panel'`）—— 它没有个体快照，
+        物种面板就是它在结算里真用的那一份（伤害、生命、先手都按它算）。
+        **整局没有快照** ⇒ 逐字仍旧是种族值（`species-race`）⇒ 回执逐位不变。
+        """
         try:
             pet = rs.pet(pet_id)
         except Exception:  # noqa: BLE001 — 规则集里没有这只精灵时必须能降级
-            return {"name": None, "types": [], "stats": None, "class": None, "stage": None}
+            return {"name": None, "types": [], "stats": None, "class": None, "stage": None,
+                    "stats_source": "unknown"}
+        own = own_by_pet.get(pet_id)
+        if own is not None and own.panel:
+            return {
+                "name": pet.name,
+                "types": list(getattr(pet, "types", []) or []),
+                "stats": dict(own.panel),
+                "class": getattr(pet, "pet_class", None),
+                "stage": getattr(pet, "stage", None),
+                "stats_source": "individual-snapshot",
+                "individual_id": own.individual_id,
+                "individual_level": own.individual_level,
+                "panel_projection": own.panel_projection,
+            }
+        if panel_scale:
+            import roco_env.data as _data  # 局部导入：与 effects 同一理由，避免模块级成环
+            species_panel = _data.panel_stats(dict(getattr(pet, "stats", {}) or {}))
+            if species_panel:
+                return {
+                    "name": pet.name,
+                    "types": list(getattr(pet, "types", []) or []),
+                    "stats": {k: v for k, v in species_panel.items()},
+                    "class": getattr(pet, "pet_class", None),
+                    "stage": getattr(pet, "stage", None),
+                    "stats_source": "species-panel",
+                    "panel_projection": _individuals.PROJECTION_VERSION,
+                }
         return {
             "name": pet.name,
             "types": list(getattr(pet, "types", []) or []),
             "stats": dict(getattr(pet, "stats", {}) or {}) or None,
             "class": getattr(pet, "pet_class", None),
             "stage": getattr(pet, "stage", None),
+            "stats_source": "species-race",
         }
 
     def decorate(panel: Dict[str, Any]) -> Dict[str, Any]:
@@ -3005,6 +4467,14 @@ def state_from_public_planner(
             charge=d.get("charging") or None,
             entered_turn=d.get("entered_turn"),
             fainted=bool(d.get("fainted", False)),
+            # 2026-09-30（Q8 收口）：公开面里有快照那一份就还原回 `PetState` ——
+            # 规划搜索与伤害预告都跑在重建出来的状态上，不还原就等于"协议带下来了、
+            # 算的时候又丢了"（伤害预告会退回种族值）。没有快照 ⇒ `{}`，与改动前逐位相同。
+            panel={k: int(v) for k, v in (d.get("panel") or {}).items()},
+            individual_source=str(d.get("individual_source") or ""),
+            individual_id=d.get("individual_id"),
+            individual_level=d.get("individual_level"),
+            panel_projection=d.get("panel_projection"),
         )
         return p
 

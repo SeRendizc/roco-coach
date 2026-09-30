@@ -284,7 +284,13 @@ test('② 池子只能来自请求：按钮与回执一一对应，硬编码会�
 
   click(root, {loadoutRead: '1'});
   await flush();
-  assert.deepEqual(request.calls, [loadoutOptionsPath('own-0001')], '请求路径必须是工坊那一个端点');
+  // ⚠ 2026-09-30 **改钉（P0）**：挂载后**会自动读一次**（详情页要拿引擎的"这条效果结算了吗"，
+  //   见 `ensureNamesForDraft`），所以点按钮之后不是"恰好一次"了。**判据的意思一个字没改**：
+  //   池子只能来自那一个端点、不许硬编码 —— 改成"每一次调用都必须是它"。
+  //   旧断言留档（改钉不删）：assert.deepEqual(request.calls, [loadoutOptionsPath('own-0001')], '请求路径必须是工坊那一个端点');
+  assert.ok(request.calls.length >= 1, '至少要真读过一次');
+  assert.deepEqual([...new Set(request.calls)], [loadoutOptionsPath('own-0001')],
+    '每一次请求都必须是工坊那一个端点（池子只能来自请求）');
   assert.equal(request.calls[0], '/api/roco/loadout/options?pet=own-0001');
   const problems = poolProblems(root.innerHTML, pool);
   assert.deepEqual(problems, [], `池子判据报错：${problems.join(' | ')}`);
@@ -366,7 +372,10 @@ test('③ 保存要再问一次引擎，说出来的名字与数字必须来自�
     ],
   };
   const storage = fakeStorage();
-  const request = fakeRequest((path, nth) => (nth === 1 ? readReply : saveReply));
+  // ⚠ 2026-09-30 **改钉（P0）**：挂载后自动读一次 ⇒ 第 1 次是自动读、第 2 次是点按钮那次读，
+  //   保存是第 3 次起。夹具按"前两次 = 读、之后 = 保存回执"给（**判据本身没改**）。
+  //   旧夹具留档（改钉不删）：fakeRequest((path, nth) => (nth === 1 ? readReply : saveReply))
+  const request = fakeRequest((path, nth) => (nth <= 2 ? readReply : saveReply));
   const {root, controller} = mount({select: 'own-0001', skills: CURRENT, request, storage});
   click(root, {loadoutRead: '1'});
   await flush();
@@ -405,7 +414,9 @@ test('③b 回执里缺一个 ⇒ 说没保存、指出第几个、本机记录�
     learnable: REPLY.learnable.filter((row) => row.skill_id !== 'skill_000704')};
   const storage = fakeStorage();
   const {root, controller} = mount({select: 'own-0001', skills: CURRENT, storage,
-    request: fakeRequest((path, nth) => (nth === 1 ? REPLY : short))});
+    // ⚠ 2026-09-30 改钉（P0，同 ③）：挂载自动读一次 ⇒ 第 1、2 次都是读，之后才是异常回执。
+    //   旧夹具留档（改钉不删）：fakeRequest((path, nth) => (nth === 1 ? REPLY : short))
+    request: fakeRequest((path, nth) => (nth <= 2 ? REPLY : short))});
   click(root, {loadoutRead: '1'});
   await flush();
   assert.equal(controller.state.draft.filter(Boolean).length, 4, '预选先满上');
@@ -433,7 +444,7 @@ test('③b 回执里缺一个 ⇒ 说没保存、指出第几个、本机记录�
 test('③c 保存时请求失败 ⇒ 只说没保存（不许乐观）', async () => {
   const {root} = mount({select: 'own-0001', skills: CURRENT, storage: fakeStorage(),
     request: fakeRequest((path, nth) => {
-      if (nth === 1) return REPLY;                    // 先正常读池子
+      if (nth <= 2) return REPLY;                     // 先正常读池子（挂载自动读一次 + 点按钮一次）
       throw new Error('规则服务不可用：连接被拒绝');
     })});
   click(root, {loadoutRead: '1'});
@@ -714,4 +725,42 @@ test('⑨b 池子请求的路径与工坊同一口径；失败文案是闭集（
   assert.match(vague, /读不到这一只的学习表/);
   // 反证：通用话不是恒真 —— 认得出的那几条必须各说各的
   assert.notEqual(playerReasonOf('未知学习表或精灵 id：pet_999999'), playerReasonOf('规则服务不可用：x'));
+});
+
+/**
+ * ㉚ P0（2026-09-30 报告 L19）：「技能详情必须与真实战报同一结论」。
+ * 报告逐字：第 1 回合点「防御」⇒ **双方战报均出现约 70% 减伤**，可同一技能详情仍称
+ * 「引擎没有结算这条效果」✗ ⇒ 玩家被误导。
+ * 根因：详情那四个技能来自**回执**（不带 `mechanics`）⇒ `mechanicsResolved` 恒 false ✗。
+ * 判据：**与战报同一事实源**（引擎学习表里同一招的 `mechanics.resolved`）——
+ *   已结算的**不许**说没结算 ✓ · 没结算的**仍必须**说没结算（负向控制）✓。
+ */
+test('㉚ 引擎结算结论与战报同源：已结算的不许说没结算；没结算的仍要说没结算', () => {
+  const pool = [
+    {record: 'skill', skill_id: 'skill_def', name: '防御', category: '防御', element: '普通系', energy: 1,
+      desc: '减伤70%，应对攻击。', mechanics: {resolved: true}, effect_support: 'unsupported'},
+    {record: 'skill', skill_id: 'skill_decay', name: '腐化', category: '状态', element: '毒系', energy: 1,
+      desc: '敌方每有1层中毒效果，敌方获得双攻-30%。',
+      mechanics: {resolved: false, reason: '这条技能里还有本机训练规则尚未拉起的原语'}, effect_support: 'unsupported'},
+  ];
+  const receiptShape = [
+    {order: 1, name: '防御', element: '普通系', category: '防御', energy: 1,
+      power_label: '游戏数据里没有这一项', desc: '减伤70%，应对攻击。'},
+    {order: 2, name: '腐化', element: '毒系', category: '状态', energy: 1,
+      power_label: '游戏数据里没有这一项', desc: '敌方每有1层中毒效果，敌方获得双攻-30%。'},
+  ];
+  const withPool = loadoutPanelHtml({select: 'own-0001', pool, skills: receiptShape});
+  const noPool = loadoutPanelHtml({select: 'own-0001', skills: receiptShape});   // = 改前的行为（没有引擎事实）
+  // ① 正例：已经结算的（防御）**不许**再说"还没结算"
+  assert.match(withPool, /引擎：这条效果已经结算。/, '已结算的效果必须说"已经结算"（与战报同一结论）');
+  assert.doesNotMatch(withPool, /引擎：这条特效还没结算[^<]*减伤70%/,
+    '已结算的防御**不许**再说"还没结算"（报告 L19 那条矛盾）');
+  // ② 负向控制：没结算的（腐化）**仍必须**说没结算，且带上引擎给的理由
+  assert.match(withPool, /引擎：这条特效还没结算/, '没结算的仍要说没结算（不许为了消矛盾把这句话删掉）');
+  assert.match(withPool, /这条技能里还有本机训练规则尚未拉起的原语/, '未结算要把引擎给的理由带上');
+  // ③ 反证：**没有池子**（= 改前那条路，拿不到引擎事实）⇒ 照旧说"还没结算"（不知道就说不知道）
+  assert.match(noPool, /引擎：这条特效还没结算/, '拿不到引擎事实时不许假装"已经结算"');
+  assert.doesNotMatch(noPool, /引擎：这条效果已经结算。/, '没有事实就不许下"已经结算"的结论');
+  // ④ 候选按钮那一行也同源（原来只分"伤害/没结算"⇒ 已结算的防御会被说成没结算 ✗）
+  assert.match(withPool, /引擎结算：这条效果/, '候选行也要按"已结算的效果"说');
 });

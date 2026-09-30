@@ -13,7 +13,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {individualsForRows, refreshIndividual, undoIndividual, addIndividualFor, removeIndividual,
-  localIndividualsOf, localIndividualById, localIndividualsGrouped, resetIndividualsForTest}
+  localIndividualsOf, localIndividualById, localIndividualsGrouped, resetIndividualsForTest,
+  planLocalCleanup, cleanupProblems, applyLocalCleanup, CLEANUP_ARCHIVE_PREFIX}
   from '../src/client/box-individuals.js';
 
 /** 最小的 localStorage 假件（这一层只用到 getItem/setItem/removeItem）。 */
@@ -135,12 +136,35 @@ test('⑥ 本机同种个体查询：`localIndividualsOf` 按编号排序、`fal
 
 test('⑦ 页面真的把这份记录接上了（静态接线 + 形状一致）', () => {
   const box = readFileSync(new URL('../src/client/box.js', import.meta.url), 'utf8');
-  assert.match(box, /localIndividualsGrouped\(state\.rows\.map\(\(row\) => row\.select\)\)/,
-    'box.js 要按"服务端这一页画了哪些"算出 extras');
-  assert.match(box, /drawerListHtml\(state\.rows, \{[^}]*extras\}/, 'extras 必须真的传给抽屉');
+  // ⚠ 2026-09-29 **改钉**（第三轮最新决定：列表**不再按种类分组** —— 一个真个体一张普通卡；
+  //   用户：「icon 重复，另外铠甲虫为啥还是和别的不一样？实在不行你删掉重新做不行吗？」）。
+  //   判据的意思一个字没改：**"本机加出来的个体"必须真的被画出来**（只在 import 里出现名字不算）。
+  //   现在接线换了地方：本机那些在 `state.extraRows`（由 `localRowsFor` 按物种勾出来，
+  //   内部仍然走 `localIndividualsGrouped`），渲染时与 `state.rows` **合并**后逐个交给抽屉。
+  //   旧断言留档（改钉不删）：
+  //     assert.match(box, /localIndividualsGrouped\(state\.rows\.map\(\(row\) => row\.select\)\)/, 'box.js 要按"服务端这一页画了哪些"算出 extras');
+  //     assert.match(box, /drawerListHtml\(state\.rows, \{[^}]*extras\}/, 'extras 必须真的传给抽屉');
+  assert.match(box, /for \(const card of \[\.\.\.state\.rows, \.\.\.state\.extraRows\]\)/,
+    '本机那些（state.extraRows）必须与服务端那一页合并后一起画');
+  assert.match(box, /grid\.innerHTML = cards\.map\(\(card\) => drawerHtml\(singleIndividualGroup\(card\)/,
+    '合并后的每一只都要真的交给抽屉画（一个个体一张卡）');
+  assert.match(box, /localIndividualsGrouped\(drawn\)/, 'state.extraRows 的来源仍然是"不在这一页里"的本机记录');
   // 验收钩子：`data-box-extras` 是"这一页交出去几个额外个体"（真机 29 号读的就是它）
-  assert.match(box, /dataset\.boxExtras = String\(Object\.values\(extras\)/,
-    '页面的自报钩子要与 extras 的形状一致（Object.values，不是 Map.values）');
+  // ⚠ 2026-09-29 **改钉**：钩子的形状跟着新渲染走 —— 现在数的是"真画出来的本机个体"张数。
+  //   旧断言留档（改钉不删）：
+  //     assert.match(box, /dataset\.boxExtras = String\(Object\.values\(extras\)/,
+  //       '页面的自报钩子要与 extras 的形状一致（Object.values，不是 Map.values）');
+  assert.match(box, /dataset\.boxExtras = String\(cards\.filter\(\(card\) => card\.extra === true\)\.length\)/,
+    '自报钩子要数"真画出来的本机个体"张数');
+  // ⚠ 2026-09-29 **task-19 改钉**：现在排除的是**所有** `extra === true` 的条目（不只是
+  //   `pet_XXXXXX` 那一类），变量名跟着改成 `offListRecords`；钩子 `boxNotPets` 保留（读数不打断），
+  //   另加一个说清语义的 `boxOffList`。
+  //   旧断言留档（改钉不删）：
+  //     assert.match(box, /dataset\.boxNotPets = String\(notPets\.size\)/, '本机记录里"不是精灵"的那些（图鉴页遗留）也要照实报数');
+  assert.match(box, /dataset\.boxOffList = String\(offListRecords\.size\)/,
+    '没画进列表的本机记录条数要照实报数（task-19）');
+  assert.match(box, /dataset\.boxNotPets = String\(offListRecords\.size\)/,
+    '既有的 boxNotPets 读数保留（语义更宽：任何不在名单里的本机记录）');
 });
 
 /**
@@ -302,3 +326,85 @@ test('㉑ 培养快照：缺字段不抛；性格与档位跟着**现值**走（
   assert.equal(snap.remaining.nature, 2, `刷过一次性格之后剩 2 次，实际 ${JSON.stringify(snap.remaining)}`);
 });
 
+/**
+ * ㉖ 按抓包名单清理本机记录（人类 2026-09-29 **选 B**，逐字：
+ * 「我想要的是 B，你可以先存个档，我意思是，有一个有抓包的真实精灵后，多的都删掉；抓包没有的也删掉」）。
+ *
+ * 规则四条：① 抓包名单里每个 species **只留 1 条**（优先留服务端那一只对应的记录）
+ * ② 同 species 多出来的删掉 ③ 抓包名单里没有的（含**没有物种编号**的）删掉 ④ **先存档再删**。
+ * 判据与真删共用同一只探测器（`cleanupProblems`），三只坏样本走**同一条**判据 —— 别写第二份规则。
+ */
+test('㉖ 按抓包名单清理本机记录：同 species 只留 1 条 + 抓包没有的也删 + 先存档再删', () => {
+  const storage = withStorage();
+  // 一份"像玩家那台机器"的夹具：1 只有抓包的 + 同种多出来 2 只；另一种 1 只 + 多出来 3 只；
+  // 外加没有物种编号的 1 条、以及抓包名单里没有的 1 条。
+  const seed = {
+    'own-0001': {individual_id: 'own-0001', species_id: 'pet_000001', nature: '稳重', level: 60},
+    'own-9001': {individual_id: 'own-9001', species_id: 'pet_000001', nature: '开朗', level: 60},
+    'own-9002': {individual_id: 'own-9002', species_id: 'pet_000001', nature: '悠闲', level: 60},
+    'own-0009': {individual_id: 'own-0009', species_id: 'pet_000009', nature: '坦率', level: 60},
+    'own-9101': {individual_id: 'own-9101', species_id: 'pet_000009', nature: '温顺', level: 60},
+    'own-9102': {individual_id: 'own-9102', species_id: 'pet_000009', nature: '调皮', level: 60},
+    'own-9103': {individual_id: 'own-9103', species_id: 'pet_000009', nature: '认真', level: 60},
+    'own-0177': {individual_id: 'own-0177', species_id: '', nature: '害羞', level: 60},
+    'own-0200': {individual_id: 'own-0200', species_id: 'pet_099999', nature: '勇敢', level: 60},
+  };
+  globalThis.localStorage.setItem('roco.box.individuals.v1', JSON.stringify(seed));
+  const ctx = {capturedSpecies: ['pet_000001', 'pet_000009'],
+    preferredBySpecies: {pet_000001: 'own-0001', pet_000009: 'own-0009'}};
+
+  const plan = planLocalCleanup(ctx);
+  assert.deepEqual(plan.keeps, ['own-0001', 'own-0009'], `同 species 各留 1 条（留服务端那一只）：${JSON.stringify(plan)}`);
+  assert.deepEqual(plan.deletes, ['own-0177', 'own-0200', 'own-9001', 'own-9002', 'own-9101', 'own-9102', 'own-9103'],
+    `同种多出来的 + 抓包没有的 + 没有物种编号的都要删：${JSON.stringify(plan.deletes)}`);
+  assert.equal(plan.reasons['own-9001'], 'extra-same-species');
+  assert.equal(plan.reasons['own-0200'], 'not-in-capture');
+  assert.equal(plan.reasons['own-0177'], 'no-species');
+  // 判据（与真删同一只探测器）：这一份计划必须挑不出毛病
+  assert.deepEqual(cleanupProblems(plan, {...ctx, all: seed}), [], '这一份清理计划应当无可挑剔');
+
+  // 反证（必红，走同一条判据 `cleanupProblems`）：
+  //   ① 同一个 species 留了两条 ② 有记录既没留也没删（漏） ③ 把"有抓包的那一只"删了
+  assert.ok(cleanupProblems({keeps: ['own-0001', 'own-9001'], deletes: []}, {...ctx, all: seed})
+    .some((one) => one.includes('留了 2 条')), '反证①：同 species 留两条必须被抓');
+  assert.ok(cleanupProblems({keeps: ['own-0001'], deletes: []}, {...ctx, all: seed})
+    .some((one) => one.includes('既没保留也没删')), '反证②：漏掉记录必须被抓');
+  assert.ok(cleanupProblems({keeps: ['own-9001', 'own-0009'],
+    deletes: ['own-0001', 'own-9002', 'own-9101', 'own-9102', 'own-9103', 'own-0177', 'own-0200']},
+  {...ctx, all: seed}).some((one) => one.includes('把抓包名单里那一只也删了')),
+  '反证③：删掉服务端那一只必须被抓');
+
+  // ④ 先存档再删：删掉的那批**原样**进存档，留下的原样留在记录里
+  const result = applyLocalCleanup(plan, {at: '2026-09-29T12:00:00.000Z'});
+  assert.equal(result.ok, true, `清理应当成功：${JSON.stringify(result)}`);
+  assert.equal(result.removedCount, 7, `删了 7 条，实际 ${result.removedCount}`);
+  assert.equal(result.keptCount, 2, `留下 2 条，实际 ${result.keptCount}`);
+  const archive = JSON.parse(globalThis.localStorage.getItem(`${CLEANUP_ARCHIVE_PREFIX}${result.archiveKey.split(`${CLEANUP_ARCHIVE_PREFIX}`).pop()}`)
+    ?? globalThis.localStorage.getItem(result.archiveKey) ?? 'null');
+  assert.ok(archive, '存档键必须真的写进去了');
+  assert.deepEqual(archive.removed, {
+    'own-0177': seed['own-0177'], 'own-0200': seed['own-0200'], 'own-9001': seed['own-9001'],
+    'own-9002': seed['own-9002'], 'own-9101': seed['own-9101'], 'own-9102': seed['own-9102'],
+    'own-9103': seed['own-9103'],
+  }, '存档必须是**原样**的那批记录（逐字，不许清洗/改动）');
+  assert.deepEqual(storage.raw(), {'own-0001': seed['own-0001'], 'own-0009': seed['own-0009']},
+    '清理之后只剩"抓包名单里每一只对应的那一条"');
+  // 同 species 只剩 1 条（按 species 分组计数，全部 ≤ 1）
+  const counts = {};
+  for (const one of Object.values(storage.raw())) {
+    counts[one.species_id] = (counts[one.species_id] ?? 0) + 1;
+  }
+  assert.deepEqual(counts, {pet_000001: 1, pet_000009: 1}, `同 species 都只剩 1 条：${JSON.stringify(counts)}`);
+
+  // 反证（必红）：**存档写不进就不许删** —— 把 setItem 打瘸，记录必须一条不少
+  const before = JSON.stringify(storage.raw());
+  const throwing = {getItem: globalThis.localStorage.getItem, setItem: () => { throw new Error('配额满'); },
+    removeItem: globalThis.localStorage.removeItem};
+  const saved = globalThis.localStorage;
+  globalThis.localStorage = throwing;
+  const blocked = applyLocalCleanup(plan, {at: '2026-09-29T13:00:00.000Z'});
+  globalThis.localStorage = saved;
+  assert.equal(blocked.ok, false, '存档写不进时必须**不删**（返回失败）');
+  assert.match(blocked.reason, /一条都没有删|没有删/, `失败原因要说清没删：${blocked.reason}`);
+  assert.equal(JSON.stringify(storage.raw()), before, '存档失败时记录必须**一条都不少**');
+});

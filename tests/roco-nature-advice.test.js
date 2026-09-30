@@ -238,3 +238,56 @@ test('⑫ 同名**不同种**不许当成"两个个体"比（真机抓到的错�
   const ok = await natureLocalAnswer({message: '喵喵这两个个体差在哪？', context: sameSpecies});
   assert.match(String(ok.text), /第一个个体在/, `同种要照旧比：${ok?.text}`);
 });
+
+// ── 2026-09-30（半成品排查 #4：**缺值当默认值** ✗）─────────────────────────────
+// 旧写法（**逐字留档，改钉不删**）：
+//   `if (!one.talent || STAT_KEYS.every((stat) => !Number(one.talent?.[stat]))) {`
+//     `caveats.push(`${label}的天分是 0（缺数值时的占位）⇒ 天分那一半比不出高低`); }`
+//   `const pa = panelOf({race, talent: a.talent, nature: a.nature}).panel;`
+// ⇒ 缺的天分**照 0 进了面板计算**：结论看着有依据，其实是**用一个假数算出来的** ✗
+// 现在：缺的那一半**不参与计算**（panelOf 收到 null）⇒ 只比真有的那一半，且**正文与 caveats 都明说** ✓
+test('⑥b 缺天分不许当 0：那一半不参与计算，且正文与依据都要说明"不含天分"（反证）', async () => {
+  const race = {hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100};
+  const talent = {hp: 10, atk: 20, def: 0, spa: 0, spd: 0, spe: 5};
+  // ① 有值：两半都参与（天分的差会体现在 atk 上）
+  const full = compareIndividuals({race, a: {nature: '开朗', talent}, b: {nature: '胆小', talent: {...talent, atk: 0, spe: 20}}});
+  assert.deepEqual(full.compared, ['天分', '性格'], `两半都有值时要都算：${JSON.stringify(full.compared)}`);
+  const atkWithTalent = full.diff.atk;
+  // ② 缺天分：那一半**不参与** ⇒ atk 的差只剩性格那部分（比有值时小得多），且明说"不含天分"
+  const noTalent = compareIndividuals({race, a: {nature: '开朗', talent: null}, b: {nature: '胆小', talent: null}});
+  assert.deepEqual(noTalent.compared, ['性格'], `缺天分时只该比性格：${JSON.stringify(noTalent.compared)}`);
+  assert.ok(Math.abs(noTalent.diff.atk) < Math.abs(atkWithTalent), `缺天分时 atk 的差里不许还留着天分那部分（${noTalent.diff.atk} vs ${atkWithTalent}）`);
+  assert.ok(noTalent.caveats.some((row) => row.includes('不含天分')), `依据里要明说"不含天分"：${noTalent.caveats}`);
+  // 旧口径逐字是「天分是 0（缺数值时的占位）⇒ 天分那一半比不出高低」——**这句不许再出现** ✓
+  // （新口径里出现的「不是按 0 算」是**说明**，不算旧口径 ✓）
+  assert.doesNotMatch(noTalent.caveats.join(' '), /天分是 0|缺数值时的占位/, '旧口径「天分是 0（占位）」不许再出现');
+  assert.match(noTalent.text, /只比了性格这一半/, `正文要自己说清只比了哪一半：${noTalent.text}`);
+  // ③ 反证：两半都有值时**不许**出现"只比了…"这种降级说法
+  assert.doesNotMatch(full.text, /只比了/, `两半都有值时不该降级：${full.text}`);
+  // ④ 两半都缺 ⇒ 只比种族值，且两条 caveat 都在
+  const none = compareIndividuals({race, a: {nature: null, talent: null}, b: {nature: null, talent: null}});
+  assert.deepEqual(none.compared, [], `两半都缺时不该有任一参与：${JSON.stringify(none.compared)}`);
+  assert.equal(none.caveats.length, 2, `两半都缺时两条都要说：${none.caveats}`);
+});
+
+// ── 2026-09-30（Lead 裁决口径 (a)：**缺天分⇒结论照给，但"按 0 计入"必须落在每一条结论的正文**）──
+// 背景：`talent.js:462` 的 `?? 0`（缺天分当 0 进公式）**不改成"不参与"**（那会打红 6 条契约、
+// 而且"给不出结论"比"给结论+明说偏低"更糟 ✗）⇒ 改成**把这句写进正文** ✓。
+// **两态都要钉**（Lead 的硬要求）：缺 ⇒ 必有 ✓ · 齐 ⇒ **必无**（否则就是"无条件挂免责" ✗）
+test('⑥c 缺天分⇒每条结论正文都要有"按 0 计入"；天分齐⇒一个字都不许有（两态反证）', async () => {
+  const {explainNature, adviceFor, compareIndividuals} = await import('../src/coach/nature-advice.js');
+  const race = {hp: 120, atk: 100, def: 90, spa: 80, spd: 80, spe: 60};
+  const talent = {hp: 10, atk: 20, def: 0, spa: 5, spd: 5, spe: 3};
+  const NOTE = /按 0 计入/;
+  const conclusions = (t) => [
+    ['explainNature', explainNature({race, talent: t, nature: '开朗'}).text],
+    ['adviceFor', adviceFor({race, talent: t, priority: ['spe'], limit: 2}).rows[0].text],
+    ['compareIndividuals', compareIndividuals({race, a: {nature: '开朗', talent: t}, b: {nature: '胆小', talent: t}}).text],
+  ];
+  for (const [name, text] of conclusions(talent)) {
+    assert.doesNotMatch(text, NOTE, `天分齐全时「${name}」正文里不许出现免责句：${text}`);
+  }
+  for (const [name, text] of conclusions(null)) {
+    assert.match(text, NOTE, `缺天分时「${name}」正文里必须写清"按 0 计入"：${text}`);
+  }
+});

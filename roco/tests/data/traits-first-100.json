@@ -1,0 +1,4028 @@
+{
+ "ruleset_id": "roco-world-s4-2026-09-10",
+ "summary": {
+  "count": 100,
+  "all_traits": true,
+  "with_engine_spec": 4,
+  "engine_spec_statuses": {
+   "PARTIAL": 1,
+   "FULL": 3
+  },
+  "parsed_something": 19,
+  "with_unclaimed": 72,
+  "with_unparsed": 12,
+  "reachable_frozen": 100,
+  "no_owner": 0,
+  "class_counter": {
+   "说明里没有已知功能词": 56,
+   "纯数值修正": 16,
+   "状态层数": 9,
+   "需要新机制/新状态": 6,
+   "带条件": 6,
+   "解析层没读出：随机": 4,
+   "印记": 4,
+   "已登记": 4,
+   "解析层没读出：动态连击数": 4,
+   "解析层有未认领片段：回合：回合结束时": 3,
+   "层数驱动": 3,
+   "魔力相关": 2,
+   "解析层有未认领片段：回复：回复3能量；回合：回合结束时": 1,
+   "解析层有未认领片段：回复：每回复1能量；每：每回复1能量": 1,
+   "解析层有未认领片段：获得：获得增益时；获得：额外获得层数+2；层：额外获得层数+2": 1,
+   "解析层有未认领片段：获得：获得能量或生命时；随机：会将等量的能量或生命随机分配给场下的精灵": 1,
+   "解析层有未认领片段：获得：获得双防+10%；每：每有1能量": 1,
+   "解析层有未认领片段：若：若自己能量为0则脱离；回合：回合结束时": 1,
+   "解析层有未认领片段：获得：本场战斗首次使用的技能获得迅捷": 1,
+   "解析层有未认领片段：回合：双方回合结束时的效果会额外触发1次": 1,
+   "解析层有未认领片段：获得：获得双攻和双防+20%": 1,
+   "解析层有未认领片段：消耗：消耗5%生命": 1,
+   "解析层有未认领片段：回复：回复3能量；每：入场前己方精灵每放1次地系技能": 1,
+   "解析层有未认领片段：每：每受到1次攻击伤害": 1,
+   "解析层有未认领片段：若：若使用技能能耗高于敌方；回合：回合结束敌方失去能耗之差的能量": 1,
+   "解析层有未认领片段：回合：回合结束时脱离": 1,
+   "解析层有未认领片段：印记：敌方每有1层星陨印记；每：敌方每有1层星陨印记；层：敌方每有1层星陨印记": 1,
+   "解析层有未认领片段：每：己方其他精灵每有1层萌化；层：己方其他精灵每有1层萌化": 1,
+   "解析层有未认领片段：获得：自己入场时获得全技能能耗-1；每：己方精灵每使用1次水系技能": 1,
+   "解析层有未认领片段：每：每携带1个毒系技能进入战斗": 1,
+   "解析层有未认领片段：影响：携带的技能受能耗变化效果的影响翻倍；变：携带的技能受能耗变化效果的影响翻倍": 1,
+   "解析层有未认领片段：变：自己的能耗增加变为能耗降低；变：能耗降低变为能耗增加": 1,
+   "解析层有未认领片段：获得：获得全技能能耗永久-2；蓄力：每次进入蓄力状态；每：每次进入蓄力状态": 1,
+   "解析层有未认领片段：获得：敌方获得中毒；获得：获得层数等于中毒印记层数的2倍；印记：获得层数等于中毒印记层数的2倍；层：获得层数等于中毒印记层数的2倍；层：获得层数等于中毒印记层数的2倍": 1,
+   "解析层有未认领片段：获得：使敌方获得冻结时；获得：也会使其获得全技能能耗+1": 1,
+   "解析层有未认领片段：每：敌方携带技能总能耗每有1点": 1,
+   "解析层有未认领片段：回复：回复3能量；每：入场前己方精灵每放1次冰系技能": 1,
+   "解析层有未认领片段：每：每携带1个冰系技能进入战斗": 1,
+   "解析层有未认领片段：获得：使敌方获得冻结时；获得：也会使其获得2层冻结；层：也会使其获得2层冻结": 1,
+   "解析层有未认领片段：若：若先于敌方攻击": 1,
+   "解析层有未认领片段：获得：行动后获得连击数+1；连击：行动后获得连击数+1；若：若先于敌方行动": 1,
+   "解析层有未认领片段：若：若后于敌方行动；变：自己携带的普通系技能变为翼系技能": 1,
+   "解析层有未认领片段：获得：获得连击数+1；连击：获得连击数+1": 1,
+   "解析层有未认领片段：获得：获得迅捷": 1,
+   "解析层有未认领片段：获得：携带的翼系攻击技能获得选择：能耗+1": 1,
+   "解析层没读出：选择": 1,
+   "解析层有未认领片段：获得：自己入场时获得攻防速+10%；每：队伍中每有1只其他的虫系精灵": 1,
+   "解析层有未认领片段：获得：己方队伍获得5次随机奉献；奉献：己方队伍获得5次随机奉献；随机：己方队伍获得5次随机奉献": 1,
+   "解析层有未认领片段：获得：己方队伍获得1次随机奉献；回合：回合结束时；奉献：己方队伍获得1次随机奉献；随机：己方队伍获得1次随机奉献": 1,
+   "解析层有未认领片段：获得：入场时获得不同效果": 1,
+   "解析层有未认领片段：获得：己方队伍获得1次随机奉献；每：每受到1次攻击伤害；奉献：己方队伍获得1次随机奉献；随机：己方队伍获得1次随机奉献": 1,
+   "解析层有未认领片段：每：己方队伍中每有1只力竭的精灵": 1,
+   "解析层有未认领片段：连击：连击数+2；每：自己每失去25%生命": 1,
+   "解析层没读出：天气": 1,
+   "解析层有未认领片段：获得：获得双攻+20%": 1,
+   "解析层有未认领片段：回复：回复3能量；每：入场前己方精灵每放1次火系技能": 1,
+   "解析层有未认领片段：获得：获得全技能威力永久+30": 1,
+   "解析层有未认领片段：获得：获得物攻+100%；回合：入场首回合": 1,
+   "解析层有未认领片段：每：每场战斗1次": 1,
+   "解析层有未认领片段：回复：自己回复等量生命": 1,
+   "解析层有未认领片段：获得：自己入场时获得全技能威力+10；每：己方精灵每使用1次火系技能": 1,
+   "解析层有未认领片段：获得：更换入场的精灵获得5层中毒；层：更换入场的精灵获得5层中毒": 1,
+   "解析层有未认领片段：获得：自己入场时获得魔攻+20%；每：敌方每使用1次「聚能」技能或更换精灵": 1,
+   "解析层有未认领片段：回复：离场时回复10能量": 1,
+   "解析层有未认领片段：获得：携带的攻击技能获得迸发：威力+40": 1,
+   "解析层有未认领片段：每：每次行动后脱离": 1,
+   "解析层有未认领片段：若：若场上的己方精灵能量等于0；回合：回合结束时": 1,
+   "解析层有未认领片段：获得：携带的电系技能获得迸发：能耗-2": 1,
+   "解析层有未认领片段：获得：永久获得双攻+30%；每：每入场1次": 1,
+   "解析层有未认领片段：回合：回合开始时": 1,
+   "解析层没读出：号位": 1,
+   "解析层有未认领片段：获得：1号位技能获得传动1": 1,
+   "解析层没读出：传动": 1,
+   "解析层有未认领片段：每：己方精灵每使用1次防御技能": 1,
+   "解析层有未认领片段：获得：携带的龙系技能获得迅捷": 1,
+   "解析层有未认领片段：蓄力：蓄力状态下": 1,
+   "解析层有未认领片段：回复：回复5能量；每：入场前己方精灵每成功应对1次": 1,
+   "解析层有未认领片段：每：己方精灵每应对1次": 1,
+   "解析层有未认领片段：回合：被打断的技能进入2回合冷却": 1,
+   "解析层有未认领片段：每：己方精灵每使用1次状态技能": 1,
+   "解析层有未认领片段：获得：可获得的萌化层数不受限制；层：可获得的萌化层数不受限制": 1,
+   "解析层有未认领片段：获得：获得连击数+3；连击：获得连击数+3；每：自己每有1层萌化；层：自己每有1层萌化": 1,
+   "解析层有未认领片段：获得：使敌方获得中毒时；获得：也会使其获得物攻-40%和速度-40": 1,
+   "解析层有未认领片段：回合：双方回合结束时的中毒效果会额外触发1次": 1,
+   "解析层有未认领片段：印记：敌方每2层中毒转化为1层中毒印记；每：敌方每2层中毒转化为1层中毒印记；回合：回合结束时；层：敌方每2层中毒转化为1层中毒印记；层：敌方每2层中毒转化为1层中毒印记": 1
+  }
+ },
+ "rows": [
+  {
+   "skill_id": "skill_000001",
+   "name": "偏振",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "受到自己携带技能系别的攻击伤害-40%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000256",
+    "pet_000257",
+    "pet_000349",
+    "pet_000350",
+    "pet_000351",
+    "pet_000352",
+    "pet_000386"
+   ],
+   "owner_count": 7,
+   "owners_in_frozen": [
+    "pet_000256",
+    "pet_000257",
+    "pet_000349",
+    "pet_000350",
+    "pet_000351",
+    "pet_000352",
+    "pet_000386"
+   ],
+   "owner_names": [
+    "矿晶虫",
+    "晶石蜗",
+    "晶石蜗",
+    "晶石蜗"
+   ],
+   "classes": [
+    "纯数值修正（威力/伤害±N%）"
+   ]
+  },
+  {
+   "skill_id": "skill_000002",
+   "name": "目空",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "携带的非光系技能，威力+25%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000054",
+    "pet_000055"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000054",
+    "pet_000055"
+   ],
+   "owner_names": [
+    "小独角兽",
+    "白金独角兽"
+   ],
+   "classes": [
+    "纯数值修正（威力/伤害±N%）"
+   ]
+  },
+  {
+   "skill_id": "skill_000003",
+   "name": "氧循环",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "使用草系技能后，回复10%生命。",
+   "parsed_kinds": [
+    "heal"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "heal",
+     "value": {
+      "percent": 10
+     },
+     "evidence": "回复10%生命"
+    }
+   ],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000001",
+    "pet_000007",
+    "pet_000022"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000001",
+    "pet_000007",
+    "pet_000022"
+   ],
+   "owner_names": [
+    "喵喵",
+    "魔力猫",
+    "喵呜"
+   ],
+   "classes": [
+    "说明里没有已知功能词"
+   ]
+  },
+  {
+   "skill_id": "skill_000004",
+   "name": "勇敢",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "携带的能耗大于3的技能，威力+40%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000024",
+    "pet_000031"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000024",
+    "pet_000031"
+   ],
+   "owner_names": [
+    "蒲公英娃娃",
+    "蒲公英"
+   ],
+   "classes": [
+    "纯数值修正（威力/伤害±N%）"
+   ]
+  },
+  {
+   "skill_id": "skill_000005",
+   "name": "生物碱",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "使用草系技能时，敌方获得2层中毒。",
+   "parsed_kinds": [
+    "foe_status"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "foe_status",
+     "value": {
+      "status": "中毒",
+      "layers": 2
+     },
+     "evidence": "敌方获得2层中毒"
+    }
+   ],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000016",
+    "pet_000017",
+    "pet_000018",
+    "pet_000247",
+    "pet_000248",
+    "pet_000249",
+    "pet_000250",
+    "pet_000251",
+    "pet_000252",
+    "pet_000253",
+    "pet_000254",
+    "pet_000255"
+   ],
+   "owner_count": 12,
+   "owners_in_frozen": [
+    "pet_000016",
+    "pet_000017",
+    "pet_000018",
+    "pet_000247",
+    "pet_000248",
+    "pet_000249",
+    "pet_000250",
+    "pet_000251",
+    "pet_000252",
+    "pet_000253",
+    "pet_000254",
+    "pet_000255"
+   ],
+   "owner_names": [
+    "蹦蹦种子",
+    "蹦蹦草",
+    "蹦蹦花",
+    "蹦蹦种子"
+   ],
+   "classes": [
+    "状态层数（已实现的原语，可直接复用）"
+   ]
+  },
+  {
+   "skill_id": "skill_000006",
+   "name": "养分重吸收",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "回合结束时，回复3能量。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "回复：回复3能量",
+    "回合：回合结束时"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000026",
+    "pet_000027",
+    "pet_000028"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000026",
+    "pet_000027",
+    "pet_000028"
+   ],
+   "owner_names": [
+    "奇丽草",
+    "奇丽叶",
+    "奇丽花"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：回复：回复3能量；回合：回合结束时"
+   ]
+  },
+  {
+   "skill_id": "skill_000007",
+   "name": "诈死",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "自己力竭时，少损失1点魔力。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000037",
+    "pet_000038",
+    "pet_000039",
+    "pet_000238",
+    "pet_000239",
+    "pet_000240",
+    "pet_000241",
+    "pet_000242",
+    "pet_000243",
+    "pet_000244",
+    "pet_000245",
+    "pet_000246"
+   ],
+   "owner_count": 12,
+   "owners_in_frozen": [
+    "pet_000037",
+    "pet_000038",
+    "pet_000039",
+    "pet_000238",
+    "pet_000239",
+    "pet_000240",
+    "pet_000241",
+    "pet_000242",
+    "pet_000243",
+    "pet_000244",
+    "pet_000245",
+    "pet_000246"
+   ],
+   "owner_names": [
+    "丢丢",
+    "卡卡虫",
+    "卡瓦重",
+    "丢丢"
+   ],
+   "classes": [
+    "魔力相关"
+   ]
+  },
+  {
+   "skill_id": "skill_000008",
+   "name": "木桶戏法",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "离场后，更换入场的精灵以木桶状态登场。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000023",
+    "pet_000032"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000023",
+    "pet_000032"
+   ],
+   "owner_names": [
+    "绿草精灵",
+    "魔草巫灵"
+   ],
+   "classes": [
+    "需要新机制/新状态"
+   ]
+  },
+  {
+   "skill_id": "skill_000009",
+   "name": "腐植循环",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "每回复1能量，同时回复5%生命。",
+   "parsed_kinds": [
+    "heal"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "heal",
+     "value": {
+      "percent": 5
+     },
+     "evidence": "回复5%生命"
+    }
+   ],
+   "unparsed": [],
+   "unclaimed": [
+    "回复：每回复1能量",
+    "每：每回复1能量"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000040",
+    "pet_000041"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000040",
+    "pet_000041"
+   ],
+   "owner_names": [
+    "伊贝儿",
+    "伊贝粉粉"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：回复：每回复1能量；每：每回复1能量"
+   ]
+  },
+  {
+   "skill_id": "skill_000010",
+   "name": "营养液泡",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "获得增益时，额外获得层数+2。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：获得增益时",
+    "获得：额外获得层数+2",
+    "层：额外获得层数+2"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000084",
+    "pet_000085",
+    "pet_000086"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000084",
+    "pet_000085",
+    "pet_000086"
+   ],
+   "owner_names": [
+    "呆小路",
+    "舞动路路",
+    "白发路路"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：获得增益时；获得：额外获得层数+2；层：额外获得层数+2"
+   ]
+  },
+  {
+   "skill_id": "skill_000011",
+   "name": "系统发育",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "获得能量或生命时，会将等量的能量或生命随机分配给场下的精灵。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [
+    "随机（出现在：获得能量或生命时，会将等量的能量或生命随机分配给场下的精灵。）"
+   ],
+   "unclaimed": [
+    "获得：获得能量或生命时",
+    "随机：会将等量的能量或生命随机分配给场下的精灵"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000144",
+    "pet_000145",
+    "pet_000299"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000144",
+    "pet_000145",
+    "pet_000299"
+   ],
+   "owner_names": [
+    "春团",
+    "春兔",
+    "春花兔"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：获得能量或生命时；随机：会将等量的能量或生命随机分配给场下的精灵",
+    "解析层没读出：随机（出现在：获得能量或生命时，会将等量的能量或生命随机分配给场下的精灵。）"
+   ]
+  },
+  {
+   "skill_id": "skill_000012",
+   "name": "生长",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "回合结束时，回复12%生命。",
+   "parsed_kinds": [
+    "heal"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "heal",
+     "value": {
+      "percent": 12
+     },
+     "evidence": "回复12%生命"
+    }
+   ],
+   "unparsed": [],
+   "unclaimed": [
+    "回合：回合结束时"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000063",
+    "pet_000064",
+    "pet_000065"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000063",
+    "pet_000064",
+    "pet_000065"
+   ],
+   "owner_names": [
+    "格兰种子",
+    "格兰花",
+    "格兰球"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：回合：回合结束时"
+   ]
+  },
+  {
+   "skill_id": "skill_000013",
+   "name": "挺起胸脯",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "携带的能耗为1的技能，威力+50%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000011",
+    "pet_000033",
+    "pet_000353",
+    "pet_000354",
+    "pet_000393",
+    "pet_000513"
+   ],
+   "owner_count": 6,
+   "owners_in_frozen": [
+    "pet_000011",
+    "pet_000033",
+    "pet_000353",
+    "pet_000354",
+    "pet_000393",
+    "pet_000513"
+   ],
+   "owner_names": [
+    "鸭吉吉",
+    "鸭吉吉",
+    "鸭吉吉",
+    "鸭吉吉"
+   ],
+   "classes": [
+    "纯数值修正（威力/伤害±N%）"
+   ]
+  },
+  {
+   "skill_id": "skill_000014",
+   "name": "碰瓷",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "自己使用恶系技能后，敌方失去2能量。",
+   "parsed_kinds": [
+    "foe_energy_loss"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "foe_energy_loss",
+     "value": {
+      "amount": 2
+     },
+     "evidence": "敌方失去2能量"
+    }
+   ],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000042",
+    "pet_000043",
+    "pet_000044"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000042",
+    "pet_000043",
+    "pet_000044"
+   ],
+   "owner_names": [
+    "锥尾羊",
+    "铃兰羊",
+    "花影羚羊"
+   ],
+   "classes": [
+    "说明里没有已知功能词"
+   ]
+  },
+  {
+   "skill_id": "skill_000015",
+   "name": "壮胆",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "队伍存在虫系精灵，自己获得双攻+50%。",
+   "parsed_kinds": [
+    "self_stat"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "self_stat",
+     "value": {
+      "stat": "atk",
+      "delta_pct": 50
+     },
+     "evidence": "自己获得双攻+50%"
+    },
+    {
+     "kind": "self_stat",
+     "value": {
+      "stat": "spa",
+      "delta_pct": 50
+     },
+     "evidence": "自己获得双攻+50%"
+    }
+   ],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000146",
+    "pet_000147",
+    "pet_000148"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000146",
+    "pet_000147",
+    "pet_000148"
+   ],
+   "owner_names": [
+    "伏地兽",
+    "贪食鼹",
+    "巨噬针鼹"
+   ],
+   "classes": [
+    "说明里没有已知功能词"
+   ]
+  },
+  {
+   "skill_id": "skill_000016",
+   "name": "囤积",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "每有1能量，获得双防+10%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：获得双防+10%",
+    "每：每有1能量"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000087",
+    "pet_000088",
+    "pet_000089"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000087",
+    "pet_000088",
+    "pet_000089"
+   ],
+   "owner_names": [
+    "绿耳松鼠",
+    "抱枕松鼠",
+    "蹦床松鼠"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：获得双防+10%；每：每有1能量"
+   ]
+  },
+  {
+   "skill_id": "skill_000017",
+   "name": "警惕",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "回合结束时，若自己能量为0则脱离。",
+   "parsed_kinds": [
+    "escape"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "escape",
+     "value": {
+      "how": "脱离"
+     },
+     "evidence": "脱离"
+    }
+   ],
+   "unparsed": [],
+   "unclaimed": [
+    "若：若自己能量为0则脱离",
+    "回合：回合结束时"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000019",
+    "pet_000020",
+    "pet_000021",
+    "pet_000355",
+    "pet_000356",
+    "pet_000357"
+   ],
+   "owner_count": 6,
+   "owners_in_frozen": [
+    "pet_000019",
+    "pet_000020",
+    "pet_000021",
+    "pet_000355",
+    "pet_000356",
+    "pet_000357"
+   ],
+   "owner_names": [
+    "地鼠",
+    "遁鼠",
+    "遁地鼠",
+    "地鼠"
+   ],
+   "classes": [
+    "带条件（要判条件是否成立）",
+    "解析层有未认领片段：若：若自己能量为0则脱离；回合：回合结束时"
+   ]
+  },
+  {
+   "skill_id": "skill_000018",
+   "name": "起飞加速",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "本场战斗首次使用的技能获得迅捷。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：本场战斗首次使用的技能获得迅捷"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000210",
+    "pet_000211",
+    "pet_000212"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000210",
+    "pet_000211",
+    "pet_000212"
+   ],
+   "owner_names": [
+    "小鹬",
+    "鄙目鹬",
+    "高脚鹬"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：本场战斗首次使用的技能获得迅捷"
+   ]
+  },
+  {
+   "skill_id": "skill_000019",
+   "name": "保守派",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "总技能能耗小于4时，自己获得双防+80%。",
+   "parsed_kinds": [
+    "self_stat"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "self_stat",
+     "value": {
+      "stat": "def",
+      "delta_pct": 80
+     },
+     "evidence": "自己获得双防+80%"
+    },
+    {
+     "kind": "self_stat",
+     "value": {
+      "stat": "spd",
+      "delta_pct": 80
+     },
+     "evidence": "自己获得双防+80%"
+    }
+   ],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000261",
+    "pet_000262",
+    "pet_000263"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000261",
+    "pet_000262",
+    "pet_000263"
+   ],
+   "owner_names": [
+    "小鼠獭",
+    "燕尾獭",
+    "卷胡巨獭"
+   ],
+   "classes": [
+    "说明里没有已知功能词"
+   ]
+  },
+  {
+   "skill_id": "skill_000020",
+   "name": "双向光速",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "在场时，双方回合结束时的效果会额外触发1次。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "回合：双方回合结束时的效果会额外触发1次"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000264",
+    "pet_000265"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000264",
+    "pet_000265"
+   ],
+   "owner_names": [
+    "粉星仔",
+    "粉耳星兔"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：回合：双方回合结束时的效果会额外触发1次"
+   ]
+  },
+  {
+   "skill_id": "skill_000021",
+   "name": "鼓气",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "使用能耗为3的技能时，获得双攻和双防+20%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：获得双攻和双防+20%"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000300",
+    "pet_000301",
+    "pet_000302"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000300",
+    "pet_000301",
+    "pet_000302"
+   ],
+   "owner_names": [
+    "逗逗",
+    "气球猫",
+    "梦想三三"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：获得双攻和双防+20%"
+   ]
+  },
+  {
+   "skill_id": "skill_000022",
+   "name": "共鸣",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "携带的「虫鸣」技能威力+20。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000303",
+    "pet_000304",
+    "pet_000383",
+    "pet_000394",
+    "pet_000395",
+    "pet_000396"
+   ],
+   "owner_count": 6,
+   "owners_in_frozen": [
+    "pet_000303",
+    "pet_000304",
+    "pet_000383",
+    "pet_000394",
+    "pet_000395",
+    "pet_000396"
+   ],
+   "owner_names": [
+    "旋叶虫",
+    "风滚暮虫",
+    "蓬叶虫",
+    "旋叶虫"
+   ],
+   "classes": [
+    "纯数值修正（威力/伤害±N%）"
+   ]
+  },
+  {
+   "skill_id": "skill_000023",
+   "name": "不移",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "携带的无额外效果的攻击技能，威力+30%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000046"
+   ],
+   "owner_count": 1,
+   "owners_in_frozen": [
+    "pet_000046"
+   ],
+   "owner_names": [
+    "记忆石"
+   ],
+   "classes": [
+    "纯数值修正（威力/伤害±N%）"
+   ]
+  },
+  {
+   "skill_id": "skill_000024",
+   "name": "石头大餐",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "能量不足时，消耗5%生命，代替1能量。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "消耗：消耗5%生命"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000013",
+    "pet_000014",
+    "pet_000015"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000013",
+    "pet_000014",
+    "pet_000015"
+   ],
+   "owner_names": [
+    "阿米亚特",
+    "阿米樱",
+    "罗隐"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：消耗：消耗5%生命"
+   ]
+  },
+  {
+   "skill_id": "skill_000025",
+   "name": "地脉",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "初始能量为0，入场前己方精灵每放1次地系技能，回复3能量。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "回复：回复3能量",
+    "每：入场前己方精灵每放1次地系技能"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000092",
+    "pet_000093",
+    "pet_000094"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000092",
+    "pet_000093",
+    "pet_000094"
+   ],
+   "owner_names": [
+    "布是石",
+    "布是岩",
+    "布克棱岩"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：回复：回复3能量；每：入场前己方精灵每放1次地系技能"
+   ]
+  },
+  {
+   "skill_id": "skill_000026",
+   "name": "刺肤",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "每受到1次攻击伤害，对攻击自己的精灵造成50威力物理伤害。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "每：每受到1次攻击伤害"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000095",
+    "pet_000096",
+    "pet_000097",
+    "pet_000398",
+    "pet_000399",
+    "pet_000400"
+   ],
+   "owner_count": 6,
+   "owners_in_frozen": [
+    "pet_000095",
+    "pet_000096",
+    "pet_000097",
+    "pet_000398",
+    "pet_000399",
+    "pet_000400"
+   ],
+   "owner_names": [
+    "石肤蜥",
+    "石刺蜥",
+    "石冠王蜥",
+    "石肤蜥"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：每：每受到1次攻击伤害"
+   ]
+  },
+  {
+   "skill_id": "skill_000027",
+   "name": "石天平",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "若使用技能能耗高于敌方，回合结束敌方失去能耗之差的能量。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "若：若使用技能能耗高于敌方",
+    "回合：回合结束敌方失去能耗之差的能量"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000149",
+    "pet_000150"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000149",
+    "pet_000150"
+   ],
+   "owner_names": [
+    "石石",
+    "巨灵石"
+   ],
+   "classes": [
+    "带条件（要判条件是否成立）",
+    "解析层有未认领片段：若：若使用技能能耗高于敌方；回合：回合结束敌方失去能耗之差的能量"
+   ]
+  },
+  {
+   "skill_id": "skill_000028",
+   "name": "奔波命",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "使用防御技能后，回合结束时脱离。",
+   "parsed_kinds": [
+    "escape"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "escape",
+     "value": {
+      "how": "脱离"
+     },
+     "evidence": "脱离"
+    }
+   ],
+   "unparsed": [],
+   "unclaimed": [
+    "回合：回合结束时脱离"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000213",
+    "pet_000214"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000213",
+    "pet_000214"
+   ],
+   "owner_names": [
+    "奔波鼠",
+    "流浪鼠"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：回合：回合结束时脱离"
+   ]
+  },
+  {
+   "skill_id": "skill_000029",
+   "name": "观星",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "敌方每有1层星陨印记，自己的地系技能威力+20%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "印记：敌方每有1层星陨印记",
+    "每：敌方每有1层星陨印记",
+    "层：敌方每有1层星陨印记"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000098",
+    "pet_000099",
+    "pet_000100"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000098",
+    "pet_000099",
+    "pet_000100"
+   ],
+   "owner_names": [
+    "仪使者",
+    "仪式之星",
+    "仪式巨像"
+   ],
+   "classes": [
+    "纯数值修正（威力/伤害±N%）",
+    "层数驱动（需要读层数改数值）",
+    "印记",
+    "解析层有未认领片段：印记：敌方每有1层星陨印记；每：敌方每有1层星陨印记；层：敌方每有1层星陨印记"
+   ]
+  },
+  {
+   "skill_id": "skill_000030",
+   "name": "浸润",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "使用水系技能后，全技能能耗-1。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000002",
+    "pet_000005",
+    "pet_000030"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000002",
+    "pet_000005",
+    "pet_000030"
+   ],
+   "owner_names": [
+    "水蓝蓝",
+    "水灵",
+    "波波拉"
+   ],
+   "classes": [
+    "说明里没有已知功能词"
+   ]
+  },
+  {
+   "skill_id": "skill_000031",
+   "name": "缩壳",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "携带的防御技能能耗-2。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000047",
+    "pet_000048",
+    "pet_000049",
+    "pet_000409",
+    "pet_000410",
+    "pet_000411"
+   ],
+   "owner_count": 6,
+   "owners_in_frozen": [
+    "pet_000047",
+    "pet_000048",
+    "pet_000049",
+    "pet_000409",
+    "pet_000410",
+    "pet_000411"
+   ],
+   "owner_names": [
+    "板板壳",
+    "咔咔壳",
+    "水泡壳",
+    "板板壳"
+   ],
+   "classes": [
+    "说明里没有已知功能词"
+   ]
+  },
+  {
+   "skill_id": "skill_000032",
+   "name": "守护者",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "己方其他精灵每有1层萌化，自己入场时全技能能耗-1。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "每：己方其他精灵每有1层萌化",
+    "层：己方其他精灵每有1层萌化"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000101",
+    "pet_000102",
+    "pet_000103"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000101",
+    "pet_000102",
+    "pet_000103"
+   ],
+   "owner_names": [
+    "甜田螺",
+    "壳乙螺",
+    "卡洛儿"
+   ],
+   "classes": [
+    "层数驱动（需要读层数改数值）",
+    "解析层有未认领片段：每：己方其他精灵每有1层萌化；层：己方其他精灵每有1层萌化"
+   ]
+  },
+  {
+   "skill_id": "skill_000033",
+   "name": "水翼推进",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "己方精灵每使用1次水系技能，自己入场时获得全技能能耗-1。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：自己入场时获得全技能能耗-1",
+    "每：己方精灵每使用1次水系技能"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000104",
+    "pet_000105",
+    "pet_000106"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000104",
+    "pet_000105",
+    "pet_000106"
+   ],
+   "owner_names": [
+    "风铃鲨",
+    "蓝蝶鲨",
+    "彩蝶鲨"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：自己入场时获得全技能能耗-1；每：己方精灵每使用1次水系技能"
+   ]
+  },
+  {
+   "skill_id": "skill_000034",
+   "name": "溶解扩散",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "每携带1个毒系技能进入战斗，水系技能使敌方获得1层中毒。",
+   "parsed_kinds": [
+    "foe_status"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "foe_status",
+     "value": {
+      "status": "中毒",
+      "layers": 1
+     },
+     "evidence": "敌方获得1层中毒"
+    }
+   ],
+   "unparsed": [],
+   "unclaimed": [
+    "每：每携带1个毒系技能进入战斗"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000269",
+    "pet_000270",
+    "pet_000271",
+    "pet_000376",
+    "pet_000377",
+    "pet_000378"
+   ],
+   "owner_count": 6,
+   "owners_in_frozen": [
+    "pet_000269",
+    "pet_000270",
+    "pet_000271",
+    "pet_000376",
+    "pet_000377",
+    "pet_000378"
+   ],
+   "owner_names": [
+    "海盔虫",
+    "刺盔虫",
+    "千棘盔",
+    "海盔虫"
+   ],
+   "classes": [
+    "状态层数（已实现的原语，可直接复用）",
+    "解析层有未认领片段：每：每携带1个毒系技能进入战斗"
+   ]
+  },
+  {
+   "skill_id": "skill_000035",
+   "name": "倾轧",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "携带的技能受能耗变化效果的影响翻倍。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "影响：携带的技能受能耗变化效果的影响翻倍",
+    "变：携带的技能受能耗变化效果的影响翻倍"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000308"
+   ],
+   "owner_count": 1,
+   "owners_in_frozen": [
+    "pet_000308"
+   ],
+   "owner_names": [
+    "深蓝鲸"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：影响：携带的技能受能耗变化效果的影响翻倍；变：携带的技能受能耗变化效果的影响翻倍"
+   ]
+  },
+  {
+   "skill_id": "skill_000036",
+   "name": "对流",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "自己的能耗增加变为能耗降低；能耗降低变为能耗增加。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "变：自己的能耗增加变为能耗降低",
+    "变：能耗降低变为能耗增加"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000309",
+    "pet_000310"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000309",
+    "pet_000310"
+   ],
+   "owner_names": [
+    "双灯鱼",
+    "利灯鱼"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：变：自己的能耗增加变为能耗降低；变：能耗降低变为能耗增加"
+   ]
+  },
+  {
+   "skill_id": "skill_000037",
+   "name": "洄游",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "每次进入蓄力状态，获得全技能能耗永久-2。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：获得全技能能耗永久-2",
+    "蓄力：每次进入蓄力状态",
+    "每：每次进入蓄力状态"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000311",
+    "pet_000312",
+    "pet_000313"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000311",
+    "pet_000312",
+    "pet_000313"
+   ],
+   "owner_names": [
+    "豆丁鱼",
+    "快鳍鱼",
+    "龙鱼"
+   ],
+   "classes": [
+    "需要新机制/新状态",
+    "解析层有未认领片段：获得：获得全技能能耗永久-2；蓄力：每次进入蓄力状态；每：每次进入蓄力状态"
+   ]
+  },
+  {
+   "skill_id": "skill_000038",
+   "name": "扩散侵蚀",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "使用水系技能后，敌方获得中毒，获得层数等于中毒印记层数的2倍。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：敌方获得中毒",
+    "获得：获得层数等于中毒印记层数的2倍",
+    "印记：获得层数等于中毒印记层数的2倍",
+    "层：获得层数等于中毒印记层数的2倍",
+    "层：获得层数等于中毒印记层数的2倍"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000108",
+    "pet_000109"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000108",
+    "pet_000109"
+   ],
+   "owner_names": [
+    "翡翠水母",
+    "琉璃水母"
+   ],
+   "classes": [
+    "印记",
+    "解析层有未认领片段：获得：敌方获得中毒；获得：获得层数等于中毒印记层数的2倍；印记：获得层数等于中毒印记层数的2倍；层：获得层数等于中毒印记层数的2倍；层：获得层数等于中毒印记层数的2倍"
+   ]
+  },
+  {
+   "skill_id": "skill_000039",
+   "name": "捉迷藏",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "使敌方获得冻结时，也会使其获得全技能能耗+1。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：使敌方获得冻结时",
+    "获得：也会使其获得全技能能耗+1"
+   ],
+   "engine_spec": {
+    "status": "PARTIAL",
+    "hook": "after_freeze_applied",
+    "extra_hooks": [],
+    "gaps": [],
+    "reason": "「给敌方挂全技能能耗+1」**已经是真机制**（RC-401 批三）：修正写进 `PetState.energy_cost_mods`，由 `env.effective_skill_cost` 在可付性判定与扣费两处读，只在配置声明 `energy.cost_modifier` 时生效。仍未实现的是它与**其他能耗修改**（湿润印记 -1、聒噪 +2）的复合顺序与下限——术语没有定义，属 MC-018 待验项；本引擎按加法累计、不设下限（负值 fail closed）。"
+   },
+   "owner_pets": [
+    "pet_000112",
+    "pet_000110",
+    "pet_000111"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000112",
+    "pet_000110",
+    "pet_000111"
+   ],
+   "owner_names": [
+    "雪影娃娃",
+    "大耳帽兜",
+    "帽兜娃娃"
+   ],
+   "classes": [
+    "已登记（PARTIAL，钩子 after_freeze_applied）",
+    "解析层有未认领片段：获得：使敌方获得冻结时；获得：也会使其获得全技能能耗+1"
+   ]
+  },
+  {
+   "skill_id": "skill_000040",
+   "name": "冰钻",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "敌方携带技能总能耗每有1点，自己攻击时威力+10%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "每：敌方携带技能总能耗每有1点"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000215",
+    "pet_000216",
+    "pet_000217"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000215",
+    "pet_000216",
+    "pet_000217"
+   ],
+   "owner_names": [
+    "布鲁斯",
+    "雪顶布鲁斯",
+    "冰钻布鲁斯"
+   ],
+   "classes": [
+    "纯数值修正（威力/伤害±N%）",
+    "解析层有未认领片段：每：敌方携带技能总能耗每有1点"
+   ]
+  },
+  {
+   "skill_id": "skill_000041",
+   "name": "结晶水",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "初始能量为0，入场前己方精灵每放1次冰系技能，回复3能量。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "回复：回复3能量",
+    "每：入场前己方精灵每放1次冰系技能"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000151",
+    "pet_000152",
+    "pet_000153"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000151",
+    "pet_000152",
+    "pet_000153"
+   ],
+   "owner_names": [
+    "雪豆丁",
+    "雪蛮人",
+    "雪巨人"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：回复：回复3能量；每：入场前己方精灵每放1次冰系技能"
+   ]
+  },
+  {
+   "skill_id": "skill_000042",
+   "name": "冻土",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "每携带1个冰系技能进入战斗，地系技能威力+10%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "每：每携带1个冰系技能进入战斗"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000218",
+    "pet_000219"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000218",
+    "pet_000219"
+   ],
+   "owner_names": [
+    "呼呼猪",
+    "獠牙猪"
+   ],
+   "classes": [
+    "纯数值修正（威力/伤害±N%）",
+    "解析层有未认领片段：每：每携带1个冰系技能进入战斗"
+   ]
+  },
+  {
+   "skill_id": "skill_000043",
+   "name": "加个雪球",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "使敌方获得冻结时，也会使其获得2层冻结。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：使敌方获得冻结时",
+    "获得：也会使其获得2层冻结",
+    "层：也会使其获得2层冻结"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000113",
+    "pet_000114",
+    "pet_000115",
+    "pet_000359",
+    "pet_000360",
+    "pet_000361",
+    "pet_000362",
+    "pet_000363",
+    "pet_000364",
+    "pet_000365",
+    "pet_000366",
+    "pet_000379",
+    "pet_000380"
+   ],
+   "owner_count": 13,
+   "owners_in_frozen": [
+    "pet_000113",
+    "pet_000114",
+    "pet_000115",
+    "pet_000359",
+    "pet_000360",
+    "pet_000361",
+    "pet_000362",
+    "pet_000363",
+    "pet_000364",
+    "pet_000365",
+    "pet_000366",
+    "pet_000379",
+    "pet_000380"
+   ],
+   "owner_names": [
+    "脆筒甜甜",
+    "香草甜甜",
+    "圣代甜甜",
+    "圣代甜甜"
+   ],
+   "classes": [
+    "状态层数（**没有回合末实现**：冻结/引电/萌化）",
+    "解析层有未认领片段：获得：使敌方获得冻结时；获得：也会使其获得2层冻结；层：也会使其获得2层冻结"
+   ]
+  },
+  {
+   "skill_id": "skill_000044",
+   "name": "冰封",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "在场时，敌方全技能能耗+1。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000272",
+    "pet_000273",
+    "pet_000274"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000272",
+    "pet_000273",
+    "pet_000274"
+   ],
+   "owner_names": [
+    "雪娃娃",
+    "冰封怨灵",
+    "雪灵"
+   ],
+   "classes": [
+    "说明里没有已知功能词"
+   ]
+  },
+  {
+   "skill_id": "skill_000045",
+   "name": "顺风",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "若先于敌方攻击，本次技能威力+50%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "若：若先于敌方攻击"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000025",
+    "pet_000034",
+    "pet_000229",
+    "pet_000230",
+    "pet_000231",
+    "pet_000232",
+    "pet_000233",
+    "pet_000234",
+    "pet_000235",
+    "pet_000236",
+    "pet_000237",
+    "pet_000420"
+   ],
+   "owner_count": 12,
+   "owners_in_frozen": [
+    "pet_000025",
+    "pet_000034",
+    "pet_000229",
+    "pet_000230",
+    "pet_000231",
+    "pet_000232",
+    "pet_000233",
+    "pet_000234",
+    "pet_000235",
+    "pet_000236",
+    "pet_000237",
+    "pet_000420"
+   ],
+   "owner_names": [
+    "冬羽雀",
+    "岚鸟",
+    "雪绒鸟",
+    "雪绒鸟"
+   ],
+   "classes": [
+    "纯数值修正（威力/伤害±N%）",
+    "带条件（要判条件是否成立）",
+    "解析层有未认领片段：若：若先于敌方攻击"
+   ]
+  },
+  {
+   "skill_id": "skill_000046",
+   "name": "咔咔冲刺",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "若先于敌方行动，行动后获得连击数+1。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [
+    "动态连击数（出现在：若先于敌方行动，行动后获得连击数+1。）",
+    "连击（出现在：若先于敌方行动，行动后获得连击数+1。）"
+   ],
+   "unclaimed": [
+    "获得：行动后获得连击数+1",
+    "连击：行动后获得连击数+1",
+    "若：若先于敌方行动"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000154",
+    "pet_000155",
+    "pet_000156"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000154",
+    "pet_000155",
+    "pet_000156"
+   ],
+   "owner_names": [
+    "咔咔羽毛",
+    "咔咔雀",
+    "咔咔鸟"
+   ],
+   "classes": [
+    "带条件（要判条件是否成立）",
+    "解析层有未认领片段：获得：行动后获得连击数+1；连击：行动后获得连击数+1；若：若先于敌方行动",
+    "解析层没读出：动态连击数（出现在：若先于敌方行动，行动后获得连击数+1。）；连击（出现在：若先于敌方行动，行动后获得连击数+1。）"
+   ]
+  },
+  {
+   "skill_id": "skill_000047",
+   "name": "洁癖",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "离场后，自己的增益和减益会被更换入场的精灵继承。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000278",
+    "pet_000279",
+    "pet_000280"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000278",
+    "pet_000279",
+    "pet_000280"
+   ],
+   "owner_names": [
+    "乖乖鹄",
+    "蓝珠天鹅",
+    "翠顶夫人"
+   ],
+   "classes": [
+    "说明里没有已知功能词"
+   ]
+  },
+  {
+   "skill_id": "skill_000048",
+   "name": "展翅",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "在场时，自己携带的普通系技能变为翼系技能，若后于敌方行动，自己受到的伤害+25%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "若：若后于敌方行动",
+    "变：自己携带的普通系技能变为翼系技能"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000314",
+    "pet_000315",
+    "pet_000316"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000314",
+    "pet_000315",
+    "pet_000316"
+   ],
+   "owner_names": [
+    "凡雀",
+    "紫翎鹰",
+    "凡鹰"
+   ],
+   "classes": [
+    "纯数值修正（威力/伤害±N%）",
+    "带条件（要判条件是否成立）",
+    "解析层有未认领片段：若：若后于敌方行动；变：自己携带的普通系技能变为翼系技能"
+   ]
+  },
+  {
+   "skill_id": "skill_000049",
+   "name": "乘风连击",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "使用翼系技能后，获得连击数+1。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [
+    "动态连击数（出现在：使用翼系技能后，获得连击数+1。）",
+    "连击（出现在：使用翼系技能后，获得连击数+1。）"
+   ],
+   "unclaimed": [
+    "获得：获得连击数+1",
+    "连击：获得连击数+1"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000116",
+    "pet_000117",
+    "pet_000118",
+    "pet_000368",
+    "pet_000369",
+    "pet_000370"
+   ],
+   "owner_count": 6,
+   "owners_in_frozen": [
+    "pet_000116",
+    "pet_000117",
+    "pet_000118",
+    "pet_000368",
+    "pet_000369",
+    "pet_000370"
+   ],
+   "owner_names": [
+    "小狮鹫",
+    "神圣狮鹫",
+    "皇家狮鹫",
+    "小狮鹫"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：获得连击数+1；连击：获得连击数+1",
+    "解析层没读出：动态连击数（出现在：使用翼系技能后，获得连击数+1。）；连击（出现在：使用翼系技能后，获得连击数+1。）"
+   ]
+  },
+  {
+   "skill_id": "skill_000050",
+   "name": "快锤",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "携带的能耗小于3的技能，获得迅捷。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：获得迅捷"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000060"
+   ],
+   "owner_count": 1,
+   "owners_in_frozen": [
+    "pet_000060"
+   ],
+   "owner_names": [
+    "锤头鹳"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：获得迅捷"
+   ]
+  },
+  {
+   "skill_id": "skill_000051",
+   "name": "异类",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "携带的翼系攻击技能获得选择：能耗+1，攻击时吸血50%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [
+    "选择（出现在：携带的翼系攻击技能获得选择：能耗+1，攻击时吸血50%。）"
+   ],
+   "unclaimed": [
+    "获得：携带的翼系攻击技能获得选择：能耗+1"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000266",
+    "pet_000267",
+    "pet_000268"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000266",
+    "pet_000267",
+    "pet_000268"
+   ],
+   "owner_names": [
+    "觅觅蝠",
+    "翻翻蝠",
+    "夜游魔"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：携带的翼系攻击技能获得选择：能耗+1",
+    "解析层没读出：选择（出现在：携带的翼系攻击技能获得选择：能耗+1，攻击时吸血50%。）"
+   ]
+  },
+  {
+   "skill_id": "skill_000052",
+   "name": "毒腺",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "使用能耗小于等于1的技能时，敌方获得4层中毒。",
+   "parsed_kinds": [
+    "foe_status"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "foe_status",
+     "value": {
+      "status": "中毒",
+      "layers": 4
+     },
+     "evidence": "敌方获得4层中毒"
+    }
+   ],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000119",
+    "pet_000120",
+    "pet_000121"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000119",
+    "pet_000120",
+    "pet_000121"
+   ],
+   "owner_names": [
+    "圆眼蜘蛛",
+    "尖角蜘蛛",
+    "芋香巨角蛛"
+   ],
+   "classes": [
+    "状态层数（已实现的原语，可直接复用）"
+   ]
+  },
+  {
+   "skill_id": "skill_000053",
+   "name": "虫群鼓舞",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "队伍中每有1只其他的虫系精灵，自己入场时获得攻防速+10%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：自己入场时获得攻防速+10%",
+    "每：队伍中每有1只其他的虫系精灵"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000050",
+    "pet_000051",
+    "pet_000143"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000050",
+    "pet_000051",
+    "pet_000143"
+   ],
+   "owner_names": [
+    "一窝蜂",
+    "黄蜂后",
+    "花魁蜂后"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：自己入场时获得攻防速+10%；每：队伍中每有1只其他的虫系精灵"
+   ]
+  },
+  {
+   "skill_id": "skill_000054",
+   "name": "振奋虫心",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "主动击败敌方后，己方队伍获得5次随机奉献。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [
+    "随机（出现在：主动击败敌方后，己方队伍获得5次随机奉献。）"
+   ],
+   "unclaimed": [
+    "获得：己方队伍获得5次随机奉献",
+    "奉献：己方队伍获得5次随机奉献",
+    "随机：己方队伍获得5次随机奉献"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000157",
+    "pet_000158"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000157",
+    "pet_000158"
+   ],
+   "owner_names": [
+    "矮脚爬爬",
+    "恶魔红钻"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：己方队伍获得5次随机奉献；奉献：己方队伍获得5次随机奉献；随机：己方队伍获得5次随机奉献",
+    "解析层没读出：随机（出现在：主动击败敌方后，己方队伍获得5次随机奉献。）"
+   ]
+  },
+  {
+   "skill_id": "skill_000055",
+   "name": "花精灵",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "回合结束时，己方队伍获得1次随机奉献。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [
+    "随机（出现在：回合结束时，己方队伍获得1次随机奉献。）"
+   ],
+   "unclaimed": [
+    "获得：己方队伍获得1次随机奉献",
+    "回合：回合结束时",
+    "奉献：己方队伍获得1次随机奉献",
+    "随机：己方队伍获得1次随机奉献"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000125",
+    "pet_000126",
+    "pet_000127"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000125",
+    "pet_000126",
+    "pet_000127"
+   ],
+   "owner_names": [
+    "小草虫",
+    "草衣虫",
+    "花衣蝶"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：己方队伍获得1次随机奉献；回合：回合结束时；奉献：己方队伍获得1次随机奉献；随机：己方队伍获得1次随机奉献",
+    "解析层没读出：随机（出现在：回合结束时，己方队伍获得1次随机奉献。）"
+   ]
+  },
+  {
+   "skill_id": "skill_000056",
+   "name": "契约的形状",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "根据捕捉所用的咕噜球，入场时获得不同效果。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：入场时获得不同效果"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000320",
+    "pet_000321",
+    "pet_000322"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000320",
+    "pet_000321",
+    "pet_000322"
+   ],
+   "owner_names": [
+    "星尘虫",
+    "落星虫",
+    "陨星虫"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：入场时获得不同效果"
+   ]
+  },
+  {
+   "skill_id": "skill_000057",
+   "name": "坚韧铠甲",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "每受到1次攻击伤害，己方队伍获得1次随机奉献。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [
+    "随机（出现在：每受到1次攻击伤害，己方队伍获得1次随机奉献。）"
+   ],
+   "unclaimed": [
+    "获得：己方队伍获得1次随机奉献",
+    "每：每受到1次攻击伤害",
+    "奉献：己方队伍获得1次随机奉献",
+    "随机：己方队伍获得1次随机奉献"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000012",
+    "pet_000035"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000012",
+    "pet_000035"
+   ],
+   "owner_names": [
+    "铠甲虫",
+    "小甲虫"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：己方队伍获得1次随机奉献；每：每受到1次攻击伤害；奉献：己方队伍获得1次随机奉献；随机：己方队伍获得1次随机奉献",
+    "解析层没读出：随机（出现在：每受到1次攻击伤害，己方队伍获得1次随机奉献。）"
+   ]
+  },
+  {
+   "skill_id": "skill_000058",
+   "name": "渴求",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "入场时获得50%吸血。",
+   "parsed_kinds": [
+    "self_lifesteal"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "self_lifesteal",
+     "value": {
+      "percent": 50
+     },
+     "evidence": "获得50%吸血"
+    }
+   ],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": {
+    "status": "FULL",
+    "hook": "on_enter",
+    "extra_hooks": [],
+    "gaps": [],
+    "reason": "只有一条原语：吸血。数值来自解析器（`self_lifesteal` 50%），结算在 `env._settle_sustain`（造成伤害后按**实际伤害**的百分比回复自己生命，上限是最大生命；溢出部分本特性不转化，只记账）。取整口径为向下取整（同 MC-011 的百分比取整假设）。与 `贪得无厌` 共用同一段实现（按**解析结果**分派，不按特性名）。"
+   },
+   "owner_pets": [
+    "pet_000009",
+    "pet_000036"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000009",
+    "pet_000036"
+   ],
+   "owner_names": [
+    "恶魔叮",
+    "叮叮恶魔"
+   ],
+   "classes": [
+    "已登记（FULL，钩子 on_enter）"
+   ]
+  },
+  {
+   "skill_id": "skill_000059",
+   "name": "悲悯",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "己方队伍中每有1只力竭的精灵，自己获得双攻+30%。",
+   "parsed_kinds": [
+    "self_stat"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "self_stat",
+     "value": {
+      "stat": "atk",
+      "delta_pct": 30
+     },
+     "evidence": "自己获得双攻+30%"
+    },
+    {
+     "kind": "self_stat",
+     "value": {
+      "stat": "spa",
+      "delta_pct": 30
+     },
+     "evidence": "自己获得双攻+30%"
+    }
+   ],
+   "unparsed": [],
+   "unclaimed": [
+    "每：己方队伍中每有1只力竭的精灵"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000010"
+   ],
+   "owner_count": 1,
+   "owners_in_frozen": [
+    "pet_000010"
+   ],
+   "owner_names": [
+    "恶魔狼"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：每：己方队伍中每有1只力竭的精灵"
+   ]
+  },
+  {
+   "skill_id": "skill_000060",
+   "name": "付给恶魔的赎价",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "击败敌方精灵时，敌方额外损失1点魔力。被敌方精灵击败时，自己额外损失1点魔力。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000159",
+    "pet_000160",
+    "pet_000161"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000159",
+    "pet_000160",
+    "pet_000161"
+   ],
+   "owner_names": [
+    "小帕尔",
+    "帕尔萨斯",
+    "龙息帕尔"
+   ],
+   "classes": [
+    "魔力相关"
+   ]
+  },
+  {
+   "skill_id": "skill_000061",
+   "name": "瞳中倒影",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "自己或其他精灵离场时，自己与更换入场的精灵交换血量百分比。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000162",
+    "pet_000163",
+    "pet_000164"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000162",
+    "pet_000163",
+    "pet_000164"
+   ],
+   "owner_names": [
+    "瑰眼仔",
+    "耳翎瑰魅",
+    "邪眼巨魔"
+   ],
+   "classes": [
+    "需要新机制/新状态"
+   ]
+  },
+  {
+   "skill_id": "skill_000062",
+   "name": "嫁祸",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "自己每失去25%生命，连击数+2。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [
+    "动态连击数（出现在：自己每失去25%生命，连击数+2。）",
+    "连击（出现在：自己每失去25%生命，连击数+2。）"
+   ],
+   "unclaimed": [
+    "连击：连击数+2",
+    "每：自己每失去25%生命"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000128",
+    "pet_000129",
+    "pet_000130"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000128",
+    "pet_000129",
+    "pet_000130"
+   ],
+   "owner_names": [
+    "小夜",
+    "紫夜",
+    "朔夜伊芙"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：连击：连击数+2；每：自己每失去25%生命",
+    "解析层没读出：动态连击数（出现在：自己每失去25%生命，连击数+2。）；连击（出现在：自己每失去25%生命，连击数+2。）"
+   ]
+  },
+  {
+   "skill_id": "skill_000063",
+   "name": "滴眼液",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "天气为雨天时，使用水系攻击技能时吸血50%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [
+    "天气（出现在：天气为雨天时，使用水系攻击技能时吸血50%。）"
+   ],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000281",
+    "pet_000282",
+    "pet_000283"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000281",
+    "pet_000282",
+    "pet_000283"
+   ],
+   "owner_names": [
+    "芽眼魔",
+    "叶眼魔",
+    "障眼魔"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层没读出：天气（出现在：天气为雨天时，使用水系攻击技能时吸血50%。）"
+   ]
+  },
+  {
+   "skill_id": "skill_000064",
+   "name": "助燃",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "使用火系技能后，获得双攻+20%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：获得双攻+20%"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000003",
+    "pet_000006",
+    "pet_000029"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000003",
+    "pet_000006",
+    "pet_000029"
+   ],
+   "owner_names": [
+    "火花",
+    "火神",
+    "焰火"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：获得双攻+20%"
+   ]
+  },
+  {
+   "skill_id": "skill_000065",
+   "name": "散热",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "初始能量为0，入场前己方精灵每放1次火系技能，回复3能量。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "回复：回复3能量",
+    "每：入场前己方精灵每放1次火系技能"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000074",
+    "pet_000075",
+    "pet_000076"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000074",
+    "pet_000075",
+    "pet_000076"
+   ],
+   "owner_names": [
+    "可爱猿",
+    "炽热猿",
+    "火焰猿"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：回复：回复3能量；每：入场前己方精灵每放1次火系技能"
+   ]
+  },
+  {
+   "skill_id": "skill_000066",
+   "name": "斗技",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "应对成功后，获得全技能威力永久+30。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：获得全技能威力永久+30"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000077",
+    "pet_000078",
+    "pet_000080"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000077",
+    "pet_000078",
+    "pet_000080"
+   ],
+   "owner_names": [
+    "可立鸡",
+    "晕晕鸡",
+    "武者鸡"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：获得全技能威力永久+30"
+   ]
+  },
+  {
+   "skill_id": "skill_000067",
+   "name": "专注力",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "入场首回合，获得物攻+100%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：获得物攻+100%",
+    "回合：入场首回合"
+   ],
+   "engine_spec": {
+    "status": "FULL",
+    "hook": "on_enter",
+    "extra_hooks": [],
+    "gaps": [],
+    "reason": "触发时机用 `entered_turn` 判定（换入即记录回合号），与术语 1010「迸发」所依据的字段是同一个。「首回合」判定为 entered_turn == 当前回合。"
+   },
+   "owner_pets": [
+    "pet_000062",
+    "pet_000061"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000062",
+    "pet_000061"
+   ],
+   "owner_names": [
+    "音速犬",
+    "护主犬"
+   ],
+   "classes": [
+    "已登记（FULL，钩子 on_enter）",
+    "解析层有未认领片段：获得：获得物攻+100%；回合：入场首回合"
+   ]
+  },
+  {
+   "skill_id": "skill_000068",
+   "name": "灵魂灼伤",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "冰系技能使敌方获得4层灼烧，火系技能使敌方获得2层冻结。",
+   "parsed_kinds": [
+    "foe_status"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "foe_status",
+     "value": {
+      "status": "灼烧",
+      "layers": 4
+     },
+     "evidence": "敌方获得4层灼烧"
+    },
+    {
+     "kind": "foe_status",
+     "value": {
+      "status": "冻结",
+      "layers": 2
+     },
+     "evidence": "敌方获得2层冻结"
+    }
+   ],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000066",
+    "pet_000067",
+    "pet_000068"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000066",
+    "pet_000067",
+    "pet_000068"
+   ],
+   "owner_names": [
+    "灵狐",
+    "九尾狐",
+    "尖嘴狐仙"
+   ],
+   "classes": [
+    "状态层数（已实现的原语，可直接复用）",
+    "状态层数（**没有回合末实现**：冻结/引电/萌化）"
+   ]
+  },
+  {
+   "skill_id": "skill_000069",
+   "name": "不死鸟",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "每场战斗1次，受到致命伤害时保留1血，且敌方获得15层灼烧。",
+   "parsed_kinds": [
+    "foe_status"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "foe_status",
+     "value": {
+      "status": "灼烧",
+      "layers": 15
+     },
+     "evidence": "敌方获得15层灼烧"
+    }
+   ],
+   "unparsed": [],
+   "unclaimed": [
+    "每：每场战斗1次"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000069",
+    "pet_000070",
+    "pet_000071"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000069",
+    "pet_000070",
+    "pet_000071"
+   ],
+   "owner_names": [
+    "烈钻鸟",
+    "长尾火鸟",
+    "火羽"
+   ],
+   "classes": [
+    "状态层数（已实现的原语，可直接复用）",
+    "解析层有未认领片段：每：每场战斗1次"
+   ]
+  },
+  {
+   "skill_id": "skill_000070",
+   "name": "仁心",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "敌方受到灼烧伤害时，自己回复等量生命。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "回复：自己回复等量生命"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000072",
+    "pet_000073",
+    "pet_000284"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000072",
+    "pet_000073",
+    "pet_000284"
+   ],
+   "owner_names": [
+    "治愈兔",
+    "红丝绒",
+    "红绒十字"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：回复：自己回复等量生命"
+   ]
+  },
+  {
+   "skill_id": "skill_000071",
+   "name": "蒸汽膨胀",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "己方精灵每使用1次火系技能，自己入场时获得全技能威力+10。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：自己入场时获得全技能威力+10",
+    "每：己方精灵每使用1次火系技能"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000081",
+    "pet_000082",
+    "pet_000083"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000081",
+    "pet_000082",
+    "pet_000083"
+   ],
+   "owner_names": [
+    "火尾瓦特",
+    "火尾战士",
+    "烈火守护"
+   ],
+   "classes": [
+    "纯数值修正（威力/伤害±N%）",
+    "解析层有未认领片段：获得：自己入场时获得全技能威力+10；每：己方精灵每使用1次火系技能"
+   ]
+  },
+  {
+   "skill_id": "skill_000072",
+   "name": "小偷小摸",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "入场时偷取敌方场上所有精灵2能量。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000056",
+    "pet_000532"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000056",
+    "pet_000532"
+   ],
+   "owner_names": [
+    "幽影树",
+    "幽影树"
+   ],
+   "classes": [
+    "需要新机制/新状态"
+   ]
+  },
+  {
+   "skill_id": "skill_000073",
+   "name": "下黑手",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "敌方精灵离场后，更换入场的精灵获得5层中毒。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：更换入场的精灵获得5层中毒",
+    "层：更换入场的精灵获得5层中毒"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000057",
+    "pet_000058"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000057",
+    "pet_000058"
+   ],
+   "owner_names": [
+    "忽幽狸",
+    "影狸"
+   ],
+   "classes": [
+    "状态层数（已实现的原语，可直接复用）",
+    "解析层有未认领片段：获得：更换入场的精灵获得5层中毒；层：更换入场的精灵获得5层中毒"
+   ]
+  },
+  {
+   "skill_id": "skill_000074",
+   "name": "惊吓",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "能量等于0的精灵，无法对自己造成伤害。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000052",
+    "pet_000053",
+    "pet_000326",
+    "pet_000381",
+    "pet_000382"
+   ],
+   "owner_count": 5,
+   "owners_in_frozen": [
+    "pet_000052",
+    "pet_000053",
+    "pet_000326",
+    "pet_000381",
+    "pet_000382"
+   ],
+   "owner_names": [
+    "小灵面",
+    "暗影灵面",
+    "幽冥眼",
+    "暗影灵面"
+   ],
+   "classes": [
+    "说明里没有已知功能词"
+   ]
+  },
+  {
+   "skill_id": "skill_000075",
+   "name": "毒蘑菇",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "回合结束时，偷取敌方场上所有精灵1能量。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "回合：回合结束时"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000131",
+    "pet_000132",
+    "pet_000133"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000131",
+    "pet_000132",
+    "pet_000133"
+   ],
+   "owner_names": [
+    "小灵菇",
+    "幻灵菇",
+    "幻影灵菇"
+   ],
+   "classes": [
+    "需要新机制/新状态",
+    "解析层有未认领片段：回合：回合结束时"
+   ]
+  },
+  {
+   "skill_id": "skill_000076",
+   "name": "搜刮",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "敌方每使用1次「聚能」技能或更换精灵，自己入场时获得魔攻+20%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：自己入场时获得魔攻+20%",
+    "每：敌方每使用1次「聚能」技能或更换精灵"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000134",
+    "pet_000135",
+    "pet_000136"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000134",
+    "pet_000135",
+    "pet_000136"
+   ],
+   "owner_names": [
+    "空空颅",
+    "夜宿颅",
+    "夜枭"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：自己入场时获得魔攻+20%；每：敌方每使用1次「聚能」技能或更换精灵"
+   ]
+  },
+  {
+   "skill_id": "skill_000077",
+   "name": "做噩梦",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "敌方精灵离场后，更换入场的精灵失去3能量。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000342",
+    "pet_000343",
+    "pet_000344",
+    "pet_000345"
+   ],
+   "owner_count": 4,
+   "owners_in_frozen": [
+    "pet_000342",
+    "pet_000343",
+    "pet_000344",
+    "pet_000345"
+   ],
+   "owner_names": [
+    "梦游",
+    "梦悠悠",
+    "梦游",
+    "梦悠悠"
+   ],
+   "classes": [
+    "说明里没有已知功能词"
+   ]
+  },
+  {
+   "skill_id": "skill_000078",
+   "name": "噼啪！",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "入场后首次行动，所选技能使用次数+1。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000165",
+    "pet_000166"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000165",
+    "pet_000166"
+   ],
+   "owner_names": [
+    "拉特",
+    "酷拉"
+   ],
+   "classes": [
+    "说明里没有已知功能词"
+   ]
+  },
+  {
+   "skill_id": "skill_000079",
+   "name": "快充",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "离场时回复10能量。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "回复：离场时回复10能量"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000167",
+    "pet_000168",
+    "pet_000169"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000167",
+    "pet_000168",
+    "pet_000169"
+   ],
+   "owner_names": [
+    "电咩咩",
+    "粉咩咩",
+    "电球咩咩"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：回复：离场时回复10能量"
+   ]
+  },
+  {
+   "skill_id": "skill_000080",
+   "name": "电流刺激",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "携带的攻击技能获得迸发：威力+40。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：携带的攻击技能获得迸发：威力+40"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000170",
+    "pet_000171",
+    "pet_000346",
+    "pet_000347"
+   ],
+   "owner_count": 4,
+   "owners_in_frozen": [
+    "pet_000170",
+    "pet_000171",
+    "pet_000346",
+    "pet_000347"
+   ],
+   "owner_names": [
+    "小星光",
+    "星光狮",
+    "小星光",
+    "星光狮"
+   ],
+   "classes": [
+    "纯数值修正（威力/伤害±N%）",
+    "解析层有未认领片段：获得：携带的攻击技能获得迸发：威力+40"
+   ]
+  },
+  {
+   "skill_id": "skill_000081",
+   "name": "防过载保护",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "每次行动后脱离。",
+   "parsed_kinds": [
+    "escape"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "escape",
+     "value": {
+      "how": "脱离"
+     },
+     "evidence": "脱离"
+    }
+   ],
+   "unparsed": [],
+   "unclaimed": [
+    "每：每次行动后脱离"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000172",
+    "pet_000173",
+    "pet_000174"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000172",
+    "pet_000173",
+    "pet_000174"
+   ],
+   "owner_names": [
+    "闪电环",
+    "刺电环",
+    "荆棘电环"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：每：每次行动后脱离"
+   ]
+  },
+  {
+   "skill_id": "skill_000082",
+   "name": "星地善良",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "回合结束时，若场上的己方精灵能量等于0，自己立即替换此精灵。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "若：若场上的己方精灵能量等于0",
+    "回合：回合结束时"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000175",
+    "pet_000176"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000175",
+    "pet_000176"
+   ],
+   "owner_names": [
+    "粉粉星",
+    "小皮球"
+   ],
+   "classes": [
+    "带条件（要判条件是否成立）",
+    "解析层有未认领片段：若：若场上的己方精灵能量等于0；回合：回合结束时"
+   ]
+  },
+  {
+   "skill_id": "skill_000083",
+   "name": "生物电",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "携带的电系技能获得迸发：能耗-2。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：携带的电系技能获得迸发：能耗-2"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000222",
+    "pet_000223"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000222",
+    "pet_000223"
+   ],
+   "owner_names": [
+    "胆小鳗鱼",
+    "闪电鳗鱼"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：携带的电系技能获得迸发：能耗-2"
+   ]
+  },
+  {
+   "skill_id": "skill_000084",
+   "name": "蓄电池",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "每入场1次，永久获得双攻+30%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：永久获得双攻+30%",
+    "每：每入场1次"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000288",
+    "pet_000289",
+    "pet_000290"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000288",
+    "pet_000289",
+    "pet_000290"
+   ],
+   "owner_names": [
+    "电动长颈鹿",
+    "奔乐鹿",
+    "爵士鹿"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：永久获得双攻+30%；每：每入场1次"
+   ]
+  },
+  {
+   "skill_id": "skill_000085",
+   "name": "盲拧",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "回合开始时，技能顺序打乱，4号位的技能能耗-4。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [
+    "号位（出现在：回合开始时，技能顺序打乱，4号位的技能能耗-4。）"
+   ],
+   "unclaimed": [
+    "回合：回合开始时"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000177",
+    "pet_000178",
+    "pet_000179"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000177",
+    "pet_000178",
+    "pet_000179"
+   ],
+   "owner_names": [
+    "机械方方",
+    "多彩方方",
+    "立方人"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：回合：回合开始时",
+    "解析层没读出：号位（出现在：回合开始时，技能顺序打乱，4号位的技能能耗-4。）"
+   ]
+  },
+  {
+   "skill_id": "skill_000086",
+   "name": "贪心算法",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "1号位技能获得传动1，且使用后使敌方获得6层灼烧。",
+   "parsed_kinds": [
+    "foe_status"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "foe_status",
+     "value": {
+      "status": "灼烧",
+      "layers": 6
+     },
+     "evidence": "敌方获得6层灼烧"
+    }
+   ],
+   "unparsed": [
+    "传动（出现在：1号位技能获得传动1，且使用后使敌方获得6层灼烧。）",
+    "号位（出现在：1号位技能获得传动1，且使用后使敌方获得6层灼烧。）"
+   ],
+   "unclaimed": [
+    "获得：1号位技能获得传动1"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000180",
+    "pet_000181",
+    "pet_000182"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000180",
+    "pet_000181",
+    "pet_000182"
+   ],
+   "owner_names": [
+    "贝瑟",
+    "贝加尔",
+    "贝古斯"
+   ],
+   "classes": [
+    "状态层数（已实现的原语，可直接复用）",
+    "解析层有未认领片段：获得：1号位技能获得传动1",
+    "解析层没读出：传动（出现在：1号位技能获得传动1，且使用后使敌方获得6层灼烧。）；号位（出现在：1号位技能获得传动1，且使用后使敌方获得6层灼烧。）"
+   ]
+  },
+  {
+   "skill_id": "skill_000087",
+   "name": "定向精炼",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "己方精灵每使用1次防御技能，自己入场时机械系和地系技能威力+10%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "每：己方精灵每使用1次防御技能"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000183",
+    "pet_000184",
+    "pet_000185"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000183",
+    "pet_000184",
+    "pet_000185"
+   ],
+   "owner_names": [
+    "多西",
+    "库多西",
+    "波多西"
+   ],
+   "classes": [
+    "纯数值修正（威力/伤害±N%）",
+    "解析层有未认领片段：每：己方精灵每使用1次防御技能"
+   ]
+  },
+  {
+   "skill_id": "skill_000088",
+   "name": "暴食",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "携带的龙系技能获得迅捷。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：携带的龙系技能获得迅捷"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000186",
+    "pet_000187"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000186",
+    "pet_000187"
+   ],
+   "owner_names": [
+    "小翼龙",
+    "翼龙"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：携带的龙系技能获得迅捷"
+   ]
+  },
+  {
+   "skill_id": "skill_000089",
+   "name": "嫉妒",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "蓄力状态下，可以使用任一携带技能。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "蓄力：蓄力状态下"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000188",
+    "pet_000331"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000188",
+    "pet_000331"
+   ],
+   "owner_names": [
+    "伊雷龙",
+    "伊兰亚龙"
+   ],
+   "classes": [
+    "需要新机制/新状态",
+    "解析层有未认领片段：蓄力：蓄力状态下"
+   ]
+  },
+  {
+   "skill_id": "skill_000090",
+   "name": "慢热型",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "初始能量为0，入场前己方精灵每成功应对1次，回复5能量。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "回复：回复5能量",
+    "每：入场前己方精灵每成功应对1次"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000045",
+    "pet_000090",
+    "pet_000091"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000045",
+    "pet_000090",
+    "pet_000091"
+   ],
+   "owner_names": [
+    "白发懒人",
+    "动力猿",
+    "瞌睡王"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：回复：回复5能量；每：入场前己方精灵每成功应对1次"
+   ]
+  },
+  {
+   "skill_id": "skill_000091",
+   "name": "身经百练",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "己方精灵每应对1次，自己入场时水系和武系技能威力+20%。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "每：己方精灵每应对1次"
+   ],
+   "engine_spec": {
+    "status": "FULL",
+    "hook": "on_enter",
+    "extra_hooks": [],
+    "gaps": [],
+    "reason": "计数源明确（术语 1015/1016/1017 的「应对成功」），加成对象明确（水系与武系技能，入场时生效）。假设：每层 +20% 且可叠加；「入场时」= 换上该精灵的那个回合。"
+   },
+   "owner_pets": [
+    "pet_000190",
+    "pet_000189"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000190",
+    "pet_000189"
+   ],
+   "owner_names": [
+    "海豹船长",
+    "海豹战士"
+   ],
+   "classes": [
+    "已登记（FULL，钩子 on_enter）",
+    "纯数值修正（威力/伤害±N%）",
+    "解析层有未认领片段：每：己方精灵每应对1次"
+   ]
+  },
+  {
+   "skill_id": "skill_000092",
+   "name": "威慑",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "打断敌方时，自己获得双攻+30%，被打断的技能进入2回合冷却。",
+   "parsed_kinds": [
+    "self_stat"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "self_stat",
+     "value": {
+      "stat": "atk",
+      "delta_pct": 30
+     },
+     "evidence": "自己获得双攻+30%"
+    },
+    {
+     "kind": "self_stat",
+     "value": {
+      "stat": "spa",
+      "delta_pct": 30
+     },
+     "evidence": "自己获得双攻+30%"
+    }
+   ],
+   "unparsed": [],
+   "unclaimed": [
+    "回合：被打断的技能进入2回合冷却"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000202",
+    "pet_000203"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000202",
+    "pet_000203"
+   ],
+   "owner_names": [
+    "小怂猫",
+    "怒目怂猫"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：回合：被打断的技能进入2回合冷却"
+   ]
+  },
+  {
+   "skill_id": "skill_000093",
+   "name": "拨浪鼓",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "己方精灵每使用1次状态技能，自己入场时毒系和萌系技能威力+10。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "每：己方精灵每使用1次状态技能"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000191",
+    "pet_000192"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000191",
+    "pet_000192"
+   ],
+   "owner_names": [
+    "古钟蛇",
+    "寒音蛇"
+   ],
+   "classes": [
+    "纯数值修正（威力/伤害±N%）",
+    "解析层有未认领片段：每：己方精灵每使用1次状态技能"
+   ]
+  },
+  {
+   "skill_id": "skill_000094",
+   "name": "无忧无虑",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "可获得的萌化层数不受限制。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：可获得的萌化层数不受限制",
+    "层：可获得的萌化层数不受限制"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000193"
+   ],
+   "owner_count": 1,
+   "owners_in_frozen": [
+    "pet_000193"
+   ],
+   "owner_names": [
+    "菊花梨"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：可获得的萌化层数不受限制；层：可获得的萌化层数不受限制"
+   ]
+  },
+  {
+   "skill_id": "skill_000095",
+   "name": "自由飘",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "自己每有1层萌化，获得连击数+3。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [
+    "动态连击数（出现在：自己每有1层萌化，获得连击数+3。）",
+    "连击（出现在：自己每有1层萌化，获得连击数+3。）"
+   ],
+   "unclaimed": [
+    "获得：获得连击数+3",
+    "连击：获得连击数+3",
+    "每：自己每有1层萌化",
+    "层：自己每有1层萌化"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000226",
+    "pet_000227",
+    "pet_000228"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000226",
+    "pet_000227",
+    "pet_000228"
+   ],
+   "owner_names": [
+    "绿翼鸟",
+    "魔翼鸟",
+    "魔眷鸟"
+   ],
+   "classes": [
+    "层数驱动（需要读层数改数值）",
+    "解析层有未认领片段：获得：获得连击数+3；连击：获得连击数+3；每：自己每有1层萌化；层：自己每有1层萌化",
+    "解析层没读出：动态连击数（出现在：自己每有1层萌化，获得连击数+3。）；连击（出现在：自己每有1层萌化，获得连击数+3。）"
+   ]
+  },
+  {
+   "skill_id": "skill_000096",
+   "name": "毒牙",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "使敌方获得中毒时，也会使其获得物攻-40%和速度-40。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "获得：使敌方获得中毒时",
+    "获得：也会使其获得物攻-40%和速度-40"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000137",
+    "pet_000138",
+    "pet_000139"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000137",
+    "pet_000138"
+   ],
+   "owner_names": [
+    "多多",
+    "多啦多",
+    "古啦多"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：获得：使敌方获得中毒时；获得：也会使其获得物攻-40%和速度-40"
+   ]
+  },
+  {
+   "skill_id": "skill_000097",
+   "name": "复方汤剂",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "在场时，双方回合结束时的中毒效果会额外触发1次。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "回合：双方回合结束时的中毒效果会额外触发1次"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000294",
+    "pet_000295"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000294",
+    "pet_000295"
+   ],
+   "owner_names": [
+    "嘟嘟煲",
+    "嘟嘟锅"
+   ],
+   "classes": [
+    "说明里没有已知功能词",
+    "解析层有未认领片段：回合：双方回合结束时的中毒效果会额外触发1次"
+   ]
+  },
+  {
+   "skill_id": "skill_000098",
+   "name": "蚀刻",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "回合结束时，敌方每2层中毒转化为1层中毒印记。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [
+    "印记：敌方每2层中毒转化为1层中毒印记",
+    "每：敌方每2层中毒转化为1层中毒印记",
+    "回合：回合结束时",
+    "层：敌方每2层中毒转化为1层中毒印记",
+    "层：敌方每2层中毒转化为1层中毒印记"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000140",
+    "pet_000141",
+    "pet_000142"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000140",
+    "pet_000141",
+    "pet_000142"
+   ],
+   "owner_names": [
+    "裘洛",
+    "裘力",
+    "裘卡"
+   ],
+   "classes": [
+    "印记",
+    "解析层有未认领片段：印记：敌方每2层中毒转化为1层中毒印记；每：敌方每2层中毒转化为1层中毒印记；回合：回合结束时；层：敌方每2层中毒转化为1层中毒印记；层：敌方每2层中毒转化为1层中毒印记"
+   ]
+  },
+  {
+   "skill_id": "skill_000099",
+   "name": "盲从",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "可以携带多个复写/借用/取念技能，非幻系技能能耗-2。",
+   "parsed_kinds": [],
+   "parsed_effects": [],
+   "unparsed": [],
+   "unclaimed": [],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000200",
+    "pet_000201"
+   ],
+   "owner_count": 2,
+   "owners_in_frozen": [
+    "pet_000200",
+    "pet_000201"
+   ],
+   "owner_names": [
+    "牵线木偶",
+    "帅帅魔偶"
+   ],
+   "classes": [
+    "说明里没有已知功能词"
+   ]
+  },
+  {
+   "skill_id": "skill_000100",
+   "name": "吸积盘",
+   "category": "特性",
+   "element": "无系别",
+   "power": null,
+   "is_trait": true,
+   "desc": "回合结束时，敌方获得2层星陨印记。",
+   "parsed_kinds": [
+    "foe_mark"
+   ],
+   "parsed_effects": [
+    {
+     "kind": "foe_mark",
+     "value": {
+      "mark": "星陨印记",
+      "layers": 2
+     },
+     "evidence": "敌方获得2层星陨印记"
+    }
+   ],
+   "unparsed": [],
+   "unclaimed": [
+    "回合：回合结束时"
+   ],
+   "engine_spec": null,
+   "owner_pets": [
+    "pet_000204",
+    "pet_000205",
+    "pet_000206"
+   ],
+   "owner_count": 3,
+   "owners_in_frozen": [
+    "pet_000204",
+    "pet_000205",
+    "pet_000206"
+   ],
+   "owner_names": [
+    "哭哭菇",
+    "怖须菇",
+    "怖哭菇"
+   ],
+   "classes": [
+    "印记",
+    "解析层有未认领片段：回合：回合结束时"
+   ]
+  }
+ ]
+}

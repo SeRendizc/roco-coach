@@ -1,0 +1,39 @@
+{
+  "schema": "READY/v1 —— `readiness.mjs check` 校验：data_dir/data_hashes/source_hashes 与现算逐字相同 + 5 个 checks 为 true 且 evidence 非空",
+  "at": "2026-09-30T10:23:42+08:00",
+  "data_dir": "/Users/serendizc/Codex/Internship/4b-training-2026-09-29/data/router-v9",
+  "data_hashes": {
+    "train": "3f86afbefff928e8eaa4f42aaec7c6d53f7a70e3e66f038e9062a2fe671edaa1",
+    "valid": "9739953407a26488223b9f09c23e85aa08bbe3b59e90ad19a429638fe774cc0a",
+    "test": "fb56d3c9045674976cdf628884241db6235b5cde76c097a905952e191b27a1ed"
+  },
+  "source_hashes": {
+    "src/coach/toolbox.js": "29dca534eb26103626483b97fe20af6d2c4ba4af55b792d07c5bae8bf5b587ff",
+    "src/coach/local-model.js": "0886e5eb9749f5b25e4a4654f2ceab6e241fb5beac59c29eebd55a74eaae206a",
+    "src/coach/shadow-tools.js": "ac9abf79c6ec759f0ecfa83599c53f447baa15008c2e34b36ab9d3cfb02336c5",
+    "src/server/index.js": "5b72d3ba4da1c28b76ee1dec545673c4c8c5c832531f06a2943d2607e4d94fd4"
+  },
+  "checks": {
+    "runtime_contract_checked": true,
+    "training_serving_prompt_aligned": true,
+    "data_reviewed": true,
+    "test_frozen": true,
+    "task_evaluator_ready": true
+  },
+  "evidence": {
+    "runtime_contract_checked": "运行时捕获的形状：`data/router-v9/evidence/shape-capture.json`（2026-09-29T11:53:35Z）—— `tools` 列出 **12 个**工具（与本轮 `audit_dataset.mjs` 的 `registry` 逐字一致）；`realExecution` = **真执行**（read_state：game.turn=1、legalPlayer=10、receiptTurn=1）；`negative` = badArgs/unknownTool ⇒ 都回 `invalid-arguments` ✓（正反都在）",
+    "training_serving_prompt_aligned": "本轮实测（我跑）：`./.venv-mlx/bin/python scripts/model/train_v9_aligned.py --entry-check` ⇒ **退出码 0**，逐字：[入口检查] 参数到达 main：['--config','x.yaml','--data','d','--train'] ｜ 替身 load 被调用：True ｜ tokenizer 已被包装：True ｜ sys.argv 已还原：True ｜ ✔ 通过",
+    "data_reviewed": "本轮实测（我跑）：`node audit_dataset.mjs <DATA_DIR> --new-data`（strict）⇒ **errorCount 0 / warningCount 0**，逐 split 行数 train 276 · valid 63 · test 63，每行 input schema 统一为 `contracts,message,receipts,remaining,tools`；生成侧 `evidence/gen-stats.json`：`uniqueInputs=402`（= 行数 ⇒ **无重复输入**）、`droppedRows=0`、`system_sha256` 单值。⚠ 覆盖缺口见 `blocking[0]`（只覆盖 7 个只读工具 + stop，12 个工具里 5 个没有样本）",
+    "test_frozen": "test 集指纹 = `data_hashes.test`（本轮 snapshot 现算，见上）：`fb56d3c9045674976cdf628884241db6235b5cde76c097a905952e191b27a1ed`；冻结题清单 `data/router-v9/evaluator/cases-manifest.json`（dev 92 · **frozen 8** · stop 41 · excluded 5）与 `cases-frozen-v2.jsonl`；test 与 train/valid **同输入 0 条**（strict 审计 0 error ⇒ 跨集合重复 0）。⚠ pair 级共享（21/63，3 对跨三集）已由 Lead 裁定**维持四键切分 + 显式声明**（见 blocking[1]）",
+    "task_evaluator_ready": "本轮实测（我跑）：`node scripts/roco/eval-tool-execution.mjs --selftest` ⇒ **退出码 0**，逐字结论：「通过 4 / 19（另有 0 条 skip）——判定 = 强制条件全过，分数只作诊断；不再用阈值抵消失败」+「**反证全过** ⇒ 评测器本身是好的 ✓（正例 4 条全过、反例 15 条全败）」；另有冻结题报告 `evaluator/report-frozen.json` / `report-frozen-v2.json`（六步判据逐题给出）"
+  },
+  "blocking": [
+    "**覆盖缺口（不拦 `check`，但拦“正式训练够不够”）**：数据集只覆盖 7 个只读工具（read_state / search_rules / compare_actions / read_match / read_evidence / read_last_turn）+ `stop`；`registry` 里另外 5 个**版本化/有状态**工具（query_rules / evaluate_team / compare_team_change / plan_actions / summarize_battle）**没有训练样本** ⇒ 这 5 个能力不会被这一版数据训到（评测器能判它们，但训练集里没有）",
+    "**pair 级共享（已裁定，如实留档）**：21/63 的共享，其中 3 对跨三集；Lead 裁定维持**四键切分**（连通分量 81% ⇒ 强行 pair-disjoint 只能切 25/3/3，会毁可比性）⇒ 训练前请把这条口径一起交给用户 ✓",
+    "**训练只能由用户启动**：本轮只做“准备 + 校验”，没有跑 smoke/fresh/continue（`train_v9.sh` 的默认 `DATA_DIR` 是 `<guide>/data/router-v9` ⇒ 用户必须用 `ROCO_TRAIN_DATA=<外部数据目录>`，见同步命令）",
+    "🔴 **训练前置的第三步过不去（本轮实测，拦 smoke/fresh/continue）**：`PYTHONDONTWRITEBYTECODE=1 .venv-mlx/bin/python token_audit.py <DATA_DIR> --max-seq-length 1024` ⇒ **退出码 2**，逐字：train samples 276 · max_tokens **1799** · p95 **1791** · **would_truncate 276** · prompt_fills_budget 276（valid 1802/63、test 1796/63 同样**全量 would_truncate**）；并警告 `Train prefix default and serving enable_thinking=False differ; inspect masking/template consistency before formal training.` ⇒ `train_v9.sh` 用 `set -euo pipefail` ⇒ **用户一跑就会停在这一步** ✗。要谁定：数据侧（行太长 ⇒ 缩短/重生成，advice-engine）还是配方侧（`lora-v9.yaml` 的 max-seq-length，属指导书/用户口径）—— 我不擅自改 ✗"
+  ],
+  "evaluator_entry": "scripts/roco/eval-tool-execution.mjs（--selftest 4 正例全过 / 15 反例全败）；冻结题在 data/router-v9/evaluator/",
+  "data_note": "三份数据在**仓外**：/Users/serendizc/Codex/Internship/4b-training-2026-09-29/data/router-v9（train/valid/test.jsonl 的 sha256 见 data_hashes）。本轮 READY 的 data_dir/user hashes 都是**现算**（`node readiness.mjs snapshot` 的产物 READY.example.json 逐字抄入），**没有沿用** READY-结构键-预计算.json 里的旧值。",
+  "note": "五项检查的证据都是本轮**实测**（命令与读数逐字写在 evidence 里）；`readiness.mjs` 自己写着「不要为了运行脚本把 false 全改成 true」，所以凡是我给不出真证据的都不写进这里 —— 见 blocking。"
+}

@@ -1,0 +1,50 @@
+{
+ "at": "2026-09-29T13:34:28.253Z",
+ "system_sha256": "ed69c30b526af2a4f5f18a2afe88ae6b7313056532ce0bb691fd7401eb2ab37b",
+ "counts": {
+  "train": 303,
+  "valid": 90,
+  "test": 90
+ },
+ "byTool": {
+  "train": {
+   "read_state": 57,
+   "compare_actions": 36,
+   "read_match": 27,
+   "read_evidence": 27,
+   "read_last_turn": 9,
+   "simulate_branch": 9,
+   "evaluate_team": 9,
+   "compare_team_change": 9,
+   "search_rules": 54,
+   "stop": 66
+  },
+  "valid": {
+   "read_state": 9,
+   "compare_actions": 9,
+   "read_match": 9,
+   "read_evidence": 9,
+   "read_last_turn": 9,
+   "simulate_branch": 9,
+   "evaluate_team": 9,
+   "compare_team_change": 9,
+   "search_rules": 9,
+   "stop": 9
+  },
+  "test": {
+   "read_state": 9,
+   "compare_actions": 9,
+   "read_match": 9,
+   "read_evidence": 9,
+   "read_last_turn": 9,
+   "simulate_branch": 9,
+   "evaluate_team": 9,
+   "compare_team_change": 9,
+   "search_rules": 9,
+   "stop": 9
+  }
+ },
+ "droppedRows": 0,
+ "uniqueInputs": 483,
+ "maxEstTokens": 1770
+}

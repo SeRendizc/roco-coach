@@ -920,13 +920,23 @@ test('阵容评估：主行给人话档位（不是裸小数），精确值收�
   for (const word of ['口径', '结构分', '声明假设', 'ENGINE_HYPOTHESIS', '相对表现']) {
     assert.ok(!visible.includes(word), `工坊面板的玩家可见文案里还有内部术语「${word}」`);
   }
-  // ③ 小芽按钮：必须真的接上宿主页给的 askCoach（没给就如实说没接上，不许假装）
-  assert.match(src, /id="tw-ask-ai"/, '抽屉里必须有「让小芽说人话」按钮');
-  assert.match(src, /const askCoach = typeof opts\.askCoach === 'function' \? opts\.askCoach : null;/,
-    'askCoach 只能由宿主页注入');
-  assert.match(src, /这一页没有接上小芽（宿主页没给 askCoach）/, '没接上时必须如实说，不许编一段解释顶上');
-  assert.match(src, /只说结构上的事：属性覆盖、速度线、能耗、角色分工/,
-    '交给小芽的题面必须写清边界（不给强度结论、不把结构分说成胜率）');
+  // ③ 小芽按钮 —— **改钉（2026-09-29，R03）**：按钮本身已被移除。
+  //
+  // 依据：README R03 逐字「**移除**…大段等权假设、11 属性枚举、反复来源声明、
+  //   「让小芽说人话」二次翻译按钮。原始证据可放二级折叠。」⇒ 这一条判据的对象没了。
+  // 判据的**意图没变**（要的是"判断本身在页面上说清楚，而不是再点一下让模型复述"），
+  // 所以改钉成三条**新**判据：① R03 的判断块必须在；② 该按钮不许再出现；③ 引擎原文进二级折叠。
+  //
+  // ⚠ 旧断言原文（留痕，不删）：
+  //   assert.match(src, /id="tw-ask-ai"/, '抽屉里必须有「让小芽说人话」按钮');
+  //   assert.match(src, /const askCoach = typeof opts\.askCoach === 'function' \? opts\.askCoach : null;/,
+  //     'askCoach 只能由宿主页注入');
+  //   assert.match(src, /这一页没有接上小芽（宿主页没给 askCoach）/, '没接上时必须如实说，不许编一段解释顶上');
+  //   assert.match(src, /只说结构上的事：属性覆盖、速度线、能耗、角色分工/,
+  //     '交给小芽的题面必须写清边界（不给强度结论、不把结构分说成胜率）');
+  assert.match(src, /id="tw-teamplan"/, 'R03：判断块（强度判断/两条短板/一个优先调整/基本打法）必须在');
+  assert.ok(!/id="tw-ask-ai"/.test(src), 'R03：二次翻译按钮不许再出现');
+  assert.match(src, /id="tw-plan-evidence"/, 'R03：引擎原文必须有二级折叠可展开');
   // ④ 宿主页那一侧：roco.js 必须把同一条 /api/coach 封装成 askCoach 传进去
   const host = readFileSync(new URL('../src/client/roco.js', import.meta.url), 'utf8');
   assert.match(host, /askCoach: \(message\) => askXiaoya\(message\)/, '宿主页必须把教练通道传进工作台');
@@ -974,9 +984,15 @@ test('换招要读共用记录、也要写回去（否则刷新丢、盒子里�
   // ⇒ **点候选项什么都不发生、六槽永远空**。定义本来就在 `loadout-store.js:26`，补进这一行即可。
   // 判据的意图一个字没变（**必须用共用那一把钥匙，不许自己拼键名**），只是允许那次补的第三个名字。
   // 旧断言留档：assert.match(src, /import \{readSharedLoadouts, writeSharedLoadout\} from '\.\/loadout-store\.js'/);
+  // ⚠ 2026-09-29 **再改钉一次**（U04 真实残留：撤销后共用记录删不掉）。旧断言原文留档（别删）：
+  //     /import \{readSharedLoadouts, writeSharedLoadout, SHARED_LOADOUT_SLOTS\} from '\.\/loadout-store\.js'/
+  //   为什么改：撤销「第一次应用」时，内存与屏幕逐值退回了，但共用记录里那六个键**删不掉**
+  //   （`loadout-store.js` 原来只有读/写两个口）⇒ 手动整页刷新 + 带 `?team=` 时来源又显示成
+  //   「你选的」。为此给那个模块补了第四个口 `clearSharedLoadout`，工坊要用它。
+  //   **意图一个字没变**：钥匙只能从那一个模块引，不许自己拼键名 —— 现在是四个名字。
   assert.match(src,
-    /import \{readSharedLoadouts, writeSharedLoadout, SHARED_LOADOUT_SLOTS\} from '\.\/loadout-store\.js'/,
-    '工坊必须用共用的那一把钥匙，不许自己再拼一个键名（三个名字都要从那一个模块引）');
+    /import \{readSharedLoadouts, writeSharedLoadout, clearSharedLoadout, SHARED_LOADOUT_SLOTS\} from '\.\/loadout-store\.js'/,
+    '工坊必须用共用的那一把钥匙，不许自己再拼一个键名（四个名字都要从那一个模块引）');
   assert.match(src, /const loadouts = new Map\(readSharedLoadouts\(\)\)/,
     '开局时要把共用记录读进 loadouts（键 = pet_id）');
   // ② 保存时写回去
@@ -1175,4 +1191,39 @@ test('阵容配置：接线（应用/撤销/再读取三个落点 + 三个 datas
   // ⑦ 性格/资质那一条：界面上要如实写"引擎按种族值算"
   assert.match(src, /引擎按<strong>种族值<\/strong>算/);
   assert.match(src, /性格 \/ 资质（个体值）目前<strong>不进引擎<\/strong>/);
+});
+
+// ── 2026-09-30（半成品施工 A：`evalOpponent` 恒 null）────────────────────────────
+// 事实经过：`grep -n evalOpponent src/client/team-workshop.js` ⇒ 全文件**只 1 处（读）**、从不赋值
+// ⇒ `team-plan` 的对手支（克制招 / 最怕什么 / 按对手算的强度）**玩家永远看不到** ✗（半成品 ⓑ 恒不触发）。
+// 修法：评估抽屉加「针对这个对手看」下拉（**纯新增** ✓）⇒ 选中写 `state.evalOpponent = {name, types}`（**speed 不留空**：
+// 页面拿不到速度 ⇒ 由判断层明写"未知"，**不编默认值** ✗）。
+// 判据两态都钉（Lead 要求）：**没选 ⇒ 对手相关一个字都不出现** / **选了但无 spe ⇒ 出现且速度那条写"未知"**。
+test('选对手：没选⇒对手相关一个字都不出现；选了（无速度）⇒ 出现且速度明写"未知"（反证钉住两态）', async () => {
+  const {buildTeamPlan} = await import('../src/coach/team-plan.js');
+  const {defenceMultiplier} = await import('../src/client/type-affinity.js');
+  const team = [
+    {name: '多彩方方', types: ['机械系'], stats: {spe: 60}, moves: [{name: '鞭打', element: '普通系', category: '攻击', power: 100, energy: 0}]},
+    {name: '缇塔', types: ['机械系'], stats: {spe: 55}, moves: [{name: '齿轮切开', element: '机械系', category: '攻击', power: 130, energy: 3}]},
+    {name: '权杖-V', types: ['机械系'], stats: {spe: 50}, moves: [{name: '防御', element: '普通系', category: '防御', power: null, energy: 1, desc: '减伤'}]},
+    {name: '迷迷箱怪', types: ['幻系'], stats: {spe: 70}, moves: [{name: '后发制人', element: '幻系', category: '攻击', power: 155, energy: 5}]},
+    {name: '离心舞者', types: ['机械系'], stats: {spe: 65}, moves: [{name: '彗星', element: '普通系', category: '攻击', power: 90, energy: 0}]},
+    {name: '权杖-Ⅱ', types: ['机械系'], stats: {spe: 45}, moves: [{name: '啮合传递', element: '机械系', category: '状态', power: null, energy: 2, desc: '未实现'}]},
+  ];
+  const base = {team, typeMultiplier: defenceMultiplier, energy: {cap: 10, initial: 10, regen: 0}};
+  // ① 没选对手 ⇒ 对手相关**一个字都不出现**（反证）
+  const none = buildTeamPlan({...base, opponent: null});
+  const flatNone = JSON.stringify([none.strength, none.shortfalls, none.priorityChange, none.playstyle]);
+  assert.doesNotMatch(flatNone, /烈火战神/, '没选对手时不许出现任何对手名');
+  assert.doesNotMatch(flatNone, /最划算的一手|打出克制/, '没选对手时不许出现"针对某对手"的克制招');
+  assert.match(String(none.strength.verdict), /要指定对手才说/, '没选对手时要如实说"要指定对手"');
+  // ② 选了对手、但页面给不出速度 ⇒ 三块出现 + **速度那条明写"未知"**（不许补默认值）
+  const picked = buildTeamPlan({...base, opponent: {name: '烈火战神', types: ['火系']}});   // 只有 name/types，无 spe
+  const flatPicked = JSON.stringify([picked.strength, picked.playstyle]);
+  assert.match(flatPicked, /烈火战神/, '选了对手 ⇒ 对手名要出现');
+  // 实测那条是「对「烈火战神」最划算的一手：…（倍率 ×…）」或「没有任何一条…打出克制」⇒ 两种口径都算"出现了" ✓
+  assert.match(flatPicked, /最划算的一手|克制/, '选了对手 ⇒ 克制/最划算那一手要出现');
+  const speedLine = (picked.strength.basis ?? []).find((b) => /速度/.test(b)) ?? '';
+  assert.match(speedLine, /未知/, `对手速度拿不到时那条必须写"未知"：${speedLine}`);
+  assert.doesNotMatch(speedLine, /\d/, `不许在"未知"那条里编一个数字：${speedLine}`);
 });

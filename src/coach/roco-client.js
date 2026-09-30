@@ -940,11 +940,17 @@ export class RocoClient {
    *   · `unverifiedOverrides`：显式的、带出处的未核验覆盖（例如 v3 的 `energy.initial`）。
    *     形状不合法/覆盖了已核验的路径 ⇒ 引擎 400；缺覆盖而配置里是 UNKNOWN ⇒ 引擎 422。
    */
+  // ⚠ 2026-09-29（要求④「同一规则同一投影」，人类逐字：「必须把选中的 instanceID 和培养快照连入规则投影」）：
+  //   这个函数**显式解构入参、只把白名单里的字段拼进请求体** ⇒ 不在名单里的键**会被静默丢掉**。
+  //   服务端（`src/server/roco-service.js` 的开局那一跳）已经把 per-instance 快照发下来了，
+  //   但在我加这一行之前，它**到这里就没了**（实测：不改这一行，开局照常成功、快照无声消失）。
+  //   ⇒ 把 `individuals` 加进白名单转发；引擎那一半（`_make_pet` 用它）在 task-17。
   async battleNew({ team, enemyTeam, seed = 1, strategy = 'greedy_damage', loadouts = null, stateVersion = 0,
-    rulesetConfigId = null, unverifiedOverrides = null } = {}) {
+    rulesetConfigId = null, unverifiedOverrides = null, individuals = null } = {}) {
     const body = { team, seed, strategy };
     if (enemyTeam) body.enemy_team = enemyTeam;
     if (loadouts) body.loadouts = loadouts;
+    if (individuals) body.individuals = individuals;
     if (rulesetConfigId) body.ruleset_config_id = rulesetConfigId;
     if (Array.isArray(unverifiedOverrides) && unverifiedOverrides.length) body.unverified_overrides = unverifiedOverrides;
     return this._request('POST', '/battle/new', this._payload(body, { stateVersion }), { stateVersion });
@@ -1044,7 +1050,11 @@ export const ROCO_TOOLS = Object.freeze([
   },
   {
     name: 'evaluate_team',
-    description: '队伍强度评估。引擎逻辑未实现（缺官方伤害公式与等级→面板换算），当前返回 not_implemented。',
+    // 2026-09-30 **改钉不删** —— 旧文案逐字留档（已过时）：
+    //   '队伍强度评估。引擎逻辑未实现（缺官方伤害公式与等级→面板换算），当前返回 not_implemented。'
+    // 为什么改：`tmp/training-prep/three-receipts.json` 实测 `ok=true · coverage=1 · evidence_ids=3 ·
+    //   engine_latency=3.153ms` ⇒ **这个工具已经能算** ✗ 旧文案会让模型**绕开一个已经能算的工具** ✗✗
+    description: '队伍强度评估。按引擎已结算的数据给强度判断，依据随回执的 evidence_ids 一起回来。',
     input_schema: {
       type: 'object',
       properties: {
@@ -1056,7 +1066,10 @@ export const ROCO_TOOLS = Object.freeze([
   },
   {
     name: 'compare_team_change',
-    description: '换人前后对比。依赖与 evaluate_team 相同的未核验机制，当前返回 not_implemented。',
+    // 2026-09-30 **改钉不删** —— 旧文案逐字留档（已过时）：
+    //   '换人前后对比。依赖与 evaluate_team 相同的未核验机制，当前返回 not_implemented。'
+    // 为什么改：实测 `ok=true · coverage=1 · evidence_ids=3 · engine_latency=0.850ms` ⇒ **已经能算** ✗
+    description: '换人前后对比。按引擎已结算的数据比较换人前后的差别，依据随回执的 evidence_ids 一起回来。',
     input_schema: {
       type: 'object',
       properties: {

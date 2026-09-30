@@ -1,0 +1,17 @@
+{
+  "data_dir": "/Users/serendizc/Codex/Internship/4b-training-2026-09-29/data/router-v9",
+  "data_hashes": {
+    "train": "10f47d43405f1793964d909bb6f8a09ce189629b9144a085afd5efb0cb457c30",
+    "valid": "8bc43c5fb151d964ece320f9bdf2f719f13743154f3e09a31469fa3c497a975f",
+    "test": "eebe9aa7ae6e9954c7737921f27800191daaf8fdfe4d313df2940cc87352369a"
+  },
+  "source_hashes": {
+    "src/coach/toolbox.js": "29dca534eb26103626483b97fe20af6d2c4ba4af55b792d07c5bae8bf5b587ff",
+    "src/coach/local-model.js": "0886e5eb9749f5b25e4a4654f2ceab6e241fb5beac59c29eebd55a74eaae206a",
+    "src/coach/shadow-tools.js": "ac9abf79c6ec759f0ecfa83599c53f447baa15008c2e34b36ab9d3cfb02336c5",
+    "src/server/index.js": "5b72d3ba4da1c28b76ee1dec545673c4c8c5c832531f06a2943d2607e4d94fd4",
+    "scripts/model/train_v9_aligned.py": "88fbf129f65aa244c7b97f1ddd0f21141fa5d1b5e5d5be77c4e2d96f8a76943b",
+    "scripts/model/serve_mlx.py": "98b736942e3abc47df97042f337ad066d918576bd6dbca292c2ab345314491aa",
+    ".models/mlx/Qwen3.5-4B-4bit/tokenizer_config.json": "e98f1901ac6f0adff67b1d540bfa0c36ac1a0cf59eb72ed78146ef89aafa1182"
+  }
+}

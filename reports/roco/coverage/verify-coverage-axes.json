@@ -1,7 +1,7 @@
 {
  "schema_version": 1,
  "generated_by": "scripts/roco/verify-coverage-axes.mjs",
- "command": "node scripts/roco/verify-coverage-axes.mjs --selftest",
+ "command": "node scripts/roco/verify-coverage-axes.mjs",
  "roster48_sha256": "acd0738a6c8dc2746e92339af5193485808dcd2f6f8915f59f1ac5bb8c23410b",
  "matrix_doc_sha256": "ac9dc5cafcaa983ef930fce3880a4bbedabe3da2e794f5d31e1eec7c95eac3cb",
  "checks_passed": 16,
@@ -88,69 +88,5 @@
    "detail": "1000/1000"
   }
  ],
- "selftest": {
-  "ok": true,
-  "baseline_problems": 0,
-  "mutations": [
-   {
-    "mutation": "把过时句子放回文档",
-    "expected_code": "matrix_stale_sentence",
-    "new_problems": [
-     "matrix_stale_sentence",
-     "matrix_reason_missing"
-    ],
-    "caught": true
-   },
-   {
-    "mutation": "名单里塞一个学不到的技能",
-    "expected_code": "roster48_skill_not_learnable",
-    "new_problems": [
-     "roster48_skill_not_learnable"
-    ],
-    "caught": true
-   },
-   {
-    "mutation": "删掉龙系（破坏属性覆盖）",
-    "expected_code": "roster48_type_min",
-    "new_problems": [
-     "roster48_size",
-     "roster48_type_min",
-     "roster48_tier_quota",
-     "roster48_must_include",
-     "roster48_unique_skills",
-     "roster60_prefix"
-    ],
-    "caught": true
-   },
-   {
-    "mutation": "换成能耗 >6 的技能（引擎永远不合法）",
-    "expected_code": "roster48_skill_energy",
-    "new_problems": [
-     "roster48_skill_not_learnable",
-     "roster48_skill_energy",
-     "roster48_unique_skills"
-    ],
-    "caught": true
-   },
-   {
-    "mutation": "特性计数改成 3/2/1",
-    "expected_code": "trait_counts_drift",
-    "new_problems": [
-     "trait_summary_vs_engine"
-    ],
-    "caught": true
-   },
-   {
-    "mutation": "roster-60 前缀与 roster-48 不一致",
-    "expected_code": "roster60_prefix",
-    "new_problems": [
-     "roster60_dup",
-     "roster60_must_include",
-     "roster60_unique_skills",
-     "roster60_prefix"
-    ],
-    "caught": true
-   }
-  ]
- }
+ "selftest": null
 }

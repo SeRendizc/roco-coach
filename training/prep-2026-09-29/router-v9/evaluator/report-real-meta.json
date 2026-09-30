@@ -1,0 +1,319 @@
+{
+ "at": "2026-09-29T13:38:29.746Z",
+ "model_outputs": "real:cloud-deepseek",
+ "model": "deepseek-flash",
+ "prompt": "productionPlannerSystem(sufficiency)",
+ "limit": 25,
+ "scored": 24,
+ "unevaluated": 1,
+ "perCase": [
+  {
+   "id": "mt-anaphor-01",
+   "ms": 1170,
+   "raw": "{\"stop\":true}",
+   "why": null,
+   "expected": {
+    "tool": "query_rules",
+    "args": {
+     "kind": "pet",
+     "pet_id": "pet_000225",
+     "state_version": 7
+    }
+   }
+  },
+  {
+   "id": "mt-anaphor-02",
+   "ms": 760,
+   "raw": "{\"stop\":true}",
+   "why": null,
+   "expected": {
+    "tool": "query_rules",
+    "args": {
+     "kind": "pet",
+     "pet_id": "pet_000225",
+     "state_version": 7
+    }
+   }
+  },
+  {
+   "id": "mt-anaphor-03",
+   "ms": 855,
+   "raw": "{\"tool\":\"query_rules\",\"args\":{\"kind\":\"pet\",\"name\":\"雪影娃娃\"}}",
+   "why": null,
+   "expected": {
+    "tool": "query_rules",
+    "args": {
+     "kind": "pet",
+     "pet_id": "pet_000225",
+     "state_version": 7
+    }
+   }
+  },
+  {
+   "id": "mt-anaphor-04",
+   "ms": 454,
+   "raw": "{\"tool\":\"query_rules\",\"args\":{\"kind\":\"pet\",\"name\":\"画间沉铁兽\"}}",
+   "why": null,
+   "expected": {
+    "tool": "query_rules",
+    "args": {
+     "kind": "pet",
+     "pet_id": "pet_000225",
+     "state_version": 7
+    }
+   }
+  },
+  {
+   "id": "mt-anaphor-05",
+   "ms": 879,
+   "raw": "{\"tool\":\"query_rules\",\"args\":{\"kind\":\"pet\",\"name\":\"獠牙猪\"}}",
+   "why": null,
+   "expected": {
+    "tool": "query_rules",
+    "args": {
+     "kind": "pet",
+     "pet_id": "pet_000225",
+     "state_version": 7
+    }
+   }
+  },
+  {
+   "id": "mt-anaphor-06",
+   "ms": 1210,
+   "raw": "{\"tool\":\"query_rules\",\"args\":{\"kind\":\"learnset\",\"name\":\"迷迷箱怪\"}}",
+   "why": null,
+   "expected": {
+    "tool": "query_rules",
+    "args": {
+     "kind": "pet",
+     "pet_id": "pet_000225",
+     "state_version": 7
+    }
+   }
+  },
+  {
+   "id": "mt-anaphor-07",
+   "ms": 1420,
+   "raw": "{\"stop\":true}",
+   "why": null,
+   "expected": {
+    "tool": "query_rules",
+    "args": {
+     "kind": "pet",
+     "pet_id": "pet_000225",
+     "state_version": 7
+    }
+   }
+  },
+  {
+   "id": "mt-anaphor-08",
+   "ms": 1117,
+   "raw": "{\"tool\":\"query_rules\",\"args\":{\"kind\":\"pet\",\"name\":\"卡卡虫\"}}",
+   "why": null,
+   "expected": {
+    "tool": "query_rules",
+    "args": {
+     "kind": "pet",
+     "pet_id": "pet_000225",
+     "state_version": 7
+    }
+   }
+  },
+  {
+   "id": "mt-action-02",
+   "ms": 617,
+   "raw": "{\"stop\":true}",
+   "why": null,
+   "expected": {
+    "tool": "simulate_branch",
+    "args": {
+     "candidates": [
+      "skill:guard"
+     ]
+    }
+   }
+  },
+  {
+   "id": "mt-action-04",
+   "ms": 1202,
+   "raw": "{\"stop\":true}",
+   "why": null,
+   "expected": {
+    "tool": "simulate_branch",
+    "args": {
+     "candidates": [
+      "skill:guard"
+     ]
+    }
+   }
+  },
+  {
+   "id": "mt-action-06",
+   "ms": 2507,
+   "raw": "{\"stop\":true}",
+   "why": null,
+   "expected": {
+    "tool": "simulate_branch",
+    "args": {
+     "candidates": [
+      "skill:guard"
+     ]
+    }
+   }
+  },
+  {
+   "id": "mt-action-08",
+   "ms": 936,
+   "raw": "{\"stop\":true}",
+   "why": null,
+   "expected": {
+    "tool": "simulate_branch",
+    "args": {
+     "candidates": [
+      "skill:guard"
+     ]
+    }
+   }
+  },
+  {
+   "id": "mt-state-01",
+   "ms": 603,
+   "raw": "{\"stop\":true}",
+   "why": null,
+   "expected": {
+    "tool": "read_state",
+    "args": {}
+   }
+  },
+  {
+   "id": "mt-state-02",
+   "ms": 578,
+   "raw": "{\"stop\":true}",
+   "why": null,
+   "expected": {
+    "tool": "read_state",
+    "args": {}
+   }
+  },
+  {
+   "id": "mt-state-03",
+   "ms": 816,
+   "raw": "{\"tool\":\"read_state\",\"args\":{}}",
+   "why": null,
+   "expected": {
+    "tool": "read_state",
+    "args": {}
+   }
+  },
+  {
+   "id": "mt-state-04",
+   "ms": 608,
+   "raw": "{\"stop\":true}",
+   "why": null,
+   "expected": {
+    "tool": "read_state",
+    "args": {}
+   }
+  },
+  {
+   "id": "mt-state-05",
+   "ms": 705,
+   "raw": "{\"stop\":true}",
+   "why": null,
+   "expected": {
+    "tool": "read_state",
+    "args": {}
+   }
+  },
+  {
+   "id": "mt-state-06",
+   "ms": 591,
+   "raw": "{\"stop\":true}",
+   "why": null,
+   "expected": {
+    "tool": "read_state",
+    "args": {}
+   }
+  },
+  {
+   "id": "mt-state-07",
+   "ms": 518,
+   "raw": "{\"stop\":true}",
+   "why": null,
+   "expected": {
+    "tool": "read_state",
+    "args": {}
+   }
+  },
+  {
+   "id": "mt-state-08",
+   "ms": 771,
+   "raw": "{\"tool\":\"read_state\",\"args\":{}}",
+   "why": null,
+   "expected": {
+    "tool": "read_state",
+    "args": {}
+   }
+  },
+  {
+   "id": "cr-turn-01",
+   "ms": 755,
+   "raw": "{\"stop\":true}",
+   "why": null,
+   "expected": {
+    "tool": "read_evidence",
+    "args": {
+     "turn": 3
+    }
+   }
+  },
+  {
+   "id": "cr-turn-02",
+   "ms": 795,
+   "raw": "{\"stop\":true}",
+   "why": null,
+   "expected": {
+    "tool": "read_evidence",
+    "args": {
+     "turn": 3
+    }
+   }
+  },
+  {
+   "id": "cr-turn-03",
+   "ms": 415,
+   "raw": "{\"stop\":true}",
+   "why": null,
+   "expected": {
+    "tool": "read_evidence",
+    "args": {
+     "turn": 3
+    }
+   }
+  },
+  {
+   "id": "cr-turn-04",
+   "ms": 25927,
+   "raw": null,
+   "why": "超时 25000ms",
+   "expected": {
+    "tool": "read_evidence",
+    "args": {
+     "turn": 3
+    }
+   }
+  },
+  {
+   "id": "cr-turn-05",
+   "ms": 6022,
+   "raw": "{\"stop\":true}",
+   "why": null,
+   "expected": {
+    "tool": "read_evidence",
+    "args": {
+     "turn": 3
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,843 @@
+{
+ "at": "2026-09-29T19:15:27.519Z",
+ "families": 31,
+ "trace": [
+  {
+   "family": "F01-read_state-g0",
+   "split": "train",
+   "tool": "read_state",
+   "args": {},
+   "receiptKeys": [
+    "screen",
+    "focus",
+    "turn",
+    "player",
+    "enemy",
+    "legalPlayer",
+    "legalEnemy"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F01-read_state-g1",
+   "split": "valid",
+   "tool": "read_state",
+   "args": {},
+   "receiptKeys": [
+    "screen",
+    "focus",
+    "turn",
+    "player",
+    "enemy",
+    "legalPlayer",
+    "legalEnemy"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F01-read_state-g2",
+   "split": "test",
+   "tool": "read_state",
+   "args": {},
+   "receiptKeys": [
+    "screen",
+    "focus",
+    "turn",
+    "player",
+    "enemy",
+    "legalPlayer",
+    "legalEnemy"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F01-read_state-g3",
+   "split": "train",
+   "tool": "read_state",
+   "args": {},
+   "receiptKeys": [
+    "screen",
+    "focus",
+    "turn",
+    "player",
+    "enemy",
+    "legalPlayer",
+    "legalEnemy"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F01-read_state-g4",
+   "split": "valid",
+   "tool": "read_state",
+   "args": {},
+   "receiptKeys": [
+    "screen",
+    "focus",
+    "turn",
+    "player",
+    "enemy",
+    "legalPlayer",
+    "legalEnemy"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F01-read_state-g5",
+   "split": "test",
+   "tool": "read_state",
+   "args": {},
+   "receiptKeys": [
+    "screen",
+    "focus",
+    "turn",
+    "player",
+    "enemy",
+    "legalPlayer",
+    "legalEnemy"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F02-search_rules-防御",
+   "split": "train",
+   "tool": "search_rules",
+   "args": {
+    "query": "防御"
+   },
+   "receiptKeys": [
+    "rulesVersion",
+    "cards",
+    "usedCharacters",
+    "method",
+    "missing",
+    "rag"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F02-search_rules-先手",
+   "split": "valid",
+   "tool": "search_rules",
+   "args": {
+    "query": "先手"
+   },
+   "receiptKeys": [
+    "rulesVersion",
+    "cards",
+    "usedCharacters",
+    "method",
+    "missing",
+    "rag"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F02-search_rules-能量",
+   "split": "test",
+   "tool": "search_rules",
+   "args": {
+    "query": "能量"
+   },
+   "receiptKeys": [
+    "rulesVersion",
+    "cards",
+    "usedCharacters",
+    "method",
+    "missing",
+    "rag"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F02-search_rules-灼烧",
+   "split": "train",
+   "tool": "search_rules",
+   "args": {
+    "query": "灼烧"
+   },
+   "receiptKeys": [
+    "rulesVersion",
+    "cards",
+    "usedCharacters",
+    "method",
+    "missing",
+    "rag"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F02-search_rules-换宠",
+   "split": "valid",
+   "tool": "search_rules",
+   "args": {
+    "query": "换宠"
+   },
+   "receiptKeys": [
+    "rulesVersion",
+    "cards",
+    "usedCharacters",
+    "method",
+    "missing",
+    "rag"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F02-search_rules-换宠",
+   "ask": "换人怎么算？",
+   "skipped": "问句解析不出意图（不进数据）"
+  },
+  {
+   "family": "F02-search_rules-反击",
+   "split": "test",
+   "tool": "search_rules",
+   "args": {
+    "query": "反击"
+   },
+   "receiptKeys": [
+    "rulesVersion",
+    "cards",
+    "usedCharacters",
+    "method",
+    "missing",
+    "rag"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F02-search_rules-追猎",
+   "split": "train",
+   "tool": "search_rules",
+   "args": {
+    "query": "追猎"
+   },
+   "receiptKeys": [
+    "rulesVersion",
+    "cards",
+    "usedCharacters",
+    "method",
+    "missing",
+    "rag"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F04-read_evidence-t1",
+   "split": "valid",
+   "tool": "read_evidence",
+   "args": {
+    "turn": 1,
+    "matchId": "m1"
+   },
+   "receiptKeys": [
+    "id",
+    "turn",
+    "events"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F04-read_evidence-t2",
+   "split": "test",
+   "tool": "read_evidence",
+   "args": {
+    "turn": 2,
+    "matchId": "m1"
+   },
+   "receiptKeys": [
+    "id",
+    "turn",
+    "events"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F04-read_evidence-t3",
+   "split": "train",
+   "tool": "read_evidence",
+   "args": {
+    "turn": 3,
+    "matchId": "m1"
+   },
+   "receiptKeys": [
+    "id",
+    "turn",
+    "events"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F04-read_evidence-t4",
+   "split": "valid",
+   "tool": "read_evidence",
+   "args": {
+    "turn": 4,
+    "matchId": "m1"
+   },
+   "receiptKeys": [
+    "id",
+    "turn",
+    "events"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F04-read_last_turn-g0",
+   "split": "test",
+   "tool": "read_last_turn",
+   "args": {},
+   "receiptKeys": [
+    "turn",
+    "matchId",
+    "action",
+    "events"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F04-read_last_turn-g1",
+   "split": "train",
+   "tool": "read_last_turn",
+   "args": {},
+   "receiptKeys": [
+    "turn",
+    "matchId",
+    "action",
+    "events"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F03-simulate_branch-g0",
+   "split": "valid",
+   "tool": "simulate_branch",
+   "args": {
+    "candidates": [
+     "skill:dash"
+    ]
+   },
+   "receiptKeys": [
+    "assumption",
+    "turn",
+    "phase",
+    "freeReplacement",
+    "turnCost",
+    "simulated",
+    "opponentActions",
+    "legalAlternatives",
+    "comparisons",
+    "illegal",
+    "notes"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F03-simulate_branch-g0",
+   "ask": "守住这一轮结果如何？",
+   "skipped": "问句解析不出意图（不进数据）"
+  },
+  {
+   "family": "F03-simulate_branch-g1",
+   "split": "test",
+   "tool": "simulate_branch",
+   "args": {
+    "candidates": [
+     "skill:gust",
+     "skill:shell"
+    ]
+   },
+   "receiptKeys": [
+    "assumption",
+    "turn",
+    "phase",
+    "freeReplacement",
+    "turnCost",
+    "simulated",
+    "opponentActions",
+    "legalAlternatives",
+    "comparisons",
+    "illegal",
+    "notes"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F03-simulate_branch-g2",
+   "split": "train",
+   "tool": "simulate_branch",
+   "args": {
+    "candidates": [
+     "skill:gust"
+    ]
+   },
+   "receiptKeys": [
+    "assumption",
+    "turn",
+    "phase",
+    "freeReplacement",
+    "turnCost",
+    "simulated",
+    "opponentActions",
+    "legalAlternatives",
+    "comparisons",
+    "illegal",
+    "notes"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F03-simulate_branch-g2",
+   "ask": "我先换人，这一轮会怎么结算？",
+   "skipped": "问句解析不出意图（不进数据）"
+  },
+  {
+   "family": "F03-compare_actions-g0",
+   "split": "valid",
+   "tool": "compare_actions",
+   "args": {},
+   "receiptKeys": [
+    "text",
+    "evidence",
+    "knowledge",
+    "actions",
+    "method"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F03-compare_actions-g1",
+   "split": "test",
+   "tool": "compare_actions",
+   "args": {},
+   "receiptKeys": [
+    "text",
+    "evidence",
+    "knowledge",
+    "actions",
+    "method"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F03-compare_actions-g1",
+   "ask": "现在该换谁？",
+   "skipped": "问句解析不出意图（不进数据）"
+  },
+  {
+   "family": "F03-compare_actions-g2",
+   "split": "train",
+   "tool": "compare_actions",
+   "args": {},
+   "receiptKeys": [
+    "text",
+    "evidence",
+    "knowledge",
+    "actions",
+    "method"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F03-compare_actions-g2",
+   "ask": "这一手用哪个技能划算？",
+   "skipped": "问句解析不出意图（不进数据）"
+  },
+  {
+   "family": "F04-read_match-g0",
+   "split": "valid",
+   "tool": "read_match",
+   "args": {
+    "offset": 0,
+    "limit": 3
+   },
+   "receiptKeys": [
+    "totalTurns",
+    "result",
+    "keyTurns",
+    "nextOffset",
+    "totalKeyTurns",
+    "availableTurns"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F04-read_match-g0",
+   "ask": "刚才那局打得怎么样？",
+   "skipped": "问句意图是 read_last_turn，与家族声明的 read_match 不符"
+  },
+  {
+   "family": "F04-read_match-g1",
+   "split": "test",
+   "tool": "read_match",
+   "args": {
+    "offset": 0,
+    "limit": 3
+   },
+   "receiptKeys": [
+    "totalTurns",
+    "result",
+    "keyTurns",
+    "nextOffset",
+    "totalKeyTurns",
+    "availableTurns"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F05-evaluate_team-g0",
+   "split": "train",
+   "tool": "evaluate_team",
+   "args": {
+    "team": [
+     "pet_000001",
+     "pet_000038",
+     "pet_000092"
+    ]
+   },
+   "receiptKeys": [
+    "tool",
+    "ok",
+    "ruleset_id",
+    "state_version",
+    "coverage",
+    "evidence_ids",
+    "latency_ms",
+    "engine_latency_ms",
+    "error_type",
+    "failure_class",
+    "limitations",
+    "calibration",
+    "doesNotClaim",
+    "freshness",
+    "result",
+    "locked_pet",
+    "constraint",
+    "candidates",
+    "explanation"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F05-evaluate_team-g1",
+   "split": "valid",
+   "tool": "evaluate_team",
+   "args": {
+    "team": [
+     "pet_000002",
+     "pet_000039",
+     "pet_000093"
+    ]
+   },
+   "receiptKeys": [
+    "tool",
+    "ok",
+    "ruleset_id",
+    "state_version",
+    "coverage",
+    "evidence_ids",
+    "latency_ms",
+    "engine_latency_ms",
+    "error_type",
+    "failure_class",
+    "limitations",
+    "calibration",
+    "doesNotClaim",
+    "freshness",
+    "result",
+    "locked_pet",
+    "constraint",
+    "candidates",
+    "explanation"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F05-compare_team_change-g0",
+   "split": "test",
+   "tool": "compare_team_change",
+   "args": {
+    "team_before": [
+     "pet_000011",
+     "pet_000048",
+     "pet_000102"
+    ],
+    "team_after": [
+     "pet_000011",
+     "pet_000048",
+     "pet_000202"
+    ]
+   },
+   "receiptKeys": [
+    "tool",
+    "ok",
+    "ruleset_id",
+    "state_version",
+    "coverage",
+    "evidence_ids",
+    "latency_ms",
+    "engine_latency_ms",
+    "error_type",
+    "failure_class",
+    "limitations",
+    "calibration",
+    "doesNotClaim",
+    "freshness",
+    "result",
+    "locked_pet",
+    "constraint"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F05-compare_team_change-g0",
+   "ask": "这只换那只差别大吗？",
+   "skipped": "问句解析不出意图（不进数据）"
+  },
+  {
+   "family": "F05-compare_team_change-g1",
+   "split": "train",
+   "tool": "compare_team_change",
+   "args": {
+    "team_before": [
+     "pet_000012",
+     "pet_000049",
+     "pet_000103"
+    ],
+    "team_after": [
+     "pet_000012",
+     "pet_000049",
+     "pet_000255"
+    ]
+   },
+   "receiptKeys": [
+    "tool",
+    "ok",
+    "ruleset_id",
+    "state_version",
+    "coverage",
+    "evidence_ids",
+    "latency_ms",
+    "engine_latency_ms",
+    "error_type",
+    "failure_class",
+    "limitations",
+    "calibration",
+    "doesNotClaim",
+    "freshness",
+    "result",
+    "locked_pet",
+    "constraint"
+   ],
+   "envelopeKeys": [
+    "id",
+    "tool",
+    "args",
+    "result",
+    "chosenBy"
+   ]
+  },
+  {
+   "family": "F05-compare_team_change-g1",
+   "ask": "换成谁能补上短板？",
+   "skipped": "问句意图是 evaluate_team，与家族声明的 compare_team_change 不符"
+  }
+ ],
+ "counts": {
+  "train": 30,
+  "valid": 27,
+  "test": 28
+ },
+ "teams_by_split": {
+  "train": [
+   "pet_000001,pet_000038,pet_000092",
+   "pet_000012,pet_000049,pet_000103,pet_000012,pet_000049,pet_000255"
+  ],
+  "valid": [
+   "pet_000002,pet_000039,pet_000093"
+  ],
+  "test": [
+   "pet_000011,pet_000048,pet_000102,pet_000011,pet_000048,pet_000202"
+  ]
+ }
+}

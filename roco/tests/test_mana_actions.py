@@ -175,8 +175,14 @@ class RuleConfigManaActionsTest(unittest.TestCase):
         # 悄悄改 v2 的口径照样红（下面那条逐字比对仍然对所有 v2 的 key 生效）。
         # 2026-09-25（第 41 轮）改钉：白名单加 `per_layer_cost`（RC-401 批次九声明的动态能耗修正，
         # 依据：`skill_000612 毒液渗透`「敌方每有1层中毒效果，本技能能耗-1」，51 只配招带它）。
-        self.assertEqual(extra, ["cost_modifier", "foe_energy_loss", "initial_for_all_pets", "per_layer_cost"],
-                         "v3 的 energy 只允许多出这三个已登记的叶子")
+        # 2026-09-29（task-20 批一）改钉：白名单加 `respond_override`（RC-401 批次十四声明的
+        # **「应对X：改为…」覆盖语义**；依据：`skill_000616 剧毒`「敌方获得3层中毒，应对防御：
+        # 改为获得8层」应对成功那一手实测读回 3 层 = 静默错值）。判据的**意图一个字没松**：
+        # v3 多出来的 key 必须逐个登记在案，悄悄改 v2 的口径照样红
+        # （下面那条逐字比对仍然对所有 v2 的 key 生效）。
+        self.assertEqual(extra, ["cost_modifier", "foe_energy_loss", "initial_for_all_pets",
+                                 "per_layer_cost", "respond_override"],
+                         "v3 的 energy 只允许多出这几个已登记的叶子")
         for key, value in v2.raw["energy"].items():
             self.assertEqual(json.dumps(v3.raw["energy"][key], sort_keys=True),
                              json.dumps(value, sort_keys=True), f"energy.{key}")

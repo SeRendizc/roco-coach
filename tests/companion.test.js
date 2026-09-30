@@ -2464,3 +2464,46 @@ test('问「该带谁」时放开队伍推荐、战斗动作仍禁（默认口�
   assert.equal(lineupPickAsk('这回合该出什么？'),false,'战斗动作问句不许被当成推荐');
   assert.equal(lineupPickAsk('建议我换上潮甲龟'),false,'战斗换人问句不许被当成推荐');
 });
+
+// ── 2026-09-29（第三轮，人类截图逐字：「你是傻子吗」→ 战绩复读；「上一句啊」→ 战绩复读）────
+//
+// 人类原话：「没连接模型我还能接受，这是啥？？**就离谱，跟傻子似的啊**」。
+// **没连模型时，兜底就是玩家看到的全部**，所以这四条是硬线：
+//   ① 战绩复读**绝不是万能兜底**（只在玩家真问最近对局时才许出现）；
+//   ② 「上一句啊」**必须真的指上一句**（摘出来），不许换话题；
+//   ③ 骂人/纯情绪/无法归类 ⇒ **一句体面的话、不推责**；
+//   ④ **不许短时间逐字复读同一句**（截图里「你想问哪一段」出现两次）。
+// 反证：连续两次「?」**不许逐字相同**。
+test('兜底四条硬线：不复读战绩 / 指向上一句 / 骂人也体面 / 同一句不许一字不改重发（含反证）', async () => {
+  const {runCoach} = await import('../src/coach/runtime.js');
+  const {freshMemory} = await import('../src/coach/memory.js');
+  const context = {mode: 'camp', profile: {pets: []}};
+  const today = (n) => Array.from({length: n}, (_, i) => ({result: i % 3 === 0 ? 'loss' : 'win',
+    turns: 22 + i, time: new Date(Date.now() - i * 3600_000).toISOString(), stage: '训练场', faints: []}));
+  const ask = (message, memory, conversation = []) =>
+    runCoach({message, role: 'auto', context, memory, conversation});
+  const STATS = /今天你打了|回合数是|一局比一局|胜.*负/;
+  const BLAME = /这条我没依据|换个说法|点名一只精灵/;
+  for (const memory of [freshMemory(), {...freshMemory(), events: today(3)}]) {
+    let mem = memory;
+    for (const message of ['?', '上一句啊', '?????', '你是傻子吗']) {
+      const a = await ask(message, mem);
+      assert.doesNotMatch(String(a.text), STATS, `「${message}」不许回战绩复读：${a.text}`);
+      if (message === '你是傻子吗') assert.doesNotMatch(String(a.text), BLAME, `骂人那句不许推责：${a.text}`);
+      if (message === '上一句啊') {
+        // ② 指向上一句：把上一句里的片段摘出来（用对话历史里的上一句原文对比）
+        const prev = (mem.dialogue ?? []).filter((x) => x.role === 'assistant').at(-1)?.content ?? '';
+        const key = String(prev).replace(/[？?。；，、\s]+/g, '').slice(0, 8);
+        assert.ok(key.length === 0 || String(a.text).includes(key), `「上一句啊」要摘出上一句（上一句「${prev}」）：${a.text}`);
+      }
+      mem = a.memory ?? mem;
+    }
+  }
+  // ④ 反证：连续两次「?」不许逐字相同
+  let mem = freshMemory();
+  const first = await ask('?', mem);
+  mem = first.memory ?? mem;
+  const second = await ask('?', mem);
+  assert.notEqual(String(first.text), String(second.text),
+    `同一句兜底不许一字不改重发：第1次「${first.text}」/ 第2次「${second.text}」`);
+});

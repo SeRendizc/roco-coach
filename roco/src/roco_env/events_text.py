@@ -362,6 +362,30 @@ def event_text(event: Dict[str, Any], rs: Any = None) -> str:
             return f"{side}因{name}损失约 {amount} 点生命。"
         return f"{side}受到{name}影响。"
 
+    if kind == "cleanse_unsupported":
+        # task-26 P0 止血：**认不出的驱散 fail closed** ⇒ 必须给玩家一句人话（不许兜底句 ✗）
+        what = detail.get("what")
+        return (f"{side}的驱散（{what}）还没有实现 ⇒ 这一手没有执行，双方状态保持不变。"
+                if what else f"{side}的驱散（双方印记）还没有实现 ⇒ 这一手没有执行，双方状态保持不变。")
+
+    if kind == "marks_cleansed":
+        # task-27：**印记的驱散**（与上面那条「清异常」分开：印记有层数）
+        cleared = detail.get("cleared") or {}
+        rows = []
+        for who, hit in cleared.items():
+            if not isinstance(hit, dict) or not hit:
+                continue
+            label = "敌方" if who == "enemy" else "我方"
+            rows.append(f"{label}的 " + "、".join(f"{k}×{v}" for k, v in hit.items()))
+        total = detail.get("total_layers")
+        if rows:
+            return f"{side}驱散了印记：{'；'.join(rows)}（共 {total} 层）。"
+        return f"{side}想驱散印记，但双方身上一层印记都没有 ⇒ 什么都没发生。"
+
+    if kind == "per_cleansed_layer_skipped":
+        # 对照实验在**运行时**的读数：0 层 ⇒ 一次都不触发（必须给玩家一句人话）
+        return f"{side}「每驱散 1 层」没有触发：这一手一层都没驱散到。"
+
     if kind == "cleanse":
         cleared = detail.get("cleared")
         n = len(cleared) if isinstance(cleared, (list, tuple)) else None
@@ -490,7 +514,9 @@ def event_text(event: Dict[str, Any], rs: Any = None) -> str:
 KNOWN_EVENT_KINDS = frozenset({
     "turn_start", "damage", "faint", "heal", "energy_regen", "drain_energy", "item",
     "switch", "replacement", "defense", "buff_self", "debuff_foe", "mark_added",
-    "status_added", "status_applied", "status_tick", "cleanse", "escape",
+    "status_added", "status_applied", "status_tick", "cleanse", "cleanse_unsupported", "escape",
+    # task-27（2026-09-30）：印记的驱散与「每驱散 1 层」的对照读数（漏登记 ⇒ 玩家看到兜底句）
+    "marks_cleansed", "per_cleansed_layer_skipped",
     "action_cancelled", "game_end", "power_unsupported", "status_unsupported", "unsupported",
     # 第 47 轮批 0 补：攻击/防御分支的附带效果现在「生效或登记」，
     # 于是多出这两个 kind（`env._apply_effect_batch` / `env._register_parsed_effects`）。

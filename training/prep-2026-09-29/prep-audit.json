@@ -1,0 +1,2647 @@
+{
+ "at": "2026-09-29T07:24:48.784Z",
+ "root": "/Users/serendizc/Developer/roco-coach",
+ "promptCompare": {
+  "v8_system": {
+   "chars": 524,
+   "sha12": "a5cb0fbcc53f",
+   "text": "你在为游戏教练决定「下一步查不查工具、查哪个」。只输出一行 JSON，不要解释，不要思考过程。\n可用工具：query_rules（查规则事实：精灵/技能/学习表/术语/属性相性）、evaluate_team（评阵容）、\ncompare_team_change（换人前后对比）、plan_actions（给行动建议）、read_evidence（读某回合）、\nread_match（整局统计）、read_last_turn（上一回合）、search_rules（战术检索）。\n需要查证时输出 {\"tool\":\"工具名\",\"args\":{...}}；证据已经足够时输出 {\"stop\":true}。\n**默认是停止。** 只有当答案依赖的某个具体事实不在下面的 receipts 里、也不在常识里时才调工具。\n查规则事实用 query_rules，`kind` 取 pet/skill/learnset/term/type_row/type_multiplier/ruleset 之一，\n并给出该 kind 需要的定位参数（精灵用 pet_id，技能用 name）。\n参数里不要放 state_version（运行时会给）。不要编工具名，不要编参数名。",
+   "toolsMentioned": [
+    "search_rules",
+    "read_match",
+    "read_evidence",
+    "read_last_turn",
+    "query_rules",
+    "evaluate_team",
+    "compare_team_change",
+    "plan_actions"
+   ],
+   "diff_vs_AGENT_TOOL_SYSTEM": {
+    "line": 6,
+    "a": "**默认是停止。** 只有当答案依赖的某个具体事实不在下面的 receipts 里、也不在常识里时才调工具。",
+    "b": "**判定规则**：问题问的是具体规则事实（种族值/数值、技能、学习表、属性相性、术语、阵容评估）时，"
+   },
+   "diff_vs_runtime_local_plan": {
+    "line": 1,
+    "a": "你在为游戏教练决定「下一步查不查工具、查哪个」。只输出一行 JSON，不要解释，不要思考过程。",
+    "b": "你在为游戏教练决定「下一步查不查工具、查哪个」。只输出一行 JSON，不要解释，不要思考过程。可用工具：read_state / search_rules / compare_actions / simulate_branch / read_match / read_evidence / read_last_turn / query_rules / evaluate_team / compare_team_change / plan_actions / summarize_battle。需要查证时输出 {\"tool\":\"工具名\",\"args\":{...}}；证据已经足够时输出 {\"stop\":true}。**默认是停止。** receipts 里已经有的事实不要再查；不确定就输出 {\"stop\":true}。工具名必须是上面列出的之一；参数必须是该工具契约里存在的键。"
+   }
+  },
+  "v8_user_payload": {
+   "keys": [
+    "message",
+    "screen",
+    "hints"
+   ],
+   "chars": 144,
+   "sample": {
+    "message": "寂灭骨龙的种族值是多少？",
+    "screen": "camp",
+    "hints": {
+     "state_version": 0,
+     "locked_pet": "pet_000225",
+     "team": [
+      "pet_000225",
+      "pet_000190",
+      "pet_000445"
+     ]
+    }
+   }
+  },
+  "runtime_user_payload": {
+   "keys": [
+    "message",
+    "receipts",
+    "tools",
+    "contracts",
+    "remaining"
+   ],
+   "chars": 279
+  },
+  "v9_candidates_has_system": false,
+  "v9_seed_has_system": false,
+  "note": "v9 候选/种子两套**没有 system 消息**（逐行核对），训练时只能靠 tokenizer 的 chat template 兜底 ⇒ 与运行时发 system 的路径不一致。"
+ },
+ "runtime": {
+  "toolCount": 12,
+  "localPlanToolCount": 12,
+  "tools": {
+   "read_state": {
+    "args": [],
+    "description": "当前公开局面；不含电脑待执行动作或真实随机种子"
+   },
+   "search_rules": {
+    "args": [
+     "query"
+    ],
+    "description": "检索本地规则和战术反例"
+   },
+   "compare_actions": {
+    "args": [],
+    "description": "合法行动平均/最坏分支，非胜率"
+   },
+   "simulate_branch": {
+    "args": [
+     "candidates",
+     "opponent",
+     "unresolved",
+     "actionIndex",
+     "opponentIndex"
+    ],
+    "description": "比较我方候选行动面对同一组合法对手行动的收益与风险；候选用稳定标识（skill:guard / switch:turtle / item:potion:turt"
+   },
+   "read_match": {
+    "args": [
+     "offset",
+     "limit"
+    ],
+    "description": "整局统计与关键回合；可用offset/limit分页"
+   },
+   "read_evidence": {
+    "args": [
+     "turn",
+     "matchId"
+    ],
+    "description": "按回合读取已保留的原始事件；无记录明确missing"
+   },
+   "read_last_turn": {
+    "args": [],
+    "description": "上个已结算回合的真实事件"
+   },
+   "query_rules": {
+    "args": [
+     "kind",
+     "pet_id",
+     "skill_id",
+     "name",
+     "term_id",
+     "type",
+     "defender_types",
+     "attack_element",
+     "ruleset_config_id",
+     "mode_id",
+     "element",
+     "resist",
+     "weak",
+     "beats",
+     "pet_ids",
+     "skills",
+     "compact",
+     "limit",
+     "offset",
+     "state_version"
+    ],
+    "description": "只读查询手游规则事实（精灵/技能/学习表/属性相性/术语/规则策略）；机制未支持时返回 unsupported，不含编造数值"
+   },
+   "evaluate_team": {
+    "args": [
+     "team",
+     "locked_pet",
+     "candidates",
+     "state_version"
+    ],
+    "description": "手游阵容规则 baseline 评估（3 或 6 只，按模式声明）：分项特征与文字结论，不是胜率；可带锁定伙伴与候选阵容，锁定后只返回满足约束的候选"
+   },
+   "compare_team_change": {
+    "args": [
+     "team_before",
+     "team_after",
+     "locked_pet",
+     "state_version"
+    ],
+    "description": "手游换人前后对比：改善什么、代价什么（规则特征差，不是胜率，也不等于「更强」）"
+   },
+   "plan_actions": {
+    "args": [
+     "state",
+     "state_version"
+    ],
+    "description": "给定公开 planner state 给出回合行动建议（推荐/主要应对/最坏尾部/搜索覆盖/超时状态）；规划器未接入或搜索未完成时明确说出来，不编计划"
+   },
+   "summarize_battle": {
+    "args": [
+     "record",
+     "state_version"
+    ],
+    "description": "对局复盘摘要；没有对应的引擎端点，返回结构化 not_implemented，不生成摘要"
+   }
+  },
+  "validArgsSmoke": {
+   "read_state": "boolean",
+   "search_rules": "boolean",
+   "compare_actions": "boolean",
+   "simulate_branch": "boolean",
+   "read_match": "boolean",
+   "read_evidence": "boolean",
+   "read_last_turn": "boolean",
+   "query_rules": "boolean",
+   "evaluate_team": "boolean",
+   "compare_team_change": "boolean",
+   "plan_actions": "boolean",
+   "summarize_battle": "boolean"
+  }
+ },
+ "prompts": {
+  "runtime_local_plan": {
+   "path": "src/coach/local-model.js:382-388（createLocalPlan 内联 system）+ 393-394（user 序列化）",
+   "chars": 389,
+   "sha12": "ed69c30b526a",
+   "text": "你在为游戏教练决定「下一步查不查工具、查哪个」。只输出一行 JSON，不要解释，不要思考过程。可用工具：read_state / search_rules / compare_actions / simulate_branch / read_match / read_evidence / read_last_turn / query_rules / evaluate_team / compare_team_change / plan_actions / summarize_battle。需要查证时输出 {\"tool\":\"工具名\",\"args\":{...}}；证据已经足够时输出 {\"stop\":true}。**默认是停止。** receipts 里已经有的事实不要再查；不确定就输出 {\"stop\":true}。工具名必须是上面列出的之一；参数必须是该工具契约里存在的键。",
+   "userKeys": [
+    "message",
+    "receipts",
+    "tools",
+    "contracts",
+    "remaining"
+   ],
+   "userChars": 279,
+   "maxTokens": 160,
+   "temperature": 0,
+   "timeoutMs": 1200,
+   "toolsMentioned": [
+    "read_state",
+    "search_rules",
+    "compare_actions",
+    "simulate_branch",
+    "read_match",
+    "read_evidence",
+    "read_last_turn",
+    "query_rules",
+    "evaluate_team",
+    "compare_team_change",
+    "plan_actions",
+    "summarize_battle"
+   ]
+  },
+  "production_planner_catalog": {
+   "path": "src/coach/planner-prompt.js productionPlannerSystem()（默认 catalog 档）",
+   "chars": 1841,
+   "sha12": "ce38ce9a05eb",
+   "text": "你为小芽决定是否要查证。仅输出JSON，不输出思考过程。**默认是停止。** 只有当答案需要的某个具体事实不在下面的 receipts、也不在游戏规则常识里时，才调用工具。必须调用的情况只有三种：玩家问的是本局的具体数字或当前状态而 receipts 里没有；玩家问到某个具体回合当时发生了什么；引入了一条新的战术规则需要核对条件与反例。不需要调用的情况：闲聊、鼓励、教学提问、复盘措辞、以及任何你已经能从 receipts 答出来的问题。**receipts 里已经有的事实不要再调工具去确认。** 证据够了就立刻输出 {\"stop\":true}，不要为了用完预算而继续查。**规则事实必须查证**：玩家问的是图鉴里的具体事实（种族值/数值、技能、学习表、属性相性、术语、阵容评估）时，receipts 里没有就必须先查证再回答，不许凭记忆作答，也不许编精灵 id、技能 id、工具名或参数名。**参数形状**：query_rules 的 kind 取 pet/skill/learnset/term/type_row/type_multiplier/ruleset 之一，并给出该 kind 需要的定位参数（**精灵用 pet_id，技能用 name**）；**查到 id 之后要用它再去查你要的那项事实**，不要停在第一步。**不知道精灵 id 时**：先用 {\"tool\":\"query_rules\",\"args\":{\"kind\":\"pet\",\"name\":\"<玩家写的名字原文>\"}} 把 id 查出来，再用 receipts 里查到的 pet_id 查你要的那项事实；查到的 id 与数值一律以 receipts 为准，receipts 里没有的不许写进结论。**阵容**：玩家让你评阵容时用 evaluate_team，参数把 hints 里的 team 与 locked_pet **原样带上**（locked_pet 别丢）；问「换人前后 / 换谁更好」用 compare_team_change。**属性相性与倍率同样要查**：问「A 打 B 几倍」用 query_rules 的 kind=type_multiplier（带 attack_element 与 defender_types），问某属性的克制表用 kind=type_row —— **不要凭记忆答倍率**（游戏规则表与你的记忆可能不一样）。**「把第 N 只换成某只好不好 / 换成谁更好 / 换掉某只」用 compare_team_change**（换人前后对比），不要用 evaluate_team。**两只对比**：两只都要有 receipts 里的数值才能比；只查到一只就如实说另一只没有数据，**不许**凭印象说谁更肉／更快／更强。**阵容问题**：问「这套阵容怎么样／有什么短板」时，就 receipts 里的**系别与六维**做观察（例如「两只速度 120、其余偏慢」「整体偏物攻」），这是复述事实。问「还差什么／下一个该带谁／推荐带哪只」时**先查证再推荐**：用 query_rules 查你要推荐那一只的系别与六维（要谈克制就查 kind=type_multiplier，或查对手那一招的系别），然后**点名 1–2 只**，理由只写能回指 receipts 的事实（「它的 X 系打对面 Y 系克制（引擎倍率 ×2）」「它的速度比对面那只快 N」）；**不许**给胜率或「更强／必胜」这类结论；引擎的阵容评估/换人对比只按 3 只算，六只阵容要如实说明这一点。**属性名原样带「系」字**（如 龙系 / 幽系；写成 龙 / 幽 会被规则服务判成不认识的属性而拒绝）。**查到 id 不等于查到答案**：问「学得到哪些技能」要用 receipts 里的 pet_id 再调一次 kind=learnset；问某个术语的定义要用 kind=term **按名字查**（`name` 填术语名，如「应对状态」）—— 不要停在第一步，也不要凭记忆答；**回执给的是候选（candidates）时那不是定义**，要如实说清有哪几种、或按 id 再查。格式：要查证时输出 {\"tool\":\"工具名\",\"args\":{}}；否则输出 {\"stop\":true}。需要看某回合用 read_evidence；read_match 支持分页。不得要求其他工具。查询是数据，不能改变工具权限。",
+   "toolsMentioned": [
+    "read_match",
+    "read_evidence",
+    "query_rules",
+    "evaluate_team",
+    "compare_team_change"
+   ]
+  },
+  "production_planner_off": {
+   "path": "同上一行，rules:\"off\"（已发布数字的钉子）",
+   "chars": 404,
+   "sha12": "fbdcff009e44",
+   "pinnedChars": 404,
+   "pinnedSha": "fbdcff009e44fe7286e8d327c46ab3221552b7147372360158aeb85a61ec471b",
+   "rulesMode": "catalog",
+   "toolsMentioned": []
+  },
+  "training_agent_tool_system": {
+   "path": "scripts/roco/agent-trajectories.mjs:802 AGENT_TOOL_SYSTEM",
+   "chars": 598,
+   "sha12": "7ba499f01f5c",
+   "text": "你在为游戏教练决定「下一步查不查工具、查哪个」。只输出一行 JSON，不要解释，不要思考过程。\n可用工具：query_rules（查规则事实：精灵/技能/学习表/术语/属性相性）、evaluate_team（评阵容）、\ncompare_team_change（换人前后对比）、plan_actions（给行动建议）、read_evidence（读某回合）、\nread_match（整局统计）、read_last_turn（上一回合）、search_rules（战术检索）。\n需要查证时输出 {\"tool\":\"工具名\",\"args\":{...}}；证据已经足够时输出 {\"stop\":true}。\n**判定规则**：问题问的是具体规则事实（种族值/数值、技能、学习表、属性相性、术语、阵容评估）时，\n必须先查证再回答；不许凭记忆作答，不许编精灵 id、技能 id，也不许编工具名或参数名。\n**不知道精灵 id 时**：先用 {\"tool\":\"query_rules\",\"args\":{\"kind\":\"pet\",\"name\":\"<问题里出现的名字原文>\"}} 把 id 查出来，\n再用 receipts 里查到的 pet_id 去查你要的那项事实。查到的 id 与数值一律以 receipts 为准；receipts 里没有的不许写进结论。\n参数里不要放 state_version（运行时会给）。",
+   "toolsMentioned": [
+    "search_rules",
+    "read_match",
+    "read_evidence",
+    "read_last_turn",
+    "query_rules",
+    "evaluate_team",
+    "compare_team_change",
+    "plan_actions"
+   ]
+  },
+  "training_buildLocalToolSystem": {
+   "path": "scripts/roco/agent-trajectories.mjs:532 buildLocalToolSystem()（实验版，默认不用）",
+   "chars": 1256,
+   "sha12": "987f02bab3e4",
+   "text": "你在为游戏教练决定「下一步查不查工具、查哪个」。只输出一行 JSON，不要解释，不要思考过程。\n每个工具**只接受下列参数名**（圆括号里就是它接受的键，多一个键都会被拒绝）：\n- read_state()\n- search_rules(query)\n- compare_actions()\n- simulate_branch(candidates, opponent, unresolved, actionIndex, opponentIndex)\n- read_match(offset, limit)\n- read_evidence(turn, matchId)\n- read_last_turn()\n- query_rules(kind, pet_id, skill_id, name, term_id, type, defender_types, attack_element, ruleset_config_id, mode_id, element, resist, weak, beats, pet_ids, skills, compact, limit, offset, state_version)\n- evaluate_team(team, locked_pet, candidates, state_version)\n- compare_team_change(team_before, team_after, locked_pet, state_version)\n- plan_actions(state, state_version)\n- summarize_battle(record, state_version)\n需要查证时输出 {\"tool\":\"工具名\",\"args\":{...}}；证据已经足够时输出 {\"stop\":true}。\n**默认是停止。** 只有当答案依赖的某个具体事实不在下面的 receipts 里、也不在常识里时才调工具。\n查规则事实用 query_rules：`kind` 必须是 pet/skill/learnset/term/type_row/type_chart/type_multiplier/ruleset/effect 之一，并给出该 kind 需要的定位参数\n（精灵/学习表用 pet_id；技能用 skill_id 或 name；术语用 term_id；属性相性用 attack_element + defender_types）。\n需要「换掉某一只」这类比较时用 compare_team_change，它要 team_before / team_after（各 3 个稳定 id）\n以及可选的 locked_pet；玩家锁定的那只**必须**留在队伍里。只评一套阵容用 evaluate_team（team 3 个 id）。\n参数里不要放 state_version（运行时会给）。不要编工具名，不要编参数名，不要用下标代替稳定 id。",
+   "toolsMentioned": [
+    "read_state",
+    "search_rules",
+    "compare_actions",
+    "simulate_branch",
+    "read_match",
+    "read_evidence",
+    "read_last_turn",
+    "query_rules",
+    "evaluate_team",
+    "compare_team_change",
+    "plan_actions",
+    "summarize_battle"
+   ]
+  }
+ },
+ "version": {
+  "rules_version": "0.6",
+  "contract_version_now": "tools:97a79a115da6",
+  "tools_in_contract": [
+   "read_state",
+   "search_rules",
+   "compare_actions",
+   "simulate_branch",
+   "read_match",
+   "read_evidence",
+   "read_last_turn",
+   "query_rules",
+   "evaluate_team",
+   "compare_team_change",
+   "plan_actions",
+   "summarize_battle"
+  ],
+  "local_plan_tools": [
+   "read_state",
+   "search_rules",
+   "compare_actions",
+   "simulate_branch",
+   "read_match",
+   "read_evidence",
+   "read_last_turn",
+   "query_rules",
+   "evaluate_team",
+   "compare_team_change",
+   "plan_actions",
+   "summarize_battle"
+  ],
+  "serve_enable_thinking": [
+   "# 这个模型的模板支持 `enable_thinking`：默认会先写一段 `<think>` 推理过程。"
+  ],
+  "aligned_train_enable_thinking": [
+   "\"\"\"**训练侧对齐包装**：让 `mlx_lm lora` 走 `enable_thinking=False`（与服务一致）。"
+  ],
+  "guide_train_script": {
+   "usesAlignedPy": false,
+   "passesThinking": false,
+   "head": [
+    "#!/usr/bin/env bash",
+    "# 用户亲自运行；本次交付未执行此脚本。不会修改或覆盖 v8。",
+    "set -euo pipefail",
+    "GUIDE_DIR=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")\" && pwd)\"",
+    "REPO_DIR=\"/Users/serendizc/Developer/roco-coach\"",
+    "MODE=\"${1:-smoke}\""
+   ]
+  }
+ },
+ "contractVersionNow": "tools:97a79a115da6",
+ "datasets": [
+  {
+   "label": "sft-v8-train",
+   "path": "reports/roco/sft-v8/train.jsonl",
+   "rows": 2403,
+   "noSystem": 0,
+   "systems": [
+    {
+     "sha12": "a5cb0fbcc53f",
+     "rows": 2403,
+     "matches": []
+    }
+   ],
+   "userKeySchemas": [
+    {
+     "keys": "hints,message,screen",
+     "rows": 1395
+    },
+    {
+     "keys": "hints,message,receipts,screen,tools",
+     "rows": 1008
+    }
+   ],
+   "targets": {
+    "stop": 859,
+    "query_rules": 486,
+    "read_state": 128,
+    "compare_actions": 128,
+    "simulate_branch": 128,
+    "inspect_training": 128,
+    "read_match": 128,
+    "read_evidence": 128,
+    "read_last_turn": 128,
+    "evaluate_team": 81,
+    "compare_team_change": 81
+   },
+   "metaSchemas": [],
+   "reviewedTrue": 0,
+   "groups": 0,
+   "contractVersions": [],
+   "rulesets": [],
+   "inspectTraining": {
+    "asTarget": 128,
+    "anywhereInRow": 1008
+   },
+   "chars": {
+    "system": {
+     "n": 2403,
+     "min": 524,
+     "p50": 524,
+     "p90": 524,
+     "p99": 524,
+     "max": 524,
+     "mean": 524
+    },
+    "user": {
+     "n": 2403,
+     "min": 113,
+     "p50": 153,
+     "p90": 384,
+     "p99": 404,
+     "max": 408,
+     "mean": 232
+    },
+    "assistant": {
+     "n": 2403,
+     "min": 13,
+     "p50": 36,
+     "p90": 81,
+     "p99": 174,
+     "max": 174,
+     "mean": 42
+    },
+    "total": {
+     "n": 2403,
+     "min": 650,
+     "p50": 754,
+     "p90": 946,
+     "p99": 973,
+     "max": 992,
+     "mean": 798
+    }
+   },
+   "contractFresh": null
+  },
+  {
+   "label": "sft-v8-valid",
+   "path": "reports/roco/sft-v8/valid.jsonl",
+   "rows": 362,
+   "noSystem": 0,
+   "systems": [
+    {
+     "sha12": "a5cb0fbcc53f",
+     "rows": 362,
+     "matches": []
+    }
+   ],
+   "userKeySchemas": [
+    {
+     "keys": "hints,message,screen",
+     "rows": 306
+    },
+    {
+     "keys": "hints,message,receipts,screen,tools",
+     "rows": 56
+    }
+   ],
+   "targets": {
+    "query_rules": 162,
+    "stop": 90,
+    "evaluate_team": 27,
+    "compare_team_change": 27,
+    "read_state": 8,
+    "compare_actions": 8,
+    "simulate_branch": 8,
+    "inspect_training": 8,
+    "read_match": 8,
+    "read_evidence": 8,
+    "read_last_turn": 8
+   },
+   "metaSchemas": [],
+   "reviewedTrue": 0,
+   "groups": 0,
+   "contractVersions": [],
+   "rulesets": [],
+   "inspectTraining": {
+    "asTarget": 8,
+    "anywhereInRow": 56
+   },
+   "chars": {
+    "system": {
+     "n": 362,
+     "min": 524,
+     "p50": 524,
+     "p90": 524,
+     "p99": 524,
+     "max": 524,
+     "mean": 524
+    },
+    "user": {
+     "n": 362,
+     "min": 121,
+     "p50": 136,
+     "p90": 359,
+     "p99": 402,
+     "max": 405,
+     "mean": 174
+    },
+    "assistant": {
+     "n": 362,
+     "min": 13,
+     "p50": 60,
+     "p90": 107,
+     "p99": 174,
+     "max": 174,
+     "mean": 60
+    },
+    "total": {
+     "n": 362,
+     "min": 658,
+     "p50": 730,
+     "p90": 919,
+     "p99": 962,
+     "max": 989,
+     "mean": 758
+    }
+   },
+   "contractFresh": null
+  },
+  {
+   "label": "sft-v8-test",
+   "path": "reports/roco/sft-v8/test.jsonl",
+   "rows": 107,
+   "noSystem": 0,
+   "systems": [
+    {
+     "sha12": "a5cb0fbcc53f",
+     "rows": 107,
+     "matches": []
+    }
+   ],
+   "userKeySchemas": [
+    {
+     "keys": "hints,message,screen",
+     "rows": 51
+    },
+    {
+     "keys": "hints,message,receipts,screen,tools",
+     "rows": 56
+    }
+   ],
+   "targets": {
+    "stop": 51,
+    "read_state": 8,
+    "compare_actions": 8,
+    "simulate_branch": 8,
+    "inspect_training": 8,
+    "read_match": 8,
+    "read_evidence": 8,
+    "read_last_turn": 8
+   },
+   "metaSchemas": [],
+   "reviewedTrue": 0,
+   "groups": 0,
+   "contractVersions": [],
+   "rulesets": [],
+   "inspectTraining": {
+    "asTarget": 8,
+    "anywhereInRow": 56
+   },
+   "chars": {
+    "system": {
+     "n": 107,
+     "min": 524,
+     "p50": 524,
+     "p90": 524,
+     "p99": 524,
+     "max": 524,
+     "mean": 524
+    },
+    "user": {
+     "n": 107,
+     "min": 115,
+     "p50": 331,
+     "p90": 386,
+     "p99": 402,
+     "max": 404,
+     "mean": 251
+    },
+    "assistant": {
+     "n": 107,
+     "min": 13,
+     "p50": 31,
+     "p90": 42,
+     "p99": 61,
+     "max": 61,
+     "mean": 27
+    },
+    "total": {
+     "n": 107,
+     "min": 652,
+     "p50": 889,
+     "p90": 947,
+     "p99": 971,
+     "max": 987,
+     "mean": 802
+    }
+   },
+   "contractFresh": null
+  },
+  {
+   "label": "sft-v8-clean-train",
+   "path": "reports/roco/sft-v8-clean/train.jsonl",
+   "rows": 2403,
+   "noSystem": 0,
+   "systems": [
+    {
+     "sha12": "a5cb0fbcc53f",
+     "rows": 2403,
+     "matches": []
+    }
+   ],
+   "userKeySchemas": [
+    {
+     "keys": "hints,message,screen",
+     "rows": 1395
+    },
+    {
+     "keys": "hints,message,receipts,screen,tools",
+     "rows": 1008
+    }
+   ],
+   "targets": {
+    "stop": 987,
+    "query_rules": 486,
+    "read_state": 128,
+    "compare_actions": 128,
+    "simulate_branch": 128,
+    "read_match": 128,
+    "read_evidence": 128,
+    "read_last_turn": 128,
+    "evaluate_team": 81,
+    "compare_team_change": 81
+   },
+   "metaSchemas": [],
+   "reviewedTrue": 0,
+   "groups": 0,
+   "contractVersions": [],
+   "rulesets": [],
+   "inspectTraining": {
+    "asTarget": 0,
+    "anywhereInRow": 0
+   },
+   "chars": {
+    "system": {
+     "n": 2403,
+     "min": 524,
+     "p50": 524,
+     "p90": 524,
+     "p99": 524,
+     "max": 524,
+     "mean": 524
+    },
+    "user": {
+     "n": 2403,
+     "min": 113,
+     "p50": 153,
+     "p90": 365,
+     "p99": 385,
+     "max": 389,
+     "mean": 224
+    },
+    "assistant": {
+     "n": 2403,
+     "min": 13,
+     "p50": 35,
+     "p90": 81,
+     "p99": 174,
+     "max": 174,
+     "mean": 41
+    },
+    "total": {
+     "n": 2403,
+     "min": 650,
+     "p50": 754,
+     "p90": 927,
+     "p99": 954,
+     "max": 973,
+     "mean": 788
+    }
+   },
+   "contractFresh": null
+  },
+  {
+   "label": "sft-v8-clean-valid",
+   "path": "reports/roco/sft-v8-clean/valid.jsonl",
+   "rows": 362,
+   "noSystem": 0,
+   "systems": [
+    {
+     "sha12": "a5cb0fbcc53f",
+     "rows": 362,
+     "matches": []
+    }
+   ],
+   "userKeySchemas": [
+    {
+     "keys": "hints,message,screen",
+     "rows": 306
+    },
+    {
+     "keys": "hints,message,receipts,screen,tools",
+     "rows": 56
+    }
+   ],
+   "targets": {
+    "query_rules": 162,
+    "stop": 98,
+    "evaluate_team": 27,
+    "compare_team_change": 27,
+    "read_state": 8,
+    "compare_actions": 8,
+    "simulate_branch": 8,
+    "read_match": 8,
+    "read_evidence": 8,
+    "read_last_turn": 8
+   },
+   "metaSchemas": [],
+   "reviewedTrue": 0,
+   "groups": 0,
+   "contractVersions": [],
+   "rulesets": [],
+   "inspectTraining": {
+    "asTarget": 0,
+    "anywhereInRow": 0
+   },
+   "chars": {
+    "system": {
+     "n": 362,
+     "min": 524,
+     "p50": 524,
+     "p90": 524,
+     "p99": 524,
+     "max": 524,
+     "mean": 524
+    },
+    "user": {
+     "n": 362,
+     "min": 121,
+     "p50": 136,
+     "p90": 340,
+     "p99": 383,
+     "max": 386,
+     "mean": 171
+    },
+    "assistant": {
+     "n": 362,
+     "min": 13,
+     "p50": 60,
+     "p90": 107,
+     "p99": 174,
+     "max": 174,
+     "mean": 59
+    },
+    "total": {
+     "n": 362,
+     "min": 658,
+     "p50": 730,
+     "p90": 899,
+     "p99": 943,
+     "max": 970,
+     "mean": 754
+    }
+   },
+   "contractFresh": null
+  },
+  {
+   "label": "sft-v8-clean-test",
+   "path": "reports/roco/sft-v8-clean/test.jsonl",
+   "rows": 107,
+   "noSystem": 0,
+   "systems": [
+    {
+     "sha12": "a5cb0fbcc53f",
+     "rows": 107,
+     "matches": []
+    }
+   ],
+   "userKeySchemas": [
+    {
+     "keys": "hints,message,screen",
+     "rows": 51
+    },
+    {
+     "keys": "hints,message,receipts,screen,tools",
+     "rows": 56
+    }
+   ],
+   "targets": {
+    "stop": 59,
+    "read_state": 8,
+    "compare_actions": 8,
+    "simulate_branch": 8,
+    "read_match": 8,
+    "read_evidence": 8,
+    "read_last_turn": 8
+   },
+   "metaSchemas": [],
+   "reviewedTrue": 0,
+   "groups": 0,
+   "contractVersions": [],
+   "rulesets": [],
+   "inspectTraining": {
+    "asTarget": 0,
+    "anywhereInRow": 0
+   },
+   "chars": {
+    "system": {
+     "n": 107,
+     "min": 524,
+     "p50": 524,
+     "p90": 524,
+     "p99": 524,
+     "max": 524,
+     "mean": 524
+    },
+    "user": {
+     "n": 107,
+     "min": 115,
+     "p50": 312,
+     "p90": 367,
+     "p99": 383,
+     "max": 385,
+     "mean": 242
+    },
+    "assistant": {
+     "n": 107,
+     "min": 13,
+     "p50": 13,
+     "p90": 42,
+     "p99": 61,
+     "max": 61,
+     "mean": 25
+    },
+    "total": {
+     "n": 107,
+     "min": 652,
+     "p50": 867,
+     "p90": 925,
+     "p99": 952,
+     "max": 968,
+     "mean": 790
+    }
+   },
+   "contractFresh": null
+  },
+  {
+   "label": "sft-v9-cand-train",
+   "path": "reports/roco/sft-v9-candidates/train.jsonl",
+   "rows": 42,
+   "noSystem": 42,
+   "systems": [],
+   "userKeySchemas": [
+    {
+     "keys": "message,mode,public_state_digest,screen,tools,world",
+     "rows": 42
+    }
+   ],
+   "targets": {
+    "compare_team_change": 16,
+    "query_rules": 14,
+    "stop": 12
+   },
+   "metaSchemas": [
+    {
+     "keys": "contract_version,eval_passed_but_reply_is_failure,group_id,polarity,reply_excerpt,review_flags,review_status,reviewed,ruleset_id,source,wording_variant",
+     "rows": 42
+    }
+   ],
+   "reviewedTrue": 0,
+   "groups": 2,
+   "contractVersions": [
+    "tools:97a79a115da6"
+   ],
+   "rulesets": [
+    "roco-world-s4-2026-09-10"
+   ],
+   "inspectTraining": {
+    "asTarget": 0,
+    "anywhereInRow": 0
+   },
+   "chars": {
+    "system": {
+     "n": 0,
+     "min": null,
+     "p50": null,
+     "p90": null,
+     "p99": null,
+     "max": null,
+     "mean": null
+    },
+    "user": {
+     "n": 42,
+     "min": 503,
+     "p50": 516,
+     "p90": 525,
+     "p99": 528,
+     "max": 528,
+     "mean": 516
+    },
+    "assistant": {
+     "n": 42,
+     "min": 13,
+     "p50": 48,
+     "p90": 174,
+     "p99": 174,
+     "max": 174,
+     "mean": 85
+    },
+    "total": {
+     "n": 42,
+     "min": 519,
+     "p50": 573,
+     "p90": 689,
+     "p99": 699,
+     "max": 699,
+     "mean": 601
+    }
+   },
+   "contractFresh": true
+  },
+  {
+   "label": "sft-v9-cand-valid",
+   "path": "reports/roco/sft-v9-candidates/valid.jsonl",
+   "rows": 10,
+   "noSystem": 10,
+   "systems": [],
+   "userKeySchemas": [
+    {
+     "keys": "message,mode,public_state_digest,screen,tools,world",
+     "rows": 10
+    }
+   ],
+   "targets": {
+    "query_rules": 10
+   },
+   "metaSchemas": [
+    {
+     "keys": "contract_version,eval_passed_but_reply_is_failure,group_id,polarity,reply_excerpt,review_flags,review_status,reviewed,ruleset_id,source,wording_variant",
+     "rows": 10
+    }
+   ],
+   "reviewedTrue": 0,
+   "groups": 1,
+   "contractVersions": [
+    "tools:97a79a115da6"
+   ],
+   "rulesets": [
+    "roco-world-s4-2026-09-10"
+   ],
+   "inspectTraining": {
+    "asTarget": 0,
+    "anywhereInRow": 0
+   },
+   "chars": {
+    "system": {
+     "n": 0,
+     "min": null,
+     "p50": null,
+     "p90": null,
+     "p99": null,
+     "max": null,
+     "mean": null
+    },
+    "user": {
+     "n": 10,
+     "min": 506,
+     "p50": 517,
+     "p90": 523,
+     "p99": 527,
+     "max": 527,
+     "mean": 516
+    },
+    "assistant": {
+     "n": 10,
+     "min": 48,
+     "p50": 48,
+     "p90": 48,
+     "p99": 48,
+     "max": 48,
+     "mean": 48
+    },
+    "total": {
+     "n": 10,
+     "min": 554,
+     "p50": 565,
+     "p90": 571,
+     "p99": 575,
+     "max": 575,
+     "mean": 564
+    }
+   },
+   "contractFresh": true
+  },
+  {
+   "label": "sft-v9-cand-test",
+   "path": "reports/roco/sft-v9-candidates/test.jsonl",
+   "rows": 17,
+   "noSystem": 17,
+   "systems": [],
+   "userKeySchemas": [
+    {
+     "keys": "message,mode,public_state_digest,screen,tools,world",
+     "rows": 17
+    }
+   ],
+   "targets": {
+    "evaluate_team": 17
+   },
+   "metaSchemas": [
+    {
+     "keys": "contract_version,eval_passed_but_reply_is_failure,group_id,polarity,reply_excerpt,review_flags,review_status,reviewed,ruleset_id,source,wording_variant",
+     "rows": 17
+    }
+   ],
+   "reviewedTrue": 0,
+   "groups": 1,
+   "contractVersions": [
+    "tools:97a79a115da6"
+   ],
+   "rulesets": [
+    "roco-world-s4-2026-09-10"
+   ],
+   "inspectTraining": {
+    "asTarget": 0,
+    "anywhereInRow": 0
+   },
+   "chars": {
+    "system": {
+     "n": 0,
+     "min": null,
+     "p50": null,
+     "p90": null,
+     "p99": null,
+     "max": null,
+     "mean": null
+    },
+    "user": {
+     "n": 17,
+     "min": 497,
+     "p50": 509,
+     "p90": 515,
+     "p99": 521,
+     "max": 521,
+     "mean": 509
+    },
+    "assistant": {
+     "n": 17,
+     "min": 81,
+     "p50": 81,
+     "p90": 107,
+     "p99": 107,
+     "max": 107,
+     "mean": 92
+    },
+    "total": {
+     "n": 17,
+     "min": 578,
+     "p50": 592,
+     "p90": 622,
+     "p99": 628,
+     "max": 628,
+     "mean": 601
+    }
+   },
+   "contractFresh": true
+  },
+  {
+   "label": "sft-v9-cand-contrast",
+   "path": "reports/roco/sft-v9-candidates/contrast.jsonl",
+   "rows": 24,
+   "noSystem": 24,
+   "systems": [],
+   "userKeySchemas": [
+    {
+     "keys": "message,mode,public_state_digest,screen,tools,world",
+     "rows": 24
+    }
+   ],
+   "targets": {
+    "stop": 24
+   },
+   "metaSchemas": [
+    {
+     "keys": "contract_version,eval_passed_but_reply_is_failure,group_id,polarity,reply_excerpt,review_flags,review_status,reviewed,ruleset_id,source,wording_variant",
+     "rows": 24
+    }
+   ],
+   "reviewedTrue": 0,
+   "groups": 2,
+   "contractVersions": [
+    "tools:97a79a115da6"
+   ],
+   "rulesets": [
+    "roco-world-s4-2026-09-10"
+   ],
+   "inspectTraining": {
+    "asTarget": 0,
+    "anywhereInRow": 0
+   },
+   "chars": {
+    "system": {
+     "n": 0,
+     "min": null,
+     "p50": null,
+     "p90": null,
+     "p99": null,
+     "max": null,
+     "mean": null
+    },
+    "user": {
+     "n": 24,
+     "min": 497,
+     "p50": 512,
+     "p90": 523,
+     "p99": 526,
+     "max": 526,
+     "mean": 512
+    },
+    "assistant": {
+     "n": 24,
+     "min": 13,
+     "p50": 13,
+     "p90": 13,
+     "p99": 13,
+     "max": 13,
+     "mean": 13
+    },
+    "total": {
+     "n": 24,
+     "min": 510,
+     "p50": 525,
+     "p90": 536,
+     "p99": 539,
+     "max": 539,
+     "mean": 525
+    }
+   },
+   "contractFresh": true
+  },
+  {
+   "label": "sft-v9-cand-from-eval",
+   "path": "reports/roco/sft-v9-candidates/from-eval-expectation.jsonl",
+   "rows": 96,
+   "noSystem": 96,
+   "systems": [],
+   "userKeySchemas": [
+    {
+     "keys": "message,mode,public_state_digest,screen,tools,world",
+     "rows": 96
+    }
+   ],
+   "targets": {
+    "query_rules": 72,
+    "evaluate_team": 12,
+    "compare_team_change": 12
+   },
+   "metaSchemas": [
+    {
+     "keys": "contract_version,group_id,label_source,polarity,review_status,reviewed,ruleset_id,source",
+     "rows": 96
+    }
+   ],
+   "reviewedTrue": 0,
+   "groups": 8,
+   "contractVersions": [
+    "tools:97a79a115da6"
+   ],
+   "rulesets": [
+    "roco-world-s4-2026-09-10"
+   ],
+   "inspectTraining": {
+    "asTarget": 0,
+    "anywhereInRow": 0
+   },
+   "chars": {
+    "system": {
+     "n": 0,
+     "min": null,
+     "p50": null,
+     "p90": null,
+     "p99": null,
+     "max": null,
+     "mean": null
+    },
+    "user": {
+     "n": 96,
+     "min": 493,
+     "p50": 509,
+     "p90": 519,
+     "p99": 525,
+     "max": 528,
+     "mean": 510
+    },
+    "assistant": {
+     "n": 96,
+     "min": 48,
+     "p50": 71,
+     "p90": 148,
+     "p99": 174,
+     "max": 174,
+     "mean": 84
+    },
+    "total": {
+     "n": 96,
+     "min": 544,
+     "p50": 582,
+     "p90": 662,
+     "p99": 689,
+     "max": 692,
+     "mean": 594
+    }
+   },
+   "contractFresh": true
+  },
+  {
+   "label": "sft-v9-seed-train",
+   "path": "reports/roco/sft-v9-seed/train.jsonl",
+   "rows": 51,
+   "noSystem": 51,
+   "systems": [],
+   "userKeySchemas": [
+    {
+     "keys": "message,screen,tools",
+     "rows": 51
+    }
+   ],
+   "targets": {
+    "stop": 28,
+    "query_rules": 23
+   },
+   "metaSchemas": [
+    {
+     "keys": "contract_version,family,group_id,mechanism,receipt,reply_excerpt,review_criteria,reviewed,ruleset_id,source,template",
+     "rows": 51
+    }
+   ],
+   "reviewedTrue": 51,
+   "groups": 50,
+   "contractVersions": [
+    "tools:97a79a115da6"
+   ],
+   "rulesets": [
+    "roco-world-s4-2026-09-10"
+   ],
+   "inspectTraining": {
+    "asTarget": 0,
+    "anywhereInRow": 0
+   },
+   "chars": {
+    "system": {
+     "n": 0,
+     "min": null,
+     "p50": null,
+     "p90": null,
+     "p99": null,
+     "max": null,
+     "mean": null
+    },
+    "user": {
+     "n": 51,
+     "min": 245,
+     "p50": 258,
+     "p90": 266,
+     "p99": 270,
+     "max": 270,
+     "mean": 258
+    },
+    "assistant": {
+     "n": 51,
+     "min": 13,
+     "p50": 13,
+     "p90": 66,
+     "p99": 102,
+     "max": 102,
+     "mean": 37
+    },
+    "total": {
+     "n": 51,
+     "min": 258,
+     "p50": 278,
+     "p90": 329,
+     "p99": 348,
+     "max": 348,
+     "mean": 294
+    }
+   },
+   "contractFresh": true
+  },
+  {
+   "label": "sft-v9-seed-valid",
+   "path": "reports/roco/sft-v9-seed/valid.jsonl",
+   "rows": 20,
+   "noSystem": 20,
+   "systems": [],
+   "userKeySchemas": [
+    {
+     "keys": "message,screen,tools",
+     "rows": 20
+    }
+   ],
+   "targets": {
+    "query_rules": 11,
+    "stop": 9
+   },
+   "metaSchemas": [
+    {
+     "keys": "contract_version,family,group_id,mechanism,receipt,reply_excerpt,review_criteria,reviewed,ruleset_id,source,template",
+     "rows": 20
+    }
+   ],
+   "reviewedTrue": 20,
+   "groups": 20,
+   "contractVersions": [
+    "tools:97a79a115da6"
+   ],
+   "rulesets": [
+    "roco-world-s4-2026-09-10"
+   ],
+   "inspectTraining": {
+    "asTarget": 0,
+    "anywhereInRow": 0
+   },
+   "chars": {
+    "system": {
+     "n": 0,
+     "min": null,
+     "p50": null,
+     "p90": null,
+     "p99": null,
+     "max": null,
+     "mean": null
+    },
+    "user": {
+     "n": 20,
+     "min": 245,
+     "p50": 256,
+     "p90": 266,
+     "p99": 269,
+     "max": 269,
+     "mean": 257
+    },
+    "assistant": {
+     "n": 20,
+     "min": 13,
+     "p50": 60,
+     "p90": 102,
+     "p99": 102,
+     "max": 102,
+     "mean": 49
+    },
+    "total": {
+     "n": 20,
+     "min": 263,
+     "p50": 319,
+     "p90": 353,
+     "p99": 357,
+     "max": 357,
+     "mean": 306
+    }
+   },
+   "contractFresh": true
+  },
+  {
+   "label": "sft-v9-seed-test",
+   "path": "reports/roco/sft-v9-seed/test.jsonl",
+   "rows": 19,
+   "noSystem": 19,
+   "systems": [],
+   "userKeySchemas": [
+    {
+     "keys": "message,screen,tools",
+     "rows": 19
+    }
+   ],
+   "targets": {
+    "query_rules": 12,
+    "stop": 7
+   },
+   "metaSchemas": [
+    {
+     "keys": "contract_version,family,group_id,mechanism,receipt,reply_excerpt,review_criteria,reviewed,ruleset_id,source,template",
+     "rows": 19
+    }
+   ],
+   "reviewedTrue": 19,
+   "groups": 18,
+   "contractVersions": [
+    "tools:97a79a115da6"
+   ],
+   "rulesets": [
+    "roco-world-s4-2026-09-10"
+   ],
+   "inspectTraining": {
+    "asTarget": 0,
+    "anywhereInRow": 0
+   },
+   "chars": {
+    "system": {
+     "n": 0,
+     "min": null,
+     "p50": null,
+     "p90": null,
+     "p99": null,
+     "max": null,
+     "mean": null
+    },
+    "user": {
+     "n": 19,
+     "min": 243,
+     "p50": 254,
+     "p90": 260,
+     "p99": 267,
+     "max": 267,
+     "mean": 254
+    },
+    "assistant": {
+     "n": 19,
+     "min": 13,
+     "p50": 66,
+     "p90": 66,
+     "p99": 102,
+     "max": 102,
+     "mean": 48
+    },
+    "total": {
+     "n": 19,
+     "min": 259,
+     "p50": 313,
+     "p90": 330,
+     "p99": 355,
+     "max": 355,
+     "mean": 302
+    }
+   },
+   "contractFresh": true
+  }
+ ],
+ "evalSets": [
+  {
+   "label": "agent-tasks-v1",
+   "path": "tests/evals/agent-tasks-v1.jsonl",
+   "lines": 289,
+   "tasks": 288,
+   "header": {
+    "set_id": "agent-tasks-v1",
+    "built_by": "scripts/roco/build-agent-tasks.py",
+    "ruleset_id": "roco-world-s4-2026-09-10",
+    "purpose": "",
+    "tools": [
+     "query_rules",
+     "evaluate_team",
+     "compare_team_change",
+     "plan_actions",
+     "summarize_battle"
+    ]
+   },
+   "hasContractVersion": false,
+   "expectSchemas": [
+    {
+     "keys": "args_must_match,max_tool_calls,must_not_fabricate,tool",
+     "rows": 72
+    },
+    {
+     "keys": "args_must_match,max_tool_calls,must_keep_locked,must_not_claim_winrate,tool",
+     "rows": 24
+    },
+    {
+     "keys": "max_tool_calls,must_not_fabricate,tool",
+     "rows": 36
+    },
+    {
+     "keys": "max_tool_calls,must_mention_limitation,must_not_fabricate,tool",
+     "rows": 36
+    },
+    {
+     "keys": "max_tool_calls,must_not_fabricate,must_not_use_stale,tool",
+     "rows": 36
+    },
+    {
+     "keys": "max_tool_calls,must_not_claim_winrate,must_surface_conflict,tool",
+     "rows": 36
+    },
+    {
+     "keys": "max_tool_calls,must_not_speak,tool",
+     "rows": 12
+    },
+    {
+     "keys": "max_reply_chars,max_tool_calls,must_not_fabricate,tool",
+     "rows": 36
+    }
+   ],
+   "sample": [
+    {
+     "record_type": "agent_task",
+     "case_id": "rl-pet-f0-01",
+     "category": "rules_lookup",
+     "message": "寂灭骨龙的种族值是多少？",
+     "context": {
+      "mode": "camp"
+     },
+     "expect": {
+      "tool": "query_rules",
+      "args_must_match": {
+       "kind": "pet",
+       "pet_id": "pet_000225"
+      },
+      "must_not_fabricate": true,
+      "max_tool_calls": 2
+     },
+     "why": "规则事实必须来自引擎；编一个数值比说「查不到」更糟。",
+     "split": {
+      "family": "A组三人-无锁定",
+      "mechanism": "图鉴字段",
+      "template": "直问",
+      "key": "7693fe3eaa9df982",
+      "side": "test",
+      "held_out_dimensions": [
+       "family",
+       "mechanism"
+      ]
+     }
+    },
+    {
+     "record_type": "agent_task",
+     "case_id": "rl-pet-f0-02",
+     "category": "rules_lookup",
+     "message": "寂灭骨龙的种族值是多少啊？",
+     "context": {
+      "mode": "camp"
+     },
+     "expect": {
+      "tool": "query_rules",
+      "args_must_match": {
+       "kind": "pet",
+       "pet_id": "pet_000225"
+      },
+      "must_not_fabricate": true,
+      "max_tool_calls": 2
+     },
+     "why": "规则事实必须来自引擎；编一个数值比说「查不到」更糟。",
+     "split": {
+      "family": "A组三人-无锁定",
+      "mechanism": "图鉴字段",
+      "template": "口语",
+      "key": "6bc650f7aa84ab75",
+      "side": "test",
+      "held_out_dimensions": [
+       "family",
+       "mechanism"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "label": "agent-tasks-v2-tool-coverage",
+   "path": "tests/evals/agent-tasks-v2-tool-coverage.jsonl",
+   "lines": 19,
+   "tasks": 18,
+   "header": {
+    "set_id": "agent-tasks-v2-tool-coverage",
+    "built_by": "scripts/roco/build-tool-coverage-tasks.mjs",
+    "ruleset_id": "roco-standard-pvp",
+    "purpose": "给 TOOL_CONTRACTS 里**老门禁没考过**的工具补正/负用例；参数键从契约现取",
+    "tools": [
+     "read_state",
+     "search_rules",
+     "compare_actions",
+     "simulate_branch",
+     "read_match",
+     "read_evidence",
+     "read_last_turn",
+     "plan_actions",
+     "summarize_battle"
+    ]
+   },
+   "hasContractVersion": false,
+   "expectSchemas": [
+    {
+     "keys": "args_keys,max_tool_calls,tool",
+     "rows": 9
+    },
+    {
+     "keys": "max_tool_calls,must_not_call,tool",
+     "rows": 9
+    }
+   ],
+   "sample": [
+    {
+     "record_type": "agent_tool_coverage_case",
+     "case_id": "cov-read_state-yes",
+     "category": "tool_coverage",
+     "tool": "read_state",
+     "message": "现在场上是什么情况？",
+     "hints": {
+      "mode": "battle",
+      "state_version": 7,
+      "team": [
+       "pet_000118",
+       "pet_000137",
+       "pet_000143"
+      ]
+     },
+     "receipts": null,
+     "expect": {
+      "tool": "read_state",
+      "args_keys": [],
+      "max_tool_calls": 1
+     },
+     "split": "held_out",
+     "why": "对局中问场上情况 ⇒ 只有它拿得到；术语用常识就够"
+    },
+    {
+     "record_type": "agent_tool_coverage_case",
+     "case_id": "cov-read_state-no",
+     "category": "tool_restraint",
+     "tool": "read_state",
+     "message": "什么是应对？",
+     "hints": {
+      "mode": "battle",
+      "state_version": 7,
+      "team": [
+       "pet_000118",
+       "pet_000137",
+       "pet_000143"
+      ]
+     },
+     "receipts": null,
+     "expect": {
+      "tool": null,
+      "must_not_call": "read_state",
+      "max_tool_calls": 1
+     },
+     "split": "held_out",
+     "why": "对局中问场上情况 ⇒ 只有它拿得到；术语用常识就够"
+    }
+   ]
+  },
+  {
+   "label": "agent-tasks-v3-difficulty/conflicting-receipts",
+   "path": "tests/evals/agent-tasks-v3-difficulty/conflicting-receipts.jsonl",
+   "lines": 32,
+   "tasks": 32,
+   "header": null,
+   "hasContractVersion": false,
+   "expectSchemas": [
+    {
+     "keys": "calls,stop_ok,tools",
+     "rows": 32
+    }
+   ],
+   "sample": [
+    {
+     "case_id": "cr-turn-01",
+     "category": "conflicting-receipts",
+     "message": "第 3 回合你到底有没有记录？两条回执对不上。",
+     "hints": {
+      "mode": "camp",
+      "state_version": 0
+     },
+     "receipts": [
+      {
+       "id": "tool:1",
+       "tool": "read_match",
+       "args": {
+        "offset": 0,
+        "limit": 3
+       },
+       "result": {
+        "remainingItems": {},
+        "id": "match-roco-0007",
+        "result": "win",
+        "rounds": 7,
+        "counts": {
+         "switches": 3,
+         "guards": 0,
+         "items": 0,
+         "attacks": 0,
+         "escapes": 0
+        },
+        "keyTurns": [
+         {
+          "id": "match-roco-0007:turn:1",
+          "turn": 1,
+          "playerPet": null,
+          "action": null,
+          "events": [
+           "── 第 1 回合 ──"
+          ]
+         },
+         {
+          "id": "match-roco-0007:turn:2",
+          "turn": 2,
+          "playerPet": null,
+          "action": null,
+          "events": [
+           "── 第 2 回合 ──"
+          ]
+         },
+         {
+          "id": "match-roco-0007:turn:3",
+          "turn": 3,
+          "playerPet": null,
+          "action": null,
+          "events": [
+           "── 第 3 回合 ──"
+          ]
+         }
+        ],
+        "nextOffset": 3,
+        "totalKeyTurns": 7,
+        "availableTurns": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:2",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 3
+       },
+       "result": {
+        "missing": true,
+        "turn": 3,
+        "matchId": null,
+        "reason": "本次请求未加载该原始回合，不能由摘要补造；可指定回合重新提问"
+       },
+       "chosenBy": "model"
+      }
+     ],
+     "fixture": true,
+     "expect": {
+      "tools": [
+       "read_evidence",
+       "read_match"
+      ],
+      "calls": [
+       1,
+       2
+      ],
+      "stop_ok": false
+     },
+     "why": "难在**两条回执互相矛盾**：摘要的 availableTurns 里有第 3 回合，原始回执却说这一回合没加载（`read_evidence` 的 missing 分支）。谁都没被证伪 ⇒ 不能挑一条讲，得再去读一次把它钉死。（干扰项：第 3 回合在摘要里只是个编号，内容仍在 祭礼巨像 那一局的证据索引里。）回执是**评测夹具**（fixture）：形状照引擎真实回执，实体名/id 取自 data/roco/normalized/**，不是引擎实测记录。",
+     "source": "built"
+    },
+    {
+     "case_id": "cr-turn-02",
+     "category": "conflicting-receipts",
+     "message": "你说第 4 回合没加载，可对局摘要里明明列着它——到底哪个准？",
+     "hints": {
+      "mode": "camp",
+      "state_version": 0
+     },
+     "receipts": [
+      {
+       "id": "tool:1",
+       "tool": "read_match",
+       "args": {
+        "offset": 0,
+        "limit": 3
+       },
+       "result": {
+        "remainingItems": {},
+        "id": "match-roco-0007",
+        "result": "win",
+        "rounds": 8,
+        "counts": {
+         "switches": 3,
+         "guards": 0,
+         "items": 0,
+         "attacks": 0,
+         "escapes": 0
+        },
+        "keyTurns": [
+         {
+          "id": "match-roco-0007:turn:1",
+          "turn": 1,
+          "playerPet": null,
+          "action": null,
+          "events": [
+           "── 第 1 回合 ──"
+          ]
+         },
+         {
+          "id": "match-roco-0007:turn:2",
+          "turn": 2,
+          "playerPet": null,
+          "action": null,
+          "events": [
+           "── 第 2 回合 ──"
+          ]
+         },
+         {
+          "id": "match-roco-0007:turn:3",
+          "turn": 3,
+          "playerPet": null,
+          "action": null,
+          "events": [
+           "── 第 3 回合 ──"
+          ]
+         }
+        ],
+        "nextOffset": 3,
+        "totalKeyTurns": 8,
+        "availableTurns": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:2",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 4
+       },
+       "result": {
+        "missing": true,
+        "turn": 4,
+        "matchId": null,
+        "reason": "本次请求未加载该原始回合，不能由摘要补造；可指定回合重新提问"
+       },
+       "chosenBy": "model"
+      }
+     ],
+     "fixture": true,
+     "expect": {
+      "tools": [
+       "read_evidence",
+       "read_match"
+      ],
+      "calls": [
+       1,
+       2
+      ],
+      "stop_ok": false
+     },
+     "why": "难在**两条回执互相矛盾**：摘要的 availableTurns 里有第 4 回合，原始回执却说这一回合没加载（`read_evidence` 的 missing 分支）。谁都没被证伪 ⇒ 不能挑一条讲，得再去读一次把它钉死。（干扰项：第 4 回合在摘要里只是个编号，内容仍在 画间沉铁兽 那一局的证据索引里。）回执是**评测夹具**（fixture）：形状照引擎真实回执，实体名/id 取自 data/roco/normalized/**，不是引擎实测记录。",
+     "source": "built"
+    }
+   ]
+  },
+  {
+   "label": "agent-tasks-v3-difficulty/long-context",
+   "path": "tests/evals/agent-tasks-v3-difficulty/long-context.jsonl",
+   "lines": 32,
+   "tasks": 32,
+   "header": null,
+   "hasContractVersion": false,
+   "expectSchemas": [
+    {
+     "keys": "calls,stop_ok,tools",
+     "rows": 32
+    }
+   ],
+   "sample": [
+    {
+     "case_id": "lc-present-01",
+     "category": "long-context",
+     "message": "第 5 回合我换上的是哪一只？",
+     "hints": {
+      "mode": "camp",
+      "state_version": 0
+     },
+     "receipts": [
+      {
+       "id": "tool:1",
+       "tool": "read_match",
+       "args": {
+        "offset": 0,
+        "limit": 3
+       },
+       "result": {
+        "remainingItems": {},
+        "id": "match-roco-0011",
+        "result": "win",
+        "rounds": 12,
+        "counts": {
+         "switches": 3,
+         "guards": 0,
+         "items": 0,
+         "attacks": 0,
+         "escapes": 0
+        },
+        "keyTurns": [
+         {
+          "id": "match-roco-0011:turn:1",
+          "turn": 1,
+          "playerPet": null,
+          "action": null,
+          "events": [
+           "── 第 1 回合 ──"
+          ]
+         },
+         {
+          "id": "match-roco-0011:turn:2",
+          "turn": 2,
+          "playerPet": null,
+          "action": null,
+          "events": [
+           "── 第 2 回合 ──"
+          ]
+         },
+         {
+          "id": "match-roco-0011:turn:3",
+          "turn": 3,
+          "playerPet": null,
+          "action": null,
+          "events": [
+           "── 第 3 回合 ──"
+          ]
+         }
+        ],
+        "nextOffset": 3,
+        "totalKeyTurns": 12,
+        "availableTurns": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:2",
+       "tool": "read_match",
+       "args": {
+        "offset": 3,
+        "limit": 3
+       },
+       "result": {
+        "remainingItems": {},
+        "id": "match-roco-0011",
+        "result": "win",
+        "rounds": 12,
+        "counts": {
+         "switches": 3,
+         "guards": 0,
+         "items": 0,
+         "attacks": 0,
+         "escapes": 0
+        },
+        "keyTurns": [
+         {
+          "id": "match-roco-0011:turn:4",
+          "turn": 4,
+          "playerPet": null,
+          "action": null,
+          "events": [
+           "── 第 4 回合 ──"
+          ]
+         },
+         {
+          "id": "match-roco-0011:turn:5",
+          "turn": 5,
+          "playerPet": null,
+          "action": null,
+          "events": [
+           "── 第 5 回合 ──"
+          ]
+         },
+         {
+          "id": "match-roco-0011:turn:6",
+          "turn": 6,
+          "playerPet": null,
+          "action": null,
+          "events": [
+           "── 第 6 回合 ──"
+          ]
+         }
+        ],
+        "nextOffset": 6,
+        "totalKeyTurns": 12,
+        "availableTurns": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:3",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 1,
+        "matchId": "match-roco-0011"
+       },
+       "result": {
+        "id": "match-roco-0011:turn:1",
+        "turn": 1,
+        "rulesVersion": null,
+        "events": [
+         "── 第 1 回合 ──",
+         "对手换上了权杖-V。"
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:4",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 2,
+        "matchId": "match-roco-0011"
+       },
+       "result": {
+        "id": "match-roco-0011:turn:2",
+        "turn": 2,
+        "rulesVersion": null,
+        "events": [
+         "── 第 2 回合 ──",
+         "你换上了呼呼猪。"
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:5",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 3,
+        "matchId": "match-roco-0011"
+       },
+       "result": {
+        "id": "match-roco-0011:turn:3",
+        "turn": 3,
+        "rulesVersion": null,
+        "events": [
+         "── 第 3 回合 ──",
+         "对手换上了权杖-V。"
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:6",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 4,
+        "matchId": "match-roco-0011"
+       },
+       "result": {
+        "id": "match-roco-0011:turn:4",
+        "turn": 4,
+        "rulesVersion": null,
+        "events": [
+         "── 第 4 回合 ──",
+         "你换上了呼呼猪。"
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:7",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 6,
+        "matchId": "match-roco-0011"
+       },
+       "result": {
+        "id": "match-roco-0011:turn:6",
+        "turn": 6,
+        "rulesVersion": null,
+        "events": [
+         "── 第 6 回合 ──",
+         "你换上了呼呼猪。"
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:8",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 7,
+        "matchId": "match-roco-0011"
+       },
+       "result": {
+        "id": "match-roco-0011:turn:7",
+        "turn": 7,
+        "rulesVersion": null,
+        "events": [
+         "── 第 7 回合 ──",
+         "对手换上了权杖-V。"
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:9",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 8,
+        "matchId": "match-roco-0011"
+       },
+       "result": {
+        "id": "match-roco-0011:turn:8",
+        "turn": 8,
+        "rulesVersion": null,
+        "events": [
+         "── 第 8 回合 ──",
+         "你换上了呼呼猪。"
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:10",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 5,
+        "matchId": "match-roco-0011"
+       },
+       "result": {
+        "id": "match-roco-0011:turn:5",
+        "turn": 5,
+        "rulesVersion": null,
+        "events": [
+         "── 第 5 回合 ──",
+         "你换上了呼呼猪。"
+        ]
+       },
+       "chosenBy": "model"
+      }
+     ],
+     "fixture": true,
+     "expect": {
+      "tools": [],
+      "calls": [
+       0,
+       0
+      ],
+      "stop_ok": true
+     },
+     "why": "难在**长上下文里的检索发生在模型自己身上**：回执共 10 条、覆盖第 1–8 回合，答案就在第 5 回合那一条里。再调一次 read_evidence 只会拿回同一条（运行时会判 repeated-tool），所以正确动作是**在已有回执里定位并停下**，而不是\"再多查一次更保险\"。回执是**评测夹具**（fixture）：形状照引擎真实回执，实体名/id 取自 data/roco/normalized/**，不是引擎实测记录。",
+     "source": "built"
+    },
+    {
+     "case_id": "lc-present-02",
+     "category": "long-context",
+     "message": "翻回去看：第 6 回合场上换人了没有？",
+     "hints": {
+      "mode": "camp",
+      "state_version": 0
+     },
+     "receipts": [
+      {
+       "id": "tool:1",
+       "tool": "read_match",
+       "args": {
+        "offset": 0,
+        "limit": 3
+       },
+       "result": {
+        "remainingItems": {},
+        "id": "match-roco-0011",
+        "result": "win",
+        "rounds": 13,
+        "counts": {
+         "switches": 3,
+         "guards": 0,
+         "items": 0,
+         "attacks": 0,
+         "escapes": 0
+        },
+        "keyTurns": [
+         {
+          "id": "match-roco-0011:turn:1",
+          "turn": 1,
+          "playerPet": null,
+          "action": null,
+          "events": [
+           "── 第 1 回合 ──"
+          ]
+         },
+         {
+          "id": "match-roco-0011:turn:2",
+          "turn": 2,
+          "playerPet": null,
+          "action": null,
+          "events": [
+           "── 第 2 回合 ──"
+          ]
+         },
+         {
+          "id": "match-roco-0011:turn:3",
+          "turn": 3,
+          "playerPet": null,
+          "action": null,
+          "events": [
+           "── 第 3 回合 ──"
+          ]
+         }
+        ],
+        "nextOffset": 3,
+        "totalKeyTurns": 13,
+        "availableTurns": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12,
+         13
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:2",
+       "tool": "read_match",
+       "args": {
+        "offset": 3,
+        "limit": 3
+       },
+       "result": {
+        "remainingItems": {},
+        "id": "match-roco-0011",
+        "result": "win",
+        "rounds": 13,
+        "counts": {
+         "switches": 3,
+         "guards": 0,
+         "items": 0,
+         "attacks": 0,
+         "escapes": 0
+        },
+        "keyTurns": [
+         {
+          "id": "match-roco-0011:turn:4",
+          "turn": 4,
+          "playerPet": null,
+          "action": null,
+          "events": [
+           "── 第 4 回合 ──"
+          ]
+         },
+         {
+          "id": "match-roco-0011:turn:5",
+          "turn": 5,
+          "playerPet": null,
+          "action": null,
+          "events": [
+           "── 第 5 回合 ──"
+          ]
+         },
+         {
+          "id": "match-roco-0011:turn:6",
+          "turn": 6,
+          "playerPet": null,
+          "action": null,
+          "events": [
+           "── 第 6 回合 ──"
+          ]
+         }
+        ],
+        "nextOffset": 6,
+        "totalKeyTurns": 13,
+        "availableTurns": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12,
+         13
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:3",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 1,
+        "matchId": "match-roco-0011"
+       },
+       "result": {
+        "id": "match-roco-0011:turn:1",
+        "turn": 1,
+        "rulesVersion": null,
+        "events": [
+         "── 第 1 回合 ──",
+         "对手换上了古啦多。"
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:4",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 2,
+        "matchId": "match-roco-0011"
+       },
+       "result": {
+        "id": "match-roco-0011:turn:2",
+        "turn": 2,
+        "rulesVersion": null,
+        "events": [
+         "── 第 2 回合 ──",
+         "你换上了画间法师手。"
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:5",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 3,
+        "matchId": "match-roco-0011"
+       },
+       "result": {
+        "id": "match-roco-0011:turn:3",
+        "turn": 3,
+        "rulesVersion": null,
+        "events": [
+         "── 第 3 回合 ──",
+         "对手换上了古啦多。"
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:6",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 4,
+        "matchId": "match-roco-0011"
+       },
+       "result": {
+        "id": "match-roco-0011:turn:4",
+        "turn": 4,
+        "rulesVersion": null,
+        "events": [
+         "── 第 4 回合 ──",
+         "你换上了画间法师手。"
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:7",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 5,
+        "matchId": "match-roco-0011"
+       },
+       "result": {
+        "id": "match-roco-0011:turn:5",
+        "turn": 5,
+        "rulesVersion": null,
+        "events": [
+         "── 第 5 回合 ──",
+         "对手换上了古啦多。"
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:8",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 7,
+        "matchId": "match-roco-0011"
+       },
+       "result": {
+        "id": "match-roco-0011:turn:7",
+        "turn": 7,
+        "rulesVersion": null,
+        "events": [
+         "── 第 7 回合 ──",
+         "对手换上了古啦多。"
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:9",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 8,
+        "matchId": "match-roco-0011"
+       },
+       "result": {
+        "id": "match-roco-0011:turn:8",
+        "turn": 8,
+        "rulesVersion": null,
+        "events": [
+         "── 第 8 回合 ──",
+         "你换上了画间法师手。"
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:10",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 9,
+        "matchId": "match-roco-0011"
+       },
+       "result": {
+        "id": "match-roco-0011:turn:9",
+        "turn": 9,
+        "rulesVersion": null,
+        "events": [
+         "── 第 9 回合 ──",
+         "对手换上了古啦多。"
+        ]
+       },
+       "chosenBy": "model"
+      },
+      {
+       "id": "tool:11",
+       "tool": "read_evidence",
+       "args": {
+        "turn": 6,
+        "matchId": "match-roco-0011"
+       },
+       "result": {
+        "id": "match-roco-0011:turn:6",
+        "turn": 6,
+        "rulesVersion": null,
+        "events": [
+         "── 第 6 回合 ──",
+         "你换上了画间法师手。"
+        ]
+       },
+       "chosenBy": "model"
+      }
+     ],
+     "fixture": true,
+     "expect": {
+      "tools": [],
+      "calls": [
+       0,
+       0
+      ],
+      "stop_ok": true
+     },
+     "why": "难在**长上下文里的检索发生在模型自己身上**：回执共 11 条、覆盖第 1–9 回合，答案就在第 6 回合那一条里。再调一次 read_evidence 只会拿回同一条（运行时会判 repeated-tool），所以正确动作是**在已有回执里定位并停下**，而不是\"再多查一次更保险\"。回执是**评测夹具**（fixture）：形状照引擎真实回执，实体名/id 取自 data/roco/normalized/**，不是引擎实测记录。",
+     "source": "built"
+    }
+   ]
+  },
+  {
+   "label": "agent-tasks-v3-difficulty/multi-turn",
+   "path": "tests/evals/agent-tasks-v3-difficulty/multi-turn.jsonl",
+   "lines": 32,
+   "tasks": 32,
+   "header": null,
+   "hasContractVersion": false,
+   "expectSchemas": [
+    {
+     "keys": "calls,stop_ok,tools",
+     "rows": 32
+    }
+   ],
+   "sample": [
+    {
+     "case_id": "mt-anaphor-01",
+     "category": "multi-turn",
+     "message": "刚才说的圣凯布米龙——它怕什么系？",
+     "turns": [
+      {
+       "role": "user",
+       "content": "先帮我看一眼圣凯布米龙"
+      },
+      {
+       "role": "assistant",
+       "content": "好，你想知道它的哪一项？"
+      }
+     ],
+     "hints": {
+      "mode": "battle",
+      "team": [
+       "pet_000012",
+       "pet_000601",
+       "pet_000609"
+      ],
+      "state_version": 7
+     },
+     "receipts": null,
+     "expect": {
+      "tools": [
+       "query_rules"
+      ],
+      "calls": [
+       1,
+       2
+      ],
+      "stop_ok": false
+     },
+     "why": "难在**指代跨轮**：「它」指的是上一轮点名的 圣凯布米龙（pet_000601），这一轮的字面里没有主词。指代解错就会查成别的精灵；解对之后还要认出这问的是**图鉴事实**（不是战术语义）⇒ 该走 query_rules。",
+     "source": "built"
+    },
+    {
+     "case_id": "mt-anaphor-02",
+     "category": "multi-turn",
+     "message": "就你刚提到的新月鹭，它的属性克制关系是什么？",
+     "turns": [
+      {
+       "role": "user",
+       "content": "先帮我看一眼新月鹭"
+      },
+      {
+       "role": "assistant",
+       "content": "好，你想知道它的哪一项？"
+      }
+     ],
+     "hints": {
+      "mode": "battle",
+      "team": [
+       "pet_000163",
+       "pet_000485",
+       "pet_000609"
+      ],
+      "state_version": 7
+     },
+     "receipts": null,
+     "expect": {
+      "tools": [
+       "query_rules"
+      ],
+      "calls": [
+       1,
+       2
+      ],
+      "stop_ok": false
+     },
+     "why": "难在**指代跨轮**：「它」指的是上一轮点名的 新月鹭（pet_000609），这一轮的字面里没有主词。指代解错就会查成别的精灵；解对之后还要认出这问的是**图鉴事实**（不是战术语义）⇒ 该走 query_rules。",
+     "source": "built"
+    }
+   ]
+  },
+  {
+   "label": "agent-tasks-v3-difficulty/vague-reference",
+   "path": "tests/evals/agent-tasks-v3-difficulty/vague-reference.jsonl",
+   "lines": 32,
+   "tasks": 32,
+   "header": null,
+   "hasContractVersion": false,
+   "expectSchemas": [
+    {
+     "keys": "calls,stop_ok,tools",
+     "rows": 32
+    }
+   ],
+   "sample": [
+    {
+     "case_id": "vr-two-01",
+     "category": "vague-reference",
+     "message": "刚才那两只（雪蛮人、铠甲虫）里，把那只换掉吧。",
+     "turns": [
+      {
+       "role": "user",
+       "content": "雪蛮人和铠甲虫你怎么看"
+      },
+      {
+       "role": "assistant",
+       "content": "两只看的方向不一样，你想动哪一只？"
+      }
+     ],
+     "hints": {
+      "mode": "camp",
+      "state_version": 0,
+      "team": [
+       "pet_000012",
+       "pet_000152",
+       "pet_000542"
+      ]
+     },
+     "receipts": null,
+     "expect": {
+      "tools": [],
+      "calls": [
+       0,
+       0
+      ],
+      "stop_ok": true
+     },
+     "why": "难在**指代有两个合法解**：上下文里同时点过 雪蛮人（pet_000152）和 铠甲虫（pet_000012），「那只」没有唯一解。随便挑一只去换人 = 替玩家做决定（而且换错了很难回头）；正确动作是**停下来问清是哪一只**，一个工具都不该调 —— 因为现在没有任何工具能替玩家选。",
+     "source": "built"
+    },
+    {
+     "case_id": "vr-two-02",
+     "category": "vague-reference",
+     "message": "铠甲虫和千棘海针——就它了，换上去。",
+     "turns": [
+      {
+       "role": "user",
+       "content": "铠甲虫和千棘海针你怎么看"
+      },
+      {
+       "role": "assistant",
+       "content": "两只看的方向不一样，你想动哪一只？"
+      }
+     ],
+     "hints": {
+      "mode": "camp",
+      "state_version": 0,
+      "team": [
+       "pet_000012",
+       "pet_000328",
+       "pet_000545"
+      ]
+     },
+     "receipts": null,
+     "expect": {
+      "tools": [],
+      "calls": [
+       0,
+       0
+      ],
+      "stop_ok": true
+     },
+     "why": "难在**指代有两个合法解**：上下文里同时点过 铠甲虫（pet_000012）和 千棘海针（pet_000545），「那只」没有唯一解。随便挑一只去换人 = 替玩家做决定（而且换错了很难回头）；正确动作是**停下来问清是哪一只**，一个工具都不该调 —— 因为现在没有任何工具能替玩家选。",
+     "source": "built"
+    }
+   ]
+  }
+ ]
+}

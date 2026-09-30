@@ -1,0 +1,311 @@
+{
+ "when": "2026-09-29T17:32:28.502Z",
+ "base": "http://127.0.0.1:8765/",
+ "shots": [
+  "01-roco-页面在线-1440x900",
+  "01-roco-页面在线-390x844",
+  "02-Q23-选队下一步-1440x900",
+  "02-Q23-选队下一步-390x844",
+  "03-Q22-齿轮切开-1440x900",
+  "03-Q22-齿轮切开-390x844",
+  "04-box-第1页-1440x900",
+  "04-box-第3页-1440x900",
+  "04-box-第3页-390x844",
+  "05-box-抽屉-1440x900",
+  "06-box详情-四技能与性格-1440x900",
+  "06-box详情-四技能与性格-390x844"
+ ],
+ "versions": {
+  "head": "51c04fb1488c7c629e659d6619b094bb92c6570a",
+  "wipCount": 197,
+  "wipSha256": "a1da997a14aaa40acd6615e2a954c48e",
+  "clientRocoJs": "sha256:ec1dff2115ba6716",
+  "projectionRocoExperienceJs": "sha256:69a6034e75a54ee7"
+ },
+ "starSweep": [
+  {
+   "page": "roco.html（训练场/选阵容）",
+   "hits": 0,
+   "chars": 119
+  },
+  {
+   "page": "box.html（盒子列表）",
+   "hits": 0,
+   "chars": 1364
+  },
+  {
+   "page": "box.html?pet=own-0004（详情）",
+   "hits": 0,
+   "chars": 1077
+  },
+  {
+   "page": "workshop.html（阵容工坊）",
+   "hits": 0,
+   "chars": 43
+  },
+  {
+   "page": "index.html（营地）",
+   "hits": 0,
+   "chars": 1585
+  },
+  {
+   "page": "小芽面板正文",
+   "hits": 0,
+   "chars": 332
+  }
+ ],
+ "visibleSurface": {
+  "q23": {
+   "exists": true,
+   "offsetParent": true,
+   "display": "block",
+   "visibility": "visible",
+   "opacity": "1",
+   "rect": {
+    "x": 1009,
+    "y": 423,
+    "w": 400,
+    "h": 173
+   },
+   "fullyInViewport": true,
+   "vw": 1440,
+   "vh": 900
+  },
+  "q22": {
+   "exists": true,
+   "offsetParent": true,
+   "display": "block",
+   "visibility": "visible",
+   "opacity": "1",
+   "rect": {
+    "x": 1009,
+    "y": 535,
+    "w": 400,
+    "h": 202
+   },
+   "fullyInViewport": true,
+   "vw": 1440,
+   "vh": 900
+  },
+  "slots": [
+   {
+    "offsetParent": true,
+    "display": "flex",
+    "w": 810,
+    "h": 95,
+    "fullyInViewport": true,
+    "vh": 900
+   },
+   {
+    "offsetParent": true,
+    "display": "flex",
+    "w": 810,
+    "h": 95,
+    "fullyInViewport": true,
+    "vh": 900
+   },
+   {
+    "offsetParent": true,
+    "display": "flex",
+    "w": 810,
+    "h": 95,
+    "fullyInViewport": true,
+    "vh": 900
+   },
+   {
+    "offsetParent": true,
+    "display": "flex",
+    "w": 810,
+    "h": 95,
+    "fullyInViewport": true,
+    "vh": 900
+   }
+  ],
+  "nature": [
+   {
+    "k": "down",
+    "offsetParent": true,
+    "w": 266,
+    "fullyInViewport": true
+   },
+   {
+    "k": "up",
+    "offsetParent": true,
+    "w": 266,
+    "fullyInViewport": false
+   }
+  ]
+ },
+ "pass": 28,
+ "fail": 0,
+ "rows": [
+  {
+   "item": "① 服务在线",
+   "label": "curl/fetch `/roco.html` 返回 200",
+   "ok": true,
+   "detail": "HTTP 200"
+  },
+  {
+   "item": "① 服务在线",
+   "label": "浏览器里的页面标题（当场读 `document.title`）",
+   "ok": true,
+   "detail": "title=\"小芽 · 洛克王国：世界（训练场）\""
+  },
+  {
+   "item": "① 服务在线",
+   "label": "页面挂上了宿主编排 API",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "item": "② Q2-3",
+   "label": "面板真的开着、输入框拿到了焦点",
+   "ok": true,
+   "detail": "activeElement=#xiaoya-input"
+  },
+  {
+   "item": "② Q2-3",
+   "label": "这句话真的发出去了（输入框被清空）",
+   "ok": true,
+   "detail": "typed=\"选队下一步做什么\""
+  },
+  {
+   "item": "② Q2-3",
+   "label": "面板给出了回答（不是空/不是\"请重试\"）",
+   "ok": true,
+   "detail": "89 字｜状态行 \"本地规则核验 · 依据可展开查看\""
+  },
+  {
+   "item": "② Q2-3",
+   "label": "**不再是**「开一局之后，我才能…」那句局内话",
+   "ok": true,
+   "detail": "下一步先定带哪几只：这一页候选里有喵喵、水蓝蓝、火花。要定的话说清目标（打谁、要快还是要稳），或者直接说三个名字 —— 我按引擎评这一队，给的是结构判断，不是胜率。依据：你的名单"
+  },
+  {
+   "item": "② Q2-3",
+   "label": "正文**在可见面上**（`offsetParent!==null` + 有尺寸），不是隐藏子树里的字",
+   "ok": true,
+   "detail": "{\"exists\":true,\"offsetParent\":true,\"display\":\"block\",\"visibility\":\"visible\",\"opacity\":\"1\",\"rect\":{\"x\":1009,\"y\":423,\"w\":400,\"h\":173},\"fullyInViewport\":true,\"vw\":1440,\"vh\":900}"
+  },
+  {
+   "item": "③ Q2-2",
+   "label": "面板真的开着、输入框拿到了焦点",
+   "ok": true,
+   "detail": "activeElement=#xiaoya-input"
+  },
+  {
+   "item": "③ Q2-2",
+   "label": "这句话真的发出去了（输入框被清空）",
+   "ok": true,
+   "detail": "typed=\"齿轮切开能用吗\""
+  },
+  {
+   "item": "③ Q2-2",
+   "label": "面板给出了回答",
+   "ok": true,
+   "detail": "66 字｜状态行 \"本地规则核验 · 依据可展开查看\""
+  },
+  {
+   "item": "③ Q2-2",
+   "label": "给了技能事实（类别或威力至少一项 + 有依据）",
+   "ok": true,
+   "detail": "技能「齿轮切开」：机械系，类别 攻击（物攻）；威力 130（这是来源里的静态值，不是这一下的最终伤害）。依据：查了图鉴 · 你的名单"
+  },
+  {
+   "item": "③ Q2-2",
+   "label": "静态值口径（\"来源里的静态值，不是这一下的最终伤害\"这一类）",
+   "ok": true,
+   "detail": "技能「齿轮切开」：机械系，类别 攻击（物攻）；威力 130（这是来源里的静态值，不是这一下的最终伤害）。依据：查了图鉴 · 你的名单"
+  },
+  {
+   "item": "③ Q2-2",
+   "label": "正文**在可见面上**",
+   "ok": true,
+   "detail": "{\"exists\":true,\"offsetParent\":true,\"display\":\"block\",\"visibility\":\"visible\",\"opacity\":\"1\",\"rect\":{\"x\":1009,\"y\":535,\"w\":400,\"h\":202},\"fullyInViewport\":true,\"vw\":1440,\"vh\":900}"
+  },
+  {
+   "item": "④ 本机加的",
+   "label": "第 1 页玩家可见文本里 0 处",
+   "ok": true,
+   "detail": "命中 0 处｜当页 24 张卡"
+  },
+  {
+   "item": "④ 本机加的",
+   "label": "第 3 页玩家可见文本里 0 处",
+   "ok": true,
+   "detail": "命中 0 处"
+  },
+  {
+   "item": "④ 本机加的",
+   "label": "抽屉里 0 处",
+   "ok": true,
+   "detail": "命中 0 处｜kind=mine｜抽屉组头 24 个"
+  },
+  {
+   "item": "⑤ 详情四技能",
+   "label": "四个槽位都在",
+   "ok": true,
+   "detail": "4 个槽位"
+  },
+  {
+   "item": "⑤ 详情四技能",
+   "label": "**不再是**「你挑的那一个」",
+   "ok": true,
+   "detail": "命中 0 处"
+  },
+  {
+   "item": "⑤ 详情四技能",
+   "label": "每格都有真名字 + 系别 + 耗能/威力（逐格读字）",
+   "ok": true,
+   "detail": "4/4 格带系别与威力/耗能"
+  },
+  {
+   "item": "⑤ 详情四技能",
+   "label": "四格都在可见面上（`offsetParent!==null` 且 h>0）",
+   "ok": true,
+   "detail": "[{\"offsetParent\":true,\"display\":\"flex\",\"w\":810,\"h\":95,\"fullyInViewport\":true,\"vh\":900},{\"offsetParent\":true,\"display\":\"flex\",\"w\":810,\"h\":95,\"fullyInViewport\":true,\"vh\":900},{\"offsetParent\":true,\"display\":\"flex\",\"w\":810,\"h\":95,\"fullyInViewport\":true,\"vh\":900},{\"offsetParent\":true,\"display\":\"flex\",\"w\":810,\"h\":95,\"fullyInViewport\":true,\"vh\":900}]"
+  },
+  {
+   "item": "⑥ 性格 ±10%",
+   "label": "加成标记在可见面上",
+   "ok": true,
+   "detail": "[{\"k\":\"down\",\"offsetParent\":true,\"w\":266,\"fullyInViewport\":true},{\"k\":\"up\",\"offsetParent\":true,\"w\":266,\"fullyInViewport\":false}]"
+  },
+  {
+   "item": "⑥ 天分",
+   "label": "读得到天分档位或\"已加成 N/3 级\"",
+   "ok": true,
+   "detail": "[\"天分档位 相当好的天分 相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：物攻、物防、魔防；性格长处是魔攻）\",\"刷新天分记录 还剩 3 次（性格还剩 3 次）\"]"
+  },
+  {
+   "item": "⑥ 天分",
+   "label": "加成级数不超过 3（封顶）",
+   "ok": true,
+   "detail": "越界 []"
+  },
+  {
+   "item": "⑥ 性格 ±10%",
+   "label": "读得到 `.metric[data-nature]` 的加成标记",
+   "ok": true,
+   "detail": "[\"down\",\"up\"]"
+  },
+  {
+   "item": "⑥ 性格 ±10%",
+   "label": "「长处 +10%」用的是浅黄（`#6d5c2a` 描边 / `#241f12` 底，或 `.nature-effect` `#f0d98a`）",
+   "ok": true,
+   "detail": "{\"nature\":[{\"k\":\"down\",\"text\":\"物防 342 种族 105+10 性格 −10%\",\"bg\":\"rgb(28, 28, 34)\",\"border\":\"rgb(74, 74, 85)\"},{\"k\":\"up\",\"text\":\"魔攻 158 种族 80 性格 +10%\",\"bg\":\"rgb(36, 31, 18)\",\"border\":\"rgb(109, 92, 42)\"}],\"effect\":[{\"text\":\"长处 魔攻 +10% · 短处 物防 −10%\",\"color\":\"rgb(240, 217, 138)\"}]}"
+  },
+  {
+   "item": "⑧ 玩家可见 `**` = 0",
+   "label": "每一页 + 面板正文都是 0 处",
+   "ok": true,
+   "detail": "[{\"page\":\"roco.html（训练场/选阵容）\",\"hits\":0,\"chars\":119},{\"page\":\"box.html（盒子列表）\",\"hits\":0,\"chars\":1364},{\"page\":\"box.html?pet=own-0004（详情）\",\"hits\":0,\"chars\":1077},{\"page\":\"workshop.html（阵容工坊）\",\"hits\":0,\"chars\":43},{\"page\":\"index.html（营地）\",\"hits\":0,\"chars\":1585},{\"page\":\"小芽面板正文\",\"hits\":0,\"chars\":332}]"
+  },
+  {
+   "item": "⑦ 无未捕获异常",
+   "label": "整程 0 条页面异常",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}

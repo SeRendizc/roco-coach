@@ -2,7 +2,7 @@ import {CoachScheduler} from './scheduler.js';
 import {chooseEnemy,legalActions} from '../game/engine.js';
 export const RESPONSE_INSTRUCTIONS='\n回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释。游戏按回合结算，不按秒；不要编造技能冷却。道具名称只能使用回复药、净化药、能量果，不要把它们叫作解药或以太。双方同时决定，不能先看对手本回合出招再决定自己的行动。复盘中hpBefore是回合开始、hpAfter是结束，不能把行动前生命称作打完还剩。逐回合核对实际事件：行动取消不能说成打出了伤害，事前预测和事后结算必须分开。';
 import {runCoach,assembleContext,checkGroundedAnswer} from './runtime.js';
-import {checkCompanionRestraint,playerWords} from './companion.js';
+import {checkCompanionRestraint,playerWords,intentOf} from './companion.js';
 let session=null;
 // 这个 await 必须自带上限：它在 requestOpponentAction 里**不在** try/catch 内，
 // 也不受回合超时（OPPONENT_TIMEOUT_MS）保护——那个超时只包住 /api/opponent 那一次 fetch。
@@ -18,6 +18,10 @@ export function requestCoach(payload){
 }
 async function executeCoach(payload,signal){
  const originalMessage=payload.message;
+ // ⚠ task-28：**必须在 `try` 之外**定义 —— 它在 `catch` 那一支（网络失败）也要用；
+ //   上一版我写在 try 里 ⇒ `ReferenceError: askedIntent is not defined`（`tests/evals/agent.test.js` 当场抓到 ✓）。
+ //   用的是陪练**同一张表**（`companion.js` 的 `intentOf`，只 import、不复制一张）。
+ const askedIntent=intentOf(playerWords(originalMessage));
  if((payload.context.battle?.result||!payload.context.battle&&payload.context.lastMatch)&&/优化|总结|分析|输在哪|为什么输|为什么赢|打得怎么样/.test(payload.message)&&!/回合|整局|整场|上一局/.test(payload.message))payload={...payload,message:'关于这份整局战报：'+payload.message};
  // ── 执行位置：**先服务端**（Codex P0-01 的核心一条）──────────────────────────
  //
@@ -56,11 +60,23 @@ async function executeCoach(payload,signal){
   //   守卫判它不合格，兜底却把「99999」漏给了玩家。**守卫拦下来的东西不许从兜底漏出去。**
   //   现在：`localText` 缺席就**回到确定性那一份**（本机 `runCoach`，与修前同一条路）；
   //   连它都拿不到时，交一句如实的话，绝不放模型原文。
+  //
+  // ⚠ 2026-09-30（task-28 客户端那一半）**先量后改**的结论，写在这里免得下一个人重走：
+  //   「回退时把 `localText` 换成'该意图的兜底'」这条**在客户端做不到，也不该在客户端做** ——
+  //   桩测（`tmp/xy-t28-measure.mjs`）：陪练那句「你觉得我有啥可以改进的？」（`intentOf` = `ask`）
+  //   走本机 `runCoach` **直跑**，产出的也是同一句「我在。聊游戏里的都行。」✗
+  //   ⇒ 换个来源（server `localText` ⇄ 本机 `runCoach`）拿到的是**同一句通用闲聊**，
+  //     在客户端"换序"或"另写一句"都只是把同一个坑盖住 ✗（编一句更是不许 ✗）。
+  //   ⇒ 真正要改的是**本机陪练那一支**（`runtime.js` / `companion.js` 按 `intent` 出兜底），
+  //     那是 advice-engine 的写域 ⇒ 已如实回报，本文件只做**客户端能做到的两件事**：
+  //       ① 回退时**不丢提问语境**（`route` / `intent` / `allowAdvice` 一起带出去）；
+  //       ② 「回退横幅」只在**真回退**时成立（见文件末尾 `fallbackBannerOf()` 的可核验判据）。
   const deterministicText=async()=>{
    if(typeof data.localText==='string'&&data.localText.trim())return {text:data.localText,from:'server'};
    try{
     const local=await runCoach(payload);
-    if(typeof local?.text==='string'&&local.text.trim())return {text:local.text,from:'local-run'};
+    if(typeof local?.text==='string'&&local.text.trim())return {text:local.text,from:'local-run',
+     intent:local.intent??null,allowAdvice:local.allowAdvice??null};
    }catch{/* 见下面：拿不到就交一句实话 */}
    return {text:'这一轮的回答没有通过事实核对，我也没能算出替代结论 —— 先不给你结论，等我重算一次。',from:'none'};
   };
@@ -68,16 +84,25 @@ async function executeCoach(payload,signal){
   if(data.provider==='deepseek'&&!validation.valid){
    const safe=await deterministicText();
    data={...data,provider:'local-fallback',validation,text:safe.text,deterministicFrom:safe.from,
+    // ⚠ task-28：回退**不许丢提问语境** —— `intent` 是"这一句在问什么"（与陪练同一张表：
+    //   `companion.js` 的 `intentOf()`，这里只 import 不复制）；`allowAdvice` 有就带（本机那一份说了算）。
+    intent:safe.intent??askedIntent,allowAdvice:safe.allowAdvice??data.allowAdvice??null,
+    askedMessage:originalMessage,
     fallbackReason:'模型回答未通过事实检查，显示本局规则分析'};
   }else if(data.provider==='deepseek'&&!restraint.valid){
    const safe=await deterministicText();
    data={...data,provider:'local-fallback',restraint,restraintCodes:restraint.reasons,text:safe.text,
     deterministicFrom:safe.from,
+    intent:safe.intent??askedIntent,allowAdvice:safe.allowAdvice??data.allowAdvice??null,
+    askedMessage:originalMessage,
     fallbackReason:'模型这次说得不太合适，已换成本局规则结论（具体原因记在日志里，不往界面上抛内部代码）'};
   }
   else if(!restraint.valid)data={...data,restraint};
   data.memory={...data.memory,journal:payload.memory.journal||[],reflections:payload.memory.reflections||{},watches:payload.memory.watches||[],quizCount:payload.memory.quizCount||0,goal:data.memory?.goal||payload.memory.goal||null};data.memory.dialogue=(data.memory.dialogue||[]).map(m=>m.role==='user'&&m.content===payload.message?{...m,content:originalMessage}:m);
-  return {...data,execution:'server',stateToken:payload.stateToken??data.stateToken,contextAudit:assembled.audit};
+  // task-28：**三路都维持提问意图** —— 正常这一路也把 `intent` 带上（服务端没给就用同一张表算），
+  // 这样"云端 / 本地 / 被拒回退"三条路的回执里，`route` 与 `intent` 同时在 ⇒ 下游（面板/记录）
+  // 不必再从措辞里猜玩家问的是什么。加性字段：没人读它时行为与改动前逐字相同。
+  return {...data,intent:data.intent??askedIntent,execution:'server',stateToken:payload.stateToken??data.stateToken,contextAudit:assembled.audit};
  }catch(error){
   if(signal?.aborted||error?.name==='AbortError')throw error;
   // 服务端这一轮没成：本地那一份只当**底稿**，而且**不许**拿它冒充服务端的资料。
@@ -92,7 +117,35 @@ async function executeCoach(payload,signal){
    :/403|鉴权|auth|会话/.test(why)?'模型连接过期了，正在重连；先按本局规则给你结论'
    :'模型暂时没答上来，先按本局规则给你结论';
   return {...fallback,provider:'local-fallback',fallbackReason:friendly,execution:'local-fallback',
+   // ⚠ task-28：网络这一路同样不许丢提问语境 —— `route` 由本机那一份带着（`runtime.js` 的返回），
+   //   `intent` 本机给了就用本机的，没给就用**同一张表**（`intentOf`）按玩家原话算；
+   //   `askedMessage` 只作机器可读的追溯钩子（页面上不渲染它）。
+   intent:fallback?.intent??askedIntent,allowAdvice:fallback?.allowAdvice??null,askedMessage:originalMessage,
    ...(need?{taskFailure:{...need,transport:why}}:{}),stateToken:payload.stateToken,contextAudit:assembled.audit};}
+}
+
+/**
+ * **回退横幅的可核验判据**（task-28 客户端那一半）。
+ *
+ * 现场那句话（玩家看到的）逐字是：
+ *   `模型这次说得不太合适，已换成本局规则结论（具体原因记在日志里，不往界面上抛内部代码）`
+ * ——它来自本文件 `:89` 的 `fallbackReason`，渲染点在 `src/client/app.js:894-895` 与
+ * `src/client/xiaoya.js:712`（`if (answer.fallbackReason) return answer.fallbackReason;`）。
+ * ⚠ 另：任务书里写的「**模型不合适已回退**」这一串**全仓 0 命中**（`grep -rn` 过 `src/` 的 js/html/css，
+ *   只有 `src/server/index.js:431` 一句无关注释）—— 那句话是转述，**不是产品里的字符串** ✓ 别去找它。
+ *
+ * 判据（**两个条件同时为真**才算"真回退"，横幅才允许显示）：
+ *   ① `fallbackReason` 是非空字符串；
+ *   ② 这份回执**确实是回退产物**：`provider==='local-fallback'` 或 `execution==='local-fallback'`。
+ * ⇒ 任何"模型正常答完"的回执（`provider==='deepseek'` 且非回退）**永远拿不到横幅** ✓。
+ * 判据输出见 `tmp/xy-t28-judge.mjs`（桩：守卫回退 / 网络失败 / 正常回答 三种，正反都跑）。
+ */
+export function fallbackBannerOf(answer){
+ if(!answer||typeof answer!=='object')return null;
+ const reason=typeof answer.fallbackReason==='string'?answer.fallbackReason.trim():'';
+ if(!reason)return null;
+ const isFallback=answer.provider==='local-fallback'||answer.execution==='local-fallback';
+ return isFallback?reason:null;
 }
 // 陪练档位扫描用的最小事实集：只判断「有没有真实经历可以支撑过去陈述」和「课程名是否真的记录过」。
 // playerMessage 传的是**玩家原话**（先把 RESPONSE_INSTRUCTIONS 切掉）：问候轮的那条硬线

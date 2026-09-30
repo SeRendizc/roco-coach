@@ -9,7 +9,9 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {groupCards, traitChips, individualHtml, drawerHtml, drawerListHtml, rollNote, formatTraitValue,
   refreshButton, undoButton, addButton} from '../src/client/box-drawer.js';
-import {REFRESH_LIMIT, refresh, undoLastRefresh, canUndo, individualsFromDataset} from '../src/coach/individuals.js';
+import {REFRESH_LIMIT, TALENT_BOOST_LIMIT, refresh, undoLastRefresh, canUndo, individualsFromDataset} from '../src/coach/individuals.js';
+// ⑳：被拒时给玩家的那句「真实原因」是这一层包装出来的（`refresh()` 抛 `boost-limit` → 原样交出 message）。
+import {refreshIndividual} from '../src/client/box-individuals.js';
 import {readFileSync as readJson} from 'node:fs';
 const dataset = JSON.parse(readJson(new URL('../data/roco/owned/owned-pets.json', import.meta.url), 'utf8'));
 
@@ -202,8 +204,16 @@ test('⑪ 「再养一只同种」：按钮生成器还在、加出来的个体�
   // 而那个名字**只出现在 import 那一行**，页面其实**从来没把 `extras` 传给抽屉** ⇒
   // 「＋ 再养一只同种」写进了 localStorage，那一行里却不显示它，判据还是绿的（又一次假绿）。
   // 现在查的是"真的把 extras 传下去了"，并且用抽屉的实际输出来验"这一行变成两个"。
-  assert.match(box, /drawerListHtml\(state\.rows, \{[^}]*extras\}/,
-    '页面必须把本机加出来的个体交给抽屉画（`extras`）；只在 import 里出现名字不算');
+  // ⚠ 2026-09-29 **改钉**（第三轮最新决定：列表不再按种类分组，一个真个体一张普通卡）。
+  //   意思没变：**本机加出来的个体必须真的交给抽屉画**。接线换了地方 —— 本机那些在
+  //   `state.extraRows`，渲染时与 `state.rows` 合并，逐个交给 `drawerHtml`。
+  //   旧断言留档（改钉不删）：
+  //     assert.match(box, /drawerListHtml\(state\.rows, \{[^}]*extras\}/,
+  //       '页面必须把本机加出来的个体交给抽屉画（`extras`）；只在 import 里出现名字不算');
+  assert.match(box, /for \(const card of \[\.\.\.state\.rows, \.\.\.state\.extraRows\]\)/,
+    '页面必须把本机加出来的个体与服务端那一页合并后再画');
+  assert.match(box, /drawerHtml\(singleIndividualGroup\(card\)/,
+    '合并后的每一只都必须交给抽屉画（一个个体一张卡）');
   // 页面上的真形状：**服务端那一页只有一张卡**，第二只是本机记录（`extras`）⇒ 这一行说 2 个。
   const real = drawerHtml({...groupCards(ONE)[0], expanded: true},
     {individuals: {'own-0001-b': locals[0]}, extras: {pet_000012: locals}});
@@ -301,7 +311,30 @@ test('⑭ 组头要有信息（人类 2026-09-28：「左上角的铠甲虫为�
   assert.match(html, /data-summary="yes"/, `组头要带摘要：${html.slice(0, 200)}`);
   // 摘要要写"这一种里**最好那只**"的性格/天分（天分总和：own-0001 = 23 > own-0049 = 19）
   assert.match(html, /性格 稳重/, '摘要要给性格');
-  assert.match(html, /天分 生命 10 \/ 速度 10/, '摘要要给天分最高的两项（按天分总和挑的那只）');
+  // ⚠ 2026-09-29 **改钉**（第三轮纠偏第 7 条，**用户最新决定覆盖旧口径**）：
+  //   收起的组头**不再堆具体数值** —— 用户图1 里铠甲虫那一格写着
+  //   「性格 忧郁 · 天分 魔攻 10 / 物防 9 · 了不起的天分 · Lv.60」，四个数值挤在一起。
+  //   现在摘要只留三样一眼能读的：**性格 + 档名 + 等级**（数值去详情页看）。
+  //   旧断言留档（改钉不删）：
+  //     assert.match(html, /天分 生命 10 \/ 速度 10/, '摘要要给天分最高的两项（按天分总和挑的那只）');
+  // 这一组夹具的天分**只给了部分项**（`{hp:10, spd:3, spe:10}`）⇒ 摘要如实写「缺 N 项资质」；
+  // 但无论哪一支，**都不许再把裸数值堆进摘要**。
+  // 判据只有一处（`summaryHasStackedValues`），正例、反证、真样本**走同一只探测器** ——
+  // 仓库的规矩：反证必须拿坏样本过**同一条**判据，另写一份就是漂。
+  const summaryHasStackedValues = (value) => /天分 [^·]*\d/.test(String(value));
+  // 反证（必红）：样本逐字取自用户图1 铠甲虫那一格 —— 堆了四个数值，必须被抓。
+  assert.equal(summaryHasStackedValues('性格 忧郁 · 天分 魔攻 10 / 物防 9 · 了不起的天分 · Lv.60'), true,
+    '反证：堆数值的摘要必须被同一条判据抓住');
+  assert.equal(summaryHasStackedValues('性格 忧郁 · 了不起的天分 · Lv.60'), false,
+    '正例：不堆数值的摘要不许被误报');
+  assert.equal(summaryHasStackedValues('天分 生命 10 / 速度 10'), true, '反证：旧格式同样必须被抓');
+  assert.equal(summaryHasStackedValues(html), false, '真样本（#pet-traits 摘要）不许堆数值（第三轮第 7 条）');
+  assert.match(html, /(的天分|缺 \d+ 项资质)/, `摘要要有可读的一档：${html.slice(0, 220)}`);
+  // 六项齐全的记录 ⇒ 摘要写的是**四档名之一**（不是数值）
+  const withTier = drawerHtml(group, {individuals: {'own-0001': {individual_id: 'own-0001', level: 60,
+    nature: '稳重', talent: {hp: 10, atk: 0, def: 0, spa: 0, spd: 3, spe: 10}}}});
+  assert.match(withTier, /(一般般|还不错|相当好|了不起)的天分/, `摘要要写档名：${withTier.slice(0, 260)}`);
+  assert.equal(summaryHasStackedValues(withTier), false, '有档名时更不该堆数值');
   assert.match(html, /Lv\.60/, '摘要里也要有等级');
   // 反证：一个值都没有时**不许编**摘要（宁可没有）
   const blank = drawerHtml(group, {individuals: {}});
@@ -317,12 +350,24 @@ test('⑮ 本机加的个体：行里带「本机加的」+ 只有它能「删�
     extras: {pet_000012: [{individual_id: 'own-0001-b', nature: '开朗', talent: {spe: 10}}]},
   });
   assert.match(html, /data-individual="own-0001-b"/, '本机那只必须在抽屉里画出来');
-  assert.match(html, /本机加的/, '要标出来它是本机加的（人类：「莫名其妙出现」）');
+  // ⚠ 2026-09-29 **改钉**（task-19，人类最新逐字：「这个第一页最下面的删掉；第三页的也是，
+  //   **所有"本机加的"都不要吧**」）—— 旧要求是「要标出来它是本机加的（人类：「莫名其妙出现」）」，
+  //   现在被最新决定覆盖：那几个字**不许再出现在任何玩家可见的地方**。
+  //   旧断言留档（改钉不删）：
+  //     assert.match(html, /本机加的/, '要标出来它是本机加的（人类：「莫名其妙出现」）');
+  assert.doesNotMatch(html, /本机加的/, '「本机加的」这几个字不许再出现在玩家可见的标记里（task-19）');
   assert.match(html, /data-remove="own-0001-b"/, '本机那只必须能删（人类：「还删不掉」）');
   assert.doesNotMatch(html, /data-remove="own-0001"/, '名单里的那只不许给"删掉"按钮（它不在本机记录里）');
   // 反证：没有本机个体时既没有标记也没有删除按钮
   const clean = drawerHtml(group, {individuals: {'own-0001': {individual_id: 'own-0001', level: 60}}});
   assert.doesNotMatch(clean, /data-remove|本机加的/, '名单里的个体不该出现这些');
+  // ⚠ 2026-09-29 **task-19 的另一半**（页面这一侧）：`extra === true` 的条目**整体不画**，
+  //   所以"模块画得出来"与"页面会画"是两件事 —— 这条判据同时钉住页面那一侧。
+  const boxSrc = readFileSync(new URL('../src/client/box.js', import.meta.url), 'utf8');
+  assert.match(boxSrc, /if \(card\.extra === true\) \{ offListRecords\.add\(id\); continue; \}/,
+    '页面必须把 extra === true 的条目从列表里整体排除（task-19）');
+  assert.doesNotMatch(boxSrc, /^\s*grid\.innerHTML = drawerListHtml/m,
+    '页面不该再走"整页交给抽屉分组渲染"那条路（那条路会把 extras 画出来）');
 });
 
 test('⑯ 「＋再养一只同种」整个下线了（人类 2026-09-28：「每种精灵只允许有一只」）', () => {
@@ -396,4 +441,80 @@ test('⑱ 天分档位要写在行里，而且**按没加成过的那一份**读
     talent: {hp: 1, atk: 9, spa: 6, def: 3, spd: 0, spe: 0}});
   assert.ok(tooMany.some((row) => row.label === '天分 认不出档位'),
     `4 条以上要说认不出：${tooMany.map((r) => r.label)}`);
+});
+
+// ── 2026-09-30（半成品 ⓐ）：「天分 已加成 N/3 级」被**接上可见面** ──────────────
+// 背景（`docs/roco/review-2026-09-28/半成品-xiaoya-review.md` 第 16 行）：`traitChips()` 写好了、
+// 判据也绿了，但它在 `src/` 里**一个调用点都没有** ⇒ 玩家永远看不到"这只一共加成过几级"
+// （运行时报据：真点 3 次「刷新天分」之后，详情页 chips 里没有一条含「已加成」✗）。
+// 现在由盒子详情页那一排 chips 认领（`box.js` 的 `petSummaryHtml` ⇒ `[data-pet-boost]`）。
+test('⑲ 天分加成那一格：有加成 ⇒ 出现；**没有 ⇒ 一条都不出现**（反证）', () => {
+  const withBoost = traitChips({individual_id: 'x', nature: '开朗',
+    talent: {hp: 10, atk: 9, spa: 10, def: 0, spd: 0, spe: 0},
+    talent_boosts: [{tier: 1, stat: 'hp', delta: 10}, {tier: 2, stat: 'spa', delta: 10}]});
+  const boost = withBoost.filter((row) => row.key === 'talent-boost');
+  assert.equal(boost.length, 1, `有 talent_boosts 就该有且只有一条加成 chip：${JSON.stringify(withBoost)}`);
+  // 分母**不许手写**：它必须等于真值层的 `TALENT_BOOST_LIMIT`（改常量 ⇒ 这句话跟着变）
+  assert.equal(boost[0].label, `天分 已加成 2/${TALENT_BOOST_LIMIT} 级`,
+    '分母只能来自 `coach/individuals.js` 的 TALENT_BOOST_LIMIT（手写 3 是第二份口径 ✗）');
+  assert.equal(TALENT_BOOST_LIMIT, 3, '真值层现在就是 3（这一条红了说明常量被改过，去看那个改动）');
+  // 反证①：**没有** talent_boosts ⇒ 一条都不出现（不是"有但是空的"）
+  const none = traitChips({individual_id: 'x', nature: '开朗', talent: {hp: 0, atk: 9, spa: 0, def: 0, spd: 0, spe: 0}});
+  assert.equal(none.filter((row) => row.key === 'talent-boost').length, 0,
+    `没加成过就不许出现那一格：${JSON.stringify(none)}`);
+  assert.ok(!none.some((row) => row.label.includes('已加成')), '连字面量都不许有');
+  // 反证②：空记录（图鉴物种页那一档）也不许凭空造一格
+  const blank = traitChips({individual_id: 'x', nature: null, talent: null});
+  assert.equal(blank.filter((row) => row.key === 'talent-boost').length, 0);
+  // ③ 接线那一头也没断：详情页把这条 chip 渲染成 `[data-pet-boost]`（**改钉不删**：只加不删）
+  const boxSrc = readFileSync(new URL('../src/client/box.js', import.meta.url), 'utf8');
+  assert.match(boxSrc, /chip\.key === 'talent-boost'/, '详情页要按 key 认领这一条（不按字面量匹配）');
+  assert.match(boxSrc, /data-pet-boost="yes"/, '详情页要真的画出那一格');
+  assert.match(boxSrc, /traitChips\(individual\)/, '文案只有一处：从 `traitChips()` 取，不许在 box.js 里抄一句');
+});
+
+// ── 2026-09-30（半成品 ⓔ）：「刷新被拒」那一句**玩家在详情页也看得见** ────────────────
+// 真机读数（改前）：详情页点第 4 次「刷新天分」⇒ 理由写进了 `#box-status`，但那一格在
+// `#box-list-view` 里、详情页把祖先设成 `display:none`（`span#box-status` **0×0**、`div#box-list-view` display:none）
+// ⇒ **玩家点了屏幕一个字都不变** ✗。
+// 改法：`#box-status` 那句**照旧保留**（列表页那一档要看 ✓），**另**把真实原因画进详情页自己的
+// 说明位 `#pet-note`（与成功那一句同一个位置），并给一个**分得开**的钩子 `data-refresh-failed`。
+test('⑳ 刷新被拒：详情页要说出**真实原因**（不是"操作失败"）；成功路不许被它污染（反证）', () => {
+  // ① 行为：到顶之后再刷 ⇒ 真值层拒，理由逐字来自 `refresh()` 的 `boost-limit`（不是包装出来的空话）
+  const store = {raw: null};
+  const saved = globalThis.localStorage;
+  try {
+    const capped = {individual_id: 'own-x', nature: '开朗',
+      talent: {hp: 10, atk: 9, spa: 10, def: 0, spd: 0, spe: 0},
+      talent_boosts: [{tier: 1, stat: 'hp', delta: 10}, {tier: 2, stat: 'atk', delta: 10},
+        {tier: 3, stat: 'spa', delta: 10}],
+      // ⚠ `history: []` 必须有：`refresh()` 要遍历它（我第一版夹具漏了它 ⇒ 反证那条假红过一次 ✗）
+      history: [], refreshes: {nature: REFRESH_LIMIT, talent: REFRESH_LIMIT}, rolls: {talent: 3}};
+    store.raw = JSON.stringify({'own-x': capped});
+    globalThis.localStorage = {
+      getItem: (k) => (k === 'roco.box.individuals.v1' ? store.raw : null),
+      setItem: (k, v) => { if (k === 'roco.box.individuals.v1') store.raw = v; },
+      removeItem: () => {},
+    };
+    const rejected = refreshIndividual('talent', 'own-x');
+    assert.equal(rejected.ok, false, '到顶之后再刷必须被拒（真值层硬闸）');
+    assert.match(rejected.reason, /3 级满了/, `拒的时候要说清"几级满了"：${rejected.reason}`);
+    assert.match(rejected.reason, /不会再叠|不会因为再刷而变高/, '还要说清"再刷不会更高"');
+    assert.doesNotMatch(rejected.reason, /^(操作失败|失败了|出错了)$/, '不许给空话');
+    // 反证：没到顶时**同一路**是成功的（拒绝只属于"到顶"这一种情况）
+    const fresh = {...capped, talent_boosts: [{tier: 1, stat: 'hp', delta: 10}]};
+    store.raw = JSON.stringify({'own-x': fresh});
+    assert.equal(refreshIndividual('talent', 'own-x').ok, true, '没到顶时同一路要成功');
+  } finally {
+    if (saved === undefined) delete globalThis.localStorage; else globalThis.localStorage = saved;
+  }
+  // ② 接线（页面那一半）：失败那句进 `#pet-note`、与成功那句同一个位置，但**钩子分得开**
+  const src = readFileSync(new URL('../src/client/box.js', import.meta.url), 'utf8');
+  assert.match(src, /state\.refreshFailed = result\.reason/, '失败原因要落进 state（逐字来自真值层）');
+  assert.match(src, /setStatus\(result\.reason\);/, '**改钉不删**：`#box-status` 那句照旧留着（列表页要用）');
+  assert.match(src, /note\.textContent = state\.petNote \|\| refreshFailed \|\| lastNote/, '失败那句要画进详情页的说明位');
+  assert.match(src, /note\.dataset\.refreshFailed = 'yes'/, '要有一个分得开的钩子（成功/失败不能共用一个标记）');
+  assert.match(src, /state\.refreshFailed = '';\s*\/\/ 成功一次/, '成功一次要把上一次的失败提示收掉（反证）');
+  assert.ok((src.match(/state\.refreshFailed = '';/g) ?? []).length >= 3,
+    '换一只/重进这一屏也要清（不然失败提示会跟着跑到别的精灵上）');
 });

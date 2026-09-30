@@ -18,13 +18,34 @@
   "攻击时": "on_action",
   "使用技能时": "on_action"
  },
- "pets_blocked_by_traits": 75,
+ "pets_blocked_by_traits": 46,
  "known_limits": [
   "`pets_blocked` 只统计「**唯一**没实现的部件是特性」的精灵；还有别的部件没实现的精灵不计入",
   "`trigger_unknown` 不等于「不能做」，而是「不知道什么时候触发」——按错时点结算比不结算更糟",
   "本清单是**排序依据**，不是实现：任何一条特性落地都要有自己的判据与反证"
  ],
  "worklist": [
+  {
+   "trait": "共鸣",
+   "skill_id": "skill_000022",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 6,
+   "blocked_pets": [
+    "pet_000303",
+    "pet_000304",
+    "pet_000383",
+    "pet_000394",
+    "pet_000395",
+    "pet_000396"
+   ],
+   "desc": "携带的「虫鸣」技能威力+20。"
+  },
   {
    "trait": "诈死",
    "skill_id": "skill_000007",
@@ -35,44 +56,22 @@
    "parsed_effects": [],
    "unparsed": [],
    "readiness": "trigger_unknown",
-   "pets_blocked": 9,
+   "pets_blocked": 6,
    "blocked_pets": [
-    "pet_000037",
-    "pet_000038",
-    "pet_000039",
     "pet_000238",
     "pet_000239",
     "pet_000241",
     "pet_000242",
-    "pet_000244"
+    "pet_000244",
+    "pet_000245"
    ],
    "desc": "自己力竭时，少损失1点魔力。"
   },
   {
-   "trait": "御驾亲征",
-   "skill_id": "skill_000226",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 5,
-   "blocked_pets": [
-    "pet_000573",
-    "pet_000574",
-    "pet_000577",
-    "pet_000578",
-    "pet_000579"
-   ],
-   "desc": "棋契陛下大幅提升种族资质，力竭时扣除4魔力。"
-  },
-  {
-   "trait": "守护者",
-   "skill_id": "skill_000032",
-   "trigger": "入场时",
-   "hook": "on_enter",
+   "trait": "月光审判",
+   "skill_id": "skill_000103",
+   "trigger": "攻击时",
+   "hook": "on_action",
    "trigger_known": true,
    "effect_clean": false,
    "parsed_effects": [],
@@ -80,162 +79,31 @@
    "readiness": "effect_unparsed",
    "pets_blocked": 3,
    "blocked_pets": [
-    "pet_000101",
-    "pet_000102",
-    "pet_000103"
+    "pet_000258",
+    "pet_000259",
+    "pet_000260"
    ],
-   "desc": "己方其他精灵每有1层萌化，自己入场时全技能能耗-1。"
+   "desc": "攻击时，若敌方血脉是首领血脉，技能威力+100%。"
   },
   {
-   "trait": "仁心",
-   "skill_id": "skill_000070",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 3,
-   "blocked_pets": [
-    "pet_000072",
-    "pet_000073",
-    "pet_000284"
-   ],
-   "desc": "敌方受到灼烧伤害时，自己回复等量生命。"
-  },
-  {
-   "trait": "养分重吸收",
-   "skill_id": "skill_000006",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 3,
-   "blocked_pets": [
-    "pet_000026",
-    "pet_000027",
-    "pet_000028"
-   ],
-   "desc": "回合结束时，回复3能量。"
-  },
-  {
-   "trait": "助燃",
-   "skill_id": "skill_000064",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 3,
-   "blocked_pets": [
-    "pet_000003",
-    "pet_000006",
-    "pet_000029"
-   ],
-   "desc": "使用火系技能后，获得双攻+20%。"
-  },
-  {
-   "trait": "多人宿舍",
-   "skill_id": "skill_000116",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 3,
-   "blocked_pets": [
-    "pet_000305",
-    "pet_000306",
-    "pet_000307"
-   ],
-   "desc": "自己的能量可以超过能量上限。"
-  },
-  {
-   "trait": "散热",
-   "skill_id": "skill_000065",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 3,
-   "blocked_pets": [
-    "pet_000074",
-    "pet_000075",
-    "pet_000076"
-   ],
-   "desc": "初始能量为0，入场前己方精灵每放1次火系技能，回复3能量。"
-  },
-  {
-   "trait": "有求必应",
-   "skill_id": "skill_000188",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [
-    "选择（出现在：使用「选择」技能后，会额外使用1次另一种「选择」效果。使用任意技能后，该技能冷却）"
-   ],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 3,
-   "blocked_pets": [
-    "pet_000196",
-    "pet_000197",
-    "pet_000198"
-   ],
-   "desc": "使用「选择」技能后，会额外使用1次另一种「选择」效果。使用任意技能后，该技能冷却1回合。"
-  },
-  {
-   "trait": "灵魂灼伤",
-   "skill_id": "skill_000068",
+   "trait": "生长",
+   "skill_id": "skill_000012",
    "trigger": null,
    "hook": null,
    "trigger_known": false,
    "effect_clean": true,
    "parsed_effects": [
-    "foe_status",
-    "foe_status"
+    "heal"
    ],
    "unparsed": [],
    "readiness": "trigger_unknown",
    "pets_blocked": 3,
    "blocked_pets": [
-    "pet_000066",
-    "pet_000067",
-    "pet_000068"
+    "pet_000063",
+    "pet_000064",
+    "pet_000065"
    ],
-   "desc": "冰系技能使敌方获得4层灼烧，火系技能使敌方获得2层冻结。"
-  },
-  {
-   "trait": "电子音乐",
-   "skill_id": "skill_000185",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [
-    "天气（出现在：天气为雷鸣时，使用电系技能后敌方获得引电。）"
-   ],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 3,
-   "blocked_pets": [
-    "pet_000285",
-    "pet_000286",
-    "pet_000287"
-   ],
-   "desc": "天气为雷鸣时，使用电系技能后敌方获得引电。"
+   "desc": "回合结束时，回复12%生命。"
   },
   {
    "trait": "盘根木",
@@ -258,21 +126,22 @@
    "desc": "初始生命为10%，入场前己方精灵每使用1次草系技能，回复30%生命。"
   },
   {
-   "trait": "渗透",
-   "skill_id": "skill_000114",
-   "trigger": "入场时",
-   "hook": "on_enter",
-   "trigger_known": true,
+   "trait": "顺风",
+   "skill_id": "skill_000045",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
    "effect_clean": false,
    "parsed_effects": [],
    "unparsed": [],
-   "readiness": "effect_unparsed",
-   "pets_blocked": 2,
+   "readiness": "trigger_unknown",
+   "pets_blocked": 3,
    "blocked_pets": [
-    "pet_000434",
-    "pet_000439"
+    "pet_000229",
+    "pet_000232",
+    "pet_000235"
    ],
-   "desc": "己方精灵每使用1次武系或地系技能，自己入场时获得攻防+5%。"
+   "desc": "若先于敌方攻击，本次技能威力+50%。"
   },
   {
    "trait": "铃兰晚钟",
@@ -290,40 +159,6 @@
     "pet_000402"
    ],
    "desc": "首次入场时，失去自己一半的当前生命。"
-  },
-  {
-   "trait": "保卫",
-   "skill_id": "skill_000135",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 2,
-   "blocked_pets": [
-    "pet_000435",
-    "pet_000440"
-   ],
-   "desc": "防御技能应对2次后，回满能量和生命，变为棋绮后。"
-  },
-  {
-   "trait": "保卫",
-   "skill_id": "skill_000165",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 2,
-   "blocked_pets": [
-    "pet_000435",
-    "pet_000440"
-   ],
-   "desc": "防御技能应对2次后，回满能量和生命，变为棋绮后。"
   },
   {
    "trait": "做噩梦",
@@ -360,8 +195,8 @@
    "desc": "携带的能耗大于3的技能，威力+40%。"
   },
   {
-   "trait": "好象坏象",
-   "skill_id": "skill_000136",
+   "trait": "博物",
+   "skill_id": "skill_000195",
    "trigger": null,
    "hook": null,
    "trigger_known": false,
@@ -371,14 +206,14 @@
    "readiness": "trigger_unknown",
    "pets_blocked": 2,
    "blocked_pets": [
-    "pet_000436",
-    "pet_000441"
+    "pet_000595",
+    "pet_000596"
    ],
-   "desc": "状态技能应对1次后，回满能量和生命，变为棋绮后。"
+   "desc": "在场时，识破精灵的变化效果，解除其伪装。"
   },
   {
-   "trait": "好象坏象",
-   "skill_id": "skill_000166",
+   "trait": "灰色肖像",
+   "skill_id": "skill_000140",
    "trigger": null,
    "hook": null,
    "trigger_known": false,
@@ -388,46 +223,30 @@
    "readiness": "trigger_unknown",
    "pets_blocked": 2,
    "blocked_pets": [
-    "pet_000436",
-    "pet_000441"
+    "pet_000471",
+    "pet_000472"
    ],
-   "desc": "状态技能应对1次后，回满能量和生命，变为棋绮后。"
+   "desc": "攻击会使敌方已有的减益层数+3。"
   },
   {
-   "trait": "安可",
-   "skill_id": "skill_000172",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": true,
-   "parsed_effects": [
-    "escape"
-   ],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 2,
-   "blocked_pets": [
-    "pet_000511",
-    "pet_000512"
-   ],
-   "desc": "使用光系技能后，回合结束时自己返场。"
-  },
-  {
-   "trait": "煤渣草",
-   "skill_id": "skill_000107",
+   "trait": "翼轴",
+   "skill_id": "skill_000132",
    "trigger": null,
    "hook": null,
    "trigger_known": false,
    "effect_clean": false,
    "parsed_effects": [],
-   "unparsed": [],
+   "unparsed": [
+    "传动（出现在：1号位技能获得迅捷和传动1。）",
+    "号位（出现在：1号位技能获得迅捷和传动1。）"
+   ],
    "readiness": "trigger_unknown",
    "pets_blocked": 2,
    "blocked_pets": [
-    "pet_000340",
-    "pet_000341"
+    "pet_000384",
+    "pet_000431"
    ],
-   "desc": "在场时，所有灼烧的衰减变为增长。"
+   "desc": "1号位技能获得迅捷和传动1。"
   },
   {
    "trait": "腾挪",
@@ -464,45 +283,24 @@
    "desc": "攻击技能应对1次后，回满能量和生命，变为棋绮后。"
   },
   {
-   "trait": "茶多酚",
-   "skill_id": "skill_000106",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": true,
-   "parsed_effects": [
-    "heal"
-   ],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 2,
-   "blocked_pets": [
-    "pet_000107",
-    "pet_000413"
-   ],
-   "desc": "离场后，更换入场的精灵回复20%生命且免疫寄生。"
-  },
-  {
-   "trait": "一意孤行",
-   "skill_id": "skill_000187",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
+   "trait": "蒸汽革命",
+   "skill_id": "skill_000244",
+   "trigger": "入场时",
+   "hook": "on_enter",
+   "trigger_known": true,
    "effect_clean": false,
    "parsed_effects": [],
-   "unparsed": [
-    "选择（出现在：使用「选择」技能后，会额外使用1次相同的「选择」效果。使用任意技能后，该技能冷却）"
-   ],
-   "readiness": "trigger_unknown",
+   "unparsed": [],
+   "readiness": "effect_unparsed",
    "pets_blocked": 1,
    "blocked_pets": [
-    "pet_000199"
+    "pet_000625"
    ],
-   "desc": "使用「选择」技能后，会额外使用1次相同的「选择」效果。使用任意技能后，该技能冷却1回合。"
+   "desc": "己方精灵每使用1次火系技能，自己入场时获得全技能威力+10和物防+5%"
   },
   {
-   "trait": "养分内循环",
-   "skill_id": "skill_000220",
+   "trait": "不移",
+   "skill_id": "skill_000023",
    "trigger": null,
    "hook": null,
    "trigger_known": false,
@@ -512,9 +310,9 @@
    "readiness": "trigger_unknown",
    "pets_blocked": 1,
    "blocked_pets": [
-    "pet_000538"
+    "pet_000046"
    ],
-   "desc": "回合结束时，回复6能量。"
+   "desc": "携带的无额外效果的攻击技能，威力+30%。"
   },
   {
    "trait": "净化",
@@ -531,22 +329,6 @@
     "pet_000561"
    ],
    "desc": "造成克制伤害后，获得攻防速+20%，回复2能量，首个技能替换为水系愿力冲击。"
-  },
-  {
-   "trait": "吉利丁片",
-   "skill_id": "skill_000150",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 1,
-   "blocked_pets": [
-    "pet_000414"
-   ],
-   "desc": "离场后，更换入场的精灵获得双防+20%且免疫冻结。"
   },
   {
    "trait": "最好的伙伴",
@@ -597,8 +379,8 @@
    "desc": "造成克制伤害后，获得攻防速+20%，回复2能量，首个技能替换为火系愿力冲击。"
   },
   {
-   "trait": "爆燃",
-   "skill_id": "skill_000210",
+   "trait": "留学生",
+   "skill_id": "skill_000149",
    "trigger": null,
    "hook": null,
    "trigger_known": false,
@@ -608,41 +390,9 @@
    "readiness": "trigger_unknown",
    "pets_blocked": 1,
    "blocked_pets": [
-    "pet_000550"
+    "pet_000485"
    ],
-   "desc": "使用火系技能后，获得双攻永久+30%。"
-  },
-  {
-   "trait": "王子的诺言",
-   "skill_id": "skill_000176",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 1,
-   "blocked_pets": [
-    "pet_000457"
-   ],
-   "desc": "每回合各1次，获得增益时，同时获得全技能能耗-1，获得减益时，同时获得全技能能耗+1。"
-  },
-  {
-   "trait": "美拉德反应",
-   "skill_id": "skill_000151",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 1,
-   "blocked_pets": [
-    "pet_000415"
-   ],
-   "desc": "离场后，更换入场的精灵获得双攻+20%且免疫灼烧。"
+   "desc": "自己全技能能耗+2，可以学习全部攻击技能石。"
   },
   {
    "trait": "裁决",
@@ -1024,6 +774,20 @@
    "desc": "根据捕捉所用的咕噜球，入场时获得不同效果。"
   },
   {
+   "trait": "守护者",
+   "skill_id": "skill_000032",
+   "trigger": "入场时",
+   "hook": "on_enter",
+   "trigger_known": true,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "effect_unparsed",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "己方其他精灵每有1层萌化，自己入场时全技能能耗-1。"
+  },
+  {
    "trait": "定向精炼",
    "skill_id": "skill_000087",
    "trigger": "入场时",
@@ -1124,20 +888,6 @@
    "desc": "己方精灵每使用过1个不同系别的技能，自己入场时获得双攻+10%。"
   },
   {
-   "trait": "月光审判",
-   "skill_id": "skill_000103",
-   "trigger": "攻击时",
-   "hook": "on_action",
-   "trigger_known": true,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "effect_unparsed",
-   "pets_blocked": 0,
-   "blocked_pets": [],
-   "desc": "攻击时，若敌方血脉是首领血脉，技能威力+100%。"
-  },
-  {
    "trait": "水翼推进",
    "skill_id": "skill_000033",
    "trigger": "入场时",
@@ -1164,6 +914,20 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "己方精灵每使用1次水系技能，自己入场时获得全技能能耗-1，且能耗为0的技能威力+30%。"
+  },
+  {
+   "trait": "渗透",
+   "skill_id": "skill_000114",
+   "trigger": "入场时",
+   "hook": "on_enter",
+   "trigger_known": true,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "effect_unparsed",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "己方精灵每使用1次武系或地系技能，自己入场时获得攻防+5%。"
   },
   {
    "trait": "猫精灵的礼物",
@@ -1240,20 +1004,6 @@
    "desc": "己方精灵每使用1次火系技能，自己入场时获得全技能威力+10。"
   },
   {
-   "trait": "蒸汽革命",
-   "skill_id": "skill_000244",
-   "trigger": "入场时",
-   "hook": "on_enter",
-   "trigger_known": true,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "effect_unparsed",
-   "pets_blocked": 0,
-   "blocked_pets": [],
-   "desc": "己方精灵每使用1次火系技能，自己入场时获得全技能威力+10和物防+5%"
-  },
-  {
    "trait": "虫群突袭",
    "skill_id": "skill_000213",
    "trigger": "入场时",
@@ -1324,6 +1074,22 @@
    "desc": "鸭吉吉国王的种族资质大幅增加，能耗为1的技能威力+50%。"
   },
   {
+   "trait": "一意孤行",
+   "skill_id": "skill_000187",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [
+    "选择（出现在：使用「选择」技能后，会额外使用1次相同的「选择」效果。使用任意技能后，该技能冷却）"
+   ],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "使用「选择」技能后，会额外使用1次相同的「选择」效果。使用任意技能后，该技能冷却1回合。"
+  },
+  {
    "trait": "三鼓作气",
    "skill_id": "skill_000227",
    "trigger": null,
@@ -1382,20 +1148,6 @@
    "desc": "每场战斗1次，受到致命伤害时保留1血，且敌方获得15层灼烧。"
   },
   {
-   "trait": "不移",
-   "skill_id": "skill_000023",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 0,
-   "blocked_pets": [],
-   "desc": "携带的无额外效果的攻击技能，威力+30%。"
-  },
-  {
    "trait": "乌龟塔理论",
    "skill_id": "skill_000206",
    "trigger": null,
@@ -1429,6 +1181,20 @@
    "desc": "使用翼系技能后，获得连击数+1。"
   },
   {
+   "trait": "仁心",
+   "skill_id": "skill_000070",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "敌方受到灼烧伤害时，自己回复等量生命。"
+  },
+  {
    "trait": "付给恶魔的赎价",
    "skill_id": "skill_000060",
    "trigger": null,
@@ -1458,6 +1224,34 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "敌方每有1层中毒效果，自己获得连击数+1。"
+  },
+  {
+   "trait": "保卫",
+   "skill_id": "skill_000135",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "防御技能应对2次后，回满能量和生命，变为棋绮后。"
+  },
+  {
+   "trait": "保卫",
+   "skill_id": "skill_000165",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "防御技能应对2次后，回满能量和生命，变为棋绮后。"
   },
   {
    "trait": "保守派",
@@ -1535,8 +1329,8 @@
    "desc": "携带的火系技能获得选择：使用后失去15%生命，光系技能威力永久+30。"
   },
   {
-   "trait": "共鸣",
-   "skill_id": "skill_000022",
+   "trait": "养分内循环",
+   "skill_id": "skill_000220",
    "trigger": null,
    "hook": null,
    "trigger_known": false,
@@ -1546,7 +1340,21 @@
    "readiness": "trigger_unknown",
    "pets_blocked": 0,
    "blocked_pets": [],
-   "desc": "携带的「虫鸣」技能威力+20。"
+   "desc": "回合结束时，回复6能量。"
+  },
+  {
+   "trait": "养分重吸收",
+   "skill_id": "skill_000006",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "回合结束时，回复3能量。"
   },
   {
    "trait": "冰封",
@@ -1621,8 +1429,8 @@
    "desc": "使敌方获得冻结时，也会使其获得2层冻结。"
   },
   {
-   "trait": "博物",
-   "skill_id": "skill_000195",
+   "trait": "助燃",
+   "skill_id": "skill_000064",
    "trigger": null,
    "hook": null,
    "trigger_known": false,
@@ -1632,7 +1440,7 @@
    "readiness": "trigger_unknown",
    "pets_blocked": 0,
    "blocked_pets": [],
-   "desc": "在场时，识破精灵的变化效果，解除其伪装。"
+   "desc": "使用火系技能后，获得双攻+20%。"
   },
   {
    "trait": "友谊之果",
@@ -1675,6 +1483,20 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "本回合与敌方使用的技能在系别/类型/能耗上每有1项相同，回合结束时获得物攻和物防永久+10%。"
+  },
+  {
+   "trait": "吉利丁片",
+   "skill_id": "skill_000150",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "离场后，更换入场的精灵获得双防+20%且免疫冻结。"
   },
   {
    "trait": "向心力",
@@ -1904,6 +1726,20 @@
    "desc": "在场时，双方回合结束时的中毒效果会额外触发1次。"
   },
   {
+   "trait": "多人宿舍",
+   "skill_id": "skill_000116",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "自己的能量可以超过能量上限。"
+  },
+  {
    "trait": "大火球",
    "skill_id": "skill_000174",
    "trigger": null,
@@ -1964,6 +1800,34 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "使用防御技能后，回合结束时脱离。"
+  },
+  {
+   "trait": "好象坏象",
+   "skill_id": "skill_000136",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "状态技能应对1次后，回满能量和生命，变为棋绮后。"
+  },
+  {
+   "trait": "好象坏象",
+   "skill_id": "skill_000166",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "状态技能应对1次后，回满能量和生命，变为棋绮后。"
   },
   {
    "trait": "威慑",
@@ -2088,6 +1952,22 @@
    "desc": "自己防御应对成功时，敌方获得萌化。"
   },
   {
+   "trait": "安可",
+   "skill_id": "skill_000172",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": true,
+   "parsed_effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "使用光系技能后，回合结束时自己返场。"
+  },
+  {
    "trait": "安眠",
    "skill_id": "skill_000190",
    "trigger": null,
@@ -2209,6 +2089,20 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "天气为雨天，或处于其他水系环境中时，获得双攻+100%。"
+  },
+  {
+   "trait": "御驾亲征",
+   "skill_id": "skill_000226",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "棋契陛下大幅提升种族资质，力竭时扣除4魔力。"
   },
   {
    "trait": "快充",
@@ -2463,6 +2357,20 @@
    "desc": "自己携带的音波弹/音爆/金属噪音/午夜噪音威力提升，且获得巧变：同系别技能。"
   },
   {
+   "trait": "散热",
+   "skill_id": "skill_000065",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "初始能量为0，入场前己方精灵每放1次火系技能，回复3能量。"
+  },
+  {
    "trait": "整点报时",
    "skill_id": "skill_000144",
    "trigger": null,
@@ -2578,6 +2486,22 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "敌方受到中毒效果伤害时，自己回复等量生命。每过量回复10%生命敌方获得1层中毒。"
+  },
+  {
+   "trait": "有求必应",
+   "skill_id": "skill_000188",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [
+    "选择（出现在：使用「选择」技能后，会额外使用1次另一种「选择」效果。使用任意技能后，该技能冷却）"
+   ],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "使用「选择」技能后，会额外使用1次另一种「选择」效果。使用任意技能后，该技能冷却1回合。"
   },
   {
    "trait": "木桶戏法",
@@ -2890,18 +2814,21 @@
    "desc": "天气为雨天时，使用水系攻击技能时吸血50%。"
   },
   {
-   "trait": "灰色肖像",
-   "skill_id": "skill_000140",
+   "trait": "灵魂灼伤",
+   "skill_id": "skill_000068",
    "trigger": null,
    "hook": null,
    "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
+   "effect_clean": true,
+   "parsed_effects": [
+    "foe_status",
+    "foe_status"
+   ],
    "unparsed": [],
    "readiness": "trigger_unknown",
    "pets_blocked": 0,
    "blocked_pets": [],
-   "desc": "攻击会使敌方已有的减益层数+3。"
+   "desc": "冰系技能使敌方获得4层灼烧，火系技能使敌方获得2层冻结。"
   },
   {
    "trait": "焰色反应",
@@ -2916,6 +2843,34 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "在场时，衰减的灼烧变为相同层数的中毒。"
+  },
+  {
+   "trait": "煤渣草",
+   "skill_id": "skill_000107",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "在场时，所有灼烧的衰减变为增长。"
+  },
+  {
+   "trait": "爆燃",
+   "skill_id": "skill_000210",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "使用火系技能后，获得双攻永久+30%。"
   },
   {
    "trait": "爆裂玉米",
@@ -2965,6 +2920,20 @@
    "desc": "在场时，背包里会变化出随机精灵，随机精灵只能与本精灵相互更换。本精灵受到的克制伤害+25%。"
   },
   {
+   "trait": "王子的诺言",
+   "skill_id": "skill_000176",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "每回合各1次，获得增益时，同时获得全技能能耗-1，获得减益时，同时获得全技能能耗+1。"
+  },
+  {
    "trait": "珊瑚骨",
    "skill_id": "skill_000117",
    "trigger": null,
@@ -3009,20 +2978,20 @@
    "desc": "使用草系技能时，敌方获得2层中毒。"
   },
   {
-   "trait": "生长",
-   "skill_id": "skill_000012",
+   "trait": "电子音乐",
+   "skill_id": "skill_000185",
    "trigger": null,
    "hook": null,
    "trigger_known": false,
-   "effect_clean": true,
-   "parsed_effects": [
-    "heal"
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [
+    "天气（出现在：天气为雷鸣时，使用电系技能后敌方获得引电。）"
    ],
-   "unparsed": [],
    "readiness": "trigger_unknown",
    "pets_blocked": 0,
    "blocked_pets": [],
-   "desc": "回合结束时，回复12%生命。"
+   "desc": "天气为雷鸣时，使用电系技能后敌方获得引电。"
   },
   {
    "trait": "电流刺激",
@@ -3037,20 +3006,6 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "携带的攻击技能获得迸发：威力+40。"
-  },
-  {
-   "trait": "留学生",
-   "skill_id": "skill_000149",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 0,
-   "blocked_pets": [],
-   "desc": "自己全技能能耗+2，可以学习全部攻击技能石。"
   },
   {
    "trait": "盗魂铃",
@@ -3269,21 +3224,18 @@
    "desc": "携带的防御技能能耗-2。"
   },
   {
-   "trait": "翼轴",
-   "skill_id": "skill_000132",
+   "trait": "美拉德反应",
+   "skill_id": "skill_000151",
    "trigger": null,
    "hook": null,
    "trigger_known": false,
    "effect_clean": false,
    "parsed_effects": [],
-   "unparsed": [
-    "传动（出现在：1号位技能获得迅捷和传动1。）",
-    "号位（出现在：1号位技能获得迅捷和传动1。）"
-   ],
+   "unparsed": [],
    "readiness": "trigger_unknown",
    "pets_blocked": 0,
    "blocked_pets": [],
-   "desc": "1号位技能获得迅捷和传动1。"
+   "desc": "离场后，更换入场的精灵获得双攻+20%且免疫灼烧。"
   },
   {
    "trait": "耐活王",
@@ -3347,6 +3299,22 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "回合结束时，己方队伍获得1次随机奉献。"
+  },
+  {
+   "trait": "茶多酚",
+   "skill_id": "skill_000106",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": true,
+   "parsed_effects": [
+    "heal"
+   ],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "离场后，更换入场的精灵回复20%生命且免疫寄生。"
   },
   {
    "trait": "草木苏醒时",
@@ -3644,20 +3612,6 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "在场时，双方回合结束时的效果不会触发。"
-  },
-  {
-   "trait": "顺风",
-   "skill_id": "skill_000045",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 0,
-   "blocked_pets": [],
-   "desc": "若先于敌方攻击，本次技能威力+50%。"
   },
   {
    "trait": "风速仪",

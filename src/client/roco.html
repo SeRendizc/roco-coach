@@ -179,7 +179,6 @@
    <b id="battle-result-verdict">—</b>
    <span class="muted" id="battle-result-turns"></span>
   </div>
-  <p class="roco-result-stats" id="battle-result-stats"></p>
   <p class="roco-result-note" id="battle-result-note"></p>
 
   <!-- ── 老师的复盘（局末）：一个关键错误或进步点 + 下一局目标；完整复盘折叠 ─────────
@@ -199,6 +198,14 @@
    <details class="lesson-full">
     <summary>完整复盘与依据（默认收起）</summary>
     <p class="muted" id="lesson-note"></p>
+    <!-- ⚠ 2026-09-29（人类逐字：「复盘**不要摆大量数据**，尽可能说**技巧、方法和指导**，
+         **数据你可以放详情**」）：这一行原来是**主视图**里的一句统计
+         （「23 个回合 · 对面倒下 4 只 · 我方倒下 1 只 · 换人 3 次 · 单次最高伤害约 246」），
+         和「下一局练一件事」那种指导挤在同一屏、同一字重 ⇒ 读起来像报表。
+         ⇒ **元素整体搬进这个「完整复盘与依据（默认收起）」**：
+         **id 一个字没改**（`finishMatch()` 那几处写入、以及判据 `eval-five-minute-chain.mjs:968`
+         按 `#battle-result-stats` 读它，**都不受影响**）—— 变的只是它在主视图上占不占位置。 -->
+    <p class="muted" id="battle-result-stats"></p>
     <p class="muted" id="result-stats"></p>
    </details>
    <p><button id="lesson-close" class="lesson-close">收起这次复盘</button></p>

@@ -633,7 +633,9 @@ async function main() {
     shots.push(await shoot('box-03-search-1440x900'));
 
     // ── ④ 真实鼠标点筛选菜单（系别=草系）───────────────────────────────
-    await mouseClick('#box-reset');
+    // ⚠ 2026-09-29（第三轮纠偏第 5 条）：这里也按**新位置**找「重置筛选」（筛选行）。
+    //   旧写法留档（改钉不删）：await mouseClick('#box-reset');
+    await mouseClick('.box-toolbar #box-reset');
     await waitFor(`document.body.dataset.boxTotal==='622'`);
     await mouseClick('#menu-type > summary');
     await sleep(200);
@@ -725,7 +727,11 @@ async function main() {
     // 2026-09-28 再改钉（人类：「没有就删掉啊」）：特长/血脉**没值就不画** ⇒ 不能按"固定四栏"比。
     // 改成：**必到三栏**（性格/资质/天分档位）都在，且出现的标签**只许**来自这五个（顺序也照这个来）。
     const REQUIRED_TRAITS = ['性格', '资质', '天分档位'];
-    const ALLOWED_TRAITS = ['性格', '资质', '特长', '血脉', '天分档位'];
+    // ⚠ 2026-09-29（Lead）：**期望过时了，不是页面错了** —— 人类 2026-09-29 要求「刷新天分」功能 ⇒ 详情页多了**「刷新天分记录」**那一行 ✓
+    //   实测（该判据红时的原话）：标签=["性格","资质","天分档位","**刷新天分记录**"] ⇒ 旧白名单里没有它 ⇒ 判据红 ✗
+    //   ⇒ 按**改钉不删**：旧白名单原文留在下面一行（注释），新名单**只加这一个** ✓（**没有放宽其它任何东西** ✗ —— 必到三栏照旧、别的标签照旧不许出现 ✓）
+    // const ALLOWED_TRAITS = ['性格', '资质', '特长', '血脉', '天分档位'];   // 2026-09-29 之前
+    const ALLOWED_TRAITS = ['性格', '资质', '特长', '血脉', '天分档位', '刷新天分记录'];
     const traitLabelsOk = REQUIRED_TRAITS.every((one) => detailFacts.traitLabels.includes(one))
       && detailFacts.traitLabels.every((one) => ALLOWED_TRAITS.includes(one));
     const tierValue = String(detailFacts.tier?.value ?? '');
@@ -774,7 +780,11 @@ async function main() {
       await waitFor(`(()=>{const v=document.getElementById('pet-view');
         return Boolean(v)&&v.hidden===false&&v.dataset.petRendered==='server'&&new URLSearchParams(location.search).get('pet')==='own-0001';})()`);
       await sleep(350);
-      const talentFacts = JSON.parse(await js(`(()=>{const body=document.getElementById('pet-body');
+      // ⚠ 2026-09-29 改钉（Lead 授权本文件）：`U02` 把「性格 / 资质 / 天分档位 / 刷新天分记录」
+      //   这四行从 `#pet-body` 搬到了**顶部紧凑摘要** `#pet-head`（`#pet-traits`），
+      //   `#pet-body` 现在只剩六维。判据的意思一个字没改（资质那一栏必须摊成六维数值），
+      //   只是**读数的地方跟着走**。旧选择器留档（改钉不删）：`document.getElementById('pet-body')`
+      const talentFacts = JSON.parse(await js(`(()=>{const body=document.getElementById('pet-head')||document.getElementById('pet-body');
         const rows=[...body.querySelectorAll('.trait')].map((el)=>({label:String(el.querySelector('b')?.textContent||'').trim(),
           value:[...el.querySelectorAll('span')].map((s)=>String(s.textContent||'').trim()).join(' ')}));
         const talent=rows.find((r)=>r.label==='资质')??null;
@@ -1112,25 +1122,52 @@ async function main() {
     await sleep(200);
 
     // ── ⑦ 工程字段只允许在默认收起的抽屉里 ─────────────────────────────
-    const drawerClosed = await js(`document.getElementById('dev-drawer').open===false`);
+    // ── ⑦ 工程信息**不进盒子页**（第三轮纠偏第 5 条：删掉「关于这一页」那个抽屉）──────
+    // ⚠ 2026-09-29 改钉（Lead 授权本文件）：原步骤查「开发者抽屉默认收起、展开后能看到
+    //   provenance / unknown_fields / state_version / coverage / licence」——
+    //   而第三轮纠偏第 5 条把那个抽屉（`#dev-drawer`）**整块从页面上删掉了** ⇒ 旧步骤在
+    //   `document.getElementById('dev-drawer').open` 上抛 null（实测 fatal：后 14 条判据全没跑）。
+    //   现在换成**反向断言**：页面上**不许存在**开发者抽屉/工程区，且玩家可见文本必须干净
+    //   —— 比原来那条"能找到它当排除对象"**更严**（找不到才通过）。
+    //   依据：docs/roco/review-2026-09-28/product-reset-2026-09-29/第三轮纠偏与训练前检查/DSH要求.md 第 1 条。
+    //   旧代码留档（改钉不删）：
+    //     const drawerClosed = await js(`document.getElementById('dev-drawer').open===false`);
+    //     await mouseClick('#dev-drawer > summary');
+    //     const devFacts = JSON.parse(await js(`(()=>{const body=document.getElementById('dev-body'); …`));
+    //     check('14-工程信息在抽屉里', '开发者抽屉默认收起；展开后能真的看到 provenance / …',
+    //       drawerClosed && closedHit === null && devFacts.open === true && devFacts.hasProvenance && …);
+    const devGone = JSON.parse(await js(`JSON.stringify({
+      devDrawer:document.getElementById('dev-drawer'),
+      devBody:document.getElementById('dev-body'),
+      anyDevBox:document.querySelector('.dev'),
+      devSummaryAt:document.querySelector('.topbar .dev')})`));
     const closedText = await playerText();
     const closedHit = closedText.match(FORBIDDEN_PLAYER);
-    await mouseClick('#dev-drawer > summary');
-    await sleep(300);
-    const devFacts = JSON.parse(await js(`(()=>{const body=document.getElementById('dev-body');
-      const text=body.textContent||'';
-      return JSON.stringify({open:document.getElementById('dev-drawer').open,len:text.length,
-        hasProvenance:text.includes('provenance'),hasUnknownFields:text.includes('unknown_fields'),
-        hasStateVersion:text.includes('state_version'),hasCoverage:text.includes('coverage'),
-        hasLicence:text.includes('licence_ref'),sample:text.replace(/\\s+/g,' ').slice(0,160)});})()`));
-    await mouseClick('#dev-drawer > summary');
-    await sleep(200);
-    check('14-工程信息在抽屉里', '开发者抽屉默认收起；展开后能真的看到 provenance / unknown_fields / state_version / coverage / 许可',
-      drawerClosed && closedHit === null && devFacts.open === true && devFacts.hasProvenance
-      && devFacts.hasUnknownFields && devFacts.hasStateVersion && devFacts.hasCoverage && devFacts.hasLicence,
-      `默认收起=${drawerClosed} 展开=${devFacts.open} 长度=${devFacts.len} provenance=${devFacts.hasProvenance}`
-      + ` unknown_fields=${devFacts.hasUnknownFields} state_version=${devFacts.hasStateVersion}`
-      + ` coverage=${devFacts.hasCoverage} licence=${devFacts.hasLicence}；样例「${devFacts.sample}」`);
+    check('14-工程信息不进盒子页', '第三轮纠偏第 5 条：页头那个「关于这一页（来源与快照）」抽屉**必须不在**页面上；'
+      + '玩家可见文本里也不许出现 provenance / unknown_fields / state_version / coverage / 许可',
+      devGone.devDrawer === null && devGone.devBody === null && devGone.anyDevBox === null
+      && devGone.devSummaryAt === null && closedHit === null,
+      `#dev-drawer=${devGone.devDrawer === null ? '不存在（对）' : '还在（错）'}`
+      + ` #dev-body=${devGone.devBody === null ? '不存在（对）' : '还在（错）'}`
+      + ` .dev=${devGone.anyDevBox === null ? '不存在（对）' : '还在（错）'}`
+      + ` 页头 .dev=${devGone.devSummaryAt === null ? '不存在（对）' : '还在（错）'}`
+      + `｜玩家文本命中=${JSON.stringify(closedHit?.[0] ?? null)}`);
+
+    // 必红方向（反向断言的"负样本"就是**把抽屉塞回去**）：同一组断言必须抓住。
+    const devBack = await js(`(()=>{const box=document.createElement('details');box.className='dev';box.id='dev-drawer';
+      box.innerHTML='<summary>关于这一页（来源与快照）</summary><div class="dev-body" id="dev-body">provenance</div>';
+      (document.querySelector('.topbar')||document.body).appendChild(box);return true;})()`);
+    const devBackRead = JSON.parse(await js(`JSON.stringify({
+      devDrawer:Boolean(document.getElementById('dev-drawer')),devBody:Boolean(document.getElementById('dev-body')),
+      anyDevBox:Boolean(document.querySelector('.dev'))})`));
+    await js(`document.getElementById('dev-drawer')?.remove(); true`);
+    const devRestored = JSON.parse(await js(`JSON.stringify({
+      devDrawer:Boolean(document.getElementById('dev-drawer')),anyDevBox:Boolean(document.querySelector('.dev'))})`));
+    counter('14-工程信息不进盒子页', '把「关于这一页」开发者抽屉塞回页头（#dev-drawer / #dev-body / .dev 三样），同一组反向断言必须命中',
+      (devBackRead.devDrawer && devBackRead.devBody && devBackRead.anyDevBox)
+        ? ['页头上又出现了开发者抽屉 #dev-drawer / #dev-body / .dev'] : [],
+      `塞回=${devBack} 读回=#dev-drawer:${devBackRead.devDrawer} #dev-body:${devBackRead.devBody} .dev:${devBackRead.anyDevBox}`
+      + `；移除后=#dev-drawer:${devRestored.devDrawer} .dev:${devRestored.anyDevBox}`);
 
     // 必红方向：往玩家区塞一个工程字段，同一个判据必须抓住
     const poison = await js(`(()=>{const grid=document.getElementById('box-grid');
@@ -1506,7 +1543,11 @@ async function main() {
     await sleep(400);
     // 真机上**每个个体只留一份状态**：先清掉本机记录，让这一次从 3+3 次开始（可复现）。
     await js(`localStorage.removeItem('roco.box.individuals.v1'); true`);
-    await js(`document.getElementById('box-reset')?.click(); true`);
+    // ⚠ 2026-09-29 改钉（Lead 授权，第三轮纠偏第 5 条）：「重置筛选」从页头搬到**筛选行**。
+    //   id 没变 ⇒ 点击语义照旧；但这里**按新位置找**（`.box-toolbar #box-reset`），
+    //   位置不对就点不到 ⇒ 后面那条"账+1"的判据会跟着红（不会静默通过）。
+    //   旧写法留档（改钉不删）：`await js(\`document.getElementById('box-reset')?.click(); true\`);`
+    await js(`document.querySelector('.box-toolbar #box-reset')?.click(); true`);
     await sleep(1200);
     // ⚠ 2026-09-28 改钉（人类③：刷新/回滚按钮搬进二级详情页 `#pet-view`）：
     // 这几步改成「先在列表里找到这一行 → 打开它自己那一页 → 在那一页上点按钮」。
@@ -1751,16 +1792,72 @@ async function main() {
     await sleep(600);
     const menuClosed = JSON.parse(await js(`JSON.stringify({open:document.getElementById('menu-role').open,
       any:[...document.querySelectorAll('details.fmenu[open]')].length})`));
-    await mouseClick('#menu-support > summary');
+    // ⚠ 2026-09-29 改钉（Lead 授权本文件，第三轮纠偏第 5 条）：原来这一段拿 `#menu-support`
+    //   来验"点外面收起来 / 点里面不收起"，而**「支持等级」筛选已按第 5 条从页面上删掉**
+    //   ⇒ 那一组 `document.getElementById('menu-support').open` 会抛 null。
+    //   现在：① 反向断言「支持等级」这一档**不在**页面上；② 行为判据照旧，改用剩下的
+    //   `#menu-type`（第一条菜单）—— 判据的意思一个字没改（打开一个收另一个 / 点外面收起 /
+    //   点里面不收起 / 重置筛选恢复）。旧代码留档（改钉不删）：
+    //     await mouseClick('#menu-support > summary');
+    //     const menuOutside = JSON.parse(await js(`JSON.stringify({open:document.getElementById('menu-support').open})`));
+    //     await js(`document.getElementById('menu-support').open=false; true`);
+    const supportGone = JSON.parse(await js(`JSON.stringify({
+      menu:document.getElementById('menu-support'),
+      label:document.getElementById('label-support'),
+      filter:document.getElementById('filter-support'),
+      text:(document.querySelector('.box-toolbar')?.innerText||'').includes('支持等级')})`));
+    await mouseClick('#menu-type > summary');
     await sleep(250);
     await mouseClick('#box-search');
     await sleep(250);
-    const menuOutside = JSON.parse(await js(`JSON.stringify({open:document.getElementById('menu-support').open})`));
-    await mouseClick('#menu-support > summary');
+    const menuOutside = JSON.parse(await js(`JSON.stringify({open:document.getElementById('menu-type').open})`));
+    await mouseClick('#menu-type > summary');
     await sleep(250);
-    const insideStayed = JSON.parse(await js(`JSON.stringify({open:document.getElementById('menu-support').open})`));
-    await js(`document.getElementById('menu-support').open=false; true`);
-    await mouseClick('#box-reset');
+    const insideStayed = JSON.parse(await js(`JSON.stringify({open:document.getElementById('menu-type').open})`));
+    await js(`document.getElementById('menu-type').open=false; true`);
+    // 「重置筛选」按**新位置**（筛选行）找 + 真点一次，并验它真的清掉了搜索词与筛选。
+    await js(`(()=>{const s=document.getElementById('box-search'); s.value='喵'; s.dispatchEvent(new Event('input',{bubbles:true})); return true;})()`);
+    await sleep(200);
+    const beforeReset = JSON.parse(await js(`JSON.stringify({q:document.getElementById('box-search').value})`));
+    await mouseClick('.box-toolbar #box-reset');
+    await sleep(900);
+    const afterReset = JSON.parse(await js(`JSON.stringify({
+      q:document.getElementById('box-search').value,
+      typeOpen:document.getElementById('menu-type').open,
+      kind:document.body.dataset.boxKind ?? null})`));
+    // 判据只有一处（`resetRowProblems`）：正例、反证、真样本**走同一只探测器**。
+    // ⚠ 这里有个我自己踩过的坑：第一版把反证写成"读当前页面状态拼问题清单"⇒ 页面是好的 ⇒
+    //   清单为空 ⇒ 框架判定"判据是空的"（反证 28/29）。反证必须喂**合成的坏样本**。
+    const resetRowProblems = (facts) => {
+      const problems = [];
+      if (facts?.supportMenu != null) problems.push('「支持等级」筛选还在页面上（第三轮第 5 条要求删掉）');
+      if (facts?.supportLabel != null) problems.push('筛选行里还有「支持等级」的文案');
+      if (facts?.supportFilter != null) problems.push('筛选行里还有「支持等级」的 chip 容器');
+      if (facts?.toolbarText === true) problems.push('筛选行文案里还能读到「支持等级」');
+      if (!(typeof facts?.qBefore === 'string' && facts.qBefore !== '')) {
+        problems.push('前置条件没做成：点重置之前搜索框应当是填着的（否则这条判据量不到东西）');
+      }
+      if (facts?.qAfter !== '') problems.push(`点了「重置筛选」之后搜索框还是「${facts?.qAfter}」—— 重置没生效`);
+      return problems;
+    };
+    const resetFacts = {supportMenu: supportGone.menu, supportLabel: supportGone.label,
+      supportFilter: supportGone.filter, toolbarText: supportGone.text,
+      qBefore: beforeReset.q, qAfter: afterReset.q};
+    check('36-重置筛选在筛选行', '第三轮纠偏第 5 条：「重置筛选」从页头搬到**筛选行**（.box-toolbar #box-reset），'
+      + '而且点一下真的清掉搜索词（不是只断言元素存在）',
+      resetRowProblems(resetFacts).length === 0,
+      resetRowProblems(resetFacts).join(' | ')
+        || `支持等级：menu/label/filter 都不在（对）；工具栏文案含「支持等级」=${supportGone.text}；`
+          + `重置前搜索框=「${beforeReset.q}」→ 重置后=「${afterReset.q}」`);
+    counter('36-重置筛选在筛选行',
+      '① 把「支持等级」那一档塞回筛选行 ② 让重置点了不清搜索词 ③ 前置条件没做成（搜索框本来就是空的）'
+      + ' —— 三种坏样本都必须被同一条判据抓住',
+      [resetRowProblems({...resetFacts, supportMenu: {}}),
+        resetRowProblems({...resetFacts, qAfter: '喵'}),
+        resetRowProblems({...resetFacts, qBefore: ''})].flat(),
+      `塞回=${JSON.stringify(resetRowProblems({...resetFacts, supportMenu: {}}))}；`
+        + `重置失效=${JSON.stringify(resetRowProblems({...resetFacts, qAfter: '喵'}))}；`
+        + `前置没做成=${JSON.stringify(resetRowProblems({...resetFacts, qBefore: ''}))}`);
     await sleep(800);
     const menuFacts = {
       afterOpen: {openCount: menuOpen.open},
@@ -1824,7 +1921,9 @@ async function main() {
         favouriteProblems({afterClick: {pressed: false, stored: false}, afterReload: {pressed: false, rowPresent: false},
           onlyFav: {contains: false, count: 0}}),
         '{"afterClick":{"pressed":false},"afterReload":{"pressed":false},"onlyFav":{}}');
-      await mouseClick('#box-reset');
+      // ⚠ 2026-09-29 改钉（同上）：「重置筛选」按新位置（筛选行）点。
+      //   旧写法留档（改钉不删）：await mouseClick('#box-reset');
+      await mouseClick('.box-toolbar #box-reset');
       await sleep(900);
     } else {
       check('35-收藏刷新后还在', '「我的盒子」每一行都要有一个收藏星标', false, '一个收藏按钮都没画出来');
@@ -2067,17 +2166,41 @@ async function main() {
     // 已由 `scripts/roco/fetch-capture-art.mjs` 逐张入库（许可 UNKNOWN / REFERENCE_ONLY，
     // 与仓里其它抓包产物同一条纪律）。这一条量的是**屏幕上真的出现了那张图**：
     // 不是"请求发出去了"，也不是"卡片上有个 art=true 的字段"。
+    // ⚠ 2026-09-29 改钉（Lead 授权本文件）：这一段原来只数 `#box-grid .avatar-art img`
+    //   == 带 art 的卡数。第三轮纠偏第 7 条要求**铠甲虫那种分组"关闭与展开都要有图"**
+    //   ⇒ 组头也画了一张立绘，于是总数从 24 变 48、旧判据红（"屏幕上却只有 48 个立绘 img"）。
+    //   现在按**两个面**分别判（更严，不是放宽）：
+    //     · 卡片面：`.card .avatar-art img` == 带 art 的卡数；没 art 的卡照旧 emoji；
+    //     · 组头面：`.species-drawer .drawer-art .avatar-art img` == 带 art 的**组数**；其余组头画 emoji；
+    //     · 两面合起来的每张图都要**真的加载出来**（naturalWidth/Height > 0）。
+    //   旧判据留档（改钉不删）：`if (Number(facts?.imgs) !== Number(facts.withArt)) …`
+    // ⚠ 2026-09-29 **改钉**（第三轮最新决定，三个改动叠在一起）：
+    //   ① 用户：「icon 重复」——每张卡上有**两个**图标（名字左边一个、定位那一行左边一个），
+    //      全都指着同一只精灵 ⇒ 现在**一张卡只留一枚图标**（名字左边那一枚）；
+    //   ② 用户：「铠甲虫为啥还是和别的不一样？实在不行你删掉重新做不行吗？」⇒ 列表不再按种类
+    //      分组，一个真个体一张普通卡（分组卡那一套 `N 个个体 ▸` + 摘要 + 收起/展开从列表里去掉）；
+    //   ③ 于是立绘只剩"组头那一枚"这一个面（行里的脸改成紧凑版：只写定位）。
+    //   判据因此**分两个面**量，比原来更严：**每一张卡不许出现两个图标** + 立绘都得真的加载出来。
+    //   旧判据留档（改钉不删）：
+    //     if (Number(facts.cardImgs) !== withArt) bad.push(`…卡片上却只画出 ${facts.cardImgs} 个立绘 img`);
+    //     if (Number(facts.headImgs) !== drawers) bad.push(`组头那一格也要有图：…`);
     const artProblems = (facts) => {
       const bad = [];
       if (!Number(facts?.withArt)) { bad.push('这一页没有一张卡带 art=true（这条判据会变空）'); return bad; }
-      if (Number(facts?.imgs) !== Number(facts.withArt)) {
-        bad.push(`带 art=true 的卡有 ${facts.withArt} 张，屏幕上却只有 ${facts.imgs} 个立绘 img`);
+      const cards = Number(facts.cards); const withArt = Number(facts.withArt);
+      if (Number(facts.artImgs) !== withArt) {
+        bad.push(`带 art=true 的卡有 ${withArt} 张，屏幕上却是 ${facts.artImgs} 个立绘 img`);
+      }
+      // 第三轮①（用户：「icon 重复」）：一张卡**只许一个图标**。
+      if (Number(facts.maxImgsPerCard) > 1) {
+        bad.push(`同一张卡上画了 ${facts.maxImgsPerCard} 个图标（第三轮①：一张卡只留一个 —— `
+          + `用户原话「icon 重复」，实测每张卡两个：名字左边一个、定位那一行左边一个）`);
       }
       const dead = (facts.loaded ?? []).filter((one) => !(Number(one.w) > 0 && Number(one.h) > 0));
       if (dead.length) bad.push(`${dead.length} 张立绘没加载出来（naturalWidth/Height 是 0）：${JSON.stringify(dead.slice(0, 2))}`);
-      // 没图的那些**不许**留一个空框：它们的头像里必须还有 emoji 文本
-      if (Number(facts.plainEmoji) !== Number(facts.cards) - Number(facts.withArt)) {
-        bad.push(`没立绘的卡应当照旧画 emoji：期望 ${Number(facts.cards) - Number(facts.withArt)} 个，实际 ${facts.plainEmoji}`);
+      // 没图的那些**不许**留一个空框：它们那一枚图标位上必须还有 emoji 文本
+      if (Number(facts.plainEmoji) !== cards - withArt) {
+        bad.push(`没立绘的卡应当照旧画 emoji：期望 ${cards - withArt} 个，实际 ${facts.plainEmoji}`);
       }
       return bad;
     };
@@ -2090,28 +2213,35 @@ async function main() {
     const artFacts = JSON.parse(await safeJs(`(async()=>{
       const route=await (await fetch('/api/roco/box?kind=mine&limit=24&offset=0')).json();
       const withArt=(route?.player?.cards??[]).filter((c)=>c.art===true).length;
-      const cards=[...document.querySelectorAll('#box-grid .card')];
+      const drawers=[...document.querySelectorAll('#box-grid .species-drawer')];
       const imgs=[...document.querySelectorAll('#box-grid .avatar-art img')];
       await Promise.all(imgs.map((i)=>i.complete?null:new Promise((r)=>{i.onload=r;i.onerror=r;})));
-      return JSON.stringify({withArt, cards:cards.length, imgs:imgs.length,
+      return JSON.stringify({withArt, cards:drawers.length, drawers:drawers.length,
+        artImgs:imgs.length,
+        maxImgsPerCard:Math.max(0,...drawers.map((d)=>d.querySelectorAll('img').length)),
+        imgsPerCard:drawers.map((d)=>d.querySelectorAll('img').length),
         loaded:imgs.map((i)=>({src:i.getAttribute('src'),w:i.naturalWidth,h:i.naturalHeight})),
         plainEmoji:[...document.querySelectorAll('#box-grid .avatar:not(.avatar-art)')].length});})()`) ?? '{}');
     steps.push({at: 'capture-art', facts: artFacts});
-    check('41-官方立绘：有图的画图、没图的照旧 emoji',
-      '人类 2026-09-28：「我抓包出来的地方是不是有精灵立绘？你把迪莫的实装一下我看看」⇒ '
-      + '带 `art=true` 的卡必须在**屏幕上真的画出那张立绘**（懒加载也要加载完：naturalWidth > 0），'
-      + '而没有立绘的卡照旧画系别 emoji —— **不许留空框**',
+    check('41-官方立绘：有图的画图、没图的照旧 emoji；一张卡只留一个图标',
+      '人类 2026-09-28：「我抓包出来的地方是不是有精灵立绘？你把迪莫的实装一下我看看」+ '
+      + '第三轮①（用户：「icon 重复」）⇒ 带 `art=true` 的卡必须在屏幕上真的画出那张立绘'
+      + '（懒加载也要加载完：naturalWidth > 0），**每一张卡只许一枚图标**（同一只精灵不许画两遍），'
+      + '没立绘的卡照旧画系别 emoji —— **不许留空框**',
       artProblems(artFacts).length === 0,
       artProblems(artFacts).join(' | ')
-        || `这一页 ${artFacts.cards} 张卡：带立绘 ${artFacts.withArt} 张、屏幕上 ${artFacts.imgs} 个 img `
-          + `（都加载出来了：${(artFacts.loaded ?? []).map((o) => o.w + '×' + o.h).join('、')}）；`
-          + `其余 ${artFacts.plainEmoji} 个照旧画 emoji`);
-    counter('41-官方立绘：有图的画图、没图的照旧 emoji',
-      '① 有 art=true 却不画图 ② 图画了但没加载出来（naturalWidth=0）③ 没图的卡留了空框'
-      + ' —— 三种坏样本都要被同一条判据抓住',
-      [[{...artFacts, imgs: 0}], [{...artFacts, loaded: [{src: 'x', w: 0, h: 0}]}], [{...artFacts, plainEmoji: 0}]]
+        || `这一页 ${artFacts.cards} 张卡：带立绘 ${artFacts.withArt} 张、屏幕上 ${artFacts.artImgs} 个立绘 img；`
+          + `单卡最多 ${artFacts.maxImgsPerCard} 个图标（第三轮①要求 1）；`
+          + `都加载出来了：${(artFacts.loaded ?? []).slice(0, 2).map((o) => o.w + '×' + o.h).join('、')}…；`
+          + `没立绘的照旧 emoji：${artFacts.plainEmoji} 个`);
+    counter('41-官方立绘：有图的画图、没图的照旧 emoji；一张卡只留一个图标',
+      '① 有 art=true 却不画图 ② **同一张卡画了两个图标**（第三轮①那一条） ③ 图画了但没加载出来'
+      + ' ④ 没图的卡留了空框 —— 四种坏样本都要被同一条判据抓住',
+      [[{...artFacts, artImgs: 0}], [{...artFacts, maxImgsPerCard: 2}],
+        [{...artFacts, loaded: [{src: 'x', w: 0, h: 0}]}], [{...artFacts, plainEmoji: 0}]]
         .map(([bad]) => artProblems(bad)).flat(),
-      `不画图=${JSON.stringify(artProblems({...artFacts, imgs: 0}))}；`
+      `不画图=${JSON.stringify(artProblems({...artFacts, artImgs: 0}))}；`
+        + `两个图标=${JSON.stringify(artProblems({...artFacts, maxImgsPerCard: 2}))}；`
         + `图没加载=${JSON.stringify(artProblems({...artFacts, loaded: [{src: 'x', w: 0, h: 0}]}))}；`
         + `留空框=${JSON.stringify(artProblems({...artFacts, plainEmoji: 0}))}`);
     shots.push(await shoot('box-12-capture-art-1440x900'));

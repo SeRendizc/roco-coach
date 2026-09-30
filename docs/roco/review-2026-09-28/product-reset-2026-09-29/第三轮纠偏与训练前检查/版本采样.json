@@ -1,0 +1,55 @@
+{
+  "time": "2026-09-29T07:39:25.303972+00:00",
+  "head": "51c04fb1488c7c629e659d6619b094bb92c6570a",
+  "url": "http://127.0.0.1:8765",
+  "files": {
+    "src/client/box.js": {
+      "disk_sha256": "259d9a05546c707bd1080a3076c4d97a30cb8bce23a45cf5a72d23cf959036bf",
+      "status": 200,
+      "served_sha256": "259d9a05546c707bd1080a3076c4d97a30cb8bce23a45cf5a72d23cf959036bf",
+      "served_equals_disk": true
+    },
+    "src/client/box.css": {
+      "disk_sha256": "c2267244f79307d399bf0b6395efc0dcfb0c5f5c8527b30d7adf716d3df55607",
+      "status": 200,
+      "served_sha256": "c2267244f79307d399bf0b6395efc0dcfb0c5f5c8527b30d7adf716d3df55607",
+      "served_equals_disk": true
+    },
+    "src/client/xiaoya.js": {
+      "disk_sha256": "0f16793a741662246e9896c25f5838f108cfbda91ba2e91afa5b14d21bf6ee92",
+      "status": 200,
+      "served_sha256": "0f16793a741662246e9896c25f5838f108cfbda91ba2e91afa5b14d21bf6ee92",
+      "served_equals_disk": true
+    },
+    "src/client/style.css": {
+      "disk_sha256": "bf63bbc052053d8ccda7bd3d043fe9c0b4283554b0eedf8a0a991f77f0948acc",
+      "status": 200,
+      "served_sha256": "bf63bbc052053d8ccda7bd3d043fe9c0b4283554b0eedf8a0a991f77f0948acc",
+      "served_equals_disk": true
+    },
+    "src/client/team-workshop.js": {
+      "disk_sha256": "164dbd5d68718d826e69a18dd049e817e4a8ef5f69fed5301504787f4271a90c",
+      "status": 200,
+      "served_sha256": "164dbd5d68718d826e69a18dd049e817e4a8ef5f69fed5301504787f4271a90c",
+      "served_equals_disk": true
+    },
+    "src/client/roco.js": {
+      "disk_sha256": "5fe277b8341c307b69d683a349b6d65e48b23f5942d3a98066d5d8466cdda3f8",
+      "status": 200,
+      "served_sha256": "5fe277b8341c307b69d683a349b6d65e48b23f5942d3a98066d5d8466cdda3f8",
+      "served_equals_disk": true
+    },
+    "src/client/roco.css": {
+      "disk_sha256": "aba9f40214886ba7dc85222d660f0bd4ea69c113939b47e525ba10c231283214",
+      "status": 200,
+      "served_sha256": "aba9f40214886ba7dc85222d660f0bd4ea69c113939b47e525ba10c231283214",
+      "served_equals_disk": true
+    },
+    "src/coach/runtime.js": {
+      "disk_sha256": "68b85d2dfec45c443742d65ed1dd704149ab08b518513bc1c552315e6c562155"
+    },
+    "src/coach/teacher.js": {
+      "disk_sha256": "811b4e4dad94194e47edb4ead0f880a8b0d422644be30c22cd23b6e7ffec5f1a"
+    }
+  }
+}

@@ -81,12 +81,22 @@ function normalizeStored(one) {
     if (!out.nature) out.nature = rolled.nature;
     out.talent_source = out.talent_source ?? 'rolled（原版随机生成；这里是按编号种子化补的，不是游戏里的真值）';
   }
-  if (Number(out.level) !== 60) {
+  const oldLevel = Number(out.level);
+  if (oldLevel !== 60) {
     out.level = 60;
     // `level_source` 是开发者抽屉里那一行（`box-drawer.js` 的 `data-level-source`）。
     // 不同步改它，属性里就还写着旧版那句话（实测旧串是「default-100（…默认 100 级）」）——
     // 玩家看不见，但下一个读它的人会以为这一条的等级不是 60。改成如实说明这次迁移。
-    out.level_source = 'migrated-60（旧记录按 100 级档写的，已按 60 归一）';
+    //
+    // ⚠ 2026-09-29 **改（T3 `task-7` 的 55/48 夹具暴露）**：原来**无条件**写
+    //   「旧记录按 100 级档写的」—— 可 55 / 48 这种值根本不是 100 档，
+    //   那句话对它们**是错的**（`level_source` 自称在如实说明，却在编一个没发生过的迁移）。
+    //   现在**把实际读到的旧值写进去**（未知/非正数就如实说不知道），不再替旧记录编档位。
+    out.level_source = Number.isFinite(oldLevel) && oldLevel > 0
+      ? (oldLevel === 100
+        ? 'migrated-60（旧记录按 100 级档写的，已按 60 归一）'
+        : `migrated-60（旧记录写的是 Lv.${oldLevel}，已按上限 60 归一）`)
+      : 'migrated-60（旧记录里没有可信的等级值，已按上限 60 归一）';
   }
   return out;
 }
@@ -146,10 +156,21 @@ export function individualsForRows(rows) {
  * 刷一次（性格或天分）。成功返回 `{ok:true}`，次数用完返回 `{ok:false, reason}` ——
  * **不抛给页面**：次数用完不是错误，是一句要说给玩家听的话。
  */
+/**
+ * 天分加成级数上限 —— **只有一处真值**（`src/coach/individuals.js` 的 `TALENT_BOOST_LIMIT`）。
+ *
+ * ⚠ 2026-09-29 改钉（Lead 扩权）：我第一版在这里**又写了一个 3 + 一句话**，那是第二份口径
+ * （两层各说各的，早晚漂）。现在这里的闸**删掉**，只保留"刷新会抛错、这一层把它变成
+ * `{ok:false, reason}`"这条既有路径 —— 规则与那句话都在真值层，这里 import 过来转出去。
+ */
+export {TALENT_BOOST_LIMIT} from '../coach/individuals.js';
+
 export function refreshIndividual(kind, individualId, {at = null} = {}) {
   const all = loadAll();
   const one = all[individualId];
   if (!one) return {ok: false, reason: '这个个体不在本地记录里'};
+  // ⚠ 这里**不再自己判 3 级**：`refresh()` 会抛（`code: 'boost-limit'`），下面那个 catch
+  //   把 `error.message` 原样交给玩家 —— 天分与性格两条路都走同一段。
   try {
     all[individualId] = refresh(one, kind, {at: at ?? new Date().toISOString()});
   } catch (error) {
@@ -174,7 +195,7 @@ export function refreshIndividual(kind, individualId, {at = null} = {}) {
  *
  * 返回 `{ok:true, individual}` / `{ok:false, reason}`（不抛给页面：成不成都是一句要说给玩家听的话）。
  */
-export function resetTalentFromImport(individualId, {talent, source = '抓包回执的「资质」栏'} = {}) {
+export function resetTalentFromImport(individualId, {talent, source = '名单那一份'} = {}) {
   const id = String(individualId ?? '').trim();
   if (!id) return {ok: false, reason: '没有编号 ⇒ 不知道改哪一只'};
   const all = loadAll();
@@ -194,7 +215,15 @@ export function resetTalentFromImport(individualId, {talent, source = '抓包回
     talent: clean,
     // 原始那一份留档（只留一次：再采纳一次时不许把第一次的原始值覆盖掉）。
     talent_before_import: one.talent_before_import ?? (one.talent ?? null),
-    talent_source: `名单导入（${source}；这一只原来的资质是本机旧口径掷出来的）`,
+    // ⚠ 2026-09-29 **改（T1 审核 §2 + Lead 独立核实）**：这里原来默认写
+    //   「抓包回执的「资质」栏」—— 而**那一栏在数据里是 `null`**
+    //   （`data/roco/owned/owned-pets.json` 542/542 `talent.value === null`），
+    //   实际填进去的是 `rollNatureAndTalent()` 那一份**建模掷点**。
+    //   用"抓包回执的资质栏"当来源名，等于在暗示"抓到过真值" —— 那是**不存在的东西**。
+    //   现在如实写"换了一份掷点"，并把**它与本机那份同源**这件事一起记进去，
+    //   下游（开发者抽屉 / 将来的判据）就不必从中文前缀去反推它是哪一种。
+    talent_source: `名单那一份掷点（${source}；与下面留档的本机掷点同源，都不是游戏真值；`
+      + '只改了资质，性格/等级/刷新次数/刷新历史没动）',
     talent_imported_at: new Date().toISOString(),
   };
   saveAll(all);
@@ -306,7 +335,10 @@ export function removeIndividual(individualId) {
   const id = String(individualId ?? '').trim();
   if (!id) return {ok: false, reason: '没有编号 ⇒ 不知道删哪一只'};
   if (!/-(?:b|c|d|e|f)$/.test(id)) {
-    return {ok: false, reason: '这只是名单里的个体（不是本机加的）⇒ 不能在这里删'};
+    // ⚠ 2026-09-29（task-19，人类：「所有"本机加的"都不要吧」）：这句**玩家看得见**，
+    //   所以「本机加的」这几个字也一并去掉 —— 意思没变（这一只在抓包名单里，不属于本机记录）。
+    //   旧文案留档（改钉不删）：'这只是名单里的个体（不是本机加的）⇒ 不能在这里删'
+    return {ok: false, reason: '这只是抓包名单里的个体 ⇒ 不能在这里删'};
   }
   const all = loadAll();
   if (!Object.hasOwn(all, id)) return {ok: false, reason: '本机记录里没有这一只（可能已经删过了）'};
@@ -379,6 +411,128 @@ export function localIndividualsGrouped(serverIds = []) {
     list.sort((a, b) => String(a.individual_id).localeCompare(String(b.individual_id)));
   }
   return groups;
+}
+
+// ── 按抓包名单清理本机记录（人类 2026-09-29 选 B）──────────────────────────────
+//
+// 人类逐字：「我想要的是 B，你可以先存个档，我意思是，**有一个有抓包的真实精灵后，多的都删掉；
+// 抓包没有的也删掉**」。⇒ 规则四条（逐条照做）：
+//   ① 保留：抓包名单里**每一个 species 只留 1 条**（优先留"服务端那一只"对应的记录）；
+//   ② 删除：同一个 species **多出来的**那些；
+//   ③ 删除：**抓包名单里没有的**（含**没有物种编号**的那些）；
+//   ④ **先存档**：把要删的那批**原样导出**（本机另一个键 + 页面给一份 JSON 下载）——存不进就**不删**。
+// ⚠ 服务端抓包名单（`data/roco/owned/owned-pets.json` 那 542 条）**一条都不动**：
+//   这一层只碰 `roco.box.individuals.v1`（玩家自己那台机器的记录）。
+// ⚠ **不许在页面加载时自动删**：只有玩家点了那个按钮（二次确认）才会走到 `applyLocalCleanup()`。
+
+/** 存档键前缀（后接时间戳）。给用户留一份"删之前长什么样"的本机底档。 */
+export const CLEANUP_ARCHIVE_PREFIX = 'roco.box.individuals.archive.';
+
+/**
+ * 只**算**要删哪些、留哪些（不写任何东西）—— 纯函数，判据与真删共用同一份。
+ *
+ * @param {{capturedSpecies?: Iterable<string>, preferredBySpecies?: object}} ctx
+ *   `capturedSpecies` = 服务端抓包名单里的物种 id；`preferredBySpecies` = 物种 → 服务端那一只的编号。
+ * @returns {{keeps: string[], deletes: string[], reasons: object, total: number}}
+ *   `reasons[id]` ∈ `'extra-same-species'`（同种多出来的）· `'not-in-capture'`（抓包名单里没有）
+ *   · `'no-species'`（没有物种编号）。
+ */
+export function planLocalCleanup({capturedSpecies = [], preferredBySpecies = {}} = {}) {
+  const captured = capturedSpecies instanceof Set ? capturedSpecies : new Set([...capturedSpecies].map(String));
+  const preferred = preferredBySpecies instanceof Map
+    ? preferredBySpecies : new Map(Object.entries(preferredBySpecies ?? {}));
+  const all = loadAll();
+  const deletes = [];
+  const reasons = {};
+  const bySpecies = new Map();
+  for (const [id, one] of Object.entries(all)) {
+    const species = String(one?.species_id ?? '').trim();
+    if (!species) { deletes.push(id); reasons[id] = 'no-species'; continue; }          // ③
+    if (!captured.has(species)) { deletes.push(id); reasons[id] = 'not-in-capture'; continue; }  // ③
+    if (!bySpecies.has(species)) bySpecies.set(species, []);
+    bySpecies.get(species).push(id);
+  }
+  const keeps = [];
+  for (const [species, ids] of bySpecies) {
+    const want = preferred.get(species);
+    const sorted = [...ids].sort((a, b) => String(a).localeCompare(String(b)));
+    // ① 优先留"服务端那一只"对应的记录；它不在本机记录里时，留编号最小的那一条（**不新造**记录）。
+    const keep = (want && ids.includes(want)) ? want : sorted[0];
+    keeps.push(keep);
+    for (const id of ids) {
+      if (id === keep) continue;
+      deletes.push(id);                                                                 // ②
+      reasons[id] = 'extra-same-species';
+    }
+  }
+  return {keeps: keeps.sort((a, b) => String(a).localeCompare(String(b))),
+    deletes: deletes.sort((a, b) => String(a).localeCompare(String(b))), reasons,
+    total: Object.keys(all).length};
+}
+
+/**
+ * 判据：这份清理计划合法吗（**测试与真删共用同一只探测器**）。
+ *
+ * 抓的是四类真会出事的情况：漏掉记录（既没留也没删）· 同一个 species 留了不止 1 条 ·
+ * 把"有抓包的那一只"也删了 · 保留了本机记录里根本没有的编号。
+ */
+export function cleanupProblems(plan, {all = {}, capturedSpecies = [], preferredBySpecies = {}} = {}) {
+  const captured = capturedSpecies instanceof Set ? capturedSpecies : new Set([...capturedSpecies].map(String));
+  const preferred = preferredBySpecies instanceof Map
+    ? preferredBySpecies : new Map(Object.entries(preferredBySpecies ?? {}));
+  const problems = [];
+  const keeps = new Set(plan?.keeps ?? []);
+  const deletes = new Set(plan?.deletes ?? []);
+  for (const id of keeps) if (!Object.hasOwn(all, id)) problems.push(`保留了一个不存在的编号「${id}」`);
+  for (const id of Object.keys(all)) {
+    if (!keeps.has(id) && !deletes.has(id)) problems.push(`记录「${id}」既没保留也没删（漏了）`);
+  }
+  const keptBySpecies = new Map();
+  for (const id of keeps) {
+    const species = String(all[id]?.species_id ?? '').trim();
+    if (!species) { problems.push(`没有物种编号的记录不该被保留（「${id}」）`); continue; }
+    if (!captured.has(species)) problems.push(`抓包名单里没有「${species}」，它的记录不该被保留（「${id}」）`);
+    keptBySpecies.set(species, (keptBySpecies.get(species) ?? 0) + 1);
+  }
+  for (const [species, n] of keptBySpecies) if (n > 1) problems.push(`「${species}」留了 ${n} 条（规则：只留 1 条）`);
+  for (const id of deletes) {
+    const species = String(all[id]?.species_id ?? '').trim();
+    if (species && captured.has(species) && preferred.get(species) === id) {
+      problems.push(`把抓包名单里那一只也删了（「${id}」是「${species}」服务端那一条）`);
+    }
+    if (species && captured.has(species) && ![...keeps].some((k) => String(all[k]?.species_id ?? '') === species)) {
+      problems.push(`「${species}」有抓包，却被删得一条不剩`);
+    }
+  }
+  return problems;
+}
+
+/**
+ * 真删（**先存档，存不进就不删**）。
+ *
+ * @returns {{ok: boolean, reason?: string, archiveKey?: string, removedCount?: number,
+ *   keptCount?: number, removedIds?: string[], payload?: object}}
+ */
+export function applyLocalCleanup(plan, {at = new Date().toISOString()} = {}) {
+  const all = loadAll();
+  const removed = {};
+  for (const id of plan?.deletes ?? []) if (Object.hasOwn(all, id)) removed[id] = all[id];
+  const payload = {at, rule: '保留抓包名单里的每一只（同 species 只留 1 条）；抓包名单里没有的、以及没有物种编号的，都删掉',
+    removed_count: Object.keys(removed).length, kept_count: Object.keys(all).length - Object.keys(removed).length,
+    removed};
+  const archiveKey = `${CLEANUP_ARCHIVE_PREFIX}${at}`;
+  let archived = false;
+  try {
+    globalThis.localStorage?.setItem(archiveKey, JSON.stringify(payload));
+    archived = globalThis.localStorage?.getItem(archiveKey) != null;
+  } catch { archived = false; }
+  // ⚠ 先存档：写不进本机（隐私模式 / 配额满）就**一条都不删**，如实说。
+  if (!archived) return {ok: false, reason: '存档写不进这台机器（可能是隐私模式或空间满了）⇒ 一条都没有删'};
+  const kept = {};
+  for (const [id, one] of Object.entries(all)) if (!Object.hasOwn(removed, id)) kept[id] = one;
+  saveAll(kept);
+  return {ok: true, archiveKey, removedCount: Object.keys(removed).length,
+    keptCount: Object.keys(kept).length, removedIds: Object.keys(removed).sort(), payload};
 }
 
 /** 本机记录里**属于这个种类**的个体（含"再养一只"加出来的），按编号排序。 */

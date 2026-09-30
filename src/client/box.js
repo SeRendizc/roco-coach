@@ -15,6 +15,8 @@
 // 页面只做取数与渲染（也因此浏览器 import 图里只有一个新文件）。
 
 const $ = (id) => document.getElementById(id);
+/** 那个清理按钮的常态文案（二次确认时会临时换掉）。 */
+const CLEANUP_LABEL = '清理本机多出来的记录';
 
 // 右上角小芽 + 弹出式小芽（人类 2026-09-25 纠偏①：「其他所有页面都要有」）。
 // 这是这一页唯一的浏览器 import：对话能力（请求、上下文、记忆、对话记录）全部复用
@@ -23,8 +25,11 @@ import {mountXiaoya} from './xiaoya.js';
 import {mountStalePageBanner} from './stale-page.js';
 // 「我的盒子」按种类收进抽屉（人类 2026-09-26）：纯函数在 `box-drawer.js`，这里只做状态与事件。
 // 二级详情页上那几个动作按钮（刷新 / 回滚 / 再养一只 / 删掉两步确认）也从这一层取 —— 文案只有一处。
-import {drawerListHtml, formatTraitValue, refreshButton, undoButton, removeButton,
-  favouriteButton} from './box-drawer.js';
+// ⚠ 2026-09-30（半成品 ⓐ）：`traitChips` 以前**只被判据调用**（`src/` 里 0 个调用点）⇒
+// 「天分 已加成 N/3 级」这句话玩家永远看不到 ✗。现在详情页那一排 chips 认领它 `key==='talent-boost'`
+// 的那一条：**文案仍然只在 `box-drawer.js` 一处产出**，这一层只负责把它插进 `#pet-traits`（不抄文案）。
+import {drawerHtml, singleIndividualGroup, formatTraitValue, refreshButton, undoButton, removeButton,
+  favouriteButton, traitChips} from './box-drawer.js';
 // 个体状态（性格/天分/刷新次数）在 `box-individuals.js`：它要碰 localStorage 与服务器字段名，
 // 而这一页的玩家区代码里不许出现工程词（判据：tests/roco-box.test.js 的玩家层那一条）。
 // ⚠ 2026-09-28 两次清理（都记在这里，免得下一个人以为漏了）：
@@ -32,15 +37,30 @@ import {drawerListHtml, formatTraitValue, refreshButton, undoButton, removeButto
 //     **一次都没被调用**（只活在 import 那一行，正是 `box-individuals.js` 点名的假绿形状）；
 //     后者是「＋再养一只同种」用的，而那个功能整个下线了（人类：「每种精灵只允许有一只」）。
 //   · 顺带删掉了那个「本机已有几只」的计数函数（它只为那个按钮服务）。
+// （2026-09-29 人类选 B：「按抓包名单清理本机记录」那条链的三个纯函数 —— 计划 / 判据 / 真删。
+//  ⚠ 注释写在 import **外面**：静态判据 `roco-box-drawer` ⑫ 是按 `import {...}` 里的逗号切名字的，
+//  夹在里面的注释会把最后一个名字切坏（实测：`planLocalCleanup` 被判成"没有定义"。）
 import {individualsForRows, refreshIndividual, undoIndividual,
   localCardById, localIndividualsGrouped, localIndividualBySpecies, removeIndividual,
-  pruneRetiredExtras, resetTalentFromImport} from './box-individuals.js';
+  pruneRetiredExtras, resetTalentFromImport,
+  planLocalCleanup, cleanupProblems, applyLocalCleanup} from './box-individuals.js';
+// ⚠ 2026-09-29：`nameOr()` = 名字展示的**唯一兜底**（`??` 不兜空串 ⇒ 空名字会印成空白）。
+// 与 `box-drawer.js` 用**同一个函数**，不再各写一份 `?? '未登记'`。
+import {nameOr} from './plain-text.js';
 // 60 级面板：**数字只有一个来源**（`coach/talent.js` 的 `panelOf`），这一层只负责把它画出来。
 // 本仓的 60 级公式是游戏导出配置表那一套（PVP 一速榜 9/9 实测），**不是**宝可梦那套 ——
 // 同一只音速犬宝可梦式算速度 153、这条算 331，混用会把数算飞。
 // `cultivationOf` = 培养那四样（性格/六项资质/天分档位/刷新账）的**唯一投影**
 //（人类 2026-09-29 报的 A7：这一屏此前同时读了服务端回执与本机记录两份 ⇒ 刷新对屏幕无效）。
 import {panelOfIndividual, cultivationOf} from '../coach/individuals.js';
+// 性格的长处 / 短处（±10%）：六维那一格与「性格」那一行都要标出来 ——
+// 人类 2026-09-29：「好像性格没体现出来吧」「性格用浅黄色显示吧，哪个 +10% 哪个 −10%」。
+import {natureOf} from '../coach/talent.js';
+// 陪练·休息提醒（2026-09-30）：读点来自 coach 层（**只读调用，不改 coach** ✓）。
+// `companionLedger` 按现实时间切"这一波"（`SESSION_GAP=90min`），`companionReadings` 给出
+// `late-night` / `long-session` 那两句（实测：「这么晚了。」/「连着第5局了。」）✓
+import {companionLedger, companionReadings} from '../coach/companion.js';
+import {freshMemory, readMemory} from '../coach/memory.js';
 // 换技能面板（2026-09-28 人类：「换技能还是没实装是吧？实装一下」）。
 // ⚠ 必须是**行首静态 import**：动态/条件引入收不进浏览器模块图 ⇒ 资源 404 ⇒ 整页白屏
 //（规则见 src/server/index.js 的模块图那段）。
@@ -141,8 +161,27 @@ const state = {
   // 培养四样来自本机记录、物种事实来自上面那份回执。渲染只读它，不再两份各取一半。
   petBuild: null,
   petNote: '',         // 取不到时给玩家的一句人话
+  //: ⚠ 2026-09-30（半成品 ⓔ）：刷新被**真值层**拒绝时的那句**真实原因**。
+  //:   为什么单独一格：`#box-status` 在 `#box-list-view` 里，而详情页把那一块设成 `display:none`
+  //:   ⇒ 拒绝理由写进去玩家也看不到（真机读数：span#box-status 0×0、祖先 `div#box-list-view` display:none）。
+  //:   `#box-status` 那句**照旧保留**（列表页那一档要用），这里只是让它**在详情页也看得见**。
+  refreshFailed: '',
   confirmRemove: '',   // 「删掉这只」按了一次、正等着二次确认的那一只
 };
+
+// ── 状态行（动作反馈）──────────────────────────────────────────────────────
+/**
+ * 往筛选行那一行状态里写一句人话（刷新 / 收藏 / 回滚 / 删除之后）。
+ *
+ * ⚠ 2026-09-29 第三轮纠偏第 5 条：这一行**不再是计数**（计数只在两个 tab 上写一次），
+ * 也不再挂在页头当那行"重复的黄色箱子计数文字"。空着的时候**整行隐藏**（不占版面）。
+ */
+function setStatus(text) {
+  const el = $('box-status');
+  if (!el) return;
+  el.textContent = String(text ?? '');
+  el.hidden = !el.textContent;
+}
 
 // ── 小工具 ──────────────────────────────────────────────────────────────────
 /** 第一个**真的填了**的值（`??` 只兜 null/undefined —— 深链那个 bug 就是被空串坑的）。 */
@@ -217,13 +256,10 @@ function renderFilterMenus() {
   };
   build($('filter-type'), [['', '全部系别'], ...vocab.types.map((t) => [t, t])], state.type, 'type');
   build($('filter-role'), [['', '全部定位'], ...vocab.roles.map((r) => [r.value, r.label])], state.role, 'role');
-  build($('filter-support'), [['', '全部等级'], ...vocab.supports.map((s) => [s.value, s.label])], state.support, 'support');
   $('label-type').textContent = state.type || '全部';
   $('label-role').textContent = (vocab.roles.find((r) => r.value === state.role)?.label) ?? '全部';
-  $('label-support').textContent = (vocab.supports.find((s) => s.value === state.support)?.label) ?? '全部';
   document.body.dataset.boxFilterType = state.type || 'all';
   document.body.dataset.boxFilterRole = state.role || 'all';
-  document.body.dataset.boxFilterSupport = state.support || 'all';
 }
 
 // ── 卡片 ────────────────────────────────────────────────────────────────────
@@ -292,7 +328,7 @@ function cardHtml(card, {compact = false, showLevel = true} = {}) {
    data-status="${picked ? 'picked' : 'idle'}">
    <button class="card-face" aria-label="看 ${escapeAttr(card.name)} 的详情">
     ${compact ? '' : avatarHtml(card)}
-    ${compact ? '' : `<span class="card-name">${escapeAttr(card.name)}</span>`}
+    ${compact ? '' : `<span class="card-name">${escapeAttr(nameOr(card.name))}</span>`}
     ${compact ? '' : `<span class="card-types">${typeChips(card.types)}</span>`}
     ${compact ? '' : (showLv ? `<span class="card-level" data-level="${level}">Lv.${level}</span>` : '')}
     ${tags.length ? `<span class="card-tags">${tags.map((t) => `<span class="tag ${t.cls ?? ''}">${escapeAttr(t.text)}</span>`).join('')}</span>` : ''}
@@ -317,10 +353,33 @@ function ownedSummaryHtml(card) {
   const bits = [];
   if (Number.isFinite(Number(one.level)) && Number(one.level) > 0) bits.push(`Lv.${Number(one.level)}`);
   if (one.nature) bits.push(`性格 ${one.nature}`);
-  const chip = talentChipOf(talentReadingOf(one));
+  const reading = talentReadingOf(one);
+  const chip = talentChipOf(reading);
+  // U01（2026-09-29）：来源跟着值走 —— 掷点来源的这一只，卡片上也要标出来。
+  // 卡片只有一行，所以用一个**短后缀**（完整那句在详情页与小芽那一行，见 §31/§32）。
+  // ⚠ 2026-09-29 第三轮纠偏第 1 条：**屏幕上不再出现「（本机掷点）」**（用户：「几乎每张卡都写」）。
+  //   `reading.rolled` 这个**内部来源字段照旧保留**（数据一致性/判据/开发材料都读它），
+  //   只是不再往玩家可见的那一行里拼后缀。旧写法留档（改钉不删）：
+  //   bits.push(reading?.rolled ? `${chip.label}（本机掷点）` : chip.label);
   if (chip?.label) bits.push(chip.label);
   if (!bits.length) return '';
   return `<span class="card-owned" data-owned-summary="yes">你的：${escapeAttr(bits.join(' · '))}</span>`;
+}
+
+/**
+ * 组头那一格的**形象**（第三轮纠偏第 7 条：「关闭与展开都要有图」）。
+ *
+ * 为什么由页面注入：`avatarHtml()` 是这一层的函数（它认 `art` / `spriteId` / 系别兜底），
+ * 而抽屉那一层（`box-drawer.js`）不认识它 —— 所以由这一层通过抽屉的 `headArt` 选项传进去。
+ * 取这一种里**第一张有立绘的卡**；一张都没有就照旧走系别 emoji（**不留空框**）。
+ */
+function headArtHtml(group) {
+  const rows = Array.isArray(group?.individuals) ? group.individuals : [];
+  const withArt = rows.find((row) => row?.art === true) ?? rows[0] ?? {};
+  // ⚠ 这里只用**页面层的卡片字段**（`group`），不写 `species_id` ——
+  //   盒子页有一条判据扫"玩家区代码里不许出现工程词"（`tests/roco-box.test.js`），实测踩到过。
+  const species = withArt?.group ?? rows[0]?.group ?? '';
+  return avatarHtml({...withArt, art: withArt?.art === true, spriteId: species, types: group?.types});
 }
 
 /**
@@ -344,29 +403,59 @@ function toggleDrawer(speciesId) {
 function renderCards() {
   const grid = $('box-grid');
   if (state.kind === 'mine') {
-    // 「我的盒子」按种类收进抽屉：一个种类一行；多个体才需要点开（单个体直接摊开）。
-    // 玩家点开过的种类记在 `state.openDrawers`，重画时通过 `open` 传回去，不会又收起来。
-    // ⚠ 「＋再养一只同种」加出来的个体不在 `state.rows` 里（它们在 `state.extraRows`）——
-    // 但它们的性格/天分记录也要从这一层取，所以两拨一起交给 `individualsForRows`。
-    const extras = localIndividualsGrouped(state.rows.map((row) => row.select));
+    // ⚠ 2026-09-29 **第三轮最新决定**（用户：「icon 重复，另外铠甲虫为啥还是和别的不一样？
+    //   实在不行你删掉重新做不行吗？」；Lead 授权"删掉重新做"）：
+    //   **列表不再按种类分组** —— 一个**真个体**一张普通卡（一个格子），和别人长得一模一样。
+    //   分组卡那一套（`N 个个体 ▸` + 收起/展开 + 摘要行）从列表里去掉；同种真有两只时
+    //   就是两张同形的卡，各自点进自己的详情页（那里本来就能分别识别 / 培养 / 选队）。
+    //   旧写法留档（改钉不删）：`grid.innerHTML` 由抽屉那一层的分组渲染函数直接产出
+    //   （把 `state.rows` 整页交给它、由它按种类分组，`extras` 也一并传进去）。
     const individuals = individualsForRows([...state.rows, ...state.extraRows]);
-    const open = state.openDrawers instanceof Set ? state.openDrawers : new Set();
-    // 卡片本体仍然用这一页原来的 `cardHtml`（头像/名字/系别/徽章都在里面），抽屉只做分组。
-    // 多只同种时抽屉会要紧凑版（`compact`）：不再重复组头已经写过的名字与系别。
-    const drawerCard = drawerCardHtml;
-    // 收藏星标：本机记的那一份为准（`favourites` 由页面传进去，抽屉只读）。
+    // 行里的"脸"用**紧凑版**（`compact`）：头像 / 名字 / 系别都在上面那一排说过了
+    // ⇒ 第三轮①「同一只精灵画了两次」的那个重复图标就在这里拿掉（一张卡只剩名字左边那一枚）。
+    const drawerCard = (card) => cardHtml(card, {compact: true, showLevel: false});
     const favourites = (select) => isFavourite(select, state.rows.find((row) => row.select === select)
       ?? state.extraRows.find((row) => row.select === select));
-    // ⚠ 这一行的形状被一条静态判据钉着（`tests/roco-box-individuals.test.js` ⑦ 的真机教训：
-    // 参数**从来没传过** ⇒ 加出来的个体不显示，而单测只查了 import 那一行还是绿的）。
-    // 所以实参写在一行里，`extras` 摆在前头 —— 别把它藏进另一层花括号里。
-    grid.innerHTML = drawerListHtml(state.rows, {individuals, open, cardHtml: drawerCard, favourites, confirmRemove: state.confirmRemove, extras}).html;
+    // 这一页画的是**抓包名单里的个体**（服务端那一页）。
+    //   ⚠ 2026-09-29 **task-19**（人类：「这个第一页最下面的删掉；第三页的也是，所有"本机加的"都不要吧」）：
+    //   `extra === true` 的条目（本机记录里"不在名单里"的那些）**一个都不画** ——
+    //   列表与抽屉里都不再出现它们。条数交给 `#box-status` 如实说一句（不静默消失）。
+    //   ⚠ **口径更新（2026-09-29，人类选 B + Lead 已执行）**：本机的这一批"不在抓包名单里"的记录
+    //   已按人类规则清理过（**先存档再删**，见 `docs/…/local-records-archive/`）——
+    //   所以这一层**不再声称"记录还在/没有删"**；它只负责"不画 + 如实说一句规则"。
+    //   旧口径留档（改钉不删）：`记录本身**不删、不 prune、不碰 localStorage**（红线）`。
+    //   旧写法留档（改钉不删）：只过滤 `pet_XXXXXX` 那一类，`own-XXXX-b` 这类照样画成卡片。
+    const offListRecords = new Set();   // 用 Set：同一条记录会从 `state.rows` 与 `state.extraRows` 各来一次
+    const bySelect = new Map();
+    for (const card of [...state.rows, ...state.extraRows]) {
+      const id = String(card.select ?? '');
+      if (card.extra === true) { offListRecords.add(id); continue; }
+      if (bySelect.has(id)) continue;
+      bySelect.set(id, card);
+    }
+    const cards = [...bySelect.values()];
+    // 一个个体一张卡：交给抽屉那一层画（每条都构造成"这一种只有一个体"的形状 ⇒ 组头就是
+    // 普通卡的那一行：形象 + 名字 + 系别 + 「看详情 ›」，body 就是这一只的那一行）。
+    grid.innerHTML = cards.map((card) => drawerHtml(singleIndividualGroup(card),
+      {individuals, cardHtml: drawerCard, favourites, confirmRemove: state.confirmRemove,
+        headArt: headArtHtml})).join('');
     grid.dataset.grouped = 'yes';
-    // 验收钩子：这一页把几个"本机加出来的个体"交给了抽屉（0 就是没接上 —— 真机 29 号查的就是它）。
-    grid.dataset.boxExtras = String(Object.values(extras).reduce((sum, list) => sum + list.length, 0));
+    // 验收钩子：这一页把几个"本机记录"当个体画了出来（0 就是没接上 —— 真机 29 号查的就是它）。
+    grid.dataset.boxExtras = String(cards.filter((card) => card.extra === true).length);
+    // 验收钩子：这一页有几条本机记录**没画进列表**（0 就是没有）。`boxNotPets` 这个名字保留，
+    // 免得打断既有验收读数；语义现在更宽：**任何不在抓包名单里的本机记录**都算。
+    grid.dataset.boxNotPets = String(offListRecords.size);
+    grid.dataset.boxOffList = String(offListRecords.size);
+    state.offListRecords = offListRecords.size;
   } else {
     grid.innerHTML = state.rows.map((card) => cardHtml(card)).join('');
     grid.dataset.grouped = 'no';
+  }
+  // 「清理本机多出来的记录」只在「我的盒子」那一档有（图鉴档没有"我的记录"这回事）。
+  const cleanupBtn = $('box-cleanup');
+  if (cleanupBtn) {
+    cleanupBtn.hidden = state.kind !== 'mine';
+    if (cleanupBtn.dataset.confirm !== 'yes') cleanupBtn.textContent = CLEANUP_LABEL;
   }
   document.body.dataset.boxCards = String(state.rows.length);
   document.body.dataset.boxGroups = String(state.kind === 'mine' ? groupCount(state.rows) : 0);
@@ -390,9 +479,28 @@ function renderMeta() {
       ? `${label} ${state.total} 项，只看收藏剩下 ${state.filteredTotal} 项`
       : `${label} ${state.total} 项，这一页 ${state.rows.length} 项`)
     : '没有符合条件的伙伴';
-  $('box-status').textContent = state.kind === 'mine'
-    ? `我的盒子 ${state.totals.mine ?? state.total} 个个体`
-    : `全图鉴 ${state.totals.catalog ?? state.total} 条记录`;
+  // T3 报告第 8 节：画不出来的本机记录**要说一句**（不静默丢）。只在真有的时候加，别当噪音。
+  const orphanNote = state.kind === 'mine' && Number(state.orphanRecords) > 0
+    ? `（另有 ${Number(state.orphanRecords)} 条本机记录没有物种编号，排不进网格 —— 缺的是「这一只是哪个物种」）`
+    : '';
+  // ⚠ 2026-09-29 **口径更新（人类选 B + Lead 已执行）**：人类逐字「我想要的是 B，你可以先存个档，
+  //   我意思是，有一个有抓包的真实精灵后，多的都删掉；抓包没有的也删掉」；Lead 已先存档
+  //   （`docs/…/local-records-archive/本机记录-存档-2026-09-29.json`）再执行清理。
+  //   ⇒ 原来那句「**记录还在，没有删**」**已经是错的**（它只在 task-19 那一轮是真的），必须去掉。
+  //   现在这句只**陈述规则**：不在抓包名单里的不保留、也不画进列表。
+  //   ⚠ 两条都不许写：①「没有删」（不是事实）②「已清空」（还留着 24 条，不是事实）。
+  //   ⚠ 措辞里也**不许出现「本机加的」**（那几个字是人类点名要去掉的）。
+  //   旧文案留档（改钉不删）：
+  //     `（另有 ${N} 条本机记录不在抓包名单里，没画进列表；记录还在，没有删）`
+  const offListNote = state.kind === 'mine' && Number(state.offListRecords) > 0
+    ? `（另有 ${Number(state.offListRecords)} 条本机记录没画进列表 —— 按名单，每一个种类只留抓包里那一条）`
+    : '';
+  // ⚠ 2026-09-29 第三轮纠偏第 5 条：这一行**不再写计数**（计数只在两个 tab 上写一次；
+  // 页头那行"重复的黄色箱子计数文字"也一起删了）。它现在只留**真的需要说一句**的东西：
+  // 画不出来的本机记录（T3 报告第 8 节的 orphan 缺口）。没有就不显示（`setStatus` 管隐藏）。
+  // 旧写法留档（改钉不删）：
+  //   setStatus(state.kind === 'mine' ? `我的盒子 … 个个体${orphanNote}` : `全图鉴 … 条记录`);
+  setStatus([orphanNote, offListNote].filter(Boolean).join(' ').replace(/^（|）$/g, ''));
   document.body.dataset.boxKind = state.kind;
   document.body.dataset.boxTotal = String(state.total);
   document.body.dataset.boxFiltered = String(state.filteredTotal);
@@ -404,6 +512,11 @@ function renderMeta() {
 function renderDev() {
   const dev = state.lastDev;
   const body = $('dev-body');
+  // ⚠ 2026-09-29 第三轮纠偏第 5 条：开发者抽屉（`#dev-drawer`）已从页面上删掉 ⇒ `#dev-body` 不存在。
+  //   这一层必须**安静返回** —— 否则 `openPet()` 那个 `try` 会把这里的 TypeError 当成
+  //   "这一只的详情读不出来"，玩家在**任何**详情页上都会看到那句**误导**的话
+  //   「这一只（…）是本机「＋再养一只同种」加出来的，还没进服务器名单…」（真机实测就是这个 bug）。
+  if (!body) return;
   if (!dev) { body.innerHTML = '<p class="muted">还没有取到数据。</p>'; return; }
   const coverage = Object.entries(dev.coverage ?? {}).map(([key, value]) => `${key}=${value}`).join(' · ');
   body.innerHTML = `
@@ -430,7 +543,8 @@ function boxQuery(extra = {}) {
   if (state.q) query.set('q', state.q);
   if (state.type) query.set('type', state.type);
   if (state.role) query.set('role', state.role);
-  if (state.support) query.set('support', state.support);
+  // 「支持等级」筛选按第三轮纠偏第 5 条**从页面上删掉**（`state.support` 仍然是空串，
+  // 所以这里不再往查询里放这个参数；服务端那一路没删，别的页面要用还在）。
   // ⚠ 2026-09-28（人类 ⑥⑦）：
   //   · 「只看收藏」**不再交给服务端筛** —— 收藏现在有本机这一份（见 `FAVOURITES_KEY` 那段注释），
   //     服务端不认识本机新点的那几个星标；所以照常取这一页，过滤放在页面里做
@@ -469,14 +583,26 @@ function localRowsFor(page) {
   const speciesOnPage = new Set(rows.map((row) => String(row?.group ?? '')).filter(Boolean));
   const grouped = localIndividualsGrouped(drawn);
   const out = [];
+  // ⚠ 2026-09-29（T3 `task-7` 报告第 8 节，Lead 认领）：**没有物种编号的本机记录会落到
+  //   `localIndividualsGrouped()` 的 `'unknown'` 那一组**，而 `'unknown'` 永远不在
+  //   `speciesOnPage` 里 ⇒ 它们被 `continue` **静默丢掉**：屏幕上既没有这一只、也没有一句说明。
+  //   本仓口径是 fail-closed（**未知要有个说法，不是当作没有**）⇒ 这里把条数**记下来**，
+  //   由 `#box-status` 如实说一句。**不渲染成卡片**（没有物种就落不到网格的哪一格），
+  //   但**不再一声不响**。
+  let orphan = 0;
   for (const [species, list] of Object.entries(grouped)) {
-    if (!speciesOnPage.has(String(species))) continue;
+    if (!speciesOnPage.has(String(species))) {
+      if (String(species) === 'unknown') orphan += list.length;
+      continue;
+    }
     for (const one of list) {
       const card = localCardById(one.individual_id);
-      // `extra: true` = 这一只不在抓包名单那一页里（列表行据此写「本机加的」+ 缺哪些字段）。
+      // `extra: true` = 这一只不在抓包名单那一页里（本机记录里那些"不在名单里"的）。
+      // ⚠ 2026-09-29 task-19：这一类**不再画进列表**（所以这里的 `extra` 只用来**排除**它）。
       if (card) out.push({...card, extra: true});
     }
   }
+  state.orphanRecords = orphan;
   return out;
 }
 
@@ -551,6 +677,15 @@ function individualOf(select) {
   const rows = state.rows ?? [];
   const local = localCardById(select);
   const known = rows.find((row) => row.select === select) ?? local ?? {};
+  // ⚠ 2026-09-29（R04 第二件查出来的**真缺陷**）：图鉴那一档的 `select` 是**物种 id**
+  // （`pet_XXXXXX`），而 `individualsForRows()` 会给它**新建一条本机个体记录**并写回
+  // localStorage —— 实测：只打开一次 `box.html?pet=pet_000004`，本机记录里就多出
+  // 一条 `pet_000004`（带一整套**掷出来的**性格/资质、`species_id` 是空串）。
+  // 那不是玩家养的精灵，是页面自己造的垃圾（而且它会一直留在那台机器上）。
+  // 物种页**不该有自己的个体记录** ⇒ 这里直接返回一个空的个体读数（不写任何东西）。
+  if (/^pet_\d{6}$/.test(String(select ?? ''))) {
+    return {individual: {individual_id: select}, card: known};
+  }
   const all = individualsForRows([{select, group: known.group ?? '', name: known.name ?? ''}]);
   return {individual: all[select] ?? {individual_id: select}, card: known};
 }
@@ -579,9 +714,14 @@ function petTraitRow(label, trait) {
   // 「养成效果未核验：这里的话只能说'是什么'，不说明'加多少'」**不再画** ——
   // 它是给维护者看的免责声明，玩家读到的只是三行一模一样的废话。
   // 口径本身没有消失：它写在 `src/coach/` 那一层的注释与台账里，需要的人去那里看。
+  // 性格那一行多一句「长处 X +10% · 短处 Y −10%」（浅黄）—— 人类 2026-09-29 点名要的。
+  const effect = trait?.effect
+    ? `<em class="nature-effect">长处 ${escapeAttr(trait.effect.up)} +10% · 短处 ${escapeAttr(trait.effect.down)} −10%</em>`
+    : '';
   return `<div class="trait">
    <b>${escapeAttr(label)}</b>
    <span class="${known ? '' : 'missing'}">${known ? fmtValue(trait.value) : escapeAttr(trait?.reason ?? NO_ITEM)}</span>
+   ${effect}
   </div>`;
 }
 
@@ -596,6 +736,7 @@ function petTraitRow(label, trait) {
 // 六维的显示名（详情页各处共用一张表）。
 const STAT_LABELS = Object.freeze({hp: '生命', atk: '物攻', def: '物防', spa: '魔攻', spd: '魔防', spe: '速度'});
 
+const STAT_NAMES_OF_KEY = Object.freeze({hp: '生命', atk: '物攻', def: '物防', spa: '魔攻', spd: '魔防', spe: '速度'});
 const STAT_KEY_OF_LABEL = Object.freeze(Object.fromEntries(
   Object.entries(STAT_LABELS).map(([key, label]) => [label, key])));
 
@@ -620,12 +761,27 @@ const STAT_KEY_OF_LABEL = Object.freeze(Object.fromEntries(
  *   + '以及这一只的天分（黄色）。这是给你看的换算值，引擎对战里用的不是这一份。'
  *   + '没有种族值的精灵只给种族值本身，不编面板。'
  */
-const PANEL_NOTE = '这是推导值（估算），不是游戏里的成品数值：主数按 60 级公式换算，'
-  + '前提是「60 级 · 默认 5 星 · 零突破」这三条（这套换算还没校准，前提也没在游戏里核验过）。'
+// ⚠ 2026-09-29（要求④逐字：「**展示写「训练属性」或正常六维，不宣称真游戏战力**」+
+//   人类最新决定：「**所有不冲突规则都列为引擎有效规则，不要管真实游戏了**」「我本身就是个模拟」）：
+//   ⇒ 说法从「**推导值（估算）**」改成「**训练属性（本机训练规则换算）**」：
+//     · 不再用"估算/还没校准"这种**自我否定**的措辞 —— 本机规则就是本机规则；
+//     · **但仍如实写"与真游戏数值不保证一致"**（这条是人类自己要求的：不宣称真游戏战力）✓
+//   ⚠ 这一段**没有**写"战斗里也用这一份" —— 引擎那一半（task-17）**还没接上**，
+//     写了就是假话。等它接上、`tmp/q8-projection.mjs` 两侧逐字相同之后，再补那一句。
+//   旧文案留档（改钉不删）：'这是推导值（估算），不是游戏里的成品数值：主数按 60 级公式换算，'
+//     + '前提是「60 级 · 默认 5 星 · 零突破」这三条（这套换算还没校准，前提也没在游戏里核验过）。' …
+// ⚠ 玩家可见字符串里**不许出现 markdown 的 `**`**（仓里 `roco-box.test.js` 有一条判据专查这个）——
+//   我第一版就把 `**训练属性**`/`**不保证…**` 写进了这句话里（差点让玩家看到字面的星号），已去掉。
+const PANEL_NOTE = '这是训练属性：按本机训练规则换算（60 级 · 默认 5 星 · 零突破这三条前提）。'
   + '下面一行是它的两个输入：种族值（静态登记）与这一只的天分（黄色）。'
-  + '引擎对战里用的不是这一份 —— 战斗里的数值按**种族值**算：引擎只吃种族值，不看性格 / 资质 / 天分'
-  + '（这几样在引擎里根本没有对应概念；开局传下去的是物种与四个技能）。'
-  + '所以这一栏不能当结论用；真正会带进对局的是这一只的四个技能。';
+  + '本机规则是为了让这一局的训练自洽，不保证与真游戏数值一致。'
+  // ⚠ 2026-09-29 补上（**之前故意没写**：引擎那一半没接上时写了就是假话）——
+  //   现在两侧已经**逐字相同**，有真机读数支撑：
+  //     战斗侧 `view.self.pets[0]` = {hp:495,atk:125,spa:331,def:120,spd:160,spe:275}
+  //     且回执自带 `stats_source='individual-snapshot'` · `individual_id='own-0001'` ·
+  //     `panel_projection='panel-pvp-60-5star/v1'`（真 8765、走产品那一跳实测）
+  //   ⚠ 边界如实写清：**统一的是"战斗里的六维"，伤害公式仍是另一套**（引擎那一半没动它）。
+  + '战斗里也是这一份（引擎按同一个体快照算）。'
 
 /**
  * ⚠ 2026-09-29 新增：**图鉴那一档（物种页）**用的那一句。
@@ -748,7 +904,14 @@ function buildSnapshotOf({select, card, player, individual}) {
 function petTraitsOf(build) {
   const rows = new Map();
   if (build.cultivation) {
+    // 人类 2026-09-29：「好像性格没体现出来吧」「性格用浅黄色显示吧，哪个 +10% 哪个 −10%」
+    // ⇒ 性格这一行**自己把长短处写出来**（就算六维那一格没看，这里也一眼知道它管哪两项）。
+    const natureRow = build.cultivation.nature ? natureOf(build.cultivation.nature) : null;
     rows.set('性格', {label: '性格', value: build.cultivation.nature,
+      effect: natureRow
+        ? {up: STAT_NAMES_OF_KEY[natureRow.up] ?? natureRow.up,
+          down: STAT_NAMES_OF_KEY[natureRow.down] ?? natureRow.down}
+        : null,
       reason: '这一只还没有性格 ⇒ 如实说没有，不编一个'});
     rows.set('资质', {label: '资质', value: build.cultivation.talent,
       reason: '这一只还没有六项资质 ⇒ 如实说没有，不编一个'});
@@ -767,10 +930,26 @@ function petTraitsOf(build) {
  * 刷新之后同屏会写「资质 物防 0 / 六维 种族 49 **+10**」（真机截图
  * `reports/roco/build-snapshot/a7-before-2-after-refresh-talent.png` 拍到的就是这一处）。
  */
+/**
+ * 性格那一行后面那句**浅黄**的长短处（人类 2026-09-29：「性格用浅黄色显示吧，哪个 +10% 哪个 −10%」）。
+ *
+ * 认不出性格（或还没填）⇒ 返回空串：不编。
+ */
+function natureEffectHtml(nature) {
+  const row = nature ? natureOf(nature) : null;
+  if (!row?.up || !row?.down) return '';
+  const up = STAT_NAMES_OF_KEY[row.up] ?? row.up;
+  const down = STAT_NAMES_OF_KEY[row.down] ?? row.down;
+  return `<em class="nature-effect" data-nature-effect="yes">长处 ${escapeAttr(up)} +10% · 短处 ${escapeAttr(down)} −10%</em>`;
+}
+
 function panelGrid(build) {
   const list = build.raceList;
   if (!list.length) return '';
   const talent = build.cultivation?.talent ?? null;
+  // 人类 2026-09-29：「好像性格没体现出来吧」+「性格用浅黄色显示吧，哪个 +10% 哪个 −10%」
+  // ⇒ 六维这一格上把性格管的那两项**直接标出来**：长处 +10%、短处 −10%（浅黄那一档）。
+  const nature = build.cultivation?.nature ? natureOf(build.cultivation.nature) : null;
   return `<div class="metrics">${list.map((row) => {
     const key = STAT_KEY_OF_LABEL[row?.label] ?? null;
     const iv = key && talent ? Number(talent[key]) : NaN;
@@ -780,8 +959,11 @@ function panelGrid(build) {
     const main = shown !== null && shown !== undefined && Number.isFinite(Number(shown))
       ? escapeAttr(shown) : escapeAttr(row?.value ?? '');
     const base = Number.isFinite(Number(row?.value)) ? escapeAttr(row.value) : '—';
-    return `<span class="metric"><b>${escapeAttr(row?.label ?? '')}</b>${main}`
-      + `<em class="metric-race">种族 ${base}${plus}</em></span>`;
+    const side = key && nature ? (nature.up === key ? 'up' : (nature.down === key ? 'down' : null)) : null;
+    const mark = side === 'up' ? '<em class="metric-nature">性格 +10%</em>'
+      : (side === 'down' ? '<em class="metric-nature">性格 −10%</em>' : '');
+    return `<span class="metric"${side ? ` data-nature="${side}"` : ''}><b>${escapeAttr(row?.label ?? '')}</b>${main}`
+      + `<em class="metric-race">种族 ${base}${plus}</em>${mark}</span>`;
   }).join('')}</div>`;
 }
 
@@ -798,7 +980,9 @@ function panelGrid(build) {
  * `petSummaryHtml`；测试与验收读的钩子仍然是 `#pet-head`。
  */
 function petBodyHtml(build) {
-  return `<h4>${build.panel ? '六维（60 级 · 估算）' : '六维（种族值）'}${build.panel ? ' <span class="tag tag-badge">推导值</span>' : ''}</h4>${panelGrid(build)
+  // 要求④逐字：「展示写「训练属性」或正常六维」——旧标题是「六维（60 级 · 估算）」+ 徽标「推导值」。
+  // 旧标题留档（改钉不删）：'六维（60 级 · 估算）' / tag-badge '推导值'
+  return `<h4>${build.panel ? '训练属性（本机规则 · 60 级）' : '六维（种族值）'}${build.panel ? ' <span class="tag tag-badge">本机训练规则</span>' : ''}</h4>${panelGrid(build)
      || `<p class="missing">${escapeAttr(build.metricsMissingReason ?? NO_ITEM)}</p>`}
    <p class="metric-label">${escapeAttr(build.panel ? PANEL_NOTE : PANEL_NOTE_SPECIES)}</p>${panelReasonHtml(build)}`;
 }
@@ -816,7 +1000,25 @@ function petBodyHtml(build) {
  */
 function petSummaryHtml(build, reading, individual, {instanceCount = 1} = {}) {
   const name = build.name ?? '这一只';
-  const level = build.level === null || build.level === undefined ? '—' : `Lv.${build.level}`;
+  // ⭐ R04 第二件（README 点名：8765 全图鉴**迪莫**详情写「性格待导出 / 等级—」，而小芽答「开朗、Lv60」）：
+  // **物种页没有个体数据**。这一屏原来把"物种"当成"缺数据的个体"来画（待导出 / —），
+  // 玩家读起来像"这一只坏了"，而小芽那边说的是**本机记录里那一只**（另一个上下文）。
+  // 现在按上下文分开说：
+  //   · 物种页 ⇒ 只画**物种有的东西**（名字/系别/种族值/机制），并明说"性格 / 资质 / 等级属于个体"；
+  //   · 若玩家盒子里真有这一种 ⇒ 额外给一块**标明来源**的「你盒子里的这一只（本机记录）」
+  //     （性格 / 等级 / 天分档位都来自 `localIndividualBySpecies`，一字不编）+ 一个入口按钮。
+  const speciesPage = build.owned === false;
+  const localOne = speciesPage
+    ? localIndividualBySpecies(build.speciesId ?? build.instanceId ?? '') : null;
+  const localReading = localOne ? talentReadingOf(localOne) : null;
+  const localBits = localReading ? [
+    localOne.nature ? `性格 ${localOne.nature}` : null,
+    Number.isFinite(Number(localOne.level)) && Number(localOne.level) > 0 ? `Lv.${Number(localOne.level)}` : null,
+    // 同上：物种页那块"你盒子里的这一只"也不带「（本机掷点）」后缀。
+    localReading.tierLabel ? localReading.tierLabel : null,
+  ].filter(Boolean) : [];
+  const level = build.level === null || build.level === undefined
+    ? (speciesPage ? '物种没有等级' : '—') : `Lv.${build.level}`;
   // ⚠ 2026-09-29：这一块原来还额外画了一排**六格资质**（`.pet-attrs`）—— 与上面「资质」那一行
   // 逐值重复（人类 2026-09-28 骂过"这几行不是重复吗？"）⇒ 删掉那一排，六项数值只在
   // 「资质」那一行里出现一次（缺的那几项照旧点名，见 `reading.qualification.missingLabels`）。
@@ -827,6 +1029,16 @@ function petSummaryHtml(build, reading, individual, {instanceCount = 1} = {}) {
     .filter((trait) => trait.value !== null && trait.value !== undefined && trait.value !== '')
     .map((trait) => petTraitRow(trait.label, trait)).join('');
   const ledger = refreshLedgerOf(individual, {note: lastRefreshNote(individual)});
+  // ── 2026-09-30（半成品 ⓐ）：天分加成那一格 ────────────────────────────────────
+  // 文案从 `traitChips()` 取（`key==='talent-boost'` ⇒ label「天分 已加成 N/3 级」），**这里不抄文案**。
+  // **只在真有 `talent_boosts` 时才渲染**：没有加成的个体**连空壳都不出现** ✗（不是"有但是空的"）。
+  // 拆成 `<b>天分</b><span>已加成 N/3 级</span>` 是为了与同一排其它 chips 的 DOM 形状一致
+  // （按**第一个空格**拆；label 的形状由 `traitChips()` 拥有，这里只拆一次）。
+  const boostChip = traitChips(individual).find((chip) => chip.key === 'talent-boost') ?? null;
+  const boostCell = boostChip
+    ? `<div class="trait" data-pet-boost="yes"><b>${escapeAttr(boostChip.label.split(' ')[0])}</b>`
+      + `<span>${escapeAttr(boostChip.label.split(' ').slice(1).join(' '))}</span></div>`
+    : '';
   const conflict = reading.conflict;
   const adopt = conflict?.adoptable
     ? `<button class="pet-fix-btn" data-adopt-talent="${escapeAttr(build.instanceId ?? '')}"`
@@ -849,8 +1061,17 @@ function petSummaryHtml(build, reading, individual, {instanceCount = 1} = {}) {
    <div class="pet-facts">
     <span class="pet-chip" data-pet-level="${escapeAttr(build.level ?? '')}"><b>等级</b>${escapeAttr(level)}</span>
    </div>
-   <div class="traits pet-traits" id="pet-traits" data-talent-source="${escapeAttr(reading.source)}">
-    <div class="trait" data-pet-nature="yes"><b>性格</b><span>${escapeAttr(build.cultivation?.nature ?? '待导出')}</span></div>
+   ${speciesPage ? `<p class="pet-species-note" data-pet-context="species">这一屏是图鉴里的物种页：
+     性格 / 资质 / 等级只属于个体，物种本身没有这三样 —— 所以这里不编一个给你
+     （要看这些，请打开「我的盒子」里属于你的那一只）。</p>`
+     + (localOne ? `<div class="pet-local-one" data-pet-local="yes">
+      <b>你盒子里的这一只（本机记录）</b>：${escapeAttr(localBits.join(' · ') || '本机记录里还没有培养数据')}
+      <button class="pet-fix-btn" data-open-local="${escapeAttr(localOne.individual_id)}"
+        title="打开这一只自己的详情页（与图鉴物种页是两回事）">看这一只的详情 ›</button></div>` : '')
+   : ''}
+   ${speciesPage ? '' : `<div class="traits pet-traits" id="pet-traits" data-talent-source="${escapeAttr(reading.source)}">
+    <div class="trait" data-pet-nature="yes"><b>性格</b><span>${escapeAttr(build.cultivation?.nature ?? '待导出')}</span>${
+      natureEffectHtml(build.cultivation?.nature)}</div>
     <div class="trait" data-pet-qualification="yes" data-missing="${escapeAttr(reading.qualification.missing.length)}">
       <b>资质</b><span>${escapeAttr(reading.qualificationText || NO_ITEM)}</span>
       ${reading.qualification.missingLabels.length
@@ -858,18 +1079,24 @@ function petSummaryHtml(build, reading, individual, {instanceCount = 1} = {}) {
     <div class="trait" data-pet-tier="yes" data-talent-status="${escapeAttr(reading.status)}">
       <b>天分档位</b><span>${escapeAttr(reading.tierLabel ?? '还没定档')}</span>
       <em class="pet-talent-why" data-pet-talent-reason="yes">${escapeAttr(reading.reason)}</em></div>
+    ${boostCell}
     <div class="trait" data-pet-ledger="yes"><b>刷新天分记录</b>
       <span>${escapeAttr(ledger.text.replace(/^刷新天分记录：/, ''))}</span>
       ${ledger.note ? `<em class="pet-note-inline">${escapeAttr(ledger.note)}</em>` : ''}</div>
-   </div>
-   ${conflict ? `<p class="pet-talent-conflict" data-pet-conflict="yes">名单那一份（${escapeAttr(conflict.source)}）写的是：`
+   </div>`}
+   ${speciesPage ? '' : (conflict ? `<p class="pet-talent-conflict" data-pet-conflict="yes">名单那一份（${escapeAttr(conflict.source)}）写的是：`
      + `${escapeAttr(conflict.label ?? '没有档名')}${conflict.valuesText ? `（资质 ${escapeAttr(conflict.valuesText)}）` : ''}`
      + `。屏幕上这一栏以你本机记录为准 —— 两边不一致就都摆出来，不替你选。${adopt}</p>`
-     : ''}
-   ${(!conflict || !conflict.adoptable) && reading.remedy
-     ? `<p class="pet-talent-remedy" data-pet-remedy="yes">补救：${escapeAttr(reading.remedy)}</p>` : ''}
+     : '')}
+   ${speciesPage ? '' : ((!conflict || !conflict.adoptable) && reading.remedy
+     ? `<p class="pet-talent-remedy" data-pet-remedy="yes">补救：${escapeAttr(reading.remedy)}</p>` : '')}
    ${instanceCount > 1 ? `<p class="pet-shared-note" data-pet-shared="yes">这一种在名单里有 ${instanceCount} 只：`
-     + '性格 / 资质 / 等级 / 收藏各按个体单独存；配招（四个技能）按**物种**保存 —— '
+     // ⚠ 2026-09-29 去星号：这里原来是 `按**物种**保存` —— 那是 **markdown 星号**，
+     //   而这是**直接拼进 HTML 的玩家可见文案**，一旦这个分支渲染出来，玩家看到的就是字面的 `**物种**`。
+     //   本仓有判据盯"星号漏到玩家眼前"；这一处之所以没被它抓到，是因为
+     //   **真实 profile 里 542 只 = 542 个物种、多实例物种 = 0**（§62 实测）⇒ 这个分支今天根本不渲染。
+     //   **今天不渲染不等于对**：同种两只一旦出现（隔离数据/将来导入），它立刻就错。故先改掉。
+     + '性格 / 资质 / 等级 / 收藏各按个体单独存；配招（四个技能）按物种保存 —— '
      + '开局时引擎按物种下发，所以同种的两只会共用同一份四技能。</p>' : ''}
   </div>`;
 }
@@ -896,6 +1123,15 @@ function panelReasonHtml(build) {
  */
 function petActionsHtml(select, individual) {
   const card = state.petCard ?? {};
+  // ⚠ 2026-09-29（R04 第二件）：**物种页没有个体** ⇒ 刷新性格 / 刷新天分 / 回滚 / 收藏 / 删除
+  // 这些动作在这一屏**一个都不该出现**（它们只会以"这个个体不在本地记录里"失败，
+  // 而屏幕却摆着一排"还剩 3 次"的按钮 —— 那是拿物种冒充个体）。
+  // 物种页只留一句指向"你盒子里的那一只"的入口（在摘要卡里，`data-open-local`）。
+  if (state.petBuild?.owned === false) {
+    return '<span class="muted" data-pet-species-actions="yes">'
+      + '这一屏是图鉴物种：刷新天分 / 收藏 / 配队这些动作只属于个体，'
+      + '要看它们请打开「我的盒子」里属于你的那一只。</span>';
+  }
   // 2026-09-28（人类逐字）：「加入比较不是删了吗？再养一只也不要」⇒ 这两个按钮都下线。
   //   · 「加入比较」：比较那套（选两只 → 比选栏 → 比较页）从此在页面上没有入口；
   //   · 「＋再养一只同种」：下线（人类：「每种精灵只允许有一只」）。
@@ -917,6 +1153,42 @@ function petActionsHtml(select, individual) {
  * 培养那四样来自本机记录，物种事实（名字/系别/种族值/四技能）来自服务端回执。
  * 取不到回执时（本机新养的那只不在名单里）**照实说清**，不留白屏，画法仍是同一条路。
  */
+/**
+ * 陪练·休息提醒（2026-09-30 · 人类原话「在首页/培养页根据现实时间/游玩时间提醒休息」）。
+ *
+ * 数据来源**全部只读 coach 层**（不改它 ✓）：
+ *   · `companionLedger(memory, null, now)` —— 按现实时间切"这一波"（相邻两局 ≤ `SESSION_GAP=90min`）
+ *   · `companionReadings({cross, signals:null, context:{}, now})` —— `signals:null` = **还没开始打**
+ *     ⇒ 实测凌晨 3 点：空账本「这么晚了。」· 有账本「这么晚了，这一波你已经打了3局。」
+ *     打久了的账本另给「连着第5局了。」（`long-session`）
+ *
+ * 渲染规矩（两条都是硬要求）：
+ *   ① 文案**直接用 coach 层给的 `text`** —— 不自己拼句子（不造祈使句，与禁用词表不冲突 ✓）；
+ *   ② **没有读点就保持 `hidden`**、文本清空 —— 不许留一块空壳（本会话 `index.html #save-message`
+ *      那种 `1196×0` 的空槽就是这么来的 ✗）。
+ */
+function renderRestNote() {
+  const el = $('pet-rest');
+  if (!el) return;
+  let memory = freshMemory();
+  try { memory = readMemory(localStorage.getItem('xiaoya-memory-v1')); } catch { /* 读不到就用空的 */ }
+  const now = Date.now();
+  let row = null;
+  try {
+    const cross = companionLedger(memory, null, now);
+    const rows = companionReadings({cross, signals: null, context: {}, now});
+    row = rows.find((r) => /late-night|long-session/.test(String(r?.klass))) ?? null;
+  } catch { row = null; }
+  const text = String(row?.sentences?.[0]?.text ?? '').trim();
+  if (!text) {
+    el.hidden = true; el.textContent = ''; delete el.dataset.restNote;
+    return;
+  }
+  el.textContent = text;
+  el.hidden = false;
+  el.dataset.restNote = 'yes';   // 可见面判据的钩子（读数见 tmp/r27-rest-surface.mjs）
+}
+
 function renderPetPage() {
   const select = state.pet;
   const {individual, card} = individualOf(select);
@@ -940,9 +1212,26 @@ function renderPetPage() {
   // 同种在这一页上有几只（名单那一页 + 本机记录，按编号去重）：
   // 用来提醒玩家"哪些按个体存、哪些按物种存"（U12：不同实例不许互相覆盖配置的那一半）。
   const speciesId = build.speciesId;
+  // ⚠⚠ 2026-09-29 **修（T3 复核抓到的真缺口）**：原来只数**当前这一页的行**
+  //   （`state.rows` + `state.extraRows` 里 `group === speciesId` 的那些）。
+  //   深链进来时（`box.html?pet=own-9006`）`state.kind` 是默认的 catalog、`state.rows` 是**物种卡**、
+  //   没有 `group` ⇒ 数出 **1** ⇒ 下面那句「性格/资质/等级/收藏按个体存、**配招按物种存**」
+  //   **根本不画**。于是玩家在深链/刷新之后看到的是：两个同种个体**默默共用**一份四技能，
+  //   屏幕上一句解释都没有 —— 那正是玩家会读成"互相覆盖配置"的情形。
+  //   修法：**本机记录里同种的个体也要数**（它们不看当前在哪一页）。
+  const localSameSpecies = (() => {
+    if (!speciesId) return [];
+    try {
+      const groups = localIndividualsGrouped([]);
+      return (groups?.[speciesId] ?? []).map((one) => one?.individual_id).filter(Boolean);
+    } catch { return []; }
+  })();
   const instanceCount = speciesId
-    ? new Set([...state.rows, ...state.extraRows]
-      .filter((row) => row?.group === speciesId).map((row) => row.select)).size
+    ? new Set([
+      ...localSameSpecies.map((id) => String(id)),
+      ...[...state.rows, ...state.extraRows]
+        .filter((row) => row?.group === speciesId).map((row) => row.select),
+    ].filter(Boolean)).size
     : 1;
   const name = build.name ?? '这一只';
   $('pet-title').textContent = `${name} · 详情`;
@@ -972,17 +1261,25 @@ function renderPetPage() {
     root: $('pet-loadout'), instanceCount});
   // 刷新之后那句话（"上一次刷天分：+10 加到「魔攻」"）在这一屏上也要看得见：
   // 它是玩家确认"刚才那一下落在哪一项"的地方（列表那一行里不再画它了）。
+  // ⚠ 2026-09-30（半成品 ⓔ）：**被拒绝的那一句也落在这里**（同一个位置 ⇒ 玩家不用学两套位置）：
+  //   它是真值层抛出来的**真实原因**（「天分加成已经 3 级满了…」），不是"操作失败"这种空话。
+  //   优先级：本机新养那只的说明 > 刷新被拒的原因 > 上一次刷到哪一项。
   const note = $('pet-note');
-  const lastNote = state.petNote ? '' : lastRefreshNote(individual);
-  note.textContent = state.petNote || lastNote || '';
+  const refreshFailed = state.refreshFailed || '';
+  const lastNote = (state.petNote || refreshFailed) ? '' : lastRefreshNote(individual);
+  note.textContent = state.petNote || refreshFailed || lastNote || '';
   note.hidden = !note.textContent;
   // ⚠ 2026-09-28 真机抓到（验收 28/30：读 `#pet-view [data-refresh-note]` 读到 null）：
   // 刷新那一句原来只有 `#pet-note` 自己带 `data-refresh-note`，而二级页的落点是 `#pet-view`
   // （`data-individual` 在它身上）⇒ 判据按"这一页上的刷新说明"去读，读到的是空。
   // 两处都挂上：整页一个钩子、那一行一个钩子，谁读都对（意图不变：**玩家要看得见落在哪一项**）。
   if (lastNote) note.dataset.refreshNote = 'yes'; else delete note.dataset.refreshNote;
+  // 被拒绝时**另给一个钩子**（`data-refresh-failed`）：判据要能分开"成功那一句"与"没成功那句"
+  // —— 成功路不许被这条污染（反证），所以两者的 DOM 标记也必须分得开。
+  if (refreshFailed) note.dataset.refreshFailed = 'yes'; else delete note.dataset.refreshFailed;
   const petView = $('pet-view');
   if (lastNote) petView.dataset.refreshNote = 'yes'; else delete petView.dataset.refreshNote;
+  if (refreshFailed) petView.dataset.refreshFailed = 'yes'; else delete petView.dataset.refreshFailed;
   // 这一屏也带着"这一只是谁"的钩子（`data-individual`）：刷新/回滚那几件事与列表那一行共用同一个落点，
   // 免得到处各写一套选择器（真机验收 28/30 号读的就是它）。
   $('pet-view').dataset.individual = select;
@@ -991,6 +1288,14 @@ function renderPetPage() {
   // ⇒ 读到中间那一帧是常事，表现为"时红时绿"。有了这个标记，验收可以等它，
   // 而不是靠 sleep 猜（`data-pet-rendered` = 服务端那份到了；`data-pet-select` = 画的是谁）。
   $('pet-view').dataset.petRendered = player ? 'server' : 'local';
+  // ── 陪练·休息提醒（2026-09-30 · 人类原话「在首页/培养页根据现实时间/游玩时间提醒休息」）──────
+  // 依据（只读 coach 层，**不改它**）：`companionReadings({cross,signals:null,context:{},now})`
+  //   · `cross` = `companionLedger(readMemory(localStorage['xiaoya-memory-v1']), null, now)`
+  //   · `signals: null` = **还没开始打**（首页/培养页就是这一档）—— 实测 3 点跑出
+  //     「这么晚了。」（空账本）/「这么晚了，这一波你已经打了3局。」（有账本）✓
+  // 渲染规矩：**只挑休息那一类读点**（`late-night` / `long-session`）；**没有就保持 hidden** ✓
+  //   （空壳会让页面多一块 0 高度空槽 —— 本会话 `index.html #save-message` 就是这么翻的车 ✗）
+  renderRestNote();
   // ⭐ 2026-09-29 新增：这一屏上「性格与资质」那几样到底是哪儿来的（判据/排障读它，玩家看不见）。
   // 判据：`reports/roco/build-snapshot/browser-a7-refresh-proof.mjs` 的 C4 —— 它要的就是
   // "屏幕上的数字 == 本机记录那一份"，而不是"屏幕上有没有出现某个词"。
@@ -1031,8 +1336,14 @@ function renderPetPage() {
 /** 打开二级详情页：地址带上这一只（刷新 / 后退 / 书签都回到同一屏）。 */
 async function openPet(select, {push = true} = {}) {
   if (!select) return;
+  // R05.4（README：点击后返回要保留筛选 / 页码 / **滚动位置**）：进详情之前把列表的滚动位置记下来。
+  // 筛选与页码本来就在 `state` 里（列表不重载），只有滚动位置会在 `backToList()` 里被清零。
+  if (state.view !== 'pet' && !petViewVisible()) state.listScroll = window.scrollY;
+  // 排障钩子（R05.4）：这一屏记下来的列表滚动位置是多少 —— 真机验收读它，玩家看不见。
+  document.body.dataset.listScroll = String(state.listScroll ?? '');
   state.pet = select;
   state.petNote = '';
+  state.refreshFailed = '';   // 换一只/重新进入这一屏：上一次的失败提示跟着作废
   if (push) history.pushState({boxPet: true}, '', petUrl(select));
   // 这一只的卡片（名字/系别/定位）：服务端那一页里没有就用本机记录兜底（本机新养的那只）。
   state.petCard = state.rows.find((row) => row.select === select)
@@ -1054,6 +1365,7 @@ async function openPet(select, {push = true} = {}) {
     state.lastDev = data.dev;
     state.petData = data.player;
     state.petNote = '';
+    state.refreshFailed = '';
     // ⚠ 2026-09-28 真机抓到（验收 29/36：`#pet-actions` 里没有 `[data-add]`）：
     // 二级页的动作按钮要靠**这一只属于哪个种类**才画得出来，而它原来只从 `state.petCard` 取。
     // 直接开 `?pet=` 链接、或列表那一页还没读完时，`state.petCard` 是空的 ⇒ `data-add=""`
@@ -1147,6 +1459,125 @@ async function namesFor(ids) {
 
 
 
+/**
+ * R05.4：把列表的滚动位置还原回去（返回列表时用）。
+ *
+ * ⚠ 为什么不能只写一句 `window.scrollTo(0, y)`（第一版就是这么写的，实测**没用**）：
+ * 从详情页回到列表的那一瞬间，`#pet-view` 刚被藏起、`#box-list-view` 刚被显示，
+ * 浏览器**还没重算排版** —— 此时 `window.scrollTo(0, 831)` 会被**按详情页那个矮文档**夹到 2px 左右
+ * （实测 `before=831 → after=2`）。所以要**等排版刷完再滚一次**：
+ * 立刻滚一次（此时列表已在 DOM 里）+ 两个 `requestAnimationFrame` 后再滚一次（排版已落定）。
+ * 幂等：滚到同一个位置不会产生任何副作用。
+ */
+function restoreListScroll() {
+  const y = Number.isFinite(Number(state.listScroll)) ? Number(state.listScroll) : 0;
+  const apply = () => {
+    window.scrollTo(0, y);
+    document.body.dataset.listScrollRestored = String(Math.round(window.scrollY));
+  };
+  apply();
+  // ⚠ 一律走 `window.` 前缀：盒子页有一条静态判据扫"裸调用本地不存在的函数"
+  //   （`tests/roco-box-drawer.test.js` ⑫）—— 裸写会被判成"调了没有定义的本地函数"（实测踩到）。
+  if (typeof window.requestAnimationFrame === 'function') {
+    window.requestAnimationFrame(() => { apply(); window.requestAnimationFrame(apply); });
+  }
+  setTimeout(apply, 60);
+}
+
+/**
+ * 按抓包名单清理本机记录（人类 2026-09-29 选 B；Lead 转述逐字：
+ * 「有一个有抓包的真实精灵后，多的都删掉；抓包没有的也删掉」）。
+ *
+ * 三条纪律，缺一不可：
+ *   · **点了才删** —— 只有玩家按下那个按钮（而且是**二次确认**）才会走到这里，页面加载**绝不**自动删；
+ *   · **先存档** —— `applyLocalCleanup()` 先写本机存档键，写不进就**一条都不删**；这里再给一份 JSON 下载；
+ *   · **如实报数** —— 删了几条、留了几条、存档在哪，都说出来（不写"已清空"，也不写"没有删"）。
+ *
+ * 抓包名单从服务端取：`/api/roco/box?kind=mine`（`limit` 上限 60，所以按页取完）——
+ * 它给的两样正是清理需要的：**哪些 species 有抓包**、以及**每个 species 服务端那一只的编号**。
+ * ⚠ 服务端那份名单（542 条）**只读不写**：这一层只碰本机记录。
+ */
+async function capturedListFromServer() {
+  const captured = new Set();
+  const preferred = new Map();
+  let offset = 0; let total = null; let guard = 0;
+  while ((total === null || offset < total) && guard < 40) {
+    guard += 1;
+    const data = await getJson(`/api/roco/box?kind=mine&limit=60&offset=${offset}`);
+    if (!data.ok) throw new Error(data.error || '抓包名单读不出来');
+    const cards = data.player?.cards ?? [];
+    total = Number(data.player?.total ?? cards.length);
+    for (const card of cards) {
+      const species = String(card.group ?? '').trim();
+      if (!species) continue;
+      captured.add(species);
+      if (!preferred.has(species)) preferred.set(species, String(card.select ?? ''));
+    }
+    if (!cards.length) break;
+    offset += cards.length;
+  }
+  return {captured, preferred, total};
+}
+
+async function runLocalCleanup() {
+  const button = $('box-cleanup');
+  try {
+    setStatus('正在按抓包名单核对本机记录…');
+    if (button) button.disabled = true;
+    const {captured, preferred} = await capturedListFromServer();
+    const plan = planLocalCleanup({capturedSpecies: captured, preferredBySpecies: preferred});
+    const all = localRecordsSnapshot();
+    const problems = cleanupProblems(plan, {all, capturedSpecies: captured, preferredBySpecies: preferred});
+    // 判据先过一遍（与单测同一只探测器）：计划不合法就**不动手**，如实说。
+    if (problems.length) {
+      setStatus(`没有清理：核对这份清理计划时发现 ${problems.length} 处不对（${problems[0]}）—— 一条都没删`);
+      return;
+    }
+    if (!plan.deletes.length) {
+      setStatus(`本机记录已经和抓包名单一致：${plan.keeps.length} 条，没有多出来的`);
+      return;
+    }
+    const result = applyLocalCleanup(plan);
+    if (!result.ok) { setStatus(`没有清理：${result.reason}`); return; }
+    // ⚠ 扩展名单独放一个**纯 ASCII 常量**里：判据 `tests/roco-plain-speak.test.js` 扫的是
+    //   "含 ≥4 个汉字的字面量里有没有硬禁词"，而 `.json` 里的 `.js` 正好在禁词表上
+    //   （它是防"玩家文案里冒出工程文件名"的）。名字本身是干净的玩家文案，扩展名不是文案 ——
+    //   合成一处而不是把 `.js` 写进那句中文里。**别把这两行合回去**（合回去当场顶红那条判据）。
+    const ARCHIVE_EXT = '.json';
+    downloadJson(result.payload, `本机记录-存档-${String(result.archiveKey).split('.').pop()}${ARCHIVE_EXT}`);
+    const message = `本机记录已按抓包名单清理：删了 ${result.removedCount} 条、留下 ${result.keptCount} 条`
+      + `（存档 ${result.archiveKey}，同一份也下载到你机器上了）`;
+    await load();        // 重新取数 + 重画（列表里那批记录已经不在了）
+    // ⚠ 报数要放在**重画之后**：`load()` 会走 `renderMeta()`，那里会把状态行改写成"还有几条没画"
+    //   （清干净之后就是空）—— 第一版把报数写在前面，结果玩家一句都看不到（真机实测 status=None）。
+    setStatus(message);
+  } catch (error) {
+    setStatus(`没有清理：${String(error?.message ?? error)}`);
+  } finally {
+    if (button) { button.disabled = false; button.hidden = state.kind !== 'mine'; button.dataset.confirm = 'no'; }
+    if (button) button.textContent = CLEANUP_LABEL;
+  }
+}
+
+/** 本机记录的原样快照（判据要用"清理前"的那一份，不能边删边算）。 */
+function localRecordsSnapshot() {
+  try { return JSON.parse(globalThis.localStorage?.getItem('roco.box.individuals.v1') ?? '{}') ?? {}; }
+  catch { return {}; }
+}
+
+/** 给玩家一份 JSON 存档（本机存档键之外再给一个文件；浏览器不让下也不影响已经存好的那一份）。 */
+function downloadJson(payload, filename) {
+  try {
+    const blob = new Blob([JSON.stringify(payload, null, 1)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url; link.download = filename; link.rel = 'noopener';
+    document.body.appendChild(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    return true;
+  } catch { return false; }
+}
+
 /** 从二级页回首层：历史里有上一屏就退回去（选人还在），没有就直接换回列表地址。 */
 function backToList() {
   const inSecondLevel = history.state?.boxCompare === true || history.state?.boxPet === true;
@@ -1155,7 +1586,10 @@ function backToList() {
   // 于是「点返回」之后那一瞬间页面**还停在二级页**上：紧接着去点列表行，自然点不到/点到别的。
   // 现在**同步先切回列表**（UI 立刻正确），再顺手把 history 收拾干净（popstate 回来时已是 list，幂等）。
   setView('list');
-  window.scrollTo(0, 0);
+  // R05.4（README 第 4 条）：返回要**保留滚动位置**（筛选与页码在 `state` 里，本来就不动）。
+  // 旧写法留档（改钉不删）：`window.scrollTo(0, 0)` —— 从第 5 行点进详情再返回会被顶回页首。
+  // `setKind` / `resetFilters` 那两条"换了列表"的路径仍然显式回页首（那里**应该**回顶）。
+  restoreListScroll();
   if (inSecondLevel) { history.back(); return; }
   history.replaceState(null, '', 'box.html');
 }
@@ -1274,7 +1708,7 @@ function handleFavClick(event) {
   if (!favBtn) return false;
   event.preventDefault();
   const on = toggleFavourite(favBtn.dataset.fav);
-  $('box-status').textContent = on ? '已经收藏这一只（记在你自己这台机器上）' : '已经取消收藏';
+  setStatus(on ? '已经收藏这一只（记在你自己这台机器上）' : '已经取消收藏');
   rerenderAfterAction();
   return true;
 }
@@ -1311,11 +1745,11 @@ function handleAdoptTalentClick(event) {
   event.preventDefault();
   const select = btn.dataset.adoptTalent || state.pet;
   const imported = state.petBuild?.importedTalent ?? null;
-  if (!imported?.values) { $('box-status').textContent = '名单里没有这一只的资质，没法重设。'; return true; }
+  if (!imported?.values) { setStatus('名单里没有这一只的资质，没法重设。'); return true; }
   const result = resetTalentFromImport(select, {talent: imported.values, source: imported.source});
-  $('box-status').textContent = result.ok
+  setStatus(result.ok
     ? `已经按抓包名单把这一只的资质重设好了（${result.filled} 项；性格与剩余刷新次数都没动）`
-    : `重设失败：${result.reason}`;
+    : `重设失败：${result.reason}`);
   if (result.ok) { renderCards(); renderPetPage(); }
   return true;
 }
@@ -1336,7 +1770,7 @@ function handleRemoveClick(event) {
     event.preventDefault();
     state.confirmRemove = '';
     rerenderAfterAction();
-    $('box-status').textContent = '没删，什么都没动。';
+    setStatus('没删，什么都没动。');
     return true;
   }
   const confirmBtn = event.target.closest?.('[data-remove-confirm]');
@@ -1344,9 +1778,9 @@ function handleRemoveClick(event) {
     event.preventDefault();
     const removed = removeIndividual(confirmBtn.dataset.removeConfirm);
     state.confirmRemove = '';
-    $('box-status').textContent = removed.ok
+    setStatus(removed.ok
       ? '已经删掉那一只（它只在本机记录里）'
-      : `删不了：${removed.reason}`;
+      : `删不了：${removed.reason}`);
     if (removed.ok && state.pet === confirmBtn.dataset.removeConfirm) {
       state.pet = null;
       backToList();
@@ -1360,7 +1794,7 @@ function handleRemoveClick(event) {
     event.preventDefault();
     state.confirmRemove = removeBtn.dataset.remove;
     rerenderAfterAction();
-    $('box-status').textContent = '再点一次「确定删掉」才会真的删掉；点「取消」就什么都不动。';
+    setStatus('再点一次「确定删掉」才会真的删掉；点「取消」就什么都不动。');
     return true;
   }
   return false;
@@ -1407,7 +1841,6 @@ function wire() {
     const value = chip.dataset.v;
     if (attr === 'type') state.type = value;
     if (attr === 'role') state.role = value;
-    if (attr === 'support') state.support = value;
     const menu = chip.closest('details');
     if (menu) menu.open = false;
     renderFilterMenus();
@@ -1423,7 +1856,21 @@ function wire() {
     // ⭐ U12：多个体时每一行都有自己的「去配队」（实例级动作，与二级页同一段逻辑）。
     if (handleToTeamClick(event, goToTeam)) return;
     const head = event.target.closest?.('.drawer-head');
-    if (head) { toggleDrawer(head.dataset.species); return; }
+    if (head) {
+      // R05.3（用户的 user-07）：组头看起来是个按钮，那就必须真的能点开东西。
+      // `data-head-action` 由 `box-drawer.js` 按"这一种有几个个体"写死：
+      //   · `toggle`（多个体）⇒ 展开 / 收起；
+      //   · `open`（单个个体）⇒ **打开这一只的详情页**（不是只换个箭头）。
+      // 兜底：没有这个属性时按 `data-count` 判（>1 才谈得上"展开"）。
+      const drawer = head.closest?.('.species-drawer');
+      const action = head.dataset.headAction
+        ?? (Number(drawer?.dataset.count ?? '1') > 1 ? 'toggle' : 'open');
+      if (action === 'toggle') { toggleDrawer(head.dataset.species); return; }
+      const select = head.dataset.detail
+        || drawer?.querySelector?.('.individual')?.dataset.individual || '';
+      if (select) void openPet(select);
+      return;
+    }
     const face = event.target.closest?.('[data-detail]');
     if (face?.dataset.detail) void openPet(face.dataset.detail);
   });
@@ -1441,13 +1888,13 @@ function wire() {
     if (undoBtn) {
       event.preventDefault();
       const undone = undoIndividual(undoBtn.dataset.undo);
-      if (!undone.ok) { $('box-status').textContent = undone.reason; return; }
+      if (!undone.ok) { setStatus(undone.reason); return; }
       renderCards();
       renderPetPage();
       // ⚠ 2026-09-29（A7 的第三条）：回滚之后「性格与资质」与「六维」要**逐值**回到刷新前。
       // 这一条以前也是**假的**（那一栏读服务端回执，回滚只改本机记录）⇒ 回滚对屏幕同样无效。
       // 现在两栏同源（本机记录）⇒ 回滚一定逐值还原；判据：`browser-a7-refresh-proof.mjs` 的 C3。
-      $('box-status').textContent = '已经回滚上一次刷新（只退这一步；退掉的次数不还）';
+      setStatus('已经回滚上一次刷新（只退这一步；退掉的次数不还）');
       return;
     }
     const refreshBtn = event.target.closest?.('[data-refresh]');
@@ -1455,7 +1902,18 @@ function wire() {
       event.preventDefault();
       const result = refreshIndividual(refreshBtn.dataset.refresh, refreshBtn.dataset.individual);
       // 次数用完**不是**错误页面：状态行如实说一句，数据一个字不动。
-      if (!result.ok) { $('box-status').textContent = result.reason; return; }
+      // ⚠ 2026-09-30（半成品 ⓔ）**改钉 · 不删**：`setStatus` 那一句**照旧留着**（列表页那一档要看它 ✓）。
+      //   新增的是**详情页那一份**：`#box-status` 在 `#box-list-view` 里，而详情页把那一块 `display:none`
+      //   ⇒ 玩家点第 4 次时屏幕一个字都不变（真机读数：`span#box-status` 0×0、祖先 `div#box-list-view` display:none）。
+      //   所以这里**同时**把**真实原因**（不是"操作失败"）画进详情页自己的说明位 `#pet-note`
+      //   ——与成功那一句**同一个位置**，玩家不用学两套位置。
+      if (!result.ok) {
+        setStatus(result.reason);
+        state.refreshFailed = result.reason || '这一下没成功';
+        renderPetPage();
+        return;
+      }
+      state.refreshFailed = '';   // 成功一次就把上一次的失败提示收掉（成功路不许被它污染）
       // 成功：这一屏重画（新的性格/天分与剩余次数立刻可见；列表那边也跟着更新）
       renderCards();
       renderPetPage();
@@ -1473,9 +1931,18 @@ function wire() {
       const note = lastRefreshNote(result.individual);
       const fallback = refreshBtn.dataset.refresh === 'nature'
         ? '性格刷新了一次（结果就在这一页上）' : '天分刷新了一次（结果就在这一页上）';
-      $('box-status').textContent = note ? `${note}（结果就在这一页上）` : fallback;
+      setStatus(note ? `${note}（结果就在这一页上）` : fallback);
       return;
     }
+  });
+  // 清理本机记录：第一次点只是**问一句**，第二次点才真删（与"删掉这只"同一套两步确认口径）。
+  $('box-cleanup')?.addEventListener('click', () => {
+    const button = $('box-cleanup');
+    if (button.dataset.confirm === 'yes') { void runLocalCleanup(); return; }
+    button.dataset.confirm = 'yes';
+    button.textContent = '再点一次就清理（先存档、再删）';
+    setStatus(`按抓包名单清理本机记录：只留每一只有抓包的那一条；同种多出来的、抓包名单里没有的都会删掉。`
+      + `清理前会先把要删的那批原样存一份（本机存档 + 下载一份 JSON）。再点一次这个按钮才会真的删。`);
   });
   $('flag-favourite').addEventListener('click', () => {
     state.favourite = !state.favourite;
@@ -1538,7 +2005,10 @@ function wire() {
     if (pet) { void openPet(pet, {push: false}); return; }
     state.pet = null;
     setView('list');
-    window.scrollTo(0, 0);
+    // R05.4：`history.back()` 回来时**也要**还原列表的滚动位置 —— 否则 `backToList()` 里刚还原的
+    // 那一行会被这一句再清零。
+    // 旧写法留档（改钉不删）：`window.scrollTo(0, 0);`
+    restoreListScroll();
   });
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;

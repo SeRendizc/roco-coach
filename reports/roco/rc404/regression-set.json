@@ -873,17 +873,21 @@
    },
    "event_kinds": {
     "action_cancelled": 1,
+    "buff_self_flat": 6,
     "damage": 21,
     "defense": 9,
     "effects_registered_unsupported": 4,
     "energy_gain": 4,
     "faint": 3,
     "mana_loss": 3,
+    "position_shift": 6,
     "replacement": 3,
-    "status_unsupported": 13,
+    "slot_condition_applied": 3,
+    "status_applied": 6,
+    "status_unsupported": 7,
     "turn_start": 22
    },
-   "state_digest": "e8e36024ba3912b5f3075a0587298912e5b152e07c213fbf919311cd8c719c84",
+   "state_digest": "8c393aa9560e9e05c487fbdf2006ca6791c0f7070868a481cf2a83e17b5e4ba5",
    "key_events": [
     {
      "kind": "damage",
@@ -1128,11 +1132,12 @@
     "11": "player",
     "12": "player",
     "13": "player",
-    "14": "player",
+    "14": "enemy",
     "15": "player",
     "16": "player",
-    "17": "player",
-    "18": "player",
+    "17": "enemy",
+    "18": "enemy",
+    "19": "player",
     "20": "enemy",
     "21": "enemy",
     "22": "player"
@@ -1150,7 +1155,7 @@
     "status_tick": 16,
     "turn_start": 22
    },
-   "state_digest": "34f3c7167ab0d6f2639ecc6b298ea385fc0cb1bb92fa514c5fecba5f5ea91123",
+   "state_digest": "c55136a82c51047d3c4ea0f24474c84cbf5598f031d3107cb3429087e0309cbc",
    "key_events": [
     {
      "kind": "damage",
@@ -2510,11 +2515,14 @@
    "lead_pet": null,
    "lead_skill": null,
    "used_skills": [
+    "skill_000286",
+    "skill_000418",
     "skill_000612",
     "skill_000619",
     "skill_000624"
    ],
    "type_multipliers": [
+    1.0,
     1.0,
     1.0
    ],
@@ -2527,24 +2535,23 @@
     "7": "enemy",
     "8": "enemy",
     "9": "enemy",
-    "10": "enemy",
-    "11": "enemy"
+    "10": "enemy"
    },
    "event_kinds": {
-    "action_cancelled": 1,
+    "action_cancelled": 2,
     "damage": 11,
-    "debuff_foe": 16,
-    "defense": 2,
-    "effects_registered_unsupported": 2,
-    "faint": 1,
-    "mana_loss": 1,
-    "replacement": 1,
+    "defense": 3,
+    "effects_registered_unsupported": 3,
+    "energy_gain": 1,
+    "faint": 2,
+    "mana_loss": 2,
+    "replacement": 2,
     "status_added": 2,
-    "status_applied": 8,
-    "status_tick": 11,
-    "turn_start": 11
+    "status_tick": 6,
+    "status_unsupported": 4,
+    "turn_start": 10
    },
-   "state_digest": "4343cf28f8138882b229df0e3f43ff2e6c5043b04ed0419806611ba1ac94b26c",
+   "state_digest": "4a3a656742bfd5d13a6989d61859a9c64aa55bf1650cfb0ec4bc497f1086de43",
    "key_events": [
     {
      "kind": "damage",
@@ -2598,11 +2605,11 @@
     },
     {
      "kind": "damage",
-     "turn": 11,
-     "side": "enemy"
+     "turn": 10,
+     "side": "player"
     }
    ],
-   "pick_hit_rate": 1.0,
+   "pick_hit_rate": 0.8,
    "problems": [],
    "unreachable": [],
    "status": "reachable"
@@ -3000,14 +3007,14 @@
     "action_cancelled": 1,
     "damage": 19,
     "defense": 2,
-    "effects_registered_unsupported": 1,
+    "effects_registered_unsupported": 10,
     "energy_gain": 1,
     "faint": 1,
     "mana_loss": 1,
     "replacement": 1,
     "turn_start": 11
    },
-   "state_digest": "4dd24cade0663c595984dca3407ed0fedb54df950cda05e0a39b2ecbc302e986",
+   "state_digest": "726af7d0781b3db3f6e8b544ea3a4d18eaa9083a04d38a84af22ee6dceace0e0",
    "key_events": [
     {
      "kind": "damage",
@@ -3355,7 +3362,7 @@
     "effects_registered_unsupported": 12,
     "turn_start": 12
    },
-   "state_digest": "dedad3fe000cd8b83fb7f20ad964339bc3e3cef1cc65a33da063742f7281b6c0",
+   "state_digest": "5a983d9d3c4e9a08ca8caf147d8e162df705a7a333953c86cb85eb44beca1e06",
    "key_events": [
     {
      "kind": "damage",

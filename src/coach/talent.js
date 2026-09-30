@@ -444,6 +444,11 @@ export function panelOf({race = null, talent = null, nature = null, scope = 'pvp
   if (!race || typeof race !== 'object') {
     return {panel: {}, unknown: [...unknown, '没有种族值 ⇒ 面板算不出来（不拿 0 顶）'], sources};
   }
+  // ⚠ 2026-09-30 试过把"缺天分"改成**不参与计算**（D1 的修法 ✗）—— **已撤回**：
+  //   实测它打红 6 条既有判据（③④⑥⑦⑩ + talent ⑤⑦），因为**整条产品链是按"算得出面板"设计的**：
+  //   天分缺失时若面板为空 ⇒ 性格建议/两体对比/端到端都给不出结论（比"按 0 算 + 明说"更糟 ✗）。
+  //   ⇒ 正确修法要**产品级决定**（见 `docs/roco/review-2026-09-28/半成品-advice-engine.md` 的 D1），
+  //     不是这一行能收口的 ✓ 旧写法**原样恢复**（改钉不删：旧注释见文档 D1 行）✓
   if (!talent || typeof talent !== 'object') {
     unknown.push('这一只还没填天分（个体值）⇒ 按 0 计入，面板偏低，别当成实测值');
   }
@@ -459,7 +464,7 @@ export function panelOf({race = null, talent = null, nature = null, scope = 'pvp
   for (const stat of STAT_KEYS) {
     const raceValue = numOrNull(race[stat]);
     if (raceValue === null) { unknown.push(`种族值缺「${STAT_NAMES[stat]}」⇒ 这一项不算`); continue; }
-    const talentValue = numOrNull(talent?.[stat]) ?? 0;
+    const talentValue = numOrNull(talent?.[stat]) ?? 0;   // ⚠ D1：这一行是"缺值当 0"（修法与代价见文档 D1）
     const shape = stat === 'hp' ? LEVEL_FORMULA.hp : LEVEL_FORMULA.other;
     const nf = natureFactor(nature, stat, {breakthrough: steps});
     if (!nf.known) unknown.push(`性格：${nf.reason}`);

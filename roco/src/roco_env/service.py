@@ -108,7 +108,8 @@ import traceback
 
 from . import events_text
 from . import coverage as coverage_mod
-from .coverage import classify_skill
+from . import effects as fx
+from .coverage import classify_skill_declared
 from dataclasses import dataclass, field
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Dict, List, Optional, Tuple
@@ -766,7 +767,43 @@ class RocoService:
         **但默认回执一个键都不加**：Agent 的工具回执被钉死的轨迹摘要比着，多一个键就变，
         那等于悄悄改了模型看到的东西。所以档位只在调用方**显式索要**（`with_tier=True`）时才带出来。
         """
-        resolved = skill.effect_support == "supported"
+        # ── 2026-09-29（第三轮要求⑤）**按类判定"引擎到底结不结算"**，不再读静态 effect_support ──
+        # 旧写法：`resolved = skill.effect_support == "supported"` —— 而 `effect_support` 是**冻结数据的
+        # 一刀切旧标记**（本函数自己的 docstring 上一段就写着「连纯伤害技能也是 unsupported」），
+        # ⇒ 拿它当判据会**把已经结算的也说成没结算**。真机实测（`docs/roco/review-2026-09-28/
+        # BATCH-1-产品修复实测-2026-09-29.md` §145/§146/§148）：
+        #   ✅ 已结算：伤害（`damage` 事件）· 减伤与应对（`defense` 事件带 `reduction`/`respond`，
+        #              连打 40 手 ×27 次 `reduction=0.7`）· 聚能（`charge.energy_gained`）·
+        #              能量回复（`energy_gain.amount`/`energy_after`）
+        #   ❌ 未结算：持续·层数状态 / 双攻升降（把「引燃/毒孢子/腐蚀酸液」装上真打一局 ⇒ **零状态事件**，
+        #              引擎改报 `effects_registered_unsupported`）
+        # 判据（**严格口径**）：把 desc 里写明的效果**逐条**归类，**只要有明说未结算的那一类**，
+        # 整条就按"没结算"报，并在 reason 里说清**哪一部分结算了、哪一部分没有** —— 不许一刀切，
+        # 也不许含糊其辞。这条规则随 `LOCAL_SETTLEMENT_RULE` 版本化（要求④同一份本地训练规则）。
+        # 2026-09-29（task-18 A 批）：**判据抽到唯一一处**（`coverage.settlement_verdict`）。
+        # 此前这里一套按类判定、`coverage.classify_skill` 另一套 ⇒ 同一招在产品回执里说"已结算"、
+        # 在工具回执里说"PARTIAL"（人类口径「同一规则同一投影」的同一条技能版本）。
+        # 现在两处调同一个函数：改口径只改那一处，这个回执跟着动。
+        _verdict = coverage_mod.settlement_verdict(skill)
+        _settled = list(_verdict["settled"])
+        _unsettled = list(_verdict["unsettled"])
+        resolved = bool(_verdict["resolved"])
+        _reason = None
+        if not resolved:
+            if _unsettled:
+                _reason = ("这条技能里还有本机训练规则尚未拉起的原语（"
+                           + "；".join(_unsettled[:3])
+                           + ("…" if len(_unsettled) > 3 else "") + "）：本局不会按说明生效")
+                if _settled:
+                    _reason += "；其中「" + "、".join(_settled) + "」这一部分引擎照常结算"
+            else:
+                _reason = ("这条技能的效果本机训练规则还没有对应原语（"
+                           + str(getattr(skill, "category", "") or "未分类") + "类）")
+        # 旧实现留档（改钉不删）：这里原来内联着 `_UNSETTLED_WORDS = ("冻结","引电","萌化","印记",
+        # "星陨","吸血","天气","离场")` 与 `_settled` 四条文本判据（伤害/减伤/应对/能量回复），
+        # 另加 2026-09-29 本轮补的三类（持续状态层数/回合、双攻升降、印记层数累加）。
+        # 全部搬进 `coverage.SETTLED_PATTERNS` / `coverage.UNSETTLED_WORDS`，**判据一条没放宽**：
+        # 仍然是「只要有明说没结算的那一类，整条就按没结算报」。
         out = {
             "record": "skill",
             "skill_id": skill.skill_id,
@@ -788,9 +825,9 @@ class RocoService:
             "mechanics": {
                 "resolved": resolved,
                 "coverage": 1.0 if resolved else 0.0,
-                "reason": None
-                if resolved
-                else "效果原语尚未核验/实现（skills.json 的 effect_support = unsupported）",
+                # 旧文案留档（改钉不删）："效果原语尚未核验/实现（skills.json 的 effect_support = unsupported）"
+                # —— 那句话把"静态导入标记"当成了"引擎执行真相"，正是第三轮要求⑤点名的错。
+                "reason": _reason,
             },
         }
         if with_tier:
@@ -798,18 +835,12 @@ class RocoService:
             # 档位要按**同一份能力读数**算（`coverage.declared_capabilities_of()`）：以前这里
             # 写死 `multi_hit_declared=True`，后面几条能力一条都没传 ⇒ 教练的工具回执与覆盖
             # 台账各说各话（第 38 轮实测：扇风在这儿是 PARTIAL、在台账里是可模拟）。
-            _caps = coverage_mod.declared_capabilities_of()
-            # ⚠ 每加一条能力都要在这里补一行 —— 漏一条就会出现"工具回执说 PARTIAL、台账说可模拟"
-            # 那种两处打架（第 38 轮实测踩过一次，第 45 轮核对时又发现换人条件/每次使用后两条漏了）。
-            tier = classify_skill(skill, multi_hit_declared=_caps.get("multi_hit", False),
-                                  slot_condition_declared=_caps.get("slot_condition", False),
-                                  position_shift_declared=_caps.get("position_shift", False),
-                                  foe_energy_loss_declared=_caps.get("foe_energy_loss", False),
-                                  initiative_declared=_caps.get("initiative_condition", False),
-                                  per_layer_cost_declared=_caps.get("per_layer_cost", False),
-                                  foe_switch_condition_declared=_caps.get("foe_switch_condition", False),
-                                  per_use_ramp_declared=_caps.get("per_use_ramp", False),
-                                  on_hit_ramp_declared=_caps.get("on_hit_ramp", False))
+            # 2026-09-30（task-25）：**这一段手抄清单已删** —— 改成走
+            # `coverage.classify_skill_declared()`（唯一入口，映射表在 `_CAPABILITY_TO_FLAG`）。
+            # 为什么删：这张手抄表**漏过三次**（第 38 轮 / 第 45 轮 / task-25 的 `stat_gain.*`），
+            # 每次都是"同一招两处两个档位"；映射表化之后漏一条是**四个调用方一起漏**，
+            # 而 `tests/test_stat_gain.py` 的「声明的能力位必须有读点」会当场红。
+            tier = classify_skill_declared(skill, coverage_mod.declared_capabilities_of())
             out["support_tier"] = tier["support"]
             out["support_why"] = tier["why"]
             out["support_unparsed"] = list(tier.get("unparsed") or [])
@@ -837,12 +868,21 @@ class RocoService:
             result=record,
             evidence_ids=[ev(rs.ruleset_id, "skills.json", skill.skill_id)],
         )
-        if skill.effect_support != "supported":
+        # 2026-09-29（第三轮⑤⑥）**按类判定**，不再读静态 `effect_support`：
+        # 旧写法 `if skill.effect_support != "supported"` 是**数据层的一刀切旧标记**
+        # （579 个进覆盖统计的技能全带 unsupported，连纯伤害技能也是），
+        # 于是回执里会出现自相矛盾：`mechanics.resolved=True` 而 `unsupported` 说"效果原语未实现"。
+        # 现在两者读**同一份**判据（`_skill_record` 里那段按类判定）。
+        _mech = record.get("mechanics") or {}
+        if not _mech.get("resolved"):
             answer.unsupported = [
                 {
                     "code": "effect_resolution",
                     "skill_id": skill.skill_id,
-                    "reason": "该技能的效果原语未实现；静态 power 只登记来源字段，不能当最终伤害",
+                    # 旧文案留档（改钉不删）："该技能的效果原语未实现；静态 power 只登记来源字段，不能当最终伤害"
+                    # —— 它把**静态导入标记**当成了"引擎执行真相"，正是第三轮⑤点名的错。
+                    "reason": _mech.get("reason")
+                    or "该技能的效果原语未实现；静态 power 只登记来源字段，不能当最终伤害",
                 }
             ]
         return answer
@@ -1970,7 +2010,6 @@ class RocoService:
         loadouts = body.get("loadouts")
         if loadouts is not None and not isinstance(loadouts, dict):
             return self._answer_envelope(_bad_request("loadouts 必须是 {pet_id: [skill_id...]}"), body, started)
-
         # 2026-09-25（人类：「我这六只怎么样」问不出来）：队伍规模按**登记表里各模式声明的值**收
         # （`demo-training-3v3`=3 / `pvp-standard-six-pet`=6 / `pvp-territory-trial-2v2`=2），
         # 不在其中的一律 refuse。原来这里靠 `validate_team` 的默认 3（RC-106 的注释写着
@@ -2360,6 +2399,16 @@ class RocoService:
         if loadouts is not None and not isinstance(loadouts, dict):
             return self._answer_envelope(_bad_request("loadouts 必须是 {pet_id: [skill_id...]}"), body, started)
 
+        # 2026-09-29（Q8「同一规则同一投影」）：个体快照。形状问题**说清哪里不对**
+        # （逐条的判据在 `individuals._snapshot_problems`，由 `env.reset` 抛成 400）。
+        # `individuals=None` ⇒ 每一只都走种族值路径（老行为逐位不变）。
+        individuals = body.get("individuals")
+        if individuals is not None and not isinstance(individuals, dict):
+            return self._answer_envelope(
+                _bad_request("individuals 必须是 {实例 id: 个体快照} 的对象"
+                             "（每项至少要有 species_id；可选 level/nature/talent）"), body, started)
+
+
         overrides = body.get("unverified_overrides")
         if overrides is not None:
             try:
@@ -2370,7 +2419,8 @@ class RocoService:
 
         try:
             state = env_mod.reset(list(team), list(enemy_team), seed=seed, rs=rs, loadouts=loadouts,
-                                  config=cfg, unverified_overrides=overrides)
+                                  config=cfg, unverified_overrides=overrides,
+                                  individuals=individuals)
         except (ValueError, KeyError) as exc:
             return self._answer_envelope(_bad_request(f"无法开局：{type(exc).__name__}: {exc}"),
                                          body, started)
@@ -2643,6 +2693,13 @@ class RocoService:
                 "damage": outcome.damage,
                 "energy": skill.energy,
                 "formula_verified": outcome.verified,
+                # 2026-09-30（Q8 收口）：这一下用的是哪一套六维（攻/防分别登记 + 整份面板）。
+                # 只在**真的用了个体快照**时出现 —— 「同一个体：列表/详情 vs 伤害里用的面板」
+                # 这条验收要靠它逐值对照（人类逐字：「不能偷懒」）。
+                **({"attacker_atk": round(outcome.attacker_atk, 4),
+                    "defender_def": round(outcome.defender_def, 4),
+                    "individual_panel": outcome.panel_provenance}
+                   if outcome.individual_panel_used() else {}),
                 "multiplier": multiplier,
                 "multiplier_element": skill.element,
                 "multiplier_defender_types": list(defender_types) if defender_types else None,
@@ -2701,6 +2758,18 @@ class RocoService:
                 # 倍率与伤害无关，各分析种子应给出同一个值；不一致就**不写**（fail closed，不挑一个）。
                 for key in ("multiplier", "multiplier_element", "multiplier_defender_types"):
                     if sample.get(key) != entry.get(key):
+                        entry[key] = None
+                # 2026-09-30（Q8 收口）：**面板来源也要跟着合并走** —— `_damage_preview` 里算好了，
+                # 不在这里带出来就等于没做（「倍率」那条就是这么踩过一次的，注释还在上面）。
+                # 口径与倍率一致：各分析种子该给同一个值（同一个体的面板与分析种子无关），
+                # 不一致就**不挑一个**。
+                # ⚠ 只在样本**真的带**这把键时才写：没有快照的对局，合并结果与改动前逐位相同。
+                for key in ("attacker_atk", "defender_def", "individual_panel"):
+                    if key not in sample:
+                        continue
+                    if key not in entry:
+                        entry[key] = sample[key]
+                    elif entry[key] != sample[key]:
                         entry[key] = None
         return {
             "available": True,

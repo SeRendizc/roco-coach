@@ -563,35 +563,103 @@
  cursor:pointer;font-family:inherit;transition:background .15s,border-color .15s}
 .xy-fab:hover{background:#233a33;border-color:#6f9c7f}
 .xy-fab[aria-expanded="true"]{color:#152c24;background:var(--accent);border-color:var(--accent);font-weight:600}
-.xy-pop{position:fixed;right:16px;top:62px;z-index:70;display:flex;flex-direction:column;
+.xy-pop{position:fixed;right:16px;top:62px;/* ⚠ 2026-09-29（阶段三 D3，T2 独立复验抓到）：原来是 70，而**结算卡 `.roco-result-card` 是 75** ⇒
+   局末在结算框里点「✦ 小芽」追问，**回答被结算卡整块盖住**（390×844 档必现：面板开着、日志 3/3 条
+   `elementFromPoint` 命中的全是结算卡元素；桌面档同位置正常）。
+   改成 78 不是随手挑的 —— 它必须落在**一个很窄的窗口里**：
+     · **> 75**：要盖过结算卡（`roco.css` 的 `.roco-result-card`）；
+     · **< 80**：要**低于 `#pet-detail`（80）** —— 那一处的注释写着
+       「必须高于小芽面板，否则真鼠标点『关闭』会落在面板上」，抬到 80 以上会把那个修复弄坏；
+     · 也低于 `.xy-modal`（90）与 `.companion`（120），弹层与陪练位次不变。 */
+z-index:78;display:flex;flex-direction:column;
  width:min(430px,calc(100vw - 24px));
  /* U07（2026-09-30）版式：**稳定侧栏/浮层**，不遮挡主要战斗动作。
     roco.html 的主要动作是一条贴底通栏（`.action-panel`，高度写在 `--bottombar`），
-    所以面板高度要把它让出来；`clamp` 的下限 320px 保证再矮的视口也读得到对话区。
+    所以面板高度要把它让出来；`max(320px, …)` 的下限 320px 保证再矮的视口也读得到对话区。
     标题栏/状态两行/输入行都不参与滚动，中间 `.xy-log` 自己滚（见下）。
+    ⚠ 2026-09-29（第五轮② 人类：「这个对话框可以再长点啊，下面那么多位置，显示都显示不完」）：
+      **不再封顶 620px** —— 面板跟着视口长（`100dvh - 82px - --bottombar`，还留 20px 底边），
+      多出来的高度**全部给消息区**（`.xy-log` 是 `flex:1 1 auto; min-height:0`，见下），
+      实测 1440×900：面板 620→**818**、消息区 382→**578**、面板下方空白 218→**20px**。
     旧规则留档（改钉不删，别再改回来）：
-      height:min(560px,calc(100dvh - 82px))  —— 高度里没给底部动作坞留位置，
-      矮视口/展开次级区时输入行会被挤出面板。 */
- height:clamp(320px,calc(100dvh - 82px - var(--bottombar,0px)),620px);
+      height:min(560px,calc(100dvh - 82px))                              —— 没给底部动作坞留位置；
+      height:clamp(320px,calc(100dvh - 82px - var(--bottombar,0px)),620px) —— 封顶 620 把下面的位置浪费了。 */
+ height:max(320px,calc(100dvh - 82px - var(--bottombar,0px)));
  overflow:hidden;padding:14px;
  border:1px solid #698d7b;border-radius:14px;background:#1e2d32;box-shadow:0 15px 70px #0009}
+/* ── 面板打开时**工作台让位**（2026-09-29 真回归修复）──────────────────────────────
+   修的是什么（真 8765 实测，1440×900）：面板是 fixed 浮层 (994,62)→(1424,682)，
+   而工作台候选池是两等分网格的**右列**（首行 739→1305，566 宽，中心 x≈1022）
+   ⇒ 真实鼠标点候选行中心，`elementFromPoint` 命中的是 `#xiaoya-log`
+   ⇒ 选不进六只，工坊判据 14 条连锁红（`npm run roco:workshop-acceptance` 掉到 37/52）。
+   **生效的是文件末尾 Lead 写的那一条**（`body:has(#xiaoya-pop:not([hidden])) #team-workshop`）：
+   它用 `:has()` 自己读开合状态，只让工作台让位，比下面这条页面级重排更小、更准。
+   ⚠ 改钉不删（原文留档，别再改回来）——我这一版曾经生效过，但两条同时在场会把工作台挤两次：
+     @media(min-width:900px){
+       body[data-xy-panel-open="yes"] main{padding-right:446px}
+     }
+   `xiaoya.js` 的 `setOpen()` 仍然写 `body[data-xy-panel-open]`，但它现在**只是事实钩子**
+   （探针/排障读"面板开着没有"），**布局不依赖它** —— 别再拿它当布局开关。 */
 .xy-pop-head{display:flex;align-items:center;gap:8px;flex:0 0 auto}
 .xy-pop-head strong{font-size:15px}
 .xy-pop-head .muted{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .xy-pop-close{min-width:34px;padding:4px 9px;font-size:15px;line-height:1.2}
+/* ── 桌面「收起」（第三轮纠偏第 3 条，2026-09-29）──────────────────────────────
+   面板是纯叠加层（不重排正文），所以它需要能**让开**：收起后只剩标题行 + 展开入口那一行，
+   量不到任何被点击的落点；`#model-chip` 仍在（≥24px），R06 的判据不受影响。
+   ⚠ ≤560px 是整幅抽屉，收起没有意义（靠 ✕ 关）⇒ 那一档不显示这个按钮。 */
+.xy-collapse{min-height:24px;padding:3px 9px;font-size:12px;line-height:1.2;border-radius:8px;
+ border:1px solid #36495e;background:transparent;color:#c6d2de;cursor:pointer;flex:0 0 auto}
+.xy-collapse:hover{border-color:#6f9c7f;color:#e6f7ec}
+@media(max-width:560px){.xy-collapse{display:none}}
+/* 收起态：只留 head（标题/状态/收起/关闭）+ `#xy-fold-more` 的 summary 行（含 `#model-chip`）。
+   面板高度改成按内容（不再占 620px），位置仍在右上。 */
+#xiaoya-pop[data-xy-collapsed="yes"]{height:auto;max-height:calc(100dvh - 82px - var(--bottombar,0px))}
+#xiaoya-pop[data-xy-collapsed="yes"] .xy-log,
+#xiaoya-pop[data-xy-collapsed="yes"] .xy-quick,
+#xiaoya-pop[data-xy-collapsed="yes"] .xy-form,
+#xiaoya-pop[data-xy-collapsed="yes"] .xy-pop-more-body,
+#xiaoya-pop[data-xy-collapsed="yes"] .xy-new-msg{display:none}
 .xy-log{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin:10px 0}
-/* 常驻两行状态（`#model-chip` 能力状态 + 焦点行）：固定，不参与滚动。
-   2026-09-30 加（U07）：它们原来和对话区抢同一列高度。 */
-.xy-pop-meta{flex:0 0 auto}
-/* 收起的二级区（模型三格 / 对话动作 / 记忆 / 身份）：默认不占版面，对话占主要空间。
-   ⚠ 里面的 id/class 一个都没换（`#model-list` / `#open-memory` / `#open-connect` / `#xiaoya-roles`），
-   只是搬进这一个 `<details>`；`#model-chip` **不在这里**（判据要它一直看得见）。 */
+/* ⚠ 2026-09-29（R06）`.xy-pop-meta` 那一层已取消：能力状态短读法上了展开入口那一行
+   （`#model-chip` 在 `<summary>` 里，一直可见），长句与焦点行进二级。旧规则留档：
+     .xy-pop-meta{flex:0 0 auto}   ← 那时它常驻两行（能力状态 + 焦点行） */
+/* 收起的二级区（动作 / 记忆 / 焦点行 / 模型格 / 身份）：默认不占版面，对话占主要空间。
+   ⚠ 同名 id 一个都没换（`#model-list` / `#open-memory` / `#xiaoya-roles` / `#model-chip`）。
+   R06（2026-09-29 人类第二轮纠偏）：默认顶部只留标题 + 关闭 + **一个**展开入口；
+   原来那两行长状态（能力状态句 / 最近看过培养诊断）进二级。 */
 .xy-pop-more{flex:0 0 auto;margin:6px 0 0}
-.xy-pop-more>summary{cursor:pointer;font-size:12.5px;color:#a9c6d8;list-style:none}
+/* 入口那一行：左边「设置」，右边是 `#model-chip` 的**短**读法，箭头靠最右。 */
+.xy-pop-more>summary{cursor:pointer;font-size:12.5px;color:#a9c6d8;list-style:none;
+ display:flex;align-items:center;gap:8px}
+.xy-fold-title{flex:0 0 auto}
 .xy-pop-more>summary::-webkit-details-marker{display:none}
 .xy-pop-more>summary::after{content:'▾';margin-left:8px;color:#7f93a6;font-size:11px}
 .xy-pop-more[open]>summary::after{content:'▴'}
+/* ── 2026-09-30（半成品排查 P0）：`#model-chip` 与短状态句搬进**独立的 .xy-status-row** ──────
+   为什么（实测）：chip 曾在 `>summary` 里右对齐，未连档 198px ⇒ 起于 x=1189，
+   而那一行中心 x=1209 ⇒ `elementFromPoint(中心) = #model-chip`，**真点击被导航到 /connect.html**。
+   搬出来之后：summary 那一行的中心**结构上不可能**是 chip；chip 文案不缩、仍可见、仍可点。
+   ⚠ `min-height:24px` 仍然不许删（判据 `live-model-status` 量高度，`h < 24` 直接判红）。 */
+.xy-status-row{display:flex;align-items:center;gap:8px;flex:0 0 auto;margin:6px 0 0}
+.xy-status-row .muted{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* `#model-chip`（短读法）：两个四字短语 + 连接入口（`href="connect.html"`）。
+   折行与省略都不做 —— 它必须**看得到**（`white-space:nowrap`）。 */
+.xy-status-row #model-chip,
+.xy-pop-more>summary #model-chip{margin-left:auto;display:inline-flex;align-items:center;
+ min-height:24px;padding:2px 9px;border:1px solid #36495e;border-radius:999px;background:#16222f;
+ font-size:12px;line-height:1.4;color:#c6d2de;text-decoration:none;white-space:nowrap}
+.xy-status-row #model-chip:hover,
+.xy-pop-more>summary #model-chip:hover{border-color:#6f9c7f;color:#e6f7ec}
+.xy-status-row #model-chip[data-roco-model="connected"],
+.xy-pop-more>summary #model-chip[data-roco-model="connected"]{color:#8dd49c;border-color:#3f6b4c}
+.xy-pop-more>summary #model-chip[data-roco-model="offline"]{color:#e6cf8a;border-color:#5c4a24}
 .xy-pop-more-body{display:grid;gap:2px;margin-top:6px}
+/* 二级里的能力状态长句（含规则集 ID 与两条后果）——默认不占版面（R06）。 */
+.xy-cap-detail{flex:0 0 auto;margin:2px 0 0;font-size:12px;line-height:1.5;color:#9caebe;overflow-wrap:anywhere}
+/* R07（2026-09-29）：「调试连接」按钮已从产品入口移除；换模型/补密钥走 `#model-chip` 那条链
+   （`<a href="connect.html">`）。这里只留一句指路，不再是第二个按钮。 */
+.xy-connect-hint{margin:6px 0 0;font-size:11.5px;color:#8fa3b4}
 /* 「↓ 有新消息」：玩家在读历史时新消息来了才出现（U07 第 3 条）。
    绝对定位在输入行上方 —— **不占版面、不推动对话区**，点一下回到最新。 */
 .xy-new-msg{position:absolute;left:50%;transform:translateX(-50%);bottom:78px;z-index:3;
@@ -609,8 +677,13 @@
    改成只命中外层那个表头：`> strong:first-child`（正文里的 `<strong>` 永远不是第一个子节点）。
    旧规则留档：.xy-entry strong{display:block;font-size:12px;color:#a5c7b2;margin-bottom:4px} */
 .xy-entry > strong:first-child{display:block;font-size:12px;color:#a5c7b2;margin-bottom:4px}
-.xy-entry details{margin-top:6px}
-.xy-entry summary{font-size:12px;color:#a9c6d8;cursor:pointer}
+.xy-entry details{margin-top:4px}
+/* ⚠ 2026-09-29（第五轮① 人类：「依据那两行可以小点吧？」）：`<summary>依据</summary>` 是**入口**，
+   字号保持 12px（别小到看不清），改的是**颜色更淡 + 行距收紧 + 间距收紧**；文案一个字没动。
+   旧规则原文留档（改钉不删，别再改回来）：
+     .xy-entry details{margin-top:6px}
+     .xy-entry summary{font-size:12px;color:#a9c6d8;cursor:pointer} */
+.xy-entry summary{font-size:12px;line-height:1.35;color:#8296a8;cursor:pointer}
 .xy-entry p{margin:4px 0 0;font-size:12px;color:#b9c9d6}
 /* ── U08 建议卡片（`decorateAdvice()` 画的，2026-09-30）──────────────────────────
    画在回答气泡**里面**、正文下方；默认收起，展开才有五行 + 两个按钮。
@@ -635,7 +708,13 @@
 .xy-form input{flex:1;min-width:0}
 .xy-form button{min-height:36px}
 @media(max-width:560px){
- .xy-pop{right:0;left:0;top:auto;bottom:0;width:100vw;height:min(70dvh,560px);
+ /* 第五轮②（2026-09-29，人类：「这个对话框可以再长点啊，下面那么多位置，显示都显示不完」）：
+    窄屏也要跟着变高 —— 70dvh/560px 在 844 高的屏上只占 560（消息区 321px），下面还空着 284。
+    现在 88dvh（844 档 = 743px，消息区 ≈504px），仍留 12dvh 让玩家看得见"这是浮层"。
+    旧规则原文留档（改钉不删，别再改回来）：
+      .xy-pop{right:0;left:0;top:auto;bottom:0;width:100vw;height:min(70dvh,560px);
+        border-radius:14px 14px 0 0;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))} */
+ .xy-pop{right:0;left:0;top:auto;bottom:0;width:100vw;height:min(88dvh,760px);
   border-radius:14px 14px 0 0;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
  .xy-fab{min-height:44px}
 }
@@ -643,15 +722,26 @@
 /* ── 单独的小芽页面（人类 2026-09-25：「小芽就直接出一个单独的小芽页面，可以大点」）
     与弹出式那一个共用 `xiaoya.js` 的同一段对话实现，只是版式更大、能常驻。
     U07（2026-09-30）四行网格：状态两行 / 收起的二级区 / **唯一滚动的**对话区 / 输入那一块。
+    ⚠ 2026-09-30（半成品排查 P1）：行模板的**顺序**原来与子元素顺序错位 —— 实测 `bodyRows =
+      30px 349.266px 308.734px 0px`，`1fr` 那一行落在**输入区**上 ⇒ 单行 `<input>` 被拉伸到
+      **101–146px 高**（`form=[138,697,1164,101]`、`input=[138,697,1061,101]`），而消息区只有 349px。
+      修法：把 `1fr` 给**消息区**（子元素顺序＝折叠行 / 消息区 / 输入区；`#xy-new-msg` 绝对定位不占行）
+      ⇒ 消息区吃剩余空间并内部滚，输入区回到自然高度。
     旧规则留档（改钉不删，别再改回来）：
       grid-template-rows:minmax(0,1fr) auto —— 只有两行，而 `xiaoya.js` 会往 `#xy-log` 前面
-      插进状态与折叠好几块 ⇒ 第一块（能力状态那一行）被撑成 1fr、对话区反而按内容长。 */
-.xy-page-body{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:10px;position:relative;
- min-height:calc(100dvh - 150px)}
+      插进状态与折叠好几块 ⇒ 第一块（能力状态那一行）被撑成 1fr、对话区反而按内容长。
+      grid-template-rows:auto auto minmax(0,1fr) auto —— 行序与子元素错位，`1fr` 落到输入区。
+     ⚠ 还得是 `height`（定高）不是 `min-height`：`min-height` 下 1fr 行**没有上界**，消息一多
+       `#xy-log` 就自己长（实测 1554px / 390 档 3707px）⇒ 把输入行顶到视口外（`input在视口=False`、
+       页 scrollY 747/3042）。定高之后 `1fr` 行才有界 ⇒ `#xy-log{overflow-y:auto}` 真的内部滚。
+       ⚠ 减 158（不是 150）：390×844 档实测输入行 bottom=848 > 844（差 4px 挤出屏幕）⇒ 多留 8px 安全边。 */
+.xy-page-body{display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;gap:10px;position:relative;
+ height:calc(100dvh - 158px)}
 .xy-page-log{overflow-y:auto;overscroll-behavior:contain;min-height:0;padding:4px 2px}
-.xy-page-compose{display:grid;gap:9px}
+.xy-page-compose{display:grid;gap:9px;align-content:start}
+.xy-page-compose .xy-form{flex:0 0 auto}
 .xy-page-compose .xy-form input{min-height:44px;font-size:15px}
-.xy-page-compose .xy-form button{min-width:96px}
+.xy-page-compose .xy-form button{min-width:96px;align-self:center}
 .xy-page-roles{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .xy-page-roles .muted{margin-right:4px}
 @media(max-width:560px){.xy-page-body{min-height:auto}}
@@ -690,3 +780,29 @@
 .stale-page-banner button{border:1px solid #c79a3a;background:#c79a3a;color:#221703;
  font:inherit;font-weight:600;padding:4px 10px;border-radius:8px;cursor:pointer}
 .stale-page-banner button:hover{background:#e0b455}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ⚠⚠ 2026-09-29（Lead 修真实回归）：**小芽面板打开时，工作台右侧必须让开。**
+   问题（真机实测 1440×900 · roco.html）：面板 `.xy-pop` 430×620、右锚 16px ⇒ 左沿在 **x=994**；
+   而工作台 `.tw-grid` 是两等分网格，候选列在 **739→1318** ⇒ **候选池首行（566 宽）的中心 x≈1022
+   正好落在面板底下** ⇒ `elementFromPoint` 命中的是 `#xiaoya-log` 而**不是候选行**。
+   后果：**真实鼠标点不进候选池**（合成 `.click()` 不受影响，所以单测全绿也发现不了）——
+   这是 `roco:workshop-acceptance` 从 **53/53 掉到 37/52** 的根因（归因见 §136–§138）。
+   为什么用 `:has()`：面板的开合状态写在 `#xiaoya-pop[hidden]` 上（**已实测：关着时 hidden=true**），
+   所以在 CSS 里就能读到，**不必去改 `xiaoya.js`**（那是 R06 的写域，不抢）。
+   为什么只在大屏生效：窄屏面板是整幅抽屉，工作台本来就是单列，不需要让位。
+   ⚠ 不许改 `.xy-pop` 的 z-index（78 = 阶段三 D3：要 >75 结算卡、<80 `#pet-detail`）。
+
+   ⚠⚠ 2026-09-29 **第三轮纠偏第 3 条把它撤了**（人类原话：「默认浮层/抽屉开关**不得改变**盒子/配队正文
+   宽度/位置或导致重新排版」；图4 铁证：面板一开，候选池那一列从 739→1305 被压到 565→1028）。
+   这条 `margin-right` 正是那个"重新排版"本身 ⇒ 产品上必须是**纯叠加层**。
+   旧规则原文留档（改钉不删，别再改回来）：
+     @media (min-width: 1024px) {
+       body:has(#xiaoya-pop:not([hidden])) #team-workshop { margin-right: 330px; }
+     }
+   代价（如实记）：面板开着时它会盖住工坊候选列右半边（行中心 x≈1022、`#tw-scope-all` x≈1165、
+   `#tw-cand-next` x≈1174 都在 430 宽面板之下）。面板本身因此加了**收起**控件
+   （`#xiaoya-collapse`，收起后只剩标题/状态/展开入口，量不到任何落点）；
+   而 `roco:workshop-acceptance` 的池子步骤**必须先把面板关掉**才有意义 ——
+   它的 `openCoachPanel()/closeCoachPanel()` 还在探测**已退役**的 `#companion-card`，
+   所以从不真正关闭（详见交接说明）。 */

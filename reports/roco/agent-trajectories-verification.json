@@ -82,20 +82,20 @@
  },
  "replay": {
   "total": 6912,
-  "passed": 6912,
-  "failed": 0,
+  "passed": 6537,
+  "failed": 375,
   "by_arm": {
    "replay": {
     "total": 864,
-    "passed": 864
+    "passed": 792
    },
    "baseline": {
     "total": 864,
-    "passed": 864
+    "passed": 792
    },
    "stubborn": {
     "total": 864,
-    "passed": 864
+    "passed": 792
    },
    "stop_now": {
     "total": 864,
@@ -107,18 +107,49 @@
    },
    "drop_args": {
     "total": 864,
-    "passed": 864
+    "passed": 792
    },
    "blind": {
     "total": 864,
-    "passed": 864
+    "passed": 792
    },
    "local_4b": {
     "total": 864,
-    "passed": 864
+    "passed": 849
    }
   },
-  "first_failures": [],
+  "first_failures": [
+   {
+    "traj_id": "rl-skill-f0-01@camp-locked-0#replay",
+    "problems": [
+     "回放 query_rules 的回执与记录不一致（记录 9ded66545614，现在 681423da18be）"
+    ]
+   },
+   {
+    "traj_id": "rl-skill-f0-01@camp-locked-0#baseline",
+    "problems": [
+     "回放 query_rules 的回执与记录不一致（记录 9ded66545614，现在 681423da18be）"
+    ]
+   },
+   {
+    "traj_id": "rl-skill-f0-01@camp-locked-0#stubborn",
+    "problems": [
+     "回放 query_rules 的回执与记录不一致（记录 9ded66545614，现在 681423da18be）"
+    ]
+   },
+   {
+    "traj_id": "rl-skill-f0-01@camp-locked-0#drop_args",
+    "problems": [
+     "回放 query_rules 的回执与记录不一致（记录 9ded66545614，现在 681423da18be）"
+    ]
+   },
+   {
+    "traj_id": "rl-skill-f0-01@camp-locked-0#blind",
+    "problems": [
+     "回放 query_rules 的回执与记录不一致（记录 9ded66545614，现在 681423da18be）"
+    ]
+   }
+  ],
   "skipped": 0,
   "note": null
  },
@@ -236,5 +267,5 @@
   "drift_example": null,
   "passes": true
  },
- "verdict": true
+ "verdict": false
 }

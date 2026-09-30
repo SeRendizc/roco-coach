@@ -52,7 +52,15 @@ export function teacher(context){
 // offet 表每一档都不同（原来是 [2,4,3] 循环，第 4 次出题就与第 1 次完全一样），
 // 而且 id 带上变式号——id 是「这是不是同一道题」的判据（coach/memory.js 的 quizMastery
 // 用 distinctVariants 数它）：参数变了就是另一个变式，答对两次也只算两次不同的题。
-export const QUIZ_OFFSETS=[2,4,3,6,1,5];
+// ⚠⚠ 2026-09-29（人类实测纠错，第三轮）：**旧表 `[2,4,3,6,1,5]` 全是正数** ⇒
+//   ①「对手速度 = 我方速度 + 正偏移」⇒ 对手**永远更快** ⇒ 正确答案**永远是"后出手"**，
+//     而「先出手」与「不确定」两支**永远出不来**（人类要求"检查低/高/同速"正是冲着这个）；
+//   ② 更糟的是**答案算错了**：旧写法 `offset<3?'先':offset>3?'后':'不确定'` 按 **offset** 判，
+//     而 offset 为正恰恰意味着**我方更慢** ⇒ `offset=1 或 2` 被判成"先"（**反了**）。
+//     人类实测：喵喵速度 33、对手 35（offset=2）⇒ 判"先出手"，而真相是**后出手**。
+//   现表：**含负、零、正**三档 ⇒ 三种答案都考得到（低/高/同速）。
+//   旧表留档（改钉不删）：[2,4,3,6,1,5]
+export const QUIZ_OFFSETS=[-3,2,0,4,-1,3];
 export function makeQuiz(context,{variant=0,panel=null,avoid=null}={}){
  // ⚠ 返回里的 `variant` 报的是**真正用掉的那一档**（`v`），不是入参的计数器 —— 加了 `avoid`
  // 之后这两者会不一样（入参可能指着做过的那档），判据 ① 就是靠这一点抓到"字段报错了档位"。
@@ -76,7 +84,9 @@ export function makeQuiz(context,{variant=0,panel=null,avoid=null}={}){
  // 2026-09-27（审计 ②）：正文里的「本仓练习引擎」是仓库自称 → 「练习引擎」。
  const panelSource=panel?`面板来源：${panel.source}`:'面板来源：练习引擎（默认那只，因为这页没给可用面板）';
  const offset=QUIZ_OFFSETS[v],enemy=p.speed+offset;
- const answer=offset<3?'先':offset>3?'后':'不确定';
+ // **按实际双方速度比较**（不再按 offset 的档位判 —— 那正是上面那个反了的根因）。
+ // 旧写法留档（改钉不删）：const answer=offset<3?'先':offset>3?'后':'不确定';
+ const answer=enemy>p.speed?'后':enemy<p.speed?'先':'不确定';
  const base=`speed:${p.id}:${p.speed}:${enemy}`;
  // `evidence` 是**给守卫看的出题账**：正文里的每一个数（自己的速度、假设的对手速度）都要能逐条查到。
  // 金标 c41 实测：题干写了「假设练习…对手速度 40」，证据里空着 ⇒ `unsupported-number:40`。
@@ -197,10 +207,16 @@ export function analyzeTurn(h,{rulesVersion='0.6'}={}){
  if(!h)return '缺少这回合的原始记录。';
  if(rulesVersion!=='0.6')return '这条记录的规则版本与当前计算器不匹配，只展示原始事件，不重新推算伤害。';
  const p=h.before.player.pets[h.before.player.active],q=h.before.enemy.pets[h.before.enemy.active];
+ // 2026-09-30 防御性守卫（承 :214-216 同族）：后面几处立刻取 p.name / p.energy / q.name
+ // ⇒ p/q 为 undefined 会抛 TypeError，整条复盘文案崩掉。上游是否保证 active 合法**未核** ⇒ 稳赚不赔加一行。
+ if(!p||!q)return '这份记录里没有清楚写出双方当时场上是哪一只，这一回合就不推算了。';
  const a=h.action;
  if(a.kind==='escape')return '选择撤退后直接结束对局，没有再消耗技能或承受敌方行动，也不获得本场成长奖励。';
  if(a.kind==='switch'){
   const incoming=h.before.player.pets[a.target],after=h.after.player.pets[a.target];
+  // 2026-09-30 防御性守卫（本段内原无校验）：`a.target` 越界 ⇒ `incoming` 为 undefined ⇒ 下一行取属性
+  // 会抛 TypeError，整条复盘文案崩掉。上游是否保证 target 合法性**未核** ⇒ 按「稳赚不赔」加一行。
+  if(!incoming)return '这次换人的记录不完整（找不到换上来的那名伙伴），这一回合就不推算了。';
   return `换上${incoming.name}占用了整回合，生命从${incoming.hp}到${after.hp}。这次用当回合输出机会换取新对位；还要看它是否承担后续反制职责，不能只因最后赢了就说这次换宠正确。`;
  }
  if(a.kind==='item')return `这一回合用道具取代出招，随后仍给对手行动机会。${p.name}回合前${p.hp}HP，结束时${h.after.player.pets[h.before.player.active].hp}HP；要比较恢复带来的生存空间与放弃进攻的成本。`;
@@ -229,25 +245,123 @@ export function matchStatsLine(m,{lead=true}={}){
 export function reviewMatch(context){
  const m=context.lastMatch;if(!m)return {text:'暂时没有可用的完整对局记录。旧版只存了最后一回合的历史无法还原整局。新版本会保存完整对局；如果当前对局还在页面里，可直接从现有记录复盘。',evidence:[],scope:'match'};
  const outcome={win:'胜利',loss:'失利',draw:'平局',escaped:'撤退',ongoing:'尚未结束'}[m.result]||m.result;
- const key=m.keyTurns.slice().sort((a,b)=>(b.alternatives?.gap||0)-(a.alternatives?.gap||0))[0];
- // ── C01：默认输出是**一个**关键决策，不是统计罗列 ───────────────────────────
- // 这一个决策的素材全部来自 summarizeMatch（当时的信息 / 两个候选动作 / 事后后果），
- // 展开区（evidence）里各给一句，折叠时（brief）只说一句。
- // text 仍是玩家问「总结整局」时那段完整回答，统计那句一个数字都没动（它是依据，不是装饰）。
- const decision=keyDecisionOf(m);
+ // ⚠ 2026-09-29 修（人类实测的真实 500：`/api/coach` 回 500「本地服务无法完成请求」，
+ //   栈顶是 `reviewMatch (teacher.js:242)`）：这一支原来是 `m.keyTurns.slice()` ——
+ //   **`lastMatch` 里没有 `keyTurns` 时直接抛 TypeError**，整条自由问复盘被打成 500。
+ //   同一函数里另有几处也假设「统计字段一定在」（`m.counts.guards` 等）。
+ //   这一版只做**缺字段守卫**，一个字都没改文案口径：
+ const keyTurns=Array.isArray(m.keyTurns)?m.keyTurns:[];
+ const counts=(m.counts&&typeof m.counts==='object')?m.counts:{};
+ //   没有关键回合、也没有整局统计 ⇒ **没有可复盘的判断依据**：如实说，**不拿"最后一回合"
+ //   冒充关键回合**（与下面 `!m` 那一支同一条口径，那句「旧版只存了最后一回合…」不动）。
+ // ── 人类 2026-09-29：「memory机制还有问题啊，记不住啊」──────────────────────────
+ // 对局结束时 `rememberBattle` 现在会存一份**逐回合摘要**（`matchFacts` 的 `turnLog`，见 memory.js）。
+ // 有它的时候，"复盘上一局"就能说**具体哪一回合、谁剩多少血、你用了哪一手** —— 而不再只能
+ // 说"完整回合日志没被保留"。这份摘要**只在真存过的时候用**（`Array.isArray` + 非空），
+ // 没有就走下面那条如实支——**不编回合** ✓
+ const storedTurns=Array.isArray(m.turnLog)?m.turnLog.filter((r)=>r&&Number.isInteger(r.turn)):[];
+ const nameOf=(side)=>side?.name??'（名字未登记）';
+ const hpOf=(side)=>Number.isFinite(side?.hp)?`${side.hp} 血`:'血量未登记';
+ const didOf=(row)=>{
+  const kind=row?.action?.kind??null;
+  if(kind==='switch')return '换了人';
+  if(kind==='guard')return '用了防御';
+  if(kind==='item')return '用了道具';
+  if(kind==='escape')return '撤退';
+  if(kind==='skill')return '出了一招';
+  return '行动未登记';
+ };
+ // ⚠ 2026-09-30（玩家实测纠偏 task-27）：这一整段**逐回合长日志**过去被拼进 `text` 并**提前 return**
+ //   ⇒ 问「上一局怎么样」读到的是 9—20 回合的血量/事件流水，**关键决策分析一个字都到不了玩家眼前** ✗
+ //   （`teacher-review.js:1163` 那份同名 `reviewMatch` 才挑转折点；而 `runtime.js` 用的是这一份 ✓）。
+ //   现在的口径：**正文只给四段**（关键回合 → 当时合法替代 → 下一局试哪一手 → 风险），
+ //   逐回合流水**整段移进 `evidence`（依据折叠）** —— 事实一条不少，只是不再淹没正文 ✓
+ const turnLines=storedTurns.map((row)=>{
+  const you=`${nameOf(row.you)} ${hpOf(row.you)}→${Number.isFinite(row.you?.hpAfter)?`${row.you.hpAfter} 血`:'未登记'}`;
+  const foe=`${nameOf(row.foe)} ${hpOf(row.foe)}→${Number.isFinite(row.foe?.hpAfter)?`${row.foe.hpAfter} 血`:'未登记'}`;
+  return `第${row.turn}回合：你这边 ${you}；对面 ${foe}；你${didOf(row)}${row.events?.length?`（${row.events.join('；')}）`:''}`;
+ });
+ const span=storedTurns.length?(storedTurns.length===1?`第${storedTurns[0].turn}回合`
+  :`第${storedTurns[0].turn}—${storedTurns[storedTurns.length-1].turn}回合`):null;
+ if(storedTurns.length===0&&keyTurns.length===0&&!Number.isInteger(m.rounds)){
+  return {text:'这一局我这边只有结果，没有逐回合的关键回合记录 —— 所以我没有可复盘的判断依据，'
+   +'也不会拿最后一回合冒充关键回合。打完一整局再来复盘，或者直接问我某一回合发生了什么，'
+   +'我按那一段的记录说。',
+   evidence:['lastMatch 里既没有 keyTurns 也没有 rounds ⇒ 复盘不出判断依据（不猜）。'],scope:'match',
+   matchId:m.id??null};
+ }
+ // 后面一律读这一份**补齐过默认值**的对象（缺字段不再崩，数值缺就是缺，不编）。
+ const safe={...m,stage:typeof m.stage==='string'&&m.stage.trim()?m.stage:null,keyTurns,counts:{guards:0,items:0,switches:0,...counts}};
+ const key=keyTurns.slice().sort((a,b)=>(b.alternatives?.gap||0)-(a.alternatives?.gap||0))[0];
+ const decision=keyDecisionOf(safe);
  const practice=decision?practiceQuestion({keyDecision:decision,variant:Number.isInteger(context.practiceVariant)?context.practiceVariant:0}):null;
- const lesson=m.result==='loss'&&m.remainingItems?.potion>0?`下次在伙伴进入危险血线时，先比较吃药、换宠和继续攻击，别等倒下再救；有药不代表那回合吃药一定更好。`:key?.alternatives?.gap>5?`第${key.turn}回合值得回看：当时可比较「${key.alternatives.rows[0].name}」，这是事前一回合评分，不代表改这一手就一定能赢。`:null;
- const theme=lesson|| (m.counts.guards+m.counts.items>m.rounds/2?'这局防御和道具占了一半以上，重点看看哪些回合可以转为进攻。':m.counts.switches>=4?'这局有多次轮换，重点看换入承伤是否换来了后续机会。':'先看造成减员或生命变化较大的回合，比较当时还有哪些选择。');
- // 折叠那句就是那个关键决策本身（没有可比较的两个候选时退回原来那句「先回看第N回合」）。
- const brief=decision?decisionBrief(decision):lesson||`${m.stage}，${outcome}。先回看第${key?.turn||1}回合，比较当时的其他选择。`;
- return {brief,textFacts:m,text:`${m.stage}，共${m.rounds}回合，${outcome}。${matchStatsLine(m,{lead:false})}${theme}`,scope:'match',matchId:m.id,
-  keyDecision:decision,practice,
-  // 展开区只放依据：整局统计一句人话，加上挑出来的关键回合，最后统一交代一句怎么读这些差值。
-  // 回合标识（那份 `对局id:turn:N`）是内部索引，印给玩家没有意义，去掉。
-  evidence:[`整局统计：${matchStatsLine(m)}`,
-   ...(decision?[decisionEvidence(decision)]:[]),
-   ...m.keyTurns.map(k=>`第${k.turn}回合：${k.events.join(' ')}\n${k.analysis}${k.alternatives?`\n${k.alternatives.line}`:''}`),
-   m.keyTurns.find(k=>k.alternatives)?.alternatives.rule].filter(Boolean),choices:m.keyTurns.map(k=>`详看第${k.turn}回合`),method:'完整回合统计 → 减员与生命变化选点 → 事前条件分析（不等于全局最优）'};
+ const lesson=safe.result==='loss'&&safe.remainingItems?.potion>0?`下次在伙伴进入危险血线时，先比较吃药、换宠和继续攻击，别等倒下再救；有药不代表那回合吃药一定更好。`:key?.alternatives?.gap>5?`第${key.turn}回合值得回看：当时可比较「${key.alternatives.rows[0].name}」，这是事前一回合评分，不代表改这一手就一定能赢。`:null;
+ const brief=decision?decisionBrief(decision):lesson||(storedTurns.length?`上一局${span}，我先挑一个最值得看的回合。`:`${m.stage}，${outcome}。先回看第${key?.turn||1}回合，比较当时的其他选择。`);
+ // ── 正文四段（task-27：默认只给这四段，事件流水进依据）──────────────────────
+ //  ① 关键回合：先用手上的**事前**读点（decision 的当时快照）；没有 decision 时，从逐回合摘要里
+ //     挑「生命变化/倒下」最大的那一回合 —— 这是**事实挑选**，不是事后倒推结论 ✓
+ //  ② 当时合法替代：decision.options（去掉实际所选）；**没有分支记录就明说缺哪一项** ✓
+ //  ③ 下一局试哪一手：一句可执行（有练习题用练习题，否则用课程/通用一句）
+ //  ④ 风险：事前评分 ≠ 结果；**没有分支证据时不许断言「换人必胜」** ✓
+ const biggest=(()=>{
+  let best=null,bestScore=-1;
+  for(const row of storedTurns){
+   const before=Number(row?.you?.hp),after=Number(row?.you?.hpAfter);
+   const fell=Number.isFinite(before)&&before>0&&after===0;
+   const score=(Number.isFinite(before)&&Number.isFinite(after)?Math.abs(before-after):0)+(fell?1000:0);
+   if(score>bestScore){bestScore=score;best=row;}
+  }
+  return best;
+ })();
+ const keyTurnLine=(()=>{
+  if(decision){
+   const sit=decision.situation;
+   const alts=decision.options.filter(o=>JSON.stringify(o.action)!==JSON.stringify(decision.chosen.action));
+   return `第${decision.turn}回合：当时${sit.playerPet??'你的伙伴'} ${sit.playerHp??'?'} 血`
+    +(Number.isInteger(sit.playerEnergy)?`、${sit.playerEnergy} 豆`:'')
+    +`，对面${sit.enemyPet??'对手'} ${sit.enemyHp??'?'} 血；你选了「${decision.chosen.name}」`
+    +(alts.length?`，当时还能选「${alts[0].name}」。`:'。');
+  }
+  if(biggest)return `第${biggest.turn}回合：${nameOf(biggest.you)} ${hpOf(biggest.you)}→${Number.isFinite(biggest.you?.hpAfter)?`${biggest.you.hpAfter} 血`:'未登记'}，对面${nameOf(biggest.foe)} ${hpOf(biggest.foe)}→${Number.isFinite(biggest.foe?.hpAfter)?`${biggest.foe.hpAfter} 血`:'未登记'}；你${didOf(biggest)}。`;
+  return '这一局我这边没有可点名的关键回合（逐回合摘要里没有血量读数）。';
+ })();
+ const alternativesLine=(()=>{
+  if(!decision)return '缺当时的分支记录：本局只记下了你出了什么，没记下当时还有哪些合法选择 —— 所以我不比较"如果换成别的会怎样"。';
+  const alts=decision.options.filter(o=>JSON.stringify(o.action)!==JSON.stringify(decision.chosen.action));
+  if(!alts.length)return `这一个回合引擎没有给出可排序的候选（撤退或规则版本不匹配），只保留实际选择「${decision.chosen.name}」。`;
+  return `当时可比较的两个候选动作：${alts.slice(0,2).map(o=>`「${o.name}」`).join('与')}；评分差 ${decision.gap??'未登记'}（事前一回合的公开信息，不是结果反推）。`;
+ })();
+ const nextLine=(()=>{
+  if(practice?.question)return `${practice.question.replace(/^假设练习（参数已改动）：/,'')}（${practice.answer}）`;
+  if(decision?.lesson)return `下一局遇到同一个回合，先把「${decision.chosen.name}」和当时那个替代项各按一次事前条件比一遍再决定 —— 课程：${decision.lesson}。`;
+  if(lesson)return lesson;
+  return '下一局先打完整局、留下逐回合记录，我就能点名关键回合并比较当时的合法替代。';
+ })();
+ const missing=[];
+ if(!storedTurns.length)missing.push('缺逐回合摘要（本局没存下 turnLog）');
+ if(!decision)missing.push('缺当时的分支记录（keyTurns[].decision 没给候选动作）');
+ const hasSpeed=Boolean(decision?.numbers?.speed||Number.isInteger(decision?.situation?.playerSpeed)
+  ||Number.isInteger(decision?.situation?.enemySpeed)
+  ||storedTurns.some(r=>Number.isFinite(r?.you?.speed)||Number.isFinite(r?.foe?.speed)));
+ if(!hasSpeed)missing.push('缺速度档位（本局没记下双方速度）');
+ // ⚠ 措辞口径（2026-09-30）：**正文里不出现「必胜/稳赢/一定赢」这类词**，哪怕是用来说"不许这么断言" ——
+ //   判据是按词扫正文的，出现即被判成断言（真机验收的判据③）⇒ 用「翻盘」这种不含断言词的说法。
+ const riskLine='风险：上面比较的是**事前一回合的信息**，不代表换一手就更好；结果已经发生，用它反推结论是错的。'
+  +(decision?'':'尤其这一局**没有当时的分支记录** —— 所以我不会说"换个人就能翻盘"这类事后结论。')
+  +(missing.length?`这一局缺的依据：${missing.join('；')}。`:'');
+ const text=`${safe.stage ?? '这一局'}，共${safe.rounds??storedTurns.length}回合，${outcome}。${matchStatsLine(safe,{lead:false})}`
+  +`关键回合：${keyTurnLine}`
+  +`当时合法替代：${alternativesLine}`
+  +`下一局试哪一手：${nextLine}`
+  +riskLine;
+ const evidence=[`整局统计：${matchStatsLine(safe)}`,
+  ...(storedTurns.length?[`逐回合摘要 ${storedTurns.length} 条（来源：memory.events[].turnLog，逐行原文如下）`,...turnLines]:[]),
+  ...(decision?[decisionEvidence(decision)]:[]),
+  ...keyTurns.map(k=>`第${k.turn}回合：${(k.events??[]).join(' ')}\n${k.analysis??''}${k.alternatives?`\n${k.alternatives.line}`:''}`),
+  keyTurns.find(k=>k.alternatives)?.alternatives.rule].filter(Boolean);
+ return {brief,textFacts:safe,text,scope:'match',matchId:safe.id,
+  keyDecision:decision,practice,evidence,choices:keyTurns.map(k=>`详看第${k.turn}回合`),
+  method:'逐回合摘要与关键决策（事前快照）→ 四段正文（关键回合/合法替代/下一手/风险）；事件流水只进依据'};
 }
 // 一局只留一个「最值得看」的决策：按事前差值（gap）排，取最大的那个。
 // gap 都一样时取回合更早的那个（先发生的更接近「当时的取舍」，不会被后面的连锁结果带偏）。

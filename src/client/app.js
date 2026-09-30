@@ -7,6 +7,10 @@ import {freshMemory,readMemory,rememberBattle,recordCoachEvent,rememberDecision,
 import {STAGES,SCENARIOS,stageOptions,createScenario} from '../game/content.js';
 import {DIFFICULTIES,SPECIES,SKILLS,ITEMS,TYPES,HELD_ITEMS,createGame,resolveTurn,chooseEnemy,buildVersusOpponent,legalActions,active,effectiveSpeed,rankEnemyActions} from '../game/engine.js';
 import {companionEvents,companionSession,companionCueSlot,bubbleDurationMs,companionAvatar,COMPANION_DEFER} from '../coach/companion.js';
+// 陪练·休息提醒（2026-09-30 · 人类原话「在首页/培养页根据现实时间/游玩时间提醒休息」）：
+// **只读调用** coach 层（不改它 ✓）—— 与 `box.js` 的 `renderRestNote()` **同源**（同一份 callable ✓，不抄 ✗）。
+// (`freshMemory`/`readMemory` 已经在上面 memory.js 那行 import 里 ✓)
+import {companionLedger,companionReadings} from '../coach/companion.js';
 // 2026-09-27（人类：「加点不要了，按照洛手的机制来，根本没有这些」）：
 // `TRAINING`/`trainingCapacity`/`MAX_STAT_TRAINING`/`train`/`resetTraining` 不再 import ——
 // 营地页不再有加点这一档（等级/经验还在，那是原版就有的）。
@@ -109,6 +113,31 @@ function grownAt(id,level){
  return createGame(17,[id,...SPECIES.filter(p=>p.id!==id).slice(0,2).map(p=>p.id)],{pets}).player.pets[0];
 }
 // 营地 = 养成。只负责看伙伴和培养，出征相关的选择全部挪到出征页。
+/**
+ * 陪练·休息提醒（2026-09-30 · 人类原话「在首页/培养页根据现实时间/游玩时间提醒休息」）。
+ *
+ * 与 `src/client/box.js` 的 `renderRestNote()` **同源同形状**（同一份 callable ✓ 不抄 ✗）：
+ *   `companionReadings({cross: companionLedger(coachMemory, null, now), signals:null, context:{}, now})`
+ *   · `signals:null` = **还没开始打**（首页/营地块就是这一档）⇒ 凌晨 3 点实测「这么晚了。」✓
+ *   · `coachMemory` 是**模块级**（本文件 `:41`）✓ ⇒ 直接可用
+ * 渲染规矩：**只挑休息那一类读点**（`late-night` / `long-session`）；**没有就读点不产出 ⇒ 保持 hidden** ✓
+ *   （不许留空壳：本页 `#save-message` 那种 0 高度空槽就是反例 ✗）
+ */
+function renderRestNote(){
+ // **两份一起写**（`#109`：浮层那份管"默认进入"· 营地那份管"收起浮层后"；一个函数写两处 ⇒ 不会漂 ✓）
+ const now=Date.now();
+ let row=null;
+ try{
+  const cross=companionLedger(coachMemory,null,now);
+  row=companionReadings({cross,signals:null,context:{},now}).find(r=>/late-night|long-session/.test(String(r?.klass)))||null;
+ }catch{row=null;}
+ const text=String(row?.sentences?.[0]?.text||'').trim();
+ for(const id of ['home-rest','home-rest-float']){
+  const el=$(id);if(!el)continue;                    // #98：两个解引用都判空（任一不存在也不炸）
+  if(!text){el.hidden=true;el.textContent='';delete el.dataset.restNote;continue;}
+  el.textContent=text;el.hidden=false;el.dataset.restNote='yes';   // 可见面判据钩子（读数见 tmp/r33-rest-two-copies.mjs）
+ }
+}
 function camp(){
  wallet();$('record').textContent=`完成 ${profile.battles} 场 · 胜利 ${profile.wins} 场`;
  renderTypeFilter('camp-pages',()=>camp());
@@ -119,6 +148,7 @@ function camp(){
  document.querySelectorAll('#camp-roster [data-focus]').forEach(b=>b.onclick=()=>{advanceContext();focus=b.dataset.focus;showCamp();cultivation();});
  document.querySelectorAll('#camp-roster [data-pet]').forEach(b=>b.onclick=()=>{const id=b.dataset.pet;selected=selected.filter(x=>x!==id);camp();});
  cultivation();
+ renderRestNote();   // 休息提醒：`camp()` 是营地重画的**咽喉**（6 处调用都经过它 ✓）
 }
 let enemyRosterType='all';
 function filteredSpecies(which='rosterType'){const t=which==='enemyRosterType'?enemyRosterType:rosterType;return SPECIES.filter(p=>t==='all'||p.type===t);}
@@ -257,7 +287,9 @@ function renderPickSplit(){
 // 旧入口（#go-pve / #go-pvp / #camp-tab）与既有验收脚本照常工作。
 function showLauncher(){const l=$('home-launcher');if(!l)return;l.hidden=false;document.body.dataset.home='yes';}
 function hideLauncher(){const l=$('home-launcher');if(!l)return;l.hidden=true;document.body.dataset.home='no';}
-function showCamp(){$('deploy').hidden=true;$('camp-home').hidden=false;$('camp-tab').classList.add('selected');hideLauncher();}
+// ⚠ 休息提醒的第二处落点（#106）：`showCamp()` 是**例外** —— `:946` 的 `#camp-tab`
+// 那条点进来**不经过 `camp()`** ⇒ 只放咽喉会漏它 ✗（两条路互不相交 ⇒ 同一流程最多调一次 ✓）
+function showCamp(){$('deploy').hidden=true;$('camp-home').hidden=false;$('camp-tab').classList.add('selected');hideLauncher();renderRestNote();}
 function showDeploy(mode){matchMode=mode||matchMode;hideLauncher();$('camp-home').hidden=true;$('deploy').hidden=false;$('camp-tab').classList.remove('selected');syncMode();deployView();}
 /** 局末出口：回选队（人类点名「再来一局 ⇒ 回选队，不是回首页」）。
  *  先 toCamp() 把这一局清干净，再按刚打完的模式回到选队页（PVP 回 PVP 的选队）。

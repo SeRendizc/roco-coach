@@ -19,10 +19,24 @@ import './xiaoya.html';
   <button class="home-hot home-hot-xiaoya" id="home-xiaoya" data-home-target="xiaoya" type="button" aria-label="小芽：单独的小芽页面"><span>小芽</span></button>
   <a class="home-hot home-hot-pvp" id="home-pvp" data-home-target="pvp" href="#pvp" aria-label="PVP：先进选队页，再进战斗"><span>PVP</span></a>
   <p class="home-hint">点图上的三个按钮：培养 · 小芽 · PVP</p>
+  <!-- 陪练·休息提醒 —— **浮层里的那一份**（2026-09-30 · `#109`/`#110`）：
+       为什么要有两份：浮层是首页的**默认态**，而营地那一份（`#home-rest`）在浮层展开时**被盖住**
+       （实测：三点采样 3/3 返回 `div.home-stage < section#home-launcher` ⇒ `isSelf=false`）⇒
+       只留营地那份 ⇒ **默认进入时玩家看不到** ✗；只留浮层这份 ⇒ **收起浮层后又看不到** ✗。
+       ⇒ 两份的可见期**不重叠**（浮层 1440×900 全覆盖 ⇒ 展开时营地那份被盖）⇒ **不是重复** ✓（`#109`）。
+       ⚠ 形状**跟容器走**（`#110`）：这里照 `.home-hint` 那一行 ✓（不是照营地的 `muted`、也不是盒子的 `cmp-trouble`）。
+       ⚠ `id` 必须与营地那份不同（两份不能同 `id` ✓）；文案仍**直接用 coach 层给的 text** ✓；
+       **读点没产出就保持 hidden**（两份都不渲染空壳 ✓）。 -->
+  <p class="home-hint" id="home-rest-float" role="status" aria-live="polite" hidden></p>
  </div>
 </section>
 <main><header><h1>小兽训练场 <small id="mode-badge">营地</small></h1><div class="header-actions"><span id="wallet"></span><button id="nav-home">← 首页</button><button id="camp-tab" class="selected">营地与培养</button><button id="rules-toggle">规则</button><button id="coach-open">✦ 小芽</button></div></header>
-<div id="preview-bar" hidden><span id="preview-title"></span><div><button id="preview-again">重播提示</button><button id="preview-exit">退出体验</button></div></div><section id="camp-home"><div class="section-title"><h2>营地与培养</h2><span id="record" class="muted"></span></div><div class="camp-grid"><div><div class="launch-cards"><button id="go-pve" class="launch-card"><strong>⚔ 训练 · PVE</strong><small>按关卡挑战固定对手，教练全程协助</small></button><button id="go-pvp" class="launch-card"><strong>🧪 本地对战练习 · 三只</strong><small>老的三只分屏练习（对手自由配队）；正式的 PVP 请点上面「⚔ 开始 PVP」进标准六宠</small></button></div><nav id="camp-pages" aria-label="按属性筛选伙伴"></nav><div id="camp-roster" class="roster"></div></div><aside class="panel cultivation"><h2>伙伴培养</h2>
+<div id="preview-bar" hidden><span id="preview-title"></span><div><button id="preview-again">重播提示</button><button id="preview-exit">退出体验</button></div></div><section id="camp-home"><!-- 陪练·休息提醒（2026-09-30 · 人类原话「在首页/培养页根据现实时间/游玩时间提醒休息」）：
+     与盒子详情页那个 `#pet-rest` **同源同形状**（同一份 `renderRestNote()` ✓），但**类名不同**：
+     那边用 `cmp-trouble`（⚠ 实测：它在任何 CSS 里都**没有规则** —— 只是同名形状），这边用本页已有的 `muted` ✓
+     （不新造 CSS ✓）。文案**直接用 coach 层给的 text**（陈述句，不自己拼 ✗）；
+     **读点没产出就保持 hidden**（不留空壳 —— 别重演下面 `#save-message` 那种 0 高度空槽 ✗）。 -->
+ <p class="muted" id="home-rest" role="status" aria-live="polite" hidden></p><div class="section-title"><h2>营地与培养</h2><span id="record" class="muted"></span></div><div class="camp-grid"><div><div class="launch-cards"><button id="go-pve" class="launch-card"><strong>⚔ 训练 · PVE</strong><small>按关卡挑战固定对手，教练全程协助</small></button><button id="go-pvp" class="launch-card"><strong>🧪 本地对战练习 · 三只</strong><small>老的三只分屏练习（对手自由配队）；正式的 PVP 请点上面「⚔ 开始 PVP」进标准六宠</small></button></div><nav id="camp-pages" aria-label="按属性筛选伙伴"></nav><div id="camp-roster" class="roster"></div></div><aside class="panel cultivation"><h2>伙伴培养</h2>
   <!-- 2026-09-27（审计 ① 的第三处说明）：这一档的加点容易被误当成《洛克王国：世界》的培养。
        页面上的话必须说清"这是三只练习对战那一档的规则"，并把手游那一档的培养指到盒子页。 -->
   <p class="muted" id="cultivation-tier">这是<strong>三只练习对战</strong>那一档的培养（训练点与培养格是它自己的规则）。

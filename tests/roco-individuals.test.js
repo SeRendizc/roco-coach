@@ -12,7 +12,7 @@ import {
   individualsFromDataset, individualFromInstance, groupBySpecies, panelOfIndividual,
   refresh, duplicateIndividual, seedOf, rngFrom, rollNature, rollTalentStat, boostedStatsOf,
   canUndo, undoLastRefresh, lastRefreshOf, rollbackAdvice, lastRefreshNote, undoUsed,
-  REFRESH_LIMIT, ROLL_RULES, TALENT_STEP, TALENT_REFRESH_LEVELS,
+  REFRESH_LIMIT, ROLL_RULES, TALENT_STEP, TALENT_REFRESH_LEVELS, TALENT_BOOST_LIMIT,
 } from '../src/coach/individuals.js';
 import {STAT_KEYS, talentTierOf} from '../src/coach/talent.js';
 
@@ -377,4 +377,89 @@ test('⑫ 刷新要报落点；回滚之后重刷要报"换掉了谁"（且不�
   // 反证：把"没有 replaced 记录"的旧账喂进去 ⇒ 不许硬编一句"换掉了 X"
   const forged = {...again, history: again.history.map((row) => ({...row, replaced: undefined}))};
   assert.doesNotMatch(String(lastRefreshNote(forged)), /换掉了原来的/, '账上没有这一条就不许说');
+});
+
+/**
+ * ③b 天分加成**硬上限 3 级** —— 人类 2026-09-29 逐字：
+ * 「这个刷新天分，为啥是一直叠加？？？」+「刷新一样要注意是刷新不是叠加」。
+ *
+ * ⚠ 这条判据**绕过客户端**直接调 `refresh()`（Lead 点名要的反证）：
+ *   客户端那道闸挡不住直接调用 —— 实测连调 5 次能加到 5 项 ✗ ⇒ 规则必须钉在真值层。
+ * 逐次打印：账上有几条、落点是不是新的、六项资质变没变。
+ */
+test('③b 天分加成上限 3 级：绕过客户端直接调 refresh() 连刷 5 次，仍然停在 3', () => {
+  let row = one;
+  const trace = [];
+  for (let i = 1; i <= 5; i += 1) {
+    try {
+      row = refresh(row, 'talent', {at: `T${i}`});
+      trace.push({i, ok: true, boosts: (row.talent_boosts ?? []).length,
+        stats: (row.talent_boosts ?? []).map((b) => b.stat).join(','), talent: {...row.talent}});
+    } catch (error) {
+      trace.push({i, ok: false, code: error?.code ?? null, message: String(error?.message ?? error),
+        boosts: (row.talent_boosts ?? []).length});
+    }
+  }
+  const applied = trace.filter((row2) => row2.ok);
+  const refused = trace.filter((row2) => !row2.ok);
+  // ① 前 3 次成功、后 2 次被拒（拒绝原因是"满 3 级"，不是"六项都加过了"）
+  assert.equal(applied.length, TALENT_BOOST_LIMIT,
+    `只许加成功 ${TALENT_BOOST_LIMIT} 次，实际 ${applied.length} 次；过程=${JSON.stringify(trace)}`);
+  assert.equal(refused.length, 5 - TALENT_BOOST_LIMIT, `第 4、5 次必须被拒；过程=${JSON.stringify(trace)}`);
+  for (const row2 of refused) {
+    assert.equal(row2.code, 'boost-limit', `拒绝原因要是"到 3 级上限"，实际 ${row2.code}：${row2.message}`);
+    assert.match(row2.message, /3 级满/, `那句话要说到"3 级"：${row2.message}`);
+  }
+  // ② 账上停在 3 条，且**互不重复**（同一项不许被加两次）
+  assert.equal((row.talent_boosts ?? []).length, TALENT_BOOST_LIMIT,
+    `账上必须停在 ${TALENT_BOOST_LIMIT} 条：${JSON.stringify(row.talent_boosts)}`);
+  const stats = (row.talent_boosts ?? []).map((b) => b.stat);
+  assert.equal(new Set(stats).size, stats.length, `同一项不许加两次：${JSON.stringify(stats)}`);
+  // ③ 六项资质 = 抓到时那一份 + 最多 3 个 +10（逐项对得上，没多改一项）
+  const base = {...one.talent};
+  for (const [key, value] of Object.entries(row.talent)) {
+    const expected = Number(base[key] ?? 0) + (stats.includes(key) ? 10 * stats.filter((s2) => s2 === key).length : 0);
+    assert.equal(Number(value), expected, `「${key}」只能被加过一次：${value} vs ${expected}`);
+  }
+  // ④ 档位只认"扣掉加成的底数"：加成不改档位（这条在 2026-09-29 已经验过，别被加成顶上去）
+  assert.ok(row.talent_boosts.length > 0, '这一轮确实加成过（否则这条判据是空的）');
+  // 反证（必红方向）：把上限当成 6 ⇒ 同一只连刷 6 次能加上去 —— 用"账上不许超过 3"这条判据去量它必须报红
+  const problemsOf = (boostRows) => (boostRows.length > TALENT_BOOST_LIMIT
+    ? [`账上有 ${boostRows.length} 条加成，超过上限 ${TALENT_BOOST_LIMIT}`] : []);
+  assert.deepEqual(problemsOf(row.talent_boosts), [], '真样本：账上 3 条，判据不报');
+  assert.ok(problemsOf([...row.talent_boosts, {tier: 4, stat: 'atk', delta: 10}]).length > 0,
+    '反证：账上 4 条必须被同一条判据抓住');
+});
+
+// ── 2026-09-30（W-01 钉桩 · 判定/笔：advice-engine · Lead 特批只加不改，#56/#61）────────────
+// 缺陷：`cultivationFingerprint` 把「缺项」折叠成 0 ⇒ **「缺 atk」与「atk=0」生成同一个指纹** ✗
+//   （指纹的用途是"比同不同" ⇒ 两种状态不可区分 ⇒ 它失效）
+// 改后：缺项写 `?`（照本函数 :327/:328 的 `?? '?'` 手法）⇒ 两串必须不同 ✓
+// 🔴 红向反证：把 `?` 改回 `?? 0` ⇒ 下面两条断言立刻红 ✓（已实测过那一步）
+// ⚠ 文件顶部已有 test/assert 的 import ⇒ 这里**只能**再 import 别名（重复声明 test 会让整文件 SyntaxError ✗ —— 2026-09-30 我当场踩到）
+import {cultivationFingerprint as fingerprintW01} from '../src/coach/individuals.js';
+
+const baseW01 = {
+  individual_id: 'own-0001', nature: '开朗',
+  talent: {hp: 10, atk: 20, def: 0, spa: 0, spd: 0, spe: 5}, talent_boosts: [],
+};
+
+test('W-01：缺项不许折叠成 0（缺 atk 与 atk=0 两个指纹必须不同）', () => {
+  const missingAtk = {...baseW01, talent: {hp: 10, def: 0, spa: 0, spd: 0, spe: 5}};
+  const zeroAtk = {...baseW01, talent: {hp: 10, atk: 0, def: 0, spa: 0, spd: 0, spe: 5}};
+  const a = fingerprintW01(missingAtk);
+  const b = fingerprintW01(zeroAtk);
+  assert.notEqual(a, b, `缺 atk 与 atk=0 生成了同一个指纹（缺值被折叠成 0）：${a}`);
+  assert.match(a, /atk\?/, `缺项的指纹里应当出现 ?：${a}`);
+  assert.match(b, /atk0/, `真 0 的指纹里应当仍是 0：${b}`);
+});
+
+test('W-01：加成账里的 tier/delta 同样不许折叠成 0', () => {
+  const base = {...baseW01, talent: {hp: 10, atk: 20, def: 0, spa: 0, spd: 0, spe: 5}};
+  const missingTier = {...base, talent_boosts: [{stat: 'atk', delta: 10}]};
+  const zeroTier = {...base, talent_boosts: [{stat: 'atk', tier: 0, delta: 10}]};
+  const missingDelta = {...base, talent_boosts: [{stat: 'atk', tier: 1}]};
+  const zeroDelta = {...base, talent_boosts: [{stat: 'atk', tier: 1, delta: 0}]};
+  assert.notEqual(fingerprintW01(missingTier), fingerprintW01(zeroTier), '缺 tier 与 tier=0 必须不同');
+  assert.notEqual(fingerprintW01(missingDelta), fingerprintW01(zeroDelta), '缺 delta 与 delta=0 必须不同');
 });

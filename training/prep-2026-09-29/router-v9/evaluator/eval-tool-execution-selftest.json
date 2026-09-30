@@ -1,0 +1,719 @@
+{
+  "at": "2026-09-29T16:42:55.034Z",
+  "self": true,
+  "rows": [
+    {
+      "id": "ok-read_state",
+      "tool": "read_state",
+      "pass": true,
+      "skipped": false,
+      "score": 7,
+      "gates": [
+        {
+          "gate": "G1",
+          "ok": true,
+          "note": "G1 形状可解析"
+        },
+        {
+          "gate": "G2",
+          "ok": true,
+          "note": "G2 工具名合法"
+        },
+        {
+          "gate": "G3",
+          "ok": true,
+          "note": "G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\""
+        },
+        {
+          "gate": "G4",
+          "ok": true,
+          "note": "G4 真执行（上下文带 battle）"
+        },
+        {
+          "gate": "G5",
+          "ok": true,
+          "note": "G5 真回执（有值的键：screen、turn、player、enemy、legalPlayer、legalEnemy）"
+        },
+        {
+          "gate": "G6",
+          "ok": true,
+          "note": "G6 这一题不带动作 ⇒ 不判动作合法性"
+        },
+        {
+          "gate": "G7",
+          "ok": true,
+          "note": "G7 语义对得上（题目声明的都满足）"
+        }
+      ],
+      "why": [
+        "✓ G1 形状可解析",
+        "✓ G2 工具名合法",
+        "✓ G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\"",
+        "✓ G4 真执行（上下文带 battle）",
+        "✓ G5 真回执（有值的键：screen、turn、player、enemy、legalPlayer、legalEnemy）",
+        "✓ G6 这一题不带动作 ⇒ 不判动作合法性",
+        "✓ G7 语义对得上（题目声明的都满足）"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "ok-search_rules",
+      "tool": "search_rules",
+      "pass": true,
+      "skipped": false,
+      "score": 7,
+      "gates": [
+        {
+          "gate": "G1",
+          "ok": true,
+          "note": "G1 形状可解析"
+        },
+        {
+          "gate": "G2",
+          "ok": true,
+          "note": "G2 工具名合法"
+        },
+        {
+          "gate": "G3",
+          "ok": true,
+          "note": "G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\""
+        },
+        {
+          "gate": "G4",
+          "ok": true,
+          "note": "G4 真执行（上下文带 battle）"
+        },
+        {
+          "gate": "G5",
+          "ok": true,
+          "note": "G5 真回执（有值的键：rulesVersion、cards、usedCharacters、method、missing、rag）"
+        },
+        {
+          "gate": "G6",
+          "ok": true,
+          "note": "G6 这一题不带动作 ⇒ 不判动作合法性"
+        },
+        {
+          "gate": "G7",
+          "ok": true,
+          "note": "G7 语义对得上（题目声明的都满足）"
+        }
+      ],
+      "why": [
+        "✓ G1 形状可解析",
+        "✓ G2 工具名合法",
+        "✓ G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\"",
+        "✓ G4 真执行（上下文带 battle）",
+        "✓ G5 真回执（有值的键：rulesVersion、cards、usedCharacters、method、missing、rag）",
+        "✓ G6 这一题不带动作 ⇒ 不判动作合法性",
+        "✓ G7 语义对得上（题目声明的都满足）"
+      ],
+      "receiptKeys": [
+        "rulesVersion",
+        "cards",
+        "usedCharacters",
+        "method",
+        "missing",
+        "rag"
+      ]
+    },
+    {
+      "id": "ok-six-pets-evaluate_team",
+      "tool": "evaluate_team",
+      "pass": true,
+      "skipped": false,
+      "score": 7,
+      "gates": [
+        {
+          "gate": "G1",
+          "ok": true,
+          "note": "G1 形状可解析"
+        },
+        {
+          "gate": "G2",
+          "ok": true,
+          "note": "G2 工具名合法"
+        },
+        {
+          "gate": "G3",
+          "ok": true,
+          "note": "G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\""
+        },
+        {
+          "gate": "G4",
+          "ok": true,
+          "note": "G4 真执行（上下文带 battle）"
+        },
+        {
+          "gate": "G5",
+          "ok": true,
+          "note": "G5 真回执（有值的键：tool、ok、ruleset_id、state_version、coverage、evidence_ids）"
+        },
+        {
+          "gate": "G6",
+          "ok": true,
+          "note": "G6 这一题不带动作 ⇒ 不判动作合法性"
+        },
+        {
+          "gate": "G7",
+          "ok": true,
+          "note": "G7 这一题没声明语义 ⇒ 只判到 G6"
+        }
+      ],
+      "why": [
+        "✓ G1 形状可解析",
+        "✓ G2 工具名合法",
+        "✓ G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\"",
+        "✓ G4 真执行（上下文带 battle）",
+        "✓ G5 真回执（有值的键：tool、ok、ruleset_id、state_version、coverage、evidence_ids）",
+        "✓ G6 这一题不带动作 ⇒ 不判动作合法性",
+        "✓ G7 这一题没声明语义 ⇒ 只判到 G6"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "ok-stop",
+      "tool": "stop",
+      "pass": true,
+      "skipped": false,
+      "score": 1,
+      "gates": [
+        {
+          "gate": "G1",
+          "ok": true,
+          "note": "G1 形状合法（停）"
+        }
+      ],
+      "why": [
+        "✓ G1 形状合法（停）",
+        "G8 这一题就该停 ⇒ 过 ✓"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "bad-unknown-tool",
+      "tool": "make_coffee",
+      "pass": false,
+      "skipped": false,
+      "score": 1,
+      "gates": [
+        {
+          "gate": "G1",
+          "ok": true,
+          "note": "G1 形状可解析"
+        },
+        {
+          "gate": "G2",
+          "ok": false,
+          "note": "G2 工具名不在运行时的 12 个里：make_coffee"
+        }
+      ],
+      "why": [
+        "✓ G1 形状可解析",
+        "✗ G2 工具名不在运行时的 12 个里：make_coffee"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "bad-args",
+      "tool": "read_state",
+      "pass": false,
+      "skipped": false,
+      "score": 2,
+      "gates": [
+        {
+          "gate": "G1",
+          "ok": true,
+          "note": "G1 形状可解析"
+        },
+        {
+          "gate": "G2",
+          "ok": true,
+          "note": "G2 工具名合法"
+        },
+        {
+          "gate": "G3",
+          "ok": false,
+          "note": "G3 参数没过 validToolArgs"
+        }
+      ],
+      "why": [
+        "✓ G1 形状可解析",
+        "✓ G2 工具名合法",
+        "✗ G3 参数没过 validToolArgs"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "bad-shape",
+      "tool": null,
+      "pass": false,
+      "skipped": false,
+      "score": 0,
+      "gates": [
+        {
+          "gate": "G1",
+          "ok": false,
+          "note": "G1 既不是 {tool,args} 也不是 {\"stop\":true}"
+        }
+      ],
+      "why": [
+        "✗ G1 既不是 {tool,args} 也不是 {\"stop\":true}"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "bad-stop-when-should-call",
+      "tool": "stop",
+      "pass": false,
+      "skipped": false,
+      "score": 1,
+      "gates": [
+        {
+          "gate": "G1",
+          "ok": true,
+          "note": "G1 形状合法（停）"
+        },
+        {
+          "gate": "G8",
+          "ok": false,
+          "note": "G8 这一题**该查工具**却回了 {\"stop\":true} ⇒ 该查没查"
+        }
+      ],
+      "why": [
+        "✓ G1 形状合法（停）",
+        "✗ G8 这一题**该查工具**却回了 {\"stop\":true} ⇒ 该查没查"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "bad-shell-receipt",
+      "tool": "read_state",
+      "pass": false,
+      "skipped": false,
+      "score": 4,
+      "gates": [
+        {
+          "gate": "G1",
+          "ok": true,
+          "note": "G1 形状可解析"
+        },
+        {
+          "gate": "G2",
+          "ok": true,
+          "note": "G2 工具名合法"
+        },
+        {
+          "gate": "G3",
+          "ok": true,
+          "note": "G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\""
+        },
+        {
+          "gate": "G4",
+          "ok": true,
+          "note": "G4 真执行（上下文带 battle）"
+        },
+        {
+          "gate": "G5",
+          "ok": false,
+          "note": "G5 回执缺必需字段：turn、player（实际有值的键：screen）——回执键=[\"screen\",\"turn\",\"player\",\"enemy\",\"legalPlayer\"]"
+        }
+      ],
+      "why": [
+        "✓ G1 形状可解析",
+        "✓ G2 工具名合法",
+        "✓ G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\"",
+        "✓ G4 真执行（上下文带 battle）",
+        "✗ G5 回执缺必需字段：turn、player（实际有值的键：screen）——回执键=[\"screen\",\"turn\",\"player\",\"enemy\",\"legalPlayer\"]"
+      ],
+      "receiptKeys": [
+        "screen",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer"
+      ]
+    },
+    {
+      "id": "bad-missing-receipt",
+      "tool": "read_evidence",
+      "pass": false,
+      "skipped": false,
+      "score": 4,
+      "gates": [
+        {
+          "gate": "G1",
+          "ok": true,
+          "note": "G1 形状可解析"
+        },
+        {
+          "gate": "G2",
+          "ok": true,
+          "note": "G2 工具名合法"
+        },
+        {
+          "gate": "G3",
+          "ok": true,
+          "note": "G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\""
+        },
+        {
+          "gate": "G4",
+          "ok": true,
+          "note": "G4 真执行（上下文带 battle）"
+        },
+        {
+          "gate": "G5",
+          "ok": false,
+          "note": "G5 回执是 missing（不是真数据）：本次请求未加载该原始回合——回执键=[\"missing\",\"reason\"]"
+        }
+      ],
+      "why": [
+        "✓ G1 形状可解析",
+        "✓ G2 工具名合法",
+        "✓ G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\"",
+        "✓ G4 真执行（上下文带 battle）",
+        "✗ G5 回执是 missing（不是真数据）：本次请求未加载该原始回合——回执键=[\"missing\",\"reason\"]"
+      ],
+      "receiptKeys": [
+        "missing",
+        "reason"
+      ]
+    },
+    {
+      "id": "bad-error-receipt",
+      "tool": "search_rules",
+      "pass": false,
+      "skipped": false,
+      "score": 4,
+      "gates": [
+        {
+          "gate": "G1",
+          "ok": true,
+          "note": "G1 形状可解析"
+        },
+        {
+          "gate": "G2",
+          "ok": true,
+          "note": "G2 工具名合法"
+        },
+        {
+          "gate": "G3",
+          "ok": true,
+          "note": "G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\""
+        },
+        {
+          "gate": "G4",
+          "ok": true,
+          "note": "G4 真执行（上下文带 battle）"
+        },
+        {
+          "gate": "G5",
+          "ok": false,
+          "note": "G5 回执是 error/not_implemented：{\"error\":\"规则服务没起来\"}——回执键=[\"error\"]"
+        }
+      ],
+      "why": [
+        "✓ G1 形状可解析",
+        "✓ G2 工具名合法",
+        "✓ G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\"",
+        "✓ G4 真执行（上下文带 battle）",
+        "✗ G5 回执是 error/not_implemented：{\"error\":\"规则服务没起来\"}——回执键=[\"error\"]"
+      ],
+      "receiptKeys": [
+        "error"
+      ]
+    },
+    {
+      "id": "bad-wrong-turn",
+      "tool": "read_evidence",
+      "pass": false,
+      "skipped": false,
+      "score": 4,
+      "gates": [
+        {
+          "gate": "G1",
+          "ok": true,
+          "note": "G1 形状可解析"
+        },
+        {
+          "gate": "G2",
+          "ok": true,
+          "note": "G2 工具名合法"
+        },
+        {
+          "gate": "G3",
+          "ok": true,
+          "note": "G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\""
+        },
+        {
+          "gate": "G4",
+          "ok": true,
+          "note": "G4 真执行（上下文带 battle）"
+        },
+        {
+          "gate": "G5",
+          "ok": false,
+          "note": "G5 回执是 missing（不是真数据）：本次请求未加载该原始回合，不能由摘要补造；可指定回合重新提问——回执键=[\"missing\",\"turn\",\"matchId\",\"reason\"]"
+        }
+      ],
+      "why": [
+        "✓ G1 形状可解析",
+        "✓ G2 工具名合法",
+        "✓ G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\"",
+        "✓ G4 真执行（上下文带 battle）",
+        "✗ G5 回执是 missing（不是真数据）：本次请求未加载该原始回合，不能由摘要补造；可指定回合重新提问——回执键=[\"missing\",\"turn\",\"matchId\",\"reason\"]"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "bad-wrong-turn-with-receipt",
+      "tool": "read_evidence",
+      "pass": false,
+      "skipped": false,
+      "score": 4,
+      "gates": [
+        {
+          "gate": "G1",
+          "ok": true,
+          "note": "G1 形状可解析"
+        },
+        {
+          "gate": "G2",
+          "ok": true,
+          "note": "G2 工具名合法"
+        },
+        {
+          "gate": "G3",
+          "ok": true,
+          "note": "G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\""
+        },
+        {
+          "gate": "G4",
+          "ok": true,
+          "note": "G4 真执行（上下文带 battle）"
+        },
+        {
+          "gate": "G5",
+          "ok": false,
+          "note": "G5 回执是 missing（不是真数据）：本次请求未加载该原始回合，不能由摘要补造；可指定回合重新提问——回执键=[\"missing\",\"turn\",\"matchId\",\"reason\"]"
+        }
+      ],
+      "why": [
+        "✓ G1 形状可解析",
+        "✓ G2 工具名合法",
+        "✓ G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\"",
+        "✓ G4 真执行（上下文带 battle）",
+        "✗ G5 回执是 missing（不是真数据）：本次请求未加载该原始回合，不能由摘要补造；可指定回合重新提问——回执键=[\"missing\",\"turn\",\"matchId\",\"reason\"]"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "bad-wrong-query",
+      "tool": "search_rules",
+      "pass": false,
+      "skipped": false,
+      "score": 6,
+      "gates": [
+        {
+          "gate": "G1",
+          "ok": true,
+          "note": "G1 形状可解析"
+        },
+        {
+          "gate": "G2",
+          "ok": true,
+          "note": "G2 工具名合法"
+        },
+        {
+          "gate": "G3",
+          "ok": true,
+          "note": "G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\""
+        },
+        {
+          "gate": "G4",
+          "ok": true,
+          "note": "G4 真执行（上下文带 battle）"
+        },
+        {
+          "gate": "G5",
+          "ok": true,
+          "note": "G5 真回执（有值的键：rulesVersion、cards、usedCharacters、method、missing、rag）"
+        },
+        {
+          "gate": "G6",
+          "ok": true,
+          "note": "G6 这一题不带动作 ⇒ 不判动作合法性"
+        },
+        {
+          "gate": "G7",
+          "ok": false,
+          "note": "G7 检索词不对：要含「能量」，实际 query=「防御」"
+        }
+      ],
+      "why": [
+        "✓ G1 形状可解析",
+        "✓ G2 工具名合法",
+        "✓ G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\"",
+        "✓ G4 真执行（上下文带 battle）",
+        "✓ G5 真回执（有值的键：rulesVersion、cards、usedCharacters、method、missing、rag）",
+        "✓ G6 这一题不带动作 ⇒ 不判动作合法性",
+        "✗ G7 检索词不对：要含「能量」，实际 query=「防御」"
+      ],
+      "receiptKeys": [
+        "rulesVersion",
+        "cards",
+        "usedCharacters",
+        "method",
+        "missing",
+        "rag"
+      ]
+    },
+    {
+      "id": "bad-illegal-action",
+      "tool": "simulate_branch",
+      "pass": false,
+      "skipped": false,
+      "score": 5,
+      "gates": [
+        {
+          "gate": "G1",
+          "ok": true,
+          "note": "G1 形状可解析"
+        },
+        {
+          "gate": "G2",
+          "ok": true,
+          "note": "G2 工具名合法"
+        },
+        {
+          "gate": "G3",
+          "ok": true,
+          "note": "G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\""
+        },
+        {
+          "gate": "G4",
+          "ok": true,
+          "note": "G4 真执行（上下文带 battle）"
+        },
+        {
+          "gate": "G5",
+          "ok": true,
+          "note": "G5 真回执（有值的键：assumption、turn、phase、freeReplacement、turnCost、opponentActions）"
+        },
+        {
+          "gate": "G6",
+          "ok": false,
+          "note": "G6 这些动作不在合法集合里（合法 10 条 / 稳定标识 15 个）：skill:not_a_real_skill"
+        }
+      ],
+      "why": [
+        "✓ G1 形状可解析",
+        "✓ G2 工具名合法",
+        "✓ G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\"",
+        "✓ G4 真执行（上下文带 battle）",
+        "✓ G5 真回执（有值的键：assumption、turn、phase、freeReplacement、turnCost、opponentActions）",
+        "✗ G6 这些动作不在合法集合里（合法 10 条 / 稳定标识 15 个）：skill:not_a_real_skill"
+      ],
+      "receiptKeys": [
+        "assumption",
+        "turn",
+        "phase",
+        "freeReplacement",
+        "turnCost",
+        "simulated",
+        "opponentActions",
+        "legalAlternatives"
+      ]
+    },
+    {
+      "id": "bad-fabricated-team",
+      "tool": "evaluate_team",
+      "pass": false,
+      "skipped": false,
+      "score": 6,
+      "gates": [
+        {
+          "gate": "G1",
+          "ok": true,
+          "note": "G1 形状可解析"
+        },
+        {
+          "gate": "G2",
+          "ok": true,
+          "note": "G2 工具名合法"
+        },
+        {
+          "gate": "G3",
+          "ok": true,
+          "note": "G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\""
+        },
+        {
+          "gate": "G4",
+          "ok": true,
+          "note": "G4 真执行（上下文带 battle）"
+        },
+        {
+          "gate": "G5",
+          "ok": true,
+          "note": "G5 真回执（有值的键：tool、ok、ruleset_id、state_version、coverage、evidence_ids）"
+        },
+        {
+          "gate": "G6",
+          "ok": true,
+          "note": "G6 这一题不带动作 ⇒ 不判动作合法性"
+        },
+        {
+          "gate": "G7",
+          "ok": false,
+          "note": "G7 凭空队伍 ID：输入里既没有队伍也没有回执，参数里却写了 3 个 id"
+        }
+      ],
+      "why": [
+        "✓ G1 形状可解析",
+        "✓ G2 工具名合法",
+        "✓ G3 参数合法（宿主补版本后）—— ⚠ 这只证明\"有效\"，不证明\"正确\"",
+        "✓ G4 真执行（上下文带 battle）",
+        "✓ G5 真回执（有值的键：tool、ok、ruleset_id、state_version、coverage、evidence_ids）",
+        "✓ G6 这一题不带动作 ⇒ 不判动作合法性",
+        "✗ G7 凭空队伍 ID：输入里既没有队伍也没有回执，参数里却写了 3 个 id"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    }
+  ]
+}

@@ -62,6 +62,17 @@ const pct = (factor) => `${factor > 1 ? '+' : ''}${Math.round((factor - 1) * 100
  * 一条性格对这只精灵做了什么：**换来什么 + 牺牲什么**，两边都给面板差值。
  * 这是"说法层"的最小单位，`adviceFor` 与答案层都用它。
  */
+/**
+ * 缺天分时**必须写进每一条结论正文**的那句话（Lead 2026-09-30 裁决口径 (a)）：
+ *   「缺天分时**产品要给结论**；但"这一半按 0 计入"必须写进**每一条结论的正文**」✓
+ * **两态**：天分齐 ⇒ 返回 `null`（正文里**一个字都不许出现** ✗ —— 否则就是"无条件挂免责"）；
+ *           天分缺 ⇒ 返回那句话 ✓（照算 + 明说偏低，与 `panelOf` 的旧契约一致 ✓）
+ */
+export function zeroTalentNote(talent) {
+  const has = Boolean(talent) && STAT_KEYS.some((stat) => Number(talent?.[stat]));
+  return has ? null : '（天分没填：这条里天分那一半按 0 计入，面板偏低，别当实测值）';
+}
+
 export function explainNature({race, talent = null, nature, breakthrough = 0}) {
   const row = natureOf(nature);
   if (!row) return null;
@@ -77,7 +88,9 @@ export function explainNature({race, talent = null, nature, breakthrough = 0}) {
     text: `「${row.name}」把${STAT_NAMES[row.up]}抬 `
       + `${pct(natureFactor(row.name, row.up, {breakthrough}).factor)}（${gain.from} → ${gain.to}），`
       + `代价是${STAT_NAMES[row.down]}掉 `
-      + `${pct(natureFactor(row.name, row.down, {breakthrough}).factor)}（${cost.from} → ${cost.to}）。`,
+      + `${pct(natureFactor(row.name, row.down, {breakthrough}).factor)}（${cost.from} → ${cost.to}）。`
+      // ⚠ 口径 (a)：缺天分时**结论照给**，但"按 0 计入"要落在**这条结论的正文**上 ✓（不是只进 unknown/caveats ✗）
+      + (zeroTalentNote(talent) ?? ''),
   };
 }
 
@@ -103,29 +116,43 @@ export function adviceFor({race, talent = null, priority = ['spe'], limit = 5} =
 
 /**
  * 两个个体差在哪（同种才有意义）：逐项面板差 + 一句取舍。
- * **缺输入的地方必须留白**：天分按 0 计、性格未知，都要在 `caveats` 里说出来，不许假装比过。
+ *
+ * ⚠ 2026-09-30 修（半成品排查 #4，人类口径「**不许拿 0 当真实值**」）：
+ *   旧写法（**逐字留档，改钉不删**）：
+ *     `if (!one.nature) caveats.push(`${label}还没有性格数据 ⇒ 性格那一半按中性算`);`
+ *     `if (!one.talent || STAT_KEYS.every((stat) => !Number(one.talent?.[stat]))) {`
+ *       `caveats.push(`${label}的天分是 0（缺数值时的占位）⇒ 天分那一半比不出高低`); }`
+ *     `const pa = panelOf({race, talent: a.talent, nature: a.nature}).panel;`
+ *   ⇒ 问题：**缺的天分照 0 进了面板计算** ✗ —— 结论看着有依据，其实**用一个假数算出来的** ✗
+ *   现在：**缺的那一半直接不参与计算**（`panelOf` 收到 null）⇒ 结论只覆盖**真有的**那一半，
+ *         并且在 `caveats` 与正文里**明说这一比不含哪一半** ✓（不是"按 0 算"，也不是"中性算"）
  */
 export function compareIndividuals({race, a, b}) {
   if (!race || !a || !b) return {ok: false, reason: '缺少种族值或个体 ⇒ 不比（也不许猜）'};
+  const hasTalent = (one) => Boolean(one?.talent) && STAT_KEYS.some((stat) => Number(one.talent?.[stat]));
+  const natureKnown = Boolean(a.nature && b.nature);
+  const talentKnown = hasTalent(a) && hasTalent(b);
   const caveats = [];
-  for (const [label, one] of [['第一个个体', a], ['第二个个体', b]]) {
-    if (!one.nature) caveats.push(`${label}还没有性格数据 ⇒ 性格那一半按中性算`);
-    if (!one.talent || STAT_KEYS.every((stat) => !Number(one.talent?.[stat]))) {
-      caveats.push(`${label}的天分是 0（缺数值时的占位）⇒ 天分那一半比不出高低`);
-    }
-  }
-  const pa = panelOf({race, talent: a.talent, nature: a.nature}).panel;
-  const pb = panelOf({race, talent: b.talent, nature: b.nature}).panel;
+  if (!natureKnown) caveats.push('性格数据缺失 ⇒ 这一比**不含性格**（不是按中性算成同一个数）');
+  if (!talentKnown) caveats.push('天分数据缺失 ⇒ 这一比**不含天分**（不是按 0 算）');
+  // 缺的那一半**不参与计算**：`panelOf` 收到 null ⇒ 面板里就没有它 ✓（不再拿 0 顶 ✗）
+  const pa = panelOf({race, talent: talentKnown ? a.talent : null, nature: natureKnown ? a.nature : null}).panel;
+  const pb = panelOf({race, talent: talentKnown ? b.talent : null, nature: natureKnown ? b.nature : null}).panel;
   const diff = {};
   for (const stat of STAT_KEYS) diff[stat] = (pa[stat] ?? null) === null || (pb[stat] ?? null) === null
     ? null : pa[stat] - pb[stat];
   const better = STAT_KEYS.filter((stat) => (diff[stat] ?? 0) > 0);
   const worse = STAT_KEYS.filter((stat) => (diff[stat] ?? 0) < 0);
+  const compared = [talentKnown ? '天分' : null, natureKnown ? '性格' : null].filter(Boolean);
+  const scope = compared.length === 2 ? '' : `只比了${compared.join('与') || '种族值'}这一半：`;   // 缺的那半要**在正文里说清** ✓
   const talk = better.length || worse.length
-    ? `第一个个体在${better.map((stat) => STAT_NAMES[stat]).join('、') || '没有一项'}上更高，`
+    ? `${scope}第一个个体在${better.map((stat) => STAT_NAMES[stat]).join('、') || '没有一项'}上更高，`
       + `在${worse.map((stat) => STAT_NAMES[stat]).join('、') || '没有一项'}上更低。`
-    : '两只算出来的面板完全一样（在天分与性格都一样的前提下，这是正常的）。';
-  return {ok: true, panels: {a: pa, b: pb}, diff, caveats, text: talk};
+    : `${scope}两只算出来的面板完全一样${compared.length === 2 ? '（在天分与性格都一样的前提下，这是正常的）' : ''}。`;
+  // 同上：两体对比也是"一条结论" ⇒ 缺天分时正文里也要有那句 ✓（天分齐时**不许有** ✗）
+  const zeroNote = (!talentKnown) ? (zeroTalentNote(a.talent) ?? zeroTalentNote(b.talent)) : null;
+  const text = `${talk}${zeroNote ?? ''}`;
+  return {ok: true, panels: {a: pa, b: pb}, diff, caveats, compared, text};
 }
 
 // ── 问句识别 + 本地成句（0 次模型调用）─────────────────────────────────────

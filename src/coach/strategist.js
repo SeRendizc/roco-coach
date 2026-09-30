@@ -7,7 +7,12 @@ import {rankEnemyActions,active,actionName,SKILLS,damage,legalActions,effectiveS
 export function strategist(context){
  const g=context.battle;
  if(isLiveMatch(context))return {text:'线上竞技 PVP 赛中不提供战术建议，结束后再复盘。',evidence:[]};
- if(!g||g.result)return {text:'进入一场 PVE 对战后，我可以结合当前生命、能量和队伍比较行动。',evidence:[]};
+ // ⚠ 2026-09-29（第三轮要求③）：这句是**旧练习局的词汇**（「PVE 对战」），玩家认不出——
+ //   判据也把它列进 legacy smell（`scripts/roco/regression-key-questions.mjs` 的 forbid、
+ //   `reports/roco/xiaoya-context/browser-capability-acceptance.mjs` 的 LEGACY_SMELL）。
+ //   改成用本产品的话说**同一件事**（仍然如实说「要先开一局」，只是不再用旧词）。
+ //   旧文案留档（改钉不删）：进入一场 PVE 对战后，我可以结合当前生命、能量和队伍比较行动。
+ if(!g||g.result)return {text:'开一局之后，我才能按当前生命、能量和队伍比较这一手。',evidence:[]};
  if(g.phase==='replace'){
   const candidates=legalActions(g).filter(a=>a.kind==='switch').map(action=>{
    const next=structuredClone(g);next.player.active=action.target;next.phase='battle';

@@ -450,8 +450,15 @@ export function localModelReport(env=process.env){
   // `env_key_is_alias:true`（「这份配置来自兼容别名」）—— 一句没依据的话。
   // 「走了别名」的前提是**真的从某个名字读到了值**，所以先要求 source 非空。
   const viaAlias4b=Boolean(resolved4b.source)&&resolved4b.source!==LOCAL_MODEL_PATH_ENV;
-  const specs=[['local-qwen35-4b','本地 · Qwen3.5-4B','局势化短提示',LOCAL_MODEL_PATH_ENV,viaAlias4b],
-               ['local-qwen38-27b','本地 · Qwen3.8-27B','整局复盘','ROCO_LOCAL_MODEL_27B_PATH',false]];
+  // ⚠⚠ 2026-09-29（README **R07**：把 27B 从产品入口移除）：这里原来还有第二项 ——
+  //   形如 `['local-qwen38-…','本地 · Qwen3.8-…','整局复盘',<27B 的权重目录环境变量>,false]`。
+  //   **改前原文逐字留档在文档 §132**（不写回本文件：判据 `tests/roco-model-wiring-honesty.test.js`
+  //   会扫全仓的 27B 环境变量名，且 R07 之后要求 `src/**` 里**一个引用都不许有**）。
+  //   为什么删：它**没有任何调用路径**（下面 `WIRED` 那段的旧注释逐字写着
+  //   「27B 在全仓只有本文件这一处 stat，没有任何调用路径」），只会在 `/api/models` 里
+  //   多报一行「本地 · Qwen3.8-27B（未连）」—— 正是 R07 点名要移除的「无用占位/探测」。
+  //   **不删**权重、训练数据与该环境变量的语义（只是不再对外"报"它）。
+  const specs=[['local-qwen35-4b','本地 · Qwen3.5-4B','局势化短提示',LOCAL_MODEL_PATH_ENV,viaAlias4b]];
   // 2026-09-25（人类口径「27B 我自己训」+ 只读调研实测 + 主线程复核）：
   // `connected` 只说明「开关开着 + 权重目录在」，**不说明有任何代码路径会调它** ——
   // 实测：4B 的唯一调用点是 `src/coach/local-model.js`（`ROCO_LOCAL_MODEL=on|shadow`）；
@@ -459,7 +466,10 @@ export function localModelReport(env=process.env){
   // 所以面板必须把「有没有接线」与「证据在哪」一起写出来，别让人读成「27B 已可用」。
   const WIRED={
     'local-qwen35-4b':{wired:true,evidence:'src/coach/local-model.js（开关 on 时由它调用）'},
-    'local-qwen38-27b':{wired:false,evidence:'仓里没有调用路径：只有本文件的 stat；27B 由人类自己训，接口预留（ROCO_LOCAL_MODEL_27B_PATH）'},
+    // 2026-09-29（R07）：27B 那一行随 `specs` 一起删掉。**改前原文逐字留档在文档 §132**
+    // （不写回本文件 —— 判据要求 src/ 里不许出现 27B 的环境变量名）。
+    // 它的存在理由记在这里：**将来真给 27B 接了调用路径**，必须同时把条目加回来并写明证据，
+    // 那时 §132 的留档就是恢复依据。
   };
   return specs.map(([id,label,role,key,viaAlias])=>{
     // 4B 的目录走「真名优先 + 别名兜底」的同一个读法；27B 仍是它自己那个预留 key。

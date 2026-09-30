@@ -1,0 +1,1 @@
+{"id": "cov2-simulate_branch-yes", "question": "要是我先手换人，对面打过来会怎样？", "model_output": {"tool": "simulate_branch", "args": {"candidates": ["switch:turtle"], "opponent": "switch:fox"}}, "_note": "重出（人类裁定「题有问题就重新出」）：原题 args_keys 同时要求新式与 legacy 两支 ⇒ 参数互斥必失败；新题只留新式支"}

@@ -17,6 +17,8 @@ import {readFileSync} from 'node:fs';
 import {
   focusFromUrl, focusSnapshotFrom, mergeFocusIntoProfile, detectFocus, createFocusProvider,
   focusFromClick, hostContextOf, FOCUS_KEY, FOCUS_EVENT,
+  // ㉛（第五轮④）：两份记忆共用一个键，页面与面板各自的合并语义是这条的判据核心。
+  mergeMemories, capabilityChipText, capabilityLines,
 } from '../src/client/xiaoya.js';
 import {focusAsk, focusFactAnswer, focusAdviceAnswer, focusIntent, focusDetailOf,
   localFactAsk, runCoach, buildContext} from '../src/coach/runtime.js';
@@ -25,7 +27,10 @@ import {
   beginNewChatSession, clearActiveChatSession, CHAT_LIMITS,
 } from '../src/coach/client.js';
 import {cultivationOf} from '../src/coach/individuals.js';
-import {readMemory} from '../src/coach/memory.js';
+import {readMemory, turnLogOf} from '../src/coach/memory.js';
+// ㉜/㉝（第六轮①）：复盘正文里「对面那一列」——投影下标、名字与血量三件事的判据。
+import {rocoGameView} from '../src/coach/roco-experience.js';
+import {reviewMatch} from '../src/coach/teacher.js';
 
 const ROOT = new URL('..', import.meta.url);
 const read = (path) => readFileSync(new URL(path, ROOT), 'utf8');
@@ -734,22 +739,34 @@ test('⑱ 甲②①：记忆面板搬进 xiaoya —— 同一套语义/同一批
   assert.doesNotMatch(read('src/client/roco.html'), /id="model-chip"/, '`#model-chip` 现在由 xiaoya 写（同名同语义）');
 });
 
-test('⑲ 甲②②：`#model-list` + `#open-connect` 搬进 xiaoya —— 同名 id/class、同一数据源、不写 chip', () => {
+test('⑲ 模型格搬进 xiaoya —— 同名 id/class、同一数据源、不写 chip；**27B 与调试连接已按 R07 移除**', () => {
   const src = read('src/client/xiaoya.js');
   const roco = read('src/client/roco.js');
   // ① 同一个数据源（`/api/models`）与同一套 id/class
-  assert.match(src, /fetch\('\/api\/models'/, '三格模型状态的来源必须是同一条只读接口');
+  assert.match(src, /fetch\('\/api\/models'/, '模型状态的来源必须是同一条只读接口');
   assert.match(src, /id="model-list" role="list"/, '沿用 #model-list');
   assert.match(src, /class="model-cell" data-model-id=/, '沿用 .model-cell + data-model-id');
   assert.match(src, /class="mc-name"/, '沿用 .mc-name');
   assert.match(src, /class="mc-state \$\{m\.connected \? 'ok' : 'no'\}"/, '沿用 .mc-state（ok/no 两档）');
-  assert.match(src, /id="open-connect"/, '沿用 #open-connect');
-  assert.match(src, /window\.open\('connect\.html', 'roco-connect'/, '与旧面板逐字同一条行为：独立小窗');
+  // ⚠ 2026-09-29 **改钉不删**（R07，人类第二轮纠偏 `user-06`：Qwen3.8-27B 仍是选项 + 「调试连接」按钮）：
+  //   用户最新决定覆盖"暂缓" —— 27B 从**产品入口与配置路径**移除，冗余的「调试连接」按钮一起去掉
+  //   （换模型/补密钥由 `#model-chip` 那条 `<a href="connect.html">` 承担，能力没少）。
+  //   旧断言原文留档（别再改回来）：
+  //     assert.match(src, /id="open-connect"/, '沿用 #open-connect');
+  //     assert.match(src, /window\.open\('connect\.html', 'roco-connect'/, '与旧面板逐字同一条行为：独立小窗');
+  assert.doesNotMatch(src, /id="open-connect"/, 'R07：调试连接按钮不许再出现在产品入口');
+  assert.doesNotMatch(src, /window\.open\('connect\.html'/, 'R07：那个独立小窗也没有第二个入口了');
+  // 判据只认**代码行**（注释里当然有"27B 已移除"这类留档）。
+  const codeOnly = src.replace(/\/\*[\s\S]*?\*\//g, '')
+    .split('\n').filter((line) => !line.trim().startsWith('//')).join('\n');
+  assert.doesNotMatch(codeOnly, /qwen3\.8-27b|Qwen3\.8-27B/, 'R07：27B 不许作为选项/占位出现在这一层');
+  assert.match(codeOnly, /\.filter\(\(one\) => one\?\.id !== 'local_27b'\)/,
+    '即使 /api/models 仍报 27B，也不在这一层画出来');
   // ② 拿不到数据不许猜（写「未知」，与旧面板同一条口径）
   assert.match(src, /const state = rows\.length \? \(m\.connected \? '已连' : '未连'\) : '未知'/);
   // ③ 一个读取点只能有一个写入者：这一块**不许**碰 `#model-chip`
   const block = src.slice(src.indexOf('const statusFold'), src.indexOf('const actions = document.createElement'));
-  assert.doesNotMatch(block, /model-chip/, '三格那一块不许写 #model-chip（旧面板踩过"两个写入者"的坑）');
+  assert.doesNotMatch(block, /model-chip/, '模型格那一块不许写 #model-chip（旧面板踩过"两个写入者"的坑）');
   // ④ 钩子换名字（面板换主人）；旧面板的 `data-roco-models` 退役时一起消失
   assert.match(src, /document\.body\.dataset\.xyModels =/);
   assert.doesNotMatch(src, /dataset\.rocoModels/, 'xiaoya 不该写旧面板的钩子');
@@ -762,7 +779,13 @@ test('⑳ 甲②③：activityLine 逐字渲染 + popup 也有 role 选择 + `#m
   // ① activityLine：用服务端给的那一句，页面不重拼（重拼=第二份事实）
   assert.match(src, /const activityLine = typeof answer\?\.activityLine === 'string' \? answer\.activityLine\.trim\(\) : ''/,
     '要读服务端算好的 activityLine');
-  assert.match(src, /basis\.textContent = activityLine;/, '逐字放进去（不重新拼措辞）');
+  // ⚠ 2026-09-30 **改钉不删**（半成品排查 P0：展开「依据」后玩家看到字面 `**`，
+  //   来源 `coach/runtime.js:80` 的串自带 markdown 而这里是不渲染 markdown 的落点）：
+  //   现在过仓库现成的 `plain()` —— **只去记号、不重拼措辞**（"逐字"这条口径不变）。
+  //   旧断言原文留档（别再改回来）：
+  //     assert.match(src, /basis\.textContent = activityLine;/, '逐字放进去（不重新拼措辞）');
+  assert.match(src, /basis\.textContent = plain\(activityLine\);/, '逐字放进去 + 只去 markdown 记号');
+  assert.match(src, /p\.textContent = plain\(line\);/, '依据栏的人话行同理（`**` 就是从这儿漏的）');
   assert.match(src, /class = 'say-basis'|className = 'say-basis'/, '与旧面板同一个 class 名');
   // ② role：popup 也放，且**只有一份 handler**（page 的静态按钮与 popup 的注入按钮同源）
   assert.match(src, /const ROLE_CHOICES = \[\['auto', '自动'\], \['companion', '陪练'\], \['strategist', '军师'\], \['teacher', '老师'\]\]/,
@@ -941,7 +964,12 @@ test('㉒ U07-④ 连通状态不自相矛盾：答完那一句自己的证据�
   assert.deepEqual(capabilityEvidenceOf({provider: 'local', text: '嗯', evidence: [{k: 1}]}, null),
     {model: null, tools: null, rulesetId: null}, '只有 evidence、没有工具回执，不够格说"规则服务跑过"');
   const silent = capabilityLines({tools: 'unknown', model: 'unknown'});
-  assert.equal(silent.toolsLine, '资料查询：还没拉起来（规则服务是第一次查询才启动的；问一句就会拉起它）');
+  // ⚠ 2026-09-29 **改钉不删**（第五轮⑤：人类说「『资料未拉起』这个字样容易读错」）：
+  //   「还没拉起来」会被读成"资料没加载/坏了"，而它其实是"惰性启动、问一句就醒"。
+  //   旧断言原文留档（别再改回来）：
+  //     assert.equal(silent.toolsLine, '资料查询：还没拉起来（规则服务是第一次查询才启动的；问一句就会拉起它）');
+  assert.equal(silent.toolsLine, '资料查询：待唤醒（规则服务是第一次查询才启动的；问一句就会唤醒它）');
+  assert.doesNotMatch(silent.toolsLine, /未拉起|还没拉起来/, '这一档不许再写成"故障"腔');
   assert.equal(silent.modelLine, '云端模型：状态未知（只影响自由发挥的文字）');
   // ④ 探针说"没连"时仍然要**明说**（判据 live-model-status 的正则 `/未连接|没连|未连/` 不许破）
   assert.match(capabilityLines({tools: 'unknown', model: 'off'}).modelLine, /未连接/);
@@ -1002,8 +1030,12 @@ test('㉔ U07-② 版式：标题栏与输入行固定、对话区独立滚动�
   assert.match(cssCode, /\.xy-form\{display:flex;gap:7px;flex:0 0 auto\}/);
   assert.match(cssCode, /\.xy-quick\{[^}]*flex:0 0 auto\}/);
   // ③ 高度：给底部动作坞留位置（`--bottombar`），不再是一个"没算动作坞"的死高度
-  assert.match(cssCode, /height:clamp\(320px,calc\(100dvh - 82px - var\(--bottombar,0px\)\),620px\)/,
-    '面板高度要跟着视口与底部动作坞算 —— 不遮挡主要战斗动作');
+  // ⚠ 2026-09-29 **改钉不删**（第五轮②：人类「这个对话框可以再长点啊，下面那么多位置」）：
+  //   `clamp(...,620px)` 把面板封在 620px，1440×900 下面白扔 218px。
+  //   现在跟着视口长（仍给底部动作坞 `--bottombar` 留位）。旧断言原文留档（别再改回来）：
+  //     assert.match(cssCode, /height:clamp\(320px,calc\(100dvh - 82px - var\(--bottombar,0px\)\),620px\)/);
+  assert.match(cssCode, /height:max\(320px,calc\(100dvh - 82px - var\(--bottombar,0px\)\)\)/,
+    '面板高度跟着视口与底部动作坞算 —— 不遮挡主要动作、也不浪费下面的位置');
   assert.doesNotMatch(cssCode, /height:min\(560px,calc\(100dvh - 82px\)\)/,
     '旧那个没给动作坞留位置的高度必须从代码里消失');
   assert.match(css, /旧规则留档[\s\S]{0,400}height:min\(560px,calc\(100dvh - 82px\)\)/,
@@ -1011,14 +1043,104 @@ test('㉔ U07-② 版式：标题栏与输入行固定、对话区独立滚动�
   // ④ 二级区默认收起，且**同名 id 一个都不许丢**（判据 ⑲/⑳ 与 demo-acceptance 都按这些名字读）
   assert.match(src, /const more = document\.createElement\('details'\);/, '二级区是个 <details>');
   assert.match(src, /more\.id = 'xy-fold-more';/);
-  assert.match(src, /moreBody\.append\(actions, memoryPanel, statusFold\);/,
-    '动作 / 记忆 / 模型三格搬进收起区（id 不变）');
+  assert.match(src, /moreBody\.append\(capDetail, chip, actions, memoryPanel, statusFold\);/,
+    '长状态句 / 焦点行 / 动作 / 记忆 / 模型格都在收起区里（id 不变）');
   assert.match(src, /moreBody\.append\(roles\);/, '身份那一排也在收起区');
-  assert.doesNotMatch(src, /moreBody\.append\([^)]*capEl/, '`#model-chip` **不许**进收起区（判据要它一直可见、高度 ≥24）');
-  assert.match(src, /meta\.append\(capEl, chip\);/, '两行状态常驻在 .xy-pop-meta');
+  // ⚠ 2026-09-29 **改钉不删**（R06，人类第二轮纠偏 `user-05`：默认顶部堆着长状态 + 「最近看过…」培养诊断）：
+  //   `#model-chip` 仍然是"判据要它一直可见、高度 ≥24"的那一个 —— 但它现在挂在**展开入口那一行**
+  //   （`<summary>` 里，`.xy-pop-more>summary #model-chip`），所以它既不在 `moreBody` 里、也**不是**
+  //   `.xy-pop-meta` 那一层了；旧断言原文留档（别再改回来）：
+  //     assert.doesNotMatch(src, /moreBody\.append\([^)]*capEl/, '`#model-chip` **不许**进收起区（判据要它一直可见、高度 ≥24）');
+  //     assert.match(src, /meta\.append\(capEl, chip\);/, '两行状态常驻在 .xy-pop-meta');
+  // ⚠ 2026-09-30 **改钉不删**（半成品排查 P0，**我自己上一轮引入的**：未连档 chip 198px 右对齐，
+  //   恰好压住展开行的中心 x=1209 ⇒ `elementFromPoint(中心) = #model-chip`，真点击被导航到
+  //   `/connect.html`、面板消失）。修法：chip 与短状态句搬进**独立的 `.xy-status-row`**（不再坐中线）。
+  //   旧断言原文留档（别再改回来）：
+  //     assert.match(src, /moreSummary\.append\(moreTitle, capEl\);/,
+  //       'R06：`#model-chip` 挂在唯一的展开入口那一行（可见 ⇒ 判据的 ≥24px 读数仍然成立）');
+  assert.match(src, /statusRow\.append\(capEl\);/, '`#model-chip` 在独立状态行里（可见 ⇒ ≥24px 读数仍成立）');
+  assert.match(src, /head\.parentNode\.insertBefore\(statusRow, head\.nextSibling\)/, '状态行插在头栏之后');
+  assert.match(src, /moreSummary\.append\(moreTitle, \.\.\.\(statusRow \? \[\] : \[capEl\]\)\);/,
+    '弹层里 summary 只剩「设置」⇒ 那一行的中心结构上不可能是 chip；独立页仍挂 summary（它那一行压不到中心）');
+  assert.doesNotMatch(src, /moreSummary\.append\(moreTitle, capEl\);/, '不再把 chip 放回 summary');
+  assert.doesNotMatch(src, /capDetail, capEl|capEl, capDetail/, '`#model-chip` 不许进收起区正文（那里量不到高度）');
+  assert.match(src, /if \(log\?\.parentNode\) log\.parentNode\.insertBefore\(more, log\);/,
+    '默认顶部只有这一个入口（不再有 `.xy-pop-meta` 那一层）');
+  assert.doesNotMatch(src, /class = 'xy-pop-meta'|className = 'xy-pop-meta'/,
+    'R06：常驻两行的那一层已取消（旧写法：meta.append(capEl, chip)）');
   // ⑤ 单独页面（xiaoya.html）也是同一套三层：四行网格，对话那行才是 1fr
-  assert.match(cssCode, /\.xy-page-body\{display:grid;grid-template-rows:auto auto minmax\(0,1fr\) auto;/,
-    'page 模式：状态/收起区/对话(1fr，唯一滚动)/输入');
+  // ⚠ 2026-09-30 **改钉不删**（半成品排查 P1：行序与子元素错位 ⇒ `1fr` 落到输入区，
+  //   单行 `<input>` 被拉伸到 101–146px）。新的行序把 `1fr` 给**消息区**。旧断言原文留档：
+  //     assert.match(cssCode, /\.xy-page-body\{display:grid;grid-template-rows:auto auto minmax\(0,1fr\) auto;/,
+  //       'page 模式：状态/收起区/对话(1fr，唯一滚动)/输入');
+  assert.match(cssCode, /\.xy-page-body\{display:grid;grid-template-rows:auto minmax\(0,1fr\) auto auto;/,
+    'page 模式：折叠行/对话(1fr，唯一滚动)/输入；`1fr` 不许再落到输入区');
+  assert.match(cssCode, /\.xy-page-compose\{display:grid;gap:9px;align-content:start\}/,
+    '输入区按内容高（单行 input 不许被拉伸）');
+  assert.match(cssCode, /\.xy-page-compose \.xy-form\{flex:0 0 auto\}/);
+});
+
+// ── R06/R07（2026-09-29，task-10）：默认头部收敛 + 27B 退出产品入口 ────────────────
+
+test('㉘ R06：默认顶部只有一个展开入口，`#model-chip` 是**短**读法（长句进二级）', async () => {
+  const {capabilityChipText} = await import('../src/client/xiaoya.js');
+  // ① 短读法：两个四字短语，且**必须**保留「未连接」三个字（判据 live-model-status 的正则）
+  assert.match(capabilityChipText({tools: 'ok', model: 'off'}), /未连接/, '没连模型要明说');
+  assert.doesNotMatch(capabilityChipText({tools: 'ok', model: 'off'}), /规则集|roco-world/,
+    '短读法里不许带规则集 ID（它进二级）');
+  assert.equal(capabilityChipText({tools: 'ok', model: 'off'}), '资料可用 · 云端未连接');
+  assert.equal(capabilityChipText({tools: 'ok', model: 'ok'}), '资料可用 · 云端已连接');
+  // ⚠ 2026-09-29 **改钉不删**（第五轮⑤）：「资料未拉起」读起来像故障。旧断言原文留档：
+  //     assert.equal(capabilityChipText({tools: 'unknown', model: 'unknown'}), '资料未拉起 · 云端状态未知');
+  assert.equal(capabilityChipText({tools: 'unknown', model: 'unknown'}), '资料：问一句就拉起 · 云端状态未知');
+  assert.doesNotMatch(capabilityChipText({tools: 'unknown', model: 'unknown'}), /未拉起|还没拉起来/);
+  assert.equal(capabilityChipText({tools: 'down', model: 'off'}), '资料不可用 · 云端未连接');
+  assert.equal(capabilityChipText({}).length < 20, true, '它是一条**短**状态，不是一整句');
+  // ② 源码形状：上屏的是短读法；长句（capabilityLines）进二级元素与 title
+  const src = read('src/client/xiaoya.js');
+  assert.match(src, /capEl\.textContent = capabilityChipText\(\{tools, model\}\);/,
+    '#model-chip 上屏的是短读法');
+  assert.match(src, /capDetail\.id = 'xy-capability-detail';/, '长句有它自己的二级元素');
+  assert.match(src, /capEl\.title = `\$\{full\}（点这里去模型设置）`;/, '长句仍挂在 title 上（悬停读得到）');
+  // ③ 默认那一行只有「设置」+ 状态；焦点行（最近看过/正在看…培养诊断）不在默认视图里
+  assert.match(src, /moreTitle\.textContent = '设置';/);
+  assert.match(src, /moreBody\.append\(capDetail, chip, actions, memoryPanel, statusFold\);/,
+    '焦点行（chip）在收起区里 —— R06：培养诊断不许堆在默认消息上方');
+  // ④ 头部自己那一句默认是**空的**（原来写「正在读取连接状态…」，那是第二行状态的重复）
+  assert.doesNotMatch(src, /role="status">正在读取连接状态…/, '默认不再自带那句连接状态');
+  // ⑤ 窄屏不挤：状态那一行允许让位，但 chip 不折行（CSS）
+  const cssCode = read('src/client/style.css').replace(/\/\*[\s\S]*?\*\//g, '');
+  assert.match(cssCode, /\.xy-pop-more>summary\{cursor:pointer;font-size:12\.5px;color:#a9c6d8;list-style:none;\s*\n?\s*display:flex;align-items:center;gap:8px\}/);
+  // ⚠ 2026-09-30（P0 改钉）：chip 的新落点同样要 `min-height:24px`（判据 `live-model-status` 量高度）
+  assert.match(cssCode, /\.xy-status-row #model-chip,\s*\n?\.xy-pop-more>summary #model-chip\{margin-left:auto;display:inline-flex;align-items:center;\s*\n?\s*min-height:24px;/,
+    'chip 的**两个**落点（独立状态行 + 独立页 summary）都要 ≥24px');
+  assert.match(cssCode, /\.xy-pop-more>summary #model-chip\{margin-left:auto;display:inline-flex;align-items:center;\s*\n?\s*min-height:24px;/,
+    'R06 之后仍要满足判据的高度下限（min-height:24px）');
+});
+
+test('㉙ R07：27B 与「调试连接」退出产品入口（权重/服务端一个字没动）', () => {
+  const src = read('src/client/xiaoya.js');
+  // 判据只认**代码行**（注释里当然会有"27B 已移除"这类留档）。
+  const code = src.replace(/\/\*[\s\S]*?\*\//g, '')
+    .split('\n').filter((line) => !line.trim().startsWith('//')).join('\n');
+  // ① 产品入口里没有 27B：没有它的短名、没有它的占位格；渲染前先过滤掉
+  assert.doesNotMatch(code, /qwen3\.8-27b|Qwen3\.8-27B/, 'R07：27B 不许出现在选项/占位里');
+  assert.match(code, /\.filter\(\(one\) => one\?\.id !== 'local_27b'\)/,
+    '唯一允许提到它的地方：渲染前把它滤掉');
+  assert.equal((code.match(/local_27b/g) ?? []).length, 1,
+    '整个模块只留那一处 filter（多一处就是又给它开了个口子）');
+  assert.match(code, /const SHORT = \{cloud: 'ds api', local_4b: 'qwen3\.5-4b'\};/, '短名表里也没有 27B');
+  assert.match(code, /const cells = rows\.length \? rows\.slice\(0, 2\) : \[/,
+    '最多两格：当前云模型 + 用户亲自训练的 4B');
+  assert.match(code, /\{id: 'cloud', label: 'ds api'\}, \{id: 'local_4b', label: 'qwen3\.5-4b'\},/,
+    '占位也只留这两个');
+  // ② 冗余的「调试连接」按钮没了，但**配置路径还在**（`#model-chip` 就是那条 <a href="connect.html">）
+  assert.doesNotMatch(code, /调试连接/);
+  assert.doesNotMatch(code, /id="open-connect"|getElementById\('open-connect'\)/);
+  assert.match(code, /capEl\.href = 'connect\.html';/, '换模型/补密钥的入口仍然只有这一条');
+  // ③ 硬边界：这一层不许碰权重 / 训练 / 密钥（那是服务端与 connect 页的事）
+  assert.doesNotMatch(code, /child_process|spawn|safetensors|DEEPSEEK_API_KEY|apiKey/,
+    '硬边界：不删权重、不训练、不查密钥 —— 客户端这一层连这些名字都不该出现');
 });
 
 
@@ -1148,4 +1270,258 @@ test('㉗ U08/U09：内部 token 不许上屏（hint-budget / below-threshold �
   assert.equal(card.headline, '换火神上场');
   assert.equal(card.reason, '对手是草系');
   assert.doesNotMatch(card.risk, /below-threshold|hint-budget/);
+});
+
+test('㉛ 第五轮④：记忆两个写入者互不覆盖 + 逐回合 turnLog 的来源（客户端那一半）', () => {
+  // 真浏览器实测（task-15 验收，临时实例，27 回合打完一局）：
+  //   · 面板设「稳健」→ 打完一局 → `events/journal/lessons` 都落了盘，`dialogue` 与 `goal` **都没被清**
+  //     （改前：页面拿开局那份旧副本整份覆盖 ⇒ goal 变 null、面板写的东西消失）。
+  //   · 复盘要的逐回合摘要：`memory.js` 的 `turnLogOf(game)` 只认 `game.history` 里 `type==='turn'` 的条目，
+  //     而**引擎公开视图没有 `history`**（实测有 ui/events/legal/mana，没有 history）⇒ 客户端自己攒。
+  //     改前 `events[].turnLog` 不存在、复盘只能说"没有逐回合记录"；改后 `turnLog` 真的写进去了。
+  const roco = read('src/client/roco.js');
+  const xiaoya = read('src/client/xiaoya.js');
+  // ① 页面这一半：局末必须把逐回合前后局面交给 `rememberBattle`（没有它 turnLog 恒为 null）
+  assert.match(roco, /const engineHistory = Array\.isArray\(view\?\.history\)/,
+    '引擎给了 history 就用引擎的');
+  assert.match(roco, /history: engineHistory\.length \? engineHistory : state\.matchHistory/,
+    '引擎没给就用客户端攒的那份（改前这里根本没有 history 键）');
+  assert.match(roco, /state\.matchHistory = \[\.\.\.state\.matchHistory, \{\s*\n?\s*type: 'turn',/,
+    '每推进一回合攒一条 {type:turn,before,after}');
+  assert.ok((roco.match(/state\.matchHistory = \[\];/g) ?? []).length >= 3,
+    '开新局的几处都要清空上一局的逐回合记录（不然复盘讲错局面）');
+  // ② 面板这一半：写记忆前先读回磁盘那一份做并集；提问前先对齐磁盘那一份
+  assert.match(xiaoya, /const storedNow = readMemory\(readStored\(MEMORY_KEY\)\);/,
+    '提问前先把记忆对齐磁盘（面板手里那份是挂载时的快照）');
+  assert.match(xiaoya, /state\.memory = mergeMemories\(readMemory\(readStored\(MEMORY_KEY\)\), incomingMemory\)/,
+    '回答落盘前做字段级并集 —— 面板不许整份覆盖页面刚写的 events/journal');
+  assert.match(xiaoya, /if \(!context\.lastMatch && Array\.isArray\(state\.memory\?\.events\)/,
+    '复盘那一支要的 lastMatch：宿主给不出就用本机记忆里最后一条对局（没有就不加这个键，不编）');
+  // ③ 语义反证（纯函数）：并集不许把"磁盘上有、这一份没有"的东西弄丢
+  const stored = {version: 1, events: [{id: 'm1', result: 'loss'}], journal: [{id: 'j1'}], dialogue: [{role: 'user', content: 'x'}]};
+  const incoming = {version: 1, events: [], journal: [], dialogue: [], goal: '稳健'};
+  const merged = mergeMemories(stored, incoming);
+  assert.equal(merged.events.length, 1, '面板那份没有 events 时，磁盘上的对局记录必须保住');
+  assert.equal(merged.journal.length, 1);
+  assert.equal(merged.dialogue.length, 1, '面板那份没有 dialogue 时，磁盘上的对话也要保住');
+  assert.equal(merged.goal, '稳健', '这一份新设置的 goal 生效');
+});
+
+test('㉚ 第三轮③：面板是**纯叠加层**（开关不改正文 rect）+ 桌面可收起', () => {
+  // 真回归的来龙去脉（读法都在真 8765 · 1440×900）：
+  //   ① 面板 (994,62)→(1424,682) 曾**盖住**工坊候选池右半边（行中心 x≈1022、`#tw-scope-all` x≈1165）
+  //      ⇒ 真实鼠标点不进六只（`roco:workshop-acceptance` 37/52）；
+  //   ② 权宜修法是"让位"（`main{padding-right:446px}` 或 `#team-workshop{margin-right:330px}`）⇒ 套件回 53/53；
+  //   ③ **第三轮纠偏第 3 条把权宜推翻了**（人类：「开关不得改变盒子/配队正文宽度/位置或导致重新排版」，
+  //      图4：面板一开候选池 739→1305 被压到 565→1028）⇒ 现在必须是**纯叠加层**，代价是面板开着时
+  //      会盖住池子右半边 —— 所以有了"收起"，而工坊套件那边由 Lead 修**陈旧探测点**
+  //      （它的 `openCoachPanel()/closeCoachPanel()` 判的是已退役的 `#companion-card`）。
+  const src = read('src/client/xiaoya.js');
+  const css = read('src/client/style.css');
+  const cssCode = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  // ① 不许再有**任何**"让位/重排"规则（两条旧写法都留档在注释里）
+  assert.doesNotMatch(cssCode, /padding-right:446px/, '旧写法①：main{padding-right:446px} 不许回来');
+  assert.doesNotMatch(cssCode, /#team-workshop\s*\{\s*margin-right/, '旧写法②：工作台让位不许回来');
+  assert.match(css, /旧规则原文留档[\s\S]{0,600}team-workshop \{ margin-right: 330px; \}/,
+    '改钉不删：旧让位规则原文留在注释里（日期 + 依据）');
+  assert.doesNotMatch(cssCode, /data-xy-panel-open/,
+    '布局不许读那个钩子（它只报事实；一被 CSS 读就又变成重排开关）');
+  // ② 面板本身：仍是 fixed 叠加层，几何与 z-index 不动
+  assert.match(cssCode, /\.xy-pop\{position:fixed;right:16px;top:62px;/, '必须是叠加层（fixed）');
+  assert.match(cssCode, /width:min\(430px,calc\(100vw - 24px\)\);/);
+  assert.match(cssCode, /z-index:78;/);
+  // ③ 桌面可收起：收起后只剩标题 + 展开入口那一行（`#model-chip` 仍可见 ≥24px）
+  assert.match(src, /id="xiaoya-collapse"/, '要有收起控件');
+  assert.match(src, /pop\.dataset\.xyCollapsed = collapsed \? 'yes' : 'no';/);
+  const collapsedRule = cssCode.slice(cssCode.indexOf('#xiaoya-pop[data-xy-collapsed="yes"]{height:auto'),
+    cssCode.indexOf('#xiaoya-pop[data-xy-collapsed="yes"] .xy-log'));
+  assert.match(collapsedRule, /height:auto/, '收起后高度按内容（不再占 620px）');
+  assert.match(cssCode, /#xiaoya-pop\[data-xy-collapsed="yes"\] \.xy-log,\s*\n?#xiaoya-pop\[data-xy-collapsed="yes"\] \.xy-quick,\s*\n?#xiaoya-pop\[data-xy-collapsed="yes"\] \.xy-form,\s*\n?#xiaoya-pop\[data-xy-collapsed="yes"\] \.xy-pop-more-body,/,
+    '收起 = 对话区 / 快捷问 / 输入行 / 二级正文 一起不显示');
+  // 收起那一段规则**只**藏这五样；`summary`/`#model-chip`/head 一个字都不许提。
+  const cStart = cssCode.indexOf('#xiaoya-pop[data-xy-collapsed="yes"]');
+  const cEnd = cssCode.indexOf('}', cssCode.indexOf('.xy-new-msg', cStart)) + 1;
+  const collapsedBlock = cssCode.slice(cStart, cEnd);
+  assert.ok(collapsedBlock.includes('.xy-form'), '切片要正好落在那段收起规则上');
+  assert.doesNotMatch(collapsedBlock, /summary|model-chip|more\{|pop-head/,
+    '收起**不许**藏掉展开入口那一行（`#model-chip` 是判据 live-model-status 的读取点，必须一直可见）');
+  // ④ 事实钩子：只在 setOpen 里写两处；不写存储（刷新回展开态）
+  assert.match(src, /document\.body\.dataset\.xyPanelOpen = open \? 'yes' : 'no';/);
+  assert.equal((src.match(/dataset\.xyPanelOpen/g) ?? []).length, 2);
+  assert.doesNotMatch(src, /localStorage\.setItem\([^)]*collaps/i, '收起状态不许落盘');
+});
+
+// ── 第六轮①（2026-09-29）：复盘正文「对面那一列」──────────────────────────────
+// 人类实测：打完一局问「复盘一下我上一局」，对面写的是「（名字未登记）· 血量未登记」。
+// **先量后改**（真引擎 17 步一局，`tmp/xy-probe-real-battle.mjs` 可复跑）：
+//   对手 `opponent.active` 序列  0,0,0,0,0,0,0, **2**,2,2,2,2,2,2,2, **1**,1,1
+//   对手 `opponent.field.name`   寂灭骨龙 ×7  →  黑猫巫师 ×8  →  海豹船长 ×3
+//   t6 原始视图：`opponent.active=2 field.name=黑猫巫师 field.pet_id=pet_000445 bench=[{slot:0,fainted:true},{slot:1,fainted:false}]`
+//   UI 视图里**没有** `opponent.pets`；`bench` 只有 {slot,fainted}（**连 pet_id 都被有意剥掉**）。
+// ⇒ 缺名字**不是**"客户端没做图鉴映射"（前一位的诊断 ✗），而是**取错了行**：
+//   `rocoGameView` 把 `enemy.pets` 压成 `[field, ...bench]`（场上那只**永远在 0 号位**），
+//   却原样照抄了引擎的**绝对下标** `foe.active` ⇒ `enemy.active ∈ {1,2}` 时
+//   `turnLogOf` 的 `pets[side.active]` 取到的是**后备行**（UI 视图里后备没有名字、没有血量）。
+// 判据（**这条改前必须红**）：`enemy.pets[enemy.active]` 就是场上那只。
+const UI_VIEW_FOE_SWITCHED = {
+  battle_result: null, phase: 'battle', turn: 7, ruleset_id: 'roco-world-s4-2026-09-10', state_version: 9,
+  self: {
+    active: 0, items: {},
+    pets: [{slot: 0, pet_id: 'pet_000225', name: '寂灭骨龙', hp: 35, max_hp: 425, energy: 2, fainted: false}],
+  },
+  // ⚠ 逐字照真 UI 视图（`ui_public_view`）：对手 `active` 是**引擎 foe.pets 的绝对下标**，
+  //   而 `bench` 已经被剥成只有位次与是否倒下。
+  opponent: {
+    active: 2, living_count: 2,
+    field: {slot: 2, pet_id: 'pet_000445', name: '黑猫巫师', hp: 405, max_hp: 405, energy: 3, fainted: false},
+    bench: [{slot: 0, fainted: true}, {slot: 1, fainted: false}],
+  },
+  legal: [],
+};
+
+test('㉜ 复盘「对面那一列」：投影后 `enemy.pets[enemy.active]` 必须就是场上那只（不是后备）', () => {
+  const game = rocoGameView(UI_VIEW_FOE_SWITCHED, {matchId: 'm1'});
+  assert.equal(game.enemy.pets[0].name, '黑猫巫师', '压缩后的 0 号位就是场上那只（引擎 `opponent.field` 给的）');
+  assert.equal(game.enemy.active, 0,
+    '`enemy.active` 必须与压缩后的数组**同坐标**（照抄引擎绝对下标 ⇒ 指到后备行）');
+  assert.equal(game.enemy.pets[game.enemy.active].name, '黑猫巫师', '按 active 取到的必须是场上那只');
+  assert.equal(game.enemy.pets[game.enemy.active].hp, 405, '场上那只的血量引擎是公开的 ⇒ 照实带过来');
+  assert.equal(game.enemy.pets[1].hp, null, '后备血量仍然是隐藏信息 ⇒ 不许补（照旧 null）');
+  // 走真链：客户端攒的行 → `turnLogOf` → 玩家看到的那段正文
+  const history = [{
+    type: 'turn',
+    before: {turn: 7, player: game.player, enemy: game.enemy},
+    after: {turn: 8, player: game.player, enemy: game.enemy},
+    action: {kind: 'skill', id: 'skill_000750'}, events: ['我方使用龙血'],
+  }];
+  const rows = turnLogOf({history});
+  assert.equal(rows[0].foe.name, '黑猫巫师', '复盘那一列要有对手场上那只的名字');
+  assert.equal(rows[0].foe.hp, 405, '血量如实（引擎公开了就有）');
+  const rev = reviewMatch({lastMatch: {id: 'm1', result: 'loss', stage: '训练场', turnLog: rows}});
+  // ⚠ 改钉（见本文件顶部说明）：这条事实现在印在**依据**里 ⇒ 读「正文 + 依据」这一整个可见面。
+  const surface = [String(rev.text ?? ''), ...(Array.isArray(rev.evidence) ? rev.evidence : [])].join('\n');
+  assert.match(surface, /对面 黑猫巫师 405 血→405 血/, '玩家可见面里要有名字与如实血量');
+  assert.doesNotMatch(surface, /名字未登记/, '场上那只的名字不该再是"未登记"');
+  // 反证：后备**永远不进这一列**（`turnLogOf` 取的永远是场上那只）
+  assert.doesNotMatch(surface, /pet_000445|pet_000190|第 1 位/, '后备不许以任何形式（id/位次）冒出来当"对面"');
+});
+
+test('㉝ 反证 A：图鉴里查不到那个物种 ⇒ 照实写「（名字未登记）」，**绝不编一个名字**', () => {
+  // 引擎没给名字（`foe.name === null`，UI 视图里后备就是这样）时，正文必须照实说 ——
+  // 不许拿"对面"、"未知精灵"、pet_id 之类顶上，也不许把上一只的名字沿用下来。
+  const rev = reviewMatch({lastMatch: {id: 'm1', result: 'loss', stage: '训练场', turnLog: [
+    {turn: 3, you: {name: '寂灭骨龙', hp: 35, hpAfter: 3}, foe: {name: null, hp: null, hpAfter: null},
+      action: {kind: 'skill', id: 'skill_000750'}, events: []},
+  ]}});
+  // ⚠ 改钉（见本文件顶部说明）：这三句量的是**投影是否照实**，事实现在在依据里 ⇒ 读整个可见面。
+  const surface = [String(rev.text ?? ''), ...(Array.isArray(rev.evidence) ? rev.evidence : [])].join('\n');
+  assert.match(surface, /对面 （名字未登记） 血量未登记→未登记/, '缺名字/缺血量要照实标注');
+  assert.doesNotMatch(surface, /pet_\d/, '不许把 pet_id 当名字印给玩家');
+  assert.doesNotMatch(surface, /对面 (未知|某某|精灵|对手)[^；]/, '不许给一个编出来的名字');
+});
+
+// ── 第六轮②（2026-09-29）：同一回合两行 ────────────────────────────────────────
+// 同一个真局（17 步）逐步读数（`tmp/xy-probe-dup.mjs`）：
+//   5 -> 6 | battle  -> battle                ← 第 6 回合正常结算
+//   6 -> 6 | battle  -> replace ["enemy"]     ← 补位步：**回合号不前进**
+//   6 -> 7 | replace -> battle                ← 「对方补上了第 3 位精灵。」
+// `turnLogOf` 按 `before.turn` 编号 ⇒ 上面**两条都记成"第6回合"**，正文出现两条「第6回合」
+// （真局 17 步里 5 对重复：6/8/10/11/13）。玩家会以为打了两回合。
+// 修法（根因位，`src/client/roco.js` 的 `applyResult`）：新的这一行若与上一行**同一个 `before.turn`**
+// ⇒ 并进上一行（保留前一段的"打之前"、事件两段拼起来、回合号变了各自成行）。
+// ⚠ 判据用的是 `before.turn`（`turnLogOf` 编号用的就是它），**不是** `after.turn`：
+//   若拿 `after.turn` 比，`replace->battle` 那一步（after=7）会被并进上一行（after=6）—— 判据会红。
+// ⚠ 「打之后」取哪一段有第二个条件（**这一条是我改了口径的，理由在 ②b**）：
+//   场上那只**换了人**时不许取后一段，否则正文会印出一句假陈述。
+//
+// 客户端 `matchHistory` 的一行（形状照 `roco.js` 的 `applyResult`）：`before`/`after` 各带
+// `{turn, player, enemy}`，`enemy.pets[enemy.active]` 就是"对面场上那只"（下标 0）。
+function clientSide({name, hp}) {
+  return {active: 0, items: {}, pets: [{id: 'p1', name, hp, maxHp: 400, energy: 3, fainted: hp <= 0, status: null}]};
+}
+function clientTurnRow(beforeTurn, afterTurn, {foeBefore, foeAfter, youBefore = {name: '寂灭骨龙', hp: 35},
+  youAfter = youBefore, events = ['我方使用龙血']} = {}) {
+  const foe0 = foeBefore ?? {name: '黑猫巫师', hp: 405};
+  return {
+    type: 'turn',
+    before: {turn: beforeTurn, player: clientSide(youBefore), enemy: clientSide(foe0)},
+    after: {turn: afterTurn, player: clientSide(youAfter), enemy: clientSide(foeAfter ?? foe0)},
+    action: {kind: 'skill', id: 'skill_000750'}, events,
+  };
+}
+// ⚠ 2026-09-30 **改钉**（task-27 玩家实测纠偏）——**旧断言原文留档，理由写在这里**：
+//   旧行为：`reviewMatch().text` 里就是**逐回合流水**（`第3回合：你这边 …；对面 …`），
+//           所以 ㉜/㉝/㉞ 原来都拿 `.text` 当"玩家看到的那段"来量。
+//   新行为（玩家实测：问「上一局怎么样」只读到 9—20 回合流水，关键决策分析到不了眼前）：
+//           **正文只给四段**（关键回合 → 当时合法替代 → 下一局试哪一手 → 风险），
+//           逐回合流水**整段移进 `evidence`（依据折叠）**。
+//   ⇒ ⇒ 这三条判据的**事实意图一个字没变**（投影要对、缺名字要照实、合并后不许重复/不许假陈述），
+//        只是那些事实现在印在**依据**那一段 ⇒ 读取口径改成「正文 + 依据」这一整个**玩家可见面** ✓
+//   旧断言原文（不要删）：
+//     const reviewTextOf = (history) => reviewMatch({...}).text;
+//     assert.match(rev.text, /对面 黑猫巫师 405 血→405 血/, '玩家正文里要有名字与如实血量');
+//     assert.match(rev.text, /对面 （名字未登记） 血量未登记→未登记/, '缺名字/缺血量要照实标注');
+//     assert.equal((text.match(/第6回合/g) ?? []).length, 1, '正文里「第6回合」只许出现一次');
+//     assert.match(text, /对方补上了第 3 位精灵。/, '补位那一段的**事实**不许因为合并丢掉');
+const reviewPacketOf = (history) => reviewMatch({lastMatch: {id: 'm1', result: 'loss', stage: '训练场',
+  turnLog: turnLogOf({history})}});
+/** 玩家可见面 = 正文 + 依据折叠（逐回合流水现在在这一半里）。 */
+const reviewSurfaceOf = (history) => {
+  const packet = reviewPacketOf(history);
+  return [String(packet.text ?? ''), ...(Array.isArray(packet.evidence) ? packet.evidence : [])].join('\n');
+};
+const reviewTextOf = (history) => reviewPacketOf(history).text;
+/** 只数**依据**里那一段流水（正文每一段也会点名回合，混在一起数会失真）。 */
+const reviewEvidenceOf = (history) => (Array.isArray(reviewPacketOf(history).evidence) ? reviewPacketOf(history).evidence : []).join('\n');
+
+test('㉞ 同一回合的两段（battle→replace→battle）必须并成一行；不同回合一律各自成行', () => {
+  const roco = read('src/client/roco.js');
+  // ① 根因位真的合并了：比的是 `before.turn`（与 `turnLogOf` 的编号口径同一个字段）
+  const start = roco.indexOf('function applyResult(data)');
+  const end = roco.indexOf('// 掉心提示', start);
+  assert.ok(start > 0 && end > start, '找不到 `applyResult` 这一块（攒逐回合的唯一收口）');
+  const block = roco.slice(start, end);
+  assert.match(block, /last\.before\?\.turn === beforeRow\.turn/,
+    'push 前要判"是不是同一个回合"（同一个 `before.turn`），是就并进上一行');
+  assert.match(block, /const switched = \['player', 'enemy'\]\.some/,
+    '换人判据要**两边都看**（自己换人也会让"打之后"张冠李戴）');
+  assert.match(block, /after: switched \? last\.after : afterRow/,
+    '场上那只换了人 ⇒ "打之后"保留**前一段**（取后一段会把补位上来的血量记在前一只名下）');
+  assert.match(block, /\.\.\.events\]\.slice\(-2\)/,
+    '事件两段拼起来取后两条（"对方补上了第 N 位精灵。"不许被"第 N 回合开始"挤掉）');
+  assert.match(block, /action: last\.action \?\? action,/, '一个回合只报一个动作（先记下的那一手）');
+
+  // ② 行为：合并后的历史 ⇒ 一个回合只印一条「第N回合」
+  const segA = clientTurnRow(6, 6, {foeBefore: {name: '寂灭骨龙', hp: 35}, foeAfter: {name: '寂灭骨龙', hp: 0},
+    events: ['第 6 回合开始。', '我方的「诡刺」命中，造成约 35 点伤害。']});
+  const segB = clientTurnRow(6, 7, {foeBefore: {name: '寂灭骨龙', hp: 0}, foeAfter: {name: '黑猫巫师', hp: 474},
+    events: ['对方补上了第 3 位精灵。']});
+  const merged = {...segA, after: segA.after, events: [...segA.events, ...segB.events].slice(-2)};
+  const rows = turnLogOf({history: [merged, clientTurnRow(7, 8,
+    {foeBefore: {name: '黑猫巫师', hp: 474}, foeAfter: {name: '黑猫巫师', hp: 474}})]});
+  assert.deepEqual(rows.map((r) => r.turn), [6, 7], '合并后一个回合一行');
+  // ⚠ 改钉（见本文件顶部说明）：**流水行**现在整段在依据里 ⇒ 计数与事实断言读依据那一段。
+  const text = reviewEvidenceOf([merged, clientTurnRow(7, 8,
+    {foeBefore: {name: '黑猫巫师', hp: 474}, foeAfter: {name: '黑猫巫师', hp: 474}})]);
+  assert.equal((text.match(/第6回合/g) ?? []).length, 1, '依据里的流水「第6回合」只许出现一次');
+  assert.match(text, /对方补上了第 3 位精灵。/, '补位那一段的**事实**不许因为合并丢掉');
+
+  // ②b **假陈述反证**：把"打之后"取成后一段 ⇒ 正文会写「对面 寂灭骨龙 35 血→474 血」，
+  //     而 474 是补位上来的**黑猫巫师**的血（真局第 6 回合逐步读数：`6->6` 对面 35→0、
+  //     `6->7` 对面 寂灭骨龙 0 → 黑猫巫师 474）。所以合并必须保留前一段的"打之后"。
+  const wrong = {...segA, after: segB.after, events: [...segA.events, ...segB.events]};
+  assert.match(reviewSurfaceOf([wrong]), /对面 寂灭骨龙 35 血→474 血/,
+    '这就是"取后一段"会印出来的假陈述（这条证明判据有牙）');
+  assert.match(text, /对面 寂灭骨龙 35 血→0 血/, '正确口径：打之后挂在同一只身上（它真倒下了）');
+  assert.match(text, /对面 黑猫巫师 474 血/, '补位上来的那只从**下一行**照常出现');
+
+  // ③ 反证：**不合并**（旧行为）时正文真的会印两条 —— 玩家以为打了两回合
+  const dupText = reviewEvidenceOf([segA, segB]);
+  assert.equal((dupText.match(/第6回合/g) ?? []).length, 2, '不合并的旧形状就是依据里的两条「第6回合」');
+  // ④ 反证：正常回合（battle→battle 前进）不许被并掉：回合号变了一个都不许少
+  const normal = [clientTurnRow(6, 7), clientTurnRow(7, 8), clientTurnRow(8, 9)];
+  assert.deepEqual(turnLogOf({history: normal}).map((r) => r.turn), [6, 7, 8], '不同回合必须各自成行');
+  // ⑤ `turnLog` 上限仍是 12（合并**不许**把上限撑破，也不许把行数撑多）
+  const many = Array.from({length: 20}, (_, i) => clientTurnRow(i + 1, i + 2));
+  assert.equal(turnLogOf({history: many}).length, 12, '逐回合摘要上限 12 条');
 });

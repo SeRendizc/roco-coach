@@ -1215,3 +1215,35 @@ body[data-roco-view="ready"] #nav-nurture{display:none}
 .plan-note{margin:6px 12px;padding:6px 10px;border-radius:8px;background:#2a1f22;color:#ffd9d9;
  border:1px solid #6a3b3b;font-size:13px;line-height:1.5}
 .plan-note[hidden]{display:none}
+
+/* ── R01（第二轮玩家纠偏 user-01）：技能详情入口与面板 ─────────────────────────
+   入口在格子**里面**但绝不出招：点击在捕获阶段被截（roco.js 的 b3SkillInfoBound），
+   出招委托那侧另有一道护栏。这里只管外观与可达性。
+   · 入口用绝对定位贴在格子右上 ⇒ **不动**格子原有排版（`.b3-slot-row` 一行都不改）。
+   · 面板 fixed + 由 JS 夹取到视口内 ⇒ 390 与 1440 都不越屏。 */
+.b3-slot{position:relative}
+/* ⚠ 2026-09-29（R01 移动端补齐）：命中区 44×44 —— 本仓自己的硬规矩是
+   「390px 下每个可见可点元素都 ≥44×44」（browser-workshop-acceptance.mjs:551 逐字），
+   而我第一版只做了 18×18 的圆点 ⇒ **在 390 档实测 18×18，不满足**。
+   改法：按钮本体 44×44（透明、只作命中区），**视觉圆点用 ::before 画成 18px** ——
+   看起来还是那个小 ⓘ，手指够得着。
+   代价（如实记）：这 44×44 会盖住格子**右上角**那一小块（那里是装饰用的克制标记的一角，
+   没有点击行为）；格子的名字、耗能、伤害行与其余区域**照旧可点出招** ——
+   下面有反证：点格子中部必须仍然出招。 */
+.b3-skill-info{position:absolute;top:0;right:0;z-index:2;width:44px;height:44px;
+ line-height:1;padding:0;font-size:0;border:0;background:transparent;cursor:help}
+.b3-skill-info::before{content:'\24D8';position:absolute;top:2px;right:2px;
+ display:flex;align-items:center;justify-content:center;width:18px;height:18px;
+ font-size:12px;line-height:1;border-radius:50%;opacity:.75;
+ background:#1b2836cc;color:#9fc4d8;border:1px solid #3b5364}
+.b3-slot:hover .b3-skill-info::before,.b3-skill-info:focus-visible::before{opacity:1}
+.b3-skill-info:hover::before{background:#24384a;color:#dff0fb}
+.b3-skill-info:focus-visible{outline:2px solid #63a6c8;outline-offset:-2px;border-radius:8px}
+#b3-skill-detail{position:fixed;z-index:90;width:min(300px,calc(100vw - 16px));
+ max-height:min(60vh,420px);overflow:auto;padding:9px 11px;border-radius:10px;
+ background:#101a26f7;color:#d9e5ee;border:1px solid #46607a;
+ box-shadow:0 12px 30px -10px #000c;font-size:12.5px;line-height:1.5}
+#b3-skill-detail[hidden]{display:none}
+.b3-skill-detail-row{margin:0 0 5px}
+.b3-skill-detail-row:last-child{margin-bottom:0}
+.b3-skill-detail-row b{color:#9fc4d8;font-weight:600;margin-right:2px}

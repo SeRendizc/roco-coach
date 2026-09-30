@@ -29,13 +29,15 @@ export function rocoPlayable(view) {
 
 function petOf(entry) {
   if (!entry || typeof entry !== 'object') return null;
-  const maxHp = Number.isFinite(entry.max_hp) ? entry.max_hp : 0;
+  // 2026-09-30 修（Lead 裁定 · 与 W-01 同族）：缺值不许折叠成 0 ✗ —— 同文件 :100 对对手后备写 null
+  //   （逐字「补了就等于编造隐藏信息」）⇒ 自己人也照同一手法 ⇒ 缺 ⇒ null（下游 coach-advice:1400 已有 !== null 守卫 ✓）
+  const maxHp = Number.isFinite(entry.max_hp) ? entry.max_hp : null;
   return {
     id: entry.pet_id ?? null,
     name: entry.name ?? entry.pet_id ?? '伙伴',
-    hp: Number.isFinite(entry.hp) ? entry.hp : 0,
+    hp: Number.isFinite(entry.hp) ? entry.hp : null,
     maxHp,
-    energy: Number.isFinite(entry.energy) ? entry.energy : 0,
+    energy: Number.isFinite(entry.energy) ? entry.energy : null,
     fainted: entry.fainted === true,
     status: entry.statuses && Object.keys(entry.statuses).length ? entry.statuses : null,
   };
@@ -81,7 +83,18 @@ export function rocoGameView(view, {matchId = null} = {}) {
       pets: (Array.isArray(self.pets) ? self.pets : []).map(petOf).filter(Boolean),
     },
     enemy: {
-      active: Number.isInteger(foe.active) ? foe.active : 0,
+      // ── 2026-09-29（第六轮①）**下标必须与压缩后的数组同坐标** ─────────────────────
+      // 引擎公开视图里 `opponent.active` 是**它自己 `foe.pets` 的绝对下标**（`schema.py`
+      // 的 `foe_field_pet(p, i == foe.active)` 就是这个口径），而下面这一份 `pets` 是
+      // **压缩过的** `[场上那只, ...后备]` —— **场上那只永远在 0 号位**。
+      // 原来照抄 `foe.active` ⇒ 对手换过人之后（`foe.active` 变成 1 / 2）指到的是**后备行**：
+      // 真引擎 17 步一局实测，`opponent.active` 序列 `0×7 → 2×8 → 1×3`，从第 7 步起
+      // 复盘正文的「对面那一列」印成「（名字未登记）· 血量未登记」（UI 视图的后备
+      // 连 `pet_id` 都被有意剥掉了，所以连 id 都拿不到）。
+      // 修法只有这一处：投影后的坐标就写 0（同一份视图的 5 个消费点
+      // `experience.js` / `companion.js` / `teacher.js` / `client.js` 读的都是
+      // `pets[active]`，根因修好它们自动对）。
+      active: 0,
       // 对手场上那一只是公开的；后备在公开视图里只有位次与是否倒下，
       // 这里**不**给它补血量——补了就等于编造隐藏信息。
       pets: [foe.field, ...(Array.isArray(foe.bench) ? foe.bench : [])]
@@ -1006,8 +1019,19 @@ export function rocoIntervention({view = null, session = null, plan = null, host
   const viewVersion = Number.isInteger(view?.state_version) ? view.state_version : null;
   const planStale = planVersion !== null && viewVersion !== null && planVersion !== viewVersion;
   detail.plan_stale = planStale;
+  // ── U09：**决定性的一手不看去重**（不可逆那一档 + 危险血线那一档）────────────────
+  //
+  // 真 8765 六宠局实测（Lead 的台子 + 我自己的页面内探针，同一手 t10/t16）：页面会对
+  // **同一个局面**跑两次 `refreshHint()`。第一次算出的建议被显示、形状进了 `session.said`；
+  // 第二次撞上去重 ⇒ 建议变 null（气泡被撤下来，玩家看到「闪一下又没了」）或**换成另一份说辞**
+  //（落到确定性兜底那条更长的段落），回执看起来像「兜底没产出」。
+  // 去重要防的是「换个回合把同一句念一遍」，不是「同一个局面被渲染两次」——
+  // 后者必须**幂等**。所以决定性那一档从一开始就不看 `said`；「可以不说」的那些
+  //（micro_hint / defer）照旧走去重，U09 的克制不变。
+  const adviceSession = detail.decisive === true ? {...askSession, said: new Set()} : askSession;
+  detail.advice_dedup_bypassed = detail.decisive === true;
   try {
-    detail.advice = coachAdvice({game, plan: planStale ? null : plan, session: askSession, host});
+    detail.advice = coachAdvice({game, plan: planStale ? null : plan, session: adviceSession, host});
   } catch (error) {
     // 建议层出问题**不许**把整页搞挂，也不许退回旧模板：记下错误、这一手沉默，
     // 错误留给开发者面板。上下文留给排查，别吞掉。
@@ -1027,8 +1051,12 @@ export function rocoIntervention({view = null, session = null, plan = null, host
   const speakWanted = ['micro_hint', 'action_hint', 'defer_to_review'].includes(detail.action);
   if (!detail.advice && speakWanted && !detail.advice_error) {
     try {
-      detail.advice = adviceForView(view, planStale ? null : plan, {session: askSession});
-      if (detail.advice) detail.advice_source = 'deterministic-fallback';
+      // 与上面同一份 `adviceSession`：决定性那一档不看 `said`，于是两次渲染给出**同一份结论**。
+      const fallback = adviceForView(view, planStale ? null : plan, {session: adviceSession});
+      if (fallback) {
+        detail.advice = fallback;
+        detail.advice_source = 'deterministic-fallback';
+      }
     } catch (error) {
       detail.advice_error = {message: String(error?.message ?? error).slice(0, 200),
         at: new Date().toISOString()};

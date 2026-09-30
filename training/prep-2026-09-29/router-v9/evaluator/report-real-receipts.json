@@ -1,0 +1,203 @@
+{
+ "at": "2026-09-29T14:28:41.819Z",
+ "model_outputs": "real:cloud-deepseek",
+ "receipts_from": "player prior turns only (no expect leakage)",
+ "scored": 24,
+ "total": 24,
+ "routing_hit": 8,
+ "routing_total": 24,
+ "detail": [
+  {
+   "id": "mt-anaphor-01",
+   "receipts": 0,
+   "got": "query_rules",
+   "want": "query_rules",
+   "hit": true,
+   "why": null
+  },
+  {
+   "id": "mt-anaphor-02",
+   "receipts": 0,
+   "got": "query_rules",
+   "want": "query_rules",
+   "hit": true,
+   "why": null
+  },
+  {
+   "id": "mt-anaphor-03",
+   "receipts": 0,
+   "got": "query_rules",
+   "want": "query_rules",
+   "hit": true,
+   "why": null
+  },
+  {
+   "id": "mt-anaphor-04",
+   "receipts": 0,
+   "got": "query_rules",
+   "want": "query_rules",
+   "hit": true,
+   "why": null
+  },
+  {
+   "id": "mt-anaphor-05",
+   "receipts": 1,
+   "got": "stop",
+   "want": "query_rules",
+   "hit": false,
+   "why": null
+  },
+  {
+   "id": "mt-anaphor-06",
+   "receipts": 1,
+   "got": "query_rules",
+   "want": "query_rules",
+   "hit": true,
+   "why": null
+  },
+  {
+   "id": "mt-anaphor-07",
+   "receipts": 0,
+   "got": "query_rules",
+   "want": "query_rules",
+   "hit": true,
+   "why": null
+  },
+  {
+   "id": "mt-anaphor-08",
+   "receipts": 1,
+   "got": "stop",
+   "want": "query_rules",
+   "hit": false,
+   "why": null
+  },
+  {
+   "id": "mt-action-02",
+   "receipts": 0,
+   "got": "stop",
+   "want": "simulate_branch",
+   "hit": false,
+   "why": null
+  },
+  {
+   "id": "mt-action-04",
+   "receipts": 0,
+   "got": "stop",
+   "want": "simulate_branch",
+   "hit": false,
+   "why": null
+  },
+  {
+   "id": "mt-action-06",
+   "receipts": 0,
+   "got": "stop",
+   "want": "simulate_branch",
+   "hit": false,
+   "why": null
+  },
+  {
+   "id": "mt-action-08",
+   "receipts": 0,
+   "got": "stop",
+   "want": "simulate_branch",
+   "hit": false,
+   "why": null
+  },
+  {
+   "id": "mt-state-01",
+   "receipts": 1,
+   "got": "stop",
+   "want": "read_state",
+   "hit": false,
+   "why": null
+  },
+  {
+   "id": "mt-state-02",
+   "receipts": 1,
+   "got": "stop",
+   "want": "read_state",
+   "hit": false,
+   "why": null
+  },
+  {
+   "id": "mt-state-03",
+   "receipts": 1,
+   "got": "stop",
+   "want": "read_state",
+   "hit": false,
+   "why": null
+  },
+  {
+   "id": "mt-state-04",
+   "receipts": 1,
+   "got": "stop",
+   "want": "read_state",
+   "hit": false,
+   "why": null
+  },
+  {
+   "id": "mt-state-05",
+   "receipts": 1,
+   "got": "stop",
+   "want": "read_state",
+   "hit": false,
+   "why": null
+  },
+  {
+   "id": "mt-state-06",
+   "receipts": 1,
+   "got": "stop",
+   "want": "read_state",
+   "hit": false,
+   "why": null
+  },
+  {
+   "id": "mt-state-07",
+   "receipts": 1,
+   "got": "stop",
+   "want": "read_state",
+   "hit": false,
+   "why": null
+  },
+  {
+   "id": "mt-state-08",
+   "receipts": 1,
+   "got": "stop",
+   "want": "read_state",
+   "hit": false,
+   "why": null
+  },
+  {
+   "id": "cr-turn-01",
+   "receipts": 0,
+   "got": "stop",
+   "want": "read_evidence",
+   "hit": false,
+   "why": null
+  },
+  {
+   "id": "cr-turn-02",
+   "receipts": 0,
+   "got": "read_match",
+   "want": "read_evidence",
+   "hit": false,
+   "why": null
+  },
+  {
+   "id": "cr-turn-03",
+   "receipts": 0,
+   "got": "read_evidence",
+   "want": "read_evidence",
+   "hit": true,
+   "why": null
+  },
+  {
+   "id": "cr-turn-05",
+   "receipts": 0,
+   "got": "read_evidence",
+   "want": "read_evidence",
+   "hit": true,
+   "why": null
+  }
+ ]
+}

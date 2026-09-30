@@ -86,8 +86,32 @@ export const ROLE_CN = {attacker: '输出', tank: '坦克', recovery: '回复', 
  * `loading="lazy"`：候选池一页 24 行、每行一张图，不懒加载会一次性拉完整页。
  */
 function twArtHtml(card, {size = 28} = {}) {
-  const petId = String(card?.group ?? card?.select ?? '');
-  if (card?.art === true && petId) {
+  // ⚠⚠ 2026-09-29（人类实测：「右边精灵名称旁边那个小虚线框，哪里不应该是 icon 吗？」）：
+  //   上面那段注释说「候选池走的就是 `/api/roco/box`，所以 `card.art` 和盒子页是同一个字段」——
+  //   **那句是错的**。真机对照两份回执（真 8765）：
+  //     · 盒子卡：`{alias, **art:true**, …, **group:"pet_000001"**, **select**, …}`
+  //     · **工坊候选行**：`{…, instance_id, **species_id**, species_name, types, …}` ⇒ **没有 `art`、没有 `group`、没有 `select`**
+  //   ⇒ 旧代码取 `card.group ?? card.select` 恒得空串、`card.art === true` 恒假
+  //   ⇒ **候选池每一行都画成虚线占位**（首字「喵」「水」「火」），而同一只精灵在左边队槽里是有图的。
+  //   修法：①物种 id 多认一个 `species_id`（候选行给的就是它）；②`art` **没给**（undefined）时不拦，
+  //   照 id 去要图 —— 那个 id 就是这一行自己的物种，**不是"借别的精灵的图"**（原注释担心的那件事）。
+  //   ③`art === false`（盒子明确说没有立绘的）仍然画占位，口径不变。
+  //   旧代码留档（改钉不删）：const petId = String(card?.group ?? card?.select ?? '');
+  //                             if (card?.art === true && petId) {
+  // ⚠ 第二版修正（实测：第一版取到的竟是 `own-0001`（实例 id），而 `/api/roco/sprite` 只认**物种 id**
+  //   ⇒ 图 `0x0` 加载不出来，等于把虚线框换成了坏图，**比原来更糟**）：
+  //   ⇒ **优先取 `pet_` 形状的那一个**，取不到才退到别的（宁可退回占位，也不发一个必然 404 的请求）。
+  const _artCands = [card?.group, card?.select, card?.species_id, card?.species].map((x) => String(x ?? ''));
+  const petId = _artCands.find((x) => /^pet_/.test(x)) ?? _artCands.find(Boolean) ?? '';
+  // ⚠ 第三版（实测收口）：**只有拿到 `pet_` 形状的物种 id 才去要图**。
+  //   我第二版试过"优先挑 pet_ 形状、挑不到就退到别的"，实测**仍然取到 `own-0001`**
+  //   ⇒ 发出去必然 404、图 `0x0` —— **那等于把虚线框换成坏图，比原样更糟**。
+  //   ⇒ 收口成：**不是 `pet_` 形状就画占位**（如实说"这只没有立绘"），**不发必然失败的请求**。
+  //   真正的修法见档：这一行**需要把物种 id 带下来**（页面 `state.ownedByInstance` 里有
+  //   `{speciesId}`，或让候选行带上 `species_id`）—— 那是下一步，**不在本版硬凑**。
+  const artOk = card?.art === true ? true
+    : (card?.art === undefined && /^pet_/.test(petId));
+  if (artOk && petId) {
     return `<span class="tw-art" style="width:${size}px;height:${size}px">`
       + `<img src="/api/roco/sprite?id=${encodeURIComponent(petId)}&v=default" alt="" `
       + `aria-hidden="true" loading="lazy" decoding="async"></span>`;
@@ -119,6 +143,26 @@ export const poolRowMetaText = (card) => {
   const levelText = level ?? (owned ? '等级未登记' : '未持有');
   return `${levelText} · ${card?.role_label ?? '定位未登记'}`;
 };
+
+/**
+ * 构建档 → **玩家第一眼读的那半句**（2026-09-29 U04）。
+ *
+ * 服务端 `build_tier_label` 原文是「有具体构建（算得出高低）」/「只有图鉴资料（算不出高低）」，
+ * 括注那句是给核对用的工程话（玩家投诉里的「算得出高低 ×6」就是它）。首层只留前半句，
+ * 括注的**原文一个字不删**，逐字留在每张卡的「诊断详情」里（`diagnosticsHtml` 的 `构建档：…`）。
+ * 认不出的档位不猜意思：只把尾部括注摘下来（摘下来的东西仍然在诊断详情里可核）。
+ */
+export function buildTierPlain(label) {
+  const raw = String(label ?? '').trim();
+  if (!raw) return '';
+  const known = {
+    '有具体构建（算得出高低）': '有具体构建',
+    '只有图鉴资料（算不出高低）': '只有图鉴资料',
+  };
+  if (known[raw]) return known[raw];
+  const head = raw.replace(/（[^）]*）\s*$/u, '').trim();
+  return head || raw;
+}
 
 /**
  * 按 `poolCardKey` 去重（保序）：**按物种去重、保留首次出现的那一只**。键为空的条目丢弃（原行为不变）。 */
@@ -184,6 +228,14 @@ export function readTeamConfig(storage = null) {
           .filter(([, ids]) => Array.isArray(ids) && ids.every((id) => typeof id === 'string' && id))
           .map(([key, ids]) => [key, ids.slice()])) : {},
       at: typeof snap.at === 'string' ? snap.at : null,
+      // 2026-09-29 U04：**撤销目标**额外要记两件事。旧记录里没有这两个键 ⇒ 一个都不补默认值
+      // （形状对旧记录逐字不变；`teamConfigFingerprint` 也一个都不读）。
+      //   · `explicit`：这一份里**玩家自己选过配招**的物种 —— 撤销要连「默认 / 你选的」一起退回去；
+      //   · `applied_before`：这一份**本身是不是一次"已应用"的结果** —— 决定撤销之后状态行
+      //     回到「已应用」还是「还没有应用过」。
+      ...(Array.isArray(snap.explicit)
+        ? {explicit: snap.explicit.filter((id) => typeof id === 'string' && id)} : {}),
+      ...(typeof snap.applied_before === 'string' ? {applied_before: snap.applied_before} : {}),
     };
   };
   return {current: clean(all.current), previous: clean(all.previous),
@@ -218,7 +270,8 @@ export function teamConfigProblems({slots = [], locked = [], learnableOf = () =>
   const list = Array.isArray(slots) ? slots.filter((slot) => slot && typeof slot === 'object') : [];
   if (list.length !== TEAM_SLOTS) {
     problems.push({slot: 0, kind: 'count',
-      text: `正式队伍要 ${TEAM_SLOTS} 只持有个体，现在只有 ${list.length} 只。`});
+      text: `正式队伍要 ${TEAM_SLOTS} 只持有个体，现在只有 ${list.length} 只。`,
+      fix: `在候选池（默认那一档就是「我的精灵」）里再挑 ${TEAM_SLOTS - list.length} 只补满六格。`});
   }
   list.forEach((slot, index) => {
     const instance = String(slot.instance ?? '');
@@ -226,29 +279,34 @@ export function teamConfigProblems({slots = [], locked = [], learnableOf = () =>
     const where = `第 ${index + 1} 格（${slot.name ?? instance}）`;
     if (!/^own-\d+$/.test(instance)) {
       problems.push({slot: index + 1, kind: 'not-owned',
-        text: `${where}不是你盒子里的个体（图鉴物种不能正式上场）。`});
+        text: `${where}不是你盒子里的个体（图鉴物种不能正式上场）。`,
+        fix: '在候选池里切回「我的精灵」再挑一只你拥有的；没有这一只就把它换掉。'});
       return;
     }
     const four = Array.isArray(slot.skills) ? slot.skills.filter((id) => typeof id === 'string' && id) : [];
     if (four.length !== SHARED_LOADOUT_SLOTS) {
       problems.push({slot: index + 1, kind: 'skills-count',
-        text: `${where}现在不是四个技能（当前 ${four.length} 个）—— 点「换招」选满四个。`});
+        text: `${where}现在不是四个技能（当前 ${four.length} 个）—— 点「换招」选满四个。`,
+        fix: `点这一格的「换招」，在它的学习表里挑满 ${SHARED_LOADOUT_SLOTS} 个，再点「保存这四个」。`});
       return;
     }
     if (new Set(four).size !== four.length) {
       problems.push({slot: index + 1, kind: 'skills-duplicate',
-        text: `${where}的四个技能里有重复的 —— 引擎按四个互不相同校验。`});
+        text: `${where}的四个技能里有重复的 —— 引擎按四个互不相同校验。`,
+        fix: '点这一格的「换招」，把重复的那个去掉、换成学习表里另一个，再保存。'});
     }
     const pool = learnableOf(species);
     if (!Array.isArray(pool)) {
       problems.push({slot: index + 1, kind: 'not-checked',
-        text: `${where}的四个技能还没核对过学习表。`});
+        text: `${where}的四个技能还没核对过学习表。`,
+        fix: '点一次「核对六只四技能」把学习表读回来（读不到会如实说，不会当成通过）。'});
       return;
     }
     four.forEach((skillId, at) => {
       if (!pool.includes(skillId)) {
         problems.push({slot: index + 1, kind: 'not-learnable',
-          text: `${where}的第 ${at + 1} 个技能（${skillId}）学不到：引擎给这一只的学习表里没有它。`});
+          text: `${where}的第 ${at + 1} 个技能（${skillId}）学不到：引擎给这一只的学习表里没有它。`,
+          fix: `点这一格的「换招」，把第 ${at + 1} 个换成学习表里有的技能，再保存。`});
       }
     });
   });
@@ -256,7 +314,8 @@ export function teamConfigProblems({slots = [], locked = [], learnableOf = () =>
   for (const id of (Array.isArray(locked) ? locked : [])) {
     if (!ids.includes(String(id))) {
       problems.push({slot: 0, kind: 'lock-missing',
-        text: `锁定的那一只（${id}）不在队伍里：锁定的精灵必须留在队里，否则整条开局请求会被拒。`});
+        text: `锁定的那一只（${id}）不在队伍里：锁定的精灵必须留在队里，否则整条开局请求会被拒。`,
+        fix: '把锁定那一只加回队伍，或者先取消它的锁定，再重来一次。'});
     }
   }
   return problems;
@@ -285,12 +344,18 @@ export const AXIS_LEGEND = Object.freeze({
 });
 
 import {markdown as renderMarkdown} from '../coach/experience.js';
+// R02/R03（2026-09-29）：**判断层**只有一处 —— `src/coach/team-plan.js`。
+// 它产出「强度判断 / 两条短板 / 一个优先调整 / 基本打法」，评估侧栏与 6×4 推荐都读它，
+// 保证「评估」和「推荐」不会各算一份（task-11 的硬要求）。
+import {buildTeamPlan, sixByFourComplete} from '../coach/team-plan.js';
+// 属性相性用页面自己那一份（来源 `data/roco/normalized/.../types.json`，有生成与校验脚本）。
+import {defenceMultiplier} from './type-affinity.js';
 // ⚠ 2026-09-29 补（`art-finish` 报的实况故障，Lead 复核并实测）：
 // 本轮 WIP 在 `slotLegalityProblems()` 等处引用了 6 次 `SHARED_LOADOUT_SLOTS`，
 // 但这一行**只导入了另外两个**、漏了它 ⇒ `ReferenceError: SHARED_LOADOUT_SLOTS is not defined`，
 // 抛在 `renderTeam → legalityRowHtml` 上 ⇒ **点候选项什么都不发生、六槽永远空**（真机实测）。
 // 定义本来就在 `loadout-store.js:26`（`export const SHARED_LOADOUT_SLOTS = 4;`），补进导入即可。
-import {readSharedLoadouts, writeSharedLoadout, SHARED_LOADOUT_SLOTS} from './loadout-store.js';
+import {readSharedLoadouts, writeSharedLoadout, clearSharedLoadout, SHARED_LOADOUT_SLOTS} from './loadout-store.js';
 
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => (
   {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
@@ -329,6 +394,19 @@ const STYLE = `
 .tw-drawer-panel{display:none;width:min(300px,80vw);overflow:auto;max-height:100%;background:#101a24;
  border:1px solid var(--line);border-radius:0 14px 14px 0;padding:12px 14px;margin-left:0}
 .tw-drawer[data-open="yes"] .tw-drawer-panel{display:block}
+    /* R03（2026-09-30）：判断块**宽视口两栏** —— 四块要在 900px 内看得全（原来 playstyle bottom≈1297 ✗）。
+       只作用于 #tw-teamplan 内部（工坊在 shadow root ⇒ 全局 style.css 够不着它 ✓） */
+    .tw-teamplan{margin:2px 0 6px}
+    .tw-teamplan .tw-teamplan-sec{min-width:0;margin:0 0 6px}
+    .tw-teamplan .tw-teamplan-sec h4{margin:4px 0 3px;font-size:13px}
+    .tw-teamplan .tw-teamplan-sec p{margin:2px 0}
+    @media (min-width:1200px){
+      #tw-teamplan{display:grid;grid-template-columns:1fr 1fr;column-gap:14px;align-items:start}
+      #tw-teamplan [data-tw-plan="strength"]{grid-column:1 / -1}
+      #tw-teamplan [data-tw-plan="playstyle"]{grid-column:1 / -1}
+      /* ⚠ 试过在 playstyle 内部再分两栏（columns:2）：实测没用（抽屉只有 300px 宽 ⇒ 每栏约 135px，
+         行反而折得更碎，高度 448 基本不变）⇒ 撤掉，别留一条看着像优化的无效规则 */
+    }
 /* 一屏装完：网格高度 = 可用高度，候选列表**内部滚动**，页面本身不上下滑。 */
 /* 人类 2026-09-23（子代理 A/B 实测）：工坊 host 曾是 h=0 但 shadow 里的固定浮层溢出，
    把页面级控件（#select-panel 的切换/搜索）挡住了 —— elementFromPoint 命中 SECTION#team-workshop。
@@ -398,9 +476,19 @@ const STYLE = `
 /* （满槽卡的「详情」贴底**不用**在这里另写规则：下面已有 .tw-detail{margin-top:auto}，
    槽位撑高之后它自然吃掉多出来的行高。先前这里多写了一条同名声明，已删。） */
 .tw-slot.on{border-style:solid;border-color:#8dd49c;background:#17242f}
-.tw-slot .tw-who{font-weight:600;font-size:14px;overflow-wrap:anywhere}
+.tw-slot .tw-who{font-weight:600;font-size:14px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 2026-09-29（阶段三布局红根因，**实测定死**）：这一行原来会**折行** ——
+   .tw-row 那条通用规则带 flex-wrap:wrap，而 .tw-slot .tw-row 没覆盖它。
+   实测（判据自己那一队 own-0001..0006）：卡1–5 首行 = tw-art(32)+tw-who(20)+移除(44) = 60px；
+   **卡6 多一个「锁定」标**（那一只是锁定态）⇒ 四个子元素放不下 ⇒ 折成两行 = 98px。
+   而 .tw-slots 是 grid-auto-rows:minmax(min-content,1fr)（按行内最高定高）
+   ⇒ 后三张那一行被撑到 383.9、前三张停在 345.9 ⇒ **两行差 38px**（判据两档视口实测、连跑三次一致）。
+   这与人类 2026-09-26 报的「第 4～6 张比前三张矮」是同一个机制（只是方向反过来）。
+   处置：首行 flex-wrap:nowrap（不折行）+ 名字 min-width:0 且超出省略号 ——
+   与上面 .tw-mech-line 同一套已文档化的口径：「首层每样只留一行，不是把资料读完」。
+   完整名字仍在详情抽屉与 title 可达，没有丢信息。 */
 .tw-slot .tw-meta{color:#9caebe;font-size:11.5px;line-height:1.5;overflow-wrap:anywhere}
-.tw-slot .tw-row{display:flex;gap:6px;align-items:center;min-width:0}
+.tw-slot .tw-row{display:flex;gap:6px;align-items:center;min-width:0;flex-wrap:nowrap}
 .tw-slot .tw-lock{margin-left:auto;color:#9caebe;font-size:11px;white-space:nowrap}
 .tw-types{display:flex;flex-wrap:wrap;gap:3px}
 /* 机制一行：首层**只留一行**（超出用省略号），完整原文与四个技能进槽位里的详情抽屉。
@@ -420,6 +508,9 @@ const STYLE = `
    现在清单不换行、超出省略号；全文同时给在 title 与「详情」的四个技能里。
    2026-09-26（六张卡结构一致）：这一行**每张卡都在**，见 loadoutRowHtml()。 */
 .tw-slot .tw-loadout{display:flex;align-items:center;gap:6px;min-width:0;min-height:44px}
+/* 2026-09-29 U04：这一块改成**竖排**（四个技能小格 + 两个动作按钮），类名保留 .tw-loadout
+   （判据与版式脚本按它找这一行），只是覆盖掉上面那条横排规则。 */
+.tw-slot .tw-loadout.tw-loadout-stack{display:flex;flex-direction:column;align-items:stretch;gap:4px;min-height:0}
 .tw-slot .tw-loadout-btn{flex:0 0 auto}
 .tw-slot .tw-loadout>span{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* 抽屉候选卡里的机制行 = **点开看全文**（人类 2026-09-23 当面确认）。默认仍是**一行**
@@ -598,6 +689,62 @@ const STYLE = `
 .tw-filter-row select.tw-btn{min-height:36px}
 #tw-cand-result{font-size:11.5px}         /* 「N 条 · 本页 M」字号小一点 */
 .tw-panel.tw-team .tw-slots .tw-slot[data-tw-state="empty"]{border-style:dashed}
+
+/* ── 2026-09-29 U04：玩家层可扫读 + 诊断层默认收起 ─────────────────────────
+   玩家投诉的是「配队全是 ID 和工程文字」。这一屏第一眼要能回答：这六只分别是谁、
+   什么系、干什么（定位）、带哪四招、能不能换/换下来。工程字段（构建档原文、机制标签、
+   学习表核对状态、技能号）**一个字都不删**，全部移进每张卡自己的「诊断详情」
+   （details[data-tw-diag]，默认收起）。 */
+.tw-slot .tw-role{font-size:11px;border:1px solid #3a4a5c;border-radius:999px;padding:1px 7px;
+ color:#bcd0e0;white-space:nowrap}
+.tw-skills{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px;margin-top:3px;min-width:0}
+.tw-skill{font-size:11px;line-height:1.35;color:#d6e2ee;background:#1d2c3c;border:1px solid #2b3d4f;
+ border-radius:6px;padding:3px 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tw-skill[data-tw-skill-state="missing"]{border-style:dashed;color:#9caebe;background:transparent}
+.tw-skills-head{display:flex;align-items:center;gap:6px;min-width:0;margin-top:3px}
+.tw-skills-src{font-size:10.5px;color:#9caebe;border:1px solid #3a4a5c;border-radius:5px;padding:0 5px;
+ white-space:nowrap;flex:0 0 auto}
+/* 两个动作（换招 / 替换）各占一半，都保持 ≥44px 的拇指尺寸（390×844 的触控判据量的就是它们）。 */
+.tw-slot-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;min-height:44px}
+.tw-slot-actions .tw-btn{width:100%;min-width:0}
+/* 被「替换」选中、等着玩家在候选池点一只的那一格：描边变色，一眼看得出要换谁。 */
+.tw-slot[data-tw-replace-armed="yes"]{border-style:solid;border-color:#f0cb77;background:#221d14}
+/* 诊断详情：默认收起（details 不带 open）。summary 保持 44px 的拇指尺寸。 */
+.tw-diag{border-top:1px solid #24313f;margin-top:4px}
+.tw-diag>summary{font-size:11.5px;color:#8fa4b6;cursor:pointer;min-height:44px;display:flex;align-items:center;
+ list-style:none;gap:6px}
+.tw-diag>summary::-webkit-details-marker{display:none}
+.tw-diag>summary::after{content:'▸';margin-left:auto;color:#6b7f92}
+.tw-diag[open]>summary::after{content:'▾'}
+.tw-diag .tw-detail-body>div{margin:3px 0}
+/* 候选池：**已拥有**与**图鉴（你没有）**必须一眼分得开（实心绿边 vs 虚线冷色）。 */
+.tw-row--owned{border-color:#3f6b4c}
+.tw-row--ref{background:#131d28;border-style:dashed;border-color:#3a4a5c}
+.tw-row--ref .tw-name{color:#c6d2de;font-weight:500}
+.tw-state-ref{color:#f0cb77;border-color:#6b5b3a;background:#2a2318}
+.tw-scope-note{margin:0 0 6px;font-size:11.5px;color:#9caebe;line-height:1.5}
+/* 队伍已满时点候选 → 「替换哪只」（不再让玩家自己猜先删谁） */
+.tw-replace{border:1px solid #6b5b3a;background:#241f16;border-radius:10px;padding:8px 10px;margin:0 0 8px;
+ flex:0 0 auto}   /* 面板是 flex 列：这一块与预览表**不许被压扁**（宁可让候选列表自己滚） */
+.tw-replace h4{margin:0 0 4px;font-size:13px;color:#f0cb77}
+.tw-replace-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:6px 0}
+.tw-replace-list .tw-btn{width:100%;min-width:0}
+/* 6×4 整套配置的预览表 */
+/* 6×4 整套配置的预览表：**自己有上限、自己滚** —— 展开时不许把六张卡整块挤出视野
+   （实测：不设上限时它在 1440×900 下把槽位区顶到只剩一条缝）。 */
+.tw-plan{margin:6px 0 0;border:1px solid #3f6b52;border-radius:10px;background:#131f1a;padding:8px 10px;
+ flex:0 0 auto;max-height:44%;overflow:auto}
+.tw-plan table{width:100%;border-collapse:collapse;font-size:11.5px}
+.tw-plan th{text-align:left;color:#9caebe;font-weight:500;padding:2px 4px;border-bottom:1px solid #2b3d4f}
+.tw-plan td{padding:3px 4px;border-bottom:1px solid #1e2a36;vertical-align:top;color:#dbe7f1}
+.tw-plan td.tw-plan-who{white-space:nowrap}
+.tw-plan td.tw-plan-four{color:#bcd0e0}
+.tw-plan .tw-plan-mark{font-size:10.5px;color:#9caebe}
+/* 应用前的逐只问题 + 修法（一条一格，说清哪一格、什么问题、怎么改） */
+.tw-problem{border:1px solid #6b5b3a;border-radius:8px;background:#241f16;padding:6px 8px;margin:6px 0 0;
+ font-size:12px;line-height:1.6}
+.tw-problem b{color:#f0cb77}
+.tw-problem .tw-fix{color:#cfeeda}
 `;
 
 /**
@@ -628,10 +775,10 @@ const isFrozenMechanism = (mechanism) => Boolean(mechanism)
  * `tags` 是「体系线索」（这一只参与了哪些机制标签），**不是强度排序**，
  * 所以只印标签名、不印 skills 计数。
  */
-function mechanismRow(mechanism, {expandable = false} = {}) {
+function mechanismRow(mechanism, {expandable = false, tags = true} = {}) {
   const frozen = isFrozenMechanism(mechanism);
   const line = frozen ? mechanism.line.trim() : MECHANISM_PENDING;
-  const tags = mechanismTagsOf(mechanism);
+  const tagList = mechanismTagsOf(mechanism);
   const lineHtml = `<span class="tw-mech-line">${escapeHtml(line)}</span>`;
   // 人类 2026-09-23（接手复核，已当面确认）：「阵容评估」抽屉里那句机制被 `-webkit-line-clamp:1`
   // 截成「…」，保持排布不变、只把它改成**点开看全文**。
@@ -644,8 +791,14 @@ function mechanismRow(mechanism, {expandable = false} = {}) {
     : lineHtml;
   return `<div class="tw-mech" data-tw-mechanism="${frozen ? 'frozen' : 'pending'}">
    ${lineBlock}
-   <span class="tw-mech-tags">${tags.length ? `机制线索：${escapeHtml(tags.join(' · '))}` : '机制线索：登记层没有这一只的标签'}</span>
+   ${tags ? `<span class="tw-mech-tags">${tagList.length
+    ? `机制线索：${escapeHtml(tagList.join(' · '))}` : '机制线索：登记层没有这一只的标签'}</span>` : ''}
   </div>`;
+}
+
+function mechanismTagsLine(mechanism) {
+  const list = mechanismTagsOf(mechanism);
+  return list.length ? `机制线索：${list.join(' · ')}` : '机制线索：登记层没有这一只的标签';
 }
 
 /** 机制标签的纯文本形式：首层那行是**两行省略号**，全文由详情与它给出（同一份数据、两处用法）。 */
@@ -755,6 +908,15 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     <div class="tw-drawer-panel" id="tw-eval-panel"><button class="tw-drawer-close" id="tw-eval-close" type="button">收起 ›</button>
      <div class="tw-head"><h3 id="tw-eval-title">阵容评估</h3>
       <span class="tw-sub" id="tw-eval-sub">—</span></div>
+     <!-- R03/半成品施工（2026-09-30，Lead 批准 A）：**针对某个对手**的判断需要一个对手来源 ——
+          页面上**原来一个都没有** ⇒ state.evalOpponent 恒 null ⇒ 对手支（克制招/最怕什么/按对手算的强度）
+          **永远不出现** ✗。这里只补**来源**本身（纯新增 ✓ 不改「没选对手就如实说」那条支 ✓）。
+          ⚠ 速度：页面拿不到（图鉴 「panel.available=false」）⇒ **只给 {name, types}**，速度留空、
+           由 team-plan 明写「对手速度未知 ⇒ 不比速度」，**不编默认值** ✓ -->
+     <div class="tw-opponent-row">
+      <label for="tw-opponent">针对这个对手看：</label>
+      <select id="tw-opponent"><option value="">不指定对手（只看结构）</option></select>
+     </div>
      <div id="tw-eval-body"></div>
     </div>
    </aside>
@@ -778,11 +940,16 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
           现在：应用 = 把这六个槽位 × 四个技能写进本机记录 roco.workshop.teamconfig.v1 并当众核对合法性；
           撤销 = 一步退回上一份（与个体的回滚一样：只能退一步）；重新读取 = 不带参数打开这一页时读回来。 -->
      <div class="tw-knobs tw-knobs--right" id="tw-config-knobs">
-      <button class="tw-btn" id="tw-config-check">核对六只四技能</button>
+      <button class="tw-btn" id="tw-plan-build">小芽给一套 6×4</button>
+       <button class="tw-btn" id="tw-config-check">核对六只四技能</button>
       <button class="tw-btn" id="tw-config-apply">应用这套配置</button>
       <button class="tw-btn" id="tw-config-undo">撤销上一次应用</button>
      </div>
      <p class="tw-note" id="tw-config-note" role="status" aria-live="polite"></p>
+     <!-- 2026-09-29 U04：**6 只 × 4 招**整套配置的预览（默认收起，点「小芽给一套 6×4」才展开）：
+          逐格给精灵名 + 四个技能名 + 这一行是哪来的（队里 / 小芽推荐 / 从盒子里补的）；
+          紧挨着的「应用这套配置 / 撤销上一次应用」就是它的应用与撤销两个动作。 -->
+     <div class="tw-plan" id="tw-plan-box" hidden></div>
      <p class="tw-error" id="tw-config-problems" hidden></p>
      <div class="tw-knobs tw-knobs--right">
       <button class="tw-btn" id="tw-reset">清空阵容</button>
@@ -792,10 +959,10 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     <section class="tw-panel tw-cand" aria-labelledby="tw-cand-title">
      <div class="tw-head"><h3 id="tw-cand-title">候选池</h3>
       <span class="tw-sub" id="tw-cand-sub">—</span></div>
-     <p class="tw-note" id="tw-cand-note"></p>
+     <p class="tw-note tw-scope-note" id="tw-cand-note"></p>
      <div class="tw-cand-tools tw-scope-row">
-      <button class="tw-btn" id="tw-scope-all" aria-pressed="true">全图鉴</button>
-      <button class="tw-btn" id="tw-scope-mine" aria-pressed="false">我的精灵</button>
+      <button class="tw-btn" id="tw-scope-mine" aria-pressed="true">我的精灵</button>
+      <button class="tw-btn" id="tw-scope-all" aria-pressed="false">全图鉴</button>
      </div>
      <div class="tw-cand-tools tw-filter-row">
       <select class="tw-select" id="tw-filter-type" aria-label="按属性筛选"></select>
@@ -809,7 +976,10 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       <span class="tw-note" id="tw-cand-page">1 / 1</span>
       <button class="tw-btn" id="tw-cand-next">下一页</button>
      </div>
-     <div class="tw-cand-list" id="tw-cand-list" role="group" aria-label="从全图鉴挑一只"></div>
+     <!-- 2026-09-29 U04：队伍已满时点候选 → 这里出现「替换哪只」（不让玩家自己猜先删谁）。
+          锁定的那一格在列表里是禁用的：锁定的一只必须留在队里（RC-301 规则⑨）。 -->
+     <div class="tw-replace" id="tw-replace-box" hidden></div>
+     <div class="tw-cand-list" id="tw-cand-list" role="group" aria-label="从候选池挑一只"></div>
     </section>
 
     
@@ -894,8 +1064,22 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     // 候选区**只有一套导航**：分页器（页码），列表整块摊开不内滚（人类 P1）。
     // 筛选走服务端（`/api/roco/box` 的 kind/q/type/role 白名单），换条件一律回第一页。
     // 人类 2026-09-23：每页数量**按可用页高**算（一屏装完、不上下滑）——初值 12，挂载后按实测高度重算。
-    pool: {offset: 0, total: 0, pageSize: 12, q: '', kind: 'catalog', type: '', role: '', rows: []},
+    // ⚠ 2026-09-29 U04 改钉：默认档从 `catalog`（全图鉴）改成 **`mine`（我的精灵）**。
+    // 用户投诉的原话是「配队全是 ID 和工程文字」，其中一半来自默认落在全图鉴那一档：
+    // 一屏 600+ 物种里大半是**你没有的**，跟「能不能上场」混在一起分不清。
+    // 现在默认只给**你拥有的**（能直接进正式队伍的那些），切「全图鉴」是玩家**显式**的一个动作；
+    // 两档在视觉上分开（见 `.tw-row--owned` / `.tw-row--ref` 与范围说明那一行）。
+    pool: {offset: 0, total: 0, pageSize: 12, q: '', kind: 'mine', type: '', role: '', rows: []},
     poolSeq: 0,
+    /** 全图鉴的物种总数（候选宇宙）。**与「本档条数」分开记**：默认档是我的精灵（几十只），
+     *  但「候选来自全图鉴」这句话里的那个数必须是候选宇宙的真实大小 —— 不拿本档条数冒充。 */
+    poolUniverse: 0,
+    /** 队伍已满时点候选的那只（先弹「替换哪只」，不让玩家自己猜先删谁）。 */
+    replaceIncoming: null,
+    /** 槽位卡上点了「替换」要换下来的那个个体（点候选池里的一只就换上它）。 */
+    replaceArm: null,
+    /** 6 只 × 4 招整套配置的预览（点「小芽给一套 6×4」才建）。 */
+    plan: null,
     ownedBySpecies: new Map(),      // 物种 → [{select: 个体, name, ...}]
     ownedByInstance: new Map(),     // 个体 → {speciesId, name}
     ambiguousNames: new Set(),      // 持有名单里重名的名字（不猜是哪一只，但知道「你有」）
@@ -953,13 +1137,20 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     // 键必须是**解析出来的物种 id**（与保存时同一把钥匙）；用 `slot.species_id` 会永远读不回来。
     const chosen = loadouts.get(speciesOfSlot(slot) ?? '');
     const skills = Array.isArray(slot.skills) ? slot.skills : [];
+    // ⚠ 2026-09-29 U04：技能**名字**必须从这一格自己的 `slot.skills` 里取（服务端发的是
+    // `{skill_id,name}`，见 `workshopPlayerMembers`）；`skillNames` 只有玩家点过换招才会被填。
+    // 原来这一行只查 `skillNames`，于是首屏四个技能印出来全是 `skill_000418` 这种内部串
+    // （实测 6 格 × 4 = 24 处）——玩家投诉的「配队全是 ID」有一半来自这里。
+    const byId = new Map(skills.filter((s) => s?.skill_id).map((s) => [s.skill_id, s]));
+    const nameOf = (id) => byId.get(id)?.name ?? skillNames.get(id) ?? null;
     if (chosen && chosen.length === 4) {
-      const byId = new Map(skills.map((s) => [s.skill_id, s]));
-      return {source: 'player', ids: chosen.slice(),
-        label: chosen.map((id) => byId.get(id)?.name ?? skillNames.get(id) ?? '（名字未登记）').join('、')};
+      const names = chosen.map(nameOf);
+      return {source: 'player', ids: chosen.slice(), names,
+        label: names.filter(Boolean).join('、')};
     }
-    return {source: 'engine', ids: skills.map((s) => s.skill_id).filter(Boolean),
-      label: skills.map((s) => s.name).filter(Boolean).join('、')};
+    const ids = skills.map((s) => s.skill_id).filter(Boolean);
+    const names = skills.map((s) => s.name ?? null);
+    return {source: 'engine', ids, names, label: names.filter(Boolean).join('、')};
   }
 
   /**
@@ -992,13 +1183,36 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
        </div>`;
     }
     const open = editor && editor.species === species;
-    const label = current.source === 'player' ? `你选的：${current.label}` : `引擎规范配招：${current.label}`;
-    // 清单固定一行（CSS 省略号），完整清单进 title —— 四个技能名的全文另在「详情」里逐条列着。
-    const shown = label || '（引擎未给技能）';
-    return `<div class="tw-meta tw-loadout">
-      <button class="tw-btn tw-loadout-btn" data-tw-loadout="${escapeHtml(species)}"
-        aria-expanded="${open ? 'true' : 'false'}">${open ? '收起换招' : '换招'}</button>
-      <span class="tw-meta" title="${escapeHtml(shown)}">${escapeHtml(shown)}</span>
+    // ⚠ 2026-09-29 U04 改：首层**不再印「引擎规范配招：…」这种工程说法**，也不再印成一行省略号。
+    // 四个技能各自一个小格（2×2），玩家第一眼就能扫到四个名字；「这四个是哪来的」缩成一个
+    // 小标（默认 / 你选的）—— 事实一个字没少，只是不再用内部叫法。技能号留在
+    // `data-tw-skill` 属性上（判据与小芽读它，页面上不显示）。
+    const chips = Array.from({length: SHARED_LOADOUT_SLOTS}, (_, at) => {
+      const id = current.ids[at] ?? null;
+      const name = id ? (current.names[at] ?? skillNames.get(id) ?? null) : null;
+      if (!id) return `<span class="tw-skill" data-tw-skill-state="missing">第 ${at + 1} 招未定</span>`;
+      return `<span class="tw-skill" data-tw-skill="${escapeAttr(id)}"
+        title="${escapeAttr(name ?? '名字未登记')}">${escapeHtml(name ?? '名字未登记')}</span>`;
+    }).join('');
+    const instance = instanceOfSlot(slot) ?? '';
+    const locked = slotLocked(slot);
+    const srcTitle = current.source === 'player'
+      ? '这四个是你自己点「换招」选的'
+      : '这四个是引擎给这一只的默认配招（你还没换过招）';
+    return `<div class="tw-meta tw-loadout tw-loadout-stack" data-tw-loadout-row="yes">
+      <div class="tw-skills-head">
+       <span class="tw-meta">四个技能</span>
+       <span class="tw-skills-src" title="${escapeAttr(srcTitle)}">${current.source === 'player' ? '你选的' : '默认'}</span>
+      </div>
+      <div class="tw-skills" data-tw-skills="${escapeAttr(current.ids.join(','))}">${chips}</div>
+      <div class="tw-slot-actions">
+       <button class="tw-btn tw-loadout-btn" data-tw-loadout="${escapeHtml(species)}"
+         aria-expanded="${open ? 'true' : 'false'}">${open ? '收起换招' : '换招'}</button>
+       <button class="tw-btn tw-slot-replace-btn" data-tw-replace-slot="${escapeHtml(species)}"
+         ${locked ? 'disabled' : ''} aria-expanded="${state.replaceArm === instance && Boolean(instance) ? 'true' : 'false'}"
+         title="${locked ? '这一只是锁定带过来的：锁定的一只必须留在队伍里，不能替换'
+    : '把这一只换下来：点一下，再去右边候选池点一只换上'}">替换</button>
+      </div>
      </div>${open ? loadoutEditorHtml(current) : ''}`;
   }
 
@@ -1019,7 +1233,12 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     const bad = slotLegalityProblems({skills, learnable: species ? learnableBySpecies.get(species) ?? null : null});
     const stateName = !skills.length ? 'none'
       : (bad.some((p) => p.kind === 'unknown') ? 'unknown' : (bad.length ? 'illegal' : 'ok'));
-    const nameOf = (id) => skillNames.get(id) ?? id;
+    const nameOf = (id) => {
+      // 名字优先从**这一格自己的** `slot.skills` 取（服务端发 `{skill_id,name}`）；
+      // `skillNames` 只是玩家点过换招之后的缓存。都拿不到才退回技能号 —— 不编一个名字出来。
+      const own = (Array.isArray(slot.skills) ? slot.skills : []).find((s) => s?.skill_id === id);
+      return own?.name ?? skillNames.get(id) ?? id;
+    };
     const four = skills.map(nameOf).join('、') || '（引擎没给技能）';
     const line = stateName === 'ok'
       ? `四个技能都在引擎学习表里：${four}`
@@ -1031,6 +1250,34 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     return `<div class="tw-meta tw-legality" data-tw-slot-legality="${stateName}"
       data-tw-slot-skills="${escapeHtml(skills.join(','))}" data-tw-slot-legal-instance="${escapeHtml(instance)}">
       ${escapeHtml(line)}</div>`;
+  }
+
+  /**
+   * ⭐ 2026-09-29 U04：每张卡的**诊断详情**（默认收起）。
+   *
+   * 这一块就是「工程词搬家」的落点 —— 构建档原文（含「算得出高低」这种括注）、机制标签、
+   * 学习表的核对状态、来源、机制原文、四个技能的逐条明细，**一个字都没删**，
+   * 只是不再占着玩家第一眼的那一层（玩家投诉：「配队全是 ID 和工程文字」）。
+   * 六张卡都有这一块（结构一致），`<details>` 不带 `open` ⇒ 默认收起。
+   */
+  function diagnosticsHtml(slot, species) {
+    return `<details class="tw-detail tw-diag" data-tw-diag="slot">
+     <summary>诊断详情（构建 / 机制 / 学习表核对）</summary>
+     <div class="tw-detail-body">
+      ${slot.build_tier_label ? `<div>构建档：${escapeHtml(slot.build_tier_label)}</div>` : ''}
+      ${slot.source_note ? `<div>来源：${escapeHtml(slot.source_note)}</div>` : ''}
+      ${legalityRowHtml(slot, species)}
+      <!-- ⭐ 2026-09-29（task-8 的性格/资质那一条）：**界面写清引擎按什么算**。
+           Lead 已查实（三条，我复核过同一条链）：战斗面板 = env.py 的 _data.panel_stats(pet.stats)，
+           panel_stats(race_stats) 是只吃**种族值**的纯函数；引擎里没有 nature/talent 这两个概念；
+           battle_new 的 team 是物种 id 数组，没有承载个体的字段。
+           ⇒ 这一页上的性格/资质/天分**不进引擎**，也没有已登记的换算公式可接。
+           所以这里如实写出来 —— 不为了好看把它标成"已贯通"。 -->
+      <div>面板怎么算：引擎按<strong>种族值</strong>算（本局用它）。性格 / 资质（个体值）目前<strong>不进引擎</strong>：
+       引擎里没有这两个概念，本仓也还没有已登记的换算公式 —— 所以这一页不把它们说成已生效。</div>
+      ${mechanismDetailHtml(slot.mechanism)}
+      ${skillsHtml(slot)}
+     </div></details>`;
   }
 
   /** 换招编辑器：可学池（`/api/roco/loadout/options`）里选四个。 */
@@ -1121,6 +1368,10 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     writeSharedLoadout(null, editor.petId ?? editor.species, editor.draft.slice());
     editor = null;
     refreshSlots();
+    // ⚠ 2026-09-29 U04（真机探针抓到）：换完招**必须重画配置那一行** —— 否则状态行还停在
+    // 「已应用」，而屏幕上的这套已经和"应用过的那一份"不一样了（`data-tw-config-current` 也是旧值）。
+    // 这一行本身就是"屏幕上的这一套 == 开局那一套"这句承诺的读数口，它不许滞后。
+    renderConfig();
     emit();          // 队伍一变就派发：主线程当次开局就带着这四个
   }
 
@@ -1160,8 +1411,11 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
         // 名字在持有名单里重名的（实测「棋契陛下」两只）：物种解析不出来，但它**是你盒子里的**。
         // 标成「图鉴 · 按需推算」会把玩家的东西说成图鉴条目 —— 给一档更短的说法，字号/行数不变。
         const sameNameHeld = !held && state.ambiguousNames?.has(String(slot.name ?? ''));
+        // ⚠ 2026-09-29 U04 改钉：这个状态标原来写的是「持有 · 可正式上场」（玩家投诉里的
+        // 「可正式上场 ×13」就是它）。**含义一个字没动**（这是你拥有的、能进正式队伍），
+        // 只是换成玩家语：「持有 · 可出战」。判据读的是 `/持有|可正式上场/`（改钉不删）。
         const tag = held
-          ? '<span class="tw-state-tag tw-state-held">持有 · 可正式上场</span>'
+          ? '<span class="tw-state-tag tw-state-held">持有 · 可出战</span>'
           : (sameNameHeld
             ? '<span class="tw-state-tag tw-state-held">持有 · 名字重复</span>'
             : '<span class="tw-state-tag tw-state-trial">图鉴 · 按需推算（未核验）</span>');
@@ -1176,34 +1430,31 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
         // 六格全错位；「移除第 N 格」也跟着移错人。现在两边都按**物种**解析：
         // 钩子给的是"这一格里那只的个体 id"，移除按钮带的是"这一格那只的物种"。
         const slotInstance = instanceOfSlot(slot);
+        // 定位（角色）：与候选行**同一份数据** —— `/api/roco/box?kind=mine` 的卡上就有 `role_label`，
+        // 在 `loadOwnedIndex()` 里随个体一起记下来。拿不到就**不写这一栏**，不编一个定位。
+        const role = slotInstance ? (state.ownedByInstance.get(slotInstance)?.role_label ?? null) : null;
+        const locked = slotLocked(slot);
         return `<article class="tw-slot on" role="listitem" data-tw-slot="${slot.index}"
           data-tw-slot-instance="${escapeAttr(slotInstance ?? '')}"
           data-tw-slot-species="${escapeAttr(species ?? '')}"
+          data-tw-slot-name="${escapeAttr(slot.name ?? '')}"
+          data-tw-slot-role="${escapeAttr(role ?? '')}"
+          ${state.replaceArm && slotInstance && state.replaceArm === slotInstance
+    ? 'data-tw-replace-armed="yes"' : ''}
           data-tw-state="filled" data-tw-fieldable="${held || sameNameHeld ? 'yes' : 'no'}">
          <div class="tw-row">${twArtHtml({group: species, art: state.artBySpecies?.get?.(String(species ?? '')) === true}, {size: 32})}<span class="tw-who">${escapeHtml(slot.name ?? NO_ITEM)}</span>
-          ${slot.locked ? '<span class="tw-lock">锁定</span>' : ''}
+          ${locked ? '<span class="tw-lock">锁定</span>' : ''}
           <button class="tw-slot-remove" data-tw-remove-slot="${escapeAttr(species ?? '')}"
-            aria-label="把这一只从队伍里移除">移除</button></div>
+            ${locked ? 'disabled' : ''}
+            aria-label="${locked ? '锁定的这一只不能移除：它必须留在队伍里'
+    : '把这一只从队伍里移除'}">移除</button></div>
          <div class="tw-meta"><span class="tw-types">${teamSlugs(slot.types) || '系别未登记'}</span>
+          ${role ? `<span class="tw-role">定位 · ${escapeHtml(role)}</span>` : ''}
           ${tag}</div>
-         <div class="tw-meta">${escapeHtml(slot.build_tier_label ?? '')}</div>
-         ${mechanismRow(slot.mechanism)}
+         <div class="tw-meta">${escapeHtml(buildTierPlain(slot.build_tier_label))}</div>
+         ${mechanismRow(slot.mechanism, {tags: false})}
          ${loadoutRowHtml(slot)}
-         ${legalityRowHtml(slot, species)}
-         <details class="tw-detail"><summary>详情（技能 / 机制原文 / 来源）</summary>
-          <div class="tw-detail-body">
-           ${slot.source_note ? `<div>来源：${escapeHtml(slot.source_note)}</div>` : ''}
-           <!-- ⭐ 2026-09-29（task-8 的性格/资质那一条）：**界面写清引擎按什么算**。
-                Lead 已查实（三条，我复核过同一条链）：战斗面板 = env.py 的 _data.panel_stats(pet.stats)，
-                panel_stats(race_stats) 是只吃**种族值**的纯函数；引擎里没有 nature/talent 这两个概念；
-                battle_new 的 team 是物种 id 数组，没有承载个体的字段。
-                ⇒ 这一页上的性格/资质/天分**不进引擎**，也没有已登记的换算公式可接。
-                所以这里如实写出来 —— 不为了好看把它标成"已贯通"。 -->
-           <div>面板怎么算：引擎按<strong>种族值</strong>算（本局用它）。性格 / 资质（个体值）目前<strong>不进引擎</strong>：
-             引擎里没有这两个概念，本仓也还没有已登记的换算公式 —— 所以这一页不把它们说成已生效。</div>
-           ${mechanismDetailHtml(slot.mechanism)}
-           ${skillsHtml(slot)}
-          </div></details>
+         ${diagnosticsHtml(slot, species)}
         </article>`;
       }
       return `<article class="tw-slot" role="listitem" data-tw-slot="${slot.index}" data-tw-state="empty">
@@ -1232,6 +1483,416 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     }
   }
 
+  // ── 替换流程（U04 第 3 条）与「6 只 × 4 招」整套配置（第 5 条）────────────────
+
+  /** 个体 id → 玩家看得见的名字。拿不到就给一句人话，**绝不把 id 印到页面上**。 */
+  function displayNameOf(instance) {
+    return state.ownedByInstance.get(instance)?.name
+      ?? (state.payload?.player?.slots ?? []).find((s) => instanceOfSlot(s) === instance)?.name
+      ?? '这一只';
+  }
+
+  /**
+   * 这一格现在**能不能动**（移除 / 替换）：两个来源合起来判，一处判完三处共用。
+   *
+   *   · `state.locked`（地址 `?lock=` 或上一次应用带下来的）—— 服务端 RC-301 规则⑨：
+   *     锁定的实例必须留在队里，否则整条开局请求被拒；
+   *   · `slot.locked`（**产物里自带的**个体属性：玩家在游戏里锁了它）—— 卡片上已经写着
+   *     「锁定」，那这一格的两个动作就不能再给。
+   * ⚠ 真机上抓到过不一致：卡上写着「锁定」而「替换」还是可点的（判据读到 replaceDisabled=false）。
+   * 所以「锁定」只有一个判据，`移除` / `替换` / 替换列表三处都读它。
+   */
+  function slotLocked(slot) {
+    if (slot?.locked === true) return true;
+    const instance = instanceOfSlot(slot);
+    return Boolean(instance) && state.locked.includes(instance);
+  }
+
+  /**
+   * ⭐ 2026-09-29 U04 第 3 条：**队伍已满时点候选 → 先问「替换哪只」**。
+   *
+   * 改之前那一下是：`state.error = '持有队伍最多 6 只：先拿掉一只再加。'` + 一行红字 ——
+   * 玩家得自己回去找哪一格可以不要、还要先点「移除」再回来点候选（两步，且没人告诉他该拿掉谁）。
+   * 现在：六个槽位在这里逐个列出来（锁定那一格**禁用**并写明为什么），点一只就换上去。
+   */
+  function renderReplaceBox() {
+    const box = $('tw-replace-box');
+    if (!box) return;
+    const inc = state.replaceIncoming;
+    const arm = state.replaceArm;
+    if (!inc && !arm) {
+      box.hidden = true;
+      box.innerHTML = '';
+      rootEl.dataset.twReplaceState = 'none';
+      delete rootEl.dataset.twReplaceIncoming;
+      return;
+    }
+    // ⚠ 标记里写死了 `hidden`（默认不占位）⇒ 这里必须**显式取消它**，否则整块永远不显示
+    // （第一版漏了这一行：DOM 里有内容、dataset 也对，但玩家一格都看不到 —— 真机探针抓到的）。
+    box.hidden = false;
+    const slots = (state.payload?.player?.slots ?? []).filter((s) => s.state === 'filled');
+    if (inc) {
+      box.innerHTML = `<h4>替换哪只？</h4>
+       <p class="tw-note">要把「${escapeHtml(displayNameOf(inc.instance))}」换上去。点一只换下来的 ——
+        锁定的那些不能换（锁定的一只必须留在队伍里）。</p>
+       <div class="tw-replace-list">${slots.map((s) => {
+    const inst = instanceOfSlot(s) ?? '';
+    const isLocked = slotLocked(s);
+    return `<button class="tw-btn" data-tw-replace-target="${escapeAttr(inst)}" ${isLocked ? 'disabled' : ''}
+        aria-label="${escapeAttr(`${isLocked ? '锁定，不能换：' : '换下：'}${s.name ?? ''}`)}">
+        ${escapeHtml(s.name ?? NO_ITEM)}<span class="tw-meta">${isLocked ? '锁定 · 不能换' : '换下这只'}</span></button>`;
+  }).join('')}</div>
+       <div class="tw-knobs tw-knobs--right"><button class="tw-btn" data-tw-replace-cancel="1">取消</button></div>`;
+      rootEl.dataset.twReplaceState = 'choosing';
+      rootEl.dataset.twReplaceIncoming = inc.instance;
+      rootEl.dataset.twReplaceChoices = String(slots.length);
+      return;
+    }
+    box.innerHTML = `<h4>要从队伍里换下「${escapeHtml(displayNameOf(arm))}」</h4>
+     <p class="tw-note">现在到右边候选池点一只换上（再点一次那一格的「替换」就取消）。</p>
+     <div class="tw-knobs tw-knobs--right"><button class="tw-btn" data-tw-replace-cancel="1">取消</button></div>`;
+    rootEl.dataset.twReplaceState = 'armed';
+    delete rootEl.dataset.twReplaceIncoming;
+    rootEl.dataset.twReplaceChoices = '0';
+  }
+
+  /** 真正换人：把 target 换下、incoming 换上。锁定的那一格一律拒绝（服务端也会拒整条请求）。 */
+  async function replaceSlot(targetInstance, incomingInstance) {
+    if (!targetInstance || !incomingInstance) return false;
+    const targetSlot = (state.payload?.player?.slots ?? [])
+      .find((s) => instanceOfSlot(s) === targetInstance) ?? null;
+    if (slotLocked(targetSlot) || state.locked.includes(targetInstance)) {
+      setPickNote(`「${displayNameOf(targetInstance)}」是锁定带过来的：锁定的一只必须留在队伍里`
+        + '（拿掉它整条开局请求都会被拒）。换一只吧。');
+      return false;
+    }
+    if (!state.selected.includes(targetInstance)) {
+      setPickNote('那一格现在已经不在队里了：重新点一次候选，再来一次。');
+      return false;
+    }
+    if (state.selected.includes(incomingInstance)) {
+      setPickNote(`「${displayNameOf(incomingInstance)}」已经在队里了：换一只吧。`);
+      return false;
+    }
+    state.selected = state.selected.map((id) => (id === targetInstance ? incomingInstance : id));
+    state.replaceIncoming = null;
+    state.replaceArm = null;
+    state.error = null;
+    state.config.reason = '';
+    setPickNote(`换上了「${displayNameOf(incomingInstance)}」，换下的是「${displayNameOf(targetInstance)}」。`);
+    renderReplaceBox();
+    await reload();
+    return true;
+  }
+
+  /** 这一只（物种）带哪四个技能：**玩家选的 > 引擎给这一只的四个 > 盒子详情里它自己带着的四个**。
+   *  三条路都是真实数据；一条都拿不到就如实回空（预览里写「还没有四个技能」，不编四个出来）。 */
+  async function fourSkillsFor(species, instance) {
+    const chosen = loadouts.get(species);
+    if (Array.isArray(chosen) && chosen.length === SHARED_LOADOUT_SLOTS) {
+      return {source: 'player',
+        skills: chosen.map((id) => ({skill_id: id, name: skillNames.get(id) ?? null}))};
+    }
+    const slot = (state.payload?.player?.slots ?? []).find((s) => speciesOfSlot(s) === species);
+    if (slot && Array.isArray(slot.skills) && slot.skills.length) {
+      return {source: 'engine', skills: slot.skills.slice(0, SHARED_LOADOUT_SLOTS)
+        .map((s) => ({skill_id: s.skill_id, name: s.name ?? null}))};
+    }
+    if (instance && /^own-\d+$/.test(instance)) {
+      try {
+        const one = await getJson(`${apiBase}/box?detail=${encodeURIComponent(instance)}`);
+        const rows = Array.isArray(one?.player?.skills) ? one.player.skills : [];
+        for (const row of rows) if (row?.skill_id && row.name) skillNames.set(row.skill_id, row.name);
+        if (rows.length) {
+          return {source: 'engine', skills: rows.slice(0, SHARED_LOADOUT_SLOTS)
+            .map((s) => ({skill_id: s.skill_id, name: s.name ?? null}))};
+        }
+      } catch { /* 读不到就如实留空 */ }
+    }
+    // ⭐ R02（2026-09-29）：**按判断层选四招**。
+    //
+    // 为什么要有这一条：原来的兜底是「这一只自己带着的那四个」，而那是**引擎的规范配招**，
+    // 不是为这套阵容选的。README 的原话是「推荐有合法招式并不等于好用」。
+    // 这里改成：向 `/api/roco/loadout/options?pet=<实例>` 要**这一只真实学得到的招**
+    // （回执带 `effect_support` / `has_static_power` / `energy`），再按三条**确定性**规则挑四招：
+    //   ① 先要**静态威力**（`has_static_power === true`）——「引擎会结算」的那一类；
+    //   ② 同系别只留最重的一招（属性面铺开，别四个同系）；
+    //   ③ 只靠附加效果、没有静态威力的招**不当主选**（引擎未结算，见 team-plan.js 的同一口径）。
+    if (instance) {
+      const picked = await judgedLoadout(instance);
+      if (picked) return picked;
+    }
+    return {source: 'none', skills: []};
+  }
+
+  /**
+   * 用**真实学招表**挑四招（确定性；来源 `/api/roco/loadout/options?pet=`）。
+   *
+   * 不编合法性：候选就是引擎回执里的 `learnable`；回执里没有的招不会出现在结果里。
+   * 拿不到回执就返回 null（调用方如实留空，不猜）。
+   */
+  async function judgedLoadout(instance) {
+    let data = null;
+    try {
+      data = await getJson(`${apiBase}/loadout/options?pet=${encodeURIComponent(instance)}`);
+    } catch { return null; }
+    const rows = (Array.isArray(data?.learnable) ? data.learnable : [])
+      .filter((row) => row && row.skill_id && row.is_trait !== true);
+    if (!rows.length) return null;
+    for (const row of rows) if (row.name) skillNames.set(row.skill_id, row.name);
+    const damage = rows.filter((row) => row.has_static_power === true && Number.isFinite(row.power));
+    const byElement = new Map();
+    for (const row of damage.sort((x, y) => y.power - x.power)) {
+      const key = String(row.element ?? '未登记');
+      if (!byElement.has(key)) byElement.set(key, row);   // 同系别只留最重的一招
+    }
+    const chosen = [...byElement.values()].sort((x, y) => y.power - x.power).slice(0, SHARED_LOADOUT_SLOTS);
+    // 会结算的攻击招不够四个：用「最高的剩余非特性招」补齐，并让判断层如实标注它们不结算。
+    if (chosen.length < SHARED_LOADOUT_SLOTS) {
+      const rest = rows.filter((row) => !chosen.includes(row))
+        .sort((x, y) => (y.power ?? -1) - (x.power ?? -1));
+      for (const row of rest) {
+        if (chosen.length >= SHARED_LOADOUT_SLOTS) break;
+        chosen.push(row);
+      }
+    }
+    if (!chosen.length) return null;
+    return {source: 'judged', skills: chosen.map((row) => ({
+      skill_id: row.skill_id, name: row.name ?? null, element: row.element ?? null,
+      category: row.category ?? null, energy: Number.isFinite(row.energy) ? row.energy : null,
+      power: Number.isFinite(row.power) ? row.power : null,
+      hasStaticPower: row.has_static_power === true,
+      effectSupport: row.effect_support ?? null, effectNote: row.effect_note ?? null,
+      desc: row.desc ?? null,
+    }))};
+  }
+
+  const PLAN_ORIGIN = Object.freeze({team: '队里这一只', recommended: '小芽推荐的下一只', box: '从你的盒子里补的'});
+
+  /**
+   * ⭐ 2026-09-29 U04 第 5 条：**6 只 × 4 招整套配置的预览**。
+   *
+   * 六格从哪来（三档都说在表里，不混）：
+   *   · `team`        = 屏幕上已经在队里的那几只（含锁定）；
+   *   · `recommended` = 小芽这一屏给的「推荐下一只 / 入口候选」里、**你盒子里真有**的那些；
+   *   · `box`         = 还不够六只时，按你盒子里的顺序补（同一物种只补一次）。
+   * 四个技能：玩家选过的 > 引擎给这一只的 > 盒子详情里它自己带着的那四个（同一份引擎来源）。
+   * **不用随机、不用模板**：一条真实数据都没有的那一格就明写「还没有四个技能」。
+   */
+  async function buildPlan({renderPreview = true} = {}) {
+    const rows = [];
+    const usedInstances = new Set();
+    const usedSpecies = new Set();
+    for (const one of configSlots()) {
+      if (!one.instance) continue;
+      rows.push({instance: one.instance, species: one.species ?? '', name: one.name ?? null,
+        origin: 'team', locked: state.locked.includes(one.instance)});
+      usedInstances.add(one.instance);
+      if (one.species) usedSpecies.add(one.species);
+    }
+    const pushSpecies = (species, origin, name) => {
+      if (rows.length >= TEAM_SLOTS || !species || usedSpecies.has(species)) return;
+      const instance = (state.ownedBySpecies.get(species) ?? [])[0]?.select ?? null;
+      if (!instance || usedInstances.has(instance)) return;
+      rows.push({instance, species, name: name ?? state.ownedByInstance.get(instance)?.name ?? null,
+        origin, locked: false});
+      usedInstances.add(instance);
+      usedSpecies.add(species);
+    };
+    const recommendNames = [
+      ...(state.payload?.player?.next_candidates ?? []),
+      ...(state.payload?.player?.entrance?.candidates ?? []),
+    ].map((row) => String(row?.name ?? '')).filter(Boolean);
+    for (const name of recommendNames) pushSpecies(state.speciesByName?.get(name) ?? null, 'recommended', name);
+    for (const [species, list] of state.ownedBySpecies) pushSpecies(species, 'box', list?.[0]?.name ?? null);
+    const out = [];
+    for (const row of rows.slice(0, TEAM_SLOTS)) {
+      const four = await fourSkillsFor(row.species, row.instance);
+      // ⚠⚠ R03 根因（2026-09-29 Lead 在真 8765 上逐层量出来的）：`fourSkillsFor` 的**前几支**
+      //   （玩家自选 / 引擎槽位 / payload）只回 `{skill_id, name}` —— **没有 `power`/`energy`/
+      //   `element`/`effect_support`**。而判断层正是靠这几个字段判断"这一招会不会结算、够不够重"，
+      //   缺了就返回 `useful:false` ⇒ `renderEval` 走 `hideEvalDrawer()` ⇒
+      //   **评估抽屉被收起、玩家一个字都看不到**。
+      //   实测证据（真 8765、满编六只、点过「小芽给一套 6×4」）：
+      //     `twPlanSkills=24`（技能确实有）却 `#tw-eval-drawer.hidden=true / data-closed-reason=no-judgement`
+      //   修法：**给判断层单独补一次真实回执**（同一只的 `learnable`，就是 R02 已经在用的那一份），
+      //   屏幕上的四招**一个都不动**（`skills` 原样），只让判断拿到事实。
+      const rich = row.instance ? await judgedLoadout(row.instance) : null;
+      const richById = new Map((rich?.skills ?? []).map((s2) => [String(s2.skill_id), s2]));
+      const movesForJudgement = (four.skills ?? []).map((s2) => {
+        const extra = richById.get(String(s2.skill_id)) ?? {};
+        return {...extra, ...s2,
+          power: s2.power ?? extra.power ?? null,
+          energy: s2.energy ?? extra.energy ?? null,
+          element: s2.element ?? extra.element ?? null,
+          category: s2.category ?? extra.category ?? null,
+          effectSupport: s2.effectSupport ?? extra.effectSupport ?? null};
+      });
+      out.push({...row, skills: four.skills, skillSource: four.source, movesForJudgement});
+    }
+    state.plan = {rows: out, at: new Date().toISOString()};
+    // ── R02/R03：把这一份**真实队伍 + 真实四招 + 真实学招表**交给判断层 ──────────────
+    // 判断只算一次（`state.teamPlan`），评估侧栏（R03）与 6×4 推荐（R02）都读它。
+    // 六只的类型从两处取：屏幕上那一队来自 `configSlots()`（payload 的 slot 带 types），
+    // 候选/盒子行里没带类型的**就是 null** —— 判断层会把它记进 `limits`，不猜。
+    try {
+      // ⚠⚠ 2026-09-29（人类实测：六只「属性未知」+ 流派「6 只里 0 只带—」）**根因在这里**：
+      //   旧写法**只按 `one.species` 作键**，而**服务端故意不给槽 `species_id`**
+      //   （`src/server/roco-service.js:1364` 注释逐字：「2026-09-25：这里**不放** `species_id`。
+      //    …页面要物种 id 就**按名字**在它自己的名单里解析（唯一匹配才算，重名不猜）」）。
+      //   ⇒ `one.species` 恒 `undefined` ⇒ **来源①一条都进不来** ⇒ 六只 types 全空
+      //   ⇒ 判断层输出「属性未知」、流派那行变成「6 只里 0 只带—」。
+      //   修法照服务端注释：**同时按名字收一份**，查的时候先按 species、再按 name 兜底。
+      //   旧代码留档（改钉不删）：if (one?.species && Array.isArray(one.types) && one.types.length) slotTypes.set(one.species, one.types);
+      const slotTypes = new Map();
+      const typesByName = new Map();
+      for (const one of configSlots()) {
+        const t = Array.isArray(one?.types) ? one.types.filter((x) => typeof x === 'string' && x) : [];
+        if (!t.length) continue;
+        if (one?.species) slotTypes.set(one.species, t);
+        if (one?.name) typesByName.set(one.name, t);
+      }
+      // ⚠ 2026-09-29 修（人类实测：六只「属性未知」+ 流派「6 只里 0 只带—」）：
+      //   **路径写错了** —— `next_candidates` 在回执的**顶层**（`payload.next_candidates`），
+      //   **不在 `payload.player` 里**（真 8765 实测：`player` 的键里没有它，顶层才有）。
+      //   旧写法 `payload?.player?.next_candidates` ⇒ 恒 `undefined` ⇒ 这个来源**一条都进不来**。
+      //   旧代码留档（改钉不删）：for (const row of (state.payload?.player?.next_candidates ?? [])) {
+      const candRows = [
+        ...(state.payload?.next_candidates ?? []),
+        ...(state.payload?.candidates ?? []),
+        ...(state.payload?.player?.next_candidates ?? []),
+      ];
+      for (const row of candRows) {
+        const t = Array.isArray(row?.types) ? row.types.filter((x) => typeof x === 'string' && x) : [];
+        if (!t.length) continue;
+        if (row?.species) slotTypes.set(row.species, t);
+        if (row?.name) typesByName.set(row.name, t);
+      }
+      state.teamPlan = buildTeamPlan({
+        team: out.map((row) => ({
+          instance: row.instance, species: row.species, name: row.name, origin: row.origin, locked: row.locked,
+          // 先按物种 id 查；查不到**按名字**兜底（槽没有 species_id，只有 name —— 见上面的注释）。
+          types: slotTypes.get(row.species) ?? typesByName.get(row.name) ?? [],
+          moves: row.movesForJudgement ?? (row.skills ?? []).map((s2) => ({...s2, effectSupport: s2.effectSupport ?? null})),
+        })),
+        pool: [],
+        opponent: state.evalOpponent ?? null,
+        typeMultiplier: defenceMultiplier,
+        // 能量上限/回能是**规则配置**里的事实，工坊这一屏拿不到 ⇒ 传 null，
+        // 判断层会如实写进 limits（不硬编一个 10）。
+        energy: null,
+      });
+      // ── 2026-09-30（评审判据 32 的真 bug）：这份判断**属于哪支队伍**要记下来 ───────────
+      // 根因：`renderEval()` 的第一支只问"判断层有没有结论"（`planned.useful === true`）就画
+      // 「六只满编 · 判断与打法」，**不看当前选了几只**；而 `state.teamPlan` 建好之后**没人作废** ——
+      // `#tw-reset` 只清 `state.selected`，清不掉这份判断 ⇒ 从此"选 0 只/选 2 只"都被画成那支
+      // 已经不存在的队伍的判断（真 8765 实测：`selected=2` 而正文停在满编帧）。
+      // 修法：把"属于哪支队伍"记在 `state.teamPlanFor` 上，`renderEval` 读出前先比对 ⇒
+      // 选择一变（清空/加人/换人/替换）这份判断自动作废，不必去逐个改变更点。
+      state.teamPlanFor = state.selected.join(',');
+    } catch (error) {
+      state.teamPlan = {useful: false, error: String(error?.message ?? error)};
+      // 失败那一份同样要挂上归属（否则它会被当成"另一支队伍的判断"而被反复重算/误用）。
+      state.teamPlanFor = state.selected.join(',');
+    }
+    if (renderPreview) renderPlan();
+    renderEval(state.payload?.player ?? null, state.payload?.stage ?? null);
+    return state.plan;
+  }
+
+  /** 预览表：逐格给名字 + 四个技能名 + 这一行是哪来的。六只 × 四个技能就是「6×4」。 */
+  function renderPlan() {
+    const box = $('tw-plan-box');
+    if (!box) return;
+    const plan = state.plan;
+    if (!plan) {
+      box.hidden = true;
+      box.innerHTML = '';
+      rootEl.dataset.twPlanState = 'none';
+      rootEl.dataset.twPlanRows = '0';
+      rootEl.dataset.twPlanSkills = '0';
+      return;
+    }
+    const rows = plan.rows;
+    const skillCount = rows.reduce((n, row) => n + (row.skills ?? []).length, 0);
+    const complete = rows.length === TEAM_SLOTS
+      && rows.every((row) => (row.skills ?? []).length === SHARED_LOADOUT_SLOTS);
+    const lockedKept = (state.locked ?? []).every((id) => rows.some((row) => row.instance === id));
+    const four = (row) => {
+      const list = Array.isArray(row.skills) ? row.skills : [];
+      const chips = list.map((s) => `<span class="tw-skill" data-tw-plan-skill="${escapeAttr(s.skill_id ?? '')}"
+        title="${escapeAttr(s.name ?? '名字未登记')}">${escapeHtml(s.name ?? '名字未登记')}</span>`).join('');
+      if (!list.length) return '<span class="tw-skill" data-tw-skill-state="missing">这一只还没有四个技能</span>';
+      const short = SHARED_LOADOUT_SLOTS - list.length;
+      return chips + (short > 0
+        ? `<span class="tw-skill" data-tw-skill-state="missing">还差 ${short} 招（点它的「换招」选满）</span>` : '');
+    };
+    box.hidden = false;
+    box.innerHTML = `<div class="tw-head"><h3>小芽给的整套配置（6 只 × 4 招）</h3>
+      <span class="tw-sub">${rows.length} 只 · ${skillCount} 个技能</span></div>
+     <table class="tw-plan"><thead><tr><th>#</th><th>精灵</th><th>四个技能</th></tr></thead><tbody>
+      ${rows.map((row, at) => `<tr data-tw-plan-row="${escapeAttr(row.instance ?? '')}"
+        data-tw-plan-species="${escapeAttr(row.species ?? '')}" data-tw-plan-origin="${escapeAttr(row.origin ?? '')}"
+        data-tw-plan-skill-count="${(row.skills ?? []).length}">
+        <td class="tw-plan-mark">${at + 1}</td>
+        <td class="tw-plan-who">${escapeHtml(row.name ?? NO_ITEM)}${row.locked
+    ? ' <span class="tw-plan-mark">锁定</span>' : ''}
+         <div class="tw-plan-mark">${escapeHtml(PLAN_ORIGIN[row.origin] ?? '')}${
+    row.skillSource === 'player' ? ' · 四个技能是你选的' : ''}</div></td>
+        <td class="tw-plan-four">${four(row)}</td>
+       </tr>`).join('')}
+     </tbody></table>
+     <div class="tw-knobs tw-knobs--right">
+      <button class="tw-btn primary" data-tw-plan-adopt="1" ${rows.length === TEAM_SLOTS ? '' : 'disabled'}>一键换上这套</button>
+      <button class="tw-btn" data-tw-plan-hide="1">收起预览</button>
+     </div>
+     <p class="tw-note">${complete
+    ? '六只 × 四个技能都齐了：点「应用这套配置」会逐只查引擎的学习表，哪里不行会说到哪一格、怎么改。'
+    : '这套还差一点：缺技能的那一格先点它的「换招」选满四个，或者把它换掉。'}</p>
+     <p class="tw-note">${lockedKept
+    ? `锁定的 ${state.locked.length} 只都留着，不会被换掉。`
+    : '注意：你锁定的一只不在这套里 —— 换上之前先取消它的锁定。'}</p>`;
+    rootEl.dataset.twPlanState = complete ? 'complete' : 'incomplete';
+    rootEl.dataset.twPlanRows = String(rows.length);
+    rootEl.dataset.twPlanSkills = String(skillCount);
+    rootEl.dataset.twPlanLockedKept = lockedKept ? 'yes' : 'no';
+    rootEl.dataset.twPlanTeam = rows.map((row) => row.instance ?? '').join(',');
+    rootEl.dataset.twPlanLoadouts = rows.map((row) => `${row.instance}:`
+      + (row.skills ?? []).map((s) => s.skill_id).filter(Boolean).join('.')).join(';');
+  }
+
+  /** 「一键换上这套」：把预览那一份装到屏幕上（锁定的一只必须还在；技能原样写进内存与共用记录）。 */
+  async function adoptPlan() {
+    const plan = state.plan;
+    if (!plan || plan.rows.length !== TEAM_SLOTS) {
+      setConfigNote('这套配置还没凑满六只：先让它补齐，再换上。');
+      return false;
+    }
+    const instances = plan.rows.map((row) => row.instance).filter(Boolean);
+    if (instances.length !== TEAM_SLOTS || new Set(instances).size !== TEAM_SLOTS) {
+      setConfigNote('这套配置里有重复或缺席的精灵：先换一只再来。');
+      return false;
+    }
+    if (!state.locked.every((id) => instances.includes(id))) {
+      setConfigNote('你锁定的一只不在这套配置里 —— 锁定的一只必须留在队伍里，先取消它的锁定再换。');
+      return false;
+    }
+    state.selected = instances;
+    for (const row of plan.rows) {
+      const ids = (row.skills ?? []).map((s) => s.skill_id).filter(Boolean).slice(0, SHARED_LOADOUT_SLOTS);
+      if (!row.species || ids.length !== SHARED_LOADOUT_SLOTS) continue;
+      loadouts.set(row.species, ids.slice());
+      writeSharedLoadout(null, row.species, ids.slice());
+    }
+    state.error = null;
+    state.replaceIncoming = null;
+    state.replaceArm = null;
+    renderReplaceBox();
+    setConfigNote('已经按预览把六只与它们的四个技能装到屏幕上了：核对无误后点「应用这套配置」。');
+    await reload();
+    await buildPlan();
+    return true;
+  }
   // ── ⭐ 阵容配置：这一屏 / 应用过的那一份 / 记录里那一份，三处比的都是同一串（task-8）──────
 
   /**
@@ -1273,6 +1934,16 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       return {
         instance,
         species: species ?? '',
+        // ⚠⚠ 2026-09-29（人类实测：六只「属性未知」+ 流派「6 只里 0 只带—」）**真正的根因在这里**：
+        //   这个函数以前**不返回 `types`** ⇒ 调用方 `buildPlan()` 里那句
+        //   `Array.isArray(one.types)` **恒假** ⇒ 六只 types 全空 ⇒ 判断层「属性未知」、
+        //   流派那行退化成「6 只里 0 只带—」。**源头没带，下游再兜底也没用。**
+        //   `types` 从槽里取（服务端填满时会给，见 `src/server/roco-service.js:1362`），
+        //   槽没有就退到本机名单里的那一只（`ownedByInstance`）。
+        //   旧代码留档（改钉不删）：这个对象以前只有 instance/species/name/skills 四个键。
+        types: (Array.isArray(slot?.types) && slot.types.length ? slot.types : null)
+          ?? (Array.isArray(known?.types) && known.types.length ? known.types : null)
+          ?? [],
         name: slot?.name ?? known?.name ?? instance,
         // 四个技能 = `loadoutOf(slot).ids`（玩家选过就是玩家的，否则引擎规范配招）——
         // 与 `emit()` 交给开局的 `loadouts` 同一处，所以这一份就是"会进对局的那一份"。
@@ -1300,11 +1971,33 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     if (!snap || !Array.isArray(snap.team) || !snap.team.length) return false;
     state.selected = snap.team.slice(0, TEAM_SLOTS);
     state.locked = (Array.isArray(snap.locked) ? snap.locked : []).filter((id) => state.selected.includes(id));
+    // ⚠ 2026-09-29 U04：`explicit` 是「这一份里玩家**自己选过**配招的物种」。
+    // 撤销时要连"默认 / 你选的"这个来源一起退回去：不在名单里的物种从内存 Map 里删掉
+    // （不删的话，应用那一刻写进来的六个物种会让整排都显示成「你选的」，看着像没退回去）。
+    if (Array.isArray(snap.explicit)) {
+      for (const speciesId of [...loadouts.keys()]) {
+        if (!snap.explicit.includes(speciesId)) loadouts.delete(speciesId);
+      }
+    }
     for (const speciesId of (Array.isArray(snap.species) ? snap.species : [])) {
       if (speciesId && !(speciesId in (snap.loadouts ?? {}))) loadouts.delete(speciesId);
     }
+    // ⚠ 2026-09-29 U04（真机探针抓到的第二处）：**不在 `explicit` 名单里的物种不许写回内存 Map**。
+    // 快照里的 `loadouts` 是"这一屏每一只带的四个技能"（六只都在），照单全收会把刚才被删掉的
+    // 六个键又装回来 ⇒ 撤销之后整排显示成「你选的」，而撤销前明明是「默认」（来源没退回去）。
+    // 值不变（payload 给的就是同样这四个技能），只是**来源**如实退回去。
+    const explicit = Array.isArray(snap.explicit) ? snap.explicit : null;
     for (const [speciesId, ids] of Object.entries(snap.loadouts ?? {})) {
       if (Array.isArray(ids) && ids.length === SHARED_LOADOUT_SLOTS) {
+        if (explicit && !explicit.includes(speciesId)) {
+          // ⚠ 2026-09-29（U04 的**真实残留**，T4 报、Lead 落）：内存不装回来**还不够** ——
+          // `writeSharedLoadout()` 当初往共用记录里写过这六个键，而那个模块原来**只有读/写两个口**，
+          // 删不掉。后果（T4 实测）：撤销之后**手动整页刷新 + 带 `?team=`** 时，
+          // 这几只的来源又显示成「你选的」，而它们明明是「默认」（四个技能名不变，只是来源说错了）。
+          // 这里补删：**同一个循环、同一个判据**，不多一套。
+          clearSharedLoadout(null, speciesId);
+          continue;
+        }
         loadouts.set(speciesId, ids.slice());
         // 共用记录也写一份：这样**别的页**（盒子 / 下一次开局）读到的与这一份一致。
         writeSharedLoadout(null, speciesId, ids.slice());
@@ -1363,10 +2056,23 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     }
     const snap = snapshotOfCurrent();
     const before = readTeamConfig();
-    // 「撤销」要退到**上一次应用的那一份**：所以先把现在这一份（= 上一次应用的结果）记成 previous。
-    // ⚠ 初版这里写成了 `state.config.previous = state.config.previous ?? null` —— 那等于**永远保留最旧的那个**
-    // （第一次应用时是 null）⇒ 应用第二次之后仍然"没有可撤销的"。真机判据 B9/B10 当场抓到。
-    const previous = state.config.applied ?? null;
+    // ⭐ 2026-09-29 U04 **改钉**（Lead 真机点出来的缺陷：应用之后「撤销」仍然 disabled）：
+    //
+    // 旧口径 `previous = state.config.applied ?? null` 有两个问题：
+    //   ① **第一次应用之后 previous 还是 null** ⇒ 撤销按钮根本不可用（U04 验收里"撤销"这一半等于没有）；
+    //   ② 它记的是"上一次应用的结果"，而不是"这一次应用之前的那一份" ⇒ 第一次应用丢掉了起点。
+    //
+    // 现在「撤销」退到哪一份，写死成两条，二选一：
+    //   · 之前**已经应用过**一份 ⇒ 退到那一份（这就是玩家心里的"改动前"）；
+    //   · 从没应用过 ⇒ 退到**应用前屏幕上的那一份**，并记住它"不是一次应用的结果"
+    //     （`applied_before:'no'`）⇒ 撤销之后状态行如实回到「还没有应用过」。
+    // `explicit` 记的是**应用前**玩家自己选过配招的物种：应用会把六个物种都写成显式的，
+    // 撤销要连"默认 / 你选的"这个来源一起退回去（否则整排都变成"你选的"，看着像没退）。
+    const explicitBefore = [...loadouts.keys()];
+    const preApplied = state.config.applied ?? null;
+    const previous = preApplied
+      ? {...preApplied, applied_before: 'yes'}
+      : {...snap, explicit: explicitBefore, applied_before: 'no'};
     const stored = writeTeamConfig(null, {current: snap, previous,
       applied_count: Number(before.applied_count ?? 0) + 1});
     // ⚠ 2026-09-29（真机抓到「进战斗那一份没有带 loadouts」）：只写本机记录**不够** ——
@@ -1384,6 +2090,9 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     state.config.previous = previous;
     state.config.state = 'applied';
     state.config.reason = '';
+    // ⚠ 2026-09-29 U04：应用之后六张卡的「四个技能」来源要**当场**跟着变（应用把它们写成了显式的）
+    // —— 不重画的话，卡上还写着「默认」而记录里已经是显式的那一份，两处对不上（探针实测过）。
+    refreshSlots();
     setConfigNote(stored
       ? '已应用：六个槽位 × 四个技能，都核对过引擎学习表。开局那一份就是它。'
       : '已应用（这一台浏览器写不进本机记录，刷新之后会丢 —— 本次开局仍然带着这一套）。');
@@ -1393,7 +2102,14 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     return true;
   }
 
-  /** 「撤销上一次应用」：**只退一步**，逐值回到应用前（与个体"回滚只能退一步"同一口径）。 */
+  /**
+   * 「撤销上一次应用」：**只退一步**，逐值退回 `previous` 那一份。
+   *
+   * ⭐ 2026-09-29 U04：撤销之后的状态行由 `previous.applied_before` 决定，**不再一律写「已应用」**：
+   *   · `'yes'`（退回到上一次应用的结果）⇒ 记录里的 current 换成它，状态行「已应用」；
+   *   · `'no'`（从没应用过，退回到应用前的屏幕）⇒ 记录里的 current **清空**，
+   *     状态行如实回到「还没有应用过」—— 这正是玩家要的那句话，也才有第二条可撤销的起点。
+   */
   function undoConfig() {
     const prev = state.config.previous;
     if (!prev) {
@@ -1405,14 +2121,20 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       return false;
     }
     const before = readTeamConfig();
-    writeTeamConfig(null, {current: prev, previous: null, applied_count: Number(before.applied_count ?? 0)});
-    state.config.applied = prev;
+    const backToApplied = prev.applied_before === 'yes';
+    writeTeamConfig(null, {current: backToApplied ? prev : null, previous: null,
+      applied_count: Number(before.applied_count ?? 0)});
+    state.config.applied = backToApplied ? prev : null;
     state.config.previous = null;
-    state.config.state = 'applied';
+    state.config.state = backToApplied ? 'applied' : 'none';
     state.config.reason = '';
-    setConfigNote('已经退回上一次应用之前的那一套（只退一步；想再退就先重新应用一次）。');
+    setConfigNote(backToApplied
+      ? '已经退回上一次应用之前的那一套（只退一步；想再退就先重新应用一次）。'
+      : '已经撤销：这一屏回到还没应用过的状态（六只与它们的四个技能还在屏幕上）。');
     renderConfig();
     void reload();
+    // 预览那一份也跟着屏幕重算（退回来的这一套就是现在的屏幕事实）。
+    if (state.plan) void buildPlan();
     return true;
   }
 
@@ -1439,6 +2161,13 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     rootEl.dataset.twConfigApplied = applied ? teamConfigFingerprint(applied) : '';
     rootEl.dataset.twConfigCurrent = teamConfigFingerprint(now);
     rootEl.dataset.twConfigUndoable = cfg.previous ? 'yes' : 'no';
+    // ⭐ 2026-09-29 U04 新增的机器可读钩子（Lead 的探针要按**钩子**验，不去正则匹配中文文案）：
+    //   · `data-tw-config-undoable`   = yes|no（撤销按钮可不可用，与按钮 disabled 同源）
+    //   · `data-tw-config-undo-target`= 撤销将退回的那一份的**指纹**（没得撤就是空串）
+    //   · `data-tw-config-undo-kind`  = applied（退回到上一次应用的结果）| screen（退回到应用前的屏幕）| none
+    rootEl.dataset.twConfigUndoTarget = cfg.previous ? teamConfigFingerprint(cfg.previous) : '';
+    rootEl.dataset.twConfigUndoKind = cfg.previous
+      ? (cfg.previous.applied_before === 'yes' ? 'applied' : 'screen') : 'none';
     rootEl.dataset.twConfigProblems = String((cfg.problems ?? []).length);
     rootEl.dataset.twConfigSlots = String(configSlots().filter((slot) => slot.instance).length);
     rootEl.dataset.twConfigSkillSlots = String(configSlots()
@@ -1470,8 +2199,30 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     if (box) {
       const problems = cfg.problems ?? [];
       box.hidden = !problems.length;
-      box.textContent = problems.length
-        ? `不能应用的原因（${problems.length} 条）：${problems.map((p) => p.text).join(' ')}` : '';
+      // ⭐ 2026-09-29 U04 第 4 条：**逐只**给「什么问题 + 怎么改」。
+      // 原来这里是一整行文本（`problems.map(p => p.text).join(' ')`）：六格都出问题时
+      // 挤成一大段，玩家读不出哪一句属于哪一格、更看不出下一步做什么。
+      // 现在一条一格（`data-tw-problem-slot` / `kind` 挂在 DOM 上，判据与探针读它），
+      // 每一格先写「第 N 格（哪一只）」，再写问题，最后写修法（`fix` 由 teamConfigProblems 给）。
+      box.innerHTML = problems.length
+        ? `<div>不能应用的原因（${problems.length} 条）—— 逐条写了怎么改：</div>`
+          + problems.map((p) => {
+            const raw = String(p.text ?? '');
+            // 标题写「第 N 格 · 哪一只」（名字从原句里取出来，正文不再重复一遍「第 N 格（名字）」）。
+            const named = /^第 \d+ 格（([^）]*)）的?/u.exec(raw);
+            const whose = p.slot
+              ? `第 ${p.slot} 格${named?.[1] ? ` · ${named[1]}` : ''}`
+              : '整队';
+            return `<div class="tw-problem" data-tw-problem-slot="${p.slot}" data-tw-problem-kind="${escapeAttr(p.kind ?? '')}">
+             <b>${escapeHtml(whose)}</b>：${escapeHtml(raw.replace(/^第 \d+ 格（[^）]*）的?/u, ''))}
+             ${p.fix ? `<div class="tw-fix">怎么改：${escapeHtml(p.fix)}</div>` : ''}
+            </div>`;
+          }).join('')
+        : '';
+      // 逐只问题的**可复跑读数**：哪几格出问题、一共几条。
+      rootEl.dataset.twConfigProblems = String(problems.length);
+      rootEl.dataset.twConfigProblemSlots = [...new Set(problems.map((p) => p.slot).filter(Boolean))].join(',');
+      rootEl.dataset.twConfigProblemFixes = String(problems.filter((p) => p.fix).length);
     }
     const undoBtn = $('tw-config-undo');
     if (undoBtn) undoBtn.disabled = !cfg.previous;
@@ -1573,11 +2324,31 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
         if (!/^own-\d+$/.test(instanceId) || !/^pet_\d{6}$/.test(speciesId)) continue;
         if (!bySpecies.has(speciesId)) bySpecies.set(speciesId, []);
         bySpecies.get(speciesId).push({select: instanceId, name: card.name ?? null,
-          level: card.level ?? null, note: card.note ?? null});
-        byInstance.set(instanceId, {speciesId, name: card.name ?? null});
+          level: card.level ?? null, note: card.note ?? null, role_label: card.role_label ?? null,
+          // ── 2026-09-30 真 bug 修：**系别照抄卡上的真数据** ──────────────────────────────
+          // 现象（真 8765 实测）：选了对手之后，判断层那句 scope 写「针对「烈火战神」（属性 **未给**）」✗
+          //   ⇒ 因为 `team-plan.js:188` 的 `matchup` 要求 `opp.types.length`，
+          //     而页面选对手时给的 `types` 取的就是这一行 —— 这里没存 ⇒ 空数组 ⇒
+          //     **整个"按对手算的行"（克制/最怕/最划算的一手）全建不起来** ✗（不是少一句文案，是半台功能）。
+          // 来源：**同一趟 `/api/roco/box?kind=mine` 的卡上本来就有 `types`**（全量分页实测 542/542 都有 ✓
+          //   例：pet_000550 烈火战神→["火系"]、pet_000001 喵喵→["草系"]）⇒ 零新接口、零新数据 ✓。
+          // ⚠ 底线：**拿不到就是空数组**（`filter` 掉非字符串/空串）——**不猜、不硬编码、不补默认属性** ✓；
+          //   空数组 ⇒ 判断层照旧说「属性 未给」✓（与"屏蔽接口 ⇒ 下拉只剩占位"那条同一族口径）。
+          types: Array.isArray(card.types)
+            ? card.types.filter((t) => typeof t === 'string' && t) : []});
+        // 2026-09-29 U04：`role_label`（定位）也记下来 —— 六槽卡首层要写「这一只是干什么的」，
+        // 而工坊载荷的槽位里没有这个字段；它本来就在这一趟 `/api/roco/box?kind=mine` 的卡上，
+        // 顺手记下即可（**零新接口、零新数据**）。缺字段就是 null（首层不写这一栏，不编）。
+        byInstance.set(instanceId, {speciesId, name: card.name ?? null,
+          role_label: card.role_label ?? null, level: card.level ?? null});
       }
       state.ownedBySpecies = bySpecies;
       state.ownedByInstance = byInstance;
+      // ── 2026-09-30 真 bug 修：**数据到了就把「选对手」下拉补填一次** ────────────────────
+      // 这条下拉挂载时（`:3457`）就绑好了，但那时 `ownedBySpecies` 还是空的（本行是 `/api/roco/box`
+      // 异步回来之后才执行）⇒ 原来"只绑一次就 return"⇒ 选项永远只有占位那一个 ✗。
+      // 这里补填一次（`fillOpponentOptions()` 幂等：占位项不动、已有的不重复、Map 空就一个不加）。
+      fillOpponentOptions();
       // 2026-09-25：名字 → 物种 id，**只在唯一匹配时**给（图鉴有 62 个重名，名单自身也有
       // 「棋契陛下」重名）。换招要按物种把配招交给引擎，而 player 段不许带 id 形状的键
       // （`tests/roco-workshop.test.js` 的「两层分界」钉着），所以由页面自己按名字解析。
@@ -1603,6 +2374,24 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       state.ownedByInstance = new Map();
       state.ambiguousNames = new Set();
     }
+  }
+
+  /**
+   * 候选宇宙有多大（全图鉴物种数）：**默认档是「我的精灵」，但这个数不能被它冒充**。
+   *
+   * 为什么单独问一次：`/api/roco/box?kind=catalog` 的 `player.total` 就是候选宇宙的物种数，
+   * 而默认档（mine）的条数是几十 —— 「候选来自全图鉴 622 只」这句话要的是前者。
+   * 取一次 `limit=1` 只要总量；**读不到就不写这个数**（不拿本档条数冒充，也不编一个）。
+   */
+  async function loadUniverseTotal() {
+    try {
+      const page = await getJson(`${apiBase}/box?kind=catalog&limit=1&offset=0`);
+      const total = Number(page?.player?.total ?? 0);
+      if (total > 0) {
+        state.poolUniverse = total;
+        rootEl.dataset.twPoolUniverse = String(total);
+      }
+    } catch { /* 读不到就留空：宁可不说这个数，也不拿候选条数冒充 */ }
   }
 
   /**
@@ -1657,6 +2446,17 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   }
 
   function renderPool() {
+    // ⚠ 2026-09-29：诊断钩子（仓里 `data-tw-*` 本来就是这个惯例）——
+    //   候选池的立绘一直画成占位，而"物种 id 对、灌表代码对、渲染时序对"三条都已排除，
+    //   所以把**这张表本身**暴露出来给探针读（不改任何玩家可见的东西）。
+    if (rootEl) {
+      rootEl.dataset.twArtMapSize = String(state.artBySpecies?.size ?? -1);
+      // 再暴露**前三个键 + 命中结果**：表有 542 条、图存在、物种 id 也对，却查不到 ⇒
+      // 只剩"键的形状不是物种 id"这一种可能，直接把键打出来定案。
+      const keys = [...(state.artBySpecies?.keys?.() ?? [])].slice(0, 3);
+      rootEl.dataset.twArtMapKeys = keys.join(',');
+      rootEl.dataset.twArtHitFirst = String(state.artBySpecies?.get?.('pet_000001') ?? '(undefined)');
+    }
     // 人类 2026-09-23（后一条推翻前一条）：「不要显示去重啥的，不是显示 10 只吗」——
     // 列表**按服务端的实例行**照原样显示（不去重），也不再写「去重后」。
     const rows = state.pool.rows;
@@ -1668,14 +2468,16 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       ? mergeMineRows(rows).map((card) => {
         // mine 视角按**物种**合并：同一个物种的多个个体在配队时是同一个选择，
         // 铺成多行只会让人以为「重复了」（用户实测就是这么问的）。
-        const status = '<span class="tw-state-tag tw-state-held">持有 · 可正式上场</span>';
+        // 2026-09-29 U04 改钉：状态标从「持有 · 可正式上场」改成玩家语「持有 · 可出战」
+        // （含义一字未动：这是你盒子里的，可以直接进正式队伍）。
+        const status = '<span class="tw-state-tag tw-state-held">持有 · 可出战</span>';
         const count = card.variants.length > 1
           ? `<span class="tw-rowtag">×${card.variants.length}</span>` : '';
-        return `<button class="tw-row" data-tw-species="${escapeAttr(card.speciesId)}"
+        return `<button class="tw-row tw-row--owned" data-tw-species="${escapeAttr(card.speciesId)}"
           data-tw-instance="${escapeAttr(card.variants[0].select)}"
           data-tw-owned="${escapeAttr(card.variants[0].select)}"
           data-tw-status="held" data-tw-kind="mine" data-tw-variants="${card.variants.length}">
-         ${twArtHtml(card.variants[0])}
+         ${twArtHtml({group: card.speciesId, art: state.artBySpecies?.get?.(String(card.speciesId ?? '')) === true})}
          <span class="tw-name">${escapeHtml(card.name ?? NO_ITEM)}${count}</span>
          <span class="tw-types">${teamSlugs(card.types)}</span>
          <span class="tw-row-meta" data-tw-row-meta="yes">${escapeHtml(poolRowMetaText(card.variants[0]))}</span>
@@ -1690,9 +2492,13 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       const instanceId = isMine ? String(card.select ?? '') : '';
       const speciesId = isMine ? String(card.group ?? '') : String(card.select ?? '');
       const held = isMine ? /^own-\d+$/.test(instanceId) : state.ownedBySpecies.has(speciesId);
+      // 2026-09-29 U04 改钉：两档的**用词与样式都要一眼分得开** ——
+      //   · 你拥有的 ⇒ 「持有 · 可出战」（实心绿边 `tw-row--owned`）；
+      //   · 图鉴里你没有 ⇒ 「图鉴 · 你没有这一只」（虚线冷色 `tw-row--ref`，不冒充可用实例）。
+      // 判据读的是 `/持有|可正式上场/` 与 `/图鉴|按需推算|未核验/`（改钉不删：两颗牙都还在）。
       const status = held
-        ? '<span class="tw-state-tag tw-state-held">持有 · 可正式上场</span>'
-        : '<span class="tw-state-tag tw-state-trial">图鉴 · 按需推算（未核验）</span>';
+        ? '<span class="tw-state-tag tw-state-held">持有 · 可出战</span>'
+        : '<span class="tw-state-tag tw-state-ref">图鉴 · 你没有这一只</span>';
       // 同物种多个个体要能区分 —— 但**不印 `own-0031` 这种内部编号**（审计 2026-09-27 实测：
       // 玩家会以为那是精灵编号）。改成"这一种里的第几只"（按本机名单里的顺序），玩家看得懂。
       const sameSpecies = isMine
@@ -1717,16 +2523,29 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       // （真机实测 `twInstance` 仍是空串才发现的）。`addCandidate()` 用的也是 `?.[0]?.select`，与这里一致。
       const ownedVariant = isMine ? null : (state.ownedBySpecies.get(speciesId)?.[0] ?? null);
       const domInstance = isMine ? instanceId : String(ownedVariant?.select ?? '');
-      return `<button class="tw-row" data-tw-species="${escapeAttr(speciesId)}"
+      // ⚠ 2026-09-29 U04：**你没有的那些也要说清「为什么不能直接上场」**，而且不能长得像可用实例。
+      // 判据读 `/图鉴|按需推算|未核验/`（那颗牙保留），所以「未核验」这四个字留在这一档的标里。
+      // ⚠⚠ 2026-09-29（人类追问：「右边精灵名称旁边的小虚线框，不应该是 icon 吗？」）——
+      //   这一行以前直接把**候选行原对象**丢给 twArtHtml，而那份行只有
+      //   {instance_id, species_id, species_name, types, …}：**没有 art、没有 group/select**
+      //   ⇒ 每一行都落到虚线占位（首字），而**同一只精灵在左边队槽里是有图的**。
+      //   修法：照队槽那两处（:1423 / :2223）的写法，用本行自己的物种 id 去查页面已有的
+      //   那张表 state.artBySpecies（:2554 从盒子卡片的 art 字段灌进来）——
+      //   只用页面上本来就有的数据，不新增接口、不猜图标。
+      //   ⚠ 教训记一笔：这些说明**不能写在模板字符串里面的 HTML 注释里** ——
+      //   我在里面写了反引号，直接把模板字面量截断（`node --check` 当场 SyntaxError）。
+      const refTag = held ? null
+        : '<span class="tw-state-tag tw-state-ref" data-tw-ref="yes">图鉴 · 你没有这一只（未核验）</span>';
+      return `<button class="tw-row ${held ? 'tw-row--owned' : 'tw-row--ref'}" data-tw-species="${escapeAttr(speciesId)}"
         data-tw-instance="${escapeAttr(domInstance)}"
         data-tw-owned="${escapeAttr(domInstance)}"
         data-tw-status="${held ? 'held' : 'on_demand'}"
         data-tw-kind="${isMine ? 'mine' : 'catalog'}">
-       ${twArtHtml(card)}
+       ${twArtHtml({group: speciesId, art: state.artBySpecies?.get?.(String(speciesId ?? '')) === true})}
        <span class="tw-name">${who}</span>
        <span class="tw-types">${teamSlugs(card.types)}</span>
        <span class="tw-row-meta" data-tw-row-meta="yes">${escapeHtml(poolRowMetaText(card))}</span>
-       ${status}
+       ${held ? status : refTag}
        <span class="tw-rowtag">${held ? '在你的盒子里' : '你还没有这一只'}</span>
       </button>`;
       }).join(''));
@@ -1748,11 +2567,22 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     $('tw-cand-result').textContent = state.pool.total
       ? `${state.pool.total} 条${filters ? `（${filters}）` : ''} · 本页 ${rows.length}`
       : '没有符合条件的精灵：换个属性/定位，或点「清除筛选」。';
-    if ($('tw-cand-note')) $('tw-cand-note').textContent = state.pool.kind === 'mine'
-      ? '这些是你**拥有**的个体：可以直接进正式队伍并开局。'
-      : '全图鉴是**参考**：可以配队与比较；能不能出战要看每一只卡片上的状态标。';
-    if ($('tw-cand-note')) $('tw-cand-note').textContent = '';   // 人类：这两行统计删掉
+    // ⚠ 2026-09-29 U04：范围说明**常驻**（原来这两行被下一行无条件清空 ⇒ 玩家看不出自己在看哪一档）。
+    // 默认档是「我的精灵」；「候选来自全图鉴」这句话必须在页面上真出现（判据 `badgeProblems` 读它，
+    // 语义是「候选宇宙是全图鉴，不是只有你那几十只」）——这一档正是最容易把它弄丢的地方。
+    const universeText = state.poolUniverse ? `全图鉴 ${state.poolUniverse} 只` : '全图鉴';
+    if ($('tw-cand-note')) {
+      $('tw-cand-note').textContent = state.pool.kind === 'mine'
+        ? `这一档只显示「你拥有」的精灵：它们可以直接进正式队伍开局。要看其它物种就切「全图鉴」——`
+          + `候选来自${universeText}，能不能上场看每一行右边那个标。`
+        : `候选来自${universeText}（世界图鉴全量）：可以配队、比较与研究。`
+          + `只有「你拥有」的那些才进得了正式队伍 —— 每一行右边写着是哪一种。`;
+    }
+    // ⚠ 两个数分开记（U04）：`twPoolTotal` 仍是**本档**的条数（换档要变，ownership 判据读它判断
+    // 「作用域分档真的换了结果集」）；候选宇宙的大小另记在 `twPoolUniverse`。
     rootEl.dataset.twPoolTotal = String(state.pool.total);
+    rootEl.dataset.twPoolScope = state.pool.kind;
+    rootEl.dataset.twPoolScopeTotal = String(state.pool.total);
     rootEl.dataset.twPoolRows = String(rows.length);
   }
 
@@ -1799,6 +2629,14 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       const unique = dedupePoolCards(all);
       state.pool.instanceTotal = data.player.total;   // 实例数（页头「80 只」用）
       state.pool.total = unique.length;               // 去重后物种数（分页用）
+      // 全图鉴这一档量到的就是候选宇宙 —— 顺手记下（默认档是「我的精灵」，它量不到这个数）。
+      // ⚠ 只在**没有筛选**时记：带搜索词/属性筛选的那一趟拿到的是筛选后的条数（实测踩过：
+      // 搜一只就把「候选来自全图鉴 622 只」写成了 1 只）。
+      const filtered = Boolean(state.pool.q || state.pool.type || state.pool.role);
+      if (state.pool.kind === 'catalog' && unique.length && !filtered) {
+        state.poolUniverse = unique.length;
+        rootEl.dataset.twPoolUniverse = String(unique.length);
+      }
       const start = Math.max(0, Math.min(state.pool.offset, Math.max(0, unique.length - 1)));
       state.pool.offset = start;
       state.pool.rows = unique.slice(start, start + state.pool.pageSize);
@@ -1861,9 +2699,113 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       不是让模型凭空列举；三个标签代表三种取舍，不是强度排名。</p>`;
   }
 
-  function renderFullTeam(player) {
+  /** R03：判断不出来时**把这一格收起来**（并在配置行里如实说一句为什么）。 */
+  function hideEvalDrawer(plan) {
+    const drawer = $('tw-eval-drawer');
+    if (drawer) { drawer.hidden = true; drawer.dataset.closedReason = 'no-judgement'; }
+    const note = $('tw-config-note');
+    if (note) {
+      note.hidden = false;
+      note.textContent = `阵容评估这一格先收起来：${(plan.limits ?? []).join('；') || '拿不到能给出有用结论的事实'}`;
+    }
+  }
+
+  /** 判断能给出结论时把它放回来（换队伍之后仍要能用）。 */
+  function showEvalDrawer() {
+    const drawer = $('tw-eval-drawer');
+    if (drawer && drawer.dataset.closedReason === 'no-judgement') {
+      drawer.hidden = false;
+      delete drawer.dataset.closedReason;
+    }
+  }
+
+  /**
+   * R03（2026-09-29）：**阵容评估默认只给四样** ——
+   *   强度判断（在明确对手/本机训练范围内）、两条主要短板、一个优先调整、基本打法。
+   *
+   * 为什么这么改（README 的原话）：「**评估文案变短不等于真能判断**」。
+   * 所以这一块不是把原来的墙删短，而是换成一个**有依据的判断**：每一句后面都能点到
+   * 真实事实（属性倍率 / 静态威力 / 速度 / 能耗 / 规则）。等权假设的大段说明、
+   * 11 属性枚举与反复的来源声明**不再默认出现**；原始数值与引擎五轴进二级折叠。
+   *
+   * 拿不到有用结论时（`plan.useful !== true`）**不硬凑**：返回空串，由调用方把侧栏收起。
+   */
+  /**
+   * R03 的四块（**默认就该看见**）——紧凑版：一块一个小标题 + 每块 1–3 行，
+   * 「依据」压成一行、工程口径进二级折叠 ⇒ 900px 视口里四块**一次装得下** ✓
+   *（2026-09-30 实测：原版 1355px 高，900px 只装得下第一块半 ⇒ 玩家要滚动才看得到 ✗）
+   */
+  function renderTeamPlanBlock() {
+    const plan = state.teamPlan ?? null;
+    if (!plan || plan.useful !== true) return '';
+    // `**加粗**` 不许把星号漏到可见文本里（Lead 逐字判的 ②）——先转义、再把成对的 ** → <b>
+    const fmt = (value) => escapeHtml(String(value ?? ''))
+      .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+    // 默认块只留「标题 + 一句为什么」；**依据逐条进二级折叠** ✓（900px 才装得下四块 ✓）
+    const row = (title, why) => `<div class="tw-planrow" data-tw-plan-row="${escapeAttr(title)}">
+      <b>${escapeHtml(title)}</b>${why ? `<p>${fmt(why)}</p>` : ''}
+    </div>`;
+    const p = plan.playstyle ?? {};
+    const lines = [
+      ['流派', p.archetype], ['核心', p.core], ['首发', p.lead], ['能量循环', p.energyCycle],
+      ['防御', p.defend], ['聚能', p.charge], ['换人', p.switch],
+      ['如何赢', p.winCondition], ['最怕什么', p.worstFear], ['替补', p.bench],
+    ].filter(([, v]) => typeof v === 'string' && v.trim());
+    return `<div class="tw-teamplan" id="tw-teamplan">
+     <div class="tw-teamplan-sec" data-tw-plan="strength"><h4>强度判断</h4>
+      <p class="tw-lead">${fmt(plan.strength?.verdict ?? NO_ITEM)}</p>
+      <p class="dim">范围：${fmt(plan.scope ?? '')}</p></div>
+     <div class="tw-teamplan-sec" data-tw-plan="shortfalls"><h4>两条主要短板</h4>
+      ${plan.shortfalls.map((r) => row(r.title, r.why)).join('')}</div>
+     <div class="tw-teamplan-sec" data-tw-plan="priority"><h4>一个优先调整</h4>
+      <p>${fmt(plan.priorityChange?.text ?? NO_ITEM)}</p></div>
+     <div class="tw-teamplan-sec" data-tw-plan="playstyle"><h4>基本打法</h4>
+      ${lines.map(([k, v]) => `<p><b>${escapeHtml(k)}</b>：${fmt(v)}</p>`).join('')}</div>
+    </div>`;
+  }
+
+  /** R03：判断不出来时**把这一格收起来**（并在配置行里如实说一句为什么）。 */
+
+  /** 判断能给出结论时把它放回来（换队伍之后仍要能用）。 */
+
+  /**
+   * R03（2026-09-29）：**阵容评估默认只给四样** ——
+   *   强度判断（在明确对手/本机训练范围内）、两条主要短板、一个优先调整、基本打法。
+   *
+   * 为什么这么改（README 的原话）：「**评估文案变短不等于真能判断**」。
+   * 所以这一块不是把原来的墙删短，而是换成一个**有依据的判断**：每一句后面都能点到
+   * 真实事实（属性倍率 / 静态威力 / 速度 / 能耗 / 规则）。等权假设的大段说明、
+   * 11 属性枚举与反复的来源声明**不再默认出现**；原始数值与引擎五轴进二级折叠。
+   *
+   * 拿不到有用结论时（`plan.useful !== true`）**不硬凑**：返回空串，由调用方把侧栏收起。
+   */
+  function renderPlanEvidence(inner) {
+    const plan = state.teamPlan ?? null;
+    const unsupported = Array.isArray(plan?.unsupportedText) ? plan.unsupportedText : [];
+    const limits = Array.isArray(plan?.limits) ? plan.limits : [];
+    const engineNotes = Array.isArray(plan?.playstyleEngineNotes) ? plan.playstyleEngineNotes : [];
+    const basis = (plan?.shortfalls ?? []).flatMap((r) => (r.basis ?? []).map((b) => `${r.title}：${b}`))
+      .concat((plan?.strength?.basis ?? []).map((b) => `强度判断：${b}`))
+      .concat((plan?.priorityChange?.basis ?? []).map((b) => `优先调整：${b}`));
+    const section = (title, rows) => (rows.length
+      ? `<div class="tw-teamplan-sec"><h4>${escapeHtml(title)}</h4>
+         <ul class="tw-basis">${rows.map((x) => `<li>${escapeHtml(x)}</li>`).join('')}</ul></div>` : '');
+    return `<details class="tw-about tw-plan-evidence" id="tw-plan-evidence">
+     <summary>依据与原始数值（逐条依据 / 引擎说明 / 未结算的效果 / 这一层不知道什么）</summary>
+     ${section('逐条依据', basis)}
+     ${section('引擎说明与来源', engineNotes)}
+     ${section('本局不会生效的效果（引擎未结算，不计入能力）', unsupported)}
+     ${section('这一层不知道什么', limits)}
+     ${inner}
+    </details>`;
+  }
+
+  function renderEngineEvidence(player) {
     const full = player?.full_team ?? null;
-    if (!full) return '';
+    // 引擎五轴还没回来：如实说一句，**不假装有五轴**，也不因此把判断块一起吞掉 ✓
+    if (!full) {
+      return `<p class="tw-note">引擎那一份（五个方面 / 最小替换）这次没有回来。下面的判断来自本机事实：真实学招表、属性相性、速度与能量规则。</p>`;
+    }
     const axes = Array.isArray(full.axes) ? full.axes : [];
     const ordered = [...axes].sort((a, b) => AXIS_LABELS.indexOf(a.label) - AXIS_LABELS.indexOf(b.label));
     // 2026-09-25（人类投诉「五项全算不出来 / 大片大片没用的信息 / 显示不完」）：
@@ -1900,22 +2842,28 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       </details>
      </li>`;
     const replacement = full.replacement;
-    return `<p class="tw-lead">${escapeHtml(full.headline ?? '')}</p>
-     <div class="tw-ai" id="tw-ai-box">
-      <button class="tw-ai-btn" id="tw-ask-ai" type="button">✦ 让小芽说人话</button>
-      <p class="tw-ai-note dim" id="tw-ai-note">这一页的数字是按阵容结构算出来的排序（不是胜率）。
-       点一下让小芽用三句话讲讲它读到什么。</p>
-      <div class="tw-ai-answer" id="tw-ai" role="status" hidden></div>
-     </div>
+    // ── R03（2026-09-29）：默认只给判断；引擎五轴/假设说明/最小替换全部进**二级折叠** ────
+    // 「让小芽说人话」那个二次翻译按钮**删掉**：判断本身就该在这一屏说清楚，
+    // 再点一下让模型把同一件事说一遍，正是 R03 点名要移除的东西。
+    const original = `<p class="tw-lead">${escapeHtml(full.headline ?? '')}</p>
      <ul class="tw-axes" id="tw-axes">${okAxes.map(availableRow).join('')}${missingRow}</ul>
      ${replacement ? `<div class="tw-replacement" id="tw-replacement">
-       <h4>一个最小替换</h4>
+       <h4>一个最小替换（引擎按结构给的）</h4>
        <p>把「${escapeHtml(replacement.out_name ?? NO_ITEM)}」换成「${escapeHtml(replacement.in_name ?? NO_ITEM)}」</p>
        <p class="dim">${escapeHtml([replacement.explanation, replacement.covers_note,
     replacement.build_note, replacement.confirmed_note].filter(Boolean).join(' '))}</p>
       </div>`
     : `<p class="tw-note" style="margin-top:9px">${escapeHtml(full.replacement_unavailable_note ?? '')}</p>`}
      ${renderUnknowns(player)}`;
+    return original;
+  }
+
+  /**
+   * R03 的整块：**判断块（默认可见）+ 引擎原文（二级折叠）**。
+   * ⚠ 与 `player.full_team` **解耦**：判断只读 `state.teamPlan`（R02 与 R03 共用同一份 ✓）。
+   */
+  function renderFullTeam(player) {
+    return `${renderTeamPlanBlock()}${renderPlanEvidence(renderEngineEvidence(player))}`;
   }
 
   /**
@@ -2001,8 +2949,45 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
        ${renderUnknowns(player)}`;
       return;
     }
+    // R03（2026-09-30）：六只齐了就**自动算一次判断**（不弹 6×4 预览 ✓）——
+    // 这样「判断块」不再依赖先点「小芽给一套 6×4」那一下 ⇒ **玩家一个动作**（点「阵容评估」）就能看到四块 ✓
+    // （实测根因：原来是两个动作才看得到 ✗；抽屉**默认收起**是 2026-09-25 人类自己的口径 ✓ 不改 ✓）
+    if (selected >= TEAM_SLOTS && !state.teamPlan && !state.teamPlanBuilding) {
+      state.teamPlanBuilding = true;
+      void buildPlan({renderPreview: false}).finally(() => { state.teamPlanBuilding = false; });
+    }
+    // R03（2026-09-30 修「判断块没上屏」）：**只要判断层有结论就渲染它**，不看 `full_team` 到没到。
+    // 根因（真 8765 实测 `#tw-teamplan` 缺失、而 `#tw-plan-evidence` 在）：判断块原来只长在
+    // `selected>=6 && player.full_team` 那一支里，而 `buildPlan()` 重渲染那一刻引擎五轴还没回来 ✗。
+    //
+    // ⚠ 2026-09-30（评审判据 32 的真 bug「从满编退回后正文不跟着选中数重画」）：这一支原来
+    //   **只看"判断层有没有结论"**，于是 `state.teamPlan` 一旦建好就永远截胡 —— 玩家点
+    //   「清空阵容」再选 2 只（真 8765 实测 `dataset.twSelected=2`），评估正文仍印
+    //   「六只满编 · 判断与打法」+ 那支**已经不存在的队伍**的判断 ✗。
+    //   两道闸（缺一不可）：
+    //     ① **归属**：这份判断必须属于**当前这支队伍**（`state.teamPlanFor` 由 `buildPlan()` 记）；
+    //     ② **满编**：六只的判断不许在 0/2 只时上屏（`selected >= TEAM_SLOTS`）。
+    //   ⇒ 选择一变（清空/加人/换人/替换）判断自动作废，落到下面 `selected>=2` 那一支 ✓。
+    const planned = state.teamPlan && state.teamPlanFor === state.selected.join(',') ? state.teamPlan : null;
+    if (planned?.useful === true && selected >= TEAM_SLOTS) {
+      showEvalDrawer();
+      $('tw-eval-sub').textContent = '六只满编 · 判断与打法';
+      lastPlayer = player ?? null;
+      $('tw-eval-body').innerHTML = renderFullTeam(player ?? {});
+      return;
+    }
     if (selected >= TEAM_SLOTS && player.full_team) {
-      $('tw-eval-sub').textContent = `六只满编 · 六个方面`;
+      // R03：**判断层说没用就把这一格收起来**，不许用短文案冒充分析。
+      // 判断来自 `state.teamPlan`（`buildPlan()` 里算的那一份），拿不到判断时保持原样。
+      // ⚠ 2026-09-30：这里**也**要读"归属校验过"的那一份（`planned`）—— 否则换过队伍之后
+      //   可能拿**上一支队伍**的判断去 `hideEvalDrawer()`（把这一格无缘无故收起来 ✗）。
+      const plan = planned;
+      if (plan && plan.useful === false) {
+        hideEvalDrawer(plan);
+        return;
+      }
+      showEvalDrawer();
+      $('tw-eval-sub').textContent = plan?.useful === true ? '六只满编 · 判断与打法' : '六只满编 · 六个方面';
       lastPlayer = player;
       $('tw-eval-body').innerHTML = renderFullTeam(player);
       wireAskAi();
@@ -2231,6 +3216,9 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     rootEl.dataset.twState = 'ok';
     // ⭐ 配置那一行（应用状态 / 指纹 / 六只四技能合法性）跟着这一屏现算 —— 不许沿用上一次的数。
     renderConfig();
+    // ⭐ 2026-09-29 U04：替换面板与 6×4 预览也要跟着这一屏现算（换人之后列表里的名字要是新的）。
+    renderReplaceBox();
+    renderPlan();
     rootEl.dataset.twSeq = String(state.seq);
     emit();
   }
@@ -2333,10 +3321,16 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
         return;
       }
       if (state.selected.length >= TEAM_SLOTS) {
-        state.error = `持有队伍最多 ${TEAM_SLOTS} 只：先拿掉一只再加。`;
-        renderTeam(state.payload?.player ?? {});
-    renderAnalysis(state.payload?.player ?? {});
-      renderAnalysis(state.payload?.player ?? {});
+        // ⭐ 2026-09-29 U04 第 3 条：**满队时点候选不再只给一行红字**。
+        //   · 槽位卡上先点过「替换」⇒ 直接换到那一格（一步完成，玩家已经选好要换谁了）；
+        //   · 否则 ⇒ 弹「替换哪只」，逐格列出来让他点（锁定的那格禁用）。
+        if (state.replaceArm) { await replaceSlot(state.replaceArm, owned.select); return; }
+        state.error = null;
+        state.replaceIncoming = {instance: owned.select,
+          species: state.ownedByInstance.get(owned.select)?.speciesId ?? species ?? null};
+        renderReplaceBox();
+        setPickNote(`队伍已经满了：先在「替换哪只」里点一只换下来的，`
+          + `「${state.ownedByInstance.get(owned.select)?.name ?? '这一只'}」就换上去（锁定的那格不能换）。`);
         return;
       }
       state.selected = [...state.selected, owned.select];
@@ -2363,6 +3357,33 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   // ── 接线 ──────────────────────────────────────────────────────────────
   // 换招：槽位卡里的按钮与编辑器（都在 shadow root 里，走同一个委托）。
   $('tw-slots').addEventListener('click', (event) => {
+    const replaceBtn = event.target?.closest?.('[data-tw-replace-slot]');
+    if (replaceBtn) {
+      // ⭐ 2026-09-29 U04：槽位卡上的「替换」= **先选好要换下谁**，再去候选池点一只换上。
+      // 再点一次同一格 = 取消（开关语义，与「移除」一致）。
+      const species = String(replaceBtn.dataset.twReplaceSlot ?? '');
+      const instance = state.selected.find((id) =>
+        (state.ownedByInstance.get(id)?.speciesId ?? null) === species) ?? null;
+      if (!instance) return;
+      const slot = (state.payload?.player?.slots ?? []).find((s) => instanceOfSlot(s) === instance) ?? null;
+      if (slotLocked(slot) || state.locked.includes(instance)) {
+        state.config.reason = `「${displayNameOf(instance)}」是锁定带过来的：锁定的一只必须留在队伍里`
+          + '（拿掉它整条开局请求都会被拒）。要换人请先取消它的锁定。';
+        setPickNote(state.config.reason);
+        renderConfig();
+        return;
+      }
+      state.replaceIncoming = null;
+      state.replaceArm = state.replaceArm === instance ? null : instance;
+      state.config.reason = '';
+      refreshSlots();
+      renderReplaceBox();
+      setPickNote(state.replaceArm
+        ? `要换下的是「${displayNameOf(instance)}」：现在到右边候选池点一只换上（再点一次「替换」取消）。`
+        : '取消替换。');
+      renderConfig();
+      return;
+    }
     const target = event.target?.closest?.('[data-tw-loadout],[data-tw-pick],[data-tw-loadout-save],[data-tw-loadout-cancel]');
     if (!target) return;
     if (target.dataset.twLoadout) {
@@ -2404,8 +3425,74 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     if ($('tw-scope-all')) $('tw-scope-all').setAttribute('aria-pressed', kind === 'catalog' ? 'true' : 'false');
     if ($('tw-scope-mine')) $('tw-scope-mine').setAttribute('aria-pressed', kind === 'mine' ? 'true' : 'false');
     rootEl.dataset.twScope = kind;
+    rootEl.dataset.twPoolScope = kind;
     void loadPool({reset: true});
   };
+  /**
+   * 「选对手」下拉（2026-09-30 A）：选项 = 名单里已有的物种（页面**只有这份带 types 的表** ✓）。
+   * 选中 ⇒ state.evalOpponent = {name, types} ⇒ 重算判断（team-plan 的对手支才会亮 ✓）；
+   * 清空 ⇒ 回到 `null` ⇒ 对手支**一个字都不出现** ✓（反证 ✓）。**速度不给**（页面拿不到 ⇒ 不编 ✓）。
+   */
+  function wireOpponentPicker() {
+    const sel = $('tw-opponent');
+    if (!sel) return;
+    // ── 2026-09-30 真 bug 修：**绑定与填充拆开** ────────────────────────────────────
+    // 现象（真 8765 实测）：这条下拉**永远只有占位那一个选项** ⇒ 「对手支」（克制招 / 最怕什么 /
+    //   按对手算的强度）在产品上**根本点不到**（A 的三态读数第②态直接崩：
+    //   `TypeError: Cannot read properties of undefined (reading 'value')`）。
+    // 根因：本函数在**挂载时同步**跑（`:3457`），而选项来源 `state.ownedBySpecies` 是
+    //   `/api/roco/box?kind=mine` **异步回来之后**才填的（`:2334`）；加上原来那句
+    //   `if (sel.dataset.twBound === 'yes') return;` ⇒ **只绑一次就 return，之后再没补过** ✗。
+    // 修法：**handler 仍然只绑一次**（否则一次选择会触发 n 次重算 ✗），
+    //   而**选项填充做成幂等、可重复调用**（数据就绪时再调一次，见 `:2334` 之后那一行）。
+    if (sel.dataset.twBound !== 'yes') {
+      sel.dataset.twBound = 'yes';
+      sel.addEventListener('change', () => {
+        const species = sel.value;
+        let picked = null;
+        if (species) {
+          const row = (state.ownedBySpecies?.get(species) ?? [])[0] ?? null;
+          const types = Array.isArray(row?.types) ? row.types
+            : (Array.isArray(state.payload?.player?.next_candidates?.find((c) => c?.species === species)?.types)
+              ? state.payload.player.next_candidates.find((c) => c?.species === species).types : []);
+          // 速度**不写**：页面拿不到（不编 ✓）⇒ `team-plan` 会明说"速度未知 ⇒ 不比速度"
+          picked = {name: row?.name ?? species, types};
+        }
+        state.evalOpponent = picked;
+        void buildPlan({renderPreview: false});
+      });
+    }
+    fillOpponentOptions();
+  }
+
+  /**
+   * **幂等**地把"名单里已有的物种"填进这条下拉。
+   *
+   * 为什么单独一个函数（2026-09-30 真 bug）：它要在**两个时刻**都能跑 ——
+   *   ① 挂载时（`wireOpponentPicker()` 末尾）；② `state.ownedBySpecies` 异步填好之后（见 `:2334` 之后）。
+   * 两条底线（与"当且仅当"是一体的）：
+   *   · 占位项「不指定对手（只看结构）」是**静态 markup**（`:918`），这里**只 append**，不许动它 ✓；
+   *   · `state.ownedBySpecies` 还是空 Map（数据没到）⇒ **一个都不加** ✓（**不预先塞假的** ✗）。
+   * `seen` 从**现有 options** 播种（不是从 Map 播种）⇒ 重复调用不会产生重复项 ✓。
+   */
+  function fillOpponentOptions() {
+    const sel = $('tw-opponent');
+    if (!sel) return 0;
+    const seen = new Set([...sel.options].map((o) => o.value));
+    let added = 0;
+    for (const [species, rows] of state.ownedBySpecies ?? []) {
+      const one = rows?.[0];
+      if (!one || !one.name || seen.has(species)) continue;
+      seen.add(species);
+      const opt = document.createElement('option');
+      opt.value = species;
+      opt.textContent = one.name;
+      sel.append(opt);
+      added += 1;
+    }
+    return added;
+  }
+
   // 左侧「阵容评估」悬浮抽屉：点按钮展开/收回（与右边小芽对应）
   const evalToggle = $('tw-eval-toggle');
   const evalClose = $('tw-eval-close');
@@ -2413,6 +3500,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     const d = $('tw-eval-drawer'); d.dataset.open = 'no';
     const t = $('tw-eval-toggle'); if (t) t.setAttribute('aria-expanded', 'false');
   });
+  wireOpponentPicker();
   if (evalToggle) evalToggle.addEventListener('click', () => {
     const d = $('tw-eval-drawer');
     const open = d.dataset.open !== 'yes';
@@ -2568,7 +3656,42 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     void reload();
   });
 
-  // ⭐ 2026-09-29（task-8）：应用 / 撤销 / 核对三个动作。落点与文案都在 `renderConfig()` 里。
+  // ⭐ 2026-09-29 U04：替换流程与 6×4 预览的接线。
+  //   · 候选池上的「替换哪只」选择/取消（面板在候选区，用 shadow 级委托，重渲染不用重新绑）；
+  //   · 「小芽给一套 6×4」建预览；「一键换上这套」把预览装到屏幕；「收起预览」收起来。
+  shadow.addEventListener('click', (event) => {
+    const pick = event.target?.closest?.('[data-tw-replace-target]');
+    if (pick) {
+      const incoming = state.replaceIncoming?.instance ?? null;
+      const target = String(pick.dataset.twReplaceTarget ?? '');
+      if (incoming) void replaceSlot(target, incoming);
+      return;
+    }
+    if (event.target?.closest?.('[data-tw-replace-cancel]')) {
+      state.replaceIncoming = null;
+      state.replaceArm = null;
+      renderReplaceBox();
+      refreshSlots();
+      setPickNote('取消替换。');
+      return;
+    }
+    if (event.target?.closest?.('[data-tw-plan-adopt]')) { void adoptPlan(); return; }
+    if (event.target?.closest?.('[data-tw-plan-hide]')) {
+      state.plan = null;
+      renderPlan();
+      setConfigNote('预览收起来了：再点一次「小芽给一套 6×4」可以重新看。');
+    }
+  });
+  $('tw-plan-build').addEventListener('click', () => {
+    setConfigNote('正在按你的队伍与盒子拼这套 6×4（只用真实数据，不编配招）…');
+    void buildPlan().then((plan) => {
+      const rows = plan?.rows?.length ?? 0;
+      setConfigNote(rows
+        ? `预览好了：${rows} 只 × 每个四个技能（下面那张表，逐格可核）。`
+        : '这套还拼不出来：你盒子里现在没有可用的个体。');
+    });
+  });
+
   $('tw-config-check').addEventListener('click', () => { void checkLegality(); });
   $('tw-config-apply').addEventListener('click', () => { void applyConfig(); });
   $('tw-config-undo').addEventListener('click', () => { undoConfig(); });
@@ -2592,6 +3715,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   rootEl.dataset.twState = 'loading';
   void (async () => {
     await loadOwnedIndex();
+    // 候选宇宙的大小（全图鉴物种数）单独问一次：默认档是「我的精灵」，不能拿它的条数冒充。
+    await loadUniverseTotal();
     await loadPool({reset: true});
     await reload();
     // 「两阶段都回来了」是一个**独立**的事实：验收脚本用它区分「初判已经画好了」

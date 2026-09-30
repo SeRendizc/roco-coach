@@ -52,6 +52,8 @@ button{min-width:44px}
 .flags button{min-height:44px;min-width:44px;font-size:13px}
 .flags button[aria-pressed="true"]{background:var(--accent);color:#152c24;border-color:var(--accent);font-weight:600}
 #box-count{margin-left:auto}
+/* 动作反馈行（第三轮第 5 条：它不再是页头那行"重复的黄色计数"，空着就隐藏）。 */
+.box-status{flex:1 1 100%;font-size:12px;color:var(--muted)}
 /* 折叠筛选菜单：与训练场页同一套形态（原生 select 在无头浏览器里按不动）。 */
 .fmenu{position:relative}
 .fmenu>summary{cursor:pointer;list-style:none;background:#121e2c;border:1px solid var(--line);
@@ -97,7 +99,9 @@ button{min-width:44px}
 .avatar-art{padding:1px;overflow:hidden}
 .avatar-art img{width:100%;height:100%;object-fit:contain;display:block}
 .avatar.big.avatar-art{padding:2px}
-.card-name{font-size:15px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
+.card-name{font-size:15px;font-weight:600;line-height:1.35;overflow-wrap:anywhere;
+ /* R05.1：中文**不按字断行**（否则窄格里会出现「铠 甲 虫」那种竖排）；真放不下时整词换行。 */
+ word-break:keep-all;min-width:0}
 .card-types{display:flex;flex-wrap:wrap;gap:4px}
 .card-tags{display:flex;flex-wrap:wrap;gap:4px}
 .tag{font-size:11.5px;background:#26374a;border-radius:5px;padding:2px 7px;color:#c8d5e2}
@@ -145,6 +149,13 @@ button{min-width:44px}
 .metric .metric-iv{font-style:normal;color:#f0c674;font-weight:600;margin-left:4px}
 /* 面板那一格下面那行输入（种族值与天分）：小一号、压暗，别跟主数抢注意力。 */
 .metric .metric-race{display:block;font-style:normal;font-size:11px;color:#8397ab;margin-top:2px}
+/* 性格的 ±10%（人类 2026-09-29：「好像性格没体现出来吧」「性格用浅黄色显示吧，
+   哪个 +10% 哪个 −10%」）—— 六维那一格把性格管的两项直接标出来：
+   长处 +10%（浅黄描边 + 浅黄底）、短处 −10%（灰底），旁边写清是哪一项。 */
+.metric[data-nature="up"]{border-color:#6d5c2a;background:#241f12}
+.metric[data-nature="down"]{border-color:#4a4a55;background:#1c1c22}
+.metric .metric-nature{display:block;margin-top:2px;font-style:normal;font-size:11.5px;color:#f0d98a}
+.trait .nature-effect{margin-left:8px;font-style:normal;font-size:12px;color:#f0d98a}
 /* 双属性之间的分隔符（人类：「双属性两个属性中间加隔断（eg 毒系｜地系）」）。 */
 .type-sep{opacity:.5;margin:0 1px;font-size:12px}
 .traits{display:flex;flex-direction:column;gap:6px}
@@ -197,8 +208,35 @@ button{min-width:44px}
    刷新、回滚、再养一只、加入比较全部搬进二级详情页（`#pet-view`），所以这里没有再给
    `.refresh-btn` 留版位 —— 列表因此从"竖着挤成一坨"瘦回一行。 */
 .species-drawer { border: 1px solid var(--line, #2a3442); border-radius: 10px; margin: 0 0 8px; }
-.drawer-head { display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 12px;
+/* ── 组头：三列网格版式（第三轮纠偏第 3/7 条 + R05.1/R05.3 的旧账）─────────────
+   第一排：[形象] [名字] [看详情 › / N 个个体 ▸]
+   第二排：[系别]
+   第三排：[收起时的摘要]（多实例才画，且不堆数值）
+   为什么要网格而不是 flex-wrap：**长名字（「鸭吉吉（蓬松的样子）」）不许把「看详情 ›」
+   挤到第二行**（用户图2 实测）。名字那一格是 `minmax(0,1fr)`、自己换行；
+   右边那一格永远留在第一排。
+   另外（R05.3，user-07）：`style.css` 的 `button:hover:not(:disabled)` 会把这个组头
+   刷成一块实心蓝底 —— 用同特异性的显式规则压掉，只留轻微底色与键盘焦点描边。 */
+.drawer-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "art name count" "art types types" "art summary summary";
+  align-items: center; gap: 3px 8px; width: 100%; padding: 8px 10px;
   background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.drawer-head:hover:not(:disabled) { background: #1b2836; border-color: transparent; }
+.drawer-head:focus { background: none; }
+.drawer-head:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* 形象（第三轮第 7 条：**关闭与展开都要有图** —— 头像由页面注入，这一格只负责摆位）。 */
+.drawer-art { grid-area: art; align-self: start; line-height: 0; }
+.drawer-art .avatar { width: 30px; height: 30px; font-size: 17px; }
+.drawer-name { grid-area: name; min-width: 0; font-weight: 600; word-break: keep-all;
+  overflow-wrap: anywhere; }
+.drawer-count { grid-area: count; display: inline-flex; align-items: center; gap: 4px;
+  white-space: nowrap; opacity: .75; font-size: 12px; }
+.drawer-types { grid-area: types; display: flex; flex-wrap: wrap; gap: 4px; }
+.drawer-types .chip { border-radius: 6px; }
+.drawer-summary { grid-area: summary; font-size: 12px; opacity: .78; }
+.drawer-caret { color: var(--muted); font-size: 12px; line-height: 1; }
 .drawer-name { font-weight: 600; }
 .drawer-count { margin-left: auto; opacity: .75; font-size: 12px; }
 .drawer-summary { flex-basis: 100%; font-size: 12px; opacity: .78; }
@@ -207,7 +245,17 @@ button{min-width:44px}
 .individual { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; }
 .individual-level { opacity: .8; }
 .individual-traits { display: inline-flex; gap: 6px; flex-wrap: wrap; }
-.trait { border: 1px solid var(--line, #2a3442); border-radius: 999px; padding: 1px 8px; font-size: 12px; }
+/* ⚠ 2026-09-29 第三轮纠偏第 4 条（用户：性格/天分「禁止巨大长胶囊」）：
+   圆角从 999px 收到 **7px**，宽度随内容（`inline-flex` + `nowrap`），不再拉成一整条。 */
+.trait { border: 1px solid var(--line, #2a3442); border-radius: 7px; padding: 2px 8px;
+  font-size: 12px; display: inline-flex; align-items: center; }
+/* ⚠ 2026-09-29 修（真机 390 实测抓到）：`white-space:nowrap` **只许留在列表卡那几枚短标签上**
+   （`.individual-traits .trait`，那里是「性格 稳重」「相当好的天分」这种短词）。
+   我第一版写进了共用的 `.trait` 基类 ⇒ 详情页那几行长文本（`.pet-talent-why` 的天分说明）
+   继承了 nowrap、整段不换行 ⇒ 390 视口下 `scrollWidth=701`（横向溢出）。
+   旧写法留档（改钉不删）：`.trait { … display:inline-flex; align-items:center; white-space:nowrap; }` */
+.individual-traits .trait { white-space: nowrap; }
+.pet-traits .trait { white-space: normal; }
 .trait[data-state="absent"] { opacity: .6; border-style: dashed; }
 .individual-actions { margin-left: auto; display: inline-flex; gap: 6px; align-items: center; }
 .remove-confirm { display: inline-flex; align-items: center; gap: 6px; }
@@ -254,7 +302,11 @@ button{min-width:44px}
    改法只作用于抽屉版（`data-grouped="yes"`）：列宽 330px ⇒ 1440 下 4 列；行内两列网格。
    ⚠ 2026-09-29（U11）：列数改成**固定档位**，每一档都整除 24（本页每页 24 项）
    ⇒ 4 / 3 / 2 / 1 列 = 6 / 8 / 12 / 24 行，正常页不会剩半行（最后一页允许真实不足）。 */
-#box-grid[data-grouped="yes"]{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start}
+/* ⚠ 2026-09-29 第三轮纠偏第 7 条（用户图1/图2 右下角的铠甲虫「又窄又矮」）：
+   同一行里的格子**等高**（`align-items:stretch`），抽屉自己撑满格子 ⇒ 分组外卡与普通卡
+   同宽同高。旧写法留档（改钉不删）：`align-items:start`。 */
+#box-grid[data-grouped="yes"]{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:stretch}
+#box-grid[data-grouped="yes"] .species-drawer{height:100%}
 @media(min-width:1500px){#box-grid[data-grouped="yes"]{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:999px){#box-grid[data-grouped="yes"]{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:759px){#box-grid[data-grouped="yes"]{grid-template-columns:minmax(0,1fr)}}
@@ -270,6 +322,12 @@ button{min-width:44px}
 #box-grid[data-grouped="yes"] .individual-card{grid-column:1;min-width:0}
 #box-grid[data-grouped="yes"] .individual-level{grid-column:2;justify-self:end;font-size:12px;opacity:.8;white-space:nowrap}
 #box-grid[data-grouped="yes"] .individual-traits{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px}
+/* R05.1：一枚胶囊内部不许断行（「天分未定档（激活 6 项）」被拆两行很难读）；挤不下时整枚换行。
+   行高因此稳定，等级 / 性格 / 天分一眼能扫。 */
+#box-grid[data-grouped="yes"] .individual-traits .trait{white-space:nowrap}
+#box-grid[data-grouped="yes"] .individual-card .card-name{word-break:keep-all}
+/* 组头右边那枚小字（「看详情 ›」/「N 个个体 ▸」）不要被压成竖排 */
+.drawer-count { white-space: nowrap; }
 #box-grid[data-grouped="yes"] .individual-note{
   grid-column:1/-1;font-size:12px;line-height:1.5;opacity:.72;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -364,7 +422,7 @@ button{min-width:44px}
 .pet-traits .trait>b{flex:0 0 auto;min-width:6em}
 .pet-traits .trait>span{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
 .pet-talent-why,.pet-missing,.pet-note-inline{flex:1 1 100%;font-size:11.5px;line-height:1.55;
-  color:#b4c3d1;font-style:normal;overflow-wrap:anywhere}
+  color:#b4c3d1;font-style:normal;overflow-wrap:anywhere;white-space:normal;min-width:0}
 .pet-missing{color:#e8ce88}
 /* （`.pet-attrs` / `.pet-attr-cell` 那一排六格资质在 2026-09-29 删掉了：它与
    「资质」那一行逐值重复 —— 六项数值只在那一行里出现一次。） */

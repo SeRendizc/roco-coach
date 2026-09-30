@@ -65,6 +65,32 @@ export function readSharedLoadout(storage, petId) {
 }
 
 /**
+ * **删掉一只的共用记录**（2026-09-29，U04 的真实残留；T4 报、Lead 落）。
+ *
+ * 为什么必须有它：撤销"第一次应用"时，`team-workshop.js` 把**内存与屏幕**逐值退回了
+ * （六槽、四个技能名、来源标「默认」全对），但**共用记录里那六个键删不掉** ——
+ * 这个模块当时只有读/写两个口。后果（T4 实测）：之后**手动整页刷新 + 带 `?team=`** 时，
+ * 那几只的来源会显示成「你选的」（四个技能名不变）⇒ 屏幕上说了一句与操作经过不符的话。
+ *
+ * 纪律与 `writeSharedLoadout` 同一套：**返回真的删掉了没有**，
+ * 形状不合法 / 没有 storage / 写被拒（隐私模式）都回 `false` —— 调用方照实说，不做乐观 UI。
+ */
+export function clearSharedLoadout(storage, petId) {
+  const s = storeOf(storage);
+  const key = typeof petId === 'string' ? petId.trim() : '';
+  if (!s || !key) return false;
+  try {
+    let all = null;
+    try { all = JSON.parse(s.getItem(LOADOUT_STORE_KEY) ?? '{}'); } catch { all = null; }
+    const next = all && typeof all === 'object' && !Array.isArray(all) ? {...all} : {};
+    if (!(key in next)) return true;   // 本来就没有 ⇒ 目标状态已经达成，算成功（幂等）
+    delete next[key];
+    s.setItem(LOADOUT_STORE_KEY, JSON.stringify(next));
+    return true;
+  } catch { return false; }
+}
+
+/**
  * 写下一只的四个。返回**真的写进去了没有** —— 调用方要照实说（不许乐观 UI）。
  * 形状不合法 / 没有 storage / 写被拒（隐私模式）都回 false。
  */

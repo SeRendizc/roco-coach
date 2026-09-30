@@ -1,0 +1,1877 @@
+{
+  "at": "2026-09-29T13:25:17.768Z",
+  "self": false,
+  "passMin": 4,
+  "rows": [
+    {
+      "id": "mt-anaphor-01",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "mt-anaphor-02",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "mt-anaphor-03",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "mt-anaphor-04",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "mt-anaphor-05",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "mt-anaphor-06",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "mt-anaphor-07",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "mt-anaphor-08",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "mt-action-02",
+      "tool": "simulate_branch",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（2 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "reason"
+      ]
+    },
+    {
+      "id": "mt-action-04",
+      "tool": "simulate_branch",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（2 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "reason"
+      ]
+    },
+    {
+      "id": "mt-action-06",
+      "tool": "simulate_branch",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（2 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "reason"
+      ]
+    },
+    {
+      "id": "mt-action-08",
+      "tool": "simulate_branch",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（2 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "reason"
+      ]
+    },
+    {
+      "id": "mt-state-01",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "mt-state-02",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "mt-state-03",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "mt-state-04",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "mt-state-05",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "mt-state-06",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "mt-state-07",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "mt-state-08",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "cr-turn-01",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "cr-turn-02",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "cr-turn-03",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "cr-turn-04",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "cr-turn-05",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "cr-turn-06",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "cr-turn-07",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "cr-turn-08",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "cr-version-01",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "cr-version-02",
+      "tool": "evaluate_team",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "cr-version-03",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "cr-version-04",
+      "tool": "evaluate_team",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "cr-version-05",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "cr-version-06",
+      "tool": "evaluate_team",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "cr-version-07",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "cr-version-08",
+      "tool": "evaluate_team",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "cr-lastturn-01",
+      "tool": "read_last_turn",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（2 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "reason"
+      ]
+    },
+    {
+      "id": "cr-lastturn-02",
+      "tool": "read_last_turn",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（2 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "reason"
+      ]
+    },
+    {
+      "id": "cr-lastturn-03",
+      "tool": "read_last_turn",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（2 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "reason"
+      ]
+    },
+    {
+      "id": "cr-lastturn-04",
+      "tool": "read_last_turn",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（2 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "reason"
+      ]
+    },
+    {
+      "id": "cr-lastturn-05",
+      "tool": "read_last_turn",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（2 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "reason"
+      ]
+    },
+    {
+      "id": "cr-lastturn-06",
+      "tool": "read_last_turn",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（2 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "reason"
+      ]
+    },
+    {
+      "id": "cr-lastturn-07",
+      "tool": "read_last_turn",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（2 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "reason"
+      ]
+    },
+    {
+      "id": "cr-lastturn-08",
+      "tool": "read_last_turn",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（2 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "reason"
+      ]
+    },
+    {
+      "id": "cr-contradiction-01",
+      "tool": "read_match",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（1 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing"
+      ]
+    },
+    {
+      "id": "cr-contradiction-02",
+      "tool": "read_match",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（1 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing"
+      ]
+    },
+    {
+      "id": "cr-contradiction-03",
+      "tool": "read_match",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（1 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing"
+      ]
+    },
+    {
+      "id": "cr-contradiction-04",
+      "tool": "read_match",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（1 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing"
+      ]
+    },
+    {
+      "id": "cr-contradiction-05",
+      "tool": "read_match",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（1 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing"
+      ]
+    },
+    {
+      "id": "cr-contradiction-06",
+      "tool": "read_match",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（1 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing"
+      ]
+    },
+    {
+      "id": "cr-contradiction-07",
+      "tool": "read_match",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（1 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing"
+      ]
+    },
+    {
+      "id": "cr-contradiction-08",
+      "tool": "read_match",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（1 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing"
+      ]
+    },
+    {
+      "id": "lc-absent-01",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "lc-absent-02",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "lc-absent-03",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "lc-absent-04",
+      "tool": "read_match",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（1 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing"
+      ]
+    },
+    {
+      "id": "lc-absent-05",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "lc-absent-06",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "lc-absent-07",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "lc-absent-08",
+      "tool": "read_match",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（1 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing"
+      ]
+    },
+    {
+      "id": "lc-confusable-01",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "lc-confusable-02",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "lc-confusable-03",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "lc-confusable-04",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "lc-confusable-05",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "lc-confusable-06",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "lc-confusable-07",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "lc-confusable-08",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "lc-crossmatch-01",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "lc-crossmatch-02",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "lc-crossmatch-03",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "lc-crossmatch-04",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "lc-crossmatch-05",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "lc-crossmatch-06",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "lc-crossmatch-07",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "lc-crossmatch-08",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "vr-anchored-01",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "vr-anchored-02",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "vr-anchored-03",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "vr-anchored-04",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "vr-anchored-05",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "vr-anchored-06",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "vr-anchored-07",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "vr-anchored-08",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "vr-active-01",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "vr-active-02",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "vr-active-03",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "vr-active-04",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "vr-active-05",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "vr-active-06",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "vr-active-07",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "vr-active-08",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    }
+  ]
+}

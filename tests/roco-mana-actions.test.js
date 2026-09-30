@@ -88,9 +88,13 @@ test('RC-105 配置：v3 只新增 mana/actions，energy 与 turn_order 与 v2 �
   const extraEnergyKeys = Object.keys(v3.energy).filter((k) => !(k in v2.energy)).sort();
   // 2026-09-25（RC-401 批次九）：再登记一个 `per_layer_cost`（动态能耗修正：
   // 「敌方每有 N 层中毒效果，本技能能耗 -M」，51 只配招带 `skill_000612 毒液渗透`）。
+  // 2026-09-29（RC-401 批次十四）：再登记一个 `respond_override`（「应对X：改为…」的**条件覆盖**）。
+  // ⚠ 与 `tests/roco-six-pet-battle.test.js` 里那份白名单**同一批同一件事**（那边已先登记）。
+  //   这不是放宽判据：白名单仍是**逐项精确相等**（多/少/改名都红），
+  //   下面「v2 有的每个 key 必须逐字相同」那一轮一个字没动 —— 它防的是「v3 悄悄改了 v2 已有叶子」。
   assert.deepEqual(extraEnergyKeys,
-    ['cost_modifier', 'foe_energy_loss', 'initial_for_all_pets', 'per_layer_cost'],
-    'v3 的 energy 只允许多出这四个已登记的叶子');
+    ['cost_modifier', 'foe_energy_loss', 'initial_for_all_pets', 'per_layer_cost', 'respond_override'],
+    'v3 的 energy 只允许多出这五个已登记的叶子');
   for (const key of Object.keys(v2.energy)) {
     assert.deepEqual(v3.energy[key], v2.energy[key], `v3 的 energy.${key} 必须逐字沿用 v2`);
   }

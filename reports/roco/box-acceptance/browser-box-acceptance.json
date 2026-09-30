@@ -1,7 +1,7 @@
 {
  "generated_by": "scripts/roco/browser-box-acceptance.mjs",
  "page": "box.html",
- "judged_at": "2026-09-28T18:15:21.206Z",
+ "judged_at": "2026-09-29T13:32:55.597Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|licence|pack_id|ruleset_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "screenshots": [
   "reports/roco/box-acceptance/box-01-mine-1440x900.png",
@@ -84,13 +84,13 @@
    "id": "06-玩家层无工程话",
    "judge": "展开的玩家可见文本里不出现 pet_id / state_version / coverage / provenance / unknown_fields / 裸 JSON",
    "ok": true,
-   "actual": "扫过 916 字；卡片首层「喵喵 🌿草系 定位：回复」"
+   "actual": "扫过 1830 字；卡片首层「喵喵 🌿草系 Lv.60 定位：回复 你的：Lv.60 · 性格 稳重 · 相当好的天分」"
   },
   {
    "id": "07-键盘搜索",
    "judge": "真实键盘输入「喵喵」后结果数 0<total<622，且每张卡的名字都含搜索词",
    "ok": true,
-   "actual": "输入框实际值=\"喵喵\" total=2 每张卡都含喵=true；样例「喵喵 🌿草系 定位：回复」"
+   "actual": "输入框实际值=\"喵喵\" total=2 每张卡都含喵=true；样例「喵喵 🌿草系 Lv.60 定位：回复 你的：Lv.60 · 性格 稳重 · 相当好的天分」"
   },
   {
    "id": "08-系别筛选",
@@ -108,19 +108,19 @@
    "id": "09-个体详情",
    "judge": "个体详情**二级页**（地址 `?pet=`）里有等级 / 性格 / 资质 / 天分档位 / 四个有序技能（必到三栏都在、标签只许来自那五个；特长与血脉有值才有），六维是 60 级换算值（标签写明 60 级），天分档位的取值落在四个档名里",
    "ok": true,
-   "actual": "二级页=true view=pet 地址 pet=own-0001 traits=3 标签=[\"性格\",\"资质\",\"天分档位\"] 天分档位=「相当好的天分」（命中档名=true；读不出来但带了说明=false） moves=4 缺词=[] 标题=喵喵 · 详情"
+   "actual": "二级页=true view=pet 地址 pet=own-0001 traits=4 标签=[\"性格\",\"资质\",\"天分档位\",\"刷新天分记录\"] 天分档位=「相当好的天分」（命中档名=true；读不出来但带了说明=false） moves=4 缺词=[] 标题=喵喵 · 详情"
   },
   {
    "id": "10-详情也不说工程话",
    "judge": "个体详情二级页（玩家点得到的）同样不出现工程字段",
    "ok": true,
-   "actual": "扫过 952 字"
+   "actual": "扫过 1043 字"
   },
   {
    "id": "10b-资质要摊成六维数值（own-0001）",
    "judge": "真鼠标打开 own-0001 的详情：资质那一栏是「生命 10 / 物攻 3 / …」这样的六维数值，整页不出现 [object Object]",
    "ok": true,
-   "actual": "喵喵 · 详情：资质 =「生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9」（数出 6 个数值；[object Object] 0 处）｜pet-view 内命中元素 25 个 [\"BUTTON.nav-btn primary@pet-back html=<button class=\\\"nav-btn primary\\\" id=\\\"pet-back\\\">← 返回精灵盒子</button>\",\"H2.@pet-title html=<h2 id=\\\"pet-title\\\">喵喵 · 详情</h2>\",\"BUTTON.refresh-btn@pet-actions html=<button class=\\\"refresh-btn\\\" data-refresh=\\\"nature\\\" data-individual=\\\"own-0001\\\">刷新性格（还剩 3 次）</button>\",\"BUTTON.refresh-btn@pet-actions html=<button class=\\\"refresh-btn\\\" data-refresh=\\\"talent\\\" data-individual=\\\"own-0001\\\">刷新天分（还剩 3 次）</button>\",\"SPAN.bl-no@pet-loadout html=<span class=\\\"bl-no\\\">第 1 个</span>\"]｜资质原样「生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9」｜本机记录 nature=\"稳重\"｜按容器拆：pet=143 list=1728 compare=-1 dev=0"
+   "actual": "喵喵 · 详情：资质 =「生命 7 / 物攻 0 / 魔攻 10 / 物防 0 / 魔防 0 / 速度 9」（数出 6 个数值；[object Object] 0 处）｜pet-view 内命中元素 26 个 [\"BUTTON.nav-btn primary@pet-back html=<button class=\\\"nav-btn primary\\\" id=\\\"pet-back\\\">← 返回精灵盒子</button>\",\"H2.@pet-title html=<h2 id=\\\"pet-title\\\">喵喵 · 详情</h2>\",\"EM.nature-effect@pet-traits html=<em class=\\\"nature-effect\\\" data-nature-effect=\\\"yes\\\">长处 物防 +10% · 短处 物攻 −10%</em>\",\"SPAN.@pet-traits html=<span>生命 7 / 物攻 0 / 魔攻 10 / 物防 0 / 魔防 0 / 速度 9</span>\",\"SPAN.@pet-traits html=<span>还剩 3 次（性格还剩 3 次）</span>\"]｜资质原样「生命 7 / 物攻 0 / 魔攻 10 / 物防 0 / 魔防 0 / 速度 9」｜本机记录 nature=\"稳重\"｜按容器拆：pet=110 list=2089 compare=-1 dev=-1"
   },
   {
    "id": "11-两个体比较",
@@ -147,10 +147,10 @@
    "actual": "比选栏=false 比较页=false 按钮=false 页面上还有那些字=false 列表在=true 卡片=24"
   },
   {
-   "id": "14-工程信息在抽屉里",
-   "judge": "开发者抽屉默认收起；展开后能真的看到 provenance / unknown_fields / state_version / coverage / 许可",
+   "id": "14-工程信息不进盒子页",
+   "judge": "第三轮纠偏第 5 条：页头那个「关于这一页（来源与快照）」抽屉**必须不在**页面上；玩家可见文本里也不许出现 provenance / unknown_fields / state_version / coverage / 许可",
    "ok": true,
-   "actual": "默认收起=true 展开=true 长度=42746 provenance=true unknown_fields=true state_version=true coverage=true licence=true；样例「 版本：state_version=rc205.1 · ruleset_id=roco-world-s4-2026-09-10 · pack_id=roco-game-data-pack-v2 数据集哈希：de62f69de8244ba33d12b91374da16958bf951afac20d8d18c26f1d42」"
+   "actual": "#dev-drawer=不存在（对） #dev-body=不存在（对） .dev=不存在（对） 页头 .dev=不存在（对）｜玩家文本命中=null"
   },
   {
    "id": "15-判据可恢复",
@@ -180,7 +180,7 @@
    "id": "19-触控目标",
    "judge": "390×844：主要动作（按钮 / summary / 输入框）都 ≥44×44；卡片上的次要控件「加入比较」允许小到 24×24（2026-09-28 人类要求把它做小），但不许小于它（摸得到）",
    "ok": true,
-   "actual": "量了 112 个元素；主要动作与次要控件都在线上（次要控件 0 个，最小 99px 高）"
+   "actual": "量了 108 个元素；主要动作与次要控件都在线上（次要控件 0 个，最小 99px 高）"
   },
   {
    "id": "20-窄屏可读",
@@ -240,13 +240,19 @@
    "id": "32-完整六维的二级详情页",
    "judge": "人类 2026-09-28：「没有个按钮能弹出个二级页面展示完整六维属性」⇒ 点一行就进**二级详情页**（地址 `?pet=<个体>`）：生命/物攻/物防/魔攻/魔防/速度 一项不落，性格 / 天分档位 / 资质这些栏都在，四个技能都在，[object Object] 0 处，还有返回入口",
    "ok": true,
-   "actual": "地址 pet=own-0001；六维量到 [\"生命\",\"物攻\",\"物防\",\"魔攻\",\"魔防\",\"速度\"]；性格/天分栏 3 行；技能 4 个"
+   "actual": "地址 pet=own-0001；六维量到 [\"生命\",\"物攻\",\"物防\",\"魔攻\",\"魔防\",\"速度\"]；性格/天分栏 4 行；技能 4 个"
   },
   {
    "id": "33-动作只在二级页",
    "judge": "人类 2026-09-28：「刷新性格、天分、再加一只啥的这个太大了…是不是最好放二级页面去？」⇒ 刷新性格 / 刷新天分 / ＋再养一只同种 / 回滚上一次 / 加入比较**只在二级详情页**上（按钮旁写清还剩几次），列表那一屏里一个都不许有；「只看锁定」那个入口（人类⑦：「锁定功能直接删了的就删了」）页面上也不许再有",
    "ok": true,
    "actual": "二级页上的入口：data-refresh=\"nature\"、data-refresh=\"talent\"、data-undo=；列表里这些属性 0 个"
+  },
+  {
+   "id": "36-重置筛选在筛选行",
+   "judge": "第三轮纠偏第 5 条：「重置筛选」从页头搬到**筛选行**（.box-toolbar #box-reset），而且点一下真的清掉搜索词（不是只断言元素存在）",
+   "ok": true,
+   "actual": "支持等级：menu/label/filter 都不在（对）；工具栏文案含「支持等级」=false；重置前搜索框=「喵」→ 重置后=「」"
   },
   {
    "id": "34-筛选菜单自己收回去",
@@ -285,10 +291,10 @@
    "actual": "这一只 own-0001（pet_000001）换掉一个技能后存下 [\"skill_000273\",\"skill_000286\",\"skill_000340\",\"skill_000624\"]；共用记录里 [\"pet_000001\"]"
   },
   {
-   "id": "41-官方立绘：有图的画图、没图的照旧 emoji",
-   "judge": "人类 2026-09-28：「我抓包出来的地方是不是有精灵立绘？你把迪莫的实装一下我看看」⇒ 带 `art=true` 的卡必须在**屏幕上真的画出那张立绘**（懒加载也要加载完：naturalWidth > 0），而没有立绘的卡照旧画系别 emoji —— **不许留空框**",
+   "id": "41-官方立绘：有图的画图、没图的照旧 emoji；一张卡只留一个图标",
+   "judge": "人类 2026-09-28：「我抓包出来的地方是不是有精灵立绘？你把迪莫的实装一下我看看」+ 第三轮①（用户：「icon 重复」）⇒ 带 `art=true` 的卡必须在屏幕上真的画出那张立绘（懒加载也要加载完：naturalWidth > 0），**每一张卡只许一枚图标**（同一只精灵不许画两遍），没立绘的卡照旧画系别 emoji —— **不许留空框**",
    "ok": true,
-   "actual": "这一页 24 张卡：带立绘 24 张、屏幕上 24 个 img （都加载出来了：256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256、256×256）；其余 0 个照旧画 emoji"
+   "actual": "这一页 24 张卡：带立绘 24 张、屏幕上 24 个立绘 img；单卡最多 1 个图标（第三轮①要求 1）；都加载出来了：256×256、256×256…；没立绘的照旧 emoji：0 个"
   },
   {
    "id": "42-默认档也要能点进详情",
@@ -338,6 +344,13 @@
    "ok": true,
    "hit": "比选栏（#compare-bar）还在页面上 | 比较二级页（#compare-view）还在页面上 | 页面上还能读到「个体比较 / 比较这两只 / 加入比较」这些字 | 带 ?a=&b= 打开时没有正常停在列表上（可能白屏）",
    "actual": "{\"bar\":true,\"view\":true,\"bodyHasWord\":true,\"listShown\":false}"
+  },
+  {
+   "id": "14-工程信息不进盒子页",
+   "judge": "把「关于这一页」开发者抽屉塞回页头（#dev-drawer / #dev-body / .dev 三样），同一组反向断言必须命中",
+   "ok": true,
+   "hit": "页头上又出现了开发者抽屉 #dev-drawer / #dev-body / .dev",
+   "actual": "塞回=true 读回=#dev-drawer:true #dev-body:true .dev:true；移除后=#dev-drawer:false .dev:false"
   },
   {
    "id": "06-玩家层无工程话",
@@ -438,6 +451,13 @@
    "actual": "{\"listHtml\":\"列表行里带着 data-refresh\"}"
   },
   {
+   "id": "36-重置筛选在筛选行",
+   "judge": "① 把「支持等级」那一档塞回筛选行 ② 让重置点了不清搜索词 ③ 前置条件没做成（搜索框本来就是空的） —— 三种坏样本都必须被同一条判据抓住",
+   "ok": true,
+   "hit": "「支持等级」筛选还在页面上（第三轮第 5 条要求删掉） | 点了「重置筛选」之后搜索框还是「喵」—— 重置没生效 | 前置条件没做成：点重置之前搜索框应当是填着的（否则这条判据量不到东西）",
+   "actual": "塞回=[\"「支持等级」筛选还在页面上（第三轮第 5 条要求删掉）\"]；重置失效=[\"点了「重置筛选」之后搜索框还是「喵」—— 重置没生效\"]；前置没做成=[\"前置条件没做成：点重置之前搜索框应当是填着的（否则这条判据量不到东西）\"]"
+  },
+  {
    "id": "34-筛选菜单自己收回去",
    "judge": "三个菜单全摊开、点完项不收、点外面不收 —— 三种坏样本都要被抓住",
    "ok": true,
@@ -487,11 +507,11 @@
    "actual": "{\"stored\":\"顺序或成员与 picks 不一致\"}"
   },
   {
-   "id": "41-官方立绘：有图的画图、没图的照旧 emoji",
-   "judge": "① 有 art=true 却不画图 ② 图画了但没加载出来（naturalWidth=0）③ 没图的卡留了空框 —— 三种坏样本都要被同一条判据抓住",
+   "id": "41-官方立绘：有图的画图、没图的照旧 emoji；一张卡只留一个图标",
+   "judge": "① 有 art=true 却不画图 ② **同一张卡画了两个图标**（第三轮①那一条） ③ 图画了但没加载出来 ④ 没图的卡留了空框 —— 四种坏样本都要被同一条判据抓住",
    "ok": true,
-   "hit": "带 art=true 的卡有 24 张，屏幕上却只有 0 个立绘 img | 1 张立绘没加载出来（naturalWidth/Height 是 0）：[{\"src\":\"x\",\"w\":0,\"h\":0}]",
-   "actual": "不画图=[\"带 art=true 的卡有 24 张，屏幕上却只有 0 个立绘 img\"]；图没加载=[\"1 张立绘没加载出来（naturalWidth/Height 是 0）：[{\\\"src\\\":\\\"x\\\",\\\"w\\\":0,\\\"h\\\":0}]\"]；留空框=[]"
+   "hit": "带 art=true 的卡有 24 张，屏幕上却是 0 个立绘 img | 同一张卡上画了 2 个图标（第三轮①：一张卡只留一个 —— 用户原话「icon 重复」，实测每张卡两个：名字左边一个、定位那一行左边一个） | 1 张立绘没加载出来（naturalWidth/Height 是 0）：[{\"src\":\"x\",\"w\":0,\"h\":0}]",
+   "actual": "不画图=[\"带 art=true 的卡有 24 张，屏幕上却是 0 个立绘 img\"]；两个图标=[\"同一张卡上画了 2 个图标（第三轮①：一张卡只留一个 —— 用户原话「icon 重复」，实测每张卡两个：名字左边一个、定位那一行左边一个）\"]；图没加载=[\"1 张立绘没加载出来（naturalWidth/Height 是 0）：[{\\\"src\\\":\\\"x\\\",\\\"w\\\":0,\\\"h\\\":0}]\"]；留空框=[]"
   }
  ],
  "console_errors": [],
@@ -574,7 +594,7 @@
     "catalogCount": "622"
    },
    "chipClick": {
-    "x": 801,
+    "x": 852,
     "y": 246,
     "w": 51,
     "h": 44,
@@ -594,11 +614,12 @@
     "view": "pet",
     "pet": "own-0001",
     "title": "喵喵 · 详情",
-    "traits": 3,
+    "traits": 4,
     "traitLabels": [
      "性格",
      "资质",
-     "天分档位"
+     "天分档位",
+     "刷新天分记录"
     ],
     "tier": {
      "value": "相当好的天分",
@@ -606,37 +627,37 @@
     },
     "moves": 4
    },
-   "text": "← 返回精灵盒子 喵喵 · 详情 喵喵 🌿草系 定位：回复 刷新性格（还剩 3 次） 刷新天分（还剩 3 次） 带上它去配队 ★ 已收藏 换技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 抓挠 现在带着的 系别 普通系 · 类别 攻击 · 耗能 0 · 威力 35 第 2 个 防御 现在带着的 系别 普通系 · 类别 防御 · 耗能 1 · 威力 游戏数据里没有这一项 第 3 个 仙人掌刺击 现在带着的 系别 草系 · 类别 攻击 · 耗能 6 · 威力 150 第 4 个 腐化 现在带着的 系别 毒系 · 类别 状态 · 耗能 1 · 威力 游戏数据里没有这一项 看它能学什么 等级 等级Lv.60 性格与资质 性格 稳重 资质 生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9 天分档位 相当好的天分 六维（60 级"
+   "text": "← 返回精灵盒子 喵喵 · 详情 喵喵 🌿草系 定位：回复 等级Lv.60 性格 稳重 长处 物防 +10% · 短处 物攻 −10% 资质 生命 7 / 物攻 0 / 魔攻 10 / 物防 0 / 魔防 0 / 速度 9 天分档位 相当好的天分 相当好的天分：六项资质里有三条被激活，但性格加成的那一条不在里面。（被激活的是：生命、魔攻、速度；性格长处是物防） 刷新天分记录 还剩 3 次（性格还剩 3 次） 补救：用名单那一份重设资质（只动资质） 刷新性格（还剩 3 次） 刷新天分（还剩 3 次） 带上它去配队 ★ 已收藏 当前四个技能 这是它现在带着的四个。点「看它能学什么」读一下引擎的学习表，就能换。 第 1 个 抓挠 现在带着的 系别 普通系 · 类别 攻击 · 耗能 0 · 必要威力 35 效果：造成物伤，自己回复1能量。 引擎：这条特效还没结算 —— 资料里写的那一句现在只有说"
   },
   {
    "at": "detail-own-0001",
    "facts": {
     "title": "喵喵 · 详情",
     "labels": [
-     "等级",
      "性格",
      "资质",
-     "天分档位"
+     "天分档位",
+     "刷新天分记录"
     ],
     "hasTalentRow": true,
-    "value": "生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9",
+    "value": "生命 7 / 物攻 0 / 魔攻 10 / 物防 0 / 魔防 0 / 速度 9",
     "statCount": 6,
     "objectObject": 0,
-    "inPet": 143,
-    "inList": 1728,
+    "inPet": 110,
+    "inList": 2089,
     "inCompare": -1,
-    "inDev": 0,
-    "leakElements": 25,
+    "inDev": -1,
+    "leakElements": 26,
     "leakWhere": [
      "BUTTON.nav-btn primary@pet-back html=<button class=\"nav-btn primary\" id=\"pet-back\">← 返回精灵盒子</button>",
      "H2.@pet-title html=<h2 id=\"pet-title\">喵喵 · 详情</h2>",
-     "BUTTON.refresh-btn@pet-actions html=<button class=\"refresh-btn\" data-refresh=\"nature\" data-individual=\"own-0001\">刷新性格（还剩 3 次）</button>",
-     "BUTTON.refresh-btn@pet-actions html=<button class=\"refresh-btn\" data-refresh=\"talent\" data-individual=\"own-0001\">刷新天分（还剩 3 次）</button>",
-     "SPAN.bl-no@pet-loadout html=<span class=\"bl-no\">第 1 个</span>"
+     "EM.nature-effect@pet-traits html=<em class=\"nature-effect\" data-nature-effect=\"yes\">长处 物防 +10% · 短处 物攻 −10%</em>",
+     "SPAN.@pet-traits html=<span>生命 7 / 物攻 0 / 魔攻 10 / 物防 0 / 魔防 0 / 速度 9</span>",
+     "SPAN.@pet-traits html=<span>还剩 3 次（性格还剩 3 次）</span>"
     ],
-    "talentRaw": "生命 7 / 物攻 0 / 物防 0 / 魔攻 10 / 魔防 0 / 速度 9",
+    "talentRaw": "生命 7 / 物攻 0 / 魔攻 10 / 物防 0 / 魔防 0 / 速度 9",
     "storeOne": "稳重",
-    "petVisibleObject": 143,
+    "petVisibleObject": 110,
     "petLeakOuter": [
      "SPAN.trait# kids=0 文字=「性格 稳重」",
      "SPAN.trait# kids=0 文字=「性格 稳重」",
@@ -656,7 +677,7 @@
    "fresh": {
     "kind": "?",
     "search": "",
-    "pressed": 3,
+    "pressed": 2,
     "cards": 24
    }
   },
@@ -712,7 +733,7 @@
     },
     "note": "",
     "undoButton": false,
-    "status": "我的盒子 542 个个体"
+    "status": ""
    },
    "afterRefresh": {
     "boosts": 1,
@@ -784,7 +805,7 @@
      "魔防",
      "速度"
     ],
-    "traitRows": 3,
+    "traitRows": 4,
     "moves": 4,
     "objectObject": 0,
     "back": true
@@ -871,7 +892,35 @@
    "facts": {
     "withArt": 24,
     "cards": 24,
-    "imgs": 24,
+    "drawers": 24,
+    "artImgs": 24,
+    "maxImgsPerCard": 1,
+    "imgsPerCard": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ],
     "loaded": [
      {
       "src": "/api/roco/sprite?id=pet_000001&v=default",

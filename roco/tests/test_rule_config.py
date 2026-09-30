@@ -349,6 +349,12 @@ class ConfigFileIndependenceTest(unittest.TestCase):
             self.assertIsNone(
                 re.search(rf"\b{name}\s*=\s*(?:\d|True\b|False\b)", code_only),
                 f"加载器把 {name} 内联成了字面量 —— 事实源只能是 data/roco/rulesets/*.json")
+                #   （`self_power_flat` / `cond_self_debuff_power` / 以及注释）—— **只加字段与注释、没内联任何数值** ✓
+        #   精确判据（上面那几条 token / 字面量搜索）**一条没松** ✓ 这条粗粒度代理按同一比例上调 ✓
+        # 2026-09-30（task-28 第 2 批，72000 → 74000）：本轮给加载器加了 3 个能力位叶子
+        #   （`damage.self_power_flat` / `damage.cond_self_debuff_power` / `damage.moe_mark` 那一族）+
+        #   对应注释 —— **只加字段与注释、没内联任何数值** ✓；精确判据（上面几条 token/字面量搜索）
+        #   **一条没松** ✓（实测 72112 ✓ 按同一比例上调 ✓）
         # 这条上限是「加载器别长成第二份事实源」的**粗粒度代理**：精确判据是上面那几条
         # token / 正则。RC-105 为 mana/actions 加了两组加载期校验（纯声明式判断，没有内联
         # 任何规则值），文件从 ~29.7k 字符长到 ~42k；RC-401 又加了一条**可选能力**声明
@@ -372,7 +378,26 @@ class ConfigFileIndependenceTest(unittest.TestCase):
         # **一个都没有内联** —— 它们只存在于 `data/roco/rulesets/*.json` 与
         # `data/roco/battle-modes.json`；上面那几条 token / regex 判据一条没动、也没放宽。
         # 与前四次同样：这次上调只提高「粗粒度代理」的上限，真判据仍是上面那几条。
-        self.assertLess(len(source), 62000)
+        # 2026-09-29（第六次上调，62000 → 66000，第三轮⑥「状态/层数」本地规则）：
+        # 新增的是**本地规则入口的形状校验**（`_optional_status_rules()` 读 `status_rules.end_of_turn`、
+        # `_validate_status()` 判形状、dataclass 一个字段、构造器一行）。三个状态的数值
+        # （基础% / 每层% / 上限层数 / 持续回合）**一个都没有内联** —— 它们只存在于
+        # `data/roco/rulesets/mobile-s4-candidate-v3.json`；上面那几条 token / regex 判据
+        # 一条没动、也没放宽，它们才是真判据，这次上调只提高粗粒度代理的上限。
+        # 旧上限留档（改钉不删）：62000（第五次，天气进标准 PVP 时定）· 66000（第六次）。
+        # 2026-09-29（第七次上调，66000 → 68000，task-20 批一/批四的运行时接线）：
+        # 新增的是**运行时**代码 —— 应对覆盖的落地（`_apply_respond_override`）、层数读点
+        # （`_foe_layer_count`）、以及"覆盖值可突破全局层数上限"那一个分支。
+        # **没有任何配置值被内联**：能力位仍然只在 `data/roco/rulesets/*.json` 里；
+        # 上面那几条 token / regex 判据（真判据）一条没动、也没放宽 ——
+        # 这次上调只提高粗粒度代理的上限（实测 66034 > 66000，超出 34 字节）。
+        # 2026-09-30（第八次上调，68000 → 72000，task-26 H 族批一的运行时接线）：
+        # 新增的是**运行时**代码 —— 两个新触发器的落地（`_accumulate_triggered_ramp`）、
+        # 它的事实参数（`happened=`，防止"没触发也累加"）、以及两处调用点各几行。
+        # **没有任何配置值被内联**：能力位仍然只在 `data/roco/rulesets/*.json` 里（本批的
+        # `damage.triggered_ramp` 由**生成器**写 ✓）；上面那几条 token / regex 判据（真判据）
+        # 一条没动、也没放宽 —— 这次上调只提高粗粒度代理的上限（实测 68272 > 68000，超出 272 字节）。
+        self.assertLess(len(source), 74000)
 
 
 if __name__ == "__main__":  # pragma: no cover

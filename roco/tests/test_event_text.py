@@ -131,6 +131,20 @@ SAMPLE_EVENTS = {
     "status_tick": {"kind": "status_tick", "turn": 8, "detail": {
         "side": "enemy", "status": "burn", "damage": 12, "layers_after": 1}},
     "cleanse": {"kind": "cleanse", "turn": 8, "detail": {"side": "player", "cleared": ["burn"]}},
+    # task-27（2026-09-30）：**印记的驱散**与「每驱散 1 层」的对照读数。
+    # 为什么必须有样例：`EveryDeclaredKindIsTested` 那条判据会红（登记了却没测 = 等于没测 ✓），
+    # 而漏登记的后果是**玩家看到兜底句**（「本页还没有它的中文说法」）—— 上一手踩过一次。
+    "marks_cleansed": {"kind": "marks_cleansed", "turn": 8, "detail": {
+        "side": "player", "marks_side": "both", "scope": "all",
+        "cleared": {"enemy": {"星陨印记": 4}, "player": {"光合印记": 2}},
+        "total_layers": 6, "picked": "all", "basis": "描述写「所有」⇒ 全清"}},
+    "per_cleansed_layer_skipped": {"kind": "per_cleansed_layer_skipped", "turn": 8,
+                                   "detail": {"side": "player", "layers": 0,
+                                              "why": "没有驱散到任何一层 ⇒ 不触发（对照实验）"}},
+    # task-26 P0 止血：**认不出的驱散 fail closed** ⇒ 这一条也要有样例（否则玩家会看到兜底句 ✗）
+    "cleanse_unsupported": {"kind": "cleanse_unsupported", "turn": 8,
+                            "detail": {"side": "player", "what": None,
+                                       "evidence": "驱散双方所有印记"}},
     "escape": {"kind": "escape", "turn": 9, "detail": {"side": "player"}},
     "action_cancelled": {"kind": "action_cancelled", "turn": 9, "detail": {"side": "enemy", "reason": "fainted"}},
     "game_end": {"kind": "game_end", "turn": 10, "detail": {"result": "win"}},

@@ -1,0 +1,785 @@
+{
+ "why": "人类 2026-09-29 回答「我想要的是 B，你可以先存个档」⇒ 删之前先留底",
+ "key": "roco.box.individuals.v1",
+ "count": 34,
+ "rows": [
+  {
+   "instance_id": "own-0001",
+   "individual_id": "own-0001",
+   "species_id": "pet_000001",
+   "species_name": "喵喵",
+   "level": 60,
+   "level_source": "migrated-60（旧记录写的是 Lv.55，已按上限 60 归一）",
+   "nature": "稳重",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "hp": 0,
+    "atk": 9,
+    "def": 0,
+    "spa": 0,
+    "spd": 0,
+    "spe": 7
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0002",
+   "individual_id": "own-0002",
+   "species_id": "pet_000002",
+   "species_name": "水蓝蓝",
+   "level": 60,
+   "level_source": "migrated-60（旧记录按 100 级档写的，已按 60 归一）",
+   "nature": "稳重",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "hp": 0,
+    "atk": 9,
+    "def": 0,
+    "spa": 0,
+    "spd": 0,
+    "spe": 7
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0003",
+   "individual_id": "own-0003",
+   "species_id": "pet_000003",
+   "species_name": "火花",
+   "level": 60,
+   "level_source": "test-fixture(原始写入)",
+   "nature": "稳重",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "hp": 0,
+    "atk": 9,
+    "def": 0,
+    "spa": 0,
+    "spd": 0,
+    "spe": 7
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0004",
+   "individual_id": "own-0004",
+   "species_id": "pet_000004",
+   "species_name": "迪莫",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "专注",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "atk": 7,
+    "spd": 7,
+    "def": 10,
+    "spa": 0,
+    "hp": 0,
+    "spe": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0005",
+   "individual_id": "own-0005",
+   "species_id": "pet_000005",
+   "species_name": "水灵",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "坦率",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "hp": 9,
+    "spd": 7,
+    "atk": 7,
+    "def": 0,
+    "spe": 0,
+    "spa": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0006",
+   "individual_id": "own-0006",
+   "species_id": "pet_000006",
+   "species_name": "火神",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "专注",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "spe": 7,
+    "def": 7,
+    "spd": 0,
+    "atk": 0,
+    "hp": 0,
+    "spa": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0007",
+   "individual_id": "own-0007",
+   "species_id": "pet_000007",
+   "species_name": "魔力猫",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "悠闲",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "def": 7,
+    "spe": 7,
+    "spd": 10,
+    "spa": 0,
+    "atk": 0,
+    "hp": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0008",
+   "individual_id": "own-0008",
+   "species_id": "pet_000008",
+   "species_name": "草头鸭",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "调皮",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "spa": 8,
+    "spe": 8,
+    "spd": 10,
+    "def": 0,
+    "hp": 0,
+    "atk": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0009",
+   "individual_id": "own-0009",
+   "species_id": "pet_000009",
+   "species_name": "恶魔叮",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "聪明",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "spd": 8,
+    "spa": 8,
+    "spe": 7,
+    "atk": 0,
+    "def": 0,
+    "hp": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0010",
+   "individual_id": "own-0010",
+   "species_id": "pet_000010",
+   "species_name": "恶魔狼",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "温顺",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "spa": 10,
+    "atk": 0,
+    "spd": 0,
+    "hp": 0,
+    "def": 0,
+    "spe": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0011",
+   "individual_id": "own-0011",
+   "species_id": "pet_000011",
+   "species_name": "鸭吉吉（蓬松的样子）",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "忧郁",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "hp": 10,
+    "spe": 9,
+    "atk": 0,
+    "spd": 0,
+    "def": 0,
+    "spa": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0012",
+   "individual_id": "own-0012",
+   "species_id": "pet_000012",
+   "species_name": "铠甲虫",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "懒散",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "def": 9,
+    "spd": 7,
+    "spe": 7,
+    "hp": 0,
+    "spa": 0,
+    "atk": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0013",
+   "individual_id": "own-0013",
+   "species_id": "pet_000013",
+   "species_name": "阿米亚特",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "害羞",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "spe": 10,
+    "hp": 8,
+    "spa": 10,
+    "atk": 0,
+    "def": 0,
+    "spd": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0014",
+   "individual_id": "own-0014",
+   "species_id": "pet_000014",
+   "species_name": "阿米樱",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "懒散",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "spe": 10,
+    "spa": 9,
+    "hp": 10,
+    "atk": 0,
+    "spd": 0,
+    "def": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0015",
+   "individual_id": "own-0015",
+   "species_id": "pet_000015",
+   "species_name": "罗隐",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "坦率",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "def": 8,
+    "spa": 9,
+    "hp": 0,
+    "atk": 0,
+    "spe": 0,
+    "spd": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0016",
+   "individual_id": "own-0016",
+   "species_id": "pet_000016",
+   "species_name": "蹦蹦种子（海神球形态）",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "懒散",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "hp": 7,
+    "spe": 9,
+    "def": 0,
+    "spd": 0,
+    "spa": 0,
+    "atk": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0017",
+   "individual_id": "own-0017",
+   "species_id": "pet_000017",
+   "species_name": "蹦蹦草（海神球形态）",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "坦率",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "spa": 10,
+    "spd": 7,
+    "def": 0,
+    "spe": 0,
+    "hp": 0,
+    "atk": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0018",
+   "individual_id": "own-0018",
+   "species_id": "pet_000018",
+   "species_name": "蹦蹦花（海神球形态）",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "冷静",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "atk": 9,
+    "def": 8,
+    "spd": 10,
+    "spe": 0,
+    "spa": 0,
+    "hp": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0019",
+   "individual_id": "own-0019",
+   "species_id": "pet_000019",
+   "species_name": "地鼠（枯水期的样子）",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "忧郁",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "spd": 7,
+    "spa": 9,
+    "def": 0,
+    "hp": 0,
+    "spe": 0,
+    "atk": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0020",
+   "individual_id": "own-0020",
+   "species_id": "pet_000020",
+   "species_name": "遁鼠（枯水期的样子）",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "粗心",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "atk": 10,
+    "spa": 7,
+    "spd": 7,
+    "hp": 0,
+    "def": 0,
+    "spe": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0021",
+   "individual_id": "own-0021",
+   "species_id": "pet_000021",
+   "species_name": "遁地鼠（枯水期的样子）",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "聪明",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "spa": 8,
+    "spe": 7,
+    "atk": 0,
+    "spd": 0,
+    "hp": 0,
+    "def": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0022",
+   "individual_id": "own-0022",
+   "species_id": "pet_000022",
+   "species_name": "喵呜",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "急躁",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "spe": 8,
+    "hp": 10,
+    "atk": 8,
+    "spd": 0,
+    "spa": 0,
+    "def": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0023",
+   "individual_id": "own-0023",
+   "species_id": "pet_000023",
+   "species_name": "绿草精灵",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "忧郁",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "hp": 8,
+    "spe": 0,
+    "def": 0,
+    "spd": 0,
+    "atk": 0,
+    "spa": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0024",
+   "individual_id": "own-0024",
+   "species_id": "pet_000024",
+   "species_name": "蒲公英娃娃",
+   "level": 60,
+   "level_source": "default-60（人类 2026-09-27：「pvp 没有的话就默认都 60 级别吧」；等级上限 60 是官方口径。9-26 曾按 100 级，已改钉）",
+   "nature": "莽撞",
+   "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）",
+   "talent": {
+    "def": 7,
+    "hp": 10,
+    "spe": 0,
+    "spa": 0,
+    "spd": 0,
+    "atk": 0
+   },
+   "talent_boosts": [],
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "history": []
+  },
+  {
+   "instance_id": "own-0177",
+   "individual_id": "own-0177",
+   "level": 60,
+   "nature": "稳重",
+   "talent": {
+    "hp": 3,
+    "atk": 9,
+    "def": 0,
+    "spa": 0,
+    "spd": 7,
+    "spe": 5
+   },
+   "talent_source": "rolled（原版随机生成；种子化掷点：随机三项 7–10、其余 0–6）"
+  },
+  {
+   "instance_id": "own-0325",
+   "individual_id": "own-0325",
+   "level": 60,
+   "nature": "稳重",
+   "talent": {
+    "hp": 0,
+    "atk": 9,
+    "def": 0,
+    "spa": 0,
+    "spd": 0,
+    "spe": 7
+   },
+   "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）"
+  },
+  {
+   "instance_id": "own-0327",
+   "individual_id": "own-0327",
+   "level": 60,
+   "nature": "稳重",
+   "talent": {
+    "hp": 8,
+    "atk": 5,
+    "def": 7,
+    "spa": 2,
+    "spd": 6,
+    "spe": 4
+   },
+   "talent_source": "名单导入（抓包回执的「资质」栏）"
+  },
+  {
+   "instance_id": "own-9001",
+   "individual_id": "own-9001",
+   "species_id": "pet_000001",
+   "level": 60,
+   "nature": "稳重",
+   "talent": {
+    "hp": 0,
+    "atk": 9,
+    "def": 0,
+    "spa": 0,
+    "spd": 0,
+    "spe": 7
+   },
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   }
+  },
+  {
+   "instance_id": "own-9002",
+   "individual_id": "own-9002",
+   "species_id": "pet_000001",
+   "level": 60,
+   "nature": "稳重",
+   "talent": {
+    "hp": 0,
+    "atk": 9,
+    "def": 0,
+    "spa": 0,
+    "spd": 0,
+    "spe": 7
+   },
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   }
+  },
+  {
+   "instance_id": "own-9101",
+   "individual_id": "own-9101",
+   "species_id": "pet_000009",
+   "level": 60,
+   "nature": "稳重",
+   "talent": {
+    "hp": 0,
+    "atk": 9,
+    "def": 0,
+    "spa": 0,
+    "spd": 0,
+    "spe": 7
+   },
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "level_source": "migrated-60（旧记录写的是 Lv.55，已按上限 60 归一）"
+  },
+  {
+   "instance_id": "own-9102",
+   "individual_id": "own-9102",
+   "species_id": "pet_000009",
+   "level": 60,
+   "nature": "稳重",
+   "talent": {
+    "hp": 0,
+    "atk": 9,
+    "def": 0,
+    "spa": 0,
+    "spd": 0,
+    "spe": 7
+   },
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   },
+   "level_source": "migrated-60（旧记录按 100 级档写的，已按 60 归一）"
+  },
+  {
+   "instance_id": "own-9103",
+   "individual_id": "own-9103",
+   "species_id": "pet_000009",
+   "level": 60,
+   "nature": "稳重",
+   "talent": {
+    "hp": 0,
+    "atk": 9,
+    "def": 0,
+    "spa": 0,
+    "spd": 0,
+    "spe": 7
+   },
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   }
+  },
+  {
+   "instance_id": "own-9201",
+   "individual_id": "own-9201",
+   "level": 60,
+   "nature": "稳重",
+   "talent": {
+    "hp": 0,
+    "atk": 9,
+    "def": 0,
+    "spa": 0,
+    "spd": 0,
+    "spe": 7
+   },
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   }
+  },
+  {
+   "instance_id": "own-9202",
+   "individual_id": "own-9202",
+   "level": 60,
+   "nature": "坦率",
+   "talent": {
+    "hp": 8,
+    "atk": 0,
+    "def": 0,
+    "spa": 0,
+    "spd": 0,
+    "spe": 0
+   },
+   "refreshes": {
+    "nature": 3,
+    "talent": 3
+   }
+  }
+ ]
+}

@@ -977,15 +977,16 @@ export function companionReadings({cross=null,signals=null,context={},now=Date.n
  // 依据全部来自 memory.events 的 ISO 时间戳：这一波打了几局、其中过了零点几局，
  // 两个数字都是他自己数不出来的。**没有一句出现钟点数字**——那是钟表在说话。
  const night=l.lateNight||null,run=l.run||null;
- if(night){
-  const n=night.count,wave=night.inWave;
+ const nowLate=dayPartAt(now).id==='late';   // 2026-09-30 现实时间这一半：:200 DAY_PARTS.late = 0–6 点
+ if(night||nowLate){
+  const n=night?night.count:0;const wave=night?night.inWave:(run?run.count:0);
   add({id:`late-night:${wave}:${n}`,topic:'night',klass:'late-night',priority:91,tags:[],sentences:[
    // 时间只说一次：这一波里有过了零点的局，就直接说那几局（比「这么晚了」更实）；
    // 一局都没有时（整波都在零点前收的，只是人还没走）才用「这么晚了」这一句。
-   SENT(n>=1?`过了零点你已经打了${n}局。`:`这么晚了，这一波你已经打了${wave}局。`,'memory','memory.events.time'),
+   SENT(n>=1?`过了零点你已经打了${n}局。`:(wave?`这么晚了，这一波你已经打了${wave}局。`:'这么晚了。'),'memory','memory.events.time'),
    // 许可句（见 PERMISSION_REQUIRED）：给的是「到这儿也行」，不是「你该睡了」。
    SENT('这一局打完就到这儿也行。','presence',null)],evidence:[
-   `跨局账本：现在是${dayPartAt(now).label}，最近一波从最后一局往回共 ${wave} 局，其中过了零点打的 ${n} 局，最后一局打完于 ${night.at}（来源：memory.events.time 的 ISO 时间戳）。`]});
+   `跨局账本：现在是${dayPartAt(now).label}，最近一波从最后一局往回共 ${wave} 局，其中过了零点打的 ${n} 局，最后一局打完于 ${night?night.at:"（这一波没有跨零点的局）"}（来源：memory.events.time 的 ISO 时间戳）。`]});
  }else if(run&&run.active&&run.count>=LONG_SESSION){
   add({id:`long-session:${run.count}`,topic:'session',klass:'long-session',priority:89,tags:[],sentences:[
    SENT(`连着第${run.count}局了。`,'memory','memory.events.time'),
@@ -1983,6 +1984,24 @@ export function playerWords(message){return String(message??'').split(ANSWER_REQ
  // socialOnly=true 表示这一句按设计就不含任何事实，跳过「至少一句跨局信息」那一关；
  // 其余每一关照旧（复述屏幕、自我中心的情绪、空泛打鸡血、说教、战术指令都还在拦，
  // companion.test.js 的「人味」那一组还会逐条钉住它不许夹带回合数、胜负数与倒下回合）。
+ // ── 第三轮最高优先（人类截图「跟傻子似的」）：这三类**先接住**，再谈观察──────────
+ // 为什么插在这里：下面那些通道（观察/跨局记录）在**有对局记录时**会赢，于是「上一句啊」
+ // 和「你是傻子吗」都被答成战绩复读（截图逐字）。这里先按**说话的形状**分流，
+ // 三类都只回一句、都不含战绩、都不推责；「上一句」那一支把上一句**摘出来** ✓
+ {
+  const raw=String(message??'');
+  const lines=recentAssistantLines(memory);
+  if((raw.trim().length<=12&&EMOTION_ASK.test(raw))||(raw.trim().length<=12&&NO_CONTENT_ASK.test(words))){
+   const line=pickFresh(['我是照本机记录答的；哪句不对，你说一声。',
+    '这句我没接住。你重说一句，我照改。',
+    '我在这儿。要问哪一条，直接说就行。'],lines);
+   return publicPacket({text:line,register:'R0',state,intent:'chat',parts:[],observed:false,message:raw});
+  }
+  if(FOLLOWUP_ONLY_ASK.test(raw)||(raw.trim().length<=4&&NO_CONTENT_ASK.test(raw))){
+   const answer=followupReply(memory);
+   return publicPacket({text:answer.text,register:'R0',state,intent:'followup',parts:[],observed:false,message:raw});
+  }
+ }
  let socialOnly=false;
  // 这一轮是不是「说心情／状态」：决定了三件事——问候让位、正文只有接词+一句陪着、
  // 以及送给模型的约束里**不再要求**跨局记录（他这一轮要的不是战报）。
@@ -2030,7 +2049,7 @@ export function playerWords(message){return String(message??'').split(ANSWER_REQ
   else if(social){text=social;parts=[SENT(social,'chat','本轮消息')];socialOnly=true;}
   // 2026-09-26：这里以前也是「我在。」——它是**更早**的那个兜底（R0 段），
   // 真机审计里 9/30 条拿到的那三个字主要出自这一行。改成按诉求给一句有用的话（见 fallbackLine）。
-  else text=fallbackLine(message);
+  else text=fallbackLine(message,intent);
  }
  else if(!text&&(register==='R1'||register==='R2')){
   // 玩家主动搭话（寒暄、家常、问陪练自己）先走闲聊线程：接住这句话，再落一件记得的事。
@@ -2111,11 +2130,11 @@ export function playerWords(message){return String(message??'').split(ANSWER_REQ
  // 包括不含事实的陪伴句（两句一模一样的陪伴句同样是重复）。判据见 repeatedInformation。
  if(text&&text!=='我在。'&&repeatedInformation(text).repeated){text=null;reading=null;parts=[];chat=null;moodUsed=false;socialOnly=false;}
  // 该档位需要的事实一条都拼不出来时，降到 R0 只说承接句：档位要么真的用上，要么明说降到最低。
- if(!text){register='R0';text=fallbackLine(message);state.register='R0';
+ if(!text){register='R0';text=fallbackLine(message,intent);state.register='R0';
   // 仍然如实记账：这一轮没找到可用事实，只是不再拿状态回报当回答。
   state.registerReason='该档位需要的事实在本机记录里一条都找不到，降到最短承接句';
   reading=null;parts=[];chat=null;moodUsed=false;}
- return publicPacket({text,register,state,intent,reading,chat,mood:moodUsed,greeting,scenario,scenarioFailed,askingPick});
+ return publicPacket({text,register,state,intent,reading,chat,mood:moodUsed,greeting,scenario,scenarioFailed,askingPick,message:String(message??'')});
 }
 
 // 被动通道手里只有 buildContext 的快照（history 被裁空），把它当成一个「没有回合记录的对局」读。
@@ -2130,11 +2149,57 @@ function liveGame(context={}){
 // 并且把球踢回给玩家（「可以指出哪一点不对，我接着核对」）——那是 QA 工单的口气，
 // 不是一个人在跟你说话。接住原话、把话头递回去，就够了。
 function followupReply(memory){
- const last=(memory.dialogue||[]).filter(x=>x?.role==='assistant'&&typeof x.content==='string').at(-1)?.content;
- if(!last)return {text:'你想问哪一段，我再说一遍。',source:'memory.dialogue'};
+ const lines=(memory.dialogue||[]).filter(x=>x?.role==='assistant'&&typeof x.content==='string').map(x=>String(x.content));
+ const last=lines.at(-1);
+ if(!last){
+  // ⚠ 2026-09-29（人类截图：「跟傻子似的」）：这一句在**同一段会话里连着出现两次**是截图里
+  // 最刺眼的一处。没有上一句时给三档说法，**最近说过的那句不再原样重发**（见 recentlySaid）。
+  return {text:pickFresh(['你想问哪一段，我再说一遍。','我这边没存住上一句；你把那句重发一下。',
+   '上一句我手边没有，你贴一句我就接着说。'],lines),source:'memory.dialogue'};
+ }
  const quote=last.replace(/[？?]+/g,'，').replace(/[。；，、\s]+$/,'').slice(0,36).replace(/[。；，、\s]+$/,'');
- return {text:`刚说的是「${quote}」。哪句不清楚，我再讲一遍。`,source:'memory.dialogue'};
+ return {text:pickFresh([`刚说的是「${quote}」。哪句不清楚，我再讲一遍。`,
+  `上一句是「${quote}」—— 你是问这句的哪一处？`,
+  `我上一句：「${quote}」。要我展开哪一段？`],lines),source:'memory.dialogue'};
 }
+
+/** 最近几轮说过的话（重复检查只看**近三轮**，不追整个会话）。 */
+function recentAssistantLines(memory){
+ return (memory?.dialogue||[]).filter((x)=>x?.role==='assistant'&&typeof x.content==='string')
+  .map((x)=>String(x.content)).slice(-3);
+}
+/**
+ * 从候选里挑一句**最近没说过**的（第三轮要求④：同一句兜底不许一字不改重发）。
+ * 全都被说过就退回第一句（那一轮确实没别的说法可用，也不编新的）。
+ */
+export function pickFresh(candidates,lines){
+ const said=new Set((lines??[]).map((x)=>String(x).trim()));
+ return candidates.find((x)=>!said.has(String(x).trim()))??candidates[0];
+}
+
+// ── 第三轮（人类截图逐字：「你是傻子吗」→ 战绩复读；「上一句啊」→ 战绩复读）─────────
+//
+// 三条硬线（Lead 逐条钉的）：
+//   ① **战绩复读绝不是万能兜底** —— 它只许出现在"玩家真的在问最近对局"时；
+//   ② 「上一句啊」必须**真的指上一句**（把上一句摘出来），**不许换话题**；
+//   ③ 骂人／纯情绪／无法归类 ⇒ **一句体面的话**，**不推责**（不许回"这条我没依据，换个说法"）。
+// 这三类都走这一支，**在观察/战绩通道之前**，所以它们不可能再被战绩顶掉。
+const FOLLOWUP_ONLY_ASK=/上一句|上一句话|刚才那句|刚说那句|你说(?:的)?什么|说的什么|啥意思|什么意思|没懂|没听懂|没看明白|解释一下|再说一遍|重新说/;
+const NO_CONTENT_ASK=/^[\s?？!！。.、~～]*$/;
+// ⚠ 只收**冲着小芽/对话**的那几种说法，而且**只在这种短句里**生效：
+// 第一版把「烦死/无聊死/没用」和裸的「傻/蠢」也收进来 ⇒ 把「今天真是烦死了」（**倾诉**）
+// 抢走了，`tests/companion.test.js` 那张六场景表当场红（期望那句里有「烦」）。倾诉归情绪通道 ✓
+const EMOTION_ASK=/傻子|傻逼|笨蛋|弱智|智障|有病|神经病|垃圾|废物|妈的|他妈|滚|闭嘴/;
+/**
+ * 骂人/发泄那一轮送给**模型**的约束（2026-09-29 第三轮，Lead 在真 8765 复测到的原话：
+ * 「傻子这词我原样接住了，**不还嘴**。」）。
+ *
+ * 为什么单独一条：原来安静档/心情档的约束里写着「**他用的那个词要原样接住**」——
+ * 那句话对「累」「没睡好」是对的，对**脏词**恰恰是错的：它等于让模型把火点回去。
+ * 三条禁令（人类口径）：**不复述脏词** ✓ · **不带情绪/不评论用词** ✓ · **不教育、不反问** ✓
+ * 再加一条正向要求：承认他在不满 + 给一个可用出口，**一句话、≤20 字**。
+ */
+const ABUSE_FOR_MODEL=/傻子|傻逼|笨蛋|弱智|智障|有病|神经病|垃圾|废物|妈的|他妈|滚|闭嘴/;
 
 // 每个数字都出现在依据里：这样模型改写后的答案也能通过 checkGroundedAnswer 的数字核对，
 // 不会因为「引用了陪练模板里的真实数字」被误判成编造。
@@ -2149,19 +2214,52 @@ function followupReply(memory){
  * 现在按诉求给一句**有用**的话：仍然**不编事实、不冒充查过**（这是红线），
  * 但至少告诉玩家下一步能做什么、或者我为什么给不了。
  */
-function fallbackLine(message=''){
+function fallbackLine(message='',intent='other'){
  const text=String(message).slice(0,50);
  // ⚠ 长度受 R0 的档位契约约束（`replyConstraints` 给 R0 的上限是 24 字）——所以这几句都压到 20 字上下：
  // 既要有用（告诉玩家下一步），又不能说成一段解释。
+ // ⚠⚠ 2026-09-29（第三轮要求③「新问『你能做什么』需回答**可执行能力**而非上一局内容」）：
+ //   原来**没有"能力问句"这一支** ⇒ 「你能做什么」里那个「什么」把它送到下面第三条
+ //   （问事实的兜底）⇒ 答出「这条我没依据，换个说法或点名一只精灵。」（真 8765 实测，`xiaoya-panel`
+ //   在配队页新问的逐字读数）。那是**把"问我能力"当成了"问我查不到的事实"**，两回事。
+ //   这一支必须**排在「什么」那条前面**（否则永远命中不到），答案写**能真正执行的**四件事，
+ //   长度照 R0 档位契约压到 ≤24 字（`replyConstraints` 的上限）。
+ if(/能做什么|会做什么|能干什么|能干啥|有什么功能|有哪些功能|能帮我|帮得上|你会什么|会些啥|能帮什么/.test(text))
+  return '查规则、看你的名单、按局面给建议、局后复盘。';
+ // ⚠⚠ 2026-09-29（第三轮要求③：「现在怎么办」在**配队页**答的也是「这条我没依据…」）：
+ //   注意**它走不到这里的原因**才是关键 —— 真机实测（§95）：**对局中**问「现在怎么办」会路由到
+ //   `strategist`（出建议卡，三段非空），**根本不进这个兜底**。⇒ **能走到这一行，就说明此刻没有
+ //   进行中的对局**。所以这一支可以**如实说"现在没有对局"并给出下一步**，而不是拿"没依据"敷衍。
+ //   ⚠ 措辞**不许断言对局状态**：我先写的是「现在没有进行中的对局…」，随后实测发现
+ //   **对局中「我该干什么」也会落到 `companion`**（真 8765 逐问实测：`现在怎么办`/`下一步该干嘛`
+ //   在对局中是 `strategist`，但 `我该干什么` 是 `companion`）⇒ 那句话在当时是**假话**。
+ //   所以改成**两种情况都成立**的说法：告诉玩家"给我什么，我就按手上的信息给建议"。
+ if(/怎么办|该干嘛|该干什么|下一步|接下来该/.test(text))
+  return '说要哪一只、或哪一手 —— 我按手上的信息给建议。';
  if(/写代码|代码|翻译|数学|算一下|作文|写首诗|写一段/.test(text))
   return '这个我不擅长，聊游戏里的吧。';
  if(/首发|该上谁|带谁|推荐|建议|怎么练|怎么打|配招|选哪|哪只好|换谁|替补/.test(text))
   return '说一下你的队伍和对手，我按相性挑。';
+ // ⚠⚠ 2026-09-30（玩家实测纠偏 task-26 遗留第 4 条）：**这里原来是同一句通用闲聊** ✗
+ //   ⇒ 无论问什么都回「我在。聊游戏里的都行。」（玩家实测 `C.json`：问「你觉得我有啥可以改进的？」
+ //     拿到的就是它 —— 而且那句的 `intent` 恰好是 `other`（`改进` 不在 `intentOf` 的词表里）
+ //     ⇒ ⇒ **光按 intent 分派接不住这个真实案例**，所以诉求词表这一支必须同时存在 ✓）。
+ //   口径不变：**不编事实、不冒充查过**（红线 ✓），只是把"你想干什么"接住并给出**可执行的下一步**。
+ //   ⚠ 位置很关键：必须排在下面「什么|怎么|…」那条**通用兜底之前**，否则「怎么才能变强」这类
+ //     会被它抢走（同一个函数里，**顺序就是语义** ✓）。
+ if(/改进|优化|提升|变强|更强|做得更好|该怎么练|哪里不行|有什么问题|帮我看看哪里/.test(text))
+  return '说清想改哪块（配招/先手/队伍），我按事实答。';
+ // 「问事实但问句形状」的那一类仍然走**更诚实**的那句（它明说"没依据"，不假装是配招问题）——
+ // 所以它排在意图兜底**之前**（`什么|怎么|…` 比"这是个问句"更具体 ✓）
  if(/什么|怎么|为什么|多少|哪些|是不是|吗|呢/.test(text))
   return '这条我没依据，换个说法或点名一只精灵。';
+ // 意图兜底（关键词都对不上时才轮到它）：问句 ⇒ 说清问的是哪一块；情绪/追问 ⇒ 先接住
+ if(intent==='ask')return '说清你问的是哪一块（配招/先手/队伍），我按事实答。';
+ if(intent==='emotion')return '先接住你这句。想说哪一局，我陪你过一遍。';
+ if(intent==='followup')return '上一句我没接住 —— 再说一遍要点，我按记录答。';
  return '我在。聊游戏里的都行。';
 }
-function publicPacket({text,register,state,intent,reading=null,chat=null,mood=false,greeting=false,scenario=null,scenarioFailed=null,askingPick=false}){
+function publicPacket({text,register,state,intent,reading=null,chat=null,mood=false,greeting=false,scenario=null,scenarioFailed=null,askingPick=false,message=null}){
  const f=state.facts,history=f.history;
  const wins=history.filter(e=>e.result==='win').length,losses=history.filter(e=>e.result==='loss').length,draws=history.filter(e=>e.result==='draw').length;
  const evidence=[`本机对战记录：已结束${history.length}场，${wins}胜${losses}负${draws?draws+'平':''}（来源：memory.events，最多保留12场，预制场景不写入）。`];
@@ -2195,14 +2293,14 @@ function publicPacket({text,register,state,intent,reading=null,chat=null,mood=fa
  if(f.mood)evidence.push(`情绪假设（不是结论）：你最近一次自己说的是「${f.mood.label}」，置信度 ${f.mood.confidence}，${new Date(f.mood.expiresAt).toISOString().slice(11,16)} 前有效（${f.mood.basis}）。这一轮只接住这个状态，不要据此评价你这个人。`);
  if(f.lessons.length)evidence.push(`课程记录：${f.lessons.join('、')}（${f.lessons.length}条答对过的练习，不等于熟练掌握）。`);
  if(scenarioFailed?.length)evidence.push(`场景文案自检未通过（${scenarioFailed.join('、')}），本机已退回原通道：这一轮不要换成别的说法去讲同一件事。`);
- return {text,evidence,register,companionState:{register,engagement:state.engagement,consideration:state.consideration,momentum:state.momentum,lossStreak:state.lossStreak,winStreak:state.winStreak,reasons:state.reasons},replyConstraints:replyConstraints(register,'companion',{emptyLedger:!history.length&&!f.lessons.length,continuing:Boolean(chat?.continued),chat:Boolean(chat),mood,greeting,metBefore:history.length>0,scenario:scenario?.intent||null,noReview:f.refused,address:f.address,askingPick}),intent,chatThread:chat?.thread||null,chatContinued:Boolean(chat?.continued),silent:register==='R0'};
+ return {text,evidence,register,companionState:{register,engagement:state.engagement,consideration:state.consideration,momentum:state.momentum,lossStreak:state.lossStreak,winStreak:state.winStreak,reasons:state.reasons},replyConstraints:replyConstraints(register,'companion',{emptyLedger:!history.length&&!f.lessons.length,continuing:Boolean(chat?.continued),chat:Boolean(chat),mood,greeting,metBefore:history.length>0,scenario:scenario?.intent||null,noReview:f.refused,address:f.address,askingPick,message:String(message??'')}),intent,chatThread:chat?.thread||null,chatContinued:Boolean(chat?.continued),silent:register==='R0'};
 }
 
 // 模型路径下的档位约束：随证据包一起送到服务端（server.js 把整个证据包作为 game_evidence 发给模型）。
 // forbid 里的每一条与 checkCompanionRestraint / checkCompanionInformation 的硬线一一对应：
 // 复述屏幕、播报自己的情绪、空泛安慰、评价水平、说教、战术指挥，一条都不留。
 // allow 里写清这一轮**该有**的东西：情绪不是被禁止的，被禁止的是把情绪落在自己身上。
-export function replyConstraints(register,voice='companion',{emptyLedger=false,continuing=false,chat=false,mood=false,greeting=false,metBefore=false,scenario=null,noReview=false,address=null,askingPick=false}={}){
+export function replyConstraints(register,voice='companion',{emptyLedger=false,continuing=false,chat=false,mood=false,greeting=false,metBefore=false,scenario=null,noReview=false,address=null,askingPick=false,message=null}={}){
  const r=REGISTERS[register];
  // 没有记录时送模型的那句话要换掉：原来写的是「至少一句要来自跨局记录（memory.events）」，
  // 而 memory.events 是空的——照这句写，模型只能编一局出来；
@@ -2269,8 +2367,10 @@ export function replyConstraints(register,voice='companion',{emptyLedger=false,c
   ?'玩家这一轮说了一句关于他自己偏好或意愿的话：只承认这句话本身（新值），一个字都不要提旧值，也不要把记录念一遍——「你自己说过的」这种展示记忆功能的话一句都不许有。'
   :'';
  const nameRule=address?`怎么称呼他已经定了（${address}）：按他的要求称呼，但不要每句都点名，也不要拿它当开场白。`:'';
+ // 骂人/发泄那一轮（第三轮）：一句话、体面、给出口；**不复述脏词、不评论用词、不反问、不说教**。
+ const abused=String(message??'').trim().length<=12&&ABUSE_FOR_MODEL.test(String(message??''));
  return {register,voice,maxChars:r.limit,maxQuestions:r.maxQuestions,allowAdvice:r.advice,
-  forbid:['复述屏幕上已经写着的事','播报自己的情绪（「我看得有点急」这类第一人称感受）','空泛安慰','评价玩家水平','说教',r.advice?'':'给建议',askingPick?'替他决定这一手该出什么（战斗动作：换成谁／守住／先出哪招）':'战术指挥','速度对比与先手判断（「速度38比它34快」「可以先动」「先手在你」）',emptyLedger?'提任何过去的事（「上次」「之前」「上回」这类说法）':'',emptyLedger?'播报本机有没有记录（「记录还是空的」「一局都还没记上」），或者把玩家推去开一局（「去开一局吧」「打完我就能接上话」）':'',register==='R0'?'提对局、记录、回合数或胜负（安静档只回玩家这一句话）':'',mood?'提对局、记录、回合数或胜负（他这一轮说的是自己的状态，先接住他）':'',greeting?'提对局、记录、回合数、胜负、血线或本局局面（这一轮只是问候，回问候就够）':'',noReview?'推复盘、提「上一局／最近几局／记录」、给建议或追问他（他明确拒绝过）':'',scenario?'提旧值、念记录，或说「我记着／我都留着底」这类展示记忆功能的话':''].filter(Boolean),
+  forbid:['复述屏幕上已经写着的事','播报自己的情绪（「我看得有点急」这类第一人称感受）','空泛安慰','评价玩家水平','说教',r.advice?'':'给建议',askingPick?'替他决定这一手该出什么（战斗动作：换成谁／守住／先出哪招）':'战术指挥','速度对比与先手判断（「速度38比它34快」「可以先动」「先手在你」）',emptyLedger?'提任何过去的事（「上次」「之前」「上回」这类说法）':'',emptyLedger?'播报本机有没有记录（「记录还是空的」「一局都还没记上」），或者把玩家推去开一局（「去开一局吧」「打完我就能接上话」）':'',register==='R0'?'提对局、记录、回合数或胜负（安静档只回玩家这一句话）':'',mood?'提对局、记录、回合数或胜负（他这一轮说的是自己的状态，先接住他）':'',greeting?'提对局、记录、回合数、胜负、血线或本局局面（这一轮只是问候，回问候就够）':'',noReview?'推复盘、提「上一局／最近几局／记录」、给建议或追问他（他明确拒绝过）':'',scenario?'提旧值、念记录，或说「我记着／我都留着底」这类展示记忆功能的话':'',abused?'复述或评论玩家用的那个词（「傻子这词」「不还嘴」这类一句都不许有）、反问（「是我哪句说错了？」）、说教（「请注意用词」）：他要的是承认他在不满 + 一个出口，一句话、20 字以内':'',abused?'把这一轮写长：一句话就够，先承认他在不满，再给一个可用出口（「哪句说得不对，你直接说」）':''].filter(Boolean),
   allow:greeting
    ?['对这句问候本身的回应（用当前时段的问候，或一句同样短的应声）——这一轮不要别的']
    :scenario?['对他这句话本身的承认（新值／他自己的那句话）——这一轮不要别的']

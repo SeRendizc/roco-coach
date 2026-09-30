@@ -14,7 +14,11 @@
  <header class="topbar">
   <h1>小芽 <small>AI 教练 · 洛克王国：世界</small></h1>
   <div class="header-actions">
-   <span class="muted" id="xy-status" role="status">正在读取连接状态…</span>
+   <!-- ⚠ 2026-09-30（半成品排查 P1）：这里原来**写死**「正在读取连接状态…」，实测它会一直挂着
+        （刚打开 → 再等 3.5s 仍是它），只有答完第一条才被真读数替掉 ⇒ 是一句"过期占位"。
+        弹层那边 R06 早就改成默认空着、由真读数来填；独立页同一条口径 ⇒ 文字清空（旧文字留档：
+          <span class="muted" id="xy-status" role="status">正在读取连接状态…</span> ） -->
+   <span class="muted" id="xy-status" role="status"></span>
    <!-- 这一页本身就是小芽，所以页眉不给「小芽」按钮；另外两个与其他页面同一套 `.nav-btn`
         （人类 2026-09-25：页眉只留 返回首页 / 开始PVP / 小芽，不要别的）。 -->
    <a class="nav-btn" id="xy-nav-home" href="/">← 返回首页</a>

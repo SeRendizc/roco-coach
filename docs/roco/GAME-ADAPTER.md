@@ -143,10 +143,28 @@ match-start → turn-start → action-resolved → replacement-required → matc
 
 | 缺口 | 现状 | 证据 |
 |---|---|---|
-| 事件级 `evidence` 是**行号**，不是 `…json#实体` | 引擎就是这么给的；宿主可见层收到的也是行号 | mock-host 场景 c3 的 actual |
+| 事件级 `evidence` 是**行号**，不是 `…json#实体` | 引擎就是这么给的；宿主可见层收到的也是行号。**2026-09-29 补实测（Lead）**：这个形状原本会**原样摆到玩家的「依据」栏**里 —— 拿行号形状直接过一遍玩家可见过滤器，`events.json:34` / `#L12` / 「第 34 行」**修前全部保留**。已在 `src/coach/evidence-lines.js` 加第三条判据 `LINE_REFERENCE_EVIDENCE` （只咬带文件名的行号 / `#L12` / 「第 N 行」，**不咬裸数字**，避免误伤正常依据），修后三种形状全部滤掉、`12` 与「防御这一回合减伤 65%」原样保留。⇒ **字段本身仍是行号（引擎层没改），但玩家可见面不再收到这个形状。** | mock-host 场景 c3 的 actual + `playerEvidence()` 直调对照（BATCH-1 §46） |
 | ~~精灵/技能级 `evidence_ids` **没有**透到宿主可见层~~ **（已修，第 61 轮）** | `/rules/query` 的 roster 回执逐只带 `ev:<ruleset>:pets.json#<pet_id>`、逐招带 `ev:<ruleset>:skills.json#<skill_id>`；`src/server/roco-service.js` 的映射层两个分支（不传参数 / 分页）都搬出来，Answer 级那条也有了顶层出口。孤儿技能（`missing_in_skills_json`）**不编**出处，`evidence_ids` 是空数组 | 判据：mock-host 场景 c3「⑥ 精灵/技能级 evidence_ids 透到宿主可见层…」+ 同组反证；`roco/tests/test_roster_evidence.py`（9 例含反证）；`tests/evals/roco/roster-evidence.test.js`（含反证） |
 | RL 判定层在页面上默认 `off` | 默认档位不改任何结论；`on` 仍需真人审阅 | `docs/roco/PROGRESS.md` / `docs/roco/W5-04-INTERVENTION-GATE.md` |
 | 手游真机指标 | 未做 | — |
+
+### 7.1 §8 那条换宿主路径**实测可跑**（2026-09-29，Lead）
+
+照 §8 第 3 条点名的两个命令**实跑**（不是照着文档抄）：
+```
+$ npm run test:game-adapter                        → ℹ tests 22 · pass 22 · fail 0   EXIT=0
+$ node --test tests/evals/roco/mock-host-integration.test.js
+                                                   → ℹ tests 17 · pass 17 · fail 0
+```
+其中包含**最要紧的那条承诺**：「装配期宿主少一个能力就拒绝装配（不许运行期降级）」
+（`mock-host-integration.test.js:57`，通过）。⇒ **契约层是能用的**，
+一个独立宿主按 §8 的 1–4 步接进来，失败会发生在**装配期**而不是运行期。
+
+**仍未做（不修成绿的）**：§7 那三条里 —— 事件级 `evidence` 仍是行号（**玩家可见性已修**，见上表）
+（**2026-09-29 补一次实测**：真机上一问「复盘一下第 3 回合」，玩家可见的依据段里**没有**行号型证据，
+`lineNumberish` 命中 0；但那次回答的依据段本身是空的 ⇒ **只证到"这一问没漏"，没钉死"对玩家无害"**，
+要钉死得先造一份确定携带事件级 evidence 的回答再对照）；
+RL 判定层仍默认 `off`；**手游真机指标仍没有**（没有真机，这一条不是代码能补的）。
 
 ## 8. 换宿主时要改什么
 

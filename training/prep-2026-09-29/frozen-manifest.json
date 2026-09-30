@@ -1,0 +1,79 @@
+{
+ "schema": "roco-frozen-eval-manifest/v1",
+ "generated_at": "2026-09-29T08:13:20Z",
+ "why": "人类要求⑥「冻结测试…版本绑定」+「不许边改规则边宣布旧数据 ready」。T4 报的缺口 7 = 「冻结集自身不带任何版本指纹」——本文件补这一条。⚠ **只登记指纹，不改冻结集本身**（改了就等于换了一份测试）。",
+ "counting_rule": "`lines` = 文件行数；`cases_excluding_header` = **去掉 `agent_task_set_header` 表头之后的题目数**。⇒ v1 `289 行 = 1 表头 + 288 题`、v2 `19 行 = 1 表头 + 18 题`（**与 T4 报告的 288/18 逐字一致**）；v3 四份无表头，各 32 ⇒ 128。**我第一版没扣表头、报成 289/19，已按事实改正。**",
+ "sets": [
+  {
+   "path": "tests/evals/agent-tasks-v1.jsonl",
+   "bytes": 180375,
+   "sha256": "f0b5d51a9142b09e43138e4dcf924698880c032bc8f9650cc5db77abc52ef975",
+   "lines": 289,
+   "by_record_type": {
+    "agent_task_set_header": 1,
+    "agent_task": 288
+   },
+   "cases_excluding_header": 288
+  },
+  {
+   "path": "tests/evals/agent-tasks-v2-tool-coverage.jsonl",
+   "bytes": 8435,
+   "sha256": "e60104b82973391c97cafb9cd9681a4b6776052e78654737b3c9a091379f1ae0",
+   "lines": 19,
+   "by_record_type": {
+    "agent_task_set_header": 1,
+    "agent_tool_coverage_case": 18
+   },
+   "cases_excluding_header": 18
+  },
+  {
+   "path": "tests/evals/agent-tasks-v3-difficulty/conflicting-receipts.jsonl",
+   "bytes": 47249,
+   "sha256": "d79ba5536ba28adc24865e86c40ae0f88d2b8d8b3c250e86fdd7dc57af5f5670",
+   "lines": 32,
+   "by_record_type": {
+    "(no record_type)": 32
+   },
+   "cases_excluding_header": 32
+  },
+  {
+   "path": "tests/evals/agent-tasks-v3-difficulty/long-context.jsonl",
+   "bytes": 111679,
+   "sha256": "6d057890322c3ae5e80f7191b33ee5d773b6c8d87bb5b373c67267e5929029be",
+   "lines": 32,
+   "by_record_type": {
+    "(no record_type)": 32
+   },
+   "cases_excluding_header": 32
+  },
+  {
+   "path": "tests/evals/agent-tasks-v3-difficulty/multi-turn.jsonl",
+   "bytes": 32672,
+   "sha256": "b2abdd7769a8422951c787ac41b04245f1d46a9366c6c0b3f475d4b98a67663d",
+   "lines": 32,
+   "by_record_type": {
+    "(no record_type)": 32
+   },
+   "cases_excluding_header": 32
+  },
+  {
+   "path": "tests/evals/agent-tasks-v3-difficulty/vague-reference.jsonl",
+   "bytes": 24855,
+   "sha256": "8086ec5333cf7d5ed491721069e9788fca3179d9a5c3b7b3ccb100afd8a9ea28",
+   "lines": 32,
+   "by_record_type": {
+    "(no record_type)": 32
+   },
+   "cases_excluding_header": 32
+  }
+ ],
+ "bindings": {
+  "contract_fingerprint": "tools:97a79a115da6",
+  "contract_fingerprint_how": "T4 用与 build-sft-candidates.mjs:63 同一算法独立复算一致 ⇒ 未漂",
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "ruleset_config_id": "mobile_s4_candidate_v3",
+  "local_rules_version": "见 data/roco/rulesets/mobile-s4-candidate-v3.json（人类已授权：不冲突规则一律列为引擎有效规则）",
+  "js_practice_engine_version": "RULES_VERSION=0.6（src/game/engine.js:1，**练习引擎，不是手游引擎**）"
+ },
+ "red_line": "**规则一变 ⇒ 本清单立刻过期**：绑定的规则/契约指纹一变，每一份冻结集的\"可用\"结论都要**重新绑定并重跑**，**不许沿用旧结论宣布 ready**。"
+}

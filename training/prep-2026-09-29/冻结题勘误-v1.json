@@ -1,0 +1,68 @@
+{
+  "schema": "roco-frozen-erratum/v1",
+  "generated_at": "2026-09-29",
+  "why": "人类 2026-09-29 指令：「冻结题互斥参数/stop 语义冲突需**留原题+版本化勘误**，**不修改黄金答案刷绿**」。本文件**只登记勘误，不改冻结集本身**（改了就等于换了一份测试）。",
+  "red_line": "**原题一个字不改**；勘误只说明「这题错在哪、为什么不改、判分时怎么处理」。任何把 args_keys 改小以让判分变绿的做法都违反本文件。",
+  "findings": [
+    {
+      "id": "ERR-001",
+      "kind": "互斥参数",
+      "set": "tests/evals/agent-tasks-v2-tool-coverage.jsonl",
+      "case_id": "cov-simulate_branch-yes",
+      "original_expect_args_keys": [
+        "candidates",
+        "opponent",
+        "unresolved",
+        "actionIndex",
+        "opponentIndex"
+      ],
+      "what_is_wrong": "`simulate_branch` 的参数有**互斥的两支**：给了 `actionIndex`/`opponentIndex`（legacy 支）就**不许再给 `candidates`**（见 `src/coach/toolbox.js:387` 的 `validToolArgs`）。而这条题的 `args_keys` **同时列了两支的键** ⇒ **没有任何一份参数能同时满足** ⇒ 这题**从数据上就不可能通过**。",
+      "measured": {
+        "validToolArgs(['candidates','opponent','unresolved','actionIndex','opponentIndex'] 全给)": false,
+        "只给 actionIndex+opponentIndex": true,
+        "只给 candidates": true,
+        "candidates+unresolved（新支）": true
+      },
+      "root_cause_in_harness": "`training/prep-2026-09-29/tool-tasks.mjs` 的 `DEFAULT_BY_KEY` 是**按「键名」逐键补值**的表，里面 `candidates` 与 `actionIndex`/`opponentIndex` **同时存在** ⇒ 遇到这条题就会**构造出非法参数** ✗ （注意：同文件的 `EXAMPLE_ARGS.simulate_branch = {candidates:['skill:guard']}` **是对的** ✓，问题只在 `DEFAULT_BY_KEY` 这个按名补值的用途上。）",
+      "verdict": "**判分时按「数据问题，不是模型问题」处理** ✓ —— 不许记为模型的失败，也不许把 `args_keys` 改小来刷绿。",
+      "not_changed": "原题（含 expect.args_keys）**保持原样**；本勘误不改冻结集文件。",
+      "harness_handling_verified": {
+        "verified_at": "2026-09-29",
+        "where": "training/prep-2026-09-29/tool-tasks.mjs",
+        "what_it_does": [
+          ":159  auditExpectations() 产出的 note 逐字：『没有任何合法调用能同时满足「这些键都在」与 validToolArgs』",
+          ":165  const expectationProblems = auditExpectations(tasks);",
+          ":225  const badIds = new Set(expectationProblems.map((b) => b.id));",
+          ":227  … expectationUnsatisfiable: badIds.has(t.id)",
+          ":233  const satisfiable = {n: 排除掉那些之后的条数, pass: …}   ← **从分数里排除**",
+          ":243  oracleExcludingUnsatisfiableExpectations: satisfiable",
+          ":248  separatorWorks: adversarySummary.pass === 0 && satisfiable.pass === satisfiable.n && …"
+        ],
+        "verdict": "**已经按「数据问题，不是模型问题」处理** ✓ —— 它被标成 `expectationUnsatisfiable` 并从分数里排除 ✓ ⇒ 本勘误**不需要改脚本行为**；它的剩余价值是**留档**（版本化 artifact + 为什么不可满足的实测 + 根因位置）✓"
+      }
+    }
+  ],
+  "stop_semantics": {
+    "status": "**未复现**（Lead 实测）",
+    "what_i_checked": "436 行冻结题按 record_type 分组（agent_task 288 / 无 128 / agent_tool_coverage_case 18 / header 2）；两处 expect 的真实字段是 `args_must_match` / `args_keys` / `max_tool_calls`，**都没有 `stop_ok` 或 `calls`**；`node tool-tasks.mjs --selftest` ⇒ EXIT=0，脚本里那条「expect.stop_ok 与 calls 区间自相矛盾（数据问题，不是模型问题）」**一次都没触发**。",
+    "conclusion": "**没复现到 stop 语义冲突** ✓ ⇒ 既不能写「已修好」✗，也不能写「确实存在」✗ ⇒ 需要**指认具体 case_id** 后再登记勘误。",
+    "note": "Lead 第一版扫描按**假设的字段形状**（stop_ok/calls/actionIndex）去扫 436 行 ⇒ 什么都没扫到 ✗ ⇒ 真相是那些字段不在冻结集里。**「没扫到」≠「没有缺陷」，也可能 =「扫错了地方」** —— 这条已记档。"
+  },
+  "provenance_correction": {
+    "what_i_first_said": "Lead 一度写：『oracle 145/145 这个数是不准的，实际是 145/146』——**这句是错的** ✗",
+    "what_the_artifact_actually_shows": "`tool-tasks-report.json` 里**本来就有**：`oracle.tasks=146 / pass=145 / fail=1`、`expectationProblems=[{id: cov-simulate_branch-yes, tool: simulate_branch, demandedKeys:[…]}]`、`oracleExcludingUnsatisfiableExpectations={n:145, pass:145}`、`verdict={oracleAllPass:false, adversaryAllCaught:true, satisfiableExpectationsAllPass:true,…}`",
+    "conclusion": "**脚本早就把这条识别出来了** ✓；**`145/145` 指的是『排除不可满足期望之后』的那个数** ✓ —— 它**本身是诚实的** ✓ ⇒ Lead 那句『145/145 不准』**不成立，已撤回** ✓",
+    "what_is_actually_new_from_lead": [
+      "用**产品自己的 `validToolArgs`** 实测出**为什么**它不可满足（四个读数：全给=false；只给 legacy=true；只给 candidates=true；candidates+unresolved=true）",
+      "定位到**评测脚本 `DEFAULT_BY_KEY`『按键名逐键补值』**是构造非法参数的那一处（同文件 `EXAMPLE_ARGS.simulate_branch` **是对的**）",
+      "补一份**版本化勘误件**（人类要求的产物；原报告里有数据、但没有这个 artifact）"
+    ],
+    "discipline": "**不许把『别人已经做的』说成『我发现的』** ✓ —— 这条更正就是为了这个。"
+  },
+  "human_ruling": {
+    "at": "2026-09-29",
+    "verbatim": "考题的问题：这说明题有问题啊，重新出呗",
+    "effect": "**人类裁定：题有问题就重新出** —— 不是「只留勘误、原题不动」✗。⇒ 互斥参数那题（cov-simulate_branch-yes）**重出一道合法的**（args_keys 只列一支的键）✓；`stop` 语义那条（未复现）在重出这批题时**把「该停/不该停」的题目要求写自洽** ✓。⇒ **原题保留（改钉不删）** ✓；**勘误件注明「已按人类裁定重出，新题见 X」** ✓（新题 id 由重出者回填）。",
+    "who": "advice-engine（task-21）重出；Lead 更新本文件"
+  }
+}

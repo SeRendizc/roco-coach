@@ -164,6 +164,28 @@ function skillFields(skill) {
   };
 }
 
+/**
+ * 把**引擎自己的**结算事实接到这一条技能上（P0：详情必须与战报同一结论）。
+ *
+ * 背景（2026-09-30 报告 L19 逐字）：第 1 回合点「防御」，**双方战报都出现约 70% 减伤** ✓，
+ * 可同一技能的详情仍写「引擎没有结算这条效果」✗ ⇒ 玩家被误导。
+ *
+ * 根因：盒子详情页那四个技能来自**回执**（`{order,name,element,category,energy,power_label,desc}`），
+ * **不带** `mechanics` ⇒ `skillFields()` 里 `mechanicsResolved` 恒为 false ✗；
+ * 而引擎在**学习表**里对同一招是有这个字段的（实测 own-0001：抓挠/防御/仙人掌刺击 =
+ * `mechanics.resolved:true`，腐化 = `false` + 一条 reason ✓）。
+ *
+ * 所以这里**按名字**把学习表里同一招的引擎字段接过来 —— 判据来自
+ * **与战报同一个事实源**（引擎的 `mechanics.resolved`），**不是**按技能名硬编码特例 ✓。
+ * 学习表里没有这一招（例如判据夹具没给 pool）⇒ **原样返回**（不知道就说不知道，不猜 ✓）。
+ */
+function withEngineFacts(fields, raw, byName) {
+  if (raw?.mechanics?.resolved !== undefined) return fields;   // 已经是学习表那一行（自带引擎字段）⇒ 不动
+  const row = byName?.get?.(fields.name);
+  if (!row) return fields;
+  return skillFields({...row, name: fields.name});
+}
+
 /** 这一招是不是"只有伤害、没有别的决定性情节"（决定"威力"那一栏与引擎那句话怎么写）。 */
 function isDamageOnly(fields) {
   if (fields.category !== '攻击') return false;
@@ -242,11 +264,21 @@ function effectLines(fields) {
  */
 function engineLine(fields, pool = null) {
   if (fields.mechanicsResolved) return '引擎：这条效果已经结算。';
+  // 引擎对"没结算"给了理由（例：腐化 = 还差本机训练规则里没拉起的原语）⇒ 原样带上，
+  // 让玩家知道缺的是哪一块，而不是一句笼统的"还没结算"（有才说，没有不编 ✓）。
+  const reason = textOf(fields.mechanicsReason);
   if (isDamageOnly(fields)) {
     return '引擎：这一招只有伤害，按威力结算 —— 特效那一层没有别的东西。';
   }
-  const bits = ['引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，'
-    + '带上它打，伤害照算、特效不生效。'];
+  // ⚠ 2026-09-29（要求⑤「不逐条只输出免责声明」+ 上下文同一投影的尾巴）：
+  //   原文案对**没有威力**的纯效果招也说「伤害照算」✗ —— 那种招根本没有伤害（例：霜降/贪婪/剧毒）
+  //   ⇒ 屏幕会告诉玩家一件不存在的事。**按"这一招有没有静态威力"分两种说法** ✓
+  //   旧文案留档（改钉不删）：'引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，'
+  //     + '带上它打，伤害照算、特效不生效。'
+  const bits = [(fields.hasStaticPower
+    ? '引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，带上它打，伤害照算、特效不生效。'
+    : '引擎：这条特效还没结算 —— 资料里写的那一句现在只有说明作用，这一招不带伤害，带上它不会白白生效。')
+    + (reason ? `（引擎说缺的是：${reason}）` : '')];
   const alternative = Array.isArray(pool)
     ? pool.find((row) => {
       const one = skillFields(row);
@@ -310,6 +342,8 @@ export function loadoutPanelHtml({
   const drafted = Array.isArray(picked);
   const poolList = Array.isArray(pool) ? pool.filter((row) => row && typeof row === 'object' && row.skill_id) : null;
   const byId = new Map((poolList ?? []).map((row) => [String(row.skill_id), row]));
+  // 回执行形状**没有 skill_id**（只有 `order/name/…`）⇒ 只能按名字与学习表同一招对齐 ✓
+  const byName = new Map((poolList ?? []).map((row) => [textOf(row.name), row]).filter(([name]) => name));
   const draft = drafted
     ? Array.from({ length: LOADOUT_SLOTS }, (_, i) => {
       const entry = picked[i];
@@ -336,12 +370,21 @@ export function loadoutPanelHtml({
       continue;
     }
     if (pick && pick.id) {
-      // 挑过、但这次的学习表里没有它（或还没读学习表）：名字以外照实说「还不知道」。
-      slots.push({at, state: 'picked', tag: '你挑的', name: pick.name ?? '你挑的那一个',
-        meta: poolList ? `引擎这次的学习表里没有它（系别 / 耗能 / 威力都不知道）`
-          : '还没读学习表：系别 / 耗能 / 威力要读了才知道',
+      // ⚠ 2026-09-29（人类：「这技能你在搞笑吗？」）：这里原来把"名字不知道"写成
+      //   「你挑的那一个」+「还没读学习表：系别 / 耗能 / 威力要读了才知道」——
+      //   玩家看到的是"你不知道我带了什么招"，四个格子还一模一样。现在分三种情况如实说，
+      //   **名字认得的就先写名字**（哪怕字段还没读到），认不得才说"查不到这个名字"（**只影响这一格**）：
+      //     · 正在读资料 ⇒ 这一格说明在读（上面那句整体状态也在说）；
+      //     · 名字认得、字段没有 ⇒ 写名字 + 「引擎这次的资料里没有它的系别 / 耗能 / 威力」；
+      //     · 名字也认不得 ⇒ 「查不到这个名字」+ 技能号（玩家/客服拿这个号能查）。
+      const knownName = pick.name ?? null;
+      const name = knownName ?? (loading ? '（正在读引擎的资料…）' : '查不到这个名字');
+      const meta = loading ? '正在读引擎的资料（名字 / 系别 / 耗能 / 威力）…'
+        : (knownName ? '引擎这次的资料里没有它的系别 / 耗能 / 威力：只认得名字。'
+          : `引擎的资料里查不到这个技能号（${pick.id}）：系别 / 耗能 / 威力也查不到。`);
+      slots.push({at, state: 'picked', tag: '你挑的', name, meta,
         effect: null, engine: null,
-        hint: poolList ? '先点掉它，再从下面挑一个。' : null});
+        hint: loading ? null : (knownName ? null : '先点掉它，再从下面挑一个。')});
       continue;
     }
     if (draft && cur) {
@@ -351,7 +394,9 @@ export function loadoutPanelHtml({
         hint: `不变的话还是它：${textOf(cur.name) ?? NO_ITEM}`});
       continue;
     }
-    const fields = skillFields(cur);
+    // ⚠ P0：回执行形状没有 `mechanics` ⇒ 从学习表同一招把**引擎自己的**结算事实接过来
+    //   （`withEngineFacts`；判据与战报同源 ✓，不是按名字硬编码 ✓）
+    const fields = withEngineFacts(skillFields(cur), cur, byName);
     slots.push({at, state: 'current', tag: '现在带着的', name: fields.name ?? NO_ITEM,
       meta: metaLine(fields), effect: effectLines(fields), engine: engineLine(fields, poolList),
       hint: null});
@@ -390,8 +435,11 @@ export function loadoutPanelHtml({
       + `${escapeHtml(fields.name ?? NO_ITEM)}<span class="bl-chip-meta">${escapeHtml(chipLine(fields))}</span>`
       + `${nonNative}`
       + `<span class="bl-chip-effect">${escapeHtml(fields.desc ?? NO_ITEM)}</span>`
-      + `<span class="bl-chip-engine">${escapeHtml(isDamageOnly(fields) || fields.mechanicsResolved
-        ? '引擎结算：伤害' : '引擎还没结算这一条特效')}</span>`
+      // ⚠ P0：`mechanicsResolved` 为真时**按"这条效果"说**（原来只分"伤害/没结算"两种 ⇒
+      //   已经结算的防御类效果会被说成"还没结算" ✗）。顺序：已结算的效果 → 纯伤害 → 还没结算。
+      + `<span class="bl-chip-engine">${escapeHtml(fields.mechanicsResolved
+        ? (isDamageOnly(fields) ? '引擎结算：伤害' : '引擎结算：这条效果')
+        : '引擎还没结算这一条特效')}</span>`
       + '</button>';
   }).join('\n');
   // 候选区的搜索/筛选（U03：「替换时展开可搜索筛选的候选」）。
@@ -450,7 +498,7 @@ export function loadoutPanelHtml({
     + `\n      <ol class="bl-slots">\n${slotHtml}\n      </ol>`
     + (instanceCount > 1
       ? `\n      <p class="bl-note" data-loadout-shared="yes">这一种在名单里有 ${Number(instanceCount)} 只：`
-        + '配招按**物种**保存（开局时引擎按物种下发），所以同种的两只会共用这一份四技能；'
+        + '配招按物种保存（开局时引擎按物种下发），所以同种的两只会共用这一份四技能；'
         + '性格 / 资质 / 等级 / 收藏各按个体单独存。</p>' : '')
     + filterBar
     + (chips ? `\n      <div class="bl-pool">\n${chips}\n      </div>` : '')
@@ -556,6 +604,9 @@ function createController(host, props, request) {
     loading: false, saving: false, status: null, raw: null, via: null, seq: 0,
     draft: [null, null, null, null], names: new Map(), request, storage: null,
     prefilled: false,
+    // 2026-09-29（人类截图：「这技能你在搞笑吗？」）：**这一只**已经为"解析草稿名字"自动读过一次
+    // 学习表了没有 —— 一只只记一次，既不重复请求，也不会被 `render()` 反复触发。
+    autoNamedFor: null,
     // U03：候选区的搜索词与类别筛选（**只藏不删** —— 候选按钮始终与引擎回执一一对应）。
     query: '', filterCategory: '', instanceCount: 1,
   };
@@ -619,7 +670,20 @@ function createController(host, props, request) {
       error: state.error,
       // 名字：池子里有就以池子为准，没有就用本机记下来的那一个（两个都没有就照实说「你挑的那一个」）。
       picked: (state.pool || state.draft.some(Boolean))
-        ? state.draft.map((id) => (id ? {skill_id: id, name: state.names.get(id) ?? null} : null))
+        // ⚠ 2026-09-29（人类实测 P1 Q7：「应用 6×4 后详情四技能全退成『你挑的那一个』」）：
+        //   名字以前**只查本机记忆**（`state.names` —— 只有"玩家自己挑过"或"存过"的 id 才有）。
+        //   配队把四招应用过来时，本机没记过名字 ⇒ 四个槽位全退成「你挑的那一个」。
+        //   ⇒ **按 id 从已载入的那份表里兜底解析**（`byId` 就是引擎给的学习表，名字本来就在里面），
+        //     玩家不需要"先点开学习表"才认得出技能名。
+        //   旧代码留档（改钉不删）：name: state.names.get(id) ?? null
+        ? state.draft.map((id) => (id ? {
+          skill_id: id,
+          // ⚠ 第一版写成 `byId.get(...)` ⇒ **`byId` 不在这个作用域里**（它是槽位那段里的局部量），
+          //   跑判据当场 `ReferenceError: byId is not defined`（`node --check` 抓不到作用域错）。
+          //   这里用**这一层能拿到的** `state.pool`（引擎刚给的那份学习表）。
+          name: state.names.get(id) ?? textOf((state.pool ?? []).find(
+            (row) => String(row?.skill_id) === String(id))?.name) ?? null,
+        } : null))
         : null,
       status: state.status,
       via: state.via,
@@ -660,6 +724,7 @@ function createController(host, props, request) {
       state.saving = false;
       state.status = null;
       state.prefilled = false;
+      state.autoNamedFor = null;
       // 换了这一只，「这份配招来自开局那一页」那句话也要跟着清掉 ——
       // 否则上一只的那句会挂在新的一只脸上。
       state.seededFrom = false;
@@ -706,7 +771,37 @@ function createController(host, props, request) {
       const missed = unmatchedNote();
       state.status = missed ? {kind: 'error', text: missed} : state.status;
     }
+    // ⚠ 2026-09-29 **自动把名字读出来**（人类：「这技能你在搞笑吗？」—— 四个格子全是
+    //   「你挑的那一个」+「还没读学习表：系别 / 耗能 / 威力要读了才知道」）。
+    //   工坊应用过来的 6×4 在 `roco.workshop.loadouts.v1` 里**只有技能号、没有名字**
+    //   （那个键的形状就是 `[四个 id]`），名字只在学习表里 ⇒ 不许把"显示名字"绑在
+    //   "玩家先点一下「看它能学什么」"上：这里**自动读一次**（`loadPool()` 与按钮同一条路，
+    //   成功之后 `state.names` / `state.pool` 都有了，槽位自然显示真名字 + 系别 + 耗能 + 威力）。
+    ensureNamesForDraft();
     render();
+  }
+
+  /**
+   * 草稿里有认不出名字的技能号 ⇒ **自动读一次**学习表（一只一次）。
+   *
+   * 触发条件都收在这里，免得 `render()` 反复打请求：
+   *   · 草稿里至少有一个号、且这个号的名字还不知道（`state.names` 里没有）；
+   *   · 还没读过学习表（`state.pool` 为空）、也没在读（`state.loading`）；
+   *   · 这一只还没自动读过（`state.autoNamedFor`）。
+   */
+  function ensureNamesForDraft() {
+    if (state.autoNamedFor === state.select) return;
+    if (state.pool || state.loading || state.error) return;
+    const ids = (state.draft ?? []).filter(Boolean).map(String);
+    const namesUnknown = ids.length > 0 && !ids.every((id) => state.names.has(id));
+    // ⚠ 2026-09-30 **P0 补**：详情页直接打开时**没有草稿**（`draft` 全空）⇒ 这里原来直接 return
+    //   ⇒ 学习表压根不读 ⇒ 「这个效果引擎结算了吗」这句话**没有事实可依**，四个格子一律说
+    //   「还没结算」✗（报告 L19：其实防御**真的结算了** 70% 减伤）。所以再加一条触发：
+    //   **现在带着的四个**里只要有一个缺 `mechanics`（回执行形状本来就不带）⇒ 也要读一次 ✓。
+    const factsUnknown = Array.isArray(state.skills) && state.skills.some((row) => row?.mechanics?.resolved === undefined);
+    if (!namesUnknown && !factsUnknown) return;
+    state.autoNamedFor = state.select;
+    void loadPool();
   }
 
   function destroy() {

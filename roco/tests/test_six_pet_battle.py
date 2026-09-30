@@ -650,9 +650,13 @@ class BindingAndCandidateDeltaTest(unittest.TestCase):
         # 2026-09-25 改钉（不删）：白名单加 `foe_energy_loss`（RC-401 批次六声明的能力）。
         # 意图不变：v3 多出来的 key 必须逐个登记在案，v2 的每个 key 仍逐字比对。
         # 2026-09-25（第 41 轮）改钉：同上，白名单加 `per_layer_cost`。
-        self.assertEqual(extra, ["cost_modifier", "foe_energy_loss", "initial_for_all_pets", "per_layer_cost"],
-                         "v3 的 energy 只允许多出这两个已登记的叶子"
-                         "（initial_for_all_pets / cost_modifier）")
+        # 2026-09-29（task-20 批一）改钉：同上，白名单加 `respond_override`
+        # （RC-401 批次十四：`skill_000616 剧毒` 的「应对防御：改为获得8层」此前被静默丢弃）。
+        # 意图不变：v3 多出来的 key 必须逐个登记在案，v2 的每个 key 仍逐字比对。
+        self.assertEqual(extra, ["cost_modifier", "foe_energy_loss", "initial_for_all_pets",
+                                 "per_layer_cost", "respond_override"],
+                         "v3 的 energy 只允许多出这几个已登记的叶子"
+                         "（initial_for_all_pets / cost_modifier / per_layer_cost / respond_override）")
         for key, value in v2.raw["energy"].items():
             self.assertEqual(json.dumps(v3.raw["energy"][key], sort_keys=True),
                              json.dumps(value, sort_keys=True), f"energy.{key}")

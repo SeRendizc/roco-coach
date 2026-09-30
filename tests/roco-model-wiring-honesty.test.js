@@ -232,8 +232,27 @@ test('模型面板：必须如实标出「有没有接线」与证据，27B 不�
     '面板条目必须带 wired（有没有代码路径会调它）');
   assert.match(src, /wired_evidence/, '面板条目必须带 wired_evidence（证据在哪，别让人猜）');
   assert.match(src, /'local-qwen35-4b':\{wired:true/, '4B 今天是有调用路径的（src/coach/local-model.js）');
-  assert.match(src, /'local-qwen38-27b':\{wired:false/,
-    '27B 今天没有调用路径 —— 面板必须写 false（人类口径：27B 他自己训、接口预留）');
+  // ── 2026-09-29 改钉（依据 README **R07**「移除 27B 在产品中的选项、连接按钮和无用占位/探测」）──
+  // **旧断言原文留档**（改前逐字）：
+  //   assert.match(src, /'local-qwen38-27b':\{wired:false/,
+  //     '27B 今天没有调用路径 —— 面板必须写 false（人类口径：27B 他自己训、接口预留）');
+  // 为什么改：那条钉的是「**报了就必须标 false**」；R07 之后连"报"都不该有了 ——
+  // 它今天没有任何调用路径（服务端原注释逐字：「27B 在全仓只有下面这一处 stat，没有任何调用路径」），
+  // 报出来只会在面板上多一行「未连」的**无用占位**。**判据意图没变**（没有任何调用路径的东西，
+  // 不许被读成可用），而且**更严**：从"报了要诚实"升级为"**根本不许报**"。
+  assert.doesNotMatch(src, /^\s*\[\s*'local-qwen38-27b'/m,
+    '27B 不许再进 localModelReport 的 specs（R07：它就是"无用占位/探测"）');
+  // 反证：把那一项加回去，上面这条必须红 —— 证明它不是"什么都过"。
+  // ⚠ 反证的注入形式必须**让那一项落在行首**（本判据用的是 `^` 锚定的多行正则）——
+  //   我第一版把它注入成 `const specs=[[...],[...]]` 一整行，行首是 `const`，于是反证自己失效。
+  // ⚠ 注入要让**27B 那一项自己占一行**（`^` 锚定）—— 第一版我把它注在行内、把 4B 放行首，反证自己失效了。
+  const injected = src.replace('const specs=[[',
+      "const specs=[\n               ['local-qwen38-27b','x','y','k',false],\n               [");
+  assert.match(injected, /^\s*\[\s*'local-qwen38-27b'/m,
+    '反证：把 27B 加回 specs 时，新判据必须能认出来（否则这条判据是空的）');
+  // 4B 仍然必须如实标 wired:true 且带证据（这一条**没动**）
+  assert.match(src, /'local-qwen35-4b':\{wired:true/);
+  assert.match(src, /wired_evidence/);
 });
 
 test('结构守卫：名字引用必须登记；真出现了 27B 的调用路径必须红，逼着同步改面板标签与证据', () => {
@@ -245,10 +264,24 @@ test('结构守卫：名字引用必须登记；真出现了 27B 的调用路径
   // 2026-09-25：原来写 `>= 3` 并注释"面板 + 两条判据"，但 `repoFiles()` **排除了本文件自己**
   // （SELF），所以那句期望**永远不可能成立**（实际只能扫到面板 + panel-env-key 判据 = 2）。
   // 修法不是放宽：把"面板必须在结果里"显式钉住，再要求至少还有一条判据 —— 比原来更难蒙混。
-  assert.ok(verdict.referenced.includes(SERVER),
-    `扫描结果里必须有面板文件 ${SERVER}，实际：${JSON.stringify(verdict.referenced)}`);
-  assert.ok(verdict.referenced.length >= 2,
-    `除面板外至少还要扫到一条判据（SELF 被 repoFiles 排除，见上），实际：${JSON.stringify(verdict.referenced)}`);
+  // ── 2026-09-29 改钉（依据 README R07）── **旧断言原文留档**：
+  //   assert.ok(verdict.referenced.includes(SERVER),
+  //     `扫描结果里必须有面板文件 ${SERVER}，实际：${JSON.stringify(verdict.referenced)}`);
+  // 为什么改：R07 之前那条要求"面板文件**必须**在 27B 名字引用列表里"（因为面板要如实标 false）；
+  // R07 之后名字**不许**再出现在产品代码里，所以改成钉**反向**的事实：
+  //   **`src/**` 里一个引用都不许有** —— 名字只允许留在 tests/（本文件与夹具）与历史注释里。
+  // 判据意图没变（名字出现在产品代码里 = 接线嫌疑，必须有人复核），只是把基线从"面板里有"改成"产品里没有"。
+  const srcRefs = verdict.referenced.filter((f) => String(f).startsWith('src/'));
+  assert.deepEqual(srcRefs, [],
+    `R07 之后 src/ 里不许再有 27B 的名字引用，实际：${JSON.stringify(srcRefs)}`);
+  // ── 2026-09-29 改钉（R07）── **旧断言原文留档**：
+  //   assert.ok(verdict.referenced.length >= 2,
+  //     `除面板外至少还要扫到一条判据（SELF 被 repoFiles 排除，见上），实际：${JSON.stringify(verdict.referenced)}`);
+  // 为什么改：那条的**意图是"扫描器还活着"**（否则"没发现引用"可能只是没扫到）。R07 之后
+  // `src/` 里已经没有引用了，所以不能再用"面板在列表里"当存活证据；改成**要求至少扫到一条引用**
+  // （今天扫到的是 name-only 白名单里的判据）—— 意图没变，基线跟着 R07 挪。
+  assert.ok(verdict.referenced.length >= 1,
+    `扫描器必须是活的（至少要扫到一条 27B 名字引用，今天在 tests/ 的 name-only 白名单里），实际：${JSON.stringify(verdict.referenced)}`);
 
   // 第一层的牙：没登记的名字引用一律要人复核。
   assert.deepEqual(verdict.unreviewed, [],
@@ -269,11 +302,25 @@ test('结构守卫：名字引用必须登记；真出现了 27B 的调用路径
     + ' —— 真接了线就必须把面板 WIRED 改成 wired:true、更新 wired_evidence，并同步本文件的口径');
 
   // 面板与代码不许脱节（两个方向都不许撒谎）。
+  // ── 2026-09-29 改钉（依据 README **R07**）── **旧断言原文留档**：
+  //   const claimsWired = /'local-qwen38-27b':\{wired:true/.test(src);
+  //   const claimsNotWired = /'local-qwen38-27b':\{wired:false/.test(src);
+  //   assert.ok(claimsWired || claimsNotWired, '面板必须对 27B 的 wired 表态');
+  //   assert.equal(claimsWired, verdict.callPaths.length > 0,
+  //     '面板的 wired 必须等于代码事实：有调用路径就得写 true，没有就得写 false');
+  // 为什么改：旧契约要求「面板**必须**对 27B 表态」；R07 之后没有调用路径的 27B
+  // **根本不许进面板**（它正是"无用占位/探测"）。**判据的牙留在"脱节检测"上，而且更硬了**：
+  //   · 真出现调用路径 ⇒ **必须**把条目加回来并写 `wired:true`（这一支与旧契约等价）；
+  //   · 没有调用路径 ⇒ **两个 claim 都不许有**（旧契约允许写 false，新契约连 false 都不许）。
   const claimsWired = /'local-qwen38-27b':\{wired:true/.test(src);
   const claimsNotWired = /'local-qwen38-27b':\{wired:false/.test(src);
-  assert.ok(claimsWired || claimsNotWired, '面板必须对 27B 的 wired 表态');
-  assert.equal(claimsWired, verdict.callPaths.length > 0,
-    '面板的 wired 必须等于代码事实：有调用路径就得写 true，没有就得写 false');
+  if (verdict.callPaths.length > 0) {
+    assert.ok(claimsWired,
+      '真给 27B 接了调用路径时，面板必须把条目加回来并标 wired:true（并更新证据；恢复依据见文档 §132）');
+  } else {
+    assert.equal(claimsWired || claimsNotWired, false,
+      'R07：没有调用路径的 27B 不许再出现在面板里（连 wired:false 那一行也不许留）');
+  }
 });
 
 test('必红反证：真的给 27B 接了调用 ⇒ 同一条纯函数判据必须报（白名单也藏不住）', () => {

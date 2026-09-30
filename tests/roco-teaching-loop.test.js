@@ -30,7 +30,11 @@ test('① 出题避开**做过**的变式：进度真的影响题目（反证：
  const panel = {id: 'pet_000118', name: '皇家狮鹫', speed: 120, source: '判据夹具'};
  const fresh = makeQuiz(camp(), {avoid: answered, panel});
  assert.equal(fresh.variant, 5, `做过的变式不许再出：variant=${fresh.variant}`);
- assert.match(fresh.question, /对手速度 125/, `v5 的对手速度应当是 120+5：${fresh.question}`);
+ // ⚠ 2026-09-29 改钉（改钉不删）。**旧断言原文留档**：
+ //   assert.match(fresh.question, /对手速度 125/, `v5 的对手速度应当是 120+5：${fresh.question}`);
+ // 为什么改：变式表 [2,4,3,6,1,5] → [-3,2,0,4,-1,3]，v5 现在是 +3 ⇒ 120+3=**123**。
+ //   **意图不变**：还是"挑中的那一档，题干里的对手速度等于 面板速度 + 该档偏移"。
+ assert.match(fresh.question, /对手速度 123/, `v5 的对手速度应当是 120+3：${fresh.question}`);
  const fromScratch = makeQuiz(camp(), {avoid: new Set(), panel});
  assert.equal(fromScratch.variant, 0, '一道都没做过时从第一档开始');
  // 全做完了也**照旧出题**（玩家主动要，不许空手）
@@ -135,3 +139,54 @@ test('同一句里既问事实又要出题 ⇒ 不许留下没显示过的 pendi
     `没答过的题不许写进学习记录：${JSON.stringify(lessons)}`);
 });
 
+
+// ── 2026-09-29（第三轮 P0 Q5，人类实测 500）────────────────────────────────────
+//
+// 事实经过（真机 + 临时实例都能复现）：`lastMatch` **只有 `{id,result,turn}`** 时，
+// `/api/coach` 问一句「复盘一下这一局」回 **500「本地服务无法完成请求」**，栈顶逐字：
+//   `TypeError … at reviewMatch (src/coach/teacher.js:242:23)`
+// 根因：`reviewMatch` 里那一行 `const key=m.keyTurns.slice()…` —— **假设 `keyTurns` 一定在**。
+// **修前行为留档（改钉不删）**：修前这条判据是**红的**（抛 TypeError），所以它当时根本写不出来；
+// 现在钉成"缺字段必须 200/可成句 + 不许拿最后一回合冒充关键回合"。
+test('复盘：lastMatch 缺 keyTurns 时不许崩，且不许拿最后一回合冒充关键回合（修前是 TypeError at reviewMatch）', async () => {
+  const {reviewMatch} = await import('../src/coach/teacher.js');
+  // ① 最小形状：产品真会给的那种（只有结果，没有逐回合记录）
+  const minimal = reviewMatch({lastMatch: {id: 'probe-match', result: 'loss', turn: 1}});
+  assert.equal(typeof minimal.text, 'string', '必须成句（修前这里直接抛 TypeError）');
+  assert.ok(minimal.text.length > 0, '正文不能是空串');
+  assert.match(minimal.text, /没有可复盘的判断依据/, '要如实说"没有可复盘的判断依据"');
+  assert.match(minimal.text, /不会拿最后一回合冒充关键回合/, '不许拿最后一回合冒充关键回合');
+  assert.doesNotMatch(minimal.text, /第\s*1\s*回合值得回看/, '缺记录时不许编出"值得回看的回合"');
+  // ② 反证：有 `rounds`/`counts`/`keyTurns` 时照常成句（这条判据没把正常路堵死）
+  const full = reviewMatch({lastMatch: {id: 'probe-2', result: 'loss', rounds: 4,
+    counts: {guards: 1, items: 0, switches: 2}, remainingItems: {potion: 1},
+    keyTurns: [{turn: 3, events: ['我方使用防御。'], analysis: '（分析）'}]}});
+  assert.match(full.text, /共4回合/, '有整局统计时照常给统计句');
+  assert.doesNotMatch(full.text, /没有可复盘的判断依据/, '有记录时不许走"没有依据"那一支');
+});
+
+// ── 2026-09-29（人类：「memory机制还有问题啊，记不住啊」；小芽答「完整回合日志没被保留」）──
+//
+// 事实经过：`rememberBattle` 原来只存结果级事实（回合数/倒下/幸存/道具），**逐回合的血量、出招、
+// 事件一条都没留** ⇒ 下一段会话问「复盘一下我上一局」只能如实说"没保留"。产品的做法应该是
+// **把能留的留住**（`matchFacts` 现在带一份**有上限**的 `turnLog`，见 memory.js 的 TURN_LOG_LIMIT）。
+// 判据（三样齐）：新行为（有 turnLog ⇒ 说得出具体回合）· 反证（没有 ⇒ 如实说、不编回合）· 旧行为留档。
+test('复盘上一局：存过的逐回合摘要要说得出具体回合；没存过必须如实说（修前只能答"没保留"）', async () => {
+  const {reviewMatch} = await import('../src/coach/teacher.js');
+  // ① 新行为：带 turnLog ⇒ 逐回合成句（血量变化与出招都在）
+  const withLog = reviewMatch({lastMatch: {id: 'm1', result: 'loss', stage: '训练场', turnLog: [
+    {turn: 3, you: {name: '烬尾狐', hp: 18, hpAfter: 0}, foe: {name: '溪刃獭', hp: 75, hpAfter: 50},
+      action: {kind: 'skill', id: 'dash'}, events: ['你的烬尾狐使用疾爪，对溪刃獭造成 25 伤害。']},
+    {turn: 4, you: {name: '潮甲龟', hp: 132, hpAfter: 120}, foe: {name: '溪刃獭', hp: 50, hpAfter: 40},
+      action: {kind: 'guard'}, events: []},
+  ]}});
+  assert.match(String(withLog.text), /第3回合/, '要说得出具体回合');
+  assert.match(String(withLog.text), /烬尾狐/, '要说出当时在场的是谁');
+  assert.match(String(withLog.text), /18 血→0 血/, '要说出血量变化（存下来的事实）');
+  assert.doesNotMatch(String(withLog.text), /没被保留|没有逐回合|只有结果/, '存过就不许再说"没保留"');
+  // ② 反证：没有 turnLog（旧形状）⇒ 如实说，且**不许编回合**
+  const noLog = reviewMatch({lastMatch: {id: 'm2', result: 'loss'}});
+  assert.match(String(noLog.text), /没有可复盘的判断依据|没有逐回合/, '没存过要如实说');
+  assert.doesNotMatch(String(noLog.text), /第\d+回合/, '没存过不许编出回合');
+  // ③ 旧行为留档：修前这条会是「这一局我这边只有结果，没有逐回合的关键回合记录…」（改钉不删）
+});

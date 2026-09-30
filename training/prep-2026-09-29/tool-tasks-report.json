@@ -1,0 +1,335 @@
+{
+ "mode": "selftest",
+ "at": "2026-09-29T11:44:16.362Z",
+ "systemSha12": "ed69c30b526a",
+ "systemChars": 389,
+ "toolsInContract": 12,
+ "exampleArgsAcceptedByProductValidator": {
+  "read_state": true,
+  "compare_actions": true,
+  "read_last_turn": true,
+  "search_rules": true,
+  "read_match": true,
+  "read_evidence": true,
+  "query_rules": true,
+  "evaluate_team": true,
+  "compare_team_change": true,
+  "plan_actions": true,
+  "summarize_battle": true,
+  "simulate_branch": true
+ },
+ "tasksBySource": {
+  "agent-tasks-v2-tool-coverage.jsonl": 18,
+  "agent-tasks-v3-difficulty/multi-turn.jsonl": 32,
+  "agent-tasks-v3-difficulty/conflicting-receipts.jsonl": 32,
+  "agent-tasks-v3-difficulty/long-context.jsonl": 32,
+  "agent-tasks-v3-difficulty/vague-reference.jsonl": 32
+ },
+ "oracle": {
+  "tasks": 146,
+  "pass": 145,
+  "byGroup": {
+   "agent-tasks-v2-tool-coverage.jsonl|tool_coverage": {
+    "n": 9,
+    "pass": 8,
+    "fail": 1,
+    "examples": [
+     {
+      "id": "cov-simulate_branch-yes",
+      "problems": [
+       "缺期望参数：opponent,unresolved,actionIndex,opponentIndex"
+      ]
+     }
+    ]
+   },
+   "agent-tasks-v2-tool-coverage.jsonl|tool_restraint": {
+    "n": 9,
+    "pass": 9,
+    "fail": 0,
+    "examples": []
+   },
+   "agent-tasks-v3-difficulty/multi-turn.jsonl|multi-turn": {
+    "n": 32,
+    "pass": 32,
+    "fail": 0,
+    "examples": []
+   },
+   "agent-tasks-v3-difficulty/conflicting-receipts.jsonl|conflicting-receipts": {
+    "n": 32,
+    "pass": 32,
+    "fail": 0,
+    "examples": []
+   },
+   "agent-tasks-v3-difficulty/long-context.jsonl|long-context": {
+    "n": 32,
+    "pass": 32,
+    "fail": 0,
+    "examples": []
+   },
+   "agent-tasks-v3-difficulty/vague-reference.jsonl|vague-reference": {
+    "n": 32,
+    "pass": 32,
+    "fail": 0,
+    "examples": []
+   }
+  },
+  "failures": [
+   {
+    "id": "cov-simulate_branch-yes",
+    "problems": [
+     "缺期望参数：opponent,unresolved,actionIndex,opponentIndex"
+    ]
+   }
+  ]
+ },
+ "adversary": {
+  "tasks": 146,
+  "pass": 0,
+  "byGroup": {
+   "agent-tasks-v2-tool-coverage.jsonl|tool_coverage": {
+    "n": 9,
+    "pass": 0,
+    "fail": 9,
+    "examples": [
+     {
+      "id": "cov-read_state-yes",
+      "problems": [
+       "参数过不了产品的 validToolArgs：{\"bogus\":1}",
+       "参数里有契约没有的键：bogus"
+      ]
+     },
+     {
+      "id": "cov-search_rules-yes",
+      "problems": [
+       "参数过不了产品的 validToolArgs：{}",
+       "缺期望参数：query"
+      ]
+     }
+    ]
+   },
+   "agent-tasks-v2-tool-coverage.jsonl|tool_restraint": {
+    "n": 9,
+    "pass": 0,
+    "fail": 9,
+    "examples": [
+     {
+      "id": "cov-read_state-no",
+      "problems": [
+       "不该调的工具被调了：read_state",
+       "反向题必须停"
+      ]
+     },
+     {
+      "id": "cov-search_rules-no",
+      "problems": [
+       "不该调的工具被调了：search_rules",
+       "反向题必须停"
+      ]
+     }
+    ]
+   },
+   "agent-tasks-v3-difficulty/multi-turn.jsonl|multi-turn": {
+    "n": 32,
+    "pass": 0,
+    "fail": 32,
+    "examples": [
+     {
+      "id": "mt-anaphor-01",
+      "problems": [
+       "参数过不了产品的 validToolArgs：{\"bogus\":1}",
+       "参数里有契约没有的键：bogus",
+       "工具不在可接受集 [query_rules]"
+      ]
+     },
+     {
+      "id": "mt-anaphor-02",
+      "problems": [
+       "参数过不了产品的 validToolArgs：{\"bogus\":1}",
+       "参数里有契约没有的键：bogus",
+       "工具不在可接受集 [query_rules]"
+      ]
+     }
+    ]
+   },
+   "agent-tasks-v3-difficulty/conflicting-receipts.jsonl|conflicting-receipts": {
+    "n": 32,
+    "pass": 0,
+    "fail": 32,
+    "examples": [
+     {
+      "id": "cr-turn-01",
+      "problems": [
+       "参数过不了产品的 validToolArgs：{\"bogus\":1}",
+       "参数里有契约没有的键：bogus",
+       "工具不在可接受集 [read_evidence,read_match]"
+      ]
+     },
+     {
+      "id": "cr-turn-02",
+      "problems": [
+       "参数过不了产品的 validToolArgs：{\"bogus\":1}",
+       "参数里有契约没有的键：bogus",
+       "工具不在可接受集 [read_evidence,read_match]"
+      ]
+     }
+    ]
+   },
+   "agent-tasks-v3-difficulty/long-context.jsonl|long-context": {
+    "n": 32,
+    "pass": 0,
+    "fail": 32,
+    "examples": [
+     {
+      "id": "lc-present-01",
+      "problems": [
+       "参数过不了产品的 validToolArgs：{\"bogus\":1}",
+       "参数里有契约没有的键：bogus",
+       "调用次数 1 不在闭区间 [0,0]",
+       "反向题必须停"
+      ]
+     },
+     {
+      "id": "lc-present-02",
+      "problems": [
+       "参数过不了产品的 validToolArgs：{\"bogus\":1}",
+       "参数里有契约没有的键：bogus",
+       "调用次数 1 不在闭区间 [0,0]",
+       "反向题必须停"
+      ]
+     }
+    ]
+   },
+   "agent-tasks-v3-difficulty/vague-reference.jsonl|vague-reference": {
+    "n": 32,
+    "pass": 0,
+    "fail": 32,
+    "examples": [
+     {
+      "id": "vr-two-01",
+      "problems": [
+       "参数过不了产品的 validToolArgs：{\"bogus\":1}",
+       "参数里有契约没有的键：bogus",
+       "调用次数 1 不在闭区间 [0,0]",
+       "反向题必须停"
+      ]
+     },
+     {
+      "id": "vr-two-02",
+      "problems": [
+       "参数过不了产品的 validToolArgs：{\"bogus\":1}",
+       "参数里有契约没有的键：bogus",
+       "调用次数 1 不在闭区间 [0,0]",
+       "反向题必须停"
+      ]
+     }
+    ]
+   }
+  },
+  "failures": [
+   {
+    "id": "cov-read_state-yes",
+    "problems": [
+     "参数过不了产品的 validToolArgs：{\"bogus\":1}",
+     "参数里有契约没有的键：bogus"
+    ]
+   },
+   {
+    "id": "cov-read_state-no",
+    "problems": [
+     "不该调的工具被调了：read_state",
+     "反向题必须停"
+    ]
+   },
+   {
+    "id": "cov-search_rules-yes",
+    "problems": [
+     "参数过不了产品的 validToolArgs：{}",
+     "缺期望参数：query"
+    ]
+   },
+   {
+    "id": "cov-search_rules-no",
+    "problems": [
+     "不该调的工具被调了：search_rules",
+     "反向题必须停"
+    ]
+   },
+   {
+    "id": "cov-compare_actions-yes",
+    "problems": [
+     "参数过不了产品的 validToolArgs：{\"bogus\":1}",
+     "参数里有契约没有的键：bogus",
+     "期望工具 compare_actions，实际 read_state",
+     "工具不在可接受集 [compare_actions]"
+    ]
+   },
+   {
+    "id": "cov-compare_actions-no",
+    "problems": [
+     "不该调的工具被调了：compare_actions",
+     "反向题必须停"
+    ]
+   },
+   {
+    "id": "cov-simulate_branch-yes",
+    "problems": [
+     "参数过不了产品的 validToolArgs：{\"bogus\":1}",
+     "参数里有契约没有的键：bogus",
+     "缺期望参数：candidates,opponent,unresolved,actionIndex,opponentIndex",
+     "期望工具 simulate_branch，实际 read_state",
+     "工具不在可接受集 [simulate_branch]"
+    ]
+   },
+   {
+    "id": "cov-simulate_branch-no",
+    "problems": [
+     "不该调的工具被调了：simulate_branch",
+     "反向题必须停"
+    ]
+   },
+   {
+    "id": "cov-read_match-yes",
+    "problems": [
+     "参数过不了产品的 validToolArgs：{\"bogus\":1}",
+     "参数里有契约没有的键：bogus",
+     "缺期望参数：offset,limit",
+     "期望工具 read_match，实际 read_state",
+     "工具不在可接受集 [read_match]"
+    ]
+   },
+   {
+    "id": "cov-read_match-no",
+    "problems": [
+     "不该调的工具被调了：read_match",
+     "反向题必须停"
+    ]
+   }
+  ]
+ },
+ "expectationProblems": [
+  {
+   "id": "cov-simulate_branch-yes",
+   "tool": "simulate_branch",
+   "demandedKeys": [
+    "candidates",
+    "opponent",
+    "unresolved",
+    "actionIndex",
+    "opponentIndex"
+   ],
+   "filledAccepted": false,
+   "minimalAccepted": true,
+   "note": "没有任何合法调用能同时满足「这些键都在」与 validToolArgs"
+  }
+ ],
+ "oracleExcludingUnsatisfiableExpectations": {
+  "n": 145,
+  "pass": 145
+ },
+ "verdict": {
+  "oracleAllPass": false,
+  "adversaryAllCaught": true,
+  "satisfiableExpectationsAllPass": true,
+  "separatorWorks": true
+ }
+}

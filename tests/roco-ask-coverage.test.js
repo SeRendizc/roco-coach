@@ -1985,3 +1985,77 @@ test('㉟ 规则集版本问句：政策必须判得出来、参数必须凑得�
   assert.deepEqual(defaultArgsFor('query_rules', ctx, '寂灭骨龙的种族值是多少？'),
     {kind: 'pet', name: '寂灭骨龙'});
 });
+
+
+// ── 2026-09-29（第三轮 P0 Q2-3，人类逐字：「偏好『简短』吞选队下一步」）──────────────────
+//
+// 事实经过（临时实例复现，修前逐字）：说过「以后简短说」之后问「选队下一步做什么」，
+// `route=strategist`、正文「开一局之后，我才能按当前生命、能量和队伍比较这一手。」
+// —— **一个配队问题被答成了局内问题**（军师在没有对局时只有这一句）。
+// 根因：路由表把「下一步 / 接下来该」当**军师**关键词，且**没有看有没有对局**。
+//
+// 判据的意图：**偏好管的是篇幅，不是意图** —— 偏好生效前后，答的必须是**同一件事**（配队下一步），
+// 只是短一截；而纯寒暄时偏好照常生效（反证）。
+test('配队下一步：偏好「简短」不许把意图顶掉（篇幅可以变短，答的必须是同一件事）', async () => {
+  const {runCoach} = await import('../src/coach/runtime.js');
+  const {freshMemory} = await import('../src/coach/memory.js');
+  const context = {mode: 'camp', profile: {pets: [
+    {id: 'own-0001', pet_id: 'pet_000001', name: '喵喵', stats: {spe: 33}},
+    {id: 'own-0007', pet_id: 'pet_000327', name: '缇塔', stats: {spe: 72}},
+  ]}};
+  const ask = (memory, message = '选队下一步做什么') => runCoach({message, role: 'auto', context, memory, conversation: []});
+  // ① 偏好之前：要给**下一步动作**，不许是局内口径
+  const before = await ask(freshMemory());
+  assert.doesNotMatch(String(before.text), /开一局之后/, '修前那句局内口径（开一局之后…）不许再出现');
+  assert.match(String(before.text), /下一步/, '要明确给"下一步"');
+  assert.match(String(before.text), /喵喵|缇塔/, '要按手里那一页候选说话（不空谈）');
+  // ② 偏好之后：**同一件事**（不是另一件事），只是更短
+  const brief = await ask({...freshMemory(), preference: 'brief'});
+  assert.doesNotMatch(String(brief.text), /开一局之后/, '偏好之后也不许退回局内口径');
+  assert.match(String(brief.text), /下一步/, '偏好之后答的仍然是"下一步"');
+  assert.ok(String(brief.text).length < String(before.text).length, '偏好生效在**篇幅**上（brief 更短）');
+  // ③ 反证：纯寒暄时偏好照常生效（别把偏好整个禁掉）
+  const hello = await ask({...freshMemory(), preference: 'brief'}, '你好');
+  assert.equal(hello.route, 'companion', '寒暄走陪练');
+  assert.doesNotMatch(String(hello.text), /下一步/, '寒暄不该被配队那一支抢走');
+  // ④ 反证：**局内**问「下一步」仍然是军师那一手（这一支没被抢）
+  const inBattle = await runCoach({message: '下一步该干嘛', role: 'auto', memory: freshMemory(), conversation: [],
+    context: {...context, roco_battle: {turn: 3, self_active: 0,
+      self: [{name: '喵喵', pet_id: 'pet_000001', hp: 300, alive: true}], foe: [], legal: []}}});
+  assert.notEqual(inBattle.route, 'guide', '局内的"下一步"不许走配队那一支');
+});
+
+// ── 2026-09-30（task-26 · 玩家实测纠偏）──────────────────────────────────────
+// 实测凭据（`tmp/accept-0930/` 只读参考 · HEAD `51c04fb` · pid 41421 · 8765 HTTP200）：
+//   「你觉得我有啥可以改进的？」⇒ **`route=companion`** ✗ · `intent=ask` · `silent=true` ·
+//     **`allowAdvice=false`** · `maxChars=24` · `localText="我在。聊游戏里的都行。"`（`C.json` ✓）
+//   「该换谁」⇒ `route=companion` ✗（`F.json`：`intent=other` · `allowAdvice=false` ✓）
+//   反证：`validation.rejected=false` · `activity.fallback=false` · `provider=deepseek`
+//   ⇒ ⇒ **不是拒绝、不是回退 ⇒ 是意图分类错**（词表里「改进」「换谁」一个都没有 ✗）。
+// 判据意图：**四类各归各位** —— ① 战绩摘要 ② 哪里改进 ③ 指定回合 ④ 当前动作；
+//   并**反证**：纯寒暄仍走陪练（别把陪练整条禁掉 ✗）。
+test('task-26：改进/换谁 这一族不许被陪练吞掉（四类归属 + 寒暄反证）', async () => {
+  const {runCoach} = await import('../src/coach/runtime.js');
+  const {freshMemory} = await import('../src/coach/memory.js');
+  const context = {mode: 'camp', profile: {pets: [
+    {id: 'own-0001', pet_id: 'pet_000001', name: '喵喵', stats: {spe: 33}},
+    {id: 'own-0007', pet_id: 'pet_000327', name: '缇塔', stats: {spe: 72}},
+  ]}};
+  const ask = (message) => runCoach({message, role: 'auto', context, memory: freshMemory(), conversation: []});
+  const GENERIC = /聊游戏里的都行/;
+  // ② 哪里改进（无对局 ⇒ 军师；有对局时由 matchRequest 分支交给老师 ✓ 那是既有行为）
+  for (const q of ['你觉得我有啥可以改进的？', '我哪里能改', '怎么才能做得更好']) {
+    const r = await ask(q);
+    assert.equal(r.route, 'strategist', `「${q}」要进军师，实际 ${r.route}`);
+    assert.doesNotMatch(String(r.text), GENERIC, `「${q}」不许落回陪练那句通用兜底`);
+  }
+  // ④ 当前动作
+  assert.equal((await ask('该换谁')).route, 'strategist', '「该换谁」要进军师');
+  assert.equal((await ask('现在怎么办')).route, 'strategist', '「现在怎么办」要进军师');
+  // ① 战绩摘要（既有行为，不许被这次改动顶掉）
+  assert.equal((await ask('上一局怎么样')).route, 'teacher', '「上一局怎么样」仍走老师');
+  // 反证：纯寒暄仍走陪练（陪练没被整条禁掉 ✓）
+  const hello = await ask('今天天气不错');
+  assert.equal(hello.route, 'companion', '寒暄仍走陪练');
+  assert.match(String(hello.text), /聊游戏里的都行|我在/, '寒暄仍拿陪练的兜底句');
+});

@@ -30,6 +30,10 @@ import {mountStalePageBanner} from './stale-page.js';
 // `markdown()` 先转义 HTML 再做少量替换，所以可以安全地插进 DOM。
 import {markdown} from '../coach/experience.js';
 import {playerEvidence} from './evidence-view.js';
+//: 2026-09-30（半成品排查 P0）：**不渲染 markdown 的落点**（`textContent`）要过 `plain()` ——
+//: 实测展开「依据」后玩家看到字面 `**`（来源 `coach/runtime.js:80`）。`plain()` 是仓库现成件
+//:（`plain-text.js` 自己的注释就写着"判 R6 必须看落点，不能看字符串"），**不自己写第二份**。
+import {plain} from './plain-text.js';
 
 //: 与 `src/client/app.js` **逐字相同**的两个键（改一个必须同时改另一个，否则小芽会分裂成两个）。
 const MEMORY_KEY = 'xiaoya-memory-v1';
@@ -208,6 +212,8 @@ export function focusSnapshotFrom(player, {instanceId = null, source = null, cul
       ? (grownTalent ? null : '这一只还没有六项资质 ⇒ 如实说没有，不编一个')
       : rawReason('资质'),
     talent_tier: grown ? (grownTier?.label ?? null) : text('天分档位'),
+    // U01（2026-09-29）：来源跟着值走 —— 焦点行要能说"这个档位是本机掷点算出来的"。
+    talent_rolled: Boolean(grown?.talent_rolled),
     talent_tier_reason: grown
       ? (grownTier?.label ? null : (grownTier?.reason ?? '没有六项资质 ⇒ 认不出档位'))
       : rawReason('天分档位'),
@@ -652,7 +658,11 @@ function decorate(entry, answer) {
   if (activityLine) {
     const basis = document.createElement('p');
     basis.className = 'say-basis';
-    basis.textContent = activityLine;
+    // ⚠ 2026-09-30（半成品排查 P0）：**这个落点是 `textContent`（不渲染 markdown）** ——
+    //   实测展开「依据」后玩家看到字面 `**`：「名单说明：profile.pets 里是**候选池的一页**…」
+    //   （来源 `coach/runtime.js:80` 拼串自带 markdown）。⇒ 过仓库现成的 `plain()`：
+    //   **去掉记号、保留文字**；答案气泡那条 `markdown()` 链一个字不动（它本来就该渲染）。
+    basis.textContent = plain(activityLine);
     entry.append(basis);
     entry.dataset.xyActivity = activityLine.slice(0, 240);
   }
@@ -667,7 +677,9 @@ function decorate(entry, answer) {
     // 里面有 `RULES.guard={…}` 这类工程串（审计：训练场把整份摊给玩家看）。见 evidence-view.js。
     for (const line of playerEvidence(evidence)) {
       const p = document.createElement('p');
-      p.textContent = line;
+      // ⚠ 同上（2026-09-30 P0）：`playerEvidence` 吐出来的是**纯文本落点**，里面可能带 markdown
+      //   记号（实测 4 个 `**` 从这里上屏）⇒ 过 `plain()`：去记号、留文字。
+      p.textContent = plain(line);
       details.append(p);
     }
     entry.append(details);
@@ -744,7 +756,12 @@ export function capabilityLines({tools = 'unknown', model = 'unknown', rulesetId
     ? `资料查询：可用（本机规则服务已连${rulesetId ? `，规则集 ${rulesetId}` : ''}）`
     : tools === 'down'
       ? `资料查询：不可用 —— 缺的是「${lack ?? '本机规则服务'}」。这一步不需要模型密钥；启动服务后原样再问。`
-      : `资料查询：还没拉起来（规则服务是第一次查询才启动的；问一句就会拉起它）`
+      // ⚠ 2026-09-29（第五轮⑤ 人类：「『资料未拉起』这个字样容易读错」）：原来写「还没拉起来」，
+      //   玩家读成"资料没加载/坏了"。它其实**不是故障**，是"惰性启动、还没被叫醒"⇒ 改成待唤醒的说法，
+      //   并且把"问一句就会醒"直接写在里面。
+      //   旧文案原文留档（改钉不删，别再改回来）：
+      //     `资料查询：还没拉起来（规则服务是第一次查询才启动的；问一句就会拉起它）`
+      : `资料查询：待唤醒（规则服务是第一次查询才启动的；问一句就会唤醒它）`
         + `${rulesetId ? ` · 本机规则集 ${rulesetId}` : ''}`;
   const modelLine = model === 'ok'
     ? '云端模型：已连接 —— 自由发挥的文字由它生成'
@@ -752,6 +769,25 @@ export function capabilityLines({tools = 'unknown', model = 'unknown', rulesetId
       ? '云端模型：未连接 —— 只影响自由发挥的文字，上面那些资料查询照常'
       : '云端模型：状态未知（只影响自由发挥的文字）';
   return {toolsLine, modelLine};
+}
+
+/**
+ * `#model-chip` 的**短**读法（R06，2026-09-29 人类第二轮纠偏：默认顶部不许堆长状态）。
+ *
+ * 为什么不是"把它藏起来"：判据 `live-model-status`（`scripts/roco/browser-live-acceptance.mjs`）
+ * 读的就是 `#model-chip`，要求「文字 / `data-roco-model` / `href` 连接入口 / 高度 ≥24 / 未连接时明说」。
+ * 所以这一行的收敛方式是**变短**：规则集 ID、后果说明、补救句都进二级
+ *（`#xy-capability-detail` 与它的 `title`），屏幕上只留两个四字短语。
+ * ⚠ 措辞里必须保留「未连接」三个字（判据正则 `/未连接|没连|未连/`，而「没有连」不匹配）。
+ * ⚠ 2026-09-29（第五轮⑤）：工具那一半的 `unknown` 档**不许**再写「未拉起/还没拉起来」——
+ *   人类读成"资料没加载"，而它其实是"惰性启动、问一句就醒"。现在写「资料：问一句就拉起」。
+ *   旧文案原文留档（改钉不删，别再改回来）：
+ *     const toolsShort = tools === 'ok' ? '资料可用' : tools === 'down' ? '资料不可用' : '资料未拉起';
+ */
+export function capabilityChipText({tools = 'unknown', model = 'unknown'} = {}) {
+  const toolsShort = tools === 'ok' ? '资料可用' : tools === 'down' ? '资料不可用' : '资料：问一句就拉起';
+  const modelShort = model === 'ok' ? '云端已连接' : model === 'off' ? '云端未连接' : '云端状态未知';
+  return `${toolsShort} · ${modelShort}`;
 }
 
 /**
@@ -877,7 +913,7 @@ export function decorateAdvice(entry, advice, notify = null) {
     document.dispatchEvent(new CustomEvent(ADVICE_EVENT, {detail: {advice, mode}}));
     notify?.(mode === 'adopt'
       ? '已把「采用建议」交给这一页 —— 真正出招由页面按现在合法的动作表来。'
-      : '已在动作坞里高亮给你看（**没有**替你点）。');
+      : '已在动作坞里高亮给你看（没有替你点）。');
   };
   const view = document.createElement('button');
   view.type = 'button';
@@ -924,7 +960,13 @@ function injectFocusStyles() {
     + '.xy-actions button{font-size:12.5px;padding:4px 10px;border-radius:8px;border:1px solid #36495e;'
     + 'background:transparent;color:#c6d2de;cursor:pointer}'
     + '.xy-actions button:hover{border-color:#8dd49c;color:#dfe8ef}'
-    + '.xy-entry .say-basis{margin:6px 0 0;font-size:12px;color:#9caebe;border-left:2px solid #36495e;padding-left:8px}'
+    // ⚠ 2026-09-29（第五轮① 人类：「依据那两行可以小点吧？」）：**字号保持 12px**（再小就看不清了，
+    //   它是"可展开看依据"的入口），改的是**颜色更淡 + 行距收紧 + 上边距收紧**。
+    //   内容一个字没动（服务端给的那一句照旧逐字渲染）。
+    //   旧规则原文留档（改钉不删，别再改回来）：
+    //     .xy-entry .say-basis{margin:6px 0 0;font-size:12px;color:#9caebe;border-left:2px solid #36495e;padding-left:8px}
+    + '.xy-entry .say-basis{margin:4px 0 0;font-size:12px;line-height:1.35;color:#8296a8;'
+    + 'border-left:2px solid #2f4154;padding-left:8px}'
     + '.xy-roles{display:flex;gap:6px;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.08)}'
     + '.xy-roles button{flex:1 1 0;font-size:12px;padding:3px 0;border-radius:8px;border:1px solid #36495e;background:transparent;color:#c6d2de;cursor:pointer}'
     + '.xy-roles button.selected{border-color:#8dd49c;color:#dfe8ef}'
@@ -1079,10 +1121,26 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
         ?? (Array.isArray(activeProfile.pets) ? (activeProfile.pets[0]?.id ?? null) : state.pet);
       // **宿主动局上下文口**（甲①）：有对局就把对局交给 `buildContext`，没有就照老行为（`null`）。
       const incoming = await readHostContext(contextProvider);
+      // ── 第五轮④（2026-09-29）：提问前先把记忆**对齐磁盘上那一份** ──────────────────────
+      // `state.memory` 是**挂载时的快照**：玩家打完一局（页面往同一个键写了 `events`/`journal`）
+      // 再回来问，面板手里那份还是旧的 ⇒ 服务端拿到的是"没有这一局"的记忆，复盘自然说
+      // 「没有完整对局记录」（真浏览器实测）。面板自己不改写记忆（写入者仍是服务端回执），
+      // 所以"对齐"就是把磁盘那一份读回来用；读不到就保持现状（不编）。
+      const storedNow = readMemory(readStored(MEMORY_KEY));
+      if (storedNow) state.memory = storedNow;
       const context = buildContext(incoming.context.game, activeProfile, focus, incoming.context.archive,
         incoming.context.stageId ?? CAMPAIGN_STAGE_ID, message);
       // 加性键（`roco_battle` / `roco_plan` …）原样并进去；拿不到的键不出现（与旧面板同一条口径）。
       if (incoming.context.extra) Object.assign(context, incoming.context.extra);
+      // ── 第五轮④（2026-09-29）：复盘那一支要的 `lastMatch`，宿主给不出就用**本机记忆里最后一条对局** ──
+      // `coach/teacher.js` 的复盘分支读 `context.lastMatch.turnLog`（逐回合摘要）。宿主动局上下文口
+      // 只在**局中**给 `game/roco_battle`，配队/盒子这些页面给不出 ⇒ 复盘永远落到「没有完整对局记录」。
+      // 而 `memory.events` 的最后一条正是"上一局"，且 `rememberBattle` 现在会把 `turnLog` 一起存进去
+      // （`roco.js` 的 `finishMatch()` 交 `history` 那一条链）。
+      // 口径：**只在宿主真的没给的时候**补，且只补**磁盘上真有的那一份**（没有就不加这个键，不编）。
+      if (!context.lastMatch && Array.isArray(state.memory?.events) && state.memory.events.length) {
+        context.lastMatch = state.memory.events[state.memory.events.length - 1];
+      }
       context.coachAllowed = true;
       if (incoming.failure) context.hostContextFailure = incoming.failure;
       // 加性键：老路（没有聚焦对象时）一个字段都不出现，行为与改动前逐字一致。
@@ -1101,7 +1159,16 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
       //   记忆的写入者仍然只有**服务端那一份回执**（下面这一句）。
       //   ⇒ 下一步是把探针真的把第二条发出去（浮层开着 + 输入框聚焦 + 发送键可用 + 气泡数必须涨），
       //     再决定"到底有没有丢"。**没量到之前不再动记忆这条链。**
-      state.memory = answer.memory ?? state.memory;
+      // ── 第五轮④（2026-09-29）：记忆这一个键有**两个写入者**，面板不许整份覆盖 ──────────
+      // `xiaoya-memory-v1` 是页面（`roco.js` 局末 `rememberBattle()+saveMemory()`）与面板共用的
+      // 一份跨局记忆（task-13 甲③ 有意合并）。`state.memory` 是**挂载时的快照**：玩家打完一局
+      // 再回面板问一句，服务端会把"它收到的那份"再发回来 —— 面板若整份写回，就把刚打完那局的
+      // `events`/`journal` 抹掉了（人类报的「记不住」的另一半，方向与 `roco.js` 那一半相反）。
+      // ⇒ 写之前**读回磁盘上现在那一份做字段级并集**（`mergeMemories`：列表取并集、标量以新的为准、
+      //   新的那份是空就留旧的）。`forgetMemory()` 那一支**不并**——删除是玩家明说的动作，
+      //   并回去等于"忘了又想起来"。
+      const incomingMemory = answer.memory ?? state.memory;
+      state.memory = mergeMemories(readMemory(readStored(MEMORY_KEY)), incomingMemory);
       writeStored(MEMORY_KEY, JSON.stringify(state.memory));
       const entry = addEntry('小芽', answer.text || '（这次没有拿到回答）', answer);
       // 小测验的选项直接可点（与营地页一致）：点一下就等于追问那个选项。
@@ -1140,15 +1207,37 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
   // 玩家刷新之后看到的是空对话，于是「刷新后能看到之前聊过的轮次」这件事在**界面上**不成立
   //（数据一直在，看不见；这属于"判据读属性是绿的、玩家看不到"那一类）。
   // 现在：先按存档把这一段会话的轮次画出来；有历史时不画开场白（开场白只属于空会话）。
-  const OPENING = mode === 'page'
-    ? '我是小芽。这一页对着**手游图鉴**说话：你的伙伴、属性相性、技能与学习表、天气与规则说明都能查。'
+  // ⚠⚠ 2026-09-29（人类实测：「换人后又弹**无事实废话**」）：
+  //   我在 §165/§166 把"裸换人"和"采用建议"两条路**都实测排除了**（六个区域前后对照，一个字没变），
+  //   但**这一句开场白是"零事实"的、而且面板一打开就在日志最上面** ——
+  //   对局中尤其刺眼：屏幕上一整屏真实信息，面板却先说一句「随便问：…」。
+  //   ⇒ 改成**按当前这一屏说话**：对局中就把这一回合的**真实事实**摆出来（回合号 + 可点的技能数），
+  //     拿不到对局状态时**退回**原来那句（一句话都不编）。
+  //   旧文案留档（改钉不删）：'我是小芽。随便问：你的伙伴、属性相性、技能与规则。'
+  const liveBattleOpening = () => {
+    try {
+      const view = globalThis?.rocoDemo?.state?.view ?? null;
+      if (!view || view.phase === 'ended') return null;
+      const legal = Array.isArray(view.legal) ? view.legal : [];
+      if (!legal.length) return null;
+      const skills = legal.filter((a) => a?.kind === 'skill').length;
+      const turn = Number.isFinite(Number(view.turn)) ? Number(view.turn) : null;
+      const head = turn === null ? '这一局' : `这一局第 ${turn} 回合`;
+      return `我是小芽。${head}，你有 ${skills} 个技能可以点`
+        + '：问「现在怎么办」，我按当前生命、能量和队伍比这一手。';
+    } catch { return null; }
+  };
+  //   ⚠ 第一版写成 `const OPENING = …`（**挂载时算一次**）⇒ 实测**没生效**：面板在**开局前**就挂载了，
+  //     那一刻还没有对局 ⇒ 永远退回旧句。改成**函数**，在真正画的时候（`drawHistory`）才算。
+  const openingLine = () => (mode === 'page'
+    ? '我是小芽。这一页对着手游图鉴说话：你的伙伴、属性相性、技能与学习表、天气与规则说明都能查。'
       + '没有连接模型时我只给引擎里查得到的事实，不猜。'
-    : '我是小芽。随便问：你的伙伴、属性相性、技能与规则。';
+    : (liveBattleOpening() ?? '我是小芽。随便问：你的伙伴、属性相性、技能与规则。'));
   const drawHistory = () => {
     const session = activeChatSession(state.chatStore);
     const turns = Array.isArray(session?.turns) ? session.turns : [];
     if (log) log.replaceChildren();
-    if (!turns.length) { addEntry('小芽', OPENING); }
+    if (!turns.length) { addEntry('小芽', openingLine()); }
     else for (const turn of turns) addEntry(turn.role === 'user' ? '你' : '小芽', turn.content);
     // 重画（挂载 / 新对话 / 清空）之后是"看最新"那一档：贴底、收起"有新消息"。
     // ⚠ 这不是"新消息"，是新的一段会话/刚打开 —— 与 `addEntry` 里那一条不许顶走阅读位置的口径不冲突。
@@ -1199,20 +1288,21 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
   };
   renderMemoryList();
 
-  // ── 连接状态（三格模型 + 去连接页）（task-13 甲②②：`#model-list` / `#open-connect` 从旧面板搬来）──
+  // ── 模型格（**只有真在用的两个**：当前云模型 + 用户亲自训练的 4B）────────────────
   //
-  // 与旧面板**同一套语义、同一套 id/class**（给同一个东西同一个名字），数据源也同一条 `/api/models`：
-  //   · 三格：`#model-list .model-cell[data-model-id]` + `.mc-name` + `.mc-state`；
-  //   · 名字放不下就**缩小字号**（不是省略号）；拿不到数据写「未知」，不猜；
-  //   · `#open-connect` 按一下弹 `connect.html` 独立小窗（与旧面板逐字同一条行为）。
-  // ⚠ 这一块**不写 `#model-chip`**（旧面板踩过的坑：一个读取点两个写入者 ⇒ 判据读到被覆盖的那份）。
-  //    chip 仍归能力状态那一行（甲②③ 再决定要不要把它搬过来）。
+  // R07（2026-09-29 人类最新决定，`user-06` 是铁证）：27B **从产品入口与配置路径移除**。
+  //   只在**这一层**不把它当选项摆出来 —— 权重/训练数据/服务端/主模型**一个字没动**，
+  //   也没有下载/训练/切模型/查密钥（那几条是硬边界）。
+  // 同一条决定还把「调试连接」那个按钮去掉：它是旧面板留下的调试入口（`window.open` 小窗），
+  //   而「当前云模型的必要设置」这条路**由 `#model-chip` 自己承担**（它就是一个
+  //   `<a href="connect.html">`，点它即达）。⇒ 能力没少，只是少了一个冗余按钮。
+  //   ⚠ 这一块**不写 `#model-chip`**（旧面板踩过的坑：一个读取点两个写入者 ⇒ 判据读到被覆盖的那份）。
   const statusFold = document.createElement('details');
   statusFold.className = 'xy-fold';
   statusFold.id = 'xy-fold-status';
-  statusFold.innerHTML = '<summary id="xy-fold-label">展开连接状态</summary>'
+  statusFold.innerHTML = '<summary id="xy-fold-label">模型与连接</summary>'
     + '<div class="xy-models" id="model-list" role="list"></div>'
-    + '<div class="xy-actions2"><button class="xy-open" id="open-connect" type="button">调试连接</button></div>';
+    + '<p class="xy-connect-hint">要换模型或补密钥，点上面那条状态（它通到模型设置）。</p>';
   const renderModelList = async () => {
     const box = statusFold.querySelector('#model-list');
     if (!box) return;
@@ -1221,10 +1311,12 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
       const response = await fetch('/api/models', {headers: {Accept: 'application/json'}});
       if (response.ok) data = await response.json();
     } catch { data = null; }
-    const rows = Array.isArray(data?.models) ? data.models : [];
-    const SHORT = {cloud: 'ds api', local_4b: 'qwen3.5-4b', local_27b: 'qwen3.8-27b'};
-    const cells = rows.length ? rows.slice(0, 3) : [
-      {id: 'cloud', label: 'ds api'}, {id: 'local_4b', label: 'qwen3.5-4b'}, {id: 'local_27b', label: 'qwen3.8-27b'},
+    // R07：27B 不进产品入口（即使 `/api/models` 仍然把它报回来，也不在这一层画出来）。
+    const rows = (Array.isArray(data?.models) ? data.models : [])
+      .filter((one) => one?.id !== 'local_27b');
+    const SHORT = {cloud: 'ds api', local_4b: 'qwen3.5-4b'};
+    const cells = rows.length ? rows.slice(0, 2) : [
+      {id: 'cloud', label: 'ds api'}, {id: 'local_4b', label: 'qwen3.5-4b'},
     ];
     box.innerHTML = cells.map((m) => {
       const raw = String(m.label ?? m.id ?? '模型');
@@ -1241,10 +1333,6 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
     // 钩子：面板换了主人 ⇒ `xy-models`（`data-roco-models` 属旧面板，退役时一起消失）
     document.body.dataset.xyModels = rows.length ? (rows.some((m) => m.connected) ? 'partial' : 'offline') : 'unknown';
   };
-  statusFold.querySelector('#open-connect')?.addEventListener('click', () => {
-    // 与旧面板逐字同一条行为：独立小窗，不覆盖主界面
-    window.open('connect.html', 'roco-connect', 'width=520,height=680,noopener');
-  });
   statusFold.addEventListener('toggle', () => { if (statusFold.open) void renderModelList(); });
   void renderModelList();
 
@@ -1305,34 +1393,57 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
   capEl.href = 'connect.html';
   capEl.title = '点这里去连接模型';
   capEl.setAttribute('role', 'status');
-  // ── 版式（U07 第 2 条）：标题栏固定 / 输入行固定 / 中间对话区自己滚 ───────────────
+  // ── R06（2026-09-29 人类第二轮纠偏，`user-05`/`user-06` 是铁证）：默认顶部**只留**
+  //    标题「✦ 小芽」、关闭、**一个**展开入口 ─────────────────────────────────────────
   //
-  // 修前：上面这八九块（能力状态两行 / 连接状态折叠 / 记忆 / 焦点行 / 三个动作 / 四个身份）
-  // **全部**摊在面板里、和对话区抢同一列高度 —— 面板高度是死的（`min(560px, …)`），
-  // 一级级摊下来对话区只剩一条缝，长回答就把输入行挤出面板外（用户截图 07/08 那一屏）。
-  //
-  // 现在分三层：
-  //   · 常驻一层（`.xy-pop-meta`）：两行状态（`#model-chip` + 焦点行）—— 这两行是"玩家随时要看见"的；
-  //   · 收起一层（`#xy-fold-more`，默认 `<details>` 关闭）：三格模型 / 对话动作 / 记忆 / 身份。
-  //     它们仍然**在 DOM 里**（同名 id 全部保留：`#model-list` / `#open-memory` / `#open-connect`），
-  //     只是默认不占版面 —— 对话占主要空间；
-  //   · 滚动一层（`.xy-log`，`flex:1;min-height:0;overflow-y:auto`）：**唯一**会滚的那一块；
-  //     输入行（`.xy-form`）与快捷问（`.xy-quick`）在它下面，`flex:0 0 auto` ⇒ 永远在面板底部。
-  const meta = document.createElement('div');
-  meta.className = 'xy-pop-meta';
-  meta.append(capEl, chip);
+  // 修前默认消息上方堆着两行：①「资料查询：可用（…规则集 roco-world-s4-2026-09-10）；云端模型：已连接…」
+  // ②「最近看过：烈火守护 · 性格 开朗 · 天分 一般般的天分（本机掷点，不是游戏里的资质）· 4 个技能」。
+  // 现在两行都进**二级**：
+  //   · `#xy-capability-detail`：能力状态那一句长文（含规则集 ID 与两条后果）；
+  //   · 焦点行（`#xiaoya-focus` / page 档 `#xy-focus`）："正在看谁 + 培养诊断"。
+  // 默认只剩 `#xy-fold-more` 这**一个**展开入口；入口那一行右边是 `#model-chip` 的**短**读法
+  //（`capabilityChipText()`）—— 它必须一直可见（判据 `live-model-status`），所以是变短而不是藏起来。
+  // 点那一条 = 去模型设置（R07 保留的那条配置路径），点这一行其它地方才是展开/收起。
+  const capDetail = document.createElement('p');
+  capDetail.className = 'xy-cap-detail';
+  capDetail.id = 'xy-capability-detail';
   const more = document.createElement('details');
   more.className = 'xy-pop-more';
   more.id = 'xy-fold-more';
-  more.innerHTML = '<summary id="xy-fold-more-label">状态、记忆与身份</summary>';
+  const moreSummary = document.createElement('summary');
+  moreSummary.id = 'xy-fold-more-label';
+  const moreTitle = document.createElement('span');
+  moreTitle.className = 'xy-fold-title';
+  moreTitle.textContent = '设置';
+  capEl.addEventListener('click', (event) => { event.stopPropagation(); });   // 别把"去设置"当展开
+  // ── 2026-09-30（半成品排查 P0，**我自己上一轮引入的**）：chip 不许坐在展开行的中线上 ─────
+  // 实测（未连档 1440）：summary `[1009,111,400,44]` 中心 `(1209,133)`，而 chip 198px 右对齐
+  // `[1189,121,198,24]` ⇒ `elementFromPoint(1209,133) = #model-chip`，**真点击 ⇒ 被导航到
+  // `/connect.html`、面板消失**（已连档 chip 只有 138px、起于 1249 ⇒ 恰好不压中心，所以只在
+  // "还没连上"的用户身上发作；chip 变长是本轮⑤改文案带来的）。
+  // 修法：**把 chip 与状态行搬出 `<summary>`，单独一行**（`.xy-status-row`）——
+  //   · summary 只剩「设置」⇒ 这一行的中心**结构上不可能**是 chip ✓
+  //   · chip 文案一个字不缩 ✓ 仍可见 ✓ ≥24px ✓ 仍可点（`href` 不变）✓
+  //   · R06「默认只有一个展开入口」不变 ✓（summary 仍是唯一入口）
+  // 独立页（`xiaoya.html`）不动：它那一行 1164px 宽、中心 x≈720，chip 起于 1082 ⇒ 压不到中心
+  //（本轮实测 `elementFromPoint` 已复核）。
+  let statusRow = null;
+  if (mode !== 'page') {
+    statusRow = document.createElement('div');
+    statusRow.className = 'xy-status-row';
+    statusRow.id = 'xiaoya-status-row';
+    const head = document.querySelector('#xiaoya-pop .xy-pop-head');
+    const statusSpan = document.getElementById('xiaoya-status');
+    if (statusSpan) statusRow.append(statusSpan);      // 短状态句（默认空）留在左
+    statusRow.append(capEl);                           // chip 靠右（CSS: margin-left:auto）
+    if (head?.parentNode) head.parentNode.insertBefore(statusRow, head.nextSibling);
+  }
+  moreSummary.append(moreTitle, ...(statusRow ? [] : [capEl]));
   const moreBody = document.createElement('div');
   moreBody.className = 'xy-pop-more-body';
-  moreBody.append(actions, memoryPanel, statusFold);
-  more.append(moreBody);
-  if (log?.parentNode) {
-    log.parentNode.insertBefore(meta, log);
-    log.parentNode.insertBefore(more, log);
-  }
+  moreBody.append(capDetail, chip, actions, memoryPanel, statusFold);
+  more.append(moreSummary, moreBody);
+  if (log?.parentNode) log.parentNode.insertBefore(more, log);
   drawHistory();
 
   /** 焦点那一行。**读不到就说读不到**，并且说清"这是最近看过"还是"正在看"。 */
@@ -1355,8 +1466,17 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
       // 口径与盒子**同源**：值来自 `focusSnapshotFrom()` 读的**本机记录**（`cultivationOf`），
       // 这一层不另算一份；有档位就写档位，没有就写**为什么没有**（`talent_tier_reason`）——
       // 空着不说才是最坏的（玩家分不清"没有"和"没读出来"）。
-      if (snapshot.talent_tier) bits.push(`天分 ${snapshot.talent_tier}`);
-      else if (snapshot.talent_tier_reason) bits.push(`天分${snapshot.talent_tier_reason}`);
+      if (snapshot.talent_tier) {
+        bits.push(`天分 ${snapshot.talent_tier}${snapshot.talent_rolled ? '（本机掷点，不是游戏里的资质）' : ''}`);
+      }
+      else if (snapshot.talent_tier_reason) {
+        // ⚠ 2026-09-29（U01 个体粒度隔离用例抓到的**缺口**）：来源标记原来只加在"有档位"那一支，
+        //   于是**认不出档位**的那一类（旧口径掷点、激活 4–6 项）在这一行**不带来源说明** ——
+        //   真机逐字：own-0177 → `天分激活了 4 条（生命、物攻、魔防、速度）⇒ 人类那四档只覆盖
+        //   1/2/3 条，认不出档位`，而它明明是**掷点**来源（`含本机掷点=false`）。
+        //   两类都要标：**只要来源是掷的，屏幕上就得说这句话**。
+        bits.push(`天分${snapshot.talent_tier_reason}${snapshot.talent_rolled ? '（本机掷点，不是游戏里的资质）' : ''}`);
+      }
       if (snapshot.skills?.length) bits.push(`${snapshot.skills.length} 个技能`);
       if (snapshot.battle_only) bits.splice(1, 0, '对战场上（只有名字/系别）');
       chip.textContent = `${prefix}：${bits.join(' · ')}`;
@@ -1506,8 +1626,14 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
     //   要求「没连模型时**明说**」（正则 `/未连接|没连|未连/`），而「没有连」**不匹配**
     //   （`没连` 中间不许有"有"）。甲②③ 在自己实例上实测到这一条：退役旧面板后
     //   `#model-chip` 由这里写 ⇒ 不修的话那条判据当场红。口径不变，只把词换成它认的那个。
+    // R06（2026-09-29）：`#model-chip` 上屏的是**短读法**（`capabilityChipText`，两个四字短语），
+    //   长句（含规则集 ID 与两条后果）进二级的 `#xy-capability-detail`，同时挂到 `title`——
+    //   悬停也读得到，"已知的规则集要写出来"这条口径没有丢，只是不再占默认那一屏。
     const {toolsLine, modelLine} = capabilityLines({tools, model, rulesetId, missing: cap?.missing});
-    capEl.textContent = `${toolsLine}；${modelLine}`;
+    const full = `${toolsLine}；${modelLine}`;
+    capEl.textContent = capabilityChipText({tools, model});
+    capEl.title = `${full}（点这里去模型设置）`;
+    if (capDetail) capDetail.textContent = full;
     if (chip) chip.title = `${toolsLine}\n${modelLine}`;
   };
   const refreshCapability = async (force = false) => {
@@ -1529,10 +1655,18 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
       if (answerEvidence.model || answerEvidence.tools) {
         const {toolsLine, modelLine} = capabilityLines({tools, model,
           rulesetId: answerEvidence.rulesetId, missing: null});
-        capEl.textContent = `${toolsLine}；${modelLine}`;
+        const full = `${toolsLine}；${modelLine}`;
+        capEl.textContent = capabilityChipText({tools, model});
+        capEl.title = `${full}（点这里去模型设置）`;
+        if (capDetail) capDetail.textContent = full;
       } else {
-        capEl.textContent = '读不到连接状态：云端模型按「未连接」处理（不谎报已连接）；'
+        capEl.textContent = capabilityChipText({tools, model});
+        capEl.title = '读不到连接状态：云端模型按「未连接」处理（不谎报已连接）；'
           + '资料查询按「未知」处理（第一次提问会把它拉起来）。';
+        if (capDetail) {
+          capDetail.textContent = '读不到连接状态：云端模型按「未连接」处理（不谎报已连接）；'
+            + '资料查询按「未知」处理（第一次提问会把它拉起来）。';
+        }
       }
       if (chip) chip.title = capEl.textContent;
     }
@@ -1614,7 +1748,16 @@ function injectPopup(host, {entryButton = true} = {}) {
   pop.setAttribute('aria-label', '和小芽说话');
   pop.hidden = true;
   pop.innerHTML = '<div class="xy-pop-head"><strong>✦ 小芽</strong>'
-    + '<span class="muted" id="xiaoya-status" role="status">正在读取连接状态…</span>'
+    // R06（2026-09-29）：这一行**默认空着**（原来写着「正在读取连接状态…」，那是第二行状态的重复）。
+    // `setStatus()` 会把真正要说的话填进来（正在查 / 谁答的 / 失败原因），空着就是"没什么要说"。
+    + '<span class="muted" id="xiaoya-status" role="status"></span>'
+    // ── 第三轮纠偏第 3 条（2026-09-29）：桌面**叠加层必须能收起** ──────────────────
+    // 面板是 fixed 浮层：它不挤正文（不重排），但开着时会盖住页面右下那一片。这里给一个
+    // "收起"控件 —— 收起后只剩标题 + 状态/展开入口那一行（`#model-chip` **仍然可见且 ≥24px**，
+    // R06 的判据不受影响），量不到任何被点击的落点；再点一下原样展开。
+    // ⚠ 只在右停靠档出现（≤560px 是整幅抽屉，收起没意义，靠 ✕ 关）。
+    + '<button class="xy-collapse" id="xiaoya-collapse" type="button" aria-expanded="true" '
+    + 'aria-controls="xiaoya-log" aria-label="收起小芽面板" title="收起面板（正文那一片就不被盖住了）">收起</button>'
     + '<button class="xy-pop-close" id="xiaoya-close" type="button" aria-label="关闭小芽">×</button></div>'
     + '<div class="xy-log" id="xiaoya-log" aria-live="polite"></div>'
     + '<div class="xy-quick" id="xiaoya-quick"></div>'
@@ -1633,13 +1776,39 @@ function injectPopup(host, {entryButton = true} = {}) {
   const setOpen = (open) => {
     pop.hidden = !open;
     if (button) button.setAttribute('aria-expanded', open ? 'true' : 'false');
+    // ⚠⚠ 2026-09-29 **第三轮纠偏第 3 条**（人类：「默认浮层/抽屉开关**不得改变**盒子/配队正文宽度/位置
+    //   或导致重新排版」；图4：面板一开候选池 739→1305 被压到 565→1028）
+    //   ⇒ 之前那条"页面让位"（`main{padding-right:446px}` / `#team-workshop{margin-right:330px}`）
+    //   已经**撤掉**：现在它是**纯叠加层**，开关面板**不改任何正文的 rect**。
+    //   下面这个钩子只报"面板开着没有"（探针/排障读它），**布局不依赖它**。
+    document.body.dataset.xyPanelOpen = open ? 'yes' : 'no';
     if (open) {
-      document.getElementById('xiaoya-input')?.focus();
+      // `preventScroll`：面板是 fixed 的，但 `focus()` 默认会把元素滚进视口 —— 那会带着
+      // **正文一起跳**（第三轮第 3 条要求"正文原有滚动位置保持"）。加上它，正文 scrollY 一个像素都不动。
+      document.getElementById('xiaoya-input')?.focus({preventScroll: true});
       // 打开面板 = 想看最新那一句 ⇒ 把对话区贴到底（`onOpen` 由 `mountXiaoya` 装上）。
       // ⚠ 自动滚**只有这一处**与"玩家本来就在底部"那一处；正在翻历史的那个位置不许动。
       onOpen?.();
     }
   };
+  document.body.dataset.xyPanelOpen = 'no';   // 初始态=收起（探针/排障读它）
+  // ── 收起/展开（第三轮第 3 条：桌面叠加层能收起）────────────────────────────────
+  // 收起 = 只留标题行 + 展开入口那一行（`#model-chip` 仍在，≥24px），对话区/快捷问/输入行/二级正文
+  // 全部 `display:none`（CSS 按 `#xiaoya-pop[data-xy-collapsed="yes"]` 收）。**不写存储**：
+  // 刷新后回到展开态（默认态），免得玩家下次打开看到一条莫名其妙的细条。
+  const setCollapsed = (collapsed) => {
+    pop.dataset.xyCollapsed = collapsed ? 'yes' : 'no';
+    const button = document.getElementById('xiaoya-collapse');
+    if (button) {
+      button.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      button.textContent = collapsed ? '展开' : '收起';
+      button.setAttribute('aria-label', collapsed ? '展开小芽面板' : '收起小芽面板');
+    }
+  };
+  setCollapsed(false);
+  pop.querySelector('#xiaoya-collapse')?.addEventListener('click', () => {
+    setCollapsed(pop.dataset.xyCollapsed !== 'yes');
+  });
   if (button) button.addEventListener('click', () => setOpen(pop.hidden));
   // 只在这两处关：再点一次右上角的「小芽」（有的话），或点浮层里的 ×。
   //

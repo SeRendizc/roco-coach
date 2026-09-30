@@ -1,0 +1,191 @@
+{
+ "model_outputs": "real:cloud-deepseek",
+ "scored": 24,
+ "routing_hit": 7,
+ "routing_total": 24,
+ "six_step_pass": 7,
+ "stop_scored_zero": 17,
+ "negatives": [
+  {
+   "id": "neg-unknown-tool",
+   "score": 1
+  },
+  {
+   "id": "neg-bad-args",
+   "score": 2
+  }
+ ],
+ "detail": [
+  {
+   "id": "mt-anaphor-01",
+   "got": "stop",
+   "expected": "query_rules",
+   "hit": false,
+   "ms": 1170
+  },
+  {
+   "id": "mt-anaphor-02",
+   "got": "stop",
+   "expected": "query_rules",
+   "hit": false,
+   "ms": 760
+  },
+  {
+   "id": "mt-anaphor-03",
+   "got": "query_rules",
+   "expected": "query_rules",
+   "hit": true,
+   "ms": 855
+  },
+  {
+   "id": "mt-anaphor-04",
+   "got": "query_rules",
+   "expected": "query_rules",
+   "hit": true,
+   "ms": 454
+  },
+  {
+   "id": "mt-anaphor-05",
+   "got": "query_rules",
+   "expected": "query_rules",
+   "hit": true,
+   "ms": 879
+  },
+  {
+   "id": "mt-anaphor-06",
+   "got": "query_rules",
+   "expected": "query_rules",
+   "hit": true,
+   "ms": 1210
+  },
+  {
+   "id": "mt-anaphor-07",
+   "got": "stop",
+   "expected": "query_rules",
+   "hit": false,
+   "ms": 1420
+  },
+  {
+   "id": "mt-anaphor-08",
+   "got": "query_rules",
+   "expected": "query_rules",
+   "hit": true,
+   "ms": 1117
+  },
+  {
+   "id": "mt-action-02",
+   "got": "stop",
+   "expected": "simulate_branch",
+   "hit": false,
+   "ms": 617
+  },
+  {
+   "id": "mt-action-04",
+   "got": "stop",
+   "expected": "simulate_branch",
+   "hit": false,
+   "ms": 1202
+  },
+  {
+   "id": "mt-action-06",
+   "got": "stop",
+   "expected": "simulate_branch",
+   "hit": false,
+   "ms": 2507
+  },
+  {
+   "id": "mt-action-08",
+   "got": "stop",
+   "expected": "simulate_branch",
+   "hit": false,
+   "ms": 936
+  },
+  {
+   "id": "mt-state-01",
+   "got": "stop",
+   "expected": "read_state",
+   "hit": false,
+   "ms": 603
+  },
+  {
+   "id": "mt-state-02",
+   "got": "stop",
+   "expected": "read_state",
+   "hit": false,
+   "ms": 578
+  },
+  {
+   "id": "mt-state-03",
+   "got": "read_state",
+   "expected": "read_state",
+   "hit": true,
+   "ms": 816
+  },
+  {
+   "id": "mt-state-04",
+   "got": "stop",
+   "expected": "read_state",
+   "hit": false,
+   "ms": 608
+  },
+  {
+   "id": "mt-state-05",
+   "got": "stop",
+   "expected": "read_state",
+   "hit": false,
+   "ms": 705
+  },
+  {
+   "id": "mt-state-06",
+   "got": "stop",
+   "expected": "read_state",
+   "hit": false,
+   "ms": 591
+  },
+  {
+   "id": "mt-state-07",
+   "got": "stop",
+   "expected": "read_state",
+   "hit": false,
+   "ms": 518
+  },
+  {
+   "id": "mt-state-08",
+   "got": "read_state",
+   "expected": "read_state",
+   "hit": true,
+   "ms": 771
+  },
+  {
+   "id": "cr-turn-01",
+   "got": "stop",
+   "expected": "read_evidence",
+   "hit": false,
+   "ms": 755
+  },
+  {
+   "id": "cr-turn-02",
+   "got": "stop",
+   "expected": "read_evidence",
+   "hit": false,
+   "ms": 795
+  },
+  {
+   "id": "cr-turn-03",
+   "got": "stop",
+   "expected": "read_evidence",
+   "hit": false,
+   "ms": 415
+  },
+  {
+   "id": "cr-turn-05",
+   "got": "stop",
+   "expected": "read_evidence",
+   "hit": false,
+   "ms": 6022
+  }
+ ],
+ "unevaluated": [
+  "cr-turn-04"
+ ]
+}

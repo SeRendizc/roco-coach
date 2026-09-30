@@ -9,11 +9,19 @@
 //   ③ 旧记录（本仓旧口径掷点：随机三项 7–10、其余 0–6 ⇒ 激活 4–6 项）套不上人类给的四档
 //      ⇒ 整页卡片机械同一句「认不出」，既不给**具体值**，也不给**可执行的补救**。
 //
-// ── 哪一份是真值（Lead 2026-09-29 口径，照做）────────────────────────────────
+// ── 哪一份说话（**2026-09-29 晚更正**，T1 独立审核 + Lead 独立核实）────────────
 //   **本机记录**（`coach/individuals.js` 的 `cultivationOf`，键 `roco.box.individuals.v1`）优先；
-//   抓包回执 / 名单里的导入字段（`traits` 的「资质」「天分档位」、列表卡的 `individual_label`）
-//   只用于**补充说明**与**玩家主动采纳时的来源**。两者不一致时：屏幕上以本机记录为准，
-//   并**如实标注**两边各是什么 —— 不静默二选一（`conflict` 字段就是那一条的落点）。
+//   抓包回执 / 名单里的导入字段只用于**补充说明**与**玩家主动采纳时的来源**。两者不一致时：
+//   屏幕上以本机记录为准，并**如实标注**两边各是什么 —— 不静默二选一（`conflict` 就是那条的落点）。
+//
+//   ⚠⚠ **更正一条我先前写错的口径**：这里原来写着「导入字段是**真值**」。**它不是。**
+//   独立核实（`data/roco/owned/owned-pets.json` 全量 542 条）：
+//     `talent.value` 有值的 = **0/542**（`nature.value` 同样 0/542），形状是
+//     `{value:null, value_source:null, effect:'UNKNOWN', …}` —— 键在、值为 null。
+//   经服务端投影后 542/542 都有值，但 `talent_source` **全部**以 `rolled` 开头。
+//   ⇒ 这个仓里**没有**"抓包来的资质真值"；所谓"导入那一份"与"本机那一份"**用的是同一个
+//     `rollNatureAndTalent(instance_id)`、同一个种子**。所以措辞里**不许再出现"真值"**：
+//     把导入份盖上去，等于**用一份掷点换掉另一份掷点**；玩家刷新过之后还会**盖掉他刚刷的数**。
 //
 // ── 三件事怎么分（同一个个体上，三样并排说，不合并成一个串）────────────────────
 //   · 天分（档位）：由「资质 + 性格」按 `coach/talent.js` 的四档读出来的**名字**；
@@ -77,6 +85,50 @@ export function qualificationOf(individual) {
   };
 }
 
+/**
+ * **激活档**：建模里"被激活的那几项"的取值范围是 **7–10**。
+ *
+ * 为什么这一个常数能修 R04（2026-09-29，用户截图：几乎每张卡都写「天分未定档（激活 6 项）」）：
+ *   本仓**两代掷点**都把 7–10 给"被激活"的那几项 ——
+ *     · 旧口径（B1）：**随机三项 7–10、其余三项 0–6**；
+ *     · 现口径（B2）：先掷激活 1–3 条，激活的那几条 7–10、其余**恰好 0**。
+ *   ⇒ 旧记录里"哪三项是真正的激活"其实**还在数据里**，就是 ≥7 的那三项；
+ *     只是拿 `>0` 当激活会把 0–6 的剩余项也算进去（于是 6 项 ⇒ 套不上四档 ⇒ 只能写"未定档"）。
+ *   ⇒ 按激活档（≥7）读，**不改任何一个数**就能把档名恢复出来 —— 这就是 R04 要的
+ *     「XXX的天分」，而且**不是**把"认不出"换个词（红线）。
+ * 玩家的刷新加成（`talent_boosts`）仍然由 `coach/individuals.js` 的 `cultivationOf`
+ * 先扣掉再进来（档位只认"抓到时是什么天分"），这一层不重复扣。
+ */
+export const ACTIVATION_FLOOR = 7;
+
+/**
+ * 把六项按**激活档**分成两组（≥7 = 激活项；1–6 = 旧口径的剩余项；0/null = 没值/未激活）。
+ * 只做读数，**不碰**原值 —— 屏幕上的资质那一行照旧印全部六项。
+ */
+export function activationBandOf(qualification) {
+  const entries = Array.isArray(qualification?.entries) ? qualification.entries : [];
+  const on = entries.filter((one) => one.value !== null && one.value >= ACTIVATION_FLOOR);
+  const below = entries.filter((one) => one.value !== null && one.value > 0 && one.value < ACTIVATION_FLOOR);
+  return {
+    keys: on.map((one) => one.key),
+    labels: on.map((one) => one.label),
+    count: on.length,
+    belowLabels: below.map((one) => one.label),
+    belowCount: below.length,
+  };
+}
+
+/** 按激活档重读一次档位（返回与 `talentTierOf` 同形状；六项不全或一项都没到档就回 null）。 */
+export function bandTierOf(qualification, nature) {
+  const band = activationBandOf(qualification);
+  // ⚠ **缺项时不许走这一条**：把 null 当成 0 会把"缺 5 项"读成"1 项激活 ⇒ 一般般的天分"，
+  // 那是拿缺数据编结论（U01 的红线）。缺项一律留给上面那条 `missing` 分支如实说。
+  if (!band.count || qualification.missing.length) return null;
+  const talent = Object.fromEntries(qualification.entries.map((one) => [one.key,
+    one.value !== null && one.value >= ACTIVATION_FLOOR ? one.value : 0]));
+  return talentTierOf({talent, nature: nature ?? null});
+}
+
 /** 「资质」缺项那一句（具体缺哪几项；不缺就说 null）。 */
 function missingText(qualification) {
   if (!qualification.missingLabels.length) return null;
@@ -108,16 +160,54 @@ export function talentReadingOf(individual, {imported = null} = {}) {
   const grown = cultivationOf(individual);
   const qualification = qualificationOf(individual);
   const tier = grown?.tier ?? null;
+  // ⭐ R04：coach 那一份读法（`>0` 即激活）之外，再按**激活档（≥7）**读一次 ——
+  // 两代掷点的"被激活项"都在 7–10 区间里，所以这一读能恢复出旧记录的档名，且**不动任何数值**。
+  const band = activationBandOf(qualification);
+  const bandTier = bandTierOf(qualification, individual?.nature ?? null);
+  let tierLabel = tier?.label ?? null;
+  let tierSource = tier?.label ? 'as-is' : (bandTier?.label ? 'activation-band' : 'none');
   const importedOne = importedReadingOf(imported);
   const missing = missingText(qualification);
   let status = 'empty';
   let reason = '';
   let remedy = null;
+  // ── U01 历史数据兼容缺口（2026-09-29，监工点名「不以非零数或原因自洽证明真实天分」）──────
+  // 本机记录里有一代是**我方自己掷的**（`talent_source` 以 `rolled` 开头：
+  // 「先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率」）。
+  // 那一代掷点**恰好能对上人类给的四档**（激活 1/2/3 项）⇒ 页面会直接给出
+  // 「一般般的天分 / 相当好的天分」这种**看起来像这一只真值**的结论，而那几个数**不是游戏数据**。
+  // 所以只要来源是掷的，就**必须**把这句话和补救一起摆出来 ——
+  // 原来它只写在 localStorage 里，玩家一个字都看不到（真机实测：页面文字里 `rolled` = false）。
+  const rolledSource = typeof individual?.talent_source === 'string'
+    && /^rolled/.test(individual.talent_source.trim());
+  // ⚠ 2026-09-29 **第三轮纠偏第 1 条（最新用户决定覆盖旧口径）**：屏幕上不再出现
+  //   「本机掷点 / 不是游戏里的资质」这一整段免责声明（用户图1/图2：几乎每张卡都写着它）。
+  //   **内部来源字段照旧保留** —— `rolledSource` / `reading.rolled` / `talent_source`
+  //   一个都没删，判据与开发材料仍然读得到；只是不再往玩家可见的文案里铺。
+  //   旧文案留档（改钉不删）：
+  //     const ROLLED_NOTE = '注意：这一只的资质是「本机掷点」，不是游戏里的资质（来源：本机记录）。'
+  //       + '名单那一份同样是建模掷点（这个仓里没有抓包来的资质真值），'
+  //       + '所以「用名单那一份重设资质」只是换一份掷点 —— 它只动资质，不动性格/等级/剩余次数。';
 
   if (tier?.label) {
     status = 'tier';
     // 档位那一句由 `talentTierOf` 给（它带着"被激活的是哪几项"）；这里只补"以谁为准"。
     reason = tier.reason ?? `${tier.label}（被激活的是：${qualification.activatedLabels.join('、')}）`;
+    if (rolledSource) remedy = remedy ?? '用名单那一份重设资质（只动资质）';
+  } else if (bandTier?.label) {
+    // ⭐ R04（2026-09-29）：coach 那一份读法（`>0` 即激活）读不出来，但**按激活档（≥7）**读得出
+    // —— 旧口径掷点（随机三项 7–10、其余 0–6）就是落在这里。档名照给，数值一个都不动。
+    status = 'tier';
+    tierLabel = bandTier.label;
+    reason = bandTier.reason ?? `${bandTier.label}（激活档里的是：${band.labels.join('、')}）`;
+    if (band.belowCount) {
+      // ⚠ 玩家可见文案里**不许出现 markdown 星号**（本仓既有口径；`**重点**` 会原样上屏）。
+      reason = `${reason}。六项里有 ${band.belowCount} 项在 1–6`
+        + `（${band.belowLabels.join('、')}）—— 按激活档（≥7）读不算激活的项；`
+        + '那几个数原样留在这里，没有删、没有截断、也没有重掷'
+        + (rolledSource ? '（这是本仓旧口径掷点留下的形状）' : '');
+    }
+    if (rolledSource) remedy = remedy ?? '用名单那一份重设资质（只动资质）';
   } else if (qualification.missing.length) {
     status = 'missing';
     reason = `${missing}资质 ⇒ 四档判不出来（缺的那几项不知道有没有被激活）`;
@@ -126,9 +216,26 @@ export function talentReadingOf(individual, {imported = null} = {}) {
       : '这一只的六项资质都还没有数';
   } else if (qualification.hasAny) {
     status = 'unresolved';
-    reason = `六项资质都有数，但被激活的有 ${qualification.activatedCount} 项`
-      + `（${qualification.activatedLabels.join('、')}）—— 四档名只覆盖 1 / 2 / 3 项`;
-    remedy = '按四档口径重掷一份（本机记录里现在这一份是旧口径掷出来的）';
+    // 认不出时把**两把尺子**都说清：>0 有几项、激活档（≥7）有几项。
+    reason = band.count
+      ? `按激活档（≥7）读只有 ${band.count} 项（${band.labels.join('、')}）`
+        + `${band.belowCount ? `，另外 ${band.belowCount} 项在 1–6（${band.belowLabels.join('、')}）` : ''}`
+        + ' —— 四档名只覆盖 1 / 2 / 3 项'
+      : `六项资质都有数，但一项都没到激活档（≥7）—— 四档名一条都对不上`;
+    // ⚠⚠ 2026-09-29（U01 隔离三条复验抓到的**真错误**）：这一句原来**无条件**写
+    //   「按四档口径重掷一份（本机记录里现在这一份是旧口径掷出来的）」。
+    //   可它对着**导入字段（真值）**也说同一句 —— 隔离用例 C（`talent_source: 名单导入`、
+    //   激活 6 项）实测就落到这里，于是页面会**建议玩家把真值换成掷点**，
+    //   与 U01「真值优先」正好相反。
+    //   现在按来源分开说：**只有掷点来源才建议重掷**；导入来源如实说"这是真值，
+    //   判不出是**口径**的问题，不是数值的问题"。
+    if (rolledSource) {
+      remedy = '用名单那一份重设资质（只动资质）';
+    } else {
+      // 一句话说清"判不出是口径问题、不是数值问题"（旧版是一整段，第三轮纠偏后压短）。
+      remedy = `四档名只覆盖「激活 1 / 2 / 3 项」，这一只对不上（${qualification.activatedCount} 项）`
+        + ' —— 不为了凑档位去改这几个数';
+    }
   } else {
     status = 'empty';
     reason = '这一只的六项资质一项都没有数（本机记录里是空的）';
@@ -138,9 +245,18 @@ export function talentReadingOf(individual, {imported = null} = {}) {
   let conflict = null;
   if (importedOne) {
     const sameLabel = Boolean(importedOne.label && tier?.label && importedOne.label === tier.label);
-    const sameValues = importedOne.qualification.present.length === qualification.present.length
-      && importedOne.qualification.present.every(
-        (key) => importedOne.qualification.values[key] === qualification.values[key]);
+    // ⚠ 2026-09-29 **改（T1 审核 §4.2 抓到的次要缺陷）**：原来先要求**项数相等**
+    //   （`importedOne...present.length === qualification.present.length`）再逐值比 ——
+    //   于是"导入是**部分项**、且它有的那几项逐值都与本机相同"会被判成**冲突**，
+    //   屏幕多印一句"名单那一份…"，看起来像两边打架，其实只是导入缺项。
+    //   旧写法留档（别删）：`=== qualification.present.length && importedOne...present.every(...)`
+    //   现在的口径：**导入有的每一项都与本机相同 ⇒ 不算冲突**（缺的项不是"不一致"，是"没有"；
+    //   缺项本身已经在 `qualification.missing` 那一支里如实说过了，不在这里再说一遍）。
+    //   今天链路碰不到（六项恒齐），但这是**对的口径**，不该靠"碰不到"活着。
+    const importedPresent = importedOne.qualification.present;
+    const sameValues = importedPresent.length > 0
+      && importedPresent.every(
+        (key) => qualification.values[key] === importedOne.qualification.values[key]);
     if (!(sameLabel && sameValues)) {
       conflict = {
         label: importedOne.label,
@@ -154,7 +270,7 @@ export function talentReadingOf(individual, {imported = null} = {}) {
   }
 
   const title = [
-    `天分：${tier?.label ?? '无档名'}（${reason}）`,
+    `天分：${tierLabel ?? '无档名'}（${reason}）`,
     `资质：${qualification.text || NO_VALUE}`,
     missing ? `缺项：${missing}` : null,
     conflict ? `名单那一份：${conflict.label ?? '（没有档名）'}${conflict.valuesText ? `（${conflict.valuesText}）` : ''}` : null,
@@ -163,9 +279,12 @@ export function talentReadingOf(individual, {imported = null} = {}) {
 
   return {
     status,                       // 'tier' | 'unresolved' | 'missing' | 'empty'
-    tierLabel: tier?.label ?? null,
-    tierKey: tier?.key ?? null,
-    tierReason: tier?.reason ?? null,
+    tierLabel,
+    tierKey: tier?.key ?? bandTier?.key ?? null,
+    // 档名是**怎么**读出来的（判据/排障读它）：'as-is' = coach 那一份；'activation-band' = R04 的恢复读法。
+    tierSource,
+    band,
+    tierReason: tier?.reason ?? bandTier?.reason ?? null,
     qualification,
     qualificationText: qualification.text,
     missingLabels: qualification.missingLabels,
@@ -174,6 +293,9 @@ export function talentReadingOf(individual, {imported = null} = {}) {
     reason, remedy, conflict, title,
     // 屏幕上的这一份是"从哪儿来的"（判据与开发者抽屉读它；玩家看不见这些键）。
     source: 'local-record',
+    // U01（2026-09-29）：**来源要不要标到屏幕上**。掷点来源必须标（§24/§31/§32）——
+    // 卡片/行/焦点这些"一眼看过去"的地方没有空间展开整段说明，只标一个短后缀。
+    rolled: rolledSource,
     fingerprint: grown?.fingerprint ?? '',
     revision: grown?.revision ?? '',
   };

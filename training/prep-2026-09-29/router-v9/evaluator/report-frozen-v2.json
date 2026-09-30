@@ -1,0 +1,24 @@
+{
+  "at": "2026-09-29T13:25:32.503Z",
+  "self": false,
+  "passMin": 4,
+  "rows": [
+    {
+      "id": "cov2-simulate_branch-yes",
+      "tool": "simulate_branch",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（2 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "reason"
+      ]
+    }
+  ]
+}

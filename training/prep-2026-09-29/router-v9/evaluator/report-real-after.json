@@ -1,0 +1,376 @@
+{
+  "at": "2026-09-29T14:27:33.151Z",
+  "self": false,
+  "passMin": 4,
+  "rows": [
+    {
+      "id": "mt-anaphor-01",
+      "tool": "stop",
+      "score": 1,
+      "max": 6,
+      "why": [
+        "① 形状合法（{\"stop\":true}）",
+        "② 这一题**该查工具**却回了 {\"stop\":true} ⇒ **该查没查**（不是形状错误）"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "mt-anaphor-02",
+      "tool": "stop",
+      "score": 1,
+      "max": 6,
+      "why": [
+        "① 形状合法（{\"stop\":true}）",
+        "② 这一题**该查工具**却回了 {\"stop\":true} ⇒ **该查没查**（不是形状错误）"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "mt-anaphor-03",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "mt-anaphor-04",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "mt-anaphor-05",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "mt-anaphor-06",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "mt-anaphor-07",
+      "tool": "stop",
+      "score": 1,
+      "max": 6,
+      "why": [
+        "① 形状合法（{\"stop\":true}）",
+        "② 这一题**该查工具**却回了 {\"stop\":true} ⇒ **该查没查**（不是形状错误）"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "mt-anaphor-08",
+      "tool": "query_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    },
+    {
+      "id": "mt-action-02",
+      "tool": "stop",
+      "score": 1,
+      "max": 6,
+      "why": [
+        "① 形状合法（{\"stop\":true}）",
+        "② 这一题**该查工具**却回了 {\"stop\":true} ⇒ **该查没查**（不是形状错误）"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "mt-action-04",
+      "tool": "stop",
+      "score": 1,
+      "max": 6,
+      "why": [
+        "① 形状合法（{\"stop\":true}）",
+        "② 这一题**该查工具**却回了 {\"stop\":true} ⇒ **该查没查**（不是形状错误）"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "mt-action-06",
+      "tool": "stop",
+      "score": 1,
+      "max": 6,
+      "why": [
+        "① 形状合法（{\"stop\":true}）",
+        "② 这一题**该查工具**却回了 {\"stop\":true} ⇒ **该查没查**（不是形状错误）"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "mt-action-08",
+      "tool": "stop",
+      "score": 1,
+      "max": 6,
+      "why": [
+        "① 形状合法（{\"stop\":true}）",
+        "② 这一题**该查工具**却回了 {\"stop\":true} ⇒ **该查没查**（不是形状错误）"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "mt-state-01",
+      "tool": "stop",
+      "score": 1,
+      "max": 6,
+      "why": [
+        "① 形状合法（{\"stop\":true}）",
+        "② 这一题**该查工具**却回了 {\"stop\":true} ⇒ **该查没查**（不是形状错误）"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "mt-state-02",
+      "tool": "stop",
+      "score": 1,
+      "max": 6,
+      "why": [
+        "① 形状合法（{\"stop\":true}）",
+        "② 这一题**该查工具**却回了 {\"stop\":true} ⇒ **该查没查**（不是形状错误）"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "mt-state-03",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "mt-state-04",
+      "tool": "stop",
+      "score": 1,
+      "max": 6,
+      "why": [
+        "① 形状合法（{\"stop\":true}）",
+        "② 这一题**该查工具**却回了 {\"stop\":true} ⇒ **该查没查**（不是形状错误）"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "mt-state-05",
+      "tool": "stop",
+      "score": 1,
+      "max": 6,
+      "why": [
+        "① 形状合法（{\"stop\":true}）",
+        "② 这一题**该查工具**却回了 {\"stop\":true} ⇒ **该查没查**（不是形状错误）"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "mt-state-06",
+      "tool": "stop",
+      "score": 1,
+      "max": 6,
+      "why": [
+        "① 形状合法（{\"stop\":true}）",
+        "② 这一题**该查工具**却回了 {\"stop\":true} ⇒ **该查没查**（不是形状错误）"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "mt-state-07",
+      "tool": "stop",
+      "score": 1,
+      "max": 6,
+      "why": [
+        "① 形状合法（{\"stop\":true}）",
+        "② 这一题**该查工具**却回了 {\"stop\":true} ⇒ **该查没查**（不是形状错误）"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "mt-state-08",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "cr-turn-01",
+      "tool": "stop",
+      "score": 1,
+      "max": 6,
+      "why": [
+        "① 形状合法（{\"stop\":true}）",
+        "② 这一题**该查工具**却回了 {\"stop\":true} ⇒ **该查没查**（不是形状错误）"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "cr-turn-02",
+      "tool": "stop",
+      "score": 1,
+      "max": 6,
+      "why": [
+        "① 形状合法（{\"stop\":true}）",
+        "② 这一题**该查工具**却回了 {\"stop\":true} ⇒ **该查没查**（不是形状错误）"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "cr-turn-03",
+      "tool": "stop",
+      "score": 1,
+      "max": 6,
+      "why": [
+        "① 形状合法（{\"stop\":true}）",
+        "② 这一题**该查工具**却回了 {\"stop\":true} ⇒ **该查没查**（不是形状错误）"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "cr-turn-05",
+      "tool": "stop",
+      "score": 1,
+      "max": 6,
+      "why": [
+        "① 形状合法（{\"stop\":true}）",
+        "② 这一题**该查工具**却回了 {\"stop\":true} ⇒ **该查没查**（不是形状错误）"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "neg-unknown-tool",
+      "tool": "make_coffee",
+      "score": 1,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名不在运行时的 12 个里：make_coffee"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "neg-bad-args",
+      "tool": "read_state",
+      "score": 2,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数没过 validToolArgs"
+      ],
+      "receiptKeys": []
+    }
+  ]
+}

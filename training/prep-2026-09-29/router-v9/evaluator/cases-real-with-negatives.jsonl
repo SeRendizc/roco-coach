@@ -1,0 +1,26 @@
+{"id": "mt-anaphor-01", "question": "刚才说的圣凯布米龙——它怕什么系？", "model_output": {"stop": true}, "_expected": {"tool": "query_rules", "args": {"kind": "pet", "pet_id": "pet_000225", "state_version": 7}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-anaphor-02", "question": "就你刚提到的新月鹭，它的属性克制关系是什么？", "model_output": {"stop": true}, "_expected": {"tool": "query_rules", "args": {"kind": "pet", "pet_id": "pet_000225", "state_version": 7}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-anaphor-03", "question": "我们刚聊的那只雪影娃娃，它自己能学哪些技能？", "model_output": {"tool": "query_rules", "args": {"kind": "pet", "name": "雪影娃娃"}}, "_expected": {"tool": "query_rules", "args": {"kind": "pet", "pet_id": "pet_000225", "state_version": 7}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-anaphor-04", "question": "接着刚才的画间沉铁兽问：它的种族值是多少？", "model_output": {"tool": "query_rules", "args": {"kind": "pet", "name": "画间沉铁兽"}}, "_expected": {"tool": "query_rules", "args": {"kind": "pet", "pet_id": "pet_000225", "state_version": 7}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-anaphor-05", "question": "我刚才点名的那只獠牙猪，它有哪些技能是攻击类？", "model_output": {"tool": "query_rules", "args": {"kind": "pet", "name": "獠牙猪"}}, "_expected": {"tool": "query_rules", "args": {"kind": "pet", "pet_id": "pet_000225", "state_version": 7}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-anaphor-06", "question": "还是刚才那只迷迷箱怪，它的能耗最低的技能是哪个？", "model_output": {"tool": "query_rules", "args": {"kind": "learnset", "name": "迷迷箱怪"}}, "_expected": {"tool": "query_rules", "args": {"kind": "pet", "pet_id": "pet_000225", "state_version": 7}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-anaphor-07", "question": "我刚问过的智辉章脑，它怕哪些属性？", "model_output": {"stop": true}, "_expected": {"tool": "query_rules", "args": {"kind": "pet", "pet_id": "pet_000225", "state_version": 7}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-anaphor-08", "question": "回到刚才那只卡卡虫——它属于哪个系？", "model_output": {"tool": "query_rules", "args": {"kind": "pet", "name": "卡卡虫"}}, "_expected": {"tool": "query_rules", "args": {"kind": "pet", "pet_id": "pet_000225", "state_version": 7}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-action-02", "question": "那你刚说的那手，最坏会掉多少？", "model_output": {"stop": true}, "_expected": {"tool": "simulate_branch", "args": {"candidates": ["skill:guard"]}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-action-04", "question": "就刚才那个方案，对面要是换人呢？", "model_output": {"stop": true}, "_expected": {"tool": "simulate_branch", "args": {"candidates": ["skill:guard"]}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-action-06", "question": "刚才那两个候选，风险差多少？", "model_output": {"stop": true}, "_expected": {"tool": "simulate_branch", "args": {"candidates": ["skill:guard"]}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-action-08", "question": "就按刚才那个来，最坏情况是什么？", "model_output": {"stop": true}, "_expected": {"tool": "simulate_branch", "args": {"candidates": ["skill:guard"]}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-state-01", "question": "皇家狮鹫现在还剩多少血？", "model_output": {"stop": true}, "_expected": {"tool": "read_state", "args": {}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-state-02", "question": "刚才那只瑰眼仔，现在的血量和能量各是多少？", "model_output": {"stop": true}, "_expected": {"tool": "read_state", "args": {}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-state-03", "question": "花魁蜂后还站着吗？", "model_output": {"tool": "read_state", "args": {}}, "_expected": {"tool": "read_state", "args": {}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-state-04", "question": "场上那只丢丢现在什么情况？", "model_output": {"stop": true}, "_expected": {"tool": "read_state", "args": {}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-state-05", "question": "铠甲虫这回合还能动吗？", "model_output": {"stop": true}, "_expected": {"tool": "read_state", "args": {}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-state-06", "question": "刚才说的深蓝鲸，现在状态怎么样？", "model_output": {"stop": true}, "_expected": {"tool": "read_state", "args": {}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-state-07", "question": "呼呼猪的血线还安全吗？", "model_output": {"stop": true}, "_expected": {"tool": "read_state", "args": {}}, "_source": "real:cloud-deepseek"}
+{"id": "mt-state-08", "question": "就朔夜伊芙，现在的场上情况给我看一眼。", "model_output": {"tool": "read_state", "args": {}}, "_expected": {"tool": "read_state", "args": {}}, "_source": "real:cloud-deepseek"}
+{"id": "cr-turn-01", "question": "第 3 回合你到底有没有记录？两条回执对不上。", "model_output": {"stop": true}, "_expected": {"tool": "read_evidence", "args": {"turn": 3}}, "_source": "real:cloud-deepseek"}
+{"id": "cr-turn-02", "question": "你说第 4 回合没加载，可对局摘要里明明列着它——到底哪个准？", "model_output": {"stop": true}, "_expected": {"tool": "read_evidence", "args": {"turn": 3}}, "_source": "real:cloud-deepseek"}
+{"id": "cr-turn-03", "question": "第 5 回合的记录，麻烦按最准的那份给我。", "model_output": {"stop": true}, "_expected": {"tool": "read_evidence", "args": {"turn": 3}}, "_source": "real:cloud-deepseek"}
+{"id": "cr-turn-05", "question": "第 7 回合究竟是缺记录，还是我没让你读？", "model_output": {"stop": true}, "_expected": {"tool": "read_evidence", "args": {"turn": 3}}, "_source": "real:cloud-deepseek"}
+{"id": "neg-unknown-tool", "question": "随便", "model_output": {"tool": "make_coffee", "args": {}}}
+{"id": "neg-bad-args", "question": "随便", "model_output": {"tool": "read_state", "args": {"bogus": 1}}}

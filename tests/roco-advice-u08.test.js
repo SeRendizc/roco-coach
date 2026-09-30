@@ -28,6 +28,7 @@ import {fileURLToPath} from 'node:url';
 import {battleAdvice, rocoAdviceAsk, legalActionIdOf} from '../src/coach/coach-advice.js';
 import {runCoach, enforceBattleAdvice} from '../src/coach/runtime.js';
 import {rocoIntervention, rocoInterventionText} from '../src/coach/roco-experience.js';
+import {normaliseAdviceShape} from '../src/coach/coach-advice.js';
 import {freshMemory} from '../src/coach/memory.js';
 import {createCoachServer} from '../src/server/index.js';
 
@@ -558,6 +559,56 @@ test('U09 硬要求：我方倒下那一手**穿过**额度与冷却，点名一
   assert.equal(silent.speak_blocked_by, 'no-legal-action',
     `沉默必须写明「引擎这一轮没有任何合法动作」：${silent.speak_blocked_by}`);
   assert.equal(rocoInterventionText(silent, null), null, '这一档沉默是对的（不误伤）');
+});
+
+test('U09：同一个局面被渲染两次时，决定性那一手的建议必须**幂等**（不许被自己的去重撤下来）', () => {
+  // 真 8765 六宠局实测的机制：页面会对同一个局面跑两次 `refreshHint()`。
+  // 第一次算出的建议被显示、形状进了 `session.said`；第二次撞上去重 ⇒ 建议为 null
+  // ⇒ 客户端按「没信息量」把气泡撤下来（闪一下又没了），回执看起来像「兜底没产出」。
+  // 去重要防的是「换个回合把同一句念一遍」，不是「同一个局面被渲染两次」。
+  const view = {
+    state_version: 60, turn: 16, phase: 'replace', battle_result: null, ruleset_id: 'r1',
+    needs_replacement: ['player'],
+    self: {active: 0, energy_max: 6, skills: [], pets: [
+      {slot: 0, pet_id: 'pet_a', name: '多彩方方', types: ['普通系'], stats: {spe: 70}, hp: 0, max_hp: 360, energy: 0, fainted: true, statuses: {}, marks: {}},
+      {slot: 1, pet_id: 'pet_b', name: '缇塔', types: ['水系'], stats: {spe: 60}, hp: 345, max_hp: 345, energy: 2, fainted: false, statuses: {}, marks: {}},
+      {slot: 2, pet_id: 'pet_c', name: '权杖-Ⅱ', types: ['光系'], stats: {spe: 90}, hp: 360, max_hp: 360, energy: 2, fainted: false, statuses: {}, marks: {}}]},
+    opponent: {active: 0, living_count: 3,
+      field: {slot: 0, pet_id: 'pet_e', name: '水蓝蓝', types: ['水系'], stats: {spe: 80}, hp: 177, max_hp: 348, energy: 2, fainted: false, statuses: {}, marks: {}},
+      bench: [{slot: 1, fainted: false}], energy_max: 6},
+    legal: [{kind: 'switch', label: '换上第2位', target_index: 1, skill: null},
+      {kind: 'switch', label: '换上第3位', target_index: 2, skill: null}],
+    events: [],
+  };
+  // 第一次渲染：正常产出。
+  const first = rocoIntervention({view, session: {hints: 0, lastAt: -Infinity, said: new Set(), dismissed: false},
+    plan: null, host: {focus: true, preference: 'gentle'}});
+  assert.equal(first.unavoidable, true);
+  assert.ok(first.advice, '第一次渲染必须有建议');
+  const shape = normaliseAdviceShape(first.advice.text);
+  // 第二次渲染：形状已经在 `said` 里（气泡刚显示过）。
+  const second = rocoIntervention({view, session: {hints: 1, lastAt: Date.now(), said: new Set([shape]), dismissed: false},
+    plan: null, host: {focus: true, preference: 'gentle'}});
+  assert.equal(second.action, first.action, '同一个局面两次渲染的判决必须一致');
+  assert.ok(second.advice, '决定性那一手的建议必须幂等 —— 被自己的去重撤下来就是「闪一下又没了」');
+  assert.equal(second.advice_dedup_bypassed, true, '「这一手不看去重」要如实进回执');
+  assert.equal(first.advice_dedup_bypassed, true, '第一次渲染也走同一条路（幂等的前提）');
+  assert.equal(second.advice.text, first.advice.text, '两次渲染给的必须是同一份结论');
+  assert.equal(rocoInterventionText(second, null)?.text, rocoInterventionText(first, null)?.text);
+
+  // 反面：**非决定性**的轻提示照旧走去重（U09 的克制不变）。
+  const calm = {...view, needs_replacement: [], phase: 'battle',
+    self: {...view.self, active: 1, pets: [view.self.pets[1], view.self.pets[2]]},
+    legal: [{kind: 'skill', label: '水枪', target_index: null, skill_id: 's1', skill_name: '水枪',
+      skill: {name: '水枪', element: '水系', energy: 1, power: 40}}]};
+  const light = rocoIntervention({view: calm, session: {hints: 0, lastAt: -Infinity, said: new Set(), dismissed: false},
+    plan: null, host: {focus: true, preference: 'gentle'}});
+  if (light.advice) {
+    const calmShape = normaliseAdviceShape(light.advice.text);
+    const again = rocoIntervention({view: calm, session: {hints: 1, lastAt: Date.now(), said: new Set([calmShape]), dismissed: false},
+      plan: null, host: {focus: true, preference: 'gentle'}});
+    assert.equal(again.advice, null, '非决定性提示仍然不许复读');
+  }
 });
 
 test('结构性：建议层是纯的（没有 node:* / fetch / DOM / 动作提交），不许自动替玩家出招', () => {

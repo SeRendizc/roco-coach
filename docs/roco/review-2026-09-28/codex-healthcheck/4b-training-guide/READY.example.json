@@ -1,0 +1,23 @@
+{
+  "data_dir": "/Users/serendizc/Codex/Internship/4b-training-2026-09-29/data/router-v9",
+  "data_hashes": {
+    "train": "3f86afbefff928e8eaa4f42aaec7c6d53f7a70e3e66f038e9062a2fe671edaa1",
+    "valid": "9739953407a26488223b9f09c23e85aa08bbe3b59e90ad19a429638fe774cc0a",
+    "test": "fb56d3c9045674976cdf628884241db6235b5cde76c097a905952e191b27a1ed"
+  },
+  "source_hashes": {
+    "src/coach/toolbox.js": "29dca534eb26103626483b97fe20af6d2c4ba4af55b792d07c5bae8bf5b587ff",
+    "src/coach/local-model.js": "0886e5eb9749f5b25e4a4654f2ceab6e241fb5beac59c29eebd55a74eaae206a",
+    "src/coach/shadow-tools.js": "ac9abf79c6ec759f0ecfa83599c53f447baa15008c2e34b36ab9d3cfb02336c5",
+    "src/server/index.js": "5b72d3ba4da1c28b76ee1dec545673c4c8c5c832531f06a2943d2607e4d94fd4"
+  },
+  "checks": {
+    "runtime_contract_checked": false,
+    "training_serving_prompt_aligned": false,
+    "data_reviewed": false,
+    "test_frozen": false,
+    "task_evaluator_ready": false
+  },
+  "evidence": {},
+  "note": "这只是指纹快照。逐项完成指导里的工作、填写证据后，另存 READY.json；不要为了运行脚本把 false 全改成 true。"
+}

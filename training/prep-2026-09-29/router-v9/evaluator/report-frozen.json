@@ -1,0 +1,154 @@
+{
+  "at": "2026-09-29T13:25:17.723Z",
+  "self": false,
+  "passMin": 4,
+  "rows": [
+    {
+      "id": "cov-read_state-yes",
+      "tool": "read_state",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（7 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "screen",
+        "focus",
+        "turn",
+        "player",
+        "enemy",
+        "legalPlayer",
+        "legalEnemy"
+      ]
+    },
+    {
+      "id": "cov-search_rules-yes",
+      "tool": "search_rules",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（6 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "rulesVersion",
+        "cards",
+        "usedCharacters",
+        "method",
+        "missing",
+        "rag"
+      ]
+    },
+    {
+      "id": "cov-compare_actions-yes",
+      "tool": "compare_actions",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（2 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "text",
+        "evidence"
+      ]
+    },
+    {
+      "id": "cov-simulate_branch-yes",
+      "tool": "simulate_branch",
+      "score": 2,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数没过 validToolArgs"
+      ],
+      "receiptKeys": []
+    },
+    {
+      "id": "cov-read_match-yes",
+      "tool": "read_match",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（1 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing"
+      ]
+    },
+    {
+      "id": "cov-read_evidence-yes",
+      "tool": "read_evidence",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（4 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "turn",
+        "matchId",
+        "reason"
+      ]
+    },
+    {
+      "id": "cov-read_last_turn-yes",
+      "tool": "read_last_turn",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（2 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "missing",
+        "reason"
+      ]
+    },
+    {
+      "id": "cov-summarize_battle-yes",
+      "tool": "summarize_battle",
+      "score": 4,
+      "max": 6,
+      "why": [
+        "① 形状可解析",
+        "② 工具名合法",
+        "③ 参数合法（宿主补版本后）",
+        "④⑤ 真执行 + 真回执（14 个键）",
+        "⑥ 这个 case 不带动作 ⇒ 不判动作合法性"
+      ],
+      "receiptKeys": [
+        "tool",
+        "ok",
+        "ruleset_id",
+        "state_version",
+        "coverage",
+        "evidence_ids",
+        "latency_ms",
+        "engine_latency_ms"
+      ]
+    }
+  ]
+}

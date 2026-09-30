@@ -1,0 +1,146 @@
+{
+ "when": "2026-09-29T18:45:29.845Z",
+ "base": "http://127.0.0.1:8765/",
+ "cases": [
+  {
+   "tag": "1440x900",
+   "scene": "到顶(第4次)",
+   "click": {
+    "ok": true,
+    "label": "刷新天分（还剩 3 次）"
+   },
+   "read": {
+    "failedHook": "yes",
+    "successHook": null,
+    "note": {
+     "text": "天分加成已经 3 级满了（一 / 二 / 三级各加一项，加过的项不会再叠）—— 这一只的资质不会因为再刷而变高",
+     "hidden": false,
+     "display": "block",
+     "offsetParent": true,
+     "w": 1164,
+     "h": 20,
+     "y": 169,
+     "fullyInViewport": true
+    },
+    "petViewFailed": "yes",
+    "boxStatus": {
+     "text": "天分加成已经 3 级满了（一 / 二 / 三级各加一项，加过的项不会再叠）—— 这一只的资质不会因为再刷而变高",
+     "hidden": false,
+     "display": "block",
+     "offsetParent": false,
+     "w": 0,
+     "h": 0,
+     "y": 0,
+     "fullyInViewport": false
+    },
+    "vw": 1440,
+    "vh": 900
+   }
+  },
+  {
+   "tag": "1440x900",
+   "scene": "反证(没到顶)",
+   "click": {
+    "ok": true,
+    "label": "刷新天分（还剩 3 次）"
+   },
+   "read": {
+    "failedHook": null,
+    "successHook": "yes",
+    "note": {
+     "text": "上一次刷天分（第 1 级）：+10 加到「物攻」",
+     "hidden": false,
+     "display": "block",
+     "offsetParent": true,
+     "w": 1164,
+     "h": 20,
+     "y": 169,
+     "fullyInViewport": true
+    },
+    "petViewFailed": null,
+    "boxStatus": {
+     "text": "上一次刷天分（第 1 级）：+10 加到「物攻」（结果就在这一页上）",
+     "hidden": false,
+     "display": "block",
+     "offsetParent": false,
+     "w": 0,
+     "h": 0,
+     "y": 0,
+     "fullyInViewport": false
+    },
+    "vw": 1440,
+    "vh": 900
+   }
+  },
+  {
+   "tag": "390x844",
+   "scene": "到顶(第4次)",
+   "click": {
+    "ok": true,
+    "label": "刷新天分（还剩 3 次）"
+   },
+   "read": {
+    "failedHook": "yes",
+    "successHook": null,
+    "note": {
+     "text": "天分加成已经 3 级满了（一 / 二 / 三级各加一项，加过的项不会再叠）—— 这一只的资质不会因为再刷而变高",
+     "hidden": false,
+     "display": "block",
+     "offsetParent": true,
+     "w": 334,
+     "h": 60,
+     "y": 194,
+     "fullyInViewport": true
+    },
+    "petViewFailed": "yes",
+    "boxStatus": {
+     "text": "天分加成已经 3 级满了（一 / 二 / 三级各加一项，加过的项不会再叠）—— 这一只的资质不会因为再刷而变高",
+     "hidden": false,
+     "display": "block",
+     "offsetParent": false,
+     "w": 0,
+     "h": 0,
+     "y": 0,
+     "fullyInViewport": false
+    },
+    "vw": 390,
+    "vh": 844
+   }
+  },
+  {
+   "tag": "390x844",
+   "scene": "反证(没到顶)",
+   "click": {
+    "ok": true,
+    "label": "刷新天分（还剩 2 次）"
+   },
+   "read": {
+    "failedHook": null,
+    "successHook": "yes",
+    "note": {
+     "text": "上一次刷天分（第 2 级）：+10 加到「速度」",
+     "hidden": false,
+     "display": "block",
+     "offsetParent": true,
+     "w": 334,
+     "h": 20,
+     "y": 194,
+     "fullyInViewport": true
+    },
+    "petViewFailed": null,
+    "boxStatus": {
+     "text": "上一次刷天分（第 2 级）：+10 加到「速度」（结果就在这一页上）",
+     "hidden": false,
+     "display": "block",
+     "offsetParent": false,
+     "w": 0,
+     "h": 0,
+     "y": 0,
+     "fullyInViewport": false
+    },
+    "vw": 390,
+    "vh": 844
+   }
+  }
+ ]
+}

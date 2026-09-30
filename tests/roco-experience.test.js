@@ -151,7 +151,12 @@ test('门控来自真实 experience.js：失焦是硬门控，不是「这次没
   //（判决要说话却没说出来时，是谁拦的）。同样只有包装层看得到 view/plan，经验层没有。
   // 旧写法留档（原文，别再改回来）：
   //   const {advice, advice_error, plan_stale, ...fromExperience} = focused;
-  const {advice, advice_error, plan_stale, advice_source, speak_blocked_by, ...fromExperience} = focused;
+  // ⚠ 2026-09-29 第三次改钉（U09 幂等）：再多个 `advice_dedup_bypassed`
+  //（决定性那一手不看去重账本，同一局面两次渲染必须给出同一份结论）。
+  // 旧写法留档（原文，别再改回来）：
+  //   const {advice, advice_error, plan_stale, advice_source, speak_blocked_by, ...fromExperience} = focused;
+  const {advice, advice_error, plan_stale, advice_source, speak_blocked_by,
+    advice_dedup_bypassed, ...fromExperience} = focused;
   assert.equal(plan_stale, false, '规划与战况同版时不许标成陈旧');
   assert.ok('plan_stale' in focused, '包装层必须如实给出「规划是不是这一版的」这一栏');
   assert.ok('advice_source' in focused && 'speak_blocked_by' in focused,
@@ -376,7 +381,16 @@ test('12 个系别的 emoji 与配色逐键对齐，且不引用任何外链素�
   assert.deepEqual(values.filter((v) => v.trim() === ''), [], '不许有空 emoji');
   assert.ok(!/https?:\/\/[^"' ]+\.(png|jpe?g|webp|svg)/i.test(page),
     '形象一律自制（emoji / 色块），不引用任何外链图片素材');
-  assert.ok(!/<img\b/i.test(page), '页面里不该有 <img>：官方立绘的许可不明，不抓');
+  // ⚠ 2026-09-29 **改钉（阶段三：查第 5 条红的实际原因）**。旧断言原文留档（别删）：
+  //     assert.ok(!/<img\b/i.test(page), '页面里不该有 <img>：官方立绘的许可不明，不抓');
+  //   为什么改：`page` 是 **JS 源码**，而这条断言在**整份源码**（含注释）上匹配 `<img`。
+  //   当时触发它的是 `src/client/roco.js:2780/2831/2832` 的三处**注释** —— 而那三处注释写的
+  //   恰恰是「**为什么不用** <img>」（`onerror` 会把 `<img>` 删掉 ⇒ 动作立绘会消失，所以撤掉）。
+  //   ⇒ 判据在惩罚"解释自己为什么不这么做"的注释，是**扫描范围**错了，不是意图错了。
+  //   **意图一个字没变**：页面不许画官方立绘。现在先剥注释再判 —— **只量能真的跑起来的代码**。
+  //   配套**反证**（`stripJsComments` 不许把真代码一起吃掉），见本文件末尾同名判据。
+  assert.ok(!/<img\b/i.test(stripJsComments(page)),
+    '页面里不该有 <img>：官方立绘的许可不明，不抓（注释不算 —— 只量可执行代码）');
 });
 
 // 2026-09-25（人类：「复盘有点太简单了」）：加厚层必须落在**玩家不点开也看得见**的地方。
@@ -415,4 +429,31 @@ test('老师沉默的兜底分支也要写出加厚层的「下一件事」（�
     '兜底分支不许再无条件清空「下一局练一件事」（口径变了就重新钉，别删这条）');
   assert.match(page, /\$\('lesson-learning'\)\.textContent = depth\?\.next_step\?\.text \?\? ''/,
     '兜底分支要把加厚层的 next_step 写出来（没有就留空）');
+});
+
+
+// ── 2026-09-29：给上面那条「页面里不该有 <img>」用的**注释剥离** + 必红反证 ──────────
+// 为什么需要剥离：那条判据量的是 JS 源码，而注释里会**解释"为什么不用 <img>"**（实测 roco.js 三处）。
+// 剥离要**保守**：块注释整段去掉；行注释只在「不是 URL 的 //」时去掉（`http://` 要留着，
+// 因为上面还有一条判据专门查外链图片）。
+function stripJsComments(src) {
+  return String(src)
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')          // /* … */ 整段
+    .replace(/(^|[^:'"\\])\/\/[^\n]*/g, '$1');   // 行注释；`:`, `'`, `"`, `\` 之后的 // 不当作注释（保住 http://）
+}
+
+test('反证：注释剥离不许把真代码里的 <img> 一起吃掉（否则上面那条判据就成了假绿）', () => {
+  // 真代码里的 <img> 必须**仍然**被抓
+  assert.match(stripJsComments('const html = "<img src=\'/art.png\'>";'), /<img\b/i,
+    '字符串里的 <img> 是可执行代码，必须留下');
+  assert.match(stripJsComments('el.innerHTML = `<img src="x">`;'), /<img\b/i,
+    '模板串里的 <img> 必须留下');
+  // 注释里的 <img> 必须被剥掉（否则又回到假阳性）
+  assert.doesNotMatch(stripJsComments('// 别用 <img>，onerror 会把它删掉'), /<img\b/i,
+    '行注释里的 <img> 必须被剥掉');
+  assert.doesNotMatch(stripJsComments('/* 说明：这里原来画 <img> */'), /<img\b/i,
+    '块注释里的 <img> 必须被剥掉');
+  // 外链检查依赖的那条判据不能被剥离误伤：`http://` 必须留下
+  assert.match(stripJsComments("const u = 'http://x/a.png';"), /http:\/\/x\/a\.png/,
+    'http:// 是 URL 不是注释，必须留下');
 });

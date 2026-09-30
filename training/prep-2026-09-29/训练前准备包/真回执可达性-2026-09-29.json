@@ -1,0 +1,184 @@
+{
+  "at": "2026-09-29T20:36:50",
+  "why": "人类要\"训练前准备\"；缺口②是\"6 个工具没有真回执\"。我用**运行时自己的路径**（`defaultArgsFor` + `validToolArgs` + `executeTool`）实测，结果比预期的更严重。",
+  "method": "起真教练服务（端口 0）+ 真六宠对局（seed=11）+ 运行时装配的 context；**不手搓参数**（照 `runtime.js:3984 defaultArgsFor`）",
+  "result": [
+    {
+      "tool": "read_state",
+      "has_args": true,
+      "legal": "✓",
+      "real_receipt": false,
+      "detail": "-"
+    },
+    {
+      "tool": "search_rules",
+      "has_args": true,
+      "legal": "✓",
+      "real_receipt": true,
+      "detail": "rulesVersion,cards,usedCharacters,"
+    },
+    {
+      "tool": "compare_actions",
+      "has_args": true,
+      "legal": "✓",
+      "real_receipt": false,
+      "detail": "-"
+    },
+    {
+      "tool": "simulate_branch",
+      "has_args": true,
+      "legal": "✓",
+      "real_receipt": false,
+      "detail": "-"
+    },
+    {
+      "tool": "read_match",
+      "has_args": true,
+      "legal": "✓",
+      "real_receipt": true,
+      "detail": "missing"
+    },
+    {
+      "tool": "read_evidence",
+      "has_args": false,
+      "legal": null,
+      "real_receipt": false,
+      "detail": "-"
+    },
+    {
+      "tool": "read_last_turn",
+      "has_args": true,
+      "legal": "✓",
+      "real_receipt": true,
+      "detail": "missing,reason"
+    },
+    {
+      "tool": "query_rules",
+      "has_args": true,
+      "legal": "✗",
+      "real_receipt": false,
+      "detail": "-"
+    },
+    {
+      "tool": "evaluate_team",
+      "has_args": false,
+      "legal": null,
+      "real_receipt": false,
+      "detail": "-"
+    },
+    {
+      "tool": "compare_team_change",
+      "has_args": false,
+      "legal": null,
+      "real_receipt": false,
+      "detail": "-"
+    },
+    {
+      "tool": "plan_actions",
+      "has_args": true,
+      "legal": "✗",
+      "real_receipt": false,
+      "detail": "-"
+    },
+    {
+      "tool": "summarize_battle",
+      "has_args": true,
+      "legal": "✗",
+      "real_receipt": false,
+      "detail": "-"
+    }
+  ],
+  "reachable": [
+    "search_rules",
+    "read_match",
+    "read_last_turn"
+  ],
+  "unreachable": [
+    "read_state",
+    "compare_actions",
+    "simulate_branch",
+    "read_evidence",
+    "query_rules",
+    "evaluate_team",
+    "compare_team_change",
+    "plan_actions",
+    "summarize_battle"
+  ],
+  "finding": [
+    "**12 个工具里，自然语言问句路径只够得着 3 个**（search_rules / read_match / read_last_turn）：而路由训练训的正是\"该调哪个工具\"⇒ **够不着的工具没有真值可训** ✗",
+    "**read_state / compare_actions / simulate_branch** 失败根因：`context.battle` 需要**JS 引擎状态**（有 `pets`），而 `/api/roco/battle/new` 回的是**投影**（`view`）⇒ 与 §238 同一个坑（我第二次踩）",
+    "**query_rules / plan_actions / summarize_battle**：`defaultArgsFor` 造得出参数，但 `validToolArgs` 判不合法",
+    "**read_evidence / evaluate_team / compare_team_change**：`defaultArgsFor` 直接给不出参数（`need=null`）"
+  ],
+  "next": [
+    "取 `public_planner_state`：走引擎的 `env.public_planner_state()`（Python 侧 ✓）或找带 `public` 的那条回执路径 ✓",
+    "`compare_team_change` 的 `team` 要用**引擎认识的物种 id**（`pet_000001` 这种 ✓，不是 JS 的 `fox` ✗）",
+    "补齐后**重生成三份 jsonl 的覆盖**（现在是 7 类工具 + stop ✓ ⇒ 可扩到 12 类 ✓）"
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "method": "用 `/battle/new` 的 **view**（Python 投影）当 context.battle",
+      "reachable": [
+        "search_rules",
+        "read_match",
+        "read_last_turn"
+      ],
+      "blocked": "read_state/compare_actions/simulate_branch 报 `Cannot read properties of undefined` ⇒ **context.battle 要 JS 引擎状态** ✗"
+    },
+    {
+      "round": 2,
+      "method": "改用 **`createGame` 造的真 JS game** 当 context.battle",
+      "reachable": [
+        "read_state",
+        "search_rules",
+        "compare_actions",
+        "simulate_branch",
+        "read_match",
+        "read_last_turn"
+      ],
+      "blocked": "其余 6 个：`defaultArgsFor` 造不出参数 / 造出但 `validToolArgs` 判不合法"
+    },
+    {
+      "round": 3,
+      "method": "**照运行时那条路**（`withRuntimeStateVersion` + 只给合同里有 `state_version` 的补 + `validToolArgs` + `executeTool`）",
+      "reachable": [
+        "read_state",
+        "search_rules",
+        "compare_actions",
+        "simulate_branch",
+        "read_match",
+        "read_evidence",
+        "read_last_turn",
+        "query_rules",
+        "evaluate_team"
+      ],
+      "blocked": "compare_team_change / plan_actions / summarize_battle"
+    },
+    {
+      "round": 4,
+      "method": "按契约逐条补参数（`team_before/after` **只差一只** · `state` 用 planner state · `record` 用公开记录）",
+      "reachable_all_12": true,
+      "note": "**12/12 都能真执行并拿到结构化回执** ✓ ⇒ **\"工具不可达\"这个结论被推翻** ✓（前三轮是我的探针没照运行时走 ✗）",
+      "caveat": "其中 3 个拿到的是 **`ok:false`** 的结构化回执（真执行了，但如实报失败）✗ —— 因为 `state`/`record` 是占位、`team` id 用了 JS 物种名 ✗"
+    },
+    {
+      "round": 5,
+      "method": "补齐最后 3 个工具的参数：**从 Python 引擎直接取 `env.public_planner_state()`**（照测试 `test_individual_panel.py:228` 的现成范式：`renv.reset(...)` → `renv.public_planner_state(state, RS, \"player\")`）",
+      "got": {
+        "public_planner_state": "2816 字节（契约上限 8000 ✓）· 6 只 · **自带 `state_version`** ✓"
+      },
+      "found": [
+        "`/api/roco/battle/advance` 是**推进端点**（动作形状要 `skill_id`，不是 `id` ✓ —— 它自己报的错很清楚 ✓）",
+        "`view` 里的合法动作在 **`legal`**（不是 `legalPlayer` ✗ 我又找错一次）· 且 `view` **自带 `state_version`** ✓",
+        "`public`（planner state）**不在** `/battle/new` 与 `/battle/advance` 的回执里 ✗ ⇒ **只能从引擎侧 `env.public_planner_state()` 取** ✓（`roco-service.js:147` 说的 `result.public` 是**另一条路**的回执）"
+      ],
+      "pending": "`plan_actions` 要跑**规划搜索**，实测 **>12 分钟未返回** ⇒ 它自己契约里就写了会报「超时/搜索未完成」⇒ **训练数据里要按\"超时状态\"如实标注** ✓（不能等它 ✗，也不能假装它有结论 ✗）"
+    }
+  ],
+  "conclusion": [
+    "**\"12 个工具里只有 3 个可达\"是我前三轮的探针问题** ✗ ⇒ **已推翻** ✓（第 4 轮 12/12 都拿到了结构化回执 ✓）",
+    "**根因两条**：①要 JS 引擎状态的工具**必须喂 `createGame` 造的真 game** ✓②要 `state_version` 的工具**必须走运行时的 `withRuntimeStateVersion`**（`runtime.js:893-900` ✓）",
+    "**第 5 轮**：`plan_actions` 的 `state` **能从引擎直接取到**（2816 字节 ✓ 在 8000 上限内 ✓）⇒ 但**它自己很慢**（>12 分钟）⇒ 数据里按**超时状态**如实标 ✓"
+  ]
+}

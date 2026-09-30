@@ -36,7 +36,15 @@ test('quiz waits for an answer, survives reload, handles question mark and cance
  const a=await runCoach({...args,message:'出一道小测验'});assert.match(a.text,/假设练习/);assert(!a.text.includes('答对'));assert.equal(a.choices.length,4);
  const memory=readMemory(JSON.stringify(a.memory));assert(memory.pendingQuiz);
  const b=await runCoach({...args,memory,message:'？'});assert(b.memory.pendingQuiz);assert.match(b.text,/等你作答/);
- const c=await runCoach({...args,memory:b.memory,message:'后出手'});assert.equal(c.quizResult.correct,false);assert.equal(c.memory.lessons.length,0);assert.match(c.text,/我方速度 38，对手 40/,'2026-09-27 改钉（加点退役）：讲解改成纯速度比较');
+ const c=await runCoach({...args,memory:b.memory,message:'后出手'});assert.equal(c.quizResult.correct,false);assert.equal(c.memory.lessons.length,0);// ⚠⚠ 2026-09-29 改钉（改钉不删）。**旧断言原文留档**：
+ //   assert.match(c.text,/我方速度 38，对手 40/,'2026-09-27 改钉（加点退役）：讲解改成纯速度比较');
+ // 为什么改：人类实测纠错（第三轮）——`QUIZ_OFFSETS` 旧表全是正数**且答案按 offset 判**，
+ //   导致 `offset=2`（我方 38、对手 40）被判成「先出手」，而真相是**后出手**。
+ //   ⚠ **旧判据把那个 bug 锁死了**：它答「后出手」却断言 `correct === false`——
+ //   可 38<40 时「后」**本来就是对的**。现表 v0 是 -3（我方 38、对手 35）⇒ 「先」才对，
+ //   答「后出手」仍然是错的 ⇒ **这条判据的原本意图（答错就不计入掌握）一个字没变**，
+ //   只是数字跟着新表走。
+ assert.match(c.text,/我方速度 38，对手 35/,'数字跟着新变式表走：v0 现在是 -3（38 vs 35）');
  const cancel=await runCoach({...args,memory,message:'先不做了'});assert.equal(cancel.memory.pendingQuiz,null);
 });
 test('provider receives earlier dialogue and topic instead of an isolated follow-up',async()=>{
@@ -310,8 +318,13 @@ test('小测的变式表每一档都不同：第 4 次出题不再与第 1 次�
  }
  assert.equal(new Set(ids).size,QUIZ_OFFSETS.length,`${QUIZ_OFFSETS.length} 个变式的 id 必须互不相同`);
  assert.equal(ids[3]===ids[0],false,'第 4 次出题不能与第 1 次完全一样（原来 [2,4,3] 循环就会）');
- assert.match(buildQuiz(context,{variant:0}).explanation,/我方速度 38，对手 40/,
-  '2026-09-27 改钉（加点退役）：第 1 个变式的数字照旧钉住，只是不再写那道加点算式');
+ // ⚠ 2026-09-29 改钉（改钉不删）。**旧断言原文留档**：
+ //   assert.match(buildQuiz(context,{variant:0}).explanation,/我方速度 38，对手 40/,
+ //     '2026-09-27 改钉（加点退役）：第 1 个变式的数字照旧钉住，只是不再写那道加点算式');
+ // 为什么改：变式表从全正 [2,4,3,6,1,5] 改成含负/零/正的 [-3,2,0,4,-1,3]（为了考到低/高/同速三种），
+ //   v0 的对手速度成了 38-3=**35**。**意图不变**：还是"第 1 个变式的数字照旧钉住"。
+ assert.match(buildQuiz(context,{variant:0}).explanation,/我方速度 38，对手 35/,
+  '第 1 个变式的数字照旧钉住（v0 现在是 -3 ⇒ 对手 35）');
 });
 test('独立解出才算一次：有提示的答对不算，一次答对也不是掌握',()=>{
  const context=buildContext(null,newProfile(),'fox');

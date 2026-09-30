@@ -1,0 +1,41 @@
+{"id":"cov-read_state-no","question":"什么是应对？","expect":{"tool":null,"must_not_call":"read_state","max_tool_calls":1},"source":"agent-tasks-v2-tool-coverage.jsonl"}
+{"id":"cov-search_rules-no","question":"帮我开一局","expect":{"tool":null,"must_not_call":"search_rules","max_tool_calls":1},"source":"agent-tasks-v2-tool-coverage.jsonl"}
+{"id":"cov-compare_actions-no","question":"我上一局输在哪？","expect":{"tool":null,"must_not_call":"compare_actions","max_tool_calls":1},"source":"agent-tasks-v2-tool-coverage.jsonl"}
+{"id":"cov-simulate_branch-no","question":"火系克制什么属性？","expect":{"tool":null,"must_not_call":"simulate_branch","max_tool_calls":1},"source":"agent-tasks-v2-tool-coverage.jsonl"}
+{"id":"cov-read_match-no","question":"这回合该干嘛？","expect":{"tool":null,"must_not_call":"read_match","max_tool_calls":1},"source":"agent-tasks-v2-tool-coverage.jsonl"}
+{"id":"cov-read_evidence-no","question":"给我讲讲这队的思路","expect":{"tool":null,"must_not_call":"read_evidence","max_tool_calls":1},"source":"agent-tasks-v2-tool-coverage.jsonl"}
+{"id":"cov-read_last_turn-no","question":"帮我组个队","expect":{"tool":null,"must_not_call":"read_last_turn","max_tool_calls":1},"source":"agent-tasks-v2-tool-coverage.jsonl"}
+{"id":"cov-plan_actions-no","question":"你好","expect":{"tool":null,"must_not_call":"plan_actions","max_tool_calls":1},"source":"agent-tasks-v2-tool-coverage.jsonl"}
+{"id":"cov-summarize_battle-no","question":"这只精灵的属性是什么？","expect":{"tool":null,"must_not_call":"summarize_battle","max_tool_calls":1},"source":"agent-tasks-v2-tool-coverage.jsonl"}
+{"id":"mt-repeat-01","question":"刚才那只权杖-V，种族值到底是多少？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/multi-turn.jsonl"}
+{"id":"mt-repeat-02","question":"还是迷迷箱怪，它的属性是什么来着？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/multi-turn.jsonl"}
+{"id":"mt-repeat-03","question":"就秩序鱿墨——它速度和物攻哪个高？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/multi-turn.jsonl"}
+{"id":"mt-repeat-04","question":"祭礼巨像的种族值，你手上有数吗？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/multi-turn.jsonl"}
+{"id":"mt-repeat-05","question":"刚才说的那只寂灭骨龙，它的两个属性分别是什么？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/multi-turn.jsonl"}
+{"id":"mt-repeat-06","question":"回到多多：它的属性组合是什么？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/multi-turn.jsonl"}
+{"id":"mt-repeat-07","question":"混乱鱿彩的六维里最高的是哪一项？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/multi-turn.jsonl"}
+{"id":"mt-repeat-08","question":"刚才那只雪巨人，种族值你查到了没有？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/multi-turn.jsonl"}
+{"id":"lc-present-01","question":"第 5 回合我换上的是哪一只？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/long-context.jsonl"}
+{"id":"lc-present-02","question":"翻回去看：第 6 回合场上换人了没有？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/long-context.jsonl"}
+{"id":"lc-present-03","question":"第 7 回合那段记录里写了什么？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/long-context.jsonl"}
+{"id":"lc-present-04","question":"第 8 回合的原始事件里，换上场的是谁？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/long-context.jsonl"}
+{"id":"lc-present-05","question":"这一局打到第 16 回合，第 9 回合的换人是谁做的？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/long-context.jsonl"}
+{"id":"lc-present-06","question":"第 10 回合那条回执里，是谁被换上场了？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/long-context.jsonl"}
+{"id":"lc-present-07","question":"第 11 回合的原始事件，给我念一遍。","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/long-context.jsonl"}
+{"id":"lc-present-08","question":"第 12 回合的结算里，换人发生在哪一边？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/long-context.jsonl"}
+{"id":"vr-two-01","question":"刚才那两只（雪蛮人、铠甲虫）里，把那只换掉吧。","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/vague-reference.jsonl"}
+{"id":"vr-two-02","question":"铠甲虫和千棘海针——就它了，换上去。","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/vague-reference.jsonl"}
+{"id":"vr-two-03","question":"那只我觉得不行，换一个。","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/vague-reference.jsonl"}
+{"id":"vr-two-04","question":"你说的那只，直接换掉。","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/vague-reference.jsonl"}
+{"id":"vr-two-05","question":"那只留着还是换掉？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/vague-reference.jsonl"}
+{"id":"vr-two-06","question":"把月使鹭纳、音速犬里的那只换成别人行不行？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/vague-reference.jsonl"}
+{"id":"vr-two-07","question":"刚才提的那只，换成别的好不好？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/vague-reference.jsonl"}
+{"id":"vr-two-08","question":"那只别要了，重新配。","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/vague-reference.jsonl"}
+{"id":"vr-noref-01","question":"那个东西再帮我看一下。","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/vague-reference.jsonl"}
+{"id":"vr-noref-02","question":"就上次说的那个，怎么样了？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/vague-reference.jsonl"}
+{"id":"vr-noref-03","question":"它还好吗？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/vague-reference.jsonl"}
+{"id":"vr-noref-04","question":"那个方案还有效吗？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/vague-reference.jsonl"}
+{"id":"vr-noref-05","question":"帮我把那只弄一下。","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/vague-reference.jsonl"}
+{"id":"vr-noref-06","question":"刚才说的那个再确认一遍。","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/vague-reference.jsonl"}
+{"id":"vr-noref-07","question":"那个到底行不行？","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/vague-reference.jsonl"}
+{"id":"vr-noref-08","question":"就它了，帮我看看。","expect":{"tools":[],"calls":[0,0],"stop_ok":true},"source":"tests/evals/agent-tasks-v3-difficulty/vague-reference.jsonl"}

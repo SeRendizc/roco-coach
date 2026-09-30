@@ -165,6 +165,57 @@ class PetState:
     #: 形状：`{skill_id: {"power": int, "cost": int, "hits": int}}`（缺的键就是 0）。
     #: 只在配置声明了 `damage.per_use_ramp` 时才会被写；同样**只在非空时进序列化**。
     skill_ramps: Dict[str, Any] = field(default_factory=dict)
+    #: task-25 B 族（2026-09-30）：**这一只「按系别」用过的技能次数**（系别 → 次数）。
+    #:
+    #: 为什么记系别而不是记技能：B 族的三种写法数的都是**别的技能**——
+    #:   · 「每使用1次其他<本系>技能」⇒ 数**同系**的其它技能（`skill_000270 蓄能轰击` / `skill_000343 光能聚集`）；
+    #:   · 「每使用过1个其他系别技能」⇒ 数**异系**技能（`skill_000450 过曝`；口径按"**次数**"登记，
+    #:     见生成器 `damage.element_use_ramp` 的 reason —— 若日后定为"不同系别**个数**"只改那一处）。
+    #: 累加点与 `skill_ramps` **同一个落点**：只有这一手**真的打出去了**（`happened=True`）才计数 ⇒
+    #: `action_cancelled{reason:"fainted"}` 那种**不算**。只在配置声明了 `damage.element_use_ramp`
+    #: 时才会被写；同样**只在非空时进序列化**（legacy / v2 逐位不变）。
+    skill_use_elems: Dict[str, int] = field(default_factory=dict)
+    #: task-28（2026-09-30）：**按系别的持久威力修正**（系别 → 百分比）。
+    #:
+    #: 服务 `skill_000462 放晴`「**光系**技能威力**永久**+50%，应对防御：改为永久+100%」这一族：
+    #:   · **持久**（不是"下一手"）· **按系别**（光系技能都吃，不是"本技能"）⇒ **不走 `skill_ramps`** ✓
+    #:   · 与 `buffs["power_water"]` 那条**旧路并行、互不重叠**（旧表 `ELEMENT_POWER_BUFF_KEYS`
+    #:     只映射水/武/虫/冰 4 系，且服务的是另一批技能）—— 两边都由 `effects.compute_damage` 读 ✓
+    #: 只在非空时进序列化 ⇒ legacy / v2 逐位不变 ✓
+    element_power_mods: Dict[str, int] = field(default_factory=dict)
+    #: task-28（H 族 `721`/`728`）：**"全技能"级的持久修正** —— `{"power_pct": int, "cost_delta": int}`。
+    #: ⚠ **作用域 = 所有技能** ✗ —— 与 `skill_ramps`（**逐技能** ✗）· `buffs`（**属性** ✗）·
+    #:   `element_power_mods`（**按系别** ✗）**都不同** ✓（现有三个写点都不覆盖 ⇒ 才新开这一个 ✓）。
+    #: **非空才进序列化** ✓（与 `element_power_mods` 同一条纪律 ✓ ⇒ legacy / v2 逐位不变 ✓）。
+    global_skill_mods: Dict[str, int] = field(default_factory=dict)
+    #: 2026-09-29（Q8「同一规则同一投影」）：**这一只的六维面板**。
+    #:
+    #: 产品那一跳把「选中的实例 + 培养快照」发下来（`/battle/new` 的 `individuals`），
+    #: 引擎据此算出**与列表/详情同一份投影**的六维（`individuals.panel_from_snapshot`）。
+    #: 形状：`{"hp": int, "atk": int, "spa": int, "def": int, "spd": int, "spe": int}`。
+    #: **空 = 这只没有快照**（走种族值路径）⇒ 回执里两种情况必须能分辨，不许看起来一样。
+    panel: Dict[str, int] = field(default_factory=dict)
+    #: 2026-09-29（task-25，A 族「获得 属性±N」）：**平值**属性修正（描述里不带 `%` 的那一类）。
+    #:
+    #: 为什么必须与 `buffs` **分开记账**：`buffs` 的语义是**百分点**（`+30` = +30%），
+    #: 而数据里有一类是**面板量纲的绝对值**——「自己获得速度+120」是速度**加 120 点**，
+    #: 不是 +120%。两套量纲混在一个字典里就是静默错算，所以分成两个字段、两个读点。
+    #: 形状：`{属性键: 平值}`（键与 `parse.STAT_KEYS` 同源）。
+    #: **只在配置声明了 `damage.stat_gain_flat` 时才会被写**，且**只在非空时进序列化** ——
+    #: legacy / v2 里没有这条概念，golden 指纹逐位不变。
+    #:
+    #: 实测（全库 `rs.skills` 逐条扫，见 task-25 的探针）：**平值修正只出现在速度上**
+    #: （14 处 / 15 条技能：`自己获得速度+50/+30/+60/+70/+80/+120`、`自己获得速度-20`、
+    #: `敌方获得速度-30/-90/-20`）⇒ 目前唯一的读点是**先手速度**（`env.order_speed`）。
+    buffs_flat: Dict[str, int] = field(default_factory=dict)
+    #: 这一只的个体来源：`individual-snapshot`（有快照）或空串（没有）。
+    individual_source: str = ""
+    #: 快照里的实例 id（如 `own-0001`）。人类逐字：「实例重复物种时不能只靠 speciesID 推断来源」。
+    individual_id: Optional[str] = None
+    #: 快照里的等级（默认 60）。**只在有快照时出现**。
+    individual_level: Optional[int] = None
+    #: 面板用的投影版本号（`individuals.PROJECTION_VERSION`）：两侧「版本号一致」的那一项。
+    panel_projection: Optional[str] = None
 
     @property
     def alive(self) -> bool:
@@ -190,6 +241,21 @@ class PetState:
                if self.energy_cost_mods else {}),
             **({"sustain": copy.deepcopy(self.sustain)} if self.sustain else {}),
             **({"skill_ramps": copy.deepcopy(self.skill_ramps)} if self.skill_ramps else {}),
+            # task-25 B 族：与 `skill_ramps` 同一条纪律 —— **只在非空时出现**
+            # （legacy / v2 / 没声明能力位的对局，序列化逐位不变）。
+            **({"skill_use_elems": dict(self.skill_use_elems)} if self.skill_use_elems else {}),
+            **({"element_power_mods": dict(self.element_power_mods)}
+               if self.element_power_mods else {}),
+            **({"global_skill_mods": dict(self.global_skill_mods)}
+               if self.global_skill_mods else {}),
+            # 2026-09-29（Q8）：只在**有快照**时出现这四个键 —— 没有快照的老路径
+            # （legacy / v2 / 不传 individuals 的调用方）序列化逐位不变。
+            **({"panel": dict(self.panel)} if self.panel else {}),
+            **({"individual_source": self.individual_source} if self.individual_source else {}),
+            **({"individual_id": self.individual_id} if self.individual_id else {}),
+            **({"individual_level": self.individual_level}
+               if self.individual_level is not None else {}),
+            **({"panel_projection": self.panel_projection} if self.panel_projection else {}),
         }
 
     @staticmethod
@@ -213,6 +279,15 @@ class PetState:
             energy_cost_mods=list(d.get("energy_cost_mods") or []),
             sustain=dict(d.get("sustain") or {}),
             skill_ramps={k: dict(v) for k, v in (d.get("skill_ramps") or {}).items()},
+            # 没有这个键 = 这一只没有任何"按系别计数"（legacy / v2 的往返形状不变）。
+            skill_use_elems={str(k): int(v) for k, v in (d.get("skill_use_elems") or {}).items()},
+            element_power_mods={str(k): int(v) for k, v in (d.get("element_power_mods") or {}).items()},
+            global_skill_mods={str(k): int(v) for k, v in (d.get("global_skill_mods") or {}).items()},
+            panel={k: int(v) for k, v in (d.get("panel") or {}).items()},
+            individual_source=str(d.get("individual_source") or ""),
+            individual_id=d.get("individual_id"),
+            individual_level=d.get("individual_level"),
+            panel_projection=d.get("panel_projection"),
         )
 
 

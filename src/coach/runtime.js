@@ -31,7 +31,7 @@ import {STAT_KEYS,STAT_NAMES} from './talent.js';
 // 进化那一族：数据来自**社区图鉴层**（`data/roco/derived/hke-2026-09-27/`，REFERENCE_ONLY）。
 // 成句时会**说出这条来路**（不许冒充官方文本）—— 接线只有下面那一行。
 import {evolutionAsk,evolutionLocalAnswer,hkeSkillLine} from './evolution-advice.js';
-import {companion} from './companion.js';
+import {companion,pickFresh} from './companion.js';
 // 台账等级的中文标签（玩家可见的「依据等级 X」）：表只有一份，在 `evidence-levels.js` ——
 // 那个文件不 import node 内建，所以这一层（浏览器也加载）能安全 import（2026-09-27 审计 ②）。
 import {EVIDENCE_LABELS} from './evidence-levels.js';
@@ -1785,9 +1785,46 @@ async function quizPanelOf(context,call){
  const rows=Array.isArray(context?.profile?.pets)?context.profile.pets.filter((row)=>row&&typeof row==='object'):[];
  if(!rows.length)return null;
  const named=rows.filter((row)=>typeof row.name==='string'&&row.name.trim());
+ // ⭐ 2026-09-29（第三轮 P0 Q1，人类逐字：「**当前局题取名单喵喵而非场上缇塔，context 选择也需修**」）：
+ //
+ // 出题问的必须是**这一局在场的那一只**，而不是名单里的第一只。名单（`profile.pets`）是
+ // **候选池那一页**送来的"一页候选"，它不代表这一局带谁；而 `roco_battle.self` + `self_active`
+ // 是引擎公开视图裁出来的**这一局在场**那一只（`rocoLineupOf` 上面已写明这一层）。
+ //
+ // 取速度的顺序（拿不到就往下退，每一档都在 `source` 里写清是哪一档）：
+ //   ① 在场那一只在名单行里能对上（按 pet_id 或名字）且带 stats.spe ⇒ 用名单里的真实速度；
+ //   ② 对不上/没有速度 ⇒ 拿它的 pet_id 查一次图鉴（`call({kind:'pet'})`，与下面老路同一个工具）；
+ //   ③ 都拿不到 ⇒ **退回老路**（名单里第一只有速度的行），但 `source` 会如实写明
+ //      "这一局在场的那只没拿到面板，用的是名单第一只" —— 不冒充。
+ const lineup=rocoLineupOf(context);
+ const activeIndex=Number.isInteger(context?.roco_battle?.self_active)?context.roco_battle.self_active:null;
+ const onField=activeIndex!==null?(lineup[activeIndex]??null):(lineup.find((one)=>one.active===true)??null);
+ if(onField){
+  const key=(row)=>String(row?.pet_id??row?.species_id??row?.id??'');
+  const named2=(row)=>String(row?.name??'');
+  const same=(row)=>(key(row)&&key(row)===key(onField))||(named2(row)&&named2(row)===named2(onField));
+  const row=named.find((one)=>same(one)&&Number.isFinite(one?.stats?.spe));
+  if(row)return {id:row.id??row.species_id??onField.pet_id??onField.name,name:onField.name??row.name,
+   speed:row.stats.spe,
+   source:`这一局在场的那只（${onField.name??row.name}）· 名单面板 stats.spe=${row.stats.spe}`};
+  const petIdKey=/^pet_\d{6}$/.test(key(onField))?key(onField):null;
+  if(petIdKey&&typeof call==='function'){
+   const receipt=await call({kind:'pet',pet_id:petIdKey});
+   const speed=receipt?.result?.stats?.spe;
+   if(Number.isFinite(speed)){
+    return {id:onField.pet_id??petIdKey,name:onField.name??petIdKey,speed,
+     source:`这一局在场的那只（${onField.name??petIdKey}）· 图鉴 ${petIdKey} 的 stats.spe=${speed}`};
+   }
+  }
+ }
  const withStats=named.find((row)=>Number.isFinite(row?.stats?.spe));
- if(withStats)return {id:withStats.id??withStats.species_id??withStats.name,name:withStats.name,
-  speed:withStats.stats.spe,source:`名单面板（${withStats.name} 的 stats.spe=${withStats.stats.spe}）`};
+ if(withStats){
+  const what=onField
+   ?`这一局在场的那只（${onField.name??'名字未登记'}）没拿到可用面板，用的是名单第一只`
+   :'名单第一只';
+  return {id:withStats.id??withStats.species_id??withStats.name,name:withStats.name,
+   speed:withStats.stats.spe,source:`${what}（${withStats.name} 的 stats.spe=${withStats.stats.spe}）`};
+ }
  const target=named.find((row)=>/^pet_\d{6}$/.test(String(row.species_id??''))||/^pet_\d{6}$/.test(String(row.id??'')));
  if(!target){
   return {blocked:true,
@@ -1912,16 +1949,297 @@ function localRocoBattleReply({message,context}){
  * 反证（`tests/roco-advice-u08.test.js`）：把 `roco_battle` 从上下文里撤掉之后，
  * 这条函数必须永远走「放行」分支（因为没有建议可对照），而回答里也不许再出现那一手。
  */
+/**
+ * 建议的**状态转移校验**（task-28，2026-09-30）—— `enforceBattleAdvice` 的第一道闸。
+ *
+ * 现场：`enforceBattleAdvice` 原来**只查正文有没有首选行动标签** ✗ —— 于是两件事都能溜过去：
+ *   ① **非法建议**：建议里的那一手在这份局面里根本不该出现（能量不够、人已经倒下、换人成本不够）；
+ *   ② **只贴标签**：正文点了名，却没有"为什么是它 / 主要风险"，等于把行动名丢给玩家自己承担 ✗。
+ * 这里用**建议自带的那份公开局面**（`advice.evidence`，与 `battleAdvice` 同一个来源）复算合法性：
+ * 每一个理由都写成玩家能读的话，而不是内部字段名。
+ *
+ * 反证（`tests/roco-battle-advice-legality.test.js`）：
+ *   · 能量 2 / 这一手要 5 ⇒ `ok:false` 且理由点名能量；
+ *   · 场上那只 hp=0 ⇒ `ok:false`（该走补位，不是出招）；
+ *   · 行动不在 `evidence.legal` 里 ⇒ `ok:false`（标签对不上合法动作表）；
+ *   · 建议本身没给理由/风险 ⇒ `ok:false`（模型可以换说法，但**不能只贴一个标签**）。
+ */
+export function adviceLegalityReport(advice){
+ if(!advice||typeof advice!=='object')return {ok:false,reasons:['没有建议对象'],action:null,state:null};
+ const ev=advice.evidence&&typeof advice.evidence==='object'?advice.evidence:{};
+ const my=ev.my??null;
+ const legal=Array.isArray(ev.legal)?ev.legal:[];
+ const reasons=[];
+ const target=legal.find((one)=>one&&one.legalActionId&&one.legalActionId===advice.legalActionId)
+  ??legal.find((one)=>one&&(one.label??null)===(advice.legalLabel??advice.actionLabel))
+  ??null;
+ if(!target)reasons.push('建议的行动不在这一回合的合法动作表里');
+ if(my){
+  if(Number.isFinite(my.hp)&&my.hp<=0)reasons.push('我方场上的伙伴已经倒下 ⇒ 这一回合该走补位，不是出招');
+  const costFromAction=Number.isFinite(advice.action?.energy)?advice.action.energy:null;
+  const cost=Number.isFinite(costFromAction)?costFromAction:(Number.isFinite(target?.energy)?target.energy:null);
+  if(Number.isFinite(cost)&&Number.isFinite(my.energy)&&cost>my.energy)
+   reasons.push(`能量不够：这一手要 ${cost} 点，现在只有 ${my.energy} 点`);
+ }
+ if(!String(advice.reason??'').trim())reasons.push('没有给出「为什么是它」');
+ if(!String(advice.risk??'').trim())reasons.push('没有给出「主要风险」');
+ return {ok:!reasons.length,reasons,action:target,
+  state:{hp:my?.hp??null,energy:my?.energy??null,alive:my?(Number.isFinite(my.hp)?my.hp>0:null):null}};
+}
+
+//: 正文里可识别的**段头**：军师那一套（首选行动/为什么是它/…）与复盘那一套（关键回合/…）。
+//: 压缩时**段头一个都不许丢** —— 这就是"四段结构仍在"的可判据形式 ✓
+const ANSWER_SECTION_LABELS=['首选行动：','为什么是它：','收益：','主要风险：','备选：','我这里不知道的：',
+ '关键回合：','当时合法替代：','下一局试哪一手：','风险：'];
+
+/** 在句子边界上砍（砍不到就硬砍），并留一个省略号说明这里被压缩过。 */
+function cutAtSentence(text,size){
+ const cut=text.slice(0,Math.max(1,size));
+ const stop=Math.max(cut.lastIndexOf('。'),cut.lastIndexOf('；'),cut.lastIndexOf('，'),cut.lastIndexOf('\n'));
+ return `${stop>size*0.5?cut.slice(0,stop+1):cut}…`;
+}
+
+/**
+ * **结构化压缩**（task-28，2026-09-30）：模型正文超长时，不再整段回退，而是**保住段头、按段分配预算**。
+ *
+ * 现场：`:2384` 原来是 `candidate.length>360 ⇒ too-long ⇒ 整段降级` ✗ —— 玩家拿到的是另一份正文，
+ * 模型那一份里有用的四段结构（关键回合 → 合法替代 → 下一手 → 风险）**全被丢掉**。
+ * 现在：段头全留、每段按自身长度占比分配剩余预算、在句号/分号/逗号处收尾。
+ * 压缩后仍然要**重新过一遍**核对（回执一致性/数字引用/长度），过不了才回退 —— 这一步在 `runCoach` 里做。
+ *
+ * 返回 `{ok,text,kept,dropped,compressed}`；**识别不到任何段头**时 `ok:false`（不猜结构，交回调用方降级）。
+ */
+export function compressStructuredAnswer(text,{limit=360}={}){
+ const body=typeof text==='string'?text:'';
+ if(body.length<=limit)return {ok:true,text:body,kept:[],dropped:[],compressed:false};
+ const marks=[];
+ for(const label of ANSWER_SECTION_LABELS){
+  let from=0;
+  for(;;){
+   const at=body.indexOf(label,from);
+   if(at<0)break;
+   marks.push({label,at});from=at+label.length;
+  }
+ }
+ marks.sort((a,b)=>a.at-b.at);
+ if(!marks.length)return {ok:false,text:body,kept:[],dropped:['正文里没有可识别的段头（不猜结构）'],compressed:false};
+ const parts=[{label:null,text:body.slice(0,marks[0].at).trim()}];
+ marks.forEach((mark,index)=>{
+  const end=index+1<marks.length?marks[index+1].at:body.length;
+  parts.push({label:mark.label,text:body.slice(mark.at,end).trimEnd()});
+ });
+ const headerSize=parts.reduce((n,part)=>n+(part.label?part.label.length:0),0);
+ const budget=Math.max(40,limit-headerSize-1);
+ const bodies=parts.filter((part)=>part.label&&part.text.length>part.label.length);
+ const total=bodies.reduce((n,part)=>n+(part.text.length-part.label.length),0)||1;
+ const dropped=[];
+ const out=[];
+ for(const part of parts){
+  if(!part.label){if(part.text)out.push(part.text.length<=80?part.text:cutAtSentence(part.text,80));continue;}
+  const inner=part.text.slice(part.label.length);
+  if(!inner.trim()){out.push(part.label);continue;}
+  const share=Math.max(24,Math.floor(budget*(inner.length/total)));
+  if(inner.length<=share){out.push(part.label+inner);continue;}
+  dropped.push(`${part.label}${inner.length-share} 字`);
+  out.push(part.label+cutAtSentence(inner,share));
+ }
+ let outText=out.join('');
+ if(outText.length>limit)outText=`${outText.slice(0,limit-1)}…`;
+ return {ok:true,text:outText,kept:parts.filter((part)=>part.label).map((part)=>part.label),dropped,compressed:true};
+}
+
+/**
+ * **同一快照**的读数表（2026-09-30，P0 局中建议）。
+ *
+ * 现场（`评估-2026-09-30-0035` L20 逐字）：主答说「缇塔 508 满血、能量 10」，
+ * 展开理由却说「**它**能量已经攒到 ${9}」—— 9 是**场上那只（多彩方方）**的能量 ✗。
+ * 一个回答里同一个"它"指了两个对象、两个数字：玩家没法照它做决定。
+ *
+ * 这一份表把**这一局的公开快照**（`context.roco_battle`，与建议同一个来源）摊平成
+ * `名字 → {hp,maxHp,energy,onField}`，后面的核对全部只认它 —— 不许再从别处取数。
+ */
+export function adviceSnapshotOf(battle){
+ const table=new Map();
+ if(!battle||typeof battle!=='object')return {table,field:null,pets:[]};
+ const active=Number.isInteger(battle.self_active)?battle.self_active:0;
+ const push=(row,onField)=>{
+  if(!row||typeof row!=='object')return;
+  const name=typeof row.name==='string'&&row.name?row.name:(typeof row.pet_id==='string'?row.pet_id:null);
+  if(!name)return;
+  const num=(v)=>(Number.isFinite(v)?v:null);
+  table.set(name,{hp:num(row.hp),maxHp:num(row.max_hp??row.maxHp),energy:num(row.energy),onField});
+ };
+ (Array.isArray(battle.self)?battle.self:[]).forEach((row,index)=>push(row,index===active));
+ push(Array.isArray(battle.foe)?battle.foe[0]:null,true);
+ const pets=[...table.entries()].map(([name,stats])=>({name,...stats}));
+ return {table,field:pets.find((one)=>one.onField)??null,pets};
+}
+
+/** 从文本里取「某个名字附近的能量/血量数字」——只认紧邻同一个分句的写法，不做全文配对。 */
+function numberClaimsNear(text,name){
+ const claims=[];
+ if(!name)return claims;
+ const body=String(text??'');
+ const clauses=body.split(/[。；;，,\n]/);
+ for(const clause of clauses){
+  if(!clause.includes(name))continue;
+  const energy=/(?:能量|豆)\s*(?:已经)?\s*(?:攒到|到|还有|剩|是)?\s*(\d+)/.exec(clause);
+  if(energy)claims.push({kind:'energy',value:Number(energy[1]),clause});
+  const hp=/(\d+)\s*(?:点)?\s*血/.exec(clause);
+  if(hp)claims.push({kind:'hp',value:Number(hp[1]),clause});
+ }
+ return claims;
+}
+
+/**
+ * **数字同源核对**（P0 第 1 条）：主答与展开理由里的每一个数字，都必须等于**同一份快照**里
+ * **它所指那个对象**的读数；跨对象串号（拿 A 的能量说 B）会被单独点名。
+ *
+ * 返回 `{ok,problems:[{name,kind,claimed,actual,borrowedFrom,clause}]}`。
+ * `borrowedFrom` 非空 = 这个数字其实来自**另一个对象**（这正是报告里那一处）。
+ */
+export function findNumberSourceProblems({text,battle}={}){
+ const snap=adviceSnapshotOf(battle);
+ const problems=[];
+ if(!snap.pets.length)return {ok:true,problems,snapshot:snap};
+ const borrowed=(name,kind,value)=>snap.pets.find((one)=>one.name!==name&&one[kind]===value)?.name??null;
+ for(const pet of snap.pets){
+  for(const claim of numberClaimsNear(text,pet.name)){
+   const actual=pet[claim.kind];
+   if(actual===null||actual===undefined)continue;   // 快照里没有这一项 ⇒ 不判（宁可不说）
+   if(actual===claim.value)continue;
+   problems.push({name:pet.name,kind:claim.kind,claimed:claim.value,actual,
+    borrowedFrom:borrowed(pet.name,claim.kind,claim.value),clause:claim.clause.trim()});
+  }
+ }
+ return {ok:!problems.length,problems,snapshot:snap};
+}
+
+/**
+ * 把带着错数字的**那一小段**摘掉（其余一个字不动），并如实记账。
+ *
+ * ⚠ 粒度：先按句号切句，再按逗号切**小段** —— 只摘"名字 + 错数字"那一小段，
+ * 不是把整句理由删掉（第一版按句摘，结果「为什么是它」整句没了 ⇒ 玩家连理由都收不到 ✗）。
+ * 一句里的小段全被摘光时才丢整句。
+ */
+export function dropClausesWithProblems(text,problems){
+ const body=String(text??'');
+ if(!problems.length)return {text:body,dropped:[]};
+ //: 这一小段算不算"带着错数字"：同一个片段里既有那个**名字**、又有那个**数字**，而且谈的是能量/血量。
+ const isBadFragment=(fragment)=>problems.some((one)=>fragment.includes(one.name)
+  &&fragment.includes(String(one.claimed))&&(fragment.includes('能量')||fragment.includes('豆')||fragment.includes('血')));
+ const kept=[],dropped=[];
+ for(const sentence of body.split(/(?<=[。；;\n])/)){
+  if(!isBadFragment(sentence)){kept.push(sentence);continue;}
+  const survivors=[];
+  for(const fragment of sentence.split(/(?<=[，,、])/)){
+   if(isBadFragment(fragment)){dropped.push(fragment.trim());continue;}
+   survivors.push(fragment);
+  }
+  const joined=survivors.join('');
+  if(joined.trim())kept.push(joined);
+ }
+ const out=kept.join('').replace(/[，、]\s*([。；])/g,'$1').replace(/^[，、]\s*/,'');
+ return {text:out.trim()||body,dropped};
+}
+
+/**
+ * **对照收益核对**（P0 第 2/3 条）：首选行动必须相对**至少一个替代**（出招/防御/换人）说清收益与代价；
+ * 说不出来就**诚实说无法区分**，不许硬挑一个首选。
+ *
+ * `comparable` = 这份建议里能拿来做对照的东西（`alternates` 里带数字，或正文里有比较句）；
+ * `indistinguishable` = 这一手**没有任何可区分的优势**（快照里双方满血、替代与首选都估不出伤害）——
+ * 此时正确行为是「说无法区分」，而不是把"首选"端出去。
+ */
+export function adviceComparisonReport(advice,{text=null,battle=null}={}){
+ if(!advice||typeof advice!=='object')return {ok:false,hasComparison:false,indistinguishable:false,alternates:[],detail:'没有建议对象'};
+ const body=String(text??advice.text??'');
+ const alternates=Array.isArray(advice.alternates)?advice.alternates.filter(Boolean):[];
+ const withNumbers=alternates.filter((row)=>Number.isFinite(row?.min)||Number.isFinite(row?.max)||Number.isFinite(row?.power));
+ // ⚠ 收紧过一次：**"列了备选"不算对照**（「防御（没有估算数据）」这种只是把选项念一遍）。
+ //    要有**估值数字**或**真的比较句**（比/不如/代价/…）才算"给出了相对替代的收益与代价"。
+ const comparative=/(比|不如|好过|优于|代价|对照|换算出|差不多|都一样|无法区分|分不出)/.test(body);
+ const snap=adviceSnapshotOf(battle);
+ const field=snap.pets.find((one)=>one.onField)??null;
+ // 「没有决策优势」的判法**刻意保守**：只有在"双方都满血 + 建议里没有任何估值数字 + 替代也没有数字"时
+ // 才判无法区分 —— 别的局面一律不抢答（宁可留着首选，也不把有信息量的判断说成"分不出"）。
+ const fullHp=Boolean(field&&field.hp!==null&&field.maxHp!==null&&field.hp>=field.maxHp);
+ const noNumbers=!advice.evidence?.estimate&&!withNumbers.length
+  &&!/(按未核验公式|估\s*\d|伤害\s*\d)/.test(body);
+ const indistinguishable=Boolean(advice.kind==='primary-action'&&fullHp&&noNumbers);
+ const hasComparison=Boolean(comparative||withNumbers.length||advice.evidence?.estimate);
+ return {ok:hasComparison||indistinguishable,hasComparison,indistinguishable,alternates,field,
+  detail:hasComparison?'有对照':(indistinguishable?'没有可区分的优势（双方满血且都估不出伤害）':'只给了首选，没有与任何替代对照')};
+}
+
+/** 「说无法区分」那一句：把**这一份快照**的读数报出来，并明说我不挑。 */
+export function indistinguishableAdviceText({advice,battle}={}){
+ const snap=adviceSnapshotOf(battle);
+ const field=snap.pets.find((one)=>one.onField)??null;
+ const bits=[];
+ if(field?.hp!==null&&field?.hp!==undefined)bits.push(`${field.name} ${field.hp}/${field.maxHp??'?'} 血`);
+ if(field?.energy!==null&&field?.energy!==undefined)bits.push(`${field.energy} 能量`);
+ const alternates=(Array.isArray(advice?.alternates)?advice.alternates:[]).map((row)=>row?.label).filter(Boolean);
+ // ⚠ 措辞不许出现「首选行动」这个标签（那正是"硬挑一个"的形状）；把备选名字去重后并进那一串。
+ const trio=['出招','防御','换人'];
+ const extra=[...new Set(alternates.filter((name)=>name&&!trio.includes(name)))];
+ return `这一手我给不出"谁更好"：${bits.length?`当前读数（${bits.join('、')}）下，`:''}`
+  +`${trio.join(' / ')}${extra.length?`（含${extra.join('、')}）`:''}`
+  +'这几条都没有可区分的优势 —— 我按同一份快照比过了，分不出来，就不替你挑一个。'
+  +'你按自己的想法走；要我盯哪一条的代价，点名一条我再算。';
+}
+
 export function enforceBattleAdvice(advice,text){
  const body=typeof text==='string'?text:'';
  if(!advice||typeof advice!=='object')return {enforced:false,reason:null,text:body};
- const labels=[advice.actionLabel,advice.legalLabel].filter((value)=>typeof value==='string'&&value);
- if(!labels.length)return {enforced:false,reason:null,text:body};
- // 只认**首选行动**的标签：模型点了备选却没点首选，仍然算没有结论（U08 要的是「一个首选」）。
- if(labels.some((label)=>body.includes(label)))return {enforced:false,reason:null,text:body};
+ // ⓪ **交付的就是引擎自己那份正文** ⇒ 无需"保障"（2026-09-30 真实读数踩到）：
+ //   `replace-required`（引擎说必须补位）那一支**没有 `risk` 字段**，于是下面 ① 会判它"缺主要风险"
+ //   ⇒ `enforced:true` + 回执写「模型回答没有点出那一手的合法首选行动…」——**玩家看到的是同一份正文，
+ //   回执却在说假话** ✗（真机读数：turn8 `phase=replace`、`needsReplacement=['player']`、`advice.kind=
+ //   'replace-required'`、`advice.legalActionId=null` 而 `advice.action.legalActionId='switch#1'`）。
+ //   判据：正文与 `advice.text` **逐字相同** ⇒ 它本来就是引擎的结论，直接放行 ✓
+ if(typeof advice.text==='string'&&advice.text&&body===advice.text)return {enforced:false,reason:null,text:body};
+ // ① **状态转移**先判（task-28）：建议的行动必须在这份公开局面里**合法**（能量/血量/存活/换人成本），
+ //    而且建议本身要给出「为什么是它」与「主要风险」。不合法 ⇒ 直接交确定性正文（它按同一局面算过）。
+ const legality=adviceLegalityReport(advice);
  const fallback=typeof advice.text==='string'&&advice.text?advice.text:body;
- return {enforced:true,reason:'answer-missing-legal-action',text:fallback};
+ if(!legality.ok)return {enforced:true,reason:`advice-state-transition:${legality.reasons[0]}`,text:fallback,legality};
+ const labels=[advice.actionLabel,advice.legalLabel].filter((value)=>typeof value==='string'&&value);
+ if(!labels.length)return {enforced:false,reason:null,text:body,legality};
+ // 只认**首选行动**的标签：模型点了备选却没点首选，仍然算没有结论（U08 要的是「一个首选」）。
+ const hasLabel=labels.some((label)=>body.includes(label));
+ // ② **不许只贴一个行动标签就算过**：正文得把那句话**解释开**，不能只有名字。
+ //    判法要经得起真模型措辞（U08 ⑦ 的对照句是「这一手先出「龙血」：对面 452 血，压上去最划算；
+ //    注意对面可能换人躲掉。」—— 一个"因为/风险"字眼都没有，但它确实解释了）⇒
+ //    口径 = 「去掉行动标签之后还剩得下一句话（≥12 字）」**且**其中带着局面/代价的线索。
+ const rest=labels.reduce((acc,label)=>acc.split(label).join(''),body).trim();
+ const explains=rest.length>=12&&/因为|所以|为什么|理由|风险|代价|注意|小心|可能|估|血|能量|换|留/.test(rest);
+ const coversReason=!/\S/.test(String(advice.reason??''))||explains;
+ const coversRisk=!/\S/.test(String(advice.risk??''))||explains;
+ if(hasLabel&&coversReason&&coversRisk)return {enforced:false,reason:null,text:body,legality};
+ return {enforced:true,reason:hasLabel?'answer-missing-reason-or-risk':'answer-missing-legal-action',text:fallback,legality};
 }
+/**
+ * **交付前的两道 P0 闸**（2026-09-30，报告 L20/L36）—— 只走这一条路，judges 直接调它：
+ *
+ *   ① **同一快照**：正文里"某个名字旁边的能量/血量"必须等于**这一份快照**里那个对象的读数；
+ *      跨对象串号（拿场上那只的能量说后备那只）⇒ **摘掉那一句**，并如实记 `numberCheck.problems`。
+ *   ② **对照收益**：首选相对一个替代的收益/代价说得出来就照发；**说不出来而且没有决策优势**
+ *      ⇒ 换成「分不出，我不替你挑一个」那一句（`indistinguishable:true`），**不许硬给首选**。
+ *
+ * 没有 `battle`（营地/图鉴/纯事实链路）⇒ **什么都不做**，原样返回（那些链路逐字节不变 ✓）。
+ */
+export function gateAdviceDelivery({advice,text,battle}={}){
+ const body=typeof text==='string'?text:'';
+ if(!battle||typeof battle!=='object')return {text:body,numberCheck:{ok:true,problems:[]},comparison:null,indistinguishable:false};
+ const numberCheck=findNumberSourceProblems({text:body,battle});
+ const repaired=numberCheck.ok?{text:body,dropped:[]}:dropClausesWithProblems(body,numberCheck.problems);
+ const comparison=adviceComparisonReport(advice,{text:repaired.text,battle});
+ const indistinguishable=Boolean(comparison.indistinguishable&&!comparison.hasComparison);
+ return {text:indistinguishable?indistinguishableAdviceText({advice,battle}):repaired.text,
+  numberCheck,comparison,indistinguishable,dropped:repaired.dropped};
+}
+
 export async function runCoach({message,role='auto',context,memory,conversation=[],provider=localProvider,correctionBudget=1}){
  // 路由只认**玩家原话**。
  //
@@ -1963,7 +2281,7 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  //
  // 现在只有**真正的分析问法**才算 situational：输在哪、哪里出问题、为什么输、怎么办…
  // 「输了」单独出现就留给陪练（两张词表同源见 companion.js 的 EMOTION_WORDS / MOOD_LINE）。
- const ANALYSIS_ASK=/咋办|怎么办|怎么救|救一下|救命|分析|输在哪|哪里出|问题出在|为什么输|为啥输|打不过|damn/i;
+ const ANALYSIS_ASK=/咋办|怎么办|怎么救|救一下|救命|分析|输在哪|哪里出|问题出在|为什么输|为啥输|打不过|改进|做得更好|哪里能改|哪儿能改|能改什么|该换谁|换谁|换什么|damn/i;
  // 「别复盘了」里也有「复盘」两个字，但这句话要的是**不要**复盘。
  // 拒绝以整句为准，不靠关键词命中——它同时挡住下面 matchRequest 与 review 两个分支，
  // 让这句话落到陪练，由 memory.stated 的 refusal 出口回答（"好，不复盘了。"）。
@@ -1990,6 +2308,37 @@ export async function runCoach({message,role='auto',context,memory,conversation=
   const names=list.slice(0,6).map((p)=>p.name).join('、');
   packet={text:`你这 ${list.length} 只是：${names}。要评的话得先点三只 —— 直接说三个名字就行。`,
    evidence:['阵容评估按三只算（引擎的 evaluate_team 只收三只）：这里只列你选中的，不替你挑。']};
+  locked=true;route='guide';next.lastTopic='team';
+ }
+ else if(ABUSE_ASK.test(String(routingText).trim())&&String(routingText).trim().length<=12){
+  // ── 第三轮（人类截图逐字：「你是傻子吗」）────────────────────────────────────
+  // **这一轮不走模型**：真 8765 实测（deepseek 已连）模型会写成「我接住这个词：傻子。你要骂就骂，
+  // 我在。」「我不是傻子，是照本机记录答话的。」——复述脏词/辩解，正是玩家炸毛的原因。
+  // 人类口径：**不复述脏词 · 不带情绪 · 不教育 · 不反问 · ≤20 字 · 承认他在不满 + 给一个出口**。
+  // 所以这一支是**确定性**的（模型再连也不改写），并按"最近三轮说过的话"换说法（不许逐字重发）。
+  const lines=(Array.isArray(next?.dialogue)?next.dialogue:[])
+   .filter((x)=>x?.role==='assistant'&&typeof x.content==='string').map((x)=>String(x.content));
+  const text=pickFresh(['我在。哪句说得不对，你直接说，我照着改。',
+   '知道了。你要问哪一条，直接说就行。',
+   '这句我记下了。哪里不对，你说一句我改。'],lines);
+  packet={text,evidence:[],scope:'companion'};locked=true;route='companion';next.lastTopic='companion';
+ }
+ else if(teamNextStepAsk(routingText,context)){
+  // 配队的下一步：按**手里那一页候选**给动作（不拿局内口径冒充）。
+  const rows=(Array.isArray(context?.profile?.pets)?context.profile.pets:[])
+   .filter((row)=>row&&typeof row==='object'&&typeof row.name==='string').slice(0,3);
+  const names=rows.map((row)=>row.name).join('、');
+  // 偏好只管**篇幅**：同一件事，短一截。读 memory 上的两份字段（`chatStyle` 优先，
+  // 退回旧的 `preference`）—— 这一层拿不到 `style`（它在别的函数里算）。
+  const brief=['brief'].includes(next?.chatStyle)||['brief'].includes(next?.preference);
+  packet={text:rows.length
+   ?(brief?`下一步：从这一页候选中定带哪只 —— 说三个名字，我按引擎评这一队。`
+    :`下一步先定**带哪几只**：这一页候选里有${names}。要定的话说清目标（打谁、要快还是要稳），`
+     +'或者直接说三个名字 —— 我按引擎评这一队，给的是结构判断，不是胜率。')
+   :'下一步先定带哪几只 —— 把候选那一页给我，或者直接说三个名字，我按引擎评这一队；'
+    +'没有目标（打谁、要快还是要稳）我只能给结构建议。',
+   evidence:[rows.length?`候选页（context.profile.pets）里有 ${rows.length} 只：${names}`:'context.profile.pets 里没有候选行'],
+   scope:'team'};
   locked=true;route='guide';next.lastTopic='team';
  }
  else if(codexLookupEnabled()&&codexFactAsk(routingText)){route='teacher';next.lastTopic='codex';
@@ -2137,7 +2486,11 @@ export async function runCoach({message,role='auto',context,memory,conversation=
    // 所以提成常量，兜底那一步能认出来并换成人话（见 `internalDraft` 那一段）。
    const factAsk=Boolean(policy.need&&FACT_TOOLS.has(policy.need))&&!situational
     &&(Boolean(factAnswer)||provider.name!=='local');
-   if(role==='auto')route=factAsk?'teacher':(/培养|加点|成长/.test(routingText)?'teacher':(/怎么打|建议|这回合|换宠|换上|换成|换掉|换一只|补位|技能|出招|先手|能量|豆|属性|克制|防御|守一下|守住|预判/.test(routingText)||situational&&context.battle)?'strategist':'companion');
+   // ⚠ 2026-09-29（`tests/evals/companion-contract.test.js` 当场抓到）：「**别复盘了**」含「复盘」
+// ⇒ 这一行的军师关键词把它判成 strategist ✗，而 `refusesReview` 那条守卫只管**正文分支**，
+// 管不到**路由** ⇒ 「拒绝」输给了「复盘」 ✗。契约是**情绪与拒绝优先于复盘路由** ✓
+// ⇒ 加一个前置排除：明确拒绝复盘/回顾时，这一行不许把它当军师问题 ✓
+if(role==='auto')route=factAsk?'teacher':(refusesReview?'companion':/培养|加点|成长/.test(routingText)?'teacher':(/怎么打|建议|这回合|换宠|换上|换成|换掉|换一只|补位|技能|出招|先手|能量|豆|属性|克制|防御|守一下|守住|预判|复盘|回顾|这一局|这一把|上一局|刚才那局|哪里.{0,4}做得|打得怎么样|评价一下|怎么办|该干嘛|该干什么|下一步|接下来该|改进|做得更好|哪里.{0,4}能改|哪儿.{0,4}能改|该换谁|换谁|换什么/.test(routingText)||situational&&context.battle)?'strategist':'companion');
    if(followup&&['teacher','strategist'].includes(memory.lastTopic))route=memory.lastTopic;
    // ── 2026-09-29（task-19 G1）：**局中「该换谁」本地这一支也要用战况** ──────────────────────
    // 修前实测（真机 + 独立实例）：`roco_battle` 在包里，但这一句既不匹配上面那条 route 正则
@@ -2322,8 +2675,20 @@ export async function runCoach({message,role='auto',context,memory,conversation=
   return null;
  };
  let modelConsistency=null,modelGrounding=null,modelPrediction=null,tooLong=false,rejectedReason=null;
+ //: 交付用的候选正文：长度超限被**结构化压缩**过时就是压缩后的那一份（不是回退）✓
+ let deliveredText=text,compressedAnswer=null;const answerCompressedFrom=text.length;
  {
-  const first=checkAnswerText(text,packet);
+  let first=checkAnswerText(deliveredText,packet);
+  // task-28（2026-09-30）：**长度超限改走结构化压缩** —— 保留段头（四段结构）、按段分配预算、
+  //   压完**重新过一遍同一批核对**（回执/数字引用/长度）；过了就交压缩稿，过不了才回退。
+  //   ⚠ 只对 `too-long` 这一种：答错内容（对不上回执/无出处/只交"不知道"）的路径一个字不动 ✓
+  if(useModel&&first.reason==='too-long'){
+   const shrunk=compressStructuredAnswer(deliveredText,{limit:360});
+   if(shrunk.ok&&shrunk.compressed){
+    const again=checkAnswerText(shrunk.text,packet);
+    if(!again.reason){compressedAnswer=shrunk;deliveredText=shrunk.text;first=again;}
+   }
+  }
   modelConsistency=first.consistency;modelGrounding=first.grounding;modelPrediction=first.prediction;tooLong=first.tooLong;rejectedReason=first.reason;
  }
  // 模型正文没过核对 ⇒ **先别降级**：把失败做成回执，再问一次（除非券已经用掉 / 已经试过）。
@@ -2393,7 +2758,7 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  // 提示词里的内部叫法会被模型照抄进给玩家的回答，光改提示词只是"希望它不抄"。
  // 这一层只换词（映射表在 `plain-words.js`，判据验"数字序列一个字都不许变"），
  // 换过哪几个词写进回执的 `speakPlain`，不悄悄改；本地正文本来就是人话 ⇒ 通常是空数组。
- const spoken=speakPlainly(rejected?rejectedText:(textBlocks??text));
+ const spoken=speakPlainly(rejected?rejectedText:(textBlocks??deliveredText));
  const spokenText=spoken.text;
  // ── U08 的**确定性保障**（交付前的最后一道）────────────────────────────────
  //
@@ -2401,7 +2766,14 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  // 这件事**不能靠提示词**（截图 08 那句「还是你自己定」就是模型自己组的），
  // 所以这里由代码判一次：正文里没有那一手 ⇒ 换成交付确定性建议（`packet.rocoAdvice.text`）。
  // 判据是**行动标签**（技能名 / 换人时用伙伴名），不是形状：模型换个说法只要点了名就放行。
- const adviceCheck=enforceBattleAdvice(packet.rocoAdvice,spokenText);
+ // ── P0（2026-09-30 报告 L20/L36）：**同一快照 + 对照收益**，在交付前再判一次 ─────────────
+ //  ① 数字同源：正文里"某个名字旁边的能量/血量"必须等于**这一份快照**里那个对象的读数；
+ //     跨对象串号（拿 A 的能量说 B）摘掉那一句并如实记账 —— 不许让玩家拿着两个数字做决定。
+ //  ② 对照收益：首选必须相对一个替代说清收益/代价；**没有决策优势时明说分不出**，不硬挑首选。
+ const gated=gateAdviceDelivery({advice:packet.rocoAdvice,text:spokenText,battle:rocoBattle});
+ const numberCheck=gated.numberCheck;
+ const indistinguishableDelivered=gated.indistinguishable;
+ const adviceCheck=enforceBattleAdvice(packet.rocoAdvice,gated.text);
  const finalText=adviceCheck.text;
  const adviceEnforced=adviceCheck.enforced;
  const speakPlain=spoken.replaced.length?{speakPlain:spoken.replaced}:{};
@@ -2416,7 +2788,7 @@ export async function runCoach({message,role='auto',context,memory,conversation=
   :rejectedReason==='unlabeled-unknown'?modelPrediction.reasons:[];
  const rejectedScope=rejectedReason==='unlabeled-unknown'?modelPrediction.scope:modelGrounding.scope;
  const validation=rejected
-  ?{valid:false,checked_by:'server',checkedText:'model-answer',deliveredText:'local-template',
+  ?{valid:false,checked_by:'server',checkedText:'model-answer',deliveredText:'local-template',...(numberCheck.problems.length?{adviceNumberFixes:numberCheck.problems}:{}),...(indistinguishableDelivered?{adviceIndistinguishable:true}:{}),
     ...(adviceEnforced?{adviceEnforced:true,adviceEnforcedReason:adviceCheck.reason,adviceAction:packet.rocoAdvice.actionLabel}:{}),rejected:true,
     rejectedReason,reasons:rejectedCheckReasons,
     ...(answerCorrection?{attempts:2,answerCorrection:correctionUsage}
@@ -2426,6 +2798,9 @@ export async function runCoach({message,role='auto',context,memory,conversation=
     scope:rejectedScope}
   :{valid:true,checked_by:'server',checkedText:useModel?'model-answer':'local-template',
     deliveredText:adviceEnforced?'deterministic-advice':(useModel?'model-answer':'local-template'),
+    // P0：数字同源修过 / 无法区分时说清了 —— 都要进回执（不许悄悄改玩家的正文）
+    ...(numberCheck.problems.length?{adviceNumberFixes:numberCheck.problems}:{}),
+    ...(indistinguishableDelivered?{adviceIndistinguishable:true}:{}),
     ...(adviceEnforced?{adviceEnforced:true,adviceEnforcedReason:adviceCheck.reason,adviceAction:packet.rocoAdvice.actionLabel}:{}),
     rejected:false,rejectedReason:null,
     ...(answerCorrection?{attempts:2,answerCorrection:correctionUsage}:{}),
@@ -2460,7 +2835,7 @@ export async function runCoach({message,role='auto',context,memory,conversation=
   ...(adviceEnforced?{adviceEnforced:{reason:adviceCheck.reason,actionLabel:packet.rocoAdvice.actionLabel,
     legalActionId:packet.rocoAdvice.legalActionId,check:'deliverable-advice'}}:{}),
   provider:adviceEnforced?'local-fallback':(rejected?'local-fallback':localFallback?'local-fallback':useModel?provider.name:'local'),verified:!useModel,localOnly:deterministic,receiptConsistency:finalConsistency,validation,
- ...(serverFailure?{agentStop:'policy-server-data-unavailable',taskFailure:serverFailure}:{}),...(answerCorrection?{answerCorrection:correctionUsage}:{}),fallbackReason:adviceEnforced?'模型回答没有点出这一手的合法首选行动，显示的是按当前局面算出来的那一条':(localFallback?`本地模型这一轮没用上（${localFallback.code??'unknown'}），显示的是引擎算出来的那份结论`:rejected?(tooLong?'模型输出过长，显示已核验的本局分析':!modelConsistency.consistent?'那份回答和引擎的记录对不上，换成我核过的这一份':rejectedReason==='unlabeled-unknown'?'模型回答只交了一句「不知道」，显示已核验的本局分析':'模型回答里有未经登记的数字或引用，显示已核验的本局分析'):undefined)};
+ ...(serverFailure?{agentStop:'policy-server-data-unavailable',taskFailure:serverFailure}:{}),...(answerCorrection?{answerCorrection:correctionUsage}:{}),...(compressedAnswer?{answerCompressed:{from:answerCompressedFrom,to:deliveredText.length,kept:compressedAnswer.kept,dropped:compressedAnswer.dropped}}:{}),fallbackReason:adviceEnforced?'模型回答没有点出这一手的合法首选行动，显示的是按当前局面算出来的那一条':(localFallback?`本地模型这一轮没用上（${localFallback.code??'unknown'}），显示的是引擎算出来的那份结论`:rejected?(tooLong?'模型输出过长，显示已核验的本局分析':!modelConsistency.consistent?'那份回答和引擎的记录对不上，换成我核过的这一份':rejectedReason==='unlabeled-unknown'?'模型回答只交了一句「不知道」，显示已核验的本局分析':'模型回答里有未经登记的数字或引用，显示已核验的本局分析'):undefined)};
 }
 
 /**
@@ -2526,6 +2901,12 @@ export const AGENT_STOPS=Object.freeze([
 /** 政策里那些「答案在引擎里，必须查一次」的工具（路由兜底用它决定要不要让开军师模板）。 */
 export const FACT_TOOLS=new Set(['query_rules','search_rules','evaluate_team','compare_team_change','read_evidence']);
 
+/**
+ * 骂人/发泄的**短句**形状（第三轮：人类截图「你是傻子吗」）。
+ * 与 `companion.js` 的 `EMOTION_ASK` 同一张词表 —— 两处必须一致，
+ * 否则「runtime 放行、companion 拦下」这类缝里会漏（判据见 `tests/companion.test.js`）。
+ */
+const ABUSE_ASK=/傻子|傻逼|笨蛋|弱智|智障|有病|神经病|垃圾|废物|妈的|他妈|滚|闭嘴/;
 export function policyFor(message='',context={}){
  const text=playerQuestion(message);
  if(policyNoTool(text))return {need:null,reason:'chitchat-or-parametric'};
@@ -2789,6 +3170,24 @@ function teamScopeMentioned(text='',context={}){
  // 点名的精灵必须**在上下文里认得出**才算（`namedTargets` 靠 profile 的名字表），所以要把 context 传进来。
  return namedTargets(source,context).length>=2;
 }
+/**
+ * 「**选队/配队的下一步**」这一类问句（第三轮 P0 Q2-3，人类逐字：「偏好『简短』**吞选队下一步**」）。
+ *
+ * 为什么单独一条：`runtime.js` 的路由表把「下一步 / 接下来该」当成**军师**关键词（那是**局内**
+ * 的那一手），于是「选队下一步做什么」在没有对局的配队页上也会被送进 `strategist`，而军师在没有
+ * 对局时只会回一句「开一局之后，我才能按当前生命、能量和队伍比较这一手。」——**一个配队问题
+ * 被答成了局内问题**。玩家把它读成"偏好把下一步吞了"，其实偏好管的是**篇幅**，意图是路由这一层丢的。
+ *
+ * ⇒ 认出来之后走**配队**那一支（`route='guide'`），按手里那一页候选给**下一步动作**；
+ * `preference==='brief'` 只让它**短一截**，不改变它答的是什么。
+ */
+const TEAM_NEXT_STEP_ASK=/选队|配队|(下一步|接下来).{0,6}(选|补|加|上)|下一只|该选哪只|选哪只|补哪只|选谁/;
+export function teamNextStepAsk(message='',context={}){
+ const text=String(message);
+ if(!TEAM_NEXT_STEP_ASK.test(text))return false;
+ if(context?.roco_battle||context?.battle)return false;   // 局内问「下一步」仍然是军师那一手
+ return true;
+}
 /** 问句**看起来**是不是在问整队（拿不拿得到队伍是另一回事，见 `teamAsk`）。 */
 export function teamAskShape(message='',context={}){
  const text=String(message);
@@ -2867,14 +3266,34 @@ const SKILL_FIELD_ASK=/(?:^|[，,：:]|的)\s*([^\s，,。：:；;！!？?、的
 // —— 那是**精灵**字段，不是技能字段（本判据第一版就这么写，`codexTarget('喵喵的属性')` 立刻从
 // `{kind:'pet'}` 变成 `{kind:'skill'}`，靠上面那条既有用例当场抓到）。
 const PET_SKILL_FIELD_ASK=/(?:^|[，,：:])\s*[^\s，,。：:；;！!？?、的]{1,12}\s*的\s*([^\s，,。：:；;！!？?、的]{2,12}?)\s*的\s*(威力|能耗|耗能|类别|属性|系别|哪个系|什么系)/;
+/**
+ * 「**<技能名>能用吗 / 能不能用 / 学得到吗**」这一族 —— **可用性询问**，不是字段询问。
+ *
+ * 为什么单独一条（第三轮 P0 Q2，人类逐字：「**齿轮切开可用性询问返回 12 天前历史**」）：
+ * 这种问句既不是纯字段查（「齿轮切开威力多少」有 `SKILL_FIELD_ASK` 接），也不是局面建议，
+ * 所以它两条路都不命中 ⇒ 落到陪练兜底，玩家拿到的是「这条我没依据，换个说法或点名一只精灵。」
+ * —— 一条**关于技能的问题**被当成闲聊顶掉。它该走的是**同一条事实链**（`query_rules{kind:'skill'}`），
+ * 由引擎给出这一招的真实属性/类别/能耗/威力/说明，再由守卫核对数字。
+ *
+ * 取名字的规矩与 `skillFieldAsk` 完全一样：代词/疑问词打头的**不当技能名**（否则会拿
+ * 「这个」「那只」去查引擎，实测会 404）。
+ */
+// ⚠ 2026-09-29（`tests/roco-learnset-lookup.test.js` ① 当场抓到）：第一版把「可以**学**」也算进来
+// ⇒「喵喵可以学哪些招式」被判成 `codex-fact`，把**学习表**那条路（`learnset-ask`）抢走了 ✗
+// ⇒ 现在：① 可用性只收**用/用吗/有用吗**这一族（**不收"学/会"**）；② 命中学习表问句时**直接让路** ✓
+const SKILL_AVAIL_ASK=/([^\s，,。！？?、]{2,8}?)(?:能|可以)(?:不能|吗|么|嘛|用|用吗)|([^\s，,。！？?、]{2,8}?)(?:有没有用|有用吗)/;
 function skillFieldAsk(text){
  const source=String(text);
+ // 学习表问句（「X 学得到哪些技能」）归 `learnset-ask`（`policyFor` 里那一条），这一层**让路** ✓
+ if(learnsetAsk(source))return null;
  // 先试原来那一档（「<招式>威力多少」），再试「<精灵>的<招式>的<字段>」那一档（两个「的」）。
- const m=source.match(SKILL_FIELD_ASK)??source.match(PET_SKILL_FIELD_ASK);
+ const m=source.match(SKILL_FIELD_ASK)??source.match(PET_SKILL_FIELD_ASK)??source.match(SKILL_AVAIL_ASK);
  if(!m)return null;
- const name=String(m[1]||'').trim();
+ const name=String(m[1]||m[2]||'').trim();
  if(!name)return null;
  if(/^(我|你|他|她|它|这|那|谁|哪|技能|招式|这个|那个)/.test(name))return null;
+ // 「能不能学 X」这种句子里，前缀捕出来的是「能不」——它是个**助动词**，不是技能名（发出去只会 404）。
+ if(/^(能|可|会|学|有|想|要|用得|使得)/.test(name))return null;
  return name;
 }
 /**

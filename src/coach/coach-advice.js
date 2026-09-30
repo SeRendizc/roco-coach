@@ -904,7 +904,13 @@ function detectFoeEnergyHigh(pos) {
   return candidate(
     'foe-energy-high',
     `对面能量到 ${show(energy)} 了（上限 ${show(energyMax)}）：重招随时来，别拿残血硬接这一手`,
-    `它能量已经攒到 ${show(energy)}（上限 ${show(energyMax)}），这一轮随时放得出重招`,
+    // ⚠ 2026-09-30 **改钉**（根治：跨对象串号）：原来是「**它**能量已经攒到 N」——
+    // 代词「它」在下游被改写成某只精灵的名字时，**名字与数字可以来自不同对象**
+    // （实测：`缇塔=后备` 的名字 + `多彩方方=场上` 的 9 能量 ⇒「缇塔它能量已经攒到 9」，而缇塔自己没动过）。
+    // 治法是把**主语写成同一个快照里的那个对象**（`foe.name` + `foe.energy` 同源）⇒ 名字与数字
+    // **结构上不可能再分家** ✓。旧句原文留档（改钉不删）：
+    //   `它能量已经攒到 ${show(energy)}（上限 ${show(energyMax)}），这一轮随时放得出重招`
+    `${foe.name} 能量已经攒到 ${show(energy)}（上限 ${show(energyMax)}），这一轮随时放得出重招`,
     '这一下硬接可能直接倒一只，先把厚的那只留在场上',
     {foe: foe.name, foeEnergy: energy, energyMax, foeHp: foe.hp},
     // 「先把厚的那只留在场上」= 换人顶上；没有能换的就用「防御」顶。两条都不合法时如实为 null。
@@ -1079,7 +1085,13 @@ function positionFromSnapshot(battle, plan = null) {
     legal,
     skills: [],
     events: [],
-    needsReplacement: [],
+    //: 2026-09-30（P0 旁路缺陷收口）：**这里原来写死 `[]`** ⇒ 引擎给的 `needs_replacement` 被丢掉 ✗
+    //:  下游有**五个**消费者直接 `.includes(...)`（`:567` `:604` `:605` `:1118` `:1393`）⇒
+    //:  所以**不能改成 `null`**（那五个会 TypeError ✗），`[]` 兜底要保留（保持数组契约 ✓）。
+    //:  ⚠ `[]` 在这里**兼表「不需要补位」与「没读到」**；更正确的形状是 `null`，
+    //:    但那要先把上面五个消费者改成容错 ⇒ 记档在这里，等那一步做完再谈 ✗
+    //:  旧行留档（**改钉不删**）：`needsReplacement: [],`
+    needsReplacement: Array.isArray(battle.needs_replacement) ? battle.needs_replacement.slice() : [],
     // 局面指纹的原料：回合 + 阶段 + 版本 + 合法动作表。任何一项变了，旧建议就不属于这个局面。
     stateVersion: Number.isInteger(battle.state_version) ? battle.state_version : null,
   };
@@ -1264,7 +1276,10 @@ function upsideOfAction(pos, plan, action) {
       + `${pos.phase === 'replace' ? '；补位不占回合' : '；这一手会把回合用掉'}`;
   }
   if (action.kind === 'item') return '吃道具占这一回合，之后不能再出招（回血/回能立刻结算）';
-  if (action.kind === 'skill' && labelKey(action.label).includes('防御')) return '防御能减伤、额外回 2 点能量';
+  // ⚠ 2026-09-29（人类实测：防御 5→4 **无额外回 2**）：手游引擎**不额外回能**；
+  //   「额外回 2 点能量」是 JS 练习引擎（`src/game/rules.js:125`）的语义，别串进来。
+  //   旧文案留档（改钉不删）：return '防御能减伤、额外回 2 点能量';
+  if (action.kind === 'skill' && labelKey(action.label).includes('防御')) return '防御能减伤';
   const est = action.kind === 'skill' ? estimateTable(pos, plan).get(action.label) ?? null : null;
   if (!est) return '这一条是现在就能出手的合法行动（这一轮没有它的伤害估算）';
   const foeHp = num(pos.foe?.hp);

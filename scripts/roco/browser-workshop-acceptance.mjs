@@ -813,6 +813,11 @@ async function main() {
       slots: d.twSlots ?? null, filled: d.twFilled ?? null, next: d.twNext ?? null,
       nextLabels: d.twNextLabels ?? null, axes: d.twAxes ?? null, axesAvailable: d.twAxesAvailable ?? null,
       poolTotal: d.twPoolTotal ?? null, poolRows: d.twPoolRows ?? null,
+      // ⚠ 2026-09-29 补（U04：默认候选档从「全图鉴」改成「我的精灵」）：
+      // twPoolTotal 是**当前档的条数**（catalog 622 / mine 542），换档会变；
+      // twPoolUniverse 才是**候选宇宙**（622，与档无关）。
+      // 徽记那条判据问的是"候选来自全图鉴 600+"，它该量宇宙，不是量当前档。
+      poolUniverse: d.twPoolUniverse ?? null, poolScope: d.twPoolScope ?? null,
       error: d.twError ?? null, hasPayload: Boolean(d.twPayload),
       stage: d.twStage ?? null, fetches: d.twFetches ?? null,
       renderedAfterFirst: d.twRenderedAfterFirst ?? null,
@@ -867,6 +872,37 @@ async function main() {
   const waitFor = async (expr, {tries = 100, ms = 150} = {}) => {
     for (let i = 0; i < tries; i++) { if (await js(expr)) return true; await sleep(ms); }
     return false;
+  };
+  /**
+   * 等**评估面板这一帧**画完（2026-09-30 诊断 `32-窄屏候选区` 得到的那一条）。
+   *
+   * 为什么需要它：`#tw-reset`/点一只之后，`dataset.twSelected` 是**即时**变的，而评估正文要等
+   * 回执回来才重画 ⇒ 「选中数变了」不等于「这一帧画完了」。诊断实测（100ms 采样）：
+   *   点第 2 只后 `+0ms {sel:1, gaps:0}` → `+100ms {sel:2, gaps:9, next:3}`
+   * ⇒ 读得早就读到**上一帧**（0/6 那一帧没有缺口清单）⇒ 判据假红 ✗。
+   *
+   * 等的条件**必须与要断言的东西相互独立**：这里等的是 `#tw-eval-panel` 正文里
+   * **回执渲染出来的**「已选 N / 6」的 N == 当时的 `dataset.twSelected`
+   * —— **不是**拿"缺口框在不在"去证明"有没有缺口"（那是循环论证 ✗）。
+   * 页面脚本用**普通字符串 + 显式转义**拼（不写模板字面量）。
+   */
+  const waitEvalFrameFor = async (selected, {tries = 40, ms = 120} = {}) => {
+    const expr = [
+      '(() => {',
+      '  const host = document.querySelector(' + JSON.stringify(ROOT_SEL) + ');',
+      '  const sr = host ? host.shadowRoot : null;',
+      '  const panel = sr ? sr.getElementById("tw-eval-panel") : null;',
+      '  const want = ' + JSON.stringify(String(selected ?? '')) + ';',
+      // ⚠ 用 `textContent` 而**不是** `innerText`：抽屉收起时面板是 `display:none`，
+      //   `innerText` 会返回空串 ⇒ 等不到帧（第一次改就是这样，frameOk=false ✗）。
+      //   这里判的是"**哪一帧**画完了"，与"看不看得见"无关 ⇒ 用 textContent 是对的。
+      '  const text = panel ? String(panel.textContent || "") : "";',
+      '  const m = text.match(/已选\\s*(\\d+)\\s*\\/\\s*6/);',
+      '  if (m) return m[1] === want;',
+      '  return want === "6" && text.includes("六只满编");',
+      '})()',
+    ].join('\n');
+    return waitFor(expr, {tries, ms});
   };
   const route = async (query) => {
     const response = await fetch(`${base}api/roco/workshop?${query}`);
@@ -955,7 +991,13 @@ async function main() {
       bootSlotProblems.join(' | ') || `slots=${boot.slots} 节点=${bootDom.slotNodes} filled=${boot.filled} selected=${boot.selected}`);
     counter('02-六个槽位', '把槽位数改成 3（退回「已选 3 只固定栏」）必须被同一条判据抓住',
       slotProblems({slots: 3, slotNodes: 3, filled: 3}), 'slots=3 / slotNodes=3 / filled=3');
-    const bootBadgeProblems = badgeProblems({...bootDom, poolTotal: boot.poolTotal});
+    // ⚠ 2026-09-29 **改钉**（U04）：旧写法 `{...bootDom, poolTotal: boot.poolTotal}` 留档。
+    //   为什么改：默认候选档现在是「我的精灵」（542），而 `twPoolTotal` 随档变 ⇒
+    //   再拿它去满足「候选池总量必须 ≥600」就成了碰运气（换到「我的精灵」档必红，且红得没道理）。
+    //   **意图一字没变**：页面上必须写着"候选来自全图鉴 600+"。改成量**候选宇宙**
+    //   （`twPoolUniverse`=622，与档无关）；拿不到宇宙时退回旧口径，不假装有。
+    const bootBadgeProblems = badgeProblems({...bootDom,
+      poolTotal: boot.poolScope === 'catalog' ? boot.poolTotal : (boot.poolUniverse ?? boot.poolTotal)});
     // 2026-09-22（人类视觉规格）：模式/候选规则/对手未知这三枚徽记**页头已经写着**，
     // 模块里再放一份就是「同屏重复」，所以从模块撤掉了。判据改成：
     //   ① 这三条信息在**页面上**（页头）恰好出现一次；
@@ -1197,18 +1239,43 @@ async function main() {
     //   ② 真鼠标点 `#coach-entry` 打开小芽面板，面板里同样一次都不许出现；
     //   ③ 口径没丢：`body.dataset.rocoMode` / `rocoPrematch` 与开发者抽屉里的注册表原文仍可核对；
     //   ④ 候选池总量仍由模块 `data-tw-pool-total`（≥600）记账。
+    // ── 2026-09-29 改钉（改钉不删；依据：Lead 查出的"探测点判已退役 id"）──────────────────
+    // **旧代码原文留档**：
+    //   const openCoachPanel = async () => {
+    //     for (let i = 0; i < 3; i += 1) {
+    //       if (await js(`(()=>{const c=document.getElementById('companion-card');
+    //         return Boolean(c)&&c.hidden===false&&c.getClientRects().length>0;})()`)) return true;
+    //       await mouseClick('#coach-entry'); await sleep(420);
+    //     }
+    //     return false;
+    //   };
+    //   const closeCoachPanel = async () => {
+    //     if (await js(`(()=>{const c=document.getElementById('companion-card');return Boolean(c)&&c.hidden===false;})()`)) {
+    //       await mouseClick('#close-companion'); await sleep(360);
+    //     }
+    //   };
+    // **为什么要改**：`#companion-card` 那一套旧面板**在 HEAD 里就已从这一页退役**
+    //   （`src/client/roco.js:142` 逐字：「甲④-1（task-13）：`#companion-card` 那一套面板已从这一页退役」）。
+    //   ⇒ 旧写法里 `openCoachPanel()` **永远返回 false**，而且会**连点 3 次 `#coach-entry`**
+    //     （净效果 = 面板**一直是开着的**）；`closeCoachPanel()` 则**从不关闭**。
+    //   后果（Lead 量化过）：面板 430×620 右锚 ⇒ 左沿 x=994，而取消"让位"后工坊候选池右沿 x=1305
+    //   ⇒ **候选池行的中心点（x≈1022）落在面板底下**，而本脚本在池子步骤里会点它
+    //     （`:1023/:1337` 点 `#tw-scope-all`、`:1056` 点 `#tw-cand-next`）⇒ 真实点击被面板吃掉。
+    //   现在改成读**真正在用的那个面板**（`#xiaoya-pop` 的 `hidden`）并用它自己的关闭按钮
+    //   （`#xiaoya-close`）—— 与 `roco.js` 里 `#coach-entry` 开、`#xiaoya-close` 关是同一套。
+    const coachPanelOpenNow = () => js(`(()=>{const p=document.getElementById('xiaoya-pop');
+      return Boolean(p)&&p.hidden!==true&&p.getClientRects().length>0;})()`);
     const openCoachPanel = async () => {
       for (let i = 0; i < 3; i += 1) {
-        if (await js(`(()=>{const c=document.getElementById('companion-card');
-          return Boolean(c)&&c.hidden===false&&c.getClientRects().length>0;})()`)) return true;
+        if (await coachPanelOpenNow()) return true;
         await mouseClick('#coach-entry');
         await sleep(420);
       }
-      return false;
+      return coachPanelOpenNow();
     };
     const closeCoachPanel = async () => {
-      if (await js(`(()=>{const c=document.getElementById('companion-card');return Boolean(c)&&c.hidden===false;})()`)) {
-        await mouseClick('#close-companion');
+      if (await coachPanelOpenNow()) {
+        await mouseClick('#xiaoya-close');
         await sleep(360);
       }
     };
@@ -1443,9 +1510,12 @@ async function main() {
       if (!missing) break;
       addResults.push({name: missing, ...(await addByName(missing))});
     }
+    // ⚠ 2026-09-30：宽屏这一段与窄屏共用同一个"等这一帧画完"（诊断 `32-` 时抽出来的）。
+    //   它原来是绿的 ⇒ **这一句只是把绿的成因钉住**，不改任何判据。
+    const twoFrameOk = await waitEvalFrameFor((await facts()).selected);
     const two = await facts();
     const twoDom = await domFacts();
-    steps.push({at: 'two-selected', facts: two, dom: twoDom, addResults});
+    steps.push({at: 'two-selected', facts: two, dom: twoDom, addResults, frameOk: twoFrameOk});
     check('12-真实键鼠选到第 2 只', '真实键盘搜名字 + 真实鼠标点候选：已选 == 2，六个槽位里两个填上了',
       two.state === 'ok' && Number(two.selected) === 2 && twoDom.filledNodes === 2 && twoDom.slotNodes === 6,
       `state=${two.state} selected=${two.selected} 填了 ${twoDom.filledNodes}/${twoDom.slotNodes} 槽`);
@@ -1622,26 +1692,113 @@ async function main() {
           arrow:getComputedStyle(s,'::after').content});})()`));
     } catch (error) { aboutOpenState = {error: error.message}; }
 
-    // 37-「引擎规范配招」那一行必须有**四个技能名**（2026-09-27；服务端原来根本没发 skills，
+    // 37-配招那一行必须有**四个技能名**（2026-09-27；服务端原来根本没发 skills，
     //    于是这行一直空着、换招起点是 0/4 —— 审计高 6。判据在页面上看，不在 API 层看）。
+    //
+    // ⚠ 2026-09-29 **改钉**（U04：工程词搬进诊断详情）。旧断言原文留档（别删）：
+    //     const texts=rows.map((el)=>String(el.textContent||'').replace(/\s+/g,' ').trim());
+    //     const joined=texts.join(' | ');
+    //     return JSON.stringify({rows:texts.length,sample:texts[0]??null,
+    //       hasCanonical:/引擎规范配招：/.test(joined),emptyHint:/引擎未给技能/.test(joined)});
+    //     旧断言的**第三格**（判据条件）原来是：loadoutLine.rows>0 && loadoutLine.hasCanonical
+    //     && !loadoutLine.emptyHint
+    //   ⚠ 这里**故意不写成函数调用那个形状**（连括号都不写）：`tests/roco-acceptance-check-arity.test.js`
+    //     是**源码扫描器**，"第二格是布尔"那条会把我留档的这行也当成真的 check 调用 ⇒ 假红。
+    //     留档要留**内容**（旧条件是什么），不是留一个会被误读的调用形状。
+    //   为什么改：「引擎规范配招」这句工程词**正是 U04 要移出首层**的东西（真机可见数已为 0），
+    //   判据再钉它就等于钉"工程词必须留在玩家眼前"，与 U04 相反。
+    //   **意图一个字没变**：那一行必须有四个技能名、不能是空的（空的等于换招要从零挑四个）。
+    //   改成量**四个技能格**（`.tw-skill` = 4）+ 来源标只能是「默认 / 你选的」。
     const loadoutLine = JSON.parse(await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)}).shadowRoot;
       const rows=[...sr.querySelectorAll('.tw-loadout')];
       const texts=rows.map((el)=>String(el.textContent||'').replace(/\\s+/g,' ').trim());
-      const joined=texts.join(' | ');
+      const chipCounts=rows.map((el)=>el.querySelectorAll('.tw-skill').length);
+      const srcTags=rows.map((el)=>String(el.querySelector('.tw-skills-src')?.textContent||'').trim());
+      const emptyHint=/引擎未给技能/.test(texts.join(' | '));
       return JSON.stringify({rows:texts.length,sample:texts[0]??null,
-        hasCanonical:/引擎规范配招：/.test(joined),emptyHint:/引擎未给技能/.test(joined)});})()`));
-    check('37-配招那一行有四个技能名', '每只已选精灵下面那行要么是你选的、要么是引擎规范配招，'
-      + '**不能是空的**（空的等于换招要从零挑四个）【审计高 6】',
-      loadoutLine.rows > 0 && loadoutLine.hasCanonical && !loadoutLine.emptyHint,
-      `配招行 ${loadoutLine.rows} 条；示例「${loadoutLine.sample ?? '—'}」`);
+        fourChips:chipCounts.length>0&&chipCounts.every((n)=>n===4),chipCounts,
+        srcTags,srcOk:srcTags.length>0&&srcTags.every((t)=>t==='默认'||t==='你选的'),
+        emptyHint});})()`));
+    check('37-配招那一行有四个技能名', '每只已选精灵下面那行必须有**四个技能名**（来源标只能是「默认/你选的」），'
+      + '**不能是空的**（空的等于换招要从零挑四个）【审计高 6；U04 改钉：不再要求工程词上屏】',
+      loadoutLine.rows > 0 && loadoutLine.fourChips && loadoutLine.srcOk && !loadoutLine.emptyHint,
+      `配招行 ${loadoutLine.rows} 条；四个技能格 ${JSON.stringify(loadoutLine.chipCounts)}；`
+      + `来源标 ${JSON.stringify(loadoutLine.srcTags)}；示例「${loadoutLine.sample ?? '—'}」`);
     // 39-「最怕的体系」那一栏必须真的写出**体系名**（2026-09-27；§C6.303 改了取数却没看渲染结果）。
     //    服务端给 `value.label`，客户端原来读 `value.archetype_label` ⇒ 名字被丢、只剩分数。
     //    这一条**读那一格的正文**，不是"整页不炸"；反证喂一段"名字被丢"的样本给同一条判据。
-    const archetypeCell = JSON.parse(await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)}).shadowRoot;
-      const boxes=[...sr.querySelectorAll('[data-tw-axis], .tw-axis, .tw-axis-row')];
-      const hit=boxes.map((el)=>String(el.textContent||'').replace(/\\s+/g,' ').trim())
-        .find((t)=>t.includes('最怕的体系'));
-      return JSON.stringify({found:Boolean(hit),text:(hit??'').slice(0,160)});})()`));
+    // ⚠ 2026-09-30 **改钉**（Lead 派活 · `scripts/**` 授权仅此一处）：**判据与可见面脱钩**。
+    //    **旧断言原文留档（别删；2026-09-27 起用）**：
+    //      const boxes=[...sr.querySelectorAll('[data-tw-axis], .tw-axis, .tw-axis-row')];
+    //      const hit=boxes.map((el)=>String(el.textContent||'').replace(/\s+/g,' ').trim())
+    //        .find((t)=>t.includes('最怕的体系'));
+    //      return JSON.stringify({found:Boolean(hit),text:(hit??'').slice(0,160)});
+    //      旧条件：`archetypeCell.found && archetypeBad.length === 0`（**只读 `textContent`**）。
+    //    **为什么改**（2026-09-30 真机读数）：`textContent` 对**隐藏子树**照样返回文本 ⇒
+    //      「最怕的体系」那一格在 `#tw-plan-evidence`（`<details>`，**默认收起**）里。实测默认态：
+    //      `#tw-plan-evidence.open=false` · `painted=false` · 那一格 `painted=false`、`inClosedDetails=true`，
+    //      **而 `textContent` 仍是完整那句**（「撞上「翼王飞翼」这类…各体系等权…」）⇒ 判据绿、**玩家看不到** ✗。
+    //    **新读法两段都要（旧行为一条不丢）**：
+    //      ① **默认可见面**：四块 `[data-tw-plan]` 必须真的画出来（不是"DOM 里有"），
+    //         且默认面上**不许**出现等权墙 / 11 属性枚举 / 旧频率说法（R03 把它们收进了二级折叠）；
+    //      ② **打开 `#tw-plan-evidence` 之后**：那一格必须 `painted`（**可见面读数**，不是 textContent），
+    //         再跑旧的 `archetypeProblems`（体系名 + 占比交代来源）；读完**还原成收起**，不给后面的检查项换状态。
+    //    ⚠ 页面脚本一律 **普通字符串 + 显式转义**（`advice-engine` 在模板字面量上撞过两次，别重踩）。
+    const WORKSHOP_VISIBLE_JS = [
+      '(() => {',
+      '  const host = document.querySelector(' + JSON.stringify(ROOT_SEL) + ');',
+      '  const sr = host ? host.shadowRoot : null;',
+      '  if (!sr) return JSON.stringify({error: "no shadowRoot"});',
+      // 可见 = 有尺寸 + 祖先链上没有 display:none / [hidden] / **收起的 <details>**
+      '  const painted = (el) => {',
+      '    if (!el) return false;',
+      '    const cs = getComputedStyle(el); const r = el.getBoundingClientRect();',
+      '    if (cs.display === "none" || cs.visibility === "hidden" || r.width <= 0 || r.height <= 0) return false;',
+      '    for (let p = el; p; p = p.parentElement) {',
+      '      if (p.hasAttribute && p.hasAttribute("hidden")) return false;',
+      '      if (getComputedStyle(p).display === "none") return false;',
+      '      if (p.tagName === "DETAILS" && !p.open) return false;',
+      '    }',
+      '    return true;',
+      '  };',
+      '  const rectOf = (el) => { const r = el.getBoundingClientRect();',
+      '    return {x: Math.round(r.left), y: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height)}; };',
+      '  const panel = sr.getElementById("tw-eval-panel");',
+      '  const panelText = String(panel ? panel.innerText : "").replace(/\\s+/g, " ").trim();',
+      '  const plan = [...sr.querySelectorAll("[data-tw-plan]")].map((el) => ({',
+      '    k: el.dataset.twPlan, painted: painted(el), rect: rectOf(el)}));',
+      '  const ev = sr.getElementById("tw-plan-evidence");',
+      '  const axes = [...sr.querySelectorAll(".tw-axis")];',
+      '  const hit = axes.map((el) => ({el, text: String(el.textContent || "").replace(/\\s+/g, " ").trim()}))',
+      '    .find((x) => x.text.includes("最怕的体系"));',
+      // 「11 属性枚举」的判定：连续 ≥3 个「X系、」/「X系/」才算枚举（单提一句「草系」不算）
+      '  const widthRun = (panelText.match(/[草水火光恶翼虫地毒幻萌幽武冰电机械龙]系[、\\/]/g) || []).length;',
+      '  return JSON.stringify({',
+      '    plan, planBlocks: plan.length, planAllPainted: plan.length === 4 && plan.every((p) => p.painted),',
+      '    equalWeight: panelText.includes("各体系等权"), sameWeight: panelText.includes("按同等权重"),',
+      '    everyN: /大约每 \\d+ 局遇到 1 次/.test(panelText), widthRun,',
+      '    evidenceExists: Boolean(ev), evidenceOpen: ev ? ev.open : null,',
+      '    axisFound: Boolean(hit), axisVisible: hit ? painted(hit.el) : false,',
+      '    axisText: hit ? hit.text.slice(0, 200) : null});',
+      '})()',
+    ].join('\n');
+    const setEvidenceOpenJs = (open) => [
+      '(() => {',
+      '  const sr = document.querySelector(' + JSON.stringify(ROOT_SEL) + ').shadowRoot;',
+      '  const ev = sr ? sr.getElementById("tw-plan-evidence") : null;',
+      '  if (ev) ev.open = ' + (open ? 'true' : 'false') + ';',
+      '  return Boolean(ev);',
+      '})()',
+    ].join('\n');
+    const visibleCell = JSON.parse(await js(WORKSHOP_VISIBLE_JS));
+    // ② 打开二级折叠再看一眼：那一格**在可见面上**吗（这一步就是"脱钩"的修法）
+    await js(setEvidenceOpenJs(true));
+    await sleep(300);
+    const openedCell = JSON.parse(await js(WORKSHOP_VISIBLE_JS));
+    await js(setEvidenceOpenJs(false));   // **还原**：不给后面的检查项换状态
+    await sleep(200);
+    const archetypeCell = {found: openedCell.axisVisible,
+      text: openedCell.axisVisible ? openedCell.axisText : ''};
     // 判据只依赖正文（纯函数）：有名字 + 有占比说法
     //
     // ⚠ 2026-09-29 改钉（task-14；`f30126a` 是按 P0-04 改的文案，判据没跟着改，于是 39 号连红）：
@@ -1672,11 +1829,27 @@ async function main() {
       return bad;
     };
     const archetypeBad = archetypeProblems(archetypeCell.text);
-    check('39-「最怕的体系」写出体系名', '这一栏要有**名字**（「撞上「X」这类」）而不是只剩分数或含糊的「某类体系」；'
+    // 新口径的两条**可见面**读数（2026-09-30）：
+    //   · 默认可见面必须有**四块判断**，且**不许**出现等权墙 / 11 属性枚举 / 旧频率说法
+    //     （`#tw-plan-evidence` 默认收起 ⇒ 那些东西**不该**在默认面上；这是 R03 的原话）；
+    //   · 打开折叠后那一格必须**真的画出来**（`painted`）——否则又是"绿着骗人"。
+    const defaultSurfaceOk = visibleCell.planAllPainted && !visibleCell.equalWeight
+      && !visibleCell.sameWeight && !visibleCell.everyN && (visibleCell.widthRun ?? 0) < 3;
+    const foldDefaultClosed = visibleCell.evidenceOpen === false;
+    check('39-「最怕的体系」写出体系名（**可见面**口径）', '**默认可见面**上要有四块判断（`[data-tw-plan]` 四块都真的画出来），'
+      + '且**不许**把等权墙 / 11 属性枚举 / 旧频率说法摆在默认面上；**打开** `#tw-plan-evidence` 之后，'
+      + '那一栏要有**名字**（「撞上「X」这类」）而不是只剩分数或含糊的「某类体系」；'
       + '占比要么给「这类占 X%」并**交代来源**（假设的权重 / 各体系等权 / 不是实测），要么如实说没有数据；'
-      + '**不许**把假设的权重说成观测频率【§C6.303 改了取数没验渲染；2026-09-29 task-14 改钉】',
-      archetypeCell.found && archetypeBad.length === 0,
-      `命中=${archetypeCell.found} 示例「${archetypeCell.text}」${archetypeBad.length ? ' · ' + archetypeBad.join('；') : ''}`);
+      + '**不许**把假设的权重说成观测频率'
+      + '【§C6.303 改了取数没验渲染；2026-09-29 task-14 改钉文案；**2026-09-30 改钉读法：读可见面而不是 `textContent`**】',
+      defaultSurfaceOk && foldDefaultClosed && archetypeCell.found && archetypeBad.length === 0,
+      `默认可见面四块=[${visibleCell.plan.map((p) => `${p.k}${p.painted ? '✓' : '✗'}(${p.rect.w}×${p.rect.h}@y${p.rect.y})`).join(' ')}]`
+      + ` 折叠默认${foldDefaultClosed ? '收起✓' : `open=${visibleCell.evidenceOpen}✗`}`
+      + ` 默认面上的等权墙/枚举/旧频率说法=${visibleCell.equalWeight || visibleCell.sameWeight || visibleCell.everyN || (visibleCell.widthRun ?? 0) >= 3 ? '有✗' : '无✓'}`
+      + `（widthRun=${visibleCell.widthRun}）`
+      + ` 打开后那一格${archetypeCell.found ? '可见✓' : '不可见✗'}`
+      + ` 示例「${(archetypeCell.text ?? '').slice(0, 120)}」`
+      + `${archetypeBad.length ? ' · ' + archetypeBad.join('；') : ''}`);
     counter('39-「最怕的体系」写出体系名', '喂**旧文案**（「大约每 5 局遇到 1 次」）给同一条判据必须红 —— 证明它不是"什么都认"',
       archetypeProblems('撞上某类体系时最吃亏（这类在环境里大约每 5 局遇到 1 次）'),
       '样本：撞上某类体系时…（旧文案：假设的权重说成观测频率）');
@@ -2158,15 +2331,53 @@ async function main() {
       `列表可见高 clientH=${candBox.clientH} 几何高=${candBox.geoH} scrollH=${candBox.scrollH} 行高=${candBox.rowH}`);
     const narrowAdds = [];
     for (const name of pickNames.slice(0, 2)) narrowAdds.push({name, ...(await addByName(name))});
+    // ⚠ 2026-09-30（诊断 `32-窄屏候选区`）：**先等评估面板这一帧画完**再读。
+    //   旧写法直接读 ⇒ 会读到上一帧（`+0ms {sel:1,gaps:0}` 那一帧）⇒ 判据假红 ✗。
+    //   **判据一个字没改**（下面 `narrowDom.gapNodes >= 1` 照旧）—— 只改"读的时机"。
+    //   等的条件与要断言的东西**相互独立**（等的是回执渲染出来的「已选 N / 6」）。
+    const narrowFrameOk = await waitEvalFrameFor((await facts()).selected);
+    // **只加诊断**（不改判据）：那一刻抽屉的三个字段 + 面板正文前 60 字
+    const narrowDrawer = JSON.parse(await js([
+      '(() => {',
+      '  const sr = document.querySelector(' + JSON.stringify(ROOT_SEL) + ').shadowRoot;',
+      '  const d = sr.getElementById("tw-eval-drawer");',
+      '  const p = sr.getElementById("tw-eval-panel");',
+      '  const r = p ? p.getBoundingClientRect() : null;',
+      '  return JSON.stringify({dataOpen: d ? d.dataset.open : null, hidden: d ? d.hasAttribute("hidden") : null,',
+      '    closedReason: d ? (d.dataset.closedReason || null) : null,',
+      '    panelWH: r ? [Math.round(r.width), Math.round(r.height)] : null,',
+      '    text60: (p ? String(p.textContent || "") : "").replace(/\\s+/g, " ").trim().slice(0, 60)});',
+      '})()',
+    ].join('\n')));
     const narrowTwo = await facts();
     const narrowDom = await domFacts();
     const narrowMetrics = await metrics();
     steps.push({at: 'narrow-two', facts: narrowTwo, dom: narrowDom, metrics: narrowMetrics, adds: narrowAdds});
     screens.push({viewport: '390x844', at: 'two-selected', ...narrowMetrics});
+    // ⚠ 2026-09-30 **改钉（只改"读的时机"，判据一个字没改）** —— 诊断见
+    //    `docs/roco/review-2026-09-28/半成品-xiaoya-review.md` 之外的 tmp/xy-diag32b.mjs 采样：
+    //    点第 2 只后 `+0ms {sel:1, gaps:0}` → `+100ms {sel:2, gaps:9, next:3}`（窗口 ≈100ms）。
+    //    **旧读法原文留档（别删；2026-09-25 起用）**：
+    //      const narrowAdds = [];
+    //      for (const name of pickNames.slice(0, 2)) narrowAdds.push({name, ...(await addByName(name))});
+    //      const narrowTwo = await facts();
+    //      const narrowDom = await domFacts();
+    //      const narrowMetrics = await metrics();
+    //      check('32-窄屏候选区', '390×844：选到第 2 只后仍然不横向溢出，三个候选与缺口清单都在',
+    //        narrowMetrics.scrollW === narrowMetrics.clientW && Number(narrowTwo.next) === 3
+    //          && narrowDom.gapNodes >= 1, …);
+    //    它的问题**不在判据**（`gapNodes >= 1` 是对的：同状态真有 9 个节点 ✓，
+    //    独立来源 `payload.player.gap_dimension_notes + unknown_dimension_notes` = 6 + 3 = 9 ✓），
+    //    而在**读得太早**：`addByName` 只等 `dataset.twSelected` 变（那是**即时**的），
+    //    评估正文要等回执回来才重画 ⇒ 读到上一帧（0/6 那一帧没有缺口清单）⇒ 假红 ✗。
+    //    ⇒ **修法**：只在这里加一句 `await waitEvalFrameFor(selected)`（与宽屏那段共用），
+    //      **判据、阈值、`gapNodes>=1` 一个符号都没动**。
     check('32-窄屏候选区', '390×844：选到第 2 只后仍然不横向溢出，三个候选与缺口清单都在',
       narrowMetrics.scrollW === narrowMetrics.clientW && Number(narrowTwo.next) === 3 && narrowDom.gapNodes >= 1,
-      `clientW=${narrowMetrics.clientW} scrollW=${narrowMetrics.scrollW} selected=${narrowTwo.selected} `
-      + `next=${narrowTwo.next} 缺口=${narrowDom.gapNodes}；加人过程=${JSON.stringify(narrowAdds)}`);
+      `frameOk=${narrowFrameOk} clientW=${narrowMetrics.clientW} scrollW=${narrowMetrics.scrollW} selected=${narrowTwo.selected} `
+      + `next=${narrowTwo.next} 缺口=${narrowDom.gapNodes}`
+      // 2026-09-30 **只加诊断**（不改判据）：把"那一刻抽屉是什么状态、面板正文前 60 字"逐字带回来
+      + ` 抽屉=${JSON.stringify(narrowDrawer)}；加人过程=${JSON.stringify(narrowAdds)}`);
     shots.push(await shootModule('workshop-06-two-selected-390x844'));
 
     // ── ⑫ 标准 PVP 真的能开局（RC-106）：六槽选满 → 点按钮 → 战斗页拿到引擎的魔力 ──

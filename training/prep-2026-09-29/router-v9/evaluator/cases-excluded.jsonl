@@ -1,0 +1,5 @@
+{"id":"cov-plan_actions-yes","question":"这回合给我一个出招计划","tool":"plan_actions","args":{"state":{"turn":1},"state_version":7},"why":"实测 >12 分钟（Lead 已量过）⇒ 本机不硬等：如实登记为\"未评\"，不拿超时当通过/失败"}
+{"id":"mt-action-01","question":"那你刚说的那手，现在该怎么打？","tool":"plan_actions","args":{"state":{"turn":1},"state_version":7},"why":"实测 >12 分钟（Lead 已量过）⇒ 本机不硬等：如实登记为\"未评\"，不拿超时当通过/失败"}
+{"id":"mt-action-03","question":"就刚才那个方案——下一手给我个出招计划。","tool":"plan_actions","args":{"state":{"turn":1},"state_version":7},"why":"实测 >12 分钟（Lead 已量过）⇒ 本机不硬等：如实登记为\"未评\"，不拿超时当通过/失败"}
+{"id":"mt-action-05","question":"照刚才那个思路，这回合我具体做什么？","tool":"plan_actions","args":{"state":{"turn":1},"state_version":7},"why":"实测 >12 分钟（Lead 已量过）⇒ 本机不硬等：如实登记为\"未评\"，不拿超时当通过/失败"}
+{"id":"mt-action-07","question":"接着说刚才那个方案，现在该怎么走？","tool":"plan_actions","args":{"state":{"turn":1},"state_version":7},"why":"实测 >12 分钟（Lead 已量过）⇒ 本机不硬等：如实登记为\"未评\"，不拿超时当通过/失败"}

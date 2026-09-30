@@ -40,6 +40,9 @@ export function childAlive(child) {
   return true;
 }
 import {shadowToolDecision} from '../coach/shadow-tools.js';
+// 2026-09-30：技能档位→玩家事实那四个纯件搬到了独立模块（在那里 `export` 才合法 ——
+// 它们原来嵌在 `createRocoService` 体内、净深度 2）。这里只留 service 相关的缓存与挂载。
+import {SKILL_SUPPORT_SETTLED, SUPPORT_INTERNAL, plainSupportClause, skillSupportFact} from './skill-support-fact.js';
 // RC-205：同种个体比较**只有一份判据**。盒子路由不另写一套「哪些字段算 same/different/unknown」，
 // 直接复用 RC-203 那个纯函数（它本来就带 `OwnedPetSpeciesMismatchError`：不同种直接抛错，不静默比较）。
 import {compareOwnedPets,OwnedPetSpeciesMismatchError} from '../../scripts/roco/owned-pets-lib.mjs';
@@ -172,6 +175,16 @@ export function publicView(result,{modeId=null,rulesetConfigId=null}={}){
   //     拿到 true 才画那一行）。两处都**只在引擎给了的时候**带出去 —— 旧 fixture 的形状不变。
   ...(p?.defense_cooldown!==undefined?{defense_cooldown:p.defense_cooldown}:{}),
   ...(p?.charging!==undefined?{charging:p.charging}:{}),
+  // ── 2026-09-29（要求④「同一规则同一投影」；`team-workshop-u04` 报的"白名单丢三个键"）──────────
+  //   引擎的 `ui.self.pets[]` 里已经有这三个键（有快照时 `stats_source='individual-snapshot'`
+  //   + `individual_id` + `panel_projection`；没快照时 `'species-race'`），
+  //   但**这个白名单整形以前把它们丢掉了** ⇒ 到了 `/api/roco/battle/new` 的 `view.self.pets[]` 就没了
+  //   ⇒ 界面**分不出**「这一局的六维是从个体快照来的」还是「按种族值算的」（而人类要求两种要可区分）。
+  //   写法照上面两条先例：**只在引擎给了的时候才带出去** ⇒ 旧 fixture 的形状一字不变。
+  ...(p?.stats_source!==undefined?{stats_source:p.stats_source}:{}),
+  ...(p?.individual_id!==undefined?{individual_id:p.individual_id}:{}),
+  ...(p?.panel_projection!==undefined?{panel_projection:p.panel_projection}:{}),
+  ...(p?.individual_level!==undefined?{individual_level:p.individual_level}:{}),
   // 展示字段（只有 `result.ui` 才带；没有就是 null，界面据 null 显示「未知」而不是编一个）
   name:p?.name??null,types:Array.isArray(p?.types)?p.types:[],stats:p?.stats??null,
   class:p?.class??null,stage:p?.stage??null,
@@ -2144,34 +2157,6 @@ function sampleEnemyPool(){
  * 键名与档位字符串全部来自引擎；服务端只做「档位 → 一句人话」的转写，不新造判据。
  */
 const SKILL_SUPPORT_CACHE=new Map();   // skill_id -> {tier,note} | null（技能档位是静态属性，缓存即可）
-const SKILL_SUPPORT_SETTLED=new Set(['SIMULATABLE_UNVERIFIED','FULL_VERIFIED']);
-//: 引擎内部说法不许进玩家文案（`support_unparsed` 命中这些片段时，退回一句通用说法）
-const SUPPORT_INTERNAL=/(未识别机制|机制词|原语|effect_support|unsupported|parse|coverage|认领)/i;
-
-function plainSupportClause(segments){
- for(const raw of (Array.isArray(segments)?segments:[])){
-  let s=String(raw??'').trim();
-  if(!s)continue;
-  s=s.replace(/（[^）]*）/g,'').replace(/\([^)]*\)/g,'').trim();   // 去掉内部注解
-  s=s.replace(/^[\u4e00-\u9fa5]{1,2}：/,'').trim();               // 去掉「变：」「每：」这类前置词
-  if(!s||SUPPORT_INTERNAL.test(s))continue;                      // 内部说法：不进玩家文案
-  const head=(s.split('、')[0]||s).trim();
-  if(!head)continue;
-  return [...head].length>22?`${[...head].slice(0,22).join('')}…`:head.replace(/[。；;]$/,'');
- }
- return null;
-}
-
-/** 引擎的档位记录 → 玩家能读的一句**事实**（不是建议）。引擎说「会结算」的手返回 null。 */
-function skillSupportFact(record){
- const tier=String(record?.support_tier??'');
- if(!tier||SKILL_SUPPORT_SETTLED.has(tier))return null;
- if(tier==='KNOWLEDGE_ONLY')return {tier,note:'这招的效果引擎还不会算，点了不会生效'};
- if(tier==='REFUSED')return {tier,note:'这招的效果缺少依据，引擎不会结算'};
- const clause=plainSupportClause(record?.support_unparsed);
- return {tier,note:clause?`这招有一部分引擎还不会算：${clause}`:'这招有一部分效果引擎还不会算'};
-}
-
 async function skillSupportOf(skillId){
  if(SKILL_SUPPORT_CACHE.has(skillId))return SKILL_SUPPORT_CACHE.get(skillId);
  let info=null;
@@ -2184,7 +2169,10 @@ async function skillSupportOf(skillId){
 }
 
 /**
- * 给 `view.legal` 里每个**技能动作**挂 `support`（只挂在引擎说「还算不出来」的那些上）。
+ * 给 `view.legal` 里每个**技能动作**挂 `support`（2026-09-30 起：**每一手都挂** ——
+ * 会结算的挂**正面事实**（`settled:true`），算不出来的挂**缺口**。
+ * 旧说法留档（改钉不删）：「（只挂在引擎说「还算不出来」的那些上）」——
+ * 那样"没挂"就同时表示「会结算」和「不知道」，前端只能去读静态旧字段 ⇒ 玩家被误导（报告 L19）。
  * 纪律：**不**改 `kind` / **不**删动作 / **不**置灰 —— 引擎说它合法，界面就让它可点，
  * 只是把「引擎算不算得出来」这个事实摆出来。显示事实，不给建议（建议是教练层的活）。
  */
@@ -2295,8 +2283,30 @@ async function attachSkillSupport(view){
   if(loadoutsCheck.error)return {ok:false,status:400,error:loadoutsCheck.error};
   const loadouts=loadoutsCheck.loadouts;
 
+  // ── Q8（要求④「同一个体：列表详情 / 培养刷新 / **战斗实际 stats** / 小芽工具 / 推荐 读同一规则同一投影」）
+  //   人类逐字：「**必须把选中的 instanceID 和培养快照连入规则投影**，
+  //   实例重复物种时**不能只靠 speciesID 推断来源**」。
+  //   ⚠ 这一跳以前**只发物种 id**（`resolved.ids`）⇒ 引擎拿不到"是哪一只、什么性格/天分/培养"。
+  //   现在把**每一只实例的快照**一起发下去（键 = 实例 id，如 `own-0001`）。
+  //   ⇒ **服务端这一半**由 Lead 做；**引擎那一半（`_make_pet` 用它）在 task-17**，两边合起来才算"统一投影"。
+  //   拿不到就**不发**（不拦开局、不编数据）—— 引擎那边会走它原来的种族值路径，如实即可。
+  let individuals=null;
+  try{
+   const byId=boxIndexCache?.instanceById;
+   if(byId?.get&&Array.isArray(resolvedTeam)){
+    const map={};
+    for(const id of resolvedTeam){
+     const one=byId.get(String(id));
+     if(!one)continue;
+     const row=individualFromInstance(one,{level:Number.isFinite(one.level)?one.level:60});
+     if(row)map[String(id)]=row;
+    }
+    if(Object.keys(map).length)individuals=map;
+   }
+  }catch(error){ console.error('[roco] 个体快照没取到（不拦开局）:', error?.message||error); }
   const envelope=await client.battleNew({team:resolved.ids,enemyTeam:resolvedEnemy?resolvedEnemy.ids:undefined,
    seed,strategy,stateVersion:0,rulesetConfigId,unverifiedOverrides,
+   ...(individuals?{individuals}:{}),
    ...(loadouts?{loadouts}:{})});
   const out=unwrap(envelope);
   // 2026-09-25（换招判据当场抓到）：这里原来一律回 **502**，但开局失败几乎都是**请求数据的问题**

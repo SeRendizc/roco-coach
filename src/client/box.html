@@ -3,26 +3,17 @@
 
 <main>
 
-<!-- ── 页头：只放标题、数据快照与「关于这一页」抽屉 ─────────────────────────────
-     工程信息（来源 / 版本 / 覆盖 / 未知字段 / 许可）**全部**在 `#dev-drawer` 里，默认收起。
-     一句话口径：页面上不出现工程字段，抽屉里才出现。 -->
+<!-- ── 页头：只放标题与导航 ───────────────────────────────────────────────────
+     ⚠ 2026-09-29 第三轮纠偏第 5 条（用户最新决定覆盖旧口径）：页头**不再放**
+       · 「关于这一页（来源与快照）」那个开发者抽屉（工程字段本来就不该出现在盒子页的页头）；
+       · 「重置筛选」（它属于筛选行 —— 用户念的「充值筛选」就是它）；
+       · 那行**重复的**黄色计数文字（计数只在两个 tab 上写一次）。
+     页头这一行现在只有：返回首页 / 开始 PVP（小芽入口仍由 `xiaoya.js` 注入同一行）。 -->
 <header class="topbar">
  <h1>小芽 · 精灵盒子 <small>全部精灵 / 我的盒子</small></h1>
  <div class="header-actions">
-  <!-- 2026-09-25（人类：「返回培养页没做」）：这一页原来只有状态/重置/关于 —— 从盒子里
-       既回不去首页、也去不了培养。补上与其他页同一套 `.nav-btn`（顺序：返回首页 / 去培养 / 开始PVP），
-       小芽仍由 `xiaoya.js` 注入同一行。 -->
   <a class="nav-btn" id="box-nav-home" href="/">← 返回首页</a>
-  
   <a class="nav-btn primary" id="box-nav-pvp" href="/roco.html">⚔ 开始 PVP</a>
-  <span id="box-status" class="chip">正在读取…</span>
-  <button id="box-reset">重置筛选</button>
-  <details class="dev" id="dev-drawer">
-   <summary>关于这一页（来源与快照）</summary>
-   <div class="dev-body" id="dev-body">
-    <p class="muted">打开后按当前视图生成。这里放的是工程字段，玩家区域一个都不显示。</p>
-   </div>
-  </details>
  </div>
 </header>
 
@@ -53,14 +44,20 @@
   <summary>定位：<span id="label-role">全部</span></summary>
   <div class="fmenu-body" id="filter-role" role="group" aria-label="按定位筛选"></div>
  </details>
- <details class="fmenu" id="menu-support">
-  <summary>支持等级：<span id="label-support">全部</span></summary>
-  <div class="fmenu-body" id="filter-support" role="group" aria-label="按支持等级筛选"></div>
- </details>
  <div class="flags" id="mine-flags" role="group" aria-label="按收藏筛选">
   <button id="flag-favourite" aria-pressed="false">只看收藏</button>
  </div>
+ <button id="box-reset" title="清掉搜索词与三个筛选，回到全部">重置筛选</button>
+ <!-- 按抓包名单清理本机记录（人类 2026-09-29 选 B）：**点了才删**、二次确认、先存档。
+      只在「我的盒子」那一档显示（图鉴档没有"我的记录"这回事）。 -->
+ <button id="box-cleanup" title="只保留抓包名单里每一只对应的那一条本机记录；先存档、再删" hidden>清理本机多出来的记录</button>
+ <!-- 按抓包名单清理本机记录（人类 2026-09-29 选 B）：**点了才删**、二次确认、先存档。
+      只在「我的盒子」那一档显示（图鉴档没有"我的记录"这回事）。 -->
+ <button id="box-cleanup" title="只保留抓包名单里每一只对应的那一条本机记录；先存档、再删" hidden>清理本机多出来的记录</button>
  <span class="muted" id="box-count">正在读取…</span>
+ <!-- 动作反馈行（刷新 / 收藏 / 回滚之后那一句人话）。默认空着、空着就隐藏 ——
+      不是计数：计数只在上面两个 tab 上写一次（第三轮纠偏第 5/6 条）。 -->
+ <span class="muted box-status" id="box-status" role="status" aria-live="polite" hidden></span>
 </section>
 
 <!-- ── 卡片网格：一行是**一个种类**（我的盒子）或一个图鉴条目 ─────────────────────
@@ -93,6 +90,15 @@
   <h2 id="pet-title">这一只的详情</h2>
  </div>
  <p class="cmp-trouble" id="pet-note" role="status" aria-live="polite" hidden></p>
+ <!-- 陪练·休息提醒（2026-09-30 · 人类原话「在首页/培养页根据现实时间/游玩时间提醒休息」）：
+      与 `#pet-note` **同一形状**（`role="status"` 一行条 ✓ 复用，不新造板块 ✓）。
+      ⚠ 文案**直接用 coach 层给的 `text`**（陈述句，不自己拼、不许祈使 ⇒ 与 `PREACH` 不冲突 ✓）；
+      ⚠ **读点没产出就保持 `hidden`**（不渲染空壳 —— 别重演 `#save-message` 那种 0 高度空槽 ✗）。
+      ⚠ **#104 留档（2026-09-30 实测）**：`cmp-trouble` 这个类名**在任何 CSS 里都没有规则**
+      （`grep -rn 'cmp-trouble' src/client/*.css` ⇒ 0 命中）⇒ 这里"复用的是**类名**，不是**样式**"，
+      显示靠默认样式（实测可见 ✓）。首页那一处（`index.html` 的 `#home-rest`）用的是本页已有的 `muted` ✓
+      ⇒ **两页类名不同是有意的**：它们**不是一套样式**，别以为改这边那边会跟着变 ✗ -->
+ <p class="cmp-trouble" id="pet-rest" role="status" aria-live="polite" hidden></p>
  <!-- ── 2026-09-29（U02）两区版式 ─────────────────────────────────────────────
       宽屏：左栏 = 紧凑精灵摘要（形象 / 名称 / 属性 / 等级 / 性格 / 资质 / 天分 / 刷新记录）
       + 动作按钮；右栏 = **唯一一组**「当前四个技能」（`#pet-loadout`）+ 六维。

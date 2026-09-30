@@ -171,8 +171,32 @@ test('桥：静态事实带 ruleset/state_version/coverage/evidence_ids/延迟',
     assert.equal(skill.result.power_status, 'static_value_present');
     assert.equal(skill.result.effective_power, null, '未核验的最终威力必须是 null，不是数字');
     assert.equal(skill.result.damage, null, '未核验的伤害必须是 null，不是数字');
-    assert.equal(skill.result.mechanics.resolved, false);
+    // ── 2026-09-29 改钉（改钉不删）───────────────────────────────────────────────
+    // **依据**：第三轮要求⑤「先审当前 coverage 与真实结算，**不把静态全 824 unsupported 当执行真相**」；
+    // **实测**：`docs/roco/review-2026-09-28/BATCH-1-产品修复实测-2026-09-29.md` §145/§146/§148。
+    // **旧断言原文留档**：
+    //   assert.equal(skill.result.mechanics.resolved, false);
+    // 为什么改：`坟场搏击`（skill_000744）是**攻击类、静态威力 180** 的招，而它 desc 里的那两件事
+    //   ——「造成物伤」与「按条件调整威力」——都是引擎**真的在结算**的原语（40 手实测：`damage` 事件 x26，
+    //   且事件自带 `conditional_power`/`conditional_reason`）。旧断言钉的是"静态 effect_support 说没结算"，
+    //   那正是要求⑤点名的错。**判据的原本意图一个字没放松**：上面两条
+    //   `effective_power === null` / `damage === null` 逐字保留，下面再重申一次并加一条反证。
+    assert.equal(skill.result.mechanics.resolved, true,
+      '攻击类 + 静态威力在 ⇒ 伤害原语是引擎真在结算的，resolved 必须是 true（按类判定，不是恒真）');
+    assert.equal(skill.result.effective_power, null, '（重申）静态威力不许被当成最终威力');
+    assert.equal(skill.result.damage, null, '（重申）不许出现最终伤害数字');
     assert.ok(skill.unsupported.length >= 1, '未实现的机制必须显式列出');
+
+    // **反证**（这条反证本身也要有牙）：把「本机训练规则尚未拉起的原语」那一类拿进来，
+    // 同一条口径必须给出 `resolved:false` 且**点名是哪一类** —— 证明 resolved 是**按类判**的。
+    const layered = await client.skillByName('引燃');   // desc：「敌方获得10层灼烧。」
+    assert.equal(layered.ok, true);
+    assert.equal(layered.result.mechanics.resolved, false,
+      '「层/灼烧」这一类本轮实测零事件（§148）⇒ 必须仍然如实说没结算（否则就是拿"没实现"当"已实现"）');
+    assert.ok(String(layered.result.mechanics.reason ?? '').includes('未拉起'),
+      `没结算时要点名是哪一类尚未拉起，实际：${layered.result.mechanics.reason}`);
+    assert.equal(layered.result.effective_power, null);
+    assert.equal(layered.result.damage, null);
 
     // 学习表与术语也是事实，同样带证据
     const learnset = await client.learnset('pet_000225');

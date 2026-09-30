@@ -19,7 +19,7 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Optional, Sequence, Tuple
 
 from .data import Ruleset, Skill
@@ -162,10 +162,26 @@ def _pct(buffs: Dict[str, Any], engine_key: str, legacy_up: str, legacy_down: st
 
 
 def buff_damage_multiplier(attacker_buffs: Dict[str, Any],
-                           defender_buffs: Dict[str, Any]) -> float:
-    """把双方的物攻/物防增减折成**一个**伤害乘区。
+                           defender_buffs: Dict[str, Any], *,
+                           atk_key: str = "atk", def_key: str = "def") -> float:
+    """把双方**这一对**攻/防的增减折成**一个**伤害乘区。
 
-    `(1 + 攻方物攻增减) / max(0.1, 1 + 守方物防增减)`
+    `(1 + 攻方<atk_key>增减) / max(0.1, 1 + 守方<def_key>增减)`
+
+    ⚠ 2026-09-29（task-25，A 族读点）**改钉**：这两个键过去**写死** `atk` / `def`，
+    而 `compute_damage` 从 RC-401 起就按**技能的伤害类别**取面板（`spa/spd` vs `atk/def`，
+    `damage.attack_stat_by_class`）⇒ **魔攻技能读的是物攻 buff、守方读的是物防 buff**。
+    实测（改前，`tmp/ab-fakegreen.py`）：
+        攻方 `spa=+100%` 打魔攻技能 ⇒ damage **101 → 101**（乘区恒 1.0，增益被静默丢掉）
+        守方 `spd=+100%` 打魔攻技能 ⇒ damage **101 → 101**
+        而 `atk` / `def` 两条照常生效（101 → 202 / 101 → 50）
+    ⇒ 11 条技能判据写着 `resolved=True`（`buff_self` 事件也真的发了），
+      但**没有任何东西读它** = 假绿。这就是「接上了但不生效」那一族第三次出现。
+
+    默认值仍是 `atk`/`def`：legacy / v2 没声明 `damage.attack_stat_by_class` ⇒ 面板也还取
+    `atk`/`def` ⇒ **两边同一对键，逐位不变**（`test_turn_order_fail_closed` 的 golden 指纹守着）。
+    这一处**不需要新能力位**：它是那条已声明能力「伤害按技能的伤害类别取」的**漏点补齐** ——
+    能力位说的是"结算按类别"，而乘区本来就是这个结算的一部分，只补一半才是缺陷。
 
     三条都要看清楚：
 
@@ -179,8 +195,8 @@ def buff_damage_multiplier(attacker_buffs: Dict[str, Any],
 
     返回值直接喂给 `DamageModel.compute(ability_level=...)`。
     """
-    atk = _pct(attacker_buffs, "atk", "atk_up", "atk_down")
-    dfn = _pct(defender_buffs, "def", "def_up", "def_down")
+    atk = _pct(attacker_buffs, atk_key, f"{atk_key}_up", f"{atk_key}_down")
+    dfn = _pct(defender_buffs, def_key, f"{def_key}_up", f"{def_key}_down")
     return (1.0 + atk) / max(0.1, 1.0 + dfn)
 
 
@@ -298,6 +314,68 @@ def stab_multiplier(skill: Skill, attacker_types: Tuple[str, ...]) -> float:
     return 1.5 if skill.element in attacker_types else 1.0
 
 
+# ── 攻/防面板的来源：**同一个体投影优先**（Q8 收口，2026-09-30）──────────
+#
+# 人类逐字：「**肯定要按照最终结算出来应该怎么样就怎么样啊，不能偷懒**」。
+#
+# 背景：产品那一跳（`src/server/roco-service.js`）把「选中的实例 + 培养快照」发下来
+# （`/battle/new` 的 `individuals`），`env._make_pet` 据此用
+# `individuals.panel_from_snapshot()` 算出六维存进 `PetState.panel` —— 那就是列表/详情
+# （前端 `panelOfIndividual()`）读的**同一份投影**（带版本号 `panel-pvp-60-5star/v1`）。
+# 在那之前，战斗回执的六维已经改用这份投影，但**伤害公式仍在读物种的种族值**
+# （`data.panel_stats(species.stats)`）⇒ 「面板上写着物攻 125，打出来的却是按 132.6 算的」。
+# 这里把那一处接上，让「最终结算」读的是同一个体的同一份面板。
+#
+# 两条路径**必须能分辨**（回执里带 `stats_source`，与 UI 视图同一套词）：
+#   · `pet.panel` 非空 ⇒ 个体快照投影；
+#   · 空（legacy / v2 / 不传 `individuals` 的调用方）⇒ **逐字**走老路径，一个字节都不变。
+
+#: 面板来源：个体快照（与列表/详情同一投影）。
+PANEL_SOURCE_INDIVIDUAL = "individual-snapshot"
+#: 面板来源：种族值路径（`data.panel_stats`，老路径）。
+PANEL_SOURCE_SPECIES = "species-race"
+
+
+def damage_panel_for(pet: Any, species: Any) -> Tuple[Dict[str, Any], str]:
+    """这一手结算要用的六维面板 + 它的来源（**同一个体投影优先**）。
+
+    返回 `(面板, 来源)`；来源是 `PANEL_SOURCE_INDIVIDUAL` 或 `PANEL_SOURCE_SPECIES`。
+    只有在 `pet.panel` 非空时才用快照那一份 —— 没有快照的老路径（legacy / v2）
+    **逐字**仍是 `data.panel_stats(species.stats)`（golden 指纹一个字节不动）。
+
+    ⚠ 快照那一路**原样带着面板里的数值**（不强转 float）：回执要能拿它和列表/详情
+    **逐字**对照（人类验收①），`495` 与 `495.0` 在 JSON 里是两个形状。
+    """
+    panel = getattr(pet, "panel", None)
+    if isinstance(panel, dict) and panel:
+        out: Dict[str, Any] = {}
+        for key, value in panel.items():
+            # 布尔是 int 的子类 —— 面板里出现 true/false 是形状错误，不许当 1/0 用。
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                continue
+            out[str(key)] = value
+        if out:
+            return out, PANEL_SOURCE_INDIVIDUAL
+    import roco_env.data as _data  # 局部导入：data 与 effects 互相引用，模块级会成环
+    return _data.panel_stats(species.stats), PANEL_SOURCE_SPECIES
+
+
+def panel_provenance_of(pet: Any, panel: Dict[str, Any], source: str) -> Dict[str, Any]:
+    """一份「这套面板从哪来」的登记（进 `DamageOutcome.panel_provenance`）。
+
+    带**整份六维**（不只是这一手用到的那两项）：回执要能让人拿它和列表/详情**逐值**对照
+    （人类验收①：同一个体的两边必须逐值相同）。没有快照的一侧 `individual_id` /
+    `projection` 是 `None`，`stats_source` 明确写 `species-race`。
+    """
+    is_individual = source == PANEL_SOURCE_INDIVIDUAL
+    return {
+        "stats_source": source,
+        "individual_id": getattr(pet, "individual_id", None) if is_individual else None,
+        "projection": getattr(pet, "panel_projection", None) if is_individual else None,
+        "panel": {str(key): value for key, value in panel.items()},
+    }
+
+
 # ── 伤害计算（唯一实现；planner / service / env 都调它）──────────────────
 #
 # 为什么要有这么一层：伤害计算原本内联在 `env._execute` 里，于是「只想算一个数」
@@ -331,9 +409,22 @@ class DamageOutcome:
     #: 它已经乘进 `power_multiplier`，这里单独留一份是为了让「这一下的加成从哪来」可追问。
     weather_multiplier: float = 1.0
     weather_note: str = ""
+    #: 2026-09-30（Q8 收口）：这一手的攻/防面板**分别**来自哪一套六维，以及用的就是那份面板。
+    #: 形状：`{"attacker": {"stats_source": "individual-snapshot"|"species-race",
+    #:          "individual_id": str|None, "projection": str|None, "panel": {六维}},
+    #:         "defender": {...}}`。
+    #: **只在有快照时进回执**（`individual_panel_used()`）—— 没有快照的老路径形状不变。
+    panel_provenance: Dict[str, Any] = field(default_factory=dict)
+
+    def individual_panel_used(self) -> bool:
+        """这一手有没有用到个体快照投影（任一侧用了就算）。"""
+        for side in ("attacker", "defender"):
+            if (self.panel_provenance.get(side) or {}).get("stats_source") == PANEL_SOURCE_INDIVIDUAL:
+                return True
+        return False
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        out = {
             "damage": self.damage,
             "raw": self.raw,
             "power": round(self.power, 4),
@@ -351,6 +442,11 @@ class DamageOutcome:
             "weather_multiplier": round(self.weather_multiplier, 6),
             "weather_note": self.weather_note,
         }
+        # 只在真的用了快照时多给一个键：没有快照的老路径，这个字典逐位不变。
+        if self.individual_panel_used():
+            out["panel_provenance"] = {
+                side: dict(self.panel_provenance.get(side) or {}) for side in ("attacker", "defender")}
+        return out
 
 
 def compute_damage(attacker: Any, defender: Any, skill: Any, rs: Ruleset,
@@ -384,8 +480,8 @@ def compute_damage(attacker: Any, defender: Any, skill: Any, rs: Ruleset,
     model = active_damage_model()
 
 
-    atk_panel = _data.panel_stats(attacker_species.stats)
-    def_panel = _data.panel_stats(defender_species.stats)
+    atk_panel, atk_panel_source = damage_panel_for(attacker, attacker_species)
+    def_panel, def_panel_source = damage_panel_for(defender, defender_species)
     # 2026-09-23（接手复核）：**攻防要按技能的伤害类别取**，不能永远用物攻/物防。
     # 原来这里写死了 `atk` / `def`，于是**魔攻技能也在用物攻算** —— 实测后果：
     # 物攻高、魔攻低的精灵放魔攻技能伤害虚高（对手一招秒杀就是这么来的），
@@ -412,14 +508,29 @@ def compute_damage(attacker: Any, defender: Any, skill: Any, rs: Ruleset,
         )
     atk_value = atk_panel[atk_key]
     def_value = def_panel[def_key]
+    # 「这一手的面板是从哪来的」—— 攻/防**分别**登记（对手那一侧通常是种族值路径）。
+    panel_provenance = {
+        "attacker": panel_provenance_of(attacker, atk_panel, atk_panel_source),
+        "defender": panel_provenance_of(defender, def_panel, def_panel_source),
+    }
 
-    ability = buff_damage_multiplier(dict(attacker.buffs or {}), dict(defender.buffs or {}))
+    # ⚠ 2026-09-29（task-25）：乘区要读**与面板同一对**键。`atk_key`/`def_key` 由上面
+    # 「按伤害类别取面板」那一段算出（魔攻 ⇒ `spa`/`spd`，其余 ⇒ `atk`/`def`）；
+    # 不传的话默认正好是 `atk`/`def` ⇒ legacy / v2 逐位不变。历史缺陷见函数 docstring。
+    ability = buff_damage_multiplier(dict(attacker.buffs or {}), dict(defender.buffs or {}),
+                                     atk_key=atk_key, def_key=def_key)
 
     power_buff = 1.0 + float((attacker.buffs or {}).get("power", 0)) / 100.0
     # 逐系别的威力增益：键名与系别的对应关系只有 `ELEMENT_POWER_BUFF_KEYS` 一处。
     for element_key, element in ELEMENT_POWER_BUFF_KEYS:
         if element_key in (attacker.buffs or {}) and skill.element == element:
             power_buff *= 1.0 + float(attacker.buffs[element_key]) / 100.0
+    # task-28（2026-09-30）：**按系别的持久威力修正**（`PetState.element_power_mods`，系别 → 百分比）。
+    # 与上面那条旧路**并行、互不重叠**：旧路认 4 个 `power_*` 键（水/武/虫/冰），新路对**全部系别**通用
+    # （`skill_000462 放晴` 的「光系技能威力**永久**+50%」就是它）。**没这个字段 = 不加** ⇒ legacy 逐位不变 ✓
+    _epm = float(int((getattr(attacker, "element_power_mods", None) or {}).get(skill.element, 0) or 0))
+    if _epm:
+        power_buff *= 1.0 + _epm / 100.0
 
     reduction = float(getattr(defender, "_defense_reduction", 0.0) or 0.0)
     # ── 天气：技能威力加成（2026-09-25 人类裁决「那你就做！」）────────────────
@@ -450,6 +561,7 @@ def compute_damage(attacker: Any, defender: Any, skill: Any, rs: Ruleset,
         ability_level=float(ability), power_multiplier=float(power_buff),
         defense_reduction=reduction, model=model.name, verified=model.verified,
         weather_multiplier=float(weather_mult), weather_note=weather_note,
+        panel_provenance=panel_provenance,
     )
 
 
@@ -539,10 +651,67 @@ def decay_layers(layers: int, *, half: bool) -> int:
     依据：术语 1002「灼烧……并衰减一半层数」；术语 1001 中毒**没有**衰减。
     假设：奇数层向上取整（1 层 → 1，2 层 → 1，3 层 → 2）。
     数据没写取整方向，属 MC-008 待验项。
+
+    ⚠ 2026-09-29：这条老函数**保持原样**（legacy / v2 逐位不变的守卫，
+    `tests/test_microcases.py` 逐值钉着 1→1 / 2→1 / 3→2）。声明了本地状态规则的配置
+    走下面的 `layer_decay_by_rule()` —— 两者不要互相改写。
     """
     if not half:
         return layers
     return int(math.ceil(layers / 2.0))
+
+
+def layered_status_tick(pet_hp: int, max_hp: int, status_name: str, layers: int,
+                        spec: Dict[str, Any], *, rounding: Optional[str] = None) -> int:
+    """**声明了本地规则**时的回合末状态伤害（2026-09-29，第三轮⑥）。
+
+    规则（逐字来自 `RuleConfig.status_end_of_turn[status]`，不是引擎里猜的）：
+        damage = floor(max_hp × (base_percent + per_layer_percent × (层数−1)) ÷ 100)
+    再夹到当前生命（`min(pet_hp, damage)`）—— 状态伤害不会把人打成负血。
+
+    为什么按「层数−1」而不是「层数」：`base_percent` 的语义是「1 层时的伤害」，
+    `per_layer_percent` 是**每多一层**再加多少。这样 10 层灼烧 = 2% + 9×1% = 11%，
+    而 1 层就是 2% —— 与规则文件里写的那个例子逐字对得上。
+    """
+    if layers < 1:
+        return 0
+    basis = str(spec.get("tick_damage_basis", "max_hp"))
+    if basis != "max_hp":
+        raise UnsupportedEffect(f"状态「{status_name}」的结算基数", f"本地规则只支持 max_hp，实际 {basis!r}")
+    base = float(spec.get("base_percent", 0.0))
+    per_layer = float(spec.get("per_layer_percent", 0.0))
+    percent = base + per_layer * max(0, layers - 1)
+    raw = max_hp * percent / 100.0
+    mode = rounding or str(spec.get("rounding", "floor"))
+    if mode == "ceil":
+        amount = int(math.ceil(raw))
+    elif mode == "round":
+        amount = int(round(raw))
+    else:
+        amount = int(math.floor(raw))
+    return min(pet_hp, max(0, amount))
+
+
+def layer_decay_by_rule(layers: int, spec: Dict[str, Any]) -> int:
+    """**声明了本地规则**时的层数衰减（`none` / `half_ceil` / `half_floor`）。
+
+    与老的 `decay_layers(half=True)`（ceil）唯一的区别是多一个 `half_floor`，
+    以及「衰减到 0 就是 0」——老函数 `ceil(1/2)=1` 会让灼烧**永不归零**
+    （2026-09-29 实测到的真缺陷，本规则用「层数归零**或**回合用尽」修掉）。
+    """
+    mode = str(spec.get("decay", "none"))
+    if mode == "none":
+        return layers
+    if mode == "half_floor":
+        return int(math.floor(layers / 2.0))
+    return int(math.ceil(layers / 2.0))
+
+
+def status_turns_left_after(layers_after: int, turns_left: int) -> int:
+    """这一回合末之后还剩几个回合（层数归零时一并归零）。"""
+    if layers_after <= 0:
+        return 0
+    return max(0, int(turns_left) - 1)
 
 
 # ── 防御 / 应对（术语 1015/1016/1017）────────────────────────────────

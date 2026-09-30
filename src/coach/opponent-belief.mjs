@@ -130,7 +130,8 @@ export const RULES = Object.freeze([
     kind: 'filter',
     label: '按对手**已亮明**的那只的速度档分层',
     reads: Object.freeze(['opponent_active.speed', 'opponent_revealed.speed']),
-    basis: '速度档来自 RC-303 的 `speedBandFor()`（在候选宇宙内按三分位分档），本模块不另立分档。'
+    basis: '**亮明的那只的**速度档是公开面上看得到的（引擎公开视图给的 `speed_band`）；'
+      + '档位本身来自 RC-303 的 `speedBandFor()`（在候选宇宙内按三分位分档），本模块不另立分档。'
       + '应用口径：**只亮明单一档**时才收窄到同档；一条都没亮明、或快慢两端都亮明时都**不应用**'
       + '（两端亮明 ⇒ 速度对「他会出什么」不再有区分度；实测照两端留会把 mid 档 237 只全剔掉）。'
       + '速度值缺失 ⇒ 不应用（记 `not_applied`），池子因此更宽 —— 宽是安全的，窄才是编的。',

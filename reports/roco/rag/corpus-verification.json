@@ -1,7 +1,7 @@
 {
  "schema": "roco-rules-corpus-verification/v1",
  "generated_by": "scripts/roco/verify-rules-corpus.mjs",
- "generated_at": "2026-09-28T05:06:45.211Z",
+ "generated_at": "2026-09-29T14:32:54.531Z",
  "scope": "语料本身对不对（检索器对不对由 eval-rag-retrieval.mjs 的 13 组判据负责）",
  "inputs": {
   "ledger": "data/roco/evidence/rule-evidence-ledger.json",
@@ -301,7 +301,7 @@
   "provenance_resolvable": {
    "ok": true,
    "problems": [],
-   "checked": 114
+   "checked": 125
   },
   "version_consistent": {
    "ok": true,

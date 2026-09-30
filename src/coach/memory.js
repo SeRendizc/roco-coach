@@ -47,13 +47,49 @@ export function rememberPreference(memory,message,{now=Date.now()}={}){
 // 记住一局真实对战。除结果与回合数外，一并记住对手阵容、我方倒下顺序、
 // 首个减员发生的回合，以及结束时剩余的道具——陪练的「具体」只能来自这些字段。
 // 首个减员必须成对记录（回合 + 当时倒下的那只），否则「X 在第 N 回合倒下」可能是假的。
+/**
+ * 对局结束时**存下来的逐回合摘要**（人类 2026-09-29：「memory机制还有问题啊，记不住啊」）。
+ *
+ * 为什么要有它：`rememberBattle` 原来只存结果级事实（回合数/倒下/幸存/道具），**逐回合的血量、
+ * 出招、事件一条都没留** ⇒ 下一段会话问「复盘一下我上一局」时，小芽只能如实说「完整回合日志
+ * 没被保留，只能看到结果」——那句话是真的（不是她偷懒），但产品该做的是**把能留的留住** ✓
+ *
+ * 边界（**不许无限长**）：只留**最近 `TURN_LOG_LIMIT` 个回合**，每回合只留
+ * `turn / 双方在场与血量 / 这一手是什么 / 最多两条事件文本`，单条字段截断 ⇒ 整份记忆不会膨胀。
+ * 拿不到 `history`（旧存档、页面没给）就**不写这个键**（不编）✓
+ */
+export const TURN_LOG_LIMIT=12;
+const TURN_TEXT_LIMIT=60;
+export function turnLogOf(game){
+ const turns=(game?.history||[]).filter((h)=>h&&h.type==='turn');
+ if(!turns.length)return null;
+ const onField=(side)=>side?.pets?.[side.active]??null;
+ const clip=(x)=>String(x??'').replace(/\s+/g,' ').trim().slice(0,TURN_TEXT_LIMIT);
+ const rows=turns.slice(-TURN_LOG_LIMIT).map((h)=>{
+  const before=h.before||{},after=h.after||{};
+  const youStart=onField(before.player),youEnd=onField(after.player);
+  const foeStart=onField(before.enemy),foeEnd=onField(after.enemy);
+  const action=h.action||{};
+  const events=(Array.isArray(h.events)?h.events:[]).filter((e)=>typeof e==='string'&&e&&!e.startsWith('──'))
+   .map(clip).slice(0,2);
+  return {turn:Number.isInteger(before.turn)?before.turn:null,
+   you:{name:youStart?.name??null,hp:Number.isFinite(youStart?.hp)?youStart.hp:null,
+    hpAfter:Number.isFinite(youEnd?.hp)?youEnd.hp:null},
+   foe:{name:foeStart?.name??null,hp:Number.isFinite(foeStart?.hp)?foeStart.hp:null,
+    hpAfter:Number.isFinite(foeEnd?.hp)?foeEnd.hp:null},
+   action:{kind:action.kind??null,id:action.id??null},events};
+ }).filter((r)=>r.turn!==null);
+ return rows.length?rows:null;
+}
 export function matchFacts(game){
  const pets=game?.player?.pets||[],turns=(game?.history||[]).filter(h=>h.type==='turn');
+ const turnLog=turnLogOf(game);
  let firstLossTurn=null,firstFallen=null;
  for(const h of turns){const before=h.before?.player?.pets||[],after=h.after?.player?.pets||[];const i=after.findIndex((p,j)=>p&&p.hp<=0&&before[j]&&before[j].hp>0);if(i>=0){firstLossTurn=h.before.turn;firstFallen=after[i]?.name||pets[i]?.name||null;break;}}
  const items=game?.player?.items;
  return {enemy:factNames((game?.enemy?.pets||[]).map(p=>p?.name)),faints:factNames(pets.filter(p=>p&&p.hp<=0).map(p=>p.name)),
   ...(Number.isInteger(firstLossTurn)?{firstLossTurn,firstFallen}:{}),survivors:pets.filter(p=>p&&p.hp>0).length,
+  ...(turnLog?{turnLog}:{}),
   items:{potion:factCount(items?.potion),cleanse:factCount(items?.cleanse),ether:factCount(items?.ether)}};
 }
 // ── 习惯判据里「残血」的定义：在场精灵血量占上限 30% 以下 ─────────────────────

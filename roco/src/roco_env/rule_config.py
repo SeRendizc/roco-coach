@@ -473,6 +473,71 @@ def _validate_actions(config: Dict[str, Any], bad) -> None:
                 bad(f"actions.kinds.{kind}.value={status!r} 与两张清单不一致（按清单应为 {expected}）")
 
 
+def _optional_status_rules(config: Dict[str, Any]) -> Optional[Dict[str, Dict[str, Any]]]:
+    """读 `status_rules.end_of_turn`（2026-09-29 新增；顶层键叫 `status_rules`，**不能**叫 `status` —— 那是配置自身的晋级状态字符串）。
+
+    **缺这一块 = `None`**（legacy / v2 没有这个概念）⇒ 引擎不得改变行为。
+    形状由 `_validate_status()` 在加载期把关；这里只做「取出来 + 去引用」，
+    不补任何默认值 —— 少一个键就在校验期炸，而不是在这里猜一个数。
+    """
+    node = _dig(config, "status_rules.end_of_turn")
+    if node is _MISSING or node is None:
+        return None
+    if not isinstance(node, dict):
+        raise RuleConfigError("status_rules.end_of_turn 必须是对象")
+    out: Dict[str, Dict[str, Any]] = {}
+    for name, leaf in node.items():
+        if not isinstance(leaf, dict) or not isinstance(leaf.get("value"), dict):
+            raise RuleConfigError(f"status_rules.end_of_turn.{name} 必须是 {{value, confidence, reason?}} 形状的对象")
+        out[str(name)] = dict(leaf["value"])
+    return out
+
+
+def _validate_status(config: Dict[str, Any], bad) -> None:
+    """`status_rules.end_of_turn` 的形状校验（**fail closed**）。
+
+    为什么要单独的校验：这一块是新加的**本地规则**入口（人类 2026-09-29 授权），
+    值会一版一版改。形状不严就会把「每层 1%」写成字符串、把 `max_layers` 写成 0，
+    然后在对局里静默错算 —— 那是这个仓库最不能接受的一类缺陷。
+    """
+    node = _dig(config, "status_rules.end_of_turn")
+    if node is _MISSING or node is None:
+        return
+    if not isinstance(node, dict) or not node:
+        bad("status_rules.end_of_turn 必须是非空对象（要么整块不写，要么逐个状态写全）")
+        return
+    note = _dig(config, "status_rules.note")
+    if note is _MISSING or not isinstance(note, str) or not note.strip():
+        bad("写了 status_rules.end_of_turn 就必须写 status_rules.note（说明这是本地规则、不是原始资料）")
+    for name, leaf in node.items():
+        where = f"status_rules.end_of_turn.{name}"
+        if not isinstance(leaf, dict) or "value" not in leaf:
+            bad(f"{where} 必须是 {{value, confidence, reason?}} 形状的对象")
+            continue
+        value = leaf.get("value")
+        if not isinstance(value, dict):
+            bad(f"{where}.value 必须是对象")
+            continue
+        for key in ("base_percent", "per_layer_percent"):
+            v = value.get(key)
+            if not isinstance(v, (int, float)) or isinstance(v, bool) or v < 0:
+                bad(f"{where}.value.{key} 必须是 ≥0 的数字（实际 {v!r}）")
+        for key in ("max_layers", "duration_turns"):
+            v = value.get(key)
+            if not isinstance(v, int) or isinstance(v, bool) or v < 1:
+                bad(f"{where}.value.{key} 必须是 ≥1 的整数（实际 {v!r}）")
+        if not isinstance(value.get("decays"), bool):
+            bad(f"{where}.value.decays 必须是布尔（实际 {value.get('decays')!r}）")
+        if value.get("decay") not in ("none", "half_ceil", "half_floor"):
+            bad(f"{where}.value.decay 必须是 none/half_ceil/half_floor 之一（实际 {value.get('decay')!r}）")
+        if value.get("tick_damage_basis") != "max_hp":
+            bad(f"{where}.value.tick_damage_basis 目前只支持 max_hp（实际 {value.get('tick_damage_basis')!r}）")
+        if value.get("rounding") not in ("floor", "ceil", "round"):
+            bad(f"{where}.value.rounding 必须是 floor/ceil/round 之一（实际 {value.get('rounding')!r}）")
+        if value.get("decays") is False and value.get("decay") not in (None, "none"):
+            bad(f"{where}.value.decays=false 与 decay={value.get('decay')!r} 自相矛盾")
+
+
 def validate_config(config: Any, ledger: Dict[str, Any], *, expected_id: Optional[str] = None) -> List[str]:
     """校验一份配置，返回问题列表（空 = 合规）。
 
@@ -522,7 +587,9 @@ def validate_config(config: Any, ledger: Dict[str, Any], *, expected_id: Optiona
     # RC-401 批次八（2026-09-25）：`damage.initiative_condition`（「若先于敌方攻击」）
     # 与上面三条同一套形状规则。
     for _cap in ("slot_condition", "position_shift", "initiative_condition", "foe_switch_condition",
-                 "per_use_ramp", "on_hit_ramp"):
+                 "per_use_ramp", "on_hit_ramp",
+                 # task-25 B 族：与上面几条同一套形状规则（缺了它，写错的叶子会静默当 False）
+                 "element_use_ramp"):
         node_cap = _dig(config, f"damage.{_cap}")
         if node_cap is _MISSING:
             continue
@@ -547,6 +614,9 @@ def validate_config(config: Any, ledger: Dict[str, Any], *, expected_id: Optiona
 
     _validate_mana(config, bad)
     _validate_actions(config, bad)
+    # 2026-09-29：本地规则入口 `status_rules.end_of_turn`（层数/持续回合）的**形状**校验。
+    # 语义（百分比怎么算）在引擎里；这里只保证「数值是数值、范围合理、自相矛盾要炸」。
+    _validate_status(config, bad)
 
     # BattleMode 必须是登记表里真实存在的模式；模式规模也以登记表为唯一事实源
     mode_id = _dig(config, "battle_mode.id")
@@ -772,6 +842,17 @@ class RuleConfig:
     #: **没声明就是 False** —— 效果在解析层就被收回（连未认领标记都不补），
     #: legacy / v2 的 `unsupported` 与结算逐位不变。
     energy_foe_energy_loss: bool
+    #: RC-401 批次十四（2026-09-29 task-20）：**「应对X：改为…」的覆盖语义**
+    #: （`energy.respond_override`）。声明为真时，`parse.resolve_respond_override()`
+    #: 会把「改为**获得N层**」读成"替换被覆盖那条基础效果的层数"，由 `env` 在**应对成功**
+    #: 那一支落地（状态支 / 防御支 / 攻击支三处）。**没声明就是 False** —— legacy / v2 里
+    #: 这一段继续什么都不产出（连结构都没有）⇒ `unsupported`、`unclaimed` 与判据逐位不变。
+    energy_respond_override: bool
+    #: RC-401 批次十六（2026-09-29 task-20 批四）：**「敌方每有 N 层<中毒效果|印记|星陨印记>，
+    #: 本次技能威力/连击数 +M」**（`damage.per_layer_boost`）。声明为真时，这一手的
+    #: 威力/连击入参按**对手场上那只的当前层数**加成（读法是"当前层数"，不是历史累计）。
+    #: **没声明就是 False** —— legacy / v2 里那一段继续算未认领机制，结算逐位不变。
+    damage_per_layer_boost: bool
     #: 2026-09-23：**伤害按技能的伤害类别取面板**（`damage.attack_stat_by_class`）。
     #: 声明为真时：`魔攻` 类技能用 `spa/spd` 结算、其余用 `atk/def`；
     #: **没声明就是 False** —— legacy / v2 里这条概念不存在，结算逐位不变
@@ -789,9 +870,112 @@ class RuleConfig:
     #: RC-401 批次十二：「**每次使用后，本技能<威力|能耗|连击数>永久±N**」（7 条技能 / 25 只带 `水炮`）。
     #: 没声明就是 False：legacy / v2 里那一段继续算未认领机制，`PetState.skill_ramps` 也不会被写。
     damage_per_use_ramp: bool
+    #: task-25 B 族（2026-09-30）：**「每使用1次其他<本系>技能 / 每使用过1个其他系别技能，
+    #: 本技能<属性>永久±N」**（3 条技能：`270 蓄能轰击` · `343 光能聚集` · `450 过曝`）。
+    #: 与 `damage_per_use_ramp` / `damage_triggered_ramp` **同一套写点**（`PetState.skill_ramps`）——
+    #: 本批只加**触发器**（数"别的技能用了几次"，落在 `PetState.skill_use_elems`）。
+    #: 没声明就是 False：legacy / v2 里那几段继续算未认领机制，`skill_ramps`/`skill_use_elems` 都不会被写。
+    damage_element_use_ramp: bool
+    #: task-26 P0（2026-09-30）：**驱散按 `what` 分派**的开关。
+    #: 没声明（legacy / v2）⇒ 走**原来那一支**（逐字不变 ⇒ golden 指纹守住 ✓）；
+    #: 声明了 ⇒ 「增益/减益」按**符号**清，**认不出的 `what` fail closed**（不执行 + 如实登记 ✓）。
+    #: RC-401 批次十八（2026-09-30 **E 族缺口二** `446 清洗`）：「**自己**每有 N 层减益，本技能能耗 -M」。
+    #: ⚠ **命名空间必须是 `damage.*`，不能是 `energy.*`** ✗ —— 判据
+    #: `test_v3_energy_and_turn_order_are_verbatim_copies_of_v2` 要求 **v3 的 `energy:` 块与 v2 逐字相同**
+    #: ⇒ 在 `energy.*` 下新开位会被判据禁止（2026-09-30 实测踩到 ✓）。照 `damage.cleanse_dispatch` 等先例 ✓。
+    damage_per_own_debuff_cost: bool
+    damage_cleanse_dispatch: bool
+    #: task-27（2026-09-30）：**印记的驱散**（`damage.cleanse_marks`）。
+    #: 与 `damage_cleanse_dispatch`（增益/减益，清 `buffs` 键名）**分开**：印记有**层数**维度
+    #: （`marks = {"星陨印记": 3}`），两个量纲混在一起必然出错。
+    #: **没声明就连结构都不产出**（`resolve_cleanse_marks(declared=False)` 什么都不加）⇒
+    #: legacy / v2 的 `state.unsupported` 与 golden 指纹逐位不变。
+    damage_cleanse_marks: bool
+    #: RC-401 批次十七（2026-09-30 task-26 H 族批一）：**「每应对成功1次 / 应对X：…本技能<属性>永久±N」**
+    #: 与「**每次击败敌方，本技能<属性>永久±N**」（6 条技能）。与 `damage_per_use_ramp` /
+    #: `damage_on_hit_ramp` **同一套写点**（`PetState.skill_ramps`），本批只加**触发器**。
+    #: 没声明就是 False：legacy / v2 里那几段继续算未认领机制，`skill_ramps` 也不会被写。
+    damage_triggered_ramp: bool
+    #: task-28（2026-09-30 · 427 并集 D 族余项）：**「应对X：减免的伤害变为回复自己生命」**
+    #: （实测 `skill_000289 无畏之心`）。语义：**被减伤挡下来的那部分**转成回复 ✓，
+    #: 穿过去的那点残余伤害照旧结算 ✓（289 减伤 100% 时仍有 1 的下限伤害）。
+    #: 数值口径 = `DamageOutcome.raw − DamageOutcome.damage`（两个量在 `effects.py` 现成 ✓，
+    #: **不新增伤害管线、不在这里猜比例** ✓）。
+    #: 没声明就是 False ⇒ `resolve_respond_reduction_to_heal(declared=False)` **什么都不产出**，
+    #: legacy / v2 的 `unsupported` 与 golden 指纹逐位不变 ✓。
+    damage_respond_reduction_to_heal: bool
+    #: task-28（2026-09-30 · D 族 `462 放晴`）：**「<系>技能威力永久±N%」**。
+    #: 写进 `PetState.element_power_mods`（系别 → 百分比），读点在 `effects.compute_damage`
+    #: （按 `skill.element` 取 ✓ **已就绪**，本批只补**写入方**）。
+    #: 「应对防御：改为永久+100%」是它的**覆盖体** ⇒ 走 `energy.respond_override` 那条链替换 ✓
+    #: （`mode="element_power"`：应对成功时**基础那条被摘掉**、只留改为值 ⇒ 不是相加 ✓）。
+    #: 没声明就是 False ⇒ `resolve_element_power_ramp(declared=False)` **连 effect 都不产出** ⇒
+    #: legacy / v2 的 `unsupported` 与 golden 指纹逐位不变 ✓。
+    damage_element_power_ramp: bool
+    #: task-28（H 族 `285 退化`）：**「萌化」= 带层数的标记**（写 `PetState.marks` ✓ 复用现成字段 ✗ 不新造）。
+    #: 语料逐字依据：`285`/`732` 写「**1层**萌化」⇒ 带层数 ✓；10 条里没有一条让萌化自己造成效果 ✓
+    #: ⇒ 它**不进** `END_OF_TURN_STATUS`（进了就是凭空 tick ⇒ 假绿 ✗，与 `冻结` 同型的坑 ✓）。
+    #: 没声明就是 False ⇒ `env` 那条路由**一个字都不写** ⇒ legacy / v2 逐位不变 ✓。
+    damage_moe_mark: bool
+    #: task-28（第 2 批 `717 超级糖果`）：**本手无条件平值威力**「本次技能威力+N」。
+    #: 语义 = `skill.power += N`（与 `foe_switch_power_flat` **同一手法** ✓ 不动伤害公式 ✓）。
+    #: ⚠ 与"**全技能**威力永久"（`721`/`728`）**作用域不同** ✗：那个是持久、这是本手 ✓
+    #: 未声明 ⇒ resolver **整条不产出** ⇒ legacy / v2 逐位不变 ✓。
+    damage_self_power_flat: bool
+    #: task-28（第 2 批 `724 破罐破摔`）：**「（自己）有减益时，本次技能威力+N」的条件门**。
+    #: **加成那半复用 `damage.self_power_flat`** ✓（同一个 kind `self_power_flat` ✓）；本叶子只管**条件** ✓。
+    #: **"减益"口径**（Lead 裁决 ✓）：只算 `buffs`/`buffs_flat` 的**负值** ✓；**状态层数不算** ✓（算进来=发明语义 ✗）。
+    #: 未声明 ⇒ resolver **整条不产出** ⇒ legacy / v2 逐位不变 ✓。
+    damage_cond_self_debuff_power: bool
+    #: task-28（H 族 `721`/`728`）：**"全技能"级持久修正**（写 `PetState.global_skill_mods` ✓）。
+    #: 覆盖两条：`721`「全技能**能耗**永久-2」· `728`「全技能**威力**永久+10」✓（**一个字段两个方向** ✓）。
+    #: ⚠ **作用域 = 所有技能** ✗ —— 与 `skill_ramps`（逐技能 ✗）/`buffs`（属性 ✗）/`element_power_mods`（按系别 ✗）都不同 ✓。
+    #: ⚠ **能耗下界口径**（Lead 2026-09-30 裁决 ✓）：**能减多少减多少、但不为负** ⇒ `max(0, base+delta)` ✓
+    #:   ⇒ **不改 MC-018 的既有守卫** ✗ · **改点**：若人类改判 ⇒ 只改 `env.effective_skill_cost` 那一处 ✓。
+    #: ⚠ **产品后果（如实登记 ✓ 不藏在代码里）**：全库 **140 条能耗 ≤1 的技能**（**427 并集内 104 条**）
+    #:   在本叶子声明后会变成 **cost 0** ✓（"全技能-2"照字面的必然结果 ✓ 不是 bug ✓）。
+    #: 未声明 ⇒ resolver **整条不产出** ⇒ legacy / v2 逐位不变 ✓。
+    damage_global_skill_mods: bool
+    #: **没声明 ⇒ `resolve_global_skill_mod(declared=False)` 什么都不产出** ⇒ legacy 逐位不变 ✓。
     #: RC-401 批次十三：「**每被攻击1次 / 每受到1次抵抗的技能攻击 → 本技能<属性>永久±N**」
     #: （3 条技能 / 37 只带得上，含 `skill_000500 岩土暴击` 的 35 只）。
     damage_on_hit_ramp: bool
+    #: 2026-09-29（task-25，A 族「获得 属性±N」的**读点**，`stat_gain.speed_buff`）：
+    #: **「自己获得速度±N%」进先手速度**。在此之前 `env.order_speed()` **完全不读 `pet.buffs`**
+    #: ⇒ 「自己获得速度+30」发出 `buff_self{stat:"spe"}` 事件、判据判 `resolved=True`，
+    #: 但先手顺序一点不变（**假绿**：事件发了、没人读）。声明为真后 ×`(1 + buffs["spe"]/100)`，
+    #: 并在 `turn_start.speed_provenance` 登记 `speed_buff_pct`。术语 1020 没写这个折法
+    #: ⇒ 乘算是**引擎假设**（evidence_id 留空）。**没声明**（legacy / v2）⇒ 逐位不变。
+    stat_gain_speed_buff: bool
+    #: 2026-09-29（task-25，A 族「获得 属性±N」的**解析形状**，`stat_gain.extended_shapes`）：
+    #: 从「`自己`获得`单/双属性``+`N`%`」放宽到数据里真实出现的：主语可为 `敌方`（⇒ `foe_stat`）、
+    #: 符号可为 `-`、`自己` 可省（「并获得魔攻+70%」）、`和` 复合与 `额外` 前缀；另含
+    #: `全技能威力`（`buffs["power"]` **已有读点**；原文一律不带 `%`，读点按 `+N` = `+N%` 解）。
+    #: **只补无条件形状** —— 落在「若/选择/应对/期间/每/或」条件句里的仍如实报未结算。
+    #: **没声明就是 False** ⇒ 解析层连这些效果都不产出，`unsupported` 与判据逐位不变。
+    stat_gain_extended: bool
+    #: 2026-09-29（task-25，A 族）：**平值属性修正**（`stat_gain.flat`）—— 解析**与读点同一把开关**。
+    #: 声明为真时「（自己|敌方）获得<属性>±N」（**不带 `%`**）读成 `self_stat_flat` /
+    #: `foe_stat_flat` ⇒ 写进 `PetState.buffs_flat`（面板量纲），由 `env.order_speed()` **真的读**
+    #: （+N 点加到先手速度上；全库实测平值只出现在速度上，14 处）。
+    #: ⚠ 解析与读点**共用一位**（不像 `speed_buff` 拆两个）：拆开就能合法造出「解析开了、
+    #: 读点没开」的假绿配置；合成一位后「声明了就有读点」是**结构上成立**的，不靠人记得。
+    #: 原始资料没有「平值如何进面板」的口径 ⇒ 加法是**本地规则**。**没声明** ⇒ 逐位不变。
+    stat_gain_flat: bool
+    #: 2026-09-29（第三轮⑥「还没做出来的机制叫你队友做」）：**回合末持续状态的显式本地规则**。
+    #:
+    #: 形状：`{状态名: {"base_percent": float, "per_layer_percent": float, "max_layers": int,
+    #: "duration_turns": int, "decays": bool, "decay": "none"|"half_ceil"|"half_floor",
+    #: "tick_damage_basis": "max_hp", "rounding": "floor"|"ceil"|"round", "source": str}}`。
+    #:
+    #: **缺字段 = `None` = 这份配置没有声明层数/持续回合**（legacy / v2）⇒ 引擎回到
+    #: `effects.END_OF_TURN_STATUS` 的老口径（固定百分比、层数只影响衰减、无持续回合），
+    #: 逐位不变。声明了的配置（v3）才走「基础% + 每层% × (层数−1)」与持续回合终止条件。
+    #:
+    #: 为什么放在规则配置里而不是写死在引擎：这些数字**不是真游戏数据**（人类 2026-09-29 逐字
+    #: 「所有不冲突规则都列为引擎有效规则」「我本身就是个模拟，不需要那么严谨」），
+    #: 必须与冻结资料区分开、可审计、一版一版可改；写死就变成第二个真相。
+    status_end_of_turn: Optional[Dict[str, Dict[str, Any]]]
     #: 行动排序的**声明维度**（RC-103）。legacy 是引擎现状（respond/priority/speed）；
     #: candidate 声明的是社区口径的总序（respond/switch/priority/speed），引擎只实现了其中一部分。
     action_order: Tuple[str, ...]
@@ -1048,6 +1232,7 @@ def load_config(ruleset_config_id: str) -> RuleConfig:
         energy_initial_for_all_pets=_optional_leaf_true(config, "energy.initial_for_all_pets"),
         energy_cost_modifier=_optional_leaf_true(config, "energy.cost_modifier"),
         energy_foe_energy_loss=_optional_leaf_true(config, "energy.foe_energy_loss"),
+        energy_respond_override=_optional_leaf_true(config, "energy.respond_override"),
         energy_per_layer_cost=_optional_leaf_true(config, "energy.per_layer_cost"),
         damage_attack_stat_by_class=_optional_leaf_true(config, "damage.attack_stat_by_class"),
         damage_slot_condition=_optional_leaf_true(config, "damage.slot_condition"),
@@ -1055,7 +1240,33 @@ def load_config(ruleset_config_id: str) -> RuleConfig:
         damage_initiative_condition=_optional_leaf_true(config, "damage.initiative_condition"),
         damage_foe_switch_condition=_optional_leaf_true(config, "damage.foe_switch_condition"),
         damage_per_use_ramp=_optional_leaf_true(config, "damage.per_use_ramp"),
+        # task-25 B 族：与 `per_use_ramp` **同一形状、同一读法**（没声明 = False ⇒ 逐位不变）。
+        damage_element_use_ramp=_optional_leaf_true(config, "damage.element_use_ramp"),
+        # task-26 P0：与上面几条同一形状（没声明 = False ⇒ legacy 逐位不变 ✓）。
+        damage_per_own_debuff_cost=_optional_leaf_true(config, "damage.per_own_debuff_cost"),
+        damage_cleanse_dispatch=_optional_leaf_true(config, "damage.cleanse_dispatch"),
+        damage_cleanse_marks=_optional_leaf_true(config, "damage.cleanse_marks"),
+        damage_triggered_ramp=_optional_leaf_true(config, "damage.triggered_ramp"),
+        damage_respond_reduction_to_heal=_optional_leaf_true(
+            config, "damage.respond_reduction_to_heal"),
+        damage_element_power_ramp=_optional_leaf_true(config, "damage.element_power_ramp"),
+        damage_moe_mark=_optional_leaf_true(config, "damage.moe_mark"),
+        damage_self_power_flat=_optional_leaf_true(config, "damage.self_power_flat"),
+        damage_cond_self_debuff_power=_optional_leaf_true(
+            config, "damage.cond_self_debuff_power"),
+        damage_global_skill_mods=_optional_leaf_true(config, "damage.global_skill_mods"),
         damage_on_hit_ramp=_optional_leaf_true(config, "damage.on_hit_ramp"),
+        damage_per_layer_boost=_optional_leaf_true(config, "damage.per_layer_boost"),
+        # 2026-09-29（task-25）：A 族「获得 属性±N」的解析形状 / 平值，与两条速度读点。
+        # **整块都在 v3 新增的 `stat_gain` 下** —— 为什么不去借 `turn_order`：`test_six_pet_battle`
+        # 判据要求 v3 的 `turn_order` 与 v2 **逐字相同**（整块 json.dumps 相比），
+        # 借它就会被判红；`damage` 虽已是 v3 独有块，但这一族不只有伤害（还有先手速度）。
+        stat_gain_extended=_optional_leaf_true(config, "stat_gain.extended_shapes"),
+        stat_gain_flat=_optional_leaf_true(config, "stat_gain.flat"),
+        stat_gain_speed_buff=_optional_leaf_true(config, "stat_gain.speed_buff"),
+        # 2026-09-29：回合末持续状态的显式本地规则（`status.end_of_turn`）。
+        # **缺字段 = None**（legacy / v2）⇒ 引擎走老口径，逐位不变。
+        status_end_of_turn=_optional_status_rules(config),
         action_order=tuple(str(x) for x in action_order),
         speed_tie=None if speed_tie == "unknown" else speed_tie,
         speed_tie_microcase_id=tie_microcase,
