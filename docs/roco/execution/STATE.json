@@ -637,6 +637,14 @@
       "owner": "harness-verifier（发现）· plan04-engine（改成「本例读数」标注）",
       "status": "fix_in_flight",
       "rule": "报告里的**具体数字必须标明局面来源**（哪个夹具/哪个探针局面），否则后人会当基线引用；跨探针比数字前先确认是同一局面"
+    },
+    {
+      "id": "O-49",
+      "what": "**改了「派生产物的真源」却没刷新产物 ⇒ 判据连锁红**（且归属容易搞混）：`src/game/content.js` 是 `data/roco/derived/tactic-cards.json` 与语义语料的真源，产物里钉着它的 `source_sha256`",
+      "evidence": "plan00-closer 在 task-42（content.js 退役词清零）后实测：产物 `tactic-cards.json.source_sha256 = de9638ec…` ≠ 当前 `content.js sha256 = 7634e910…` ⇒ `tests/roco-rag-tactic-cards.test.js` **4/5 exit=1**、`tests/knowledge.test.js` **8/11 exit=1**，而**干净 HEAD 副本上分别 5/5 与 11/11 绿** ⇒ 归属明确是这次改动引起；同批 `roco-rag-eval`(20/24) 与 `roco-corpus-verification`(8/9) 在两侧同样红 ⇒ 属既存。修法 = 跑 `node scripts/roco/build-tactic-cards.mjs` + `npm run build:knowledge`（只写 `data/roco/derived/**`）—— Lead 已给**窄例外**（只许这两个生成器、只许写 derived、产物 diff 与 sha 前后要报、跑完复跑那两条判据证明回绿、**不许自行提交**）",
+      "owner": "plan00-closer（执行刷新）· lead（窄例外 + 提交）",
+      "status": "fix_in_flight",
+      "rule": "① **凡改「派生产物的真源」必须在同一刀里刷新产物**（改动面评估时先把「真源 → 产物 → 判据」这条链列出来）；② `data/**` 仍只读，**唯一例外是生成器**（且只写 `derived/**`），产物 diff 必须能逐字核对；③ 出现「工作树红 / 干净 HEAD 绿」时，**先取干净副本对照再定性归属**（这次就是这么分的：2 条我引起 + 2 条既存）"
     }
   ],
   "handoff": {
