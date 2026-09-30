@@ -17,7 +17,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { activeMatchIdOf, activeMatchOf, assembleContext, buildContext, effectiveMatchScope, readsAsPreviousMatch, runCoach } from '../src/coach/runtime.js';
+import { activeMatchIdOf, activeMatchOf, assembleContext, buildContext, effectiveMatchScope, hydrationOfPreviousMatch, readsAsPreviousMatch, runCoach } from '../src/coach/runtime.js';
 import { createGame, legalActions, step } from '../src/game/engine.js';
 import { archiveRound } from '../src/coach/experience.js';
 import { companionFacts } from '../src/coach/companion.js';
@@ -141,4 +141,19 @@ test('③ 非恒真：判定在四种配置上各给唯一结果（不是"总能
   assert.equal(activeMatchIdOf({ battle: { id: 'B' }, lastMatch: { id: 'PREV' } }), 'B');
   assert.equal(activeMatchIdOf({ lastMatch: { id: 'PREV' } }), 'PREV');
   assert.equal(activeMatchIdOf({}), null);
+});
+
+test('⑥ 客户端盲补（`xiaoya.js` 那条路）也走同一个判定：有当前局 ⇒ 不补上一局；没当前局 ⇒ 补但必须标注', () => {
+  const events = [{ id: 'PREV-MATCH-ID', result: 'loss', stage: PREV_TAG, turns: 16 }];
+  // 有当前局（宿主动局上下文口给了 roco_battle / battle）⇒ **一个字都不补**（02 红线：不许显示上一局当本局）
+  assert.equal(hydrationOfPreviousMatch({ roco_battle: { turn: 1, state_version: 0 } }, events), null);
+  assert.equal(hydrationOfPreviousMatch({ battle: { turn: 1 } }, events), null);
+  assert.equal(hydrationOfPreviousMatch({ matchScope: 'current' }, events), null);
+  // 没有当前局 ⇒ 允许补，但**必须标成 previous** ⇒ 下游正文写「上一局：」
+  const hydration = hydrationOfPreviousMatch({ mode: 'camp' }, events);
+  assert.deepEqual(hydration, { lastMatch: events[0], matchScope: 'previous' });
+  assert.equal(readsAsPreviousMatch({ mode: 'camp', ...hydration }), true);
+  // 宿主已经给了 lastMatch ⇒ 不覆盖；磁盘上没有记录 ⇒ 不编
+  assert.equal(hydrationOfPreviousMatch({ mode: 'camp', lastMatch: { id: 'HOST' } }, events), null);
+  assert.equal(hydrationOfPreviousMatch({ mode: 'camp' }, []), null);
 });

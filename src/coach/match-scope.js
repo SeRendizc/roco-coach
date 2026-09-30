@@ -61,3 +61,20 @@ export function activeMatchIdOf(context={}){
 export function readsAsPreviousMatch(context={}){
  return effectiveMatchScope(context)==='previous';
 }
+
+/**
+ * 宿主没给 `lastMatch` 时，要不要用本机记忆里的最后一条来补？（P1-B · 02 红线「不许显示上一局当本局」）
+ *
+ * 规则：
+ *   · **有当前局**（`effectiveMatchScope==='current'`：宿主动局上下文口给了 `game`/`roco_battle`）⇒ **不补**；
+ *   · 没有当前局 ⇒ 允许补，且**必须显式标成 `previous`** —— 下游（`teacher.reviewMatch`）据此在正文写「上一局：」；
+ *   · 宿主已经给了 `lastMatch`、或磁盘上根本没有对局记录 ⇒ 什么都不做（不编）。
+ *
+ * 返回要写进上下文的 `{lastMatch, matchScope}`；不该补时返回 `null`。
+ */
+export function hydrationOfPreviousMatch(context={},events=[]){
+ if(effectiveMatchScope(context)==='current')return null;
+ if(context?.lastMatch)return null;
+ if(!Array.isArray(events)||!events.length)return null;
+ return {lastMatch:events[events.length-1],matchScope:'previous'};
+}

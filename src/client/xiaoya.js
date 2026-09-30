@@ -16,6 +16,8 @@ import {requestCoach, connectionStatus, readChatStore, serializeChatStore,
   activeChatSession, chatConversation, appendChatTurn, startChatSession, emptyChatStore,
   beginNewChatSession, clearActiveChatSession} from '../coach/client.js';
 import {buildContext} from '../coach/runtime.js';
+// P1-B（task-46）：补 `lastMatch` 之前要过"这一问依据哪一局"的**同一个判定**（叶子模块，浏览器安全）。
+import {hydrationOfPreviousMatch} from '../coach/match-scope.js';
 import {freshMemory, readMemory, memoryItems, deleteMemoryItem, MEMORY_GROUPS,
   rememberPreference} from '../coach/memory.js';
 // 培养那几样（性格 / 六项资质 / 天分档位）的**唯一**投影：页面读它，小芽也读它 ——
@@ -1138,8 +1140,13 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
       // 而 `memory.events` 的最后一条正是"上一局"，且 `rememberBattle` 现在会把 `turnLog` 一起存进去
       // （`roco.js` 的 `finishMatch()` 交 `history` 那一条链）。
       // 口径：**只在宿主真的没给的时候**补，且只补**磁盘上真有的那一份**（没有就不加这个键，不编）。
-      if (!context.lastMatch && Array.isArray(state.memory?.events) && state.memory.events.length) {
-        context.lastMatch = state.memory.events[state.memory.events.length - 1];
+      // P1-B（task-46 · 02 红线「不许显示上一局当本局」）：补之前先过**同一个判定** ——
+      //   有当前局（宿主动局上下文口给了 `game`/`roco_battle`）⇒ 一个字都不补；
+      //   没有当前局才补，并且**显式标成 `previous`**（复盘正文会写「上一局：」，见 `teacher.reviewMatch`）。
+      const hydration = hydrationOfPreviousMatch(context, state.memory?.events);
+      if (hydration) {
+        context.lastMatch = hydration.lastMatch;
+        context.matchScope = hydration.matchScope;
       }
       context.coachAllowed = true;
       if (incoming.failure) context.hostContextFailure = incoming.failure;

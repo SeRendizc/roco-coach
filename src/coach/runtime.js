@@ -52,8 +52,8 @@ export const localProvider={name:'local',async generate(packet){return packet.te
 export const FACT_DRAFT='这一问是规则或图鉴事实：先查引擎，再按回执回答。';
 // 判定抽到叶子模块 `match-scope.js`：它零依赖，`runtime`/`companion`/`teacher` 都能 import，
 // 而不会成环（`runtime.js` 已经 import 了 companion/teacher）。这里 re-export，既有 import 路径不变。
-import {activeMatchOf,effectiveMatchScope,activeMatchIdOf,readsAsPreviousMatch} from './match-scope.js';
-export {activeMatchOf,effectiveMatchScope,activeMatchIdOf,readsAsPreviousMatch};
+import {activeMatchOf,effectiveMatchScope,activeMatchIdOf,readsAsPreviousMatch,hydrationOfPreviousMatch} from './match-scope.js';
+export {activeMatchOf,effectiveMatchScope,activeMatchIdOf,readsAsPreviousMatch,hydrationOfPreviousMatch};
 export function buildContext(game,profile,focus,archive=null,stageId='meadow',message=''){
  // 当前局优先：判定只在这里做一次（见 `activeMatchOf`），下游一律读 `matchScope` / `activeMatchId`。
  const active=activeMatchOf({game,archive,message});

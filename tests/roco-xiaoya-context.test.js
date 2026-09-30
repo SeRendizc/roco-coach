@@ -1295,8 +1295,18 @@ test('㉛ 第五轮④：记忆两个写入者互不覆盖 + 逐回合 turnLog �
     '提问前先把记忆对齐磁盘（面板手里那份是挂载时的快照）');
   assert.match(xiaoya, /state\.memory = mergeMemories\(readMemory\(readStored\(MEMORY_KEY\)\), incomingMemory\)/,
     '回答落盘前做字段级并集 —— 面板不许整份覆盖页面刚写的 events/journal');
-  assert.match(xiaoya, /if \(!context\.lastMatch && Array\.isArray\(state\.memory\?\.events\)/,
-    '复盘那一支要的 lastMatch：宿主给不出就用本机记忆里最后一条对局（没有就不加这个键，不编）');
+  // 2026-10-01 改钉（task-46 第 3 步 · 原断言逐字留档）：
+  //   原：assert.match(xiaoya, /if \(!context\.lastMatch && Array\.isArray\(state\.memory\?\.events\)/,
+  //         '复盘那一支要的 lastMatch：宿主给不出就用本机记忆里最后一条对局（没有就不加这个键，不编）');
+  //   理由：P1-B（02 红线「不许显示上一局当本局」）要求补之前先过"这一问依据哪一局"的**同一个判定**
+  //        （`coach/match-scope.js` 的 `hydrationOfPreviousMatch`）：**有当前局（宿主动局上下文口给了
+  //        game/roco_battle）⇒ 一个字都不补**；没有当前局才补，并且必须把它标成 `previous`，
+  //        复盘正文才会写「上一局：」。原断言钉的是"无条件补"的旧条件，语义已被新规则取代。
+  assert.match(xiaoya, /const hydration = hydrationOfPreviousMatch\(context, state\.memory\?\.events\);/,
+    '复盘那一支要的 lastMatch：宿主给不出就用本机记忆里最后一条对局（没有就不加这个键，不编）——'
+    + '且必须先过"有当前局就不补"的判定');
+  assert.match(xiaoya, /context\.matchScope = hydration\.matchScope;/,
+    '补进来的那一份必须显式标成 previous（复盘正文据此写「上一局：」）');
   // ③ 语义反证（纯函数）：并集不许把"磁盘上有、这一份没有"的东西弄丢
   const stored = {version: 1, events: [{id: 'm1', result: 'loss'}], journal: [{id: 'j1'}], dialogue: [{role: 'user', content: 'x'}]};
   const incoming = {version: 1, events: [], journal: [], dialogue: [], goal: '稳健'};
