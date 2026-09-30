@@ -178,7 +178,11 @@ def classify_skill(skill: Any, **flags: Any) -> Dict[str, Any]:
     （`test_foe_switch_moe:111` 逐字：关掉能力后档位必须 `SUPPORT_PARTIAL` ✓）。
     🔴 本体细节（`plain_attack`／「效果齐」两条早退 ✓）等判据继续报（#138 ✓）。
     """
-    declared = {name: bool(flags.get(name)) for name in _CAPABILITY_TO_FLAG}
+    # 🔴 #175（Lead 2026-09-30 定案 ✓）：**同一张表，两个消费方要两列** ✓
+    #   · 这里的 `**flags` 键是**右列（形参名）** ✓（`support.py:95` 传 `multi_hit_declared=…` ✓）
+    #   · 而 `settlement_verdict(declared=…)` 的键是**左列（能力名）** ✓（`declared_capabilities_of()` 产的就是左列 ✓）
+    #   ⚠ 我上一版用**左列名**去查 `flags` ✗ ⇒ 全 False ⇒ **旗标失效** ⇒ `:60` 的 `'PARTIAL' == 'PARTIAL'` ✗
+    declared = {name: bool(flags.get(_CAPABILITY_TO_FLAG[name])) for name in _CAPABILITY_TO_FLAG}
     v = settlement_verdict(skill, declared=declared)
     if not v["resolved"] or not v["unsettled"] == []:
         return {"support": SUPPORT_PARTIAL, "why": "有未结算子句或能力位未声明", "unparsed": []}

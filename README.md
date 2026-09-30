@@ -192,3 +192,59 @@ Python 环境或模型缺失时不会报错中断：语义检索预热失败会�
 ## 存档
 
 成长、偏好、会话与最近 3 场完整对局存在本机 localStorage。刷新可以复盘，但不会把进行中的对战恢复到可继续操作的状态——旧版没存下来的历史无法补造。AI Coach 事件最多 240 条；清除记忆会同时删除 AI Coach 档案，游戏成长保留。预制体验不写真实进度。
+
+---
+
+## 当前状态（2026-09-30，**必读**）
+
+### 主交付物
+
+**`docs/roco/coach-理想形态-计划书-2026-09-30.md`**（本机实测 **6872 行**，附录 A–DM）——小芽"理想形态"的完整计划与实测记录：四页可见面读数、引擎各族盘点、以及一套编号纪律（踩坑记录，见下）。
+
+### 🔴 引擎当前是红的（并且原因值得记住）
+
+`roco/src/roco_env/coverage.py` 在工作区里被一次误操作（`git checkout -- <file>`）抹掉了**整层未提交改动**——那条命令回滚到的是 **HEAD**，不是"改动前"。五路核查（`.pyc` / 备份 / `git stash` / `git fsck` 165 个 dangling blob / 活进程）**均不可恢复**。
+
+**该文件目前停在 HEAD 版本，整棵树是红的**（引擎侧 `coverage` 的 3 个入口 + 一张映射表缺失，`service.py:112` 的 import 会直接 `ImportError`）。
+
+**重建正在进行**，方式是：
+
+- 重建稿写在 `tmp/coverage.rebuild.N.py`，**正文一字未改**（`coverage.py` 的 hash 至今仍是 `cc3de2ba09c8b5d1`）；
+- 用**影子注入**验证：`importlib` 把 `sys.modules['roco_env.coverage']` 指向 `tmp/` 的稿子，判据一行不改；
+- 进度：**`test_cond_self_debuff_power` 已绿**（`Ran 7 tests · OK`）；`test_effect_coverage` 从 18 个问题降到 16（`10F+6E`），口径逐项对齐中。
+
+重建稿每版都复制进 `reports/roco/rc401/rebuild-drafts/` —— **过程本身也有备份**。
+
+### 备份与远端
+
+| 远端 | 用途 | 最新已推 |
+|---|---|---|
+| **Gitee**（`https://gitee.com/serendizc/roco-coach.git`） | **优先** | `1342851` |
+| GitHub（`https://github.com/SeRendizc/roco-coach.git`） | 大版本时推 | `b5a8d51` |
+
+当前分支 `wip/roco-coach-2026-09-30-1418`（`master` 未动，仍 `51c04fb`）。
+另有轻量快照 `refs/snapshots/wip-2026-09-30-1418`（`git stash create` 建的，**只建对象、不动工作区**）——它的存在就是为了让"`git checkout` 抹掉未提交改动"这件事**不再发生第二次**。
+
+### 常用命令
+
+```sh
+curl -s -o /dev/null -w '%{http_code}\n' localhost:8765/roco.html        # 验活产品服务（期望 200）
+cd roco && PYTHONPATH=src python3 -m unittest tests.test_cond_self_debuff_power   # 跑单个判据文件
+cd roco && PYTHONPATH=src python3 -m unittest discover -s tests -q      # 跑全量（跑前先确认服务不需重启）
+git for-each-ref refs/snapshots/                                        # 看安全网快照
+git log --oneline -1 && git branch --show-current                       # 我在哪一版
+```
+
+### 🔴 服务现状：**"网页 200"不等于"一切正常"**
+
+`8765` 端口的 **node 层还活着**（`curl` 回 200），**但 Python 引擎侧已经退化**——因为上面那条：引擎每次 `spawn` 子进程时 import 的是当前（HEAD 版）的 `coverage.py`。**不要把 HTTP 200 读成"功能都好了"。**
+
+### 纪律（踩坑记录）
+
+项目累积了一套编号纪律（**#1 起，现已到一百七十余号**），入口在计划书上文的计划书里（`grep -n '纪律' docs/roco/coach-理想形态-计划书-2026-09-30.md`）。最该记住的五条：
+
+1. **`exit=0` 是必要不充分** —— 必须看红字是什么。
+2. **"parse 认出来 / 判据说 true / DOM 里有 / 进视口"都不等于生效** —— 唯一解药是**运行时报据 + 对照实验**。
+3. **回滚必须回"改前"，不是回 HEAD** —— `git checkout` 的语义是后者，而两者之间可能隔着一整个会话的工作。
+4. **报一个数要说清四件**：值 · 分母 · 口径 · 单位（含范围）。
+5. **一处红不等于一处根因，也不等于一处病** —— `errors` 说"缺东西"，`failures` 说"做错了"。
