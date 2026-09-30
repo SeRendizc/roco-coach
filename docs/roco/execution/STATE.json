@@ -691,8 +691,17 @@
       "what": "**共享守卫 `safeObject` 过度拒绝（同根因第二次）**：`UNSAFE_KEYS` 含 `path`，而**模式对局** `pvp-standard-six-pet` 的真公开面有 `unverified_overrides[0].path = \"turn_order.speed_tie\"` ⇒ `validToolArgs('plan_actions') = false` ⇒ **模式对局仍调不动 `plan_actions`**",
       "evidence": "plan04-engine 在 04.5 里用真模式公开面实测（排除法：`bytes=2984 < 8000`；`rules_version='roco-world-s4-2026-09-10/mobile_s4_candidate_v3'` 已被 C-2 白名单放行；**唯一剩余拒绝点 `$.unverified_overrides[0].path`**）。**为什么 C-2 没抓到**：生成器那条路 `unverified_overrides=[]` ⇒ 该字段为空、不在视野内 ⇒ **这是 C-2 的盲区**。修法（Lead 已批）：只对 `unverified_overrides[]` 元素内的 `path` 按**点分路径**格式放行（`^[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*$`，禁 `/`、`\\`、`..`），通用 `path` 与其它字段照旧 fail closed",
       "owner": "plan04-engine（修 + 系统性扫面）· lead（裁决）",
-      "status": "fix_in_flight",
-      "rule": "① 同一根因**出现第二次就不是个例** ⇒ 必须做**系统性扫面**（本次要求：`工具 × 真公开面` 逐格断言 `validToolArgs === true`，真公开面至少含「生成器普通对局」与「模式对局」两种形态，**并成为常驻判据**）；② 修参数校验类缺陷时，**必须找一条与单元测试不同的真实入口来验**（C-2/C-3 都是只有真公开面才暴露）；③ **空数组/缺省字段是盲区**（`unverified_overrides=[]` 让 C-3 躲过了 C-2 的验证）"
+      "status": "closed",
+      "rule": "① 同一根因**出现第二次就不是个例** ⇒ 必须做**系统性扫面**（本次要求：`工具 × 真公开面` 逐格断言 `validToolArgs === true`，真公开面至少含「生成器普通对局」与「模式对局」两种形态，**并成为常驻判据**）；② 修参数校验类缺陷时，**必须找一条与单元测试不同的真实入口来验**（C-2/C-3 都是只有真公开面才暴露）；③ **空数组/缺省字段是盲区**（`unverified_overrides=[]` 让 C-3 躲过了 C-2 的验证）",
+      "closed_by": "**已修 + 扫面常驻**（`d819820`）：`safeObject` 加 **scope**（只在 `unverified_overrides[]` 元素内、只对键 `path`、值须点分路径、禁 `/` `\\` `..`）；⑪ 正（真模式值）+ 负（8 种穿越/斜杠/空格 + 顶层 `path` + 非白名单字段含 `/`）全拒；**N18 去掉白名单 ⇒ 单测 21/1 红 + e2e 10/1 红（精确复现）**；**扫面表常驻在 `plan-e2e`**：`plan_actions×generator` / `plan_actions×mode:pvp-standard-six-pet` / `query_rules×pet` / `query_rules×learnset` / `evaluate_team` / `compare_team_change` / `summarize_battle` **7 格全 ok**，并断言模式那格**必须真带 `unverified_overrides`**（否则扫不到 C-3）。`/api/coach` 取到 **200**（定位=快照缺 `phase`/`mode`/`profile`/`memory.version`，**校验器一字未改**）。回归：plan-context 22/22 · plan-e2e 11/11（0 skip）· toolbox-roco 17/17 · server 26/26 · Python 四模块 OK"
+    },
+    {
+      "id": "O-56",
+      "what": "**负结果留档：检索别名表（legacy `豆→能量`）在本索引上测不出召回收益**（4 配置 × 14 问句，检索结果与分数**逐位相同 · 0/14 差异**）",
+      "evidence": "plan00-closer 在 task-42 里做了变异矩阵：判据侧确实会红（删别名表 ⇒ 判据①④；删 `keywords` 里的「豆」⇒ 判据③；两边删 ⇒ ①③④），但**检索结果与分数四组逐位相同**（例：问「回豆怎么用」四组都返回 `tactic:guard-energy:2070`）⇒ 「豆」这个信号**不是召回的决定因素**（命中由「防御/上限/怎么用」等正文 token 承担）。**他自己判错了机制并主动上报**，还把结论写进判据文件头：「别名表是**保险**、不是召回修复」。**Lead 裁决 (a) 保留**（理由：查询侧归一化契约显式化 + 判据①④本身有判别力 + 负结果本身是资产，省得后人再做一个「以为改别名能救召回」的实验），但**不许声称测不出的收益**",
+      "owner": "plan00-closer（实测 + 自曝）· lead（裁决保留 + 立规）",
+      "status": "closed",
+      "rule": "**保留一段代码可以，但不许声称一段测不出来的收益**：当实现者自己判错了机制、实测又拿不到预期收益时，正确做法是**把负结果留档 + 明确标注它的真实价值**（本次=保险/契约），而不是删掉了事或含糊过去；判据文件头必须让后人一眼看出「这条判据不证明什么」"
     }
   ],
   "handoff": {
