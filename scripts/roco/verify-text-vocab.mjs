@@ -40,7 +40,11 @@ for (const e of entries) {
 }
 console.log(`  玩家可见正文明细命中 = ${hits.length} 处`);
 for (const h of hits.slice(0, 8)) console.log('   ', JSON.stringify(h));
-check('语料条数 = 230（9b43bc1 声称）', entries.length === 230, `实际 ${entries.length}`);
+// 语料会随覆盖面增长（2026-10-01：230 → 503）⇒ **不钉死具体条数**：只断言「≥ 登记生产者声明的下限」
+// + 覆盖审计 ok。钉死数字会让器材每次扩容都红（与其它读数「范围 + 声明」的口径也不一致）。
+const minExpected = CORPUS_PRODUCERS.reduce((n, r) => n + (Number(r.min) || 0), 0);
+console.log(`  登记生产者声明的语料下限 = ${minExpected}`);
+check(`语料条数 ≥ 登记下限 ${minExpected}（不钉死具体条数）`, entries.length >= minExpected, `实际 ${entries.length}`);
 check('渲染器 0 失败', failures.length === 0);
 check('覆盖审计 ok', coverage.ok === true);
 check('退役词 HP/生命/豆 在玩家可见正文里 **0 处**', hits.length === 0, `实际 ${hits.length}`);
