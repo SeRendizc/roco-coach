@@ -19,8 +19,10 @@ import {readFileSync, existsSync} from 'node:fs';
 
 import {TOOL_CONTRACTS, validToolArgs} from '../src/coach/toolbox.js';
 import {checkGroundedAnswer} from '../src/coach/runtime.js';
+import {fileURLToPath} from 'node:url';
 
-const ROOT = new URL('..', import.meta.url).pathname;
+// 2026-09-30（task-26）：`.pathname` 在 Windows 上给出 `/E:/…`（带前导斜杠、没有盘符）⇒ 字符串拼接出 `E:\E:\…`；改用 fileURLToPath。旧写法留档（改钉不删）：new URL('..', import.meta.url).pathname
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const read = (rel) => readFileSync(`${ROOT}${rel}`, 'utf8');
 const RULES_DOC = 'docs/roco/PVP-FAIRNESS-RULES.md';
 
