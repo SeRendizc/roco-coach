@@ -1,0 +1,24 @@
+== node: v24.21.0 ==
+v24.21.0
+== panel-model-env-key ==
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3337.602551
+== rule-promotion ==
+✔ RC-102 判决：media_ref / pass_criteria / 记录过期 / 日期不可解析 各有必红方向 (43.64838ms)
+✔ RC-102 判决：candidate_config_can_be_default 恒为 false（即使字段全绿也不许自动转默认） (7.303638ms)
+✔ RC-102 自检：--selftest 的 12 条用例全部通过（≥6 条反证） (106.315138ms)
+✔ RC-102 边界：报告只写 rule-promotion.json，且 data/ 下的只读输入一个字节都没变 (39.182856ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 357.343558

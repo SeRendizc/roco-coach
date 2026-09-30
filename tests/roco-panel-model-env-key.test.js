@@ -36,7 +36,10 @@ import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {mkdirSync, mkdtempSync, readFileSync, rmSync} from 'node:fs';
 import {join, dirname} from 'node:path';
-import {fileURLToPath} from 'node:url';
+// 旧写法：`import(${JSON.stringify(SERVER)})` —— 把 Windows 绝对路径（`E:\…`）直接喂给 ESM `import()`
+// ⇒ `ERR_UNSUPPORTED_ESM_URL_SCHEME`（默认加载器只认 file/data/node 三种 scheme）；改成 `file://` URL
+// （与 task-31 修的第 12 例同族：判断口径问题，不是产品产出了坏路径）。
+import {fileURLToPath, pathToFileURL} from 'node:url';
 
 import {LOCAL_MODEL_PATH_ENV, LOCAL_MODEL_PATH_ALIASES, localModelPathFromEnv} from '../src/coach/local-model.js';
 
@@ -52,7 +55,7 @@ const ALIAS = LOCAL_MODEL_PATH_ALIASES[0];
  * `env` 是显式白名单：没列出的变量一律不继承。
  */
 function reportWithEnv(env) {
-  const code = `import(${JSON.stringify(SERVER)}).then((m) => `
+  const code = `import(${JSON.stringify(pathToFileURL(SERVER).href)}).then((m) => `
     + `console.log(JSON.stringify(m.localModelReport(process.env))));`;
   const out = execFileSync(process.execPath, ['--input-type=module', '-e', code], {
     cwd: ROOT,

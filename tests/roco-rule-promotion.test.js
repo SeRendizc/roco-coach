@@ -19,7 +19,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
-import {dirname, join, resolve} from 'node:path';
+import {dirname, isAbsolute, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 import {
@@ -29,7 +29,10 @@ import {
 import {LEDGER_PATH, RECORDS_PATH} from '../scripts/roco/evidence-ledger-lib.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const abs = (rel) => (rel.startsWith('/') ? rel : join(ROOT, rel));
+// 旧写法：`rel.startsWith('/') ? rel : join(ROOT, rel)` —— **POSIX-only** 的绝对判断，在 Windows 上
+// 把已经是绝对的 `E:\…\rule-evidence-ledger.json` 当相对路径再拼一次 ⇒ 双根
+// `E:\roco-coach\E:\roco-coach\data\…`（ENOENT）。改用 `isAbsolute`（与 task-20/24/26 修的 11 例同族）。
+const abs = (rel) => (isAbsolute(rel) ? rel : join(ROOT, rel));
 const readJson = (rel) => JSON.parse(readFileSync(abs(rel), 'utf8'));
 const sha256File = (rel) => createHash('sha256').update(readFileSync(abs(rel))).digest('hex');
 

@@ -511,7 +511,10 @@ export function evaluatePromotion(options) {
       blocks_fields: fields.filter((field) => field.microcase_id === id).map((field) => field.path),
     }));
 
-  const configText = readFileSync(configPath.startsWith('/') ? configPath : join(root, configPath));
+  // task-47：旧写法 `configPath.startsWith('/')` 只认 POSIX 绝对路径 ⇒ 在 Windows 上把已是绝对的
+  // `E:\…` 当相对路径再拼一次，得到双根 `E:\a\E:\a\…`（ENOENT）。改用 `isAbsolute`，与本文件
+  // L243/L593/L827 的既有写法一致（L39 已 import）。
+  const configText = readFileSync(isAbsolute(configPath) ? configPath : join(root, configPath));
   const configSha = sha256(configText.toString('utf8'));
   const report = {
     schema: REPORT_SCHEMA,
@@ -547,7 +550,8 @@ export function evaluatePromotion(options) {
     all_fields_promotable: allPromotable,
   };
   report.config_unchanged = report.inputs.candidate_config.sha256 === sha256(
-    readFileSync(configPath.startsWith('/') ? configPath : join(root, configPath)).toString('utf8'));
+    // task-47：同上（L514）——`startsWith('/')` 是 POSIX-only，Windows 会双根。
+    readFileSync(isAbsolute(configPath) ? configPath : join(root, configPath)).toString('utf8'));
   return report;
 }
 
