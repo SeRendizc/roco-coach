@@ -572,6 +572,64 @@ def aggregate_plan_traces(
     return coverage_detail, truncation, budget
 
 
+# ── 04.4：稳健排序与「不是概率」声明的逐种子聚合 ─────────────────────────────
+
+
+def aggregate_plan_robustness(
+    per_seed: List[Dict[str, Any]], seeds: List[int]
+) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    """把逐种子的 `robustness` / `declarations` 聚合成回执级两栏。
+
+    · `robustness` —— 排序规则与阈值取第一个种子（请求级常量）；**并列**给「稳定并列」
+      （每个分析种子都并列才算，避免把某一次搜索的巧合说成产品的两难）；
+      重大损失动作给**并集**并标出它出现在哪些种子。
+    · `declarations` —— 逐种子的声明做 canonical 比较，`by_seed_consistent` 如实报一致与否。
+    """
+    rob_rows = [(p.get("robustness") or {}) for p in per_seed]
+    dec_rows = [(p.get("declarations") or {}) for p in per_seed]
+    first = rob_rows[0] if rob_rows else {}
+
+    by_seed: Dict[str, Any] = {}
+    material: List[Dict[str, Any]] = []
+    seen = set()
+    for sv, row in zip(seeds, rob_rows):
+        tied = [t.get("action") for t in (row.get("tied_with_top") or [])]
+        lost = [a.get("action") for a in (row.get("material_loss_actions") or [])]
+        by_seed[str(sv)] = {
+            "top": (row.get("top") or {}).get("action"),
+            "primary_rule_applied": bool(row.get("primary_rule_applied")),
+            "tied_with_top": tied,
+            "material_loss_actions": lost,
+        }
+        for entry in (row.get("material_loss_actions") or []):
+            key = json.dumps(entry, ensure_ascii=False, sort_keys=True)
+            if key in seen:
+                continue
+            seen.add(key)
+            material.append({**entry, "seeds": [str(sv)]})
+    tie_sets = [{t.get("action") for t in (row.get("tied_with_top") or [])} for row in rob_rows]
+    stable_ties = set.intersection(*tie_sets) if tie_sets else set()
+    robustness = {
+        "ordering": first.get("ordering"),
+        "material_loss_threshold": first.get("material_loss_threshold"),
+        "tie_epsilon": first.get("tie_epsilon"),
+        "primary_rule_applied": any(bool(row.get("primary_rule_applied")) for row in rob_rows),
+        "material_loss_actions": material,
+        "tied_with_top_stable": sorted(stable_ties),
+        "by_seed": by_seed,
+        "is_probability": False,
+        "note": (first.get("note") or "") + "；并列只报**每个分析种子都并列**的那些"
+                "（tied_with_top_stable），逐种子的并列见 by_seed",
+    }
+    canon = lambda value: json.dumps(value, ensure_ascii=False, sort_keys=True)
+    declarations = dict(dec_rows[0] if dec_rows else {})
+    if declarations:
+        declarations["by_seed_consistent"] = (
+            len({canon(row) for row in dec_rows}) == 1
+        )
+    return robustness, declarations
+
+
 # ── 服务本体 ────────────────────────────────────────────────────────────
 
 
@@ -590,6 +648,13 @@ class RocoService:
         self.verbose = verbose
         self.cache = RulesetCache(self.repo_root)
         self._type_rows_cache: Dict[str, Tuple[Optional[Dict[str, Any]], Optional[str]]] = {}
+        #: 规划搜索的**时钟接缝**（默认 `None` = 用真实时钟，行为与改动前逐位相同）。
+        #:
+        #: 为什么要有它：`plan_actions` 早就支持注入 `clock`（「方便测试用一个确定性时钟
+        #: 验证超时后如实上报」），但 `/battle/plan` 这条路上测试注入不进去 ⇒ service 级
+        #: 判据只能靠「预算开得足够大」躲挂钟（O-36：负载下会随机红）。给它一个接缝，
+        #: 判据就能像 planner 级那样**完全确定**，而不是靠余量赌。
+        self.plan_clock: Optional[Callable[[], float]] = None
         self.started_at = time.time()
         self.started_monotonic = time.monotonic()
 
@@ -2433,7 +2498,9 @@ class RocoService:
                     unsupported=[{"reason": "对局已结束，没有可规划的动作"}],
                 ), body, started)
             plan = pm.plan_actions(state, rs, depth=depth, beam=beam, budget_ms=budget,
-                                   opponent_scenarios=(raw_scenarios if parsed_scenarios else None))
+                                   opponent_scenarios=(raw_scenarios if parsed_scenarios else None),
+                                   # 时钟接缝：默认不传 ⇒ 用 `plan_actions` 的真实时钟（逐位不变）
+                                   **({"clock": self.plan_clock} if self.plan_clock else {}))
             unsupported_total += plan.unsupported_seen
             per_seed.append(plan.to_dict())
             if damage_preview:
@@ -2462,6 +2529,8 @@ class RocoService:
                           if scenarios_given else None)
         # 04.3：R3（coverage 计数比）/ R5（候选裁剪留痕）/ R8（深度与预算截断语义）
         coverage_detail, truncation, budget_detail = aggregate_plan_traces(per_seed, raw_seeds)
+        # 04.4：稳健排序留痕 + 「不是概率」的机器可检声明
+        robustness, declarations = aggregate_plan_robustness(per_seed, raw_seeds)
 
         payload = {
             "schema_version": public.get("schema_version"),
@@ -2503,6 +2572,10 @@ class RocoService:
             "truncation": truncation,
             # 04.3（R8）：深度/束宽/预算的截断语义（请求截断 vs 到达引擎上限）
             "budget": budget_detail,
+            # 04.4：稳健排序的留痕（规则/阈值/被压下去的动作/稳定并列）
+            "robustness": robustness,
+            # 04.4（R1/R2）：每个数字的口径声明（`is_probability:false` 等，机器可检）
+            "declarations": declarations,
             "timed_out": timed_out,
             "unsupported_seen": unsupported_total,
             "opponent_model": per_seed[0]["opponent_model"],
@@ -2556,6 +2629,10 @@ class RocoService:
             "这是**分析**状态，不是权威对局状态；实际结算以游戏内为准",
             "coverage 是**计数比**（见 coverage_detail.by_seed 的分子/分母），不是「结论有多可靠」的"
             "把握度；被束宽裁掉的候选逐条见 truncation.dropped，深度/预算是否到顶见 budget",
+            "排序是**稳健优先**（见 robustness.ordering）：先避「有证据的重大损失」，再比期望"
+            "（资源与后手都在期望里）；相近动作并列列出（`tied_with_top_stable`），不假装一条严格更优",
+            "expected/worst/first_second_margin/coverage 的口径见 declarations：**不是胜率、"
+            "不是概率、不是把握度**（启发式估值 + 计数比）",
         ]
         if opponent_basis:
             limitations.append(

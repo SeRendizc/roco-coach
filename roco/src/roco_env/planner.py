@@ -58,6 +58,88 @@ CANDIDATE_RULE = (
     "类别保底（skill / switch / item 各至少 1 条，保底可能超过 beam）"
     "+ 按**一手推演值**降序补到 beam（不按静态威力排序）"
 )
+#: 04.4：判定「**有证据的**重大损失」的阈值（`evaluate` 的分数尺度）。
+#:
+#: 与 `FRAGILE_DOWNSIDE` **语义不同、故意分开**：那个是「期望到最坏的落差」（措辞分级），
+#: 这个是「最坏分支本身已经很差」（**排序规则**）。改一个不会动另一个。
+#: 这是**产品阈值**，不是游戏机制；它只决定排序里的第一优先级，不改变任何估值。
+MATERIAL_LOSS = 1.2
+#: 04.4：「相近动作可并列」的容差（一手推演尺度）。两条动作的期望与最坏都落在容差内
+#: ⇒ 回执里**并列**列出，不假装一条严格更优（阈值同样是产品参数）。
+TIE_EPSILON = 0.02
+
+
+def robust_sort_key(row: Dict[str, Any]) -> Tuple[int, float, float]:
+    """04.4 的稳健排序键：① 无「有证据的重大损失」优先 ② 期望降序 ③ 最坏降序。
+
+    为什么要有①：旧的 `(expected, worst)` 字典序里**期望压倒一切** ——
+    「期望略高、但某个确定分支会崩」的动作会排在「稳一点、没有崩盘分支」的前面。
+    这正是必做反例②要拦的东西（纯伤害分高 ≠ 该推荐）。
+
+    「**有证据的**」是关键：分支 rollout 因非法/机制未核验被 fail closed 丢掉时返回的是
+    哨兵 `alpha`，那是「没算出来」而不是「重大损失」⇒ 不计入①（见 `is_material_loss`）。
+    """
+    return (0 if row.get("material_loss") else 1, float(row.get("expected", 0.0)),
+            float(row.get("worst", 0.0)))
+
+
+def is_material_loss(*, row_worst: float, worst_computed: bool,
+                     has_opponent_distribution: bool) -> bool:
+    """04.4：**有证据的**重大损失 —— 三个条件缺一不可。
+
+    ① `has_opponent_distribution`：没有对手分布时那一行只是「无对手的静态估值」，
+       不是分支损失证据；
+    ② `worst_computed`：最坏那一支必须是**算出来的**。fail closed 丢分支时返回哨兵
+       `alpha=-10.0`，它不是「这手会崩」的证据（是「没算出来」）；
+    ③ `row_worst <= -MATERIAL_LOSS`：确实够差。
+    """
+    return bool(has_opponent_distribution and worst_computed
+                and row_worst <= -MATERIAL_LOSS)
+
+
+def close_calls(results: Sequence[Dict[str, Any]], top: Dict[str, Any], *,
+                epsilon: float = TIE_EPSILON) -> List[Dict[str, Any]]:
+    """04.4：与首选**相近**的候选（容差内，且重大损失等级相同）。
+
+    「相近动作可并列」的落地：两条动作的期望与最坏都落在 `epsilon` 内 ⇒ 不假装一条严格
+    更优。重大损失等级不同的两条**不算并列**（一条有崩盘分支、一条没有，那是实质差别，
+    不是噪声）。
+    """
+    return [row for row in results
+            if row is not top
+            and bool(row.get("material_loss")) == bool(top.get("material_loss"))
+            and abs(float(row["expected"]) - float(top["expected"])) <= epsilon
+            and abs(float(row["worst"]) - float(top["worst"])) <= epsilon]
+
+
+def estimate_declarations() -> Dict[str, Any]:
+    """04.4（R1/R2）：把「这些数字不是胜率/不是概率/不是把握度」写成**机器可检字段**。
+
+    04.2 已有注入路径的 `is_probability:false`，人读声明也在 `limitations` 里；这里补的是
+    **每个数字自己的口径**：期望 / 最坏 / 最好 / 边际量 / 覆盖率 / 风险阈值 / 对手权重。
+    上层可以不读中文也把「这是估值不是概率」判死。
+    """
+    return {
+        "is_probability": False,
+        "is_winrate": False,
+        "scale": "heuristic-position-score",
+        "value_range": "启发式局面分落在 [-3, 3]；终局 ±10（见 evaluate() 的 docstring）",
+        "expected": {"is_probability": False, "unit": "score",
+                     "basis": "启发式局面分对**启发式**对手分布取期望；权重没有实测频率数据"},
+        "worst": {"is_probability": False, "unit": "score",
+                  "basis": "对手分布下最差那一支的分数"},
+        "best": {"is_probability": False, "unit": "score",
+                 "basis": "对手分布下最好那一支的分数"},
+        "first_second_margin": {"is_probability": False, "unit": "one-ply-value",
+                                "basis": "一手推演值的前两名之差；量纲按本引擎标定"},
+        "coverage": {"is_probability": False, "is_confidence": False, "unit": "count_ratio",
+                     "basis": "计数比（对手反制被枚举过的候选 / 参与搜索的候选）"},
+        "risk": {"is_probability": False, "unit": "score_gap",
+                 "basis": f"期望到最坏的落差；fragile 阈值 {FRAGILE_DOWNSIDE} 是产品参数"},
+        "opponent_weights": {"is_probability": False, "unit": "heuristic_weight",
+                             "basis": "启发式权重（可解释规则），不是频率、不是概率"},
+        "note": "以上是启发式估值与计数比：**不是胜率、不是概率、不是把握度**",
+    }
 
 
 @dataclass
@@ -117,6 +199,10 @@ class PlanResult:
     coverage_detail: Dict[str, Any] = field(default_factory=dict)
     #: 04.3（R8）：深度/束宽/预算被截断的**语义**（请求截断 vs 到达引擎上限）。
     budget: Dict[str, Any] = field(default_factory=dict)
+    #: 04.4：稳健排序的**可核对留痕**（排序规则、阈值、被①压下去的动作、并列动作、逐候选排序）。
+    robustness: Dict[str, Any] = field(default_factory=dict)
+    #: 04.4（R1/R2）：每个数字的口径声明（`is_probability:false` 等），机器可检。
+    declarations: Dict[str, Any] = field(default_factory=dict)
     #: 04.2：**只在注入对手情景时**出现（缺省为空 ⇒ `to_dict()` 的键集与 04.2 之前逐字段相同）。
     opponent_model_detail: Dict[str, Any] = field(default_factory=dict)
 
@@ -144,6 +230,9 @@ class PlanResult:
             "coverage": round(self.coverage, 4),
             # 04.3（R3）：coverage 的计数比口径（不是把握度、不是概率）
             "coverage_detail": dict(self.coverage_detail),
+            # 04.4：稳健排序的留痕 + 每个数字的口径声明
+            "robustness": dict(self.robustness),
+            "declarations": dict(self.declarations),
             "timed_out": self.timed_out,
             "latency_ms": round(self.latency_ms, 1),
             "opponent_model": self.opponent_model,
@@ -807,6 +896,8 @@ def plan_actions(
             searched=stats.get("searched", 0), total=len(my_candidates),
             no_counter=result.no_counter_branches,
         )
+        # 04.4（R1/R2）：每个数字的口径声明（机器可检的「不是概率」）
+        result.declarations = estimate_declarations()
         return result
     finally:
         # 无论走哪条出口（含超时、异常）都把 seed 还回去。
@@ -841,10 +932,13 @@ def _search(state, rs, *, side, depth, beam, budget_s, clock, start, my_candidat
         dropped[key] = dropped.get(key, 0) + 1
 
     def rollout(root: GameState, first: Action, opp_action: Action, remaining: int,
-                alpha: float) -> float:
+                alpha: float) -> Tuple[float, bool]:
         """从 root 出发走一手，然后按「双方都取启发式最优」继续 remaining 层。
 
-        返回从 `side` 视角的估值。超时由外层循环检查。
+        返回 `(从 side 视角的估值, 这个值是不是**算出来的**)`。
+        第二个返回值不是装饰：分支被 fail closed 丢掉时返回哨兵 `alpha`，
+        它**不是**「这手会崩」的证据 —— 04.4 的重大损失判定必须能把两者分开。
+        超时由外层循环检查。
         """
         nonlocal branches
         try:
@@ -868,7 +962,7 @@ def _search(state, rs, *, side, depth, beam, budget_s, clock, start, my_candidat
                     if opponent in queue:
                         renv.step_replace(cur, rs, opponent, int(theirs_first.target_index))
                 # 补位不消耗战斗回合，`remaining` 不递减：这里的「深度」是换人次数
-                return evaluate(cur, rs, side)
+                return evaluate(cur, rs, side), True
             nxt = renv.step_joint(
                 _clone(root), rs, first if side == "player" else opp_action,
                 opp_action if side == "player" else first,
@@ -880,7 +974,7 @@ def _search(state, rs, *, side, depth, beam, budget_s, clock, start, my_candidat
             # 实测撞到过：「硬门」是一条描述里读不出减伤比例的防御技能，
             # 估值一走到它就抛，整次 `plan_actions` 直接失败。
             _record_dropped_branch(exc)
-            return alpha
+            return alpha, False
         branches += 1
         cur = nxt
         for _ in range(remaining):
@@ -908,7 +1002,7 @@ def _search(state, rs, *, side, depth, beam, budget_s, clock, start, my_candidat
                 break
             cur = stepped
             branches += 1
-        return evaluate(cur, rs, side)
+        return evaluate(cur, rs, side), True
 
     for action in my_candidates:
         if (clock() - start) > budget_s:
@@ -922,7 +1016,11 @@ def _search(state, rs, *, side, depth, beam, budget_s, clock, start, my_candidat
             # 因为它进 branches_evaluated 会把「搜了多少分支」说过头。
             score = evaluate(_safe_step(state, rs, action, None, side), rs, side)
             results.append({"action": action, "expected": score, "worst": score,
-                            "best": score, "branch_scores": {}})
+                            "best": score, "branch_scores": {},
+                            "worst_computed": True, "worst_branch": None,
+                            "uncomputable_branches": 0,
+                            # 没有对手分布 ⇒ 这不是「分支损失证据」，不参与稳健排序的①
+                            "material_loss": False})
             no_counter += 1
             reached_depth = 1
             continue
@@ -930,22 +1028,40 @@ def _search(state, rs, *, side, depth, beam, budget_s, clock, start, my_candidat
         expected = 0.0
         worst = None
         best = None
+        worst_computed = True
+        worst_label: Optional[str] = None
+        uncomputable = 0
         for opp_action, weight in dist:
-            sc = rollout(state, action, opp_action, depth - 1, alpha=-10.0)
-            per_opp[_label(rs, opp_action)] = sc
+            sc, computed = rollout(state, action, opp_action, depth - 1, alpha=-10.0)
+            label = _label(rs, opp_action)
+            per_opp[label] = sc
+            if not computed:
+                uncomputable += 1
             expected += sc * weight
-            worst = sc if worst is None else min(worst, sc)
+            if worst is None or sc < worst:
+                worst = sc
+                worst_computed = computed
+                worst_label = label
             best = sc if best is None else max(best, sc)
         reached_depth = max(reached_depth, depth)
         # 主要反制 = 让我方收益最低的那个对手动作
         if per_opp:
             counter_label = min(per_opp.items(), key=lambda kv: kv[1])
             counters[action] = counter_label
+        row_worst = worst if worst is not None else expected
         results.append({
             "action": action, "expected": expected,
-            "worst": worst if worst is not None else expected,
+            "worst": row_worst,
             "best": best if best is not None else expected,
             "branch_scores": per_opp,
+            # 04.4：区分「算出来的最坏」与「fail closed 哨兵」——只有前者才是损失证据
+            "worst_computed": worst_computed if worst is not None else True,
+            "worst_branch": worst_label,
+            "uncomputable_branches": uncomputable,
+            "material_loss": is_material_loss(row_worst=row_worst,
+                                              worst_computed=(worst_computed
+                                                              if worst is not None else True),
+                                              has_opponent_distribution=True),
         })
 
     if not results:
@@ -960,10 +1076,55 @@ def _search(state, rs, *, side, depth, beam, budget_s, clock, start, my_candidat
             note="超时：未完成任何分支。上层应当把 coverage 当作 0 并降级。",
         )
 
-    # 排序：先看期望，再看最坏（稳健），避免推荐「赌一把」
-    results.sort(key=lambda r: (r["expected"], r["worst"]), reverse=True)
+    # ── 04.4：稳健排序 ──────────────────────────────────────────────────
+    # 旧口径：`(expected, worst)` 字典序 ⇒ **期望压倒一切**，「期望略高但某个确定分支会崩」
+    # 的动作会排在「稳一点、没有崩盘分支」的前面（必做反例②要拦的正是这个）。
+    # 新口径：① 无「**有证据的**重大损失」优先 ② 期望降序（资源与后手都在 evaluate 里）
+    # ③ 最坏降序。「有证据」= 那一支是**算出来的**（不是 fail closed 哨兵 alpha）。
+    material_rows = [r for r in results if r["material_loss"]]
+    results.sort(key=robust_sort_key, reverse=True)
     top = results[0]
     counter_label, counter_score = counters.get(top["action"], (None, None))
+    # 相近动作**并列**：不假装一条严格更优（容差内两条的期望与最坏都几乎一样）
+    tied = [
+        {"action": _label(rs, row["action"]),
+         "expected": round(row["expected"], 4), "worst": round(row["worst"], 4),
+         "gap_expected": round(top["expected"] - row["expected"], 4),
+         "gap_worst": round(top["worst"] - row["worst"], 4)}
+        for row in close_calls(results, top)
+    ]
+    robustness = {
+        "ordering": ["① 无「有证据的重大损失」优先", "② 期望降序（资源与后手都在期望里）",
+                     "③ 最坏降序"],
+        "material_loss_threshold": MATERIAL_LOSS,
+        "material_loss_actions": [
+            {"action": _label(rs, row["action"]),
+             "expected": round(row["expected"], 4), "worst": round(row["worst"], 4),
+             "worst_branch": row["worst_branch"],
+             "why": (f"有证据的最坏分支 {row['worst']:.4f} ≤ -{MATERIAL_LOSS}"
+                     "（那一支是**算出来的**，不是 fail closed 哨兵）")}
+            for row in material_rows
+        ],
+        "primary_rule_applied": bool(material_rows) and not top["material_loss"],
+        "tie_epsilon": TIE_EPSILON,
+        "tied_with_top": tied,
+        "top": {"action": _label(rs, top["action"]),
+                "expected": round(top["expected"], 4), "worst": round(top["worst"], 4),
+                "material_loss": bool(top["material_loss"]),
+                "worst_computed": bool(top["worst_computed"])},
+        "candidates_ranked": [
+            {"action": _label(rs, row["action"]),
+             "expected": round(row["expected"], 4), "worst": round(row["worst"], 4),
+             "best": round(row["best"], 4),
+             "material_loss": bool(row["material_loss"]),
+             "worst_computed": bool(row["worst_computed"]),
+             "uncomputable_branches": int(row["uncomputable_branches"])}
+            for row in results
+        ],
+        "is_probability": False,
+        "note": ("稳健优先：先看有没有「有证据的重大损失」，再看期望（资源与后手都在期望里），"
+                 "最后看最坏；相近动作并列列出，不假装一条严格更优。阈值是产品参数，不是游戏机制"),
+    }
 
     # ── 风险分支（W3-04）────────────────────────────────────────────────
     # 只描述**推荐的那一手**：别的候选不该出现在「推荐的风险」里。
@@ -1022,6 +1183,20 @@ def _search(state, rs, *, side, depth, beam, budget_s, clock, start, my_candidat
         note_parts.append(
             "**超时**：这是已完成的部分，不是完整搜索结果；上层不得当成深搜结论"
         )
+    if robustness["primary_rule_applied"]:
+        note_parts.append(
+            f"稳健排序：{len(material_rows)} 个候选有**有证据的重大损失**"
+            f"（最坏 ≤ -{MATERIAL_LOSS}），按「先避重大损失」规则未获推荐"
+        )
+    elif material_rows:
+        note_parts.append(
+            f"稳健排序：{len(material_rows)} 个候选有有证据的重大损失，且首选本身就在其中"
+            "（所有可算分支都不好，不是没算）"
+        )
+    if tied:
+        note_parts.append(
+            f"与首选**相近**的动作有 {len(tied)} 个（容差 {TIE_EPSILON}，并列列出，不假装更优）"
+        )
     note_parts.append("对手按分布建模，未读取其待执行动作")
 
     return PlanResult(
@@ -1045,6 +1220,8 @@ def _search(state, rs, *, side, depth, beam, budget_s, clock, start, my_candidat
         unsupported_seen=len(state.unsupported),
         note="；".join(note_parts),
         risk=risk,
+        # 04.4：稳健排序的可核对留痕（规则、阈值、被①压下去的动作、并列动作、逐候选排序）
+        robustness=robustness,
     )
 
 

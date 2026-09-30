@@ -407,6 +407,38 @@ test('⑦f 配置了 outlook provider 时情景进请求体；坏行丢弃并在
   }
 });
 
+test('⑧d 04.4：引擎的 robustness/declarations 带出来；缺 declarations 时回退工具层那份', async () => {
+  const harness = planToolHarness({});
+  try {
+    const receipt = await harness.run();
+    assert.equal(receipt.declarations.source, 'engine', '引擎自带声明时优先用它');
+    assert.equal(receipt.declarations.expected.unit, 'score');
+    // 稳健排序的留痕要原样到工具回执（被压下去的动作**不许**被藏起来）
+    assert.equal(receipt.robustness.primary_rule_applied, true);
+    assert.equal(receipt.robustness.material_loss_threshold, 1.2);
+    assert.equal(receipt.robustness.top.material_loss, false);
+    assert.equal(receipt.robustness.material_loss_actions[0].action, '使用能量果');
+    assert.equal(receipt.robustness.material_loss_actions[0].expected, 0.4417,
+      '被压下去的动作期望更高 —— 这正是反例②的要点，必须留着可核对');
+    assert.equal(receipt.robustness.is_probability, false);
+    assert.deepEqual(receipt.robustness.tied_with_top, []);
+  } finally {
+    harness.done();
+  }
+
+  // 引擎没给（老引擎 / 规划器自报形状）⇒ 回退工具层那份声明，robustness 记 null（不造）
+  const bare = planToolHarness({plan: {declarations: undefined, robustness: undefined}});
+  try {
+    const receipt = await bare.run();
+    assert.equal(receipt.declarations.source, 'toolbox');
+    assert.equal(receipt.declarations.is_probability, false);
+    assert.equal(receipt.declarations.coverage.unit, 'count_ratio');
+    assert.equal(receipt.robustness, null, '缺字段 ⇒ null，不许自己造一份');
+  } finally {
+    bare.done();
+  }
+});
+
 // ── ⑧ 04.3：D-27 边际量读侧 / R3+R5+R8 声明 / P6 缓存 ───────────────────────────
 const PLAN_TOOL_STATE = {
   schema_version: 1, ruleset_id: 'roco-world-s4-2026-09-10', rules_version: 'rv-1',
@@ -438,6 +470,21 @@ function fakePlanEngine(overrides = {}) {
       budget: {depth_requested: 2, depth_effective: 3, depth_searched: 3, depth_max: 3,
         depth_truncated: true, depth_capped_by_max: true, beam_truncated: true,
         budget_ms: 2000, timed_out: false, nodes: 12},
+      robustness: {ordering: ['① 无「有证据的重大损失」优先', '② 期望降序（资源与后手都在期望里）',
+        '③ 最坏降序'], material_loss_threshold: 1.2, primary_rule_applied: true,
+        material_loss_actions: [{action: '使用能量果', expected: 0.4417, worst: -1.5177,
+          worst_branch: '换上第2位', why: '有证据的最坏分支 -1.5177 ≤ -1.2'}],
+        tie_epsilon: 0.02, tied_with_top: [],
+        top: {action: '换上第3位', expected: -0.8878, worst: -1.0051, material_loss: false,
+          worst_computed: true},
+        is_probability: false, note: '稳健优先：先看有没有「有证据的重大损失」…'},
+      declarations: {is_probability: false, is_winrate: false,
+        scale: 'heuristic-position-score',
+        note: '以上是启发式估值与计数比：**不是胜率、不是概率、不是把握度**',
+        expected: {is_probability: false, unit: 'score',
+          basis: '启发式局面分对**启发式**对手分布取期望；权重没有实测频率数据'},
+        coverage: {is_probability: false, is_confidence: false, unit: 'count_ratio',
+          basis: '计数比（对手反制被枚举过的候选 / 参与搜索的候选）'}},
       opponent_basis: {source: 'injected_scenarios', label: '本次对手依据 = 注入情景'},
       ...overrides,
     },
@@ -522,12 +569,16 @@ test('⑧b 回执带出 R3/R5/R8 与 `is_probability:false` 声明（机器可�
   try {
     const receipt = await harness.run();
     assert.equal(receipt.declarations.is_probability, false);
-    for (const key of ['expected', 'worst', 'firstSecondMargin', 'coverage', 'truncation']) {
-      assert.equal(receipt.declarations[key].is_probability, false, `${key} 要单独声明`);
+    // 04.4：引擎自带 declarations ⇒ 用引擎那份（每个数字的口径都在），并标明来源
+    assert.equal(receipt.declarations.source, 'engine');
+    for (const [key, value] of Object.entries(receipt.declarations)) {
+      if (value && typeof value === 'object') {
+        assert.equal(value.is_probability, false, `${key} 要单独声明不是概率`);
+      }
     }
     assert.equal(receipt.declarations.coverage.is_confidence, false);
     assert.equal(receipt.declarations.coverage.unit, 'count_ratio');
-    assert.match(receipt.declarations.basis, /不是胜率/);
+    assert.match(JSON.stringify(receipt.declarations), /不是胜率/);
 
     assert.equal(receipt.truncation.rule, '类别保底 + 束宽');
     assert.equal(receipt.truncation.candidates_dropped, 5);

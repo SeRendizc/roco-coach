@@ -32,6 +32,11 @@
   （`stay_attack`+技能 / `stay_defense` / `switch_in_seen`+位次）；默认（不配 provider）**不注入**。
   两个落法（04.3b 新增映射层 / 维持 provider 注入）待裁决，见
   `reports/roco/product-execution/04/04.3-budget-truncation-cache.md` §6。
+- 下游进度（2026-10-01 · 04.3b 裁决 D-33 / 04.4）：映射**不由 04 侧做** —— 03 侧新增
+  `buildActionScenarios()`（协议 `rc604-opponent-action-scenarios/v1`），04.3b **只消费不映射**
+  （避免复制 03 口径）；`slots: []` 一律照传（**不许替它猜位次**），`unavailable[]` 里的 P3 残留照实传递。
+  04.4 另落了稳健排序（先避「**有证据的**重大损失」）与 R1/R2 的机器可检 `declarations`，
+  读数与反例见 `reports/roco/product-execution/04/04.4-robust-ranking.md`。
 
 ---
 

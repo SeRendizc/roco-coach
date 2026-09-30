@@ -31,6 +31,10 @@ B_TEAM = [RS.pets_by_name(n)[0].pet_id for n in ("圆号鱼", "雪影娃娃", "�
 #: service 级缺省请求（金标就是按这组参数冻的；改这里会让金标比对失去意义）。
 PLAN_DEPTH = 2
 PLAN_BEAM = 2
+#: O-36：service 级判据**不再靠挂钟**——`service_public()` 会给服务注入确定性时钟
+#: （`svc.plan_clock = lambda: 0.0`，默认 None = 真实时钟，产品行为逐位不变）。
+#: 预算仍写 5000，只作为请求参数进入金标（`budget.budget_ms`）；有注入时钟后
+#: `timed_out` 恒 False ⇒ 这条判据与负载无关。
 PLAN_BUDGET_MS = 5000
 PLAN_SEEDS = [11, 29]
 #: 默认路径的**键集金标**（04.2 之前的 `PlanResult.to_dict()`；新键只许在注入时出现）。
@@ -42,6 +46,7 @@ DEFAULT_KEYS = {
     "counter_note",
     "coverage",
     "coverage_detail",
+    "declarations",
     "depth_searched",
     "dropped_branches",
     "expected",
@@ -54,6 +59,7 @@ DEFAULT_KEYS = {
     "recommended",
     "recommended_label",
     "risk",
+    "robustness",
     "timed_out",
     "truncation",
     "unsupported_seen",
@@ -95,6 +101,49 @@ PLANNER_DEFAULT_GOLDEN_TEXT = r"""
   "numerator": 3,
   "unit": "count_ratio"
  },
+ "declarations": {
+  "best": {
+   "basis": "对手分布下最好那一支的分数",
+   "is_probability": false,
+   "unit": "score"
+  },
+  "coverage": {
+   "basis": "计数比（对手反制被枚举过的候选 / 参与搜索的候选）",
+   "is_confidence": false,
+   "is_probability": false,
+   "unit": "count_ratio"
+  },
+  "expected": {
+   "basis": "启发式局面分对**启发式**对手分布取期望；权重没有实测频率数据",
+   "is_probability": false,
+   "unit": "score"
+  },
+  "first_second_margin": {
+   "basis": "一手推演值的前两名之差；量纲按本引擎标定",
+   "is_probability": false,
+   "unit": "one-ply-value"
+  },
+  "is_probability": false,
+  "is_winrate": false,
+  "note": "以上是启发式估值与计数比：**不是胜率、不是概率、不是把握度**",
+  "opponent_weights": {
+   "basis": "启发式权重（可解释规则），不是频率、不是概率",
+   "is_probability": false,
+   "unit": "heuristic_weight"
+  },
+  "risk": {
+   "basis": "期望到最坏的落差；fragile 阈值 1.2 是产品参数",
+   "is_probability": false,
+   "unit": "score_gap"
+  },
+  "scale": "heuristic-position-score",
+  "value_range": "启发式局面分落在 [-3, 3]；终局 ±10（见 evaluate() 的 docstring）",
+  "worst": {
+   "basis": "对手分布下最差那一支的分数",
+   "is_probability": false,
+   "unit": "score"
+  }
+ },
  "depth_searched": 2,
  "dropped_branches": {},
  "expected": -0.2394,
@@ -128,6 +177,56 @@ PLANNER_DEFAULT_GOLDEN_TEXT = r"""
     "score": -0.2394
    }
   ]
+ },
+ "robustness": {
+  "candidates_ranked": [
+   {
+    "action": "抓挠",
+    "best": -0.2394,
+    "expected": -0.2394,
+    "material_loss": false,
+    "uncomputable_branches": 0,
+    "worst": -0.2394,
+    "worst_computed": true
+   },
+   {
+    "action": "使用能量果",
+    "best": -0.2767,
+    "expected": -0.2767,
+    "material_loss": false,
+    "uncomputable_branches": 0,
+    "worst": -0.2767,
+    "worst_computed": true
+   },
+   {
+    "action": "换上第2位",
+    "best": -0.4029,
+    "expected": -0.4029,
+    "material_loss": false,
+    "uncomputable_branches": 0,
+    "worst": -0.4029,
+    "worst_computed": true
+   }
+  ],
+  "is_probability": false,
+  "material_loss_actions": [],
+  "material_loss_threshold": 1.2,
+  "note": "稳健优先：先看有没有「有证据的重大损失」，再看期望（资源与后手都在期望里），最后看最坏；相近动作并列列出，不假装一条严格更优。阈值是产品参数，不是游戏机制",
+  "ordering": [
+   "① 无「有证据的重大损失」优先",
+   "② 期望降序（资源与后手都在期望里）",
+   "③ 最坏降序"
+  ],
+  "primary_rule_applied": false,
+  "tie_epsilon": 0.02,
+  "tied_with_top": [],
+  "top": {
+   "action": "抓挠",
+   "expected": -0.2394,
+   "material_loss": false,
+   "worst": -0.2394,
+   "worst_computed": true
+  }
  },
  "timed_out": false,
  "truncation": {
@@ -236,6 +335,50 @@ SERVICE_DEFAULT_GOLDEN_TEXT = r"""
  },
  "damage_preview": null,
  "decision_id": "m-b3453cbad856d5c6:v0",
+ "declarations": {
+  "best": {
+   "basis": "对手分布下最好那一支的分数",
+   "is_probability": false,
+   "unit": "score"
+  },
+  "by_seed_consistent": true,
+  "coverage": {
+   "basis": "计数比（对手反制被枚举过的候选 / 参与搜索的候选）",
+   "is_confidence": false,
+   "is_probability": false,
+   "unit": "count_ratio"
+  },
+  "expected": {
+   "basis": "启发式局面分对**启发式**对手分布取期望；权重没有实测频率数据",
+   "is_probability": false,
+   "unit": "score"
+  },
+  "first_second_margin": {
+   "basis": "一手推演值的前两名之差；量纲按本引擎标定",
+   "is_probability": false,
+   "unit": "one-ply-value"
+  },
+  "is_probability": false,
+  "is_winrate": false,
+  "note": "以上是启发式估值与计数比：**不是胜率、不是概率、不是把握度**",
+  "opponent_weights": {
+   "basis": "启发式权重（可解释规则），不是频率、不是概率",
+   "is_probability": false,
+   "unit": "heuristic_weight"
+  },
+  "risk": {
+   "basis": "期望到最坏的落差；fragile 阈值 1.2 是产品参数",
+   "is_probability": false,
+   "unit": "score_gap"
+  },
+  "scale": "heuristic-position-score",
+  "value_range": "启发式局面分落在 [-3, 3]；终局 ±10（见 evaluate() 的 docstring）",
+  "worst": {
+   "basis": "对手分布下最差那一支的分数",
+   "is_probability": false,
+   "unit": "score"
+  }
+ },
  "depth_searched": 2,
  "expected": {
   "max": -0.2394,
@@ -286,6 +429,49 @@ SERVICE_DEFAULT_GOLDEN_TEXT = r"""
     "numerator": 3,
     "unit": "count_ratio"
    },
+   "declarations": {
+    "best": {
+     "basis": "对手分布下最好那一支的分数",
+     "is_probability": false,
+     "unit": "score"
+    },
+    "coverage": {
+     "basis": "计数比（对手反制被枚举过的候选 / 参与搜索的候选）",
+     "is_confidence": false,
+     "is_probability": false,
+     "unit": "count_ratio"
+    },
+    "expected": {
+     "basis": "启发式局面分对**启发式**对手分布取期望；权重没有实测频率数据",
+     "is_probability": false,
+     "unit": "score"
+    },
+    "first_second_margin": {
+     "basis": "一手推演值的前两名之差；量纲按本引擎标定",
+     "is_probability": false,
+     "unit": "one-ply-value"
+    },
+    "is_probability": false,
+    "is_winrate": false,
+    "note": "以上是启发式估值与计数比：**不是胜率、不是概率、不是把握度**",
+    "opponent_weights": {
+     "basis": "启发式权重（可解释规则），不是频率、不是概率",
+     "is_probability": false,
+     "unit": "heuristic_weight"
+    },
+    "risk": {
+     "basis": "期望到最坏的落差；fragile 阈值 1.2 是产品参数",
+     "is_probability": false,
+     "unit": "score_gap"
+    },
+    "scale": "heuristic-position-score",
+    "value_range": "启发式局面分落在 [-3, 3]；终局 ±10（见 evaluate() 的 docstring）",
+    "worst": {
+     "basis": "对手分布下最差那一支的分数",
+     "is_probability": false,
+     "unit": "score"
+    }
+   },
    "depth_searched": 2,
    "dropped_branches": {},
    "expected": -0.2394,
@@ -318,6 +504,56 @@ SERVICE_DEFAULT_GOLDEN_TEXT = r"""
       "score": -0.2394
      }
     ]
+   },
+   "robustness": {
+    "candidates_ranked": [
+     {
+      "action": "抓挠",
+      "best": -0.2394,
+      "expected": -0.2394,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.2394,
+      "worst_computed": true
+     },
+     {
+      "action": "使用能量果",
+      "best": -0.2767,
+      "expected": -0.2767,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.2767,
+      "worst_computed": true
+     },
+     {
+      "action": "换上第2位",
+      "best": -0.4029,
+      "expected": -0.4029,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.4029,
+      "worst_computed": true
+     }
+    ],
+    "is_probability": false,
+    "material_loss_actions": [],
+    "material_loss_threshold": 1.2,
+    "note": "稳健优先：先看有没有「有证据的重大损失」，再看期望（资源与后手都在期望里），最后看最坏；相近动作并列列出，不假装一条严格更优。阈值是产品参数，不是游戏机制",
+    "ordering": [
+     "① 无「有证据的重大损失」优先",
+     "② 期望降序（资源与后手都在期望里）",
+     "③ 最坏降序"
+    ],
+    "primary_rule_applied": false,
+    "tie_epsilon": 0.02,
+    "tied_with_top": [],
+    "top": {
+     "action": "抓挠",
+     "expected": -0.2394,
+     "material_loss": false,
+     "worst": -0.2394,
+     "worst_computed": true
+    }
    },
    "timed_out": false,
    "truncation": {
@@ -408,6 +644,49 @@ SERVICE_DEFAULT_GOLDEN_TEXT = r"""
     "numerator": 3,
     "unit": "count_ratio"
    },
+   "declarations": {
+    "best": {
+     "basis": "对手分布下最好那一支的分数",
+     "is_probability": false,
+     "unit": "score"
+    },
+    "coverage": {
+     "basis": "计数比（对手反制被枚举过的候选 / 参与搜索的候选）",
+     "is_confidence": false,
+     "is_probability": false,
+     "unit": "count_ratio"
+    },
+    "expected": {
+     "basis": "启发式局面分对**启发式**对手分布取期望；权重没有实测频率数据",
+     "is_probability": false,
+     "unit": "score"
+    },
+    "first_second_margin": {
+     "basis": "一手推演值的前两名之差；量纲按本引擎标定",
+     "is_probability": false,
+     "unit": "one-ply-value"
+    },
+    "is_probability": false,
+    "is_winrate": false,
+    "note": "以上是启发式估值与计数比：**不是胜率、不是概率、不是把握度**",
+    "opponent_weights": {
+     "basis": "启发式权重（可解释规则），不是频率、不是概率",
+     "is_probability": false,
+     "unit": "heuristic_weight"
+    },
+    "risk": {
+     "basis": "期望到最坏的落差；fragile 阈值 1.2 是产品参数",
+     "is_probability": false,
+     "unit": "score_gap"
+    },
+    "scale": "heuristic-position-score",
+    "value_range": "启发式局面分落在 [-3, 3]；终局 ±10（见 evaluate() 的 docstring）",
+    "worst": {
+     "basis": "对手分布下最差那一支的分数",
+     "is_probability": false,
+     "unit": "score"
+    }
+   },
    "depth_searched": 2,
    "dropped_branches": {},
    "expected": -0.2394,
@@ -440,6 +719,56 @@ SERVICE_DEFAULT_GOLDEN_TEXT = r"""
       "score": -0.2394
      }
     ]
+   },
+   "robustness": {
+    "candidates_ranked": [
+     {
+      "action": "抓挠",
+      "best": -0.2394,
+      "expected": -0.2394,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.2394,
+      "worst_computed": true
+     },
+     {
+      "action": "使用能量果",
+      "best": -0.2767,
+      "expected": -0.2767,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.2767,
+      "worst_computed": true
+     },
+     {
+      "action": "换上第2位",
+      "best": -0.4029,
+      "expected": -0.4029,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.4029,
+      "worst_computed": true
+     }
+    ],
+    "is_probability": false,
+    "material_loss_actions": [],
+    "material_loss_threshold": 1.2,
+    "note": "稳健优先：先看有没有「有证据的重大损失」，再看期望（资源与后手都在期望里），最后看最坏；相近动作并列列出，不假装一条严格更优。阈值是产品参数，不是游戏机制",
+    "ordering": [
+     "① 无「有证据的重大损失」优先",
+     "② 期望降序（资源与后手都在期望里）",
+     "③ 最坏降序"
+    ],
+    "primary_rule_applied": false,
+    "tie_epsilon": 0.02,
+    "tied_with_top": [],
+    "top": {
+     "action": "抓挠",
+     "expected": -0.2394,
+     "material_loss": false,
+     "worst": -0.2394,
+     "worst_computed": true
+    }
    },
    "timed_out": false,
    "truncation": {
@@ -522,6 +851,34 @@ SERVICE_DEFAULT_GOLDEN_TEXT = r"""
     "score": -0.2394
    }
   ]
+ },
+ "robustness": {
+  "by_seed": {
+   "11": {
+    "material_loss_actions": [],
+    "primary_rule_applied": false,
+    "tied_with_top": [],
+    "top": "抓挠"
+   },
+   "29": {
+    "material_loss_actions": [],
+    "primary_rule_applied": false,
+    "tied_with_top": [],
+    "top": "抓挠"
+   }
+  },
+  "is_probability": false,
+  "material_loss_actions": [],
+  "material_loss_threshold": 1.2,
+  "note": "稳健优先：先看有没有「有证据的重大损失」，再看期望（资源与后手都在期望里），最后看最坏；相近动作并列列出，不假装一条严格更优。阈值是产品参数，不是游戏机制；并列只报**每个分析种子都并列**的那些（tied_with_top_stable），逐种子的并列见 by_seed",
+  "ordering": [
+   "① 无「有证据的重大损失」优先",
+   "② 期望降序（资源与后手都在期望里）",
+   "③ 最坏降序"
+  ],
+  "primary_rule_applied": false,
+  "tie_epsilon": 0.02,
+  "tied_with_top_stable": []
  },
  "rules_version": "roco-world-s4-2026-09-10/legacy_sim_v1",
  "schema_version": 1,
@@ -643,6 +1000,49 @@ PLANNER_DEFAULT_BEAM8_GOLDEN_TEXT = r"""
   "numerator": 8,
   "unit": "count_ratio"
  },
+ "declarations": {
+  "best": {
+   "basis": "对手分布下最好那一支的分数",
+   "is_probability": false,
+   "unit": "score"
+  },
+  "coverage": {
+   "basis": "计数比（对手反制被枚举过的候选 / 参与搜索的候选）",
+   "is_confidence": false,
+   "is_probability": false,
+   "unit": "count_ratio"
+  },
+  "expected": {
+   "basis": "启发式局面分对**启发式**对手分布取期望；权重没有实测频率数据",
+   "is_probability": false,
+   "unit": "score"
+  },
+  "first_second_margin": {
+   "basis": "一手推演值的前两名之差；量纲按本引擎标定",
+   "is_probability": false,
+   "unit": "one-ply-value"
+  },
+  "is_probability": false,
+  "is_winrate": false,
+  "note": "以上是启发式估值与计数比：**不是胜率、不是概率、不是把握度**",
+  "opponent_weights": {
+   "basis": "启发式权重（可解释规则），不是频率、不是概率",
+   "is_probability": false,
+   "unit": "heuristic_weight"
+  },
+  "risk": {
+   "basis": "期望到最坏的落差；fragile 阈值 1.2 是产品参数",
+   "is_probability": false,
+   "unit": "score_gap"
+  },
+  "scale": "heuristic-position-score",
+  "value_range": "启发式局面分落在 [-3, 3]；终局 ±10（见 evaluate() 的 docstring）",
+  "worst": {
+   "basis": "对手分布下最差那一支的分数",
+   "is_probability": false,
+   "unit": "score"
+  }
+ },
  "depth_searched": 2,
  "dropped_branches": {},
  "expected": 0.207,
@@ -682,6 +1082,101 @@ PLANNER_DEFAULT_BEAM8_GOLDEN_TEXT = r"""
     "score": -0.0326
    }
   ]
+ },
+ "robustness": {
+  "candidates_ranked": [
+   {
+    "action": "使用能量果",
+    "best": 1.2574,
+    "expected": 0.207,
+    "material_loss": false,
+    "uncomputable_branches": 0,
+    "worst": -0.2767,
+    "worst_computed": true
+   },
+   {
+    "action": "抓挠",
+    "best": 1.0704,
+    "expected": 0.1781,
+    "material_loss": false,
+    "uncomputable_branches": 0,
+    "worst": -0.2394,
+    "worst_computed": true
+   },
+   {
+    "action": "使用净化药",
+    "best": 0.9808,
+    "expected": 0.1013,
+    "material_loss": false,
+    "uncomputable_branches": 0,
+    "worst": -0.3069,
+    "worst_computed": true
+   },
+   {
+    "action": "使用回复药",
+    "best": 0.9808,
+    "expected": 0.1013,
+    "material_loss": false,
+    "uncomputable_branches": 0,
+    "worst": -0.3069,
+    "worst_computed": true
+   },
+   {
+    "action": "腐化",
+    "best": 0.9778,
+    "expected": 0.0819,
+    "material_loss": false,
+    "uncomputable_branches": 0,
+    "worst": -0.3179,
+    "worst_computed": true
+   },
+   {
+    "action": "防御",
+    "best": 0.9308,
+    "expected": 0.0463,
+    "material_loss": false,
+    "uncomputable_branches": 0,
+    "worst": -0.3767,
+    "worst_computed": true
+   },
+   {
+    "action": "换上第2位",
+    "best": 0.088,
+    "expected": -0.181,
+    "material_loss": false,
+    "uncomputable_branches": 0,
+    "worst": -0.4029,
+    "worst_computed": true
+   },
+   {
+    "action": "换上第3位",
+    "best": -0.4029,
+    "expected": -0.698,
+    "material_loss": false,
+    "uncomputable_branches": 0,
+    "worst": -1.0921,
+    "worst_computed": true
+   }
+  ],
+  "is_probability": false,
+  "material_loss_actions": [],
+  "material_loss_threshold": 1.2,
+  "note": "稳健优先：先看有没有「有证据的重大损失」，再看期望（资源与后手都在期望里），最后看最坏；相近动作并列列出，不假装一条严格更优。阈值是产品参数，不是游戏机制",
+  "ordering": [
+   "① 无「有证据的重大损失」优先",
+   "② 期望降序（资源与后手都在期望里）",
+   "③ 最坏降序"
+  ],
+  "primary_rule_applied": false,
+  "tie_epsilon": 0.02,
+  "tied_with_top": [],
+  "top": {
+   "action": "使用能量果",
+   "expected": 0.207,
+   "material_loss": false,
+   "worst": -0.2767,
+   "worst_computed": true
+  }
  },
  "timed_out": false,
  "truncation": {
@@ -755,6 +1250,50 @@ SERVICE_DEFAULT_BEAM8_GOLDEN_TEXT = r"""
  },
  "damage_preview": null,
  "decision_id": "m-b3453cbad856d5c6:v0",
+ "declarations": {
+  "best": {
+   "basis": "对手分布下最好那一支的分数",
+   "is_probability": false,
+   "unit": "score"
+  },
+  "by_seed_consistent": true,
+  "coverage": {
+   "basis": "计数比（对手反制被枚举过的候选 / 参与搜索的候选）",
+   "is_confidence": false,
+   "is_probability": false,
+   "unit": "count_ratio"
+  },
+  "expected": {
+   "basis": "启发式局面分对**启发式**对手分布取期望；权重没有实测频率数据",
+   "is_probability": false,
+   "unit": "score"
+  },
+  "first_second_margin": {
+   "basis": "一手推演值的前两名之差；量纲按本引擎标定",
+   "is_probability": false,
+   "unit": "one-ply-value"
+  },
+  "is_probability": false,
+  "is_winrate": false,
+  "note": "以上是启发式估值与计数比：**不是胜率、不是概率、不是把握度**",
+  "opponent_weights": {
+   "basis": "启发式权重（可解释规则），不是频率、不是概率",
+   "is_probability": false,
+   "unit": "heuristic_weight"
+  },
+  "risk": {
+   "basis": "期望到最坏的落差；fragile 阈值 1.2 是产品参数",
+   "is_probability": false,
+   "unit": "score_gap"
+  },
+  "scale": "heuristic-position-score",
+  "value_range": "启发式局面分落在 [-3, 3]；终局 ±10（见 evaluate() 的 docstring）",
+  "worst": {
+   "basis": "对手分布下最差那一支的分数",
+   "is_probability": false,
+   "unit": "score"
+  }
+ },
  "depth_searched": 2,
  "expected": {
   "max": 0.207,
@@ -805,6 +1344,49 @@ SERVICE_DEFAULT_BEAM8_GOLDEN_TEXT = r"""
     "numerator": 8,
     "unit": "count_ratio"
    },
+   "declarations": {
+    "best": {
+     "basis": "对手分布下最好那一支的分数",
+     "is_probability": false,
+     "unit": "score"
+    },
+    "coverage": {
+     "basis": "计数比（对手反制被枚举过的候选 / 参与搜索的候选）",
+     "is_confidence": false,
+     "is_probability": false,
+     "unit": "count_ratio"
+    },
+    "expected": {
+     "basis": "启发式局面分对**启发式**对手分布取期望；权重没有实测频率数据",
+     "is_probability": false,
+     "unit": "score"
+    },
+    "first_second_margin": {
+     "basis": "一手推演值的前两名之差；量纲按本引擎标定",
+     "is_probability": false,
+     "unit": "one-ply-value"
+    },
+    "is_probability": false,
+    "is_winrate": false,
+    "note": "以上是启发式估值与计数比：**不是胜率、不是概率、不是把握度**",
+    "opponent_weights": {
+     "basis": "启发式权重（可解释规则），不是频率、不是概率",
+     "is_probability": false,
+     "unit": "heuristic_weight"
+    },
+    "risk": {
+     "basis": "期望到最坏的落差；fragile 阈值 1.2 是产品参数",
+     "is_probability": false,
+     "unit": "score_gap"
+    },
+    "scale": "heuristic-position-score",
+    "value_range": "启发式局面分落在 [-3, 3]；终局 ±10（见 evaluate() 的 docstring）",
+    "worst": {
+     "basis": "对手分布下最差那一支的分数",
+     "is_probability": false,
+     "unit": "score"
+    }
+   },
    "depth_searched": 2,
    "dropped_branches": {},
    "expected": 0.207,
@@ -843,6 +1425,101 @@ SERVICE_DEFAULT_BEAM8_GOLDEN_TEXT = r"""
       "score": -0.0326
      }
     ]
+   },
+   "robustness": {
+    "candidates_ranked": [
+     {
+      "action": "使用能量果",
+      "best": 1.2574,
+      "expected": 0.207,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.2767,
+      "worst_computed": true
+     },
+     {
+      "action": "抓挠",
+      "best": 1.0704,
+      "expected": 0.1781,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.2394,
+      "worst_computed": true
+     },
+     {
+      "action": "使用净化药",
+      "best": 0.9808,
+      "expected": 0.1013,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.3069,
+      "worst_computed": true
+     },
+     {
+      "action": "使用回复药",
+      "best": 0.9808,
+      "expected": 0.1013,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.3069,
+      "worst_computed": true
+     },
+     {
+      "action": "腐化",
+      "best": 0.9778,
+      "expected": 0.0819,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.3179,
+      "worst_computed": true
+     },
+     {
+      "action": "防御",
+      "best": 0.9308,
+      "expected": 0.0463,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.3767,
+      "worst_computed": true
+     },
+     {
+      "action": "换上第2位",
+      "best": 0.088,
+      "expected": -0.181,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.4029,
+      "worst_computed": true
+     },
+     {
+      "action": "换上第3位",
+      "best": -0.4029,
+      "expected": -0.698,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -1.0921,
+      "worst_computed": true
+     }
+    ],
+    "is_probability": false,
+    "material_loss_actions": [],
+    "material_loss_threshold": 1.2,
+    "note": "稳健优先：先看有没有「有证据的重大损失」，再看期望（资源与后手都在期望里），最后看最坏；相近动作并列列出，不假装一条严格更优。阈值是产品参数，不是游戏机制",
+    "ordering": [
+     "① 无「有证据的重大损失」优先",
+     "② 期望降序（资源与后手都在期望里）",
+     "③ 最坏降序"
+    ],
+    "primary_rule_applied": false,
+    "tie_epsilon": 0.02,
+    "tied_with_top": [],
+    "top": {
+     "action": "使用能量果",
+     "expected": 0.207,
+     "material_loss": false,
+     "worst": -0.2767,
+     "worst_computed": true
+    }
    },
    "timed_out": false,
    "truncation": {
@@ -898,6 +1575,49 @@ SERVICE_DEFAULT_BEAM8_GOLDEN_TEXT = r"""
     "numerator": 8,
     "unit": "count_ratio"
    },
+   "declarations": {
+    "best": {
+     "basis": "对手分布下最好那一支的分数",
+     "is_probability": false,
+     "unit": "score"
+    },
+    "coverage": {
+     "basis": "计数比（对手反制被枚举过的候选 / 参与搜索的候选）",
+     "is_confidence": false,
+     "is_probability": false,
+     "unit": "count_ratio"
+    },
+    "expected": {
+     "basis": "启发式局面分对**启发式**对手分布取期望；权重没有实测频率数据",
+     "is_probability": false,
+     "unit": "score"
+    },
+    "first_second_margin": {
+     "basis": "一手推演值的前两名之差；量纲按本引擎标定",
+     "is_probability": false,
+     "unit": "one-ply-value"
+    },
+    "is_probability": false,
+    "is_winrate": false,
+    "note": "以上是启发式估值与计数比：**不是胜率、不是概率、不是把握度**",
+    "opponent_weights": {
+     "basis": "启发式权重（可解释规则），不是频率、不是概率",
+     "is_probability": false,
+     "unit": "heuristic_weight"
+    },
+    "risk": {
+     "basis": "期望到最坏的落差；fragile 阈值 1.2 是产品参数",
+     "is_probability": false,
+     "unit": "score_gap"
+    },
+    "scale": "heuristic-position-score",
+    "value_range": "启发式局面分落在 [-3, 3]；终局 ±10（见 evaluate() 的 docstring）",
+    "worst": {
+     "basis": "对手分布下最差那一支的分数",
+     "is_probability": false,
+     "unit": "score"
+    }
+   },
    "depth_searched": 2,
    "dropped_branches": {},
    "expected": 0.207,
@@ -936,6 +1656,101 @@ SERVICE_DEFAULT_BEAM8_GOLDEN_TEXT = r"""
       "score": -0.0326
      }
     ]
+   },
+   "robustness": {
+    "candidates_ranked": [
+     {
+      "action": "使用能量果",
+      "best": 1.2574,
+      "expected": 0.207,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.2767,
+      "worst_computed": true
+     },
+     {
+      "action": "抓挠",
+      "best": 1.0704,
+      "expected": 0.1781,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.2394,
+      "worst_computed": true
+     },
+     {
+      "action": "使用净化药",
+      "best": 0.9808,
+      "expected": 0.1013,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.3069,
+      "worst_computed": true
+     },
+     {
+      "action": "使用回复药",
+      "best": 0.9808,
+      "expected": 0.1013,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.3069,
+      "worst_computed": true
+     },
+     {
+      "action": "腐化",
+      "best": 0.9778,
+      "expected": 0.0819,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.3179,
+      "worst_computed": true
+     },
+     {
+      "action": "防御",
+      "best": 0.9308,
+      "expected": 0.0463,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.3767,
+      "worst_computed": true
+     },
+     {
+      "action": "换上第2位",
+      "best": 0.088,
+      "expected": -0.181,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -0.4029,
+      "worst_computed": true
+     },
+     {
+      "action": "换上第3位",
+      "best": -0.4029,
+      "expected": -0.698,
+      "material_loss": false,
+      "uncomputable_branches": 0,
+      "worst": -1.0921,
+      "worst_computed": true
+     }
+    ],
+    "is_probability": false,
+    "material_loss_actions": [],
+    "material_loss_threshold": 1.2,
+    "note": "稳健优先：先看有没有「有证据的重大损失」，再看期望（资源与后手都在期望里），最后看最坏；相近动作并列列出，不假装一条严格更优。阈值是产品参数，不是游戏机制",
+    "ordering": [
+     "① 无「有证据的重大损失」优先",
+     "② 期望降序（资源与后手都在期望里）",
+     "③ 最坏降序"
+    ],
+    "primary_rule_applied": false,
+    "tie_epsilon": 0.02,
+    "tied_with_top": [],
+    "top": {
+     "action": "使用能量果",
+     "expected": 0.207,
+     "material_loss": false,
+     "worst": -0.2767,
+     "worst_computed": true
+    }
    },
    "timed_out": false,
    "truncation": {
@@ -988,6 +1803,34 @@ SERVICE_DEFAULT_BEAM8_GOLDEN_TEXT = r"""
     "score": -0.0326
    }
   ]
+ },
+ "robustness": {
+  "by_seed": {
+   "11": {
+    "material_loss_actions": [],
+    "primary_rule_applied": false,
+    "tied_with_top": [],
+    "top": "使用能量果"
+   },
+   "29": {
+    "material_loss_actions": [],
+    "primary_rule_applied": false,
+    "tied_with_top": [],
+    "top": "使用能量果"
+   }
+  },
+  "is_probability": false,
+  "material_loss_actions": [],
+  "material_loss_threshold": 1.2,
+  "note": "稳健优先：先看有没有「有证据的重大损失」，再看期望（资源与后手都在期望里），最后看最坏；相近动作并列列出，不假装一条严格更优。阈值是产品参数，不是游戏机制；并列只报**每个分析种子都并列**的那些（tied_with_top_stable），逐种子的并列见 by_seed",
+  "ordering": [
+   "① 无「有证据的重大损失」优先",
+   "② 期望降序（资源与后手都在期望里）",
+   "③ 最坏降序"
+  ],
+  "primary_rule_applied": false,
+  "tie_epsilon": 0.02,
+  "tied_with_top_stable": []
  },
  "rules_version": "roco-world-s4-2026-09-10/legacy_sim_v1",
  "schema_version": 1,
@@ -1058,8 +1901,15 @@ def public_state():
 
 
 def service_public():
-    """service 级夹具：`/battle/plan` 要的就是这份公开面。"""
+    """service 级夹具：`/battle/plan` 要的就是这份公开面。
+
+    O-36：这里给服务注入**确定性时钟**（`plan_clock`）——否则 service 级判据只能靠
+    「预算开得足够大」躲挂钟，负载高了就会随机红。注入后 `timed_out` 恒 False、
+    搜索结果与真实时钟下的「快速完成」逐位相同（只是 `latency_ms` 变成 0，而它本来就
+    在比对时被剔除）。**产品默认（`plan_clock=None`）不变。**
+    """
     svc = RocoService()
+    svc.plan_clock = lambda: 0.0
     status, envelope = svc.battle_new({"team": A_TEAM, "enemy_team": B_TEAM,
                                        "seed": 5, "state_version": 0})
     assert status == 200, envelope

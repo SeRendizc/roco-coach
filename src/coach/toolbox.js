@@ -1441,6 +1441,9 @@ async function rocoPlanActions(args,context,client,stateVersion,freshness,starte
  const state=searchTimedOut?'timed_out':plan?(completed?'completed':'incomplete'):'not_started';
  // D-27：边际量只有**对象形且三个数都有限**才出数字；缺/坏一律 unknown（并进 limitations）。
  const margin=readFirstSecondMargin(plan,{available:completed});
+ // 04.4：引擎自带的 `declarations`（每个数字的口径声明）；缺则回退到工具层那份。
+ const engineDecl=(plan&&typeof plan.declarations==='object'&&!Array.isArray(plan.declarations)
+  &&plan.declarations!==null)?plan.declarations:null;
  const limitations=Array.isArray(receipt.limitations)?[...receipt.limitations]:[];
  if(margin.status==='unknown')limitations.push(`边际量不可用：${margin.reason}`);
  if(injected.unavailable.length)limitations.push(
@@ -1470,19 +1473,24 @@ async function rocoPlanActions(args,context,client,stateVersion,freshness,starte
   opponentBasis:plan?.opponent_basis??null,
   opponentScenarios:{injected:injected.rows.length,source:injected.source,
    scenario_ids:injected.rows.map((row)=>row.scenario_id),unavailable:injected.unavailable},
+  // 04.4：稳健排序的留痕（规则/阈值/被「先避重大损失」压下去的动作/稳定并列）
+  robustness:plan?.robustness??null,
   // R1/R2 的机器可检声明：这些数字**不是概率**，也不是把握度。
-  declarations:{
-   is_probability:false,
-   basis:'启发式局面分 + 启发式对手分布：没有实测频率数据，**不是胜率、不是概率**',
-   expected:{is_probability:false,scale:'heuristic-position-score'},
-   worst:{is_probability:false,scale:'heuristic-position-score'},
-   firstSecondMargin:{is_probability:false,status:margin.status,
-    scale:margin.scale??'one-ply-value'},
-   coverage:{is_probability:false,is_confidence:false,unit:'count_ratio',
-    note:'coverage 是计数比（分子/分母见 coverageDetail.by_seed），不是「结论有多可靠」的把握度'},
-   truncation:{is_probability:false,
-    note:'束宽与类别保底是**产品规则**，不是概率；被裁掉的候选逐条见 truncation.dropped'},
-  },
+  //
+  // 04.4：引擎现在**自带** `declarations`（每个数字的口径，比工具层这份细）⇒ 优先用它，
+  // 工具层这份只作为回退（规划器自报形状 / 老引擎）。两份都带 `source`，便于核对用的是哪份。
+  declarations:engineDecl
+   ?{...engineDecl,source:'engine'}
+   :{is_probability:false,source:'toolbox',
+    basis:'启发式局面分 + 启发式对手分布：没有实测频率数据，**不是胜率、不是概率**',
+    expected:{is_probability:false,scale:'heuristic-position-score'},
+    worst:{is_probability:false,scale:'heuristic-position-score'},
+    firstSecondMargin:{is_probability:false,status:margin.status,
+     scale:margin.scale??'one-ply-value'},
+    coverage:{is_probability:false,is_confidence:false,unit:'count_ratio',
+     note:'coverage 是计数比（分子/分母见 coverageDetail.by_seed），不是「结论有多可靠」的把握度'},
+    truncation:{is_probability:false,
+     note:'束宽与类别保底是**产品规则**，不是概率；被裁掉的候选逐条见 truncation.dropped'}},
   search:{completed,coverage:searchCoverage??(completed?receipt.coverage:0),timedOut:searchTimedOut,
    nodes:Number.isInteger(search?.nodes)?search.nodes:(Number.isInteger(plan?.branches_evaluated)?plan.branches_evaluated:null),
    depth:Number.isInteger(search?.depth)?search.depth:(Number.isInteger(plan?.depth_searched)?plan.depth_searched:null),
