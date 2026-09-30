@@ -39,6 +39,10 @@
     "src/client/**": "plan02-front（02：roco.js/roco.html/roco.css/battle-v3.css/app.js）",
     "tests/roco-battle-context.test.js": "plan02-front（Lead 授权最小改钉 :124，见 D-11）",
     "reports/roco/product-execution/02/**": "plan02-front（plan02-p0-* 归 plan00-closer；verify-* 归 harness-verifier）",
+    "src/coach/opponent-belief.mjs": "plan03-belief（03）",
+    "tests/roco-opponent-belief.test.js": "plan03-belief",
+    "reports/roco/rc604/opponent-belief.json": "plan03-belief（仅生成器写，见 D-15 Q1）",
+    "reports/roco/product-execution/03/**": "plan03-belief（verify-* 归 harness-verifier）",
     "roco/src/roco_env/service.py": "plan00-closer（P0 task-9：_watch_parent Windows 分支）",
     "roco/tests/**（P0 task-9 相关）": "plan00-closer",
     "scripts/roco/**": "harness-verifier",
@@ -116,11 +120,11 @@
     "03": {
       "title": "对手候选与证据更新",
       "status": "in_progress",
-      "step": "03.1 审查现有候选生成是否真用公开物种/可学技能（只读勘察先行）",
+      "step": "03.1 勘察完成（结论：候选生成真用公开物种+冻结图鉴，但只到物种级；本模块未接任何在线路径、无 view→publicFacts 适配器；起点 1 条红是报告陈旧）→ 按 D-15 收尾 03.1 并进入 03.2",
       "code": "unverified",
       "isolated": "unverified",
       "player": "unverified",
-      "evidence": null,
+      "evidence": "reports/roco/product-execution/03/03.1-recon.md + raw-03.1-*（隐藏值读点 H1–H5 · 无依据先验 R1–R7 · G9 实测确认）",
       "commit": null,
       "remote_sha": null
     },
@@ -436,6 +440,12 @@
       "what": "用户授权「可以启动服务」后的边界变化",
       "decision": "2026-09-30 20:0x 用户明确说「你可以启动服务啊」⇒ 边界从「不许自行启动/重启用户 8765」放宽为：**允许 Lead 在本机启动产品服务实例做真实验收**。执行与限定：① Lead 用 `node src/server/index.js` 在真 8765 起了一个实例（ROCO_PYTHON=Windows Python 3.10.5），并用真 Chrome+真鼠标走完 02 全链路 18/18（证据 `reports/roco/product-execution/02/resident-run-8765/`）；② **不得**把它写成「用户自己长期部署的那一份已验收」—— 那仍未证明；③ 不清理任何真实数据、不改用户配置；④ 该实例由 Lead 自己拥有，可自行停止；⑤ 若用户另有常驻版本，以用户那一份为准复核",
       "by": "user（Lucas）+ lead（执行与限定）"
+    },
+    {
+      "id": "D-15",
+      "what": "03.1 勘察提出的四问 + Lead 追加的三条要求",
+      "decision": "Q1 批准 plan03-belief 临时写 `reports/roco/rc604/opponent-belief.json`（只许生成器写；须给重生成前后逐路径 diff，证明数据面一致、只差 2 条 basis 文案）。Q2 批准放行 `opponent.active` 的 hp/max_hp/energy/statuses/marks，但口径收紧为「**引擎自己的公开投影里已有的字段**」而非「游戏里看得见」：每个放行字段须附 ui_public_view/public_planner_state 的**确切键路径**；不在公开投影里的不许由信念模块自行放行，登记为引擎侧缺口。`stats/types` 只在 stats_source ∈ {species-panel, species-race} 收，individual-* 拒绝。Q3 批准技能池组合：冻结 learnsets+overlay（542）为主、on-demand-builds（622）为**带等级**补充，未验证不许与已验证同权呈现。Q4 批准真引擎 view 与手工 publicFacts **两者都要**，但分栏取证、不许混成一份读数。追加：① **禁止仅凭「我方阵容速度层次」把候选压 0 权重**（可与公开证据矛盾时排除，并写证据 ID），R4 必须改；② H3 的规则账本自述与实现不一致必须修到一致；③ R2/R5/R7 按 03.4/03.5 补显式标记（层内等权标「仅作基线」、speed_band 标「工程三分位构造」、返回里带候选上限与截断信息）；G-03-a 不实文案照实改",
+      "by": "lead"
     }
   ]
 }
