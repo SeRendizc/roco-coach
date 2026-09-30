@@ -538,14 +538,8 @@
       "owner": "lead（登记 + 修器材）· plan04-engine（审计新判据是否时序敏感）",
       "status": "registered",
       "rule": "① **任何套件运行都必须捕获 `FAIL:`/`ERROR:` 用例名**（只留汇总行等于没有证据）—— 这条对 Lead 自己也适用；② 新增判据**不得依赖挂钟**（超时/耗时类断言要么注入时钟、要么留足余量并在报告里写明「这是时序敏感判据」）；③ 未复现的红**如实登记为未定**，不许当噪声忽略、也不许当已修"
-    },
-    {
-      "id": "D-33",
-      "what": "04.3 卡住的「band → 动作级情景」映射归属裁决",
-      "decision": "**在 03 侧新增独立导出 `buildActionScenarios()`（协议 `rc604-opponent-action-scenarios/v1`），04 侧只消费**；**不**让 04.3b 自己映射（会复制 03 的口径，正是 D-21 ① 否掉的那条），**也不改** `buildScenarioOutlook` 现有语义（band 分组是 03.4 的交付、已被判据钉住）。依据（plan03-belief 实测，只读回答）：observed 候选 **6/6 有位次**（`view.seen_roster[].slot` + `opponent.active.slot`），inferred **18/18 没有 slot** ⇒ 位次在公开面**不可判定**（bench 只有 `{slot,fainted}`、无 `pet_id`，G9）；band 成员构成 fast 4（已见2/未见2）· mid 12（已见2/未见6）· slow 8（已见2/未见6），**场上那只只在 band:slow** ⇒ 同一 band 既含可留场也含只能靠换人上场的成员，**按 band 二选一就会写出「必然留场」的错结论**。硬证据只有 `readOpponentEvidence(view).observations.used_skills[]`。约束：可学池必须标 `learnable_pool_hypothesis`（或进 `unavailable[]`）· **留场与换人并存、绝不塌缩**（两向变异）· 推断位次/未出技能/是否换人/后备血配(P3)/区间转概率 **一律进 `unavailable[]`**。任务 task-34",
-      "by": "lead（依据 plan03-belief 的实测）"
     }
-  ]
+  ],
   "handoff": {
     "to": "下一台电脑 / 下一个 DSH 会话",
     "doc": "reports/roco/product-execution/HANDOFF-2026-09-30-TO-NEXT-MACHINE.md",
@@ -728,6 +722,12 @@
       "what": "11（完整玩家链路与版本候选）勘察裁决 Q1–Q6 + 12 勘察派单",
       "decision": "**Q1 主推档位**：两个都留，按「先练习局上手 → 再六宠标准局」引导；**两档 rules_version 必须隔离**（记忆/建议/复盘不得跨档串味，断言 + 两向变异）。**Q2 浏览器验收**：批准副本 + 独立 profile + 独立端口 + **按 PID 停**。**Q3** `box-loadout` 那条红已由 08-S1 入库解决（`145d7ae` ⇒ 17/0）；其判断「他人 WIP 中间态、非链路断裂」正确；规则：**候选与读数必须钉 commit SHA**、跨人 WIP 造成的红要标注归属。**Q4** 停/重启步骤写进候选说明（`npm start` / 按 PID 停 / 设 `ROCO_PYTHON`）；**信号类验证交 harness-verifier**。**Q5** 候选基线 = 11 完成时的产品分支 tip（不预锁），每条读数带 commit。**Q6** 批准加「日志/证据不落玩家数据」判据（扫描日志/证据/回执/导出不得含密钥或私有数据；两向变异：塞假密钥 ⇒ 必红）。**另**：O-27（不带 `state_version` 的 `advance` 真能推进）**定为「试用前必须消除」的硬条件**。12 勘察派给 plan00-closer（task-29）",
       "by": "lead"
+    },
+    {
+      "id": "D-33",
+      "what": "04.3 卡住的「band → 动作级情景」映射归属裁决",
+      "decision": "**在 03 侧新增独立导出 `buildActionScenarios()`（协议 `rc604-opponent-action-scenarios/v1`），04 侧只消费**；**不**让 04.3b 自己映射（会复制 03 的口径，正是 D-21 ① 否掉的那条），**也不改** `buildScenarioOutlook` 现有语义（band 分组是 03.4 的交付、已被判据钉住）。依据（plan03-belief 实测，只读回答）：observed 候选 **6/6 有位次**（`view.seen_roster[].slot` + `opponent.active.slot`），inferred **18/18 没有 slot** ⇒ 位次在公开面**不可判定**（bench 只有 `{slot,fainted}`、无 `pet_id`，G9）；band 成员构成 fast 4（已见2/未见2）· mid 12（已见2/未见6）· slow 8（已见2/未见6），**场上那只只在 band:slow** ⇒ 同一 band 既含可留场也含只能靠换人上场的成员，**按 band 二选一就会写出「必然留场」的错结论**。硬证据只有 `readOpponentEvidence(view).observations.used_skills[]`。约束：可学池必须标 `learnable_pool_hypothesis`（或进 `unavailable[]`）· **留场与换人并存、绝不塌缩**（两向变异）· 推断位次/未出技能/是否换人/后备血配(P3)/区间转概率 **一律进 `unavailable[]`**。任务 task-34",
+      "by": "lead（依据 plan03-belief 的实测）"
     }
   ]
 }
