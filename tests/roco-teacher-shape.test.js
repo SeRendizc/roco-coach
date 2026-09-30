@@ -128,7 +128,11 @@ test('⑥ 结构性：那句话只有一份（runtime.js 不许再抄一遍）�
  const holders = [];
  for (const file of walk(join(ROOT, 'src'))) {
   const text = readFileSync(file, 'utf8');
-  if (/['"]pet-coach-growth-v1['"]/.test(text)) holders.push(file.slice(ROOT.length));
+  // 2026-10-01（task-37，**只修比较口径、期望值一字不改**）：`walk()` 用 `join()` 拼的是**平台原生**路径，
+  // Windows 上 `file.slice(ROOT.length)` 得到 `src\game\progression.js`，而期望值是 `/` 写法 ⇒ 必红。
+  // 这里归一化的是**比较用的**分隔符（不是改产品、也不是改期望值）。
+  // 旧写法留档（改钉不删）：holders.push(file.slice(ROOT.length));
+  if (/['"]pet-coach-growth-v1['"]/.test(text)) holders.push(file.slice(ROOT.length).replace(/\\/g, '/'));
  }
  assert.deepEqual(holders, ['src/game/progression.js'],
   `localStorage 键只许有一处字面量（现在：${holders.join('、')}）`);
