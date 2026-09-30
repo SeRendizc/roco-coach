@@ -101,6 +101,8 @@ class PlanResult:
     #: `fragile` = 落差超过 `FRAGILE_DOWNSIDE` 时置位：上层可以把措辞从
     #: 「可以优先考虑」降级成「这一手不稳，看区间」。
     risk: Dict[str, Any] = field(default_factory=dict)
+    #: 04.2：**只在注入对手情景时**出现（缺省为空 ⇒ `to_dict()` 的键集与 04.2 之前逐字段相同）。
+    opponent_model_detail: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -125,6 +127,9 @@ class PlanResult:
             "opponent_model": self.opponent_model,
             "unsupported_seen": self.unsupported_seen,
             "note": self.note,
+            # 04.2：只在注入情景时出现（缺省不出现 ⇒ 逐字段不变）
+            **({"opponent_model_detail": dict(self.opponent_model_detail)}
+               if self.opponent_model_detail else {}),
         }
 
 
@@ -193,7 +198,8 @@ def evaluate(state: GameState, rs: Ruleset, side: str) -> float:
 
 
 def opponent_distribution(
-    state: GameState, rs: Ruleset, *, beam: int = DEFAULT_BEAM
+    state: GameState, rs: Ruleset, *, beam: int = DEFAULT_BEAM,
+    scenarios: Optional[Sequence["OpponentScenario"]] = None,
 ) -> List[Tuple[Action, float]]:
     """对手动作的**分布**，不是「它一定会做什么」。
 
@@ -202,7 +208,15 @@ def opponent_distribution(
 
     重要：这里没有任何地方读取 `state._pending_*`（那是对手本回合已提交的动作），
     也没有读取对手后备的血量。教练不应该知道对手下一手。
+
+    04.2（**加性可选**）：给了 `scenarios`（注入的对手情景，来自 03 的
+    `buildScenarioOutlook`）就改走 `opponent_scenario_distribution()` —— 只当**无序集合**：
+    等权基线、按 `scenario_id` 定序、不把任何权重当概率。`scenarios` 为 None/空 ⇒ 本函数
+    与 04.2 之前**逐字段相同**。
     """
+    if scenarios:
+        dist, _detail = opponent_scenario_distribution(state, rs, beam=beam, scenarios=scenarios)
+        return dist
     actions = [a for a in renv.legal_actions(state, rs, "enemy") if a.kind != "escape"]
     if not actions:
         return []
@@ -237,6 +251,164 @@ def opponent_distribution(
     top = scored[:beam]
     total = sum(w for _, w in top) or 1.0
     return [(a, w / total) for a, w in top]
+
+
+# ── 04.2：注入的对手情景（**加性可选**；缺省路径逐字段不变）──────────────────
+#
+# 为什么是「注入」而不是引擎自建：对手候选/情景口径的**唯一实现**在 Node 侧
+# （`src/coach/opponent-belief.mjs` 的 `buildScenarioOutlook`，协议 rc604-opponent-outlook/v1）。
+# 引擎在这里只当它是一个**无序情景集合**：按 `scenario_id` 定序、**不排序**、
+# **不把任何权重当概率**（情景集合没有频率数据，见 03.4 的声明）。
+#: 情景类别（与 04-PLAN 的「留场攻击 / 防御 / 换入已见威胁」一一对应）。
+SCENARIO_KINDS: Tuple[str, ...] = ("stay_attack", "stay_defense", "switch_in_seen")
+#: 注入情景时对手动作的权重口径：**均匀基线**（不是概率、不是频率）。
+SCENARIO_WEIGHT_BASIS = (
+    "均匀基线：注入的情景集合没有真实频率数据，集合内每个可枚举动作等权；"
+    "**不是概率**、不是「对手会这么做」的把握度（对齐 03.4 的 is_probability:false）"
+)
+
+
+class ScenarioShapeError(ValueError):
+    """注入的 `opponent_scenarios` 形状不合法。**fail closed**：拒绝，不猜。"""
+
+
+@dataclass(frozen=True)
+class OpponentScenario:
+    """一条注入的对手情景（只描述「可能」，不描述「已经提交」）。"""
+
+    scenario_id: str
+    kind: str
+    slots: Tuple[int, ...] = ()
+    species_ids: Tuple[str, ...] = ()
+    skill_ids: Tuple[str, ...] = ()
+    evidence_ids: Tuple[str, ...] = ()
+    source: str = "injected:outlook"
+
+
+def parse_opponent_scenarios(raw: Any) -> List[OpponentScenario]:
+    """结构校验 + 定序。**形状不对就抛**（上层转成 400），不「猜一个」。
+    """
+    if raw is None:
+        return []
+    if not isinstance(raw, list):
+        raise ScenarioShapeError("opponent_scenarios 必须是数组")
+    if len(raw) > 64:
+        raise ScenarioShapeError("opponent_scenarios 最多 64 条")
+    out: List[OpponentScenario] = []
+    seen = set()
+    for i, row in enumerate(raw):
+        if not isinstance(row, dict):
+            raise ScenarioShapeError(f"opponent_scenarios[{i}] 必须是对象")
+        sid = row.get("scenario_id")
+        kind = row.get("kind")
+        if not isinstance(sid, str) or not sid.strip():
+            raise ScenarioShapeError(f"opponent_scenarios[{i}].scenario_id 必须是非空字符串")
+        if sid in seen:
+            raise ScenarioShapeError(f"opponent_scenarios 里 scenario_id 重复：{sid}")
+        seen.add(sid)
+        if kind not in SCENARIO_KINDS:
+            raise ScenarioShapeError(
+                f"opponent_scenarios[{i}].kind 必须是 {' / '.join(SCENARIO_KINDS)}，实际 {kind!r}")
+        # 概率性字段一律拒绝：情景集合不是分布
+        for banned in ("probability", "weight", "share", "p", "is_probability_true"):
+            if banned in row:
+                raise ScenarioShapeError(
+                    f"opponent_scenarios[{i}] 不许带 {banned}：情景集合不是概率分布")
+        def _ints(key: str) -> Tuple[int, ...]:
+            value = row.get(key, [])
+            if not isinstance(value, list) or any(not isinstance(x, int) or isinstance(x, bool) for x in value):
+                raise ScenarioShapeError(f"opponent_scenarios[{i}].{key} 必须是整数数组")
+            return tuple(value)
+
+        def _strs(key: str) -> Tuple[str, ...]:
+            value = row.get(key, [])
+            if not isinstance(value, list) or any(not isinstance(x, str) or not x for x in value):
+                raise ScenarioShapeError(f"opponent_scenarios[{i}].{key} 必须是非空字符串数组")
+            return tuple(value)
+
+        out.append(OpponentScenario(
+            scenario_id=sid, kind=kind,
+            slots=_ints("slots"), species_ids=_strs("species_ids"),
+            skill_ids=_strs("skill_ids"), evidence_ids=_strs("evidence_ids"),
+            source=str(row.get("source") or "injected:outlook"),
+        ))
+    # **按 scenario_id 定序**（不是按任何权重/range —— 情景之间不排序）
+    return sorted(out, key=lambda s: s.scenario_id)
+
+
+def opponent_scenario_distribution(state: GameState, rs: Ruleset, *, beam: int,
+                                   scenarios: Sequence[OpponentScenario]
+                                   ) -> Tuple[List[Tuple[Action, float]], Dict[str, Any]]:
+    """把注入情景映射成对手的**可枚举动作集合**（均匀基线），并如实登记缺什么。
+
+    映射（逐条可核对）：
+      · `stay_attack`     ⇒ 场上那只的**攻击/状态类**技能动作，技能 id 落在该情景的 `skill_ids` 里
+                            （`skill_ids` 为空 = 不筛，取该只全部攻击/状态技能）；
+      · `stay_defense`    ⇒ 场上那只的**防御类**技能动作；
+      · `switch_in_seen`  ⇒ 换到该情景 `slots` 里的任一存活后备（已见威胁通常在 `species_ids` 里点名）。
+
+    情景里点名、但**当前重建状态枚举不出来**的技能/位次 ⇒ 记进 `unavailable[]`（不假装能算）。
+    权重 = `SCENARIO_WEIGHT_BASIS`（集合内等权），按 `scenario_id` 定序后取前 `beam` 条。
+    """
+    legal = [a for a in renv.legal_actions(state, rs, "enemy") if a.kind != "escape"]
+    if not legal:
+        return [], {"scenario_ids": [], "basis": SCENARIO_WEIGHT_BASIS, "is_probability": False,
+                    "enumerated": 0, "dropped": [], "unavailable": [], "weights": "uniform_baseline"}
+    by_skill = {a.skill_id: a for a in legal if a.kind == ACTION_SKILL and a.skill_id}
+    by_slot = {a.target_index: a for a in legal if a.kind == ACTION_SWITCH and a.target_index is not None}
+    picked: List[Tuple[Action, str]] = []
+    unavailable: List[Dict[str, Any]] = []
+    for sc in scenarios:
+        if sc.kind in ("stay_attack", "stay_defense"):
+            wanted = list(sc.skill_ids) if sc.skill_ids else None
+            for skill_id in (wanted if wanted is not None else sorted(by_skill)):
+                action = by_skill.get(skill_id)
+                if action is None:
+                    unavailable.append({"scenario_id": sc.scenario_id, "skill_id": skill_id,
+                                        "why": "重建状态里枚举不出这个技能（不在规范配招/当前可学面里）"})
+                    continue
+                sk = rs.skills.get(skill_id)
+                if sk is None:
+                    continue
+                want_defense = sc.kind == "stay_defense"
+                if bool(getattr(sk, "is_defense", False)) != want_defense:
+                    continue
+                if wanted is None and want_defense and not getattr(sk, "is_defense", False):
+                    continue
+                picked.append((action, sc.scenario_id))
+            continue
+        for slot in sc.slots:
+            action = by_slot.get(slot)
+            if action is None:
+                unavailable.append({"scenario_id": sc.scenario_id, "slot": slot,
+                                    "why": "重建状态里这个位次换不了（倒下 / 不是合法换人）"})
+                continue
+            picked.append((action, sc.scenario_id))
+    # 去重（同一动作可能被多条情景点到），保持 scenario_id 定序 ⇒ 动作序也确定
+    seen_actions: List[Tuple[Action, str]] = []
+    for action, sid in picked:
+        if all(existing is not action for existing, _ in seen_actions):
+            seen_actions.append((action, sid))
+    kept = seen_actions[:max(1, beam)]
+    dropped = [{"action": _label(rs, a), "scenario_id": sid,
+                "why": f"束宽 {beam} 之外（按 scenario_id 定序截断，不按权重）"}
+               for a, sid in seen_actions[max(1, beam):]]
+    total = len(kept) or 1
+    dist = [(a, 1.0 / total) for a, _sid in kept]
+    detail = {
+        "scenario_ids": [sc.scenario_id for sc in scenarios],
+        "kinds": sorted({sc.kind for sc in scenarios}),
+        "basis": SCENARIO_WEIGHT_BASIS,
+        "is_probability": False,
+        "weights": "uniform_baseline",
+        "enumerated": len(kept),
+        "dropped": dropped,
+        "unavailable": unavailable,
+        "evidence_ids": sorted({e for sc in scenarios for e in sc.evidence_ids}),
+        "note": ("注入情景只当**无序集合**用：按 scenario_id 定序、不按 range 排序、"
+                 "不把任何权重当概率；情景里枚举不出来的技能/位次如实记在 unavailable 里"),
+    }
+    return dist, detail
 
 
 def _quick(a: Action, rs: Ruleset) -> float:
@@ -280,7 +452,7 @@ def _quick_candidates(state: GameState, rs: Ruleset, *, beam: int,
 
 
 def one_ply_value(state: GameState, rs: Ruleset, action: Action, *, side: str = "player",
-                  beam: int = 4) -> float:
+                  beam: int = 4, scenarios: Optional[Sequence[OpponentScenario]] = None) -> float:
     """一个动作的**一步推演**值：按对手分布走一手，再估值，取期望。
 
     这是候选筛选用的判据，也是「基准最优」用的判据 —— **同一个函数**，
@@ -297,7 +469,7 @@ def one_ply_value(state: GameState, rs: Ruleset, action: Action, *, side: str = 
     一条都推不动时返回 `-inf`（明确表示「这个动作现在算不出来」），
     这样它不会因为「恰好排前面」而被选中。
     """
-    dist = opponent_distribution(state, rs, beam=beam)
+    dist = opponent_distribution(state, rs, beam=beam, scenarios=scenarios)
     if not dist:
         trial = _clone(state)
         nxt = _safe_step(trial, rs, action, None, side)
@@ -319,7 +491,8 @@ def one_ply_value(state: GameState, rs: Ruleset, action: Action, *, side: str = 
 
 
 def _my_candidates(state: GameState, rs: Ruleset, *, beam: int,
-                   side: str = "player") -> List[Action]:
+                   side: str = "player",
+                   scenarios: Optional[Sequence[OpponentScenario]] = None) -> List[Action]:
     """根节点的我方候选：**按一步推演值**挑，而不是按静态威力挑。
 
     为什么改（这是本仓库里第一次用一个客观基准量出来的修正）：
@@ -337,12 +510,14 @@ def _my_candidates(state: GameState, rs: Ruleset, *, beam: int,
     于是「换宠承伤」「防御等一轮」永远进不了搜索 —— 而多回合规划存在的理由
     恰恰是这两类分支。保底与按值排序**并存**，不是二选一。
     """
-    picked, _scored = _candidates_and_scores(state, rs, beam=beam, side=side)
+    picked, _scored = _candidates_and_scores(state, rs, beam=beam, side=side, scenarios=scenarios)
     return picked
 
 
 def _candidates_and_scores(state: GameState, rs: Ruleset, *, beam: int,
-                           side: str = "player") -> Tuple[List[Action], List[Tuple[float, Action]]]:
+                           side: str = "player",
+                           scenarios: Optional[Sequence[OpponentScenario]] = None
+                           ) -> Tuple[List[Action], List[Tuple[float, Action]]]:
     """候选与它们的分数一起返回。
 
     拆出来的理由：一手推演值是**每个合法动作都要算一次**的成本，
@@ -354,7 +529,7 @@ def _candidates_and_scores(state: GameState, rs: Ruleset, *, beam: int,
     if not actions:
         return [], []
     scored: List[Tuple[float, Action]] = [
-        (one_ply_value(state, rs, a, side=side), a) for a in actions]
+        (one_ply_value(state, rs, a, side=side, scenarios=scenarios), a) for a in actions]
     scored.sort(key=lambda pair: -pair[0])
 
     picked: List[Action] = []
@@ -398,15 +573,25 @@ def plan_actions(
     beam: int = DEFAULT_BEAM,
     budget_ms: int = DEFAULT_BUDGET_MS,
     clock: Callable[[], float] = time.perf_counter,
+    opponent_scenarios: Optional[Any] = None,
 ) -> PlanResult:
     """搜索 2—3 回合，返回推荐动作与它的风险画像。
 
     `clock` 可注入，方便测试用一个确定性时钟验证「超时后如实上报」。
+
+    04.2：`opponent_scenarios` 是**可选**的注入情景（形状见 `parse_opponent_scenarios`）。
+    不给 ⇒ 与 04.2 之前逐字段相同；给了 ⇒ 对手一侧改按**无序情景集合**枚举（等权基线），
+    并把「用的是哪一种依据、枚举了什么、缺什么」写进 `opponent_model_detail`。
     """
     start = clock()
     depth = max(1, min(MAX_DEPTH, depth))
     beam = max(1, min(MAX_BEAM, beam))
     budget_s = max(0.05, budget_ms / 1000.0)
+    parsed = parse_opponent_scenarios(opponent_scenarios) if opponent_scenarios is not None else []
+    scenarios = parsed or None
+    detail: Dict[str, Any] = {}
+    if scenarios:
+        _dist, detail = opponent_scenario_distribution(state, rs, beam=beam, scenarios=scenarios)
 
     opponent = "enemy" if side == "player" else "player"
     # 搜索内部统一用一个**固定**随机种子，理由见 SEARCH_SEED 的注释。
@@ -414,7 +599,8 @@ def plan_actions(
     # 我们不该把它的 seed 换掉（那会污染调用方后续的 replay）。
     original_seed = state.seed
     state.seed = SEARCH_SEED
-    my_candidates, scored_candidates = _candidates_and_scores(state, rs, beam=beam, side=side)
+    my_candidates, scored_candidates = _candidates_and_scores(state, rs, beam=beam, side=side,
+                                                              scenarios=scenarios)
     # 产品侧判断「这一手是不是真的两难」要用它；与候选筛选同一批分数，不重复计算。
     margin = first_second_margin(scored_candidates)
     branches = 0
@@ -431,8 +617,9 @@ def plan_actions(
     try:
         result = _search(state, rs, side=side, depth=depth, beam=beam, budget_s=budget_s,
                          clock=clock, start=start, my_candidates=my_candidates,
-                         opponent=opponent, original_seed=original_seed)
+                         opponent=opponent, original_seed=original_seed, scenarios=scenarios)
         result.first_second_margin = margin
+        result.opponent_model_detail = detail
         return result
     finally:
         # 无论走哪条出口（含超时、异常）都把 seed 还回去。
@@ -441,7 +628,7 @@ def plan_actions(
 
 
 def _search(state, rs, *, side, depth, beam, budget_s, clock, start, my_candidates,
-            opponent, original_seed) -> PlanResult:
+            opponent, original_seed, scenarios=None) -> PlanResult:
     branches = 0
     dropped: Dict[str, int] = {}
     no_counter = 0
@@ -513,7 +700,7 @@ def _search(state, rs, *, side, depth, beam, budget_s, clock, start, my_candidat
             if cur.result or cur.phase == "replace":
                 break
             mine = _quick_candidates(cur, rs, beam=2, side=side)
-            theirs = opponent_distribution(cur, rs, beam=2)
+            theirs = opponent_distribution(cur, rs, beam=2, scenarios=scenarios)
             if not mine or not theirs:
                 break
             # 说明：这里**只用分布里权重最高的那条对手线**推进，而不是对分布取期望。
@@ -540,7 +727,7 @@ def _search(state, rs, *, side, depth, beam, budget_s, clock, start, my_candidat
         if (clock() - start) > budget_s:
             timed_out = True
             break
-        dist = opponent_distribution(state, rs, beam=beam)
+        dist = opponent_distribution(state, rs, beam=beam, scenarios=scenarios)
         if not dist:
             # 对手分布为空（典型情形：补位阶段，对手侧没有可枚举的动作）。
             # 这时仍然对我方每个候选做了静态估值，但**没有建模对手的反制**：
