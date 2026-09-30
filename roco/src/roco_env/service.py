@@ -491,6 +491,87 @@ def opponent_basis_block(
     }
 
 
+# ── 04.3：逐种子的 R3/R5/R8 三块聚合成回执级三栏 ─────────────────────────────
+
+
+def aggregate_plan_traces(
+    per_seed: List[Dict[str, Any]], seeds: List[int]
+) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
+    """把逐种子的 `coverage_detail` / `truncation` / `budget` 聚合成回执级三栏。
+
+    口径（逐条可核对）：
+      · `coverage_detail` —— **计数比**：逐种子分子/分母 + 单位 + `is_confidence:false`。
+        不给「一个数」代表所有种子：分析种子之间分母可能不同（重建状态可能不同）。
+      · `truncation` —— 候选层裁剪：逐种子计数 + **并集**的逐条缺谁 + 规则。
+      · `budget` —— 深度/束宽/预算：请求级参数（各种子相同）+ `depth_searched_max`
+        （取最大）+ `nodes`（求和）+ `timed_out`（任一）。
+    """
+    coverage_rows = [(p.get("coverage_detail") or {}) for p in per_seed]
+    trunc_rows = [(p.get("truncation") or {}) for p in per_seed]
+    budget_rows = [(p.get("budget") or {}) for p in per_seed]
+    first_cov = coverage_rows[0] if coverage_rows else {}
+    first_trunc = trunc_rows[0] if trunc_rows else {}
+    first_budget = budget_rows[0] if budget_rows else {}
+
+    dropped: List[Dict[str, Any]] = []
+    seen = set()
+    for row in trunc_rows:
+        for item in row.get("dropped") or []:
+            key = json.dumps(item, ensure_ascii=False, sort_keys=True)
+            if key in seen:
+                continue
+            seen.add(key)
+            dropped.append(item)
+
+    coverage_detail = {
+        "unit": first_cov.get("unit") or "count_ratio",
+        "is_confidence": False,
+        "is_probability": False,
+        "by_seed": {str(sv): {"numerator": (row or {}).get("numerator"),
+                              "denominator": (row or {}).get("denominator")}
+                    for sv, row in zip(seeds, coverage_rows)},
+        "meaning": first_cov.get("meaning"),
+        "excluded_from_denominator": first_cov.get("excluded_from_denominator"),
+        "note": first_cov.get("note"),
+    }
+    truncation = {
+        "rule": first_trunc.get("rule"),
+        "is_probability": False,
+        "by_seed": {
+            str(sv): {
+                "candidates_total": (row or {}).get("candidates_total"),
+                "candidates_kept": (row or {}).get("candidates_kept"),
+                "candidates_dropped": (row or {}).get("candidates_dropped"),
+                "kept_by_kind": (row or {}).get("kept_by_kind"),
+                "dropped_by_kind": (row or {}).get("dropped_by_kind"),
+                "uncomputable": (row or {}).get("uncomputable"),
+            } for sv, row in zip(seeds, trunc_rows)
+        },
+        "dropped": dropped,
+        "note": ("逐条列出被「类别保底 + 束宽」规则裁掉的候选（缺谁、按什么规则）；"
+                 "搜索分支层面的丢弃（非法/机制未核验）见 per_seed[].dropped_branches"),
+    }
+    depths = [row.get("depth_searched") for row in budget_rows
+              if isinstance((row or {}).get("depth_searched"), int)]
+    budget = {
+        "depth_requested": first_budget.get("depth_requested"),
+        "depth_effective": first_budget.get("depth_effective"),
+        "depth_max": first_budget.get("depth_max"),
+        "depth_searched_max": max(depths) if depths else None,
+        "depth_truncated": any((row or {}).get("depth_truncated") for row in budget_rows),
+        "depth_capped_by_max": any((row or {}).get("depth_capped_by_max") for row in budget_rows),
+        "beam_requested": first_budget.get("beam_requested"),
+        "beam_effective": first_budget.get("beam_effective"),
+        "beam_max": first_budget.get("beam_max"),
+        "beam_truncated": any((row or {}).get("beam_truncated") for row in budget_rows),
+        "budget_ms": first_budget.get("budget_ms"),
+        "nodes": sum((row or {}).get("nodes") or 0 for row in budget_rows),
+        "timed_out": any((row or {}).get("timed_out") for row in budget_rows),
+        "note": first_budget.get("note"),
+    }
+    return coverage_detail, truncation, budget
+
+
 # ── 服务本体 ────────────────────────────────────────────────────────────
 
 
@@ -2379,6 +2460,8 @@ class RocoService:
         opponent_basis = (opponent_basis_block(per_seed, raw_seeds, parsed_scenarios,
                                               public_assumptions=public.get("assumptions"))
                           if scenarios_given else None)
+        # 04.3：R3（coverage 计数比）/ R5（候选裁剪留痕）/ R8（深度与预算截断语义）
+        coverage_detail, truncation, budget_detail = aggregate_plan_traces(per_seed, raw_seeds)
 
         payload = {
             "schema_version": public.get("schema_version"),
@@ -2414,6 +2497,12 @@ class RocoService:
             "depth_searched": max(p["depth_searched"] for p in per_seed),
             "beam": beam,
             "coverage": coverage,
+            # 04.3（R3）：coverage 的计数比口径（不是把握度、不是概率）
+            "coverage_detail": coverage_detail,
+            # 04.3（R5）：候选层被裁掉谁、按什么规则（束宽与类别保底）
+            "truncation": truncation,
+            # 04.3（R8）：深度/束宽/预算的截断语义（请求截断 vs 到达引擎上限）
+            "budget": budget_detail,
             "timed_out": timed_out,
             "unsupported_seen": unsupported_total,
             "opponent_model": per_seed[0]["opponent_model"],
@@ -2465,6 +2554,8 @@ class RocoService:
             "随机性用与真实对局无关的 analysis_seeds，并跨种子聚合；结论不依赖真实 seed",
             "对手按启发式分布建模，不是真实对手行为模型",
             "这是**分析**状态，不是权威对局状态；实际结算以游戏内为准",
+            "coverage 是**计数比**（见 coverage_detail.by_seed 的分子/分母），不是「结论有多可靠」的"
+            "把握度；被束宽裁掉的候选逐条见 truncation.dropped，深度/预算是否到顶见 budget",
         ]
         if opponent_basis:
             limitations.append(

@@ -53,6 +53,11 @@ SEARCH_SEED = 20260921
 #: 期望到最坏的落差超过这个值，就认为这一手「脆」（`risk.fragile`）。
 #: 这是**产品阈值**，不是游戏机制；改它只影响措辞分级，不影响任何估值。
 FRAGILE_DOWNSIDE = 1.2
+#: 04.3（R5）：根节点候选的裁剪规则，**逐字写进回执**（让「裁掉了谁、按什么规则」可追问）。
+CANDIDATE_RULE = (
+    "类别保底（skill / switch / item 各至少 1 条，保底可能超过 beam）"
+    "+ 按**一手推演值**降序补到 beam（不按静态威力排序）"
+)
 
 
 @dataclass
@@ -101,6 +106,17 @@ class PlanResult:
     #: `fragile` = 落差超过 `FRAGILE_DOWNSIDE` 时置位：上层可以把措辞从
     #: 「可以优先考虑」降级成「这一手不稳，看区间」。
     risk: Dict[str, Any] = field(default_factory=dict)
+    #: 04.3（R5）：**候选**这一层被裁掉谁、按什么规则裁的，逐类留痕。
+    #:
+    #: 为什么要有它：`coverage` 与 `branches_evaluated` 只说「算了多少」，
+    #: 「合法动作里哪些没进搜索、为什么」在回执里看不见。束宽与类别保底都是
+    #: **产品规则**，被裁掉的候选可能正是玩家想问的那一手（03.5 的同类教训）。
+    truncation: Dict[str, Any] = field(default_factory=dict)
+    #: 04.3（R3）：`coverage` 的**计数比**口径（分子/分母/单位/不是把握度）。
+    #: 分母是 **beam 裁剪之后**的候选数 —— 单看 `coverage` 会把它读成「把握度」。
+    coverage_detail: Dict[str, Any] = field(default_factory=dict)
+    #: 04.3（R8）：深度/束宽/预算被截断的**语义**（请求截断 vs 到达引擎上限）。
+    budget: Dict[str, Any] = field(default_factory=dict)
     #: 04.2：**只在注入对手情景时**出现（缺省为空 ⇒ `to_dict()` 的键集与 04.2 之前逐字段相同）。
     opponent_model_detail: Dict[str, Any] = field(default_factory=dict)
 
@@ -118,10 +134,16 @@ class PlanResult:
             "first_second_margin": (round(self.first_second_margin, 4)
                                     if self.first_second_margin is not None else None),
             "dropped_branches": dict(self.dropped_branches),
+            # 04.3（R5）：候选层的裁剪留痕（谁被裁、按什么规则）
+            "truncation": dict(self.truncation),
             "risk": dict(self.risk),
             "depth_searched": self.depth_searched,
             "beam": self.beam,
+            # 04.3（R8）：深度/束宽/预算的截断语义
+            "budget": dict(self.budget),
             "coverage": round(self.coverage, 4),
+            # 04.3（R3）：coverage 的计数比口径（不是把握度、不是概率）
+            "coverage_detail": dict(self.coverage_detail),
             "timed_out": self.timed_out,
             "latency_ms": round(self.latency_ms, 1),
             "opponent_model": self.opponent_model,
@@ -564,7 +586,8 @@ def _my_candidates(state: GameState, rs: Ruleset, *, beam: int,
 
 def _candidates_and_scores(state: GameState, rs: Ruleset, *, beam: int,
                            side: str = "player",
-                           scenarios: Optional[Sequence[OpponentScenario]] = None
+                           scenarios: Optional[Sequence[OpponentScenario]] = None,
+                           trace: Optional[Dict[str, Any]] = None,
                            ) -> Tuple[List[Action], List[Tuple[float, Action]]]:
     """候选与它们的分数一起返回。
 
@@ -572,9 +595,21 @@ def _candidates_and_scores(state: GameState, rs: Ruleset, *, beam: int,
     `_my_candidates` 已经算过一遍；`first_second_margin` 要用同一个分数，
     再算一遍就是白花一遍预算（`one_ply_value` 会对每个动作枚举对手分布）。
     两处必须用**同一批**分数，否则「候选是按这个分数挑的」就不成立。
+
+    04.3：给了 `trace` 就把**候选层的裁剪**写进去（谁被裁、按什么规则）。
+    用出参而不是第三个返回值：`_my_candidates` 与 `plan_actions` 两处调用点
+    只有后者要留痕，改返回值会让所有调用点都要解包（改动面大、收益为零）。
     """
     actions = [a for a in renv.legal_actions(state, rs, side) if a.kind != "escape"]
     if not actions:
+        if trace is not None:
+            trace.update({
+                "candidates_total": 0, "candidates_kept": 0, "candidates_dropped": 0,
+                "dropped_by_kind": {}, "kept_by_kind": {}, "dropped": [],
+                "uncomputable": 0, "beam": beam,
+                "rule": CANDIDATE_RULE, "is_probability": False,
+                "note": "当前局面没有可参与搜索的合法动作",
+            })
         return [], []
     scored: List[Tuple[float, Action]] = [
         (one_ply_value(state, rs, a, side=side, scenarios=scenarios), a) for a in actions]
@@ -595,7 +630,91 @@ def _candidates_and_scores(state: GameState, rs: Ruleset, *, beam: int,
             picked.append(action)
     # 类别保底可能已经超过 beam（例如 beam=1 但有三个类别）——那也留着：
     # 宁可多看两眼，也不要把「换宠/防御」这两类整类丢掉。
+    if trace is not None:
+        dropped_rows = []
+        for value, action in scored:
+            if action in picked:
+                continue
+            finite = value == value and value not in (float("inf"), float("-inf"))
+            dropped_rows.append({
+                "action": _label(rs, action), "kind": action.kind,
+                # `-inf` 不能直接进 JSON（`json.dumps` 会写成 `-Infinity`，JS 的
+                # `JSON.parse` 直接抛）⇒ 算不出来的记 null，并说明原因。
+                "value": round(value, 4) if finite else None,
+                "why": ("一手推演算不出来（-inf），无法与其它候选比较"
+                        if not finite else f"束宽 beam={beam} 之外（按一手推演值降序补位时被裁）"),
+            })
+        trace.update({
+            "candidates_total": len(actions),
+            "candidates_kept": len(picked),
+            "candidates_dropped": len(actions) - len(picked),
+            "kept_by_kind": _count_by_kind(picked),
+            "dropped_by_kind": _count_by_kind([a for _v, a in scored if a not in picked]),
+            "dropped": dropped_rows,
+            "uncomputable": sum(1 for v, _a in scored
+                                if v != v or v in (float("inf"), float("-inf"))),
+            "beam": beam,
+            "rule": CANDIDATE_RULE,
+            "is_probability": False,
+            "note": ("truncation 只讲**候选**这一层被裁掉谁；搜索分支层面的丢弃"
+                     "（非法/机制未核验）见 dropped_branches"),
+        })
     return picked, scored
+
+
+def _count_by_kind(actions: Sequence[Action]) -> Dict[str, int]:
+    """按动作类别计数（`skill` / `switch` / `item` …），保持确定性顺序。"""
+    out: Dict[str, int] = {}
+    for action in actions:
+        out[action.kind] = out.get(action.kind, 0) + 1
+    return dict(sorted(out.items()))
+
+
+def coverage_detail(*, searched: int, total: int, no_counter: int = 0) -> Dict[str, Any]:
+    """04.3（R3）：`coverage` 的**计数比**口径（机器可检，防被读成把握度）。
+
+    分子的定义：真的对着对手分布搜过的候选数；分母：**beam 裁剪之后**参与搜索的
+    候选数（不是全部合法动作 —— 那部分在 `truncation` 里）。
+    """
+    return {
+        "numerator": int(searched),
+        "denominator": int(total),
+        "unit": "count_ratio",
+        "is_confidence": False,
+        "is_probability": False,
+        "meaning": "对手反制被枚举过的候选数 / 参与搜索的候选数（beam 裁剪**之后**的分母）",
+        "excluded_from_denominator": "beam 之外的候选（见 truncation.dropped）",
+        "excluded_from_numerator": (
+            f"对手分布为空、只做静态估值的 {int(no_counter)} 个候选（见 no_counter_branches）"
+        ),
+        "note": "coverage 是计数比，**不是**「结论有多可靠」的把握度，也不是概率",
+    }
+
+
+def plan_budget_detail(*, depth_requested: int, depth_effective: int, depth_searched: int,
+                       beam_requested: int, beam_effective: int, budget_ms: int,
+                       timed_out: bool, nodes: int) -> Dict[str, Any]:
+    """04.3（R8）：深度/束宽/预算被截断的语义，两种「到顶」分开写。"""
+    return {
+        "depth_requested": int(depth_requested),
+        "depth_effective": int(depth_effective),
+        "depth_searched": int(depth_searched),
+        "depth_max": MAX_DEPTH,
+        "depth_truncated": bool(int(depth_requested) > MAX_DEPTH),
+        "depth_capped_by_max": bool(int(depth_searched) >= MAX_DEPTH),
+        "beam_requested": int(beam_requested),
+        "beam_effective": int(beam_effective),
+        "beam_max": MAX_BEAM,
+        "beam_truncated": bool(int(beam_requested) > MAX_BEAM),
+        "budget_ms": int(budget_ms),
+        "timed_out": bool(timed_out),
+        "nodes": int(nodes),
+        "note": (
+            "depth_truncated = 调用方要的深度超过 MAX_DEPTH，被**上限**截断；"
+            "depth_capped_by_max = 搜索已到引擎上限（再深没有语义，**不是**「没算完」）；"
+            "depth_searched < depth_effective 且 depth_truncated=false ⇒ 只可能是 timed_out=true"
+        ),
+    }
 
 
 def first_second_margin(scored: Sequence[Tuple[float, Action]]) -> Optional[float]:
@@ -632,6 +751,11 @@ def plan_actions(
     并把「用的是哪一种依据、枚举了什么、缺什么」写进 `opponent_model_detail`。
     """
     start = clock()
+    # 04.3（R8）：把**调用方要的**深度/束宽先记下来，再 clamp —— 否则
+    # 「请求被 MAX_DEPTH 截断」与「按你的要求只搜这么深」在回执里长得一样。
+    depth_requested = depth
+    beam_requested = beam
+    budget_ms_requested = budget_ms
     depth = max(1, min(MAX_DEPTH, depth))
     beam = max(1, min(MAX_BEAM, beam))
     budget_s = max(0.05, budget_ms / 1000.0)
@@ -647,8 +771,10 @@ def plan_actions(
     # 我们不该把它的 seed 换掉（那会污染调用方后续的 replay）。
     original_seed = state.seed
     state.seed = SEARCH_SEED
+    trace: Dict[str, Any] = {}
+    stats: Dict[str, Any] = {}
     my_candidates, scored_candidates = _candidates_and_scores(state, rs, beam=beam, side=side,
-                                                              scenarios=scenarios)
+                                                              scenarios=scenarios, trace=trace)
     # 产品侧判断「这一手是不是真的两难」要用它；与候选筛选同一批分数，不重复计算。
     margin = first_second_margin(scored_candidates)
     branches = 0
@@ -665,9 +791,22 @@ def plan_actions(
     try:
         result = _search(state, rs, side=side, depth=depth, beam=beam, budget_s=budget_s,
                          clock=clock, start=start, my_candidates=my_candidates,
-                         opponent=opponent, original_seed=original_seed, scenarios=scenarios)
+                         opponent=opponent, original_seed=original_seed, scenarios=scenarios,
+                         stats=stats)
         result.first_second_margin = margin
         result.opponent_model_detail = detail
+        # 04.3：R5 候选裁剪留痕 / R8 预算与截断语义 / R3 coverage 的计数比口径。
+        result.truncation = trace
+        result.budget = plan_budget_detail(
+            depth_requested=depth_requested, depth_effective=depth,
+            depth_searched=result.depth_searched, beam_requested=beam_requested,
+            beam_effective=beam, budget_ms=budget_ms_requested,
+            timed_out=result.timed_out, nodes=result.branches_evaluated,
+        )
+        result.coverage_detail = coverage_detail(
+            searched=stats.get("searched", 0), total=len(my_candidates),
+            no_counter=result.no_counter_branches,
+        )
         return result
     finally:
         # 无论走哪条出口（含超时、异常）都把 seed 还回去。
@@ -676,7 +815,7 @@ def plan_actions(
 
 
 def _search(state, rs, *, side, depth, beam, budget_s, clock, start, my_candidates,
-            opponent, original_seed, scenarios=None) -> PlanResult:
+            opponent, original_seed, scenarios=None, stats=None) -> PlanResult:
     branches = 0
     dropped: Dict[str, int] = {}
     no_counter = 0
@@ -860,6 +999,10 @@ def _search(state, rs, *, side, depth, beam, budget_s, clock, start, my_candidat
     coverage = (searched / total_possible) if total_possible else 0.0
     if no_counter and not searched:
         coverage = 0.0
+    if stats is not None:
+        stats["searched"] = searched
+        stats["total_possible"] = total_possible
+        stats["no_counter"] = no_counter
 
     note_parts = [
         f"搜了 {len(results)}/{total_possible} 个我方候选 × 对手 {beam} 个候选",

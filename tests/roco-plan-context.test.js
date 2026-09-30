@@ -25,7 +25,10 @@ import {runCoach, buildContext, checkGroundedAnswer} from '../src/coach/runtime.
 import {freshMemory} from '../src/coach/memory.js';
 import {validateChat} from '../src/server/index.js';
 import {createRocoClient, findHiddenKeys, ROCO_ERROR} from '../src/coach/roco-client.js';
-import {planActionsViaPlanner} from '../src/coach/toolbox.js';
+import {
+  planActionsViaPlanner, executeTool, configureRocoTools, resetRocoTools,
+  readFirstSecondMargin, rocoPlanCacheKey, rocoPlanCacheSize, normalizeOpponentScenarioRows,
+} from '../src/coach/toolbox.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CLIENT_SRC = readFileSync(join(ROOT, 'src', 'client', 'roco.js'), 'utf8');
@@ -195,8 +198,11 @@ test('⑥ 规划进包时附一条**来源说明**（只在有规划时出现，
 
 //: `planActions` / `planActionsViaPlanner` 允许出现在请求体里的**全部**键。
 //: ⚠ 白名单变更必须显式改这一行 —— 新字段是新契约，不许静默透传。
+//: 04.3 加了 `opponent_scenarios`（可选：只有显式给了情景才出现）。
 const PLAN_BODY_KEYS = ['analysis_seeds', 'beam', 'budget_ms', 'damage_preview', 'depth',
-  'public', 'ruleset_id', 'state_version'];
+  'opponent_scenarios', 'public', 'ruleset_id', 'state_version'];
+//: 不带情景注入时的**恰好**键集（键集断言用；多一个少一个都要红）。
+const PLAN_BODY_KEYS_WITHOUT_SCENARIOS = PLAN_BODY_KEYS.filter((k) => k !== 'opponent_scenarios');
 
 //: 一份**公开** planner state 夹具（形状取自 `env.public_planner_state()`：
 //: 不含真实 seed、不含对手待执行动作、对手后备只有 slot/fainted）。
@@ -262,8 +268,11 @@ test('⑦ 请求体白名单：planActions 只发公开面，seed/隐藏字段�
   const {method, path, body} = calls[0];
   assert.equal(method, 'POST');
   assert.equal(path, '/battle/plan');
-  assert.deepEqual(Object.keys(body).sort(), PLAN_BODY_KEYS,
+  assert.deepEqual(Object.keys(body).sort(), PLAN_BODY_KEYS_WITHOUT_SCENARIOS,
     '请求体键集必须**恰好**是白名单：多一个键就说明有字段被静默透传（白名单变更要显式改这条断言）');
+  for (const key of Object.keys(body)) {
+    assert.ok(PLAN_BODY_KEYS.includes(key), `${key} 不在白名单里`);
+  }
   assert.deepEqual(body.public, PUBLIC_PLANNER_STATE, 'public 必须原样发（不改写、不合并）');
   assert.deepEqual(findHiddenKeys(body), [], '请求体任何深度都不许出现隐藏键');
   assert.deepEqual(suspiciousKeyPaths(body), [], '不许有下划线开头 / `state.` 私有容器键');
@@ -308,4 +317,303 @@ test('⑦c 反证：隐藏字段混进 public ⇒ 桥本地拒绝且**连发都�
   assert.deepEqual(findHiddenKeys({public: {...PUBLIC_PLANNER_STATE, seed: 1}}), ['public.seed']);
   assert.deepEqual(suspiciousKeyPaths({public: {_pending_enemy: 'x', 'state.seed': 1}}),
     ['public._pending_enemy', 'public.state.seed']);
+});
+
+// ── ⑦d 04.3：`opponent_scenarios` 透传（白名单 +1，但**只有给了才出现**）────────────
+test('⑦d 注入情景只有显式给出才进请求体（白名单第 9 个键，形状照原样）', async () => {
+  const scenarios = [{scenario_id: 's1', kind: 'stay_attack', skill_ids: ['skill_000246'],
+    slots: [], species_ids: [], evidence_ids: ['view.opponent.revealed_skills']}];
+
+  const without = [];
+  await capturingClient(without).planActions(PUBLIC_PLANNER_STATE, {stateVersion: 7});
+  assert.equal('opponent_scenarios' in without[0].body, false,
+    '不给情景时请求体里**不许**出现这个键（缺省路径逐字段不变）');
+
+  const withScenarios = [];
+  const res = await capturingClient(withScenarios).planActions(PUBLIC_PLANNER_STATE,
+    {stateVersion: 7, opponentScenarios: scenarios});
+  assert.equal(res.ok, true, JSON.stringify(res));
+  assert.deepEqual(Object.keys(withScenarios[0].body).sort(),
+    ['opponent_scenarios', 'public', 'ruleset_id', 'state_version']);
+  assert.deepEqual(withScenarios[0].body.opponent_scenarios, scenarios, '情景行原样发，不裁剪不排序');
+  assert.deepEqual(findHiddenKeys(withScenarios[0].body), []);
+  assert.deepEqual(suspiciousKeyPaths(withScenarios[0].body), []);
+
+  // 工具层：`planActionsViaPlanner` 也要透传（否则「接上了但不生效」）
+  const toolCalls = [];
+  const toolRes = await planActionsViaPlanner({client: capturingClient(toolCalls),
+    state: PUBLIC_PLANNER_STATE, state_version: 7, timeoutMs: 200, opponentScenarios: scenarios});
+  assert.equal(toolRes.ok, true, JSON.stringify(toolRes));
+  assert.deepEqual(toolCalls[0].body.opponent_scenarios, scenarios);
+});
+
+test('⑦e 情景行的 fail-closed 校验：带概率/未知 kind/重复 id ⇒ 丢掉并登记（不裁剪不归一化）', () => {
+  const normalized = normalizeOpponentScenarioRows([
+    {scenario_id: 's2', kind: 'stay_defense'},
+    {scenario_id: 's1', kind: 'stay_attack', skill_ids: ['skill_000246'], probability: 0.5},
+    {scenario_id: 's3', kind: 'whatever'},
+    {scenario_id: 's2', kind: 'stay_defense'},
+    {kind: 'stay_attack'},
+    'not-an-object',
+  ]);
+  assert.deepEqual(normalized.rows.map((row) => row.scenario_id), ['s2'],
+    '合法行只剩 s2，并且按 scenario_id 定序');
+  assert.equal(normalized.unavailable.length, 5, `每条坏行都要登记：${JSON.stringify(normalized.unavailable)}`);
+  const why = normalized.unavailable.map((row) => row.why).join('\n');
+  assert.match(why, /带了 probability/);
+  assert.match(why, /kind 必须是/);
+  assert.match(why, /scenario_id 重复/);
+  assert.match(why, /不是对象/);
+  // 正控：全合法时一行都不许丢（否则上面「丢 5 条」可能只是校验器把什么都丢了）
+  const clean = normalizeOpponentScenarioRows([{scenario_id: 'a', kind: 'switch_in_seen', slots: [1]}]);
+  assert.equal(clean.unavailable.length, 0);
+  assert.deepEqual(clean.rows, [{scenario_id: 'a', kind: 'switch_in_seen', slots: [1],
+    species_ids: [], skill_ids: [], evidence_ids: []}]);
+});
+
+// ── ⑦f 04.3：outlook provider → 工具层注入（合法行发出去，坏行丢掉并点名）────────
+test('⑦f 配置了 outlook provider 时情景进请求体；坏行丢弃并在 limitations 点名', async () => {
+  const harness = planToolHarness({scenarioProvider: () => [
+    {scenario_id: 's1', kind: 'stay_attack', skill_ids: ['skill_000246']},
+    {scenario_id: 's2', kind: 'bogus'},
+    {scenario_id: 's3', kind: 'stay_defense', weight: 2},
+  ]});
+  try {
+    const receipt = await harness.run();
+    assert.equal(harness.plannerCalls.length, 1);
+    assert.deepEqual(harness.plannerCalls[0].opponentScenarios, [
+      {scenario_id: 's1', kind: 'stay_attack', slots: [], species_ids: [],
+        skill_ids: ['skill_000246'], evidence_ids: []},
+    ], '只有合法行进请求，且按 scenario_id 定序');
+    assert.equal(receipt.opponentScenarios.injected, 1);
+    assert.equal(receipt.opponentScenarios.source, 'configured-provider');
+    assert.equal(receipt.opponentScenarios.unavailable.length, 2, '两条坏行都要登记');
+    assert.ok(receipt.limitations.some((line) => /形状不合法被丢弃/.test(String(line))),
+      `坏行必须在 limitations 里点名：${JSON.stringify(receipt.limitations)}`);
+    assert.ok(receipt.opponentBasis, '引擎注入时给的依据栏要带回来');
+  } finally {
+    harness.done();
+  }
+
+  // 默认（没配 provider）⇒ 一个情景都不注入，也不编 unavailable
+  const plain = planToolHarness({});
+  try {
+    const receipt = await plain.run();
+    assert.equal(plain.plannerCalls[0].opponentScenarios, undefined);
+    assert.deepEqual(receipt.opponentScenarios,
+      {injected: 0, source: null, scenario_ids: [], unavailable: []});
+  } finally {
+    plain.done();
+  }
+});
+
+// ── ⑧ 04.3：D-27 边际量读侧 / R3+R5+R8 声明 / P6 缓存 ───────────────────────────
+const PLAN_TOOL_STATE = {
+  schema_version: 1, ruleset_id: 'roco-world-s4-2026-09-10', rules_version: 'rv-1',
+  match_id: 'm-plan-1', decision_id: 'm-plan-1:v7', state_version: 7, turn: 3,
+  self: {active: 0, items: {}, pets: [{pet_id: 'pet_000225', slot: 0, hp: 120, max_hp: 180, energy: 4}]},
+  opponent: {active: 0, field: {pet_id: 'pet_000417', slot: 0, hp: 100, max_hp: 160, energy: 3}},
+};
+const PLAN_STATE_VERSION = 7;
+
+/** 引擎形状的成功回执（`/battle/plan` 的真实字段名）。 */
+function fakePlanEngine(overrides = {}) {
+  return {
+    ok: true, code: null, failure_class: null, message: null,
+    ruleset_id: 'roco-world-s4-2026-09-10', state_version: PLAN_STATE_VERSION,
+    coverage: 1, evidence_ids: [], unsupported: [], latency_ms: 1.5, error_type: null,
+    limitations: ['引擎自报的限制'],
+    result: {
+      recommended_label: '抓挠', recommendation_stable: true,
+      expected: {min: -0.3, max: -0.2, mean: -0.24}, worst: {min: -0.3, max: -0.2},
+      main_counter: '换上第2位', counter_note: '对手最可能换人',
+      branches_evaluated: 12, depth_searched: 2, coverage: 1, timed_out: false,
+      first_second_margin: {min: 0.01, max: 0.09, mean: 0.0732, scale: 'one-ply-value',
+        note: '对象形'},
+      truncation: {rule: '类别保底 + 束宽', candidates_total: 8, candidates_kept: 3,
+        candidates_dropped: 5, dropped_by_kind: {skill: 2, item: 2, switch: 1},
+        dropped: [{action: '防御', kind: 'skill', value: 0.2162, why: '束宽 beam=2 之外'}]},
+      coverage_detail: {numerator: 3, denominator: 3, unit: 'count_ratio',
+        is_confidence: false, is_probability: false},
+      budget: {depth_requested: 2, depth_effective: 3, depth_searched: 3, depth_max: 3,
+        depth_truncated: true, depth_capped_by_max: true, beam_truncated: true,
+        budget_ms: 2000, timed_out: false, nodes: 12},
+      opponent_basis: {source: 'injected_scenarios', label: '本次对手依据 = 注入情景'},
+      ...overrides,
+    },
+  };
+}
+
+/** 假桥 + 假规划器 + `executeTool('plan_actions')` 的夹具（不起 Python）。 */
+function planToolHarness({plan = {}, engine = null, scenarioProvider = null} = {}) {
+  resetRocoTools();
+  const plannerCalls = [];
+  const bridgeCalls = [];
+  // 版本用**函数** provider：`rocoStateVersionOf` 优先取 provider（不看 context），
+  // 所以「换版本 ⇒ 换缓存键」这条必须靠它来模拟（否则工具会在 freshness 那一步就拒绝）。
+  let version = PLAN_STATE_VERSION;
+  configureRocoTools({client: capturingClient(bridgeCalls), stateVersion: () => version});
+  configureRocoTools({planner: async (request) => {
+    plannerCalls.push(request);
+    const produced = engine ?? fakePlanEngine(plan);
+    // 与真桥一致：state_version 原样回传（调用方用它判断事实是否过期）。
+    return produced ? {...produced, state_version: request.state_version} : produced;
+  }});
+  if (scenarioProvider) configureRocoTools({opponentOutlook: scenarioProvider});
+  const context = {matchId: 'm-plan-1'};
+  return {
+    plannerCalls,
+    bridgeCalls,
+    setVersion: (next) => { version = next; },
+    run: (args = {}, extraContext = {}) => executeTool('plan_actions',
+      {state: PLAN_TOOL_STATE, state_version: version, ...args},
+      {...context, ...extraContext}),
+    done: () => resetRocoTools(),
+  };
+}
+
+test('⑧ D-27：边际量按对象形读；缺字段/形状不对 ⇒ unknown，**不许当 0**', async () => {
+  // 纯函数层：四种形状逐个钉
+  const known = readFirstSecondMargin({first_second_margin: {min: 0.01, max: 0.09, mean: 0.0732,
+    scale: 'one-ply-value', note: 'x'}}, {available: true});
+  assert.equal(known.status, 'known');
+  assert.equal(known.value, 0.0732);
+  assert.deepEqual([known.min, known.max], [0.01, 0.09]);
+
+  for (const [label, field] of [
+    ['缺字段', undefined],
+    ['旧标量形', 0.0732],
+    ['缺 mean', {min: 0.01, max: 0.09}],
+    ['mean 是 null', {min: 0.01, max: 0.09, mean: null}],
+    ['数组', [0.01, 0.09]],
+  ]) {
+    const view = readFirstSecondMargin({first_second_margin: field}, {available: true});
+    assert.equal(view.status, 'unknown', `${label} 必须判 unknown`);
+    assert.equal(view.value, null, `${label} 不许给出数字（尤其不许当 0）`);
+    assert.match(view.reason, /不产出数字|不当 0/);
+  }
+  assert.equal(readFirstSecondMargin(null, {available: false}).status, 'not_applicable');
+  assert.equal(readFirstSecondMargin({}, {available: false}).value, null);
+
+  // 工具回执层：缺字段 ⇒ null + limitations 点名；对象形 ⇒ 出 mean
+  const missing = planToolHarness({plan: {first_second_margin: undefined}});
+  try {
+    const receipt = await missing.run();
+    assert.equal(receipt.firstSecondMargin, null);
+    assert.equal(receipt.firstSecondMarginDetail.status, 'unknown');
+    assert.ok(receipt.limitations.some((line) => /边际量不可用/.test(String(line))),
+      `缺字段必须在 limitations 里点名：${JSON.stringify(receipt.limitations)}`);
+  } finally {
+    missing.done();
+  }
+  const ok = planToolHarness({});
+  try {
+    const receipt = await ok.run();
+    assert.equal(receipt.firstSecondMargin, 0.0732);
+    assert.equal(receipt.firstSecondMarginDetail.status, 'known');
+    assert.ok(receipt.limitations.includes('引擎自报的限制'), '引擎的 limitations 必须原样保留');
+  } finally {
+    ok.done();
+  }
+});
+
+test('⑧b 回执带出 R3/R5/R8 与 `is_probability:false` 声明（机器可检，不只在文案里）', async () => {
+  const harness = planToolHarness({});
+  try {
+    const receipt = await harness.run();
+    assert.equal(receipt.declarations.is_probability, false);
+    for (const key of ['expected', 'worst', 'firstSecondMargin', 'coverage', 'truncation']) {
+      assert.equal(receipt.declarations[key].is_probability, false, `${key} 要单独声明`);
+    }
+    assert.equal(receipt.declarations.coverage.is_confidence, false);
+    assert.equal(receipt.declarations.coverage.unit, 'count_ratio');
+    assert.match(receipt.declarations.basis, /不是胜率/);
+
+    assert.equal(receipt.truncation.rule, '类别保底 + 束宽');
+    assert.equal(receipt.truncation.candidates_dropped, 5);
+    assert.deepEqual(receipt.truncation.dropped[0].action, '防御');
+    assert.equal(receipt.coverageDetail.unit, 'count_ratio');
+    assert.equal(receipt.coverageDetail.numerator, 3);
+    assert.equal(receipt.budget.depth_truncated, true);
+    assert.equal(receipt.search.depthTruncated, true, 'R8 的语义要出现在 search 里');
+    assert.equal(receipt.search.depthCappedByMax, true);
+    assert.equal(receipt.search.beamTruncated, true);
+    assert.equal(receipt.search.depthMax, 3);
+    assert.equal(receipt.opponentBasis.source, 'injected_scenarios');
+    assert.equal(receipt.opponentScenarios.injected, 0, '默认不注入情景（见 toolbox 的说明）');
+  } finally {
+    harness.done();
+  }
+
+  // 引擎**没给**这三块时不许自己造：一律 null（编一份空的等于假装查过）
+  const bare = planToolHarness({plan: {truncation: undefined, coverage_detail: undefined,
+    budget: undefined, opponent_basis: undefined}});
+  try {
+    const receipt = await bare.run();
+    assert.equal(receipt.truncation, null);
+    assert.equal(receipt.coverageDetail, null);
+    assert.equal(receipt.budget, null);
+    assert.equal(receipt.opponentBasis, null);
+    assert.equal(receipt.search.depthTruncated, null, '缺字段 ⇒ null，不许当 false');
+  } finally {
+    bare.done();
+  }
+});
+
+test('⑧c P6 缓存：同键只算一次；身份/版本/rules 换一项就重算；超时不缓存', async () => {
+  const harness = planToolHarness({});
+  try {
+    const first = await harness.run();
+    assert.equal(harness.plannerCalls.length, 1);
+    assert.equal(first.cache.hit, false);
+    assert.equal(first.cache.stored, true, '完成的搜索才写缓存');
+    assert.equal(first.cache.key,
+      'm-plan-1|v7|rv-1|ddefault|bdefault|tdefault|sdefault',
+      '键必须是七元组（缺省参数用 default 占位）');
+    assert.equal(rocoPlanCacheSize(), 1);
+
+    const second = await harness.run();
+    assert.equal(harness.plannerCalls.length, 1, '同键必须**一次都不再问引擎**');
+    assert.equal(second.cache.hit, true);
+    assert.equal(second.recommendation, first.recommendation, '命中给的还是同一份结论');
+    assert.ok(Number.isInteger(second.cache.ageMs));
+
+    // 版本换一项 ⇒ 另一个键（缓存不许把 v7 的结论发给 v8）
+    harness.setVersion(8);
+    const bumped = await harness.run();
+    assert.equal(harness.plannerCalls.length, 2, 'state_version 变了必须重算');
+    assert.equal(bumped.cache.hit, false);
+    assert.equal(bumped.cache.key, 'm-plan-1|v8|rv-1|ddefault|bdefault|tdefault|sdefault');
+
+    // 身份/规则集换一项 ⇒ 另一个键
+    assert.notEqual(rocoPlanCacheKey({match_id: 'm-plan-1', state_version: 8, rules_version: 'rv-2'}),
+      rocoPlanCacheKey({match_id: 'm-plan-1', state_version: 8, rules_version: 'rv-1'}));
+    assert.notEqual(rocoPlanCacheKey({match_id: 'm-other', state_version: 8, rules_version: 'rv-1'}),
+      rocoPlanCacheKey({match_id: 'm-plan-1', state_version: 8, rules_version: 'rv-1'}));
+    assert.notEqual(rocoPlanCacheKey({match_id: 'm-plan-1', state_version: 8, rules_version: 'rv-1', beam: 4}),
+      rocoPlanCacheKey({match_id: 'm-plan-1', state_version: 8, rules_version: 'rv-1'}));
+    assert.notEqual(rocoPlanCacheKey({match_id: 'm-plan-1', state_version: 8, rules_version: 'rv-1',
+      analysis_seeds: [1, 2]}),
+    rocoPlanCacheKey({match_id: 'm-plan-1', state_version: 8, rules_version: 'rv-1'}));
+    // 身份不全 ⇒ 不给键（宁可不缓存，也不拿半个键去撞）
+    assert.equal(rocoPlanCacheKey({state_version: 8, rules_version: 'rv-1'}), null);
+    assert.equal(rocoPlanCacheKey({match_id: 'm', state_version: 8}), null);
+    assert.equal(rocoPlanCacheKey({match_id: 'm', rules_version: 'rv-1'}), null);
+  } finally {
+    harness.done();
+  }
+
+  // 超时的结果**不缓存**（缓存它等于把「没算完」永久化）
+  const timedOut = planToolHarness({plan: {timed_out: true, recommended_label: '先防御'}});
+  try {
+    const receipt = await timedOut.run();
+    assert.equal(receipt.planAvailable, false);
+    assert.equal(receipt.cache.stored, false);
+    assert.equal(rocoPlanCacheSize(), 0);
+    const again = await timedOut.run();
+    assert.equal(timedOut.plannerCalls.length, 2, '没缓存就必须重新问');
+    assert.equal(again.cache.hit, false);
+  } finally {
+    timedOut.done();
+  }
 });

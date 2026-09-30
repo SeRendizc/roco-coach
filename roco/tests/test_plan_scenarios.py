@@ -35,10 +35,29 @@ PLAN_BUDGET_MS = 5000
 PLAN_SEEDS = [11, 29]
 #: 默认路径的**键集金标**（04.2 之前的 `PlanResult.to_dict()`；新键只许在注入时出现）。
 DEFAULT_KEYS = {
-    "recommended", "recommended_label", "expected", "worst", "best", "main_counter", "counter_note",
-    "branches_evaluated", "no_counter_branches", "first_second_margin", "dropped_branches", "risk",
-    "depth_searched", "beam", "coverage", "timed_out", "latency_ms", "opponent_model",
-    "unsupported_seen", "note",
+    "beam",
+    "best",
+    "branches_evaluated",
+    "budget",
+    "counter_note",
+    "coverage",
+    "coverage_detail",
+    "depth_searched",
+    "dropped_branches",
+    "expected",
+    "first_second_margin",
+    "latency_ms",
+    "main_counter",
+    "no_counter_branches",
+    "note",
+    "opponent_model",
+    "recommended",
+    "recommended_label",
+    "risk",
+    "timed_out",
+    "truncation",
+    "unsupported_seen",
+    "worst",
 }
 
 # @@GOLDEN:BEGIN（由 scratch 生成器注入；**不要手改**，改坏就是改证据）
@@ -47,8 +66,35 @@ PLANNER_DEFAULT_GOLDEN_TEXT = r"""
  "beam": 2,
  "best": -0.2394,
  "branches_evaluated": 12,
+ "budget": {
+  "beam_effective": 2,
+  "beam_max": 8,
+  "beam_requested": 2,
+  "beam_truncated": false,
+  "budget_ms": 800,
+  "depth_capped_by_max": false,
+  "depth_effective": 2,
+  "depth_max": 3,
+  "depth_requested": 2,
+  "depth_searched": 2,
+  "depth_truncated": false,
+  "nodes": 12,
+  "note": "depth_truncated = 调用方要的深度超过 MAX_DEPTH，被**上限**截断；depth_capped_by_max = 搜索已到引擎上限（再深没有语义，**不是**「没算完」）；depth_searched < depth_effective 且 depth_truncated=false ⇒ 只可能是 timed_out=true",
+  "timed_out": false
+ },
  "counter_note": "最不利的对手选择是「换上第2位」（估值 -0.24）",
  "coverage": 1.0,
+ "coverage_detail": {
+  "denominator": 3,
+  "excluded_from_denominator": "beam 之外的候选（见 truncation.dropped）",
+  "excluded_from_numerator": "对手分布为空、只做静态估值的 0 个候选（见 no_counter_branches）",
+  "is_confidence": false,
+  "is_probability": false,
+  "meaning": "对手反制被枚举过的候选数 / 参与搜索的候选数（beam 裁剪**之后**的分母）",
+  "note": "coverage 是计数比，**不是**「结论有多可靠」的把握度，也不是概率",
+  "numerator": 3,
+  "unit": "count_ratio"
+ },
  "depth_searched": 2,
  "dropped_branches": {},
  "expected": -0.2394,
@@ -84,6 +130,58 @@ PLANNER_DEFAULT_GOLDEN_TEXT = r"""
   ]
  },
  "timed_out": false,
+ "truncation": {
+  "beam": 2,
+  "candidates_dropped": 5,
+  "candidates_kept": 3,
+  "candidates_total": 8,
+  "dropped": [
+   {
+    "action": "使用净化药",
+    "kind": "item",
+    "value": 0.2614,
+    "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+   },
+   {
+    "action": "使用回复药",
+    "kind": "item",
+    "value": 0.2614,
+    "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+   },
+   {
+    "action": "防御",
+    "kind": "skill",
+    "value": 0.2162,
+    "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+   },
+   {
+    "action": "腐化",
+    "kind": "skill",
+    "value": 0.2114,
+    "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+   },
+   {
+    "action": "换上第3位",
+    "kind": "switch",
+    "value": -0.6216,
+    "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+   }
+  ],
+  "dropped_by_kind": {
+   "item": 2,
+   "skill": 2,
+   "switch": 1
+  },
+  "is_probability": false,
+  "kept_by_kind": {
+   "item": 1,
+   "skill": 1,
+   "switch": 1
+  },
+  "note": "truncation 只讲**候选**这一层被裁掉谁；搜索分支层面的丢弃（非法/机制未核验）见 dropped_branches",
+  "rule": "类别保底（skill / switch / item 各至少 1 条，保底可能超过 beam）+ 按**一手推演值**降序补到 beam（不按静态威力排序）",
+  "uncomputable": 0
+ },
  "unsupported_seen": 0,
  "worst": -0.2394
 }
@@ -100,8 +198,42 @@ SERVICE_DEFAULT_GOLDEN_TEXT = r"""
   "min": -0.2394
  },
  "branches_evaluated": 24,
+ "budget": {
+  "beam_effective": 2,
+  "beam_max": 8,
+  "beam_requested": 2,
+  "beam_truncated": false,
+  "budget_ms": 5000,
+  "depth_capped_by_max": false,
+  "depth_effective": 2,
+  "depth_max": 3,
+  "depth_requested": 2,
+  "depth_searched_max": 2,
+  "depth_truncated": false,
+  "nodes": 24,
+  "note": "depth_truncated = 调用方要的深度超过 MAX_DEPTH，被**上限**截断；depth_capped_by_max = 搜索已到引擎上限（再深没有语义，**不是**「没算完」）；depth_searched < depth_effective 且 depth_truncated=false ⇒ 只可能是 timed_out=true",
+  "timed_out": false
+ },
  "counter_note": "最不利的对手选择是「换上第2位」（估值 -0.24）",
  "coverage": 1.0,
+ "coverage_detail": {
+  "by_seed": {
+   "11": {
+    "denominator": 3,
+    "numerator": 3
+   },
+   "29": {
+    "denominator": 3,
+    "numerator": 3
+   }
+  },
+  "excluded_from_denominator": "beam 之外的候选（见 truncation.dropped）",
+  "is_confidence": false,
+  "is_probability": false,
+  "meaning": "对手反制被枚举过的候选数 / 参与搜索的候选数（beam 裁剪**之后**的分母）",
+  "note": "coverage 是计数比，**不是**「结论有多可靠」的把握度，也不是概率",
+  "unit": "count_ratio"
+ },
  "damage_preview": null,
  "decision_id": "m-b3453cbad856d5c6:v0",
  "depth_searched": 2,
@@ -125,8 +257,35 @@ SERVICE_DEFAULT_GOLDEN_TEXT = r"""
    "beam": 2,
    "best": -0.2394,
    "branches_evaluated": 12,
+   "budget": {
+    "beam_effective": 2,
+    "beam_max": 8,
+    "beam_requested": 2,
+    "beam_truncated": false,
+    "budget_ms": 5000,
+    "depth_capped_by_max": false,
+    "depth_effective": 2,
+    "depth_max": 3,
+    "depth_requested": 2,
+    "depth_searched": 2,
+    "depth_truncated": false,
+    "nodes": 12,
+    "note": "depth_truncated = 调用方要的深度超过 MAX_DEPTH，被**上限**截断；depth_capped_by_max = 搜索已到引擎上限（再深没有语义，**不是**「没算完」）；depth_searched < depth_effective 且 depth_truncated=false ⇒ 只可能是 timed_out=true",
+    "timed_out": false
+   },
    "counter_note": "最不利的对手选择是「换上第2位」（估值 -0.24）",
    "coverage": 1.0,
+   "coverage_detail": {
+    "denominator": 3,
+    "excluded_from_denominator": "beam 之外的候选（见 truncation.dropped）",
+    "excluded_from_numerator": "对手分布为空、只做静态估值的 0 个候选（见 no_counter_branches）",
+    "is_confidence": false,
+    "is_probability": false,
+    "meaning": "对手反制被枚举过的候选数 / 参与搜索的候选数（beam 裁剪**之后**的分母）",
+    "note": "coverage 是计数比，**不是**「结论有多可靠」的把握度，也不是概率",
+    "numerator": 3,
+    "unit": "count_ratio"
+   },
    "depth_searched": 2,
    "dropped_branches": {},
    "expected": -0.2394,
@@ -161,6 +320,58 @@ SERVICE_DEFAULT_GOLDEN_TEXT = r"""
     ]
    },
    "timed_out": false,
+   "truncation": {
+    "beam": 2,
+    "candidates_dropped": 5,
+    "candidates_kept": 3,
+    "candidates_total": 8,
+    "dropped": [
+     {
+      "action": "使用净化药",
+      "kind": "item",
+      "value": 0.2614,
+      "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+     },
+     {
+      "action": "使用回复药",
+      "kind": "item",
+      "value": 0.2614,
+      "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+     },
+     {
+      "action": "防御",
+      "kind": "skill",
+      "value": 0.2162,
+      "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+     },
+     {
+      "action": "腐化",
+      "kind": "skill",
+      "value": 0.2114,
+      "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+     },
+     {
+      "action": "换上第3位",
+      "kind": "switch",
+      "value": -0.6216,
+      "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+     }
+    ],
+    "dropped_by_kind": {
+     "item": 2,
+     "skill": 2,
+     "switch": 1
+    },
+    "is_probability": false,
+    "kept_by_kind": {
+     "item": 1,
+     "skill": 1,
+     "switch": 1
+    },
+    "note": "truncation 只讲**候选**这一层被裁掉谁；搜索分支层面的丢弃（非法/机制未核验）见 dropped_branches",
+    "rule": "类别保底（skill / switch / item 各至少 1 条，保底可能超过 beam）+ 按**一手推演值**降序补到 beam（不按静态威力排序）",
+    "uncomputable": 0
+   },
    "unsupported_seen": 0,
    "worst": -0.2394
   },
@@ -168,8 +379,35 @@ SERVICE_DEFAULT_GOLDEN_TEXT = r"""
    "beam": 2,
    "best": -0.2394,
    "branches_evaluated": 12,
+   "budget": {
+    "beam_effective": 2,
+    "beam_max": 8,
+    "beam_requested": 2,
+    "beam_truncated": false,
+    "budget_ms": 5000,
+    "depth_capped_by_max": false,
+    "depth_effective": 2,
+    "depth_max": 3,
+    "depth_requested": 2,
+    "depth_searched": 2,
+    "depth_truncated": false,
+    "nodes": 12,
+    "note": "depth_truncated = 调用方要的深度超过 MAX_DEPTH，被**上限**截断；depth_capped_by_max = 搜索已到引擎上限（再深没有语义，**不是**「没算完」）；depth_searched < depth_effective 且 depth_truncated=false ⇒ 只可能是 timed_out=true",
+    "timed_out": false
+   },
    "counter_note": "最不利的对手选择是「换上第2位」（估值 -0.24）",
    "coverage": 1.0,
+   "coverage_detail": {
+    "denominator": 3,
+    "excluded_from_denominator": "beam 之外的候选（见 truncation.dropped）",
+    "excluded_from_numerator": "对手分布为空、只做静态估值的 0 个候选（见 no_counter_branches）",
+    "is_confidence": false,
+    "is_probability": false,
+    "meaning": "对手反制被枚举过的候选数 / 参与搜索的候选数（beam 裁剪**之后**的分母）",
+    "note": "coverage 是计数比，**不是**「结论有多可靠」的把握度，也不是概率",
+    "numerator": 3,
+    "unit": "count_ratio"
+   },
    "depth_searched": 2,
    "dropped_branches": {},
    "expected": -0.2394,
@@ -204,6 +442,58 @@ SERVICE_DEFAULT_GOLDEN_TEXT = r"""
     ]
    },
    "timed_out": false,
+   "truncation": {
+    "beam": 2,
+    "candidates_dropped": 5,
+    "candidates_kept": 3,
+    "candidates_total": 8,
+    "dropped": [
+     {
+      "action": "使用净化药",
+      "kind": "item",
+      "value": 0.2614,
+      "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+     },
+     {
+      "action": "使用回复药",
+      "kind": "item",
+      "value": 0.2614,
+      "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+     },
+     {
+      "action": "防御",
+      "kind": "skill",
+      "value": 0.2162,
+      "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+     },
+     {
+      "action": "腐化",
+      "kind": "skill",
+      "value": 0.2114,
+      "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+     },
+     {
+      "action": "换上第3位",
+      "kind": "switch",
+      "value": -0.6216,
+      "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+     }
+    ],
+    "dropped_by_kind": {
+     "item": 2,
+     "skill": 2,
+     "switch": 1
+    },
+    "is_probability": false,
+    "kept_by_kind": {
+     "item": 1,
+     "skill": 1,
+     "switch": 1
+    },
+    "note": "truncation 只讲**候选**这一层被裁掉谁；搜索分支层面的丢弃（非法/机制未核验）见 dropped_branches",
+    "rule": "类别保底（skill / switch / item 各至少 1 条，保底可能超过 beam）+ 按**一手推演值**降序补到 beam（不按静态威力排序）",
+    "uncomputable": 0
+   },
    "unsupported_seen": 0,
    "worst": -0.2394
   }
@@ -237,6 +527,77 @@ SERVICE_DEFAULT_GOLDEN_TEXT = r"""
  "schema_version": 1,
  "state_version": 0,
  "timed_out": false,
+ "truncation": {
+  "by_seed": {
+   "11": {
+    "candidates_dropped": 5,
+    "candidates_kept": 3,
+    "candidates_total": 8,
+    "dropped_by_kind": {
+     "item": 2,
+     "skill": 2,
+     "switch": 1
+    },
+    "kept_by_kind": {
+     "item": 1,
+     "skill": 1,
+     "switch": 1
+    },
+    "uncomputable": 0
+   },
+   "29": {
+    "candidates_dropped": 5,
+    "candidates_kept": 3,
+    "candidates_total": 8,
+    "dropped_by_kind": {
+     "item": 2,
+     "skill": 2,
+     "switch": 1
+    },
+    "kept_by_kind": {
+     "item": 1,
+     "skill": 1,
+     "switch": 1
+    },
+    "uncomputable": 0
+   }
+  },
+  "dropped": [
+   {
+    "action": "使用净化药",
+    "kind": "item",
+    "value": 0.2614,
+    "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+   },
+   {
+    "action": "使用回复药",
+    "kind": "item",
+    "value": 0.2614,
+    "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+   },
+   {
+    "action": "防御",
+    "kind": "skill",
+    "value": 0.2162,
+    "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+   },
+   {
+    "action": "腐化",
+    "kind": "skill",
+    "value": 0.2114,
+    "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+   },
+   {
+    "action": "换上第3位",
+    "kind": "switch",
+    "value": -0.6216,
+    "why": "束宽 beam=2 之外（按一手推演值降序补位时被裁）"
+   }
+  ],
+  "is_probability": false,
+  "note": "逐条列出被「类别保底 + 束宽」规则裁掉的候选（缺谁、按什么规则）；搜索分支层面的丢弃（非法/机制未核验）见 per_seed[].dropped_branches",
+  "rule": "类别保底（skill / switch / item 各至少 1 条，保底可能超过 beam）+ 按**一手推演值**降序补到 beam（不按静态威力排序）"
+ },
  "turn": 1,
  "unsupported_seen": 0,
  "worst": {
@@ -253,8 +614,35 @@ PLANNER_DEFAULT_BEAM8_GOLDEN_TEXT = r"""
  "beam": 8,
  "best": 1.2574,
  "branches_evaluated": 128,
+ "budget": {
+  "beam_effective": 8,
+  "beam_max": 8,
+  "beam_requested": 8,
+  "beam_truncated": false,
+  "budget_ms": 800,
+  "depth_capped_by_max": false,
+  "depth_effective": 2,
+  "depth_max": 3,
+  "depth_requested": 2,
+  "depth_searched": 2,
+  "depth_truncated": false,
+  "nodes": 128,
+  "note": "depth_truncated = 调用方要的深度超过 MAX_DEPTH，被**上限**截断；depth_capped_by_max = 搜索已到引擎上限（再深没有语义，**不是**「没算完」）；depth_searched < depth_effective 且 depth_truncated=false ⇒ 只可能是 timed_out=true",
+  "timed_out": false
+ },
  "counter_note": "最不利的对手选择是「换上第2位」（估值 -0.28）",
  "coverage": 1.0,
+ "coverage_detail": {
+  "denominator": 8,
+  "excluded_from_denominator": "beam 之外的候选（见 truncation.dropped）",
+  "excluded_from_numerator": "对手分布为空、只做静态估值的 0 个候选（见 no_counter_branches）",
+  "is_confidence": false,
+  "is_probability": false,
+  "meaning": "对手反制被枚举过的候选数 / 参与搜索的候选数（beam 裁剪**之后**的分母）",
+  "note": "coverage 是计数比，**不是**「结论有多可靠」的把握度，也不是概率",
+  "numerator": 8,
+  "unit": "count_ratio"
+ },
  "depth_searched": 2,
  "dropped_branches": {},
  "expected": 0.207,
@@ -296,6 +684,23 @@ PLANNER_DEFAULT_BEAM8_GOLDEN_TEXT = r"""
   ]
  },
  "timed_out": false,
+ "truncation": {
+  "beam": 8,
+  "candidates_dropped": 0,
+  "candidates_kept": 8,
+  "candidates_total": 8,
+  "dropped": [],
+  "dropped_by_kind": {},
+  "is_probability": false,
+  "kept_by_kind": {
+   "item": 3,
+   "skill": 3,
+   "switch": 2
+  },
+  "note": "truncation 只讲**候选**这一层被裁掉谁；搜索分支层面的丢弃（非法/机制未核验）见 dropped_branches",
+  "rule": "类别保底（skill / switch / item 各至少 1 条，保底可能超过 beam）+ 按**一手推演值**降序补到 beam（不按静态威力排序）",
+  "uncomputable": 0
+ },
  "unsupported_seen": 0,
  "worst": -0.2767
 }
@@ -312,8 +717,42 @@ SERVICE_DEFAULT_BEAM8_GOLDEN_TEXT = r"""
   "min": 1.2574
  },
  "branches_evaluated": 256,
+ "budget": {
+  "beam_effective": 8,
+  "beam_max": 8,
+  "beam_requested": 8,
+  "beam_truncated": false,
+  "budget_ms": 5000,
+  "depth_capped_by_max": false,
+  "depth_effective": 2,
+  "depth_max": 3,
+  "depth_requested": 2,
+  "depth_searched_max": 2,
+  "depth_truncated": false,
+  "nodes": 256,
+  "note": "depth_truncated = 调用方要的深度超过 MAX_DEPTH，被**上限**截断；depth_capped_by_max = 搜索已到引擎上限（再深没有语义，**不是**「没算完」）；depth_searched < depth_effective 且 depth_truncated=false ⇒ 只可能是 timed_out=true",
+  "timed_out": false
+ },
  "counter_note": "最不利的对手选择是「换上第2位」（估值 -0.28）",
  "coverage": 1.0,
+ "coverage_detail": {
+  "by_seed": {
+   "11": {
+    "denominator": 8,
+    "numerator": 8
+   },
+   "29": {
+    "denominator": 8,
+    "numerator": 8
+   }
+  },
+  "excluded_from_denominator": "beam 之外的候选（见 truncation.dropped）",
+  "is_confidence": false,
+  "is_probability": false,
+  "meaning": "对手反制被枚举过的候选数 / 参与搜索的候选数（beam 裁剪**之后**的分母）",
+  "note": "coverage 是计数比，**不是**「结论有多可靠」的把握度，也不是概率",
+  "unit": "count_ratio"
+ },
  "damage_preview": null,
  "decision_id": "m-b3453cbad856d5c6:v0",
  "depth_searched": 2,
@@ -337,8 +776,35 @@ SERVICE_DEFAULT_BEAM8_GOLDEN_TEXT = r"""
    "beam": 8,
    "best": 1.2574,
    "branches_evaluated": 128,
+   "budget": {
+    "beam_effective": 8,
+    "beam_max": 8,
+    "beam_requested": 8,
+    "beam_truncated": false,
+    "budget_ms": 5000,
+    "depth_capped_by_max": false,
+    "depth_effective": 2,
+    "depth_max": 3,
+    "depth_requested": 2,
+    "depth_searched": 2,
+    "depth_truncated": false,
+    "nodes": 128,
+    "note": "depth_truncated = 调用方要的深度超过 MAX_DEPTH，被**上限**截断；depth_capped_by_max = 搜索已到引擎上限（再深没有语义，**不是**「没算完」）；depth_searched < depth_effective 且 depth_truncated=false ⇒ 只可能是 timed_out=true",
+    "timed_out": false
+   },
    "counter_note": "最不利的对手选择是「换上第2位」（估值 -0.28）",
    "coverage": 1.0,
+   "coverage_detail": {
+    "denominator": 8,
+    "excluded_from_denominator": "beam 之外的候选（见 truncation.dropped）",
+    "excluded_from_numerator": "对手分布为空、只做静态估值的 0 个候选（见 no_counter_branches）",
+    "is_confidence": false,
+    "is_probability": false,
+    "meaning": "对手反制被枚举过的候选数 / 参与搜索的候选数（beam 裁剪**之后**的分母）",
+    "note": "coverage 是计数比，**不是**「结论有多可靠」的把握度，也不是概率",
+    "numerator": 8,
+    "unit": "count_ratio"
+   },
    "depth_searched": 2,
    "dropped_branches": {},
    "expected": 0.207,
@@ -379,6 +845,23 @@ SERVICE_DEFAULT_BEAM8_GOLDEN_TEXT = r"""
     ]
    },
    "timed_out": false,
+   "truncation": {
+    "beam": 8,
+    "candidates_dropped": 0,
+    "candidates_kept": 8,
+    "candidates_total": 8,
+    "dropped": [],
+    "dropped_by_kind": {},
+    "is_probability": false,
+    "kept_by_kind": {
+     "item": 3,
+     "skill": 3,
+     "switch": 2
+    },
+    "note": "truncation 只讲**候选**这一层被裁掉谁；搜索分支层面的丢弃（非法/机制未核验）见 dropped_branches",
+    "rule": "类别保底（skill / switch / item 各至少 1 条，保底可能超过 beam）+ 按**一手推演值**降序补到 beam（不按静态威力排序）",
+    "uncomputable": 0
+   },
    "unsupported_seen": 0,
    "worst": -0.2767
   },
@@ -386,8 +869,35 @@ SERVICE_DEFAULT_BEAM8_GOLDEN_TEXT = r"""
    "beam": 8,
    "best": 1.2574,
    "branches_evaluated": 128,
+   "budget": {
+    "beam_effective": 8,
+    "beam_max": 8,
+    "beam_requested": 8,
+    "beam_truncated": false,
+    "budget_ms": 5000,
+    "depth_capped_by_max": false,
+    "depth_effective": 2,
+    "depth_max": 3,
+    "depth_requested": 2,
+    "depth_searched": 2,
+    "depth_truncated": false,
+    "nodes": 128,
+    "note": "depth_truncated = 调用方要的深度超过 MAX_DEPTH，被**上限**截断；depth_capped_by_max = 搜索已到引擎上限（再深没有语义，**不是**「没算完」）；depth_searched < depth_effective 且 depth_truncated=false ⇒ 只可能是 timed_out=true",
+    "timed_out": false
+   },
    "counter_note": "最不利的对手选择是「换上第2位」（估值 -0.28）",
    "coverage": 1.0,
+   "coverage_detail": {
+    "denominator": 8,
+    "excluded_from_denominator": "beam 之外的候选（见 truncation.dropped）",
+    "excluded_from_numerator": "对手分布为空、只做静态估值的 0 个候选（见 no_counter_branches）",
+    "is_confidence": false,
+    "is_probability": false,
+    "meaning": "对手反制被枚举过的候选数 / 参与搜索的候选数（beam 裁剪**之后**的分母）",
+    "note": "coverage 是计数比，**不是**「结论有多可靠」的把握度，也不是概率",
+    "numerator": 8,
+    "unit": "count_ratio"
+   },
    "depth_searched": 2,
    "dropped_branches": {},
    "expected": 0.207,
@@ -428,6 +938,23 @@ SERVICE_DEFAULT_BEAM8_GOLDEN_TEXT = r"""
     ]
    },
    "timed_out": false,
+   "truncation": {
+    "beam": 8,
+    "candidates_dropped": 0,
+    "candidates_kept": 8,
+    "candidates_total": 8,
+    "dropped": [],
+    "dropped_by_kind": {},
+    "is_probability": false,
+    "kept_by_kind": {
+     "item": 3,
+     "skill": 3,
+     "switch": 2
+    },
+    "note": "truncation 只讲**候选**这一层被裁掉谁；搜索分支层面的丢弃（非法/机制未核验）见 dropped_branches",
+    "rule": "类别保底（skill / switch / item 各至少 1 条，保底可能超过 beam）+ 按**一手推演值**降序补到 beam（不按静态威力排序）",
+    "uncomputable": 0
+   },
    "unsupported_seen": 0,
    "worst": -0.2767
   }
@@ -466,6 +993,38 @@ SERVICE_DEFAULT_BEAM8_GOLDEN_TEXT = r"""
  "schema_version": 1,
  "state_version": 0,
  "timed_out": false,
+ "truncation": {
+  "by_seed": {
+   "11": {
+    "candidates_dropped": 0,
+    "candidates_kept": 8,
+    "candidates_total": 8,
+    "dropped_by_kind": {},
+    "kept_by_kind": {
+     "item": 3,
+     "skill": 3,
+     "switch": 2
+    },
+    "uncomputable": 0
+   },
+   "29": {
+    "candidates_dropped": 0,
+    "candidates_kept": 8,
+    "candidates_total": 8,
+    "dropped_by_kind": {},
+    "kept_by_kind": {
+     "item": 3,
+     "skill": 3,
+     "switch": 2
+    },
+    "uncomputable": 0
+   }
+  },
+  "dropped": [],
+  "is_probability": false,
+  "note": "逐条列出被「类别保底 + 束宽」规则裁掉的候选（缺谁、按什么规则）；搜索分支层面的丢弃（非法/机制未核验）见 per_seed[].dropped_branches",
+  "rule": "类别保底（skill / switch / item 各至少 1 条，保底可能超过 beam）+ 按**一手推演值**降序补到 beam（不按静态威力排序）"
+ },
  "turn": 1,
  "unsupported_seen": 0,
  "worst": {

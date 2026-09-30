@@ -24,6 +24,14 @@
   与 **assumption-driven**（后备满血 + 规范配招假设，**仍然生效**）**分两栏**写，情景点名但枚举不出来的
   技能/位次/物种逐条进 `unavailable[]` 并升级进 `unsupported[]`。**未做**（显式残留 P3）：用可学池替换
   `rs.candidate_moveset()`。读数、变异与残留判据见 `reports/roco/product-execution/04/04.2-scenarios.md`。
+- 下游进度（2026-09-30 · 04.3）：**注入的传输链已通**（工具层 `configureRocoTools({opponentOutlook})`
+  → 严格校验 `normalizeOpponentScenarioRows()`：非对象 / 未知 kind / 带 `probability|weight|share|p` /
+  id 重复 ⇒ 该行丢掉并逐条登记 → `planActionsViaPlanner` → 桥 `planActions` → 引擎 `opponent_scenarios`）。
+  ⚠ **档位情景 → 动作级情景的映射未落地**（不许猜）：本模块的 `outlook.scenarios[]` 是
+  `scenario_id: "band:<band>"` 的**速度档分组**，而引擎要的是**动作级**情景
+  （`stay_attack`+技能 / `stay_defense` / `switch_in_seen`+位次）；默认（不配 provider）**不注入**。
+  两个落法（04.3b 新增映射层 / 维持 provider 注入）待裁决，见
+  `reports/roco/product-execution/04/04.3-budget-truncation-cache.md` §6。
 
 ---
 

@@ -672,6 +672,10 @@ let rocoModule=null;             // import('./roco-client.js') 的结果（成�
 let rocoClientBuilds=0;
 let rocoStateVersionProvider=null;
 let rocoPlanner=null;
+//: 04.3：注入情景 provider（`({state,context}) => 引擎形状的情景行`）。默认 null = **不注入**，
+//: 走缺省对手依据（理由见 `rocoOpponentScenariosFor`：03 的档位情景与引擎的动作级情景
+//: 之间是一次需要裁决的语义映射，不许猜）。
+let rocoOpponentOutlook=null;
 // RC-301：阵容请求合同的数据集（owned / pack / modes / rulesets）。注入式，避免每次调用读盘。
 let recommendationInputsProvider=null;
 const rocoStartups=new WeakMap();
@@ -861,12 +865,14 @@ export async function searchRulesWithRag(query,{game=null,rulesVersion=RULES_VER
  * @param {number|Function} [options.stateVersion] 当前状态版本，或 (context)=>version
  * @param {Function} [options.planner]   规划器（见 planActionsViaPlanner）
  */
-export function configureRocoTools({client,factory,stateVersion,planner,recommendationInputs}={}){
+export function configureRocoTools({client,factory,stateVersion,planner,recommendationInputs,opponentOutlook}={}){
  if(client!==undefined)rocoClient=client;
  if(factory!==undefined)rocoClientFactory=factory;
  if(stateVersion!==undefined)rocoStateVersionProvider=typeof stateVersion==='function'?stateVersion:()=>stateVersion;
  if(planner!==undefined)rocoPlanner=planner;
  if(recommendationInputs!==undefined)recommendationInputsProvider=recommendationInputs;
+ // 04.3：注入情景的 provider（返回**引擎形状**的行；见 rocoOpponentScenariosFor）。
+ if(opponentOutlook!==undefined)rocoOpponentOutlook=opponentOutlook;
 }
 /** 清掉注入与「见过的状态版本」记录（测试用；也用于切换对局时防止串号）。 */
 export function resetRocoTools({keepClient=false}={}){
@@ -875,7 +881,10 @@ export function resetRocoTools({keepClient=false}={}){
  rocoStateVersionProvider=null;
  rocoPlanner=null;
  recommendationInputsProvider=null;
+ rocoOpponentOutlook=null;
  rocoSeenStateVersions.clear();
+ // P6：切换对局/重置注入时缓存必须一起清 —— 否则上一条注入的结论会跟着新 provider 走。
+ resetRocoPlanCache();
 }
 /**
  * 资料工具的**被动**状态：不新建连接、不拉引擎、不读盘（`/api/bootstrap` 每次开页面都要问）。
@@ -1052,15 +1061,18 @@ async function readyRocoClient(){
  * 补发了一次。那座桥已修好——`planActions()` 现在直接发 `public` 并透传深度/波束/
  * 预算/分析种子——所以补发分支已删除。留着它只会掩盖下一次同类不一致。
  */
-export async function planActionsViaPlanner({client,state,state_version,timeoutMs,context}={}){
- if(typeof rocoPlanner==='function')return rocoPlanner({client,state,state_version,timeoutMs,context});
+export async function planActionsViaPlanner({client,state,state_version,timeoutMs,context,opponentScenarios}={}){
+ if(typeof rocoPlanner==='function')return rocoPlanner({client,state,state_version,timeoutMs,context,opponentScenarios});
  if(!client||typeof client.planActions!=='function'){
   return {ok:false,code:ROCO_ERROR.NOT_IMPLEMENTED,error_type:ROCO_ERROR.NOT_IMPLEMENTED,failure_class:ROCO_FAILURE_CLASS.UNSUPPORTED,
    ruleset_id:client?.rulesetId??null,state_version:Number.isInteger(state_version)?state_version:null,coverage:0,evidence_ids:[],latency_ms:0,result:null,
    unsupported:[{code:'battle_planning',reason:'桥没有 planActions 方法，规划器未接入',missing:['action_order','respond_mechanics','charge_mechanics']}]};
  }
  // 直接调桥。桥负责把公开 state 放进 `public` 键（并拒绝私有 serialize()）。
- return client.planActions(state,{stateVersion:state_version,timeoutMs});
+ // 04.3：`opponentScenarios` 是**可选**的注入情景（引擎形状，已过 normalizeOpponentScenarioRows）；
+ // 不给就是缺省路径（桥不往请求体里放这个键）。
+ return client.planActions(state,{stateVersion:state_version,timeoutMs,
+  ...(opponentScenarios?{opponentScenarios}:{})});
 }
 
 async function executeRocoTool(name,args,context){
@@ -1229,6 +1241,157 @@ export function projectCompareResult(result){
  return {...rest,before:side(before),after:side(after)};
 }
 
+// ── 04.3：规划回执的字段语义（D-27 边际量 / R3 coverage / R5 裁剪 / R8 预算 / P6 缓存）──
+//
+// 这一段的纪律：**只搬运 + 声明，不编数**。引擎没给的字段一律 null/unknown + `limitations`
+// 点名 —— 把「缺字段」读成 0 是本仓库反复出现过的坑（`latency`/`margin` 都撞过）。
+
+/** P6 缓存上限：32 条 ≈ 一局里十几个回合 × 几个参数组合。 */
+const ROCO_PLAN_CACHE_LIMIT=32;
+/** P6：`key → {receipt, at}`。**进程内**缓存；身份与版本都在键里，故不会跨局串味。 */
+const rocoPlanCache=new Map();
+const rocoClone=(value)=>JSON.parse(JSON.stringify(value));
+
+/**
+ * P6：规划结果缓存键 = `(match_id, state_version, rules_version, depth, beam, budget_ms, analysis_seeds)`。
+ *
+ * 为什么必须是这七项（少一项就会串味）：
+ *   · `match_id` / `state_version` / `rules_version` —— 同一局、同一版局面、同一规则集，
+ *     才可能是同一份结论；
+ *   · `depth` / `beam` / `budget_ms` —— **搜索强度不同 ⇒ 结论不同**（换 beam 就是另一次搜索）；
+ *   · `analysis_seeds` —— 跨种子聚合的输入不同 ⇒ 区间不同。
+ *
+ * 身份三件套缺一 ⇒ 返回 `null`（**不进缓存**）：宁可不缓存，也不拿身份不全的键去撞。
+ * 参数缺省（工具层当前不转发 depth/beam/budget/seeds）用 `default` 占位 —— 它是
+ * **引擎缺省**，与显式 `depth=2` 语义等价但键不同（保守：不把两种来源合并）。
+ */
+export function rocoPlanCacheKey({match_id,state_version,rules_version,depth,beam,budget_ms,analysis_seeds}={}){
+ if(match_id===undefined||match_id===null||match_id==='')return null;
+ if(rules_version===undefined||rules_version===null||rules_version==='')return null;
+ if(!Number.isInteger(state_version)||state_version<0)return null;
+ const part=(value,prefix)=>Number.isInteger(value)?`${prefix}${value}`:`${prefix}default`;
+ const seeds=Array.isArray(analysis_seeds)&&analysis_seeds.length
+  ?`s${analysis_seeds.map((n)=>(Number.isInteger(n)?n:'?')).join('.')}`:'sdefault';
+ return [String(match_id),`v${state_version}`,String(rules_version),
+  part(depth,'d'),part(beam,'b'),part(budget_ms,'t'),seeds].join('|');
+}
+/** 测试/排障：清空规划缓存（`resetRocoTools()` 也会清）。 */
+export function resetRocoPlanCache(){rocoPlanCache.clear();}
+export function rocoPlanCacheSize(){return rocoPlanCache.size;}
+function rememberRocoPlan(key,receipt){
+ rocoPlanCache.set(key,{receipt:rocoClone(receipt),at:rocoNow()});
+ if(rocoPlanCache.size>ROCO_PLAN_CACHE_LIMIT){
+  const oldest=[...rocoPlanCache.entries()].sort((a,b)=>a[1].at-b[1].at)[0];
+  if(oldest)rocoPlanCache.delete(oldest[0]);
+ }
+}
+
+/**
+ * D-27：读 `first_second_margin` —— 三层统一按**对象形** `{min,max,mean(,scale,note)}`。
+ *
+ * 为什么要一个专门的读侧（而不是 `plan?.first_second_margin?.mean ?? null`）：
+ * 缺字段时返回 `null` 会被下游读成 0（本仓库撞过同类坑），而**标量形是旧形状**，
+ * D-27 已裁决三层统一对象形 ⇒ 形状不对就**不许出数字**。四种结果：
+ *   · `known`          —— min/max/mean 三个都是有限数（**唯一**会给数字的情形）；
+ *   · `unknown`        —— 有规划，但字段缺失/形状不对（标量、缺键、非有限数）；
+ *   · `not_applicable` —— 没有可用规划（搜索没完成/桥不可用），无从谈起。
+ * 下游要数字就读 `value`，要解释就读 `status`/`reason`；
+ * `unknown` 会被上层追加进 `limitations`（不许悄悄吞掉）。
+ */
+export function readFirstSecondMargin(plan,{available=true}={}){
+ const usable=available!==false&&Boolean(plan)&&typeof plan==='object';
+ const field=plan?.first_second_margin;
+ const finite=(value)=>typeof value==='number'&&Number.isFinite(value);
+ if(usable&&field&&typeof field==='object'&&!Array.isArray(field)
+  &&finite(field.min)&&finite(field.max)&&finite(field.mean)){
+  return {status:'known',value:field.mean,min:field.min,max:field.max,mean:field.mean,
+   scale:typeof field.scale==='string'?field.scale:null,
+   note:typeof field.note==='string'?field.note:null,is_probability:false};
+ }
+ if(!usable){
+  return {status:'not_applicable',value:null,is_probability:false,
+   reason:'这次没有完成的搜索，无从产出边际量（不是 0）'};
+ }
+ const shape=field===undefined?'缺失':(Array.isArray(field)?'数组':typeof field);
+ return {status:'unknown',value:null,is_probability:false,
+  reason:`first_second_margin 不是 {min,max,mean} 对象（实际 ${shape}）：不产出数字，也**不当 0**`};
+}
+
+/** 注入情景的类别：与 `roco/src/roco_env/planner.py` 的 `SCENARIO_KINDS` 一一对应。 */
+export const ROCO_SCENARIO_KINDS=Object.freeze(['stay_attack','stay_defense','switch_in_seen']);
+/** 概率性字段：情景集合不是分布，带了就**整条丢掉**（引擎侧同样 400 拒绝）。 */
+const ROCO_SCENARIO_BANNED=Object.freeze(['probability','weight','share','p']);
+
+/**
+ * 把注入的情景行**严格**规范化（fail closed，给 `opponent_scenarios` 用）。
+ *
+ * 规则（每一条都有对应反证）：
+ *   · 不是对象 / 缺 `scenario_id` / `kind` 不在 `ROCO_SCENARIO_KINDS` ⇒ 该行**丢掉**并登记原因；
+ *   · 带 `probability`/`weight`/`share`/`p` ⇒ 该行丢掉并登记（**不裁剪、不归一化**，
+ *     情景集合没有频率数据）；
+ *   · `scenario_id` 重复 ⇒ 只留第一条并登记；
+ *   · 合法行按 `scenario_id` **定序**（情景之间不排序）。
+ * 返回 `{rows, unavailable}`：`rows` 可以直接进请求体；`unavailable` 逐条说明丢了什么、为什么。
+ */
+export function normalizeOpponentScenarioRows(input){
+ const unavailable=[];
+ if(input===undefined||input===null)return {rows:[],unavailable};
+ if(!Array.isArray(input)){
+  return {rows:[],unavailable:[{why:`opponent_scenarios 必须是数组，实际 ${typeof input}`}]};
+ }
+ const rows=[];const seen=new Set();
+ input.forEach((row,index)=>{
+  const where=`opponent_scenarios[${index}]`;
+  if(!row||typeof row!=='object'||Array.isArray(row)){
+   unavailable.push({scenario_id:null,why:`${where} 不是对象`});return;
+  }
+  const id=typeof row.scenario_id==='string'?row.scenario_id.trim():'';
+  if(!id){unavailable.push({scenario_id:null,why:`${where}.scenario_id 必须是非空字符串`});return;}
+  if(seen.has(id)){unavailable.push({scenario_id:id,why:`${where} 的 scenario_id 重复`});return;}
+  if(!ROCO_SCENARIO_KINDS.includes(row.kind)){
+   unavailable.push({scenario_id:id,why:`${where}.kind 必须是 ${ROCO_SCENARIO_KINDS.join(' / ')}，实际 ${JSON.stringify(row.kind??null)}`});return;
+  }
+  const banned=ROCO_SCENARIO_BANNED.filter((key)=>Object.prototype.hasOwnProperty.call(row,key));
+  if(banned.length){
+   unavailable.push({scenario_id:id,why:`${where} 带了 ${banned.join('/')}：情景集合不是概率分布`});return;
+  }
+  const ints=Array.isArray(row.slots)?row.slots.filter((n)=>Number.isInteger(n)):[];
+  const strs=(key)=>(Array.isArray(row[key])?row[key]:[]).filter((s)=>typeof s==='string'&&s);
+  seen.add(id);
+  rows.push({scenario_id:id,kind:row.kind,slots:ints,species_ids:strs('species_ids'),
+   skill_ids:strs('skill_ids'),evidence_ids:strs('evidence_ids')});
+ });
+ rows.sort((a,b)=>(a.scenario_id<b.scenario_id?-1:1));
+ return {rows,unavailable};
+}
+
+/**
+ * 04.3：本次请求要注入的对手情景。
+ *
+ * ⚠ **当前默认不注入**，原因是语义而不是懒：03 的 `outlook.scenarios[]` 是
+ * **速度档分组**（`scenario_id: "band:<band>"`，成员是一批候选配招），而引擎要的是
+ * **动作级**情景（`stay_attack` + 技能 / `stay_defense` / `switch_in_seen` + 位次）。
+ * 两者不是改名关系 —— 「哪个档的哪些候选 → 哪条动作」是一次**语义映射**，
+ * 猜错就会把「对手可能换人」写成「对手必然留场」。所以：
+ *   · 传输与校验这一段（本函数 + `normalizeOpponentScenarioRows` + 桥的透传）已落地；
+ *   · 映射规则等 Lead 裁决（登记在报告里），届时只需 `configureRocoTools({opponentOutlook})`
+ *     注入一个返回**引擎形状**行的 provider，其余不动。
+ * provider 返回 `{scenarios}` 或直接返回数组；非法行一律丢掉并登记。
+ */
+function rocoOpponentScenariosFor({state,context}={}){
+ if(typeof rocoOpponentOutlook!=='function')return {rows:[],unavailable:[],source:null};
+ let produced;
+ try{
+  produced=rocoOpponentOutlook({state,context});
+ }catch(error){
+  return {rows:[],unavailable:[{why:`opponentOutlook provider 抛异常：${error?.message||error}`}],
+   source:'provider-error'};
+ }
+ const raw=Array.isArray(produced)?produced:produced?.scenarios;
+ const normalized=normalizeOpponentScenarioRows(raw);
+ return {rows:normalized.rows,unavailable:normalized.unavailable,source:'configured-provider'};
+}
+
 /**
  * G05：规划。没有完成的搜索就不给结论。
  *
@@ -1242,9 +1405,28 @@ export function projectCompareResult(result){
  * 字段名同时认引擎现状（recommended_label / main_counter / worst / coverage / timed_out）
  * 与规划器自报形状（recommendation / mainCounter / worstCaseTail / search.*），
  * 但**只搬运**，不从一个字段推另一个字段。
+ *
+ * 04.3 新增（全部机器可检，见文件头那段纪律）：
+ *   · `truncation` / `coverageDetail` / `budget` —— 引擎 R5/R3/R8 三块**原样**带出来（缺则 null）；
+ *   · `declarations` —— `is_probability:false` 等声明落在字段上，而不是只在人读文案里；
+ *   · `firstSecondMarginDetail` —— D-27 的读侧（对象形；缺/坏 ⇒ unknown，**不当 0**）；
+ *   · `cache` —— P6 缓存是否命中、键是什么、有没有写进去（命中 ≠ 重新算过）。
  */
 async function rocoPlanActions(args,context,client,stateVersion,freshness,started){
- const engine=await planActionsViaPlanner({client,state:args.state,state_version:stateVersion,timeoutMs:ROCO_PLAN_TIMEOUT_MS,context});
+ // P6：键只由**身份 + 参数**构成；身份不全 ⇒ 不缓存（也不去撞）。
+ const cacheParts={match_id:args.state?.match_id,state_version:stateVersion,
+  rules_version:args.state?.rules_version,depth:args.depth,beam:args.beam,
+  budget_ms:args.budget_ms,analysis_seeds:args.analysis_seeds};
+ const cacheKey=rocoPlanCacheKey(cacheParts);
+ const hit=cacheKey?rocoPlanCache.get(cacheKey):null;
+ if(hit){
+  return {...rocoClone(hit.receipt),latency_ms:rocoLatency(started),
+   cache:{hit:true,stored:false,key:cacheKey,keyParts:cacheParts,ageMs:Math.round(rocoNow()-hit.at)}};
+ }
+ const injected=rocoOpponentScenariosFor({state:args.state,context});
+ const engine=await planActionsViaPlanner({client,state:args.state,state_version:stateVersion,
+  timeoutMs:ROCO_PLAN_TIMEOUT_MS,context,
+  opponentScenarios:injected.rows.length?injected.rows:undefined});
  const receipt=rocoReceipt('plan_actions',engine,{stateVersion,latencyMs:rocoLatency(started),freshness:rocoFreshness(freshness,false)});
  const stale=staleResultRefusal(receipt,engine,stateVersion,rocoLatency(started),freshness);
  if(stale)return stale;
@@ -1257,7 +1439,14 @@ async function rocoPlanActions(args,context,client,stateVersion,freshness,starte
  const completed=Boolean(plan)&&!searchTimedOut&&search?.completed!==false;
  const searchCoverage=typeof search?.coverage==='number'?search.coverage:(typeof plan?.coverage==='number'?plan.coverage:null);
  const state=searchTimedOut?'timed_out':plan?(completed?'completed':'incomplete'):'not_started';
- return {...receipt,
+ // D-27：边际量只有**对象形且三个数都有限**才出数字；缺/坏一律 unknown（并进 limitations）。
+ const margin=readFirstSecondMargin(plan,{available:completed});
+ const limitations=Array.isArray(receipt.limitations)?[...receipt.limitations]:[];
+ if(margin.status==='unknown')limitations.push(`边际量不可用：${margin.reason}`);
+ if(injected.unavailable.length)limitations.push(
+  `有 ${injected.unavailable.length} 条注入情景形状不合法被丢弃（见 opponentScenarios.unavailable），本次按**缺省**对手依据计算`);
+ const out={...receipt,
+  limitations,
   planAvailable:completed,
   recommendation:completed?plan.recommendation??plan.recommended_label??null:null,
   recommendationStable:plan?.recommendation_stable??null,
@@ -1268,11 +1457,40 @@ async function rocoPlanActions(args,context,client,stateVersion,freshness,starte
   // 枚举第一与第二名的估值差（一手推演尺度）。它公开出来是为了让产品侧能判断
   // 「这一手是不是真的两难」；**它只在一手推演值上有意义，不是胜率、不是机制分差**。
   // 量纲按本引擎标定（实测 0.02—0.08 量级），不要与旧演示引擎的分数直接比较。
-  firstSecondMargin:Number.isFinite(plan?.first_second_margin?.mean)?plan.first_second_margin.mean
-   :(Number.isFinite(plan?.first_second_margin)?plan.first_second_margin:null),
+  // D-27：按**对象形**读（`?.mean`），形状不对不出数字（`unknown`）。
+  firstSecondMargin:margin.value,
+  firstSecondMarginDetail:margin,
+  // R5：束宽/类别保底裁掉了谁（引擎块原样带出来；缺则 null，不自己造一份）
+  truncation:plan?.truncation??null,
+  // R3：coverage 的计数比口径（分子/分母/单位/不是把握度）
+  coverageDetail:plan?.coverage_detail??null,
+  // R8：深度/束宽/预算的截断语义（请求截断 vs 到达引擎上限）
+  budget:plan?.budget??null,
+  // 04.2：注入情景时引擎给的「两类依据分开写」块（没注入就是 null）
+  opponentBasis:plan?.opponent_basis??null,
+  opponentScenarios:{injected:injected.rows.length,source:injected.source,
+   scenario_ids:injected.rows.map((row)=>row.scenario_id),unavailable:injected.unavailable},
+  // R1/R2 的机器可检声明：这些数字**不是概率**，也不是把握度。
+  declarations:{
+   is_probability:false,
+   basis:'启发式局面分 + 启发式对手分布：没有实测频率数据，**不是胜率、不是概率**',
+   expected:{is_probability:false,scale:'heuristic-position-score'},
+   worst:{is_probability:false,scale:'heuristic-position-score'},
+   firstSecondMargin:{is_probability:false,status:margin.status,
+    scale:margin.scale??'one-ply-value'},
+   coverage:{is_probability:false,is_confidence:false,unit:'count_ratio',
+    note:'coverage 是计数比（分子/分母见 coverageDetail.by_seed），不是「结论有多可靠」的把握度'},
+   truncation:{is_probability:false,
+    note:'束宽与类别保底是**产品规则**，不是概率；被裁掉的候选逐条见 truncation.dropped'},
+  },
   search:{completed,coverage:searchCoverage??(completed?receipt.coverage:0),timedOut:searchTimedOut,
    nodes:Number.isInteger(search?.nodes)?search.nodes:(Number.isInteger(plan?.branches_evaluated)?plan.branches_evaluated:null),
    depth:Number.isInteger(search?.depth)?search.depth:(Number.isInteger(plan?.depth_searched)?plan.depth_searched:null),
+   // R8：到顶的两种含义分开（引擎 `budget` 块；缺则 null —— 不猜）
+   depthMax:Number.isInteger(plan?.budget?.depth_max)?plan.budget.depth_max:null,
+   depthTruncated:typeof plan?.budget?.depth_truncated==='boolean'?plan.budget.depth_truncated:null,
+   depthCappedByMax:typeof plan?.budget?.depth_capped_by_max==='boolean'?plan.budget.depth_capped_by_max:null,
+   beamTruncated:typeof plan?.budget?.beam_truncated==='boolean'?plan.budget.beam_truncated:null,
    budget_ms:ROCO_PLAN_TIMEOUT_MS,
    engineBudgetMs:Number.isInteger(plan?.budget_ms)?plan.budget_ms:null},
   timeout:{timedOut:searchTimedOut,state,budget_ms:ROCO_PLAN_TIMEOUT_MS,
@@ -1281,6 +1499,10 @@ async function rocoPlanActions(args,context,client,stateVersion,freshness,starte
    ?{code:receipt.unsupported?.[0]?.code??null,reason:receipt.unsupported?.[0]?.reason??receipt.message??null,missing:receipt.unsupported?.[0]?.missing??[]}
    :null,
   note:completed?'规划器给出了完成搜索后的推荐':'没有完成的搜索：不给出推荐、主要应对或最坏尾部，也不用启发式补一个'};
+ // P6：**只缓存完成的搜索**。超时/半途的结果不是结论，缓存它等于把「没算完」永久化。
+ if(cacheKey&&completed)rememberRocoPlan(cacheKey,out);
+ out.cache={hit:false,stored:Boolean(cacheKey&&completed),key:cacheKey,keyParts:cacheParts};
+ return out;
 }
 
 async function rocoSummarizeBattle(args,client,stateVersion,freshness,started){

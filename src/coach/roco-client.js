@@ -917,6 +917,12 @@ export class RocoClient {
     // 而且不报错。第四个同类问题了（前三次：特征只读调用方字段、命名不一致、
     // 边际量对象形状）。
     if (options.damagePreview === true) body.damage_preview = true;
+    // 04.3：**可选**的对手情景注入（引擎侧 `opponent_scenarios`，见 service.py 的 battle_plan）。
+    // 仍然是**逐键白名单**：只有调用方显式给了数组才放进去，不给就一个字都不多。
+    // 形状校验在工具层（`normalizeOpponentScenarioRows`）与引擎侧各做一遍（fail closed 两层）。
+    if (Array.isArray(options.opponentScenarios) && options.opponentScenarios.length) {
+      body.opponent_scenarios = options.opponentScenarios;
+    }
     return this._request('POST', '/battle/plan', this._payload(body, options), options);
   }
 
