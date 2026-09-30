@@ -38,7 +38,9 @@
     "src/server/roco-service.js": "plan01-engine",
     "src/client/**": "plan02-front（02：roco.js/roco.html/roco.css/battle-v3.css/app.js）",
     "tests/roco-battle-context.test.js": "plan02-front（Lead 授权最小改钉 :124，见 D-11）",
-    "reports/roco/product-execution/02/**": "plan02-front（verify-* 归 harness-verifier）",
+    "reports/roco/product-execution/02/**": "plan02-front（plan02-p0-* 归 plan00-closer；verify-* 归 harness-verifier）",
+    "roco/src/roco_env/service.py": "plan00-closer（P0 task-9：_watch_parent Windows 分支）",
+    "roco/tests/**（P0 task-9 相关）": "plan00-closer",
     "scripts/roco/**": "harness-verifier",
     "reports/roco/product-execution/harness/**": "harness-verifier",
     "reports/roco/product-execution/00/**": "plan00-closer（verify-* 归 harness-verifier）",
@@ -295,6 +297,14 @@
       "evidence": "① `ROCO_PYTHON=C:\\Users\\ASUS\\AppData\\Local\\Programs\\Python\\Python310\\python.exe`（3.10.5）—— Windows 没有 `python3`；设置后 `node --test tests/roco-standard-pvp-battle.test.js` ⇒ tests 15 · pass 15 · exit 0（plan01-engine 原先记成「本机跑不了」，已在 01 acceptance 更正）。② 浏览器验收走零依赖 CDP：`CHROME_PATH=C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe` + `--headless=new --remote-debugging-port=0 --user-data-dir=<独立 profile>`，端口读 profile 内 DevToolsActivePort；Lead 烟测 `E:\\roco-scratch\\cdp-smoke.mjs` ⇒ `CDP_SMOKE_OK`（Chrome 153.0.8010.53，/json/version http=200）。③ 仓库 Node 零依赖（无 node_modules），Python 侧只需标准库",
       "owner": "lead（已写进 task-7 与 01 acceptance）",
       "status": "closed"
+    },
+    {
+      "id": "O-10",
+      "what": "P0 · Windows 上服务会误杀自己整棵进程树：`_watch_parent()` 的 `os.kill(parent_pid, 0)` 在 Windows 被 CPython 当成 `signal.CTRL_C_EVENT`（值就是 0）⇒ `GenerateConsoleCtrlEvent(0, pid)` 向同 console 进程组广播 Ctrl+C ⇒ 整树以 `0xC000013A` 退出",
+      "evidence": "harness-verifier 单变量 A/B（同夹具只差探针那一行）：`kill` 组 +7.6s 后整树消失且**无 PROCESS_EXIT**（外力终止）· `nokill` 组完整跑完 exit 0；分离进程 `ExitCode=-1073741510`=0xC000013A（STATUS_CONTROL_C_EXIT）；服务由 `src/coach/roco-client.js:381` 用 `--parent-pid <node pid>` 起 ⇒ Windows 侧所有经它起服务的调用方都会间歇中招（取决于 console/进程组拓扑；WSL/macOS 不受影响，这解释了「WSL 全绿 / Windows 夹具被杀」的分裂）。对照实验（全部有读数）：纯睡眠后台心跳跑满 120s（**harness 作业生命周期排除**）· 前台/managed 后台/分离三种方式同点死（**前台超时排除**）· harness-verifier 自建最小夹具（本地页+无头 Chrome+CDP+真鼠标，**不起 Python 服务**）三跑全 `PROCESS_EXIT 0`（点按钮/Chrome/CDP/长前台都不足以触发）· 无浏览器同序列 HTTP 全绿（不是某条路由）。**Lead 两条阴性结果（避免重复排查）**：① Windows Python 3.10.5 下 `os.kill(alive_pid, 0)` **调用返回成功且目标存活** ⇒ 危害在**副作用**（广播 Ctrl+C）而非返回值，也说明「返回值检查」这种验证方式会漏掉它；② `Start-Process` 分离子进程在父命令结束后**存活** ⇒ 不存在「父命令退出即整树归零」。未钉死：为何投递落在 +6.3s 的 click 而非第一次 tick（观察：排队后的控制事件在进程组下一次处理时才生效）",
+      "owner": "harness-verifier（定位）· plan00-closer（task-9 修复）",
+      "status": "fix_in_flight",
+      "rule": "判据必须包含**反例**：父 Node 真被杀后服务要 ~2s 内自行退出（不许修成永不退出的孤儿）；且 WSL/POSIX 行为不变"
     }
   ],
   "handoff": {
@@ -379,6 +389,13 @@
       "id": "D-12",
       "what": "02 报告的浏览器进程树「原子中断」环境阻断怎么处置",
       "decision": "不定性为环境限制，先按三步重试并留证：① managed 后台作业跑（前台有超时、后台不受限）；② 拆两进程（服务常驻 + CDP 驱动）区分「一次性进程树被杀」与「特定动作触发」；③ 三条都试过仍失败才允许写「未定位根因」。同时让 harness-verifier 独立复现同一路径。在解除前：02.5 记 pending_environment，**不许**用大厅/静态截图冒充「真实操作走完」；收口时若仍未解除，浏览器操作栏如实登记不可得，由 Lead 决定是否按已登记偏差收口",
+      "by": "lead",
+      "outcome": "已定性为产品 P0（见 O-10 / D-13）：不是环境限制，是 `_watch_parent` 在 Windows 上误广播 Ctrl+C"
+    },
+    {
+      "id": "D-13",
+      "what": "O-10（Windows 误杀整树）的修复口径",
+      "decision": "按最小修复 + **保留原意图**执行：Windows 分支改用 `OpenProcess(SYNCHRONIZE)+WaitForSingleObject(INFINITE)`（或等价无副作用方式），父进程已不在则立即 `os._exit(0)`；POSIX 分支一行不动。**接受标准必须含反例**：父 Node 真被杀 ⇒ 服务 ~2s 内自行退出（不许修成孤儿）；父 Node 存活 ⇒ 服务不退；WSL/POSIX 行为不变；`ROCO_PYTHON` 真引擎端到端连跑 3 次稳定。指派 plan00-closer（task-9），由 harness-verifier 独立复验",
       "by": "lead"
     }
   ]
