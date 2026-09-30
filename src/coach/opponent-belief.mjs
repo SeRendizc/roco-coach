@@ -294,6 +294,11 @@ export const STRUCTURAL_CRITERIA = Object.freeze({
     + '违反 ⇒ `SCENARIO_SEMANTICS_NOT_DECLARED` / `SCENARIO_RANKS_A_SCENARIO`（红）。'
     + '降级（空候选 / 矛盾证据 / 预算裁剪）必须 `degraded:true` + 逐条原因，且每个情景标 `complete:false`；'
     + '`available:false` 时不许带任何情景或区间 ⇒ `OUTLOOK_DEGRADED_WITHOUT_REASON`（红）。',
+  truncation_visible: '候选被预算裁剪时，产出必须带**完整的截断信息**：候选总数 / 可用总数 / 保留数 / '
+    + '被截断数与其分布 / 截断依据（可解释规则）；缺项或与 `budget` 不一致 ⇒ `TRUNCATION_INFO_MISSING`（红）。'
+    + '**被裁掉的重大威胁必须逐条点名**（candidate_id + threat_level + why + evidence_ids）：'
+    + '缩减可以裁，但不许隐去重大威胁 ⇒ `THREAT_HIDDEN_BY_TRUNCATION`（红）。'
+    + '「重大威胁」的口径只用公开数据（候选系别 × 我方阵容系别 × 冻结相性表），见 `THREAT_RULE`。',
   rules_recomputable: '每条规则必须给出 `{id, kind, reads[], inputs[], output, basis, applied}`；'
     + '`applied:true` 的规则必须给出非空的 `output`（匹配数 / 层大小）。'
     + '规则账本缺字段、或 `applied:true` 却没有输出 ⇒ `RULE_LEDGER_INCOMPLETE`（红）。',
@@ -1432,7 +1437,17 @@ export const FOUR_SKILL_LIMIT = 4;
 /** 候选预算默认值；`rule` 必须是**可解释、可复算**的一条。 */
 export const DEFAULT_CANDIDATE_BUDGET = Object.freeze({
   limit: 24,
-  rule: 'observed_first（按 slot 升序）→ inferred（①有冻结学招表 ②与已亮明速度档同档 ③species_id 升序）',
+  rule: 'observed_first（按 slot 升序）→ inferred（①**重大威胁**优先 ②有冻结学招表 ③与已亮明速度档同档 '
+    + '④species_id 升序）；**已见永不裁剪**，被裁掉的重大威胁必须点名',
+});
+
+/** 「重大威胁」的口径（只用公开数据：候选的物种系别 × 我方阵容系别 × 冻结相性表）。 */
+export const THREAT_RULE = Object.freeze({
+  id: 'threat.super_effective_against_own_team',
+  rule: '候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ 计 1 点；'
+    + '点数 = 被我方阵容里多少只「怕」它。`threat_level >= 2` 记为重大威胁。',
+  why: '只用公开事实：候选系别来自冻结图鉴、我方系别是自己的信息、相性表是冻结数据；'
+    + '不引入「谁强谁弱」的强度判断，只回答「它能不能打我队里的谁」',
 });
 
 /**
@@ -1686,7 +1701,7 @@ export function buildOpponentCandidates(input = {}) {
     universe_size: universe.size,
     provenance: read.facts.provenance,
     budget: {limit, rule, kept: 0, observed_kept: 0, inferred_kept: 0, truncated: false,
-      dropped_count: 0, pool_summary: null},
+      dropped_count: 0, pool_summary: null, truncation: null},
     candidates: [],
     contradictions: [],
     rule_ledger: [],
@@ -1715,6 +1730,22 @@ export function buildOpponentCandidates(input = {}) {
   const onDemandBuilds = isPlainObject(skillPool?.onDemandBuilds) ? skillPool.onDemandBuilds : null;
   const rules = applyRules(universe, read.facts, {catalog});
   const memberById = new Map(universe.members.map((row) => [row.key, row]));
+
+  // ── 03.5：重大威胁（只用公开数据算；见 `THREAT_RULE`） ──
+  const checkScale = universe.scale_lookup ?? null;
+  const ownTypes = arr(read.facts.own_team).map((row) => arr(row.types)).filter((types) => types.length > 0);
+  const threatLevelOf = (candidateTypes) => {
+    if (checkScale === null || !arr(candidateTypes).length || ownTypes.length === 0) return 0;
+    let hits = 0;
+    for (const types of ownTypes) {
+      const hitsThis = arr(candidateTypes).some((attackType) => {
+        const scale = checkScale(types, attackType);
+        return scale !== null && scale >= 8;
+      });
+      if (hitsThis) hits += 1;
+    }
+    return hits;
+  };
 
   const observedRows = arr(read.facts.revealed_pets);
   const observedIds = new Set(observedRows.map((row) => row.species_id));
@@ -1765,6 +1796,8 @@ export function buildOpponentCandidates(input = {}) {
       band_source: band === null ? null : 'RC-303 speedBandFor()（工程三分位构造，不是游戏字段）',
       in_filtered_pool: poolIds.has(speciesId),
       inferred_rank: rank,
+      threat_level: threatLevelOf(types),
+      threat_rule: THREAT_RULE.id,
       observed: observed === null ? null : {
         slots: [observed.slot].filter(Number.isInteger),
         reveals: [{revealed_via: observed.revealed_via, revealed_turn: observed.revealed_turn,
@@ -1823,9 +1856,12 @@ export function buildOpponentCandidates(input = {}) {
   observedCandidates.sort((a, b) => ((a.observed?.slots?.[0] ?? 99) - (b.observed?.slots?.[0] ?? 99))
     || (a.species_id < b.species_id ? -1 : 1));
 
-  // ② 推出来的候选：只从**规则筛过的池子**里取，按可解释规则排序
+  // ② 推出来的候选：只从**规则筛过的池子**里取，按可解释规则排序（03.5：重大威胁优先）
   const bandMatches = (row) => rules.stratum === null ? false : (row.speed_band === rules.stratum);
   const inferredPool = rules.pool.filter((row) => !observedIds.has(row.key)).sort((a, b) => {
+    const aThreat = threatLevelOf(a.types);
+    const bThreat = threatLevelOf(b.types);
+    if (aThreat !== bThreat) return bThreat - aThreat;
     const aTier = skillPoolFor(a.key, {learnsets, skills, onDemandBuilds}).tier === 'frozen_learnset' ? 0 : 1;
     const bTier = skillPoolFor(b.key, {learnsets, skills, onDemandBuilds}).tier === 'frozen_learnset' ? 0 : 1;
     if (aTier !== bTier) return aTier - bTier;
@@ -1844,6 +1880,16 @@ export function buildOpponentCandidates(input = {}) {
     const band = row.speed_band ?? 'unknown';
     droppedByBand[band] = (droppedByBand[band] ?? 0) + 1;
   }
+  // 03.5：**被裁掉的重大威胁必须点名**（不许隐去）
+  const droppedThreats = dropped.filter((row) => threatLevelOf(row.types) >= 2).map((row) => ({
+    candidate_id: `cand:${row.key}`,
+    species_id: row.key,
+    threat_level: threatLevelOf(row.types),
+    why: `被预算裁掉，但它是**重大威胁**（${THREAT_RULE.rule.slice(0, 40)}…）：`
+      + '名单在这里点名，不许静默丢掉',
+    evidence_ids: [`catalog.featureFor(${row.key}).types`, `catalog.scaleByCombo`, 'publicFacts.own_team[].types'],
+  }));
+  const threatsKept = [...observedCandidates, ...inferredCandidates].filter((row) => row.threat_level >= 2).length;
 
   // ③ 矛盾（不静默）：已亮明却被规则筛掉、已出招却不在可学池里
   const contradictions = [];
@@ -1881,9 +1927,29 @@ export function buildOpponentCandidates(input = {}) {
     unknown_reason: null,
     kind: 'public_fact_conditioned',
     candidates: allCandidates,
-    budget: {limit, rule, kept: allCandidates.length, observed_kept: observedCandidates.length,
+    budget: {
+      limit, rule, kept: allCandidates.length, observed_kept: observedCandidates.length,
       inferred_kept: inferredCandidates.length,
-      truncated: dropped.length > 0, dropped_count: dropped.length, pool_summary: poolSummary},
+      truncated: dropped.length > 0, dropped_count: dropped.length, pool_summary: poolSummary,
+      // 03.5：**截断信息**（总数 / 保留数 / 被截断数与分布 / 截断依据），且重大威胁必须点名
+      truncation: {
+        total_candidates: allCandidates.length,
+        total_available: observedCandidates.length + inferredPool.length,
+        limit, kept: allCandidates.length, dropped: dropped.length,
+        rule,
+        dropped_by_band: Object.fromEntries(Object.entries(droppedByBand).sort()),
+        dropped_by_threat: {high: droppedThreats.length,
+          none: dropped.length - droppedThreats.length},
+        dropped_threats: droppedThreats,
+        threats_kept: threatsKept,
+        limit_exceeded_by_observed: observedCandidates.length > limit,
+        threat_rule: {...THREAT_RULE},
+        note: dropped.length === 0
+          ? '没有候选被裁掉（在预算之内）'
+          : `裁掉 ${dropped.length} 条（分布见 dropped_by_band）；其中重大威胁 ${droppedThreats.length} 条`
+            + '逐条点名在 dropped_threats 里 —— 缩减按可解释规则，不隐去重大威胁',
+      },
+    },
     contradictions,
     rule_ledger: rules.ledger,
     leaked_fields: [],
@@ -3341,6 +3407,42 @@ export function auditOpponentBelief(result, options = {}) {
       push('OUTLOOK_DEGRADED_WITHOUT_REASON', 'outlook',
         'available:false 却带着情景或区间：算不出来就什么都不给，不许拿空数据冒充');
     }
+  }
+
+  // ── 03.5：截断信息必须齐全；被裁掉的重大威胁必须点名 ──
+  const budget = result?.budget ?? null;
+  if (isPlainObject(budget) && budget.truncated === true) {
+    const truncation = budget.truncation;
+    const required = ['total_available', 'limit', 'kept', 'dropped', 'rule', 'dropped_by_band',
+      'dropped_by_threat', 'dropped_threats'];
+    const missing = required.filter((key) => !(key in (truncation ?? {})));
+    if (!isPlainObject(truncation) || missing.length > 0) {
+      push('TRUNCATION_INFO_MISSING', 'budget.truncation',
+        `截断了 ${stableJson(budget.dropped_count)} 条却没有完整的截断信息（缺 ${missing.join(' / ')}）：`
+        + '总数 / 保留数 / 被截断数与分布 / 截断依据都要在产出里');
+    } else {
+      if (truncation.dropped !== budget.dropped_count || truncation.kept !== budget.kept) {
+        push('TRUNCATION_INFO_MISSING', 'budget.truncation',
+          `截断信息与 budget 不一致（kept ${truncation.kept} vs ${budget.kept}、`
+          + `dropped ${truncation.dropped} vs ${budget.dropped_count}）`);
+      }
+      if (truncation.dropped_by_threat?.high > 0 && arr(truncation.dropped_threats).length === 0) {
+        push('THREAT_HIDDEN_BY_TRUNCATION', 'budget.truncation.dropped_threats',
+          `有 ${truncation.dropped_by_threat.high} 条**重大威胁**被裁掉却没有点名：`
+          + '缩减可以裁，但不许隐去重大威胁（逐条写 candidate_id / threat_level / why / evidence_ids）');
+      }
+      for (const row of arr(truncation.dropped_threats)) {
+        if (!isNonEmptyString(row?.candidate_id) || !isNonEmptyString(row?.why)
+          || arr(row?.evidence_ids).length === 0) {
+          push('THREAT_HIDDEN_BY_TRUNCATION', `budget.truncation.dropped_threats.${row?.candidate_id ?? '?'}`,
+            '点名的重大威胁必须带 why 与 evidence_ids（没有依据的「点名」等于没点）');
+        }
+      }
+    }
+  }
+  if (isPlainObject(budget) && budget.kept !== arr(result?.candidates).length) {
+    push('TRUNCATION_INFO_MISSING', 'budget.kept',
+      `budget.kept ${stableJson(budget.kept)} 与候选数 ${arr(result?.candidates).length} 不一致`);
   }
 
   return {ok: problems.length === 0, problems};

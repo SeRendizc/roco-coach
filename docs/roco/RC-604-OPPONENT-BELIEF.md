@@ -7,16 +7,16 @@
 > 三条都不产出胜率、不产出伪精确百分数，也不偷看对手的配招与后备。
 
 - 模块：`src/coach/opponent-belief.mjs`
-- 判据：`tests/roco-opponent-belief.test.js`（**34 条**：RC-604 原始 13 + 03.1 的 5 + 03.2 的 7
-  + 03.3 的 4（证据观察器 / 反例① / 更新与排除 / 白名单穷尽覆盖）+ 03.4 的 4（语义声明 / 两条降级 /
-  五条变异 / 反例② 回归）+ F-03-1 在线段覆盖 1；含多类必红反证与反向控制）
+- 判据：`tests/roco-opponent-belief.test.js`（**37 条**：RC-604 原始 13 + 03.1 的 5 + 03.2 的 7
+  + 03.3 的 4 + 03.4 的 4 + 03.5 的 2（截断信息 / 三条变异）+ F-03-1、F-03-4 各 1；
+  含多类必红反证与反向控制）
 - 产物：`reports/roco/rc604/opponent-belief.json`（含 `candidate_protocol` 与候选样本）
 - 跑法：`node --test tests/roco-opponent-belief.test.js`
   （重新生成产物：`RC604_WRITE_REPORT=1 node --test tests/roco-opponent-belief.test.js`）
-- 进度（2026-09-30）：03.1（公开性口径按实测重写 + 来源必填 + 假设只降权）、
-  03.2（候选协议 + 三个可复现局面）、F-03-1/F-03-2（在线段覆盖 + 条件③断言守护）、
-  03.3（证据更新 + 反例①）与 03.4（情景集合与范围 + 两条降级）已落地；
-  **03.5**（候选数量上限的威胁保留策略）**待做**。
+- 进度（2026-09-30）：**03.1–03.5 全部落地** —— 03.1（公开性口径按实测重写 + 来源必填 + 假设只降权）、
+  03.2（候选协议 + 三个可复现局面）、03.3（证据更新 + 反例①）、03.4（情景集合与范围 + 两条降级）、
+  03.5（候选上限 + 截断信息 + 威胁点名），外加 F-03-1/F-03-2/F-03-3/F-03-4 四条判据修补。
+  收口复跑：`node --test tests/roco-opponent-belief.test.js` ⇒ 37 ✔ / 0 ✖。
 
 ---
 
@@ -284,6 +284,17 @@ declarations, scenarios[], ranges, best_scenario: null, ...}`。
   `available:false` 时**一个情景、一个区间都不给**。
 - 判据：`SCENARIO_SEMANTICS_NOT_DECLARED` · `SCENARIO_RANKS_A_SCENARIO` · `OUTLOOK_DEGRADED_WITHOUT_REASON`
   （五条克隆变异 + 一条实现级变异都实测必红）。读数见 `03.4-scenario-outlook.md`。
+
+### 7.3 候选上限与截断（03.5）
+
+`buildOpponentCandidates({..., budget:{limit}})` 的 `budget` 带**完整截断信息**：候选总数 / 可用总数 /
+保留数 / 被截断数与其分布（`dropped_by_band`、`dropped_by_threat`）/ 截断依据（可解释规则）；
+缩减规则 = `observed_first（已见永不裁剪）→ inferred（①**重大威胁**优先 ②冻结学招表 ③同速度档 ④species_id）`。
+**重大威胁不许被隐去**：被裁掉的重大威胁在 `budget.truncation.dropped_threats[]` 里**逐条点名**
+（candidate_id + threat_level + why + evidence_ids）。威胁口径见 `THREAT_RULE`（候选系别 × 我方阵容系别 ×
+冻结相性表，标度 ≥ 8 计 1 点，≥2 点记重大）—— 只用公开数据，不做强度判断。
+判据：`TRUNCATION_INFO_MISSING` · `THREAT_HIDDEN_BY_TRUNCATION`（克隆变异四条 + 实现级变异一条，实测必红）。
+读数见 `03.5-budget-and-threats.md`。
 
 ## 8. 不做什么（边界）
 

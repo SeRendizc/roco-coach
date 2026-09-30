@@ -1315,6 +1315,13 @@ test('03.3-E2（真引擎读数 · 反例①）：同一公开伤害由两种个
   assert.ok(updated.multi_solution.some((row) => row.candidate_id === active.candidate_id));
   assert.ok(!updated.diff.excluded.includes(active.candidate_id), '多解时**不许**排除这只');
   assert.ok(active.individual_range.unknowns.some((line) => line.includes('哪一种是真身')));
+  // F-03-3：**相容时不许出现「情景解释不了伤害」的假矛盾** —— 独立复核用变异证明：
+  // 把排除分支的外层条件放宽（`matches.length === 0` → `>= 0`），相容的 7 个情景会多推一条
+  // `DAMAGE_UNEXPLAINED_BY_SCENARIOS`，而旧套件仍 30/30 全绿（行为变了、判据不红）。
+  assert.ok(!updated.contradictions.some((row) => row.code === 'DAMAGE_UNEXPLAINED_BY_SCENARIOS'),
+    `相容时不许推「情景解释不了伤害」：${JSON.stringify(updated.contradictions.map((row) => row.code))}`);
+  assert.ok(!updated.contradictions.some((row) => /解释不了|不相容/.test(String(row.detail ?? ''))),
+    '任何声称「情景解释不了这次伤害」的条目在相容时都不许出现');
 
   // 变坏方向：把它声明成穷尽、再给一套"一条都不相容"的情景 ⇒ 这时才允许排除
   const impossible = {[ce.attacker_species]: {exhaustive: true, source: 'injected',
@@ -1356,6 +1363,11 @@ test('03.3-E3：已出技能升级候选、先手速度只在同量纲时排除�
   assert.ok(filtered.diff.excluded.length > 0, 'E3 同量纲下必须真的排除');
   assert.ok(filtered.excluded.every((row) => row.evidence_ids.includes('view.events[seq=999]')));
   assert.ok(filtered.excluded.every((row) => row.rule_id === 'evidence.turn_order_speed'));
+  // 同一类「降级要明说」：**每条 not_applied 的规则都必须有非空 reason**（不许只给字段不给内容）
+  for (const rule of filtered.rule_ledger.filter((row) => row.applied !== true)) {
+    assert.ok(typeof rule.reason === 'string' && rule.reason.trim().length > 0,
+      `E3 ${rule.id} 未应用必须写清原因`);
+  }
   // 已见的永不被排除（以观察为准）
   assert.ok(!filtered.diff.excluded.includes(promoted.candidate_id));
   // 观察里混进 individual-* ⇒ 记进 observations_rejected（不静默用）
@@ -1579,6 +1591,130 @@ test('03.4-E6（回归）：反例② 不合法技能组合仍不进候选，且
   mutated.candidates.find((row) => row.species_id === species).skills.legality.kept = [legalPool[0], legalPool[0]];
   assert.ok(auditOpponentBelief({beliefs: [uniformBelief({catalog: index})], candidates: mutated.candidates})
     .problems.some((p) => p.code === 'ILLEGAL_LOADOUT_IN_CANDIDATES'), 'E6 必红方向仍在');
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// 03.5 · 候选上限：截断信息 + 重大威胁不许被隐去
+// ─────────────────────────────────────────────────────────────────────────
+
+test('03.5-E7：上限带完整截断信息，缩减规则可解释，重大威胁点名', () => {
+  const built = buildOpponentCandidates({catalog: index, view: VIEW_33.pvp, skillPool: SKILL_POOL,
+    budget: {limit: 8}});
+  const truncation = built.budget.truncation;
+  raw('E7 截断信息', {limit: built.budget.limit, kept: built.budget.kept,
+    total_available: truncation.total_available, dropped: truncation.dropped,
+    dropped_by_band: truncation.dropped_by_band, dropped_by_threat: truncation.dropped_by_threat,
+    dropped_threats: truncation.dropped_threats.length, threats_kept: truncation.threats_kept,
+    rule: built.budget.rule});
+  assert.equal(built.budget.truncated, true);
+  assert.equal(built.budget.kept, built.candidates.length);
+  assert.equal(built.budget.kept, 8);
+  for (const key of ['total_available', 'limit', 'kept', 'dropped', 'rule', 'dropped_by_band',
+    'dropped_by_threat', 'dropped_threats']) {
+    assert.ok(key in truncation, `E7 截断信息缺 ${key}`);
+  }
+  assert.equal(truncation.dropped, built.budget.dropped_count);
+  assert.equal(truncation.kept, built.budget.kept);
+  assert.ok(truncation.rule.includes('威胁'), 'E7 缩减规则必须写明「重大威胁优先」');
+  assert.ok(truncation.total_available >= built.budget.kept + truncation.dropped);
+  // 每条候选都要能说清「为什么留下 / 它是几级威胁」
+  assert.ok(built.candidates.every((row) => Number.isInteger(row.threat_level)));
+  const inferred = built.candidates.filter((row) => row.basis === 'inferred');
+  for (let i = 1; i < inferred.length; i += 1) {
+    assert.ok(inferred[i - 1].threat_level >= inferred[i].threat_level,
+      'E7 推出来的候选必须按威胁优先排序（可解释规则）');
+  }
+  // 更大预算（保留 24 条 inferred）⇒ 排序断言才有牙：关掉「威胁优先」这条规则时这一步必须红
+  const wide = buildOpponentCandidates({catalog: index, view: VIEW_33.pvp, skillPool: SKILL_POOL,
+    budget: {limit: 30}});
+  const wideInferred = wide.candidates.filter((row) => row.basis === 'inferred');
+  raw('E7 宽预算的 inferred 威胁序列', {kept: wide.budget.kept, inferred: wideInferred.length,
+    threats: wideInferred.map((row) => row.threat_level).slice(0, 12)});
+  assert.ok(wideInferred.length >= 8, 'E7 宽预算夹具必须留下足够多的 inferred 才能验证排序');
+  for (let i = 1; i < wideInferred.length; i += 1) {
+    assert.ok(wideInferred[i - 1].threat_level >= wideInferred[i].threat_level,
+      `E7 威胁优先排序失效：第 ${i} 条 ${wideInferred[i].species_id} 的威胁等级 `
+      + `${wideInferred[i].threat_level} 高于前一条 ${wideInferred[i - 1].threat_level}`);
+  }
+  // 干净产出必须过审计
+  const audit = auditOpponentBelief({beliefs: [uniformBelief({catalog: index})],
+    candidates: built.candidates, budget: built.budget});
+  raw('E7 审计', {ok: audit.ok, problems: auditRaw(audit).slice(0, 2)});
+  assert.equal(audit.ok, true, `E7 合法截断必须放行：${auditRaw(audit).join(' | ')}`);
+
+  // 更小的预算 ⇒ 一定有重大威胁被裁掉：必须逐条点名（candidate_id + why + evidence_ids）
+  const tighter = buildOpponentCandidates({catalog: index, view: VIEW_33.pvp, skillPool: SKILL_POOL,
+    budget: {limit: 6}});
+  const tight = tighter.budget.truncation;
+  raw('E7 更小预算的截断', {kept: tighter.budget.kept, dropped: tight.dropped,
+    by_threat: tight.dropped_by_threat, named: tight.dropped_threats.length});
+  assert.ok(tight.dropped_by_threat.high > 0, 'E7 夹具必须让「有重大威胁被裁掉」发生');
+  assert.equal(tight.dropped_threats.length, tight.dropped_by_threat.high,
+    'E7 被裁掉的重大威胁必须**逐条**点名，不许隐去');
+  for (const row of tight.dropped_threats) {
+    assert.ok(row.candidate_id && row.why && row.evidence_ids.length > 0);
+    assert.ok(row.threat_level >= 2);
+  }
+  assert.equal(auditOpponentBelief({beliefs: [uniformBelief({catalog: index})],
+    candidates: tighter.candidates, budget: tighter.budget}).ok, true);
+});
+
+test('03.5-M：截断判据三条变异必红（控制组不红）', () => {
+  const built = buildOpponentCandidates({catalog: index, view: VIEW_33.pvp, skillPool: SKILL_POOL,
+    budget: {limit: 6}});
+  const control = auditOpponentBelief({beliefs: [uniformBelief({catalog: index})],
+    candidates: built.candidates, budget: built.budget});
+  raw('03.5-M 控制组', {ok: control.ok, problems: auditRaw(control)});
+  assert.equal(control.ok, true, 'M 控制组不许红');
+
+  const cases = [
+    ['把截断信息整块抹掉', (doc) => { doc.budget.truncation = null; }, 'TRUNCATION_INFO_MISSING'],
+    ['截断信息与 budget 不一致', (doc) => { doc.budget.kept = doc.budget.kept + 1; },
+      'TRUNCATION_INFO_MISSING'],
+    ['把被裁掉的重大威胁名单清空', (doc) => { doc.budget.truncation.dropped_threats = []; },
+      'THREAT_HIDDEN_BY_TRUNCATION'],
+    ['点名却不给依据', (doc) => {
+      doc.budget.truncation.dropped_threats = doc.budget.truncation.dropped_threats
+        .map((row) => ({...row, evidence_ids: []})); }, 'THREAT_HIDDEN_BY_TRUNCATION'],
+  ];
+  for (const [label, mutate, code] of cases) {
+    const mutated = clone({candidates: built.candidates, budget: built.budget});
+    mutate(mutated);
+    const audit = auditOpponentBelief({beliefs: [uniformBelief({catalog: index})],
+      candidates: mutated.candidates, budget: mutated.budget});
+    raw(`03.5-M ${label} 的审计`, {ok: audit.ok, problems: auditRaw(audit).slice(0, 1)});
+    proof('budget.truncation（03.5）', label, STRUCTURAL_CRITERIA.truncation_visible, code,
+      auditRaw(audit).slice(0, 1));
+    assert.equal(audit.ok, false, `03.5-M ${label} 必须判红`);
+    assert.ok(audit.problems.some((p) => p.code === code), `03.5-M ${label} 必须命中 ${code}`);
+  }
+});
+
+test('F-03-4：候选集合不可用（fail-closed 输入）也必须逐条给出降级原因', () => {
+  // 注入隐藏字段（配招）⇒ `readPublicFacts` 拒绝整份 ⇒ 候选集合不可用 ⇒ 情景产出也必须降级
+  const leaked = {...FACTS_SINGLE_SLOW, opponent: {active: {...publicPet('pet_000002'), moves: ['skill_000246']},
+    revealed_pets: []}};
+  const outlook = buildScenarioOutlook({catalog: index, publicFacts: leaked, skillPool: SKILL_POOL});
+  const candidates = buildOpponentCandidates({catalog: index, publicFacts: leaked, skillPool: SKILL_POOL});
+  raw('F-03-4 fail-closed 输入', {outlook_available: outlook.available, degraded: outlook.degraded,
+    reasons: outlook.degrade_reasons, scenarios: outlook.scenarios.length,
+    candidates_available: candidates.available});
+  assert.equal(candidates.available, false, 'F-03-4 越界输入下候选集合必须不可用');
+  assert.equal(outlook.available, false);
+  assert.equal(outlook.degraded, true);
+  assert.ok(outlook.degrade_reasons.length > 0, 'F-03-4 降级必须给原因');
+  assert.ok(outlook.degrade_reasons.every((line) => typeof line === 'string' && line.trim().length > 0),
+    'F-03-4 降级原因不许是空串 / 纯空白');
+  assert.equal(outlook.scenarios.length, 0);
+  assert.equal(outlook.ranges, null);
+  assert.equal(outlook.best_scenario, null);
+
+  // 顺带钉住：预算截断本身也要在情景产出里留下降级原因（同一类「降级要明说」）
+  const truncated = buildScenarioOutlook({catalog: index, view: VIEW_33.pvp, skillPool: SKILL_POOL,
+    budget: {limit: 6}});
+  raw('F-03-4 预算截断的降级原因', {degraded: truncated.degraded, reasons: truncated.degrade_reasons});
+  assert.equal(truncated.degraded, true);
+  assert.ok(truncated.degrade_reasons.some((line) => line.includes('预算裁掉')));
 });
 
 // ─────────────────────────────────────────────────────────────────────────

@@ -2067,7 +2067,7 @@
     "four_skill_limit": 4,
     "default_budget": {
       "limit": 24,
-      "rule": "observed_first（按 slot 升序）→ inferred（①有冻结学招表 ②与已亮明速度档同档 ③species_id 升序）"
+      "rule": "observed_first（按 slot 升序）→ inferred（①**重大威胁**优先 ②有冻结学招表 ③与已亮明速度档同档 ④species_id 升序）；**已见永不裁剪**，被裁掉的重大威胁必须点名"
     },
     "degrade_policy": "输入越界 / 缺来源 ⇒ available:false 且**一个候选都不生成**（不拿空数组冒充「没有威胁」）；候选为空或与观察矛盾 ⇒ 明确降级并逐条写 `contradictions[]`（不静默丢）"
   },
@@ -2083,7 +2083,7 @@
     },
     "budget": {
       "limit": 24,
-      "rule": "observed_first（按 slot 升序）→ inferred（①有冻结学招表 ②与已亮明速度档同档 ③species_id 升序）",
+      "rule": "observed_first（按 slot 升序）→ inferred（①**重大威胁**优先 ②有冻结学招表 ③与已亮明速度档同档 ④species_id 升序）；**已见永不裁剪**，被裁掉的重大威胁必须点名",
       "kept": 24,
       "observed_kept": 1,
       "inferred_kept": 23,
@@ -2098,6 +2098,471 @@
         "dropped_by_band": {
           "slow": 122
         }
+      },
+      "truncation": {
+        "total_candidates": 24,
+        "total_available": 146,
+        "limit": 24,
+        "kept": 24,
+        "dropped": 122,
+        "rule": "observed_first（按 slot 升序）→ inferred（①**重大威胁**优先 ②有冻结学招表 ③与已亮明速度档同档 ④species_id 升序）；**已见永不裁剪**，被裁掉的重大威胁必须点名",
+        "dropped_by_band": {
+          "slow": 122
+        },
+        "dropped_by_threat": {
+          "high": 40,
+          "none": 82
+        },
+        "dropped_threats": [
+          {
+            "candidate_id": "cand:pet_000027",
+            "species_id": "pet_000027",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000027).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000031",
+            "species_id": "pet_000031",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000031).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000040",
+            "species_id": "pet_000040",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000040).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000063",
+            "species_id": "pet_000063",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000063).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000064",
+            "species_id": "pet_000064",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000064).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000065",
+            "species_id": "pet_000065",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000065).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000084",
+            "species_id": "pet_000084",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000084).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000104",
+            "species_id": "pet_000104",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000104).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000132",
+            "species_id": "pet_000132",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000132).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000133",
+            "species_id": "pet_000133",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000133).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000144",
+            "species_id": "pet_000144",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000144).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000218",
+            "species_id": "pet_000218",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000218).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000269",
+            "species_id": "pet_000269",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000269).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000278",
+            "species_id": "pet_000278",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000278).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000376",
+            "species_id": "pet_000376",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000376).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000459",
+            "species_id": "pet_000459",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000459).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000536",
+            "species_id": "pet_000536",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000536).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000520",
+            "species_id": "pet_000520",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000520).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000521",
+            "species_id": "pet_000521",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000521).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000522",
+            "species_id": "pet_000522",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000522).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000030",
+            "species_id": "pet_000030",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000030).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000047",
+            "species_id": "pet_000047",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000047).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000048",
+            "species_id": "pet_000048",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000048).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000049",
+            "species_id": "pet_000049",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000049).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000101",
+            "species_id": "pet_000101",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000101).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000102",
+            "species_id": "pet_000102",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000102).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000167",
+            "species_id": "pet_000167",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000167).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000172",
+            "species_id": "pet_000172",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000172).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000261",
+            "species_id": "pet_000261",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000261).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000262",
+            "species_id": "pet_000262",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000262).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000281",
+            "species_id": "pet_000281",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000281).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000282",
+            "species_id": "pet_000282",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000282).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000283",
+            "species_id": "pet_000283",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000283).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000285",
+            "species_id": "pet_000285",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000285).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000288",
+            "species_id": "pet_000288",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000288).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000308",
+            "species_id": "pet_000308",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000308).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000409",
+            "species_id": "pet_000409",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000409).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000410",
+            "species_id": "pet_000410",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000410).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000456",
+            "species_id": "pet_000456",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000456).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000462",
+            "species_id": "pet_000462",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000462).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          }
+        ],
+        "threats_kept": 24,
+        "limit_exceeded_by_observed": false,
+        "threat_rule": {
+          "id": "threat.super_effective_against_own_team",
+          "rule": "候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ 计 1 点；点数 = 被我方阵容里多少只「怕」它。`threat_level >= 2` 记为重大威胁。",
+          "why": "只用公开事实：候选系别来自冻结图鉴、我方系别是自己的信息、相性表是冻结数据；不引入「谁强谁弱」的强度判断，只回答「它能不能打我队里的谁」"
+        },
+        "note": "裁掉 122 条（分布见 dropped_by_band）；其中重大威胁 40 条逐条点名在 dropped_threats 里 —— 缩减按可解释规则，不隐去重大威胁"
       }
     },
     "candidates": [
@@ -2116,6 +2581,8 @@
         "band_source": "RC-303 speedBandFor()（工程三分位构造，不是游戏字段）",
         "in_filtered_pool": true,
         "inferred_rank": null,
+        "threat_level": 2,
+        "threat_rule": "threat.super_effective_against_own_team",
         "observed": {
           "slots": [],
           "reveals": [
@@ -2368,68 +2835,71 @@
         ]
       },
       {
-        "candidate_id": "cand:pet_000001",
-        "species_id": "pet_000001",
-        "name": "喵喵",
+        "candidate_id": "cand:pet_000239",
+        "species_id": "pet_000239",
+        "name": "丢丢",
         "basis": "inferred",
         "types": [
-          "草系"
+          "草系",
+          "地系"
         ],
-        "spe": 33,
+        "spe": 75,
         "spe_source": "catalog:species-race（冻结图鉴的物种值）",
         "spe_status": "validated",
         "speed_band": "slow",
         "band_source": "RC-303 speedBandFor()（工程三分位构造，不是游戏字段）",
         "in_filtered_pool": true,
         "inferred_rank": 1,
+        "threat_level": 5,
+        "threat_rule": "threat.super_effective_against_own_team",
         "observed": null,
         "skills": {
           "known_used": [],
           "possible": [
             {
-              "skill_id": "skill_000246",
-              "name": "抓挠",
+              "skill_id": "skill_000247",
+              "name": "猛烈撞击",
               "grade": "FULL_VERIFIED",
               "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
-              "pointer": "learnsets.pet_000001"
+              "pointer": "learnsets.pet_000239"
             },
             {
-              "skill_id": "skill_000249",
-              "name": "扫尾",
+              "skill_id": "skill_000256",
+              "name": "连续爪击",
               "grade": "FULL_VERIFIED",
               "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
-              "pointer": "learnsets.pet_000001"
+              "pointer": "learnsets.pet_000239"
             },
             {
-              "skill_id": "skill_000264",
-              "name": "重击",
+              "skill_id": "skill_000266",
+              "name": "垂死反击",
               "grade": "FULL_VERIFIED",
               "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
-              "pointer": "learnsets.pet_000001"
+              "pointer": "learnsets.pet_000239"
             },
             {
-              "skill_id": "skill_000273",
-              "name": "休息回复",
+              "skill_id": "skill_000271",
+              "name": "力量增效",
               "grade": "FULL_VERIFIED",
               "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
-              "pointer": "learnsets.pet_000001"
+              "pointer": "learnsets.pet_000239"
             },
             {
-              "skill_id": "skill_000282",
-              "name": "应激反应",
+              "skill_id": "skill_000286",
+              "name": "防御",
               "grade": "FULL_VERIFIED",
               "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
-              "pointer": "learnsets.pet_000001"
+              "pointer": "learnsets.pet_000239"
             },
             {
-              "skill_id": "skill_000284",
-              "name": "精神扰乱",
+              "skill_id": "skill_000294",
+              "name": "取念",
               "grade": "FULL_VERIFIED",
               "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
-              "pointer": "learnsets.pet_000001"
+              "pointer": "learnsets.pet_000239"
             }
           ],
-          "possible_count": 51,
+          "possible_count": 45,
           "pool_tier": "frozen_learnset",
           "grade": "FULL_VERIFIED",
           "grade_legend": "FULL_VERIFIED（冻结学招表）> SIMULATABLE_UNVERIFIED（工程启发式，未实机核验）> UNKNOWN（没有池）",
@@ -2440,7 +2910,7 @@
             "excluded": [],
             "proposed": []
           },
-          "possible_omitted": 45,
+          "possible_omitted": 39,
           "possible_omitted_note": "报告里只贴前 6 条可学技能（省体积）；完整池在 buildOpponentCandidates() 的返回值里"
         },
         "individual_range": {
@@ -2462,72 +2932,67 @@
         "sources": [
           {
             "source_file": "injected:catalog",
-            "pointer": "catalog.featureFor(pet_000001)",
+            "pointer": "catalog.featureFor(pet_000239)",
             "field": "types/spe",
             "value": {
               "types": [
-                "草系"
+                "草系",
+                "地系"
               ],
-              "spe": 33
+              "spe": 75
             },
             "note": "物种级属性与速度：冻结图鉴（公开数据）"
           },
           {
             "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
-            "pointer": "learnsets.pet_000001",
+            "pointer": "learnsets.pet_000239",
             "field": "skill_pool",
             "value": [
-              "skill_000246",
-              "skill_000249",
-              "skill_000264",
-              "skill_000273",
-              "skill_000282",
-              "skill_000284",
+              "skill_000247",
+              "skill_000256",
+              "skill_000266",
+              "skill_000271",
               "skill_000286",
-              "skill_000290",
-              "skill_000306",
+              "skill_000294",
+              "skill_000313",
+              "skill_000324",
               "skill_000325",
               "skill_000331",
               "skill_000339",
-              "skill_000340",
-              "skill_000342",
-              "skill_000343",
-              "skill_000344",
               "skill_000345",
-              "skill_000348",
               "skill_000350",
-              "skill_000351",
-              "skill_000352",
-              "skill_000353",
-              "skill_000359",
-              "skill_000361",
+              "skill_000360",
+              "skill_000362",
               "skill_000363",
-              "skill_000367",
-              "skill_000387",
-              "skill_000425",
-              "skill_000458",
-              "skill_000460",
+              "skill_000366",
+              "skill_000368",
+              "skill_000376",
+              "skill_000434",
               "skill_000461",
-              "skill_000483",
-              "skill_000506",
-              "skill_000535",
+              "skill_000468",
+              "skill_000498",
+              "skill_000499",
+              "skill_000514",
+              "skill_000519",
+              "skill_000520",
+              "skill_000521",
+              "skill_000522",
+              "skill_000543",
               "skill_000566",
-              "skill_000588",
-              "skill_000609",
-              "skill_000614",
-              "skill_000616",
-              "skill_000620",
+              "skill_000593",
               "skill_000621",
-              "skill_000622",
-              "skill_000624",
-              "skill_000640",
-              "skill_000663",
-              "skill_000667",
-              "skill_000705",
-              "skill_000723",
-              "skill_000756",
-              "skill_000775",
-              "skill_000810"
+              "skill_000637",
+              "skill_000642",
+              "skill_000647",
+              "skill_000648",
+              "skill_000655",
+              "skill_000675",
+              "skill_000699",
+              "skill_000727",
+              "skill_000753",
+              "skill_000766",
+              "skill_000767",
+              "skill_000817"
             ],
             "note": "可学技能池（等级 FULL_VERIFIED）：冻结学招表（native + blood + stones 的并集）：判据最硬的一份"
           }
@@ -2547,72 +3012,67 @@
           },
           {
             "source_file": "injected:catalog",
-            "pointer": "catalog.featureFor(pet_000001)",
+            "pointer": "catalog.featureFor(pet_000239)",
             "field": "types/spe",
             "value": {
               "types": [
-                "草系"
+                "草系",
+                "地系"
               ],
-              "spe": 33
+              "spe": 75
             },
             "note": "物种级属性与速度：冻结图鉴（公开数据）"
           },
           {
             "source_file": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json",
-            "pointer": "learnsets.pet_000001",
+            "pointer": "learnsets.pet_000239",
             "field": "skill_pool",
             "value": [
-              "skill_000246",
-              "skill_000249",
-              "skill_000264",
-              "skill_000273",
-              "skill_000282",
-              "skill_000284",
+              "skill_000247",
+              "skill_000256",
+              "skill_000266",
+              "skill_000271",
               "skill_000286",
-              "skill_000290",
-              "skill_000306",
+              "skill_000294",
+              "skill_000313",
+              "skill_000324",
               "skill_000325",
               "skill_000331",
               "skill_000339",
-              "skill_000340",
-              "skill_000342",
-              "skill_000343",
-              "skill_000344",
               "skill_000345",
-              "skill_000348",
               "skill_000350",
-              "skill_000351",
-              "skill_000352",
-              "skill_000353",
-              "skill_000359",
-              "skill_000361",
+              "skill_000360",
+              "skill_000362",
               "skill_000363",
-              "skill_000367",
-              "skill_000387",
-              "skill_000425",
-              "skill_000458",
-              "skill_000460",
+              "skill_000366",
+              "skill_000368",
+              "skill_000376",
+              "skill_000434",
               "skill_000461",
-              "skill_000483",
-              "skill_000506",
-              "skill_000535",
+              "skill_000468",
+              "skill_000498",
+              "skill_000499",
+              "skill_000514",
+              "skill_000519",
+              "skill_000520",
+              "skill_000521",
+              "skill_000522",
+              "skill_000543",
               "skill_000566",
-              "skill_000588",
-              "skill_000609",
-              "skill_000614",
-              "skill_000616",
-              "skill_000620",
+              "skill_000593",
               "skill_000621",
-              "skill_000622",
-              "skill_000624",
-              "skill_000640",
-              "skill_000663",
-              "skill_000667",
-              "skill_000705",
-              "skill_000723",
-              "skill_000756",
-              "skill_000775",
-              "skill_000810"
+              "skill_000637",
+              "skill_000642",
+              "skill_000647",
+              "skill_000648",
+              "skill_000655",
+              "skill_000675",
+              "skill_000699",
+              "skill_000727",
+              "skill_000753",
+              "skill_000766",
+              "skill_000767",
+              "skill_000817"
             ],
             "note": "可学技能池（等级 FULL_VERIFIED）：冻结学招表（native + blood + stones 的并集）：判据最硬的一份"
           }
@@ -2844,7 +3304,7 @@
     "unverified": [
       "未核实：对手**下一手** —— 动作不在公开面，候选只说明「可能是谁 / 可能带什么」，不预测出招",
       "未核实：候选之间的强弱 —— 本协议不给排序、不给权重（权重在 `revealedConditioned()` 里，且只是基线）",
-      "未核实：被预算裁掉的 122 只（按 observed_first（按 slot 升序）→ inferred（①有冻结学招表 ②与已亮明速度档同档 ③species_id 升序））—— 它们的分布留在 budget.pool_summary.dropped_by_band 里，没有消失"
+      "未核实：被预算裁掉的 122 只（按 observed_first（按 slot 升序）→ inferred（①**重大威胁**优先 ②有冻结学招表 ③与已亮明速度档同档 ④species_id 升序）；**已见永不裁剪**，被裁掉的重大威胁必须点名）—— 它们的分布留在 budget.pool_summary.dropped_by_band 里，没有消失"
     ],
     "sample_note": "报告只贴前 2 条候选（共 24 条）：完整候选集合由 buildOpponentCandidates() 返回，报告不复制整份（否则 24 × 45 条技能会把报告变成噪声）"
   },
@@ -2930,13 +3390,13 @@
         "inferred_count": 23,
         "members": [
           "pet_000002",
-          "pet_000001",
-          "pet_000007",
-          "pet_000012",
-          "pet_000016",
-          "pet_000017",
-          "pet_000022",
-          "pet_000023"
+          "pet_000239",
+          "pet_000305",
+          "pet_000306",
+          "pet_000307",
+          "pet_000401",
+          "pet_000402",
+          "pet_000016"
         ],
         "members_omitted": 16,
         "range": {
@@ -3023,7 +3483,7 @@
     "best_scenario_reason": "本模块**不给最优情景**：没有频次数据时「哪个情景更好」没有依据；而且当前存在未消解的降级原因",
     "candidates_budget": {
       "limit": 24,
-      "rule": "observed_first（按 slot 升序）→ inferred（①有冻结学招表 ②与已亮明速度档同档 ③species_id 升序）",
+      "rule": "observed_first（按 slot 升序）→ inferred（①**重大威胁**优先 ②有冻结学招表 ③与已亮明速度档同档 ④species_id 升序）；**已见永不裁剪**，被裁掉的重大威胁必须点名",
       "kept": 24,
       "observed_kept": 1,
       "inferred_kept": 23,
@@ -3038,6 +3498,471 @@
         "dropped_by_band": {
           "slow": 122
         }
+      },
+      "truncation": {
+        "total_candidates": 24,
+        "total_available": 146,
+        "limit": 24,
+        "kept": 24,
+        "dropped": 122,
+        "rule": "observed_first（按 slot 升序）→ inferred（①**重大威胁**优先 ②有冻结学招表 ③与已亮明速度档同档 ④species_id 升序）；**已见永不裁剪**，被裁掉的重大威胁必须点名",
+        "dropped_by_band": {
+          "slow": 122
+        },
+        "dropped_by_threat": {
+          "high": 40,
+          "none": 82
+        },
+        "dropped_threats": [
+          {
+            "candidate_id": "cand:pet_000027",
+            "species_id": "pet_000027",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000027).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000031",
+            "species_id": "pet_000031",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000031).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000040",
+            "species_id": "pet_000040",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000040).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000063",
+            "species_id": "pet_000063",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000063).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000064",
+            "species_id": "pet_000064",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000064).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000065",
+            "species_id": "pet_000065",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000065).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000084",
+            "species_id": "pet_000084",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000084).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000104",
+            "species_id": "pet_000104",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000104).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000132",
+            "species_id": "pet_000132",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000132).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000133",
+            "species_id": "pet_000133",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000133).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000144",
+            "species_id": "pet_000144",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000144).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000218",
+            "species_id": "pet_000218",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000218).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000269",
+            "species_id": "pet_000269",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000269).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000278",
+            "species_id": "pet_000278",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000278).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000376",
+            "species_id": "pet_000376",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000376).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000459",
+            "species_id": "pet_000459",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000459).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000536",
+            "species_id": "pet_000536",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000536).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000520",
+            "species_id": "pet_000520",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000520).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000521",
+            "species_id": "pet_000521",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000521).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000522",
+            "species_id": "pet_000522",
+            "threat_level": 3,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000522).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000030",
+            "species_id": "pet_000030",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000030).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000047",
+            "species_id": "pet_000047",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000047).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000048",
+            "species_id": "pet_000048",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000048).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000049",
+            "species_id": "pet_000049",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000049).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000101",
+            "species_id": "pet_000101",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000101).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000102",
+            "species_id": "pet_000102",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000102).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000167",
+            "species_id": "pet_000167",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000167).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000172",
+            "species_id": "pet_000172",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000172).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000261",
+            "species_id": "pet_000261",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000261).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000262",
+            "species_id": "pet_000262",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000262).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000281",
+            "species_id": "pet_000281",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000281).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000282",
+            "species_id": "pet_000282",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000282).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000283",
+            "species_id": "pet_000283",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000283).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000285",
+            "species_id": "pet_000285",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000285).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000288",
+            "species_id": "pet_000288",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000288).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000308",
+            "species_id": "pet_000308",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000308).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000409",
+            "species_id": "pet_000409",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000409).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000410",
+            "species_id": "pet_000410",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000410).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000456",
+            "species_id": "pet_000456",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000456).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          },
+          {
+            "candidate_id": "cand:pet_000462",
+            "species_id": "pet_000462",
+            "threat_level": 2,
+            "why": "被预算裁掉，但它是**重大威胁**（候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ …）：名单在这里点名，不许静默丢掉",
+            "evidence_ids": [
+              "catalog.featureFor(pet_000462).types",
+              "catalog.scaleByCombo",
+              "publicFacts.own_team[].types"
+            ]
+          }
+        ],
+        "threats_kept": 24,
+        "limit_exceeded_by_observed": false,
+        "threat_rule": {
+          "id": "threat.super_effective_against_own_team",
+          "rule": "候选的某个系别对我方某只成员**克制**（相性表标度 ≥ 8，即 ≥2 倍）⇒ 计 1 点；点数 = 被我方阵容里多少只「怕」它。`threat_level >= 2` 记为重大威胁。",
+          "why": "只用公开事实：候选系别来自冻结图鉴、我方系别是自己的信息、相性表是冻结数据；不引入「谁强谁弱」的强度判断，只回答「它能不能打我队里的谁」"
+        },
+        "note": "裁掉 122 条（分布见 dropped_by_band）；其中重大威胁 40 条逐条点名在 dropped_threats 里 —— 缩减按可解释规则，不隐去重大威胁"
       }
     },
     "candidates_available": true,
@@ -3155,7 +4080,7 @@
       "label": "在线段没有引擎 / 子进程调用，**而且判据真的覆盖到在线入口**（F-03-1）",
       "criteria": "把 `src/coach/opponent-belief.mjs` 的在线段（`ONLINE_SECTION_MARKER` **定义行之后**、`OFFLINE_SECTION_MARKER` **之前**）逐行取出、剥掉行注释与块注释，再对每行做 `FORBIDDEN_ONLINE_PATTERNS[].pattern` 的子串匹配：命中即 `ONLINE_ENGINE_CALL` / `ONLINE_SUBPROCESS_CALL`（红）。判据是**源码结构**，不是注释声明。⚠ 2026-09-30（F-03-1）：旧口径取的是标记串**第一次出现之前**的正文 —— 那正是定义行自己，于是「在线段」只剩 69 行文件头，判据**覆盖为空**却显示干净（假绿）。现在还要查**覆盖**：在线段必须定义全部 `ONLINE_ENTRYPOINTS`，缺一个 ⇒ `ONLINE_COVERAGE_INCOMPLETE`（红）。",
       "actual": {
-        "online_lines": 2706,
+        "online_lines": 2803,
         "scanned_online_entrypoints": 14,
         "missing_online_entrypoints": [],
         "hits": []
@@ -3456,6 +4381,34 @@
       "criterion": "没有真实频次数据时，三种表达（uniform / 情景集合 / 区间）各自都必须带语义声明：`is_probability:false` + 「为什么它是基线/区间而不是概率」；区间必须带量纲与语义、`best_scenario` 必须是 `null`（不给最优结论）；违反 ⇒ `SCENARIO_SEMANTICS_NOT_DECLARED` / `SCENARIO_RANKS_A_SCENARIO`（红）。降级（空候选 / 矛盾证据 / 预算裁剪）必须 `degraded:true` + 逐条原因，且每个情景标 `complete:false`；`available:false` 时不许带任何情景或区间 ⇒ `OUTLOOK_DEGRADED_WITHOUT_REASON`（红）。",
       "expect_code": "OUTLOOK_DEGRADED_WITHOUT_REASON",
       "actual": "[\"[OUTLOOK_DEGRADED_WITHOUT_REASON] outlook.scenarios：降级时每个情景都必须标 complete:false（不许把不完整的情景当完整的给人）\"]"
+    },
+    {
+      "where": "budget.truncation（03.5）",
+      "mutation": "把截断信息整块抹掉",
+      "criterion": "候选被预算裁剪时，产出必须带**完整的截断信息**：候选总数 / 可用总数 / 保留数 / 被截断数与其分布 / 截断依据（可解释规则）；缺项或与 `budget` 不一致 ⇒ `TRUNCATION_INFO_MISSING`（红）。**被裁掉的重大威胁必须逐条点名**（candidate_id + threat_level + why + evidence_ids）：缩减可以裁，但不许隐去重大威胁 ⇒ `THREAT_HIDDEN_BY_TRUNCATION`（红）。「重大威胁」的口径只用公开数据（候选系别 × 我方阵容系别 × 冻结相性表），见 `THREAT_RULE`。",
+      "expect_code": "TRUNCATION_INFO_MISSING",
+      "actual": "[\"[TRUNCATION_INFO_MISSING] budget.truncation：截断了 616 条却没有完整的截断信息（缺 total_available / limit / kept / dropped / rule / dropped_by_band / dropped_by_threat / dropped_threats）：总数 / 保留数 / 被截断数与分布 / 截断依据都要在产出里\"]"
+    },
+    {
+      "where": "budget.truncation（03.5）",
+      "mutation": "截断信息与 budget 不一致",
+      "criterion": "候选被预算裁剪时，产出必须带**完整的截断信息**：候选总数 / 可用总数 / 保留数 / 被截断数与其分布 / 截断依据（可解释规则）；缺项或与 `budget` 不一致 ⇒ `TRUNCATION_INFO_MISSING`（红）。**被裁掉的重大威胁必须逐条点名**（candidate_id + threat_level + why + evidence_ids）：缩减可以裁，但不许隐去重大威胁 ⇒ `THREAT_HIDDEN_BY_TRUNCATION`（红）。「重大威胁」的口径只用公开数据（候选系别 × 我方阵容系别 × 冻结相性表），见 `THREAT_RULE`。",
+      "expect_code": "TRUNCATION_INFO_MISSING",
+      "actual": "[\"[TRUNCATION_INFO_MISSING] budget.truncation：截断信息与 budget 不一致（kept 6 vs 7、dropped 616 vs 616）\"]"
+    },
+    {
+      "where": "budget.truncation（03.5）",
+      "mutation": "把被裁掉的重大威胁名单清空",
+      "criterion": "候选被预算裁剪时，产出必须带**完整的截断信息**：候选总数 / 可用总数 / 保留数 / 被截断数与其分布 / 截断依据（可解释规则）；缺项或与 `budget` 不一致 ⇒ `TRUNCATION_INFO_MISSING`（红）。**被裁掉的重大威胁必须逐条点名**（candidate_id + threat_level + why + evidence_ids）：缩减可以裁，但不许隐去重大威胁 ⇒ `THREAT_HIDDEN_BY_TRUNCATION`（红）。「重大威胁」的口径只用公开数据（候选系别 × 我方阵容系别 × 冻结相性表），见 `THREAT_RULE`。",
+      "expect_code": "THREAT_HIDDEN_BY_TRUNCATION",
+      "actual": "[\"[THREAT_HIDDEN_BY_TRUNCATION] budget.truncation.dropped_threats：有 266 条**重大威胁**被裁掉却没有点名：缩减可以裁，但不许隐去重大威胁（逐条写 candidate_id / threat_level / why / evidence_ids）\"]"
+    },
+    {
+      "where": "budget.truncation（03.5）",
+      "mutation": "点名却不给依据",
+      "criterion": "候选被预算裁剪时，产出必须带**完整的截断信息**：候选总数 / 可用总数 / 保留数 / 被截断数与其分布 / 截断依据（可解释规则）；缺项或与 `budget` 不一致 ⇒ `TRUNCATION_INFO_MISSING`（红）。**被裁掉的重大威胁必须逐条点名**（candidate_id + threat_level + why + evidence_ids）：缩减可以裁，但不许隐去重大威胁 ⇒ `THREAT_HIDDEN_BY_TRUNCATION`（红）。「重大威胁」的口径只用公开数据（候选系别 × 我方阵容系别 × 冻结相性表），见 `THREAT_RULE`。",
+      "expect_code": "THREAT_HIDDEN_BY_TRUNCATION",
+      "actual": "[\"[THREAT_HIDDEN_BY_TRUNCATION] budget.truncation.dropped_threats.cand:pet_000242：点名的重大威胁必须带 why 与 evidence_ids（没有依据的「点名」等于没点）\"]"
     }
   ],
   "audit": {
