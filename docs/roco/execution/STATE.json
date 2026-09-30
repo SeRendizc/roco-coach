@@ -1,8 +1,8 @@
 {
   "schema": "roco-dsh-execution/v1",
-  "updated_at": "2026-09-30T16:35:33+08:00",
-  "active_plan": "00",
-  "next_action": "修 00 残余 4 红（顺序）：① test_effect_coverage.test_report_has_no_simulatable_with_unclaimed_mechanic_spans—— 逐行取 residual_mechanic_spans 与 claimed_words 对照，属「未支持机制不得被当作完整支持」红线；② test_respond_override.test_static_one_hit_is_credited_under_v3（257「应对状态：本技能变为3连击」认领链未闭合）；③ test_respond_reduction_to_heal.test_tier_flips_to_partial_when_ramp_is_undeclared（289 compound 子句）；④ test_tier_verdict_agreement.test_counter_proof（关两闸后 6 条 < 8：先查漏抓的是哪两类，不拟合数字）。四项全绿且隔离复跑通过后：00 记 passed，commit+push，随即读 01-PLAN.md 第一步。",
+  "updated_at": "2026-09-30T16:48:27+08:00",
+  "active_plan": "01",
+  "next_action": "1) 收 22 行差额审计 → 逐行有据则按最小修订把 test_effect_coverage:853 的 306 改钉为实测值（附审计读数）；发现判宽行则收紧对应闸（不许放宽）。2) 反证 6<8 只登记不拟合。3) 01 并行：plan01-recon 先修 ui.legal.enemy 泄漏与三协议对齐，交付需含「仅改对手隐藏个体 ⇒ 公开输入逐字段相同」反例（U1 缺入口则标 blocked）。4) 每步绿了就 commit+push 并推进 00/01 状态。",
   "plan_order": [
     "00",
     "01",
@@ -20,20 +20,22 @@
   ],
   "write_owners": {
     "roco/src/roco_env/coverage.py": "lead",
-    "roco/src/roco_env/service.py": "lead",
-    "scripts/roco/smoke-service-import.py": "lead",
-    "reports/roco/product-execution/**": "lead",
-    "roco/tests/**": "lead（仅在确证判据陈旧时，附独立证据与最小修订理由）",
-    "docs/roco/execution/STATE.json": "lead（单独更新）",
+    "roco/src/roco_env/env.py": "plan01-recon",
+    "roco/src/roco_env/schema.py": "plan01-recon",
+    "roco/src/roco_env/service.py": "plan01-recon（自 lead 让渡）",
+    "scripts/roco/**": "harness-verifier / lead",
+    "reports/roco/product-execution/**": "harness-verifier(harness/) · plan01-recon(01/) · lead(00/)",
+    "roco/tests/**": "仅确证判据陈旧时，附独立证据+最小修订理由",
     "README.md": "codex-planner",
-    "docs/roco/PRODUCT-VISION-AND-ROADMAP.md": "codex-planner"
+    "docs/roco/PRODUCT-VISION-AND-ROADMAP.md": "codex-planner",
+    "docs/roco/execution/STATE.json": "lead（单独更新）"
   },
   "blockers": [
     {
       "id": "B1",
       "what": "玩家常驻版本与整局验收",
       "status": "waiting_external",
-      "reason": "不得重启用户服务；只能只读探活。8765 available:true 只证明探活，不足以宣称常驻代码版本或整局验收。"
+      "reason": "不得重启用户服务；8765 available:true 仅证明探活"
     }
   ],
   "plans": {
@@ -44,21 +46,38 @@
       "code": "fixed",
       "isolated": "passed",
       "player": "observed_healthy_pending_resident_version",
-      "evidence": "reports/roco/product-execution/00/result.json（+ acceptance.md / union-mismatch.txt / isolated-http.txt / skill-detail-http.txt / unittest-full.txt）",
-      "commit": "9a0a573",
-      "remote_sha": "9a0a5732f8981c4f899303bc5434a613a53419f5",
-      "note": "修复前 Ran 669·2F+83E（12 模块 import 挂）⇒ 修复后 Ran 846·4F+0E；427 并集打架 0；隔离 :8899 全链路通过；烟测反证 exit=1"
+      "evidence": "reports/roco/product-execution/00/** + harness/last-run.json（6/6 exit=0）",
+      "commit": "9717e5c",
+      "remote_sha": null,
+      "note": "隔离基线已通过（00 自动续接条款）：import OK · isolated 6/6 · 三栏分列 · 红线（残余片段/SIM）OK。两条残余登记在案，不阻断 01。",
+      "residuals": [
+        {
+          "id": "R-00-a",
+          "test": "test_effect_coverage.test_report_has_no_simulatable_with_unclaimed_mechanic_spans",
+          "reading": "残余片段已归零；同一方法末尾钉 simulatable_entities==306，实测 328（+22）",
+          "status": "逐行审计中（子代理枚举 当前SIM−HEAD SIM 差额）",
+          "rule": "不拟合 306：审计通过才按最小修订改钉数字"
+        },
+        {
+          "id": "R-00-b",
+          "test": "test_tier_verdict_agreement.test_counter_proof_disabling_the_shared_gates_brings_them_back",
+          "reading": "关两闸后打架 6 条，判据要求 >=8",
+          "status": "未拟合；已确认是另有闸在兜的覆盖面问题，不是恒真",
+          "rule": "不许为凑数量放宽或收紧闸"
+        }
+      ]
     },
     "01": {
       "title": "公开观察与决策快照契约",
-      "status": "pending",
-      "step": null,
+      "status": "in_progress",
+      "step": "01.1/01.2",
       "code": "unverified",
       "isolated": "unverified",
       "player": "unverified",
-      "evidence": null,
-      "commit": null,
-      "remote_sha": null
+      "evidence": "reports/roco/product-execution/01/recon.md（428 行）+ raw-*.json + probe-*.py",
+      "commit": "9717e5c",
+      "remote_sha": null,
+      "note": "三条公开协议不一致（public_planner_state / ui_public_view / observation_for）；最大泄漏 ui.legal.enemy（9/9 seed 复原对手真实四招 1.000）优先修；opening_roster_revealed/match_id/event_seq 全仓 0 命中；event_seq 可由 state_version=len(state.events) 派生；U3 已裁决（battle_new 发 + state.events 留同源记录）；待改钉的 4 条历史断言见 recon §5。"
     },
     "02": {
       "title": "开局预览与已见阵容回看",
