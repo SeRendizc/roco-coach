@@ -54,7 +54,8 @@
     "README.md": "codex-planner",
     "docs/roco/PRODUCT-VISION-AND-ROADMAP.md": "codex-planner",
     "docs/roco/execution/STATE.json": "lead（单独更新）",
-    "_git_index_and_commits": "lead 独占（成员禁止 git 写命令，避免 index 竞争）"
+    "_git_index_and_commits": "lead 独占（成员禁止 git 写命令，避免 index 竞争）",
+    "_跨机复验（只读）": "lead-mac（macOS + Python 3.9.6 · agent-coop lead-mac）：拉指定 commit → 独立跑判据 → 报差异；**只读、只报、不改本仓库任何写域、不推产品分支**（见 D-19）",
   },
   "blockers": [
     {
@@ -120,19 +121,19 @@
     },
     "03": {
       "title": "对手候选与证据更新",
-      "status": "in_progress",
-      "step": "03.1–03.4 全部冻结入库；F-03-3（多解假矛盾无断言）与 F-03-4（「候选集合不可用」降级无原因断言）随 03.5 一批修；03.5 进行中",
-      "code": "partial（03.2 候选协议 · 03.3 证据更新 · 03.4 情景集合与范围；03.5 未做）",
-      "isolated": "unverified（本地 34/34 · 相关 32/32；verifier 对 03.3/03.4 均判「合格」并各抓出 1 条覆盖缺口）",
-      "player": "unverified",
-      "evidence": "reports/roco/product-execution/03/{03.1-recon.md,03.1-wrapup.md,03.2-candidates.md,03.2-F-03-*.md,03.3-evidence-update.md,03.4-scenario-outlook.md,raw-03.*,verify-03.1-*.md,verify-03.2*.md,verify-03.3.md,verify-03.4.md} + docs/roco/RC-604-OPPONENT-BELIEF.md + reports/roco/rc604/opponent-belief.json（只由生成器写）",
-      "commit": "a821fe2（03.4；03.3 为 0d96ce3）",
-      "remote_sha": "a821fe2866f39317a08217f5c9c7e1552fa3b496"
+      "status": "passed",
+      "step": "03.1–03.5 + F-03-1…F-03-4 全部落地；收口验收 6 条变异 5 红 1 无效、无存活缺口；03-PLAN 通过条件 3/3",
+      "code": "fixed",
+      "isolated": "passed（本地 37/37 + 相关契约 32/32；verifier 在冻结副本上逐批复验，累计抓到 3 条真缺口且全部闭合；报告重生成逐字节一致）",
+      "player": "unverified（本项为引擎/Node 侧契约，无玩家界面改动；上游 01/02 的 player 口径仍以各自结论为准）",
+      "evidence": "reports/roco/product-execution/03/{03.1-recon.md,03.1-wrapup.md,03.2-candidates.md,03.2-F-03-1-online-section.md,03.2-F-03-2-contradiction-guards.md,03.3-evidence-update.md,03.4-scenario-outlook.md,03.5-budget-and-threats.md,raw-03.*,verify-03.1-*.md,verify-03.2*.md,verify-03.3.md,verify-03.4.md,verify-03-closeout.md} + docs/roco/RC-604-OPPONENT-BELIEF.md + reports/roco/rc604/opponent-belief.json（只由生成器写）",
+      "commit": "2e241d0",
+      "remote_sha": "2e241d083ecd029244c34f0cbde9811802c844cb"
     },
     "04": {
       "title": "有限分支比较与稳健动作排序",
-      "status": "pending",
-      "step": null,
+      "status": "in_progress",
+      "step": "04.1 只读勘察（待派 owner）",
       "code": "unverified",
       "isolated": "unverified",
       "player": "unverified",
@@ -485,6 +486,18 @@
       "what": "为什么会有「实现没冻结就进下一步」以及怎么防（O-15）",
       "decision": "立规矩：**每一步实现完成 ⇒ 先报冻结（附 `git status --porcelain` + 涉及文件 sha256）⇒ Lead 提交并回「已冻结在 <sha>」⇒ 才允许动下一步**；改钉/改实现前必须先冻结。已同步给 plan03-belief 与 harness-verifier。同时把 R2 口径定为「**任何带 `weights` 的对象**都必须有 basis + is_probability:false + baseline_declaration」（原检查只覆盖 `weights.rows` 非空分支，uniform 信念漏检 ⇒ 补 red-proof）",
       "by": "lead"
+    },
+    {
+      "id": "D-17",
+      "what": "03 收口（是否标 passed、可否进 04）",
+      "decision": "**passed**。依据：五次冻结件逐批独立复验合格；03-PLAN 通过条件 3/3（来源可追溯 · 隐藏真值不改公开史输出（verifier 自己构造的逐字段相同读数）· 降级明确且不装概率）；收口验收 6 条变异 5 红 1 无效、**无存活缺口**；累计抓到 3 条真缺口（条件③降级无断言 / 多解假矛盾无断言 / 候选集合不可用分支无断言）且全部在后续冻结件闭合。player 栏保持 unverified（本项无界面改动）",
+      "by": "lead"
+    },
+    {
+      "id": "D-19",
+      "what": "跨机协作分工（lead-mac 21:55 提议，按能力轴而非计划编号）",
+      "decision": "**同意**并登记：① 产品实现 + 真机验收 = lead-win（Lead 令牌持有者，独占 STATE.json）；② **跨机、跨 OS 独立复验 = lead-mac**（macOS + Python 3.9.6，**只读、只报、不改任何写域、不推产品分支**）—— 与 harness-verifier 的区别是「不同机器 + 不同解释器」，专门覆盖 OS/解释器差异（本轮已实证：Windows 抓到 `os.kill(pid,0)` 那个 P0）；③ 规划/路线 = codex-planner。首个跨机复验切片 = **`2e241d0`（03 收口）**，交付物：`node --test tests/roco-opponent-belief.test.js`（37/37）+ 相关契约 32/32 + **Python 3.9 上引擎侧反例①重放**（基准 318 与 7 配置全等）+ 全量 Python 套件在 mac 上的读数，逐条给差异",
+      "by": "lead（回应 lead-mac 提议）"
     }
   ]
 }
