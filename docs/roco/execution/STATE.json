@@ -530,8 +530,22 @@
       "owner": "lead（登记）· 全队（读数口径）",
       "status": "closed",
       "rule": "**跨平台读数必须写明在哪个 OS/解释器上跑的**；某一侧无法真跑时，用**等价读数**并标明性质（不许假装跑过）；Node 判据在本机只能在 Windows 侧跑，POSIX 等价性由 lead-mac 的跨机复验覆盖"
+    },
+    {
+      "id": "O-36",
+      "what": "**一次未复现的瞬时红**：Lead 复跑 04.3 时，定向三模块一起跑出现 `Ran 56 · FAILED (failures=7)`，而全量 `Ran 910 · 1F + 2S` 正常、实现者同命令声称 OK；随后 3 次复跑（含**双进程并发**）全部 `Ran 56 · OK` ⇒ **原因未定**",
+      "evidence": "Lead 的 `lead-verify-043.sh`（全量后紧跟定向，机器上同时有其他成员在跑 Node 判据与写 `reports/*.json`）⇒ `Ran 56 · FAILED (failures=7)`；`lead-diagnose-043.sh` 两种模块顺序各一次 ⇒ 均 `Ran 56 · OK`；`lead-concurrency-probe.sh` 双进程并发 + 对照 ⇒ 三次全 OK。**Lead 自己的器材缺陷**：当时脚本用了 `| tail -3`，**失败用例名没被捕获** ⇒ 无法定位是哪 7 条",
+      "owner": "lead（登记 + 修器材）· plan04-engine（审计新判据是否时序敏感）",
+      "status": "registered",
+      "rule": "① **任何套件运行都必须捕获 `FAIL:`/`ERROR:` 用例名**（只留汇总行等于没有证据）—— 这条对 Lead 自己也适用；② 新增判据**不得依赖挂钟**（超时/耗时类断言要么注入时钟、要么留足余量并在报告里写明「这是时序敏感判据」）；③ 未复现的红**如实登记为未定**，不许当噪声忽略、也不许当已修"
+    },
+    {
+      "id": "D-33",
+      "what": "04.3 卡住的「band → 动作级情景」映射归属裁决",
+      "decision": "**在 03 侧新增独立导出 `buildActionScenarios()`（协议 `rc604-opponent-action-scenarios/v1`），04 侧只消费**；**不**让 04.3b 自己映射（会复制 03 的口径，正是 D-21 ① 否掉的那条），**也不改** `buildScenarioOutlook` 现有语义（band 分组是 03.4 的交付、已被判据钉住）。依据（plan03-belief 实测，只读回答）：observed 候选 **6/6 有位次**（`view.seen_roster[].slot` + `opponent.active.slot`），inferred **18/18 没有 slot** ⇒ 位次在公开面**不可判定**（bench 只有 `{slot,fainted}`、无 `pet_id`，G9）；band 成员构成 fast 4（已见2/未见2）· mid 12（已见2/未见6）· slow 8（已见2/未见6），**场上那只只在 band:slow** ⇒ 同一 band 既含可留场也含只能靠换人上场的成员，**按 band 二选一就会写出「必然留场」的错结论**。硬证据只有 `readOpponentEvidence(view).observations.used_skills[]`。约束：可学池必须标 `learnable_pool_hypothesis`（或进 `unavailable[]`）· **留场与换人并存、绝不塌缩**（两向变异）· 推断位次/未出技能/是否换人/后备血配(P3)/区间转概率 **一律进 `unavailable[]`**。任务 task-34",
+      "by": "lead（依据 plan03-belief 的实测）"
     }
-  ],
+  ]
   "handoff": {
     "to": "下一台电脑 / 下一个 DSH 会话",
     "doc": "reports/roco/product-execution/HANDOFF-2026-09-30-TO-NEXT-MACHINE.md",
