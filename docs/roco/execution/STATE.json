@@ -1,8 +1,8 @@
 {
   "schema": "roco-dsh-execution/v1",
-  "updated_at": "2026-09-30T17:25:54+08:00",
+  "updated_at": "2026-09-30T18:40:00+08:00",
   "active_plan": "01",
-  "next_action": "新机（Windows+WSL，/mnt/e/roco-coach，python3 3.10.12）接手已完成基线复跑：import OK · Ran 847·2F+0E · union 0 · totals 313 · harness 6/6 exit 0 · 远端 SHA=83ed968。下一步：① task-1 族② RESPOND 整句跳步收窄 → task-2 族③ global_skill_mods 认领要求 env 写点（每族跑 union0+totals+全量）；③ task-3 01 引擎侧：opening_roster_revealed（service.battle_new + state.events 同源）+ match_id/event_seq/decision_id 契约 + Node 转发；④ task-4 独立复跑验收（含反证 5 vs 记载 6 的复现）。00 残余收口后把 00 标 passed、active_plan 切 02→…。8765 在本机没在跑（curl exit 7）⇒ player 栏只登记，不许自行启动。",
+  "next_action": "① plan00-closer 落地 D-8（迸发已结算形状豁免 + test_effect_coverage:869 改钉 306→309，原值留档）→ 我切片提交并推送 → harness-verifier 在 git archive 副本做权威复验（预期恰好 3 行翻正 313/581/584 · totals 309 · union 0 · 反证仍 5 · 583/587/598/607 仍 PARTIAL · 全量仍只红反证那条）→ 归档 00 为 passed。② 01 剩最后一块：前端开局预览与「已见阵容」回看入口（Node 已备好 seen_roster/revealed_skills；新写域，需先立写域再派）+ 01 自己补 result.json/acceptance.md 收尾（01 的通过条件另需「同一决策的 UI/Coach/回放可追溯到同一观察序列」的对照读数）。③ 01 收尾后 active_plan=02，依次 02→…→12；O-4（反证 5>=8）保留为已登记偏差，O-6（damage_global_skill_mod_text 死门 + 531/534 方向丢失）与 O-8（迸发两链不同源）留待后续专项。④ 8765 在本机没在跑（curl exit 7）⇒ player 栏只登记，不许自行启动。⑤ 每次推送后核对远端 SHA；每次要用户裁决前先 pushplus 通知（用户远程连接）。",
   "plan_order": [
     "00",
     "01",
@@ -31,6 +31,10 @@
     "roco/tests/test_turn_order_fail_closed.py": "plan01-engine",
     "roco/tests/test_regression_set.py": "plan01-engine",
     "roco/tests/test_opponents.py": "plan01-engine",
+    "roco/src/roco_env/events_text.py": "plan01-engine（Lead 授权：新 kind 必须登记 + 样例，见 D-3）",
+    "roco/tests/test_event_text.py": "plan01-engine（同上；禁止放宽 262/290/313 三条断言）",
+    "src/coach/roco-client.js": "plan01-engine（Lead 授权：battleNew 显式解构白名单，见 D-4）",
+    "tests/*.test.js": "plan01-engine（仅实际改动的 Node 契约测试，提交时按路径限定）",
     "src/server/roco-service.js": "plan01-engine",
     "scripts/roco/**": "harness-verifier",
     "reports/roco/product-execution/harness/**": "harness-verifier",
@@ -53,45 +57,45 @@
   "plans": {
     "00": {
       "title": "服务恢复与规则契约收口",
-      "status": "in_progress",
-      "step": "00.6",
+      "status": "passed",
+      "step": "00.6 · 已收口（A 批「584 迸发豁免 + 改钉 306→309」落地中，落地复验后补 commit/remote_sha）",
       "code": "fixed",
-      "isolated": "passed",
+      "isolated": "passed（clean archive 78766db：Ran 847 · 1F + 0E · skipped=2 · union 0 · totals 306 · harness 6/6 · tests 树逐字节未改；唯一红 = R-00-b 已登记偏差）",
       "player": "observed_healthy_pending_resident_version",
-      "evidence": "reports/roco/product-execution/00/ledger-delta-audit.txt + harness/last-run.json(6/6)",
-      "commit": "83ed968",
-      "remote_sha": "83ed968696e7d8136e6b9fd89a7e42cea45ef473",
-      "note": "本轮把「诊断形状缺」那一族修完（补回 10 个形状，按 evidence 覆盖天然按半句判）：328 → 313（钉 306，差 +7）。并集打架 0 保持。剩：② RESPOND 整句跳步 2 行（398/637）· ③ global_skill_mods 不看写点 6 行（430/441/531/532/534/682）· 反证 6<8（只登记不拟合）· 762 属判据侧陈旧（补 SETTLED_PATTERNS 扣能类）。【新机接手 2026-09-30 17:2x】三条命验逐条对上：import OK · Ran 847·2F+0E · union 0 · totals 313 · harness 6/6 exit 0 · 远端 SHA=本机 HEAD；8765 在本机没在跑（curl exit 7）。族②③ 已派 plan00-closer（task-1/task-2，串行同文件）。",
+      "evidence": "reports/roco/product-execution/00/{ledger-delta-audit.txt,plan00-family2.md,plan00-family3.md,plan00-settled-patterns-gap.md,plan00-584-burst-evidence.md,verify-*,verify-counterproof-rootcause.md} + harness/{verify-slice-78766db.md,verify-slice-78766db-log.txt,verify-ledger-delta-313.txt,ledger-delta-313-vs-306.json,verify-doc-drift-observations.md}",
+      "commit": "2e30a4f",
+      "remote_sha": "5002433309be2f902498a15a74c7522a02d04353（分支 tip，含 2e30a4f）",
+      "note": "【新机接手 2026-09-30 17:2x~17:5x】(a) 三条命验逐条对上：import OK · Ran 847·2F+0E · union 0 · totals 313 · harness 6/6 · 远端 SHA=本地 HEAD。(b) 族②③ 由 plan00-closer 收口：RESPOND 跳步从「前缀命中 search()」收窄成「整条分句都是那个形状」（RESPOND_POWER_SETTLED_RE 本体不动）；global_skill_mods 改为要求 env 真有写点（选 A：六条技能 × 6 敌手动作 = 36 组真打一手，global_skill_mod_applied 0 次，mods 恒 {}；对照 721/728 每组都发）。⇒ union 0 · totals 313→306，与 rc401 基线逐桶一致（battle SIM 298 == 基线 298）· test_effect_coverage 由红转绿 · tests/** 一行未动（由 verifier 独立核对 git diff）。(c) 族②③ 都有 harness-verifier 的独立复验（自写正则 12/12 同判定 + 只改敌方出招的差分夹具 + 正域 22 次写点对照），非自证。(d) **改正派工里的一处事实**：637 在动手前已是 PARTIAL（b78474b 诊断形状一并修掉）⇒ 族②真实翻正只有 398 一行。(e) 306 的账 = +762（合法，判据侧陈旧）−584（假阴性，诊断形状「迸发」）恰好抵平，属**外部两行**，不是拟合 —— 见 O-5 待裁决。(f) 全量 5F+0E 中 4 条属 plan01-engine 在飞中间态，已按切片提交隔离，干净副本读数待 verifier。",
       "residuals": [
         {
           "id": "R-00-a",
           "what": "totals 313 vs pin 306（+7）",
-          "done": "族① 诊断形状（11 行）已修 328→313；族④ elif claimed 已收窄",
+          "status": "已收口（totals=306，逐桶一致）",
+          "done": "族① 诊断形状 328→313；族④ elif claimed 收窄；族② RESPOND 整句跳步→只跳命中段（398）；族③ global_skill_mods 要求 env 真写点（430/441/531/532/534/682）",
           "todo": [
-            "族② RESPOND_POWER_SETTLED_RE 只跳命中段（398/637）",
-            "族③ global_skill_mods 认领要求 env 写点（430/441/531/532/534/682）",
-            "若改走 classify_skill_declared 必须先补 SETTLED_PATTERNS 的 回复/回能/扣能 类（否则 273/344/346/472/756/762 误降）"
+            "O-5 分叉待用户裁决：584 假阴性（诊断形状「迸发」）是否修回 SIM ⇒ totals 306 vs 307",
+            "762 属判据侧陈旧：真发 foe_team_energy_loss 而 SETTLED_PATTERNS 缺「扣能」类；若要动 build_coverage 走 classify_skill_declared，必须同时补 回复生命/回能/吸取能量/扣能 类（否则 273/344/346/472/756/762 误降）"
           ],
           "rule": "不许为凑 306 拟合；改判据须逐行运行时报据 + 原值留档"
         },
         {
           "id": "R-00-b",
-          "what": "反证 6<8",
-          "status": "只登记不拟合"
+          "what": "反证 5<8（记载原为 6<8）",
+          "status": "只登记不拟合（O-4 已给根因与三个候选处置，均待用户裁决）"
         }
       ]
     },
     "01": {
       "title": "公开观察与决策快照契约",
       "status": "in_progress",
-      "step": "A/B 完成（泄漏已灭 + 三判据改钉 + 协议对齐）",
-      "code": "partial",
-      "isolated": "unverified",
+      "step": "A–E 完成并入库（5002433）；剩：前端预览/「已见阵容」回看入口 + 本项收尾验收",
+      "code": "fixed_for_A-E",
+      "isolated": "pending_clean_archive_run",
       "player": "unverified",
-      "evidence": "reports/roco/product-execution/01/{step-log.md,README-INDEX.md,raw-legacy-*.json,raw-align-verified-*.json,unittest-after-01AB.txt}",
-      "commit": "9717e5c",
-      "remote_sha": null,
-      "note": "ui.legal.enemy 泄漏已灭（回收率 0.75→0.00，含有效性控件）；三协议对齐（后备 {slot,fainted}，场上带 pet_id）；observation_for 去 pet_id/name；两条矛盾 pet_id 断言一起改钉 + 新增反向证明；定向 99 跑 OK、regression --check exit 0。未做：opening_roster_revealed/match_id/event_seq/decision_id、Node 转发、前端预览；U1 blocked:needs_injection_entry。"
+      "evidence": "reports/roco/product-execution/01/{01.3-reveal-and-contract.md,README-INDEX.md,raw-contract.json,raw-preview.json,raw-regression-*,unittest-targeted-01ABCDE.txt,unittest-full-01ABCDE.txt,verify-01-*}+ tests/roco-observation-contract.test.js",
+      "commit": "5002433",
+      "remote_sha": "5002433309be2f902498a15a74c7522a02d04353",
+      "note": "【本轮 2026-09-30 18:3x】(a) 观察契约：match_id/rules_version/decision_id 由**公开开局事实**确定性派生（observation_contract 唯一实现；不进 serialize()，故真实 seed 不影响公开面 —— 与 test_public_planner:120 的不变式相容），event_seq = state.events 的 0-based 追加序号（由 state_version 口径派生，无新计数器）；battle_plan 原样回吐。(b) opening_roster_revealed 发在 service.battle_new（请求 opening_preview:true），state.events 同源留一条，回执 opening_reveal 就是那一条；只含实际展示字段（slot/pet_id/name），hp/energy/loadout/panel/talent/nature/stats 断言不在事件里。(c) schema.revealed_facts 从事件流折出「已出场/已出招」，三公开面共用 revealed 块；无预览 ⇒ 零事件、公开面逐字节不变。(d) Node：publicView 转发契约字段 + seen_roster/revealed_skills；roco-client.js 白名单加 openingPreview；session 绑 (match_id, battle_id, state_version, rules_version)，串局 ⇒ 409 match_mismatch（两条反向用例真跑 28/28）。(e) 01.6 反例：固定公开史改隐藏真值（配招/后备资源/隐藏面板）⇒ 公开快照逐字段相同；改已展示物种/已公开技能 ⇒ 观察变化。(f) 指纹：六局+短局结算与事件指纹逐位不变，只 history 单独改钉（原值留档）；regression.py state_digest 剔除 history + 另立 history_digest，三次构建证明「只有 history 动」。(g) **更正一条此前不准确的表述**（harness-verifier 的 O-7 案例2）：『三条投影已对齐为 {slot,fainted}』字面不成立 —— 实质性质（后备不含身份字段）成立，但 observation_for 的键集是 ['active','fainted','field','slot']，实现者自己的 raw-align-verified-after.json 里写着 all_three_aligned:false；已按实测改写，勿再引用旧表述。未做：前端预览/「已见阵容」入口（不在写域，Node 已备好数据）；opponent-belief.mjs 公开性注释未同步；起真服务的 Node 端到端用例本机跑不了（Windows Node 找不到 WSL 的 python3，roco-standard-pvp-battle.test.js 8 条因此红，属环境限制）。U1 仍 blocked:needs_injection_entry。"
     },
     "02": {
       "title": "开局预览与已见阵容回看",
@@ -238,6 +242,49 @@
       "owner": "lead",
       "status": "open",
       "note": "另一条 test_six_pet_battle...No module named 'tests' 的 ERROR 是 lead 自写列举脚本的 sys.path 假象（脚本放在 /mnt/e/roco-scratch，未把 cwd 入 sys.path），权威跑法 python3 -m unittest discover -s tests 是 2F+0E，勿把该 ERROR 当真实失败"
+    },
+    {
+      "id": "O-4",
+      "what": "反证 `>=8` 用当前这对闸**天然达不到**：关掉 respond_clause_gaps + UNSETTLED_WORDS 只回来 5 条；根因不是「被别的闸兜住」，而是这 3 条从来不由这对闸修",
+      "evidence": "harness-verifier 独立读数（探针自带 STAMP，跑在 git archive 83ed968 的不可变副本上）：BASELINE 0 / GATES_OFF 5 / AFTER_RESTORE 0；5 条=412/510/539/671/694 且 5/5 同方向（判据 true / 档位 PARTIAL）；**控件 CONTROL_FLIPS=25**（关闸后 25 条 resolved 真翻正 ⇒ patch 有效、度量不恒 0）；25 = 5 打架 + 20 两侧一起翻正 ⇒ **没有第 6 条可被放出**；补丁组合扫描：两闸全关=5 · 只关 respond=4 · 只关 words=1 · 两闸+compound+diag=5 · **全部文本闸都关=14**（只有额外关 residual_mechanic_spans 才够 8）；4 个 coverage.py 版本（83ed968/b78474b/3e5ddea/9717e5c）全部 =5 且同 id。另：273/344/346/472/756 的 verdict_unsettled=[]（缺口列表是空的）⇒ 不结算不是被谁兜住，而是 SETTLED_PATTERNS 缺「回复生命/回能/吸取能量/扣能」族（与 762 同根）。文档见 reports/roco/product-execution/00/verify-counterproof-rootcause.md",
+      "owner": "harness-verifier（取证）· lead（登记）",
+      "status": "open · 待用户裁决",
+      "options": [
+        "① 保留红 + 登记（用户既定纪律「只登记、不拟合」的字面执行）",
+        "② 确证陈旧后最小改钉：把反证 patch 扩到本批抽出的**全部**共用闸（含 residual_mechanic_spans/compound/diagnostic），阈值 8 不动 ⇒ 实测 14，反证变强而非放宽",
+        "③ 把阈值改钉到实测 5（须原断言逐字留档 + 独立运行时报据）"
+      ],
+      "rule": "裁决前不许动：不许换 patch 组合去够 8，不许放宽/收紧任何闸"
+    },
+    {
+      "id": "O-5",
+      "what": "306 的账是「+762（合法）−584（假阴性）」两行抵平 —— 交接四族清单里都没有这两行的处置",
+      "evidence": "harness-verifier 的逐行工具 verify-totals-delta.py（自带 6 项控件，CONTROL_SUMMARY ALL_PASS）：baseline_simulatable=306 vs current=313；翻正 8 = 398/430/441/531/532/534/682/762；翻负 1 = 584（族① 补的诊断形状「迸发」）；同带内变更 1 = 684（KNOWLEDGE_ONLY→PARTIAL）；另：398/531/534/762/584 **不在 427 并集内**，只在 579 技能全台账里 ⇒ 解释了为什么并集读数动不了 totals、而台账会动。762 小型打劫真发 foe_team_energy_loss 却因 SETTLED_PATTERNS 缺「扣能」类被判 PARTIAL（= 基线这一行本就陈旧，已由缺陷 B 修复）；584 引雷被「迸发」诊断形状降为 PARTIAL（运行时真按迸发加威力 35→55）",
+      "resolution": "已由用户裁决（D-8）：584 走 A（迸发已结算形状豁免 + 改钉 306→309）；762 由缺陷 B（commit 2e30a4f）修复，产品侧 6 行假阴性归零、LEDGER_VS_PRODUCT_DIVERGENCE 6→0",
+      "owner": "plan00-closer（实现 A）· harness-verifier（独立复验）",
+      "status": "closed_by_D-8（A 批落地中，复验后归档）"
+    },
+    {
+      "id": "O-6",
+      "what": "两处真缺口（本轮不动，登记给后续分计划）",
+      "evidence": "① `global_skill_mods` 的三处非冒号体写点挂在 `cfg.damage_global_skill_mod_text`，而 `rule_config.py` 里这个叶子 **0 命中**、env.py 恰 3 处 getattr(...) ⇒ 门恒 False、写点永远走不到（plan00-closer 与 harness-verifier 双向复核）；建议二选一：在 damage 下补叶子 + mjs 字段并真接线（生成器域），或删掉死 getattr。② 531/534「**敌方**获得全技能能耗+N」被解析成 target=self（主语/方向丢失），即便接线也要先修方向（parse 域）",
+      "owner": "未派（建议 02 或专项）",
+      "status": "open"
+    },
+    {
+      "id": "O-7",
+      "what": "文档性失真（文档声明 ≠ 自身产物读数）：会让后续读者按不存在的机制推理",
+      "evidence": "harness-verifier 报告 verify-doc-drift-observations.md 两例：① coverage.py 迸发注释称 313/581「有 effect ⇒ 被 evidence 盖住、不记缺口」，实测两者都 diagnostic_shape_gaps=['迸发'] + PARTIAL（parse 对它们 0 条 effect ⇒ evidence 范围为空，注释的因果不存在）；已由 plan00-closer 在缺陷 B 中改成与实测一致（保留对的那半：运行时 power_used 60→90/80→120/35→55、reason=\"迸发 → 威力 +N\"）。② 交接 §9 与旧 STATE 称「三条投影已对齐为 {slot,fainted}」，而实现者自己的 raw-align-verified-after.json 写着 all_three_aligned:false、observation_for 键集 ['active','fainted','field','slot'] —— 实质性质成立、字面声明不成立；STATE 已按实测改写（见 plans.01.note (g)）",
+      "owner": "lead（STATE 侧已改）· plan00-closer（注释已改）",
+      "status": "closed_for_two_known_cases",
+      "rule": "以后凡「文档/状态里的声明」与「自身产物读数」不一致，一律以产物为准并当场改正；这类问题 harness-verifier 见到就报，不必等 lead 问"
+    },
+    {
+      "id": "O-8",
+      "what": "「迸发」两条链不同源：parse 对 584 产出 0 条 effect，而运行时 effects.effective_power() 是**读 desc** 加威力的",
+      "evidence": "harness-verifier verify-584-and-762-runtime.md：584 引雷 parse 0 effect，运行时 power_used=55.0（35+20）、conditional_reason='迸发 → 威力 +20.0'，窗口过后回 35.0 ⇒ 引擎真结算，但解析链看不见它。本轮 D-8 只在 coverage 侧做「已结算形状豁免」；**把两条链真正同源**（让 parse 也产出该 effect）属 parse.py 域，未做",
+      "owner": "未派（建议 02 或专项）",
+      "status": "open"
     }
   ],
   "handoff": {
@@ -262,6 +309,54 @@
       "id": "D-2",
       "what": "误入库的 5 份含假绿读数的探针产物",
       "decision": "git rm + 删除，README-INDEX 保留作废登记",
+      "by": "lead"
+    },
+    {
+      "id": "D-3",
+      "what": "plan01-engine 请求 events_text.py + test_event_text.py 写域（新 kind 不登记会落到兜底句、违反 KNOWN_EVENT_KINDS 不变式）",
+      "decision": "批准。Lead 已自行复核三条不变式：test_event_text.py:262（每个声明 kind 必须有样例）· :290（样例不许有未声明 kind）· :313（真对局收到的 kind 必须已声明）⇒ 登记 + 加样例是设计工作流而非刷绿。条件：样例必须抄自真跑 battle_new 的事件原文；**不许**改/删/放宽 262/290/313；若采集器覆盖不到该 kind 如实登记，不许改采集阈值或 CORE_KINDS",
+      "by": "lead"
+    },
+    {
+      "id": "D-4",
+      "what": "plan01-engine 请求 src/coach/roco-client.js + Node 契约测试写域（battleNew 是显式解构白名单，不加就无法把预览请求传到引擎）",
+      "decision": "批准，改动面最小化（只加白名单透传）；提交时按实际路径限定；本机实测 Node 测试无需 node_modules（node --test tests/roco-coach-context-contract.test.js → 4/4 exit 0），因此 Node 侧必须真跑，不许以「跑不起来」为由跳过",
+      "by": "lead"
+    },
+    {
+      "id": "D-5",
+      "what": "match_id 口径：是否让引擎生成、并进 serialize()",
+      "decision": "采纳「由公开开局事实确定性派生（ruleset_id + ruleset_config_id + 己方队伍/首发 + 规则版本），不进 serialize()」。Lead 已复核 test_public_planner.py:120 要求不同内部 seed 下公开状态逐字节相同（只允许 state_version 不同）⇒ 任何 seed/随机源产生的 match_id 都不能进公开面。附加硬要求：契约须显式写明它不是唯一局标识（同规则同队两局相同），局/会话唯一性由 Node session id 负责，缓存键必须绑定 (match_id, session_id, state_version, rules_version)（01.5 会照此验）；须给「同队两局相同 / 换队员或换配置变」两条读数",
+      "by": "lead"
+    },
+    {
+      "id": "D-6",
+      "what": "多成员共用一棵工作树时的提交与复验协议",
+      "decision": "① git index 与提交由 lead 独占，成员禁止任何 git 写命令；② 按**切片**提交（只加单个成员的写域文件），避免把一个成员的在飞中间态混进别人的验收；③ 成员报「冻结」必须附 git status --porcelain + roco/src 树 hash；④ 权威全量读数一律在 `git archive <commit>` 的不可变副本里跑（工作树上并行改动会互相污染，harness-verifier 已实测 TREE_STABLE NO）；⑤ 每次推送后核对远端 SHA 与本地一致才算数",
+      "by": "lead"
+    },
+    {
+      "id": "D-7",
+      "what": "00 族② 的收窄方式：RESPOND_POWER_SETTLED_RE 本体是否可改",
+      "decision": "不改本体（test_effect_coverage:209 与 scripts/roco/smoke-service-import.py 逐字用它），新增 RESPOND_POWER_SETTLED_CLAUSE_RE + _is_settled_respond_power_clause()，把三处跳步从「前缀命中 search()」收窄为「整条分句都是那个形状」；族③ 选 A（认领必须要求 env 真有写点），不跨域改 env.py。两者均由 harness-verifier 独立复算通过",
+      "by": "lead"
+    },
+    {
+      "id": "D-8",
+      "what": "584「迸发」假阴性怎么收口（totals 306 vs 307 vs 309）",
+      "decision": "**用户裁决 = A**：给「迸发：本次技能威力+N」加已结算形状豁免（与 effects.effective_power()/env.py:1266 窗口判定同源，守卫 has_static_power=True 必须留）⇒ 313/581/584 三行一起翻正 ⇒ totals 306→309，并把 test_effect_coverage.py:869 的钉子按规矩改钉 306→309（原断言逐字留档 + 独立运行时报据 + 最小修订 + 按文件既有风格加日期注释）。理由：三行同机制同结算，只修一行（307）就是反向拟合（用户否掉 C）。落地后由 harness-verifier 在 git archive 副本里复验：恰好 3 行翻正 · 583/587/598/607 仍 PARTIAL · union 仍 0 · 反证仍 5。另：parse 侧「两条链同源」不做，登记为 O-8",
+      "by": "user（Lucas）"
+    },
+    {
+      "id": "D-9",
+      "what": "反证 5>=8 与 00 的收口口径",
+      "decision": "**用户裁决 = ①**：00 标 passed，把「5>=8」作为**已登记偏差**（R-00-b / O-4）继续挂着，active_plan 继续往下走；不采用 O-4 的候选②（扩大关闸 patch 让 8 达标）与候选③（改钉阈值）。按此执行：00 status=passed，R-00-b 保留 open+已解释，禁止任何人为凑 8 的动作",
+      "by": "user（Lucas）"
+    },
+    {
+      "id": "D-10",
+      "what": "01 冻结清单里越界产物的归属",
+      "decision": "approve：reports/roco/rc404/regression-set.json 是 plan01-engine 被授权改 regression.py 的必然产物（测试指路的 --out 重建），算 01 切片入库；reports/roco/product-execution/*/.work-backup/ 不入库（已加 .gitignore）；提交以成员报告的确切文件清单为准",
       "by": "lead"
     }
   ]

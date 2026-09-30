@@ -39,6 +39,10 @@ data/roco/raw/hke-2026-09-27/raw/
 .dsh-pushplus-token
 reports/roco/notify-log.jsonl
 
+# 成员在飞对照副本（2026-09-30 补）：A/B 用的「改前」快照与备份只作本地留痕，
+# 入库会把「每次改动都变的那一份」塞进历史，且容易被误引为权威读数。
+reports/roco/product-execution/*/.work-backup/
+
 # W3-03 轨迹：**只入库 manifest**（规模、切分、口径、种子）。
 # 12,000 局产生约 91MB 的 jsonl；把它们塞进 git 会让仓库无法维护，
 # 而它们**完全可复现**：manifest 里有 base_seed / split_seed / turn_limit / 策略版本，
