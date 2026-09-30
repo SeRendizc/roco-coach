@@ -410,10 +410,21 @@ test('复盘加厚层落在「不点开也看得见」的两个节点上（不�
   // ② 页面可见节点：正文那一行 + 「下一局练一件事」
   assert.match(page, /\$\('lesson-question'\)\.textContent = review\.text/,
     '正文那一行必须写 review.text（含加厚 summary）');
-  assert.match(page, /const nextStep = review\.depth\?\.next_step\?\.text/, '页面要取加厚层的 next_step');
-  const learning = page.match(/\$\('lesson-learning'\)\.textContent = \[([\s\S]{0,300}?)\]\.filter\(Boolean\)/);
-  assert.ok(learning, '找不到「下一局练一件事」那一栏的写入点（口径变了就重新钉，别删这条）');
-  assert.match(learning[1], /nextStep/, '「下一局练一件事」那一栏必须把 next_step 拼进去（可见的那一处）');
+  // ── 改钉（2026-10-01，P1-C）：旧断言原文（**逐字留档，别删**）────────────────────
+  //   assert.match(page, /const nextStep = review\.depth\?\.next_step\?\.text/, '页面要取加厚层的 next_step');
+  //   const learning = page.match(/\$\('lesson-learning'\)\.textContent = \[([\s\S]{0,300}?)\]\.filter\(Boolean\)/);
+  //   assert.ok(learning, '找不到「下一局练一件事」那一栏的写入点（口径变了就重新钉，别删这条）');
+  //   assert.match(learning[1], /nextStep/, '「下一局练一件事」那一栏必须把 next_step 拼进去（可见的那一处）');
+  // 为什么改：这三条钉的是**页面自己拼字符串**的实现形状（主分支里的 `const nextStep = …` + 数组 join）。
+  //   P1-C 把这一栏收口到纯函数 `lessonGoalRow()`（空 ⇒ `visible:false` ⇒ 隐藏整行），
+  //   页面只调用、不再自己拼。**意图一个字没变**：加厚层的 `next_step` 必须出现在**不点开也看得见**
+  //   的那一栏里。所以改成钉「页面把 depth 交给收口」+「收口里 next_step 一定进文本」这两件事。
+  //   两向变异：把 `lessonGoalRow` 里的 nextStep 那一段删掉 ⇒ 下面第二条必红。
+  assert.match(page, /applyGoalRow\(lessonGoalRow\(\{review, depth: review\.depth\}\)\)/,
+    '「下一局练一件事」那一栏必须把加厚层 depth 交给收口（可见的那一处）');
+  const goalRowFn = exp.match(/export function lessonGoalRow\(\{review = null, depth = null\} = \{\}\) \{([\s\S]{0,700}?)\n\}/);
+  assert.ok(goalRowFn, '找不到 lessonGoalRow 的实现（口径变了就重新钉，别删这条）');
+  assert.match(goalRowFn[1], /depth\?\.next_step\?\.text/, 'lessonGoalRow 必须把 next_step 拼进去');
   // ③ 深细节仍在折叠区（刻意），但必须写明「默认收起」，不许悄悄藏
   const details = html.match(/<details class="lesson-full">[\s\S]{0,200}?<\/summary>/);
   assert.ok(details, '找不到完整复盘的折叠块（`<details class="lesson-full">`）');
@@ -428,8 +439,16 @@ test('老师沉默的兜底分支也要写出加厚层的「下一件事」（�
   const page = readFileSync(new URL('../src/client/roco.js', import.meta.url), 'utf8');
   assert.doesNotMatch(page, /\$\('lesson-learning'\)\.textContent = '';/,
     '兜底分支不许再无条件清空「下一局练一件事」（口径变了就重新钉，别删这条）');
-  assert.match(page, /\$\('lesson-learning'\)\.textContent = depth\?\.next_step\?\.text \?\? ''/,
-    '兜底分支要把加厚层的 next_step 写出来（没有就留空）');
+  // ── 改钉（2026-10-01，P1-C）：旧断言原文（**逐字留档，别删**）────────────────────
+  //   assert.match(page, /\$\('lesson-learning'\)\.textContent = depth\?\.next_step\?\.text \?\? ''/,
+  //     '兜底分支要把加厚层的 next_step 写出来（没有就留空）');
+  // 为什么改：这条钉的是「**空就写一个空串**」的实现形状 —— 而玩家看到的是一个空标签
+  //   （lead-mac：换宠打出 288 点后撤退 ⇒ 整栏空白）。P1-C 把口径改成「空 ⇒ 整行不显示」，
+  //   两处入口都走同一个收口 `applyGoalRow(lessonGoalRow(...))`。
+  //   **意图一个字没变**：有内容就写出来；变的是「没有时」的行为（藏行，而不是留空串）。
+  //   两向变异：把兜底改回 `= depth?.next_step?.text ?? ''` ⇒ 下面那条 P1-C 静态判据必红。
+  assert.match(page, /applyGoalRow\(lessonGoalRow\(\{review: null, depth\}\)\)/,
+    '兜底分支要走同一个收口（有内容就写出来；没有则隐藏整行）');
 });
 
 // ── P1-C（2026-10-01）：这一栏的**空/非空口径**（两条入口同一收口）──────────────
@@ -467,6 +486,37 @@ test('P1-C：lessonGoalRow —— 空就 visible:false（页面据此隐藏整�
 
   // 非恒真：两个不同的输入不许得到同一句话（否则这一层就是「复制一句套话」）
   assert.notEqual(pathA.text, learningOnly.text);
+});
+
+test('P1-C：页面收口 —— 空则隐藏整行（不许写空串、不许留空标签）', () => {
+  const page = readFileSync(new URL('../src/client/roco.js', import.meta.url), 'utf8');
+  // ① 两条入口都必须走**同一个**收口（只接一条会漏 —— 这正是 lead-mac 那一局的路径）
+  assert.match(page, /applyGoalRow\(lessonGoalRow\(\{review, depth: review\.depth\}\)\)/,
+    '主分支要走收口（老师那句 + 下一步；空则隐藏整行）');
+  assert.match(page, /applyGoalRow\(lessonGoalRow\(\{review: null, depth\}\)\)/,
+    '兜底分支要走同一个收口（不再自己拼字符串）');
+  // ② 收口里必须真的作用到**那一行**并把它藏掉（花括号配对取函数体，不用长度上限）
+  const body = (() => {
+    const start = page.indexOf('const applyGoalRow = ');
+    assert.ok(start >= 0, '页面里应当有 applyGoalRow 这个收口');
+    const open = page.indexOf('{', start);
+    let depth = 0;
+    for (let j = open; j < page.length; j++) {
+      if (page[j] === '{') depth++;
+      else if (page[j] === '}') { depth--; if (depth === 0) return page.slice(open + 1, j); }
+    }
+    return null;
+  })();
+  assert.ok(body, 'applyGoalRow 的函数体要取得到（改成长短不一的写法也不该让判据失效）');
+  assert.match(body, /lesson-learning/, '收口写在 #lesson-learning 上');
+  assert.match(body, /closest\('\.result-goal'\)/, '要作用在 #lesson-learning 的最近祖先（那一行）');
+  assert.match(body, /\.hidden = !\(\w+\?\.visible === true\)/,
+    '空（visible:false）⇒ 整行 hidden=true；有内容才显示');
+  // ③ 负向：旧的两处「自己拼」写法不许回来（两向变异就是把它们改回去 ⇒ 本判据必红）
+  assert.doesNotMatch(page, /=\s*depth\?\.next_step\?\.text \?\? ''/,
+    '兜底分支不许再「把 next_step 直接写成空串」');
+  assert.doesNotMatch(page, /const nextStep = review\.depth\?\.next_step\?\.text \?\? null/,
+    '主分支也不许自己拼 nextStep（口径统一到 lessonGoalRow）');
 });
 
 

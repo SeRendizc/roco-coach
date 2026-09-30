@@ -35,6 +35,7 @@ import {
   rocoLessonEntry,
   rocoDamagePreviewText,
   rocoMatchReview,
+  lessonGoalRow,
   battleLoadouts,
   rocoGameView,
   expectedLine,
@@ -5170,15 +5171,24 @@ async function finishMatch() {
 
   const evidence = (review?.evidence ?? []).filter((line) => !/\b0\s*\/\s*\d+\s*生命/.test(line));
 
+  // ── P1-C（2026-10-01）：「下一局练一件事」这一栏的**唯一收口** ─────────────────
+  // 这一栏有**两条独立入口**（`review` 非 null 的主分支、`review === null` 的兜底分支）。
+  // 原来两处各自拼一次字符串，而「空」时的行为是**写一个空串** ⇒ 玩家只看到静态标签
+  // 「下一局练一件事」（lead-mac 报的：换宠打出 288 点后撤退）。
+  // 现在：口径由纯函数 `lessonGoalRow()` 决定（**空 ⇒ visible:false**），这里只负责套用 ——
+  // 空就把整行藏掉（`<div class="result-goal">` 是 `#lesson-learning` 的最近祖先），
+  // **不留空标签、也不填占位句**（没有本局事实支撑的「下一局练什么」就是套话）。
+  const applyGoalRow = (row) => {
+    const line = $('lesson-learning');
+    if (line) line.textContent = row?.text ?? '';
+    const goalRow = line?.closest('.result-goal') ?? null;
+    if (goalRow) goalRow.hidden = !(row?.visible === true);
+  };
+
   if (review) {
     $('lesson-question').textContent = review.text;
-    // 「下一局练一件事」这一栏：老师那一条照旧，后面接一句**有条件**的下一步
-    // （条件来自这一局真出现过的事件——没有那样的事件时 `next_step` 是 null，这里就只剩老师那句）。
-    const nextStep = review.depth?.next_step?.text ?? null;
-    $('lesson-learning').textContent = [
-      review.learning ? `这一局学到一件事：${review.learning}` : '',
-      nextStep,
-    ].filter(Boolean).join(' ');
+    // 老师那一条照旧，后面接一句**有条件**的下一步（条件来自这一局真出现过的事件）。
+    applyGoalRow(lessonGoalRow({review, depth: review.depth}));
     $('lesson-progress').textContent = progress.checked && progress.recurred && progress.note
       ? `上一次那一课的核对：${progress.note}`
       : '';
@@ -5206,10 +5216,9 @@ async function finishMatch() {
     $('lesson-question').textContent = entry.question;
     // 老师那一角没有转折点时（`review === null`）走这条兜底：固定问句照旧，
     // 但加厚层里那些**真的发生过**的片段仍然显示出来（没有支撑时 `depth.evidence` 是空的）。
-    // 「下一局练一件事」这一栏原来在兜底分支里被无条件清成空 —— 而加厚层的 `next_step`
-    // 这时候可能**有内容**（例：只有对面补位、没有减员 ⇒ 老师沉默，但 `enemy-replacement-first`
-    // 成立），等于把已经算出来的一条如实结论白丢。有就写出来（这是玩家看得见的那一处）。
-    $('lesson-learning').textContent = depth?.next_step?.text ?? '';
+    // 「下一局练一件事」这一栏走**同一个收口**（`applyGoalRow`）：有内容才显示；
+    // 这一局既没有课也没有可总结的事件 ⇒ 整行藏掉，不留空标签（P1-C）。
+    applyGoalRow(lessonGoalRow({review: null, depth}));
     $('lesson-progress').textContent = '';
     $('lesson-note').textContent = [entry.note, ...(depth?.evidence ?? [])].filter(Boolean).join(' ');
     $('lesson-card').hidden = false;

@@ -227,6 +227,57 @@ UI 那一条若要做，需要页面层判据（`tests/roco-experience.test.js` 
 
 ---
 
+# §11 · UI 层落地记录（**已冻结** · 2026-10-01，task-44 释放 `roco.js` 之后）
+
+## 11.1 落地的补丁（`src/client/roco.js`，行号按落地时的工作树）
+
+| 位置 | 改动 |
+|---|---|
+| import（原 `:30-42`） | 加 `lessonGoalRow`（**纯加性**，一行） |
+| `finishMatch()` 内（原 `:5171` 之后） | 新增收口 `applyGoalRow({text, visible})`：写 `#lesson-learning`；`visible !== true` ⇒ `line.closest('.result-goal').hidden = true`（**空则整行不显示**，不留空标签、不填占位句） |
+| 主分支（原 `:5173-5181`） | `const nextStep = …` + 数组 join ⇒ **一行** `applyGoalRow(lessonGoalRow({review, depth: review.depth}))` |
+| 兜底分支（原 `:5209-5212`） | `= depth?.next_step?.text ?? ''` ⇒ `applyGoalRow(lessonGoalRow({review: null, depth}))` |
+| `roco.html` / 副标题 | **未动**（Lead 已批：那是这一块的用途说明） |
+
+**改钉记录（两条，旧断言原文逐字留档在测试文件注释里）**：
+1. `老师沉默的兜底分支也要写出加厚层的「下一件事」`：旧断言钉 `$('lesson-learning').textContent = depth?.next_step?.text ?? ''`（**空就写空串**的实现形状）⇒ 改成钉「兜底分支走同一个收口」；
+2. `复盘加厚层落在「不点开也看得见」的两个节点上`（第 ② 组）：旧断言钉页面自己拼 `const nextStep = …` + `[…].filter(Boolean)` ⇒ 改成钉「页面把 `depth` 交给收口」+「`lessonGoalRow` 里 `next_step` 一定进文本」。
+   两条的**意图都没变**（有内容就写出来 / 加厚层的 `next_step` 必须在可见那一栏），变的是「空」时的行为与实现形状。
+
+## 11.2 读数（命令 + 退出码）
+
+| # | 命令 | 退出码 | 原文 |
+|---|---|---|---|
+| 1 | `node --check`（把 `roco.js` 复制成 `.mjs` 后解析） | **0** | 语法通过（页面 `import` 一行加得对、无拼写错误） |
+| 2 | `node --test --test-concurrency=1 tests/roco-experience.test.js` | **0** | `tests 19 / pass 19 / fail 0` |
+| 3 | `node --test --test-concurrency=1 tests/roco-experience.test.js tests/roco-match-review-depth.test.js` | **0** | `tests 33 / pass 32 / fail 0 / skipped 1` |
+| 4 | **读 `roco.js` 的全部 23 个判据文件**一起跑（`evals/claim-honesty`、`evals/structure-contract` 除外的清单见命令） | 1（见 §11.3） | 我的改动相关文件全绿；余下失败与本次改动无关（逐条取证见下） |
+
+## 11.3 那条宽面运行里的失败：**不是本次改动**（取证）
+
+| 失败文件 | 失败原因（原文） | 为什么不是我的 |
+|---|---|---|
+| `tests/roco-plain-speak.test.js` ① 硬禁词 | `src/coach/runtime.js:2756 「.js」 data/roco/battle-modes.json 的 parameters.team_size…` | 报的是 **`src/coach/runtime.js`**（另一位队友在飞改的文件，`git status` 里是 `M`）；我**没碰**过它。另在「HEAD 版 `roco.js`」的副本里同一条**通过** ⇒ 与本刀无关 |
+| `tests/roco-standard-pvp-battle.test.js`（9 条）· `tests/roco-workshop.test.js`（5 条） | `AssertionError: 开局失败：规则服务不可用：找不到 Python 解释器：python3` | 纯环境（这台机器 `python3` 只在 WSL 里）。失败文本里**0 次**提到 `lessonGoalRow`/`lesson-learning`/`roco-experience` |
+
+## 11.4 页面补丁的两向变异（临时副本，改坏 `roco.js` 再跑）
+
+| 变异 | 做了什么 | 读数 |
+|---|---|---|
+| 基线 | 未变异 | **exit 0 · 33 tests / 32 pass / 0 fail / 1 skip** |
+| **E1** | 兜底分支改回 `$('lesson-learning').textContent = depth?.next_step?.text ?? '';` | **exit 1 · 30/2** ⇒ 红：兜底分支判据 + `P1-C 页面收口` |
+| **E2** | 主分支改回「页面自己拼 `const nextStep = …` + join」 | **exit 1 · 30/2** ⇒ 红：加厚层判据（改钉后）+ `P1-C 页面收口` |
+| **E3** | 收口里 `hidden = !(row?.visible === true)` ⇒ 恒 `false`（不藏行） | **exit 1 · 31/1** ⇒ 红：`P1-C 页面收口`（"空则整行不显示"那一条） |
+| 还原 | — | **exit 0** |
+
+## 11.5 状态
+
+- **数据层 + UI 层都已落地**：`next_step` 有内容 ⇒ 那一栏显示（含本局事实）；没有 ⇒ 整行隐藏（不再出现「只有标签、没有内容」的空栏）。
+- 玩家侧复验口径不变：换宠打出 288 伤害后投降 ⇒ 该栏**要么有内容、要么整行不显示**（数据层读数为 `our-switch-then-hit`，文本含「这一局第 1 回合…约 288 点」）。
+- **不是本刀的事**：§10 的语料覆盖面缺口（Lead 已另派 `plan00-closer`）；`roco-experience.js` 的数字口径迁移（task-33 那一批）。
+
+---
+
 # §8 · UI 层准备（判据的**决策逻辑**已落地；页面两处补丁等解锁）
 
 ## 8.1 为什么把「这一栏该不该显示」抽成纯函数
