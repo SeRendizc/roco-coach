@@ -870,3 +870,40 @@ test('⑩ C-2：契约键按格式放行；穿越样式与非白名单字段含 
   assert.equal(validToolArgs('plan_actions', {state: state({seed: 5}), state_version: 7}), false,
     '隐藏键照旧（白名单只认那四个契约键）');
 });
+
+// ── ⑪ C-3：`unverified_overrides[].path` 是**契约点分路径**，只在那个作用域内按格式放行 ──
+//
+// 为什么：RC-106 的公开面带 `unverified_overrides[]`（未核验覆盖点），键名 `path` 撞 `UNSAFE_KEYS`
+// ⇒ **真模式对局**（`pvp-standard-six-pet`）的公开面被整份拒 ⇒ 模式对局调不动 `plan_actions`。
+test('⑪ C-3：unverified_overrides[].path 按点分路径放行；其它 path 与含 / 的值仍必拒', () => {
+  const withOverrides = (path, extra = {}) => ({...PUBLIC_PLANNER_STATE,
+    rules_version: 'roco-world-s4-2026-09-10/mobile_s4_candidate_v3',
+    unverified_overrides: [{path, value: 'random_seeded', confidence: 'ENGINE_HYPOTHESIS',
+      microcase_id: 'MC-E05', unverified: true, ...extra}]});
+  // 正：真模式公开面那一条（逐字来自实测）
+  assert.equal(validToolArgs('plan_actions',
+    {state: withOverrides('turn_order.speed_tie'), state_version: 7}), true,
+  '真模式公开面的 unverified_overrides[].path 必须能过（否则模式对局调不动工具）');
+  assert.equal(validToolArgs('plan_actions',
+    {state: withOverrides('energy.initial'), state_version: 7}), true, '单段点分路径也放行');
+  // 负：文件路径/穿越/多段斜杠一律拒
+  for (const bad of ['../etc/passwd', 'a/b', 'a.b/../c', '/etc/passwd', 'a\\b', '..', 'a..b', 'a b']) {
+    assert.equal(validToolArgs('plan_actions',
+      {state: withOverrides(bad), state_version: 7}), false,
+    `unverified_overrides[].path=${JSON.stringify(bad)} 必须被拒`);
+  }
+  // 负：同一个键名在**别的作用域**里照旧拒（白名单不越作用域）
+  assert.equal(validToolArgs('plan_actions',
+    {state: {...PUBLIC_PLANNER_STATE, path: 'a.b'}, state_version: 7}), false,
+  '顶层 path 不是契约字段 ⇒ 照旧拒');
+  assert.equal(validToolArgs('plan_actions',
+    {state: {...PUBLIC_PLANNER_STATE, self: {...PUBLIC_PLANNER_STATE.self, path: 'a.b'}},
+      state_version: 7}), false, '其它作用域里的 path 照旧拒');
+  // 负：非白名单字段含 / 照旧拒（通用规则没放宽）
+  assert.equal(validToolArgs('plan_actions',
+    {state: {...withOverrides('turn_order.speed_tie'), note: 'a/b'}, state_version: 7}), false);
+  // 正/负都不影响其它守卫
+  assert.equal(validToolArgs('plan_actions',
+    {state: withOverrides('turn_order.speed_tie', {hidden_note: 'x'.repeat(9000)}),
+      state_version: 7}), false, '字节上限照旧');
+});

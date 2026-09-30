@@ -386,21 +386,30 @@ function contractStringOk(normalized,value){
  if(!/[\\/]/.test(value))return null;
  return pattern.test(value)&&!value.includes('..');
 }
+//: C-3：**点分路径**（`turn_order.speed_tie` 这种**契约路径**，不是文件路径）。
+//: `unverified_overrides[].path` 是 RC-106 的**公开事实**（未核验覆盖点落在哪条规则上），
+//: 而 `UNSAFE_KEYS` 里有 `path` ⇒ 真模式对局的公开面被整份拒掉 ⇒ 模式对局调不动 `plan_actions`。
+//: 纪律与 C-2 完全一样：**只**在 `unverified_overrides[]` 元素内、**只**对键 `path`、
+//: **值必须匹配点分路径**（禁 `/`、`\`、`..`）；通用 `path` 与其它字段照旧 fail closed。
+const RAW_OVERRIDE_PATH_SCOPE='unverified_overrides';
+const DOTTED_PATH=/^[A-Za-z0-9_]+(\.[A-Za-z0-9_]+)*$/;
 function safeObject(value,{maxBytes=2000,maxDepth=4}={}){
  if(!value||typeof value!=='object'||Array.isArray(value))return false;
  let encoded;try{encoded=JSON.stringify(value);}catch{return false;}
  if(typeof encoded!=='string'||encoded.length>maxBytes)return false;
- const walk=(node,depth)=>{
+ const walk=(node,depth,scope)=>{
   if(depth>maxDepth)return false;
   if(node===null)return true;
   if(typeof node==='string')return !UNSAFE_TEXT.test(node);
   if(typeof node==='number')return Number.isFinite(node);
   if(typeof node==='boolean')return true;
   if(typeof node!=='object')return false;
-  if(Array.isArray(node))return node.length<=32&&node.every(item=>walk(item,depth+1));
+  if(Array.isArray(node))return node.length<=32&&node.every(item=>walk(item,depth+1,scope));
   for(const [key,item] of Object.entries(node)){
    const normalized=String(key).toLowerCase().replace(/[^a-z0-9]/g,'');
-   if(UNSAFE_KEYS.has(normalized))return false;
+   const isOverridePath=scope===RAW_OVERRIDE_PATH_SCOPE&&normalized==='path'
+    &&typeof item==='string'&&DOTTED_PATH.test(item);
+   if(UNSAFE_KEYS.has(normalized)&&!isOverridePath)return false;
    // 隐藏信息（MC-013）在到达引擎之前就拦一次；引擎那一侧也会拦，两层都要。
    if(ROCO_HIDDEN_KEYS.has(normalized))return false;
    // 04 · C-2：契约字段按「键 + 格式」放行（只有白名单键 + 格式对得上才放行）
@@ -408,12 +417,14 @@ function safeObject(value,{maxBytes=2000,maxDepth=4}={}){
     const contract=contractStringOk(normalized,item);
     if(contract===false)return false;
     if(contract===true)continue;
+    if(isOverridePath)continue;                     // C-3：已按点分路径校验过
    }
-   if(!walk(item,depth+1))return false;
+   const childScope=normalized==='unverifiedoverrides'?RAW_OVERRIDE_PATH_SCOPE:scope;
+   if(!walk(item,depth+1,childScope))return false;
   }
   return true;
  };
- return walk(value,0);
+ return walk(value,0,null);
 }
 export function validToolArgs(name,args){
  if(!Object.hasOwn(TOOL_CONTRACTS,name)||!args||typeof args!=='object'||Array.isArray(args))return false;

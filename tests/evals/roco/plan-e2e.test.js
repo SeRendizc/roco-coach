@@ -241,6 +241,44 @@ test('端到端：toolbox → roco-client → 真 Python 服务，公开状态�
   });
 });
 
+test('工具 × 真公开面 扫面：validToolArgs 必须全绿（新增 ruleset / 公开面字段时会**先红**）', { skip: SKIP }, async () => {
+  const rows = [];
+  const { public: genPub } = generate(7);
+  rows.push(['plan_actions', 'generator(普通对局)', {state: genPub, state_version: genPub.state_version}]);
+  const service = createRocoService({repoRoot: ROOT});
+  try {
+    const roster = await service.roster({limit: 12});
+    const six = (roster.pets ?? []).map((p) => p.pet_id).slice(0, 6);
+    const begun = await service.startBattle({mode: 'pvp-standard-six-pet', team: six, seed: 11});
+    assert.equal(begun.ok, true, JSON.stringify(begun).slice(0, 200));
+    const svcClient = service._client();
+    const legal = await svcClient.battleLegal({state: service._sessions.get(begun.battle_id).state,
+      strategy: 'greedy_damage', stateVersion: 0});
+    const modePub = legal?.ok === true ? (legal.result?.public ?? legal.result?.planner_public) : null;
+    assert.ok(modePub, '模式对局必须能给出公开 planner state');
+    assert.ok(Array.isArray(modePub.unverified_overrides) && modePub.unverified_overrides.length > 0,
+      '模式对局必须带 unverified_overrides（否则这一格扫不到 C-3）');
+    rows.push(['plan_actions', 'mode:pvp-standard-six-pet', {state: modePub, state_version: modePub.state_version}]);
+    const firstPet = genPub.self.pets[0].pet_id;
+    rows.push(['query_rules', 'pet', {kind: 'pet', pet_id: firstPet, state_version: genPub.state_version}]);
+    rows.push(['query_rules', 'learnset', {kind: 'learnset', pet_id: firstPet, state_version: genPub.state_version}]);
+    rows.push(['evaluate_team', '训练场3只', {team: six.slice(0, 3), state_version: genPub.state_version}]);
+    rows.push(['compare_team_change', '换一只', {team_before: six.slice(0, 3),
+      team_after: [six[0], six[1], six[3]], state_version: genPub.state_version}]);
+    rows.push(['summarize_battle', '记录', {record: {match_id: 'm1', turns: 3},
+      state_version: genPub.state_version}]);
+  } finally {
+    await service.stop();
+  }
+  const table = [];
+  for (const [tool, label, args] of rows) {
+    const ok = validToolArgs(tool, args);
+    table.push(`${tool}×${label}=${ok ? 'ok' : 'RED'}`);
+    assert.equal(ok, true, `${tool} × ${label} 必须能过 validToolArgs（真实参数）`);
+  }
+  console.log('  · [04.5 扫面] ' + table.join(' · '));
+});
+
 test('反证：把私有 serialize() 递进去必须被拒，客户端与服务端两层都拦', { skip: SKIP }, async () => {
   const { private: priv } = generate(7);
   const version = priv.state_version;
