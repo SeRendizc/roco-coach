@@ -1387,6 +1387,22 @@ export function normalizeOpponentScenarioRows(input){
 //   · `unavailable[]`（含 **P3 残留**：后备满血 + 规范配招假设）**照实传递**，不吞；
 //   · 可学池情景保留 `evidence_basis:'learnable_pool_hypothesis'` 标记（假设 ≠ 观察）；
 //   · 拿不到输入 / 03b 说 `available:false` ⇒ **不注入**，把原因带进回执。
+/**
+ * 引擎上限 64：按 `scenario_id` 定序截断，并把截掉的**逐条登记**。
+ *
+ * ⚠ verifier 复核（04.3b ①）：这条必须对**两条来源**用同一把尺子 ——
+ * 03b 路径与 `configureRocoTools({opponentOutlook})` 注入的 provider 路径。
+ * 只在前者截断的话，将来谁配了 provider 就会把 70 条发给引擎 ⇒ **引擎 400**。
+ */
+function capActionScenarioRows(rows,unavailable){
+ if(rows.length<=ROCO_ACTION_SCENARIO_MAX)return rows;
+ unavailable.push(...rows.slice(ROCO_ACTION_SCENARIO_MAX).map((row)=>({
+  what:`over_engine_limit:${row.scenario_id}`,
+  why:`引擎 opponent_scenarios 上限 ${ROCO_ACTION_SCENARIO_MAX} 条；按 scenario_id 定序截断`,
+  evidence_ids:Array.isArray(row.evidence_ids)?row.evidence_ids:[]})));
+ return rows.slice(0,ROCO_ACTION_SCENARIO_MAX);
+}
+
 /** 引擎 `opponent_scenarios` 的条数上限（`planner.parse_opponent_scenarios` 是 64）。 */
 const ROCO_ACTION_SCENARIO_MAX=64;
 /** 每进程一份的 03b 依赖（catalog / skillPool）；按 repoRoot 缓存，避免每次规划读盘。 */
@@ -1423,7 +1439,17 @@ async function loadActionScenarioDeps(root){
 async function buildActionScenariosForPlan({state,context}={}){
  // 测试/上层可注入 builder（签名同 03b）；注入时仍走同一套校验与登记。
  const builder=typeof rocoActionScenarioBuilder==='function'?rocoActionScenarioBuilder:null;
- const view=context?.rocoActionView??context?.roco_battle??null;
+ // 04.3b：`rocoActionView` 允许是**函数**（服务端惰性取口：只有真跑规划才去问引擎）⇒ 先解出视图。
+ let view=context?.rocoActionView??context?.roco_battle??null;
+ if(typeof view==='function'){
+  try{
+   const got=await view();
+   view=got&&got.ok===true?got.view:(got?.view??null);
+  }catch(error){
+   return {doc:null,source:'view-provider-error',
+    why:`取完整引擎视图失败：${error?.message||error}`};
+  }
+ }
  if(!builder&&!view){
   return {doc:null,source:'missing-view',
    why:'没有公开视图（`context.rocoActionView` 与 `context.roco_battle` 都不在）⇒ 不注入情景'};
@@ -1451,6 +1477,14 @@ async function buildActionScenariosForPlan({state,context}={}){
 }
 
 /**
+ * 04.3b：给**判据/排障**用的公开取口 —— 只跑「视图 → 03b → 引擎形状行」这一段，
+ * 不调桥、不产回执。生产路径仍走 `rocoPlanActions`（同一份实现，不是复制）。
+ */
+export async function planOpponentScenarios({state,context}={}){
+ return rocoOpponentScenariosFor({state,context});
+}
+
+/**
  * 04.3：本次请求要注入的对手情景。
  *
  * 04.3b 起**默认走 03b 的 `buildActionScenarios()`**（D-33：只消费、不自己映射）：
@@ -1470,8 +1504,10 @@ async function rocoOpponentScenariosFor({state,context}={}){
   }
   const raw=Array.isArray(produced)?produced:produced?.scenarios;
   const normalized=normalizeOpponentScenarioRows(raw);
-  return {rows:normalized.rows,doc:null,unavailable:normalized.unavailable,
-   source:'configured-provider'};
+  const unavailable=[...normalized.unavailable];
+  // 04.3b①：provider 路径与 03b 路径**同一把尺子**（否则配了 provider 就会把超量行发给引擎）
+  const rows=capActionScenarioRows(normalized.rows,unavailable);
+  return {rows,doc:null,unavailable,source:'configured-provider'};
  }
  let built;
  try{
@@ -1489,15 +1525,7 @@ async function rocoOpponentScenariosFor({state,context}={}){
  }
  const normalized=normalizeOpponentScenarioRows(doc.scenarios);
  unavailable.push(...normalized.unavailable);
- let rows=normalized.rows;
- if(rows.length>ROCO_ACTION_SCENARIO_MAX){
-  // 引擎上限 64：按 scenario_id 定序截断，并把截掉的**逐条登记**（不许静默丢）
-  unavailable.push(...rows.slice(ROCO_ACTION_SCENARIO_MAX).map((row)=>({
-   what:`over_engine_limit:${row.scenario_id}`,
-   why:`引擎 opponent_scenarios 上限 ${ROCO_ACTION_SCENARIO_MAX} 条；按 scenario_id 定序截断`,
-   evidence_ids:row.evidence_ids})));
-  rows=rows.slice(0,ROCO_ACTION_SCENARIO_MAX);
- }
+ const rows=capActionScenarioRows(normalized.rows,unavailable);
  return {rows,doc,unavailable,source:built.source};
 }
 

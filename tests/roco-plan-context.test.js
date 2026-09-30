@@ -818,4 +818,17 @@ test('⑨c 超过引擎上限（64）⇒ 按 scenario_id 定序截断并逐条�
   } finally {
     harness.done();
   }
+
+  // ② **provider 路径**（verifier 04.3b① 实测这里曾不截断 ⇒ 发出 70 条 ⇒ 引擎会 400）
+  const viaProvider = planToolHarness({scenarioProvider: () => many});
+  try {
+    const receipt = await viaProvider.run();
+    assert.equal(viaProvider.plannerCalls[0].opponentScenarios.length, 64,
+      'provider 路径必须与 03b 路径同一把尺子（否则引擎 400）');
+    const over = receipt.opponentScenarios.unavailable.filter((row) => /over_engine_limit/.test(row.what));
+    assert.equal(over.length, 6, 'provider 路径也要逐条登记被截断的行');
+    assert.equal(receipt.opponentScenarios.scenario_ids.length, 64);
+  } finally {
+    viaProvider.done();
+  }
 });

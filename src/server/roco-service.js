@@ -3007,7 +3007,28 @@ async function attachSkillSupport(view){
   };
  }
 
- return {status,startBattle,advanceBattle,freeAction,planBattle,roster,box,workshop,loadoutOptions,shadowPlan,ensure,stop,publicView,
+ /**
+  * 04.3b（D-33 批准的唯一新增）：取**当前对局的完整公开引擎视图**。
+  *
+  * 为什么需要：`plan_actions` 的动作级情景（03b `buildActionScenarios()`）要 `view.opponent.field`
+  * 与 `seen_roster`/`revealed_skills`；客户端快照（`roco_battle` 的 `foe`/`foe_bench`）**没有**这些，
+  * 只有服务端会话能给出完整视图。**只读**：一次 `/battle/legal`（与 `planBattle` 同一条路），
+  * 再用 `publicView()` 白名单裁剪 —— 私有状态绝不外流（它只进本进程的工具上下文）。
+  */
+ async function battleView(body={}){
+  const session=sessionOf(body.battle_id);
+  if(!session)return {ok:false,status:404,error:'对局不存在或已失效：请重新开一局'};
+  const up=await ensure();
+  if(!up.ok)return {ok:false,status:503,error:`规则服务不可用：${up.error}`};
+  touch();
+  const stateVersion=session.state?.state_version??0;
+  const legal=await client.battleLegal({state:session.state,strategy:session.strategy,stateVersion});
+  const out=unwrap(legal);
+  if(!out.ok)return {ok:false,status:502,error:out.reason,error_type:out.error_type};
+  return {ok:true,battle_id:body.battle_id,state_version:stateVersion,view:publicView(out.result)};
+ }
+
+ return {status,startBattle,advanceBattle,freeAction,planBattle,battleView,roster,box,workshop,loadoutOptions,shadowPlan,ensure,stop,publicView,
   // task-6：把「档位 → 人话」的纯函数也交出去，判据脚本可以不启服务地复核它
   skillSupportFact,
   _sessions:sessions,_client:()=>client};

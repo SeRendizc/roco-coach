@@ -1040,7 +1040,13 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
       // 2026-09-27：把**个体层**（每只的天分/性格）补进上下文 —— 只补字段、不改判断。
       // 页面名单里只有 `own-XXXX` 与等级，天分性格在个体数据集里；不补的话玩家问自己那只
       // 永远拿到"天分按 0 / 性格按中性"那一版（面板、性格建议、个体比较都会受影响）。
-      const coachedContext={...attachIndividualsToContext(b.context),rocoPreview};
+      // 04.3b（D-33 批准）：把**完整引擎公开视图**做成**惰性**取口给工具上下文 —— 只有真的
+      // 跑 `plan_actions` 时才会去问服务端（不跑就不产生额外引擎往返）。客户端快照
+      // `roco_battle` 是裁剪形状（`foe`/`foe_bench`，没有 `opponent.field`），消费侧会 fail closed。
+      const rocoActionView=typeof b.context?.roco_battle?.battle_id==='string'
+        ?()=>rocoService.battleView({battle_id:b.context.roco_battle.battle_id}):null;
+      const coachedContext={...attachIndividualsToContext(b.context),rocoPreview,
+        ...(rocoActionView?{rocoActionView}:{})};
       const answer=await runCoach({message:b.message,role:b.role,context:coachedContext,memory:b.memory,conversation:historyForModel(b.conversation),provider});
       const payload={...answer,usage,tokenAudit,stateToken:b.stateToken,
         ...(_mode==='off'?{}:{modelRoute:{...modelRoute,task:_task,localProbe:_localProbe,localCooling:_localCooling}})};
