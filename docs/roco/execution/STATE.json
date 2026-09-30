@@ -544,6 +544,18 @@
       "what": "04.2 中途上报的缺口与四项裁决（有牙断言 / service 注入 / P3 是否替换配招 / toolbox 时机）",
       "decision": "① **补有牙断言 + 再加一条变异**：同状态同预算下「注入 vs 不注入」的 `plan_actions` 对手分支集必须**不同**（比 `risk.top_risks` 的对手动作集合或 `per_seed[].risk`，不比长度）；两向变异（`if False and scenarios:` 忽略注入 ⇒ 必红）。**另加**「缺省逐位不变」的破坏性变异（把缺省路径权重取整/排序改一位 ⇒ 金标必须红）—— 两头都钉住。② **service.py 接注入批准**：可选字段 `opponent_scenarios`（不得变成新必填）、形状不对 ⇒ **400 fail closed 且点名坏在哪条**、缺省回执逐字段不变、注入时回显「本次对手依据 = 注入情景 / 规范配招假设(缺省)」。③ **P3（用情景里的可学池替换对手配招假设）本步不做**：只筛可枚举技能是「情景收窄候选」，替换重建状态配招会改对手侧结算语义、可能破坏「缺省逐位不变」并触碰隐藏真值红线 ⇒ 另立专项（04.2b 或 05），自带「隐藏真值不变 + 只吃公开面」两条判据；本步只要求：回执把 scenario-driven 与 assumption-driven **分开写**、`unavailable[]` 如实报、P3 作为**显式残留**登记。④ **toolbox.js 与 `truncation/is_probability` 一起放 04.3**（避免同一段回执改两次）。04.2 交付面 = planner 加性路径 + 有牙断言 + service 注入/回显 + P3 登记 + 文档同步；冻结后交 lead-mac 跨机复验（判据须能 `cd roco && PYTHONPATH=src python3 -m unittest tests.test_plan_scenarios -q` 一键跑、不写死绝对路径、产物不进产品仓库）",
       "by": "lead"
+    },
+    {
+      "id": "D-23",
+      "what": "10（异常恢复与运行版本验收）勘察裁决：6 条（快照落点/恢复语义/空闲停引擎/强制版本/幂等键/版本口径）",
+      "decision": "勘察 `reports/roco/product-execution/10/10.1-recon.md`（19 条缺口 R1–R7/G1–G6/V1–V6；实测：陈旧版本 409 · 同版本并发第二条 409 且引擎只调 1 次 · match_id 不符 409 · 引擎被杀可自动重启续局 · **空闲 5 分钟 stop() 无条件清局** · `status()` 无 service_version/started_at/HEAD）。裁决：**Q1** 快照落运行时目录（`output/roco/sessions/` 或等价被忽略目录），**不进 `data/**`、不进版本库**，写入原子（tmp→fsync→rename），保留 ≤20 份且只清 24h 内**已结束**局，**当前局永不清理**；**Q2** 刷新/重连 = **明确提示 + 一键继续**，选开新局则旧快照**退役**，**绝不显示上一局当本局**；**Q3** `IDLE_STOP_MS` 改「停引擎进程但保留会话快照」，下次按需重启 + 水合，水合校验 `match_id`/`rules_version`/`state_version` 不一致 **fail closed**；**Q4** **批准强制 `state_version`**（改状态的动作缺它 ⇒ 400 + 大白话 + 回传当前版本；只读端点不受影响；若老路径真的不带版本先回报再谈兼容）；**Q5** 幂等**复用 `decision_id`**（同 id 同版本重放 ⇒ 同回执且状态不变；同 id 异版本 ⇒ 拒绝），覆盖 G1/G3/G6；**Q6** `runtimeVersion` 由构建/HEAD 生成并进 `status()`，**ruleset 不一致 fail closed**、`runtimeVersion` 不一致仅提示，两边值都要显示。顺序 10.1-a 行为定义（禁沉默清空）→ 10.1-b 快照落盘 → 10.1-c 客户端恢复 → 10.2 隔离注入（补齐 3 点未实测）→ 10.3–10.6。任务 task-18",
+      "by": "lead"
+    },
+    {
+      "id": "D-24",
+      "what": "08（配队打法与目标培养闭环）勘察裁决：6 条（写域/迁移口径/阈值口径/测试 profile/跨页入口/档位）",
+      "decision": "勘察 `reports/roco/product-execution/08/08.1-recon.md`（22 条缺口 G01–G10/C1–C6/U1–U6 + 9 条伪最优风险；实测 **G01 配招键是物种级**：`loadout-store.js:13-16` 按 `pet_…` 存、`team-workshop.js:1885/2003` 写 `row.species`、`box-loadout.js:752/1007` 读 `state.species` 写 `state.petId` ⇒ **同物种两只个体共用一份配招**，正是 08 反例②；另实测不设 `ROCO_PYTHON` 时 `tests/roco-loadout-ui.test.js` 6/9、设了 9/9）。裁决：**Q1** 批准单独一轮只碰 `src/client/loadout-store.js`+`box-loadout.js`+`team-workshop.js`，**G01 最先冻结**；**Q2** 老记录**新键 + 兼容读取、不删旧键**，读旧记录须**如实标注「物种级（未区分个体）」**，下次编辑写个体级新键（幂等），个体级优先；**Q3** 阈值**只给档位 + 区间 + 未核验标注**（`formula_verified:false` 传到 UI 大白话 + 机器可检字段），点估计 ⇒ 必红；**Q4** 专用测试 profile = **验收口径**，只在测试脚本，不得产品化；**Q5** 08.5 **不新增页面/路由**，用 query 参数，不得显示上一局当本局，改 `src/client/roco.js` 先回报；**Q6** `goal` **维持两档**，加档单独立项。顺序 S1 个体级键 → S2 可比较尺子 → S3 可撤销与偏好 → S4 跨页链路 → S5 伪最优可检字段。任务 task-19",
+      "by": "lead"
     }
   ]
 }
