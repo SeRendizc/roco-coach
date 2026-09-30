@@ -1,8 +1,8 @@
 {
   "schema": "roco-dsh-execution/v1",
-  "updated_at": "2026-09-30T19:50:00+08:00",
-  "active_plan": "02",
-  "next_action": "① plan02-front：P0 已解除（8462d70）⇒ 跑**真点开局**的 02.5（桌面+390px：预览→关闭→回看→开小芽→选动作）+ 02.3/02.4 收尾，截图必须来自真实操作那一次。② harness-verifier：在 `8462d70` 上做权威副本复验（P0 两臂 + 孤儿两臂含收尸 + POSIX 不变 + ROCO_PYTHON 端到端 3 次 + clean 全量 875·1F + plain-speak 12/12）+ **Node 套件差分（83ed968 vs 8462d70）**。③ 02 收口后我按切片提交（含被引用的截图 `git add -f`）+ 更新 STATE（02 passed）→ active_plan=03，依次 03→…→12。④ 常驻登记：O-4（反证 5>=8 已登记偏差）· O-6（damage_global_skill_mod_text 死门 + 531/534 方向丢失）· O-7（文档失真 3 例）· O-8（迸发两链不同源）· O-10（已修，等复验）· O-11（验收清单已补）。⑤ 8765 本机未运行 ⇒ player 栏只登记，不许自行启动。⑥ 每次要用户裁决前先 pushplus 通知；每步切片提交后核对远端 SHA。",
+  "updated_at": "2026-09-30T20:30:00+08:00",
+  "active_plan": "03",
+  "next_action": "① 03.1 只读勘察：审查现有对手候选生成是否真用**公开物种 + 可学技能**，登记隐藏值读点与「没有依据的默认概率」（写域 src/coach/opponent-belief.mjs · 规则/技能检索适配 · 相关工具契约与测试；先读 tests/roco-opponent-belief.test.js + 01 观察契约）→ 产出「候选生成路径与风险清单」。② 据此做 03.2 候选协议（合法且相容、每项带来源/规则版本/证据/未知项）+ 03.3 出招前后候选更新 + 03.4 无频率时用情景集合（均匀权重必须显式标为基线、不装概率预测）+ 03.5 预算/截断/未知配置保留。③ 反例必做：同一伤害两种个体配置都能解释 ⇒ 两者都留；不合法技能组合不得进候选。④ 收口后 active_plan=04，依次 04→…→12。⑤ 常驻登记：O-4（反证 5>=8 已登记偏差）· O-6（damage_global_skill_mod_text 死门 + 531/534 方向丢失）· O-7（文档失真 3 例）· O-8（迸发两链不同源）· O-12（截图规则，已闭环）· O-13（干净副本差分口径）· O-14（STATE 提交前必须 lint）。⑥ 用户已授权启动服务（D-14）：可起自己的实例做真实验收，但**不得**写成「用户自有常驻版已验收」；8765 上有一个 Lead 启动的实例仍在运行（Lead 拥有、可自行停止）。⑦ 要用户裁决前先 pushplus 通知。",
   "plan_order": [
     "00",
     "01",
@@ -104,19 +104,19 @@
     },
     "02": {
       "title": "开局预览与已见阵容回看",
-      "status": "in_progress",
-      "step": "02.1–02.5 全部落地；02.5 隔离（8879）与常驻（8765）两次真实验收均 18/18；收口件已入库，待最终归档",
+      "status": "passed",
+      "step": "02.1–02.5 全部完成；隔离（8879）与常驻（8765）两次真实验收均 18/18；verifier v2 与 resident 复核均判合格",
       "code": "fixed",
-      "isolated": "passed（隔离实例 8879：checks 18/18 · exit 0；16 张截图哈希互异、每张带拍前断言/state_version；Node 客户端相关 10 文件 117/117）",
-      "player": "resident_instance_started_by_lead_passed（用户 2026-09-30 20:0x 授权后，Lead 在真 8765 起服务，真 Chrome+真鼠标走完 18/18、exit 0、18.5s；**用户自有长期部署仍未证明**，不许写成「用户常驻版已验收」）",
-      "evidence": "reports/roco/product-execution/02/{02.2-acceptance.md,02.3-acceptance.md,02.5-acceptance.md,acceptance.md,result.json,README-INDEX.md,recon-02.md,fixture-run.json,preview-run.json,raw-*,test-relaxation.md,verify-02-5-acceptance.md} + shots/（9 张权威截图入库） + resident-run-8765/（常驻实例真操作验收）",
-      "commit": "e446c2d",
-      "remote_sha": "e446c2d（随后随 STATE 提交推送；以分支 tip 为准）"
+      "isolated": "passed（隔离实例 8879：checks 18/18 · exit 0；16 张截图哈希互异、每张带拍前断言/state_version；Node 客户端相关 10 文件 117/117；verifier 独立复跑 18/18 · 20.2s）",
+      "player": "resident_instance_started_by_lead_passed（用户授权后 Lead 在真 8765 起服务，真 Chrome+真鼠标 18/18、exit 0、18.5s；verifier 独立复核确认「真打到 8765」（ready_ms=0）且 9/9 哈希与磁盘一致。**用户自有长期部署仍未证明**，不许写成「用户常驻版已验收」）",
+      "evidence": "reports/roco/product-execution/02/{02.2-acceptance.md,02.3-acceptance.md,02.5-acceptance.md,acceptance.md,result.json,README-INDEX.md,recon-02.md,fixture-run.json,preview-run.json,raw-*,test-relaxation.md,verify-02-5-acceptance.md(v1),verify-02-5-acceptance-v2.md,verify-02-resident-8765.md,FIXTURE-PROVENANCE.md} + shots/（9 张权威截图入库） + resident-run-8765/ + tools: scripts/roco/plan02-browser-fixture.mjs",
+      "commit": "81168e2（收尾切片；前端实现为 e446c2d）",
+      "remote_sha": "81168e2（随后随 STATE 提交推送；以分支 tip 为准）"
     },
     "03": {
       "title": "对手候选与证据更新",
-      "status": "pending",
-      "step": null,
+      "status": "in_progress",
+      "step": "03.1 审查现有候选生成是否真用公开物种/可学技能（只读勘察先行）",
       "code": "unverified",
       "isolated": "unverified",
       "player": "unverified",
@@ -330,6 +330,14 @@
       "owner": "harness-verifier（读数）· lead（登记）",
       "status": "closed_for_our_three_commits",
       "rule": "**干净归档副本适合做差分（前后对比），不适合当绝对健康度读数** —— 要绝对值就在工作树上跑并在证据里写明树的状态"
+    },
+    {
+      "id": "O-14",
+      "what": "Lead 自己造成的一次状态文件事故：改 STATE.json 时留下**尾逗号** ⇒ JSON 非法，且**已随 d94f3dc 推送到远端**；下一轮 lint 才发现，已用 7dc6451 修复（工作树与远端复验通过）",
+      "evidence": "state-lint 报 `Expecting property name enclosed in double quotes: line 115 column 5`；对 d94f3dc 的 blob 复核同样报错（自证错误范围只在那一个提交，未被后续提交继承）；修复后 `WORKTREE STATE OK · active_plan=02 · observations=13 · decisions=14`",
+      "owner": "lead",
+      "status": "closed",
+      "rule": "**STATE.json 每次提交前必须先跑 `python3 E:\\roco-scratch\\state-lint.py`（或等价 json.load）并把输出留在当轮记录里**；改大块 JSON 时不要在替换串里留尾逗号 —— 先把要替换的整段读完再改"
     }
   ],
   "handoff": {
