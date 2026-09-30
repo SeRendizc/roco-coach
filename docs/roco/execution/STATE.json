@@ -111,7 +111,7 @@
       "player": "resident_instance_started_by_lead_passed（用户 2026-09-30 20:0x 授权后，Lead 在真 8765 起服务，真 Chrome+真鼠标走完 18/18、exit 0、18.5s；**用户自有长期部署仍未证明**，不许写成「用户常驻版已验收」）",
       "evidence": "reports/roco/product-execution/02/{02.2-acceptance.md,02.3-acceptance.md,02.5-acceptance.md,acceptance.md,result.json,README-INDEX.md,recon-02.md,fixture-run.json,preview-run.json,raw-*,test-relaxation.md,verify-02-5-acceptance.md} + shots/（9 张权威截图入库） + resident-run-8765/（常驻实例真操作验收）",
       "commit": "e446c2d",
-      "remote_sha": "e446c2d（随后随 STATE 提交推送；以分支 tip 为准）",
+      "remote_sha": "e446c2d（随后随 STATE 提交推送；以分支 tip 为准）"
     },
     "03": {
       "title": "对手候选与证据更新",
