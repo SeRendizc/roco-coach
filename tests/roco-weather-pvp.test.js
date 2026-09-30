@@ -41,7 +41,15 @@ const LEDGER_PATH = 'data/roco/evidence/rule-evidence-ledger.json';
 
 const readJson = (rel) => JSON.parse(readFileSync(join(REPO_ROOT, rel), 'utf8'));
 
-const PYTHON = RocoClient.probePython(process.env.ROCO_PYTHON || 'python3');
+// ⚠ 2026-10-01（Lead，改钉留档）：原写法是 `RocoClient.probePython(process.env.ROCO_PYTHON || 'python3')`
+//   之后在第 239 行用 `PYTHON.path || 'python3'` 起探针 —— 但 **`probePython()` 的返回值里没有 `path`**
+//   （只有 `{ok, version, error}`）⇒ 恒回落到 `'python3'`。POSIX 上 `python3` 恰好存在 ⇒ 长期掩盖；
+//   Windows 上不存在 ⇒ 探针 `status=null`、stdout/stderr 全空 ⇒ 断言只报「引擎探针失败：undefined」。
+//   **原断言逐字留档**：`spawnSync(PYTHON.path || 'python3', ['-c', ENGINE_PROBE], {…})`。
+//   **最小修订**：用「探测时传入的那个 bin」本身（同一个表达式，只求值一次），语义与作者意图一致
+//   （「用刚探测过的那个解释器」），不改产品代码、不改 SKIP 口径。
+const PY_BIN = process.env.ROCO_PYTHON || 'python3';
+const PYTHON = RocoClient.probePython(PY_BIN);
 const SKIP = PYTHON.ok ? false : `python3 不可用（${PYTHON.error}）：引擎回执那一半测不了`;
 
 // ── ① 规则配置一侧 ───────────────────────────────────────────────────────
@@ -236,10 +244,10 @@ print(json.dumps(out, ensure_ascii=False))
 
 test('引擎回执：出一手「落雨」之后，回执里读得到当前天气与剩余回合（没声明时 fail closed）',
   {skip: SKIP}, () => {
-    const probe = spawnSync(PYTHON.path || 'python3', ['-c', ENGINE_PROBE], {
+    const probe = spawnSync(PY_BIN, ['-c', ENGINE_PROBE], {
       cwd: REPO_ROOT,
       encoding: 'utf8',
-      env: {...process.env, PYTHONDONTWRITEBYTECODE: '1'},
+      env: {...process.env, PYTHONDONTWRITEBYTECODE: '1', PYTHONIOENCODING: 'utf-8'},
       maxBuffer: 32 * 1024 * 1024,
     });
     assert.equal(probe.status, 0, `引擎探针失败：${probe.stderr || probe.stdout}`);
