@@ -537,7 +537,24 @@
       "evidence": "Lead 的 `lead-verify-043.sh`（全量后紧跟定向，机器上同时有其他成员在跑 Node 判据与写 `reports/*.json`）⇒ `Ran 56 · FAILED (failures=7)`；`lead-diagnose-043.sh` 两种模块顺序各一次 ⇒ 均 `Ran 56 · OK`；`lead-concurrency-probe.sh` 双进程并发 + 对照 ⇒ 三次全 OK。**Lead 自己的器材缺陷**：当时脚本用了 `| tail -3`，**失败用例名没被捕获** ⇒ 无法定位是哪 7 条",
       "owner": "lead（登记 + 修器材）· plan04-engine（审计新判据是否时序敏感）",
       "status": "registered",
-      "rule": "① **任何套件运行都必须捕获 `FAIL:`/`ERROR:` 用例名**（只留汇总行等于没有证据）—— 这条对 Lead 自己也适用；② 新增判据**不得依赖挂钟**（超时/耗时类断言要么注入时钟、要么留足余量并在报告里写明「这是时序敏感判据」）；③ 未复现的红**如实登记为未定**，不许当噪声忽略、也不许当已修"
+      "rule": "① **任何套件运行都必须捕获 `FAIL:`/`ERROR:` 用例名**（只留汇总行等于没有证据）—— 这条对 Lead 自己也适用；② 新增判据**不得依赖挂钟**（超时/耗时类断言要么注入时钟、要么留足余量并在报告里写明「这是时序敏感判据」）；③ 未复现的红**如实登记为未定**，不许当噪声忽略、也不许当已修",
+      "closed_by": "harness-verifier 独立长跑 **6/6 全绿**（`seq1..seq5` + 与全量 discover 并发 1 次）⇒ **未能复现**；无红故无 `FAIL:` 可抓（器材已修，能抓 `^FAIL: `）。第 7 次因伴跑的全量 discover 卡住而作废（见 O-38）"
+    },
+    {
+      "id": "O-37",
+      "what": "P6 缓存键「身份缺一不进缓存」的**精确口径**（Lead 与实现者的原始表述都压缩过头）",
+      "evidence": "harness-verifier 在 `3bb4356` 上独立构造「少一项」场景：删 `state.rules_version` ⇒ `key:null`、两次都 `hit:false`、**缓存条数 0**；`timed_out` ⇒ `stored:false`、缓存 0。**精确说法**：只有**三个身份项**（`match_id` / `state_version` / `rules_version`）缺失才 ⇒ `key:null` 不进缓存；另外 4 项（`depth` / `beam` / `budget_ms` / `analysis_seeds`）缺失会回落 `ddefault|bdefault|tdefault|sdefault`，**仍可缓存但不撞键**",
+      "owner": "harness-verifier（精确化）· lead（登记）",
+      "status": "closed",
+      "rule": "描述缓存/键的行为时，必须区分「**身份项缺失 ⇒ 不缓存**」与「**参数项缺失 ⇒ 用默认值仍缓存**」——两者语义不同，压成一句会误导（同 O-28 的教训）"
+    },
+    {
+      "id": "O-38",
+      "what": "**环境事实：`unittest discover`（Python 全量）在 `/mnt/e` 的 `git archive` 副本上会卡住不收敛**（已出现两次）",
+      "evidence": "harness-verifier 记两次：04.2 复核时「归档副本里 `discover` 十余分钟未收敛（stdout 0 字节、最后一条 stderr 是 `test_agent_tasks.py:141` 的 ResourceWarning、90s 无增长）」⇒ kill；04.3 复核时**再次**出现（本次把并发的 load2 饿死）。对照：**工作树**上同一命令 `Ran 910 tests in 227s` 正常收敛（Lead 复跑两次均正常）",
+      "owner": "harness-verifier（发现）· 全队（读数口径）",
+      "status": "closed",
+      "rule": "**全量 Python 套件只在工作树（或原生文件系统副本）上跑**；`/mnt/e` 的 archive 副本只用于「单模块/定向」复验。跨机或跨路径比对全量数字前，**必须先确认 `discover` 在该路径能收敛**（否则数字不可比）——这条要在给跨机的指令里写明"
     }
   ],
   "handoff": {
