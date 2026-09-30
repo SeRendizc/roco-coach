@@ -351,6 +351,14 @@
       "owner": "lead（立规矩）· plan03-belief（执行）",
       "status": "closed_by_D-16",
       "rule": "**每一步实现完成 ⇒ 先报冻结（附 git status --porcelain + 涉及文件 sha256）⇒ Lead 提交 ⇒ 才允许动下一步**；改钉/改实现前必须先冻结"
+    },
+    {
+      "id": "O-16",
+      "what": "「打印即证据」+ 变异测试发现的真缺口（03.2）：通过条件③的降级行为**只被打印、没被断言** ⇒ 删掉实现套件仍全绿，判据可静默回归",
+      "evidence": "harness-verifier 在 `git archive 2253c2e` 副本上做变异：删掉唯一 `contradictions.push({code:'OBSERVED_NOT_IN_FILTERED_POOL'})`（模块约 1835 行）⇒ 套件 **exit=0 · 25/25 全绿**，而它的 S2 真 view 探针 exit=1 · `contradictions: []`（行为确实消失）；对照变异（R4 权重改回 1:0）⇒ exit=1 · 23p/2f ⇒ **套件不是普遍失灵，是这条没牙**。原因：用例注释写「必须报出来（不静默丢）」但代码只用 `raw(...)` 打印、没有 `assert`",
+      "owner": "harness-verifier（发现）· plan03-belief（F-03-2 修）",
+      "status": "fix_in_flight",
+      "rule": "① 凡**通过条件/反例**对应的行为，必须有 `assert` 守护，`raw(...)` 打印不算证据；② 新判据交付时必须给**变异 red-proof（两向：改坏必红 / 不改坏不红）**；③ 顺手交一份「只打印不断言」清单（Lead 会抽样独立验证）"
     }
   ],
   "handoff": {
