@@ -525,11 +525,11 @@
     },
     {
       "id": "O-35",
-      "what": "**本机 WSL 里没有 node**（`command -v node` ⇒ `NO_NODE_IN_WSL`）⇒ 跨平台验证时「在 POSIX 侧跑 Node 判据」这条路走不通，必须换等价读数",
-      "evidence": "plan01-engine 在 task-31 里实测并**如实登记**：`NO_NODE_IN_WSL`，因此改用**说明符等价读数**（python3 按 `join()` 语义 + `Path.as_uri()` 等价 `pathToFileURL().href`）证明修法两平台都产出合法 URL；对照：Windows 侧 Node v24.19/24.21 可用",
-      "owner": "lead（登记）· 全队（读数口径）",
+      "what": "**（Lead 更正）WSL 里其实有 node** —— `command -v node` 失败只是因为**非登录 shell 没 source nvm**；真身是 `/root/.nvm/versions/node/v24.21.0/bin/node`",
+      "evidence": "plan02-front 在 task-37 里实测并更正：用绝对路径 `/root/.nvm/versions/node/v24.21.0/bin/node` 在 **WSL 侧真跑**了 `tests/roco-teacher-shape.test.js` ⇒ **12/12 exit=0**（零回归）；并在 task-20/24/26 也都是这么跑的真读数。⇒ 我原先记的「本机 WSL 没有 node ⇒ POSIX 侧 Node 判据只能给等价读数」**是错的**，根因是探测方式（非登录 shell 的 PATH）而不是环境缺失",
+      "owner": "plan02-front（更正）· lead（改登记）",
       "status": "closed",
-      "rule": "**跨平台读数必须写明在哪个 OS/解释器上跑的**；某一侧无法真跑时，用**等价读数**并标明性质（不许假装跑过）；Node 判据在本机只能在 Windows 侧跑，POSIX 等价性由 lead-mac 的跨机复验覆盖"
+      "rule": "**探测环境能力时要用绝对路径或登录 shell再确认一次**（`command -v` 在非登录 shell 里会漏掉 nvm/conda 之类的注入）；「某侧跑不了」这类结论必须给探测命令，并且**允许被更精确的探测推翻**"
     },
     {
       "id": "O-36",
@@ -572,6 +572,30 @@
       "owner": "harness-verifier（发现）· 全队（读数口径）",
       "status": "closed",
       "rule": "**全量 Python 套件只在工作树（或原生文件系统副本）上跑**；`/mnt/e` 的 archive 副本只用于「单模块/定向」复验。跨机或跨路径比对全量数字前，**必须先确认 `discover` 在该路径能收敛**（否则数字不可比）——这条要在给跨机的指令里写明"
+    },
+    {
+      "id": "O-41",
+      "what": "路径家族**第 13 例**：判据**比较**路径时没归一化分隔符（Windows 必红、POSIX 绿）—— 与 task-20/24/26 修的「拼路径」机制不同、家族相同",
+      "evidence": "plan00-closer 在 task-35 复跑里如实登记（**迁移前基线就红**）：`tests/roco-teacher-shape.test.js` ⇒ `exit 1 · tests 12 · pass 11 · fail 1`，`actual: ['src\\\\game\\\\progression.js']` vs `expected: ['src/game/progression.js']`。plan02-front 判定**不是产品缺陷**：反斜杠出自判据自己 —— `walk()` 用 `join()` 拼平台原生路径、`file.slice(ROOT.length)` 于是给出 Windows 形式。修法 = 比较前 `.replace(/\\\\/g,'/')`（与同族既有正例 `structure-contract.test.js` 5 处、`claim-honesty.test.js:39` 同口径）；**期望值/断言一字未改**；改后 Windows **12/12 exit 0**、WSL（绝对路径 node）**12/12 零回归**。同族扫描：已无其它待修项，`roco-model-wiring-honesty.test.js:274` 属 EXCLUDED（需本地模型）未跑、如实登记",
+      "owner": "plan02-front（修）· lead（登记）",
+      "status": "closed",
+      "rule": "判据里**凡是路径都要在比较前归一化**（拼接用 `fileURLToPath`，比较用统一分隔符）；「某条判据在 Windows 红」先判**是判据比较口径还是产品产出**，两者修法完全不同"
+    },
+    {
+      "id": "O-42",
+      "what": "**本机 `npm run test:unit` 基线本身就不绿**：对照 run（登记前）`1906 tests / 1801 pass / **83 fail** / 22 skip`，失败面覆盖 **29 个文件**",
+      "evidence": "plan05-recon 在 task-27 里做了三次对照（登记前 / 登记 11 / 登记 12）：**83 → 87 → 86** 红、失败文件数 **29 → 29**（差集只有 `companion.test.js` 一条瞬时红，单跑 90/90 绿）。抽样分类：**环境依赖**（local-model 15 · pet-mechanisms 15 · on-demand-builds 7 · workshop 5 · panel-model-env-key 5 · rag-eval 4…）与**产物过期**（corpus-verification / catalog-reconciliation / provenance / hke-layer / owned-pets / sft-dataset-contract，失败信息逐字「磁盘产物与重算不一致」）。⇒ **12 个孤儿判据登记这件事没有引入新红**（29 vs 29），但那 29 个文件本来就是红的",
+      "owner": "plan05-recon（量出基线）· lead（登记）",
+      "status": "registered",
+      "rule": "**「套件绿」必须指明入口与子集**（例如「11 个路径家族文件 68/67/1」≠「`test:unit` 全绿」）；把某批判据接进流水线时，**先量登记前的对照基线**，用「失败文件数」而不是「失败条数」判断有没有引入新红（条数会被瞬时红污染）"
+    },
+    {
+      "id": "O-43",
+      "what": "**跑 `npm run test:unit` 会顺带重写仓库里的生成器产物**（`reports/roco/agent-trajectories-verification.json`、`reports/live-model-eval-only.json`），内容含**环境特定数据**（把交接机的 macOS 路径换成当前机器的 Windows 路径、哈希随机器变）",
+      "evidence": "plan05-recon 如实登记「我定稿那次 `npm run test:unit`（00:06–00:14）确实重写了它们」（mtime 00:08/00:11），并说明自己无权重还原（`git checkout --` 属 git 写命令）。Lead 查 diff 后确认：`trajectories` 字段由 `/Users/serendizc/Developer/roco-coach/...` 变成 `E:\\\\roco-coach\\\\...`，回放哈希也随之改变 ⇒ **属环境特定数据，不该默默入库**。Lead 已用 `git checkout --` 还原这两个文件（只提交 task-27 的正式冻结件）",
+      "owner": "plan05-recon（发现）· lead（还原 + 立规）",
+      "status": "closed",
+      "rule": "① **副作用产物要么还原、要么在提交信息里写明 provenance**（哪个命令、什么时候、哪个环境生成的），不许默默入库；② 生成器产物含**机器路径**时，跨机比对前先确认不是环境差异；③ 成员无 git 写权限 ⇒ 被副作用改动的文件**报给 Lead 还原**，别自己 `git checkout`"
     }
   ],
   "handoff": {
