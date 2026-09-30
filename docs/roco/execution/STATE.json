@@ -621,6 +621,22 @@
       "owner": "plan05-recon（自曝 + 重取）· lead（核验后放行）",
       "status": "closed",
       "rule": "**冻结哈希必须在最后一次写盘之后整组重取**；用占位符两段式写报告时尤其容易踩（Lead 侧照旧：哈希不符就不提交，要求重报——本次就是这么做的）"
+    },
+    {
+      "id": "O-47",
+      "what": "**超限裁剪只在 03b（生产）路径生效**：测试用 provider `configureRocoTools({opponentOutlook})` 不截断 ⇒ 若将来有产品代码配它，70 条会被引擎 400",
+      "evidence": "harness-verifier 在 `5449db7` 上实测：走 03b 注入 70 条 ⇒ 发出 **64**（s000…s063，按 `scenario_id` 定序）+ **6 条逐条登记** `over_engine_limit:s064..s069`（含 `evidence_ids`）✓；但改走测试用 `opponentOutlook` provider ⇒ **发出 70 条**（不截断）。他自曝第一版走错注入点（用 provider ⇒ 误判 70）后改走 `actionScenarioBuilder` 重测，并把两条路径差异登记进报告",
+      "owner": "plan04-engine（修：provider 也走同一截断，或显式标测试专用 + 生产路径 fail closed）",
+      "status": "fix_in_flight",
+      "rule": "**同一约束必须对所有入口生效**（不许「生产路径截断、测试路径不截断」这种分叉）——若某入口确实只给测试用，必须**显式标注 + 加判据禁止生产调用**，而不是靠人记得"
+    },
+    {
+      "id": "O-48",
+      "what": "**集成读数里的「本例数字」不许当稳定属性引用**：`engine_enumerated`（3 vs 4）与 `dropped`（[] vs 2）两处差异由**探针局面不同**造成，不是矛盾",
+      "evidence": "harness-verifier 独立集成（把消费侧实际发出的 9 条喂真引擎）⇒ `battle_plan http=200 · error=None`、**9/9 全接受无 400**、`weights=uniform_baseline`、**池情景零分支**（`stay:pool:*` 均为 `[]`）、逐条 `unavailable`（8 条「枚举不出这个技能」+2 条「一个动作都枚举不出来（不假装能算）」+3 条「都在束宽外」）、`coverage_detail.by_seed={4/4,4/4,4/4}`；但 `engine_enumerated` 他测 **4**（多「仙人掌刺击」）vs 实现者 3、`dropped` 他测 **2**（换上第4/5位在束宽外）vs 实现者 `[]` —— 实现者文档 §2.1 已自述「view 与探针公开面不是同一局」。**结论性的一致**：全接受 / 无 400 / 池情景零分支 / 逐条 unavailable / coverage 4/4",
+      "owner": "harness-verifier（发现）· plan04-engine（改成「本例读数」标注）",
+      "status": "fix_in_flight",
+      "rule": "报告里的**具体数字必须标明局面来源**（哪个夹具/哪个探针局面），否则后人会当基线引用；跨探针比数字前先确认是同一局面"
     }
   ],
   "handoff": {
