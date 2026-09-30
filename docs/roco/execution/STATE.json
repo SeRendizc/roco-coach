@@ -121,13 +121,13 @@
     "03": {
       "title": "对手候选与证据更新",
       "status": "in_progress",
-      "step": "03.1 + 03.2 + F-03-1（在线段假覆盖 68→2079 行/14-14 入口）+ F-03-2（条件③补断言，两向变异必红）已冻结在 b744739；03.3 进行中",
-      "code": "partial（03.2 候选协议 + F-03 批落地；03.3–03.5/R7 未做）",
-      "isolated": "unverified（本地 26/26 · 相关 32/32；verifier 在 b744739 上复验 F-03 批中）",
+      "step": "03.1–03.4 全部冻结入库；F-03-3（多解假矛盾无断言）与 F-03-4（「候选集合不可用」降级无原因断言）随 03.5 一批修；03.5 进行中",
+      "code": "partial（03.2 候选协议 · 03.3 证据更新 · 03.4 情景集合与范围；03.5 未做）",
+      "isolated": "unverified（本地 34/34 · 相关 32/32；verifier 对 03.3/03.4 均判「合格」并各抓出 1 条覆盖缺口）",
       "player": "unverified",
-      "evidence": "reports/roco/product-execution/03/{03.1-recon.md,03.1-wrapup.md,03.2-candidates.md,03.2-F-03-1-online-section.md,03.2-F-03-2-contradiction-guards.md,raw-03.*,verify-03.*} + docs/roco/RC-604-OPPONENT-BELIEF.md + reports/roco/rc604/opponent-belief.json（只由生成器写）",
-      "commit": "b744739",
-      "remote_sha": "b7447396d85617b9efc65d80c9519918b00ace77"
+      "evidence": "reports/roco/product-execution/03/{03.1-recon.md,03.1-wrapup.md,03.2-candidates.md,03.2-F-03-*.md,03.3-evidence-update.md,03.4-scenario-outlook.md,raw-03.*,verify-03.1-*.md,verify-03.2*.md,verify-03.3.md,verify-03.4.md} + docs/roco/RC-604-OPPONENT-BELIEF.md + reports/roco/rc604/opponent-belief.json（只由生成器写）",
+      "commit": "a821fe2（03.4；03.3 为 0d96ce3）",
+      "remote_sha": "a821fe2866f39317a08217f5c9c7e1552fa3b496"
     },
     "04": {
       "title": "有限分支比较与稳健动作排序",
@@ -359,6 +359,22 @@
       "owner": "harness-verifier（发现）· plan03-belief（F-03-2 修）",
       "status": "fix_in_flight",
       "rule": "① 凡**通过条件/反例**对应的行为，必须有 `assert` 守护，`raw(...)` 打印不算证据；② 新判据交付时必须给**变异 red-proof（两向：改坏必红 / 不改坏不红）**；③ 顺手交一份「只打印不断言」清单（Lead 会抽样独立验证）"
+    },
+    {
+      "id": "O-17",
+      "what": "变异测试连续抓到**三条同形态缺口**：降级/否定式分支只在「高兴路径」上有断言（F-03-2 条件③降级、F-03-3 多解时凭空冒假矛盾、F-03-4「候选集合不可用」降级无原因）",
+      "evidence": "harness-verifier 各在冻结副本上做实现级变异：F-03-2 删 `contradictions.push(...)` ⇒ 25/25 仍绿；F-03-3 放宽排除分支外层条件 ⇒ 多推假矛盾 `DAMAGE_UNEXPLAINED_BY_SCENARIOS` 而 30/30 仍绿；F-03-4 把「候选集合不可用」早返回分支（模块 ≈2401 行）的 `degrade_reasons` 清空 ⇒ 34/34 仍绿（该分支可达：注入 `moves` ⇒ available=false + reason）。三条都有对照变异证明「不是套件普遍失灵」",
+      "owner": "harness-verifier（发现）· plan03-belief（F-03-3/F-03-4 修）",
+      "status": "fix_in_flight",
+      "rule": "**降级/否定式分支必须与正向分支同等有断言**；已被要求交一张「所有 available:false / degraded:true / complete:false 返回分支 → 有没有断言」的表，Lead 会让 verifier 按表抽样变异（不许只补被抓到的那一条）"
+    },
+    {
+      "id": "O-18",
+      "what": "双机协作（agent-coop）在本机装了一个 `pre-push` 守卫钩子，**要求 PATH 上有 `python3`**；本机默认没有该命令 ⇒ 不带 PATH 适配的 push 会被挡成 exit 1",
+      "evidence": "钩子内容末行 `exec python3 \"$GUARD\" check-push …`；实测：不带 PATH 适配 ⇒ `.git/hooks/pre-push: line 10: exec: python3: not found` → `failed to push some refs`（远端不动）；把解释器目录加进 PATH 后钩子正常跑并打印「✅ 可以推送（…@<sha>；工作区与远端一致）」→ push exit 0。已在本机解释器目录建 `python3.exe` 硬链接作为环境适配（可删）",
+      "owner": "lead（环境适配 + 登记）· lead-mac（钩子脚本可移植性待修）",
+      "status": "workaround_in_place",
+      "rule": "**本仓库推送必须在 PATH 含解释器目录的环境下执行**（否则被守卫钩子挡住）；**不许 `--no-verify` 绕过** —— 被挡时应先看守卫打印的原因"
     }
   ],
   "handoff": {
