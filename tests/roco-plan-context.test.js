@@ -395,13 +395,18 @@ test('⑦f 配置了 outlook provider 时情景进请求体；坏行丢弃并在
     harness.done();
   }
 
-  // 默认（没配 provider）⇒ 一个情景都不注入，也不编 unavailable
+  // 默认（没配 provider、context 里也没有公开视图）⇒ 一个情景都不注入，但**必须说明为什么**
+  // （04.3b：`source:'missing-view'` + 一条带原因的 `unavailable`，不许「什么都没有也不说话」）
   const plain = planToolHarness({});
   try {
     const receipt = await plain.run();
     assert.equal(plain.plannerCalls[0].opponentScenarios, undefined);
-    assert.deepEqual(receipt.opponentScenarios,
-      {injected: 0, source: null, scenario_ids: [], unavailable: []});
+    assert.equal(receipt.opponentScenarios.injected, 0);
+    assert.deepEqual(receipt.opponentScenarios.scenario_ids, []);
+    assert.equal(receipt.opponentScenarios.source, 'missing-view');
+    assert.equal(receipt.opponentScenarios.available, null);
+    assert.equal(receipt.opponentScenarios.unavailable.length, 1);
+    assert.match(receipt.opponentScenarios.unavailable[0].why, /没有公开视图/);
   } finally {
     plain.done();
   }
@@ -666,5 +671,151 @@ test('⑧c P6 缓存：同键只算一次；身份/版本/rules 换一项就重�
     assert.equal(again.cache.hit, false);
   } finally {
     timedOut.done();
+  }
+});
+
+// ── ⑨ 04.3b：动作级情景的**消费侧**（只消费 03b 的 buildActionScenarios，不自己映射）────
+//
+// 守的红线（D-33 + Lead 三令）：
+//   ① **留场与换人并存、绝不塌缩**：公开面有换人证据就必须有 `switch_in_seen` 行；
+//      「期望」从 `view.seen_roster` **现算**（不读 03b 自己的 `sources` —— 它塌缩后会自恰变 false）；
+//   ② `slots: []` = 位次不可判定 ⇒ **照传空数组**，绝不猜一个位次；
+//   ③ 可学池情景必须带 `learnable_pool_hypothesis` 标记（假设 ≠ 观察）；
+//   ④ `unavailable[]`（含 P3 残留：后备满血 + 规范配招假设）**照实传递**，不吞。
+
+/** 真引擎 view（03 留档的原始回执，不是手写夹具）。 */
+const REAL_ACTION_VIEW = JSON.parse(readFileSync(
+  join(ROOT, 'reports', 'roco', 'product-execution', '03', 'raw-03.3-view-pvp.json'), 'utf8'));
+
+/** 从**公开面**独立现算「有公开证据的换人位次」——不读 03b 的 sources。 */
+function independentSwitchSlots(view) {
+  const activeSlot = Number.isInteger(view?.opponent?.field?.slot) ? view.opponent.field.slot : null;
+  const fainted = new Map((view?.opponent?.bench ?? [])
+    .filter((row) => Number.isInteger(row?.slot)).map((row) => [row.slot, row.fainted === true]));
+  return [...new Set((view?.seen_roster ?? [])
+    .map((row) => row?.slot)
+    .filter((slot) => Number.isInteger(slot) && slot !== activeSlot && fainted.get(slot) !== true))]
+    .sort((a, b) => a - b);
+}
+
+test('⑨a 消费真 view：留场与换人并存（不塌缩）· slots=[] 照传 · 池情景带假设标记 · P3 照报', async () => {
+  const harness = planToolHarness({});
+  try {
+    const receipt = await harness.run({}, {rocoActionView: REAL_ACTION_VIEW});
+    const sent = harness.plannerCalls[0].opponentScenarios;
+    assert.ok(Array.isArray(sent) && sent.length > 0, '真 view 必须能产出动作级情景');
+    const stay = sent.filter((row) => row.kind === 'stay_attack' || row.kind === 'stay_defense');
+    const sw = sent.filter((row) => row.kind === 'switch_in_seen');
+    assert.ok(stay.length > 0, '必须有留场情景（observed 已出技能）');
+    // ① 绝不塌缩：换人证据在公开面上存在 ⇒ 情景里必须也有换人行
+    const expectedSlots = independentSwitchSlots(REAL_ACTION_VIEW);
+    assert.ok(expectedSlots.length > 0, '夹具必须含换人证据（否则这条判据是空的）');
+    assert.equal(sw.length, expectedSlots.length,
+      `换人情景数必须等于从 seen_roster 现算的期望 ${JSON.stringify(expectedSlots)}`);
+    assert.deepEqual(sw.map((row) => row.slots[0]).sort((a, b) => a - b), expectedSlots,
+      '换人位次必须逐个来自公开面（seen_roster 的 slot）');
+    // ② 池情景：位次不可判定 ⇒ slots 必须是空数组（照传，不是猜一个）
+    const pool = sent.filter((row) => row.evidence_basis === 'learnable_pool_hypothesis');
+    assert.ok(pool.length > 0, '夹具的可学池情景必须被带出来');
+    for (const row of pool) {
+      assert.deepEqual(row.slots, [], `池情景 ${row.scenario_id} 的位次不可判定 ⇒ 必须传空数组`);
+      assert.equal(row.kind, 'stay_attack');
+    }
+    // ③ 假设标记逐条保留；回执里能一眼看出哪些是假设
+    assert.deepEqual(receipt.opponentScenarios.hypothesis_scenarios,
+      pool.map((row) => row.scenario_id));
+    assert.deepEqual(receipt.opponentScenarios.slot_undetermined,
+      sent.filter((row) => row.slots.length === 0).map((row) => row.scenario_id));
+    // ④ 03b 的 unavailable（含 P3 残留）照实传递 + limitations 点名
+    const what = receipt.opponentScenarios.unavailable.map((row) => row.what);
+    assert.ok(what.includes('bench_hp_and_moveset'), `P3 残留必须传递：${JSON.stringify(what)}`);
+    const p3 = receipt.opponentScenarios.unavailable.find((row) => row.what === 'bench_hp_and_moveset');
+    assert.match(p3.why, /满血|规范配招/);
+    assert.ok(receipt.limitations.some((line) => /P3 残留/.test(String(line))),
+      `limitations 要点名 P3 残留：${JSON.stringify(receipt.limitations)}`);
+    // 03b 的自报读数原样带出（协议 / counts / sources / 声明）
+    assert.equal(receipt.opponentScenarios.protocol, 'rc604-opponent-action-scenarios/v1');
+    assert.equal(receipt.opponentScenarios.available, true);
+    assert.equal(receipt.opponentScenarios.counts.stay, stay.length);
+    assert.equal(receipt.opponentScenarios.counts.switch, sw.length);
+    assert.equal(receipt.opponentScenarios.declarations.is_probability, false);
+    assert.equal(receipt.opponentScenarios.source, '03b-buildActionScenarios');
+  } finally {
+    harness.done();
+  }
+});
+
+test('⑨b 视图不完整 ⇒ 不注入 + 说明原因（fail closed，不补造情景、不猜位次）', async () => {
+  // ① 客户端快照形状（`foe`/`foe_bench`，**没有 `opponent.field`**）：场上那只不可确定 ⇒
+  //    消费侧前置闸拦住（否则 03b 会照 `seen_roster` 产出「对手换入自己」——实测过）。
+  const clientSnapshot = {
+    turn: 3, state_version: 7,
+    self: [{pet_id: 'pet_000007', hp: 100, max_hp: 120}], self_active: 0,
+    foe: [{pet_id: 'pet_000239', hp: 90, max_hp: 110}],
+    foe_bench: [{slot: 1, fainted: false}, {slot: 2, fainted: true}],
+    seen_roster: (REAL_ACTION_VIEW.seen_roster ?? []).slice(0, 2),
+  };
+  const harness = planToolHarness({});
+  try {
+    const receipt = await harness.run({}, {roco_battle: clientSnapshot});
+    assert.equal(harness.plannerCalls[0].opponentScenarios, undefined, '不允许带着不完整视图注入');
+    assert.equal(receipt.opponentScenarios.injected, 0);
+    assert.equal(receipt.opponentScenarios.source, 'view-missing-active');
+    assert.equal(receipt.opponentScenarios.available, null);
+    assert.match(receipt.opponentScenarios.unavailable[0].why, /opponent\.field/);
+    assert.match(receipt.opponentScenarios.unavailable[0].why, /留场|换人/);
+    assert.ok(receipt.limitations.some((line) => /不可判定项/.test(String(line))));
+  } finally {
+    harness.done();
+  }
+
+  // ② 完全没有视图 ⇒ missing-view（回执 `available:null`，不是 false 也不是 true）
+  const bare = planToolHarness({});
+  try {
+    const receipt = await bare.run();
+    assert.equal(bare.plannerCalls[0].opponentScenarios, undefined);
+    assert.equal(receipt.opponentScenarios.injected, 0);
+    assert.equal(receipt.opponentScenarios.source, 'missing-view');
+    assert.equal(receipt.opponentScenarios.available, null);
+    assert.match(receipt.opponentScenarios.unavailable[0].why, /没有公开视图/);
+  } finally {
+    bare.done();
+  }
+
+  // ③ 完整视图（⑨a 用的那份）在同一个夹具里**必须**能注入 —— 否则前置闸就是把功能关掉了
+  const full = planToolHarness({});
+  try {
+    await full.run({}, {rocoActionView: REAL_ACTION_VIEW});
+    assert.ok(Array.isArray(full.plannerCalls[0].opponentScenarios)
+      && full.plannerCalls[0].opponentScenarios.length > 0, '完整视图必须照常注入');
+  } finally {
+    full.done();
+  }
+});
+
+test('⑨c 超过引擎上限（64）⇒ 按 scenario_id 定序截断并逐条登记（不静默丢）', async () => {
+  const many = Array.from({length: 70}, (_v, i) => ({
+    scenario_id: `s${String(i).padStart(3, '0')}`,
+    kind: 'stay_attack', slots: [0], species_ids: ['pet_000239'],
+    skill_ids: ['skill_000340'], evidence_basis: 'observed', evidence_ids: ['x'],
+  }));
+  const harness = planToolHarness({});
+  configureRocoTools({actionScenarioBuilder: () => ({
+    protocol: 'rc604-opponent-action-scenarios/v1', available: true, unknown_reason: null,
+    scenarios: many, counts: {stay: 70, switch: 0, observed: 70, hypothesis: 0},
+    sources: {stay_available: true, switch_available: false, pool_candidates: 0},
+    unavailable: [], declarations: {is_probability: false},
+  })});
+  try {
+    const receipt = await harness.run();
+    assert.equal(harness.plannerCalls[0].opponentScenarios.length, 64, '引擎上限是 64');
+    const over = receipt.opponentScenarios.unavailable.filter((row) => /over_engine_limit/.test(row.what));
+    assert.equal(over.length, 6, '被截断的 6 条必须逐条登记');
+    assert.match(over[0].why, /上限 64/);
+    // 定序截断：留下的是 id 最小的 64 条
+    assert.equal(harness.plannerCalls[0].opponentScenarios[0].scenario_id, 's000');
+    assert.equal(harness.plannerCalls[0].opponentScenarios[63].scenario_id, 's063');
+  } finally {
+    harness.done();
   }
 });

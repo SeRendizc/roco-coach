@@ -676,6 +676,9 @@ let rocoPlanner=null;
 //: 走缺省对手依据（理由见 `rocoOpponentScenariosFor`：03 的档位情景与引擎的动作级情景
 //: 之间是一次需要裁决的语义映射，不许猜）。
 let rocoOpponentOutlook=null;
+//: 04.3b：注入一个 **03b 形状**的 builder（签名同 `buildActionScenarios({catalog,view,skillPool})`）。
+//: 默认 null ⇒ 动态 import 真模块（`src/coach/opponent-belief.mjs`）+ RC-303 索引。
+let rocoActionScenarioBuilder=null;
 // RC-301：阵容请求合同的数据集（owned / pack / modes / rulesets）。注入式，避免每次调用读盘。
 let recommendationInputsProvider=null;
 const rocoStartups=new WeakMap();
@@ -865,7 +868,7 @@ export async function searchRulesWithRag(query,{game=null,rulesVersion=RULES_VER
  * @param {number|Function} [options.stateVersion] 当前状态版本，或 (context)=>version
  * @param {Function} [options.planner]   规划器（见 planActionsViaPlanner）
  */
-export function configureRocoTools({client,factory,stateVersion,planner,recommendationInputs,opponentOutlook}={}){
+export function configureRocoTools({client,factory,stateVersion,planner,recommendationInputs,opponentOutlook,actionScenarioBuilder}={}){
  if(client!==undefined)rocoClient=client;
  if(factory!==undefined)rocoClientFactory=factory;
  if(stateVersion!==undefined)rocoStateVersionProvider=typeof stateVersion==='function'?stateVersion:()=>stateVersion;
@@ -873,6 +876,8 @@ export function configureRocoTools({client,factory,stateVersion,planner,recommen
  if(recommendationInputs!==undefined)recommendationInputsProvider=recommendationInputs;
  // 04.3：注入情景的 provider（返回**引擎形状**的行；见 rocoOpponentScenariosFor）。
  if(opponentOutlook!==undefined)rocoOpponentOutlook=opponentOutlook;
+ // 04.3b：注入 03b 的 builder（默认走真模块）。
+ if(actionScenarioBuilder!==undefined)rocoActionScenarioBuilder=actionScenarioBuilder;
 }
 /** 清掉注入与「见过的状态版本」记录（测试用；也用于切换对局时防止串号）。 */
 export function resetRocoTools({keepClient=false}={}){
@@ -882,9 +887,12 @@ export function resetRocoTools({keepClient=false}={}){
  rocoPlanner=null;
  recommendationInputsProvider=null;
  rocoOpponentOutlook=null;
+ rocoActionScenarioBuilder=null;
  rocoSeenStateVersions.clear();
  // P6：切换对局/重置注入时缓存必须一起清 —— 否则上一条注入的结论会跟着新 provider 走。
  resetRocoPlanCache();
+ // 04.3b：03b 的依赖（catalog/skillPool）也一起清（测试里不同 root 不许互相污染）。
+ rocoActionScenarioDeps.clear();
 }
 /**
  * 资料工具的**被动**状态：不新建连接、不拉引擎、不读盘（`/api/bootstrap` 每次开页面都要问）。
@@ -1357,39 +1365,140 @@ export function normalizeOpponentScenarioRows(input){
   }
   const ints=Array.isArray(row.slots)?row.slots.filter((n)=>Number.isInteger(n)):[];
   const strs=(key)=>(Array.isArray(row[key])?row[key]:[]).filter((s)=>typeof s==='string'&&s);
+  // 04.3b：`evidence_basis` 是**来源标记**（observed / learnable_pool_hypothesis），必须留下 ——
+  // 池情景是**假设**不是观察，抹掉这一位就等于把假设当观察。引擎只读它认识的键，不会因此 400。
+  const basis=typeof row.evidence_basis==='string'&&row.evidence_basis?row.evidence_basis:null;
   seen.add(id);
   rows.push({scenario_id:id,kind:row.kind,slots:ints,species_ids:strs('species_ids'),
-   skill_ids:strs('skill_ids'),evidence_ids:strs('evidence_ids')});
+   skill_ids:strs('skill_ids'),evidence_ids:strs('evidence_ids'),
+   ...(basis?{evidence_basis:basis}:{})});
  });
  rows.sort((a,b)=>(a.scenario_id<b.scenario_id?-1:1));
  return {rows,unavailable};
 }
 
+// ── 04.3b：动作级情景的**消费侧**（只消费 03b，不自己映射）───────────────────────
+//
+// 纪律（D-33 裁决）：
+//   · **不自己映射**：`kind` / `slots` / `species_ids` / `skill_ids` 一律来自
+//     `buildActionScenarios()`（协议 `rc604-opponent-action-scenarios/v1`）；
+//   · **`slots: []` = 位次不可判定** ⇒ **照传空数组**，绝不替它猜一个位次
+//     （推断候选在公开面上没有 pet_id，猜位次就是编事实）；
+//   · `unavailable[]`（含 **P3 残留**：后备满血 + 规范配招假设）**照实传递**，不吞；
+//   · 可学池情景保留 `evidence_basis:'learnable_pool_hypothesis'` 标记（假设 ≠ 观察）；
+//   · 拿不到输入 / 03b 说 `available:false` ⇒ **不注入**，把原因带进回执。
+/** 引擎 `opponent_scenarios` 的条数上限（`planner.parse_opponent_scenarios` 是 64）。 */
+const ROCO_ACTION_SCENARIO_MAX=64;
+/** 每进程一份的 03b 依赖（catalog / skillPool）；按 repoRoot 缓存，避免每次规划读盘。 */
+const rocoActionScenarioDeps=new Map();
+
+async function loadActionScenarioDeps(root){
+ if(!rocoActionScenarioDeps.has(root)){
+  const pending=(async()=>{
+   const [belief,candidates]=await Promise.all([
+    import('./opponent-belief.mjs'),import('./team-candidates.mjs')]);
+   const inputs=await candidates.loadTeamCandidatesInputs({root});
+   const index=candidates.buildCandidateIndex(inputs);
+   let onDemandBuilds=null;
+   try{
+    const [fs,path]=await Promise.all([import('node:fs'),import('node:path')]);
+    onDemandBuilds=JSON.parse(fs.readFileSync(
+     path.join(root,'data','roco','derived','on-demand-builds.json'),'utf8'));
+   }catch{onDemandBuilds=null;}   // 读不到就少一栏（03b 自己会登记），不编
+   return {buildActionScenarios:belief.buildActionScenarios,index,
+    skillPool:{learnsets:index.learnsets,skills:index.skills,onDemandBuilds}};
+  })().catch((error)=>{rocoActionScenarioDeps.delete(root);throw error;});
+  rocoActionScenarioDeps.set(root,pending);
+ }
+ return rocoActionScenarioDeps.get(root);
+}
+
+/**
+ * 04.3b：把 03b 的动作级情景拿进来（**只搬运**）。
+ *
+ * 视图来源（按优先级）：`context.rocoActionView`（显式注入；服务端会话里有完整引擎 view）
+ * → `context.roco_battle`（客户端公开快照：`foe` / `foe_bench` 形状，03b 自己判可用性）。
+ * 两者都没有 ⇒ 不注入 + 记原因。**03b 说不可用就听它的**（fail closed），不补造情景。
+ */
+async function buildActionScenariosForPlan({state,context}={}){
+ // 测试/上层可注入 builder（签名同 03b）；注入时仍走同一套校验与登记。
+ const builder=typeof rocoActionScenarioBuilder==='function'?rocoActionScenarioBuilder:null;
+ const view=context?.rocoActionView??context?.roco_battle??null;
+ if(!builder&&!view){
+  return {doc:null,source:'missing-view',
+   why:'没有公开视图（`context.rocoActionView` 与 `context.roco_battle` 都不在）⇒ 不注入情景'};
+ }
+ // **消费侧前置闸**（不是映射）：必须能确定「对手场上是谁」（`view.opponent.field`）。
+ // 少了它，03b 仍会照 `seen_roster` 出 `switch_in_seen` —— 但**场上那只也在 seen_roster 里**，
+  // 于是会产出「对手换入自己」（实测：客户端快照的 `foe` 形状就走这一步）。
+ // 那是把「留场」写成「换人」，和塌缩是同一类错误 ⇒ 宁可不注入，并如实说明缺什么。
+ if(!builder){
+  const field=view?.opponent?.field;
+  const hasActive=field&&typeof field==='object'&&!Array.isArray(field)
+   &&typeof field.pet_id==='string'&&field.pet_id;
+  if(!hasActive){
+   return {doc:null,source:'view-missing-active',
+    why:'公开视图里没有 `opponent.field`（对手场上那只不可确定）⇒ 留场/换人无法区分，不注入情景'};
+  }
+ }
+ if(builder){
+  return {doc:builder({catalog:null,view,skillPool:null,state,context}),source:'injected-builder'};
+ }
+ const root=rocoClient?.repoRoot??globalThis.process?.cwd?.()??'.';
+ const deps=await loadActionScenarioDeps(root);
+ return {doc:deps.buildActionScenarios({catalog:deps.index,view,skillPool:deps.skillPool}),
+  source:'03b-buildActionScenarios'};
+}
+
 /**
  * 04.3：本次请求要注入的对手情景。
  *
- * ⚠ **当前默认不注入**，原因是语义而不是懒：03 的 `outlook.scenarios[]` 是
- * **速度档分组**（`scenario_id: "band:<band>"`，成员是一批候选配招），而引擎要的是
- * **动作级**情景（`stay_attack` + 技能 / `stay_defense` / `switch_in_seen` + 位次）。
- * 两者不是改名关系 —— 「哪个档的哪些候选 → 哪条动作」是一次**语义映射**，
- * 猜错就会把「对手可能换人」写成「对手必然留场」。所以：
- *   · 传输与校验这一段（本函数 + `normalizeOpponentScenarioRows` + 桥的透传）已落地；
- *   · 映射规则等 Lead 裁决（登记在报告里），届时只需 `configureRocoTools({opponentOutlook})`
- *     注入一个返回**引擎形状**行的 provider，其余不动。
- * provider 返回 `{scenarios}` 或直接返回数组；非法行一律丢掉并登记。
+ * 04.3b 起**默认走 03b 的 `buildActionScenarios()`**（D-33：只消费、不自己映射）：
+ * 拿得到公开视图就调用它，把它给的 `scenarios[]`（已是引擎 kind）逐行**原样**传下去，
+ * `slots: []` 照传、`evidence_basis` 照留、`unavailable[]` 照报。
+ * 拿不到输入 / 03b 说 `available:false` ⇒ **不注入**（缺省路径逐字段不变）+ 记原因。
+ * `configureRocoTools({opponentOutlook})` 仍可注入一个自定义 provider 覆盖它（测试用）。
  */
-function rocoOpponentScenariosFor({state,context}={}){
- if(typeof rocoOpponentOutlook!=='function')return {rows:[],unavailable:[],source:null};
- let produced;
- try{
-  produced=rocoOpponentOutlook({state,context});
- }catch(error){
-  return {rows:[],unavailable:[{why:`opponentOutlook provider 抛异常：${error?.message||error}`}],
-   source:'provider-error'};
+async function rocoOpponentScenariosFor({state,context}={}){
+ if(typeof rocoOpponentOutlook==='function'){
+  let produced;
+  try{
+   produced=rocoOpponentOutlook({state,context});
+  }catch(error){
+   return {rows:[],doc:null,unavailable:[{what:'provider_error',
+    why:`opponentOutlook provider 抛异常：${error?.message||error}`}],source:'provider-error'};
+  }
+  const raw=Array.isArray(produced)?produced:produced?.scenarios;
+  const normalized=normalizeOpponentScenarioRows(raw);
+  return {rows:normalized.rows,doc:null,unavailable:normalized.unavailable,
+   source:'configured-provider'};
  }
- const raw=Array.isArray(produced)?produced:produced?.scenarios;
- const normalized=normalizeOpponentScenarioRows(raw);
- return {rows:normalized.rows,unavailable:normalized.unavailable,source:'configured-provider'};
+ let built;
+ try{
+  built=await buildActionScenariosForPlan({state,context});
+ }catch(error){
+  return {rows:[],doc:null,source:'03b-error',
+   unavailable:[{what:'action_scenarios_build',
+    why:`03b 构建失败：${error?.message||error}`}]};
+ }
+ const doc=built.doc;
+ const unavailable=[...(Array.isArray(doc?.unavailable)?doc.unavailable:[])];
+ if(!doc||doc.available!==true){
+  if(built.why)unavailable.push({what:'action_scenarios_input',why:built.why});
+  return {rows:[],doc,unavailable,source:built.source};
+ }
+ const normalized=normalizeOpponentScenarioRows(doc.scenarios);
+ unavailable.push(...normalized.unavailable);
+ let rows=normalized.rows;
+ if(rows.length>ROCO_ACTION_SCENARIO_MAX){
+  // 引擎上限 64：按 scenario_id 定序截断，并把截掉的**逐条登记**（不许静默丢）
+  unavailable.push(...rows.slice(ROCO_ACTION_SCENARIO_MAX).map((row)=>({
+   what:`over_engine_limit:${row.scenario_id}`,
+   why:`引擎 opponent_scenarios 上限 ${ROCO_ACTION_SCENARIO_MAX} 条；按 scenario_id 定序截断`,
+   evidence_ids:row.evidence_ids})));
+  rows=rows.slice(0,ROCO_ACTION_SCENARIO_MAX);
+ }
+ return {rows,doc,unavailable,source:built.source};
 }
 
 /**
@@ -1423,7 +1532,7 @@ async function rocoPlanActions(args,context,client,stateVersion,freshness,starte
   return {...rocoClone(hit.receipt),latency_ms:rocoLatency(started),
    cache:{hit:true,stored:false,key:cacheKey,keyParts:cacheParts,ageMs:Math.round(rocoNow()-hit.at)}};
  }
- const injected=rocoOpponentScenariosFor({state:args.state,context});
+ const injected=await rocoOpponentScenariosFor({state:args.state,context});
  const engine=await planActionsViaPlanner({client,state:args.state,state_version:stateVersion,
   timeoutMs:ROCO_PLAN_TIMEOUT_MS,context,
   opponentScenarios:injected.rows.length?injected.rows:undefined});
@@ -1446,8 +1555,15 @@ async function rocoPlanActions(args,context,client,stateVersion,freshness,starte
   &&plan.declarations!==null)?plan.declarations:null;
  const limitations=Array.isArray(receipt.limitations)?[...receipt.limitations]:[];
  if(margin.status==='unknown')limitations.push(`边际量不可用：${margin.reason}`);
- if(injected.unavailable.length)limitations.push(
-  `有 ${injected.unavailable.length} 条注入情景形状不合法被丢弃（见 opponentScenarios.unavailable），本次按**缺省**对手依据计算`);
+ const invalidRows=injected.unavailable.filter((row)=>typeof row.scenario_id==='string');
+ const undoneItems=injected.unavailable.filter((row)=>typeof row.what==='string');
+ if(invalidRows.length)limitations.push(
+  `有 ${invalidRows.length} 条动作级情景形状不合法被丢弃（见 opponentScenarios.unavailable），本次按**缺省**对手依据计算`);
+ if(undoneItems.length)limitations.push(
+  `对手情景有 ${undoneItems.length} 条**不可判定项**（含 P3 残留：后备满血 + 规范配招假设）——逐条见 opponentScenarios.unavailable`);
+ if(injected.rows.length&&!injected.rows.some((row)=>row.kind==='switch_in_seen')){
+  limitations.push('本次注入的情景里**没有换人分支**：这是 03b 按公开面给出的结果，不是「对手必然留场」的断言');
+ }
  const out={...receipt,
   limitations,
   planAvailable:completed,
@@ -1471,8 +1587,27 @@ async function rocoPlanActions(args,context,client,stateVersion,freshness,starte
   budget:plan?.budget??null,
   // 04.2：注入情景时引擎给的「两类依据分开写」块（没注入就是 null）
   opponentBasis:plan?.opponent_basis??null,
-  opponentScenarios:{injected:injected.rows.length,source:injected.source,
-   scenario_ids:injected.rows.map((row)=>row.scenario_id),unavailable:injected.unavailable},
+  opponentScenarios:{
+   injected:injected.rows.length,
+   source:injected.source,
+   // 04.3b：03b 的**自报**读数（只搬运；不可用时 `available:false` + `unknownReason`）
+   protocol:injected.doc?.protocol??null,
+   available:injected.doc?injected.doc.available===true:null,
+   unknownReason:injected.doc?.unknown_reason??null,
+   counts:injected.doc?.counts??null,
+   sources:injected.doc?.sources??null,
+   declarations:injected.doc?.declarations??null,
+   scenario_ids:injected.rows.map((row)=>row.scenario_id),
+   // 假设标记**逐条**保留：池情景（`learnable_pool_hypothesis`）绝不当观察
+   evidence_basis:injected.rows.map((row)=>({scenario_id:row.scenario_id,
+    basis:row.evidence_basis??null})),
+   hypothesis_scenarios:injected.rows
+    .filter((row)=>row.evidence_basis==='learnable_pool_hypothesis')
+    .map((row)=>row.scenario_id),
+   // `slots: []` 的行：位次**不可判定**（照传、不猜）；单独列出来便于上层措辞
+   slot_undetermined:injected.rows.filter((row)=>row.slots.length===0)
+    .map((row)=>row.scenario_id),
+   unavailable:injected.unavailable},
   // 04.4：稳健排序的留痕（规则/阈值/被「先避重大损失」压下去的动作/稳定并列）
   robustness:plan?.robustness??null,
   // R1/R2 的机器可检声明：这些数字**不是概率**，也不是把握度。

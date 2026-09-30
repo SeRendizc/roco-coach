@@ -2020,6 +2020,32 @@ class ScenarioShapeTest(unittest.TestCase):
         ])
         self.assertEqual([s.scenario_id for s in parsed], ["band:fast", "band:mid", "band:slow"])
 
+    def test_accepts_evidence_basis_marker_from_03b(self):
+        """03b（D-33）的行带 `evidence_basis`（observed / learnable_pool_hypothesis）⇒ 必须接受。
+
+        引擎不认识这个键（只读它认识的键），但**不许因此拒绝整行**：它是 04.3b 透传的来源标记，
+        池情景靠它区分「假设」与「观察」。这条把「将来有人加严格的未知键拒绝」挡住。
+        """
+        parsed = pm.parse_opponent_scenarios([
+            {"scenario_id": "stay:pool:pet_000239", "kind": "stay_attack", "slots": [],
+             "species_ids": ["pet_000239"], "skill_ids": ["skill_000340"],
+             "evidence_basis": "learnable_pool_hypothesis",
+             "evidence_ids": ["candidates[pet_000239].skills.possible"]},
+            {"scenario_id": "stay:attack:pet_000007:skill_000340", "kind": "stay_attack",
+             "slots": [0], "species_ids": ["pet_000007"], "skill_ids": ["skill_000340"],
+             "evidence_basis": "observed", "evidence_ids": ["view.opponent.revealed_skills"]},
+        ])
+        self.assertEqual([s.scenario_id for s in parsed],
+                         ["stay:attack:pet_000007:skill_000340", "stay:pool:pet_000239"])
+        # `slots: []` 必须**原样**留着（位次不可判定 ⇒ 不许替它猜）
+        pool = [s for s in parsed if s.scenario_id.startswith("stay:pool:")][0]
+        self.assertEqual(pool.slots, ())
+        # 概率性字段照旧被拒（来源标记与概率字段是两回事，别混为一谈）
+        with self.assertRaises(pm.ScenarioShapeError):
+            pm.parse_opponent_scenarios([
+                {"scenario_id": "s", "kind": "stay_attack", "evidence_basis": "observed",
+                 "probability": 0.5}])
+
 
 class DefaultGoldenTest(unittest.TestCase):
     """② 缺省路径**逐字段金标**：注入是加性的，缺省行为一个字节都不许动。
