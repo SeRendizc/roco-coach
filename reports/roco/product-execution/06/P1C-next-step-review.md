@@ -224,3 +224,86 @@ UI 那一条若要做，需要页面层判据（`tests/roco-experience.test.js` 
 - **不在本刀范围**（留给 task-33 的共用件迁移）：`roco-experience.js` 的玩家可见数字仍走内联整数插值
   （与既有 5 条规则的写法一致）；迁移到 `playerNumber/playerQuantity` 时应与整个深度层一起做，避免同一文件两套口径。
 - **未跑**：浏览器级验收（`roco.js` 未改，且 8765 不重启）——留给 Lead 的玩家侧复验。
+
+---
+
+# §8 · UI 层准备（判据的**决策逻辑**已落地；页面两处补丁等解锁）
+
+## 8.1 为什么把「这一栏该不该显示」抽成纯函数
+
+这一栏有**两条独立入口**（`review` 非 null 的主分支、`review === null` 的兜底分支）。若两处各自拼字符串，
+「只堵一条」是迟早的事 —— lead-mac 报的那一局走的正是兜底那条。所以先落一个纯函数
+**`lessonGoalRow({review, depth}) → {text, visible}`**（`src/coach/roco-experience.js`，加性导出）：
+
+```js
+const learning = review?.learning ? `这一局学到一件事：${review.learning.trim()}` : '';
+const nextStep = typeof depth?.next_step?.text === 'string' ? depth.next_step.text.trim() : '';
+const text = [learning, nextStep].filter(Boolean).join(' ');
+return {text, visible: text.length > 0};     // 空 ⇒ visible:false ⇒ 页面隐藏整行
+```
+文本口径与页面原来**逐字一致**（`这一局学到一件事：X` + 空格 + `next_step.text`），所以主分支不会因为这次收口改文案。
+
+## 8.2 判据（已落地、已绿；两向变异已跑）
+
+`tests/roco-experience.test.js` 新增 `P1-C：lessonGoalRow —— 空就 visible:false`，覆盖：
+两条路径各自为空 ⇒ `{text:'',visible:false}`（**不是空串**）· 路径 A 有 `next_step` ⇒ 可见且文本含「约 288 点」·
+只有 `learning` ⇒ 仍可见（不许把老师那句也藏掉）· 两段都有 ⇒ 逐字等于原拼法 · 非恒真（两个不同输入不许同一句话）。
+
+| 读数 | 命令 | 退出码 | 结果 |
+|---|---|---|---|
+| 工作树 + 副本基线 | `node --test --test-concurrency=1 tests/roco-experience.test.js` | 0 | `tests 18 / pass 18 / fail 0` |
+| **变异 D（页面口径）** | 把 `lessonGoalRow` 改成「空也返回一句套话且 `visible:true`」 | **1** | `17 pass / 1 fail` —— **只红那条 P1-C 判据**（定向，不误伤） |
+| 还原 | — | 0 | `18/18` |
+
+## 8.3 解锁后要落的页面补丁（**已备好，等 task-44 提交**）
+
+```js
+// finishMatch() 内、两条分支之前：一个收口
+const applyGoalRow = ({text, visible}) => {
+  const line = $('lesson-learning');
+  if (line) line.textContent = text;
+  const row = line?.closest('.result-goal') ?? null;
+  if (row) row.hidden = !visible;      // 空 ⇒ 整行不显示（不是留一个空标签）
+};
+// 主分支（现 :5166-5170）
+applyGoalRow(lessonGoalRow({review, depth: review.depth}));
+// 兜底分支（现 :5201）
+applyGoalRow(lessonGoalRow({review: null, depth}));
+```
+**副标题与 HTML 不动**（Lead 已批：那是这一块的用途说明）。同批加一条**静态判据**（放 `tests/roco-experience.test.js`，
+与既有的页面接线判据同族）：`roco.js` 必须调用 `lessonGoalRow(`，且两处 `$('lesson-learning').textContent` 都要经
+`applyGoalRow`（**不许**再出现 `= depth?.next_step?.text ?? ''` 这种「空串写进去」的写法）；
+其两向变异 = 把兜底改回写空串 ⇒ 该静态判据必红（与 §8.2 的行为判据互补）。
+
+> 为什么这条静态判据**现在不加**：加在页面补丁之前它会立刻红（树里不留红），所以与补丁同批落；
+> 而「决策逻辑」那一半已经用纯函数判据在今天钉住了。
+
+---
+
+# §9 · E-X3 与 06 阶段裁决的一致性核对
+
+| 06 裁决 | 与 E-X3 / 本刀的关系 | 判定 |
+|---|---|---|
+| **Q1** 判定/叙述边界（`decisions[]` 冻结当时信息 + `narrative` + 每条陈述 `basis`） | 本栏属于**叙述侧**（用的是整局事件，允许 `after_the_fact`）⇒ 06.4 拼正文时这一句必须标 `basis:'after_the_fact'` | **不冲突**，补一条口径 |
+| **Q2** 快照按 `decision_id` / 对不上 ⇒ `absent` | 本栏不读快照（只读本局事件） | 无关 |
+| **Q3** 适配器两步（先文本逐字不变） | 本刀改的是**页面渲染**（哪一行显示什么），`teacher.js` 的输出文本一字未动 | 不冲突 |
+| **Q4** `grade.kind` 枚举 + journal 可统计副本 | `next_step` 不是 `grade`；若 06.4 让本栏改读 `decisions[]`，E-X3 仍需成立（两条判据可并存） | 不冲突 |
+| **Q5** 判据登记归 task-27 | 新判据放进**已登记**的 `tests/roco-experience.test.js` 与 `tests/roco-match-review-depth.test.js` ⇒ **不新增孤儿文件** | 一致 |
+| **Q6** 干净树复跑基线 | 全部加性改动，当前全绿；冻结时按干净树复跑 | 一致 |
+| **D-31 / H3**（数字口径：整数原样、非整数 1 位、脏值占位） | 新规则文本里的数字是**整数**（`约 288 点`），未引入长浮点；整个 `roco-experience.js` 迁到 `playerNumber/playerQuantity` 时这几句要一起迁（§7.4） | 不冲突 |
+| **H1**（裸 null/undefined/NaN） | 新文案只有中文 + 整数，无裸字面量 | 不冲突 |
+| **D-2**（玩家禁用词） | 新文案未引入禁词；但注意 `player-copy` / `plain-speak` **不扫** `roco-experience.js`（见 §10） | 不冲突，另登记缺口 |
+
+---
+
+# §10 · 新登记的覆盖面缺口（同族「门外文案」）
+
+**读数**（grep，0 命中）：`reports/roco/product-execution/crosscut/player-text-corpus.mjs` 里
+**没有** `rocoMatchDepth` / `rocoMatchReview` / `next_step` —— 也就是说**整个深度层 + 复盘装配层的玩家可见文本**
+（5 条 `next_step`、6 条 `facts`、`summary`、复盘正文与依据）都**不在** `player-text-gate` 的语料里；
+而 `player-copy` / `plain-speak` 的扫描清单也不含 `roco-experience.js`。
+⇒ 这一层的文案目前**没有任何自动化门禁**（与 `practiceQuestion` 静默 0 条同族）。
+**建议**（等 Lead 定，我不跨域改）：与 `compareTurnAlternatives` / `coachSelfAudit` 同批把
+`rocoMatchDepth`（含 `next_step`）与 `rocoMatchReview` 的可见字段补进语料并登记进 `CORPUS_PRODUCERS`；
+在此之前，本刀的新文案由 `tests/roco-match-review-depth.test.js` 的 `assertNoForbidden`（禁词）与
+`P1-C ①②④`（事实相关性）守着。

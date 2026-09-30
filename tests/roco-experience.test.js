@@ -21,6 +21,7 @@ import {
   rocoIntervention,
   rocoInterventionText,
   rocoDamagePreviewText,
+  lessonGoalRow,
   ROCO_MODE,
 } from '../src/coach/roco-experience.js';
 import {normaliseAdviceShape} from '../src/coach/coach-advice.js';
@@ -429,6 +430,43 @@ test('老师沉默的兜底分支也要写出加厚层的「下一件事」（�
     '兜底分支不许再无条件清空「下一局练一件事」（口径变了就重新钉，别删这条）');
   assert.match(page, /\$\('lesson-learning'\)\.textContent = depth\?\.next_step\?\.text \?\? ''/,
     '兜底分支要把加厚层的 next_step 写出来（没有就留空）');
+});
+
+// ── P1-C（2026-10-01）：这一栏的**空/非空口径**（两条入口同一收口）──────────────
+//
+// 缺陷（lead-mac 玩家可见）：换宠打出 288 点后撤退 ⇒ `next_step=null` + `review=null`
+// ⇒ 两条分支都写空串 ⇒ 玩家只看到静态标签「下一局练一件事」。
+// 修法分两半：① 数据层（正面向规则，已落地，判据在 `roco-match-review-depth.test.js`）；
+// ② 页面层「空则隐藏整行」—— 这一半的**决策逻辑**抽成纯函数 `lessonGoalRow()`，在这里先钉住；
+// 页面那两处调用与「隐藏整行」的静态判据等 `src/client/roco.js` 解锁后同批落（见
+// `reports/roco/product-execution/06/P1C-next-step-review.md` §8）。
+test('P1-C：lessonGoalRow —— 空就 visible:false（页面据此隐藏整行，而不是写空串）', () => {
+  // 路径 A：老师沉默（review=null）+ 加厚层也没有下一步 ⇒ 这一栏整行不该显示
+  assert.deepEqual(lessonGoalRow({review: null, depth: null}), {text: '', visible: false});
+  assert.deepEqual(lessonGoalRow({review: null, depth: {next_step: null}}), {text: '', visible: false});
+  // 路径 B：老师有结论但 learning 为空 + 没有下一步 ⇒ 同样整行不显示
+  assert.deepEqual(lessonGoalRow({review: {learning: ''}, depth: {next_step: null}}), {text: '', visible: false});
+  assert.deepEqual(lessonGoalRow({review: {learning: '   '}, depth: null}), {text: '', visible: false});
+  assert.deepEqual(lessonGoalRow(), {text: '', visible: false}, '不传参数也不许崩，且不许编一句话');
+
+  // 路径 A 有料：加厚层的下一步必须照写（这就是 lead-mac 报的那一局）
+  const nextStep = '下一次换上新的一只之后，先按对位打出一手（这一局第 1 回合换上来，就打出了约 288 点）；换人前先把「上来先打谁」想好。';
+  const pathA = lessonGoalRow({review: null, depth: {next_step: {text: nextStep}}});
+  assert.equal(pathA.visible, true);
+  assert.equal(pathA.text, nextStep);
+  assert.match(pathA.text, /约 288 点/);
+
+  // 老师有 learning、没有下一步 ⇒ 这一栏仍有内容（不许把老师那句也藏掉）
+  const learningOnly = lessonGoalRow({review: {learning: '换宠承伤'}, depth: null});
+  assert.deepEqual(learningOnly, {text: '这一局学到一件事：换宠承伤', visible: true});
+
+  // 两段都有 ⇒ 逐字与页面原来的拼法一致（空格分隔、顺序不变）
+  const both = lessonGoalRow({review: {learning: '换宠承伤'}, depth: {next_step: {text: nextStep}}});
+  assert.equal(both.text, `这一局学到一件事：换宠承伤 ${nextStep}`);
+  assert.equal(both.visible, true);
+
+  // 非恒真：两个不同的输入不许得到同一句话（否则这一层就是「复制一句套话」）
+  assert.notEqual(pathA.text, learningOnly.text);
 });
 
 

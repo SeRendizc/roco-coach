@@ -994,6 +994,28 @@ export function battleLoadouts({loadouts = null, teamSpecies = null, slots = nul
   return Object.keys(out).length ? out : null;
 }
 
+/**
+ * 「下一局练一件事」那一栏**该写什么、要不要显示**（P1-C，2026-10-01）。
+ *
+ * 为什么抽成纯函数：这一栏有**两条独立入口** —— `review` 非 null 的主分支与 `review === null` 的
+ * 兜底分支（`src/client/roco.js` 的 `finishMatch`）。原先两处各自拼一次字符串，**只堵一条会漏**；
+ * lead-mac 报的那一局（换宠打出 288 点后撤退）走的正是兜底那条 ⇒ 空串 ⇒ 只剩静态标签。
+ *
+ * 口径：**内容为空 ⇒ `visible:false`，页面隐藏整行**（不是写空串、更不是填一句占位话）；
+ * 有内容才显示。禁止占位句的理由与 `depthNextStep` 的 fail closed 同源：
+ * 没有本局事实支撑的「下一局练什么」就是套话。
+ *
+ * 文本口径与页面原来逐字一致：`这一局学到一件事：<learning>` + 空格 + `<next_step.text>`。
+ */
+export function lessonGoalRow({review = null, depth = null} = {}) {
+  const learning = typeof review?.learning === 'string' && review.learning.trim()
+    ? `这一局学到一件事：${review.learning.trim()}`
+    : '';
+  const nextStep = typeof depth?.next_step?.text === 'string' ? depth.next_step.text.trim() : '';
+  const text = [learning, nextStep].filter(Boolean).join(' ');
+  return {text, visible: text.length > 0};
+}
+
 export function rocoMatchReview({
   matchId = null, finalView = null, lastLiveView = null,
   events = [], turns = null, result = null, memory = null, skills = null,
