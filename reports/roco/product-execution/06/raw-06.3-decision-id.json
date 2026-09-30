@@ -1,0 +1,48 @@
+{
+ "ruleset_config_id": "mobile_s4_candidate_v3",
+ "ruleset_id": "roco-world-s4-2026-09-10",
+ "runs": {
+  "opening_preview_off": {
+   "derived_decision_id_before": "m-6491e1e6d15f5331:v0",
+   "history_row0": {
+    "events_n": 5,
+    "pre_observation_hash": "84fbe9ac5cb7c767",
+    "state_version": 5,
+    "turn": 1
+   },
+   "match": true,
+   "status": 200,
+   "view": {
+    "decision_id": "m-6491e1e6d15f5331:v0",
+    "event_kinds": [],
+    "events_n": 0,
+    "opening_reveal": false,
+    "phase": "battle",
+    "state_version": 0,
+    "turn": 1
+   },
+   "view_decision_id": "m-6491e1e6d15f5331:v0"
+  },
+  "opening_preview_on": {
+   "derived_decision_id_before": "m-6491e1e6d15f5331:v0",
+   "history_row0": {
+    "events_n": 6,
+    "pre_observation_hash": "e50b57248f8e3791",
+    "state_version": 6,
+    "turn": 1
+   },
+   "match": false,
+   "status": 200,
+   "view": {
+    "decision_id": "m-6491e1e6d15f5331:v1",
+    "event_kinds": [],
+    "events_n": 0,
+    "opening_reveal": true,
+    "phase": "battle",
+    "state_version": 1,
+    "turn": 1
+   },
+   "view_decision_id": "m-6491e1e6d15f5331:v1"
+  }
+ }
+}

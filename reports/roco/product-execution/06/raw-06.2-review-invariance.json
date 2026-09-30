@@ -1,0 +1,907 @@
+{
+ "source": "raw-06.1-timeline.json",
+ "digest_of_source": "27834a8e644813e4",
+ "experiments": {
+  "E1": {
+   "what": "现网口径：整局事件 + 按回合号后写覆盖的合法表",
+   "events_n": 126,
+   "legal_turns": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+   ],
+   "legal_n_by_turn": {
+    "1": 12,
+    "2": 12,
+    "3": 5,
+    "4": 11,
+    "5": 10,
+    "6": 10,
+    "7": 11,
+    "8": 10,
+    "9": 10,
+    "10": 4,
+    "11": 10,
+    "12": 9,
+    "13": 9,
+    "14": 10,
+    "15": 9,
+    "16": 9,
+    "17": 10,
+    "18": 9,
+    "19": 9,
+    "20": 10,
+    "21": 3,
+    "22": 10,
+    "23": 9
+   },
+   "anchor_turn": 5,
+   "verdict": {
+    "goal": "stop-attacking-into-resistance",
+    "check_turn": 5,
+    "check_situation": "our-hit-resisted",
+    "check_handling": "repeated-resist",
+    "tp_turn": 3,
+    "tp_rule": "first-faint",
+    "mistake_available": true,
+    "teaching_a_mistake": true,
+    "alt_claimed": true,
+    "alt_source": "legal-by-turn",
+    "alt_skipped": null,
+    "alt_unknown": null,
+    "alt_menu_n": 6,
+    "outcome_category": "missing",
+    "text": "这一局一共 23 个回合，这一局的结论引擎没给全（结束方式那一项是空的），这一局不按输赢来看。第 3 回合 我方 喵喵 倒下，这是全场第一次减员。有两回合连着打在对方的属性抵抗上。第 5 回合当时的合法动作里还有「水炮」这一项。之所以值得看它：我方在第 5 与第 6 回合连着打在属性抵抗上（这一局共 4 次）——这一课要改的是「换一手或换一只再打」。这里只说当时有这一项可选，不代表换了它整局就会不一样。全场最重的一次伤害在第 2 回合（对方，约 319 点）。"
+   },
+   "student_view": {
+    "learning": "打在抵抗上的那一手不要连着出，换一只或者换一个系别的技能。",
+    "evidence": [
+     "第 3 回合：我方 喵喵 倒下（第一次减员）。",
+     [
+      "我方在第 5 与第 6 回合连着打在属性抵抗上（这一局共 4 次）。"
+     ],
+     "第 5 回合的合法动作表里有「水炮」（来自调用方逐回合送来的合法表）。",
+     "关键片段：全场最重的一次伤害在第 2 回合——对方那一手打出约 319 点（用的是「仙人掌刺击」），落在我方 喵喵 身上。",
+     "关键片段：最吃亏的一回合是第 2 回合——我方在这一回合一共挨了约 319 点（对方出手 1 次）。",
+     "资源：被动补位：我方 3 次／对方 1 次（补位不占回合）。",
+     "资源：手段——对方减伤/应对 7 次（第 1–21 回合之间）；我方技能回能 13 次（第 1–21 回合之间，合计约 6 点能量）；对方技能回能 12 次（第 3–20 回合之间，合计约 12 点能量）；我方减伤/应对 8 次（第 4–22 回合之间）。"
+    ]
+   }
+  },
+  "E2": {
+   "what": "必做反例：固定当时信息（事件截到锚点回合之前，前缀逐字节相同）⇒ 结论应当不变",
+   "anchor_turn": 5,
+   "prefix_events_n": 21,
+   "prefix_identical_to_full_head": true,
+   "prefix_digest": "8a01a558ade33163",
+   "then_only_verdict": null,
+   "full_match_verdict": {
+    "goal": "stop-attacking-into-resistance",
+    "check_turn": 5,
+    "check_situation": "our-hit-resisted",
+    "check_handling": "repeated-resist",
+    "tp_turn": 3,
+    "tp_rule": "first-faint",
+    "mistake_available": true,
+    "teaching_a_mistake": true,
+    "alt_claimed": true,
+    "alt_source": "legal-by-turn",
+    "alt_skipped": null,
+    "alt_unknown": null,
+    "alt_menu_n": 6,
+    "outcome_category": "missing",
+    "text": "这一局一共 23 个回合，这一局的结论引擎没给全（结束方式那一项是空的），这一局不按输赢来看。第 3 回合 我方 喵喵 倒下，这是全场第一次减员。有两回合连着打在对方的属性抵抗上。第 5 回合当时的合法动作里还有「水炮」这一项。之所以值得看它：我方在第 5 与第 6 回合连着打在属性抵抗上（这一局共 4 次）——这一课要改的是「换一手或换一只再打」。这里只说当时有这一项可选，不代表换了它整局就会不一样。全场最重的一次伤害在第 2 回合（对方，约 319 点）。"
+   },
+   "conclusion_invariant": false
+  },
+  "E2b": {
+   "what": "必做反例（严格版）：保留整局，只把**锚点之后**那次抵抗改成中性 ⇒ 对锚点那一手的判断应当不变",
+   "anchor_turn": 5,
+   "mutated_event": {
+    "turn": 6,
+    "kind": "damage",
+    "from_multiplier": 0.5,
+    "to_multiplier": 1
+   },
+   "before": {
+    "goal": "stop-attacking-into-resistance",
+    "check_turn": 5,
+    "check_situation": "our-hit-resisted",
+    "check_handling": "repeated-resist",
+    "tp_turn": 3,
+    "tp_rule": "first-faint",
+    "mistake_available": true,
+    "teaching_a_mistake": true,
+    "alt_claimed": true,
+    "alt_source": "legal-by-turn",
+    "alt_skipped": null,
+    "alt_unknown": null,
+    "alt_menu_n": 6,
+    "outcome_category": "missing",
+    "text": "这一局一共 23 个回合，这一局的结论引擎没给全（结束方式那一项是空的），这一局不按输赢来看。第 3 回合 我方 喵喵 倒下，这是全场第一次减员。有两回合连着打在对方的属性抵抗上。第 5 回合当时的合法动作里还有「水炮」这一项。之所以值得看它：我方在第 5 与第 6 回合连着打在属性抵抗上（这一局共 4 次）——这一课要改的是「换一手或换一只再打」。这里只说当时有这一项可选，不代表换了它整局就会不一样。全场最重的一次伤害在第 2 回合（对方，约 319 点）。"
+   },
+   "after": {
+    "goal": "stop-attacking-into-resistance",
+    "check_turn": 5,
+    "check_situation": "our-hit-resisted",
+    "check_handling": "repeated-resist",
+    "tp_turn": 3,
+    "tp_rule": "first-faint",
+    "mistake_available": true,
+    "teaching_a_mistake": true,
+    "alt_claimed": true,
+    "alt_source": "legal-by-turn",
+    "alt_skipped": null,
+    "alt_unknown": null,
+    "alt_menu_n": 6,
+    "outcome_category": "missing",
+    "text": "这一局一共 23 个回合，这一局的结论引擎没给全（结束方式那一项是空的），这一局不按输赢来看。第 3 回合 我方 喵喵 倒下，这是全场第一次减员。有两回合连着打在对方的属性抵抗上。第 5 回合当时的合法动作里还有「水炮」这一项。之所以值得看它：我方在第 8 与第 9 回合连着打在属性抵抗上（这一局共 3 次）——这一课要改的是「换一手或换一只再打」。这里只说当时有这一项可选，不代表换了它整局就会不一样。全场最重的一次伤害在第 2 回合（对方，约 319 点）。"
+   },
+   "verdict_changed": false
+  },
+  "E2c": {
+   "what": "对照：只改一件与判据无关的「以后」事实（第 20 回合回能 +7）⇒ 判断应当不变",
+   "before": {
+    "goal": "stop-attacking-into-resistance",
+    "check_turn": 5,
+    "check_situation": "our-hit-resisted",
+    "check_handling": "repeated-resist",
+    "tp_turn": 3,
+    "tp_rule": "first-faint",
+    "mistake_available": true,
+    "teaching_a_mistake": true,
+    "alt_claimed": true,
+    "alt_source": "legal-by-turn",
+    "alt_skipped": null,
+    "alt_unknown": null,
+    "alt_menu_n": 6,
+    "outcome_category": "missing",
+    "text": "这一局一共 23 个回合，这一局的结论引擎没给全（结束方式那一项是空的），这一局不按输赢来看。第 3 回合 我方 喵喵 倒下，这是全场第一次减员。有两回合连着打在对方的属性抵抗上。第 5 回合当时的合法动作里还有「水炮」这一项。之所以值得看它：我方在第 5 与第 6 回合连着打在属性抵抗上（这一局共 4 次）——这一课要改的是「换一手或换一只再打」。这里只说当时有这一项可选，不代表换了它整局就会不一样。全场最重的一次伤害在第 2 回合（对方，约 319 点）。"
+   },
+   "after": {
+    "goal": "stop-attacking-into-resistance",
+    "check_turn": 5,
+    "check_situation": "our-hit-resisted",
+    "check_handling": "repeated-resist",
+    "tp_turn": 3,
+    "tp_rule": "first-faint",
+    "mistake_available": true,
+    "teaching_a_mistake": true,
+    "alt_claimed": true,
+    "alt_source": "legal-by-turn",
+    "alt_skipped": null,
+    "alt_unknown": null,
+    "alt_menu_n": 6,
+    "outcome_category": "missing",
+    "text": "这一局一共 23 个回合，这一局的结论引擎没给全（结束方式那一项是空的），这一局不按输赢来看。第 3 回合 我方 喵喵 倒下，这是全场第一次减员。有两回合连着打在对方的属性抵抗上。第 5 回合当时的合法动作里还有「水炮」这一项。之所以值得看它：我方在第 5 与第 6 回合连着打在属性抵抗上（这一局共 4 次）——这一课要改的是「换一手或换一只再打」。这里只说当时有这一项可选，不代表换了它整局就会不一样。全场最重的一次伤害在第 2 回合（对方，约 319 点）。"
+   },
+   "verdict_changed": false
+  },
+  "E2d": {
+   "what": "非恒等对照：把**锚点回合**那次抵抗改成中性 ⇒ 判断必须变（否则这一层是死的）",
+   "anchor_turn": 5,
+   "mutated_event": {
+    "turn": 5,
+    "from_multiplier": 0.5
+   },
+   "after": {
+    "goal": "stop-attacking-into-resistance",
+    "check_turn": 6,
+    "check_situation": "our-hit-resisted",
+    "check_handling": "repeated-resist",
+    "tp_turn": 3,
+    "tp_rule": "first-faint",
+    "mistake_available": true,
+    "teaching_a_mistake": true,
+    "alt_claimed": true,
+    "alt_source": "legal-by-turn",
+    "alt_skipped": null,
+    "alt_unknown": null,
+    "alt_menu_n": 6,
+    "outcome_category": "missing",
+    "text": "这一局一共 23 个回合，这一局的结论引擎没给全（结束方式那一项是空的），这一局不按输赢来看。第 3 回合 我方 喵喵 倒下，这是全场第一次减员。有两回合连着打在对方的属性抵抗上。第 6 回合当时的合法动作里还有「水炮」这一项。之所以值得看它：我方在第 8 与第 9 回合连着打在属性抵抗上（这一局共 3 次）——这一课要改的是「换一手或换一只再打」。这里只说当时有这一项可选，不代表换了它整局就会不一样。全场最重的一次伤害在第 2 回合（对方，约 319 点）。"
+   },
+   "verdict_changed": true
+  },
+  "E3a": {
+   "what": "两向变异①：只改决策前的事实 ⇒ 判断**必须**跟着变（否则判据是空的）",
+   "injected_heal_verdict": {
+    "goal": "stop-attacking-into-resistance",
+    "check_turn": 5,
+    "check_situation": "our-hit-resisted",
+    "check_handling": "repeated-resist",
+    "tp_turn": 3,
+    "tp_rule": "first-faint",
+    "mistake_available": true,
+    "teaching_a_mistake": true,
+    "alt_claimed": true,
+    "alt_source": "legal-by-turn",
+    "alt_skipped": null,
+    "alt_unknown": null,
+    "alt_menu_n": 6,
+    "outcome_category": "missing",
+    "text": "这一局一共 23 个回合，这一局的结论引擎没给全（结束方式那一项是空的），这一局不按输赢来看。第 3 回合 我方 喵喵 倒下，这是全场第一次减员。有两回合连着打在对方的属性抵抗上。第 5 回合当时的合法动作里还有「水炮」这一项。之所以值得看它：我方在第 5 与第 6 回合连着打在属性抵抗上（这一局共 4 次）——这一课要改的是「换一手或换一只再打」。这里只说当时有这一项可选，不代表换了它整局就会不一样。全场最重的一次伤害在第 2 回合（对方，约 319 点）。"
+   },
+   "increased_pre_damage_verdict": {
+    "goal": "stop-attacking-into-resistance",
+    "check_turn": 5,
+    "check_situation": "our-hit-resisted",
+    "check_handling": "repeated-resist",
+    "tp_turn": 3,
+    "tp_rule": "first-faint",
+    "mistake_available": true,
+    "teaching_a_mistake": true,
+    "alt_claimed": true,
+    "alt_source": "legal-by-turn",
+    "alt_skipped": null,
+    "alt_unknown": null,
+    "alt_menu_n": 6,
+    "outcome_category": "missing",
+    "text": "这一局一共 23 个回合，这一局的结论引擎没给全（结束方式那一项是空的），这一局不按输赢来看。第 3 回合 我方 喵喵 倒下，这是全场第一次减员。有两回合连着打在对方的属性抵抗上。第 5 回合当时的合法动作里还有「水炮」这一项。之所以值得看它：我方在第 5 与第 6 回合连着打在属性抵抗上（这一局共 4 次）——这一课要改的是「换一手或换一只再打」。这里只说当时有这一项可选，不代表换了它整局就会不一样。全场最重的一次伤害在第 2 回合（对方，约 359 点）。"
+   },
+   "changed_by_heal": false,
+   "changed_by_pre_damage": false
+  },
+  "E3b": {
+   "what": "两向变异②：只改终局结果（win/loss/draw/escaped）⇒ 判断不许跟着变",
+   "by_result": {
+    "win": {
+     "goal": "stop-attacking-into-resistance",
+     "check_turn": 5,
+     "check_situation": "our-hit-resisted",
+     "check_handling": "repeated-resist",
+     "tp_turn": 3,
+     "tp_rule": "first-faint",
+     "mistake_available": true,
+     "teaching_a_mistake": true,
+     "alt_claimed": true,
+     "alt_source": "legal-by-turn",
+     "alt_skipped": null,
+     "alt_unknown": null,
+     "alt_menu_n": 6,
+     "outcome_category": "win",
+     "text": "这一局一共 23 个回合，最后赢了下来。第 3 回合 我方 喵喵 倒下，这是全场第一次减员。有两回合连着打在对方的属性抵抗上。第 5 回合当时的合法动作里还有「水炮」这一项。之所以值得看它：我方在第 5 与第 6 回合连着打在属性抵抗上（这一局共 4 次）——这一课要改的是「换一手或换一只再打」。这里只说当时有这一项可选，不代表换了它整局就会不一样。全场最重的一次伤害在第 2 回合（对方，约 319 点）。"
+    },
+    "loss": {
+     "goal": "stop-attacking-into-resistance",
+     "check_turn": 5,
+     "check_situation": "our-hit-resisted",
+     "check_handling": "repeated-resist",
+     "tp_turn": 3,
+     "tp_rule": "first-faint",
+     "mistake_available": true,
+     "teaching_a_mistake": true,
+     "alt_claimed": true,
+     "alt_source": "legal-by-turn",
+     "alt_skipped": null,
+     "alt_unknown": null,
+     "alt_menu_n": 6,
+     "outcome_category": "loss",
+     "text": "这一局一共 23 个回合，最后输掉了。第 3 回合 我方 喵喵 倒下，这是全场第一次减员。有两回合连着打在对方的属性抵抗上。第 5 回合当时的合法动作里还有「水炮」这一项。之所以值得看它：我方在第 5 与第 6 回合连着打在属性抵抗上（这一局共 4 次）——这一课要改的是「换一手或换一只再打」。这里只说当时有这一项可选，不代表换了它整局就会不一样。全场最重的一次伤害在第 2 回合（对方，约 319 点）。"
+    },
+    "draw": {
+     "goal": "stop-attacking-into-resistance",
+     "check_turn": 5,
+     "check_situation": "our-hit-resisted",
+     "check_handling": "repeated-resist",
+     "tp_turn": 3,
+     "tp_rule": "first-faint",
+     "mistake_available": true,
+     "teaching_a_mistake": true,
+     "alt_claimed": true,
+     "alt_source": "legal-by-turn",
+     "alt_skipped": null,
+     "alt_unknown": null,
+     "alt_menu_n": 6,
+     "outcome_category": "draw",
+     "text": "这一局一共 23 个回合，双方打平。第 3 回合 我方 喵喵 倒下，这是全场第一次减员。有两回合连着打在对方的属性抵抗上。第 5 回合当时的合法动作里还有「水炮」这一项。之所以值得看它：我方在第 5 与第 6 回合连着打在属性抵抗上（这一局共 4 次）——这一课要改的是「换一手或换一只再打」。这里只说当时有这一项可选，不代表换了它整局就会不一样。全场最重的一次伤害在第 2 回合（对方，约 319 点）。"
+    },
+    "escaped": {
+     "goal": "stop-attacking-into-resistance",
+     "check_turn": 5,
+     "check_situation": "our-hit-resisted",
+     "check_handling": "repeated-resist",
+     "tp_turn": 3,
+     "tp_rule": "first-faint",
+     "mistake_available": true,
+     "teaching_a_mistake": true,
+     "alt_claimed": true,
+     "alt_source": "legal-by-turn",
+     "alt_skipped": null,
+     "alt_unknown": null,
+     "alt_menu_n": 6,
+     "outcome_category": "escaped",
+     "text": "这一局一共 23 个回合，最后是我方主动撤退结束的，不是被打输的。第 3 回合 我方 喵喵 倒下，这是全场第一次减员。有两回合连着打在对方的属性抵抗上。第 5 回合当时的合法动作里还有「水炮」这一项。之所以值得看它：我方在第 5 与第 6 回合连着打在属性抵抗上（这一局共 4 次）——这一课要改的是「换一手或换一只再打」。这里只说当时有这一项可选，不代表换了它整局就会不一样。全场最重的一次伤害在第 2 回合（对方，约 319 点）。"
+    }
+   },
+   "distinct_judgements": 1,
+   "verdict_stable_across_results": true
+  },
+  "E4": {
+   "what": "同一份输入、只换 legalByTurn 的合并口径（后写覆盖 vs 首写保留）",
+   "anchor_turn": 5,
+   "last_write_wins": {
+    "goal": "stop-attacking-into-resistance",
+    "check_turn": 5,
+    "check_situation": "our-hit-resisted",
+    "check_handling": "repeated-resist",
+    "tp_turn": 3,
+    "tp_rule": "first-faint",
+    "mistake_available": true,
+    "teaching_a_mistake": true,
+    "alt_claimed": true,
+    "alt_source": "legal-by-turn",
+    "alt_skipped": null,
+    "alt_unknown": null,
+    "alt_menu_n": 6,
+    "outcome_category": "missing",
+    "text": "这一局一共 23 个回合，这一局的结论引擎没给全（结束方式那一项是空的），这一局不按输赢来看。第 3 回合 我方 喵喵 倒下，这是全场第一次减员。有两回合连着打在对方的属性抵抗上。第 5 回合当时的合法动作里还有「水炮」这一项。之所以值得看它：我方在第 5 与第 6 回合连着打在属性抵抗上（这一局共 4 次）——这一课要改的是「换一手或换一只再打」。这里只说当时有这一项可选，不代表换了它整局就会不一样。全场最重的一次伤害在第 2 回合（对方，约 319 点）。",
+    "alternative_full": {
+     "claimed": true,
+     "source": "legal-by-turn",
+     "anchor_turn": 5,
+     "view_turn": 23,
+     "label": "水炮",
+     "reason": "我方在第 5 与第 6 回合连着打在属性抵抗上（这一局共 4 次）",
+     "unknown": null,
+     "skipped": null,
+     "menu": [
+      "甩水",
+      "水炮",
+      "多维击打",
+      "聚能",
+      "换上第3位",
+      "换上第4位"
+     ],
+     "remedy": "换一手或换一只再打",
+     "kind": "skill"
+    }
+   },
+   "first_write_wins": {
+    "goal": "stop-attacking-into-resistance",
+    "check_turn": 5,
+    "check_situation": "our-hit-resisted",
+    "check_handling": "repeated-resist",
+    "tp_turn": 3,
+    "tp_rule": "first-faint",
+    "mistake_available": true,
+    "teaching_a_mistake": true,
+    "alt_claimed": true,
+    "alt_source": "legal-by-turn",
+    "alt_skipped": null,
+    "alt_unknown": null,
+    "alt_menu_n": 6,
+    "outcome_category": "missing",
+    "text": "这一局一共 23 个回合，这一局的结论引擎没给全（结束方式那一项是空的），这一局不按输赢来看。第 3 回合 我方 喵喵 倒下，这是全场第一次减员。有两回合连着打在对方的属性抵抗上。第 5 回合当时的合法动作里还有「水炮」这一项。之所以值得看它：我方在第 5 与第 6 回合连着打在属性抵抗上（这一局共 4 次）——这一课要改的是「换一手或换一只再打」。这里只说当时有这一项可选，不代表换了它整局就会不一样。全场最重的一次伤害在第 2 回合（对方，约 319 点）。",
+    "alternative_full": {
+     "claimed": true,
+     "source": "legal-by-turn",
+     "anchor_turn": 5,
+     "view_turn": 23,
+     "label": "水炮",
+     "reason": "我方在第 5 与第 6 回合连着打在属性抵抗上（这一局共 4 次）",
+     "unknown": null,
+     "skipped": null,
+     "menu": [
+      "甩水",
+      "水炮",
+      "多维击打",
+      "聚能",
+      "换上第3位",
+      "换上第4位"
+     ],
+     "remedy": "换一手或换一只再打",
+     "kind": "skill"
+    }
+   },
+   "differs": false
+  },
+  "E4b": {
+   "what": "锚点落在碰撞回合（该回合 battle 表被 replace 表覆盖）时的两套读数",
+   "collision_turn": 3,
+   "last_write_wins": {
+    "verdict": null,
+    "alternative": null,
+    "legal_used": 5
+   },
+   "first_write_wins": {
+    "verdict": null,
+    "alternative": null,
+    "legal_used": 12
+   },
+   "text_differs": false
+  },
+  "E5": {
+   "what": "同一 seed/同一队伍：只把第 3 回合**补位**那一手换成另一只（前缀逐位相同）",
+   "pair": {
+    "a_events": 126,
+    "a_turns": 25,
+    "b_events": 127,
+    "b_turns": 30,
+    "equal_prefix_events": 17,
+    "equal_prefix_turns": 4,
+    "first_divergent_turn": 5
+   },
+   "base_verdict": {
+    "goal": "stop-attacking-into-resistance",
+    "check_turn": 5,
+    "check_situation": "our-hit-resisted",
+    "check_handling": "repeated-resist",
+    "tp_turn": 3,
+    "tp_rule": "first-faint",
+    "mistake_available": true,
+    "teaching_a_mistake": true,
+    "alt_claimed": true,
+    "alt_source": "legal-by-turn",
+    "alt_skipped": null,
+    "alt_unknown": null,
+    "alt_menu_n": 6,
+    "outcome_category": "missing",
+    "text": "这一局一共 23 个回合，这一局的结论引擎没给全（结束方式那一项是空的），这一局不按输赢来看。第 3 回合 我方 喵喵 倒下，这是全场第一次减员。有两回合连着打在对方的属性抵抗上。第 5 回合当时的合法动作里还有「水炮」这一项。之所以值得看它：我方在第 5 与第 6 回合连着打在属性抵抗上（这一局共 4 次）——这一课要改的是「换一手或换一只再打」。这里只说当时有这一项可选，不代表换了它整局就会不一样。全场最重的一次伤害在第 2 回合（对方，约 319 点）。"
+   },
+   "diverged_verdict": {
+    "goal": "read-the-replacement-first",
+    "check_turn": 9,
+    "check_situation": "enemy-pet-fainted",
+    "check_handling": "next-hit-not-resisted",
+    "tp_turn": 3,
+    "tp_rule": "first-faint",
+    "mistake_available": false,
+    "teaching_a_mistake": false,
+    "alt_claimed": false,
+    "alt_source": null,
+    "alt_skipped": "lesson-is-not-an-action-choice",
+    "alt_unknown": null,
+    "alt_menu_n": 0,
+    "outcome_category": "loss",
+    "text": "这一局一共 25 个回合，最后输掉了。第 3 回合 我方 喵喵 倒下，这是全场第一次减员。对面补上新的一只之后，我方下一手没有被抵抗。全场最重的一次伤害在第 2 回合（对方，约 319 点）；我方主动换人 0 次、被动补位 5 次、用道具 0 次。"
+   },
+   "conclusion_invariant": false,
+   "base_events_n": 126,
+   "diverged_events_n": 127
+  }
+ },
+ "facts": {
+  "history_row_keys": [
+   "enemy_action",
+   "events",
+   "player_action",
+   "pre_observation_hash",
+   "pre_observation_opponent_hash",
+   "state_version",
+   "turn"
+  ],
+  "private_serialize_keys": [
+   "enemy",
+   "events",
+   "history",
+   "log",
+   "phase",
+   "player",
+   "replace_queue",
+   "result",
+   "ruleset_config_id",
+   "ruleset_id",
+   "seed",
+   "state_version",
+   "turn",
+   "unsupported"
+  ],
+  "turn_collisions": {
+   "3": [
+    {
+     "i": 2,
+     "legal_kinds": [
+      "skill",
+      "skill",
+      "skill",
+      "skill",
+      "charge",
+      "switch",
+      "switch",
+      "switch",
+      "switch",
+      "switch",
+      "magic",
+      "surrender"
+     ],
+     "legal_labels": [
+      "抓挠",
+      "防御",
+      "仙人掌刺击",
+      "腐化",
+      "聚能",
+      "换上第2位",
+      "换上第3位",
+      "换上第4位",
+      "换上第5位",
+      "换上第6位",
+      "愿力强化",
+      "投降"
+     ],
+     "legal_n": 12,
+     "phase": "battle",
+     "state_version": 11
+    },
+    {
+     "i": 3,
+     "legal_kinds": [
+      "switch",
+      "switch",
+      "switch",
+      "switch",
+      "switch"
+     ],
+     "legal_labels": [
+      "换上第2位",
+      "换上第3位",
+      "换上第4位",
+      "换上第5位",
+      "换上第6位"
+     ],
+     "legal_n": 5,
+     "phase": "replace",
+     "state_version": 18
+    }
+   ],
+   "10": [
+    {
+     "i": 10,
+     "legal_kinds": [
+      "skill",
+      "skill",
+      "skill",
+      "skill",
+      "charge",
+      "switch",
+      "switch",
+      "switch",
+      "switch",
+      "magic",
+      "surrender"
+     ],
+     "legal_labels": [
+      "防御",
+      "甩水",
+      "水炮",
+      "多维击打",
+      "聚能",
+      "换上第3位",
+      "换上第4位",
+      "换上第5位",
+      "换上第6位",
+      "愿力强化",
+      "投降"
+     ],
+     "legal_n": 11,
+     "phase": "battle",
+     "state_version": 53
+    },
+    {
+     "i": 11,
+     "legal_kinds": [
+      "switch",
+      "switch",
+      "switch",
+      "switch"
+     ],
+     "legal_labels": [
+      "换上第3位",
+      "换上第4位",
+      "换上第5位",
+      "换上第6位"
+     ],
+     "legal_n": 4,
+     "phase": "replace",
+     "state_version": 58
+    }
+   ],
+   "21": [
+    {
+     "i": 22,
+     "legal_kinds": [
+      "skill",
+      "skill",
+      "skill",
+      "charge",
+      "switch",
+      "switch",
+      "switch",
+      "magic",
+      "surrender"
+     ],
+     "legal_labels": [
+      "火苗",
+      "火云车",
+      "龙之利爪",
+      "聚能",
+      "换上第4位",
+      "换上第5位",
+      "换上第6位",
+      "愿力强化",
+      "投降"
+     ],
+     "legal_n": 9,
+     "phase": "battle",
+     "state_version": 115
+    },
+    {
+     "i": 23,
+     "legal_kinds": [
+      "switch",
+      "switch",
+      "switch"
+     ],
+     "legal_labels": [
+      "换上第4位",
+      "换上第5位",
+      "换上第6位"
+     ],
+     "legal_n": 3,
+     "phase": "replace",
+     "state_version": 122
+    }
+   ]
+  },
+  "derived_check": {
+   "derivable_matches": 21,
+   "rows": [
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v1",
+     "derived_version_before": 0,
+     "events_n": 6,
+     "history_state_version": 6,
+     "turn": 1
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v6",
+     "derived_version_before": 6,
+     "events_n": 5,
+     "history_state_version": 11,
+     "turn": 2
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v11",
+     "derived_version_before": 11,
+     "events_n": 7,
+     "history_state_version": 18,
+     "turn": 3
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v18",
+     "derived_version_before": 11,
+     "events_n": 7,
+     "history_state_version": 18,
+     "turn": 3
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v19",
+     "derived_version_before": 19,
+     "events_n": 3,
+     "history_state_version": 22,
+     "turn": 4
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v22",
+     "derived_version_before": 22,
+     "events_n": 7,
+     "history_state_version": 29,
+     "turn": 5
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v29",
+     "derived_version_before": 29,
+     "events_n": 7,
+     "history_state_version": 36,
+     "turn": 6
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v36",
+     "derived_version_before": 36,
+     "events_n": 3,
+     "history_state_version": 39,
+     "turn": 7
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v39",
+     "derived_version_before": 39,
+     "events_n": 7,
+     "history_state_version": 46,
+     "turn": 8
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v46",
+     "derived_version_before": 46,
+     "events_n": 7,
+     "history_state_version": 53,
+     "turn": 9
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v53",
+     "derived_version_before": 53,
+     "events_n": 5,
+     "history_state_version": 58,
+     "turn": 10
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v58",
+     "derived_version_before": 53,
+     "events_n": 5,
+     "history_state_version": 58,
+     "turn": 10
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v59",
+     "derived_version_before": 59,
+     "events_n": 5,
+     "history_state_version": 64,
+     "turn": 11
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v64",
+     "derived_version_before": 64,
+     "events_n": 5,
+     "history_state_version": 69,
+     "turn": 12
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v69",
+     "derived_version_before": 69,
+     "events_n": 7,
+     "history_state_version": 76,
+     "turn": 13
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v76",
+     "derived_version_before": 76,
+     "events_n": 5,
+     "history_state_version": 81,
+     "turn": 14
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v81",
+     "derived_version_before": 81,
+     "events_n": 5,
+     "history_state_version": 86,
+     "turn": 15
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v86",
+     "derived_version_before": 86,
+     "events_n": 7,
+     "history_state_version": 93,
+     "turn": 16
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v93",
+     "derived_version_before": 93,
+     "events_n": 5,
+     "history_state_version": 98,
+     "turn": 17
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v98",
+     "derived_version_before": 98,
+     "events_n": 5,
+     "history_state_version": 103,
+     "turn": 18
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v103",
+     "derived_version_before": 103,
+     "events_n": 7,
+     "history_state_version": 110,
+     "turn": 19
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v110",
+     "derived_version_before": 110,
+     "events_n": 5,
+     "history_state_version": 115,
+     "turn": 20
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v115",
+     "derived_version_before": 115,
+     "events_n": 7,
+     "history_state_version": 122,
+     "turn": 21
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v122",
+     "derived_version_before": 115,
+     "events_n": 7,
+     "history_state_version": 122,
+     "turn": 21
+    },
+    {
+     "decision_id_at_view": "m-6491e1e6d15f5331:v124",
+     "derived_version_before": 124,
+     "events_n": 3,
+     "history_state_version": 127,
+     "turn": 22
+    }
+   ],
+   "rows_n": 25
+  },
+  "player_faint_step": {
+   "decision_id": "m-6491e1e6d15f5331:v11",
+   "i": 2,
+   "turn": 3
+  },
+  "opening_preview_revealed": {
+   "alt_bench_ids": [
+    "pet_000013",
+    "pet_000014",
+    "pet_000015",
+    "pet_000016",
+    "pet_000017"
+   ],
+   "base_bench_ids": [
+    "pet_000008",
+    "pet_000009",
+    "pet_000010",
+    "pet_000011",
+    "pet_000012"
+   ],
+   "base_bench_n": 5,
+   "base_bench_revealed_via": [
+    "opening_preview",
+    "opening_preview",
+    "opening_preview",
+    "opening_preview",
+    "opening_preview"
+   ]
+  },
+  "base_teacher_facts": {
+   "faints": [
+    {
+     "index": 12,
+     "turn": 3,
+     "side": "player",
+     "slot": 0
+    },
+    {
+     "index": 55,
+     "turn": 10,
+     "side": "player",
+     "slot": 1
+    },
+    {
+     "index": 117,
+     "turn": 21,
+     "side": "enemy",
+     "slot": 0
+    }
+   ],
+   "items": [],
+   "switches_n": 0,
+   "first_player_faint": {
+    "index": 12,
+    "turn": 3,
+    "side": "player",
+    "slot": 0
+   }
+  }
+ }
+}
