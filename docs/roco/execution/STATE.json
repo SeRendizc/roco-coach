@@ -718,6 +718,14 @@
       "owner": "lead（修 + 登记）",
       "status": "closed",
       "rule": "① **用别人 API 前先确认返回值里真有你要的字段**（`probePython()` 的 `path` 就是凭空想象的）；② **跨平台跑子进程必须显式指定编码**（`PYTHONIOENCODING=utf-8`），否则 Windows 默认 GBK 会把中文变成乱码，而 POSIX 上永远看不出问题；③ 见到「探针失败：undefined」这种**信息量为零的断言消息**，先怀疑**判据自身**（调用没起来）而不是产品"
+    },
+    {
+      "id": "O-59",
+      "what": "**静态可达 ≠ 已证根因**：lead-mac 用「逐跳都在代码里核过」的静态链把 P1-A 根因定在 `roco.js:4216`（无条件 `state.view = data.view`，与 `:3576` 的有条件写法不对称）—— 链条本身站得住，但**被 Codex 的浏览器证据否掉**",
+      "evidence": "codex-planner 在独立实例（8877）给 `/api/coach` 请求流加**只读探针**（未改仓库源码）实测：`battle/new ⇒ 200 · hasView=true · viewType=object · turn=1`；**首问与追问两个真实 UI 请求的 `contextKeys` 都同时含 `battle` 与 `roco_battle`，但 `battle=null`、`roco_battle` 有值且 `turn=1`**；局内画面正常（第 1 回合、双方血量都在）⇒ **`state.view` 没丢**。他并留下方法论要求原话：「**切勿再把静态可达当成已证根因**」。⇒ P1-A 的**已证**成因收敛为两条：① 契约断裂（`coachCampContext()` 给 `battle:null`、`sayOnce()` 另挂 `context.roco_battle`，而 `strategist.js:8` 只读 `context.battle`）；② **守卫判 `ungrounded` 时回退草稿本身就是那句假话**。`:4216` 降级为「潜在健壮性问题（静态可达、未被真机证实）」，**不许阻塞 B1**",
+      "owner": "codex-planner（运行时证据 + 方法论）· lead-mac（静态链，已被更正）· lead（改派 + 登记）",
+      "status": "closed",
+      "rule": "① 把一条链写进任务前必须标明它是**候选（静态可达）**还是**已证（有运行时读数）**——两者在任务里的地位不同（候选只能作为「顺带检查」，不许当必改项）；② **静态链再自洽也要留一个可证伪的运行时观测点**（本次就是「抓 `/api/coach` 请求体 + `battle/*` 响应」那一条）；③ 被否掉的假设**要显式更正到跨机文档里**（否则两边会各修一半）"
     }
   ],
   "handoff": {
