@@ -60,10 +60,30 @@ if (!uni) {
     REQUIRE_UNIFORM ? '（**计入判定**：R2 口径 = 凡带 weights 都须声明）' : '（观察项）');
 }
 
+// ── R2 三连改坏版（Lead 点名）：删 basis / is_probability=true / 抹 baseline_declaration ──
+// 三条都期望 `WEIGHT_BASIS_NOT_DECLARED` 红；只在 --require-r2-uniform 时计入判定。
+const uniBase = base.beliefs.find((x) => x.weights && !Array.isArray(x.weights.rows));
+const variants = [
+  ['C1(delete basis)', (u) => { delete u.weights.basis; }],
+  ['C2(is_probability=true)', (u) => { u.weights.is_probability = true; }],
+  ['C3(erase baseline_declaration)', (u) => { u.weights.baseline_declaration = ''; }],
+];
+const cResults = [];
+for (const [label, mutate] of variants) {
+  const v = structuredClone(base);
+  const u = v.beliefs.find((x) => x.weights && !Array.isArray(x.weights.rows)) ?? uniBase;
+  mutate(u);
+  const fired = codes(v).includes('WEIGHT_BASIS_NOT_DECLARED');
+  cResults.push([label, fired]);
+  console.log(`${label} WEIGHT_BASIS_NOT_DECLARED=`, fired);
+}
+
 const ok = !ctl.includes('ASSUMPTION_ZEROES_CANDIDATE') && !ctl.includes('WEIGHT_BASIS_NOT_DECLARED')
   && ca.includes('ASSUMPTION_ZEROES_CANDIDATE') && cb.includes('WEIGHT_BASIS_NOT_DECLARED')
-  && (!REQUIRE_UNIFORM || uniformFires);
+  && (!REQUIRE_UNIFORM || (uniformFires && cResults.every(([, f]) => f)));
 console.log(ok ? 'REDPROOF PASS（控件干净 + 改坏版都红'
-  + (REQUIRE_UNIFORM ? ' + uniform 也红）' : '）') : 'REDPROOF FAIL'
-  + (REQUIRE_UNIFORM && !uniformFires ? '（uniform 信念的 basis 改坏仍未红 ⇒ R2 口径未落地）' : ''));
+  + (REQUIRE_UNIFORM ? ' + uniform 红 + R2 三连全红）' : '）') : 'REDPROOF FAIL'
+  + (REQUIRE_UNIFORM && !uniformFires ? '（uniform 信念的 basis 改坏仍未红 ⇒ R2 口径未落地）' : '')
+  + (REQUIRE_UNIFORM && !cResults.every(([, f]) => f)
+    ? `（R2 三连里有没红的：${cResults.filter(([, f]) => !f).map(([l]) => l).join(',')}）` : ''));
 process.exit(ok ? 0 : 1);

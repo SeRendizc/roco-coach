@@ -65,14 +65,6 @@ import {
 export const RC604_REPORT_PATH = 'reports/roco/rc604/opponent-belief.json';
 export const RC604_REPORT_VERSION = 'roco-rc604-opponent-belief-report/v1';
 
-/**
- * 在线段到此结束（审计扫的是它**之前**的正文）。
- *
- * 为什么边界常量写在最前面：下面每一次 `//` 注释里的「在线路径不…」都只是注释，
- * 判据必须落在**源码结构**上 —— 审计把这一段源码取出来逐行做禁止模式的子串匹配。
- */
-export const ONLINE_SECTION_MARKER = '<!-- ONLINE-SECTION-END -->';
-
 /** 三条基线的 ID 与顺序（顺序即输出键序 ⇒ 逐字节可复跑）。 */
 export const BELIEF_IDS = Object.freeze(['uniform', 'revealed_conditioned', 'frequency']);
 
@@ -315,9 +307,13 @@ export const STRUCTURAL_CRITERIA = Object.freeze({
   evidence_and_confidence: '每份信念必须有非空 `evidence[]`（`source_file` + `pointer` + `field`），'
     + '`confidence` 必须命中台账六级；`available:false` 时 `confidence` 只能是 `UNKNOWN`，'
     + '否则 `EVIDENCE_MISSING` / `CONFIDENCE_NOT_IN_LEDGER`（红）。',
-  online_no_engine: '把 `src/coach/opponent-belief.mjs` 的在线段（`ONLINE_SECTION_MARKER` 之前）'
-    + '逐行取出、剥掉行注释与块注释，再对每行做 `FORBIDDEN_ONLINE_PATTERNS[].pattern` 的子串匹配：'
-    + '命中即 `ONLINE_ENGINE_CALL` / `ONLINE_SUBPROCESS_CALL`（红）。判据是**源码结构**，不是注释声明。',
+  online_no_engine: '把 `src/coach/opponent-belief.mjs` 的在线段（`ONLINE_SECTION_MARKER` **定义行之后**、'
+    + '`OFFLINE_SECTION_MARKER` **之前**）逐行取出、剥掉行注释与块注释，再对每行做 '
+    + '`FORBIDDEN_ONLINE_PATTERNS[].pattern` 的子串匹配：命中即 `ONLINE_ENGINE_CALL` / '
+    + '`ONLINE_SUBPROCESS_CALL`（红）。判据是**源码结构**，不是注释声明。'
+    + '⚠ 2026-09-30（F-03-1）：旧口径取的是标记串**第一次出现之前**的正文 —— 那正是定义行自己，'
+    + '于是「在线段」只剩 69 行文件头，判据**覆盖为空**却显示干净（假绿）。现在还要查**覆盖**：'
+    + '在线段必须定义全部 `ONLINE_ENTRYPOINTS`，缺一个 ⇒ `ONLINE_COVERAGE_INCOMPLETE`（红）。',
   deterministic: '同一份输入连续两次调用（含重新从同一份数据构造 catalog），'
     + '三条基线 + 报告正文的 `JSON.stringify` 必须逐字节相同（含 tie-break 与排序），'
     + '否则 `NONDETERMINISTIC`（红）。',
@@ -386,6 +382,21 @@ export const ONLINE_ENTRYPOINTS = Object.freeze([
   'collectClaimText', 'renderBeliefText', 'exact',
   'readOpponentView', 'buildOpponentCandidates', 'legalSkillLoadout',
 ]);
+
+/**
+ * **在线段的起点**（审计扫的是这一行**之后**、`OFFLINE_SECTION_MARKER` **之前**的正文）。
+ *
+ * ⚠ 2026-09-30（F-03-1 修复）：这个常量原先写在文件最前面，而 `onlineSectionOf()` 用
+ * `text.indexOf(ONLINE_SECTION_MARKER)` 找边界 —— 命中的正是**这一行定义自己**，
+ * 于是「在线段」只剩文件头注释（实测 69 行），**所有在线函数一行都没被扫**：
+ * 审计声称覆盖在线路径，实际覆盖为空（判据假绿）。
+ *
+ * 现在边界写在这里（判据 / 白名单 / 词表这些**声明**之后，纯在线代码之前），
+ * 并且 `onlineSectionOf()` 从**定义行的行尾**开始切，不再命中定义本身。
+ * 判据不只看命中数，还要求**覆盖到全部 `ONLINE_ENTRYPOINTS`**（见 `onlineSectionCoverage()`）——
+ * 段子再变空 ⇒ `ONLINE_COVERAGE_INCOMPLETE`（红），不会再静默通过。
+ */
+export const ONLINE_SECTION_MARKER = '<!-- ONLINE-SECTION-END -->';
 
 // ─────────────────────────────────────────────────────────────────────────
 // 小工具（确定性优先：分数用整数运算，绝不靠浮点近似）
@@ -2172,16 +2183,49 @@ export function collectClaimText(result) {
   return out;
 }
 
-/** 取源码的**在线段**：`ONLINE_SECTION_MARKER` 之前的正文，剥掉注释。 */
+/**
+ * 取源码的**在线段**：`ONLINE_SECTION_MARKER` **定义行之后**、`OFFLINE_SECTION_MARKER` **之前**的正文，
+ * 剥掉行注释与块注释。
+ *
+ * ⚠ 2026-09-30（F-03-1）：旧实现是 `text.indexOf(ONLINE_SECTION_MARKER)` 之后 `slice(0, at)` ——
+ * 命中的是**常量定义那一行自己**，于是「在线段」只剩文件头注释（69 行），在线函数一行都没扫。
+ * 现在两处都按**结构**切：
+ *   ① 起点 = 标记字符串所在行的**行尾之后**（定义行不算在线代码）；
+ *   ② 终点 = 离线段标记所在位置（它之前全是在线段）。
+ */
 export function onlineSectionOf(source) {
   const text = String(source ?? '');
-  const markerAt = text.indexOf(ONLINE_SECTION_MARKER);
-  const head = markerAt >= 0 ? text.slice(0, markerAt) : text;
-  return head
+  const offlineAt = text.indexOf(OFFLINE_SECTION_MARKER);
+  const head = offlineAt >= 0 ? text.slice(0, offlineAt) : text;
+  const markerAt = head.indexOf(ONLINE_SECTION_MARKER);
+  const lineEnd = markerAt >= 0 ? head.indexOf('\n', markerAt) : -1;
+  const body = markerAt >= 0 ? head.slice(lineEnd >= 0 ? lineEnd + 1 : markerAt) : head;
+  return body
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .split('\n')
     .map((line) => line.replace(/(^|\s)\/\/.*$/, ''))
     .join('\n');
+}
+
+/**
+ * **在线段的覆盖读数**（F-03-1）：光看 `hits=[]` 分不清「扫过、干净」与「扫了个空」。
+ *
+ * 返回在线段长度 + **真的被扫到的在线入口** + 缺失的入口。审计把「缺失」判红
+ * （`ONLINE_COVERAGE_INCOMPLETE`），这样「段子变空」这种假绿不可能再通过。
+ */
+export function onlineSectionCoverage(source, options = {}) {
+  const section = typeof options.section === 'string' ? options.section : onlineSectionOf(source);
+  const defined = (name) => new RegExp(`(function|const|let|class)\\s+${name}\\b`, 'u').test(section);
+  const scanned = ONLINE_ENTRYPOINTS.filter(defined);
+  const missing = ONLINE_ENTRYPOINTS.filter((name) => !defined(name));
+  const hits = scanForbiddenPatterns(section, options.patterns ?? FORBIDDEN_ONLINE_PATTERNS);
+  return {
+    online_lines: section.split('\n').length,
+    online_chars: section.length,
+    scanned_online_entrypoints: scanned,
+    missing_online_entrypoints: missing,
+    hits: hits.map((hit) => `${hit.code}:${hit.pattern}`),
+  };
 }
 
 /** 取源码的**离线段**：`OFFLINE_SECTION_MARKER` 之后的正文（不剥注释，边界要看得见）。 */
@@ -2524,7 +2568,7 @@ export function auditOpponentBelief(result, options = {}) {
     }
   }
 
-  // ── 在线段不许出现引擎 / 子进程调用 ──
+  // ── 在线段不许出现引擎 / 子进程调用；**并且在线段必须真的覆盖到在线入口**（F-03-1） ──
   const section = sourceText(options.source, scope);
   if (typeof section === 'string') {
     for (const hit of scanForbiddenPatterns(section)) {
@@ -2532,6 +2576,15 @@ export function auditOpponentBelief(result, options = {}) {
         `出现 ${hit.pattern}：${hit.detail}（实际源码 ${stableJson(hit.text)}）`);
     }
     if (scope === 'online') {
+      // 覆盖判据：`hits=[]` 分不清「扫过、干净」与「扫了个空」。段子变空必须判红。
+      // （旧口径下在线段只有 69 行文件头 ⇒ 所有在线函数都没被扫，却一路显示干净。）
+      const coverage = onlineSectionCoverage(options.source, {section, patterns: options.patterns});
+      if (coverage.missing_online_entrypoints.length > 0) {
+        push('ONLINE_COVERAGE_INCOMPLETE', 'src/coach/opponent-belief.mjs',
+          `在线段只覆盖了 ${coverage.scanned_online_entrypoints.length} / ${ONLINE_ENTRYPOINTS.length} 个在线入口`
+          + `（扫过的行数 ${coverage.online_lines}）；缺 ${coverage.missing_online_entrypoints.join(' / ')}：`
+          + '「没扫到」与「扫过、没问题」必须分得开 —— 覆盖为空时判据是假绿');
+      }
       for (const entry of OFFLINE_ENTRYPOINTS) {
         if (section.includes(entry.id)) {
           push('OFFLINE_ENTRYPOINT_IN_ONLINE_SECTION', 'src/coach/opponent-belief.mjs',
@@ -2610,6 +2663,19 @@ export function auditOpponentBelief(result, options = {}) {
 // 产出：机器可读报告
 // ─────────────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────────────
+// 离线段：报告生成 / 读盘 / 对照样例（在线路径不许调用这里的任何入口）
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * 离线段从此开始（审计的分界线）。
+ *
+ * ⚠ 2026-09-30（F-03-1）：这个常量原先放在 `beliefReport()` **之后** —— 而 `beliefReport`
+ * 在 `OFFLINE_ENTRYPOINTS` 里，于是「以离线段标记为界」的在线段会把它的定义也扫进去，
+ * 触发 `OFFLINE_ENTRYPOINT_IN_ONLINE_SECTION`（假红）。所以边界必须落在**离线入口之前**。
+ */
+export const OFFLINE_SECTION_MARKER = '<!-- OFFLINE-SECTION-BEGIN -->';
+
 /**
  * 三条基线的机器可读产物。
  *
@@ -2639,6 +2705,8 @@ export function beliefReport(input = {}) {
   const beliefs = [uniform, conditioned, frequency];
   const candidateSample = isPlainObject(skillPool)
     ? buildOpponentCandidates({catalog, publicFacts, skillPool, budget: candidateBudget}) : null;
+  // F-03-1：在线段的**覆盖读数**（判据「在线段干净」必须同时证明「真的扫到了在线函数」）。
+  const onlineCoverage = typeof input.source === 'string' ? onlineSectionCoverage(input.source) : null;
 
   const universe = buildCandidateUniverse(catalog);
   const second = [uniformBelief({catalog}), revealedConditioned({catalog, publicFacts}),
@@ -2737,12 +2805,16 @@ export function beliefReport(input = {}) {
       ok: audit.ok,
     },
     {
-      label: '在线段没有引擎 / 子进程调用（源码结构判据）',
+      label: '在线段没有引擎 / 子进程调用，**而且判据真的覆盖到在线入口**（F-03-1）',
       criteria: STRUCTURAL_CRITERIA.online_no_engine,
-      actual: typeof input.source === 'string'
-        ? scanForbiddenPatterns(onlineSectionOf(input.source)).map((hit) => hit.pattern) : '未注入源码',
-      ok: typeof input.source === 'string'
-        && scanForbiddenPatterns(onlineSectionOf(input.source)).length === 0,
+      actual: onlineCoverage === null ? '未注入源码' : {
+        online_lines: onlineCoverage.online_lines,
+        scanned_online_entrypoints: onlineCoverage.scanned_online_entrypoints.length,
+        missing_online_entrypoints: onlineCoverage.missing_online_entrypoints,
+        hits: onlineCoverage.hits,
+      },
+      ok: onlineCoverage !== null && onlineCoverage.hits.length === 0
+        && onlineCoverage.missing_online_entrypoints.length === 0 && onlineCoverage.online_lines > 0,
     },
     {
       label: '同一份输入两次运行逐字节相同（含 tie-break）',
@@ -2888,11 +2960,8 @@ export function frequencyReasonCode(belief) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// 离线段：读盘 / 对照样例（在线路径不许调用这里的任何入口）
+// 离线段（续）：读盘 / 对照样例
 // ─────────────────────────────────────────────────────────────────────────
-
-/** 离线段从此开始（审计的分界线）。 */
-export const OFFLINE_SECTION_MARKER = '<!-- OFFLINE-SECTION-BEGIN -->';
 
 /**
  * 离线：读盘加载 RC-303 的候选索引输入，并现建一份 `buildCandidateIndex()`。
@@ -2935,7 +3004,7 @@ export function buildMeasuredFrequencySample({rows = [], note = null} = {}) {
   };
 }
 
-/** 本模块的在线段到此结束（给审计看的显式标记；`ONLINE_SECTION_MARKER` 在文件上方）。 */
+/** 本模块的离线段到此结束（在线 / 离线的显式标记见文件上方两处 `*_SECTION_MARKER`）。 */
 export const MODULE_PATH = fileURLToPath(import.meta.url);
 
 /**

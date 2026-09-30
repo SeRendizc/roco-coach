@@ -2908,9 +2908,14 @@
       "ok": true
     },
     {
-      "label": "在线段没有引擎 / 子进程调用（源码结构判据）",
-      "criteria": "把 `src/coach/opponent-belief.mjs` 的在线段（`ONLINE_SECTION_MARKER` 之前）逐行取出、剥掉行注释与块注释，再对每行做 `FORBIDDEN_ONLINE_PATTERNS[].pattern` 的子串匹配：命中即 `ONLINE_ENGINE_CALL` / `ONLINE_SUBPROCESS_CALL`（红）。判据是**源码结构**，不是注释声明。",
-      "actual": [],
+      "label": "在线段没有引擎 / 子进程调用，**而且判据真的覆盖到在线入口**（F-03-1）",
+      "criteria": "把 `src/coach/opponent-belief.mjs` 的在线段（`ONLINE_SECTION_MARKER` **定义行之后**、`OFFLINE_SECTION_MARKER` **之前**）逐行取出、剥掉行注释与块注释，再对每行做 `FORBIDDEN_ONLINE_PATTERNS[].pattern` 的子串匹配：命中即 `ONLINE_ENGINE_CALL` / `ONLINE_SUBPROCESS_CALL`（红）。判据是**源码结构**，不是注释声明。⚠ 2026-09-30（F-03-1）：旧口径取的是标记串**第一次出现之前**的正文 —— 那正是定义行自己，于是「在线段」只剩 69 行文件头，判据**覆盖为空**却显示干净（假绿）。现在还要查**覆盖**：在线段必须定义全部 `ONLINE_ENTRYPOINTS`，缺一个 ⇒ `ONLINE_COVERAGE_INCOMPLETE`（红）。",
+      "actual": {
+        "online_lines": 2079,
+        "scanned_online_entrypoints": 14,
+        "missing_online_entrypoints": [],
+        "hits": []
+      },
       "ok": true
     },
     {
@@ -3069,9 +3074,23 @@
       "actual": "[\"[NONDETERMINISTIC] opponentBelief:beliefs：同一输入两次运行的 JSON.stringify 不一致（含 tie-break）：[{\\\"belief\\\":\\\"uniform\\\",\\\"label\\\":\\\"均匀分布（无信息基线）\\\",\\\"available\\\":true,\\\"kind\\\":\\\"non_informative_baseline\\\",\\\"informativeness\\\":\\\"non_informative_baseline\\\",\\\"universe_size\\\":622,\\\" vs []\"]"
     },
     {
+      "where": "src/coach/opponent-belief.mjs 的在线段（F-03-1 之后）",
+      "mutation": "往在线函数 readPublicFacts() 里塞一行 step_joint(0)",
+      "criterion": "把 `src/coach/opponent-belief.mjs` 的在线段（`ONLINE_SECTION_MARKER` **定义行之后**、`OFFLINE_SECTION_MARKER` **之前**）逐行取出、剥掉行注释与块注释，再对每行做 `FORBIDDEN_ONLINE_PATTERNS[].pattern` 的子串匹配：命中即 `ONLINE_ENGINE_CALL` / `ONLINE_SUBPROCESS_CALL`（红）。判据是**源码结构**，不是注释声明。⚠ 2026-09-30（F-03-1）：旧口径取的是标记串**第一次出现之前**的正文 —— 那正是定义行自己，于是「在线段」只剩 69 行文件头，判据**覆盖为空**却显示干净（假绿）。现在还要查**覆盖**：在线段必须定义全部 `ONLINE_ENTRYPOINTS`，缺一个 ⇒ `ONLINE_COVERAGE_INCOMPLETE`（红）。",
+      "expect_code": "ONLINE_ENGINE_CALL",
+      "actual": "[\"[ONLINE_ENGINE_CALL] src/coach/opponent-belief.mjs:173（scanned=online）：出现 step_joint：在线信念里出现引擎的联合推进入口：信念只吃公开事实，跑模拟是离线产标签的事（实际源码 \\\"const engineTick = step_joint(0);\\\"）\"]"
+    },
+    {
+      "where": "src/coach/opponent-belief.mjs 的在线段（压空）",
+      "mutation": "把在线段压成 0 行（标记之间不留代码）",
+      "criterion": "把 `src/coach/opponent-belief.mjs` 的在线段（`ONLINE_SECTION_MARKER` **定义行之后**、`OFFLINE_SECTION_MARKER` **之前**）逐行取出、剥掉行注释与块注释，再对每行做 `FORBIDDEN_ONLINE_PATTERNS[].pattern` 的子串匹配：命中即 `ONLINE_ENGINE_CALL` / `ONLINE_SUBPROCESS_CALL`（红）。判据是**源码结构**，不是注释声明。⚠ 2026-09-30（F-03-1）：旧口径取的是标记串**第一次出现之前**的正文 —— 那正是定义行自己，于是「在线段」只剩 69 行文件头，判据**覆盖为空**却显示干净（假绿）。现在还要查**覆盖**：在线段必须定义全部 `ONLINE_ENTRYPOINTS`，缺一个 ⇒ `ONLINE_COVERAGE_INCOMPLETE`（红）。",
+      "expect_code": "ONLINE_COVERAGE_INCOMPLETE",
+      "actual": "[\"[ONLINE_COVERAGE_INCOMPLETE] src/coach/opponent-belief.mjs：在线段只覆盖了 0 / 14 个在线入口（扫过的行数 1）；缺 uniformBelief / revealedConditioned / frequencyBelief / auditOpponentBelief / readPublicFacts / buildCandidateUniverse / normalizeFrequencyInput / applyRules / collectClaimText / renderBeliefText / exact / readOpponentView / buildOpponentCandidates / legalSkillLoadout：「没扫到」与「扫过、没问题」必须分得开 —— 覆盖为空时判据是假绿\"]"
+    },
+    {
       "where": "src/coach/opponent-belief.mjs 的在线段",
       "mutation": "往在线段塞一行 step_joint 调用",
-      "criterion": "把 `src/coach/opponent-belief.mjs` 的在线段（`ONLINE_SECTION_MARKER` 之前）逐行取出、剥掉行注释与块注释，再对每行做 `FORBIDDEN_ONLINE_PATTERNS[].pattern` 的子串匹配：命中即 `ONLINE_ENGINE_CALL` / `ONLINE_SUBPROCESS_CALL`（红）。判据是**源码结构**，不是注释声明。",
+      "criterion": "把 `src/coach/opponent-belief.mjs` 的在线段（`ONLINE_SECTION_MARKER` **定义行之后**、`OFFLINE_SECTION_MARKER` **之前**）逐行取出、剥掉行注释与块注释，再对每行做 `FORBIDDEN_ONLINE_PATTERNS[].pattern` 的子串匹配：命中即 `ONLINE_ENGINE_CALL` / `ONLINE_SUBPROCESS_CALL`（红）。判据是**源码结构**，不是注释声明。⚠ 2026-09-30（F-03-1）：旧口径取的是标记串**第一次出现之前**的正文 —— 那正是定义行自己，于是「在线段」只剩 69 行文件头，判据**覆盖为空**却显示干净（假绿）。现在还要查**覆盖**：在线段必须定义全部 `ONLINE_ENTRYPOINTS`，缺一个 ⇒ `ONLINE_COVERAGE_INCOMPLETE`（红）。",
       "expect_code": "ONLINE_ENGINE_CALL",
       "actual": "[\"ONLINE_ENGINE_CALL:step_joint\"]"
     },

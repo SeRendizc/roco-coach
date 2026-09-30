@@ -31,11 +31,11 @@ import {fileURLToPath} from 'node:url';
 import {
   BANNED_CLAIM_KEYS, BANNED_CLAIM_WORDS, BELIEF_IDS, BELIEF_KINDS, CANDIDATE_BASES,
   FAIL_CLOSED_REASONS, FORBIDDEN_ONLINE_PATTERNS, HIDDEN_FACT_FIELDS, NON_INFORMATIVE_DECLARATION,
-  PUBLIC_FACT_FIELDS, RC604_REPORT_PATH, RULES, RULE_IDS, SKILL_POOL_GRADES, STRUCTURAL_CRITERIA,
-  auditOpponentBelief, beliefReport, buildCandidateUniverse, buildMeasuredFrequencySample,
-  buildOpponentCandidates, exact, formatAuditProblem, frequencyBelief, legalSkillLoadout,
-  normalizeFrequencyInput, onlineSectionOf, readOpponentView, readPublicFacts, revealedConditioned,
-  scanForbiddenPatterns, uniformBelief, weightsFor,
+  ONLINE_ENTRYPOINTS, PUBLIC_FACT_FIELDS, RC604_REPORT_PATH, RULES, RULE_IDS, SKILL_POOL_GRADES,
+  STRUCTURAL_CRITERIA, auditOpponentBelief, beliefReport, buildCandidateUniverse,
+  buildMeasuredFrequencySample, buildOpponentCandidates, exact, formatAuditProblem, frequencyBelief,
+  legalSkillLoadout, normalizeFrequencyInput, onlineSectionCoverage, onlineSectionOf, readOpponentView,
+  readPublicFacts, revealedConditioned, scanForbiddenPatterns, uniformBelief, weightsFor,
 } from '../src/coach/opponent-belief.mjs';
 import {CONFIDENCE_LEVELS} from '../src/coach/team-gaps.js';
 import {buildCandidateIndex, loadTeamCandidatesInputs, speedBandFor} from '../src/coach/team-candidates.mjs';
@@ -700,10 +700,87 @@ test('RC-604 判据⑧：同一输入两次调用逐字节相同（含 tie-break
 // 结构判据：在线段不许出现引擎 / 子进程调用
 // ─────────────────────────────────────────────────────────────────────────
 
+test('F-03-1：在线段判据必须**真的覆盖在线函数** —— 旧口径覆盖为空（假绿）已修', () => {
+  const ONLINE_LINE = "export const ONLINE_SECTION_MARKER = '<!-- ONLINE-SECTION-END -->';";
+  const OFFLINE_LINE = "export const OFFLINE_SECTION_MARKER = '<!-- OFFLINE-SECTION-BEGIN -->';";
+  // 旧实现留档（改前就长这样）：取标记串**第一次出现之前**的正文 —— 那正是定义行自己。
+  const OLD_ONLINE = (source) => {
+    const text = String(source ?? '');
+    const at = text.indexOf('<!-- ONLINE-SECTION-END -->');
+    const head = at >= 0 ? text.slice(0, at) : text;
+    return head.replace(/\/\*[\s\S]*?\*\//g, '').split('\n')
+      .map((line) => line.replace(/(^|\s)\/\/.*$/, '')).join('\n');
+  };
+  const covers = (section) => ONLINE_ENTRYPOINTS.filter((name) =>
+    new RegExp(`(function|const|let|class)\\s+${name}\\b`, 'u').test(section));
+  // 旧**布局**（标记常量写在文件最前面）+ 旧算法 ⇒ 复现「在线段只剩文件头」那 69 行
+  const VERSION_ANCHOR = "export const RC604_REPORT_VERSION = 'roco-rc604-opponent-belief-report/v1';";
+  const legacyLayout = SOURCE.replace(VERSION_ANCHOR, `${VERSION_ANCHOR}\n\n${ONLINE_LINE}`);
+  const legacySection = OLD_ONLINE(legacyLayout);
+  const now = onlineSectionCoverage(SOURCE);
+  raw('F-03-1 改前（旧布局 + 旧算法）', {online_lines: legacySection.split('\n').length,
+    covered_online_entrypoints: covers(legacySection).length,
+    hits: scanForbiddenPatterns(legacySection).map((hit) => hit.pattern)});
+  raw('F-03-1 改后（新布局 + 新算法）', {online_lines: now.online_lines, online_chars: now.online_chars,
+    scanned_online_entrypoints: now.scanned_online_entrypoints.length,
+    missing_online_entrypoints: now.missing_online_entrypoints, hits: now.hits});
+  assert.ok(legacySection.split('\n').length < 100, '旧口径的在线段只剩文件头（69 行级）');
+  assert.equal(covers(legacySection).length, 0, '旧口径**一个在线入口都没扫到** —— 这就是假绿的来源');
+  assert.ok(now.online_lines > 1000, `改后在线段必须真的覆盖在线函数，实际 ${now.online_lines} 行`);
+  assert.equal(now.missing_online_entrypoints.length, 0);
+  assert.deepEqual(now.hits, [], '真实源码的在线段不许有违规命中');
+
+  // 方向 ②：不改坏 ⇒ 不红
+  const clean = auditOpponentBelief({beliefs: [uniformBelief({catalog: index})]},
+    {source: SOURCE, scope: 'online'});
+  raw('F-03-1 反向控制：真实源码审计', {ok: clean.ok, problems: auditRaw(clean)});
+  assert.equal(clean.ok, true, `真实源码不许判红：${auditRaw(clean).join(' | ')}`);
+
+  // 方向 ①：往**在线函数体里**塞一个违规调用 ⇒ 必红；旧口径对同一份源码依然抓不到（对照）
+  const tampered = SOURCE.replace('export function readPublicFacts(publicFacts) {',
+    'export function readPublicFacts(publicFacts) {\n  const engineTick = step_joint(0);');
+  assert.notEqual(tampered, SOURCE, '注入必须真的落到在线函数体里');
+  const tamperedCoverage = onlineSectionCoverage(tampered);
+  const tamperedAudit = auditOpponentBelief({beliefs: [uniformBelief({catalog: index})]},
+    {source: tampered, scope: 'online'});
+  const legacyHits = scanForbiddenPatterns(OLD_ONLINE(legacyLayout.replace('export function readPublicFacts(publicFacts) {',
+    'export function readPublicFacts(publicFacts) {\n  const engineTick = step_joint(0);')));
+  raw('F-03-1 往在线函数体注入 step_joint', {new_coverage_hits: tamperedCoverage.hits,
+    audit_problems: auditRaw(tamperedAudit).slice(0, 2),
+    old_algorithm_hits_on_same_source: legacyHits.map((hit) => hit.pattern)});
+  proof('src/coach/opponent-belief.mjs 的在线段（F-03-1 之后）',
+    '往在线函数 readPublicFacts() 里塞一行 step_joint(0)',
+    STRUCTURAL_CRITERIA.online_no_engine, 'ONLINE_ENGINE_CALL', auditRaw(tamperedAudit).slice(0, 2));
+  assert.ok(tamperedCoverage.hits.includes('ONLINE_ENGINE_CALL:step_joint'), '新判据必须抓到注入');
+  assert.equal(tamperedAudit.ok, false);
+  assert.ok(tamperedAudit.problems.some((p) => p.code === 'ONLINE_ENGINE_CALL'));
+  assert.deepEqual(legacyHits.map((hit) => hit.pattern), [], '对照：旧口径对同一份源码抓不到（证明修的是覆盖）');
+
+  // 覆盖判据自己的牙：把在线段压空（标记之间什么都不留）⇒ ONLINE_COVERAGE_INCOMPLETE
+  const cutAt = SOURCE.indexOf(ONLINE_LINE) + ONLINE_LINE.length;
+  const emptied = `${SOURCE.slice(0, cutAt)}\n${OFFLINE_LINE}\n`;
+  const emptiedCoverage = onlineSectionCoverage(emptied);
+  const emptiedAudit = auditOpponentBelief({beliefs: [uniformBelief({catalog: index})]},
+    {source: emptied, scope: 'online'});
+  raw('F-03-1 把在线段压空', {online_lines: emptiedCoverage.online_lines,
+    missing: emptiedCoverage.missing_online_entrypoints.length,
+    problems: auditRaw(emptiedAudit).slice(0, 1)});
+  proof('src/coach/opponent-belief.mjs 的在线段（压空）', '把在线段压成 0 行（标记之间不留代码）',
+    STRUCTURAL_CRITERIA.online_no_engine, 'ONLINE_COVERAGE_INCOMPLETE', auditRaw(emptiedAudit).slice(0, 1));
+  assert.equal(emptiedCoverage.online_lines, 1, '压空之后在线段只剩一个空行');
+  assert.ok(emptiedAudit.problems.some((p) => p.code === 'ONLINE_COVERAGE_INCOMPLETE'),
+    '覆盖为空必须判红（否则「扫了个空」又会静默通过）');
+});
+
 test('RC-604 结构：在线段没有引擎 / 子进程调用（判据落在源码上，不是注释里）', () => {
+  const coverage = onlineSectionCoverage(SOURCE);
+  raw('结构：在线段覆盖与命中', coverage);
+  assert.equal(coverage.missing_online_entrypoints.length, 0,
+    `在线段必须真的覆盖全部在线入口（F-03-1）：缺 ${coverage.missing_online_entrypoints.join(' / ')}`);
   const online = onlineSectionOf(SOURCE);
   const hits = scanForbiddenPatterns(online);
-  raw('结构：在线段长度与命中', {online_lines: online.split('\n').length, hits: hits.map((hit) => hit.pattern)});
+  assert.equal(hits.length, 0,
+    `在线段不许出现 ${FORBIDDEN_ONLINE_PATTERNS.map((spec) => spec.pattern).join(' / ')}`);
   // `weightsFor()`：均匀基线按需展开成逐条明细；没有候选键时返回空数组（不凭空造 key）
   const uniform = uniformBelief({catalog: index});
   const expanded = weightsFor(uniform, ['pet_000001', 'pet_000002']);
@@ -931,7 +1008,7 @@ test('03.2-S1（真 view · 开局预览六只）：适配器只搬公开字段�
   assert.equal(read.ok, true, `S1 适配器产出必须合法：${JSON.stringify(read.leaked)}`);
 
   const built = buildOpponentCandidates({catalog: index, view, skillPool: SKILL_POOL});
-  raw('S2→S1 候选预算', built.budget);
+  raw('S1 候选预算', built.budget);
   raw('S1 首条候选（截断字段）', {candidate_id: built.candidates[0].candidate_id,
     basis: built.candidates[0].basis, skills_possible: built.candidates[0].skills.possible_count,
     grade: built.candidates[0].skills.grade, constraints: built.candidates[0].unknowns.length});
@@ -951,7 +1028,7 @@ test('03.2-S1（真 view · 开局预览六只）：适配器只搬公开字段�
   assert.ok(observed.every((candidate) => candidate.observed.reveals[0].revealed_via === 'opening_preview'));
 });
 
-test('03.2-S2（真 view · 无预览）：observed=0 且如实说明；候选仍出但标注全是推的', () => {
+test('03.2-S2（真 view · 无预览）：已见阵容为空、场上那只仍算观察；候选全是推的且如实说明', () => {
   const view = REAL_VIEW.s2_no_preview;
   const adapted = readOpponentView(view);
   raw('S2 适配器形状', adapted.shapes);
@@ -970,6 +1047,13 @@ test('03.2-S2（真 view · 无预览）：observed=0 且如实说明；候选�
     .every((candidate) => candidate.observed.reveals[0].revealed_via === 'field_on_screen'));
   assert.ok(built.candidates.filter((candidate) => candidate.basis === 'inferred')
     .every((candidate) => candidate.unknowns.some((line) => line.includes('公开史里没有它'))));
+  // F-03-2：**真 view 上**也要钉住条件③的降级行为 —— 独立复核用变异测试实测：
+  // 删掉模块里那条 `contradictions.push(...)`，旧版套件仍 25/25 全绿（行为没了、判据不红）。
+  assert.ok(built.contradictions.some((row) => row.code === 'OBSERVED_NOT_IN_FILTERED_POOL'),
+    `无预览局里「场上那只被规则筛出池子」必须如实报矛盾：${JSON.stringify(built.contradictions)}`);
+  const contradicted = built.candidates.find((row) => !row.in_filtered_pool && row.basis === 'observed');
+  assert.ok(contradicted, '被筛出池子的那只仍然要在候选里（以观察为准）');
+  assert.equal(contradicted.basis, 'observed');
 });
 
 test('03.2-S3（真 view · 已出招 / 换人来源）：已打出来的技能挂到对应候选上，来源保留', () => {
@@ -1019,6 +1103,26 @@ test('03.2-手工栏：同一份公开事实（手工 publicFacts）下候选可
   // 已见 = 场上那只（field_on_screen）+ 换人亮明的那只 = 2，**都不受预算裁剪**
   assert.equal(withContradiction.budget.observed_kept, 2, '已见候选不受预算裁剪');
   assert.ok(withContradiction.candidates.some((row) => row.species_id === 'pet_000017'));
+
+  // 第二类矛盾：已出招的技能不在这只的可学池里 ⇒ USED_SKILL_NOT_LEARNABLE（必须有守护）
+  const impossibleSkillView = {...REAL_VIEW.s3_after_switch,
+    opponent: {...REAL_VIEW.s3_after_switch.opponent,
+      revealed_skills: {pet_000007: [{skill_id: 'skill_999999', name: '不存在的技能'}]}}};
+  const impossible = buildOpponentCandidates({catalog: index, view: impossibleSkillView, skillPool: SKILL_POOL});
+  const markedSkill = impossible.candidates.find((row) => row.species_id === 'pet_000007');
+  raw('手工栏 反例：已出招却不在可学池', {known_used: markedSkill.skills.known_used,
+    contradictions: impossible.contradictions.map((row) => row.code)});
+  // ⚠ 2026-09-30（独立复核 `verify-03.2.md` §1② 的覆盖缺口 / F-03-2）：原来这里只**打印**矛盾、
+  // 没有断言，于是把 `contradictions.push(...)` 删掉套件照样全绿 —— 条件③的降级行为无守护。
+  // 这里钉**第二类**矛盾（已出招却不在可学池）；**第一类**（已亮明却被筛出池）在 S2 真 view 那条钉
+  // ——手工栏这套夹具不会触发第一类（候选都在池子里），别硬凑。
+  assert.ok(impossible.contradictions.some((row) => row.code === 'USED_SKILL_NOT_LEARNABLE'),
+    `已出招却不在可学池时必须如实报矛盾（学招表不全 / 形态对不上，两条都留）：`
+    + `${JSON.stringify(impossible.contradictions)}`);
+  assert.ok(impossible.contradictions.every((row) => typeof row.detail === 'string' && row.detail.length > 0),
+    '每条矛盾都要带人读的 detail（点名是谁、为什么冲突）');
+  assert.equal(markedSkill.skills.known_used[0].in_learnable_pool, false);
+  assert.ok(markedSkill.unknowns.some((line) => line.includes('矛盾')), '候选自己也要点名这条矛盾');
 });
 
 test('03.2-反例②：已知不合法的技能组合一个都不进 kept（并独立复算 + 必红）', () => {

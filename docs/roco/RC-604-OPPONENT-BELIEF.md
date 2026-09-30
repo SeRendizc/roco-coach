@@ -7,13 +7,14 @@
 > 三条都不产出胜率、不产出伪精确百分数，也不偷看对手的配招与后备。
 
 - 模块：`src/coach/opponent-belief.mjs`
-- 判据：`tests/roco-opponent-belief.test.js`（**24 条**：RC-604 原始 13 条 + 03.1 的 H1/H2/H4/H5/R2-R4 5 条
-  + 03.2 的候选协议 6 条；含多类必红反证与反向控制）
+- 判据：`tests/roco-opponent-belief.test.js`（**26 条**：RC-604 原始 13 条 + 03.1 的 H1/H2/H4/H5/R2-R4 5 条
+  + 03.2 的候选协议 6 条 + R2 扩展 1 条 + F-03-1 在线段覆盖 1 条；含多类必红反证与反向控制）
 - 产物：`reports/roco/rc604/opponent-belief.json`（含 `candidate_protocol` 与候选样本）
 - 跑法：`node --test tests/roco-opponent-belief.test.js`
   （重新生成产物：`RC604_WRITE_REPORT=1 node --test tests/roco-opponent-belief.test.js`）
-- 进度（2026-09-30）：03.1（公开性口径按实测重写 + 来源必填 + 假设只降权）与
-  03.2（候选协议 + 三个可复现局面）已落地；03.3–03.5（证据更新 / 无频率情景集合 / 预算细化）**待做**。
+- 进度（2026-09-30）：03.1（公开性口径按实测重写 + 来源必填 + 假设只降权）、
+  03.2（候选协议 + 三个可复现局面）与 F-03-1（在线段判据覆盖率）已落地；
+  03.3–03.5（证据更新 / 无频率情景集合 / 预算细化）**待做**。
 
 ---
 
@@ -188,7 +189,7 @@ belief.pool_ratio = {numerator: pool, denominator: universe, value, unit: '候�
 | ⑥ | unknown 不许拿权重顶替 | `weights` / `weights=0` / `pool_ratio` ⇒ `UNKNOWN_BELIEF_HAS_VALUE`；权重合计凑不到 1 ⇒ `AVAILABILITY_SHAPE` |
 | ⑦ | 零胜率零伪精确 | `win_rate` 键 / 百分数量纲 / 渲染文本里的「胜率 62%」⇒ `PSEUDO_PRECISION`；**反向控制**：声明边界的句子必须放行 |
 | ⑧ | 确定性 | 两次调用、重建索引后逐字节相同；快照不一致 ⇒ `NONDETERMINISTIC` |
-| 结构 | 在线段没有引擎 / 子进程 | 塞一行 `step_joint` ⇒ `ONLINE_ENGINE_CALL`（⚠ 见 §10 的已知缺陷 F-03-1：当前「在线段」只覆盖文件头） |
+| 结构 | 在线段没有引擎 / 子进程 | 塞一行 `step_joint` **到在线函数体里** ⇒ `ONLINE_ENGINE_CALL`；把在线段压空 ⇒ `ONLINE_COVERAGE_INCOMPLETE`（覆盖为空判红，F-03-1 修复） |
 | 报告 | 产物与生成逻辑逐字节一致 | 磁盘字节对照 + 每条基线自报 `available/evidence/confidence/unknown_reason` + ≥8 条反证留痕 |
 | ⑨ | **注入式**：把 unknown 改成「已测」 | 补一个样本量、换成「声称有来源」的证据 ⇒ `FREQUENCY_FAKED` |
 | ⑩ | **注入式**：缺速度值不许自己算档位 | 速度规则 `not_applied` + 写清原因；缺速度时退回**池内等权基线**（`uniform_over_pool_baseline`），池子只由已应用的规则决定 |
@@ -274,18 +275,24 @@ fail closed 的分支也**如实报池子的实况**：`REVEALED_EMPTY_STRATUM`�
 
 ## 10. 已知缺陷与未做（如实登记）
 
-- **F-03-1（判据没牙）**：`ONLINE_SECTION_MARKER` 的字面量**自己**出现在文件顶部那行定义里，
-  于是 `onlineSectionOf()` 的 `indexOf()` 命中的是定义本身 ⇒ 所谓「在线段」只有 69 行（文件头注释），
-  真正的在线函数一行都没被扫。实测读数见 `reports/roco/product-execution/03/raw-03.2-tests.txt`
-  （`{"online_lines":69,"hits":[]}`）。修它要挪 `OFFLINE_SECTION_MARKER` 的位置并同步审计口径，
-  已上报 Lead 等裁决（**本文件不写成已修**）。
+- **F-03-1（判据没牙）—— 已修（2026-09-30，Lead 指派）**：`ONLINE_SECTION_MARKER` 的字面量原先写在
+  它自己的定义行里，而 `onlineSectionOf()` 用 `indexOf(marker)` 取「它之前」的正文 ⇒ 命中的正是定义行本身，
+  「在线段」只剩 68–69 行文件头，**所有在线函数一行都没被扫**（判据声称覆盖在线路径，实际覆盖为空）。
+  修法：① 标记常量**下移**到判据/白名单/词表这些声明之后、纯在线代码之前；② `onlineSectionOf()`
+  取「定义行之后 → `OFFLINE_SECTION_MARKER` 之前」；③ `OFFLINE_SECTION_MARKER` 上移到
+  `beliefReport()` **之前**（否则「离线入口定义」会落进在线段，触发假红）；④ 新增
+  `onlineSectionCoverage()` 与 `ONLINE_COVERAGE_INCOMPLETE`：在线段必须**定义全部
+  `ONLINE_ENTRYPOINTS`**，覆盖为空即判红。
+  读数：改前 `{online_lines: 68, covered_online_entrypoints: 0, hits: []}` →
+  改后 `{online_lines: 2079, online_chars: 83135, scanned: 14/14, missing: [], hits: []}`。
 - **R7**（候选数量上限的威胁保留策略）留给 03.5；现在只有「可解释缩减 + 分布留痕」。
 - **03.3 / 03.4 / 03.5 尚待做**：证据更新（已出技能 / 先手关系 / 可见伤害 ⇒ 收窄候选、保留多解）、
   无频率时的情景集合、预算与截断细化。
 
 ## 11. 文件清单
 
-- `src/coach/opponent-belief.mjs`（在线段 + 离线段，边界由 `ONLINE_SECTION_MARKER` 分开；见 F-03-1）
-- `tests/roco-opponent-belief.test.js`（24 条，已登记进 `package.json` 的 `test:unit` 枚举清单）
+- `src/coach/opponent-belief.mjs`（在线段 + 离线段：`ONLINE_SECTION_MARKER` 之后、`OFFLINE_SECTION_MARKER`
+  （在 `beliefReport()` 之前）之前是在线段；覆盖读数见 `onlineSectionCoverage()`）
+- `tests/roco-opponent-belief.test.js`（**26 条**，已登记进 `package.json` 的 `test:unit` 枚举清单）
 - `reports/roco/rc604/opponent-belief.json`（由测试复跑比对，逐字节；含 `candidate_protocol` 与候选样本）
 - `docs/roco/RC-604-OPPONENT-BELIEF.md`（本文）
