@@ -50,13 +50,69 @@ import {rememberPreference,playerWishes,quizMastery,QUIZ_MASTERY} from './memory
 export const localProvider={name:'local',async generate(packet){return packet.text;}};
 /** 给模型的内部指令（**不是**玩家文案）：见 `internalDraft` 那一段的兜底。 */
 export const FACT_DRAFT='这一问是规则或图鉴事实：先查引擎，再按回执回答。';
+/**
+ * **本问句该依据哪一局**：当前局优先（P1-B，2026-10-01，lead-mac 报的「新局被上一局抢答」）。
+ *
+ * 为什么要抽这一个判定：`lastMatch` 这个名字骗人 —— 它其实是"**本问句依据的那一局**"
+ * （`buildContext` 里由 `summarizeMatch(source)` 得来）。旧兜底写的是 `previous || current`：
+ * 只要调用方没把 `game` 递进来（小芽面板 / 营地页那条路），而 archive 里既有进行中的 `current`
+ * 又有上一局的 `completed`，它就会挑**上一局** ⇒ 玩家在新局里问「现在该出什么招」，答的是上一局的
+ * 复盘（实测原文见 `reports/roco/product-execution/crosscut/p1b-lastmatch-triage.md` §1）。
+ *
+ * 三条规则（**所有读点共用这一份**，不许各写各的）：
+ *   ① 当前局存在（进行中的 live / archive.current，或刚结束的当前局）⇒ 一律 `current`；
+ *   ② 只有"明确问上一局"或"根本不存在当前局"时才回落 `previous` —— 下游**必须显式标注**
+ *      「这是上一局」（`matchScope==='previous'` 就是那个标注信号）；
+ *   ③ 两者都没有 ⇒ `scope:null`（不猜）。
+ */
+export function activeMatchOf({game=null,archive=null,message=''}={}){
+ const hasHistory=(x)=>Array.isArray(x?.history)&&x.history.length>0;
+ const live=hasHistory(game)&&!game.result?game:null;                        // 进行中的当前局（宿主递了 game）
+ const archived=hasHistory(archive?.current)?archive.current:null;           // archive 里的当前局（可能已结束）
+ const previous=Array.isArray(archive?.completed)&&archive.completed.length?archive.completed.at(-1):null;
+ const asksPrevious=/上一局|上一场|上个局/.test(String(message));
+ if(asksPrevious&&previous)return {scope:'previous',match:previous,id:previous.id??null};   // 明确问上一局 ⇒ 允许回落
+ const current=live??archived;
+ if(current)return {scope:'current',match:current,id:current.id??null};                     // ① 当前局优先
+ if(hasHistory(game)&&game.result)return {scope:'current',match:game,id:game.id??null};     // 刚结束的当前局仍算当前
+ if(previous)return {scope:'previous',match:previous,id:previous.id??null};                 // ② 无当前局才回落
+ return {scope:null,match:null,id:null};                                                    // ③ 都不存在
+}
+/**
+ * **生效的作用域**：把"这个包里有没有实时局面"也算进来。
+ *
+ * 为什么不能只看 `matchScope`：`buildContext` 只拿得到 `game`/`archive`，而客户端（`roco.js`）
+ * 是把实时局面放在 `context.roco_battle` 里加的。Codex 报的第二条入口正是"面板没给 `game`、
+ * archive 里也没有 `current`，但 `roco_battle` 有值（turn=1）"——那种情况下 `matchScope` 可能是
+ * `previous`，于是下游又去讲上一局。**`roco_battle` 本身就是"当前局存在"的证据**，这里统一收口。
+ */
+export function effectiveMatchScope(context={}){
+ const liveBattle=context?.roco_battle&&typeof context.roco_battle==='object'?context.roco_battle:null;
+ if(liveBattle)return 'current';
+ return context?.matchScope??(context?.battle?'current':context?.lastMatch?'previous':null);
+}
+/**
+ * 上下文里"当前依据的那一局"的 id。老形状（只有 `battle`/`lastMatch`）按 current 反推，
+ * 这样模型路径上的历史会话不会因为新增字段而变味。
+ */
+export function activeMatchIdOf(context={}){
+ const scope=effectiveMatchScope(context);
+ if(scope==='previous')return context?.lastMatch?.id??null;
+ if(scope==='current')return context?.battle?.id??context?.roco_battle?.id??context?.lastMatch?.id??null;
+ return null;
+}
+/** 这一次回答是不是在讲**上一局**（下游据此显式标注「上一局」）。 */
+export function readsAsPreviousMatch(context={}){
+ return effectiveMatchScope(context)==='previous';
+}
 export function buildContext(game,profile,focus,archive=null,stageId='meadow',message=''){
- const current=game?.history?.length?game:archive?.current;
- const previous=archive?.completed?.at(-1);
- const source=/本局|当前.*局/.test(message)||game&&!/上一局/.test(message)?current:/上一局/.test(message)?previous||((game?.result)?game:null):game?.result?game:previous||current;
+ // 当前局优先：判定只在这里做一次（见 `activeMatchOf`），下游一律读 `matchScope` / `activeMatchId`。
+ const active=activeMatchOf({game,archive,message});
+ const source=active.match;
  const requested=message.match(/第\s*(\d+)\s*回合/);
  const selected=requested?source?.history?.find(h=>h.type==='turn'&&h.before.turn===Number(requested[1])):null;
  return {evidenceIndex:(source?.history||[]).filter(h=>h.type==='turn').map(h=>({id:(source.id||'current')+':turn:'+h.before.turn,turn:h.before.turn,rulesVersion:source.version,events:h.events})),mode:game?.mode||'camp',focus,stageId,profile:structuredClone(profile),lastMatch:summarizeMatch(source),
+ matchScope:active.scope,activeMatchId:active.id,
  evidenceRulesVersion:requested?source?.version:game?.version||archive?.current?.version||'unknown',
  requestedTurn:requested?Number(requested[1]):null,
  lastTurn:requested?selected||null:game?.history.filter(x=>x.type==='turn').at(-1)||(!game?archive?.lastTurn:null)||null,
@@ -2292,7 +2348,9 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  // 显式请求优先于旧拒绝，这一轮也会把 review-after-loss 写成 yes。
  const wishes=playerWishes(next);
  const reviewRequest=/整局|整场|上一局|一整局/.test(routingText)||/复盘|回顾/.test(routingText)&&!/回合/.test(routingText);
- const reviewInferred=(situational||followup)&&!!(context.battle?.result||!context.battle&&context.lastMatch);
+ // P1-B：复盘推断也走同一个判定 —— "有上一局"不再是可复盘的理由；只有"依据的那一局是上一局"
+ // 或"当前局已经打完"才算复盘请求（当前局还活着时问「现在该出什么招」绝不能被当成复盘）。
+ const reviewInferred=(situational||followup)&&(readsAsPreviousMatch(context)||!!context.battle?.result||!!context.roco_battle?.result);
  const matchRequest=!refusesReview&&(reviewRequest||reviewInferred&&!wishes.refusedReview);
  const quizRequest=/小测|练习题|出.{0,5}题/.test(routingText);
  if(isLiveMatch(context))return {text:'线上竞技 PVP 赛中不提供战术分析或教学，结束后我们再聊。',evidence:[],memory:next,route:'policy',provider:'local'};
@@ -2354,7 +2412,7 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  // 是因为「还算数吗 / 取消了没」问的是**状态**，状态只能从记录里读，不能靠话题猜。
  else if(/提醒|委托/.test(routingText)&&REMINDER_STATE_ASK.test(routingText)&&!REMINDER_SET_ASK.test(routingText)){
   const watches=(Array.isArray(next.watches)?next.watches:[]).filter((w)=>w&&typeof w==='object'&&w.matchId);
-  const liveId=context.battle?.id??context.lastMatch?.id??null;
+  const liveId=activeMatchIdOf(context);
   const here=watches.filter((w)=>w.matchId===liveId);
   const labelOf=(w)=>w.kind==='finish'?'合法攻击满足当前目标的直接收尾条件':'场上伙伴能量降到1豆或以下';
   packet=here.length
@@ -2547,6 +2605,20 @@ if(role==='auto')route=factAsk?'teacher':(refusesReview?'companion':/培养|加�
   route='strategist';
   next.lastTopic='strategist';
  }
+ // ── P1-B（task-46 第 1 步）：当前局存在、问的是"这一手怎么打"，但这个包里没有实时局面 ──────
+ // 面板/营地页那条路（宿主没给 `game`/`roco_battle`）以前会落进 `companion(...)`，而陪练手上
+ // 只有"上一局"的素材（`memory.events`）⇒ 玩家在新局里问出招，答的是上一局小结
+ // （实测原文见 `reports/roco/product-execution/crosscut/p1b-lastmatch-triage.md` §1）。
+ // 判定层已经知道"当前局存在"（`matchScope==='current'`）⇒ 这里**如实说清读不到实时局面**，
+ // 不再拿上一局顶替。`matchScope` 不是 current 时一个字都不变（营地/图鉴/三宠那几条老路不受影响）。
+ if(rocoAdviceAsk(routingText)&&!rocoBattle&&effectiveMatchScope(context)==='current'){
+  // 证据**整段换成这两条**：原来那份 `packet.evidence` 里带着"最近一局：上一局的 16 回合、谁先倒下…"
+  // 的流水 —— 判据①要的是"不出现上一局内容"，所以不能一边说"读不到实时局面"、一边把上一局的账端出去。
+  packet={text:'这一局的实时局面我在这边读不到（面板只带了对局编号和回合记录）。到训练场那一页问，我按当前生命、能量和队伍比较这一手。',
+   evidence:['这一问在问当前行动，上下文标着 `matchScope=current`（当前局存在），但这个包里没有实时局面。',
+    '当前局存在时不许拿上一局的素材顶替；读不到实时局面就如实说读不到。']};
+  locked=true;route='strategist';next.lastTopic='strategist';
+ }
  // 事实查全了、但这一问还含**取舍/推荐**（「选哪只更合适」「为什么」）⇒ 事实留作证据、模型接着答。
  // `provider.name!=='local'` 是硬条件：没接模型时这一支一个字都不变（仍是纯事实路径）。
  judgementOverFacts=Boolean(factAnswer)&&provider.name!=='local'&&!deterministic&&judgementAsk(message);
@@ -2709,7 +2781,7 @@ if(role==='auto')route=factAsk?'teacher':(refusesReview?'companion':/培养|加�
    :rejectedReason==='unlabeled-unknown'?'模型回答只交了一句「不知道」，显示已核验的本局分析'
    :'那份回答和引擎的记录对不上，换成我核过的这一份';
   const receipted=buildAnswerCorrection({check:failedCheck,reasons:checkReasonsOf(failedCheck),
-   tool:scrubbedTrace.at(-1)?.tool??null,toolArgs:scrubbedTrace.at(-1)?.args??null,matchId:context.battle?.id??context.lastMatch?.id??null,
+   tool:scrubbedTrace.at(-1)?.tool??null,toolArgs:scrubbedTrace.at(-1)?.args??null,matchId:activeMatchIdOf(context),
    reasonsCode:codes,answerReceiptIndex:scrubbedTrace.filter(item=>item?.chosenBy==='correction').length});
   if(!granted){
    if(alreadyTried){
@@ -3013,7 +3085,9 @@ export function policyFor(message='',context={}){
  // 模型只能给一句没标注的"不给结论"，再被守卫按人类口径（「不要说不知道」）判 `unlabeled-unknown`
  // 打回，玩家最后拿到的是一句通用兜底。没有对局就没有可复盘的东西 —— 本地如实说清 + 两条路，
  // 0 次模型调用。范围只收"明确在问某一回合/整局"的说法，别的问句一个字不动。
- const hasMatch=Boolean(context?.battle||context?.roco_battle||context?.lastTurn||context?.lastMatch||context?.match||context?.history);
+ // P1-B：`matchScope` 也算"有对局" —— 面板路径（宿主没给 game、archive 里有进行中的当前局）以前
+ // 在这里被判成"没有可复盘的东西"，于是回落到上一局。
+ const hasMatch=Boolean(context?.battle||context?.roco_battle||context?.lastTurn||context?.lastMatch||context?.match||context?.history)||effectiveMatchScope(context)!=null;
  if(!hasMatch&&/(刚才那回合|刚才那一回合|上一回合|上个回合|前面那回合|这一回合|我错在哪|输在哪|赢在哪|整局的统计|整场统计|回顾上一局|回顾整局|帮我复盘)/.test(text))
   return {need:null,reason:'review-without-match'};
  if(/第\s*\d+\s*回合|上一回合|上个回合|前面那回合/.test(text))return {need:'read_evidence',reason:'named-turn'};
@@ -4549,10 +4623,16 @@ export function assembleContext(payload,{window=WORKING_CONTEXT,output=OUTPUT_RE
  const p=structuredClone(payload),m=p.memory||{};
  const journal=m.journal||[];
  const task=/复盘|回顾|整局|上一局|分析|输/.test(p.message)||p.context.battle?.result?'review':/培养|加点/.test(p.message)?'training':'battle';
- m.journal=journal.filter(e=>task==='review'?e.matchId===p.context.lastMatch?.id:e.kind==='dismiss').slice(-6);
+ // P1-B：剥离条件从"任务类型"换成"**这一次依据的是不是上一局**"：
+ //   · `previous` ⇒ 留着（复盘上一局是正当的，下游会显式标注）；
+ //   · `current` 且要复盘 ⇒ 留着（复盘刚打完的当前局，正是"当前局优先"的用处）；
+ //   · 其余（current 非复盘 / 没有当前局）⇒ 整段删掉，别把上一局的流水塞进模型负载。
+ const scope=effectiveMatchScope(p.context);
+ const keepMatch=scope==='previous'||(scope==='current'&&task==='review');
+ m.journal=journal.filter(e=>task==='review'?e.matchId===activeMatchIdOf(p.context):e.kind==='dismiss').slice(-6);
  m.reflections=Object.fromEntries(Object.entries(m.reflections||{}).map(([k,v])=>[k,{...v,evidenceIds:v.evidenceIds.filter(id=>m.journal.some(e=>e.id===id))}]).filter(([k,v])=>v.evidenceIds.length>=3));
  m.events=(m.events||[]).slice(-3);m.dialogue=[];
- if(task!=='review'){delete p.context.lastMatch;p.context.evidenceIndex=[];}
+ if(!keepMatch){delete p.context.lastMatch;p.context.evidenceIndex=[];}
  p.conversation=(p.conversation||[]).slice(-8);
  while(bytes(p)>budget&&p.context.evidenceIndex?.length>1)p.context.evidenceIndex.shift();
  while(bytes(p)>budget&&p.conversation.length)p.conversation.shift();

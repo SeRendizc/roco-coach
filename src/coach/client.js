@@ -1,7 +1,7 @@
 import {CoachScheduler} from './scheduler.js';
 import {chooseEnemy,legalActions} from '../game/engine.js';
 export const RESPONSE_INSTRUCTIONS='\n回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释。游戏按回合结算，不按秒；不要编造技能冷却。道具名称只能使用回复药、净化药、能量果，不要把它们叫作解药或以太。双方同时决定，不能先看对手本回合出招再决定自己的行动。复盘中hpBefore是回合开始、hpAfter是结束，不能把行动前生命称作打完还剩。逐回合核对实际事件：行动取消不能说成打出了伤害，事前预测和事后结算必须分开。';
-import {runCoach,assembleContext,checkGroundedAnswer} from './runtime.js';
+import {runCoach,assembleContext,checkGroundedAnswer,readsAsPreviousMatch} from './runtime.js';
 import {checkCompanionRestraint,playerWords,intentOf} from './companion.js';
 let session=null;
 // 这个 await 必须自带上限：它在 requestOpponentAction 里**不在** try/catch 内，
@@ -22,7 +22,9 @@ async function executeCoach(payload,signal){
  //   上一版我写在 try 里 ⇒ `ReferenceError: askedIntent is not defined`（`tests/evals/agent.test.js` 当场抓到 ✓）。
  //   用的是陪练**同一张表**（`companion.js` 的 `intentOf`，只 import、不复制一张）。
  const askedIntent=intentOf(playerWords(originalMessage));
- if((payload.context.battle?.result||!payload.context.battle&&payload.context.lastMatch)&&/优化|总结|分析|输在哪|为什么输|为什么赢|打得怎么样/.test(payload.message)&&!/回合|整局|整场|上一局/.test(payload.message))payload={...payload,message:'关于这份整局战报：'+payload.message};
+ // P1-B：这条分流也走**同一个判定**（`readsAsPreviousMatch`）—— 以前写的是
+ // `battle?.result || (!battle && lastMatch)`，与 runtime.js 的优先序各写各的，两条路会分叉。
+ if((readsAsPreviousMatch(payload.context)||payload.context.battle?.result)&&/优化|总结|分析|输在哪|为什么输|为什么赢|打得怎么样/.test(payload.message)&&!/回合|整局|整场|上一局/.test(payload.message))payload={...payload,message:'关于这份整局战报：'+payload.message};
  // ── 执行位置：**先服务端**（Codex P0-01 的核心一条）──────────────────────────
  //
  // 修前是「先在浏览器里 `runCoach`，本地结果一出来就 `return`（`localOnly` / `route==='policy'`
