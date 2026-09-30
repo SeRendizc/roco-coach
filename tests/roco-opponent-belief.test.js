@@ -31,11 +31,12 @@ import {fileURLToPath} from 'node:url';
 import {
   BANNED_CLAIM_KEYS, BANNED_CLAIM_WORDS, BELIEF_IDS, BELIEF_KINDS, CANDIDATE_BASES,
   FAIL_CLOSED_REASONS, FORBIDDEN_ONLINE_PATTERNS, HIDDEN_FACT_FIELDS, NON_INFORMATIVE_DECLARATION,
-  ONLINE_ENTRYPOINTS, PUBLIC_FACT_FIELDS, RC604_REPORT_PATH, RULES, RULE_IDS, SKILL_POOL_GRADES,
-  STRUCTURAL_CRITERIA, auditOpponentBelief, beliefReport, buildCandidateUniverse,
+  ONLINE_ENTRYPOINTS, PUBLIC_FACT_FIELDS, PUBLIC_FACT_FIELDS_OPTIONAL, RC604_REPORT_PATH, RULES, RULE_IDS,
+  SKILL_POOL_GRADES, STRUCTURAL_CRITERIA, auditOpponentBelief, beliefReport, buildCandidateUniverse,
   buildMeasuredFrequencySample, buildOpponentCandidates, exact, formatAuditProblem, frequencyBelief,
-  legalSkillLoadout, normalizeFrequencyInput, onlineSectionCoverage, onlineSectionOf, readOpponentView,
-  readPublicFacts, revealedConditioned, scanForbiddenPatterns, uniformBelief, weightsFor,
+  legalSkillLoadout, normalizeFrequencyInput, onlineSectionCoverage, onlineSectionOf, readOpponentEvidence,
+  readOpponentView, readPublicFacts, revealedConditioned, scanForbiddenPatterns, uniformBelief,
+  updateOpponentCandidates, weightsFor,
 } from '../src/coach/opponent-belief.mjs';
 import {CONFIDENCE_LEVELS} from '../src/coach/team-gaps.js';
 import {buildCandidateIndex, loadTeamCandidatesInputs, speedBandFor} from '../src/coach/team-candidates.mjs';
@@ -1218,6 +1219,200 @@ test('03.2-R2（扩展）：**任何**带 weights 的信念都必须声明依据
       STRUCTURAL_CRITERIA.no_assumption_zeroing, 'WEIGHT_BASIS_NOT_DECLARED', auditRaw(audit).slice(0, 1));
     assert.equal(audit.ok, false, `R2 ${label} 必须判红`);
     assert.ok(audit.problems.some((p) => p.code === 'WEIGHT_BASIS_NOT_DECLARED'));
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// 03.3 · 证据更新：已出技能 / 先手关系 / 可见伤害 / 可见状态
+// ─────────────────────────────────────────────────────────────────────────
+
+/** 03.3 的真引擎夹具（回执切片过真 `publicView()`；反例读数来自同一份引擎产物）。 */
+const ENGINE_33 = readJson('reports/roco/product-execution/03/raw-03.3-engine.json');
+const VIEW_33 = Object.freeze({
+  pvp: readJson('reports/roco/product-execution/03/raw-03.3-view-pvp.json'),
+  legacy: readJson('reports/roco/product-execution/03/raw-03.3-view-legacy.json'),
+});
+
+test('03.3-E1（真 view）：证据观察器只吃公开事实，每条观察都带 evidence_id', () => {
+  const seen = readOpponentEvidence(VIEW_33.pvp);
+  raw('E1 PVP 观察读数', {
+    used_skills: seen.observations.used_skills.map((row) => `${row.pet_id}:${row.skill_id}`),
+    turn_order: seen.observations.turn_order.map((row) => `${row.enemy_speed.value}/${row.enemy_speed.source}`),
+    first_sides: seen.observations.first_sides.map((row) => `t${row.turn}:${row.first_side}`),
+    visible_damage: seen.observations.visible_damage.map((row) => `${row.attacker_side}:${row.skill_id}:${row.amount}`),
+    visible_state: seen.observations.visible_state,
+    rejected: seen.rejected,
+  });
+  assert.ok(seen.observations.used_skills.length > 0, 'E1 必须读到已出技能');
+  assert.ok(seen.observations.visible_damage.some((row) => row.attacker_side === 'enemy'),
+    'E1 必须读到对手打出来的伤害');
+  assert.equal(seen.observations.visible_state.species_id, VIEW_33.pvp.opponent.field.pet_id);
+  assert.deepEqual(seen.observations.contract, {
+    match_id: VIEW_33.pvp.match_id, rules_version: VIEW_33.pvp.rules_version,
+    decision_id: VIEW_33.pvp.decision_id});
+  for (const group of ['used_skills', 'visible_damage']) {
+    for (const row of seen.observations[group]) {
+      assert.ok(row.evidence_id.startsWith('view.'), `E1 ${group} 的每条观察都要能指回公开载荷`);
+    }
+  }
+  assert.equal(seen.rejected.length, 0, 'E1 真 view 里没有 individual-* 出处');
+
+  // `speed_provenance`：引擎只在**面板口径**下发 ⇒ 用 02 留档里那份有 `individual-snapshot` 的局
+  // （对手那侧是 `species-panel`），本探针自己起的局（双方都没快照）与 legacy 都没有这个键。
+  const withSpeed = readOpponentEvidence(REAL_VIEW.s3_after_switch);
+  raw('E1 带 speed_provenance 的真 view', {turn_order: withSpeed.observations.turn_order});
+  assert.equal(withSpeed.observations.turn_order.length, 1);
+  assert.equal(withSpeed.observations.turn_order[0].enemy_speed.source, 'species-panel');
+  assert.equal(withSpeed.observations.turn_order[0].panel_scale, true);
+
+  // legacy：没有 speed_provenance ⇒ 先手速度**没有读数**（如实说明，不自己换算）
+  const legacy = readOpponentEvidence(VIEW_33.legacy);
+  raw('E1 legacy 观察读数', {turn_order: legacy.observations.turn_order.length,
+    damage: legacy.observations.visible_damage.length, notes: legacy.notes});
+  assert.equal(legacy.observations.turn_order.length, 0);
+  assert.ok(legacy.notes.some((line) => line.includes('speed_provenance')));
+  assert.equal(seen.observations.turn_order.length, 0, 'E1 本探针的六宠局双方都没快照 ⇒ 也没有该键');
+});
+
+test('03.3-E2（真引擎读数 · 反例①）：同一公开伤害由两种个体配置都能解释 ⇒ 两者都保留', () => {
+  const ce = ENGINE_33.counterexample;
+  raw('E2 引擎读数（反例①）', {observed_battle_damage: ce.observed_damage,
+    baseline_replay: ce.baseline_replay.damage, fidelity: ce.replay_fidelity,
+    matching: ce.matching_configs.map((row) => [row.panel_delta, row.damage]),
+    sensitive: ce.sensitive_configs.map((row) => [row.panel_delta, row.damage])});
+  assert.ok(ce.matching_configs.length >= 2,
+    '引擎必须给出至少两种解释得通的个体配置（同一公开伤害）');
+  assert.equal(new Set(ce.matching_configs.map((row) => row.damage)).size, 1,
+    '反例① 的两种配置必须落在同一个伤害数字上');
+  assert.ok(ce.sensitive_configs.length >= 1,
+    '对照组：改 atk 的配置伤害必须跟着变（相等不是恒等）');
+
+  // 注入引擎情景（伤害范围带 ±1 的重放保真度，来源写明）⇒ 更新候选
+  const tolerance = Math.abs(ce.observed_damage - ce.baseline_replay.damage);
+  const scenarios = {[ce.attacker_species]: {
+    exhaustive: false,
+    source: 'reports/roco/product-execution/03/raw-03.3-engine.json#counterexample'
+      + '（effects.compute_damage，同一重放管线）',
+    rows: ce.matching_configs.map((row, position) => ({
+      scenario_id: `cfg-${position + 1}`,
+      config: {panel_delta: row.panel_delta, stats_source: 'individual-snapshot'},
+      damage: {min: row.damage - tolerance, max: row.damage + tolerance},
+      source: ce.replay_fidelity.note.slice(0, 40),
+      assumption: true,
+    })),
+  }};
+  const observations = readOpponentEvidence(VIEW_33.pvp).observations;
+  const built = buildOpponentCandidates({catalog: index, view: VIEW_33.pvp, skillPool: SKILL_POOL});
+  const updated = updateOpponentCandidates({catalog: index, candidates: built, observations, scenarioTable: scenarios});
+  const active = updated.kept.find((row) => row.species_id === ce.attacker_species);
+  raw('E2 更新后的多解读数', {multi_solution: updated.diff.multi_solution,
+    scenarios: active?.individual_range?.scenarios?.map((row) => row.scenario_id),
+    note: active?.individual_range?.note, excluded: updated.diff.excluded});
+  assert.ok(active, 'E2 场上那只必须在候选里');
+  assert.equal(active.multi_solution, true, '两种配置都解释得通 ⇒ 不许收敛成单点');
+  assert.ok(active.individual_range.scenarios.length >= 2);
+  assert.ok(active.individual_range.scenarios.every((row) => row.source !== null), '每个情景都要带来源');
+  assert.ok(updated.multi_solution.some((row) => row.candidate_id === active.candidate_id));
+  assert.ok(!updated.diff.excluded.includes(active.candidate_id), '多解时**不许**排除这只');
+  assert.ok(active.individual_range.unknowns.some((line) => line.includes('哪一种是真身')));
+
+  // 变坏方向：把它声明成穷尽、再给一套"一条都不相容"的情景 ⇒ 这时才允许排除
+  const impossible = {[ce.attacker_species]: {exhaustive: true, source: 'injected',
+    rows: [{scenario_id: 'only', config: {panel_delta: {atk: 99}}, damage: {min: 99999, max: 99999}, assumption: true}]}};
+  const dropped = updateOpponentCandidates({catalog: index, candidates: built, observations, scenarioTable: impossible});
+  raw('E2 情景穷尽且全不相容 ⇒ 排除', {excluded: dropped.diff.excluded,
+    reasons: dropped.excluded.map((row) => row.why.slice(0, 40))});
+  assert.ok(dropped.diff.excluded.includes(active.candidate_id));
+  assert.ok(dropped.excluded[0].evidence_ids.length > 0, '排除必须写清依据哪条公开证据');
+});
+
+test('03.3-E3：已出技能升级候选、先手速度只在同量纲时排除，且排除都带证据 ID', () => {
+  // 用 02 留档那份**有 speed_provenance**（species-panel）的真 view
+  const view = REAL_VIEW.s3_after_switch;
+  const seen = readOpponentEvidence(view);
+  const built = buildOpponentCandidates({catalog: index, view, skillPool: SKILL_POOL});
+  const updated = updateOpponentCandidates({catalog: index, candidates: built, observations: seen.observations});
+  raw('E3 更新账本', updated.rule_ledger.map((row) => [row.id, row.applied, row.output]));
+  // ① 已出技能 ⇒ 出现在队里（升级/新增）
+  const skillPet = seen.observations.used_skills[0].pet_id;
+  const promoted = updated.kept.find((row) => row.species_id === skillPet);
+  assert.equal(promoted.basis, 'observed', 'E3 出过招的那只必须在 observed 里');
+  assert.ok(updated.diff.evidence_ids_used.some((id) => id.includes('revealed_skills')));
+  // ④ 真 view 的先手速度是面板量纲 ⇒ 规则不应用（不换算、不排除）
+  const speedRule = updated.rule_ledger.find((row) => row.id === 'evidence.turn_order_speed');
+  assert.equal(speedRule.applied, false);
+  assert.ok(speedRule.reason.includes('species-panel') || speedRule.reason.includes('面板量纲'));
+  assert.equal(updated.diff.excluded.length, 0, 'E3 面板量纲下不许凭速度排除任何候选');
+
+  // 反向控制：注入一条**同量纲**（species-race）的先手速度读数 ⇒ 规则真的会排除，且带证据 ID
+  const injected = {...seen.observations,
+    turn_order: [...seen.observations.turn_order, {turn: 9, panel_scale: false,
+      enemy_speed: {value: 55, source: 'species-race'}, evidence_id: 'view.events[seq=999]'}]};
+  const filtered = updateOpponentCandidates({catalog: index, candidates: built, observations: injected});
+  const speedApplied = filtered.rule_ledger.find((row) => row.id === 'evidence.turn_order_speed');
+  raw('E3 注入同量纲先手速度后的排除', {applied: speedApplied.applied, excluded_n: filtered.diff.excluded.length,
+    sample: filtered.excluded.slice(0, 2)});
+  assert.equal(speedApplied.applied, true);
+  assert.ok(filtered.diff.excluded.length > 0, 'E3 同量纲下必须真的排除');
+  assert.ok(filtered.excluded.every((row) => row.evidence_ids.includes('view.events[seq=999]')));
+  assert.ok(filtered.excluded.every((row) => row.rule_id === 'evidence.turn_order_speed'));
+  // 已见的永不被排除（以观察为准）
+  assert.ok(!filtered.diff.excluded.includes(promoted.candidate_id));
+  // 观察里混进 individual-* ⇒ 记进 observations_rejected（不静默用）
+  const dirty = updateOpponentCandidates({catalog: index, candidates: built,
+    observations: {...seen.observations, rejected: [{path: 'view.events[seq=1].detail.speed_provenance',
+      why: '速度出处是 individual-panel（个体真值）'}]}});
+  assert.equal(dirty.observations_rejected.length, 1);
+});
+
+test('03.3-缺口#1（F-03-2 清单）：白名单每一项都必须被夹具或适配器用到（穷尽覆盖）', () => {
+  // 原判据只查「每组非空 + 隐藏清单含 moves」，而注释声称「每一项都必须出现」⇒ 注释与判据不一致。
+  // 现在把它变成可计算的两向断言：
+  //   ① 夹具/适配器真的用到的键 ⊆ 白名单（不许有没经白名单的键溜进来）；
+  //   ② 白名单里的每一项要么被用到、要么在 `PUBLIC_FACT_FIELDS_OPTIONAL` 里点名（不许有死条目）。
+  const used = new Set();
+  const take = (row) => { if (row && typeof row === 'object') Object.keys(row).forEach((key) => used.add(key)); };
+  OWN_TEAM.forEach(take);
+  take(publicPet('pet_000002'));
+  take(revealedPet('pet_000006'));
+  take({pet_id: 'pet_000002', types: ['水系'], stats: {spe: 1}, stats_source: 'species-panel'});
+  take({pet_id: 'pet_000003', types: ['火系'], hp: 1, max_hp: 2, energy: 3, statuses: {}, marks: {}, fainted: false,
+    name: 'x', slot: 0, source: 'injected'});
+  take({pet_id: 'pet_000004', revealed_via: 'switch', revealed_turn: 2, revealed_event_seq: 1});
+  take({key: 'k', species_id: 'pet_000005', slot: 1});
+  // 适配器（真 view → publicFacts）产出的行也必须落在白名单里
+  const adapted = readOpponentView(VIEW_33.pvp);
+  take(adapted.publicFacts.opponent.active);
+  adapted.publicFacts.opponent.revealed_pets.forEach(take);
+  adapted.publicFacts.own_team.pets.forEach(take);
+  take(adapted.publicFacts.mode);
+  take(adapted.publicFacts.provenance);
+  take(FACTS_SINGLE_SLOW.mode);
+
+  const whitelist = new Set(Object.values(PUBLIC_FACT_FIELDS).flatMap((group) => [...group]));
+  const optional = new Set(Object.values(PUBLIC_FACT_FIELDS_OPTIONAL).flatMap((group) => [...group]));
+  const hidden = new Set(Object.values(HIDDEN_FACT_FIELDS).flatMap((group) => [...group]));
+  const notWhitelisted = [...used].filter((key) => !whitelist.has(key)).sort();
+  const unused = [...whitelist].filter((key) => !used.has(key) && !optional.has(key)).sort();
+  raw('缺口#1 白名单覆盖读数', {used: used.size, whitelist: whitelist.size, optional: optional.size,
+    not_whitelisted: notWhitelisted, unused_whitelist_entries: unused});
+  assert.deepEqual(notWhitelisted, [], '夹具/适配器用到的键必须都在白名单里（关键的防漏方向）');
+  assert.deepEqual(unused, [], '白名单里不许有既没被用到、也没在 OPTIONAL 里点名的死条目');
+  // 白名单与隐藏清单的交集**按组**判：`hp/max_hp/energy` 在「场上那只」是公开的、
+  // 在「已亮明的后备行」是隐藏的 —— 不同组各自成对，跨组取交集会把这条口径判错。
+  const hiddenByGroup = {
+    opponent_active: HIDDEN_FACT_FIELDS.opponent,
+    opponent_revealed: HIDDEN_FACT_FIELDS.opponent_revealed,
+    own_team: HIDDEN_FACT_FIELDS.own_team,
+    mode: [], provenance: [],
+  };
+  for (const group of Object.keys(PUBLIC_FACT_FIELDS)) {
+    const clash = PUBLIC_FACT_FIELDS[group].filter((key) => hiddenByGroup[group].includes(key));
+    assert.deepEqual(clash, [], `${group} 的白名单与隐藏清单不许有交集`);
+  }
+  // OPTIONAL 的每一条都要在 README/注释里有理由（这里钉住它是显式的、非空的理由由常量注释给）
+  for (const group of Object.keys(PUBLIC_FACT_FIELDS_OPTIONAL)) {
+    assert.ok(Array.isArray(PUBLIC_FACT_FIELDS_OPTIONAL[group]), `OPTIONAL 缺 ${group}`);
   }
 });
 

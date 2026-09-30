@@ -1,0 +1,592 @@
+{
+ "schema_version": 1,
+ "ruleset_id": "roco-world-s4-2026-09-10",
+ "state_version": 17,
+ "turn": 4,
+ "phase": "battle",
+ "battle_result": null,
+ "match_id": "m-f3a4c9affd66ef3d",
+ "rules_version": "roco-world-s4-2026-09-10/legacy_sim_v1",
+ "decision_id": "m-f3a4c9affd66ef3d:v17",
+ "self": {
+  "active": 0,
+  "energy_max": 6,
+  "energy_charge": null,
+  "pets": [
+   {
+    "slot": 0,
+    "pet_id": "pet_000225",
+    "name": "寂灭骨龙",
+    "hp": 389,
+    "max_hp": 425,
+    "energy": 3,
+    "fainted": false,
+    "statuses": {},
+    "marks": {},
+    "buffs": {},
+    "defense_cooldown": 0,
+    "charging": false,
+    "stats_source": "species-race",
+    "types": [
+     "龙系",
+     "幽系"
+    ],
+    "stats": {
+     "hp": 120,
+     "atk": 137,
+     "def": 104,
+     "spa": 50,
+     "spd": 81,
+     "spe": 60
+    },
+    "class": null,
+    "stage": null
+   },
+   {
+    "slot": 1,
+    "pet_id": "pet_000190",
+    "name": "海豹船长",
+    "hp": 374,
+    "max_hp": 374,
+    "energy": 0,
+    "fainted": false,
+    "statuses": {},
+    "marks": {},
+    "buffs": {},
+    "defense_cooldown": 0,
+    "charging": false,
+    "stats_source": "species-race",
+    "types": [
+     "武系",
+     "水系"
+    ],
+    "stats": {
+     "hp": 90,
+     "atk": 113,
+     "def": 111,
+     "spa": 109,
+     "spd": 77,
+     "spe": 100
+    },
+    "class": null,
+    "stage": null
+   },
+   {
+    "slot": 2,
+    "pet_id": "pet_000445",
+    "name": "黑猫巫师",
+    "hp": 474,
+    "max_hp": 474,
+    "energy": 0,
+    "fainted": false,
+    "statuses": {},
+    "marks": {},
+    "buffs": {},
+    "defense_cooldown": 0,
+    "charging": false,
+    "stats_source": "species-race",
+    "types": [
+     "普通系"
+    ],
+    "stats": {
+     "hp": 149,
+     "atk": 53,
+     "def": 90,
+     "spa": 124,
+     "spd": 129,
+     "spe": 70
+    },
+    "class": null,
+    "stage": null
+   }
+  ],
+  "skills": [
+   {
+    "skill_id": "skill_000251",
+    "name": "音爆",
+    "element": "普通系",
+    "category": "攻击",
+    "energy": 4,
+    "power": 130,
+    "power_status": "static_value_present",
+    "damage_class": "魔攻",
+    "desc": "对敌方精灵造成魔法伤害。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000286",
+    "name": "防御",
+    "element": "普通系",
+    "category": "防御",
+    "energy": 1,
+    "power": null,
+    "power_status": "not_provided_by_source",
+    "damage_class": null,
+    "desc": "减伤70%，应对攻击。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000294",
+    "name": "取念",
+    "element": "普通系",
+    "category": "状态",
+    "energy": 0,
+    "power": null,
+    "power_status": "not_provided_by_source",
+    "damage_class": null,
+    "desc": "每回合随机变成敌方任意精灵的技能，且该技能能耗-2。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000321",
+    "name": "彗星",
+    "element": "普通系",
+    "category": "攻击",
+    "energy": 0,
+    "power": 240,
+    "power_status": "static_value_present",
+    "damage_class": "魔攻",
+    "desc": "造成魔伤，每失去5%生命，本次技能威力-10，使用后消耗全部生命。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000429",
+    "name": "水泡盾",
+    "element": "水系",
+    "category": "防御",
+    "energy": 2,
+    "power": null,
+    "power_status": "not_provided_by_source",
+    "damage_class": null,
+    "desc": "减伤80%，应对攻击：自己获得魔攻+70%。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000483",
+    "name": "啮合传递",
+    "element": "机械系",
+    "category": "状态",
+    "energy": 1,
+    "power": null,
+    "power_status": "not_provided_by_source",
+    "damage_class": null,
+    "desc": "自己获得速度+30，本技能位于1号或3号位时额外获得物攻+80%，传动1。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000576",
+    "name": "龙血",
+    "element": "龙系",
+    "category": "防御",
+    "energy": 2,
+    "power": null,
+    "power_status": "not_provided_by_source",
+    "damage_class": null,
+    "desc": "减伤70%，本技能可以在蓄力状态下使用，应对攻击：下次技能无需蓄力。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000591",
+    "name": "集中",
+    "element": "电系",
+    "category": "防御",
+    "energy": 2,
+    "power": null,
+    "power_status": "not_provided_by_source",
+    "damage_class": null,
+    "desc": "减伤80%，应对攻击：自己回合结束返场。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000673",
+    "name": "气波",
+    "element": "武系",
+    "category": "攻击",
+    "energy": 0,
+    "power": 40,
+    "power_status": "static_value_present",
+    "damage_class": "魔攻",
+    "desc": "对敌方精灵造成魔法伤害。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000678",
+    "name": "一拳",
+    "element": "武系",
+    "category": "攻击",
+    "energy": 5,
+    "power": 140,
+    "power_status": "static_value_present",
+    "damage_class": "物攻",
+    "desc": "对敌方精灵造成物理伤害。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000744",
+    "name": "坟场搏击",
+    "element": "幽系",
+    "category": "攻击",
+    "energy": 4,
+    "power": 180,
+    "power_status": "static_value_present",
+    "damage_class": "物攻",
+    "desc": "造成物伤，敌方每有1能量，本次技能威力-10%。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000750",
+    "name": "诡刺",
+    "element": "幽系",
+    "category": "攻击",
+    "energy": 0,
+    "power": 40,
+    "power_status": "static_value_present",
+    "damage_class": "物攻",
+    "desc": "对敌方精灵造成物理伤害。",
+    "is_trait": false
+   }
+  ],
+  "loadouts": {
+   "pet_000225": [
+    "skill_000750",
+    "skill_000576",
+    "skill_000744",
+    "skill_000591"
+   ],
+   "pet_000190": [
+    "skill_000673",
+    "skill_000429",
+    "skill_000678",
+    "skill_000294"
+   ],
+   "pet_000445": [
+    "skill_000321",
+    "skill_000286",
+    "skill_000251",
+    "skill_000483"
+   ]
+  }
+ },
+ "opponent": {
+  "active": 0,
+  "living_count": 3,
+  "energy_max": 6,
+  "field": {
+   "slot": 0,
+   "pet_id": "pet_000417",
+   "name": "圆号鱼",
+   "hp": 275,
+   "max_hp": 413,
+   "energy": 2,
+   "fainted": false,
+   "statuses": {},
+   "marks": {},
+   "defense_cooldown": 0,
+   "charging": false,
+   "stats_source": "species-race",
+   "types": [
+    "水系"
+   ],
+   "stats": {
+    "hp": 113,
+    "atk": 31,
+    "def": 95,
+    "spa": 95,
+    "spd": 110,
+    "spe": 105
+   },
+   "class": null,
+   "stage": null
+  },
+  "bench": [
+   {
+    "slot": 1,
+    "fainted": false
+   },
+   {
+    "slot": 2,
+    "fainted": false
+   }
+  ],
+  "revealed_skills": {
+   "pet_000417": [
+    {
+     "skill_id": "skill_000286",
+     "name": "防御",
+     "element": "普通系",
+     "category": "防御",
+     "energy": 1,
+     "power": null,
+     "power_status": "not_provided_by_source",
+     "damage_class": null,
+     "desc": "减伤70%，应对攻击。",
+     "is_trait": false
+    },
+    {
+     "skill_id": "skill_000418",
+     "name": "甩水",
+     "element": "水系",
+     "category": "攻击",
+     "energy": 0,
+     "power": 30,
+     "power_status": "static_value_present",
+     "damage_class": "魔攻",
+     "desc": "造成魔伤，自己回复1能量。",
+     "is_trait": false
+    },
+    {
+     "skill_id": "skill_000305",
+     "name": "许愿星",
+     "element": "普通系",
+     "category": "攻击",
+     "energy": 3,
+     "power": 110,
+     "power_status": "static_value_present",
+     "damage_class": "魔攻",
+     "desc": "对敌方精灵造成魔法伤害。",
+     "is_trait": false
+    }
+   ]
+  }
+ },
+ "legal": [
+  {
+   "kind": "skill",
+   "label": "龙血",
+   "skill_id": "skill_000576",
+   "skill_name": "龙血",
+   "magic_id": null,
+   "skill": {
+    "name": "龙血",
+    "element": "龙系",
+    "category": "防御",
+    "energy": 2,
+    "power": null,
+    "power_status": "not_provided_by_source",
+    "damage_class": null,
+    "desc": "减伤70%，本技能可以在蓄力状态下使用，应对攻击：下次技能无需蓄力。",
+    "is_trait": false,
+    "effect_support": "unsupported"
+   },
+   "target_index": null,
+   "item_id": null
+  },
+  {
+   "kind": "skill",
+   "label": "集中",
+   "skill_id": "skill_000591",
+   "skill_name": "集中",
+   "magic_id": null,
+   "skill": {
+    "name": "集中",
+    "element": "电系",
+    "category": "防御",
+    "energy": 2,
+    "power": null,
+    "power_status": "not_provided_by_source",
+    "damage_class": null,
+    "desc": "减伤80%，应对攻击：自己回合结束返场。",
+    "is_trait": false,
+    "effect_support": "unsupported"
+   },
+   "target_index": null,
+   "item_id": null
+  },
+  {
+   "kind": "skill",
+   "label": "诡刺",
+   "skill_id": "skill_000750",
+   "skill_name": "诡刺",
+   "magic_id": null,
+   "skill": {
+    "name": "诡刺",
+    "element": "幽系",
+    "category": "攻击",
+    "energy": 0,
+    "power": 40,
+    "power_status": "static_value_present",
+    "damage_class": "物攻",
+    "desc": "对敌方精灵造成物理伤害。",
+    "is_trait": false,
+    "effect_support": "unsupported"
+   },
+   "target_index": null,
+   "item_id": null
+  },
+  {
+   "kind": "switch",
+   "label": "换上第2位",
+   "skill_id": null,
+   "skill_name": null,
+   "magic_id": null,
+   "skill": null,
+   "target_index": 1,
+   "item_id": null
+  },
+  {
+   "kind": "switch",
+   "label": "换上第3位",
+   "skill_id": null,
+   "skill_name": null,
+   "magic_id": null,
+   "skill": null,
+   "target_index": 2,
+   "item_id": null
+  },
+  {
+   "kind": "item",
+   "label": "使用净化药",
+   "skill_id": null,
+   "skill_name": null,
+   "magic_id": null,
+   "skill": null,
+   "target_index": 0,
+   "item_id": "净化药"
+  },
+  {
+   "kind": "item",
+   "label": "使用回复药",
+   "skill_id": null,
+   "skill_name": null,
+   "magic_id": null,
+   "skill": null,
+   "target_index": 0,
+   "item_id": "回复药"
+  },
+  {
+   "kind": "item",
+   "label": "使用能量果",
+   "skill_id": null,
+   "skill_name": null,
+   "magic_id": null,
+   "skill": null,
+   "target_index": 0,
+   "item_id": "能量果"
+  },
+  {
+   "kind": "escape",
+   "label": "撤退",
+   "skill_id": null,
+   "skill_name": null,
+   "magic_id": null,
+   "skill": null,
+   "target_index": null,
+   "item_id": null
+  }
+ ],
+ "cpu_legal_count": 9,
+ "needs_replacement": [],
+ "events": [
+  {
+   "turn": 3,
+   "kind": "turn_start",
+   "side": null,
+   "detail": {
+    "turn": 3
+   },
+   "extra": {
+    "seq": 12
+   },
+   "text": "第 3 回合开始。",
+   "evidence": []
+  },
+  {
+   "turn": 3,
+   "kind": "damage",
+   "side": null,
+   "detail": {
+    "side": "enemy",
+    "skill_id": "skill_000305",
+    "target_slot": 0,
+    "damage": 26,
+    "power_used": 110,
+    "conditional_power": false,
+    "conditional_reason": "",
+    "type_multiplier": 0.5,
+    "stab": 1,
+    "ability_level": 1,
+    "power_multiplier": 1,
+    "damage_model": "community-hypothesis-v1",
+    "formula_verified": false
+   },
+   "extra": {
+    "seq": 13
+   },
+   "text": "对方的「许愿星」命中，造成约 26 点伤害（伤害公式未核验，这是引擎估值），属性抗性。",
+   "evidence": [
+    "skill_000305"
+   ]
+  },
+  {
+   "turn": 3,
+   "kind": "damage",
+   "side": null,
+   "detail": {
+    "side": "player",
+    "skill_id": "skill_000750",
+    "target_slot": 0,
+    "damage": 69,
+    "power_used": 40,
+    "conditional_power": false,
+    "conditional_reason": "",
+    "type_multiplier": 1,
+    "stab": 1.5,
+    "ability_level": 1,
+    "power_multiplier": 1,
+    "damage_model": "community-hypothesis-v1",
+    "formula_verified": false
+   },
+   "extra": {
+    "seq": 14
+   },
+   "text": "我方的「诡刺」命中，造成约 69 点伤害（伤害公式未核验，这是引擎估值）。",
+   "evidence": [
+    "skill_000750"
+   ]
+  },
+  {
+   "turn": 3,
+   "kind": "energy_regen",
+   "side": null,
+   "detail": {
+    "side": "player",
+    "energy": 3
+   },
+   "extra": {
+    "seq": 15
+   },
+   "text": "我方的能量回到 3。",
+   "evidence": []
+  },
+  {
+   "turn": 3,
+   "kind": "energy_regen",
+   "side": null,
+   "detail": {
+    "side": "enemy",
+    "energy": 2
+   },
+   "extra": {
+    "seq": 16
+   },
+   "text": "对方的能量回到 2。",
+   "evidence": []
+  }
+ ],
+ "strategy": {
+  "name": "greedy_damage",
+  "version": 1
+ },
+ "assumptions": {
+  "opponent_bench": "full_hp_nominal_loadout",
+  "note": "对手后备的血量、配招与物种都不在公开信息里，重建搜索状态时按满血 + 规范配招 + 占位物种建模；任何依赖对手后备精确构成或精确血量的结论都会因此偏乐观。"
+ },
+ "unsupported_count": 1,
+ "mana": null,
+ "unverified_overrides": [],
+ "unverified_notes": [
+  "本局没有使用任何未核验覆盖：规则值全部来自规则配置本身"
+ ],
+ "mode_id": null,
+ "ruleset_config_id": "legacy_sim_v1"
+}

@@ -2911,7 +2911,7 @@
       "label": "在线段没有引擎 / 子进程调用，**而且判据真的覆盖到在线入口**（F-03-1）",
       "criteria": "把 `src/coach/opponent-belief.mjs` 的在线段（`ONLINE_SECTION_MARKER` **定义行之后**、`OFFLINE_SECTION_MARKER` **之前**）逐行取出、剥掉行注释与块注释，再对每行做 `FORBIDDEN_ONLINE_PATTERNS[].pattern` 的子串匹配：命中即 `ONLINE_ENGINE_CALL` / `ONLINE_SUBPROCESS_CALL`（红）。判据是**源码结构**，不是注释声明。⚠ 2026-09-30（F-03-1）：旧口径取的是标记串**第一次出现之前**的正文 —— 那正是定义行自己，于是「在线段」只剩 69 行文件头，判据**覆盖为空**却显示干净（假绿）。现在还要查**覆盖**：在线段必须定义全部 `ONLINE_ENTRYPOINTS`，缺一个 ⇒ `ONLINE_COVERAGE_INCOMPLETE`（红）。",
       "actual": {
-        "online_lines": 2079,
+        "online_lines": 2441,
         "scanned_online_entrypoints": 14,
         "missing_online_entrypoints": [],
         "hits": []

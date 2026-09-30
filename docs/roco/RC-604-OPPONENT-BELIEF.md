@@ -7,14 +7,14 @@
 > 三条都不产出胜率、不产出伪精确百分数，也不偷看对手的配招与后备。
 
 - 模块：`src/coach/opponent-belief.mjs`
-- 判据：`tests/roco-opponent-belief.test.js`（**26 条**：RC-604 原始 13 条 + 03.1 的 H1/H2/H4/H5/R2-R4 5 条
-  + 03.2 的候选协议 6 条 + R2 扩展 1 条 + F-03-1 在线段覆盖 1 条；含多类必红反证与反向控制）
+- 判据：`tests/roco-opponent-belief.test.js`（**30 条**：RC-604 原始 13 + 03.1 的 5 + 03.2 的 7
+  + 03.3 的 4（证据观察器 / 反例① / 更新与排除 / 白名单穷尽覆盖）+ F-03-1 在线段覆盖 1；含多类必红反证与反向控制）
 - 产物：`reports/roco/rc604/opponent-belief.json`（含 `candidate_protocol` 与候选样本）
 - 跑法：`node --test tests/roco-opponent-belief.test.js`
   （重新生成产物：`RC604_WRITE_REPORT=1 node --test tests/roco-opponent-belief.test.js`）
 - 进度（2026-09-30）：03.1（公开性口径按实测重写 + 来源必填 + 假设只降权）、
-  03.2（候选协议 + 三个可复现局面）与 F-03-1（在线段判据覆盖率）已落地；
-  03.3–03.5（证据更新 / 无频率情景集合 / 预算细化）**待做**。
+  03.2（候选协议 + 三个可复现局面）、F-03-1/F-03-2（在线段覆盖 + 条件③断言守护）与
+  03.3（证据更新 + 反例①）已落地；03.4–03.5（无频率情景集合 / 预算细化）**待做**。
 
 ---
 
@@ -248,6 +248,22 @@ fail closed 的分支也**如实报池子的实况**：`REVEALED_EMPTY_STRATUM`�
 
 三个可复现局面（真引擎 view，01/02 留档）与手工 `publicFacts` 栏的读数见
 `reports/roco/product-execution/03/03.2-candidates.md`（两栏不混成一份读数）。
+
+### 7.1 证据更新（03.3）
+
+`readOpponentEvidence(view)` → **观察**；`updateOpponentCandidates({catalog, candidates, observations, scenarioTable})`
+→ `{kept, excluded, multi_solution, contradictions, rule_ledger, diff, ...}`（协议 `rc604-opponent-candidate-update/v1`）。
+
+四条规则：① `evidence.used_skill_presence` 打过技能的宠物一定在队里（只**升级**为 observed，不排除）；
+② `evidence.used_skill_learnability` 已出技能 vs **冻结学招表**（冲突记矛盾，**不排除**）；
+③ `evidence.visible_damage_scenarios` 可见伤害只与**注入的引擎情景**比相容：多条相容 ⇒ **全保留**
+（`multi_solution`），一条都不相容且情景**声明穷尽**才排除；④ `evidence.turn_order_speed` 先手速度
+**只在同量纲**（`species-race`）时参与排除 —— 引擎只在面板口径下发 `speed_provenance`（`species-panel`），
+与候选宇宙的物种速度**不可比** ⇒ 本仓实测恒 `not_applied`（不换算量纲）。
+
+**反例①（必做）**：真引擎重放同一回合、只换对手的个体配置 ⇒ **7 种配置的伤害都等于基准**（318），
+而改 `atk` 的配置伤害确实变了（320/321/325）⇒ 公开面分不出这些配置，候选**保留多解**（每个情景带来源与
+`assumption` 标记），只有声明穷尽时才允许排除。读数见 `03.3-evidence-update.md` §4。
 
 ## 8. 不做什么（边界）
 

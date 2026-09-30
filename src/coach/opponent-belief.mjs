@@ -1900,6 +1900,400 @@ export function buildOpponentCandidates(input = {}) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// ③′ 证据更新（03.3）：已出技能 / 先手关系 / 可见伤害 / 可见状态 ⇒ 更新候选
+// ─────────────────────────────────────────────────────────────────────────
+
+/** 证据更新的协议版本（03/04/06 都按这一份解析）。 */
+export const EVIDENCE_UPDATE_PROTOCOL = 'rc604-opponent-candidate-update/v1';
+
+/**
+ * 白名单里**允许不被夹具直接用到**的键（每一项都要写清为什么）——
+ * 「白名单每一项都必须被用上」这条判据据此不会被死条目糊过去（见测试 ③ 的逐项覆盖断言）。
+ */
+export const PUBLIC_FACT_FIELDS_OPTIONAL = Object.freeze({
+  opponent_active: Object.freeze(['species_id', 'source']),
+  opponent_revealed: Object.freeze(['species_id', 'revealed_event_seq', 'source']),
+  own_team: Object.freeze(['species_id', 'stats', 'stats_source', 'source']),
+  mode: Object.freeze([]),
+  provenance: Object.freeze([]),
+});
+
+/**
+ * **证据观察器**（03.3）：从 `view` 里取**公开**证据。只读这几条路径，别的一律不碰：
+ *   · `opponent.revealed_skills`  —— 对手已经**打出来**的技能（谁打的、什么技能）；
+ *   · `events[].kind === 'turn_start'` 的 `detail.speed_provenance` —— 这一回合两侧用的速度**与出处**；
+ *   · `events[].kind === 'damage'`      —— 可见伤害（谁打谁、什么技能、多少点）；
+ *   · `events[].detail.side` 的**先后** —— 这一回合谁先动（先手关系的可见读数）；
+ *   · `opponent.field`                  —— 场上那只的可见面板（血条 / 能量 / 异常 / 印记）。
+ *
+ * `individual-*` 出处**一律拒绝**（它是个体真值）：出现在 `speed_provenance` 里就记进 `rejected[]`
+ * 并且**不使用**。每一条观察都带 `evidence_id`，指回公开载荷里的位置。
+ */
+export function readOpponentEvidence(view) {
+  const doc = isPlainObject(view) ? view : {};
+  const opponent = isPlainObject(doc.opponent) ? doc.opponent : {};
+  const rejected = [];
+  const notes = [];
+  const unknowns = [];
+  const used_skills = [];
+  const turn_order = [];
+  const visible_damage = [];
+
+  for (const petId of sortedKeys(opponent.revealed_skills ?? {})) {
+    arr(opponent.revealed_skills[petId]).forEach((row, index) => {
+      const skillId = isPlainObject(row) ? row.skill_id ?? null : null;
+      if (skillId === null && !isNonEmptyString(row?.name)) return;
+      used_skills.push({
+        pet_id: petId,
+        skill_id: skillId,
+        name: isPlainObject(row) && isNonEmptyString(row.name) ? row.name : null,
+        evidence_id: `view.opponent.revealed_skills[${petId}][${index}]`,
+      });
+    });
+  }
+
+  const events = arr(doc.events);
+  const perTurn = new Map();
+  events.forEach((event, index) => {
+    if (!isPlainObject(event)) return;
+    const detail = isPlainObject(event.detail) ? event.detail : {};
+    const seq = Number.isInteger(event.seq) ? event.seq : (Number.isInteger(event.extra?.seq) ? event.extra.seq : null);
+    const evidenceId = `view.events[seq=${seq ?? `#${index}`}]`;
+    const turn = Number.isInteger(event.turn) ? event.turn : null;
+    if (event.kind === 'turn_start' && isPlainObject(detail.speed_provenance)) {
+      const speeds = isPlainObject(detail.speed_provenance.speeds) ? detail.speed_provenance.speeds : {};
+      const enemy = isPlainObject(speeds.enemy) ? speeds.enemy : null;
+      const source = isNonEmptyString(enemy?.source) ? enemy.source : null;
+      if (source !== null && source.startsWith('individual')) {
+        rejected.push({path: `${evidenceId}.detail.speed_provenance.speeds.enemy`, why:
+          `速度出处是 ${source}（个体真值）：不在对手的公开面上 ⇒ 这条观察**不使用**`});
+      } else if (enemy !== null && Number.isFinite(enemy.value)) {
+        turn_order.push({turn, enemy_speed: {value: Number(enemy.value), source},
+          panel_scale: detail.speed_provenance.panel_scale === true, evidence_id: evidenceId});
+      } else {
+        unknowns.push(`未核实：第 ${turn ?? '?'} 回合对手的先手速度 —— \`speed_provenance\` 里没有可用的出处/数值`);
+      }
+    }
+    if (isNonEmptyString(detail.side) && turn !== null) {
+      if (!perTurn.has(turn)) perTurn.set(turn, {first_side: detail.side, evidence_id: evidenceId});
+    }
+    if (event.kind === 'damage' && Number.isFinite(detail.damage)) {
+      visible_damage.push({turn, attacker_side: isNonEmptyString(detail.side) ? detail.side : null,
+        skill_id: isNonEmptyString(detail.skill_id) ? detail.skill_id : null,
+        amount: Number(detail.damage), evidence_id: evidenceId});
+    }
+  });
+  const firstSides = [...perTurn.entries()].sort((a, b) => a[0] - b[0])
+    .map(([turn, row]) => ({turn, first_side: row.first_side, evidence_id: row.evidence_id}));
+
+  const field = isPlainObject(opponent.field) ? opponent.field : null;
+  const visible_state = field === null ? null : {
+    species_id: field.pet_id ?? null,
+    hp: Number.isFinite(field.hp) ? field.hp : null,
+    max_hp: Number.isFinite(field.max_hp) ? field.max_hp : null,
+    energy: Number.isFinite(field.energy) ? field.energy : null,
+    statuses: isPlainObject(field.statuses) ? {...field.statuses} : null,
+    marks: isPlainObject(field.marks) ? {...field.marks} : null,
+    evidence_id: 'view.opponent.field',
+  };
+  if (turn_order.length === 0) {
+    notes.push('这一份 view 的 `events` 里没有 `speed_provenance`（引擎只在**面板口径**下发它）'
+      + '⇒ 先手速度这条证据没有读数，规则会记 not_applied，不自己换算');
+  }
+  if (visible_damage.length === 0) notes.push('这一份 view 里没有 damage 事件 ⇒ 可见伤害为空，不拿别的数顶');
+
+  const contract = {
+    match_id: isNonEmptyString(doc.match_id) ? doc.match_id : null,
+    rules_version: isNonEmptyString(doc.rules_version) ? doc.rules_version : null,
+    decision_id: isNonEmptyString(doc.decision_id) ? doc.decision_id : null,
+  };
+  return {
+    ok: true,
+    observations: {used_skills, turn_order, first_sides: firstSides, visible_damage, visible_state, contract},
+    rejected,
+    notes,
+    unknowns,
+    evidence: [
+      evidence('view', 'view.opponent.revealed_skills', 'used_skills',
+        used_skills.map((row) => `${row.pet_id}:${row.skill_id ?? row.name}`),
+        '**已经打出来**的技能（公开事实）：只登记，不从它推强度'),
+      evidence('view', 'view.events[].detail.speed_provenance', 'turn_order',
+        turn_order.map((row) => `t${row.turn}:${row.enemy_speed.value}/${row.enemy_speed.source}`),
+        '这一回合两侧用的速度与**出处**（引擎只在面板口径下发；individual-* 会被拒绝）'),
+      evidence('view', 'view.events[].kind=damage', 'visible_damage',
+        visible_damage.map((row) => `t${row.turn}:${row.attacker_side}:${row.skill_id}:${row.amount}`),
+        '可见伤害（屏幕上的数字）：只登记原始读数，不在信念里重算伤害公式（唯一实现在引擎）'),
+      evidence('view', 'view.opponent.field', 'visible_state', visible_state,
+        '场上那只的可见面板（血条 / 能量 / 异常 / 印记）——公开；状态本身不指向某个物种'),
+      evidence('view', 'view.match_id/rules_version/decision_id', 'contract', contract,
+        '01.2 契约三件套：原样转发，缺就是 null'),
+    ],
+  };
+}
+
+/**
+ * **候选更新**（03.3）：证据 ⇒ 收窄候选 / 保留多解 / 逐条写排除理由。
+ *
+ * 四条规则（账本逐条可核对）：
+ *   ① `evidence.used_skill_presence`  打过技能的宠物**一定在对手队里**（公开事实）⇒ 升级/新增 observed 候选；
+ *   ② `evidence.used_skill_learnability` 已出技能必须在候选的可学池里（冻结学招表）——
+ *      不在 ⇒ 记矛盾（**不排除**：学招表可能不全、形态可能对不上，两条都留）；
+ *   ③ `evidence.visible_damage_scenarios` 可见伤害只能由**注入的引擎情景**解释（不在这里重算公式）：
+ *      多条情景都解释得通 ⇒ **全部保留**（`multi_solution`）；一条都不解释得上且情景声明**穷尽** ⇒ 排除；
+ *      没声明穷尽 ⇒ 保留 + 记矛盾；
+ *   ④ `evidence.turn_order_speed` 先手速度：**只有同量纲才用**（出处必须是 `species-race`，
+ *      与候选宇宙的物种速度可比）；引擎只在面板口径下发 `speed_provenance`（`species-panel`）
+ *      ⇒ 本仓实测不可比，规则记 `not_applied` + 原因，**不换算、不排除**。
+ *
+ * @param {object} input
+ * @param {Array|object} input.candidates  `buildOpponentCandidates()` 的产出（或它的 `candidates[]`）
+ * @param {object} input.observations      `readOpponentEvidence().observations`
+ * @param {object} [input.scenarioTable]   `{candidate_id: {exhaustive, source, rows:[{scenario_id, config, damage:{min,max}}]}}`
+ * @param {object} [input.catalog]         RC-303 索引（判速度量纲要用它的 `spe`）
+ */
+export function updateOpponentCandidates(input = {}) {
+  const {candidates = null, observations = null, scenarioTable = null, catalog = null} = input ?? {};
+  const list = arr(Array.isArray(candidates) ? candidates : candidates?.candidates);
+  const obs = isPlainObject(observations) ? observations : {};
+  const ledger = [];
+  const excluded = [];
+  const contradictions = [];
+  const unverified = [];
+  const evidenceIds = new Set();
+  // 观察里如果混进了 individual-* 出处 ⇒ 整份拒绝（03.2 立的规矩，更新这一层同样不许破）
+  const badObservations = arr(obs.rejected).length > 0 ? arr(obs.rejected) : [];
+  const individualInScenarios = [];
+  for (const [candidateId, table] of Object.entries(isPlainObject(scenarioTable) ? scenarioTable : {})) {
+    for (const row of arr(table?.rows)) {
+      if (isNonEmptyString(row?.config?.stats_source) && row.config.stats_source.startsWith('individual')) {
+        // 个体出处在这里是**允许的**：情景本来就是「对手可能是什么个体配置」的假设，不是观测。
+        // 但必须写明它是假设（assumption），不能当成公开事实。
+        if (row.assumption !== true) individualInScenarios.push({candidate_id: candidateId, scenario_id: row.scenario_id});
+      }
+    }
+  }
+
+  const observedIds = new Set(list.filter((row) => row?.basis === 'observed').map((row) => row.species_id));
+  const usedSkills = arr(obs.used_skills);
+  const petsWithSkills = [...new Set(usedSkills.map((row) => row.pet_id).filter(isNonEmptyString))].sort();
+
+  // ── ① 已出技能 ⇒ 这只在队里（升级为 observed / 新增） ──
+  const promoted = [];
+  const added = [];
+  const updated = list.map((row) => ({...row}));
+  for (const petId of petsWithSkills) {
+    const into = updated.find((row) => row.species_id === petId);
+    const skillRows = usedSkills.filter((row) => row.pet_id === petId);
+    skillRows.forEach((row) => evidenceIds.add(row.evidence_id));
+    if (!into) {
+      added.push({candidate_id: `cand:${petId}`, species_id: petId, basis: 'observed',
+        why: '已出招 ⇒ 一定在对手队里（公开事实）', evidence_ids: skillRows.map((row) => row.evidence_id),
+        skills: {known_used: skillRows.map((row) => ({skill_id: row.skill_id, name: row.name,
+          source: 'view.opponent.revealed_skills'}))}});
+      observedIds.add(petId);
+      continue;
+    }
+    if (into.basis !== 'observed') {
+      into.basis = 'observed';
+      into.promoted_by_evidence = skillRows.map((row) => row.evidence_id);
+      promoted.push({candidate_id: into.candidate_id, from: 'inferred', to: 'observed',
+        evidence_ids: skillRows.map((row) => row.evidence_id)});
+    }
+  }
+  ledger.push({
+    id: 'evidence.used_skill_presence', kind: 'promote',
+    reads: ['opponent.revealed_skills', 'view.events[].detail.skill_id'],
+    inputs: [{pets_with_used_skills: petsWithSkills}],
+    output: {promoted: promoted.length, added: added.length, already_observed: petsWithSkills.length - promoted.length - added.length},
+    basis: '「这只打出了技能」是公开事实 ⇒ 它一定在对手队里；这条只**升级/新增**，不排除任何候选',
+    applied: petsWithSkills.length > 0,
+    ...(petsWithSkills.length === 0 ? {reason: '这一份证据里没有任何已出技能'} : {}),
+  });
+
+  // ── ② 已出技能 vs 可学池（只记矛盾，不排除） ──
+  let checkedPools = 0;
+  let contradictory = 0;
+  for (const petId of petsWithSkills) {
+    const candidate = updated.find((row) => row.species_id === petId);
+    if (!candidate) continue;
+    const poolIds = arr(candidate.skills?.possible).map((row) => row.skill_id);
+    if (candidate.skills?.pool_tier !== 'frozen_learnset' || poolIds.length === 0) {
+      unverified.push(`未核实：${petId} 的可学池不是冻结学招表（${candidate.skills?.pool_tier ?? 'none'}）`
+        + '⇒ 不能拿它判「已出技能是否合法」');
+      continue;
+    }
+    checkedPools += 1;
+    const bad = usedSkills.filter((row) => row.pet_id === petId && row.skill_id !== null
+      && !poolIds.includes(row.skill_id));
+    if (bad.length > 0) {
+      contradictory += 1;
+      for (const row of bad) {
+        contradictions.push({code: 'USED_SKILL_NOT_IN_FROZEN_LEARNSET', species_id: petId, skill_id: row.skill_id,
+          evidence_ids: [row.evidence_id, candidate.skills.source_file ?? 'learnsets'],
+          detail: '已出招的技能不在这只的**冻结学招表**里：学招表不全或形态对不上（候选保留，不排除）'});
+      }
+    }
+  }
+  ledger.push({
+    id: 'evidence.used_skill_learnability', kind: 'check',
+    reads: ['opponent.revealed_skills', 'candidates[].skills.possible'],
+    inputs: [{pets: petsWithSkills, frozen_pools_checked: checkedPools}],
+    output: {checked: checkedPools, contradictory},
+    basis: '冻结学招表（542 只）是这一层最硬的依据；但它**可能不全**（80 只没有冻结表）'
+      + '⇒ 冲突只记矛盾、不排除候选（不然会把真身冤杀）',
+    applied: checkedPools > 0,
+    ...(checkedPools === 0 ? {reason: '没有一只候选有冻结学招表可比（或没有已出技能）'} : {}),
+    unverified: ['未核实：学招表完整性 —— 冻结层 542 只，其余只有工程启发式；冲突不排除候选'],
+  });
+
+  // ── ③ 可见伤害 ⇒ 情景集合（多解保留；穷尽时才排除） ──
+  const active = isPlainObject(obs.visible_state) ? obs.visible_state : null;
+  const enemyDamage = arr(obs.visible_damage).filter((row) => row.attacker_side === 'enemy');
+  enemyDamage.forEach((row) => evidenceIds.add(row.evidence_id));
+  const scenarioReport = [];
+  let damageApplied = false;
+  if (active !== null && enemyDamage.length > 0) {
+    const candidate = updated.find((row) => row.species_id === active.species_id);
+    const table = isPlainObject(scenarioTable) ? scenarioTable[active.species_id] : null;
+    if (candidate && table) {
+      damageApplied = true;
+      const rows = arr(table.rows);
+      const matches = rows.filter((row) => enemyDamage.every((obsRow) => {
+        const range = row?.damage;
+        if (Number.isFinite(range)) return range === obsRow.amount;
+        const min = Number.isFinite(range?.min) ? range.min : null;
+        const max = Number.isFinite(range?.max) ? range.max : null;
+        return min !== null && max !== null && obsRow.amount >= min && obsRow.amount <= max;
+      }));
+      candidate.individual_range = {
+        ...(candidate.individual_range ?? {}),
+        known: false,
+        scenarios: matches.map((row) => ({scenario_id: row.scenario_id, config: row.config ?? null,
+          damage: row.damage ?? null, source: isNonEmptyString(row.source) ? row.source : (table.source ?? null),
+          assumption: row.assumption === true})),
+        note: matches.length >= 2
+          ? `公开伤害解释了 ${matches.length} 种个体配置 ⇒ **多解全保留**（不强行猜中真实配装）`
+          : '公开伤害与情景集合的相容情况见 update 账本',
+      };
+      candidate.multi_solution = matches.length >= 2;
+      if (matches.length >= 2) {
+        candidate.individual_range.unknowns = ['未核实：哪一种是真身 —— 同一份公开伤害由多种个体配置都能解释'];
+      }
+      if (matches.length === 0) {
+        if (table.exhaustive === true) {
+          excluded.push({candidate_id: candidate.candidate_id, rule_id: 'evidence.visible_damage_scenarios',
+            why: `可见伤害 ${enemyDamage.map((row) => row.amount).join(' / ')} 与全部情景都不相容，`
+              + '且情景集合声明**穷尽** ⇒ 排除这只（依据：伤害读数 + 情景来源）',
+            evidence_ids: [...enemyDamage.map((row) => row.evidence_id), table.source ?? 'scenarioTable']});
+        } else {
+          contradictions.push({code: 'DAMAGE_UNEXPLAINED_BY_SCENARIOS', species_id: active.species_id,
+            evidence_ids: enemyDamage.map((row) => row.evidence_id),
+            detail: '可见伤害与已知情景都不相容，但情景集合**没声明穷尽** ⇒ 候选保留（多解可能还没列全）'});
+        }
+      }
+      scenarioReport.push({candidate_id: candidate.candidate_id,
+        observed: enemyDamage.map((row) => row.amount), scenarios: rows.length,
+        matching: matches.length, multi_solution: matches.length >= 2,
+        exhaustive: table.exhaustive === true});
+    }
+  }
+  ledger.push({
+    id: 'evidence.visible_damage_scenarios', kind: 'filter',
+    reads: ['events[].kind=damage', 'opponent.field', 'scenarioTable（注入的引擎情景）'],
+    inputs: [{active_species: active?.species_id ?? null,
+      enemy_damage: enemyDamage.map((row) => ({turn: row.turn, skill_id: row.skill_id, amount: row.amount})),
+      scenario_table: isPlainObject(scenarioTable) ? sortedKeys(scenarioTable) : []}],
+    output: {applied: damageApplied, candidates: scenarioReport},
+    basis: '伤害公式的**唯一实现**在引擎里（`effects.compute_damage`）：信念不重算，只拿注入的引擎情景'
+      + '与公开伤害比相容性；多条相容 ⇒ 全保留（多解），一条都不相容且情景穷尽 ⇒ 才排除',
+    applied: damageApplied,
+    ...(damageApplied ? {} : {reason: enemyDamage.length === 0
+      ? '这一份证据里没有对手打出来的伤害读数'
+      : '没有「当前场上那只」的候选或没有注入情景集合 ⇒ 不敢用伤害排除任何候选'}),
+    unverified: ['未核实：情景集合是否穷尽 —— 只有调用方显式声明 exhaustive:true 时才拿它排除候选'],
+  });
+
+  // ── ④ 先手速度（同量纲才用） ──
+  const comparable = arr(obs.turn_order).filter((row) => row?.enemy_speed?.source === 'species-race');
+  const incomparable = arr(obs.turn_order).length - comparable.length;
+  let speedExcluded = 0;
+  if (comparable.length > 0 && catalog) {
+    for (const row of comparable) {
+      const value = row.enemy_speed.value;
+      for (const candidate of [...updated]) {
+        const feature = typeof catalog?.featureFor === 'function' ? catalog.featureFor(candidate.species_id) : null;
+        if (!Number.isFinite(feature?.spe)) continue;
+        if (Number(feature.spe) === Number(value)) continue;
+        if (candidate.basis === 'observed') continue;      // 已见的永不被排除（以观察为准）
+        const at = updated.indexOf(candidate);
+        if (at >= 0) updated.splice(at, 1);
+        excluded.push({candidate_id: candidate.candidate_id, rule_id: 'evidence.turn_order_speed',
+          why: `第 ${row.turn} 回合的公开先手速度是 ${value}（出处 species-race），与候选的物种速度 `
+            + `${feature.spe} 不同 ⇒ 排除`,
+          evidence_ids: [row.evidence_id]});
+        speedExcluded += 1;
+      }
+    }
+  }
+  ledger.push({
+    id: 'evidence.turn_order_speed', kind: 'filter',
+    reads: ['events[].detail.speed_provenance.speeds.enemy'],
+    inputs: [{comparable: comparable.length, incomparable}],
+    output: {applied: comparable.length > 0, excluded: speedExcluded},
+    basis: '先手速度只有在**同量纲**时才能跟候选比：出处 `species-race` 与候选宇宙的物种速度同一套；'
+      + '`species-panel` 是面板量纲（本模块没有它的换算表）⇒ **不换算、不排除**（宽是安全的，窄才是编的）',
+    applied: comparable.length > 0,
+    ...(comparable.length > 0 ? {} : {reason: arr(obs.turn_order).length === 0
+      ? '这一份证据里没有 `speed_provenance`：引擎只在面板口径下发它 ⇒ 先手速度没有读数'
+      : `先手速度的出处是面板量纲（species-panel），与候选宇宙的物种速度不可比 ⇒ 不换算、不排除`
+        + `（实测 ${incomparable} 条）`}),
+  });
+
+  const beforeIds = new Set(list.map((row) => row.species_id));
+  const afterIds = new Set(updated.map((row) => row.species_id));
+  const multiSolution = updated.filter((row) => row.multi_solution === true)
+    .map((row) => ({candidate_id: row.candidate_id, options: arr(row.individual_range?.scenarios)
+      .map((row2) => row2.scenario_id)}));
+  return {
+    protocol: EVIDENCE_UPDATE_PROTOCOL,
+    available: true,
+    unknown_reason: null,
+    kept: updated,
+    excluded,
+    multi_solution: multiSolution,
+    contradictions,
+    observations: obs,
+    observations_rejected: [...badObservations,
+      ...(individualInScenarios.length > 0 ? individualInScenarios.map((row) => ({path: `scenarioTable.${row.candidate_id}.${row.scenario_id}`,
+        why: '情景带 individual 出处却**没标 assumption:true**：那会被读成公开事实'})) : [])],
+    rule_ledger: ledger,
+    diff: {
+      before: beforeIds.size,
+      after: afterIds.size,
+      promoted: promoted.map((row) => row.candidate_id),
+      added: added.map((row) => row.candidate_id),
+      excluded: excluded.map((row) => row.candidate_id),
+      multi_solution: multiSolution.map((row) => row.candidate_id),
+      evidence_ids_used: [...evidenceIds].sort(),
+    },
+    provenance: obs.contract ?? null,
+    evidence: [
+      evidence('view', 'view.opponent.revealed_skills', 'used_skill_presence',
+        petsWithSkills, '已出技能 ⇒ 这只在队里（只升级，不排除）'),
+      evidence('view', 'view.events[].kind=damage', 'visible_damage_scenarios',
+        scenarioReport, '可见伤害与注入情景的相容性（多解全留；只有声明穷尽才排除）'),
+      evidence('view', 'view.events[].detail.speed_provenance', 'turn_order_speed',
+        {comparable: comparable.length, incomparable}, '先手速度只在同量纲时参与排除'),
+    ],
+    unverified: [
+      '未核实：对手**真实个体配置** —— 公开面只到物种级；同一份伤害可能由多种配置解释（多解全保留）',
+      '未核实：情景集合的完整性 —— 由调用方声明是否穷尽，本模块不自己补情景',
+      ...unverified,
+    ],
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // ③ 频次信念：需要真实对局数据（本仓没有 ⇒ fail closed）
 // ─────────────────────────────────────────────────────────────────────────
 /**

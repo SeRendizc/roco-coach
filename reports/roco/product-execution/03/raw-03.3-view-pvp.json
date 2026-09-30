@@ -1,0 +1,809 @@
+{
+ "schema_version": 1,
+ "ruleset_id": "roco-world-s4-2026-09-10",
+ "state_version": 11,
+ "turn": 3,
+ "phase": "battle",
+ "battle_result": null,
+ "match_id": "m-6491e1e6d15f5331",
+ "rules_version": "roco-world-s4-2026-09-10/mobile_s4_candidate_v3",
+ "decision_id": "m-6491e1e6d15f5331:v11",
+ "seen_roster": [
+  {
+   "slot": 0,
+   "pet_id": "pet_000007",
+   "name": "魔力猫",
+   "revealed_via": "opening_preview",
+   "revealed_turn": 1
+  },
+  {
+   "slot": 1,
+   "pet_id": "pet_000008",
+   "name": "草头鸭",
+   "revealed_via": "opening_preview",
+   "revealed_turn": 1
+  },
+  {
+   "slot": 2,
+   "pet_id": "pet_000009",
+   "name": "恶魔叮",
+   "revealed_via": "opening_preview",
+   "revealed_turn": 1
+  },
+  {
+   "slot": 3,
+   "pet_id": "pet_000010",
+   "name": "恶魔狼",
+   "revealed_via": "opening_preview",
+   "revealed_turn": 1
+  },
+  {
+   "slot": 4,
+   "pet_id": "pet_000011",
+   "name": "鸭吉吉",
+   "revealed_via": "opening_preview",
+   "revealed_turn": 1
+  },
+  {
+   "slot": 5,
+   "pet_id": "pet_000012",
+   "name": "铠甲虫",
+   "revealed_via": "opening_preview",
+   "revealed_turn": 1
+  }
+ ],
+ "self": {
+  "active": 0,
+  "energy_max": 10,
+  "energy_charge": 5,
+  "pets": [
+   {
+    "slot": 0,
+    "pet_id": "pet_000001",
+    "name": "喵喵",
+    "hp": 13,
+    "max_hp": 332,
+    "energy": 10,
+    "fainted": false,
+    "statuses": {},
+    "marks": {},
+    "buffs": {},
+    "defense_cooldown": 0,
+    "charging": false,
+    "stats_source": "species-race",
+    "types": [
+     "草系"
+    ],
+    "stats": {
+     "hp": 65,
+     "atk": 66,
+     "def": 49,
+     "spa": 66,
+     "spd": 91,
+     "spe": 33
+    },
+    "class": null,
+    "stage": null
+   },
+   {
+    "slot": 1,
+    "pet_id": "pet_000002",
+    "name": "水蓝蓝",
+    "hp": 348,
+    "max_hp": 348,
+    "energy": 10,
+    "fainted": false,
+    "statuses": {},
+    "marks": {},
+    "buffs": {},
+    "defense_cooldown": 0,
+    "charging": false,
+    "stats_source": "species-race",
+    "types": [
+     "水系"
+    ],
+    "stats": {
+     "hp": 75,
+     "atk": 35,
+     "def": 56,
+     "spa": 76,
+     "spd": 79,
+     "spe": 51
+    },
+    "class": null,
+    "stage": null
+   },
+   {
+    "slot": 2,
+    "pet_id": "pet_000003",
+    "name": "火花",
+    "hp": 340,
+    "max_hp": 340,
+    "energy": 10,
+    "fainted": false,
+    "statuses": {},
+    "marks": {},
+    "buffs": {},
+    "defense_cooldown": 0,
+    "charging": false,
+    "stats_source": "species-race",
+    "types": [
+     "火系"
+    ],
+    "stats": {
+     "hp": 70,
+     "atk": 84,
+     "def": 56,
+     "spa": 37,
+     "spd": 43,
+     "spe": 78
+    },
+    "class": null,
+    "stage": null
+   },
+   {
+    "slot": 3,
+    "pet_id": "pet_000004",
+    "name": "迪莫",
+    "hp": 425,
+    "max_hp": 425,
+    "energy": 10,
+    "fainted": false,
+    "statuses": {},
+    "marks": {},
+    "buffs": {},
+    "defense_cooldown": 0,
+    "charging": false,
+    "stats_source": "species-race",
+    "types": [
+     "光系"
+    ],
+    "stats": {
+     "hp": 120,
+     "atk": 80,
+     "def": 105,
+     "spa": 80,
+     "spd": 105,
+     "spe": 92
+    },
+    "class": null,
+    "stage": null
+   },
+   {
+    "slot": 4,
+    "pet_id": "pet_000005",
+    "name": "水灵",
+    "hp": 434,
+    "max_hp": 434,
+    "energy": 10,
+    "fainted": false,
+    "statuses": {},
+    "marks": {},
+    "buffs": {},
+    "defense_cooldown": 0,
+    "charging": false,
+    "stats_source": "species-race",
+    "types": [
+     "水系"
+    ],
+    "stats": {
+     "hp": 125,
+     "atk": 58,
+     "def": 94,
+     "spa": 127,
+     "spd": 132,
+     "spe": 85
+    },
+    "class": null,
+    "stage": null
+   },
+   {
+    "slot": 5,
+    "pet_id": "pet_000006",
+    "name": "火神",
+    "hp": 420,
+    "max_hp": 420,
+    "energy": 10,
+    "fainted": false,
+    "statuses": {},
+    "marks": {},
+    "buffs": {},
+    "defense_cooldown": 0,
+    "charging": false,
+    "stats_source": "species-race",
+    "types": [
+     "火系"
+    ],
+    "stats": {
+     "hp": 117,
+     "atk": 139,
+     "def": 94,
+     "spa": 61,
+     "spd": 72,
+     "spe": 130
+    },
+    "class": null,
+    "stage": null
+   }
+  ],
+  "skills": [
+   {
+    "skill_id": "skill_000246",
+    "name": "抓挠",
+    "element": "普通系",
+    "category": "攻击",
+    "energy": 0,
+    "power": 35,
+    "power_status": "static_value_present",
+    "damage_class": "物攻",
+    "desc": "造成物伤，自己回复1能量。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000286",
+    "name": "防御",
+    "element": "普通系",
+    "category": "防御",
+    "energy": 1,
+    "power": null,
+    "power_status": "not_provided_by_source",
+    "damage_class": null,
+    "desc": "减伤70%，应对攻击。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000340",
+    "name": "仙人掌刺击",
+    "element": "草系",
+    "category": "攻击",
+    "energy": 6,
+    "power": 150,
+    "power_status": "static_value_present",
+    "damage_class": "物攻",
+    "desc": "对敌方精灵造成物理伤害。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000359",
+    "name": "棘突",
+    "element": "草系",
+    "category": "攻击",
+    "energy": 3,
+    "power": 100,
+    "power_status": "static_value_present",
+    "damage_class": "魔攻",
+    "desc": "对敌方精灵造成魔法伤害。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000368",
+    "name": "抽枝",
+    "element": "草系",
+    "category": "攻击",
+    "energy": 4,
+    "power": 90,
+    "power_status": "static_value_present",
+    "damage_class": "物攻",
+    "desc": "造成物伤，应对状态：自己回复50%生命和5能量。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000378",
+    "name": "火苗",
+    "element": "火系",
+    "category": "攻击",
+    "energy": 0,
+    "power": 30,
+    "power_status": "static_value_present",
+    "damage_class": "物攻",
+    "desc": "造成物伤，自己回复1能量。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000392",
+    "name": "火云车",
+    "element": "火系",
+    "category": "攻击",
+    "energy": 5,
+    "power": 140,
+    "power_status": "static_value_present",
+    "damage_class": "物攻",
+    "desc": "对敌方精灵造成物理伤害。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000418",
+    "name": "甩水",
+    "element": "水系",
+    "category": "攻击",
+    "energy": 0,
+    "power": 30,
+    "power_status": "static_value_present",
+    "damage_class": "魔攻",
+    "desc": "造成魔伤，自己回复1能量。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000421",
+    "name": "水炮",
+    "element": "水系",
+    "category": "攻击",
+    "energy": 5,
+    "power": 110,
+    "power_status": "static_value_present",
+    "damage_class": "魔攻",
+    "desc": "造成魔伤，每次使用后，本技能能耗永久-1。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000456",
+    "name": "光刃",
+    "element": "光系",
+    "category": "攻击",
+    "energy": 4,
+    "power": 120,
+    "power_status": "static_value_present",
+    "damage_class": "物攻",
+    "desc": "对敌方精灵造成物理伤害。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000567",
+    "name": "龙之利爪",
+    "element": "龙系",
+    "category": "攻击",
+    "energy": 3,
+    "power": 130,
+    "power_status": "static_value_present",
+    "damage_class": "物攻",
+    "desc": "蓄力，造成物伤并吸血50%。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000624",
+    "name": "腐化",
+    "element": "毒系",
+    "category": "状态",
+    "energy": 1,
+    "power": null,
+    "power_status": "not_provided_by_source",
+    "damage_class": null,
+    "desc": "敌方每有1层中毒效果，敌方获得双攻-30%。",
+    "is_trait": false
+   },
+   {
+    "skill_id": "skill_000808",
+    "name": "多维击打",
+    "element": "幻系",
+    "category": "攻击",
+    "energy": 4,
+    "power": 15,
+    "power_status": "static_value_present",
+    "damage_class": "魔攻",
+    "desc": "造成魔伤，1连击，敌方每有1层星陨印记，本次技能连击数+1。",
+    "is_trait": false
+   }
+  ],
+  "loadouts": {
+   "pet_000001": [
+    "skill_000246",
+    "skill_000286",
+    "skill_000340",
+    "skill_000624"
+   ],
+   "pet_000002": [
+    "skill_000418",
+    "skill_000286",
+    "skill_000421",
+    "skill_000808"
+   ],
+   "pet_000003": [
+    "skill_000378",
+    "skill_000286",
+    "skill_000392",
+    "skill_000567"
+   ],
+   "pet_000004": [
+    "skill_000456",
+    "skill_000286",
+    "skill_000359",
+    "skill_000368"
+   ],
+   "pet_000005": [
+    "skill_000418",
+    "skill_000286",
+    "skill_000421",
+    "skill_000808"
+   ],
+   "pet_000006": [
+    "skill_000378",
+    "skill_000286",
+    "skill_000392",
+    "skill_000567"
+   ]
+  },
+  "magic": {
+   "uses_left": 2,
+   "cooldown": 0,
+   "swapped": {},
+   "cooldown_set_turn": null
+  }
+ },
+ "opponent": {
+  "active": 0,
+  "living_count": 6,
+  "energy_max": 10,
+  "field": {
+   "slot": 0,
+   "pet_id": "pet_000007",
+   "name": "魔力猫",
+   "hp": 369,
+   "max_hp": 405,
+   "energy": 3,
+   "fainted": false,
+   "statuses": {},
+   "marks": {},
+   "defense_cooldown": 1,
+   "charging": false,
+   "stats_source": "species-race",
+   "types": [
+    "草系"
+   ],
+   "stats": {
+    "hp": 108,
+    "atk": 109,
+    "def": 81,
+    "spa": 109,
+    "spd": 151,
+    "spe": 55
+   },
+   "class": null,
+   "stage": null
+  },
+  "bench": [
+   {
+    "slot": 1,
+    "fainted": false
+   },
+   {
+    "slot": 2,
+    "fainted": false
+   },
+   {
+    "slot": 3,
+    "fainted": false
+   },
+   {
+    "slot": 4,
+    "fainted": false
+   },
+   {
+    "slot": 5,
+    "fainted": false
+   }
+  ],
+  "revealed_skills": {
+   "pet_000007": [
+    {
+     "skill_id": "skill_000286",
+     "name": "防御",
+     "element": "普通系",
+     "category": "防御",
+     "energy": 1,
+     "power": null,
+     "power_status": "not_provided_by_source",
+     "damage_class": null,
+     "desc": "减伤70%，应对攻击。",
+     "is_trait": false
+    },
+    {
+     "skill_id": "skill_000340",
+     "name": "仙人掌刺击",
+     "element": "草系",
+     "category": "攻击",
+     "energy": 6,
+     "power": 150,
+     "power_status": "static_value_present",
+     "damage_class": "物攻",
+     "desc": "对敌方精灵造成物理伤害。",
+     "is_trait": false
+    }
+   ]
+  }
+ },
+ "legal": [
+  {
+   "kind": "skill",
+   "label": "抓挠",
+   "skill_id": "skill_000246",
+   "skill_name": "抓挠",
+   "magic_id": null,
+   "skill": {
+    "name": "抓挠",
+    "element": "普通系",
+    "category": "攻击",
+    "energy": 0,
+    "power": 35,
+    "power_status": "static_value_present",
+    "damage_class": "物攻",
+    "desc": "造成物伤，自己回复1能量。",
+    "is_trait": false,
+    "effect_support": "unsupported"
+   },
+   "target_index": null,
+   "item_id": null
+  },
+  {
+   "kind": "skill",
+   "label": "防御",
+   "skill_id": "skill_000286",
+   "skill_name": "防御",
+   "magic_id": null,
+   "skill": {
+    "name": "防御",
+    "element": "普通系",
+    "category": "防御",
+    "energy": 1,
+    "power": null,
+    "power_status": "not_provided_by_source",
+    "damage_class": null,
+    "desc": "减伤70%，应对攻击。",
+    "is_trait": false,
+    "effect_support": "unsupported"
+   },
+   "target_index": null,
+   "item_id": null
+  },
+  {
+   "kind": "skill",
+   "label": "仙人掌刺击",
+   "skill_id": "skill_000340",
+   "skill_name": "仙人掌刺击",
+   "magic_id": null,
+   "skill": {
+    "name": "仙人掌刺击",
+    "element": "草系",
+    "category": "攻击",
+    "energy": 6,
+    "power": 150,
+    "power_status": "static_value_present",
+    "damage_class": "物攻",
+    "desc": "对敌方精灵造成物理伤害。",
+    "is_trait": false,
+    "effect_support": "unsupported"
+   },
+   "target_index": null,
+   "item_id": null
+  },
+  {
+   "kind": "skill",
+   "label": "腐化",
+   "skill_id": "skill_000624",
+   "skill_name": "腐化",
+   "magic_id": null,
+   "skill": {
+    "name": "腐化",
+    "element": "毒系",
+    "category": "状态",
+    "energy": 1,
+    "power": null,
+    "power_status": "not_provided_by_source",
+    "damage_class": null,
+    "desc": "敌方每有1层中毒效果，敌方获得双攻-30%。",
+    "is_trait": false,
+    "effect_support": "unsupported"
+   },
+   "target_index": null,
+   "item_id": null
+  },
+  {
+   "kind": "charge",
+   "label": "聚能",
+   "skill_id": null,
+   "skill_name": null,
+   "magic_id": null,
+   "skill": null,
+   "target_index": null,
+   "item_id": null
+  },
+  {
+   "kind": "switch",
+   "label": "换上第2位",
+   "skill_id": null,
+   "skill_name": null,
+   "magic_id": null,
+   "skill": null,
+   "target_index": 1,
+   "item_id": null
+  },
+  {
+   "kind": "switch",
+   "label": "换上第3位",
+   "skill_id": null,
+   "skill_name": null,
+   "magic_id": null,
+   "skill": null,
+   "target_index": 2,
+   "item_id": null
+  },
+  {
+   "kind": "switch",
+   "label": "换上第4位",
+   "skill_id": null,
+   "skill_name": null,
+   "magic_id": null,
+   "skill": null,
+   "target_index": 3,
+   "item_id": null
+  },
+  {
+   "kind": "switch",
+   "label": "换上第5位",
+   "skill_id": null,
+   "skill_name": null,
+   "magic_id": null,
+   "skill": null,
+   "target_index": 4,
+   "item_id": null
+  },
+  {
+   "kind": "switch",
+   "label": "换上第6位",
+   "skill_id": null,
+   "skill_name": null,
+   "magic_id": null,
+   "skill": null,
+   "target_index": 5,
+   "item_id": null
+  },
+  {
+   "kind": "magic",
+   "label": "愿力强化",
+   "skill_id": null,
+   "skill_name": null,
+   "magic_id": "wish_power_up",
+   "skill": null,
+   "target_index": null,
+   "item_id": null
+  },
+  {
+   "kind": "surrender",
+   "label": "投降",
+   "skill_id": null,
+   "skill_name": null,
+   "magic_id": null,
+   "skill": null,
+   "target_index": null,
+   "item_id": null
+  }
+ ],
+ "cpu_legal_count": 10,
+ "needs_replacement": [],
+ "events": [
+  {
+   "turn": 2,
+   "kind": "turn_start",
+   "side": null,
+   "detail": {
+    "turn": 2
+   },
+   "extra": {
+    "seq": 6
+   },
+   "text": "第 2 回合开始。",
+   "evidence": []
+  },
+  {
+   "turn": 2,
+   "kind": "damage",
+   "side": null,
+   "detail": {
+    "side": "enemy",
+    "skill_id": "skill_000340",
+    "target_slot": 0,
+    "damage": 319,
+    "power_used": 150,
+    "conditional_power": false,
+    "conditional_reason": "",
+    "type_multiplier": 1,
+    "stab": 1.5,
+    "ability_level": 1,
+    "power_multiplier": 1,
+    "damage_model": "community-hypothesis-v1",
+    "formula_verified": false
+   },
+   "extra": {
+    "seq": 7
+   },
+   "text": "对方的「仙人掌刺击」命中，造成约 319 点伤害（伤害公式未核验，这是引擎估值）。",
+   "evidence": [
+    "skill_000340"
+   ]
+  },
+  {
+   "turn": 2,
+   "kind": "damage",
+   "side": null,
+   "detail": {
+    "side": "player",
+    "skill_id": "skill_000246",
+    "target_slot": 0,
+    "damage": 28,
+    "power_used": 35,
+    "conditional_power": false,
+    "conditional_reason": "",
+    "type_multiplier": 1,
+    "stab": 1,
+    "ability_level": 1,
+    "power_multiplier": 1,
+    "damage_model": "community-hypothesis-v1",
+    "formula_verified": false
+   },
+   "extra": {
+    "seq": 8
+   },
+   "text": "我方的「抓挠」命中，造成约 28 点伤害（伤害公式未核验，这是引擎估值）。",
+   "evidence": [
+    "skill_000246"
+   ]
+  },
+  {
+   "turn": 2,
+   "kind": "energy_gain",
+   "side": null,
+   "detail": {
+    "side": "player",
+    "skill_id": "skill_000246",
+    "amount": 0,
+    "energy_after": 10,
+    "assumption": "MC-007",
+    "evidence_text": "自己回复1能量"
+   },
+   "extra": {
+    "seq": 9
+   },
+   "text": "我方用「抓挠」获得 0 点能量（回能时序未核验，按出手时立即回能处理）。",
+   "evidence": [
+    "MC-007"
+   ]
+  },
+  {
+   "turn": 2,
+   "kind": "effects_registered_unsupported",
+   "side": null,
+   "detail": {
+    "side": "player",
+    "skill_id": "skill_000246",
+    "parsed_effects": 1,
+    "unclaimed_spans": 0,
+    "unparsed_markers": 0,
+    "reason": "攻击分支只结算伤害、以及**已解析并已应用**的附带效果；这一段没有对应的实现"
+   },
+   "extra": {
+    "seq": 10
+   },
+   "text": "我方的抓挠有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。",
+   "evidence": []
+  }
+ ],
+ "strategy": {
+  "name": "greedy_damage",
+  "version": 1
+ },
+ "assumptions": {
+  "opponent_bench": "full_hp_nominal_loadout",
+  "note": "对手后备的血量、配招与物种都不在公开信息里，重建搜索状态时按满血 + 规范配招 + 占位物种建模；任何依赖对手后备精确构成或精确血量的结论都会因此偏乐观。"
+ },
+ "unsupported_count": 2,
+ "mana": {
+  "self": 4,
+  "opponent": 4,
+  "pool": 4
+ },
+ "unverified_overrides": [],
+ "unverified_notes": [
+  "本局没有使用任何未核验覆盖：规则值全部来自规则配置本身"
+ ],
+ "mode_id": "pvp-standard-six-pet",
+ "ruleset_config_id": "mobile_s4_candidate_v3"
+}
