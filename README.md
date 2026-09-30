@@ -7,7 +7,7 @@
 ![营地](output/demo-live/01-营地.png)
 
 > 🔴 **先读这一句**：`8765` 上的网页现在回 **200**，但 **Python 引擎侧是红的**（`coverage.py` 停在被 `git checkout` 抹掉之后的 HEAD 版本）。**"网页能打开"不等于"功能都好了"** —— 详见文末「当前状态」。
-> 主交付物是 **[`docs/roco/coach-理想形态-计划书-2026-09-30.md`](docs/roco/coach-理想形态-计划书-2026-09-30.md)**（本机实测 **6968 行**）。
+> 主交付物是 **[`docs/roco/coach-理想形态-计划书-2026-09-30.md`](docs/roco/coach-理想形态-计划书-2026-09-30.md)**（本机 `wc -l` = **7193 行** @ 2026-09-30 14:56 —— 该文件**仍在被追加**，行数以你跑的时刻为准）。
 
 ---
 
@@ -209,10 +209,10 @@ Python 环境或模型缺失时不会报错中断：语义检索预热失败会�
 
 ### 主交付物
 
-**`docs/roco/coach-理想形态-计划书-2026-09-30.md`** —— 本机 `wc -l` 实测 **6968 行**。
+**`docs/roco/coach-理想形态-计划书-2026-09-30.md`** —— 本机 `wc -l` 实测 **7193 行**（@ 2026-09-30 14:56）。
 小芽"理想形态"的完整计划与实测记录：可见面读数、引擎各族盘点，以及一套编号纪律。
 
-> ⚠ 计划书**仍在增长**（我写作期间它从 6872 涨到 6968），所以 **6968 这个数是采样值**，不当作常量引用；请以你本机 `wc -l` 为准。
+> ⚠ 计划书**仍在增长**（写这一节期间它从 6872 → 6968 → 7193），所以 **7193 这个数也只是采样值**，不当作常量引用；请以你本机 `wc -l` 为准。
 
 ### 🔴 引擎当前是红的
 
@@ -229,7 +229,7 @@ Python 环境或模型缺失时不会报错中断：语义检索预热失败会�
 
 **重建正在进行**，方式是：
 
-- 重建稿写在 `tmp/coverage.rebuild.N.py`（当前第 4 稿：`tmp/coverage.rebuild.4.py`）；
+- 重建稿写在 `tmp/coverage.rebuild.N.py`。**注意：最新稿 ≠ 最绿的稿** —— 我 14:56 采样时最新是**第 5 稿**（`tmp/coverage.rebuild.5.py`，56,620 字节），但它**目前跑不出绿**：`test_cond_self_debuff_power` 报 `NameError: name '_RESOLVER_BY_CAPABILITY' is not defined`（`coverage.rebuild.5.py:856`；该稿只*用*了这个名字、没有定义，而第 4 稿 `:59` 定义了）。**跑得出"单文件绿"的是第 4 稿**，见下表；
 - 用**影子注入**验证：`importlib` 把 `sys.modules['roco_env.coverage']` 指向 `tmp/` 的稿子，**判据一行不改**；
 - **正文一字未改** —— `shasum -a 256 roco/src/roco_env/coverage.py` 至今仍是 **`cc3de2ba09c8b5d1…`**。
 
@@ -240,6 +240,8 @@ Python 环境或模型缺失时不会报错中断：语义检索预热失败会�
 | 直接跑（正文 = HEAD 版） | `tests.test_cond_self_debuff_power` | `Ran 7 tests` · 🔴 **`FAILED (errors=4)`** |
 | 影子注入第 4 稿 | `tests.test_cond_self_debuff_power` | `Ran 7 tests` · ✅ **`OK`** |
 | 影子注入第 4 稿 | `tests.test_effect_coverage` | `Ran 21 tests` · 🔴 **`FAILED (failures=10, errors=6)`** |
+| 影子注入第 5 稿（我 14:56 采样时它在写稿中） | `tests.test_cond_self_debuff_power` | `Ran 7 tests` · 🔴 **`FAILED (errors=4)`**（`NameError: _RESOLVER_BY_CAPABILITY`） |
+| 影子注入第 5 稿（同上） | `tests.test_effect_coverage` | `Ran 21 tests` · 🔴 **`FAILED (failures=2, errors=5)`**（问题数 16 ⇒ 7，比第 4 稿少 9 个） |
 
 ⇒ 🔴 **关键区别：`test_cond_self_debuff_power` 只在影子注入下是绿的；直接跑仍是红的。**
 这就是"重建中"的确切含义 —— **绿还没有落到正文上**。
@@ -301,7 +303,7 @@ PY
 
 ### 纪律（踩坑记录）
 
-项目累积了一套编号纪律（**编号已到 `#176`** —— 我在这份计划书里读到的最大号）。入口：
+项目累积了一套编号纪律（我 14:55 读到的最新一条是 **`#181`**（附录 DR），**号还在涨**；顺带一条：计划书里**最小的纪律号是 `#10`**，所以别写"从 #1 起"）。入口：
 
 ```sh
 grep -n '纪律' docs/roco/coach-理想形态-计划书-2026-09-30.md | tail -8
@@ -329,7 +331,7 @@ grep -n '纪律' docs/roco/coach-理想形态-计划书-2026-09-30.md | tail -8
 ### 这一节的读数怎么来的（2026-09-30 采样）
 
 ```
-《计划书》行数          wc -l                                    ⇒ 6968（采样时；仍在增长）
+《计划书》行数          wc -l                                    ⇒ 7193（@14:56 采样；仍在增长）
 coverage.py            782 行 · git hash-object = HEAD blob      ⇒ 0c9f6f14bab2（工作区 == HEAD）
 coverage.py            正文 sha256                               ⇒ cc3de2ba09c8b5d1…
 分支 / commit          git branch --show-current / log -1        ⇒ wip/roco-coach-2026-09-30-1418 / ae826e3
