@@ -1,0 +1,17 @@
+========================================================================
+skill_000398 炙热波动 | 造成魔伤，敌方获得4层灼烧，应对状态：本次技能威力和赋予灼烧翻倍。
+  A(敌状态技) {"foe_pet": "pet_000003", "foe_skill": "skill_000271", "foe_skill_name": "力量增效", "foe_skill_is_status": true, "respond_succeeded": true, "base_power": 55, "power_used": 110.0, "power_doubled": true, "conditional_reason": "应对成功 → 威力翻倍", "status_added": [{"side": "enemy", "status": "灼烧", "layers": 4, "layers_total": 4, "turns_left": 4, "damage_rule": "LOCAL_RULE"}], "layers": 4, "enemy_statuses_after": {"灼烧": {"layers": 2, "turns_left": 3}}, "unsupported": [], "event_kinds": ["turn_start", "damage", "status_added", "effects_registered_unsupported", "buff_self", "status_applied", "status_tick"]}
+  B(敌攻击技) {"foe_pet": "pet_000003", "foe_skill": "skill_000247", "foe_skill_name": "猛烈撞击", "foe_skill_is_status": false, "respond_succeeded": false, "base_power": 55, "power_used": 55.0, "power_doubled": false, "conditional_reason": null, "status_added": [{"side": "enemy", "status": "灼烧", "layers": 4, "layers_total": 4, "turns_left": 4, "damage_rule": "LOCAL_RULE"}], "layers": 4, "enemy_statuses_after": {"灼烧": {"layers": 2, "turns_left": 3}}, "unsupported": [], "event_kinds": ["turn_start", "damage", "status_added", "effects_registered_unsupported", "damage", "status_tick"]}
+  ctl_fixture_flips_power=True ctl_status_event_seen=True layers A=4 B=4
+========================================================================
+skill_000255 突袭 | 造成魔伤，应对状态：本次技能威力变为3倍。
+  A(敌状态技) {"foe_pet": "pet_000003", "foe_skill": "skill_000271", "foe_skill_name": "力量增效", "foe_skill_is_status": true, "respond_succeeded": true, "base_power": 70, "power_used": 210.0, "power_doubled": true, "conditional_reason": "应对成功 → 威力 ×3.0", "status_added": [], "layers": 0, "enemy_statuses_after": {}, "unsupported": [], "event_kinds": ["turn_start", "damage", "buff_self", "status_applied"]}
+  B(敌攻击技) {"foe_pet": "pet_000003", "foe_skill": "skill_000247", "foe_skill_name": "猛烈撞击", "foe_skill_is_status": false, "respond_succeeded": false, "base_power": 70, "power_used": 70.0, "power_doubled": false, "conditional_reason": null, "status_added": [], "layers": 0, "enemy_statuses_after": {}, "unsupported": [], "event_kinds": ["turn_start", "damage", "damage"]}
+  ctl_fixture_flips_power=True ctl_status_event_seen=n/a(不施加状态) layers A=0 B=0
+========================================================================
+skill_000637 虫击 | 造成物伤，应对状态：本次技能威力变为2倍，无视敌方系别抵抗。
+  A(敌状态技) {"foe_pet": "pet_000003", "foe_skill": "skill_000271", "foe_skill_name": "力量增效", "foe_skill_is_status": true, "respond_succeeded": true, "base_power": 90, "power_used": 180.0, "power_doubled": true, "conditional_reason": "应对成功 → 威力 ×2.0", "status_added": [], "layers": 0, "enemy_statuses_after": {}, "unsupported": [], "event_kinds": ["turn_start", "damage", "buff_self", "status_applied"]}
+  B(敌攻击技) {"foe_pet": "pet_000003", "foe_skill": "skill_000247", "foe_skill_name": "猛烈撞击", "foe_skill_is_status": false, "respond_succeeded": false, "base_power": 90, "power_used": 90.0, "power_doubled": false, "conditional_reason": null, "status_added": [], "layers": 0, "enemy_statuses_after": {}, "unsupported": [], "event_kinds": ["turn_start", "damage", "damage"]}
+  ctl_fixture_flips_power=True ctl_status_event_seen=n/a(不施加状态) layers A=0 B=0
+========================================================================
+RUNTIME_FAILS 0

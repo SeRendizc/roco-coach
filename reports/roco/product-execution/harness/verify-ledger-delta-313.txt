@@ -1,0 +1,25 @@
+STAMP coverage.py    36650edf4f2e87f36947b459bdeb4bcc5e7eecee225331ca74047839bf577022 /mnt/e/roco-scratch/pin83ed968/roco/src/roco_env/coverage.py
+STAMP service.py     74f53be59fb01dc19db51dd401dfb25039aea69fc238662991b3484445fcad33 /mnt/e/roco-scratch/pin83ed968/roco/src/roco_env/service.py
+STAMP data.py        d92786ef8c1a9584afbbb7b57640793111d52737be8e97cbc0efee12aa6f9e2a /mnt/e/roco-scratch/pin83ed968/roco/src/roco_env/data.py
+REPO /mnt/e/roco-scratch/pin83ed968
+BASELINE /mnt/e/roco-coach/reports/roco/rc401/effect-coverage.json
+TOTALS baseline_simulatable=306 current_simulatable=313 delta=7 (up-down)
+SUPPORT_LEVELS baseline={"battle_skills": {"FULL_VERIFIED": 0, "SIMULATABLE_UNVERIFIED": 298, "PARTIAL": 279, "KNOWLEDGE_ONLY": 2, "REFUSED": 0}, "traits": {"FULL_VERIFIED": 8, "SIMULATABLE_UNVERIFIED": 0, "PARTIAL": 5, "KNOWLEDGE_ONLY": 228, "REFUSED": 4}}
+SUPPORT_LEVELS current ={"battle_skills": {"FULL_VERIFIED": 0, "SIMULATABLE_UNVERIFIED": 305, "PARTIAL": 273, "KNOWLEDGE_ONLY": 1, "REFUSED": 0}, "traits": {"FULL_VERIFIED": 8, "SIMULATABLE_UNVERIFIED": 0, "PARTIAL": 5, "KNOWLEDGE_ONLY": 228, "REFUSED": 4}}
+CONTROL_RUN skipped
+
+== skills == only_base=0 only_cur=0 翻正=8 翻负=1 同带内变更=1
+   翻正 skill_000398 PARTIAL -> SIMULATABLE_UNVERIFIED | 描述被完整读出（1 条效果），且没有未认领片段
+   翻正 skill_000430 PARTIAL -> SIMULATABLE_UNVERIFIED | 描述被完整读出（1 条效果），且没有未认领片段
+   翻正 skill_000441 PARTIAL -> SIMULATABLE_UNVERIFIED | 描述被完整读出（2 条效果），且没有未认领片段
+   翻正 skill_000531 PARTIAL -> SIMULATABLE_UNVERIFIED | 描述被完整读出（1 条效果），且没有未认领片段
+   翻正 skill_000532 PARTIAL -> SIMULATABLE_UNVERIFIED | 描述被完整读出（1 条效果），且没有未认领片段
+   翻正 skill_000534 PARTIAL -> SIMULATABLE_UNVERIFIED | 描述被完整读出（1 条效果），且没有未认领片段
+   翻正 skill_000682 PARTIAL -> SIMULATABLE_UNVERIFIED | 描述被完整读出（1 条效果），且没有未认领片段
+   翻正 skill_000762 PARTIAL -> SIMULATABLE_UNVERIFIED | 描述被完整读出（1 条效果），且没有未认领片段
+   翻负 skill_000584 SIMULATABLE_UNVERIFIED -> PARTIAL | 读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：迸发
+   同带内变更 skill_000684 KNOWLEDGE_ONLY -> PARTIAL | 读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：应对：选择：本次技能威力+20或应对状态时本次技能威力+140
+
+== traits == only_base=0 only_cur=0 翻正=0 翻负=0 同带内变更=0
+
+WROTE /mnt/e/roco-coach/reports/roco/product-execution/harness/ledger-delta-313-vs-306.json

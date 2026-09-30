@@ -1,0 +1,92 @@
+{
+  "baseline": "/mnt/e/roco-coach/reports/roco/rc401/effect-coverage.json",
+  "diff": {
+    "_totals": {
+      "baseline": 306,
+      "current": 313
+    },
+    "skills": {
+      "band_change": [
+        [
+          "skill_000684",
+          "KNOWLEDGE_ONLY",
+          "PARTIAL",
+          "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：应对：选择：本次技能威力+20或应对状态时本次技能威力+140"
+        ]
+      ],
+      "down": [
+        [
+          "skill_000584",
+          "SIMULATABLE_UNVERIFIED",
+          "PARTIAL",
+          "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：迸发"
+        ]
+      ],
+      "only_base": [],
+      "only_cur": [],
+      "up": [
+        [
+          "skill_000398",
+          "PARTIAL",
+          "SIMULATABLE_UNVERIFIED",
+          "描述被完整读出（1 条效果），且没有未认领片段"
+        ],
+        [
+          "skill_000430",
+          "PARTIAL",
+          "SIMULATABLE_UNVERIFIED",
+          "描述被完整读出（1 条效果），且没有未认领片段"
+        ],
+        [
+          "skill_000441",
+          "PARTIAL",
+          "SIMULATABLE_UNVERIFIED",
+          "描述被完整读出（2 条效果），且没有未认领片段"
+        ],
+        [
+          "skill_000531",
+          "PARTIAL",
+          "SIMULATABLE_UNVERIFIED",
+          "描述被完整读出（1 条效果），且没有未认领片段"
+        ],
+        [
+          "skill_000532",
+          "PARTIAL",
+          "SIMULATABLE_UNVERIFIED",
+          "描述被完整读出（1 条效果），且没有未认领片段"
+        ],
+        [
+          "skill_000534",
+          "PARTIAL",
+          "SIMULATABLE_UNVERIFIED",
+          "描述被完整读出（1 条效果），且没有未认领片段"
+        ],
+        [
+          "skill_000682",
+          "PARTIAL",
+          "SIMULATABLE_UNVERIFIED",
+          "描述被完整读出（1 条效果），且没有未认领片段"
+        ],
+        [
+          "skill_000762",
+          "PARTIAL",
+          "SIMULATABLE_UNVERIFIED",
+          "描述被完整读出（1 条效果），且没有未认领片段"
+        ]
+      ]
+    },
+    "traits": {
+      "band_change": [],
+      "down": [],
+      "only_base": [],
+      "only_cur": [],
+      "up": []
+    }
+  },
+  "repo": "/mnt/e/roco-scratch/pin83ed968",
+  "stamp": {
+    "coverage.py": "36650edf4f2e87f36947b459bdeb4bcc5e7eecee225331ca74047839bf577022",
+    "data.py": "d92786ef8c1a9584afbbb7b57640793111d52737be8e97cbc0efee12aa6f9e2a",
+    "service.py": "74f53be59fb01dc19db51dd401dfb25039aea69fc238662991b3484445fcad33"
+  }
+}

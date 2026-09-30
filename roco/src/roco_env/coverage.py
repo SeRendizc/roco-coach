@@ -305,7 +305,7 @@ def classify_skill(skill: Any, *, foe_energy_loss_declared: bool = False,
     # 是**假保守**。判据的意图一个字没松：可结算仍然必须**说得出来源**，只是来源多了一种。
     if not _residual_spans and not _gates and not parsed.effects \
             and getattr(skill, "has_static_power", False) \
-            and RESPOND_POWER_SETTLED_RE.search(str(getattr(skill, "desc", "") or "")):
+            and _has_settled_respond_power_clause(skill):
         return {
             "support": SUPPORT_SIMULATABLE_UNVERIFIED,
             "why": "纯伤害 + 已结算的应对子句（effects.effective_power() 按倍率改这一手的威力），"
@@ -1001,8 +1001,32 @@ _HEAD_CAPABILITIES = ("multi_hit", "slot_condition", "position_shift", "foe_ener
 
 
 def _claim_global_skill_mods(skill: Any, parsed: Any, caps: Dict[str, bool]) -> Any:
-    """「获得全技能威力/能耗±N%」：**非冒号体** + **冒号体**两条写法，同一族。"""
-    parsed = parse_mod.resolve_global_skill_mod(skill, declared=True, parsed=parsed)
+    """「获得全技能威力/能耗±N%」：**只认冒号体**（运行时真有写点的那条链）。
+
+    ⚠ 2026-09-30（分计划 00 · 族③ 收窄）：**非冒号体不再认领** —— 认领必须要求
+    env 真有写点（运行时报据），不是"文本读得出来"就算结算。
+
+    逐行运行时报据（真开局、真出招，每条试 6 个敌手动作；原文见 `plan00-family3.md`）：
+      · **冒号体** `721 赤子之心` / `728 撒娇` ⇒ `mark_added` + **`global_skill_mod_applied`**
+        （`cost_delta:-2` / `power_pct:+10`，`global_skill_mods` 真的被写）；
+      · **非冒号体** `430 水环` / `441 洗礼` / `531 冰晶坠` / `532 冰雹` / `534 冰冻光线`
+        / `682 防御反击` ⇒ 6×6 个组合里 **一次 `global_skill_mod_applied` 都没有**，
+        两边 `global_skill_mods` 恒为 `{}`（对照：同时段 `721`/`728` 每次都发）。
+
+    结构依据（只读得到的）：非冒号体在 `env.py:1295`（防御支）/`:1396`（攻击支）/`:1869`
+    （状态支）三处都挂在 `cfg.damage_global_skill_mod_text` 上，而 `RuleConfig` **没有这个叶子**
+    （`rule_config.py` 全文件 0 命中）⇒ `getattr(..., False)` 恒 False ⇒ 那三次
+    `resolve_global_skill_mod(...)` 永远不产出 ⇒ 写点走不到。（该叶子的接线曾被回退，
+    `docs/roco/coach-理想形态-计划书-2026-09-30.md` §"回退" 有记录。）
+    ⇒ 这不是"认领入口写错"（B），是**运行时不结算**（A）⇒ 不认领，缺口如实登记。
+
+    ⚠ 收窄只动本族：
+      · 冒号体仍由 `resolve_moe_colon(global_declared=…)` 认领（`721`/`728` 不动）；
+      · `667 化劲` / `680 提气` / `776 力量吞噬` 也是非冒号体，但它们的文本**另有**
+        `stat_gain_extended` 那条链产出（实测 `buff_self` / `debuff_foe`）⇒ 仍留在可模拟档。
+    ⚠ **不跨域改** `env.py`（属 01 写域）：`damage_global_skill_mod_text` 三处 `getattr`
+    要么接线、要么删死代码，留给下一轮；本次只让台账别把"没写点"说成已结算。
+    """
     return parse_mod.resolve_moe_colon(skill, declared=True, parsed=parsed,
                                        global_declared=True)
 
@@ -1224,12 +1248,46 @@ _DIAGNOSTIC_SHAPE_PATTERNS = (
     ("应对后半（下次）", _re.compile(r"应对[^，。；]*[：:][^，。；]*下次")),
 )
 
-#: 「应对…：**本次技能威力**…」= **已结算的形状**（`effects.effective_power()` 真的按
-#: 倍率改这一手的威力）。⚠ 只认「应对…：本次技能威力」这种**紧接着**的写法：
-#:   · `skill_000255 突袭`「应对状态：本次技能威力变为3倍」 ✓ 命中
+#: 「应对…：**本次技能威力**…」的**前缀形状**（`effects.effective_power()` 真的按倍率改这一手
+#: 的威力）。⚠ 它只是**前缀**：`skill_000398 炙热波动`「应对状态：本次技能威力**和赋予灼烧翻倍**」
+#: 也命中它，但后半段（灼烧翻倍）引擎一个字节都没实现 ⇒ **命中前缀 ≠ 整条结算**。
+#: 所以「这一段算不算已结算」一律走下面的 `_is_settled_respond_power_clause()`（整条分句才算），
+#: 这个前缀正则只留给「描述里有没有这个形状」的诊断读数（`test_effect_coverage:209` 逐字用它）。
+#:   · `skill_000255 突袭`「应对状态：本次技能威力变为3倍」 ✓ 整条
 #:   · `skill_000383 持续高温`「应对状态：**下次**攻击技能威力翻倍」 ✗ 不命中（它确实没结算）
 #:   · `skill_000533 极寒领域`「应对状态：使冻结翻倍」 ✗ 不命中
 RESPOND_POWER_SETTLED_RE = _re.compile(r"应对(?:状态|攻击|防御)?\s*[:：]\s*本次技能威力")
+
+#: 2026-09-30（分计划 00 · 族② 收窄）：**整条分句**都是那个已结算形状才算已结算。
+#: 逐行实测（579 条战斗技能里旧口径会跳掉的分句共 **12** 条）：
+#:   · **11 条**是完整形状（「应对状态：本次技能威力变为N倍」/「…翻倍」）⇒ 照旧放行；
+#:   · `skill_000398 炙热波动`「应对状态：本次技能威力**和赋予灼烧翻倍**」⇒ 只命中前缀
+#:     ⇒ 不再整句放行（后半段没有产出效果 ⇒ 记 `respond_clause_gaps`）。
+#: 真打一手（应对成功）两向读数：`398` 的威力那半**真的翻了**（`power_used` 55→110，
+#: `conditional_reason="应对成功 → 威力翻倍"`），而「赋予灼烧翻倍」那半**零事件、层数没翻**
+#: ⇒ 同一条分句里的两半必须分开判（两把尺子共用同一把）。
+RESPOND_POWER_SETTLED_CLAUSE_RE = _re.compile(
+    r"应对(?:状态|攻击|防御)?\s*[:：]\s*本次技能威力(?:变为|改为)?\s*(?:\d+(?:\.\d+)?\s*倍|翻倍)")
+
+
+def _is_settled_respond_power_clause(clause: str) -> bool:
+    """这条**分句整条**就是「应对…：本次技能威力N倍/翻倍」这个已结算形状吗？
+
+    ⚠ 不许退化成 `search()`：`398` 那种「…本次技能威力**和赋予灼烧翻倍**」只命中前缀，
+    后半段是另一条机制而引擎没有产出 —— 命中前缀就整句放行 = 把未结算说成已结算。
+    """
+    return bool(RESPOND_POWER_SETTLED_CLAUSE_RE.fullmatch(str(clause or "").strip()))
+
+
+def _has_settled_respond_power_clause(skill: Any) -> bool:
+    """描述里有没有**整条分句**就是那个已结算形状（`classify_skill` 那条早退用）。
+
+    ⚠ 别再写成 `RESPOND_POWER_SETTLED_RE.search(desc)`：那是**全描述**级的前缀命中，
+    与「只放行命中那一段」同一条纪律冲突（实测该收窄对当前语料的影响 = 0 行，
+    属**留着一个洞**而不是改读数 —— 见 `plan00-family2.md` 的爆炸半径读数）。
+    """
+    desc = str(getattr(skill, "desc", "") or "")
+    return any(_is_settled_respond_power_clause(c) for c in _CLAUSE_SPLIT_RE.split(desc))
 
 
 def _flags_of(caps: Optional[Dict[str, bool]]) -> Dict[str, bool]:
@@ -1283,9 +1341,12 @@ def residual_mechanic_spans(skill: Any, parsed: Any, claimed_words: Any = ()) ->
 
     ① 已声明能力认领掉的词（`claimed_mechanic_words`）；
     ② **已结算的形状** —— 「应对…：本次技能威力…」，`effects.effective_power()` 真的
-       按倍率改这一手的威力（用与判据**同一个**正则 `RESPOND_POWER_SETTLED_RE`，
+       按倍率改这一手的威力（两把尺子共用 `_is_settled_respond_power_clause()`，
        不各写一份）。⚠ 只对有静态威力的技能生效：状态类技能描述里出现同样字样
        并不代表引擎会结算（`skill_000389` 的假绿就是这么来的）。
+    ⚠ 2026-09-30（分计划 00 · 族②）：② 从「`search()` 命中前缀就跳」收窄成
+       「**整条分句**都是那个形状才跳」—— `398` 的「本次技能威力**和赋予灼烧翻倍**」
+       只命中前缀，后半段没有产出，必须记缺口（实测影响 = 398 一行，见 `plan00-family2.md`）。
     """
     _claimed = set(claimed_words or ())
     _has_power = bool(getattr(skill, "has_static_power", False))
@@ -1295,7 +1356,7 @@ def residual_mechanic_spans(skill: Any, parsed: Any, claimed_words: Any = ()) ->
         word, _, clause = text.partition("：")
         if word in _claimed:
             continue
-        if _has_power and RESPOND_POWER_SETTLED_RE.search(clause or text):
+        if _has_power and _is_settled_respond_power_clause(clause or text):
             continue
         out.append(text)
     return out
@@ -1310,9 +1371,12 @@ def respond_clause_gaps(skill: Any, parsed: Any) -> List[str]:
 
     判定与 `parse.unclaimed_mechanic_spans` 同一把尺子：一条分句只在这两种情况算已结算 ——
       · 它的文本落在某条**已产出效果**的 `evidence` 里（含 `respond_override` 的覆盖体）；
-      · 它就是「应对…：本次技能威力…」那个已结算形状（有静态威力时）。
+      · 它**整条**就是「应对…：本次技能威力…」那个已结算形状（有静态威力时）。
     其余一律算缺口 ⇒ fail closed（`skill_000383 持续高温`「应对状态：下次攻击技能威力翻倍」
     就是被这条抓住的：那句话引擎一个字节都没实现）。
+    ⚠ 2026-09-30（分计划 00 · 族②）：「整条」是**收窄后**的口径 —— 旧写法 `search()`
+    只要命中前缀就放行整句，于是 `398 炙热波动`「应对状态：本次技能威力**和赋予灼烧翻倍**」
+    的后半段（没有产出效果）被当成已结算（真打一手：威力翻了、灼烧层数没翻）。
     """
     desc = str(getattr(skill, "desc", "") or "")
     if "应对" not in desc:
@@ -1331,7 +1395,7 @@ def respond_clause_gaps(skill: Any, parsed: Any) -> List[str]:
             continue
         if _is_defense and _re.fullmatch(r"应对(?:状态|攻击|防御)?", clause):
             continue
-        if _has_power and RESPOND_POWER_SETTLED_RE.search(clause):
+        if _has_power and _is_settled_respond_power_clause(clause):
             continue
         gaps.append(f"应对：{clause}")
     return gaps

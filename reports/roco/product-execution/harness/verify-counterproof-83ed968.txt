@@ -1,0 +1,40 @@
+===== verify-counterproof-gates 全套 @83ed968 2026-09-30T17:33:26+08:00 =====
+probe_sha256 070bf35f8de1c62fc6e2ceb838602e8ad39382a2a88e0e016f5e21b1ec82d1ed
+--- --once --sweep --variants --components ---
+STAMP coverage.py 36650edf4f2e87f36947b459bdeb4bcc5e7eecee225331ca74047839bf577022 /mnt/e/roco-scratch/pin83ed968/roco/src/roco_env/coverage.py
+STAMP service.py 74f53be59fb01dc19db51dd401dfb25039aea69fc238662991b3484445fcad33 /mnt/e/roco-scratch/pin83ed968/roco/src/roco_env/service.py
+STAMP data.py d92786ef8c1a9584afbbb7b57640793111d52737be8e97cbc0efee12aa6f9e2a /mnt/e/roco-scratch/pin83ed968/roco/src/roco_env/data.py
+IDS 427
+BASELINE_MISMATCHES 0
+GATES_OFF_MISMATCHES 5
+AFTER_RESTORE_MISMATCHES 0
+CONTROL_FLIPS 25 (关闸后 resolved 翻正的技能数；0 = 补丁空转 ⇒ 本次测量作废)
+DIRECTIONS ['判据 true / 档位 PARTIAL']
+  MM skill_000412 | 判据 true / 档位 PARTIAL
+  MM skill_000510 | 判据 true / 档位 PARTIAL
+  MM skill_000539 | 判据 true / 档位 PARTIAL
+  MM skill_000671 | 判据 true / 档位 PARTIAL
+  MM skill_000694 | 判据 true / 档位 PARTIAL
+PY_HASH_SEED <unset>
+--- hash seed sweep ---
+seed=<unset>  exit=0 GATES_OFF_MISMATCHES 5 CONTROL_FLIPS 25 (关闸后 resolved 翻正的技能数；0 = 补丁空转 ⇒ 本次测量作废)
+seed=0        exit=0 GATES_OFF_MISMATCHES 5 CONTROL_FLIPS 25 (关闸后 resolved 翻正的技能数；0 = 补丁空转 ⇒ 本次测量作废)
+seed=1        exit=0 GATES_OFF_MISMATCHES 5 CONTROL_FLIPS 25 (关闸后 resolved 翻正的技能数；0 = 补丁空转 ⇒ 本次测量作废)
+seed=7        exit=0 GATES_OFF_MISMATCHES 5 CONTROL_FLIPS 25 (关闸后 resolved 翻正的技能数；0 = 补丁空转 ⇒ 本次测量作废)
+seed=42       exit=0 GATES_OFF_MISMATCHES 5 CONTROL_FLIPS 25 (关闸后 resolved 翻正的技能数；0 = 补丁空转 ⇒ 本次测量作废)
+seed=12345    exit=0 GATES_OFF_MISMATCHES 5 CONTROL_FLIPS 25 (关闸后 resolved 翻正的技能数；0 = 补丁空转 ⇒ 本次测量作废)
+--- 关闸后仍被别的闸兜住的候选（底档∈SIM 但判据未翻正）---
+CAND skill_000273 tier_base=SIMULATABLE_UNVERIFIED verdict_unsettled=[]
+CAND skill_000344 tier_base=SIMULATABLE_UNVERIFIED verdict_unsettled=[]
+CAND skill_000346 tier_base=SIMULATABLE_UNVERIFIED verdict_unsettled=[]
+CAND skill_000472 tier_base=SIMULATABLE_UNVERIFIED verdict_unsettled=[]
+CAND skill_000756 tier_base=SIMULATABLE_UNVERIFIED verdict_unsettled=[]
+--- 补丁组合扫描 ---
+VARIANT baseline(无补丁) mismatches=0
+VARIANT both-off(判据口径) mismatches=5 ids=['skill_000412', 'skill_000510', 'skill_000539', 'skill_000671', 'skill_000694']
+VARIANT respond-only mismatches=4 ids=['skill_000412', 'skill_000510', 'skill_000539', 'skill_000671']
+VARIANT words-only mismatches=1 ids=['skill_000694']
+VARIANT both-off+compound+diag mismatches=5 ids=['skill_000412', 'skill_000510', 'skill_000539', 'skill_000671', 'skill_000694']
+VARIANT all-text-gates-off mismatches=14 ids=['skill_000288', 'skill_000326', 'skill_000327', 'skill_000354', 'skill_000412', 'skill_000509', 'skill_000510', 'skill_000539', 'skill_000553', 'skill_000626', 'skill_000631', 'skill_000671', 'skill_000694', 'skill_000791']
+VARIANT baseline(恢复后) mismatches=0
+probe_exit=0

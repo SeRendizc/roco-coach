@@ -1,0 +1,28 @@
+/mnt/e/roco-coach/roco/tests/test_agent_tasks.py:141: ResourceWarning: unclosed file <_io.TextIOWrapper name='/mnt/e/roco-coach/tests/evals/agent-tasks-v1.jsonl' mode='r' encoding='utf-8'>
+  committed = [
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/mnt/e/roco-coach/roco/tests/test_trait_worklist.py:55: ResourceWarning: unclosed file <_io.TextIOWrapper name='/mnt/e/roco-coach/roco/src/roco_env/traits.py' mode='r' encoding='utf-8'>
+  source = open(tr.__file__, "r", encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+======================================================================
+FAIL: test_report_has_no_simulatable_with_unclaimed_mechanic_spans (test_effect_coverage.UnclaimedSpanBlocksSimulatableTest)
+台账里每一条「可模拟」都必须**没有**未被引擎结算的机制片段（非循环：从解析层重算）。
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/e/roco-coach/roco/tests/test_effect_coverage.py", line 869, in test_report_has_no_simulatable_with_unclaimed_mechanic_spans
+    self.assertEqual(report["totals"]["simulatable_entities"], 306,
+AssertionError: 313 != 306 : 可模拟总数变了，先核对再改这条
+
+======================================================================
+FAIL: test_counter_proof_disabling_the_shared_gates_brings_them_back (test_tier_verdict_agreement.TierAndVerdictAgreeTest)
+**反证（必红方向）**：把本批抽出来的两个共用闸关掉 ⇒ 打架必须**重新出现**。
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/e/roco-coach/roco/tests/test_tier_verdict_agreement.py", line 99, in test_counter_proof_disabling_the_shared_gates_brings_them_back
+    self.assertGreaterEqual(len(bad), 8,
+AssertionError: 5 not greater than or equal to 8 : 关掉两道共用闸之后必须重新出现打架（否则这条判据是空的）
+
+----------------------------------------------------------------------
+Ran 847 tests in 173.591s
+
+FAILED (failures=2, skipped=2)

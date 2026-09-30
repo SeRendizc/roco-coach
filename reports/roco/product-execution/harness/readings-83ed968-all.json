@@ -1,0 +1,6985 @@
+{
+  "n": 579,
+  "rows": {
+    "skill_000246": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000247": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000248": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000249": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000250": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000251": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000252": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000253": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "若：若上回合使用状态技能",
+        "回合：若上回合使用状态技能"
+      ]
+    },
+    "skill_000254": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "若：使用后若能量耗尽"
+      ]
+    },
+    "skill_000255": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对",
+        "本手威力加成"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000256": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000257": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000258": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000259": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对",
+        "本手威力加成"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000260": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000261": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000262": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对状态：额外打断被应对技能"
+      ]
+    },
+    "skill_000263": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "若：若敌方能量小于等于2"
+      ]
+    },
+    "skill_000264": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000265": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "消耗：使用时消耗所有能量",
+        "消耗：消耗越高"
+      ]
+    },
+    "skill_000266": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：自己每失去5%生命"
+      ]
+    },
+    "skill_000267": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：每应对成功1次",
+        "应对：每应对成功1次"
+      ]
+    },
+    "skill_000268": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "若：若上回合应对成功",
+        "回合：若上回合应对成功",
+        "应对：若上回合应对成功"
+      ]
+    },
+    "skill_000269": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回复：回复6能量",
+        "若：若使用本技能击败敌方"
+      ]
+    },
+    "skill_000270": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000271": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000272": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000273": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000274": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：敌方获得全攻击技能能耗+2",
+        "回合：持续3回合"
+      ]
+    },
+    "skill_000275": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回合：敌方除本回合使用的技能",
+        "回合：持续3回合"
+      ]
+    },
+    "skill_000276": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000277": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000278": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "应对",
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对防御：改为速度+160"
+      ]
+    },
+    "skill_000279": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000280": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000281": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回合：敌方本回合使用的技能能耗+7",
+        "回合：持续3回合"
+      ]
+    },
+    "skill_000282": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回复：应对防御：改为回复50%生命",
+        "应对：应对防御：改为回复50%生命"
+      ]
+    },
+    "skill_000283": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000284": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "应对",
+        "全技能持久修正"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对防御：改为能耗+3"
+      ]
+    },
+    "skill_000285": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "萌化标记"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000286": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000287": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对",
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000288": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回合：应对攻击：本回合受到致命伤害时",
+        "应对：应对攻击：本回合受到致命伤害时"
+      ]
+    },
+    "skill_000289": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000290": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "随机（出现在：每回合随机变成己方队伍中其他精灵的技能。）"
+      ],
+      "unsettled": [
+        "每：每回合随机变成己方队伍中其他精灵的技能",
+        "回合：每回合随机变成己方队伍中其他精灵的技能",
+        "随机：每回合随机变成己方队伍中其他精灵的技能",
+        "变：每回合随机变成己方队伍中其他精灵的技能",
+        "随机（出现在：每回合随机变成己方队伍中其他精灵的技能。）"
+      ]
+    },
+    "skill_000294": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "随机（出现在：每回合随机变成敌方任意精灵的技能，且该技能能耗-2。）"
+      ],
+      "unsettled": [
+        "每：每回合随机变成敌方任意精灵的技能",
+        "回合：每回合随机变成敌方任意精灵的技能",
+        "随机：每回合随机变成敌方任意精灵的技能",
+        "变：每回合随机变成敌方任意精灵的技能",
+        "随机（出现在：每回合随机变成敌方任意精灵的技能，且该技能能耗-2。）"
+      ]
+    },
+    "skill_000298": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "随机（出现在：每回合随机变成自己未携带的技能，且该技能能耗-2。）"
+      ],
+      "unsettled": [
+        "每：每回合随机变成自己未携带的技能",
+        "回合：每回合随机变成自己未携带的技能",
+        "随机：每回合随机变成自己未携带的技能",
+        "变：每回合随机变成自己未携带的技能",
+        "随机（出现在：每回合随机变成自己未携带的技能，且该技能能耗-2。）"
+      ]
+    },
+    "skill_000302": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000303": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000304": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000305": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000306": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000307": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000308": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000309": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000310": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000311": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000312": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000313": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "迸发"
+      ]
+    },
+    "skill_000314": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "体重/吨位条件"
+      ]
+    },
+    "skill_000315": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "体重/吨位条件"
+      ]
+    },
+    "skill_000316": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000317": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000318": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000319": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000320": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "连击（出现在：敌方获得连击数-4。）"
+      ],
+      "unsettled": [
+        "获得：敌方获得连击数-4",
+        "连击：敌方获得连击数-4",
+        "连击（出现在：敌方获得连击数-4。）"
+      ]
+    },
+    "skill_000321": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "消耗：使用后消耗全部生命",
+        "每：每失去5%生命"
+      ]
+    },
+    "skill_000322": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合",
+        "驱散"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000323": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000324": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "动态连击数（出现在：自己获得连击数+3。）",
+        "连击（出现在：自己获得连击数+3。）"
+      ],
+      "unsettled": [
+        "获得：自己获得连击数+3",
+        "连击：自己获得连击数+3",
+        "动态连击数（出现在：自己获得连击数+3。）",
+        "连击（出现在：自己获得连击数+3。）"
+      ]
+    },
+    "skill_000325": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "驱散"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000326": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：应对攻击：下一次行动获得先手+1",
+        "应对：应对攻击：下一次行动获得先手+1"
+      ]
+    },
+    "skill_000327": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对",
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：获得双攻+40%",
+        "每：应对攻击：期间自己每受到1次攻击伤害",
+        "应对：应对攻击：期间自己每受到1次攻击伤害"
+      ]
+    },
+    "skill_000328": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000329": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "动态连击数（出现在：造成魔伤，3连击，若敌方本回合更换精灵，本次技能连击数+3。）"
+      ],
+      "unsettled": [
+        "若：若敌方本回合更换精灵",
+        "回合：若敌方本回合更换精灵",
+        "动态连击数（出现在：造成魔伤，3连击，若敌方本回合更换精灵，本次技能连击数+3。）"
+      ]
+    },
+    "skill_000330": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：本技能能耗每+1"
+      ]
+    },
+    "skill_000331": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "应对",
+        "全技能持久修正"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "眩晕（出现在：敌方获得全技能能耗+3，应对防御：额外造成打断，且敌方下回合获得眩晕。）"
+      ],
+      "unsettled": [
+        "获得：且敌方下回合获得眩晕",
+        "回合：且敌方下回合获得眩晕",
+        "眩晕（出现在：敌方获得全技能能耗+3，应对防御：额外造成打断，且敌方下回合获得眩晕。）",
+        "应对：应对防御：额外造成打断"
+      ]
+    },
+    "skill_000332": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对",
+        "印记层数累加",
+        "驱散"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "若：若本次攻击未被防御技能应对",
+        "应对：若本次攻击未被防御技能应对"
+      ]
+    },
+    "skill_000333": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合",
+        "印记层数累加",
+        "驱散"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "选择（出现在：造成魔伤，选择：驱散敌方所有增益或驱散双方1层印记。）"
+      ],
+      "unsettled": [
+        "印记：选择：驱散敌方所有增益或驱散双方1层印记",
+        "驱散：选择：驱散敌方所有增益或驱散双方1层印记",
+        "层：选择：驱散敌方所有增益或驱散双方1层印记",
+        "选择（出现在：造成魔伤，选择：驱散敌方所有增益或驱散双方1层印记。）"
+      ]
+    },
+    "skill_000334": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000335": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "变：巧变：魔攻技能"
+      ]
+    },
+    "skill_000336": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "选择（出现在：造成魔伤，选择：每次使用后威力永久+20或应对状态时本次技能威力+100%。）"
+      ],
+      "unsettled": [
+        "每：选择：每次使用后威力永久+20或应对状态时本次技能威力+100%",
+        "选择（出现在：造成魔伤，选择：每次使用后威力永久+20或应对状态时本次技能威力+100%。）",
+        "应对：选择：每次使用后威力永久+20或应对状态时本次技能威力+100%"
+      ]
+    },
+    "skill_000337": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：并获得魔攻魔防+10%"
+      ]
+    },
+    "skill_000338": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000339": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000340": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000341": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000342": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000343": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000344": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000345": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "应对",
+        "全技能持久修正"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对防御：改为威力+60"
+      ]
+    },
+    "skill_000346": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000347": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000348": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000349": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "动态连击数（出现在：自己获得连击数+2，应对防御：额外造成打断，且敌方下回合获得眩晕。）",
+        "连击（出现在：自己获得连击数+2，应对防御：额外造成打断，且敌方下回合获得眩晕。）",
+        "眩晕（出现在：自己获得连击数+2，应对防御：额外造成打断，且敌方下回合获得眩晕。）"
+      ],
+      "unsettled": [
+        "获得：自己获得连击数+2",
+        "获得：且敌方下回合获得眩晕",
+        "连击：自己获得连击数+2",
+        "回合：且敌方下回合获得眩晕",
+        "动态连击数（出现在：自己获得连击数+2，应对防御：额外造成打断，且敌方下回合获得眩晕。）",
+        "连击（出现在：自己获得连击数+2，应对防御：额外造成打断，且敌方下回合获得眩晕。）",
+        "眩晕（出现在：自己获得连击数+2，应对防御：额外造成打断，且敌方下回合获得眩晕。）",
+        "应对：应对防御：额外造成打断"
+      ]
+    },
+    "skill_000350": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000351": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000352": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000353": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000354": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回复：应对攻击：回复3能量",
+        "应对：应对攻击：回复3能量"
+      ]
+    },
+    "skill_000355": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "吸血"
+      ]
+    },
+    "skill_000356": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000357": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000358": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000359": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000360": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000361": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000362": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000363": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "条件：生命阈值"
+      ]
+    },
+    "skill_000364": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：每次连击自己获得魔攻+60%",
+        "每：每次连击自己获得魔攻+60%"
+      ]
+    },
+    "skill_000365": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "动态连击数（出现在：2连击，每次连击自己回复8%生命，使用后本技能连击数永久+1。）"
+      ],
+      "unsettled": [
+        "每：每次连击自己回复8%生命",
+        "动态连击数（出现在：2连击，每次连击自己回复8%生命，使用后本技能连击数永久+1。）"
+      ]
+    },
+    "skill_000366": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回复：为场下每个精灵回复3能量",
+        "每：为场下每个精灵回复3能量"
+      ]
+    },
+    "skill_000367": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对",
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000368": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000369": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回复：为场下所有精灵回复1能量"
+      ]
+    },
+    "skill_000370": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：自己每有1能量"
+      ]
+    },
+    "skill_000371": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "选择（出现在：造成魔伤，选择：自己生命大于80%时威力+50或应对状态时自己回复35%生命。）"
+      ],
+      "unsettled": [
+        "选择（出现在：造成魔伤，选择：自己生命大于80%时威力+50或应对状态时自己回复35%生命。）",
+        "条件：生命阈值"
+      ]
+    },
+    "skill_000372": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000373": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "选择（出现在：选择：自己回复25%生命或回复8能量。）"
+      ],
+      "unsettled": [
+        "回复：选择：自己回复25%生命或回复8能量",
+        "选择（出现在：选择：自己回复25%生命或回复8能量。）"
+      ]
+    },
+    "skill_000374": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000375": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "若：若上回合双方有精灵使用萌系技能",
+        "回合：若上回合双方有精灵使用萌系技能"
+      ]
+    },
+    "skill_000376": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000377": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000378": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000379": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对",
+        "本手威力加成"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000380": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000381": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000382": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000383": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对状态：下次攻击技能威力翻倍",
+        "应对后半（下次）"
+      ]
+    },
+    "skill_000384": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：每次连击使敌方获得2层灼烧"
+      ]
+    },
+    "skill_000385": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000386": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：每使用1次其他火系技能"
+      ]
+    },
+    "skill_000387": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000388": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "变：应对防御：改为威力变为4倍",
+        "应对：应对防御：改为威力变为4倍"
+      ]
+    },
+    "skill_000389": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000390": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "应对",
+        "持续状态层数/回合"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000391": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对",
+        "持续状态层数/回合"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000392": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000393": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000394": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000395": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000396": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000397": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000398": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对",
+        "持续状态层数/回合",
+        "本手威力加成"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000399": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000400": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000401": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000402": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000403": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000404": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000405": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对攻击：下次攻击技能威力翻倍",
+        "应对后半（下次）"
+      ]
+    },
+    "skill_000406": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：敌方每失去5%生命"
+      ]
+    },
+    "skill_000407": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合",
+        "双攻升降",
+        "印记层数累加",
+        "驱散"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000408": {
+      "n_effects": 3,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加",
+        "驱散"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000409": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "驱散"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000410": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：每次击败敌方"
+      ]
+    },
+    "skill_000411": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000412": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对攻击：下一次攻击时"
+      ]
+    },
+    "skill_000413": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "眩晕（出现在：造成高额物理伤害，自己下回合获得眩晕。）"
+      ],
+      "unsettled": [
+        "获得：自己下回合获得眩晕",
+        "回合：自己下回合获得眩晕",
+        "眩晕（出现在：造成高额物理伤害，自己下回合获得眩晕。）"
+      ]
+    },
+    "skill_000414": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "持续状态层数/回合",
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "选择（出现在：选择：敌方获得7层灼烧或物防-90%。）"
+      ],
+      "unsettled": [
+        "选择（出现在：选择：敌方获得7层灼烧或物防-90%。）"
+      ]
+    },
+    "skill_000415": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "双攻升降",
+        "印记层数累加",
+        "驱散"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000416": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：每使用1次其他火系技能"
+      ]
+    },
+    "skill_000417": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "持续状态层数/回合"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：敌方额外获得12层灼烧",
+        "若：若上回合双方有精灵使用光系技能",
+        "回合：若上回合双方有精灵使用光系技能",
+        "层：敌方额外获得12层灼烧"
+      ]
+    },
+    "skill_000418": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000419": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000420": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000421": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000422": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000423": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000424": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000425": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000426": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000427": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回合：持续8回合",
+        "解析得出但没有结算分支：weather",
+        "天气"
+      ]
+    },
+    "skill_000428": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000429": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对",
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000430": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对",
+        "全技能持久修正"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000431": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000432": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000433": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000434": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000435": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000436": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000437": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000438": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000439": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000440": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：本技能能耗每-1"
+      ]
+    },
+    "skill_000441": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "驱散",
+        "全技能持久修正"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000442": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "应对",
+        "全技能持久修正"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对防御：改为技能能耗-3"
+      ]
+    },
+    "skill_000443": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对",
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000444": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：本技能能耗每-1"
+      ]
+    },
+    "skill_000445": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "天气（出现在：造成物伤，天气为雨天时，本技能能耗-2。）"
+      ],
+      "unsettled": [
+        "天气（出现在：造成物伤，天气为雨天时，本技能能耗-2。）",
+        "天气"
+      ]
+    },
+    "skill_000446": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [
+        "持续状态层数/回合",
+        "驱散"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "变：巧变：水系攻击技能"
+      ]
+    },
+    "skill_000447": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回合：雨天的回合数延长4回合",
+        "回合：应对防御：改为延长8回合",
+        "应对：应对防御：改为延长8回合"
+      ]
+    },
+    "skill_000448": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000449": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000450": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000451": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "效果未定义"
+      ]
+    },
+    "skill_000452": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：每种系别中的至多1个技能"
+      ]
+    },
+    "skill_000453": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "变：应对攻击：本技能变为被应对的技能",
+        "应对：应对攻击：本技能变为被应对的技能"
+      ]
+    },
+    "skill_000454": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000455": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000456": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000457": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000458": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000459": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000460": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "天气（出现在：造成魔伤，本技能系别和天气系别相同。）"
+      ],
+      "unsettled": [
+        "天气（出现在：造成魔伤，本技能系别和天气系别相同。）",
+        "天气"
+      ]
+    },
+    "skill_000461": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000462": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "应对"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000463": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000464": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "选择（出现在：造成物伤，选择：敌方携带光系技能时威力+50或应对状态时被应对的技能变为透射。）"
+      ],
+      "unsettled": [
+        "变：选择：敌方携带光系技能时威力+50或应对状态时被应对的技能变为透射",
+        "选择（出现在：造成物伤，选择：敌方携带光系技能时威力+50或应对状态时被应对的技能变为透射。）",
+        "应对：选择：敌方携带光系技能时威力+50或应对状态时被应对的技能变为透射"
+      ]
+    },
+    "skill_000465": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "混血条件"
+      ]
+    },
+    "skill_000466": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：额外获得魔攻+10%",
+        "每：己方队伍中精灵每有1个不同的系别"
+      ]
+    },
+    "skill_000467": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000468": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000469": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：每回合位置发生变化时",
+        "回合：每回合位置发生变化时",
+        "变：每回合位置发生变化时"
+      ]
+    },
+    "skill_000470": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000471": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000472": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000473": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000474": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "变：应对防御：变为威力永久+30",
+        "应对：应对防御：变为威力永久+30"
+      ]
+    },
+    "skill_000475": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对攻击：两侧技能能耗永久-1"
+      ]
+    },
+    "skill_000476": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000477": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000478": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000479": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000480": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000481": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000482": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "变：此技能位置不会改变"
+      ]
+    },
+    "skill_000483": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000484": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000485": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "选择（出现在：选择：自己获得速度+60或物攻+90%。）"
+      ],
+      "unsettled": [
+        "获得：选择：自己获得速度+60或物攻+90%",
+        "选择（出现在：选择：自己获得速度+60或物攻+90%。）"
+      ]
+    },
+    "skill_000486": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "选择（出现在：造成物伤，传动1，选择：本技能位于1号位时威力+65或本回合额外传动1。）"
+      ],
+      "unsettled": [
+        "回合：选择：本技能位于1号位时威力+65或本回合额外传动1",
+        "选择（出现在：造成物伤，传动1，选择：本技能位于1号位时威力+65或本回合额外传动1。）"
+      ]
+    },
+    "skill_000487": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "变：此技能位置不会改变"
+      ]
+    },
+    "skill_000488": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对状态：本次伤害翻倍"
+      ]
+    },
+    "skill_000489": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000490": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "连击（出现在：敌方获得威力-20，自己每受到1次抵抗伤害（不含连击），敌方额外获得威力-20，）"
+      ],
+      "unsettled": [
+        "获得：敌方获得威力-20",
+        "获得：敌方额外获得威力-20",
+        "连击：自己每受到1次抵抗伤害（不含连击）",
+        "每：自己每受到1次抵抗伤害（不含连击）",
+        "连击（出现在：敌方获得威力-20，自己每受到1次抵抗伤害（不含连击），敌方额外获得威力-20，）"
+      ]
+    },
+    "skill_000491": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000492": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000493": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "变：巧变：机械系技能"
+      ]
+    },
+    "skill_000494": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000495": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000496": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "KNOWLEDGE_ONLY",
+      "unparsed": [
+        "号位（出现在：造成物伤，位于1号位时，先手+1。传动1。）"
+      ],
+      "unsettled": [
+        "号位（出现在：造成物伤，位于1号位时，先手+1。传动1。）"
+      ]
+    },
+    "skill_000497": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000498": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000499": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对状态：额外打断被应对技能"
+      ]
+    },
+    "skill_000500": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000501": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：敌方获得3回合禁足",
+        "回合：敌方获得3回合禁足"
+      ]
+    },
+    "skill_000502": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对",
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000503": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000504": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000505": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：敌方获得3回合禁足",
+        "回合：敌方获得3回合禁足"
+      ]
+    },
+    "skill_000506": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [
+        "应对",
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对防御：额外使自己的增益翻倍"
+      ]
+    },
+    "skill_000507": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回合：持续8回合",
+        "解析得出但没有结算分支：weather",
+        "天气"
+      ]
+    },
+    "skill_000508": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对",
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000509": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "若：若上次使用攻击技则本技能能耗-2"
+      ]
+    },
+    "skill_000510": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对攻击：防御技能冷却-1"
+      ]
+    },
+    "skill_000511": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000512": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000513": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000514": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000515": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000516": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000517": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "双攻升降",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "面板比值条件"
+      ]
+    },
+    "skill_000518": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对",
+        "双攻升降",
+        "本手威力加成"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000519": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "固定能耗"
+      ]
+    },
+    "skill_000520": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "连击（出现在：造成物伤，敌方获得连击数-3。）"
+      ],
+      "unsettled": [
+        "获得：敌方获得连击数-3",
+        "连击：敌方获得连击数-3",
+        "连击（出现在：造成物伤，敌方获得连击数-3。）"
+      ]
+    },
+    "skill_000521": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000522": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000523": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000524": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "连击（出现在：减伤80%，应对攻击：敌方获得连击数-3。）"
+      ],
+      "unsettled": [
+        "获得：应对攻击：敌方获得连击数-3",
+        "连击：应对攻击：敌方获得连击数-3",
+        "连击（出现在：减伤80%，应对攻击：敌方获得连击数-3。）",
+        "应对：应对攻击：敌方获得连击数-3"
+      ]
+    },
+    "skill_000525": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对",
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000526": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "天气（出现在：造成魔伤，天气为沙暴时，先手+1。）"
+      ],
+      "unsettled": [
+        "天气（出现在：造成魔伤，天气为沙暴时，先手+1。）",
+        "天气"
+      ]
+    },
+    "skill_000527": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "选择（出现在：自己获得速度-20，选择：且额外获得物防+90%或魔防+90%。）"
+      ],
+      "unsettled": [
+        "获得：选择：且额外获得物防+90%或魔防+90%",
+        "选择（出现在：自己获得速度-20，选择：且额外获得物防+90%或魔防+90%。）"
+      ]
+    },
+    "skill_000528": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：自己获得物防+100%"
+      ]
+    },
+    "skill_000529": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000530": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "冻结"
+      ]
+    },
+    "skill_000531": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "全技能持久修正"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000532": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对",
+        "全技能持久修正"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000533": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "若：若敌方有冻结",
+        "应对：应对状态：使冻结翻倍",
+        "冻结"
+      ]
+    },
+    "skill_000534": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "全技能持久修正"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000535": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "持续状态层数/回合"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "冻结"
+      ]
+    },
+    "skill_000536": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "应对",
+        "全技能持久修正"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回合：本回合敌方使用的技能能耗+3",
+        "应对：应对防御：改为全技能能耗+3"
+      ]
+    },
+    "skill_000537": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回复：回复能量",
+        "回复：回复值等于敌方技能总能耗的一半"
+      ]
+    },
+    "skill_000538": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [
+        "持续状态层数/回合",
+        "全技能持久修正"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：且每有1层冻结获得全技能能耗+1",
+        "层：且每有1层冻结获得全技能能耗+1",
+        "层数驱动",
+        "冻结"
+      ]
+    },
+    "skill_000539": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对攻击：被应对技能能耗+3"
+      ]
+    },
+    "skill_000540": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对",
+        "持续状态层数/回合"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "冻结"
+      ]
+    },
+    "skill_000541": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000542": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000543": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000544": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000545": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对",
+        "持续状态层数/回合",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：应对状态：额外获得2层",
+        "层：应对状态：额外获得2层",
+        "应对：应对状态：额外获得2层",
+        "冻结"
+      ]
+    },
+    "skill_000546": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000547": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000548": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000549": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：敌方每有1层冻结",
+        "层：敌方每有1层冻结",
+        "层数驱动",
+        "冻结"
+      ]
+    },
+    "skill_000550": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [
+        "全技能持久修正"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：每次连击敌方获得全技能能耗+1"
+      ]
+    },
+    "skill_000551": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000552": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对",
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000553": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回复：应对攻击：回复能量",
+        "回复：回复值等于被应对技能能耗的2倍",
+        "应对：应对攻击：回复能量",
+        "应对：回复值等于被应对技能能耗的2倍"
+      ]
+    },
+    "skill_000554": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000555": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回合：持续8回合",
+        "解析得出但没有结算分支：weather",
+        "天气"
+      ]
+    },
+    "skill_000556": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000557": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "应对",
+        "持续状态层数/回合"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：应对防御：额外获得5层",
+        "层：应对防御：额外获得5层",
+        "应对：应对防御：额外获得5层",
+        "冻结"
+      ]
+    },
+    "skill_000558": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：敌方每有1层冻结",
+        "层：敌方每有1层冻结",
+        "层数驱动",
+        "冻结"
+      ]
+    },
+    "skill_000559": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对",
+        "持续状态层数/回合"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：应对状态：额外获得4层冻结",
+        "层：应对状态：额外获得4层冻结",
+        "变：巧变：冻结相关技能",
+        "应对：应对状态：额外获得4层冻结",
+        "冻结"
+      ]
+    },
+    "skill_000560": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "选择（出现在：造成物伤，选择：敌方获得物防-30%或敌方获得速度-20。）"
+      ],
+      "unsettled": [
+        "获得：选择：敌方获得物防-30%或敌方获得速度-20",
+        "选择（出现在：造成物伤，选择：敌方获得物防-30%或敌方获得速度-20。）"
+      ]
+    },
+    "skill_000561": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "天气（出现在：造成物伤，天气为暴风雪时，本次技能威力+50）"
+      ],
+      "unsettled": [
+        "天气（出现在：造成物伤，天气为暴风雪时，本次技能威力+50）",
+        "天气"
+      ]
+    },
+    "skill_000562": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [
+        "持续状态层数/回合"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：每次连击敌方获得1层冻结",
+        "冻结"
+      ]
+    },
+    "skill_000563": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000564": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "蓄力：蓄力"
+      ]
+    },
+    "skill_000565": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "蓄力：蓄力",
+        "蓄力：若蓄力期间受到攻击",
+        "若：若蓄力期间受到攻击",
+        "变：本技能威力变为敌方技能威力的3倍"
+      ]
+    },
+    "skill_000566": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "蓄力：蓄力"
+      ]
+    },
+    "skill_000567": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "蓄力：蓄力",
+        "吸血"
+      ]
+    },
+    "skill_000568": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "蓄力：蓄力"
+      ]
+    },
+    "skill_000569": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "蓄力：下次技能无需蓄力"
+      ]
+    },
+    "skill_000570": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000571": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "蓄力：应对状态：下次技能无需蓄力",
+        "应对：应对状态：下次技能无需蓄力",
+        "应对后半（下次）"
+      ]
+    },
+    "skill_000572": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000573": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000574": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000575": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000576": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "蓄力：本技能可以在蓄力状态下使用",
+        "蓄力：应对攻击：下次技能无需蓄力",
+        "应对：应对攻击：下次技能无需蓄力",
+        "应对后半（下次）"
+      ]
+    },
+    "skill_000577": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "若：若自己上回合未使用攻击技能",
+        "回合：若自己上回合未使用攻击技能"
+      ]
+    },
+    "skill_000578": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "选择（出现在：下次技能无需蓄力，本技能可在蓄力状态下使用。选择：本次能耗-1或应对防御时打断，）",
+        "眩晕（出现在：下次技能无需蓄力，本技能可在蓄力状态下使用。选择：本次能耗-1或应对防御时打断，）"
+      ],
+      "unsettled": [
+        "获得：敌方下回合获得眩晕",
+        "蓄力：下次技能无需蓄力",
+        "蓄力：本技能可在蓄力状态下使用",
+        "回合：敌方下回合获得眩晕",
+        "选择（出现在：下次技能无需蓄力，本技能可在蓄力状态下使用。选择：本次能耗-1或应对防御时打断，）",
+        "眩晕（出现在：下次技能无需蓄力，本技能可在蓄力状态下使用。选择：本次能耗-1或应对防御时打断，）",
+        "应对：选择：本次能耗-1或应对防御时打断"
+      ]
+    },
+    "skill_000579": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "变：巧变：龙系状态技能"
+      ]
+    },
+    "skill_000580": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000581": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "迸发"
+      ]
+    },
+    "skill_000582": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000583": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "迸发"
+      ]
+    },
+    "skill_000584": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "迸发"
+      ]
+    },
+    "skill_000585": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000586": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：每次入场"
+      ]
+    },
+    "skill_000587": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：迸发：本技能获得所有生效过的迸发",
+        "获得：每获得1种",
+        "每：每获得1种",
+        "迸发"
+      ]
+    },
+    "skill_000588": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "应对",
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000589": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000590": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回复：替换入场的精灵回复8能量",
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000591": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回合：应对攻击：自己回合结束返场",
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000592": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000593": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000594": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000595": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000596": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000597": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000598": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "使用次数",
+        "迸发"
+      ]
+    },
+    "skill_000599": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回合：回合结束自己返场",
+        "回合：下回合所选技能使用次数+1",
+        "使用次数",
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000600": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000601": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：每离场1次",
+        "使用次数",
+        "离场"
+      ]
+    },
+    "skill_000602": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回合：应对状态：回合结束时使敌方精灵返场",
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000603": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000604": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回合：应对攻击：下回合所选技能使用次数+1",
+        "应对：应对攻击：下回合所选技能使用次数+1",
+        "使用次数"
+      ]
+    },
+    "skill_000605": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回合：持续8回合",
+        "解析得出但没有结算分支：weather",
+        "天气"
+      ]
+    },
+    "skill_000606": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "引电"
+      ]
+    },
+    "skill_000607": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：携带的攻击技能下回合获得1个已触发过的迸发效果",
+        "获得：应对防御：改为获得所有触发过的迸发效果",
+        "回合：自己回合结束时返场",
+        "回合：携带的攻击技能下回合获得1个已触发过的迸发效果",
+        "应对：应对防御：改为获得所有触发过的迸发效果",
+        "迸发",
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000608": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000609": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000610": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：每次连击使敌方获得1层中毒"
+      ]
+    },
+    "skill_000611": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对",
+        "持续状态层数/回合"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000612": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000613": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "印记层数累加"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "印记：若击败敌方则将中毒转化为中毒印记",
+        "若：若击败敌方则将中毒转化为中毒印记"
+      ]
+    },
+    "skill_000614": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000615": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "持续状态层数/回合"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "层：转化为相同层数的中毒",
+        "条件：自身增益/减益"
+      ]
+    },
+    "skill_000616": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "应对",
+        "持续状态层数/回合"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000617": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "持续状态层数/回合",
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：自己获得魔攻+30%",
+        "每：敌方每有1层中毒效果",
+        "层：敌方每有1层中毒效果",
+        "层数驱动"
+      ]
+    },
+    "skill_000618": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "持续状态层数/回合"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "层：使敌方精灵减益的层数翻倍",
+        "层数驱动"
+      ]
+    },
+    "skill_000619": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000620": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000621": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000622": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000623": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对",
+        "持续状态层数/回合",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对状态：改为本次威力+40"
+      ]
+    },
+    "skill_000624": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "持续状态层数/回合",
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：敌方获得双攻-30%",
+        "每：敌方每有1层中毒效果",
+        "层：敌方每有1层中毒效果",
+        "层数驱动"
+      ]
+    },
+    "skill_000625": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000626": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对",
+        "持续状态层数/回合"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：敌方每有1层中毒效果",
+        "层：敌方每有1层中毒效果",
+        "层数驱动"
+      ]
+    },
+    "skill_000627": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000628": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对",
+        "驱散"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000629": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "动态连击数（出现在：造成魔伤，1连击，若敌方有中毒效果，本次技能连击数+2。）"
+      ],
+      "unsettled": [
+        "若：若敌方有中毒效果",
+        "动态连击数（出现在：造成魔伤，1连击，若敌方有中毒效果，本次技能连击数+2。）"
+      ]
+    },
+    "skill_000630": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：携带的攻击技能获得附加中毒3",
+        "获得：应对防御：改为获得附加中毒6",
+        "应对：应对防御：改为获得附加中毒6"
+      ]
+    },
+    "skill_000631": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "变：巧变：毒系状态技能"
+      ]
+    },
+    "skill_000632": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：每被影响1次",
+        "影响：本技能会受奉献影响",
+        "影响：每被影响1次",
+        "奉献：本技能会受奉献影响"
+      ]
+    },
+    "skill_000633": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：己方队伍获得1次奉献：威力+20",
+        "奉献：己方队伍获得1次奉献：威力+20"
+      ]
+    },
+    "skill_000634": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "动态连击数（出现在：造成物伤，2连击。己方队伍获得1次奉献：获得连击数+1。）"
+      ],
+      "unsettled": [
+        "获得：己方队伍获得1次奉献：获得连击数+1",
+        "奉献：己方队伍获得1次奉献：获得连击数+1",
+        "动态连击数（出现在：造成物伤，2连击。己方队伍获得1次奉献：获得连击数+1。）"
+      ]
+    },
+    "skill_000635": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "影响：本技能会受奉献影响",
+        "奉献：本技能会受奉献影响"
+      ]
+    },
+    "skill_000636": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000637": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "无视抵抗"
+      ]
+    },
+    "skill_000638": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "动态连击数（出现在：造成魔伤，队伍中的精灵每携带1个虫鸣，本次技能连击数+1。）",
+        "连击（出现在：造成魔伤，队伍中的精灵每携带1个虫鸣，本次技能连击数+1。）"
+      ],
+      "unsettled": [
+        "连击：本次技能连击数+1",
+        "每：队伍中的精灵每携带1个虫鸣",
+        "动态连击数（出现在：造成魔伤，队伍中的精灵每携带1个虫鸣，本次技能连击数+1。）",
+        "连击（出现在：造成魔伤，队伍中的精灵每携带1个虫鸣，本次技能连击数+1。）"
+      ]
+    },
+    "skill_000639": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [
+        "持续状态层数/回合"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：获得1次奉献：敌方获得2层中毒",
+        "层：获得1次奉献：敌方获得2层中毒",
+        "奉献：获得1次奉献：敌方获得2层中毒"
+      ]
+    },
+    "skill_000640": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：己方队伍获得1次奉献：能耗-2",
+        "奉献：己方队伍获得1次奉献：能耗-2"
+      ]
+    },
+    "skill_000641": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：己方队伍获得1次奉献：获得10%吸血",
+        "奉献：己方队伍获得1次奉献：获得10%吸血",
+        "解析得出但没有结算分支：self_lifesteal",
+        "吸血"
+      ]
+    },
+    "skill_000642": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "随机（出现在：己方队伍获得2次随机奉献。）"
+      ],
+      "unsettled": [
+        "获得：己方队伍获得2次随机奉献",
+        "奉献：己方队伍获得2次随机奉献",
+        "随机：己方队伍获得2次随机奉献",
+        "随机（出现在：己方队伍获得2次随机奉献。）"
+      ]
+    },
+    "skill_000643": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：每携带1个0能耗技能"
+      ]
+    },
+    "skill_000644": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：应对攻击：下个入场精灵获得减伤",
+        "应对：应对攻击：下个入场精灵获得减伤",
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000645": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000646": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000647": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000648": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000649": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000650": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对",
+        "印记层数累加",
+        "驱散"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "印记：应对状态：改为偷取印记",
+        "应对：应对状态：改为偷取印记"
+      ]
+    },
+    "skill_000651": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000652": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加",
+        "驱散"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000653": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "随机（出现在：减伤80%，应对攻击：己方队伍获得1次随机奉献。）"
+      ],
+      "unsettled": [
+        "获得：应对攻击：己方队伍获得1次随机奉献",
+        "奉献：应对攻击：己方队伍获得1次随机奉献",
+        "随机：应对攻击：己方队伍获得1次随机奉献",
+        "随机（出现在：减伤80%，应对攻击：己方队伍获得1次随机奉献。）",
+        "应对：应对攻击：己方队伍获得1次随机奉献"
+      ]
+    },
+    "skill_000654": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "选择（出现在：选择：己方队伍获得1次奉献：连击+1或威力+20。）",
+        "连击（出现在：选择：己方队伍获得1次奉献：连击+1或威力+20。）"
+      ],
+      "unsettled": [
+        "获得：选择：己方队伍获得1次奉献：连击+1或威力+20",
+        "连击：选择：己方队伍获得1次奉献：连击+1或威力+20",
+        "奉献：选择：己方队伍获得1次奉献：连击+1或威力+20",
+        "选择（出现在：选择：己方队伍获得1次奉献：连击+1或威力+20。）",
+        "连击（出现在：选择：己方队伍获得1次奉献：连击+1或威力+20。）"
+      ]
+    },
+    "skill_000655": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "印记：偷取敌方1层印记",
+        "层：偷取敌方1层印记"
+      ]
+    },
+    "skill_000656": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "若：若敌方本回合更换精灵",
+        "回合：若敌方本回合更换精灵",
+        "无视抵抗"
+      ]
+    },
+    "skill_000657": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "随机（出现在：己方队伍获得1次随机奉献，若上回合双方有精灵使用地系技能，额外获得3次随机奉献。）"
+      ],
+      "unsettled": [
+        "获得：己方队伍获得1次随机奉献",
+        "获得：额外获得3次随机奉献",
+        "若：若上回合双方有精灵使用地系技能",
+        "回合：若上回合双方有精灵使用地系技能",
+        "奉献：己方队伍获得1次随机奉献",
+        "奉献：额外获得3次随机奉献",
+        "随机：己方队伍获得1次随机奉献",
+        "随机：额外获得3次随机奉献",
+        "随机（出现在：己方队伍获得1次随机奉献，若上回合双方有精灵使用地系技能，额外获得3次随机奉献。）"
+      ]
+    },
+    "skill_000658": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "随机（出现在：造成物伤，若敌方本回合更换精灵，己方队伍获得3次随机奉献。）"
+      ],
+      "unsettled": [
+        "获得：己方队伍获得3次随机奉献",
+        "若：若敌方本回合更换精灵",
+        "回合：若敌方本回合更换精灵",
+        "奉献：己方队伍获得3次随机奉献",
+        "随机：己方队伍获得3次随机奉献",
+        "随机（出现在：造成物伤，若敌方本回合更换精灵，己方队伍获得3次随机奉献。）"
+      ]
+    },
+    "skill_000659": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000660": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对",
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000661": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000662": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对",
+        "本手威力加成"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000663": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对状态：额外打断被应对技能"
+      ]
+    },
+    "skill_000664": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "动态连击数（出现在：造成物伤，2连击，若后手攻击，改为3连击。）"
+      ],
+      "unsettled": [
+        "若：若后手攻击",
+        "动态连击数（出现在：造成物伤，2连击，若后手攻击，改为3连击。）"
+      ]
+    },
+    "skill_000665": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对",
+        "本手威力加成"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000666": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回复：回复被打断技能能耗的能量",
+        "应对：应对状态：造成打断"
+      ]
+    },
+    "skill_000667": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "全技能持久修正"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000668": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [
+        "应对",
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：应对防御：自己额外获得物攻+70%",
+        "应对：应对防御：自己额外获得物攻+70%"
+      ]
+    },
+    "skill_000669": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回合：应对防御：额外使被应对技能冷却2回合",
+        "应对：应对防御：额外使被应对技能冷却2回合"
+      ]
+    },
+    "skill_000670": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [
+        "应对",
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：每次应对后本技能能耗-3",
+        "应对：每次应对后本技能能耗-3"
+      ]
+    },
+    "skill_000671": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对攻击：打断被应对技能"
+      ]
+    },
+    "skill_000672": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对攻击：对敌方造成武系物理伤害",
+        "应对：威力与被应对技能相等"
+      ]
+    },
+    "skill_000673": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000674": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对",
+        "本手威力加成"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000675": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000676": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000677": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000678": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000679": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "动态连击数（出现在：造成魔伤，2连击，每成功应对1次，本技能连击数永久+2。）"
+      ],
+      "unsettled": [
+        "每：每成功应对1次",
+        "动态连击数（出现在：造成魔伤，2连击，每成功应对1次，本技能连击数永久+2。）",
+        "应对：每成功应对1次"
+      ]
+    },
+    "skill_000680": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "全技能持久修正"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000681": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "应对",
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000682": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对",
+        "全技能持久修正"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000683": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "选择（出现在：本技能先手-1，选择：若自己生命低于20%，回复60%生命或若自己生命高于80%）"
+      ],
+      "unsettled": [
+        "获得：获得物攻+150%",
+        "若：选择：若自己生命低于20%",
+        "若：回复60%生命或若自己生命高于80%",
+        "选择（出现在：本技能先手-1，选择：若自己生命低于20%，回复60%生命或若自己生命高于80%）",
+        "条件：生命阈值"
+      ]
+    },
+    "skill_000684": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "选择（出现在：造成魔伤，选择：本次技能威力+20或应对状态时本次技能威力+140。）"
+      ],
+      "unsettled": [
+        "选择（出现在：造成魔伤，选择：本次技能威力+20或应对状态时本次技能威力+140。）",
+        "应对：选择：本次技能威力+20或应对状态时本次技能威力+140"
+      ]
+    },
+    "skill_000685": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000686": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000687": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000688": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "迅捷"
+      ]
+    },
+    "skill_000689": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000690": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "迅捷"
+      ]
+    },
+    "skill_000691": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000692": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000693": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "动态连击数（出现在：获得连击数+100%。）",
+        "连击（出现在：获得连击数+100%。）"
+      ],
+      "unsettled": [
+        "获得：获得连击数+100%",
+        "连击：获得连击数+100%",
+        "动态连击数（出现在：获得连击数+100%。）",
+        "连击（出现在：获得连击数+100%。）"
+      ]
+    },
+    "skill_000694": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "迅捷"
+      ]
+    },
+    "skill_000695": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000696": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000697": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000698": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回合：应对状态：回合结束使敌方紧急脱离",
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000699": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000700": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000701": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000702": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "双攻升降",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "面板比值条件"
+      ]
+    },
+    "skill_000703": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "驱散"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "迅捷"
+      ]
+    },
+    "skill_000704": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000705": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "全技能持久修正"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "迅捷"
+      ]
+    },
+    "skill_000706": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "动态连击数（出现在：减伤70%，应对攻击：自己获得连击数+2。）",
+        "连击（出现在：减伤70%，应对攻击：自己获得连击数+2。）"
+      ],
+      "unsettled": [
+        "获得：应对攻击：自己获得连击数+2",
+        "连击：应对攻击：自己获得连击数+2",
+        "动态连击数（出现在：减伤70%，应对攻击：自己获得连击数+2。）",
+        "连击（出现在：减伤70%，应对攻击：自己获得连击数+2。）",
+        "应对：应对攻击：自己获得连击数+2"
+      ]
+    },
+    "skill_000707": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：每次使用后能耗+1",
+        "迅捷"
+      ]
+    },
+    "skill_000708": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：自己每先于敌方行动1次"
+      ]
+    },
+    "skill_000709": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "动态连击数（出现在：造成物伤，2连击。选择：每次使用后本技能威力永久+10或连击数永久+1。）"
+      ],
+      "unsettled": [
+        "动态连击数（出现在：造成物伤，2连击。选择：每次使用后本技能威力永久+10或连击数永久+1。）"
+      ]
+    },
+    "skill_000710": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "应对",
+        "全技能持久修正"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "选择（出现在：自己获得全技能威力+20，选择：本次能耗-1或应对防御时改为全技能威力永久+20）"
+      ],
+      "unsettled": [
+        "选择（出现在：自己获得全技能威力+20，选择：本次能耗-1或应对防御时改为全技能威力永久+20）",
+        "应对：选择：本次能耗-1或应对防御时改为全技能威力永久+20"
+      ]
+    },
+    "skill_000711": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "变：巧变：翼系防御技能"
+      ]
+    },
+    "skill_000712": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000713": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：本技能获得迅捷",
+        "若：若上回合双方有精灵使用幻系技能",
+        "回合：若上回合双方有精灵使用幻系技能",
+        "迅捷"
+      ]
+    },
+    "skill_000714": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "动态连击数（出现在：自己获得连击数+1，迅捷。）",
+        "连击（出现在：自己获得连击数+1，迅捷。）"
+      ],
+      "unsettled": [
+        "获得：自己获得连击数+1",
+        "连击：自己获得连击数+1",
+        "动态连击数（出现在：自己获得连击数+1，迅捷。）",
+        "连击（出现在：自己获得连击数+1，迅捷。）",
+        "迅捷"
+      ]
+    },
+    "skill_000715": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000716": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000717": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "萌化标记",
+        "本手威力加成"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000718": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "体重/吨位条件"
+      ]
+    },
+    "skill_000719": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "驱散"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000720": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "双攻升降",
+        "萌化标记"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000721": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "萌化标记",
+        "全技能持久修正"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000722": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "转移标记",
+        "萌化标记"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000723": {
+      "n_effects": 3,
+      "resolved": true,
+      "settled": [
+        "萌化标记"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000724": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000725": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000726": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000727": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000728": {
+      "n_effects": 3,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "萌化标记",
+        "全技能持久修正"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000729": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000730": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000731": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合",
+        "萌化标记"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "动态连击数（出现在：造成物伤，1连击，双方携带的所有精灵每有1层萌化，本次技能连击数+1。）"
+      ],
+      "unsettled": [
+        "每：双方携带的所有精灵每有1层萌化",
+        "层：双方携带的所有精灵每有1层萌化",
+        "动态连击数（出现在：造成物伤，1连击，双方携带的所有精灵每有1层萌化，本次技能连击数+1。）",
+        "层数驱动",
+        "萌化"
+      ]
+    },
+    "skill_000732": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对",
+        "持续状态层数/回合",
+        "萌化标记"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000733": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "萌化标记",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "若：若敌方有萌化",
+        "萌化"
+      ]
+    },
+    "skill_000734": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对",
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000735": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000736": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "萌化标记"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000737": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "萌化标记"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "选择（出现在：造成魔伤，自己有减益时本技能能耗-1，选择：自己获得萌化或解除萌化。）"
+      ],
+      "unsettled": [
+        "获得：选择：自己获得萌化或解除萌化",
+        "选择（出现在：造成魔伤，自己有减益时本技能能耗-1，选择：自己获得萌化或解除萌化。）",
+        "条件：自身增益/减益",
+        "萌化"
+      ]
+    },
+    "skill_000738": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000739": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "动态连击数（出现在：自己获得双攻永久+10%，2连击。自己有减益时，本次技能连击数+1。）"
+      ],
+      "unsettled": [
+        "获得：自己获得双攻永久+10%",
+        "动态连击数（出现在：自己获得双攻永久+10%，2连击。自己有减益时，本次技能连击数+1。）",
+        "条件：自身增益/减益"
+      ]
+    },
+    "skill_000740": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "随机（出现在：造成魔伤，自己每使用过1次选择技能，自己获得3层随机永久属性增益，使用后重置。）",
+        "选择（出现在：造成魔伤，自己每使用过1次选择技能，自己获得3层随机永久属性增益，使用后重置。）"
+      ],
+      "unsettled": [
+        "获得：自己获得3层随机永久属性增益",
+        "每：自己每使用过1次选择技能",
+        "层：自己获得3层随机永久属性增益",
+        "随机：自己获得3层随机永久属性增益",
+        "随机（出现在：造成魔伤，自己每使用过1次选择技能，自己获得3层随机永久属性增益，使用后重置。）",
+        "选择（出现在：造成魔伤，自己每使用过1次选择技能，自己获得3层随机永久属性增益，使用后重置。）"
+      ]
+    },
+    "skill_000741": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000742": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000743": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "若：若敌方能量等于0"
+      ]
+    },
+    "skill_000744": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：敌方每有1能量"
+      ]
+    },
+    "skill_000745": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "应对覆盖（出现在：敌方失去3能量，应对防御：改为敌方失去6能量。）"
+      ],
+      "unsettled": [
+        "应对覆盖（出现在：敌方失去3能量，应对防御：改为敌方失去6能量。）",
+        "应对：应对防御：改为敌方失去6能量"
+      ]
+    },
+    "skill_000746": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000747": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000748": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000749": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000750": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000751": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000752": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000753": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000754": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "动态连击数（出现在：造成魔伤，3连击，若敌方本回合更换精灵，本次技能连击数翻倍。）"
+      ],
+      "unsettled": [
+        "若：若敌方本回合更换精灵",
+        "回合：若敌方本回合更换精灵",
+        "动态连击数（出现在：造成魔伤，3连击，若敌方本回合更换精灵，本次技能连击数翻倍。）"
+      ]
+    },
+    "skill_000755": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：自己获得速度+70",
+        "若：若敌方本回合更换精灵",
+        "回合：若敌方本回合更换精灵"
+      ]
+    },
+    "skill_000756": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000757": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对",
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000758": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000759": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000760": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回复：敌方下回合回复的能量-5",
+        "回合：敌方下回合回复的能量-5",
+        "回合：冷却2回合"
+      ]
+    },
+    "skill_000761": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "随机（出现在：造成魔伤，自己每使用过1次选择技能，敌方获得3层随机永久属性减益，使用后重置。）",
+        "选择（出现在：造成魔伤，自己每使用过1次选择技能，敌方获得3层随机永久属性减益，使用后重置。）"
+      ],
+      "unsettled": [
+        "获得：敌方获得3层随机永久属性减益",
+        "每：自己每使用过1次选择技能",
+        "层：敌方获得3层随机永久属性减益",
+        "随机：敌方获得3层随机永久属性减益",
+        "随机（出现在：造成魔伤，自己每使用过1次选择技能，敌方获得3层随机永久属性减益，使用后重置。）",
+        "选择（出现在：造成魔伤，自己每使用过1次选择技能，敌方获得3层随机永久属性减益，使用后重置。）"
+      ]
+    },
+    "skill_000762": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000763": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000764": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "若：若上回合双方有精灵使用火系技能",
+        "回合：若上回合双方有精灵使用火系技能"
+      ]
+    },
+    "skill_000765": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000766": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000767": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000768": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "吸血"
+      ]
+    },
+    "skill_000769": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对状态：本次攻击吸血100%",
+        "吸血"
+      ]
+    },
+    "skill_000770": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "动态连击数（出现在：造成物伤，3连击，若自己的生命低于50%，本次技能连击数+2。）"
+      ],
+      "unsettled": [
+        "若：若自己的生命低于50%",
+        "动态连击数（出现在：造成物伤，3连击，若自己的生命低于50%，本次技能连击数+2。）",
+        "条件：生命阈值"
+      ]
+    },
+    "skill_000771": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "吸血"
+      ]
+    },
+    "skill_000772": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：使用后自己获得双攻-50%",
+        "若：若自己生命高于50%",
+        "条件：生命阈值"
+      ]
+    },
+    "skill_000773": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "应对",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对状态：改为对敌方造成物伤"
+      ]
+    },
+    "skill_000774": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：自己每失去10%生命"
+      ]
+    },
+    "skill_000775": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "解析得出但没有结算分支：self_lifesteal",
+        "吸血"
+      ]
+    },
+    "skill_000776": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "全技能持久修正"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000777": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000778": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对防御：额外使敌方攻击技能能耗+4",
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000779": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000780": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "解析得出但没有结算分支：self_lifesteal",
+        "吸血"
+      ]
+    },
+    "skill_000781": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "面板比值条件"
+      ]
+    },
+    "skill_000782": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000783": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000784": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000785": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000786": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000787": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "应对",
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：应对状态：改为获得物攻+50%",
+        "应对：应对状态：改为获得物攻+50%"
+      ]
+    },
+    "skill_000788": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "消耗：消耗5%生命代替1能量"
+      ]
+    },
+    "skill_000789": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：敌方每有1只力竭精灵"
+      ]
+    },
+    "skill_000790": {
+      "n_effects": 4,
+      "resolved": false,
+      "settled": [
+        "应对",
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：应对防御：改为敌方获得双攻和双防-120%",
+        "应对：应对防御：改为敌方获得双攻和双防-120%"
+      ]
+    },
+    "skill_000791": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "消耗：消耗5%生命代替1能量"
+      ]
+    },
+    "skill_000792": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000793": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "回复：若敌方本回合回复生命",
+        "回复：改为失去2倍（含溢出的回复量）",
+        "若：若敌方本回合回复生命",
+        "回合：若敌方本回合回复生命"
+      ]
+    },
+    "skill_000794": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：敌方每有1只力竭精灵"
+      ]
+    },
+    "skill_000795": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000796": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：自己每失去10%生命"
+      ]
+    },
+    "skill_000797": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "若：若自己生命低于50%",
+        "条件：生命阈值",
+        "吸血"
+      ]
+    },
+    "skill_000798": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "选择（出现在：造成物伤，选择：本次技能威力+40，使用后自己生命-10%或自己生命低于50%时）"
+      ],
+      "unsettled": [
+        "选择（出现在：造成物伤，选择：本次技能威力+40，使用后自己生命-10%或自己生命低于50%时）",
+        "条件：生命阈值"
+      ]
+    },
+    "skill_000799": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "变：巧变：吸血相关技能",
+        "吸血"
+      ]
+    },
+    "skill_000800": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "变：自己的生命比例变为与敌方生命比例相同",
+        "变：巧变：恶系攻击技能",
+        "面板比值条件"
+      ]
+    },
+    "skill_000801": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "变：敌方的属性增益变为对应的属性减益"
+      ]
+    },
+    "skill_000802": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000803": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000804": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000805": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "双攻升降"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：自己获得魔攻+70%",
+        "若：若击败敌方"
+      ]
+    },
+    "skill_000806": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "印记：敌方每有1层印记",
+        "每：敌方每有1层印记",
+        "层：敌方每有1层印记",
+        "层数驱动"
+      ]
+    },
+    "skill_000807": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000808": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000809": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "应对",
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000810": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000811": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000812": {
+      "n_effects": 2,
+      "resolved": false,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "每：每次连击使敌方获得1层星陨印记"
+      ]
+    },
+    "skill_000813": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "印记：赋予的星陨印记层数永久+1",
+        "每：每使用1次",
+        "层：赋予的星陨印记层数永久+1"
+      ]
+    },
+    "skill_000814": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "获得：敌方获得星陨印记",
+        "获得：获得层数等于敌方印记层数",
+        "印记：敌方获得星陨印记",
+        "印记：获得层数等于敌方印记层数",
+        "层：获得层数等于敌方印记层数"
+      ]
+    },
+    "skill_000815": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "应对",
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "印记：应对防御：额外使敌方星陨印记层数翻倍",
+        "层：应对防御：额外使敌方星陨印记层数翻倍",
+        "应对：应对防御：额外使敌方星陨印记层数翻倍",
+        "层数驱动"
+      ]
+    },
+    "skill_000816": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000817": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000818": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000819": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000820": {
+      "n_effects": 0,
+      "resolved": true,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000821": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "减伤",
+        "应对",
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000822": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "印记：双方已有的印记层数+1",
+        "层：双方已有的印记层数+1"
+      ]
+    },
+    "skill_000823": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "印记层数累加",
+        "本手威力加成"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "印记：若敌方有印记",
+        "若：若敌方有印记"
+      ]
+    },
+    "skill_000824": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "持续状态层数/回合"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "随机（出现在：自己获得随机16层属性增益，巧变：幻系攻击技能。）"
+      ],
+      "unsettled": [
+        "获得：自己获得随机16层属性增益",
+        "层：自己获得随机16层属性增益",
+        "随机：自己获得随机16层属性增益",
+        "变：巧变：幻系攻击技能",
+        "随机（出现在：自己获得随机16层属性增益，巧变：幻系攻击技能。）"
+      ]
+    },
+    "skill_000825": {
+      "n_effects": 1,
+      "resolved": true,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000826": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "印记层数累加"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [
+        "随机（出现在：选择：敌方随机获得1种负面印记或自己随机获得1种正面印记。）",
+        "选择（出现在：选择：敌方随机获得1种负面印记或自己随机获得1种正面印记。）"
+      ],
+      "unsettled": [
+        "获得：选择：敌方随机获得1种负面印记或自己随机获得1种正面印记",
+        "印记：选择：敌方随机获得1种负面印记或自己随机获得1种正面印记",
+        "随机：选择：敌方随机获得1种负面印记或自己随机获得1种正面印记",
+        "随机（出现在：选择：敌方随机获得1种负面印记或自己随机获得1种正面印记。）",
+        "选择（出现在：选择：敌方随机获得1种负面印记或自己随机获得1种正面印记。）"
+      ]
+    },
+    "skill_000827": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对防御：改为额外造成300%幻系伤害"
+      ]
+    },
+    "skill_000828": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "伤害"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "若：若敌方生命低于50%",
+        "条件：生命阈值"
+      ]
+    },
+    "skill_000829": {
+      "n_effects": 2,
+      "resolved": true,
+      "settled": [
+        "双攻升降"
+      ],
+      "tier": "SIMULATABLE_UNVERIFIED",
+      "unparsed": [],
+      "unsettled": []
+    },
+    "skill_000830": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "解析得出但没有结算分支：escape"
+      ]
+    },
+    "skill_000831": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "印记：若敌方没有星陨印记",
+        "若：若敌方没有星陨印记"
+      ]
+    },
+    "skill_000832": {
+      "n_effects": 1,
+      "resolved": false,
+      "settled": [
+        "伤害",
+        "持续状态层数/回合",
+        "印记层数累加"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "若：若上回合双方有精灵使用水系技能",
+        "回合：若上回合双方有精灵使用水系技能"
+      ]
+    },
+    "skill_000833": {
+      "n_effects": 0,
+      "resolved": false,
+      "settled": [
+        "减伤",
+        "应对"
+      ],
+      "tier": "PARTIAL",
+      "unparsed": [],
+      "unsettled": [
+        "应对：应对攻击：以魔法伤害触发敌方的星陨效果"
+      ]
+    }
+  },
+  "scope": "all",
+  "stamp": {
+    "coverage.py": "36650edf4f2e87f36947b459bdeb4bcc5e7eecee225331ca74047839bf577022",
+    "data.py": "d92786ef8c1a9584afbbb7b57640793111d52737be8e97cbc0efee12aa6f9e2a",
+    "service.py": "74f53be59fb01dc19db51dd401dfb25039aea69fc238662991b3484445fcad33"
+  },
+  "totals": {
+    "battle_skills": 579,
+    "entities": 824,
+    "simulatable_entities": 313,
+    "simulatable_ratio": 0.3799,
+    "traits": 245
+  }
+}
