@@ -45,7 +45,10 @@ def declared_capabilities_of(cfgid: Optional[Any] = None) -> Dict[str, bool]:
     """
     from . import rule_config as _rc  # 延迟 import（照既有写法 ✓）
     cfg = _rc.get_rule_config(cfgid)
-    return {name: bool(getattr(cfg, attr, False)) for name, attr in _CAPABILITY_TO_FLAG.items()}
+    # 🔴 #161（Lead 2026-09-30 定案 ✓）：**右列是"形参名"（`flags = {f: … for k, f in …}` 要它 ✓），
+    # 不是 cfg 属性名** ✗ —— cfg 上的真名是 **`damage_<能力名>`**（v3 实测：`damage_cleanse_marks`=True ✓
+    # 而 `cleanse_marks_declared` **不存在** ✗）⇒ **表不动，改的是消费它的这一处** ✓。
+    return {name: bool(getattr(cfg, "damage_%s" % name, False)) for name in _CAPABILITY_TO_FLAG}
 
 
 def respond_clause_gaps(skill: Any, parsed: Any) -> List[str]:
@@ -137,7 +140,10 @@ def settlement_verdict(skill: Any, *, declared: Optional[Dict[str, bool]] = None
         _diag = []                       # 该条件子句已被某个效果"覆盖" ⇒ 缺口消失 ✓
     unsettled.extend(_diag)
 
-    return {"resolved": bool(settled) and not unsettled,
+    # ⚠ `settled` 键**照旧产出**（`test_cond_self_debuff_power:117` 有 `assertIn("驱散", v["settled"])` ✓）,
+    #   但**不再参与 `resolved`**（Lead 2026-09-30 重裁 ✓）：`resolved = not unsettled` ✓
+    #   两点一线：`724`（`unsettled=[]` ⇒ 必须 True ✓）· `805`/`533`（有 unsettled ⇒ 必须 False ✓）。
+    return {"resolved": not unsettled,
             "settled": settled,
             "unsettled": unsettled,
             "parsed": parsed}
