@@ -394,6 +394,14 @@
       "owner": "lead（改正）",
       "status": "closed",
       "rule": "给跨机复验的指令必须**逐条自测路径**（不同 OS 的目录布局不同：Node 测试在仓库根 `tests/`，Python 判据在 `roco/tests/`）；探针不写死绝对路径、产物不落进产品仓库"
+    },
+    {
+      "id": "O-21",
+      "what": "04 的「同时行动红线」**已被独立复验为成立**（8/8），但红线有一条**没有测试守护**的部分：`seed` 只是「不进请求体」，并非「被主动拒绝」",
+      "evidence": "harness-verifier 在 `216195c` 不可变副本上自建探针（`E:\\roco-scratch\\vfy-041-redline3.py`；先量噪声地板：唯一易变字段是 `per_seed[*].latency_ms`）：[A] public+state_version ⇒ 200；[B] 私有 serialize ⇒ **400**（点名 `state.seed, state.replace_queue`）；[C] 不给 public ⇒ **400**；[D] public 里种 `_pending_enemy` ⇒ **400 点名**；[E] public+无关隐藏键 ⇒ 200 但剥离易变字段后与 [A] **逐字段相同**；[F] 顶层真实 seed ⇒ 400 且回执含真实 seed=False；[G] planner 级两状态只差 `_pending_enemy` ⇒ 剥离后相同。反向证据：路由表仅 9 条（无 debug/replay/history/state）、唯一回吐私有 state 的是**玩家对局域** `_sim_envelope`、`answer-cache` 只服务问答（**plan 路径无缓存**）、`planner.py`/`opponents.py` **0 处代码读 `_pending`**。**两处措辞与代码不符**：① `_pending` 是「2 处命中（第 7/209 行）**皆在 docstring**，代码 0 处」而非「0 命中」；② `planActions` **没有**「带 seed 本地拒绝」的代码（body keys 实测 = `ruleset_id,state_version,public`），真实机制是「seed 根本不进请求体」+ 引擎侧 400，**且测试里没有任何断言**",
+      "owner": "harness-verifier（发现）· plan04-engine（同批修：改措辞 + 补假客户端抓 body 的断言 + 两向变异）",
+      "status": "fix_in_flight",
+      "rule": "**安全属性必须由断言守护，不能只靠「当前没人那么写」**：凡「某个字段不进请求体/不进回执」这类红线，都要有「假客户端抓包断言白名单键 + 两向变异」；描述机制时**不许**把「没转发」写成「主动拒绝」（O-21 就是范本）"
     }
   ],
   "handoff": {
