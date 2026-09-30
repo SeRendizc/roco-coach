@@ -2848,6 +2848,235 @@
     ],
     "sample_note": "报告只贴前 2 条候选（共 24 条）：完整候选集合由 buildOpponentCandidates() 返回，报告不复制整份（否则 24 × 45 条技能会把报告变成噪声）"
   },
+  "outlook_protocol": {
+    "version": "rc604-opponent-outlook/v1",
+    "expressions": {
+      "uniform": {
+        "expression": "uniform_weight",
+        "is_probability": false,
+        "why": "候选宇宙内每条候选一样重（1/N）：这是**无信息基线**，不是强度、不是胜率，也不是版本环境占比 —— 本仓没有任何真实对局频次数据"
+      },
+      "conditioned": {
+        "expression": "conditioned_weight",
+        "is_probability": false,
+        "why": "权重只由**已公开**事实（已亮明系别 / 物种速度、我方阵容、模式规模）筛 + 分层得到；层内等权、层间只有一条声明过的假设（2:1 降权），**没有候选被压 0**"
+      },
+      "scenario_set": {
+        "expression": "scenario_set",
+        "is_probability": false,
+        "why": "把候选按**速度档**分成若干个情景（每组可解释、可复算）：它回答「哪些候选在一起」，不回答「哪一个更可能」—— 情景之间**不给优先级**、不给最优结论"
+      },
+      "range": {
+        "expression": "range",
+        "is_probability": false,
+        "why": "每个情景给成员权重的**闭区间**（不是点估计）：区间宽度就是「这份基线只到这个精度」的如实表达；均匀时 min == max，那是**基线退化**，不是「很确定」"
+      }
+    },
+    "range_unit": "权重闭区间 [min, max]（同一情景内成员权重的取值范围；**不是概率**、不是把握度、不是预测：它只说明「这些成员在这份基线里各占多少」）",
+    "degrade_policy": "空候选 / 输入越界 / 证据矛盾 / 预算裁剪 ⇒ degraded:true + degrade_reasons[]，每个情景标 complete:false，**不给**最优情景（best_scenario:null）",
+    "audit_codes": [
+      "SCENARIO_SEMANTICS_NOT_DECLARED",
+      "SCENARIO_RANKS_A_SCENARIO",
+      "OUTLOOK_DEGRADED_WITHOUT_REASON"
+    ]
+  },
+  "outlook_sample": {
+    "protocol": "rc604-opponent-outlook/v1",
+    "available": true,
+    "degraded": true,
+    "degrade_reasons": [
+      "候选被预算裁掉 122 条（分布留在 budget.pool_summary）"
+    ],
+    "frequency": {
+      "available": false,
+      "reason_code": "FREQUENCY_NO_DECLARED_SOURCE",
+      "unknown_reason": "缺**频次数据的来源声明**：注入的频次数据没有声明它是从哪来的（顶层 `declared_source` 必须是 \"measured\" 之类的实测声明，且每一行都要有 `scope` 与 `revision`）。没有来源的数字 = 编出来的数字，所以整份输入被**拒绝**，退化成 available:false；均匀分布**不会**被拿来顶替频次（那正是「用无信息基线冒充实测」这个错误的写法）。去哪拿：① 实机对局统计（游戏内匹配记录 / 赛季数据面板导出，需 url 或仓内文件 + 日期）；② 玩家自己提供的对局记录（匿名化的队伍-出场频次表，需说明样本量、时间窗与采集方式）；③ 离线联赛 / 自博弈产物（本仓现在也**没有**，且 RC-601 的规则绑定还 BLOCKED）。",
+      "note": "没有真实对局频次 ⇒ 不给概率预测；用情景集合与范围如实表达「我们知道到哪一层」"
+    },
+    "declarations": {
+      "is_probability": false,
+      "not_a_prediction": "这不是「他会出哪只」的概率预测，也不是最优结论：没有频次数据时本模块只给候选集合、情景分组与权重区间",
+      "uniform_is_baseline_only": true,
+      "expressions": {
+        "uniform": {
+          "expression": "uniform_weight",
+          "is_probability": false,
+          "why": "候选宇宙内每条候选一样重（1/N）：这是**无信息基线**，不是强度、不是胜率，也不是版本环境占比 —— 本仓没有任何真实对局频次数据"
+        },
+        "conditioned": {
+          "expression": "conditioned_weight",
+          "is_probability": false,
+          "why": "权重只由**已公开**事实（已亮明系别 / 物种速度、我方阵容、模式规模）筛 + 分层得到；层内等权、层间只有一条声明过的假设（2:1 降权），**没有候选被压 0**"
+        },
+        "scenario_set": {
+          "expression": "scenario_set",
+          "is_probability": false,
+          "why": "把候选按**速度档**分成若干个情景（每组可解释、可复算）：它回答「哪些候选在一起」，不回答「哪一个更可能」—— 情景之间**不给优先级**、不给最优结论"
+        },
+        "range": {
+          "expression": "range",
+          "is_probability": false,
+          "why": "每个情景给成员权重的**闭区间**（不是点估计）：区间宽度就是「这份基线只到这个精度」的如实表达；均匀时 min == max，那是**基线退化**，不是「很确定」"
+        }
+      }
+    },
+    "scenarios": [
+      {
+        "scenario_id": "band:slow",
+        "label": "速度档 slow 的候选（24 条，其中已见 1 条）",
+        "basis": "按**速度档**分组（RC-303 speedBandFor 现算的工程三分位；分档口径见 rule_ledger）",
+        "member_count": 24,
+        "observed_count": 1,
+        "inferred_count": 23,
+        "members": [
+          "pet_000002",
+          "pet_000001",
+          "pet_000007",
+          "pet_000012",
+          "pet_000016",
+          "pet_000017",
+          "pet_000022",
+          "pet_000023"
+        ],
+        "members_omitted": 16,
+        "range": {
+          "min": 0.006849315068,
+          "max": 0.006849315068,
+          "unit": "权重闭区间 [min, max]（同一情景内成员权重的取值范围；**不是概率**、不是把握度、不是预测：它只说明「这些成员在这份基线里各占多少」）",
+          "semantics": {
+            "expression": "range",
+            "is_probability": false,
+            "why": "每个情景给成员权重的**闭区间**（不是点估计）：区间宽度就是「这份基线只到这个精度」的如实表达；均匀时 min == max，那是**基线退化**，不是「很确定」"
+          }
+        },
+        "complete": false,
+        "evidence": [
+          {
+            "source_file": "injected:publicFacts",
+            "pointer": "publicFacts",
+            "field": "scenario_members",
+            "value": 24,
+            "note": "情景 slow 的成员数（按物种；observed/inferred 分列）"
+          }
+        ]
+      }
+    ],
+    "ranges": {
+      "pool": {
+        "numerator": 146,
+        "denominator": 622,
+        "unit": "候选池占比（入选候选数 / 候选宇宙大小；是计数比，不是把握度）"
+      },
+      "weight": {
+        "min": 0.006849315068,
+        "max": 0.006849315068,
+        "unit": "权重闭区间 [min, max]（同一情景内成员权重的取值范围；**不是概率**、不是把握度、不是预测：它只说明「这些成员在这份基线里各占多少」）",
+        "semantics": {
+          "expression": "range",
+          "is_probability": false,
+          "why": "每个情景给成员权重的**闭区间**（不是点估计）：区间宽度就是「这份基线只到这个精度」的如实表达；均匀时 min == max，那是**基线退化**，不是「很确定」"
+        },
+        "degenerate": true,
+        "degenerate_note": "区间退化成一点 = 这一层里所有候选**同样重**（基线），不是「很确定」"
+      },
+      "observed_vs_inferred": {
+        "observed": 1,
+        "inferred": 23,
+        "unit": "计数（条）",
+        "note": "「已见」与「推出来的」分开计数：已观察事实与推测不混用"
+      }
+    },
+    "members_total": 24,
+    "contradictions": [],
+    "evidence": [
+      {
+        "source_file": "injected:catalog",
+        "pointer": "catalog.universeSpecies",
+        "field": "universe_size",
+        "value": 622,
+        "note": "均匀基线的分母：从注入数据现数（pack 物种 ∪ owned 物种，按物种去重），不是写死的 48 / 600 / 622"
+      },
+      {
+        "source_file": "injected:catalog",
+        "pointer": "catalog.featureFor()",
+        "field": "members_with_types",
+        "value": 622,
+        "note": "带属性数据的候选数（属性相性规则只能在这部分上判；缺属性的候选按「不知道」处理，不猜成 1 倍）"
+      },
+      {
+        "source_file": "injected:publicFacts",
+        "pointer": "publicFacts",
+        "field": "scenario_set",
+        "value": [
+          "band:slow"
+        ],
+        "note": "情景集合：按速度档分组（可解释、可复算）；情景之间不排序、不给最优"
+      }
+    ],
+    "unverified": [
+      "未核实：情景之间的优劣 —— 不给优先级、不给最优结论（没有频次数据就没有比较的依据）",
+      "未核实：区间之外的候选 —— 被预算裁掉的部分只留分布（budget.pool_summary），没被算成 0",
+      "未核实：当前产出**已降级** —— 情景标 complete:false，降级原因见 degrade_reasons"
+    ],
+    "unknown_reason": null,
+    "best_scenario": null,
+    "best_scenario_reason": "本模块**不给最优情景**：没有频次数据时「哪个情景更好」没有依据；而且当前存在未消解的降级原因",
+    "candidates_budget": {
+      "limit": 24,
+      "rule": "observed_first（按 slot 升序）→ inferred（①有冻结学招表 ②与已亮明速度档同档 ③species_id 升序）",
+      "kept": 24,
+      "observed_kept": 1,
+      "inferred_kept": 23,
+      "truncated": true,
+      "dropped_count": 122,
+      "pool_summary": {
+        "by_band": {
+          "slow": 146
+        },
+        "observed": 1,
+        "inferred_available": 145,
+        "dropped_by_band": {
+          "slow": 122
+        }
+      }
+    },
+    "candidates_available": true,
+    "beliefs": {
+      "uniform": {
+        "kind": "non_informative_baseline",
+        "is_probability": false,
+        "semantics": {
+          "expression": "uniform_weight",
+          "is_probability": false,
+          "why": "候选宇宙内每条候选一样重（1/N）：这是**无信息基线**，不是强度、不是胜率，也不是版本环境占比 —— 本仓没有任何真实对局频次数据"
+        }
+      },
+      "conditioned": {
+        "available": true,
+        "kind": "public_fact_conditioned",
+        "pool_size": 146,
+        "basis": "own_speed_tier_downweight",
+        "is_probability": false,
+        "semantics": {
+          "expression": "conditioned_weight",
+          "is_probability": false,
+          "why": "权重只由**已公开**事实（已亮明系别 / 物种速度、我方阵容、模式规模）筛 + 分层得到；层内等权、层间只有一条声明过的假设（2:1 降权），**没有候选被压 0**"
+        },
+        "unknown_reason": null
+      },
+      "frequency": {
+        "available": false,
+        "semantics": {
+          "expression": "scenario_set",
+          "is_probability": false,
+          "why": "把候选按**速度档**分成若干个情景（每组可解释、可复算）：它回答「哪些候选在一起」，不回答「哪一个更可能」—— 情景之间**不给优先级**、不给最优结论"
+        },
+        "note": "频次基线缺数据 ⇒ 用情景集合代替，且**不**把它展示成概率"
+      }
+    },
+    "observations_rejected": [],
+    "update_diff": null
+  },
   "criteria": [
     {
       "label": "均匀基线的分母来自数据（改数据 ⇒ 分母与 1/N 跟着变）",
@@ -2896,6 +3125,21 @@
       "ok": true
     },
     {
+      "label": "没有频率数据时三种表达都声明「不是概率」，且降级如实（03.4）",
+      "criteria": "没有真实频次数据时，三种表达（uniform / 情景集合 / 区间）各自都必须带语义声明：`is_probability:false` + 「为什么它是基线/区间而不是概率」；区间必须带量纲与语义、`best_scenario` 必须是 `null`（不给最优结论）；违反 ⇒ `SCENARIO_SEMANTICS_NOT_DECLARED` / `SCENARIO_RANKS_A_SCENARIO`（红）。降级（空候选 / 矛盾证据 / 预算裁剪）必须 `degraded:true` + 逐条原因，且每个情景标 `complete:false`；`available:false` 时不许带任何情景或区间 ⇒ `OUTLOOK_DEGRADED_WITHOUT_REASON`（红）。",
+      "actual": {
+        "available": true,
+        "degraded": true,
+        "degrade_reasons": [
+          "候选被预算裁掉 122 条（分布留在 budget.pool_summary）"
+        ],
+        "is_probability": false,
+        "best_scenario": null,
+        "scenarios": 1
+      },
+      "ok": true
+    },
+    {
       "label": "频次信念必须有真实来源；没有来源一律拒绝（不用均匀冒充）",
       "criteria": "`frequencyBelief()` 只在注入的频次数据**带可核对来源**（顶层实测声明 + 每行 url / 仓内文件 + 日期 + scope + revision）时才 `available:true`；没有来源 / 没有行标签的一律**拒绝**并在 `unknown_reason` 里写清「缺什么、去哪拿」。用均匀分布冒充频次 ⇒ `FREQUENCY_FAKED`（红）—— 这是本 RC 最想防的那一个错误。",
       "actual": "available=false、reason_code=FREQUENCY_NO_DECLARED_SOURCE",
@@ -2911,7 +3155,7 @@
       "label": "在线段没有引擎 / 子进程调用，**而且判据真的覆盖到在线入口**（F-03-1）",
       "criteria": "把 `src/coach/opponent-belief.mjs` 的在线段（`ONLINE_SECTION_MARKER` **定义行之后**、`OFFLINE_SECTION_MARKER` **之前**）逐行取出、剥掉行注释与块注释，再对每行做 `FORBIDDEN_ONLINE_PATTERNS[].pattern` 的子串匹配：命中即 `ONLINE_ENGINE_CALL` / `ONLINE_SUBPROCESS_CALL`（红）。判据是**源码结构**，不是注释声明。⚠ 2026-09-30（F-03-1）：旧口径取的是标记串**第一次出现之前**的正文 —— 那正是定义行自己，于是「在线段」只剩 69 行文件头，判据**覆盖为空**却显示干净（假绿）。现在还要查**覆盖**：在线段必须定义全部 `ONLINE_ENTRYPOINTS`，缺一个 ⇒ `ONLINE_COVERAGE_INCOMPLETE`（红）。",
       "actual": {
-        "online_lines": 2441,
+        "online_lines": 2706,
         "scanned_online_entrypoints": 14,
         "missing_online_entrypoints": [],
         "hits": []
@@ -3163,6 +3407,55 @@
       "criterion": "条件化信念的逐条权重**不许出现 0**：仅凭「我方阵容的速度层次」这类假设把候选压 0 = 声称这只「不可能上场」，而假设不是证据。允许的排除只有**公开证据**（已出技能 / 先手关系 / 可见伤害…）并必须把证据 ID 写进排除理由；违反 ⇒ `ASSUMPTION_ZEROES_CANDIDATE`（红）。权重还必须显式声明它是哪种基线（`weights.basis` ∈ own_speed_tier_downweight / uniform_over_pool），缺声明 ⇒ `WEIGHT_BASIS_NOT_DECLARED`（红）。",
       "expect_code": "WEIGHT_BASIS_NOT_DECLARED",
       "actual": "[\"[WEIGHT_BASIS_NOT_DECLARED] beliefs.uniform.weights.baseline_declaration：权重必须带一句人读的边界声明（baseline_declaration）：这份权重能用来做什么、不能用来做什么\"]"
+    },
+    {
+      "where": "outlook.scenarios（available:false 时）",
+      "mutation": "空候选降级却塞回一个假情景",
+      "criterion": "没有真实频次数据时，三种表达（uniform / 情景集合 / 区间）各自都必须带语义声明：`is_probability:false` + 「为什么它是基线/区间而不是概率」；区间必须带量纲与语义、`best_scenario` 必须是 `null`（不给最优结论）；违反 ⇒ `SCENARIO_SEMANTICS_NOT_DECLARED` / `SCENARIO_RANKS_A_SCENARIO`（红）。降级（空候选 / 矛盾证据 / 预算裁剪）必须 `degraded:true` + 逐条原因，且每个情景标 `complete:false`；`available:false` 时不许带任何情景或区间 ⇒ `OUTLOOK_DEGRADED_WITHOUT_REASON`（红）。",
+      "expect_code": "OUTLOOK_DEGRADED_WITHOUT_REASON",
+      "actual": "[\"[SCENARIO_SEMANTICS_NOT_DECLARED] outlook.scenarios.fake.range：情景的权重区间必须带 unit + semantics（闭区间，不是‹概率›/把握度）\"]"
+    },
+    {
+      "where": "outlook（03.4 情景集合）",
+      "mutation": "把 is_probability 改成 true",
+      "criterion": "没有真实频次数据时，三种表达（uniform / 情景集合 / 区间）各自都必须带语义声明：`is_probability:false` + 「为什么它是基线/区间而不是概率」；区间必须带量纲与语义、`best_scenario` 必须是 `null`（不给最优结论）；违反 ⇒ `SCENARIO_SEMANTICS_NOT_DECLARED` / `SCENARIO_RANKS_A_SCENARIO`（红）。降级（空候选 / 矛盾证据 / 预算裁剪）必须 `degraded:true` + 逐条原因，且每个情景标 `complete:false`；`available:false` 时不许带任何情景或区间 ⇒ `OUTLOOK_DEGRADED_WITHOUT_REASON`（红）。",
+      "expect_code": "SCENARIO_SEMANTICS_NOT_DECLARED",
+      "actual": "[\"[SCENARIO_SEMANTICS_NOT_DECLARED] outlook.declarations：情景集合/范围必须显式声明 is_probability:false（没有频次数据时不许把它读成‹概率›预测）\"]"
+    },
+    {
+      "where": "outlook（03.4 情景集合）",
+      "mutation": "抹掉情景区间的量纲",
+      "criterion": "没有真实频次数据时，三种表达（uniform / 情景集合 / 区间）各自都必须带语义声明：`is_probability:false` + 「为什么它是基线/区间而不是概率」；区间必须带量纲与语义、`best_scenario` 必须是 `null`（不给最优结论）；违反 ⇒ `SCENARIO_SEMANTICS_NOT_DECLARED` / `SCENARIO_RANKS_A_SCENARIO`（红）。降级（空候选 / 矛盾证据 / 预算裁剪）必须 `degraded:true` + 逐条原因，且每个情景标 `complete:false`；`available:false` 时不许带任何情景或区间 ⇒ `OUTLOOK_DEGRADED_WITHOUT_REASON`（红）。",
+      "expect_code": "SCENARIO_SEMANTICS_NOT_DECLARED",
+      "actual": "[\"[SCENARIO_SEMANTICS_NOT_DECLARED] outlook.scenarios.band:slow.range：情景的权重区间必须带 unit + semantics（闭区间，不是‹概率›/把握度）\"]"
+    },
+    {
+      "where": "outlook（03.4 情景集合）",
+      "mutation": "抹掉 range 表达的 why",
+      "criterion": "没有真实频次数据时，三种表达（uniform / 情景集合 / 区间）各自都必须带语义声明：`is_probability:false` + 「为什么它是基线/区间而不是概率」；区间必须带量纲与语义、`best_scenario` 必须是 `null`（不给最优结论）；违反 ⇒ `SCENARIO_SEMANTICS_NOT_DECLARED` / `SCENARIO_RANKS_A_SCENARIO`（红）。降级（空候选 / 矛盾证据 / 预算裁剪）必须 `degraded:true` + 逐条原因，且每个情景标 `complete:false`；`available:false` 时不许带任何情景或区间 ⇒ `OUTLOOK_DEGRADED_WITHOUT_REASON`（红）。",
+      "expect_code": "SCENARIO_SEMANTICS_NOT_DECLARED",
+      "actual": "[\"[SCENARIO_SEMANTICS_NOT_DECLARED] outlook.declarations.expressions.range：表达「range」缺语义声明（is_probability:false + 为什么它是基线/区间而不是‹概率›）\"]"
+    },
+    {
+      "where": "outlook（03.4 情景集合）",
+      "mutation": "给出一个「最优情景」",
+      "criterion": "没有真实频次数据时，三种表达（uniform / 情景集合 / 区间）各自都必须带语义声明：`is_probability:false` + 「为什么它是基线/区间而不是概率」；区间必须带量纲与语义、`best_scenario` 必须是 `null`（不给最优结论）；违反 ⇒ `SCENARIO_SEMANTICS_NOT_DECLARED` / `SCENARIO_RANKS_A_SCENARIO`（红）。降级（空候选 / 矛盾证据 / 预算裁剪）必须 `degraded:true` + 逐条原因，且每个情景标 `complete:false`；`available:false` 时不许带任何情景或区间 ⇒ `OUTLOOK_DEGRADED_WITHOUT_REASON`（红）。",
+      "expect_code": "SCENARIO_RANKS_A_SCENARIO",
+      "actual": "[\"[SCENARIO_RANKS_A_SCENARIO] outlook.best_scenario：没有频次数据时不许给「最优情景」，实际 \\\"band:slow\\\"\"]"
+    },
+    {
+      "where": "outlook（03.4 情景集合）",
+      "mutation": "降级却清空原因",
+      "criterion": "没有真实频次数据时，三种表达（uniform / 情景集合 / 区间）各自都必须带语义声明：`is_probability:false` + 「为什么它是基线/区间而不是概率」；区间必须带量纲与语义、`best_scenario` 必须是 `null`（不给最优结论）；违反 ⇒ `SCENARIO_SEMANTICS_NOT_DECLARED` / `SCENARIO_RANKS_A_SCENARIO`（红）。降级（空候选 / 矛盾证据 / 预算裁剪）必须 `degraded:true` + 逐条原因，且每个情景标 `complete:false`；`available:false` 时不许带任何情景或区间 ⇒ `OUTLOOK_DEGRADED_WITHOUT_REASON`（红）。",
+      "expect_code": "OUTLOOK_DEGRADED_WITHOUT_REASON",
+      "actual": "[\"[OUTLOOK_DEGRADED_WITHOUT_REASON] outlook.degrade_reasons：degraded:true 却没说清降级原因：降级必须点名（空候选 / 矛盾证据 / 预算裁剪）\"]"
+    },
+    {
+      "where": "outlook（03.4 情景集合）",
+      "mutation": "降级了但情景仍标完整",
+      "criterion": "没有真实频次数据时，三种表达（uniform / 情景集合 / 区间）各自都必须带语义声明：`is_probability:false` + 「为什么它是基线/区间而不是概率」；区间必须带量纲与语义、`best_scenario` 必须是 `null`（不给最优结论）；违反 ⇒ `SCENARIO_SEMANTICS_NOT_DECLARED` / `SCENARIO_RANKS_A_SCENARIO`（红）。降级（空候选 / 矛盾证据 / 预算裁剪）必须 `degraded:true` + 逐条原因，且每个情景标 `complete:false`；`available:false` 时不许带任何情景或区间 ⇒ `OUTLOOK_DEGRADED_WITHOUT_REASON`（红）。",
+      "expect_code": "OUTLOOK_DEGRADED_WITHOUT_REASON",
+      "actual": "[\"[OUTLOOK_DEGRADED_WITHOUT_REASON] outlook.scenarios：降级时每个情景都必须标 complete:false（不许把不完整的情景当完整的给人）\"]"
     }
   ],
   "audit": {

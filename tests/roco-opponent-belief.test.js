@@ -33,10 +33,10 @@ import {
   FAIL_CLOSED_REASONS, FORBIDDEN_ONLINE_PATTERNS, HIDDEN_FACT_FIELDS, NON_INFORMATIVE_DECLARATION,
   ONLINE_ENTRYPOINTS, PUBLIC_FACT_FIELDS, PUBLIC_FACT_FIELDS_OPTIONAL, RC604_REPORT_PATH, RULES, RULE_IDS,
   SKILL_POOL_GRADES, STRUCTURAL_CRITERIA, auditOpponentBelief, beliefReport, buildCandidateUniverse,
-  buildMeasuredFrequencySample, buildOpponentCandidates, exact, formatAuditProblem, frequencyBelief,
-  legalSkillLoadout, normalizeFrequencyInput, onlineSectionCoverage, onlineSectionOf, readOpponentEvidence,
-  readOpponentView, readPublicFacts, revealedConditioned, scanForbiddenPatterns, uniformBelief,
-  updateOpponentCandidates, weightsFor,
+  buildMeasuredFrequencySample, buildOpponentCandidates, buildScenarioOutlook, exact, formatAuditProblem,
+  frequencyBelief, legalSkillLoadout, normalizeFrequencyInput, onlineSectionCoverage, onlineSectionOf,
+  readOpponentEvidence, readOpponentView, readPublicFacts, revealedConditioned, scanForbiddenPatterns,
+  uniformBelief, updateOpponentCandidates, weightsFor,
 } from '../src/coach/opponent-belief.mjs';
 import {CONFIDENCE_LEVELS} from '../src/coach/team-gaps.js';
 import {buildCandidateIndex, loadTeamCandidatesInputs, speedBandFor} from '../src/coach/team-candidates.mjs';
@@ -1414,6 +1414,171 @@ test('03.3-缺口#1（F-03-2 清单）：白名单每一项都必须被夹具或
   for (const group of Object.keys(PUBLIC_FACT_FIELDS_OPTIONAL)) {
     assert.ok(Array.isArray(PUBLIC_FACT_FIELDS_OPTIONAL[group]), `OPTIONAL 缺 ${group}`);
   }
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// 03.4 · 没有频率数据 ⇒ 情景集合 + 区间（不装概率）+ 两条降级
+// ─────────────────────────────────────────────────────────────────────────
+
+test('03.4-E4：三种表达都声明「不是概率」，情景与区间都必须带语义', () => {
+  const outlook = buildScenarioOutlook({catalog: index, publicFacts: FACTS_SINGLE_SLOW, skillPool: SKILL_POOL});
+  raw('E4 情景集合与区间', {available: outlook.available, degraded: outlook.degraded,
+    frequency: {available: outlook.frequency.available, reason_code: outlook.frequency.reason_code},
+    is_probability: outlook.declarations.is_probability, best_scenario: outlook.best_scenario,
+    scenarios: outlook.scenarios.map((row) => [row.scenario_id, row.member_count, row.range?.min, row.range?.max]),
+    ranges: {weight: outlook.ranges.weight, observed_vs_inferred: outlook.ranges.observed_vs_inferred}});
+  assert.equal(outlook.available, true);
+  assert.equal(outlook.frequency.available, false, 'E4 本仓没有真实频次 ⇒ 频次基线必须不可用');
+  assert.equal(outlook.frequency.reason_code, 'FREQUENCY_NO_DECLARED_SOURCE');
+  assert.equal(outlook.declarations.is_probability, false);
+  assert.ok(outlook.declarations.not_a_prediction.includes('不是'));
+  for (const key of ['uniform', 'conditioned', 'scenario_set', 'range']) {
+    const one = outlook.declarations.expressions[key];
+    assert.equal(one.is_probability, false, `E4 ${key} 必须声明不是概率`);
+    assert.ok(one.why.length > 0, `E4 ${key} 必须写清为什么`);
+  }
+  assert.equal(outlook.best_scenario, null, 'E4 没有频次数据 ⇒ 不许给最优情景');
+  assert.ok(outlook.scenarios.length >= 1);
+  for (const scenario of outlook.scenarios) {
+    assert.ok(scenario.range.unit.includes('不是概率'), 'E4 区间的量纲必须写明不是概率');
+    assert.equal(scenario.range.semantics.is_probability, false);
+    assert.ok(scenario.member_count >= scenario.members.length);
+  }
+  if (outlook.ranges.weight.degenerate) {
+    assert.ok(outlook.ranges.weight.degenerate_note.includes('不是'), 'E4 区间退化必须说清「那是基线不是确定」');
+  }
+  for (const banned of ['probability', 'posterior', 'best_guess', 'win_rate', 'win_probability']) {
+    assert.ok(!(banned in outlook), `E4 产出里不许有 ${banned} 这类字段`);
+  }
+  // 干净产出必须过审计（语义声明的判据不是恒红）
+  const audit = auditOpponentBelief({beliefs: [uniformBelief({catalog: index})], outlook});
+  raw('E4 审计', {ok: audit.ok, problems: auditRaw(audit)});
+  assert.equal(audit.ok, true, `E4 干净的情景产出必须放行：${auditRaw(audit).join(' | ')}`);
+});
+
+test('03.4-E5（通过条件③）：空候选 与 矛盾证据 两条降级读数', () => {
+  // (a1) 没有候选宇宙：obs=场上那只（公开事实仍在），但宇宙为空 ⇒ 降级 + 情景标 incomplete
+  const noCatalog = buildScenarioOutlook({catalog: null, publicFacts: FACTS_SINGLE_SLOW, skillPool: SKILL_POOL});
+  raw('E5a1 没有候选宇宙', {available: noCatalog.available, degraded: noCatalog.degraded,
+    reasons: noCatalog.degrade_reasons, scenarios: noCatalog.scenarios.length,
+    complete: noCatalog.scenarios.map((row) => row.complete)});
+  assert.equal(noCatalog.degraded, true);
+  assert.ok(noCatalog.degrade_reasons.some((line) => line.includes('候选宇宙')));
+  assert.equal(noCatalog.best_scenario, null);
+  assert.ok(noCatalog.scenarios.every((row) => row.complete === false));
+
+  // (a2) 池子被规则筛空：只留一只**被水系克制**的候选（火系），属性规则把它筛掉 ⇒ 空池
+  const tinyIndex = {
+    universeSpecies: new Set(['pet_000003']),
+    featureFor: (speciesId) => index.featureFor(speciesId),
+    speedValues: index.speedValues,
+    scaleByCombo: index.scaleByCombo,
+    learnsets: index.learnsets,
+    skills: index.skills,
+  };
+  const emptyPool = buildScenarioOutlook({catalog: tinyIndex, publicFacts: FACTS_SINGLE_SLOW, skillPool: SKILL_POOL});
+  raw('E5a2 池子被筛空', {available: emptyPool.available, degraded: emptyPool.degraded,
+    reasons: emptyPool.degrade_reasons, unknown_reason: String(emptyPool.unknown_reason ?? '').slice(0, 70),
+    complete: emptyPool.scenarios.map((row) => row.complete)});
+  assert.equal(emptyPool.degraded, true);
+  assert.equal(emptyPool.unknown_reason, FAIL_CLOSED_REASONS.REVEALED_EMPTY_POOL);
+  assert.ok(emptyPool.degrade_reasons.some((line) => line.includes('条件化信念不可用')));
+  assert.ok(emptyPool.scenarios.every((row) => row.complete === false));
+  assert.equal(emptyPool.best_scenario, null);
+
+  // (a3) 一条候选都没有（无 catalog、公开事实里也没有场上那只/已见阵容）⇒ 明确降级、什么都不给
+  const nothing = buildScenarioOutlook({catalog: null, skillPool: SKILL_POOL,
+    publicFacts: {own_team: {pets: OWN_TEAM}, mode: FACTS_SINGLE_SLOW.mode, provenance: PROVENANCE}});
+  raw('E5a3 一条候选都没有', {available: nothing.available, degraded: nothing.degraded,
+    reasons: nothing.degrade_reasons, scenarios: nothing.scenarios.length, ranges: nothing.ranges,
+    best: nothing.best_scenario});
+  assert.equal(nothing.available, false);
+  assert.equal(nothing.degraded, true);
+  assert.ok(nothing.degrade_reasons.length > 0);
+  assert.equal(nothing.scenarios.length, 0);
+  assert.equal(nothing.ranges, null);
+  assert.equal(nothing.best_scenario, null);
+
+  // 审计：available:false 却带情景 ⇒ OUTLOOK_DEGRADED_WITHOUT_REASON（判据有牙）
+  const sneaky = clone(emptyPool);
+  sneaky.scenarios = [{scenario_id: 'fake', range: null, complete: true, member_count: 0}];
+  const auditSneaky = auditOpponentBelief({beliefs: [uniformBelief({catalog: index})], outlook: sneaky});
+  raw('E5a 空候选却带情景的审计', {ok: auditSneaky.ok, problems: auditRaw(auditSneaky).slice(0, 1)});
+  proof('outlook.scenarios（available:false 时）', '空候选降级却塞回一个假情景',
+    STRUCTURAL_CRITERIA.no_probability_without_frequency, 'OUTLOOK_DEGRADED_WITHOUT_REASON',
+    auditRaw(auditSneaky).slice(0, 1));
+  assert.ok(auditSneaky.problems.some((p) => p.code === 'OUTLOOK_DEGRADED_WITHOUT_REASON'));
+
+  // (b) 矛盾证据：无预览局里场上那只被规则筛出池子 ⇒ 降级、情景标 incomplete、不给最优
+  const contradicted = buildScenarioOutlook({catalog: index, view: REAL_VIEW.s2_no_preview, skillPool: SKILL_POOL});
+  raw('E5b 矛盾证据降级', {degraded: contradicted.degraded, reasons: contradicted.degrade_reasons,
+    complete: contradicted.scenarios.map((row) => row.complete), best: contradicted.best_scenario,
+    contradictions: contradicted.contradictions.map((row) => row.code)});
+  assert.equal(contradicted.degraded, true);
+  assert.ok(contradicted.degrade_reasons.some((line) => line.includes('矛盾')));
+  assert.ok(contradicted.scenarios.every((row) => row.complete === false),
+    'E5b 降级时每个情景都必须标 complete:false');
+  assert.equal(contradicted.best_scenario, null);
+  assert.ok(contradicted.contradictions.some((row) => row.code === 'OBSERVED_NOT_IN_FILTERED_POOL'));
+  const auditContradicted = auditOpponentBelief({beliefs: [uniformBelief({catalog: index})], outlook: contradicted});
+  assert.equal(auditContradicted.ok, true, 'E5b 降级本身要合法（原因写清、情景标 incomplete）');
+});
+
+test('03.4-M：语义/降级判据五条变异必红（控制组不红）', () => {
+  const outlook = buildScenarioOutlook({catalog: index, publicFacts: FACTS_SINGLE_SLOW, skillPool: SKILL_POOL});
+  const control = auditOpponentBelief({beliefs: [uniformBelief({catalog: index})], outlook});
+  raw('M 控制组（不改坏）', {ok: control.ok, problems: auditRaw(control)});
+  assert.equal(control.ok, true, 'M 控制组不许红');
+
+  const cases = [
+    ['把 is_probability 改成 true', (o) => { o.declarations.is_probability = true; },
+      'SCENARIO_SEMANTICS_NOT_DECLARED'],
+    ['抹掉情景区间的量纲', (o) => { o.scenarios[0].range.unit = ''; },
+      'SCENARIO_SEMANTICS_NOT_DECLARED'],
+    ['抹掉 range 表达的 why', (o) => { o.declarations.expressions.range.why = ''; },
+      'SCENARIO_SEMANTICS_NOT_DECLARED'],
+    ['给出一个「最优情景」', (o) => { o.best_scenario = o.scenarios[0].scenario_id; },
+      'SCENARIO_RANKS_A_SCENARIO'],
+    ['降级却清空原因', (o) => { o.degraded = true; o.degrade_reasons = [];
+      for (const s of o.scenarios) s.complete = false; }, 'OUTLOOK_DEGRADED_WITHOUT_REASON'],
+    ['降级了但情景仍标完整', (o) => { o.degraded = true; o.degrade_reasons = ['x'];
+      for (const s of o.scenarios) s.complete = true; }, 'OUTLOOK_DEGRADED_WITHOUT_REASON'],
+  ];
+  for (const [label, mutate, code] of cases) {
+    const mutated = clone(outlook);
+    mutate(mutated);
+    const audit = auditOpponentBelief({beliefs: [uniformBelief({catalog: index})], outlook: mutated});
+    raw(`M ${label} 的审计`, {ok: audit.ok, problems: auditRaw(audit).slice(0, 1)});
+    proof('outlook（03.4 情景集合）', label, STRUCTURAL_CRITERIA.no_probability_without_frequency,
+      code, auditRaw(audit).slice(0, 1));
+    assert.equal(audit.ok, false, `M ${label} 必须判红`);
+    assert.ok(audit.problems.some((p) => p.code === code), `M ${label} 必须命中 ${code}`);
+  }
+});
+
+test('03.4-E6（回归）：反例② 不合法技能组合仍不进候选，且不影响情景产出', () => {
+  const species = 'pet_000417';
+  const legalPool = [...(index.learnsets.get(species)?.skill_ids ?? [])].sort();
+  const facts = {...FACTS_SINGLE_SLOW,
+    opponent: {active: publicPet('pet_000002'),
+      revealed_pets: [revealedPet(species, {revealed_via: 'switch', revealed_turn: 2})]}};
+  const built = buildOpponentCandidates({catalog: index, publicFacts: facts, skillPool: SKILL_POOL,
+    proposedLoadouts: {[species]: [legalPool[0], legalPool[0], legalPool[1]]}});
+  const candidate = built.candidates.find((row) => row.species_id === species);
+  raw('E6 回归：不合法配招仍被挡', {ok: candidate.skills.legality.ok, kept: candidate.skills.legality.kept,
+    excluded: candidate.skills.legality.excluded.map((row) => row.why.slice(0, 16))});
+  assert.equal(candidate.skills.legality.ok, false, 'E6 反例② 的结论必须还在');
+  assert.ok(candidate.skills.legality.kept.every((id) => legalPool.includes(id)));
+  assert.equal(new Set(candidate.skills.legality.kept).size, candidate.skills.legality.kept.length);
+  const outlook = buildScenarioOutlook({catalog: index, publicFacts: facts, skillPool: SKILL_POOL});
+  const audit = auditOpponentBelief({beliefs: [uniformBelief({catalog: index})],
+    candidates: built.candidates, outlook});
+  raw('E6 候选+情景一起审计', {ok: audit.ok, problems: auditRaw(audit).slice(0, 2)});
+  assert.equal(audit.ok, true, 'E6 新逻辑不许把合法产出弄红');
+  const mutated = clone(built);
+  mutated.candidates.find((row) => row.species_id === species).skills.legality.kept = [legalPool[0], legalPool[0]];
+  assert.ok(auditOpponentBelief({beliefs: [uniformBelief({catalog: index})], candidates: mutated.candidates})
+    .problems.some((p) => p.code === 'ILLEGAL_LOADOUT_IN_CANDIDATES'), 'E6 必红方向仍在');
 });
 
 // ─────────────────────────────────────────────────────────────────────────

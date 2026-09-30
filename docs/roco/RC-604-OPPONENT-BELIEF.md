@@ -7,14 +7,16 @@
 > 三条都不产出胜率、不产出伪精确百分数，也不偷看对手的配招与后备。
 
 - 模块：`src/coach/opponent-belief.mjs`
-- 判据：`tests/roco-opponent-belief.test.js`（**30 条**：RC-604 原始 13 + 03.1 的 5 + 03.2 的 7
-  + 03.3 的 4（证据观察器 / 反例① / 更新与排除 / 白名单穷尽覆盖）+ F-03-1 在线段覆盖 1；含多类必红反证与反向控制）
+- 判据：`tests/roco-opponent-belief.test.js`（**34 条**：RC-604 原始 13 + 03.1 的 5 + 03.2 的 7
+  + 03.3 的 4（证据观察器 / 反例① / 更新与排除 / 白名单穷尽覆盖）+ 03.4 的 4（语义声明 / 两条降级 /
+  五条变异 / 反例② 回归）+ F-03-1 在线段覆盖 1；含多类必红反证与反向控制）
 - 产物：`reports/roco/rc604/opponent-belief.json`（含 `candidate_protocol` 与候选样本）
 - 跑法：`node --test tests/roco-opponent-belief.test.js`
   （重新生成产物：`RC604_WRITE_REPORT=1 node --test tests/roco-opponent-belief.test.js`）
 - 进度（2026-09-30）：03.1（公开性口径按实测重写 + 来源必填 + 假设只降权）、
-  03.2（候选协议 + 三个可复现局面）、F-03-1/F-03-2（在线段覆盖 + 条件③断言守护）与
-  03.3（证据更新 + 反例①）已落地；03.4–03.5（无频率情景集合 / 预算细化）**待做**。
+  03.2（候选协议 + 三个可复现局面）、F-03-1/F-03-2（在线段覆盖 + 条件③断言守护）、
+  03.3（证据更新 + 反例①）与 03.4（情景集合与范围 + 两条降级）已落地；
+  **03.5**（候选数量上限的威胁保留策略）**待做**。
 
 ---
 
@@ -264,6 +266,24 @@ fail closed 的分支也**如实报池子的实况**：`REVEALED_EMPTY_STRATUM`�
 **反例①（必做）**：真引擎重放同一回合、只换对手的个体配置 ⇒ **7 种配置的伤害都等于基准**（318），
 而改 `atk` 的配置伤害确实变了（320/321/325）⇒ 公开面分不出这些配置，候选**保留多解**（每个情景带来源与
 `assumption` 标记），只有声明穷尽时才允许排除。读数见 `03.3-evidence-update.md` §4。
+
+### 7.2 情景集合与范围（03.4 · 没有频次数据时**不装概率**）
+
+`buildScenarioOutlook({catalog, publicFacts|view, skillPool, observations, scenarioTable})`
+→ `{protocol: 'rc604-opponent-outlook/v1', available, degraded, degrade_reasons, frequency,
+declarations, scenarios[], ranges, best_scenario: null, ...}`。
+
+- **三种表达各自声明**（`EXPRESSION_SEMANTICS`，都带 `is_probability:false` + 「为什么」）：
+  `uniform_weight`（无信息基线）· `conditioned_weight`（筛+分层，层内等权）·
+  `scenario_set`（按速度档分组，**情景之间不排序**）· `range`（成员权重的**闭区间**，
+  均匀时 min==max 是**基线退化**，不是「很确定」）。
+- **缺频次就明说**：`frequency.available:false` + `reason_code` + 「缺什么/去哪拿」（照抄 fail-closed 文本）；
+  `best_scenario` **恒 `null`**（不给最优结论）。
+- **降级如实**（通过条件③）：候选宇宙为空 / 池子被筛空 / 一条候选都没有 / 证据矛盾 / 预算裁剪
+  ⇒ `degraded:true` + `degrade_reasons[]`；降级时每个情景标 `complete:false`；
+  `available:false` 时**一个情景、一个区间都不给**。
+- 判据：`SCENARIO_SEMANTICS_NOT_DECLARED` · `SCENARIO_RANKS_A_SCENARIO` · `OUTLOOK_DEGRADED_WITHOUT_REASON`
+  （五条克隆变异 + 一条实现级变异都实测必红）。读数见 `03.4-scenario-outlook.md`。
 
 ## 8. 不做什么（边界）
 

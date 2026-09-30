@@ -288,6 +288,12 @@ export const STRUCTURAL_CRITERIA = Object.freeze({
     + '每条都在这只的可学池里，而且与 `legalSkillLoadout()` 的独立复算一致；'
     + '违反 ⇒ `ILLEGAL_LOADOUT_IN_CANDIDATES`（红）。已知不合法的组合**一个都不许进候选**，'
     + '被排除的必须逐条写出理由（不静默丢）。',
+  no_probability_without_frequency: '没有真实频次数据时，三种表达（uniform / 情景集合 / 区间）'
+    + '各自都必须带语义声明：`is_probability:false` + 「为什么它是基线/区间而不是概率」；'
+    + '区间必须带量纲与语义、`best_scenario` 必须是 `null`（不给最优结论）；'
+    + '违反 ⇒ `SCENARIO_SEMANTICS_NOT_DECLARED` / `SCENARIO_RANKS_A_SCENARIO`（红）。'
+    + '降级（空候选 / 矛盾证据 / 预算裁剪）必须 `degraded:true` + 逐条原因，且每个情景标 `complete:false`；'
+    + '`available:false` 时不许带任何情景或区间 ⇒ `OUTLOOK_DEGRADED_WITHOUT_REASON`（红）。',
   rules_recomputable: '每条规则必须给出 `{id, kind, reads[], inputs[], output, basis, applied}`；'
     + '`applied:true` 的规则必须给出非空的 `output`（匹配数 / 层大小）。'
     + '规则账本缺字段、或 `applied:true` 却没有输出 ⇒ `RULE_LEDGER_INCOMPLETE`（红）。',
@@ -2294,6 +2300,235 @@ export function updateOpponentCandidates(input = {}) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// ③″ 情景集合与范围（03.4）：没有真实频率数据时**不许装概率**
+// ─────────────────────────────────────────────────────────────────────────
+
+/** 情景集合/范围输出的协议版本。 */
+export const OUTLOOK_PROTOCOL = 'rc604-opponent-outlook/v1';
+
+/** 范围的量纲：闭区间，**不是**概率、不是把握度。 */
+export const RANGE_UNIT = '权重闭区间 [min, max]（同一情景内成员权重的取值范围；'
+  + '**不是概率**、不是把握度、不是预测：它只说明「这些成员在这份基线里各占多少」）';
+
+/**
+ * 三种表达各自的**语义声明**（03.4 的核心：没有频率数据时不许把基线读成概率）。
+ * 每一种都必须带 `is_probability:false` 与「为什么」，缺一个 ⇒ `SCENARIO_SEMANTICS_NOT_DECLARED`（红）。
+ */
+export const EXPRESSION_SEMANTICS = Object.freeze({
+  uniform: Object.freeze({
+    expression: 'uniform_weight',
+    is_probability: false,
+    why: '候选宇宙内每条候选一样重（1/N）：这是**无信息基线**，不是强度、不是胜率，'
+      + '也不是版本环境占比 —— 本仓没有任何真实对局频次数据',
+  }),
+  conditioned: Object.freeze({
+    expression: 'conditioned_weight',
+    is_probability: false,
+    why: '权重只由**已公开**事实（已亮明系别 / 物种速度、我方阵容、模式规模）筛 + 分层得到；'
+      + '层内等权、层间只有一条声明过的假设（2:1 降权），**没有候选被压 0**',
+  }),
+  scenario_set: Object.freeze({
+    expression: 'scenario_set',
+    is_probability: false,
+    why: '把候选按**速度档**分成若干个情景（每组可解释、可复算）：它回答「哪些候选在一起」，'
+      + '不回答「哪一个更可能」—— 情景之间**不给优先级**、不给最优结论',
+  }),
+  range: Object.freeze({
+    expression: 'range',
+    is_probability: false,
+    why: '每个情景给成员权重的**闭区间**（不是点估计）：区间宽度就是「这份基线只到这个精度」的如实表达；'
+      + '均匀时 min == max，那是**基线退化**，不是「很确定」',
+  }),
+});
+
+/**
+ * **情景集合 + 范围**（03.4）：没有真实频率数据时的表达方式。
+ *
+ * 三条纪律：
+ *   · **不装概率**：`declarations.is_probability === false` + 每种表达各自的 `why`；产出里没有任何
+ *     「概率 / 把握度 / 最优 / 排名」字段；
+ *   · **降级要明说**：候选为空、或证据自相矛盾时 `degraded:true` + `degrade_reasons[]`，
+ *     并且**不给**单一最优情景（`best_scenario: null`）；
+ *   · **频次缺就是缺**：`frequency.available === false` 时逐字带上缺什么 / 去哪拿
+ *     （复用 `frequencyBelief()` 的 fail-closed 文本，不另写一套）。
+ *
+ * @param {object} input
+ * @param {object} input.catalog           RC-303 索引 / 朴素数据
+ * @param {object} [input.publicFacts]     公开事实；或给 `view` 让适配器搬
+ * @param {object} [input.view]            真 `view`
+ * @param {object} [input.skillPool]       技能池（同 `buildOpponentCandidates`）
+ * @param {object} [input.observations]    证据观察（同 `updateOpponentCandidates`）
+ * @param {object} [input.scenarioTable]   引擎情景（同 `updateOpponentCandidates`）
+ * @param {number} [input.member_limit]    每个情景里列几个成员（默认 8；被裁掉的记 `members_omitted`）
+ */
+export function buildScenarioOutlook(input = {}) {
+  const {catalog = null, publicFacts = null, view = null, skillPool = null,
+    observations = null, scenarioTable = null, member_limit = 8} = input ?? {};
+  const candidatesBuilt = buildOpponentCandidates({catalog, publicFacts, view, skillPool});
+  const believed = revealedConditioned({catalog, publicFacts:
+    publicFacts ?? (view !== null ? readOpponentView(view).publicFacts : null)});
+  const frequency = frequencyBelief({});
+  const weightByKey = new Map(arr(believed.weights?.rows).map((row) => [row.key, row]));
+  const base = {
+    protocol: OUTLOOK_PROTOCOL,
+    available: false,
+    degraded: true,
+    degrade_reasons: [],
+    frequency: {
+      available: frequency.available,
+      reason_code: frequency.available ? null : frequencyReasonCode(frequency),
+      unknown_reason: frequency.available ? null : frequency.unknown_reason,
+      note: '没有真实对局频次 ⇒ 不给概率预测；用情景集合与范围如实表达「我们知道到哪一层」',
+    },
+    declarations: {
+      is_probability: false,
+      not_a_prediction: '这不是「他会出哪只」的概率预测，也不是最优结论：没有频次数据时本模块'
+        + '只给候选集合、情景分组与权重区间',
+      uniform_is_baseline_only: true,
+      expressions: EXPRESSION_SEMANTICS,
+    },
+    scenarios: [],
+    ranges: null,
+    members_total: 0,
+    contradictions: [],
+    evidence: [],
+    unverified: [],
+  };
+
+  if (!candidatesBuilt.available) {
+    return {...base,
+      unknown_reason: candidatesBuilt.unknown_reason ?? FAIL_CLOSED_REASONS.REVEALED_EMPTY_POOL,
+      degrade_reasons: [candidatesBuilt.unknown_reason?.slice(0, 48) ?? '候选集合不可用'],
+      degraded_input: candidatesBuilt.leaked_fields?.length > 0 ? 'input_rejected' : 'no_candidates',
+      best_scenario: null,
+      unverified: ['未核实：任何情景 —— 候选集合本身不可用（空池或输入越界），这里一个情景都不给'],
+    };
+  }
+
+  const rows = arr(candidatesBuilt.candidates);
+  // 候选为空 ⇒ 明确降级（一个情景都不给）：空不是「更精确」，是「没有可说的」
+  if (rows.length === 0) {
+    return {...base,
+      unknown_reason: FAIL_CLOSED_REASONS.REVEALED_EMPTY_POOL,
+      degrade_reasons: ['候选集合为空（公开事实一条候选都推不出来）'],
+      degraded_input: 'no_candidates',
+      best_scenario: null,
+      unverified: ['未核实：任何情景 —— 一条候选都没有，这里一个情景都不给'],
+    };
+  }
+  const byBand = new Map();
+  for (const row of rows) {
+    const band = isNonEmptyString(row.speed_band) ? row.speed_band : 'unknown';
+    if (!byBand.has(band)) byBand.set(band, []);
+    byBand.get(band).push(row);
+  }
+  const scenarios = [...byBand.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1)).map(([band, members]) => {
+    const weights = members.map((row) => weightByKey.get(row.species_id)).filter(Boolean);
+    const values = weights.map((row) => row.value).filter(Number.isFinite);
+    const observed = members.filter((row) => row.basis === 'observed').length;
+    return {
+      scenario_id: `band:${band}`,
+      label: `速度档 ${band} 的候选（${members.length} 条，其中已见 ${observed} 条）`,
+      basis: '按**速度档**分组（RC-303 speedBandFor 现算的工程三分位；分档口径见 rule_ledger）',
+      member_count: members.length,
+      observed_count: observed,
+      inferred_count: members.length - observed,
+      members: members.slice(0, member_limit).map((row) => row.species_id),
+      members_omitted: Math.max(0, members.length - member_limit),
+      range: values.length === 0 ? null : {
+        min: Math.min(...values), max: Math.max(...values), unit: RANGE_UNIT,
+        semantics: EXPRESSION_SEMANTICS.range,
+      },
+      complete: true,
+      evidence: [evidence('injected:publicFacts', 'publicFacts', 'scenario_members', members.length,
+        `情景 ${band} 的成员数（按物种；observed/inferred 分列）`)],
+    };
+  });
+
+  // 证据矛盾 ⇒ 降级：情景标 incomplete、不给最优情景
+  const update = observations === null && scenarioTable === null ? null
+    : updateOpponentCandidates({catalog, candidates: candidatesBuilt, observations, scenarioTable});
+  const contradictions = [...arr(candidatesBuilt.contradictions), ...arr(update?.contradictions)];
+  const rejected = arr(update?.observations_rejected);
+  const degradeReasons = [];
+  if (candidatesBuilt.universe_size === 0) degradeReasons.push('候选宇宙为空（没有注入 catalog）');
+  if (believed.available === false) {
+    degradeReasons.push(`条件化信念不可用：${String(believed.unknown_reason ?? '').slice(0, 40)}`);
+  }
+  if (contradictions.length > 0) degradeReasons.push(`${contradictions.length} 条证据矛盾未消解`);
+  if (rejected.length > 0) degradeReasons.push(`${rejected.length} 条观察越界（individual-*）被拒绝`);
+  if (candidatesBuilt.budget?.truncated) degradeReasons.push(`候选被预算裁掉 ${candidatesBuilt.budget.dropped_count} 条（分布留在 budget.pool_summary）`);
+  const degraded = degradeReasons.length > 0;
+  if (degraded) {
+    for (const scenario of scenarios) scenario.complete = false;
+  }
+  const allValues = arr(believed.weights?.rows).map((row) => row.value).filter(Number.isFinite);
+  const observedRows = rows.filter((row) => row.basis === 'observed');
+  const ranges = {
+    pool: believed.pool_ratio === null || believed.pool_ratio === undefined ? null : {
+      numerator: believed.pool_ratio.numerator, denominator: believed.pool_ratio.denominator,
+      unit: believed.pool_ratio.unit,
+    },
+    weight: allValues.length === 0 ? null : {
+      min: Math.min(...allValues), max: Math.max(...allValues), unit: RANGE_UNIT,
+      semantics: EXPRESSION_SEMANTICS.range,
+      degenerate: Math.min(...allValues) === Math.max(...allValues),
+      degenerate_note: Math.min(...allValues) === Math.max(...allValues)
+        ? '区间退化成一点 = 这一层里所有候选**同样重**（基线），不是「很确定」' : null,
+    },
+    observed_vs_inferred: {
+      observed: observedRows.length, inferred: rows.length - observedRows.length,
+      unit: '计数（条）',
+      note: '「已见」与「推出来的」分开计数：已观察事实与推测不混用',
+    },
+  };
+
+  return {
+    ...base,
+    available: true,
+    degraded,
+    degrade_reasons: degradeReasons,
+    unknown_reason: believed.available === false ? believed.unknown_reason : null,
+    best_scenario: null,
+    best_scenario_reason: '本模块**不给最优情景**：没有频次数据时「哪个情景更好」没有依据；'
+      + (degraded ? '而且当前存在未消解的降级原因' : '即使没有降级原因，情景之间也不排序'),
+    candidates_budget: candidatesBuilt.budget,
+    candidates_available: candidatesBuilt.available,
+    beliefs: {
+      uniform: {kind: 'non_informative_baseline', is_probability: false,
+        semantics: EXPRESSION_SEMANTICS.uniform},
+      conditioned: {available: believed.available, kind: believed.kind,
+        pool_size: believed.pool_size, basis: believed.weights?.basis ?? null,
+        is_probability: false, semantics: EXPRESSION_SEMANTICS.conditioned,
+        unknown_reason: believed.unknown_reason ?? null},
+      frequency: {available: false, semantics: EXPRESSION_SEMANTICS.scenario_set,
+        note: '频次基线缺数据 ⇒ 用情景集合代替，且**不**把它展示成概率'},
+    },
+    scenarios,
+    ranges,
+    members_total: rows.length,
+    contradictions,
+    observations_rejected: rejected,
+    update_diff: update?.diff ?? null,
+    evidence: [
+      ...candidatesBuilt.evidence.slice(0, 2),
+      evidence('injected:publicFacts', 'publicFacts', 'scenario_set', scenarios.map((row) => row.scenario_id),
+        '情景集合：按速度档分组（可解释、可复算）；情景之间不排序、不给最优'),
+      evidence('injected:publicFacts', 'publicFacts', 'weight_range', ranges.weight,
+        '权重区间：不是点估计；均匀时区间退化，那是基线而不是「确定」'),
+      evidence('injected:publicFacts', 'frequencyData', 'frequency_available', frequency.available,
+        '频次基线：本仓没有真实频次 ⇒ available:false（用情景集合与范围表达，不装概率）'),
+    ],
+    unverified: [
+      '未核实：情景之间的优劣 —— 不给优先级、不给最优结论（没有频次数据就没有比较的依据）',
+      '未核实：区间之外的候选 —— 被预算裁掉的部分只留分布（budget.pool_summary），没被算成 0',
+      ...(degraded ? ['未核实：当前产出**已降级** —— 情景标 complete:false，降级原因见 degrade_reasons'] : []),
+      ...(update?.unverified ?? []).slice(0, 2),
+    ],
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // ③ 频次信念：需要真实对局数据（本仓没有 ⇒ fail closed）
 // ─────────────────────────────────────────────────────────────────────────
 /**
@@ -3050,6 +3285,64 @@ export function auditOpponentBelief(result, options = {}) {
     }
   }
 
+  // ── 03.4：情景集合 / 范围的**语义声明**与**降级如实** ──
+  const outlook = result?.outlook ?? null;
+  if (isPlainObject(outlook)) {
+    const declarations = outlook.declarations;
+    if (!isPlainObject(declarations) || declarations.is_probability !== false) {
+      push('SCENARIO_SEMANTICS_NOT_DECLARED', 'outlook.declarations',
+        '情景集合/范围必须显式声明 is_probability:false（没有频次数据时不许把它读成概率预测）');
+    }
+    if (isPlainObject(declarations)) {
+      for (const key of ['uniform', 'conditioned', 'scenario_set', 'range']) {
+        const one = declarations.expressions?.[key];
+        if (!isPlainObject(one) || one.is_probability !== false || !isNonEmptyString(one.why)) {
+          push('SCENARIO_SEMANTICS_NOT_DECLARED', `outlook.declarations.expressions.${key}`,
+            `表达「${key}」缺语义声明（is_probability:false + 为什么它是基线/区间而不是概率）`);
+        }
+      }
+      if (!isNonEmptyString(declarations.not_a_prediction)) {
+        push('SCENARIO_SEMANTICS_NOT_DECLARED', 'outlook.declarations.not_a_prediction',
+          '缺「这不是预测 / 不是最优结论」这一句');
+      }
+    }
+    if (outlook.available === true) {
+      for (const scenario of arr(outlook.scenarios)) {
+        const range = scenario?.range;
+        if (!isPlainObject(range) || range.is_probability === true
+          || !isNonEmptyString(range.unit) || !isPlainObject(range.semantics)) {
+          push('SCENARIO_SEMANTICS_NOT_DECLARED', `outlook.scenarios.${scenario?.scenario_id ?? '?'}.range`,
+            '情景的权重区间必须带 unit + semantics（闭区间，不是概率/把握度）');
+        }
+      }
+      if ('best_scenario' in outlook && outlook.best_scenario !== null) {
+        push('SCENARIO_RANKS_A_SCENARIO', 'outlook.best_scenario',
+          `没有频次数据时不许给「最优情景」，实际 ${stableJson(outlook.best_scenario)}`);
+      }
+      // 频次不可用时不许出现任何像概率的数值字段
+      if (outlook.frequency?.available === false) {
+        for (const key of ['probability', 'posterior', 'confidence_score', 'best_guess']) {
+          if (key in outlook) {
+            push('SCENARIO_SEMANTICS_NOT_DECLARED', `outlook.${key}`,
+              `频次不可用时不许出现 ${key} 这类数值结论`);
+          }
+        }
+      }
+    }
+    if (outlook.degraded === true && arr(outlook.degrade_reasons).length === 0) {
+      push('OUTLOOK_DEGRADED_WITHOUT_REASON', 'outlook.degrade_reasons',
+        'degraded:true 却没说清降级原因：降级必须点名（空候选 / 矛盾证据 / 预算裁剪）');
+    }
+    if (outlook.degraded === true && arr(outlook.scenarios).some((row) => row?.complete !== false)) {
+      push('OUTLOOK_DEGRADED_WITHOUT_REASON', 'outlook.scenarios',
+        '降级时每个情景都必须标 complete:false（不许把不完整的情景当完整的给人）');
+    }
+    if (outlook.available === false && (arr(outlook.scenarios).length > 0 || outlook.ranges?.weight)) {
+      push('OUTLOOK_DEGRADED_WITHOUT_REASON', 'outlook',
+        'available:false 却带着情景或区间：算不出来就什么都不给，不许拿空数据冒充');
+    }
+  }
+
   return {ok: problems.length === 0, problems};
 }
 
@@ -3099,6 +3392,9 @@ export function beliefReport(input = {}) {
   const beliefs = [uniform, conditioned, frequency];
   const candidateSample = isPlainObject(skillPool)
     ? buildOpponentCandidates({catalog, publicFacts, skillPool, budget: candidateBudget}) : null;
+  // 03.4：情景集合与范围的样本（同样只在注入技能池时生成，保持报告体积可控）
+  const outlookSample = isPlainObject(skillPool)
+    ? buildScenarioOutlook({catalog, publicFacts, skillPool}) : null;
   // F-03-1：在线段的**覆盖读数**（判据「在线段干净」必须同时证明「真的扫到了在线函数」）。
   const onlineCoverage = typeof input.source === 'string' ? onlineSectionCoverage(input.source) : null;
 
@@ -3183,6 +3479,22 @@ export function beliefReport(input = {}) {
           .every((problem) => problem.code !== 'ILLEGAL_LOADOUT_IN_CANDIDATES'),
     },
 
+    {
+      label: '没有频率数据时三种表达都声明「不是概率」，且降级如实（03.4）',
+      criteria: STRUCTURAL_CRITERIA.no_probability_without_frequency,
+      actual: outlookSample === null ? '（本次报告没有注入技能池：情景集合只声明、不生成样本）' : {
+        available: outlookSample.available,
+        degraded: outlookSample.degraded,
+        degrade_reasons: outlookSample.degrade_reasons,
+        is_probability: outlookSample.declarations.is_probability,
+        best_scenario: outlookSample.best_scenario,
+        scenarios: outlookSample.scenarios.length,
+      },
+      ok: outlookSample === null || (outlookSample.declarations.is_probability === false
+        && outlookSample.best_scenario === null
+        && arr(outlookSample.scenarios).every((row) => row.range === null || isPlainObject(row.range.semantics))
+        && (outlookSample.degraded === false || arr(outlookSample.degrade_reasons).length > 0)),
+    },
     {
       label: '频次信念必须有真实来源；没有来源一律拒绝（不用均匀冒充）',
       criteria: STRUCTURAL_CRITERIA.frequency_needs_real_source,
@@ -3313,6 +3625,20 @@ export function beliefReport(input = {}) {
       sample_note: `报告只贴前 ${Math.min(2, candidateSample.candidates.length)} 条候选`
         + `（共 ${candidateSample.candidates.length} 条）：完整候选集合由 buildOpponentCandidates() 返回，`
         + '报告不复制整份（否则 24 × 45 条技能会把报告变成噪声）',
+    },
+    outlook_protocol: {
+      version: OUTLOOK_PROTOCOL,
+      expressions: EXPRESSION_SEMANTICS,
+      range_unit: RANGE_UNIT,
+      degrade_policy: '空候选 / 输入越界 / 证据矛盾 / 预算裁剪 ⇒ degraded:true + degrade_reasons[]，'
+        + '每个情景标 complete:false，**不给**最优情景（best_scenario:null）',
+      audit_codes: ['SCENARIO_SEMANTICS_NOT_DECLARED', 'SCENARIO_RANKS_A_SCENARIO',
+        'OUTLOOK_DEGRADED_WITHOUT_REASON'],
+    },
+    outlook_sample: outlookSample === null ? null : {
+      ...outlookSample,
+      evidence: arr(outlookSample.evidence).slice(0, 3),
+      unverified: arr(outlookSample.unverified).slice(0, 3),
     },
     criteria,
     red_proofs: arr(red_proofs).map((row) => ({
