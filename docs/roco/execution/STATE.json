@@ -726,6 +726,22 @@
       "owner": "codex-planner（运行时证据 + 方法论）· lead-mac（静态链，已被更正）· lead（改派 + 登记）",
       "status": "closed",
       "rule": "① 把一条链写进任务前必须标明它是**候选（静态可达）**还是**已证（有运行时读数）**——两者在任务里的地位不同（候选只能作为「顺带检查」，不许当必改项）；② **静态链再自洽也要留一个可证伪的运行时观测点**（本次就是「抓 `/api/coach` 请求体 + `battle/*` 响应」那一条）；③ 被否掉的假设**要显式更正到跨机文档里**（否则两边会各修一半）"
+    },
+    {
+      "id": "O-60",
+      "what": "**`src/client/**` 的 DOM 文案在所有判据/门禁的覆盖之外（实证，不再是推测）**：把一处文案换回退役词，**10 个最相关判据 0 红**、**门禁 `verify-text-vocab` 退役词命中 0 处**",
+      "evidence": "plan02-front 在 task-43 里做了两向变异：把 `src/client/app.js` 一处 `血量` 换回 `生命` ⇒ 跑 10 个最相关判据 **0 红**、门禁仍报 **0 命中**；还原后 sha 逐位相同。根因：语料 `imp()` 只收 `src/game/*` + `src/coach/*` 九模块，**client 模块无可被调用的导出** ⇒ 结构上看不见（`player-text-audit.md:133` 早写明「`src/client/**` DOM 文案属未覆盖」，现在有了读数）。他同时交出一份**生产者清单**（157 个 DOM 写入生产者 + 73 个文案表/格式化器，带函数 + `文件:行` + 样例），并给了接线建议：**先收标签表最省事**，收编后按 O-44 在 `auditProducerCoverage` 登记 `min`",
+      "owner": "plan02-front（实证 + 清单）· plan00-closer（接线）· harness-verifier（独立复验）",
+      "status": "fix_in_flight",
+      "rule": "① **「改回去也不会红」= 该处不在任何判据覆盖内** ⇒ 这种盲区必须显式登记（而不是等下次有人发现）；② **接线后必须重做同一个变异**：换回旧词**必红**——否则接线是无效的（空覆盖）；③ 交清单时要带「函数 + `文件:行` + 样例」，否则接线方无从下手"
+    },
+    {
+      "id": "O-61",
+      "what": "**同一份玩家可见标签有两处来源**（client 词表 `STAT_LABELS`/`STAT_ORDER` + **服务端** `src/server/roco-service.js:418 BOX_STAT_FIELDS=[['hp','生命'],…]`）⇒ 只改一侧会**功能回归**（反查表落空 ⇒ 详情页资质数字不显示）",
+      "evidence": "plan02-front 实测依赖链：`box.js:740` 用 `STAT_LABELS` 反向建 `STAT_KEY_OF_LABEL` ⇒ `box.js:954`（与 `xiaoya.js:190`）拿**服务端给的** `row.label` 去查它 ⇒ 那个 label 来自 `roco-service.js:418`（`:661`/`:1847` 做成 `metrics`，`box.js:953` 直接渲染进 DOM）。撞钉：`tests/roco-box-drawer.test.js:394` 逐字钉 `'生命 10 / 物攻 3 / …'`；`tests/roco-box-redo.test.js` 的标签来自 `scripts/roco/browser-box-acceptance.mjs:232`。Lead 裁决 **(A) 扩权一次对齐** + **必须新增「两侧绑定」判据**（详情页渲染出的标签**逐字等于**服务端提供的那一组）",
+      "owner": "plan02-front（修 + 绑定判据）· lead（裁决）",
+      "status": "fix_in_flight",
+      "rule": "**同一个词表出现在两侧时，必须有一条把两侧绑起来的判据**（否则任一侧单独改词都会静默分叉）；改这类词表前先把「谁产出、谁消费、谁反查」三链列出来（本例的反查链就是只改一侧会炸的原因）"
     }
   ],
   "handoff": {
