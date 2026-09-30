@@ -645,6 +645,30 @@
       "owner": "plan00-closer（执行刷新）· lead（窄例外 + 提交）",
       "status": "fix_in_flight",
       "rule": "① **凡改「派生产物的真源」必须在同一刀里刷新产物**（改动面评估时先把「真源 → 产物 → 判据」这条链列出来）；② `data/**` 仍只读，**唯一例外是生成器**（且只写 `derived/**`），产物 diff 必须能逐字核对；③ 出现「工作树红 / 干净 HEAD 绿」时，**先取干净副本对照再定性归属**（这次就是这么分的：2 条我引起 + 2 条既存）"
+    },
+    {
+      "id": "O-50",
+      "what": "**P0：共享守卫 `safeObject` 的字符串规则把契约里的正常值判为危险 ⇒ 真机上模型根本调不动 `plan_actions`**（任何公开面都带含 `/` 的 `rules_version`）",
+      "evidence": "plan04-engine 设 `ROCO_PYTHON` 后跑真端到端 `tests/evals/roco/plan-e2e.test.js` ⇒ **8 pass / 2 fail / 0 skip**（不设变量时**全 skip**，所以长期没暴露）：① bench 行键期望过期（断言 `['fainted','pet_id','slot']`、实际 `['fainted','slot']` —— 01.3 公开性收紧后的正确行为，属**判据过期**）；② `validToolArgs('plan_actions')` 抛 `invalid-arguments`，根因钉死在 `safeObject` 的 `UNSAFE_TEXT=/[/\\\\]|\\.\\.|:\\/\\/|…/` **把任何含 `/` 的字符串判危险**，而真公开面的 `rules_version='roco-world-s4-2026-09-10/legacy_sim_v1'`。**实测排除项**：`json bytes=1804`（远低于 8000）、`max depth=4`、**唯一拒绝点 `$.rules_version`** ⇒ 模型在真机上无法调用该工具",
+      "owner": "plan04-engine（修：按「键 + 格式」白名单）· lead（P0 裁决 + 登记）",
+      "status": "fix_in_flight",
+      "rule": "① **每个工具都必须有一条「真端到端调用」读数**（单元测试里参数是造的短串，掩盖了这条 P0）——只测单元不算；② 安全守卫**按「已知契约字段 + 格式」放行，不按字符一刀切**（未知字段仍 fail closed，路径穿越必须仍被拒）；③ 涉及 `safeObject`/参数校验这类**共享守卫**的改动必须单列切片 + 两向反例（正：真值放行；反：穿越样式仍拒）"
+    },
+    {
+      "id": "O-51",
+      "what": "**「窄例外」的边界必须由生成器的实际写入清单决定，而不是由 Lead 的描述决定** —— `npm run build:knowledge` 实际写 **4 个路径**，其中 `scripts/build-knowledge.js:19` 直接重写**产品源文件 `src/game/content.js`**，`:27/:29` 写 `knowledge/semantic-corpus.json` 与 `knowledge/reference.generated.json`（都不在 `data/roco/derived/**`）",
+      "evidence": "Lead 给 (A) 例外时说「只允许写 `data/roco/derived/**`」，但**没有先读生成器代码**；plan00-closer 跑之前按边界检查，发现写入面超出 ⇒ **立即停手、没继续跑任何命令、没提交**并回报。⇒ 例外前提不成立，真正的边界是生成器的写入清单（只有 `scripts/roco/build-tactic-cards.mjs:90` 那条写在允许范围内）",
+      "owner": "plan00-closer（发现并停手）· lead（改立规）",
+      "status": "closed",
+      "rule": "**批「窄例外」前必须读生成器代码并列出它写哪些路径**；执行者跑生成器前**先核对写入清单**，一旦越界**立即停手回报**（不许「跑都跑了」）——本次执行者的处置就是范本"
+    },
+    {
+      "id": "O-52",
+      "what": "**`src/game/content.js` 是生成物**（`#L26` 标记：`Generated local tactical cards; edit knowledge/tactics.json then regenerate.`）—— 真源是 **`knowledge/tactics.json` + `scripts/build-knowledge.js` 的模板**；改 content.js 会在下次生成时被整体覆盖",
+      "evidence": "plan00-closer 在 task-42 里把退役词清零直接改在 `content.js` 上（**漏看了生成标记**：盘点只筛「含退役词的行」，而标记那行不含退役词），随后跑生成器 ⇒ 迁移被整体覆盖、退役词回到 `生命 24 · 豆 29`，`roco-player-text-gate` **5/6 红**、`rules.test.js` **16/17 红**、`rag-tactic-cards` **4/5 红**（还叠加了「先跑产物、后重写 content.js」的**顺序错**导致漂移重现）。修正方案（Lead 已批）：改**真源**（`knowledge/tactics.json` + 生成器模板）⇒ 按**正确顺序**跑（`build:knowledge` → `build-tactic-cards`）⇒ 期望门禁 6/6 · rules 17/17 · knowledge 11/11 · rag-tactic-cards 5/5，既存红（rag-eval 20/24 · corpus-verification 8/9）不变",
+      "owner": "plan00-closer（自曝 + 修正）· lead（裁决 + 登记）",
+      "status": "fix_in_flight",
+      "rule": "① **改任何文件前先查生成标记**（`Generated … edit X then regenerate` 一类）；有标记 ⇒ **真源在别处**，盘点必须把「真源 → 产物」整条链列出来；② **多产物生成器有顺序依赖**（门指纹真源的产物必须**最后**生成），顺序错会重现漂移；③ 早期一笔直接改生成物的提交（`c397527`）**将被重新生成覆盖**，以生成器产出为准"
     }
   ],
   "handoff": {
