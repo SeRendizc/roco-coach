@@ -544,7 +544,7 @@
     {
       "id": "O-39",
       "what": "**service 级判据的挂钟依赖是真隐患**（余量只有 6.3×）：`/battle/plan` 无法注入时钟 ⇒ 14 条 service 级判据在慢机器/高负载下可能因超时变红",
-      "evidence": "plan04-engine 在 O-36 审计里量化：8 个纯 CPU 自旋进程 / 16 核下不注入时钟实测 —— `beam=2` 135–157ms / 预算 5000 ⇒ **31.8×** 余量；**`beam=8` 698–791ms ⇒ 仅 6.3× 余量**（更慢的机器如 lead-mac 或更高负载下 `SERVICE_DEFAULT_BEAM8` 金标完全可能因超时变红）。**加固**：给 `RocoService` 加 `plan_clock` 接缝（**默认 `None` ⇒ 真实时钟、产品行为逐位不变**，与 `plan_actions(clock=)` 同源），`service_public()` 与 ranking 的 service 判据注入 `lambda: 0.0` ⇒ service 级判据**零挂钟依赖**（只影响「要不要判超时」，搜索照跑）；加固后 8 burner 负载下 3 轮 42 条 ⇒ **3/3 OK**",
+      "evidence": "plan04-engine 在 O-36 审计里量化：8 个纯 CPU 自旋进程 / 16 核下不注入时钟实测 —— `beam=2` 135–157ms / 预算 5000 ⇒ **31.8×** 余量；**`beam=8` 698–791ms ⇒ 仅 6.3× 余量**（更慢的机器如 lead-mac 或更高负载下 `SERVICE_DEFAULT_BEAM8` 金标完全可能因超时变红）。**加固**：给 `RocoService` 加 `plan_clock` 接缝（**签名默认是 `time.perf_counter`（真实时钟）——⚠ 不是 `None`；不传 == 传真时钟、逐字段相同**；显式传 `None` 会 `TypeError`，无兜底，属小瑕疵），`service_public()` 与 ranking 的 service 判据注入 `lambda: 0.0` ⇒ service 级判据**零挂钟依赖**（只影响「要不要判超时」，搜索照跑）；加固后 8 burner 负载下 3 轮 42 条 ⇒ **3/3 OK**。**verifier 独立复测（`vfy-044-o39.py`，8 自旋 × 8 轮 `beam=8 budget_ms=5000`）**：空载 `min/median/max = 447.3/453.4/487.9ms`（余量 11.03×/10.25×）· 满载 `594.6/660.0/786.7ms`（余量 7.58×/**6.36×**）· `timed_out` 全 False；**关键证据：`nodes = 119` 空载与满载完全相同** ⇒ **搜索结果与挂钟无关**，负载只改耗时、6.36× 决定的是「能否算完」而不是「算成什么」",
       "owner": "plan04-engine（审计 + 加固）· lead（登记）",
       "status": "closed",
       "rule": "**判据尽量注入时钟**（超时类用构造的超时驱动，不用真实耗时）；**必须用真实耗时的**要在报告里给出「余量倍数」的实测读数；跨机（更慢机器）跑之前先看余量够不够"
