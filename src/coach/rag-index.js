@@ -1200,6 +1200,34 @@ const DEFINITION_ASK = /定义|术语|什么意思|是什么意思|指的是|怎
 //: 这不是"卡片没用"，而是**问句类型不对**：卡片回答"该怎么打 / 该不该"，不回答"是哪一条 / 测过吗"。
 const GUIDANCE_ASK = /该不该|要不要|怎么打|怎么用|怎么办|咋办|如何应对|怎么应对|思路|打法|建议|技巧|为什么|为啥|值得吗|划算吗/;
 
+/**
+ * **玩家旧说法 → 当前词表口径**（2026-10-01 task-42，Lead 窄例外）。
+ *
+ * 为什么需要：知识卡的 `keywords` 里**有意保留**「豆」（那是玩家的旧说法，删了召回就退化），
+ * 而卡的正文已经统一叫「能量」（`src/game/content.js`，词表唯一事实源见 `src/coach/player-text.js`）。
+ * 查询侧也归一化，两条说法才都能命中同一张卡；将来真把旧关键词清掉时，「豆」也不会查不到。
+ *
+ * 纪律（学 `LOADOUT_STORE_*` 那一套）：**这张表只在本文件定义一处**，判据会钉住"只有一处"；
+ * 其它模块需要时只许 `import`，不许各写一份近义映射。
+ */
+export const LEGACY_QUERY_ALIASES = Object.freeze({'豆': '能量'});
+
+/**
+ * 查询扩展：`原文 + 归一化后的变体`。
+ *
+ * 为什么保留原文而不是直接替换：卡自己的 `keywords` 里还有旧说法，**替换会把它删掉**；
+ * 追加一份归一化变体，等于「旧词命中关键词 + 新词命中正文」两条路都留着（互为备份）。
+ * 例：`豆怎么算` → `豆怎么算 能量怎么算`。
+ */
+export function expandLegacyQuery(text) {
+  const raw = String(text ?? '');
+  const extras = [];
+  for (const [legacy, canonical] of Object.entries(LEGACY_QUERY_ALIASES)) {
+    if (raw.includes(legacy)) extras.push(raw.split(legacy).join(canonical));
+  }
+  return extras.length ? `${raw} ${extras.join(' ')}` : raw;
+}
+
 export function searchIndex(index, query, options = {}) {
   const {
     limit = 10,

@@ -63,8 +63,12 @@ test('generated browser knowledge stays identical to source',async()=>{
 test('generated reference facts stay tied to the engine rather than copied external game rules',async()=>{
  const {REFERENCE_CARDS}=await import('../src/game/content.js');const {SKILLS,SPECIES,createGame}=await import('../src/game/engine.js');
  assert.equal(new Set(REFERENCE_CARDS.map(c=>c.id)).size,REFERENCE_CARDS.length);
- for(const [id,s]of Object.entries(SKILLS)){const c=REFERENCE_CARDS.find(c=>c.id==='rule:skill:'+id);assert(c);assert(c.principle.includes('消耗'+s.cost+'豆'));assert.equal(c.rulesVersion,createGame().version);}
- for(const p of SPECIES){const c=REFERENCE_CARDS.find(c=>c.id==='rule:pet:'+p.id);assert(c.principle.includes('生命'+p.maxHp));assert.match(c.counterexample,/实际成长/);}
+ // 2026-10-01 改钉（task-42 · 原断言逐字留档）：
+ //   原：assert(c.principle.includes('消耗'+s.cost+'豆'));  ⇒ 词表口径统一叫「能量」（退役词「豆」只许留在检索别名 keywords 里）
+ //   原：assert(c.principle.includes('生命'+p.maxHp));      ⇒ 面板/属性名口径统一叫「血量」
+ //   同语义、只换词；独立读数见 task-42 冻结报告（改后 knowledge.test.js 11/11）。
+ for(const [id,s]of Object.entries(SKILLS)){const c=REFERENCE_CARDS.find(c=>c.id==='rule:skill:'+id);assert(c);assert(c.principle.includes('消耗'+s.cost+'能量'));assert.equal(c.rulesVersion,createGame().version);}
+ for(const p of SPECIES){const c=REFERENCE_CARDS.find(c=>c.id==='rule:pet:'+p.id);assert(c.principle.includes('血量'+p.maxHp));assert.match(c.counterexample,/实际成长/);}
 });
 test('the semantic corpus is generated from the same source as content.js',async()=>{
  const {readFileSync}=await import('node:fs');

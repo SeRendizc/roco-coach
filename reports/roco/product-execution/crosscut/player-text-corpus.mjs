@@ -86,6 +86,10 @@ export const CORPUS_PRODUCERS = Object.freeze([
   { api: 'proactiveText', min: 1, prefix: true },
   { api: 'indistinguishableAdviceText', min: 1 },
   { api: 'rulesSections', min: 1 },
+  // task-42（第三刀）：知识卡正文（title / principle / counterexample）——47+44 张卡共 ~270 条。
+  // 下限 20 只是"不许静默消失"的门槛；**只收玩家可见字段**（`id`/`sourceId`/`variantOf` 含
+  // `pet_000118` 这类内部 id，整对象 walk 会制造假 `internal-id`；`keywords` 是检索别名，见下）。
+  { api: 'knowledgeCards', min: 20 },
 ]);
 
 /**
@@ -144,6 +148,7 @@ export async function collectCorpus({ strict = true } = {}) {
   const progression = await imp('src/game/progression.js');
   const runtimeMod = await imp('src/coach/runtime.js');
   const rulesMod = await imp('src/game/rules.js');
+  const contentMod = await imp('src/game/content.js');
 
   const entries = [];
   const failures = [];
@@ -283,6 +288,17 @@ export async function collectCorpus({ strict = true } = {}) {
   tryRender('rulesSections', 'rules.js', () => {
     const sections = rulesMod.rulesSections?.() ?? [];
     return sections.flatMap((s) => (Array.isArray(s?.lines) ? s.lines : [])).filter((x) => typeof x === 'string');
+  });
+
+  // 知识卡（`src/game/content.js` 的 `TACTIC_CARDS` / `REFERENCE_CARDS`）：小芽检索到的规则卡，
+  // 玩家在回答的「依据」里读得到 —— task-42（第三刀）的对象。
+  // ⚠ 只收**玩家可见的三段正文**（title / principle / counterexample）：
+  //   · `id`/`sourceId`/`variantOf` 含 `pet_000118` 这类内部 id ⇒ 整对象 walk 会制造**假** `internal-id`；
+  //   · `keywords` 是**检索别名**（`src/coach/rag-index.js:981` 把 `card.keywords` 当 `aliases`），
+  //     不是给玩家读的正文；而且它按 Lead 裁决**有意保留**旧说法「豆」⇒ 收进来会让第 5 类判据误报。
+  tryRender('knowledgeCards', 'content.js', () => {
+    const cards = [...(contentMod.TACTIC_CARDS ?? []), ...(contentMod.REFERENCE_CARDS ?? [])];
+    return cards.flatMap((c) => [c?.title, c?.principle, c?.counterexample]).filter((x) => typeof x === 'string');
   });
 
   const coverage = auditProducerCoverage({ entries, attempted });
