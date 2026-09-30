@@ -530,6 +530,12 @@
       "what": "04.1 勘察结论与三件裁决（同时行动红线 / 03 接口 / 写域）",
       "decision": "**04.1 结论**：① 同时行动红线**成立**（`planner.py` 全文 `_pending` 0 命中；对手按分布枚举；搜索跑在 `state_from_public_planner` 的公开重建状态上，真实 seed 不进；`/battle/plan` 强制 public+schema_version；Node 带 seed 本地拒绝）；② 但「对手可能出什么」的依据目前是**规则集规范配招**（`env.py:4817 candidate_moveset`，即 OPPONENT_BENCH_ASSUMPTION），不是 03 的候选协议 —— 这正是 04.2 要接的口；③ 输出已有 expected/worst/best 与 risk/coverage，但**缺截断逐类留痕**、且「启发式不是胜率」只在人读 limitations 里。**裁决**：① 04.2 接口走 **Node 注入 outlook**（不批准引擎侧自建 —— 会复制 03 口径，违反「不另造平行信念系统」）；硬要求：缺省逐位不变（判据+两向变异）· 显式类型化注入 + 形状校验 fail closed · 按 scenario_id 定序、禁止排序/当概率 · 回执须能看出用的是注入情景还是缺省假设 · 注入不得让引擎读到隐藏真值（同形判据）。② `planner.py` 情景枚举器走**加性可选路径**（缺省不变），且 **R1 同批处理**（`opponent_distribution` 的 `expected` 要落 `is_probability:false` + `basis` 到机器可检字段）；缺省路径在回执里**显式点名**「配招依据=规范配招假设」。③ 批准 `src/coach/toolbox.js` 切片（**仅** plan 回执组装段的 truncation/is_probability/情景依据字段；给确切行、改前后回执 diff、不注入时不变）。R/P 清单归位：R3/R5/R8/P6 → 04.3；R1/R2 → 04.2/04.4；P3 若被情景取代须显式登记哪条假设被替换",
       "by": "lead"
+    },
+    {
+      "id": "D-22",
+      "what": "04.2 中途上报的缺口与四项裁决（有牙断言 / service 注入 / P3 是否替换配招 / toolbox 时机）",
+      "decision": "① **补有牙断言 + 再加一条变异**：同状态同预算下「注入 vs 不注入」的 `plan_actions` 对手分支集必须**不同**（比 `risk.top_risks` 的对手动作集合或 `per_seed[].risk`，不比长度）；两向变异（`if False and scenarios:` 忽略注入 ⇒ 必红）。**另加**「缺省逐位不变」的破坏性变异（把缺省路径权重取整/排序改一位 ⇒ 金标必须红）—— 两头都钉住。② **service.py 接注入批准**：可选字段 `opponent_scenarios`（不得变成新必填）、形状不对 ⇒ **400 fail closed 且点名坏在哪条**、缺省回执逐字段不变、注入时回显「本次对手依据 = 注入情景 / 规范配招假设(缺省)」。③ **P3（用情景里的可学池替换对手配招假设）本步不做**：只筛可枚举技能是「情景收窄候选」，替换重建状态配招会改对手侧结算语义、可能破坏「缺省逐位不变」并触碰隐藏真值红线 ⇒ 另立专项（04.2b 或 05），自带「隐藏真值不变 + 只吃公开面」两条判据；本步只要求：回执把 scenario-driven 与 assumption-driven **分开写**、`unavailable[]` 如实报、P3 作为**显式残留**登记。④ **toolbox.js 与 `truncation/is_probability` 一起放 04.3**（避免同一段回执改两次）。04.2 交付面 = planner 加性路径 + 有牙断言 + service 注入/回显 + P3 登记 + 文档同步；冻结后交 lead-mac 跨机复验（判据须能 `cd roco && PYTHONPATH=src python3 -m unittest tests.test_plan_scenarios -q` 一键跑、不写死绝对路径、产物不进产品仓库）",
+      "by": "lead"
     }
   ]
 }
