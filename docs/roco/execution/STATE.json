@@ -425,6 +425,22 @@
       "owner": "plan02-front（修）· lead（抽验 + 登记）",
       "status": "fix_in_flight",
       "rule": "**判据文件取自身路径一律用 `fileURLToPath(import.meta.url)`**（不许 `.pathname`）；「套件在 Windows 上能跑」是前提条件（用户实际环境是 Windows，而跨机复验跑 POSIX ⇒ 两边都必须绿）；任何「套件全绿」的声称必须**声明跑在哪个 OS**"
+    },
+    {
+      "id": "O-23",
+      "what": "**同一个回执字段在「三层」的形状约定互相矛盾**（引擎发对象 / 客户端丢对象 / 服务端拒对象 / 教练层等对象）——跨模块契约缺陷，单看一层都像正常",
+      "evidence": "harness-verifier 独立确认（`reports/roco/product-execution/harness/verify-claims-08-g01-and-05.md`；器材 `scripts/roco/verify-claims-05.mjs` + `E:\\roco-scratch\\vfy-claims-receipt.py`）：真 `/battle/plan` 回执里 `expected{min,max,mean}` · `worst{min,max}` · `first_second_margin{min,max,mean,scale,note}` **全是对象**（`branches_evaluated=96`/`depth_searched=2` 是 int）；`src/client/roco.js:5577-5620` 的 `coachRocoPlan()` 用 `Number.isFinite` 过滤 ⇒ **三个对象全丢**（只剩两个标量）；`src/server/index.js:389` `validateChat` 对**对象形直接 400**「本回合规划无效：expected」而标量通过；`src/coach/toolbox.js:1271-1272` 又按 `first_second_margin?.mean` 读 ⇒ **四个位置三种约定**",
+      "owner": "harness-verifier（发现）· plan05-recon（task-25：客户端投影 + 服务端校验）· plan04-engine（04.3：toolbox 读侧 + 缺字段不许编数字）",
+      "status": "fix_in_flight",
+      "rule": "**跨模块契约必须有一份「字段名 + 形状 + 缺省语义」的单一来源**；发现同一字段在不同层形状不一致时，**先定契约再动手**（不许各层各修一版）；「字段缺失」必须显式标注（`absent`/`unknown`），**不许伪造默认值**"
+    },
+    {
+      "id": "O-24",
+      "what": "08 的门槛例外依据（G01 同物种配招共用）**已被独立复现**，且工作树修复被验证有效",
+      "evidence": "harness-verifier 用内存假 storage 探针（`scripts/roco/verify-claims-08-g01.mjs`）：HEAD 版 `loadout-store.js` sha16 `1b32a824b2b18504` **没有个体级 API**；两条 UI 路径写同一键（盒子 `state.petId`、工坊 `row.species` ⇒ 都是 `pet_000012`）⇒ A 写 `[a1..a4]`、B 写 `[b1..b4]` 后 **A 读回 `b1..b4`（被覆盖）**，storage 只有 `roco.workshop.loadouts.v1`。工作树版（sha16 `ce928eef509968bf`，08-S1 在飞）：A/B 各读写 `own-0001`/`own-0002` **不互相覆盖**；只有历史 v1 时读到同一份但 `scope=\"species\"` + 如实标注；v1+v2 并存时**个体级优先**。**注意**：按工作树读行号已变（`team-workshop.js:1926/2049/2136`、`box-loadout.js:1020`，改为 `writeIndividualLoadout`）",
+      "owner": "harness-verifier（复验）",
+      "status": "closed",
+      "rule": "门槛例外的**依据**必须能被独立复现（本例已复现 ⇒ 例外成立）；登记时须写明「验的是 HEAD 还是工作树」以及工作树是否为在飞未提交态"
     }
   ],
   "handoff": {
