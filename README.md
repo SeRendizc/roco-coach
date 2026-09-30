@@ -1,151 +1,127 @@
-# 小芽 · 宠物对战 AI Coach
+# 小芽 · Roco Coach
 
-一个宠物对战游戏，外加一个住在游戏里的 AI 教练。**引擎算事实，模型只负责说话。**
+**一位住在宠物对战训练场里的 AI 教练，帮助你打好眼前这一手，也学会下一次自己判断。**
 
-![营地](output/demo-live/01-营地.png)
+小芽围绕玩家的完整练习过程设计：带喜欢的精灵配出一套打法，在局中看清选择与风险，打完后找到一个值得改进的决定，再用新的局面检验是否学会。军师、老师和陪练是同一位教练在不同情境下的表现。
 
-小芽来自腾讯 IEG 的「基于 LLM 的智能 AI Coach」面试题：玩家在对局里做取舍时，教练要给出**有依据、可核对**的建议。
+项目包含本地对战模拟器、精灵盒子与配队页面、规则工具和模型对话链路。近期主线是《洛克王国：世界》六宠训练场；自研小兽营地用于入门练习与可控实验。**目前处于开发与整体验收阶段，尚未达到稳定可用版本。**
 
-难点不在「接一个模型」，而在两件事同时成立——数字必须对，话必须像人话。所以链路被拆成两层：规则引擎负责合法动作、伤害、顺序与状态计时；模型只负责理解问题、按需查证、把算好的事实讲出来。
+[产品愿景与实施路线](docs/roco/PRODUCT-VISION-AND-ROADMAP.md) · [教练设计](docs/COACH-PLAN.md) · [数据来源与许可](docs/roco/LICENSE-MATRIX.md)
 
-游戏、规则引擎、成长、页面、教练链路都在本仓库里，**零 npm 运行依赖**，`npm start` 就能玩；不接模型也有本地结论可看，接上模型后同一批事实改由模型表述。
+## 想把小芽做成什么样
 
-仓库里有两条产品线：
-
-| 线 | 是什么 | 页面 |
+| 场景 | 玩家需要的帮助 | 目标体验 |
 |---|---|---|
-| **小兽训练场** | 自研宠物：营地 PVE 关卡、同屏本地对战、培养与阶段小测 | `/` |
-| **《洛克王国：世界》训练场** | 手游数据层 + Python 规则引擎 + 六宠标准 PVP 与局面教练 | `/roco.html` |
+| 配队与培养 | “我喜欢这只，怎么围绕它打？” | 尊重本命宠与资源预算，解释配合、四技能分工和取舍，修改前可比较 |
+| 开局 | “对面这六只，最该注意谁？” | 记住真实展示过的阵容，帮助判断主要对位风险 |
+| 局中 | “现在怎么办？该换谁？” | 给合法首选、一句理由和主要风险，必要时提供备选 |
+| 局末 | “这局哪一步值得改？” | 挑一个有证据的关键决策，说清当时的替代与下次判断方法 |
+| 问答与练习 | “为什么这样打？我真的会了吗？” | 用当前队伍和真实局面解释，再提供可跳过的变式练习 |
+| 陪伴 | “今天就想轻松玩一会儿。” | 情境恰当的回应、可控的提示与休息提醒，尊重玩家节奏 |
 
-## 核心特性
+以上是产品目标，逐项完成标准见[路线图](docs/roco/PRODUCT-VISION-AND-ROADMAP.md#6-实施顺序与退出条件)。已有页面和模块仍需完成整条玩家链路的验收。
 
-- **算与说分离**：伤害、克制、命中、胜负由引擎结算；模型正文里的数字与技能名必须能在证据包里找到，找不到就整句丢弃回退到本地结论（`src/coach/runtime.js` 的 `checkGroundedAnswer`）。
-- **有界多步**：第一步由政策直接调工具，之后模型才能提议再查什么；工具回执数量有上限，超限即停。
-- **该沉默就沉默**：开口与否按重要性、置信度、是否还来得及、打扰量判定；线上竞技模式（`pvp-live`）直接静音（`src/coach/policy.js`）。
-- **过期结果整条丢弃**：局面版本一推进，迟到的模型回答不再采用，并记录原因（`stale_result_discarded`）。
-- **三种角色**：军师（局中建议）、老师（复盘与阶段小测）、陪练（有情绪、有记忆）（`docs/COACH-PLAN.md` §1）。
-- **情绪挂在读数上**：陪练可以说「可惜 / 漂亮 / 悬 / 憋屈 / 松口气」，但每种情绪都要绑定一条真实对局读数（`src/coach/companion.js`）。
-- **记忆在本机**：偏好、教训、事件与条件提醒存在浏览器 localStorage；清空记忆不影响游戏成长。
-- **数据可复算**：图鉴、技能、学习表、相性都带来源与 SHA256；第三方 Lua 只做文本解析，不执行。
-- **零 npm 依赖**：`package.json` 里 `dependencies` 与 `devDependencies` 都是空的，不需要 `npm install`。
+## 看见多少，就根据多少来分析
 
-## 快速开始
+开局短暂展示的对方六只属于已观察事实，预览关闭后小芽仍应记住。知道物种并不意味着知道对方个体的天分、性格、真实六维、实际四技能或下一步行动。
 
-需要 Node.js（判据用内置的 `node --test` 跑；本机在 v24.20.0 上实测）。仓库没有 npm 依赖，克隆后直接启动：
+小芽应把信息分清：**已经看见的事实、图鉴提供的可能性、根据战斗证据作出的推测**。再比较对手留场、换人或使用不同技能时的主要分支，给出在这些假设下更稳妥的选择。
+
+伤害和合法性由规则引擎计算；模型负责理解目标、按需选择工具、组织假设与解释取舍。没有证据时不编数值，搜索有限时不承诺全局最优。复盘也只使用决策当时能够知道的信息，不能从终局结果倒推玩家“本来就该知道”。
+
+## 少说，但在需要时说清楚
+
+主动提示应出现在还有行动空间、确实存在重要风险或机会的时候。玩家明确问“该换谁”时，小芽应直接处理这次战术问题；日常提示频率限制不应把它变成闲聊。
+
+默认回答先给行动，再给理由和风险；详细依据按需展开。过期建议不可采用，查看建议不应自动出招。复盘不逐行倾倒战报，也不要求每场都挑错：合理选择遇到坏结果，需要被如实解释。
+
+最终要验证的是玩家能否理解和独立运用这些判断。回答更长、提示更多、测试数量更多，都不能替代这项验证。
+
+## 本地运行
+
+需要 Node.js 和 Python 3。Node 服务使用 ES modules 与内置 API；Roco 规则服务默认通过 `python3` 启动，也可用 `ROCO_PYTHON` 指定解释器。`package.json` 没有 npm 运行依赖。
 
 ```sh
-npm start            # → http://127.0.0.1:8765/
-PORT=8899 npm start  # 换端口
+git clone --branch wip/roco-coach-2026-09-30-1418 https://gitee.com/serendizc/roco-coach.git
+cd roco-coach
+npm start
 ```
 
-| 路径 | 页面 |
+上述命令取当前开发分支，并非稳定发布版。默认访问 [http://127.0.0.1:8765/](http://127.0.0.1:8765/)。已有服务占用该端口时，在另一个终端使用独立端口：
+
+```sh
+PORT=8899 npm start
+```
+
+| 页面 | 用途 |
 |---|---|
-| `/` | 营地：PVE 关卡、培养、同屏对战练习 |
-| `/roco.html` | 《洛克王国：世界》训练场：选边选队、六宠标准 PVP、局中教练与局末复盘 |
-| `/box.html` | 精灵盒子：全部精灵 / 我的盒子，逐只的性格、资质、天分与配招 |
-| `/xiaoya.html` | 单独的小芽页面 |
-| `/connect.html` | 加密录入 DeepSeek API Key（只留在服务进程内存，不落盘） |
+| `/roco.html` | Roco 对战训练场 |
+| `/box.html` | 精灵盒子、个体资料与配招入口 |
+| `/` | 自研小兽营地、PVE 与本地同屏对战 |
+| `/xiaoya.html` | 独立小芽对话页面 |
+| `/connect.html` | 可选的模型连接设置 |
 
-**不接模型也能用**：建议、复盘、培养建议与小测由本地链路给出。想接模型，在 `/connect.html` 填入 Key；macOS 也可以用钥匙串启动：
+先检查规则服务是否可用。以下以默认端口为例；使用其他端口时同步替换：
 
 ```sh
-./scripts/start.sh --save-key   # 存一次
-./scripts/start.sh              # 以后直接启动
+curl -s http://127.0.0.1:8765/api/roco/status
 ```
 
-## 怎么用
+`available: true` 和有效的 `health` 是开始验证 Roco 对战的必要条件；页面能打开不代表战斗服务正常。若返回 `available: false`，查看 `last_error`。健康检查通过后，仍需验证真实对局和教练链路。
 
-1. **打一局营地 PVE**：打开 `/` → 「⚔ 训练 · PVE」→ 选关卡与队伍 → 局中看小芽的短提示，结束后看复盘。
-2. **打一局标准 PVP**：打开 `/roco.html` → 选边与阵容 → 开局；行动面板给出合法动作与依据，结束后出「✦ 局末复盘」。
-3. **直接问小芽**：点页面上的「✦ 小芽」入口或打开 `/xiaoya.html`；问题会连同相关游戏依据一起交给模型，回答受同一条证据校验约束。
+模型连接是可选项：仓库包含本地分析与回答回退链路，但其质量和覆盖范围仍需验收。启用模型可在 `/connect.html` 配置；不要把密钥写入源码或提交到仓库。
 
-## 项目结构
+## 建议先体验这一条链
 
+1. 在盒子与配队入口选择六只精灵，检查每只的技能和队伍打法。
+2. 进入训练场，观察实际公开信息，问小芽“现在怎么办”或“该换谁”。
+3. 查看建议的理由与风险，再由自己决定行动。
+4. 局末挑一处值得复看的选择，下一局尝试运用同一判断方法。
+
+这是项目的核心验收流程。若任何一步需要开发者代操作、输出缺少可执行建议，或模拟结果与说明矛盾，都应作为产品缺陷保留。
+
+## 接下来怎么做
+
+开发顺序是：**恢复服务与规则一致性 → 打通公开观察 → 做好一局中的建议 → 形成复盘与练习闭环 → 连通配队培养与陪伴 → 真人试用。**
+
+2026-09-30 本次文档核对期间，Roco 服务经历了覆盖判据接口缺失导致的启动故障；最新健康检查已返回 `available: true`，完整对局与教练验收仍在进行。当前仓库不应被理解为“开箱即可完整使用”的发布版本。已有代码包括建议、复盘、记忆和模型工具调用；开局观察一致性、复杂分支质量及真人学习收益仍待验收。
+
+详细交付、信息边界、体验设计和质量门槛见[产品愿景与实施路线](docs/roco/PRODUCT-VISION-AND-ROADMAP.md)。最新服务状态以运行实例为准。
+
+## 开发与验证
+
+```sh
+# Python 服务入口检查
+PYTHONPATH=roco/src python3 -c 'import roco_env.service'
+
+# 查看项目状态
+npm run roco:status
+
+# Python 规则测试
+npm run test:env
 ```
-src/game/     规则引擎、对战结算、关卡内容、成长（纯 Node，零依赖）
-src/coach/    教练链路：政策与门控、有界多步、工具合同、回答守卫、记忆、陪练、检索
-src/server/   HTTP 服务与 API（默认 127.0.0.1:8765）
-src/client/   页面（营地 / roco / box / xiaoya / connect）与样式
-roco/         Python 规则引擎（roco/src/roco_env/）与它自己的判据（roco/tests/）
-data/roco/    数据层：原始快照、归一化图鉴、抓包派生层、台账
-scripts/      数据管线、离线评测、浏览器验收脚本
-tests/        Node 判据（183 个 *.test.js，其中 146 个平铺在根上，其余在 tests/evals/）
-docs/         设计与验收文档；手游那一档在 docs/roco/
-knowledge/    知识卡与语义语料（由 npm run build:knowledge 生成）
-reports/      实验与验收产物（JSON / Markdown / 日志）
-output/       截图与 PDF 报告
-```
 
-## 文档索引
+更完整的 Node、浏览器和发布验证入口在 `package.json` 与 [tests/README.md](tests/README.md)。完整验收请在隔离实例和专用浏览器数据中进行，先确认脚本的端口、数据目录及进程清理范围。
 
-| 想知道什么 | 看哪 |
+每次验收应记录代码与规则版本、公开输入、实际状态转移和界面结果。区分代码通过、隔离实例通过、玩家正在使用的服务已加载新版。针对未实现机制、隐藏信息变化、模型超时和过期结果的反例同样重要。
+
+## 代码与资料
+
+| 目录 | 内容 |
 |---|---|
-| 主链路 30 秒看懂（架构一页图） | `docs/ARCHITECTURE-ONE-PAGER.md` |
-| 新文件该放哪、目录约定 | `docs/STRUCTURE.md` |
-| 教练方案、三种角色、展示原则 | `docs/COACH-PLAN.md` |
-| 证据、事件、任务状态与权限约定 | `docs/EVIDENCE-SCHEMA.md` |
-| 实验与资源边界 | `docs/EXPERIMENTS.md` |
-| 当前能力、运行版本与限制 | `docs/IMPLEMENTATION-STATUS.md` |
-| 逐项完成状态与验收证据 | `docs/CHECKLIST.md` |
-| 演示与验收脚本 | `docs/DEMO-ACCEPTANCE.md` |
-| 讲述与追问准备 | `docs/INTERVIEW-GUIDE.md`、`docs/INTERVIEW-DRILL.md` |
-| 手游数据层怎么分层 | `data/roco/README.md` |
-| 数据来源、revision 与许可等级 | `data/roco/sources.yaml`、`docs/roco/LICENSE-MATRIX.md` |
-| 进度台账（路线图 vs 证据） | `docs/roco/PROGRESS.md` |
-| 逐轮执行台账 | `docs/roadmap/DSH-EXECUTION-STATE.md` |
-| 判据怎么找、怎么加 | `tests/README.md` |
-| 小芽「理想形态」计划书与实测记录 | `docs/roco/coach-理想形态-计划书-2026-09-30.md` |
-| 实施与实验报告（PDF） | `output/pdf/xiaoya-coach-report.pdf` |
-| 已完成的第一版说明 | `docs/RELEASE-v0.1.md` |
+| `src/coach/` | 意图理解、工具编排、建议、复盘、记忆与陪伴 |
+| `roco/src/roco_env/` | Roco Python 规则引擎与服务 |
+| `src/game/` | 自研小兽游戏规则 |
+| `src/server/` | 本地 HTTP 服务与接口 |
+| `src/client/` | 训练场、盒子、小芽等页面 |
+| `data/roco/` | 规则、图鉴、技能与来源数据 |
+| `tests/`、`roco/tests/` | Node 与 Python 测试 |
+| `scripts/`、`reports/` | 数据工具、评测脚本与验证产物 |
+| `docs/` | 产品设计、接口约定与历史记录 |
 
-## 开发
+- [产品路线](docs/roco/PRODUCT-VISION-AND-ROADMAP.md)：要解决什么问题、按什么顺序交付、如何判断好用。
+- [教练整体方案](docs/COACH-PLAN.md)：干预、工具、记忆与学习闭环的设计背景。
+- [数据说明](data/roco/README.md)与[许可矩阵](docs/roco/LICENSE-MATRIX.md)：来源和使用边界。
+- [DSH 交接](docs/roco/交接-2026-09-30-给新DSH会话.md)：当前开发交接线索，具体状态需重新核对。
 
-```sh
-npm run test:unit      # Node 判据（package.json 里的手写清单，171 个文件）
-npm run test:browser   # 真实 Chrome 无头验收（脚本自己找本机 Chrome）
-npm test               # 上面两条
-npm run test:env       # Python 引擎判据：cd roco && PYTHONPATH=src python3 -m unittest discover -s tests
-npm run roco:status    # 只读现状：判据数、最近一次门禁、服务端口、工作区
-npm run verify:release # 发版门禁（27 套，含浏览器验收与 Python 引擎）
-```
-
-数据管线（读 `data/roco/` 的原始快照，产出归一化与文档；`data/roco/raw/extracted/` 不入库，新克隆要先解压 `data/roco/raw/*.tar.gz`）：
-
-```sh
-npm run roco:pipeline    # 解析校验 → 交叉核验 → 导入 → 支持矩阵 → microcase → 文档
-npm run test:roco        # 数据域验收
-npm run roco:acceptance  # 真实浏览器验收（含截图）
-```
-
-离线实验（纯 Node，产物写在 `reports/`）：
-
-```sh
-npm run build:knowledge      # 从规则与知识卡生成可检索语料
-npm run eval:retrieval       # 检索对照
-npm run eval:balance:quick   # 单宠胜率对照
-npm run eval:balance         # 平衡矩阵（大规模无头仿真）
-npm run train:intervention   # Q-learning 学干预时机
-```
-
-可选依赖：语义检索与精确 token 计数需要 `.venv-agent/bin/python`（缺失时语义检索自动退回词项检索，不报错中断）；本地小模型实验另需 MLX 环境与权重（`scripts/model/`）。
-
-## 边界
-
-- **本地对战是同一台设备上的同屏对战，不是联网 PVP**；也还没有生产级权威对局与认证（`docs/CHECKLIST.md`）。
-- **一回合搜索不是全局最优**：给出的是启发式局面评分，不是胜率。
-- **不给胜率、不给伪精确百分数**：阵容与培养建议只讲结构与依据（`docs/roco/WORKSHOP.md`）。
-- **浏览器语音暂停使用**：`src/client/app.js` 里 `VOICE_FEATURE = false`，只保留文字提示。
-- **不是 DeepSeek 微调**：离线只训过一个二选一的工具路由头，线上用的是基座模型（`docs/CHECKLIST.md`）。
-- 真人学习收益、生产模型权重训练与独立大样本评测尚未完成。
-
-## 当前进度
-
-- **游戏侧可用**（2026-09-30 实测）：`npm start` 后 `/`、`/roco.html`、`/box.html`、`/connect.html`、`/xiaoya.html` 都返回 200；营地 PVE、同屏对战、精灵盒子与阵容工坊都在。
-- **数据层已冻结**：622 条图鉴、12 只基线精灵、530 只抓包精灵（目录名仍叫 `layer-playable-48`，"48" 是名字不是数量，合计 542 只）。
-- **规则引擎侧在重建**：`roco/src/roco_env/service.py` 目前 import 不通（`coverage.py` 缺入口），所以引擎相关判据与发版门禁尚未全绿；最近一次登记的门禁结果是 2026-09-28 的 `unit` 未通过（`reports/roco/verification/latest.json`）。
-- **还没做完**：真人学习收益、生产权威状态、生产模型权重训练。
-- 已打过 tag 的完成版本是 `v0.1.0`；一条命令看现状用 `npm run roco:status`（只读）。
-
-## 数据与出处
-
-上游数据的来源、revision 与再分发等级记在 `data/roco/sources.yaml` 与 `docs/roco/LICENSE-MATRIX.md`；对战设计的灵感来源逐条记在知识卡的 `inspiration` 字段里（`knowledge/tactics.json`），外部资料调研见 `docs/LINGBAO-RESEARCH.md`。
+本项目是非官方的本地训练与研究原型，目前没有接入官方游戏客户端或提供联网竞技服务。模拟规则、机制覆盖和图鉴资料应分别核对。模型大小与训练完成不代表教练质量；4B 训练由项目负责人另行开展，27B 暂缓。
