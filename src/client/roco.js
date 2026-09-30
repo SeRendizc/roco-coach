@@ -5511,6 +5511,58 @@ function coachCampContext() {
  *
  * 没开局时返回 `null`，调用方据此**不加**这个字段 —— 营地/三宠那两条老路一字不变。
  */
+/**
+ * B3（2026-10-01）：**承伤相性的上传读数** —— 页面把自己已经算好并渲染的那个数，作为**带来源的公开读数**
+ * 随上下文交给教练。
+ *
+ * 为什么需要它（机制实测，不是纸面推理）：玩家在六宠局里问「喵喵光系承伤 0.5 与缇塔 1 怎么比」，
+ * 模型照实引用了 `0.5`，而 `0.5` **不在**证据包里 ⇒ 守卫判 `ungrounded` ⇒ 回退正文
+ * （修 P1-A 之前那句假话、修之后是「这一轮能做的是…」）⇒ **玩家问的那个数永远答不上**。
+ * 把读数带上去之后实测：「不带 ⇒ `rejected=ungrounded` + 回退」/「带 ⇒ `rejected=null` + `delivered=model-answer`」。
+ *
+ * 三条纪律：
+ *   ① **不重算**：倍率由 `type-affinity.js` 的 `incomingAffinity()` 现算（与渲染同**一个函数、同一组输入**），
+ *      本函数只搬运；服务端**只校验形状**，绝不在服务端重算（`type-affinity.js` 文件头：承伤向与
+ *      进攻向是两件事，且相性表只有一份实现）。
+ *   ② **拿不到不给数**：`known:false` 的那一只**不许**出现在 `rows` 里、**不许**填 0/1 之类的数字，
+ *      只能进 `unavailable[]` 并写明理由（服务端对此 fail closed：见 `validateChat`）。
+ *   ③ **带来源**：`source` 指向生成产物与规则集 id（H4 之后页面里那个 id 的唯一来源是 `RULESET_ID`）。
+ *
+ * 这个函数**自包含**（`affinityOf` / `sourceId` 都由调用方传入），判据用本仓既有抽法直接从源码里抠出来跑。
+ */
+function affinityReadingsOf(view, affinityOf, sourceId) {
+  if (typeof affinityOf !== 'function') return null;
+  const self = Array.isArray(view?.self?.pets) ? view.self.pets : [];
+  if (!self.length) return null;
+  const foeTypes = Array.isArray(view?.opponent?.field?.types)
+    ? view.opponent.field.types.filter((one) => typeof one === 'string' && one).slice(0, 6) : [];
+  const typesOf = (pet) => (Array.isArray(pet?.types) ? pet.types : (pet?.type ? [pet.type] : []));
+  const active = Number.isInteger(view?.self?.active) ? view.self.active : 0;
+  const order = [active, ...self.map((_, index) => index).filter((index) => index !== active)];
+  const rows = [];
+  const unavailable = [];
+  for (const index of order.slice(0, 6)) {
+    const pet = self[index];
+    const petId = typeof pet?.pet_id === 'string' && pet.pet_id ? pet.pet_id : null;
+    if (!petId) continue;
+    const reading = affinityOf(typesOf(pet), foeTypes);
+    const worst = reading?.known ? reading.worst : null;
+    if (worst && Number.isFinite(worst.multiplier)) {
+      const row = {pet_id: petId, multiplier: worst.multiplier, known: true};
+      if (typeof worst.attackType === 'string' && worst.attackType) row.vs_type = worst.attackType.slice(0, 12);
+      rows.push(row);
+    } else {
+      unavailable.push({pet_id: petId,
+        reason: String(reading?.reason ?? '承伤相性读不到（属性缺失或组合没登记）').slice(0, 60)});
+    }
+  }
+  if (!rows.length && !unavailable.length) return null;
+  const out = {source: `src/client/type-affinity.data.js@${String(sourceId ?? 'unknown').slice(0, 60)}`,
+    rows, unavailable};
+  if (foeTypes.length) out.vs_types = foeTypes;
+  return out;
+}
+
 function coachRocoBattle() {
   const view = state.view;
   if (!view || !Number.isInteger(view.turn) || !Array.isArray(view.self?.pets)) return null;
@@ -5593,6 +5645,10 @@ function coachRocoBattle() {
     return item;
   }).filter(Boolean);
   if (legal.length) snapshot.legal = legal;
+  // B3：承伤相性的公开读数（带来源；`known:false` 只进 `unavailable`，不给数字）。
+  // 拿不到就**不加这个键**（加性红线：老路径一字不变）。`incomingAffinity` 与渲染用的是同一个函数。
+  const affinity = affinityReadingsOf(view, incomingAffinity, RULESET_ID);
+  if (affinity) snapshot.affinity = affinity;
   return snapshot;
 }
 

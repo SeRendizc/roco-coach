@@ -1034,7 +1034,16 @@ export function rocoAdviceAsk(message) {
     || /(该|要|应该)换(谁|哪只|哪一?只|什么|上谁)|换上谁|换谁(好|上|顶)|谁(来|去)顶|补谁/.test(text)
     || /(出招|进攻|打)还是(防御|守|换)|(防御|守)还是(出招|进攻|换)|要不要换(人|宠|只)|该攻还是该守|怎么选/.test(text)
     || /(接下来|下一步|下面)(该)?(做什么|干什么|怎么办|怎么打|该干嘛|怎么走)/.test(text)
-    || /(给|来|出)(我)?(个|条|点)?建议|有什么建议|帮我(选|挑|定)|我该怎么选/.test(text);
+    || /(给|来|出)(我)?(个|条|点)?建议|有什么建议|帮我(选|挑|定)|我该怎么选/.test(text)
+    // 第 8 组（2026-10-01，B2/P1-A 同族）：**比较类**问句 —— 「谁更耐打 / 承伤怎么比 / 扛不扛得住」。
+    //   现场：玩家在六宠局里问「喵喵光系承伤 0.5 与缇塔 1 如何比较」，旧词表一条都不命中 ⇒
+    //   落到陪伴层回「说清你问的是哪一块（配招/先手/队伍），我按事实答。」——**答非所问**。
+    //   为什么仍然必须是窄表：**比较词与承伤/生存词必须同现**。只说「承伤是什么」是机制题，
+    //   归事实层；带上「更 / 哪个 / 比」才是真的拿两只看。下面三条各管一种说法。
+    || (/(谁|哪(?:一)?只|哪个|这两只|这两个)/.test(text) && /(更|比较)/.test(text)
+      && /(承伤|挨打|耐打|抗打|扛得住|顶得住|站得住)/.test(text))
+    || /(承伤|挨打|耐打|抗打).{0,16}(更低|更少|更小|怎么比|如何比|比较一下|比较|哪个更好)/.test(text)
+    || /(扛得住|顶得住|站得住).{0,6}(吗|么|这一下|这一手|这一招)/.test(text);
 }
 
 /**
@@ -1362,7 +1371,35 @@ function situationLine(pos) {
  * }}
  */
 export function battleAdvice({battle = null, plan = null, message = null} = {}) {
-  return adviceForPosition(positionFromSnapshot(battle, plan), plan);
+  return withAffinityLimits(adviceForPosition(positionFromSnapshot(battle, plan), plan), battle);
+}
+
+/**
+ * B3（2026-10-01）：把页面送上来的**承伤相性读数**里「读不到的那几只」并进建议的「不知道」一栏。
+ *
+ * 为什么在这一层做：`battleAdviceText()` 已经把 `advice.unknown` 渲染成
+ * 「我这里不知道的：…」——这正是「拿不到就如实说」的那条既有通道（不新增话术、不新增出口）。
+ * **只引用、不重算**：本层没有相性表，也不该有第二份实现（`type-affinity.js` 是唯一来源）；
+ * 名字也从 `battle.self/foe` 的公开面取，**不把内部 id 端给玩家**。
+ * 加性：老上下文没有 `affinity` ⇒ 原样返回（一个字不变）。
+ */
+function withAffinityLimits(advice, battle) {
+  if (!advice) return advice;
+  const unread = Array.isArray(battle?.affinity?.unavailable) ? battle.affinity.unavailable : [];
+  if (!unread.length) return advice;
+  const nameOf = new Map();
+  for (const row of [...(Array.isArray(battle?.self) ? battle.self : []),
+    ...(Array.isArray(battle?.foe) ? battle.foe : [])]) {
+    if (row && typeof row.pet_id === 'string' && typeof row.name === 'string' && row.name) {
+      nameOf.set(row.pet_id, row.name);
+    }
+  }
+  const lines = unread
+    .filter((row) => row && typeof row.reason === 'string' && row.reason)
+    .map((row) => `「${nameOf.get(row.pet_id) ?? '场上一只'}」这一只的承伤相性我没有：${row.reason}`)
+    .slice(0, 6);
+  if (!lines.length) return advice;
+  return {...advice, unknown: [...(Array.isArray(advice.unknown) ? advice.unknown : []), ...lines]};
 }
 
 /**

@@ -75,7 +75,10 @@ export function strategist(context){
  //   `reports/roco/xiaoya-context/browser-capability-acceptance.mjs` 的 LEGACY_SMELL）。
  //   改成用本产品的话说**同一件事**（仍然如实说「要先开一局」，只是不再用旧词）。
  //   旧文案留档（改钉不删）：进入一场 PVE 对战后，我可以结合当前生命、能量和队伍比较行动。
- if(!g||g.result)return {text:'开一局之后，我才能按当前生命、能量和队伍比较这一手。',evidence:[]};
+ // 2026-10-01（B3 搭车 · 退役单位口径）：句里的「生命」换成「血量」——
+ //   `src/coach/player-text.js` 的词表口径是「血量类只许 血 / 血量」，`HP`/`生命`/`豆` 一律退役
+ //   （玩家可见文本里出现它们就是缺陷）。旧句逐字留档在上面那一行。
+ if(!g||g.result)return {text:'开一局之后，我才能按当前血量、能量和队伍比较这一手。',evidence:[]};
  if(g.phase==='replace'){
   const candidates=legalActions(g).filter(a=>a.kind==='switch').map(action=>{
    const next=structuredClone(g);next.player.active=action.target;next.phase='battle';
@@ -84,13 +87,17 @@ export function strategist(context){
   }).sort((a,b)=>b.score-a.score);
   const best=candidates[0],fallen=active(g,'player'),q=active(g,'enemy');
   if(!best)return {text:'目前没有可补位的存活伙伴。',evidence:[]};
-  return {text:`${fallen.name}倒下了，先让${best.pet.name}补位。它还剩${best.pet.hp}HP、${best.pet.energy}豆；补位免费，选好后再决定出招。这是把下一回合双方可能的选择都算过一遍，对手仍可能换宠。`,
-   actions:candidates.map(c=>c.action),evidence:[`当前对手${q.name}：${q.hp}HP、${q.energy}豆。倒下后的补位不占回合，也不会触发一次额外攻击。`,...candidates.map(c=>`${c.pet.name}：${c.pet.hp}HP、${c.pet.energy}豆${c.pet.status?'，'+c.pet.status.kind:''}；补位后下一回合按双方可能的选择算下来是 ${c.score.toFixed(1)} 分（只用来排序，不是胜率）。`)]};
+  // 2026-10-01（B3 搭车 · 退役单位口径）：下面三句里的 `HP`/`豆` 一并换成「血」「能量」——
+  //   lead-mac 的真机探针在 `[局内建议·evidence]` 抓到的就是这一族（原文「烬尾狐：45/98 HP，能量 6，速度 38。」）。
+  //   旧写法逐字留档（改钉不删）：`…还剩${best.pet.hp}HP、${best.pet.energy}豆；…` · `…${q.hp}HP、${q.energy}豆…` ·
+  //     `${p.name}：${p.hp}/${p.maxHp} HP，能量 ${p.energy}，速度 …`
+  return {text:`${fallen.name}倒下了，先让${best.pet.name}补位。它还剩${best.pet.hp} 血、${best.pet.energy} 能量；补位免费，选好后再决定出招。这是把下一回合双方可能的选择都算过一遍，对手仍可能换宠。`,
+   actions:candidates.map(c=>c.action),evidence:[`当前对手${q.name}：${q.hp} 血、${q.energy} 能量。倒下后的补位不占回合，也不会触发一次额外攻击。`,...candidates.map(c=>`${c.pet.name}：${c.pet.hp} 血、${c.pet.energy} 能量${c.pet.status?'，'+c.pet.status.kind:''}；补位后下一回合按双方可能的选择算下来是 ${c.score.toFixed(1)} 分（只用来排序，不是胜率）。`)]};
  }
  const ranked=rankEnemyActions({...g,player:g.enemy,enemy:g.player},{goal:context.goal});
  const best=ranked[0]?.action;if(!best)return {text:'当前没有可分析的合法行动。',evidence:[]};
  const p=active(g,'player'),q=active(g,'enemy');
- const evidence=[`${p.name}：${p.hp}/${p.maxHp} HP，能量 ${p.energy}，速度 ${effectiveSpeed(p)}。`,`${q.name}：${q.hp}/${q.maxHp} HP，能量 ${q.energy}，速度 ${effectiveSpeed(q)}。`];
+ const evidence=[`${p.name}：${p.hp}/${p.maxHp} 血，能量 ${p.energy}，速度 ${effectiveSpeed(p)}。`,`${q.name}：${q.hp}/${q.maxHp} 血，能量 ${q.energy}，速度 ${effectiveSpeed(q)}。`];
  if(best.kind==='skill'&&SKILLS[best.id].power)evidence.push(`若对手不换宠、不防御，${SKILLS[best.id].name}对当前目标计算伤害为 ${damage(p,q,SKILLS[best.id])}；实际结算受对手行动影响。`);
  // 短句只给结论与备选。那句「这是结合双方合法行动的一回合风险比较，不能保证后续最优或获胜」
  // 曾经挂在每一条建议后面，使用者反馈是废话——它每次都一样，却不提供任何新信息。

@@ -27,6 +27,8 @@ import {executeTool} from '../src/coach/toolbox.js';
 import {policyFor} from '../src/coach/runtime.js';
 import {freshMemory} from '../src/coach/memory.js';
 import {validateChat} from '../src/server/index.js';
+import {incomingAffinity} from '../src/client/type-affinity.js';
+import {rocoAdviceAsk, battleAdvice, battleAdviceText} from '../src/coach/coach-advice.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SERVER_SRC = readFileSync(join(ROOT, 'src', 'server', 'index.js'), 'utf8');
@@ -318,4 +320,151 @@ test('⑨ 结构性：`state.view` 只许被条件式覆盖（响应不带 view 
   assert.deepEqual(scanner('  state.view = data.view;'), [{line: 'state.view = data.view;', no: 1}],
     '探测器本身必须能红');
   assert.deepEqual(scanner('  if (data?.view) state.view = data.view;'), []);
+});
+
+// ── B3（2026-10-01）：承伤相性的**上传读数** ────────────────────────────────────
+// 现场：玩家六宠局里问「喵喵光系承伤 0.5 与缇塔 1 怎么比」，模型照实引用 `0.5`，而 `0.5` 不在证据包里
+// ⇒ 守卫判 `ungrounded` ⇒ 回退正文 ⇒ **玩家问的那个数永远答不上**（机制实测见下 ⑤）。
+// 修法：页面把**已经算好并渲染**的承伤相性作为**带来源的公开读数**上传；服务端**只校验形状不重算**。
+const AFF_VIEW = {
+  self: {active: 0, pets: [
+    {pet_id: 'pet_000001', name: '喵喵', types: ['草系']},
+    {pet_id: 'pet_000417', name: '缇塔', types: ['光系']},
+    {pet_id: 'pet_000190', name: '潮甲龟', types: []}]},          // 无属性 ⇒ 必须进 unavailable
+  // 对手**两个属性**（各当一次攻击系）⇒ `worst` 与 `best` 是两格不同的值：
+  // 这样「取 worst」才可判 —— 单属性时 worst===best，改坏了也看不出来（变异 M23 就是靠这条抓的）。
+  opponent: {field: {types: ['火系', '水系']}},
+};
+/** 从 `roco.js` 源码里把那个自包含纯函数抠出来（与 `roco-page-ux` 的抽法同一条）。 */
+function extractAffinityReader() {
+  const src = readFileSync(join(ROOT, 'src', 'client', 'roco.js'), 'utf8');
+  const start = src.indexOf('function affinityReadingsOf(');
+  assert.ok(start >= 0, 'roco.js 里找不到 `affinityReadingsOf`（改名/删除 ⇒ 这条判据已失效）');
+  const open = src.indexOf('{', start);
+  let depth = 0;
+  for (let i = open; i < src.length; i += 1) {
+    if (src[i] === '{') depth += 1;
+    else if (src[i] === '}') { depth -= 1; if (depth === 0) return new Function(`return (${src.slice(start, i + 1)})`)(); }
+  }
+  throw new Error('affinityReadingsOf 的大括号没有配平');
+}
+
+test('⑩ B3①：页面读数 = 在场 + 候选，且倍率与渲染**同源**（同一个 incomingAffinity、同一组输入）', () => {
+  const read = extractAffinityReader();
+  const out = read(AFF_VIEW, incomingAffinity, 'roco-world-s4-2026-09-10');
+  assert.ok(out, '有战况就必须产出读数');
+  assert.equal(out.source, 'src/client/type-affinity.data.js@roco-world-s4-2026-09-10', '要带来源');
+  assert.deepEqual(out.vs_types, ['火系', '水系'], '对手场上属性（公开）');
+  assert.deepEqual(out.rows.map((r) => r.pet_id), ['pet_000001', 'pet_000417'], '在场那只在前，候选在后');
+  // 同源：每一行的倍率必须等于**直接调那一个函数**的结果（页面不复算、判据也不另算一份口径）
+  for (const row of out.rows) {
+    const pet = AFF_VIEW.self.pets.find((p) => p.pet_id === row.pet_id);
+    const want = incomingAffinity(pet.types, AFF_VIEW.opponent.field.types);
+    assert.equal(row.known, true);
+    assert.equal(row.multiplier, want.worst.multiplier, `${row.pet_id} 的倍率必须来自 incomingAffinity`);
+    assert.equal(row.vs_type, want.worst.attackType);
+  }
+});
+
+test('⑩ B3②：`known:false` 不许给数字，必须逐条进 `unavailable` 并写明理由', () => {
+  const read = extractAffinityReader();
+  const out = read(AFF_VIEW, incomingAffinity, 'x');
+  const ids = out.rows.map((r) => r.pet_id);
+  assert.ok(!ids.includes('pet_000190'), '没有属性数据的那一只不许出现在 rows 里');
+  const row = out.unavailable.find((r) => r.pet_id === 'pet_000190');
+  assert.ok(row, '必须进 unavailable（不许静默省略）');
+  assert.ok(row.reason.length > 0 && row.reason.length <= 60, `理由要写清且不超长：${row.reason}`);
+  assert.equal(Object.hasOwn(row, 'multiplier'), false, 'unavailable 里不许带数字');
+  // 反证：把「没有属性」换成「有属性」⇒ 它必须回到 rows（证明上面不是恒真）
+  const fixed = {...AFF_VIEW, self: {...AFF_VIEW.self,
+    pets: AFF_VIEW.self.pets.map((p) => (p.pet_id === 'pet_000190' ? {...p, types: ['水系']} : p))}};
+  const outs = read(fixed, incomingAffinity, 'x');
+  assert.ok(outs.rows.some((r) => r.pet_id === 'pet_000190'), '有属性之后必须回到 rows');
+  assert.deepEqual(outs.unavailable, [], '没有读不到的就该空');
+});
+
+test('⑩ B3③：服务端**只校验形状**且 fail closed（known:false 带数字 / 缺 unavailable / 越界 一律 400）', () => {
+  const ok = {...SNAPSHOT, affinity: {source: 'src/client/type-affinity.data.js@x', vs_types: ['火系'],
+    rows: [{pet_id: 'pet_000225', multiplier: 0.5, known: true, vs_type: '火系'}], unavailable: []}};
+  assert.doesNotThrow(() => validateChat(bodyWith(ok)), '合法读数必须放行');
+  // `known:false` 那一只走 unavailable（合法的第二种形态）
+  assert.doesNotThrow(() => validateChat(bodyWith({...SNAPSHOT, affinity: {
+    source: 's', rows: [], unavailable: [{pet_id: 'pet_000225', reason: '组合没登记'}]}})));
+  const bad = [
+    ['不是对象', 'x'],
+    ['source 空', {source: '', rows: []}],
+    ['rows 超 6', {source: 's', rows: Array.from({length: 7}, (_, i) => ({pet_id: `p${i}`, multiplier: 1, known: true}))}],
+    ['known 不是布尔', {source: 's', rows: [{pet_id: 'p', multiplier: 1, known: 'yes'}]}],
+    ['known=true 却没有 multiplier', {source: 's', rows: [{pet_id: 'p', known: true}]}],
+    ['multiplier 越界', {source: 's', rows: [{pet_id: 'p', multiplier: 9, known: true}]}],
+    ['known=false 却带 multiplier', {source: 's', rows: [{pet_id: 'p', multiplier: 0, known: false}],
+      unavailable: [{pet_id: 'p', reason: '读不到'}]}],
+    ['known=false 没进 unavailable', {source: 's', rows: [{pet_id: 'p', known: false}], unavailable: []}],
+    ['unavailable 缺 reason', {source: 's', rows: [], unavailable: [{pet_id: 'p'}]}],
+  ];
+  for (const [why, affinity] of bad) {
+    assert.throws(() => validateChat(bodyWith({...SNAPSHOT, affinity})), /六宠战况无效/,
+      `${why} 必须被拒（形状校验 fail closed）`);
+  }
+});
+
+test('⑩ B3④：加性红线 —— 不带 `affinity` 时与改动前完全一样', () => {
+  assert.doesNotThrow(() => validateChat(bodyWith(SNAPSHOT)), '老形状照旧放行');
+  assert.doesNotThrow(() => validateChat(bodyWith(undefined)), '不带 roco_battle 照旧放行');
+  const read = extractAffinityReader();
+  assert.equal(read({self: {pets: []}}, incomingAffinity, 'x'), null, '没有我方阵容 ⇒ 不加这个键');
+  assert.equal(read({}, null, 'x'), null, '拿不到相性函数 ⇒ 不加这个键');
+});
+
+test('⑩ B3⑤：机制证据 —— 带读数时，引用「承伤 0.5」的正文**不再**被打回（不带时报 ungrounded）', async () => {
+  const battle = {...SNAPSHOT, affinity: {source: 'src/client/type-affinity.data.js@x', vs_types: ['火系'],
+    rows: [{pet_id: 'pet_000225', multiplier: 0.5, known: true}], unavailable: []}};
+  const answer = '第 3 回合寂灭骨龙 120/180 血、4 能量；它对火系承伤 0.5，比潮甲龟的 1 更抗这一手。';
+  const ask = (rocoBattle) => runCoach({message: '寂灭骨龙对火系承伤 0.5 是怎么算出来的？', role: 'auto',
+    context: {mode: 'camp', profile: {pets: [{id: 'pet_000225', name: '寂灭骨龙'}]}, roco_battle: rocoBattle},
+    memory: freshMemory(), conversation: [],
+    provider: {name: 'deepseek', async generate() { return answer; }}});
+  const withField = await ask(battle);
+  const without = await ask(SNAPSHOT);
+  assert.equal(without.validation?.rejectedReason, 'ungrounded', '不带读数 ⇒ 0.5 无出处 ⇒ 必须判 ungrounded');
+  assert.equal(without.provider, 'local-fallback', '不带读数 ⇒ 交付的是回退那一份');
+  assert.equal(withField.validation?.rejectedReason, null, '带读数 ⇒ 0.5 有出处 ⇒ 不许再打回');
+  assert.equal(withField.provider, 'deepseek', '带读数 ⇒ 交付的就是模型正文');
+  assert.match(String(withField.text), /承伤 0\.5/, '玩家拿到的正文里要留着那个数（有出处）');
+  // ⚠ 如实登记（**与本片无关的第二道闸**）：交付正文里 「第 3 回合寂灭骨龙 120/180 血、」 这一截被
+  //   `findNumberSourceProblems` 摘掉了 —— 它把「120/180 血」里的 **180** 当成 hp 主张（实际 120）⇒ 误判。
+  //   这是**既有**行为（`runtime.js`，不在本片写域）：页面/模型写标准的「当前/上限 血」形式就会中招。
+  //   本判据只钉「承伤倍率那个数不再被打回」，不替那道闸背锅；已单列在报告 §「本片外发现」。
+  assert.doesNotMatch(String(withField.text), /开一局之后/, '局里不许出现那句假话');
+});
+
+// ── B2（2026-10-01）：比较类问句进建议层（第 8 组**窄**词表）────────────────────
+// 现场：五条比较类问句（含 lead-mac 的原句）一条都不命中旧词表 ⇒ 落到陪伴层回
+// 「说清你问的是哪一块（配招/先手/队伍），我按事实答。」—— 答非所问。
+// 为什么必须窄：`coach-advice.js` 文件头逐字写着「宽一个词，事实问句（火系克制什么属性）就会被吞掉，
+// 玩家得到一段答非所问的战术建议 —— 这比沉默更糟」。
+test('⑪ B2①：比较类命中、事实/机制题**不许**被吞（窄表的两个方向）', () => {
+  const yes = ['喵喵光系承伤 0.5 与缇塔 1 如何比较', '喵喵和缇塔哪个更耐打？', '谁更抗打？',
+    '这两只谁的承伤更低？', '缇塔扛得住这一下吗？'];
+  for (const q of yes) assert.equal(rocoAdviceAsk(q), true, `比较类必须命中：${q}`);
+  const no = ['火系克制什么属性？', '承伤是什么意思？', '能量上限是多少？', '缇塔是什么属性？',
+    '这一局我换了几次宠？', '承伤', '耐打'];
+  for (const q of no) assert.equal(rocoAdviceAsk(q), false, `事实/机制题不许被吞：${q}`);
+});
+
+test('⑪ B2②：页面读数里「读不到的那几只」并进建议的「不知道」，且只用玩家看得懂的名字', () => {
+  const battle = {...SNAPSHOT, affinity: {source: 'src/client/type-affinity.data.js@x', vs_types: ['火系'],
+    rows: [{pet_id: 'pet_000225', multiplier: 0.5, known: true}],
+    unavailable: [{pet_id: 'pet_000190', reason: '属性组合不在冻结相性表里'}]}};
+  const advice = battleAdvice({battle, message: '喵喵和缇塔哪个更耐打？'});
+  assert.ok(advice, '比较类问句要能给出建议');
+  const unknown = (advice.unknown ?? []).join(' | ');
+  assert.match(unknown, /潮甲龟/, `要用公开面里的名字：${unknown}`);
+  assert.match(unknown, /属性组合不在冻结相性表里/, '理由要逐字带上');
+  assert.doesNotMatch(unknown, /pet_\d+/, '内部 id 不许端给玩家');
+  assert.match(battleAdviceText(advice), /我这里不知道的/, '走既有的「不知道」通道');
+  // 加性：没有 affinity 时 `unknown` 一个字都不变
+  const plain = battleAdvice({battle: SNAPSHOT, message: '喵喵和缇塔哪个更耐打？'});
+  assert.deepEqual(plain.unknown ?? [], advice.unknown.filter((line) => !/潮甲龟/.test(line)),
+    '没有读数时不许凭空多出「不知道」');
 });

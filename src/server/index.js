@@ -371,6 +371,42 @@ export function validateChat(b){
     if(a.kind!==undefined&&(typeof a.kind!=='string'||a.kind.length>16))throw fail(400,'六宠战况无效：legal.kind');
    }
   }
+  // ── B3（2026-10-01）：承伤相性的**上传读数**（可选键）────────────────────────────
+  // 加性：不出现 ⇒ 整段不执行（老客户端逐字节不变）。出现 ⇒ **只校验形状**，一个字都不重算：
+  //   倍率由页面用 `type-affinity.js` 的 `incomingAffinity()` 从生成产物现算（服务端重算 = 第二份实现，
+  //   而 `type-affinity.js` 文件头明令承伤向与进攻向不许混）。**fail closed**：
+  //   `known:true` ⇒ `multiplier` 必须是 [0,4] 的有限数；**`known:false` ⇒ 不许带 `multiplier`
+  //   且那一只必须逐条进 `unavailable[]`**（拿不到的东西不许静默省略、也不许补 0）。
+  if(rb.affinity!==undefined){
+   const af=rb.affinity;
+   if(!af||typeof af!=='object'||Array.isArray(af))throw fail(400,'六宠战况无效：affinity 必须是对象');
+   if(typeof af.source!=='string'||!af.source||af.source.length>80)throw fail(400,'六宠战况无效：affinity.source');
+   if(af.vs_types!==undefined&&(!Array.isArray(af.vs_types)||af.vs_types.length>6
+     ||af.vs_types.some((t)=>typeof t!=='string'||!t||t.length>12)))throw fail(400,'六宠战况无效：affinity.vs_types');
+   if(!Array.isArray(af.rows)||af.rows.length>6)throw fail(400,'六宠战况无效：affinity.rows 最多 6 条');
+   const afUnavailable=af.unavailable===undefined?[]:af.unavailable;
+   if(!Array.isArray(afUnavailable)||afUnavailable.length>6)throw fail(400,'六宠战况无效：affinity.unavailable 最多 6 条');
+   for(const row of af.rows){
+    if(!row||typeof row!=='object'||Array.isArray(row))throw fail(400,'六宠战况无效：affinity.rows 每条要是对象');
+    if(typeof row.pet_id!=='string'||!row.pet_id||row.pet_id.length>32)throw fail(400,'六宠战况无效：affinity.rows.pet_id');
+    if(typeof row.known!=='boolean')throw fail(400,'六宠战况无效：affinity.rows.known');
+    if(row.vs_type!==undefined&&(typeof row.vs_type!=='string'||!row.vs_type||row.vs_type.length>12))throw fail(400,'六宠战况无效：affinity.rows.vs_type');
+    if(row.known===true){
+     if(!Number.isFinite(row.multiplier)||row.multiplier<0||row.multiplier>4)throw fail(400,'六宠战况无效：affinity.rows.multiplier（known=true 时必须是 0..4 的有限数）');
+    }else if(row.multiplier!==undefined){
+     throw fail(400,'六宠战况无效：affinity 里 known=false 的那一只不许带 multiplier（拿不到就不许填数）');
+    }
+   }
+   for(const row of afUnavailable){
+    if(!row||typeof row!=='object'||Array.isArray(row))throw fail(400,'六宠战况无效：affinity.unavailable 每条要是对象');
+    if(typeof row.pet_id!=='string'||!row.pet_id||row.pet_id.length>32)throw fail(400,'六宠战况无效：affinity.unavailable.pet_id');
+    if(typeof row.reason!=='string'||!row.reason||row.reason.length>60)throw fail(400,'六宠战况无效：affinity.unavailable.reason');
+   }
+   // 拿不到的不许静默省略：`known:false` 的每一只都要在 `unavailable` 里点名。
+   const afMissing=af.rows.filter((row)=>row.known===false).map((row)=>row.pet_id)
+     .filter((id)=>!afUnavailable.some((row)=>row.pet_id===id));
+   if(afMissing.length)throw fail(400,`六宠战况无效：affinity 里 known=false 的 ${afMissing.join('、')} 没有进 unavailable（拿不到的不许静默省略）`);
+  }
  }
  // ── 引擎本回合的规划（军师浮条那一份）也可以随上下文送上来（2026-09-25）────────────
  // 加性：不送就整段不执行。**过期的一份都不许进来**：页面按 `rocoPlanFreshness()` 判过，
