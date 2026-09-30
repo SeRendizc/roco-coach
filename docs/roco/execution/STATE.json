@@ -702,6 +702,22 @@
       "owner": "plan00-closer（实测 + 自曝）· lead（裁决保留 + 立规）",
       "status": "closed",
       "rule": "**保留一段代码可以，但不许声称一段测不出来的收益**：当实现者自己判错了机制、实测又拿不到预期收益时，正确做法是**把负结果留档 + 明确标注它的真实价值**（本次=保险/契约），而不是删掉了事或含糊过去；判据文件头必须让后人一眼看出「这条判据不证明什么」"
+    },
+    {
+      "id": "O-57",
+      "what": "**交接快照里带进来一个语法错误**（`scripts/roco/build-rule-configs.mjs:687-690` 半截编辑）⇒ 该脚本 `node --check` 失败 ⇒ **4 个导入它的文件级判据永远红**（连一条真判据都没跑）",
+      "evidence": "引入于 `b5a8d51`（2026-09-30 14:15「wip(安全网)：全量工作区快照」）⇒ **已入库**（不是谁的工作区改动）。现象：`roco-mana-actions` / `roco-rule-config` / `roco-six-pet-battle` / `roco-weather-pvp` 四个文件单跑全是 **`ℹ tests 1 · pass 0 · fail 1`**（模块加载即崩）。**plan02-front 与 Lead 各自独立发现同一处**（交叉验证成立）。Lead 修法（`56c517e`）：保留 `global_skill_mods` 的冒号体描述、删掉那半截调用，并把「**非冒号体叶子 `damage.global_skill_mod_text` 刻意不声明**」（`coverage.py:1004-1029`：`env.py:1295/1396/1869` 三处 `getattr` 因 `RuleConfig` 无此叶子而恒 False ⇒ 那三次 `resolve_global_skill_mod` 永不产出；该叶子接线曾被回退）写成注释留档 ⇒ **只恢复可解析性、行为零变化**。修后 `mana-actions 7/7 · rule-config 8/8 · six-pet-battle 4/4`",
+      "owner": "lead（修 + 登记）· plan02-front（独立发现）",
+      "status": "closed",
+      "rule": "① **「模块加载即崩」在测试汇总里长得像「1 test · 1 fail」** ⇒ 容易被误分类成「本来就红的判据」而放过；见到这个形状**先 `node --check` 它导入的脚本**；② 交接快照类提交（`wip(安全网)`）**必须假定含半截编辑**，接手时要对关键脚本做一次 `node --check` 扫面"
+    },
+    {
+      "id": "O-58",
+      "what": "**判据侧的两条「假崩」**（不是产品缺陷）：① 读了一个**不存在的字段** ② 探针缺 **UTF-8 环境** ⇒ Windows 上必红、POSIX 上恰好掩盖",
+      "evidence": "同一文件 `tests/roco-weather-pvp.test.js` 上连中两条（Lead 修于 `d3b03db`）：① 判据写 `PYTHON.path || 'python3'`，而 `RocoClient.probePython()` 返回 **`{ok, version, error}`（没有 `path`）** ⇒ 恒回落 `python3`；POSIX 上恰好有 `python3` ⇒ 长期掩盖，Windows 上 ⇒ `status=null`、stdout/stderr 全空、断言只报「引擎探针失败：undefined」（**原断言逐字留档**在注释里）；② 探针缺 `PYTHONIOENCODING=utf-8` ⇒ Windows Python 默认 **GBK** stdout ⇒ 中文变 `????`（`actual '????' vs expected '雨天'`）。修后 **5/5 exit 0**；不设 `ROCO_PYTHON` 时 **1 skipped**（优雅跳过、不假绿）",
+      "owner": "lead（修 + 登记）",
+      "status": "closed",
+      "rule": "① **用别人 API 前先确认返回值里真有你要的字段**（`probePython()` 的 `path` 就是凭空想象的）；② **跨平台跑子进程必须显式指定编码**（`PYTHONIOENCODING=utf-8`），否则 Windows 默认 GBK 会把中文变成乱码，而 POSIX 上永远看不出问题；③ 见到「探针失败：undefined」这种**信息量为零的断言消息**，先怀疑**判据自身**（调用没起来）而不是产品"
     }
   ],
   "handoff": {
