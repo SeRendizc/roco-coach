@@ -1,0 +1,1195 @@
+{
+  "plan": "02",
+  "kind": "browser-fixture-bringup",
+  "at": "2026-09-30T11:53:06.293Z",
+  "repo": "E:\\roco-coach",
+  "port": 8879,
+  "chrome": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "python": "C:\\Users\\ASUS\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+  "team": "own-0001,own-0002,own-0003,own-0004,own-0005,own-0006",
+  "checks": [
+    {
+      "name": "隔离服务起来了（独立端口 + 引擎可用）",
+      "pass": true,
+      "detail": {
+        "port": 8879,
+        "ready_ms": 981,
+        "status": {
+          "http": 200,
+          "ok": null,
+          "available": true,
+          "ruleset_id": "roco-world-s4-2026-09-10"
+        }
+      }
+    },
+    {
+      "name": "无头 Chrome 起来了（独立 profile + CDP 端口读自 DevToolsActivePort）",
+      "pass": true,
+      "detail": {
+        "chrome_port": "9811",
+        "profile": "E:\\roco-scratch\\plan02\\profile",
+        "chrome": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+      }
+    },
+    {
+      "name": "页面挂上宿主 API 且默认是六宠主流程",
+      "pass": true,
+      "detail": {
+        "host_ms": 504,
+        "route": "six-pet",
+        "view": "empty"
+      }
+    },
+    {
+      "name": "桌面 1440 截图落盘（大厅可读）",
+      "pass": true,
+      "detail": {
+        "start_rect": {
+          "x": 122,
+          "y": 694,
+          "w": 203,
+          "h": 38
+        },
+        "start_mode": "formal"
+      }
+    },
+    {
+      "name": "390px 视口无横向溢出且开局按钮在屏内（真实鼠标命中测试）",
+      "pass": true,
+      "detail": {
+        "read": {
+          "innerWidth": 390,
+          "innerHeight": 844,
+          "scrollWidth": 390,
+          "overflow": false,
+          "start_mode": "formal",
+          "start_text": "开一局（标准 PVP · 六宠）",
+          "start_rect": {
+            "x": 24,
+            "y": 761,
+            "w": 342,
+            "h": 70,
+            "onscreen": true
+          }
+        },
+        "hit_test": {
+          "x": 195,
+          "y": 796,
+          "inside": true,
+          "hitTag": "BUTTON",
+          "disabled": false
+        }
+      }
+    },
+    {
+      "name": "控制台零报错 / 零未捕获异常",
+      "pass": true,
+      "detail": {
+        "errors": [],
+        "exceptions": [],
+        "failedRequests": []
+      }
+    },
+    {
+      "name": "标准 PVP 开局按钮在真实鼠标下可用（formal）",
+      "pass": true,
+      "detail": {
+        "formal": true,
+        "click": {
+          "ok": true,
+          "via": "mouse",
+          "rect": {
+            "x": 235,
+            "y": 868,
+            "w": 203,
+            "h": 38,
+            "inside": true,
+            "hitTag": "BUTTON",
+            "disabled": false,
+            "hidden": false
+          }
+        }
+      }
+    },
+    {
+      "name": "真实开局成功：进了对局且拿到公开视图",
+      "pass": true,
+      "detail": {
+        "waited_ms": 312,
+        "turn": 1,
+        "legal_n": 12
+      }
+    },
+    {
+      "name": "首个动作在真实鼠标下可达并推进了局面",
+      "pass": true,
+      "detail": {
+        "selector": "[data-b3-action=\"0\"], .b3-slot[data-b3-slot-legal=\"yes\"]",
+        "click": {
+          "ok": true,
+          "via": "mouse",
+          "rect": {
+            "x": 149,
+            "y": 229,
+            "w": 232,
+            "h": 146,
+            "inside": true,
+            "hitTag": "SPAN",
+            "disabled": false,
+            "hidden": false
+          }
+        },
+        "before_version": 1,
+        "after_version": 6,
+        "advanced": true
+      }
+    },
+    {
+      "name": "对局态 390px 无横向溢出且首个动作仍在屏内",
+      "pass": true,
+      "detail": {
+        "innerWidth": 390,
+        "innerHeight": 844,
+        "scrollWidth": 390,
+        "overflow": false,
+        "turn": 2,
+        "legal_n": 12,
+        "first_action": {
+          "sel": "b3-slot",
+          "x": 32,
+          "y": 250,
+          "w": 326,
+          "h": 102,
+          "onscreen": true,
+          "hitInside": true,
+          "text": "⭐ 0 抓挠 ⚪普通系 攻击 预期伤害 26 引擎会结算这条效果。ⓘ"
+        },
+        "b3_round": "第 2 回合"
+      }
+    },
+    {
+      "name": "02.5① 真点开局后预览自动出现（六行、名字与真引擎一致）",
+      "pass": true,
+      "detail": {
+        "waited_ms": 1,
+        "title": "开局预览：对手的 6 只",
+        "rows": [
+          {
+            "slot": "0",
+            "pet": "pet_000007",
+            "text": "🌿 魔力猫 🌿草系 第 1 位",
+            "icon": true,
+            "img_ok": false
+          },
+          {
+            "slot": "1",
+            "pet": "pet_000008",
+            "text": "🌿 草头鸭 🌿草系 第 2 位",
+            "icon": true,
+            "img_ok": false
+          },
+          {
+            "slot": "2",
+            "pet": "pet_000009",
+            "text": "🌑 恶魔叮 🌑恶系 🪶翼系 第 3 位",
+            "icon": true,
+            "img_ok": false
+          },
+          {
+            "slot": "3",
+            "pet": "pet_000010",
+            "text": "🌑 恶魔狼 🌑恶系 第 4 位",
+            "icon": true,
+            "img_ok": false
+          },
+          {
+            "slot": "4",
+            "pet": "pet_000011",
+            "text": "🐾 鸭吉吉 🐾普通系 第 5 位",
+            "icon": true,
+            "img_ok": false
+          },
+          {
+            "slot": "5",
+            "pet": "pet_000012",
+            "text": "铠甲虫 🐛虫系 第 6 位",
+            "icon": false,
+            "img_ok": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "02.5① 真实鼠标关预览（closedBy=button、焦点不落空）",
+      "pass": true,
+      "detail": {
+        "click": {
+          "ok": true,
+          "via": "mouse",
+          "rect": {
+            "x": 720,
+            "y": 606,
+            "w": 522,
+            "h": 44,
+            "inside": true,
+            "hitTag": "BUTTON",
+            "disabled": false,
+            "hidden": false
+          }
+        },
+        "open": false,
+        "closedBy": "button",
+        "duration_ms": 1986,
+        "focus": "seen-roster-entry"
+      }
+    },
+    {
+      "name": "02.5② 关闭后紧凑入口在屏内、真实鼠标可开回看面板",
+      "pass": true,
+      "detail": {
+        "entry": {
+          "exists": true,
+          "text": "已见阵容 6",
+          "rect": {
+            "x": 1337,
+            "y": 114,
+            "w": 66,
+            "h": 26,
+            "onscreen": true
+          }
+        },
+        "panel": {
+          "click": {
+            "ok": true,
+            "via": "mouse",
+            "rect": {
+              "x": 1370,
+              "y": 127,
+              "w": 66,
+              "h": 26,
+              "inside": true,
+              "hitTag": "BUTTON",
+              "disabled": false,
+              "hidden": false
+            }
+          },
+          "open": true,
+          "title": "已见阵容（6 只）",
+          "groups": [
+            {
+              "title": "开局预览（6）",
+              "rows": 6
+            }
+          ],
+          "rows_n": 6,
+          "skills_n": 0,
+          "aria_expanded": "true",
+          "focus": "seen-roster-close",
+          "overflow": false
+        }
+      }
+    },
+    {
+      "name": "02.5② 回看面板无横向溢出、Esc 可关（closedBy=esc）",
+      "pass": true,
+      "detail": {
+        "groups": [
+          {
+            "title": "开局预览（6）",
+            "rows": 6
+          }
+        ],
+        "close": {
+          "open": false,
+          "closedBy": "esc",
+          "focus": "seen-roster-entry"
+        }
+      }
+    },
+    {
+      "name": "02.5③ 小芽收到的战况与页面同一份已见阵容（无个体面板字段）",
+      "pass": true,
+      "detail": {
+        "coach_rows": [
+          {
+            "slot": 0,
+            "pet_id": "pet_000007",
+            "name": "魔力猫",
+            "revealed_via": "opening_preview",
+            "revealed_turn": 1
+          },
+          {
+            "slot": 1,
+            "pet_id": "pet_000008",
+            "name": "草头鸭",
+            "revealed_via": "opening_preview",
+            "revealed_turn": 1
+          },
+          {
+            "slot": 2,
+            "pet_id": "pet_000009",
+            "name": "恶魔叮",
+            "revealed_via": "opening_preview",
+            "revealed_turn": 1
+          },
+          {
+            "slot": 3,
+            "pet_id": "pet_000010",
+            "name": "恶魔狼",
+            "revealed_via": "opening_preview",
+            "revealed_turn": 1
+          },
+          {
+            "slot": 4,
+            "pet_id": "pet_000011",
+            "name": "鸭吉吉",
+            "revealed_via": "opening_preview",
+            "revealed_turn": 1
+          },
+          {
+            "slot": 5,
+            "pet_id": "pet_000012",
+            "name": "铠甲虫",
+            "revealed_via": "opening_preview",
+            "revealed_turn": 1
+          }
+        ],
+        "page_rows": 6,
+        "revealed_skills": null
+      }
+    },
+    {
+      "name": "02.5④ 390px 回看入口可达 + 面板不溢出 + 关闭按钮在屏内",
+      "pass": true,
+      "detail": {
+        "entry": {
+          "exists": true,
+          "text": "已见阵容 6",
+          "rect": {
+            "x": 254,
+            "y": 210,
+            "w": 66,
+            "h": 26,
+            "onscreen": true,
+            "hitInside": true
+          }
+        },
+        "panel": {
+          "click": {
+            "ok": true,
+            "via": "mouse",
+            "rect": {
+              "x": 287,
+              "y": 223,
+              "w": 66,
+              "h": 26,
+              "inside": true,
+              "hitTag": "BUTTON",
+              "disabled": false,
+              "hidden": false
+            }
+          },
+          "open": true,
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "overflow": false,
+          "box": {
+            "x": 16,
+            "y": 121,
+            "w": 358,
+            "h": 601
+          },
+          "close_btn": {
+            "x": 35,
+            "y": 662,
+            "w": 320,
+            "h": 44,
+            "onscreen": true
+          }
+        },
+        "close": {
+          "click": {
+            "ok": true,
+            "via": "mouse",
+            "rect": {
+              "x": 195,
+              "y": 684,
+              "w": 320,
+              "h": 44,
+              "inside": true,
+              "hitTag": "BUTTON",
+              "disabled": false,
+              "hidden": false
+            }
+          },
+          "open": false
+        }
+      }
+    },
+    {
+      "name": "02.5⑤ 390px 开小芽浮层（输入框在屏内）",
+      "pass": true,
+      "detail": {
+        "coach": "open",
+        "form_id": "xiaoya-form",
+        "input_id": "xiaoya-input",
+        "say_form": {
+          "x": 15,
+          "y": 790,
+          "w": 360,
+          "h": 39,
+          "onscreen": true
+        },
+        "say_input": {
+          "x": 15,
+          "y": 790,
+          "w": 297,
+          "h": 39,
+          "onscreen": true
+        },
+        "overflow": false
+      }
+    },
+    {
+      "name": "02.4 刷新：中途刷新后不出现上一局的预览/入口，也不假装恢复该局",
+      "pass": true,
+      "detail": {
+        "before": {
+          "battle_id": "s1-0xgrptda",
+          "seen_roster_n": 6,
+          "entry": true
+        },
+        "has_view": false,
+        "battle_id": null,
+        "preview": false,
+        "entry": false,
+        "status": "规则服务：已就绪",
+        "note": "本局没有使用未核验覆盖：规则值全部来自规则配置本身。 本局按上方徽记标明的模式结算（候选规则，待实机核对）；登记未核实 4 项",
+        "action_hint": "开一局后这里会出现可执行的动作"
+      }
+    }
+  ],
+  "console": {
+    "errors": [],
+    "exceptions": [],
+    "failedRequests": []
+  },
+  "shots": [
+    {
+      "name": "desktop-01-lobby",
+      "file": "reports/roco/product-execution/02/shots/desktop-01-lobby.png",
+      "assert": "document.body.dataset.rocoRoute === 'six-pet' && Boolean(document.getElementById('start-standard-pvp')) && window.innerWidth >= 1400",
+      "sha256_16": "d395a38769c5137d",
+      "bytes": 208477,
+      "viewport": "1440x900"
+    },
+    {
+      "name": "narrow-390-00-lobby",
+      "file": "reports/roco/product-execution/02/shots/narrow-390-00-lobby.png",
+      "assert": "window.innerWidth === 390 && document.documentElement.scrollWidth === 390 && Boolean(document.getElementById('start-standard-pvp'))",
+      "sha256_16": "3a1bb088c9c61746",
+      "bytes": 78711,
+      "viewport": "390x844"
+    },
+    {
+      "name": "flow-desktop-01-preview",
+      "file": "reports/roco/product-execution/02/shots/flow-desktop-01-preview.png",
+      "assert": "Boolean(document.getElementById('opening-preview')) && document.querySelectorAll('#opening-preview .roco-opening-row').length === 6 && window.rocoDemo.state.view.state_version >= 1",
+      "sha256_16": "1f293ee8c85a3050",
+      "bytes": 189262,
+      "viewport": "1440x900",
+      "state_version": 1,
+      "turn": 1
+    },
+    {
+      "name": "flow-desktop-02-seen-roster",
+      "file": "reports/roco/product-execution/02/shots/flow-desktop-02-seen-roster.png",
+      "assert": "document.getElementById('seen-roster-entry')?.getAttribute('aria-expanded') === 'true' && Boolean(document.getElementById('seen-roster-panel')) && document.querySelectorAll('#seen-roster-panel .roco-seen-row').length >= 6 && document.getElementById('seen-roster-panel').getBoundingClientRect().bottom <= window.innerHeight",
+      "sha256_16": "810fe73829f77ce0",
+      "bytes": 195228,
+      "viewport": "1440x900",
+      "state_version": 1,
+      "turn": 1
+    },
+    {
+      "name": "flow-desktop-03-after-action",
+      "file": "reports/roco/product-execution/02/shots/flow-desktop-03-after-action.png",
+      "assert": "window.rocoDemo.state.view.state_version > 1 && document.querySelectorAll('[data-b3-action]').length > 0",
+      "sha256_16": "afe263421a99d6d6",
+      "bytes": 299551,
+      "viewport": "1440x900",
+      "note": "关掉回看之后真实点第一格 ⇒ 局面推进",
+      "before_version": 1,
+      "after_version": 6,
+      "state_version": 6,
+      "turn": null
+    },
+    {
+      "name": "narrow-390-01-battle",
+      "file": "reports/roco/product-execution/02/shots/narrow-390-01-battle.png",
+      "assert": "window.innerWidth === 390 && Boolean(window.rocoDemo.state.view) && window.rocoDemo.state.view.state_version >= 1 && document.documentElement.scrollWidth === 390 && document.body.dataset.rocoView === 'ready'",
+      "sha256_16": "ef5aae0043f54c1b",
+      "bytes": 56309,
+      "viewport": "390x844",
+      "state_version": 1,
+      "turn": null
+    },
+    {
+      "name": "flow-390-02-seen-roster",
+      "file": "reports/roco/product-execution/02/shots/flow-390-02-seen-roster.png",
+      "assert": "window.innerWidth === 390 && Boolean(document.getElementById('seen-roster-panel')) && document.documentElement.scrollWidth === 390 && document.getElementById('seen-roster-close').getBoundingClientRect().bottom <= window.innerHeight",
+      "sha256_16": "90a529dbad558528",
+      "bytes": 73723,
+      "viewport": "390x844"
+    },
+    {
+      "name": "narrow-390-02-battle-xiaoya",
+      "file": "reports/roco/product-execution/02/shots/narrow-390-02-battle-xiaoya.png",
+      "assert": "window.innerWidth === 390 && document.body.dataset.rocoCoach === 'open' && document.getElementById('xiaoya-input').getBoundingClientRect().top >= 0",
+      "sha256_16": "3c027e9242353296",
+      "bytes": 38506,
+      "viewport": "390x844"
+    },
+    {
+      "name": "flow-desktop-04-after-refresh",
+      "file": "reports/roco/product-execution/02/shots/flow-desktop-04-after-refresh.png",
+      "assert": "performance.getEntriesByType('navigation')[0]?.type === 'reload' && !window.rocoDemo.state.view && !document.getElementById('opening-preview') && !document.getElementById('seen-roster-entry')",
+      "sha256_16": "5fcaeae9f05d407e",
+      "bytes": 78785,
+      "viewport": "1440x900",
+      "note": "同一局中途刷新之后：没有上一局的预览/入口，也没有假装恢复"
+    }
+  ],
+  "service": {
+    "base": "http://127.0.0.1:8879/",
+    "ready_ms": 981,
+    "status": {
+      "http": 200,
+      "ok": null,
+      "available": true,
+      "ruleset_id": "roco-world-s4-2026-09-10"
+    }
+  },
+  "chrome_port": "9811",
+  "bringup": {
+    "nav_ms": 2331,
+    "ready": {
+      "ok": true
+    },
+    "host": {
+      "ok": true,
+      "waitedMs": 504,
+      "attempts": 3
+    },
+    "formal": {
+      "ok": true,
+      "waitedMs": 757,
+      "attempts": 4
+    }
+  },
+  "lobby": {
+    "title": "小芽 · 洛克王国：世界（训练场）",
+    "innerWidth": 1416,
+    "innerHeight": 745,
+    "engine_status": "规则服务：已就绪",
+    "route": "six-pet",
+    "view": "empty",
+    "start_mode": "formal",
+    "start_text": "开一局（标准 PVP · 六宠）",
+    "start_rect": {
+      "x": 122,
+      "y": 694,
+      "w": 203,
+      "h": 38
+    },
+    "workshop_team_n": 6,
+    "overflow": false
+  },
+  "lobby_narrow": {
+    "viewport": {
+      "w": 390,
+      "h": 844,
+      "sw": 390
+    },
+    "read": {
+      "innerWidth": 390,
+      "innerHeight": 844,
+      "scrollWidth": 390,
+      "overflow": false,
+      "start_mode": "formal",
+      "start_text": "开一局（标准 PVP · 六宠）",
+      "start_rect": {
+        "x": 24,
+        "y": 761,
+        "w": 342,
+        "h": 70,
+        "onscreen": true
+      }
+    },
+    "hit_test": {
+      "x": 195,
+      "y": 796,
+      "inside": true,
+      "hitTag": "BUTTON",
+      "disabled": false
+    }
+  },
+  "narrow_coach": {
+    "skipped": true,
+    "reason": "打开小芽浮层同样触发外力中断（~900MB）；默认不点，用 --coach 复现"
+  },
+  "start_click": {
+    "ok": true,
+    "via": "mouse",
+    "rect": {
+      "x": 235,
+      "y": 868,
+      "w": 203,
+      "h": 38,
+      "inside": true,
+      "hitTag": "BUTTON",
+      "disabled": false,
+      "hidden": false
+    }
+  },
+  "in_battle": {
+    "ok": true,
+    "waitedMs": 312,
+    "attempts": 2
+  },
+  "battle_read": {
+    "turn": 1,
+    "state_version": 1,
+    "mode_id": "pvp-standard-six-pet",
+    "match_id": "m-6491e1e6d15f5331",
+    "decision_id": "m-6491e1e6d15f5331:v1",
+    "has_seen_roster": true,
+    "seen_roster_n": 6,
+    "bench_n": 5,
+    "revealed_skills": null,
+    "opening_reveal_event": null,
+    "legal_n": 12,
+    "event_kinds": [],
+    "b3_round": "第 1 回合",
+    "route": "six-pet",
+    "roco_view": "ready",
+    "first_action": {
+      "sel": "b3-slot",
+      "x": 33,
+      "y": 157,
+      "w": 232,
+      "h": 146,
+      "text": "⭐ 0 抓挠 ⚪普通系 攻击 预期伤害 26 引擎会结算这条效果。ⓘ"
+    },
+    "overflow": false
+  },
+  "view_keys": [
+    "assumptions",
+    "battle_result",
+    "cpu_legal_count",
+    "damage_preview",
+    "decision_id",
+    "enemy_note",
+    "enemy_source",
+    "events",
+    "legal",
+    "loadout_origin",
+    "mana",
+    "match_id",
+    "mode_id",
+    "needs_replacement",
+    "opponent",
+    "phase",
+    "rules_version",
+    "ruleset_config_id",
+    "ruleset_id",
+    "schema_version",
+    "seen_roster",
+    "self",
+    "state_version",
+    "strategy",
+    "turn",
+    "unsupported_count",
+    "unverified_notes",
+    "unverified_overrides"
+  ],
+  "flow_preview": {
+    "seen": true,
+    "waited_ms": 1,
+    "open": true,
+    "title": "开局预览：对手的 6 只",
+    "list_label": "对手亮明的成员",
+    "rows_n": 6,
+    "rows": [
+      {
+        "slot": "0",
+        "pet": "pet_000007",
+        "text": "🌿 魔力猫 🌿草系 第 1 位",
+        "icon": true,
+        "img_ok": false
+      },
+      {
+        "slot": "1",
+        "pet": "pet_000008",
+        "text": "🌿 草头鸭 🌿草系 第 2 位",
+        "icon": true,
+        "img_ok": false
+      },
+      {
+        "slot": "2",
+        "pet": "pet_000009",
+        "text": "🌑 恶魔叮 🌑恶系 🪶翼系 第 3 位",
+        "icon": true,
+        "img_ok": false
+      },
+      {
+        "slot": "3",
+        "pet": "pet_000010",
+        "text": "🌑 恶魔狼 🌑恶系 第 4 位",
+        "icon": true,
+        "img_ok": false
+      },
+      {
+        "slot": "4",
+        "pet": "pet_000011",
+        "text": "🐾 鸭吉吉 🐾普通系 第 5 位",
+        "icon": true,
+        "img_ok": false
+      },
+      {
+        "slot": "5",
+        "pet": "pet_000012",
+        "text": "铠甲虫 🐛虫系 第 6 位",
+        "icon": false,
+        "img_ok": true
+      }
+    ],
+    "shownAt": 5705.400000035763,
+    "shownAtISO": "2026-09-30T11:53:13.566Z",
+    "has_seen_roster": true,
+    "focus": "opening-preview-close"
+  },
+  "flow_preview_close": {
+    "click": {
+      "ok": true,
+      "via": "mouse",
+      "rect": {
+        "x": 720,
+        "y": 606,
+        "w": 522,
+        "h": 44,
+        "inside": true,
+        "hitTag": "BUTTON",
+        "disabled": false,
+        "hidden": false
+      }
+    },
+    "open": false,
+    "closedBy": "button",
+    "duration_ms": 1986,
+    "focus": "seen-roster-entry"
+  },
+  "flow_entry_before": {
+    "exists": true,
+    "text": "已见阵容 6",
+    "rect": {
+      "x": 1337,
+      "y": 114,
+      "w": 66,
+      "h": 26,
+      "onscreen": true
+    }
+  },
+  "flow_seen_panel": {
+    "click": {
+      "ok": true,
+      "via": "mouse",
+      "rect": {
+        "x": 1370,
+        "y": 127,
+        "w": 66,
+        "h": 26,
+        "inside": true,
+        "hitTag": "BUTTON",
+        "disabled": false,
+        "hidden": false
+      }
+    },
+    "open": true,
+    "title": "已见阵容（6 只）",
+    "groups": [
+      {
+        "title": "开局预览（6）",
+        "rows": 6
+      }
+    ],
+    "rows_n": 6,
+    "skills_n": 0,
+    "aria_expanded": "true",
+    "focus": "seen-roster-close",
+    "overflow": false
+  },
+  "flow_seen_close": {
+    "open": false,
+    "closedBy": "esc",
+    "focus": "seen-roster-entry"
+  },
+  "flow_coach_snapshot": {
+    "turn": 1,
+    "battle_id": "s1-0xgrptda",
+    "state_version": 1,
+    "phase": "battle",
+    "result": null,
+    "self": [
+      {
+        "pet_id": "pet_000001",
+        "name": "喵喵",
+        "hp": 495,
+        "max_hp": 495,
+        "energy": 10,
+        "alive": true
+      },
+      {
+        "pet_id": "pet_000002",
+        "name": "水蓝蓝",
+        "hp": 298,
+        "max_hp": 298,
+        "energy": 10,
+        "alive": true
+      },
+      {
+        "pet_id": "pet_000003",
+        "name": "火花",
+        "hp": 289,
+        "max_hp": 289,
+        "energy": 10,
+        "alive": true
+      },
+      {
+        "pet_id": "pet_000004",
+        "name": "迪莫",
+        "hp": 374,
+        "max_hp": 374,
+        "energy": 10,
+        "alive": true
+      },
+      {
+        "pet_id": "pet_000005",
+        "name": "水灵",
+        "hp": 602,
+        "max_hp": 602,
+        "energy": 10,
+        "alive": true
+      },
+      {
+        "pet_id": "pet_000006",
+        "name": "火神",
+        "hp": 369,
+        "max_hp": 369,
+        "energy": 10,
+        "alive": true
+      }
+    ],
+    "self_active": 0,
+    "self_energy_max": 10,
+    "foe": [
+      {
+        "pet_id": "pet_000007",
+        "name": "魔力猫",
+        "hp": 405,
+        "max_hp": 405,
+        "energy": 10,
+        "alive": true
+      }
+    ],
+    "foe_living_count": 6,
+    "needs_replacement": [],
+    "foe_bench": [
+      {
+        "slot": 1,
+        "fainted": false
+      },
+      {
+        "slot": 2,
+        "fainted": false
+      },
+      {
+        "slot": 3,
+        "fainted": false
+      },
+      {
+        "slot": 4,
+        "fainted": false
+      },
+      {
+        "slot": 5,
+        "fainted": false
+      }
+    ],
+    "seen_roster": [
+      {
+        "slot": 0,
+        "pet_id": "pet_000007",
+        "name": "魔力猫",
+        "revealed_via": "opening_preview",
+        "revealed_turn": 1
+      },
+      {
+        "slot": 1,
+        "pet_id": "pet_000008",
+        "name": "草头鸭",
+        "revealed_via": "opening_preview",
+        "revealed_turn": 1
+      },
+      {
+        "slot": 2,
+        "pet_id": "pet_000009",
+        "name": "恶魔叮",
+        "revealed_via": "opening_preview",
+        "revealed_turn": 1
+      },
+      {
+        "slot": 3,
+        "pet_id": "pet_000010",
+        "name": "恶魔狼",
+        "revealed_via": "opening_preview",
+        "revealed_turn": 1
+      },
+      {
+        "slot": 4,
+        "pet_id": "pet_000011",
+        "name": "鸭吉吉",
+        "revealed_via": "opening_preview",
+        "revealed_turn": 1
+      },
+      {
+        "slot": 5,
+        "pet_id": "pet_000012",
+        "name": "铠甲虫",
+        "revealed_via": "opening_preview",
+        "revealed_turn": 1
+      }
+    ],
+    "legal": [
+      {
+        "label": "抓挠",
+        "kind": "skill"
+      },
+      {
+        "label": "防御",
+        "kind": "skill"
+      },
+      {
+        "label": "仙人掌刺击",
+        "kind": "skill"
+      },
+      {
+        "label": "腐化",
+        "kind": "skill"
+      },
+      {
+        "label": "聚能",
+        "kind": "charge"
+      },
+      {
+        "label": "换上第2位",
+        "kind": "switch"
+      },
+      {
+        "label": "换上第3位",
+        "kind": "switch"
+      },
+      {
+        "label": "换上第4位",
+        "kind": "switch"
+      },
+      {
+        "label": "换上第5位",
+        "kind": "switch"
+      },
+      {
+        "label": "换上第6位",
+        "kind": "switch"
+      },
+      {
+        "label": "愿力强化",
+        "kind": "magic"
+      },
+      {
+        "label": "投降",
+        "kind": "surrender"
+      }
+    ]
+  },
+  "first_action": {
+    "selector": "[data-b3-action=\"0\"], .b3-slot[data-b3-slot-legal=\"yes\"]",
+    "click": {
+      "ok": true,
+      "via": "mouse",
+      "rect": {
+        "x": 149,
+        "y": 229,
+        "w": 232,
+        "h": 146,
+        "inside": true,
+        "hitTag": "SPAN",
+        "disabled": false,
+        "hidden": false
+      }
+    },
+    "before_version": 1,
+    "after_version": 6,
+    "advanced": true
+  },
+  "narrow_viewport": {
+    "w": 390,
+    "h": 844,
+    "sw": 390
+  },
+  "narrow_read": {
+    "innerWidth": 390,
+    "innerHeight": 844,
+    "scrollWidth": 390,
+    "overflow": false,
+    "turn": 2,
+    "legal_n": 12,
+    "first_action": {
+      "sel": "b3-slot",
+      "x": 32,
+      "y": 250,
+      "w": 326,
+      "h": 102,
+      "onscreen": true,
+      "hitInside": true,
+      "text": "⭐ 0 抓挠 ⚪普通系 攻击 预期伤害 26 引擎会结算这条效果。ⓘ"
+    },
+    "b3_round": "第 2 回合"
+  },
+  "narrow_entry": {
+    "exists": true,
+    "text": "已见阵容 6",
+    "rect": {
+      "x": 254,
+      "y": 210,
+      "w": 66,
+      "h": 26,
+      "onscreen": true,
+      "hitInside": true
+    }
+  },
+  "narrow_panel": {
+    "click": {
+      "ok": true,
+      "via": "mouse",
+      "rect": {
+        "x": 287,
+        "y": 223,
+        "w": 66,
+        "h": 26,
+        "inside": true,
+        "hitTag": "BUTTON",
+        "disabled": false,
+        "hidden": false
+      }
+    },
+    "open": true,
+    "innerWidth": 390,
+    "scrollWidth": 390,
+    "overflow": false,
+    "box": {
+      "x": 16,
+      "y": 121,
+      "w": 358,
+      "h": 601
+    },
+    "close_btn": {
+      "x": 35,
+      "y": 662,
+      "w": 320,
+      "h": 44,
+      "onscreen": true
+    }
+  },
+  "narrow_panel_close": {
+    "click": {
+      "ok": true,
+      "via": "mouse",
+      "rect": {
+        "x": 195,
+        "y": 684,
+        "w": 320,
+        "h": 44,
+        "inside": true,
+        "hitTag": "BUTTON",
+        "disabled": false,
+        "hidden": false
+      }
+    },
+    "open": false
+  },
+  "narrow_coach_battle": {
+    "click": {
+      "ok": true,
+      "via": "mouse",
+      "rect": {
+        "x": 362,
+        "y": 44,
+        "w": 56,
+        "h": 44,
+        "inside": true,
+        "hitTag": "BUTTON",
+        "disabled": false,
+        "hidden": false
+      }
+    },
+    "read": {
+      "coach": "open",
+      "form_id": "xiaoya-form",
+      "input_id": "xiaoya-input",
+      "say_form": {
+        "x": 15,
+        "y": 790,
+        "w": 360,
+        "h": 39,
+        "onscreen": true
+      },
+      "say_input": {
+        "x": 15,
+        "y": 790,
+        "w": 297,
+        "h": 39,
+        "onscreen": true
+      },
+      "overflow": false
+    }
+  },
+  "after_reload": {
+    "before": {
+      "battle_id": "s1-0xgrptda",
+      "seen_roster_n": 6,
+      "entry": true
+    },
+    "has_view": false,
+    "battle_id": null,
+    "preview": false,
+    "entry": false,
+    "status": "规则服务：已就绪",
+    "note": "本局没有使用未核验覆盖：规则值全部来自规则配置本身。 本局按上方徽记标明的模式结算（候选规则，待实机核对）；登记未核实 4 项",
+    "action_hint": "开一局后这里会出现可执行的动作"
+  },
+  "baseline_no_preview": {
+    "has_seen_roster": true,
+    "opening_reveal_event": null,
+    "note": "夹具 bring-up 阶段（src/client 未改）：标准 PVP 开局没带 opening_preview，所以公开视图里不该有 seen_roster、事件流里不该有 opening_roster_revealed。"
+  },
+  "summary": {
+    "total": 18,
+    "pass": 18,
+    "fail": 0
+  },
+  "service_tail": "",
+  "finished_at": "2026-09-30T11:53:26.089Z",
+  "status": "finished",
+  "step": "02.4-refresh",
+  "saved_at": "2026-09-30T11:53:26.089Z"
+}

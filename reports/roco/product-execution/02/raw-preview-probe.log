@@ -1,0 +1,22 @@
+[preview +1.0s] 服务就绪 http://127.0.0.1:8891
+[preview +1.1s] [svc-err] [roco] 对手候选（我的可用物种）: 536 pet_000007,pet_000008,pet_000009,pet_000010,pet_000011,pet_000012,pet_000013,pet_000014
+[preview +1.2s] [svc-err] [roco] 对手候选（我的可用物种）: 536 pet_000007,pet_000008,pet_000009,pet_000010,pet_000011,pet_000012,pet_000013,pet_000014
+[preview +1.2s] 真引擎视图 ["魔力猫","草头鸭","恶魔叮","恶魔狼","鸭吉吉","铠甲虫"] | 无预览局 has_seen_roster= false
+[preview +2.0s] 页面就绪（宿主 API + applyResult 可用）
+[preview +3.8s] [svc-err] [roco] 对手候选（我的可用物种）: 536 pet_000007,pet_000008,pet_000009,pet_000010,pet_000011,pet_000012,pet_000013,pet_000014
+[preview +9.4s] checks 14/14 pass
+[preview +9.4s]   OK  预览层出现（role=dialog / aria-modal / 标题 / 列表标签）
+[preview +9.4s]   OK  六只按 slot 顺序展示（名称 + 形象 + 属性在同一条目里）
+[preview +9.4s]   OK  六行都有可见形象（立绘加载成功 或 自制 emoji 头像兜底）
+[preview +9.4s]   OK  名字与真引擎 seen_roster 逐行一致（不猜、不重排）
+[preview +9.4s]   OK  shownAt 是渲染那一刻（倒计时未结束时 closedAt=null）
+[preview +9.4s]   OK  倒计时文字是可读的文字替代
+[preview +9.4s]   OK  真实鼠标点「知道了」：closedBy=button、浮层移除、焦点归还
+[preview +9.4s]   OK  同一局同一份 view 再喂一次**不再弹**（回看不重复触发）
+[preview +9.4s]   OK  Esc 关闭：closedBy=esc、浮层移除、焦点归还
+[preview +9.4s]   OK  自动关闭：约 5.5s 后 closedBy=auto，且 shownAt 不变
+[preview +9.4s]   OK  浮层里没有个体面板字样（stats/天赋/性格/个体/六维）
+[preview +9.4s]   OK  物种属性 join：名单到了就补齐（六行都不再写「不在本地名单里」）
+[preview +9.4s]   OK  反例：无预览模式（真 legacy 3v3 视图）不出现浮层
+[preview +9.4s]   OK  390px：无横向溢出、关闭按钮在屏内、六行单列
+[preview +9.7s] exit 0

@@ -1,0 +1,410 @@
+{
+  "plan": "02",
+  "kind": "browser-fixture-bringup",
+  "at": "2026-09-30T11:13:54.832Z",
+  "repo": "E:\\roco-coach",
+  "port": 8879,
+  "chrome": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "python": "C:\\Users\\ASUS\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+  "team": "own-0001,own-0002,own-0003,own-0004,own-0005,own-0006",
+  "checks": [],
+  "console": {
+    "errors": [],
+    "exceptions": [],
+    "failedRequests": []
+  },
+  "shots": [],
+  "service": {
+    "base": "http://127.0.0.1:8879/",
+    "ready_ms": 0,
+    "status": {
+      "http": 200,
+      "available": true,
+      "ruleset_id": "roco-world-s4-2026-09-10",
+      "health": {
+        "ruleset_id": "roco-world-s4-2026-09-10",
+        "snapshot_fingerprint": "4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc",
+        "protocol_version": 1
+      },
+      "strategies": [
+        "random_legal",
+        "greedy_damage",
+        "conservative_switch",
+        "status_control",
+        "shallow_search"
+      ],
+      "default_team": [
+        "pet_000225",
+        "pet_000190",
+        "pet_000445"
+      ],
+      "analysis_seeds": [
+        11,
+        29,
+        47
+      ],
+      "sessions": 0,
+      "last_error": null,
+      "counters": {
+        "sessions": 0,
+        "advances": 0,
+        "plans": 0
+      },
+      "mode": {
+        "id": "pvp-standard-six-pet",
+        "label": "标准 PVP 六宠阵容工坊（候选模式）",
+        "status": "CANDIDATE",
+        "confidence": "CROSS_SOURCE_SUPPORTED",
+        "ruleset_binding": "mobile_s4_candidate_v3",
+        "parameters": {
+          "team_size": 6,
+          "active_count": 1,
+          "mana_pool": 4,
+          "faint_mana_cost": 1,
+          "trait_sharing": false,
+          "boss_form": null,
+          "level_normalization": "demo_standardized_max_level"
+        },
+        "engine": {
+          "team_size": 3,
+          "ruleset_id": "roco-world-s4-2026-09-10"
+        },
+        "sources_count": 6,
+        "unknowns_count": 7,
+        "microcase_ids": [
+          "MC-BM01",
+          "MC-BM02",
+          "MC-BM03"
+        ],
+        "policies": {
+          "boss_form_policy": {
+            "name": "boss_form",
+            "value": "allowed_if_eligible",
+            "confidence": "RECORDED_IN_GAME",
+            "evidence_id": "EV-PVP-BOSS-FORM-STANDARD",
+            "evidence_role": "supports",
+            "microcase_id": null,
+            "reason": "人类实机口径（人类是唯一权威）：首领化 = 精灵**首领形态 / 血脉觉醒**，在闪耀大赛式标准 PVP 里**存在**，不是领地试炼专属；`boss_form=false` 不是最终设计。因此标准模式写成 allowed_if_eligible = **满足资格即可使用**，既不是 forbidden（那等于说这个模式没有首领化），也不是 required_for_entry（那会挡住打不了首领化的正常队伍）。首领信物 / 进化之力 = 资格或触发条件，**不叫普通 item**。主题层的「普通闪耀大赛是否开放 / 首领对决是否要求全员满足」写成 theme 子对象，不是全局布尔。",
+            "eligibility": {
+              "predicate": "pet.has_boss_lineage && team.holds_boss_token(pet) —— 换成人类口径的话：该精灵具备**首领血脉**（首领形态 / 血脉觉醒的资格），且队伍持有对应的**首领信物 / 进化之力**（触发条件）。资格判定不成立时该精灵不能首领化，但**不影响**它正常参赛。",
+              "status": "UNVERIFIED",
+              "evidence_id": "EV-PVP-BOSS-FORM-STANDARD",
+              "on_unknown": "FAIL_CLOSED",
+              "reason": "资格判定的两半（血脉是否具备、信物如何取得与消耗）只有「它们存在」这一条实机口径，具体判定式未核验：所以 predicate 是**待核验的表达式**，status=UNVERIFIED；引擎在判定不出资格时**必须 fail closed**（不释放首领化、不猜一个默认值），不许静默当作「满足」。"
+            },
+            "unknowns": [
+              {
+                "field": "activation_occupies_action",
+                "value": null,
+                "status": "UNVERIFIED",
+                "why": "首领化是否占用一次行动，未核验 —— 不许从 mockup 文案沿用确定说法。"
+              },
+              {
+                "field": "per_battle_uses",
+                "value": null,
+                "status": "UNVERIFIED",
+                "why": "同一场的次数上限，未核验。"
+              },
+              {
+                "field": "cooldown",
+                "value": null,
+                "status": "UNVERIFIED",
+                "why": "冷却，未核验。"
+              },
+              {
+                "field": "removal",
+                "value": null,
+                "status": "UNVERIFIED",
+                "why": "如何解除（换下 / 力竭 / 特定效果），未核验。"
+              },
+              {
+                "field": "duration",
+                "value": null,
+                "status": "UNVERIFIED",
+                "why": "是否持续到回合末 / 整场，未核验。"
+              },
+              {
+                "field": "stat_multipliers",
+                "value": null,
+                "status": "UNVERIFIED",
+                "why": "数值倍率，未核验。"
+              }
+            ]
+          },
+          "magic_policy": {
+            "name": "pvp_magic",
+            "value": "allowed_candidate",
+            "classification": "pvp_magic_special_action",
+            "confidence": "RECORDED_IN_GAME",
+            "evidence_id": "EV-PVP-WISH-POWER-UP",
+            "evidence_role": "supports",
+            "evidence_id_prior": "EV-PVP-BOSS-FORM-STANDARD",
+            "reason": "愿力强化 / 共鸣魔法等 PVP 魔法是**特殊行动**，不是普通道具。旧标准 PVP 口径里的 `item:0` **不**意味着它们不存在 —— 那正是这次要修掉的错误。2026-09-23 人类口述把「愿力强化」的语义与数值补齐（台账 EV-PVP-WISH-POWER-UP，RECORDED_IN_GAME），因此本策略不再是 all_unverified：**已登记的字段**写进 registered，**仍未核验的**留在 unknowns（引擎对它们一律 fail closed）。**2026-09-25 人类更正**：「愿力强化不占行动，就是这样，**背包物品都不占行动**」（台账 EV-PVP-WISH-POWER-UP 的第二条 2026-09-25 来源）—— 于是 `occupies_action` 从 `true` 改成 **`false`**：这一类是**自由动作**（用掉之后回合不变、还能照常出这一手），「『愿力冲击』就是个技能，这个算行动」说的是换上来的那个技能本身照常占一手。这条取值就是**能力声明**：引擎只认 `false`（`RuleConfig.magic_occupies_action`），没声明 / 未核验一律 fail closed。",
+            "kinds": [
+              "愿力强化",
+              "共鸣魔法"
+            ],
+            "is_item": false,
+            "occupies_action": false,
+            "occupies_action_status": "RECORDED_IN_GAME",
+            "all_unverified": false,
+            "registered": [
+              {
+                "kind": "愿力强化",
+                "action_class": "magic",
+                "occupies_action": false,
+                "occupies_action_status": "RECORDED_IN_GAME",
+                "occupies_action_note": "自由动作（人类 2026-09-25：「不占行动，自由动作」）：用掉之后 `state.turn` 不变、对手这一手还没结算、我方仍可照常出一手技能（引擎入口 `env.step_free`；服务端点 `/battle/free`）。**旧口径「占一次行动」已被这一条取代**（2026-09-23 口述），历史留在台账里，不抹掉。",
+                "per_battle_uses": 2,
+                "cooldown_turns": 3,
+                "target": "self_active",
+                "target_note": "只能对自己**场上那只**用（人类：这点和首领化一致）。",
+                "effect": "把目标精灵的**最上面（第一个）技能**替换成「愿力冲击」。",
+                "removal": "再在背包里用一次「愿力强化」解除这次替换、还原原来的第一个技能；**不消耗次数**，但**自动进入冷却**。两次都是**自由动作**（不占行动）。",
+                "visibility": {
+                  "skill_visible_to_opponent": true,
+                  "magic_visible_to_opponent": false,
+                  "status": "RECORDED_IN_GAME",
+                  "note": "人类原话：「能看见你使用这个技能，道具应该看不见吧」——后半句带「吧」，页面上按**不揭示**处理，不写成断言。"
+                },
+                "purpose": "反制「对方拿克制自己阵容的精灵」（人类原话）。",
+                "wish_impact": {
+                  "name": "愿力冲击",
+                  "energy": 2,
+                  "power": 80,
+                  "element": "pet.wish_element",
+                  "element_note": "该精灵的**愿力属性**：默认取它的第一个属性；培养页可用道具改成任意属性（本系统里直接改即可）。按属性分形态（同族出处：特性「裁决」「滋养」的『首个技能替换为光系/草系/火系愿力冲击』）。",
+                  "damage_class": "atk >= spa ? 物攻 : 魔攻",
+                  "damage_class_note": "取该精灵物攻 / 魔攻里更高的那一项（人类：后面也得做进培养系统）。",
+                  "respond_bonus": {
+                    "condition": "应对状态",
+                    "power_multiplier": 2.5,
+                    "human_wording": "额外造成150%伤害",
+                    "reading": "按 +150% = 总倍率 2.5 实现；若口径是「变为 150%」则改 1.5。",
+                    "condition_basis": "本仓术语 1015/1016/1017：技能 desc 写「应对状态」= 对手这一手是**状态**类动作时应对成功（roco/src/roco_env/effects.py::respond_to / env.py::_respond_success）。人类表示不确定，让本仓自行确认。"
+                  },
+                  "other_effects": "无（人类：没别的效果了）。"
+                },
+                "confidence": "RECORDED_IN_GAME",
+                "status": "READY_TO_IMPLEMENT"
+              }
+            ],
+            "unknowns": [
+              {
+                "field": "wish_element_reitem",
+                "value": null,
+                "status": "UNVERIFIED",
+                "why": "愿力属性的改名道具、消耗与是否可反复改，未核验（本系统按「直接改」处理）。"
+              },
+              {
+                "field": "cooldown_interaction",
+                "value": null,
+                "status": "UNVERIFIED",
+                "why": "冷却与换人 / 外层回合的交互，未核验（本实现按自己的回合递减）。"
+              },
+              {
+                "field": "swap_persistence",
+                "value": null,
+                "status": "UNVERIFIED",
+                "why": "被替换掉的第一个技能在换下场 / 再次上场之后还原成什么，未核验。"
+              },
+              {
+                "field": "duration",
+                "value": null,
+                "status": "UNVERIFIED",
+                "why": "替换的持续时间（是否持续到本局结束）—— 人类口径只说「再用一次解除」，没有说自动到期，故按「持续到解除」实现，但仍记为未核验。"
+              },
+              {
+                "field": "stat_multipliers",
+                "value": null,
+                "status": "UNVERIFIED",
+                "why": "除愿力冲击本身外没有别的倍率（人类：没别的效果了），保留此条以便将来登记。"
+              }
+            ]
+          },
+          "team_size_policy": {
+            "min": 1,
+            "max": 6,
+            "fill_required": true,
+            "fill_required_status": "RECORDED_IN_GAME",
+            "value": "recorded_six",
+            "confidence": "RECORDED_IN_GAME",
+            "evidence_id": "EV-PVP-STANDARD-FILL-SIX",
+            "evidence_role": "supports",
+            "microcase_id": "MC-E07",
+            "microcase_status": "NOT_RECORDED",
+            "value_status": "RECORDED_IN_GAME",
+            "reason": "上下界仍是 1～6（最多 6 只有官方转载与社区口径支撑）。「**是否必须选满 6 只**」这一格在 2026-09-25 由**人类实机口径**给出：「闪耀大赛就是6v6 4魔力v4魔力的pvp啊，不是随机6只啊，自己配队」⇒ fill_required=**true**、value=recorded_six、confidence=RECORDED_IN_GAME，台账条目 EV-PVP-STANDARD-FILL-SIX。**原口径（改钉不删）**：此前这里是 fill_required=null + UNVERIFIED，理由是\"「必须选满 6 只」没有任何来源支持\" —— 那条理由在当时成立（没有任何官方/社区文本支持），现在被人类实机口径取代；**张力**：官方一手的措辞是「最多可携带 6 只」（上限），与\"必须编入 6 只\"的措辞不同，已登记在 disputed_with 里。引擎遇到\"没填满算不算合法\"时**不再** fail closed 到\"未知\"，而是按 true（必须 6 只）判定；若将来拿到官方\"可以少于 6 只\"的条文，改这一格（原值已留在 fill_required_prior）。",
+            "evidence_id_prior": "EV-PVP-STANDARD-TEAM-SIZE",
+            "fill_required_prior": null,
+            "fill_required_prior_status": "UNVERIFIED",
+            "disputed_with": [
+              {
+                "ref": "https://news.qq.com/rain/a/20260414A0644900",
+                "kind": "official_first_party",
+                "claim": "官方一手措辞是「每人**最多**可携带6只随机精灵进行对战」= **上限**，没有逐字写过\"必须编入 6 只\"。",
+                "how_resolved": "按本仓效力等级取**人类实机口径**（owner 2026-09-25：「闪耀大赛就是6v6…自己配队」）⇒ fill_required=true；张力原样留在这里，不许抹平，也不许写成\"官方已确认必须 6 只\"。"
+              }
+            ]
+          },
+          "weather_policy": {
+            "name": "weather",
+            "value": "enabled",
+            "confidence": "OFFICIAL_CURRENT",
+            "evidence_id": "EV-WEATHER-STANDARD-PVP",
+            "evidence_role": "supports",
+            "microcase_id": null,
+            "reason": "官方一手（腾讯新闻·官方号《洛个明白》闪耀大赛入门篇 2026-04-14，正文全文精读）在整篇讲闪耀大赛的语境下专设「07 对战基础：印记与天气效果」一节，逐字：「天气是常驻在全场的效果，让对战双方都能获得相应的加成，但天气只能存在一种。」2026-09-25 人类据此**推翻**此前「天气仅存在于 PvE ⇒ 引擎删掉天气层」的口径（旧口径原话逐字留在 superseded_ruling 里，不抹掉）。四种天气的效果与数值以**当前规则集（S4 术语表 terms.json）**为准：3008 雨天水系技能威力 +75% / 3006 沙暴地系技能能耗减半 / 3007 暴风雪双方回合末 +2 层冻结（冰系免疫）/ 3021 雷鸣双方回合末 +1 层引电（电系免疫）；官方 4/14 那篇写雨天 +50%，属**更早版本**，逐字登记在 unknowns。回合数限制与「只能存在一种」同出官方 4/14；持续 8 回合由造天气技能的冻结描述给出（见 duration_note）。",
+            "superseded_ruling": "旧口径原话（改钉不删）：「人类核实天气**仅存在于 PvE** ⇒ 这个天气系统可以删掉」（引擎侧曾据此回滚天气层）。2026-09-25 人类以官方一手 4/14 那篇推翻它，原话：「那你就做！」",
+            "scope": "standard_pvp_field_effect",
+            "max_concurrent": 1,
+            "max_concurrent_reason": "官方 4/14 逐字「但天气只能存在一种」⇒ 新天气**替换**旧天气，不叠加。",
+            "duration_turns": 8,
+            "duration_source": "skill_desc",
+            "duration_note": "引擎从**技能描述**里读回合数，不写死常量：四条造天气技能的冻结描述逐字都是「将天气改为X，持续8回合。」（skills.json：skill_000427 落雨 / skill_000507 沙涌 / skill_000555 冬至 / skill_000605 惊雷）。官方万字公告（2026-03-13）另有「落雨：技能能耗8→5，将天气改为雨天，持续8回合」（见台账 notes）。",
+            "settlement": "end_turn_after_declared_stages",
+            "settlement_note": "天气的回合末效果（暴风雪 / 雷鸣）**不是** `turn_order.end_turn.order` 里声明的逐宠阶段 —— 那个清单的语义是「每一只在场精灵内部」的结算顺序（见 env.py 的注释），而天气是**场地级、双方一起**结算。引擎在声明阶段跑完之后、天气回合数递减之前结算它。这条顺序**没有一手证据**，登记为 unknowns 里的一条。",
+            "effects": {
+              "雨天": {
+                "element": "水系",
+                "kind": "skill_power_multiplier",
+                "value": 1.75,
+                "term_id": "3008",
+                "text": "天气为雨天时，双方的水系技能威力+75%。"
+              },
+              "沙暴": {
+                "element": "地系",
+                "kind": "skill_energy_cost_multiplier",
+                "value": 0.5,
+                "term_id": "3006",
+                "text": "天气为沙暴时，双方的地系技能能耗减半。"
+              },
+              "暴风雪": {
+                "kind": "end_turn_status",
+                "status": "冻结",
+                "layers": 2,
+                "immune_element": "冰系",
+                "term_id": "3007",
+                "text": "天气为暴风雪时，双方每回合结束获得2层冻结。（冰系精灵免疫此效果）"
+              },
+              "雷鸣": {
+                "kind": "end_turn_status",
+                "status": "引电",
+                "layers": 1,
+                "immune_element": "电系",
+                "term_id": "3021",
+                "text": "天气为雷鸣时，双方每回合结束获得1层引电。（电系精灵免疫此效果）"
+              }
+            },
+            "unknowns": [
+              {
+                "field": "energy_cost_halving_rounding",
+                "value": null,
+                "status": "UNVERIFIED",
+                "why": "「能耗减半」遇到**奇数**能耗怎么取整（1 能耗 → 0 还是 1）没有任何来源；引擎按**向下取整**实现并登记，等人类裁决（不要以为这是规则）。"
+              },
+              {
+                "field": "freeze_tick",
+                "value": null,
+                "status": "UNVERIFIED",
+                "why": "冻结层数的结算（术语 1004「冻结5%生命，若当前生命低于冻结比例，则力竭」）**未实现**：本轮只做「获得层数」。引擎照既有做法把未实现的回合末状态登记进 unsupported（不静默、不猜伤害）。"
+              },
+              {
+                "field": "shock_two_layer_trigger",
+                "value": null,
+                "status": "UNVERIFIED",
+                "why": "术语 3022「获得2层引电时，立即受到25%生命的电系伤害，并失去2层引电」—— 雷鸣每回合 +1 层，两层时**该不该立刻结算**没有来源；引擎不实现它，只在层数达到 2 时登记 unsupported。"
+              },
+              {
+                "field": "end_turn_order_vs_status_tick",
+                "value": null,
+                "status": "UNVERIFIED",
+                "why": "天气的回合末效果与 status_tick / regen 的先后顺序没有一手证据（官方只说「每回合结束时」）；引擎选「声明阶段之后」并登记。"
+              },
+              {
+                "field": "rain_power_percent",
+                "value": null,
+                "status": "UNVERIFIED",
+                "why": "官方 4/14 逐字「双方水系技能威力提升50%」，而仓内 S4 术语表 3008 逐字「双方的水系技能威力+75%」。**版本差异**：人类裁决取**当前规则集（S4 术语表）= +75%**，+50% 作为更早版本逐字留在台账 EV-WEATHER-STANDARD-PVP 的 notes 里。本条登记的是「两个数都真实存在过」，不是「随便取一个」。"
+              }
+            ]
+          }
+        },
+        "entry_gate": {
+          "requires": [
+            "team.size 落在 policies.team_size_policy 的 [min, max] 区间内（1～6，且每只都在候选宇宙里）",
+            "所有参赛精灵都通过 UNKNOWN_PREMATCH 的赛前信息口径（不知道对手阵容，不得假装知道）",
+            "被绑定的 ruleset 是可运行的候选（mobile_s4_candidate_v3 已生成且未被 promote 成默认，见 ruleset_binding）",
+            "首领化若要用：policies.boss_form_policy.eligibility 判定为满足（资格未核验时按 on_unknown=FAIL_CLOSED 处理，**不**阻止整队参赛）"
+          ],
+          "on_unmet": "SHOW_DISABLED_WITH_REASON",
+          "on_unknown": "FAIL_CLOSED",
+          "reason": "门控的语义是**先拦住、再把原因说出来**：条件不满足时给出禁用态与具体缺哪一条，而不是偷偷换一套规则开一局、也不是回落到别的模式（那会让「标准 PVP」悄悄变成极速对决 3v3）。判定不出来的资格一律按未知处理。",
+          "never": [
+            "call_engine_after_unmet",
+            "fallback_to_other_mode"
+          ]
+        },
+        "theme": {
+          "theme_id": null,
+          "boss_form_required": null,
+          "period": null,
+          "status": "UNVERIFIED",
+          "why": "「普通闪耀大赛是否开放首领化」「首领对决主题是否要求全员满足」属于**主题 PVP** 的参数，不是全局布尔：它们写在这里、由具体主题填，标准模式本身保持 null（= 未定，不是 false）。首领对决（battle_mode.boss_duel）复用标准模式的规模与结算，只改 theme 这一块。"
+        },
+        "parameter_mirrors": [
+          {
+            "parameter": "boss_form",
+            "authoritative_path": "policies.boss_form_policy.value",
+            "deprecated": true
+          },
+          {
+            "parameter": "team_size",
+            "authoritative_path": "policies.team_size_policy",
+            "deprecated": false
+          },
+          {
+            "parameter": "mana_pool",
+            "authoritative_path": null,
+            "deprecated": false,
+            "note": "魔力池仍只有候选口径（EV-PVP-STANDARD-MANA），未核验，因此没有单独的 policy 子树。"
+          }
+        ],
+        "prematch": {
+          "visibility": "UNKNOWN_PREMATCH",
+          "evidence_id": "EV-PVP-UNKNOWN-OPPONENT",
+          "topic": "pvp.fairness",
+          "confidence": "ENGINE_HYPOTHESIS",
+          "microcase_ids": [
+            "MC-E11"
+          ],
+          "claim": "匹配前不知道对手阵容：这是**产品场景**（阵容工坊固定 UNKNOWN_PREMATCH），不是一条可引用的游戏规则。所有“对手会怎么打”的推断都必须标成先验而不是事实。"
+        }
+      }
+    }
+  },
+  "chrome_port": "4502",
+  "bringup": {
+    "nav_ms": 41379,
+    "ready": {
+      "ok": true
+    },
+    "host": {
+      "ok": false,
+      "waitedMs": 20151,
+      "label": "宿主 API",
+      "attempts": 80
+    },
+    "formal": {
+      "ok": false,
+      "waitedMs": 20153,
+      "label": "标准 PVP 开局按钮可用",
+      "attempts": 80
+    }
+  },
+  "error": "页面求值失败：TypeError: Cannot read properties of undefined (reading 'state')\n    at <anonymous>:8:53\n    at <anonymous>:9:67",
+  "finished_at": "2026-09-30T11:14:36.794Z",
+  "status": "error",
+  "step": "navigate",
+  "saved_at": "2026-09-30T11:14:36.795Z"
+}

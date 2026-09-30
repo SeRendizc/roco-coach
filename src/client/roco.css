@@ -1145,6 +1145,71 @@ body:has(#battle-panel:not([hidden])){overflow-x:hidden}
   background:linear-gradient(180deg,rgba(16,26,36,.72),#101a24 38%);border-top:1px solid var(--line);
 }
 
+/* ── 02.2 开局预览（六只）────────────────────────────────────────────────────
+   首个决策前把「对手亮明的成员」摆出来：形象 + 名字 + 属性 + 出场位次。
+   配色与圆角沿用结算框那套（底 #101a24 / 边 var(--line) / 圆角 18）；
+   z-index 74：在动作坞（23）与小芽浮条（32）之上，在详情抽屉（80）与各弹窗之下。
+   窄屏（≤430px）单列，六行**不横向溢出**（390px 判据量 `scrollWidth === innerWidth`）。 */
+.roco-opening{position:fixed;inset:0;z-index:74;display:flex;align-items:center;justify-content:center;
+  padding:16px;background:rgba(6,10,14,.62)}
+.roco-opening[hidden]{display:none !important}
+.roco-opening-box{width:min(560px,94vw);max-height:88vh;overflow:auto;overscroll-behavior:contain;
+  background:#101a24;border:1px solid var(--line);border-radius:18px;padding:16px 18px;
+  display:flex;flex-direction:column;gap:10px;box-shadow:0 18px 46px rgba(0,0,0,.6)}
+.roco-opening-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.roco-opening-head b{font-size:19px;color:#dfe8ef}
+.roco-opening-note{margin:0;font-size:12.5px;line-height:1.7;color:#9caebe}
+.roco-opening-list{list-style:none;margin:0;padding:0;display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.roco-opening-row{display:flex;align-items:center;gap:9px;padding:8px 10px;
+  border:1px solid var(--line);border-radius:12px;background:#0d1620;min-width:0}
+.roco-opening-sprite{width:44px;height:44px;object-fit:contain;flex:0 0 auto;
+  border-radius:10px;background:#0a121b}
+/* 立绘取不到时的自制形象（系别 emoji + 配色），与候选池卡片同一套；尺寸与立绘格一致。 */
+.roco-opening-icon{width:44px;height:44px;flex:0 0 auto;display:inline-flex;align-items:center;
+  justify-content:center;border-radius:10px;border:1px solid #3a4a5c;background:#0a121b;font-size:20px}
+.roco-opening-main{display:flex;flex-direction:column;gap:3px;min-width:0}
+.roco-opening-name{font-size:14px;color:#e6eef6;font-weight:600;overflow-wrap:anywhere}
+.roco-opening-types{display:flex;gap:4px;flex-wrap:wrap}
+.roco-opening-type{display:inline-flex;align-items:center;gap:3px;padding:1px 6px;border-radius:999px;
+  border:1px solid #3a4a5c;background:#16222f;color:#cfe0d4;font-size:11.5px;white-space:nowrap}
+.roco-opening-type.muted{border-style:dashed;color:#8a9cae}
+.roco-opening-slot{margin-left:auto;font-size:11.5px;color:#7f93a6;white-space:nowrap}
+.roco-opening-actions{display:flex;gap:8px;margin-top:2px;position:sticky;bottom:-16px;
+  padding:8px 0 0;background:linear-gradient(180deg,rgba(16,26,36,.72),#101a24 60%)}
+.roco-opening-actions button{min-height:44px;flex:1 1 auto}
+@media (max-width:430px){.roco-opening-list{grid-template-columns:1fr}}
+
+/* ── 02.3 已见阵容：紧凑入口 + 只读面板 ─────────────────────────────────────
+   入口挂在战场顶栏**对手侧**（那里本来就只有存活点，加一个小按钮不挤操作区）；
+   面板按需弹出（桌面居中卡片 / 窄屏贴底单列），z-index 与开局预览同一层。 */
+.roco-seen-chip{flex:0 0 auto;min-height:26px;padding:2px 10px;border-radius:999px;
+  border:1px solid #3a4a5c;background:#16222f;color:#cfe0d4;font-size:12px;white-space:nowrap;cursor:pointer}
+.roco-seen-chip:hover{border-color:#5d7d9e;color:#eaf2f8}
+.roco-seen-chip[aria-expanded="true"]{border-color:#5fd39a;color:#eaf7ef}
+.roco-seen{position:fixed;inset:0;z-index:74;display:flex;align-items:center;justify-content:center;
+  padding:16px;background:rgba(6,10,14,.62)}
+.roco-seen-box{width:min(520px,94vw);max-height:88vh;overflow:auto;overscroll-behavior:contain;
+  background:#101a24;border:1px solid var(--line);border-radius:18px;padding:16px 18px;
+  display:flex;flex-direction:column;gap:10px;box-shadow:0 18px 46px rgba(0,0,0,.6)}
+.roco-seen-head{display:flex;flex-direction:column;gap:4px}
+.roco-seen-head b{font-size:18px;color:#dfe8ef}
+.roco-seen-head .muted{font-size:12px;line-height:1.6}
+.roco-seen-group{display:flex;flex-direction:column;gap:6px}
+.roco-seen-group-title{font-size:13px;color:#9fd8bd}
+.roco-seen-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.roco-seen-row{border:1px solid var(--line);border-radius:12px;background:#0d1620;padding:8px 10px;
+  display:flex;flex-direction:column;gap:4px}
+.roco-seen-row-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.roco-seen-slot{font-size:11.5px;color:#7f93a6;white-space:nowrap}
+.roco-seen-name{font-size:14px;color:#e6eef6}
+.roco-seen-meta{font-size:11.5px;color:#8a9cae}
+.roco-seen-skills{list-style:none;margin:0;padding:0 0 0 2px;display:flex;flex-wrap:wrap;gap:6px}
+.roco-seen-skills li{font-size:11.5px;color:#cfe0d4;border:1px dashed #3a4a5c;border-radius:999px;padding:1px 8px}
+.roco-seen-actions{display:flex;gap:8px;position:sticky;bottom:-16px;padding:8px 0 0;
+  background:linear-gradient(180deg,rgba(16,26,36,.72),#101a24 60%)}
+.roco-seen-actions button{min-height:44px;flex:1 1 auto}
+
 /* ── 小芽面板里那一行模型连接状态（判据 `live-model-status` 的读取点 `#model-chip`）──
    高度按判据给足（≥24px），点它去连接页；文案与 `data-roco-model` 由 `renderModelChip()` 写。 */
 .model-chip{display:inline-flex;align-items:center;min-height:26px;padding:0 9px;border-radius:999px;

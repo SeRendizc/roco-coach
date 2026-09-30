@@ -120,9 +120,22 @@ test('④ 结构性：/api/coach 真的调用校验；客户端从公开视图�
   // （这一轮同一处要挂 `roco_plan`）。判据的**意图**不变：战况必须进 context。
   assert.match(CLIENT_SRC, /if \(rocoBattle\) context\.roco_battle = rocoBattle;/,
     '客户端必须把它送进 /api/coach 的 context');
-  // 对手后备**只给位次与是否倒下**：源码里不许出现给后备补 id 的写法。
-  assert.ok(!/bench[\s\S]{0,120}pet_id/.test(CLIENT_SRC),
-    '对手后备不许补 pet_id（那是公开面之外的信息）');
+  // 对手后备**只给位次与是否倒下**：身份字段不许凭空补出来。
+  // ── 2026-09-30（分计划 02 · D-11 **改钉**）─────────────────────────────────────
+  // 原断言（逐字留档在 `reports/roco/product-execution/02/test-relaxation.md`，别再写回来）：
+  //     assert.ok(!/bench[\s\S]{0,120}pet_id/.test(CLIENT_SRC),
+  //       '对手后备不许补 pet_id（那是公开面之外的信息）');
+  // 红因（实测，不是推测）：它是**正则窗口**判据 —— 02.2 在客户端加了「对手**已亮明**的成员」
+  //   那一层（数据源 `view.seen_roster`，公开事实）之后，只要 `bench` 之后 120 字符内出现
+  //   任何 `pet_id`（连**注释**里那句「不从 opponent.bench 猜身份……按 pet_id 查名单」也算）
+  //   就判红。它要防的是「从 `view.opponent.bench` 直取身份」，注释与已亮明那条路都不该被它误伤。
+  // 新判据（**结构**，意图一条不少）：① 后备行只由 slot/fainted 构造；② 身份只许来自 seen_roster。
+  const benchBuild = /const bench = \(view\.opponent\?\.bench \?\? \[\]\)\.map\(\(b\) => \(\{[\s\S]{0,220}?\}\)\);/.exec(CLIENT_SRC);
+  assert.ok(benchBuild, '找不到把 opponent.bench 收成 {slot,fainted} 的那一段（后备口径要靠它钉住）');
+  assert.doesNotMatch(benchBuild[0], /pet_id|name/,
+    '对手后备**只给位次与是否倒下**：构造里不许出现 pet_id / name');
+  assert.match(CLIENT_SRC, /openingPreviewRows|seen_roster/,
+    '已亮明的身份只能来自 view.seen_roster（引擎折出来的公开事实），不许从 opponent.bench 直取');
 });
 
 test('必红反证：拿掉 roco_battle，② 里那些畸形输入不再被这条规则拒绝', () => {

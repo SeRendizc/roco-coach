@@ -1,0 +1,66 @@
+{
+  "schema": "roco-dsh-plan-result/v1",
+  "plan_id": "02",
+  "title": "开局预览与已见阵容回看",
+  "status": "running",
+  "status_note": "02.1~02.5 的实现与证据已就绪；等待 Lead 把它标 passed 并提交（STATE.json 由 Lead 独占）。",
+  "completed_steps": ["02.1", "02.2", "02.3", "02.5"],
+  "partial_steps": [
+    {"id": "02.4", "what": "新局 / 刷新 / 旧存档已取证；**重连未单独取证**（页面不提供按 battle_id 恢复的入口，刷新即回大厅 ⇒ 「重连」在页面侧不存在独立路径，按不可得如实登记）"}
+  ],
+  "remaining_steps": [],
+  "checked_at": "2026-09-30T11:5x:00Z",
+  "base_head": "3589f73",
+  "tested_head": "b5306f2",
+  "dirty_file_hashes": {
+    "src/client/roco.js": "见 git status（本轮唯一写入者 plan02-front）",
+    "src/client/roco.css": "见 git status",
+    "tests/roco-battle-context.test.js": "见 git status（D-11 最小改钉，见 test-relaxation.md）"
+  },
+  "rules_version": "roco-world-s4-2026-09-10/mobile_s4_candidate_v3",
+  "owner": "plan02-front",
+  "changed_files": [
+    "src/client/roco.js",
+    "src/client/roco.css",
+    "tests/roco-battle-context.test.js"
+  ],
+  "write_scope_conflicts": [],
+  "commands": [
+    {"cmd": "node E:\\roco-scratch\\plan02\\browser-fixture.mjs --battle --team own-0001..own-0006", "cwd": "E:\\roco-coach", "exit": 0, "log": "reports/roco/product-execution/02/raw-fixture-flow.log", "when": "2026-09-30 19:5x", "what": "真点开局全链路：预览→关闭→回看→开小芽→选择动作（桌面 + 390px），18/18"},
+    {"cmd": "node E:\\roco-scratch\\plan02\\preview-probe.mjs", "cwd": "E:\\roco-coach", "exit": 0, "log": "reports/roco/product-execution/02/raw-preview-probe.log", "when": "2026-09-30 19:5x", "what": "真引擎 view 喂真函数（过渡驱动）：02.2 计时/关闭/焦点 + 02.3 回看/来源追加/Coach，21/21"},
+    {"cmd": "node --test tests/roco-page-ux.test.js tests/roco-plain-speak.test.js tests/roco-observation-contract.test.js tests/roco-battle-panel-static.test.js tests/roco-lineup-context.test.js tests/roco-coach-context-contract.test.js tests/roco-experience.test.js tests/roco-loadout-ui.test.js tests/roco-battle-context.test.js tests/roco-plan-context.test.js", "cwd": "E:\\roco-coach", "exit": 0, "log": "reports/roco/product-execution/02/raw-tests-batch-after-02.2.txt + E:\\roco-scratch\\plan02\\tests-batch3.txt", "when": "2026-09-30 19:5x", "what": "117 tests · 117 pass · 0 fail（02.4 后重跑）"},
+    {"cmd": "node E:\\roco-scratch\\plan02\\probe-service-http.mjs --mimic-page", "cwd": "E:\\roco-coach", "exit": 0, "log": "reports/roco/product-execution/02/raw-probe-service-http.log", "when": "2026-09-30 19:2x", "what": "数据面探针：battle_new(opening_preview) → seen_roster 6 行 → advance → plan"}
+  ],
+  "checks": [
+    {"id": "C1", "condition": "首个决策前六只清晰可辨（名称/形象/属性）", "result": "pass", "evidence": "02.2-acceptance.md 判据 2/3/12；flow-desktop-01-preview.png（1f293ee8c85a3050）；preview-390-01-open.png（e1de3c3c58d736d4）"},
+    {"id": "C2", "condition": "默认约 5–6 秒自动关闭；可主动关闭；键盘与文字替代可用", "result": "pass", "evidence": "自动关闭 duration_ms=5501、closedBy=auto、shownAt 不变；真实鼠标 closedBy=button；Esc closedBy=esc；倒计时文字「知道了（5 秒后自动关闭）」"},
+    {"id": "C3", "condition": "展示开始与观察事件同源（客户端不造 event_seq）", "result": "pass", "evidence": "锚点 = view.seen_roster[].revealed_via/revealed_turn（引擎由 opening_roster_revealed 折出）；battle_new 的 view.events 为空 ⇒ 页面不消费 event_seq（Lead 裁决 (a)）"},
+    {"id": "C4", "condition": "关闭后保留紧凑「已见阵容」入口，回看不重复触发首次事件", "result": "pass", "evidence": "02.3-acceptance.md：同一局同一 view 再喂不再弹；回看窗口内 /api/roco/* 请求数 = 0"},
+    {"id": "C5", "condition": "已公开的新技能与出场信息按来源追加", "result": "pass", "evidence": "3v3 真引擎 replacement 亮明 ⇒ 分组出现「补位上场（1）」；flow-390-02-seen-roster.png（90a529dbad558528）第 1 行追加「防御 · 普通系 · 1 能」"},
+    {"id": "C6", "condition": "Coach 只在真实预览发生后知道六只，关闭后仍记住", "result": "pass", "evidence": "coachRocoBattle().seen_roster 与页面同源同量（6 行）；字段只有公开项"},
+    {"id": "C7", "condition": "新局/刷新/旧存档只恢复有持久证据的观察", "result": "pass(部分)", "evidence": "刷新：navigation.type=reload 且无 view/预览/入口（flow-390-04-after-refresh.png 5fcaeae9f05d407e）；换队两局对手阵容互异；旧存档=无 seen_roster ⇒ 入口不出现；**重连未单独取证**"},
+    {"id": "C8", "condition": "桌面 + 390px 真实操作走完：预览→关闭→回看→开小芽→选择动作", "result": "pass", "evidence": "18/18（raw-fixture-flow.log）；焦点/遮挡读数见 02.5-acceptance.md §3"}
+  ],
+  "counterexamples": [
+    {"id": "X1", "what_changed": "无预览模式（真 legacy 3v3 视图，has_seen_roster=false）", "expected": "不得有完整阵容入口或后台泄漏", "actual": "浮层不出现、入口与面板都不出现", "evidence": "preview-run.json 的 no_preview_counterexample / seen_counterexample；seen-roster-desktop-03-no-preview-counterexample.png（17216a5fdb7ce7ef）"},
+    {"id": "X2", "what_changed": "同一局同一份 view 再喂一次", "expected": "不重复触发首次事件", "actual": "不再弹（key 未变）；回看窗口内 /api/roco/* 请求数 0", "evidence": "preview-run.json same_view_twice / seen_review_requests"},
+    {"id": "X3", "what_changed": "新局换一组队伍（own-0007..0012）", "expected": "不出现旧局卡片/旧 Coach 引用", "actual": "对手阵容变成 pet_000001..006（与队 A 的 007..012 完全不同）；刷新后 battle_id=null、无预览/入口", "evidence": "raw-fixture-run-A.json + 02.5-acceptance.md §3"}
+  ],
+  "runtime": {
+    "code": {"status": "passed", "what": "src/client/roco.js + roco.css + tests/roco-battle-context.test.js（未提交：HEAD b5306f2，工作区 3 个文件 modified）", "how": "117/117 客户端相关判据 + 21/21 过渡探针"},
+    "isolated": {"status": "passed", "url": "http://127.0.0.1:8879（浏览器夹具）/ 8891（预览探针）", "instance": "plan02-front 自己的隔离实例：独立端口 + 独立 Chrome profile（E:\\roco-scratch\\plan02\\profile|preview-profile）+ ROCO_PYTHON", "started": "2026-09-30 19:5x", "endpoints": ["/api/roco/status", "/api/roco/roster", "/api/roco/workshop", "/api/roco/battle/new", "/api/roco/battle/advance", "/api/roco/plan", "/api/roco/sprite"]},
+    "player": {"status": "not_available", "url": null, "why": "本机 8765 没有在跑（curL exit 7），按 02-PLAN/00 的边界不许自行启动用户服务 ⇒ 玩家端读数不可得；浏览器验收全部走隔离实例"}
+  },
+  "commit": null,
+  "remote_sha": null,
+  "blockers": [
+    {"what": "重连（同一 battle_id 在另一个页面恢复）没有独立读数", "tried": "页面没有按 battle_id 恢复的入口（刷新即回大厅）；二次开页面与刷新等价", "who_can_unblock": "Lead 裁决是否接受「按不可得登记」", "independent_work": "02.5 其余读数与 02 收口件不受影响"}
+  ],
+  "gaps": [
+    {"id": "G6", "what": "服务端 validateChat 对 roco_battle 是加性校验，不校验新键 seen_roster/revealed_skills 的形状", "evidence": "src/server/index.js:329-371", "suggested": "需要服务侧切片（不在 02 写域）"},
+    {"id": "G7", "what": "重连未单独取证（见 blockers）", "evidence": "02.4 章节", "suggested": "Lead 裁决"},
+    {"id": "G9", "what": "立绘只覆盖部分物种（本轮六只里 1 只有图），预览层按本品「自制 emoji 形象」兜底并标 data-opening-sprite=none", "evidence": "preview-run.json images_after_wait", "suggested": "素材缺口，非本轮范围"}
+  ],
+  "next_plan": "03",
+  "next_action": "02 收口：Lead 审 result.json/acceptance.md → 提交 src/client/** 与 tests/roco-battle-context.test.js → harness-verifier 独立复核（哈希唯一 + 拍前断言 + 亲自看画面）→ 之后进入分计划 03。"
+}

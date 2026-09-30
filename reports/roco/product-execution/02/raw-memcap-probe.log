@@ -1,0 +1,26 @@
+start pid=9020
+step 1 allocated=64MB rss=99MB
+step 2 allocated=128MB rss=164MB
+step 3 allocated=192MB rss=228MB
+step 4 allocated=256MB rss=292MB
+step 5 allocated=320MB rss=356MB
+step 6 allocated=384MB rss=420MB
+step 7 allocated=448MB rss=484MB
+step 8 allocated=512MB rss=548MB
+step 9 allocated=576MB rss=612MB
+step 10 allocated=640MB rss=676MB
+step 11 allocated=704MB rss=740MB
+step 12 allocated=768MB rss=804MB
+step 13 allocated=832MB rss=868MB
+step 14 allocated=896MB rss=932MB
+step 15 allocated=960MB rss=996MB
+step 16 allocated=1024MB rss=1060MB
+step 17 allocated=1088MB rss=1124MB
+step 18 allocated=1152MB rss=1188MB
+step 19 allocated=1216MB rss=1252MB
+step 20 allocated=1280MB rss=1316MB
+step 21 allocated=1344MB rss=1380MB
+step 22 allocated=1408MB rss=1444MB
+step 23 allocated=1472MB rss=1508MB
+step 24 allocated=1536MB rss=1572MB
+finished all steps without being killed

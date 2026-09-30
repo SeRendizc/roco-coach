@@ -1,0 +1,8 @@
+[keeper +0.2s] [svc] 小兽训练场：http://127.0.0.1:8879/
+加密配置：http://127.0.0.1:8879/connect.html
+密钥仅保存在当前进程内存，不写入文件。
+[keeper +1.0s] SERVICE_READY true http://127.0.0.1:8879
+[keeper +3.0s] alive true rss_mb 48
+[keeper +5.0s] alive true rss_mb 49
+[keeper +7.0s] alive true rss_mb 49
+[keeper +9.0s] alive true rss_mb 49

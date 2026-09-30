@@ -1,0 +1,20 @@
+[fixture02 +0.0s] step -> start-service
+[fixture02 +0.2s] [svc] 小兽训练场：http://127.0.0.1:8879/
+加密配置：http://127.0.0.1:8879/connect.html
+密钥仅保存在当前进程内存，不写入文件。
+[fixture02 +1.0s] 服务就绪 http://127.0.0.1:8879/（1003ms，status={"http":200,"ok":null,"available":true,"ruleset_id":"roco-world-s4-2026-09-10"}）
+[fixture02 +1.6s] step -> chrome-ready
+[fixture02 +1.6s] Chrome 就绪 port=3172 profile=E:\roco-scratch\plan02\profile
+[fixture02 +1.6s] step -> navigate
+[fixture02 +4.0s] 大厅读数 {"title":"小芽 · 洛克王国：世界（训练场）","innerWidth":1416,"innerHeight":745,"engine_status":"规则服务：已就绪","route":"six-pet","view":"empty","start_mode":"formal","start_text":"开一局（标准 PVP · 六宠）","start_rect":{"x":122,"y":694,"w":203,"h":38},"workshop_team_n":6,"overflow":false}
+[fixture02 +5.5s] 窄屏大厅读数 {"viewport":{"w":390,"h":844,"sw":390},"read":{"innerWidth":390,"innerHeight":844,"scrollWidth":390,"overflow":false,"start_mode":"formal","start_text":"开一局（标准 PVP · 六宠）","start_rect":{"x":24,"y":761,"w":342,"h":70,"onscreen":true}}}
+[fixture02 +5.5s] step -> narrow-coach
+[fixture02 +5.5s] 默认：跳过打开小芽（用 --coach 复现中断）
+[fixture02 +6.5s] 默认（不带 --battle）：跳过开局那一下 —— 本机在开局请求后会被外力整棵树中断（见 interruption 证据）
+[fixture02 +6.5s] checks 6/6 pass
+[fixture02 +6.5s]   OK  隔离服务起来了（独立端口 + 引擎可用）
+[fixture02 +6.5s]   OK  无头 Chrome 起来了（独立 profile + CDP 端口读自 DevToolsActivePort）
+[fixture02 +6.5s]   OK  页面挂上宿主 API 且默认是六宠主流程
+[fixture02 +6.5s]   OK  桌面 1440 截图落盘（大厅可读）
+[fixture02 +6.5s]   OK  390px 视口无横向溢出且开局按钮在屏内（真实鼠标命中测试）
+[fixture02 +6.5s]   OK  控制台零报错 / 零未捕获异常

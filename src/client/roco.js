@@ -136,6 +136,13 @@ const state = {
     allSupport: false},
   detail: null,        // 详情抽屉里正在看的那一只
   coach: {open: false}, // 小芽那一栏是否展开（默认收起，避免一进来就盖住战况）
+  //: 02.2 开局预览：**同一局只展示一次**的记录，不展示就是 null。
+  //: 形状 `{key, shownAt, shownAtISO, closedAt, closedBy, timer, rows}` —— `shownAt`（渲染那一刻）
+  //: 就是「首次看见」的时刻，**不是**倒计时结束；`closedBy ∈ {auto, button, esc, overlay, new-battle}`。
+  //: 02.3 已见阵容入口：`{open, openedAt, closedAt, closedBy, rows, skills}`（未开就是 `{open:false}`）。
+  //: 只读 `view.seen_roster` / `view.opponent.revealed_skills`，**不发任何请求**。
+  seenRoster: {open: false},
+  openingPreview: null,
   mode: null,          // `/api/roco/status` 的 mode（注册表原文），页面只渲染不写死
   teamWorkshop: null,  // RC-305 工作台回传的同一份评价（页面不重算）
   seedOverride: null,  // 只给验收脚本换局用；界面上没有这个开关
@@ -906,6 +913,8 @@ function render() {
   renderB3Topbar(view);
   renderB3Panels(view);
   renderB3Sprites(view);
+  // 02.3：已见阵容入口跟着当前 view 走（没有亮明事实 ⇒ 入口与面板一起收掉）。
+  renderSeenRosterEntry(view);
   // 2026-09-25（死代码清理批二）：这里原来还写 `#turn-chip` / `#phase-chip`，
   // 而这两个 id 在 `roco.html` 里**根本不存在**（`grep 'id="turn-chip"'` = 0）——
   // 回合与胜负现在画在 v3h 顶栏（`renderB3Topbar` 的 `#b3-round`）与结算浮层上。
@@ -3569,6 +3578,545 @@ function b3RejectGuard(data) {
   return true;
 }
 
+// ── 02.2 开局预览：首个决策前把「对手亮明的六只」摆出来 ───────────────────────
+//
+// 数据面（01 已就绪，**页面不自己造**）：
+//   · `view.seen_roster[]` = `{slot, pet_id, name, revealed_via, revealed_turn}`，由引擎从
+//     `opening_roster_revealed` 事件折出来（`revealed_via === 'opening_preview'` 就是本局预览展示过的那批）；
+//   · **客户端拿不到 event_seq**（`battle_new` 的 `view.events` 是空数组，`opening_reveal` 只在私有回执里，
+//     `publicView` 不转发）⇒ 这里不造、不猜事件序号；「展示开始」的时刻 = 本函数渲染那一刻。
+//   · **顺序只认 `slot`**：不重排、不从 `opponent.bench` 猜身份（bench 只有 `{slot,fainted}`）。
+// 展示字段只有**物种公开图鉴事实**（名字 / 形象 / 属性）：属性按 `pet_id` 查页面手上的名单。
+// ⚠ **个体面板 stats / 天赋 / 性格 / 个体值一律不进这一层**（那是未公开的私有投影）。
+const OPENING_PREVIEW_MS = 5500;       // 默认约 5–6 秒（02.2 的口径）
+const OPENING_PREVIEW_ROW_LIMIT = 8;   // 六只为主；引擎若给更多也不把浮层撑爆
+
+/** 本局预览展示过的那批（只取 `revealed_via === 'opening_preview'`），按 `slot` 原序。 */
+function openingPreviewRows(view) {
+  const rows = Array.isArray(view?.seen_roster) ? view.seen_roster : [];
+  return rows
+    .filter((row) => row && row.revealed_via === 'opening_preview' && typeof row.pet_id === 'string' && row.pet_id)
+    .slice()
+    .sort((a, b) => {
+      const sa = Number.isInteger(a.slot) ? a.slot : Number.MAX_SAFE_INTEGER;
+      const sb = Number.isInteger(b.slot) ? b.slot : Number.MAX_SAFE_INTEGER;
+      return sa - sb;
+    })
+    .slice(0, OPENING_PREVIEW_ROW_LIMIT);
+}
+
+/**
+ * 物种公开图鉴事实：**只按 `pet_id` 查**页面手上的名单（`/api/roco/roster` 那一份）。
+ * 查不到返回 null —— 调用方写「属性不在本地名单里」，**不猜**。
+ * 取到的只有 `types`（物种图鉴事实）；`stats` 那类字段**不读**。
+ */
+function speciesRowByPetId(petId) {
+  if (typeof petId !== 'string' || !petId) return null;
+  for (const list of [state.roster, state.rosterAll]) {
+    if (!Array.isArray(list)) continue;
+    for (const row of list) if (row?.pet_id === petId) return row;
+  }
+  return null;
+}
+
+/**
+ * 属性查不到时**只补一次**全量名单（与 `startStandardPvp()` 用的是同一条只读路由、同一份缓存）。
+ * 名单回来时若预览还开着就重画属性；**不重置计时**（计时归 02.2 的「约 5–6 秒」，不被网络拖长）。
+ */
+function ensureSpeciesIndex() {
+  if (state.rosterAll || state.rosterAllLoading) return;
+  state.rosterAllLoading = true;
+  fetch('/api/roco/roster?support=all&limit=700&offset=0')
+    .then((response) => (response.ok ? response.json() : null))
+    .then((all) => { state.rosterAll = (all?.pets ?? []).filter((p) => Array.isArray(p.moveset) && p.moveset.length); })
+    .catch(() => { state.rosterAll = null; })
+    .finally(() => {
+      state.rosterAllLoading = false;
+      if (state.openingPreview && !state.openingPreview.closedAt) paintOpeningPreviewRows();
+    });
+}
+
+function openingPreviewKey(view) {
+  const id = state.battleId ?? null;
+  if (!id) return null;   // 没有本局身份 ⇒ 宁可不弹，也不冒「跨局重弹」的险
+  const rows = openingPreviewRows(view);
+  return `${id}:${rows.map((row) => `${row.slot ?? '-'}/${row.pet_id}`).join(',')}`;
+}
+
+/**
+ * 自制形象（与 `petAvatar()` 同一套 emoji + 配色）：**立绘取不到时的可见替代**。
+ * 仓内立绘只覆盖一部分物种（实测：这六只里 5 只 404、1 只有图），而页面对"没有立绘"的既有
+ * 口径是「不画占位、不猜」（`renderB3Sprites` 的 `data-b3-sprite='none'`）——那一套在**战场上**
+ * 成立（还有血条/能量/属性徽章），但预览层要的是「六只一眼可辨」，所以这里退到本品自己的
+ * 形象体系（系别 emoji + 配色圆角块，与候选池卡片同一套），**不是**外部素材、也不是编造的形象。
+ */
+function openingPreviewIconNode(pet) {
+  const main = Array.isArray(pet?.types) ? (pet.types[0] ?? null) : null;
+  if (!main) return null;
+  const span = document.createElement('span');
+  span.className = 'avatar pet-icon roco-opening-icon';
+  span.style.borderColor = typeColor(main);
+  span.setAttribute('aria-hidden', 'true');
+  span.textContent = typeEmoji(main);
+  return span;
+}
+
+/**
+ * 一行：形象 + 名称 + 属性 + 位次。文字与图**同源同义**（读屏与纯文本用户拿到同样的信息）。
+ *
+ * ⚠ 立绘用 `document.createElement('img')` 建，**不写 `<img` 字面量**：本仓有一条判据
+ *   （`tests/roco-experience.test.js` 的「不引用任何外链素材」）在**可执行代码**上不许出现 `<img`，
+ *   它与 `renderB3Sprites()` 同一条先例（那边也是 createElement）。形象本身走 `/api/roco/sprite`，
+ *   是仓内资源，不是外链。
+ */
+function openingPreviewRowNode(row) {
+  const name = typeof row.name === 'string' && row.name ? row.name : '（这一只没给名字）';
+  const pet = speciesRowByPetId(row.pet_id);
+  const types = Array.isArray(pet?.types) ? pet.types.filter((t) => typeof t === 'string' && t) : [];
+  const slotText = Number.isInteger(row.slot) ? `第 ${row.slot + 1} 位` : '位次未给';
+  const li = document.createElement('li');
+  li.className = 'roco-opening-row';
+  li.dataset.openingSlot = Number.isInteger(row.slot) ? String(row.slot) : '';
+  li.dataset.openingPet = row.pet_id;
+  const img = document.createElement('img');
+  img.className = 'roco-opening-sprite';
+  img.src = b3SpriteUrl({pet_id: row.pet_id, name: row.name}, 'default');
+  img.alt = `${name}的形象`;
+  img.loading = 'lazy';
+  const main = document.createElement('span');
+  main.className = 'roco-opening-main';
+  const nameEl = document.createElement('span');
+  nameEl.className = 'roco-opening-name';
+  nameEl.textContent = name;
+  const typesEl = document.createElement('span');
+  typesEl.className = 'roco-opening-types';
+  if (types.length) {
+    for (const type of types) {
+      const chip = document.createElement('span');
+      chip.className = 'roco-opening-type';
+      chip.style.borderColor = typeColor(type);
+      chip.textContent = `${typeEmoji(type)}${type}`;
+      typesEl.appendChild(chip);
+    }
+  } else {
+    const unknown = document.createElement('span');
+    unknown.className = 'roco-opening-type muted';
+    unknown.textContent = '属性不在本地名单里';
+    typesEl.appendChild(unknown);
+  }
+  const slotEl = document.createElement('span');
+  slotEl.className = 'roco-opening-slot';
+  slotEl.textContent = slotText;
+  // 立绘取不到（仓内没有这一只的图）⇒ 换成自制 emoji 形象；连属性都没有就什么都不放。
+  // **只标记、不静默**：`data-opening-sprite="none"` 让验收/排查一眼看出这一格走的是替代。
+  img.addEventListener('load', () => { li.dataset.openingSprite = 'ok'; });
+  img.addEventListener('error', () => {
+    li.dataset.openingSprite = 'none';
+    img.remove();
+    const icon = openingPreviewIconNode(pet);
+    if (icon) li.insertBefore(icon, main);
+  });
+  main.append(nameEl, typesEl);
+  li.append(img, main, slotEl);
+  return li;
+}
+
+function paintOpeningPreviewRows() {
+  const list = document.getElementById('opening-preview-list');
+  if (!list) return;
+  list.replaceChildren(...(state.openingPreview?.rows ?? []).map(openingPreviewRowNode));
+}
+
+function openingPreviewCountdownText(leftMs) {
+  const seconds = Math.max(0, Math.ceil(leftMs / 1000));
+  return `知道了（${seconds} 秒后自动关闭）`;
+}
+
+function closeOpeningPreview(reason) {
+  const current = state.openingPreview;
+  if (!current || current.closedAt) return null;
+  if (current.timer) { clearTimeout(current.timer); current.timer = null; }
+  current.closedAt = performance.now();
+  current.closedAtISO = new Date().toISOString();
+  current.closedBy = reason;
+  const node = document.getElementById('opening-preview');
+  if (node) node.remove();
+  // 焦点还回去：关闭后不把键盘用户留在虚空里（原来聚焦谁就还给谁）。
+  // ⚠ 两处实测坑：① 真实流程里「原来聚焦的」常常是**已经被藏起来的开局按钮**（进对局后不可见），
+  //   聚焦它什么也不会发生；② 用鼠标点「知道了」时，浏览器会在**事件处理结束之后**把焦点收回到
+  //   body（按钮已经随浮层删掉了）⇒ 在这里同步 focus() 会被覆盖。所以：**延迟一拍**再还焦点，
+  //   还不上就退到「已见阵容」入口（关掉预览之后玩家最可能的下一站）。
+  //   `document.body` / `<html>` **不算**「原来聚焦谁」：开局按钮一进对局就被 disable，
+  //   焦点这时正好落在 body 上 —— 第一版就把 body 当成了目标，于是「还焦点」成了空动作。
+  const raw = current.focusBack;
+  const focusBack = (raw && raw !== document.body && raw !== document.documentElement) ? raw : null;
+  setTimeout(() => {
+    if (focusBack && typeof focusBack.focus === 'function' && document.contains(focusBack)) {
+      try { focusBack.focus({preventScroll: true}); } catch { /* 元素已经不在页面上就算了 */ }
+    }
+    if (!focusBack || document.activeElement !== focusBack) {
+      const next = document.getElementById(SEEN_ROSTER_ENTRY_ID);
+      if (next) { try { next.focus({preventScroll: true}); } catch { /* 忽略 */ } }
+    }
+  }, 0);
+  document.body.dataset.rocoOpeningPreview = 'closed';
+  return state.openingPreview;
+}
+
+/**
+ * 只在**真实展示模式**弹：
+ *   ① 本局确实是标准 PVP 六宠（`view.mode_id`，服务端回执里就有）；
+ *   ② `seen_roster` 里真有 `revealed_via === 'opening_preview'` 的行（引擎由**事件**折出来的痕迹）；
+ *   ③ 同一局只弹一次（键 = 对局号 + 揭示行的身份）。
+ * 三条缺一 ⇒ 什么都不做（无预览模式 / 旧存档 / 3v3 练习局都走这条）。
+ */
+function maybeShowOpeningPreview(view) {
+  const rows = openingPreviewRows(view);
+  if (!rows.length) return null;
+  if (view?.mode_id !== STANDARD_PVP_MODE_ID) return null;
+  const key = openingPreviewKey(view);
+  if (!key || state.openingPreview?.key === key) return null;
+  // ⚠ 上一份预览若还开着（或计时器还在跑）：**先结清**再开新的。
+  // 02.2 实测踩到过：新局换了 key 时，旧计时器没被清掉 ⇒ 它在 5.5s 后把**新**浮层关掉，
+  // 读数就是「自动关闭只过了 4.3 秒」。旧记录的 `closedBy` 记成 `replaced`（不是 `auto`）。
+  if (state.openingPreview) {
+    if (state.openingPreview.timer) { clearTimeout(state.openingPreview.timer); state.openingPreview.timer = null; }
+    if (state.openingPreview.stopCountdown) { try { state.openingPreview.stopCountdown(); } catch { /* 忽略 */ } state.openingPreview.stopCountdown = null; }
+    if (!state.openingPreview.closedAt) closeOpeningPreview('replaced');
+  }
+  const previous = document.getElementById('opening-preview');
+  if (previous) previous.remove();
+
+  const host = document.body;
+  if (!host) return null;
+  const wrap = document.createElement('div');
+  wrap.className = 'roco-opening';
+  wrap.id = 'opening-preview';
+  wrap.dataset.rocoOpening = 'yes';
+  wrap.setAttribute('role', 'dialog');
+  wrap.setAttribute('aria-modal', 'true');
+  wrap.setAttribute('aria-labelledby', 'opening-preview-title');
+  wrap.innerHTML = `<div class="roco-opening-box">`
+    + `<div class="roco-opening-head"><b id="opening-preview-title">开局预览：对手的 ${rows.length} 只</b>`
+    + `<span class="muted" id="opening-preview-left"></span></div>`
+    + `<p class="roco-opening-note">这是开局那一刻对手亮明的成员（按出场位次）。`
+    + `关掉之后可以在「已见阵容」里随时回看——它不会替你做任何决定。</p>`
+    + `<ul class="roco-opening-list" id="opening-preview-list" aria-label="对手亮明的成员"></ul>`
+    + `<div class="roco-opening-actions">`
+    + `<button type="button" id="opening-preview-close" class="primary">知道了</button></div></div>`;
+  host.appendChild(wrap);
+
+  const shownAt = performance.now();
+  state.openingPreview = {
+    key,
+    match_id: typeof view.match_id === 'string' ? view.match_id : null,   // 只记录，不参与判据
+    rows: rows.map((row) => ({
+      slot: Number.isInteger(row.slot) ? row.slot : null,
+      pet_id: row.pet_id,
+      name: typeof row.name === 'string' ? row.name : null,
+      revealed_via: row.revealed_via,
+      revealed_turn: row.revealed_turn ?? null,
+    })),
+    shownAt,
+    shownAtISO: new Date().toISOString(),
+    closedAt: null, closedAtISO: null, closedBy: null,
+    focusBack: document.activeElement ?? null,
+    timer: null,
+  };
+  paintOpeningPreviewRows();
+  // 属性若不在本地名单里：**只补一次**名单，回来就重画（计时不变）。
+  if (rows.some((row) => !speciesRowByPetId(row.pet_id))) ensureSpeciesIndex();
+
+  const leftLabel = document.getElementById('opening-preview-left');
+  const closeBtn = document.getElementById('opening-preview-close');
+  const tick = () => {
+    const left = Math.max(0, OPENING_PREVIEW_MS - (performance.now() - shownAt));
+    const text = openingPreviewCountdownText(left);
+    if (leftLabel) leftLabel.textContent = text;
+    if (closeBtn) closeBtn.textContent = text;
+  };
+  tick();
+  const countdown = setInterval(tick, 500);
+  const finish = (reason) => {
+    clearInterval(countdown);
+    closeOpeningPreview(reason);
+  };
+  state.openingPreview.timer = setTimeout(() => finish('auto'), OPENING_PREVIEW_MS);
+  state.openingPreview.stopCountdown = () => clearInterval(countdown);
+  if (closeBtn) closeBtn.addEventListener('click', () => finish('button'));
+  // 点遮罩（不是框里）也关：鼠标用户不必先找按钮。
+  wrap.addEventListener('click', (event) => { if (event.target === wrap) finish('overlay'); });
+  document.body.dataset.rocoOpeningPreview = 'open';
+  // 焦点进浮层（键盘用户立刻能 Tab 到关闭按钮、能按 Esc）。
+  if (closeBtn) { try { closeBtn.focus({preventScroll: true}); } catch { /* 聚焦失败不改行为 */ } }
+  return state.openingPreview;
+}
+
+/** 新局/换局：这一局的预览记录与浮层一起作废（**不显示上一局的卡片**）；已见阵容入口同理。 */
+function resetOpeningPreview(reason = 'new-battle') {
+  if (state.openingPreview && !state.openingPreview.closedAt) closeOpeningPreview(reason);
+  if (state.openingPreview?.stopCountdown) { try { state.openingPreview.stopCountdown(); } catch { /* 忽略 */ } }
+  state.openingPreview = null;
+  const node = document.getElementById('opening-preview');
+  if (node) node.remove();
+  delete document.body.dataset.rocoOpeningPreview;
+  // 02.4：新局不许留着上一局的「已见阵容」面板/入口（入口会在下一次 render 按新 view 重建）。
+  closeSeenRoster(reason);
+}
+
+/** Esc 关浮层：整页只注册一次（`bind()` 每次 render 都会跑，不能在那里重复挂）。 */
+let rocoOpeningPreviewWired = false;
+function wireOpeningPreviewOnce() {
+  if (rocoOpeningPreviewWired) return;
+  rocoOpeningPreviewWired = true;
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    // 谁在最上面先关谁：开局预览 → 已见阵容面板。
+    if (state.openingPreview && !state.openingPreview.closedAt) {
+      event.preventDefault();
+      closeOpeningPreview('esc');
+      return;
+    }
+    if (state.seenRoster?.open) {
+      event.preventDefault();
+      closeSeenRoster('esc');
+    }
+  });
+  // 点面板外面就收起来（入口按钮自己那一下由它的 click 处理，不在这里抢）。
+  document.addEventListener('click', (event) => {
+    if (!state.seenRoster?.open) return;
+    const target = event.target;
+    if (target instanceof Element && (target.closest(`#${SEEN_ROSTER_PANEL_ID}`) || target.closest(`#${SEEN_ROSTER_ENTRY_ID}`))) return;
+    closeSeenRoster('outside');
+  });
+}
+
+// ── 02.3 已见阵容：预览关掉之后的**紧凑入口** ─────────────────────────────────
+//
+// 口径（02-PLAN 02.3）：
+//   · 只列**已经亮明**的对手成员 —— 数据源就是 `view.seen_roster`（引擎从事件折出来的公开事实，
+//     与 02.2 的预览**同一份**）；没有亮明事件时这个键根本不存在 ⇒ 入口也不出现；
+//   · **回看不触发首次事件**：这里只读 `state.view`，一个 `/api/roco/*` 都不发 ——
+//     服务端对重复登记是抛错的（01 实测 `duplicate_reveal_raises=true`），回看再发开局请求就是错的；
+//   · **不挤占操作区**：入口是一个小按钮，挂在战场顶栏的对手侧；面板是**按需**弹出的浮层；
+//   · **按来源追加**：每行带 `revealed_via`（开局预览 / 换人 / 补位）与 `revealed_turn`，
+//     面板按来源分组；对手**已经打出来**的技能走 `view.opponent.revealed_skills`，挂在对应那一只下面。
+const SEEN_ROSTER_SOURCE_CN = {opening_preview: '开局预览', switch: '换人上场', replacement: '补位上场'};
+const SEEN_ROSTER_ENTRY_ID = 'seen-roster-entry';
+const SEEN_ROSTER_PANEL_ID = 'seen-roster-panel';
+
+function seenRosterRows(view) {
+  const rows = Array.isArray(view?.seen_roster) ? view.seen_roster : [];
+  return rows.filter((row) => row && typeof row.pet_id === 'string' && row.pet_id)
+    .slice()
+    .sort((a, b) => {
+      const sa = Number.isInteger(a.slot) ? a.slot : Number.MAX_SAFE_INTEGER;
+      const sb = Number.isInteger(b.slot) ? b.slot : Number.MAX_SAFE_INTEGER;
+      return sa - sb;
+    });
+}
+
+const seenRosterSourceCn = (via) => (typeof via === 'string' && SEEN_ROSTER_SOURCE_CN[via]) || '已亮明';
+
+/** 面板里的一行：位次 + 名字 + 属性 + 亮明来源/回合 + 该只**已经打出来**的技能。 */
+function seenRosterRowNode(row, view) {
+  const li = document.createElement('li');
+  li.className = 'roco-seen-row';
+  li.dataset.seenPet = row.pet_id;
+  li.dataset.seenVia = typeof row.revealed_via === 'string' ? row.revealed_via : '';
+  const name = typeof row.name === 'string' && row.name ? row.name : '（这一只没给名字）';
+  const head = document.createElement('div');
+  head.className = 'roco-seen-row-head';
+  const slotEl = document.createElement('span');
+  slotEl.className = 'roco-seen-slot';
+  slotEl.textContent = Number.isInteger(row.slot) ? `第 ${row.slot + 1} 位` : '位次未给';
+  const nameEl = document.createElement('b');
+  nameEl.className = 'roco-seen-name';
+  nameEl.textContent = name;
+  head.append(slotEl, nameEl);
+  const pet = speciesRowByPetId(row.pet_id);
+  const types = Array.isArray(pet?.types) ? pet.types.filter((t) => typeof t === 'string' && t) : [];
+  if (types.length) {
+    const typesEl = document.createElement('span');
+    typesEl.className = 'roco-opening-types';
+    for (const type of types) {
+      const chip = document.createElement('span');
+      chip.className = 'roco-opening-type';
+      chip.style.borderColor = typeColor(type);
+      chip.textContent = `${typeEmoji(type)}${type}`;
+      typesEl.appendChild(chip);
+    }
+    head.appendChild(typesEl);
+  }
+  const meta = document.createElement('span');
+  meta.className = 'roco-seen-meta';
+  meta.textContent = `${seenRosterSourceCn(row.revealed_via)}`
+    + (Number.isInteger(row.revealed_turn) ? ` · 第 ${row.revealed_turn} 回合亮明` : '');
+  li.append(head, meta);
+  // 已经打出来的技能（公开事实）：`revealed_skills[pet_id]` 与 `legal[].skill` 同形。
+  const skills = Array.isArray(view?.opponent?.revealed_skills?.[row.pet_id])
+    ? view.opponent.revealed_skills[row.pet_id] : [];
+  if (skills.length) {
+    const ul = document.createElement('ul');
+    ul.className = 'roco-seen-skills';
+    for (const skill of skills) {
+      const item = document.createElement('li');
+      const label = typeof skill?.name === 'string' && skill.name ? skill.name : (typeof skill?.skill_id === 'string' ? skill.skill_id : '（未给名字）');
+      const parts = [label];
+      if (typeof skill?.element === 'string' && skill.element) parts.push(skill.element);
+      if (Number.isFinite(skill?.energy)) parts.push(`${skill.energy} 能`);
+      item.textContent = parts.join(' · ');
+      ul.appendChild(item);
+    }
+    li.appendChild(ul);
+  }
+  return li;
+}
+
+function seenRosterPanelNode(view) {
+  const rows = seenRosterRows(view);
+  const wrap = document.createElement('div');
+  wrap.className = 'roco-seen';
+  wrap.id = SEEN_ROSTER_PANEL_ID;
+  wrap.dataset.rocoSeenPanel = 'yes';
+  wrap.setAttribute('role', 'dialog');
+  wrap.setAttribute('aria-modal', 'true');
+  wrap.setAttribute('aria-labelledby', 'seen-roster-title');
+  const box = document.createElement('div');
+  box.className = 'roco-seen-box';
+  const head = document.createElement('div');
+  head.className = 'roco-seen-head';
+  const title = document.createElement('b');
+  title.id = 'seen-roster-title';
+  title.textContent = `已见阵容（${rows.length} 只）`;
+  const note = document.createElement('span');
+  note.className = 'muted';
+  note.textContent = '只列已经亮明的成员，按亮明来源分组；回看不触发任何新事件。';
+  head.append(title, note);
+  box.appendChild(head);
+  // 按来源分组（顺序固定：开局预览 → 换人 → 补位 → 其它），组内按 slot。
+  const groups = new Map();
+  for (const row of rows) {
+    const key = seenRosterSourceCn(row.revealed_via);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(row);
+  }
+  for (const [label, groupRows] of groups) {
+    const section = document.createElement('div');
+    section.className = 'roco-seen-group';
+    section.dataset.seenGroup = label;
+    const h = document.createElement('b');
+    h.className = 'roco-seen-group-title';
+    h.textContent = `${label}（${groupRows.length}）`;
+    const ul = document.createElement('ul');
+    ul.className = 'roco-seen-list';
+    for (const row of groupRows) ul.appendChild(seenRosterRowNode(row, view));
+    section.append(h, ul);
+    box.appendChild(section);
+  }
+  const actions = document.createElement('div');
+  actions.className = 'roco-seen-actions';
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.id = 'seen-roster-close';
+  close.className = 'primary';
+  close.textContent = '关闭';
+  close.addEventListener('click', () => closeSeenRoster('button'));
+  actions.appendChild(close);
+  box.appendChild(actions);
+  wrap.appendChild(box);
+  wrap.addEventListener('click', (event) => { if (event.target === wrap) closeSeenRoster('overlay'); });
+  return wrap;
+}
+
+function closeSeenRoster(reason = 'close') {
+  const node = document.getElementById(SEEN_ROSTER_PANEL_ID);
+  if (node) node.remove();
+  const state2 = state.seenRoster ?? (state.seenRoster = {open: false});
+  if (state2.open) {
+    state2.open = false;
+    state2.closedAt = performance.now();
+    state2.closedBy = reason;
+  }
+  const chip = document.getElementById(SEEN_ROSTER_ENTRY_ID);
+  if (chip) {
+    chip.setAttribute('aria-expanded', 'false');
+    // 同样延迟一拍：用鼠标点「关闭」时浏览器会在处理结束后把焦点收回 body（按钮已随面板删掉）。
+    if (reason !== 'new-battle') {
+      setTimeout(() => {
+        if (document.contains(chip)) { try { chip.focus({preventScroll: true}); } catch { /* 忽略 */ } }
+      }, 0);
+    }
+  }
+  return state2;
+}
+
+function openSeenRoster(reason = 'entry') {
+  const view = state.view;
+  if (!seenRosterRows(view).length) return null;   // 没有亮明事实 ⇒ 没有入口，也不开面板
+  const chip = document.getElementById(SEEN_ROSTER_ENTRY_ID);
+  const previous = document.getElementById(SEEN_ROSTER_PANEL_ID);
+  if (previous) previous.remove();
+  if (!state.seenRoster) state.seenRoster = {open: false};
+  const panel = seenRosterPanelNode(view);
+  document.body.appendChild(panel);
+  const st = state.seenRoster;
+  st.open = true;
+  st.openedAt = performance.now();
+  st.openedAtISO = new Date().toISOString();
+  st.openedBy = reason;
+  st.rows = seenRosterRows(view).map((row) => ({slot: row.slot ?? null, pet_id: row.pet_id,
+    name: row.name ?? null, revealed_via: row.revealed_via ?? null, revealed_turn: row.revealed_turn ?? null}));
+  st.skills = Object.keys(view?.opponent?.revealed_skills ?? {});
+  if (chip) chip.setAttribute('aria-expanded', 'true');
+  const close = document.getElementById('seen-roster-close');
+  if (close) { try { close.focus({preventScroll: true}); } catch { /* 忽略 */ } }
+  return st;
+}
+
+/**
+ * 入口（紧凑按钮）与面板的刷新。**在 `render()` 里调用**，所以：
+ *   · 新亮明的成员/新打出来的技能会**跟着当前 view 追加**（面板开着时也即时更新）；
+ *   · `view` 里没有 `seen_roster`（无预览模式 / 旧存档 / 3v3 练习局）⇒ 入口与面板一起收掉。
+ */
+function renderSeenRosterEntry(view) {
+  const rows = seenRosterRows(view);
+  const existing = document.getElementById(SEEN_ROSTER_ENTRY_ID);
+  if (!rows.length) {
+    if (existing) existing.remove();
+    if (state.seenRoster?.open) closeSeenRoster('no-facts');
+    return;
+  }
+  const host = document.querySelector('.b3-topbar .b3-side--foe') ?? document.querySelector('.b3-topbar')
+    ?? document.querySelector('.b3-wrap') ?? document.body;
+  let chip = existing;
+  if (!chip) {
+    chip = document.createElement('button');
+    chip.type = 'button';
+    chip.id = SEEN_ROSTER_ENTRY_ID;
+    chip.className = 'roco-seen-chip';
+    chip.dataset.rocoSeenEntry = 'yes';
+    chip.setAttribute('aria-haspopup', 'dialog');
+    chip.setAttribute('aria-expanded', 'false');
+    chip.title = '回看已经亮明的对手成员';
+    chip.addEventListener('click', () => {
+      if (state.seenRoster?.open) closeSeenRoster('entry');
+      else openSeenRoster('entry');
+    });
+  }
+  chip.textContent = `已见阵容 ${rows.length}`;
+  if (chip.parentElement !== host) host.appendChild(chip);
+  if (state.seenRoster?.open) {
+    const panel = document.getElementById(SEEN_ROSTER_PANEL_ID);
+    if (panel) {
+      const fresh = seenRosterPanelNode(view);
+      panel.replaceWith(fresh);
+      const close = document.getElementById('seen-roster-close');
+      if (close && !fresh.contains(document.activeElement)) { /* 保持原焦点，不抢 */ }
+    }
+  }
+}
+
 function applyResult(data) {
   // 换掉 `state.view` **之前**先留两份东西（顺序不能反）：
   //   · 上一个局面还能行动 → 它是「最后一个可决策的局面」，复盘要用它；
@@ -3673,6 +4221,9 @@ function applyResult(data) {
   }
   if (Array.isArray(data.view?.events)) state.events = data.view.events;
   render();
+  // 02.2：**唯一**的开局预览触发点 —— 新局事实刚落到 `state.view`、屏幕刚画完。
+  // 「展示开始」= 这一刻（不是倒计时结束）；无预览来源的模式在这里什么都不做。
+  maybeShowOpeningPreview(data.view);
   flashDamage(data.view?.events);      // legacy 3v3 页面的飘字（元素不在时自动空转）
   b3PlayActionFx(data.view?.events);   // v3h 战场：动作立绘 + 受击/治疗/未击中/倒下
   if (state.view?.battle_result) void finishMatch();
@@ -4324,6 +4875,8 @@ async function startBattle() {
     state.matchHistory = [];
     state.lastLiveView = null;
     state.pick.open = false;
+    // 02.2/02.4：新的一局 = 上一局的预览记录与浮层一起作废（**不显示上一局的六只**）。
+    resetOpeningPreview('new-battle');
     $('lesson').textContent = '';
     $('lesson-card').hidden = true;
     $('companion-line').hidden = true;
@@ -4970,6 +5523,33 @@ function coachRocoBattle() {
     fainted: b?.fainted === true,
   }));
   if (bench.length) snapshot.foe_bench = bench;
+  // ── 02.3：**已经亮明**的对手成员与**已经打出来**的技能 ────────────────────────
+  // 与页面「已见阵容」面板同一份来源（`view.seen_roster` / `view.opponent.revealed_skills`），
+  // 都是**公开事实**（引擎由事件折出来）。没有亮明事实时这两个键**不出现**（旧 profile 一字不变）。
+  // ⚠ 只带公开字段：个体面板 stats / 天赋 / 性格 / 个体值**一个都不带**（那是私有投影）。
+  const seenRows = (view.seen_roster ?? [])
+    .filter((row) => row && typeof row.pet_id === 'string' && row.pet_id)
+    .slice(0, 6)
+    .map((row) => ({
+      ...(Number.isInteger(row.slot) ? {slot: row.slot} : {}),
+      pet_id: row.pet_id,
+      ...(typeof row.name === 'string' && row.name ? {name: row.name.slice(0, 24)} : {}),
+      ...(typeof row.revealed_via === 'string' && row.revealed_via ? {revealed_via: row.revealed_via.slice(0, 24)} : {}),
+      ...(Number.isInteger(row.revealed_turn) ? {revealed_turn: row.revealed_turn} : {}),
+    }));
+  if (seenRows.length) snapshot.seen_roster = seenRows;
+  const revealedSkills = view.opponent?.revealed_skills;
+  if (revealedSkills && typeof revealedSkills === 'object') {
+    const out = {};
+    for (const [petId, list] of Object.entries(revealedSkills)) {
+      if (typeof petId !== 'string' || !petId) continue;
+      const names = (Array.isArray(list) ? list : [])
+        .map((one) => (typeof one?.name === 'string' && one.name ? one.name.slice(0, 24) : null))
+        .filter(Boolean).slice(0, 6);
+      if (names.length) out[petId] = names;
+    }
+    if (Object.keys(out).length) snapshot.revealed_skills = out;
+  }
   const legal = (view.legal ?? []).slice(0, 12).map((a) => {
     const label = typeof a?.label === 'string' ? a.label : (typeof a?.name === 'string' ? a.name : null);
     if (!label) return null;
@@ -5544,13 +6124,20 @@ async function startStandardPvp() {
     state.matchHistory = [];
     state.lastLiveView = null;
     state.pick.open = false;
+    // 02.2/02.4：新的一局 = 上一局的预览记录与浮层一起作废（**不显示上一局的六只**）。
+    resetOpeningPreview('new-battle');
     $('lesson').textContent = '';
     $('lesson-card').hidden = true;
     closePetDetail();
     hideHint();
     // `team` 里可以是持有实例（`own-XXXX`），也可以是物种 id（试玩）：服务端两样都收，
     // 物种 id 走的是**按需推算的配招**（未核验），所以这一局必须标明是试玩。
-    const body = {mode: STANDARD_PVP_MODE_ID, team, strategy: 'greedy_damage'};
+    // 02.2：`opening_preview: true` = **页面承诺真的会展示**这批亮明的成员（引擎据此登记事件）。
+    // 只在标准 PVP 六宠这条路上发；legacy 3v3（`startBattle()`）不发。
+    const body = {mode: STANDARD_PVP_MODE_ID, team, strategy: 'greedy_damage', opening_preview: true};
+    // 预览要的「物种属性」来自本地名单：**与开局请求并行**先补一份全量名单，
+    // 免得预览弹出来时属性那一格先写「属性不在本地名单里」再跳变（计时归 5.5s，不等网络）。
+    void ensureSpeciesIndex();
     // 试玩只体现在**界面与数据**上：`team` 里是物种 id 就说明引擎要用按需推算的配招，
     // 不额外给服务端发明字段（那一层没有「试玩」这个参数，硬塞一个就是第二个事实源）。
     document.body.dataset.rocoTrial = trial ? 'yes' : 'no';
@@ -5647,6 +6234,8 @@ async function boot() {
   renderCoverage();
   applyRouteMode();
   bind();
+  // 02.2：Esc 关开局预览的监听器**整页只挂一次**（`bind()` 每次 render 都会跑，挂那里会重复）。
+  wireOpeningPreviewOnce();
   applyOnboard();
   // 阵容选择：先接线，再读名单（读名单会顺带给出一个默认对手阵容与第一页池子）。
   wirePickControls();
@@ -5718,6 +6307,17 @@ window.rocoDemo = {state, startBattle, playAction, autoTurn, requestPlan, say, r
   // 免得「测试里另写一份正则」变成另一套口径。
   actionGroupsOf, actionCardHtml, resourceHtml, rosterLineHtml, statBlockHtml, mechanismOf,
   modeChipHtml, offsetOfPage, standardPvpActive, resolveMode,
+  // 02.2：把**新局事实的唯一收口** `applyResult(data)` 也放出来。
+  // 为什么需要：本机（Windows/DSH harness）浏览器走到「开一局」那一下会被外力整棵树中断
+  // （见 `reports/roco/product-execution/02/fixture-interruption.md`），于是验收只能把
+  // **真引擎回执里的 `view`** 喂给**真函数**，让预览层按真路径渲染 —— 不是另写一条渲染路径，
+  // 也不是伪造视图（验收脚本把 `battle_new` 的原样回执写盘后再喂回来）。
+  applyResult,
+  // 02.3：Coach 那份战况快照也放出来 —— 「小芽引用同一份已见阵容」要有**运行时**读数，
+  // 不能只靠源码正则（判据 ④ 那种）。
+  coachRocoBattle,
+  // 02.3：已见阵容面板的开关（验收脚本要能用真鼠标点入口，也能直接读状态）。
+  openSeenRoster, closeSeenRoster,
   // ⚠ 2026-09-30 甲④-1（Lead 拍板走 (i)）：`companionVisibility()` / `renderCompanion()` 这两个出口
   // **同名同语义**转成小芽浮层的真实状态 —— 三个验收脚本（`browser-live-acceptance`、
   // `browser-mobile-sweep`、`browser-roco-ux-acceptance`）读的就是它们，改了就得改三处判据。

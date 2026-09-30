@@ -1,0 +1,917 @@
+{
+  "plan": "02",
+  "kind": "opening-preview-acceptance",
+  "at": "2026-09-30T11:55:04.953Z",
+  "checks": [
+    {
+      "name": "预览层出现（role=dialog / aria-modal / 标题 / 列表标签）",
+      "pass": true,
+      "detail": {
+        "role": "dialog",
+        "labelledby": "opening-preview-title",
+        "list_label": "对手亮明的成员"
+      }
+    },
+    {
+      "name": "六只按 slot 顺序展示（名称 + 形象 + 属性在同一条目里）",
+      "pass": true,
+      "detail": [
+        {
+          "slot": "0",
+          "pet": "pet_000007",
+          "text": "魔力猫 属性不在本地名单里 第 1 位",
+          "has_img": true,
+          "img_loaded": false,
+          "img_src": "/api/roco/sprite?id=pet_000007&name=%E9%AD%94%E5%8A%9B%E7%8C%AB&v=default&size=battle"
+        },
+        {
+          "slot": "1",
+          "pet": "pet_000008",
+          "text": "草头鸭 属性不在本地名单里 第 2 位",
+          "has_img": true,
+          "img_loaded": false,
+          "img_src": "/api/roco/sprite?id=pet_000008&name=%E8%8D%89%E5%A4%B4%E9%B8%AD&v=default&size=battle"
+        },
+        {
+          "slot": "2",
+          "pet": "pet_000009",
+          "text": "恶魔叮 属性不在本地名单里 第 3 位",
+          "has_img": true,
+          "img_loaded": false,
+          "img_src": "/api/roco/sprite?id=pet_000009&name=%E6%81%B6%E9%AD%94%E5%8F%AE&v=default&size=battle"
+        },
+        {
+          "slot": "3",
+          "pet": "pet_000010",
+          "text": "恶魔狼 属性不在本地名单里 第 4 位",
+          "has_img": true,
+          "img_loaded": false,
+          "img_src": "/api/roco/sprite?id=pet_000010&name=%E6%81%B6%E9%AD%94%E7%8B%BC&v=default&size=battle"
+        },
+        {
+          "slot": "4",
+          "pet": "pet_000011",
+          "text": "鸭吉吉 属性不在本地名单里 第 5 位",
+          "has_img": true,
+          "img_loaded": false,
+          "img_src": "/api/roco/sprite?id=pet_000011&name=%E9%B8%AD%E5%90%89%E5%90%89&v=default&size=battle"
+        },
+        {
+          "slot": "5",
+          "pet": "pet_000012",
+          "text": "铠甲虫 属性不在本地名单里 第 6 位",
+          "has_img": true,
+          "img_loaded": false,
+          "img_src": "/api/roco/sprite?id=pet_000012&name=%E9%93%A0%E7%94%B2%E8%99%AB&v=default&size=battle"
+        }
+      ]
+    },
+    {
+      "name": "六行都有可见形象（立绘加载成功 或 自制 emoji 头像兜底）",
+      "pass": true,
+      "detail": {
+        "images": [
+          {
+            "src": null,
+            "complete": null,
+            "w": 0,
+            "icon": true,
+            "sprite": "none"
+          },
+          {
+            "src": null,
+            "complete": null,
+            "w": 0,
+            "icon": true,
+            "sprite": "none"
+          },
+          {
+            "src": null,
+            "complete": null,
+            "w": 0,
+            "icon": true,
+            "sprite": "none"
+          },
+          {
+            "src": null,
+            "complete": null,
+            "w": 0,
+            "icon": true,
+            "sprite": "none"
+          },
+          {
+            "src": null,
+            "complete": null,
+            "w": 0,
+            "icon": true,
+            "sprite": "none"
+          },
+          {
+            "src": "/api/roco/sprite?id=pet_000012&name=%E9%93%A0%E7%94%B2%E8%99%AB&v=default&size=battle",
+            "complete": true,
+            "w": 384,
+            "icon": false,
+            "sprite": "ok"
+          }
+        ],
+        "sprite_http": {
+          "status": 404,
+          "type": "application/json; charset=utf-8"
+        }
+      }
+    },
+    {
+      "name": "名字与真引擎 seen_roster 逐行一致（不猜、不重排）",
+      "pass": true,
+      "detail": {
+        "engine": [
+          "魔力猫",
+          "草头鸭",
+          "恶魔叮",
+          "恶魔狼",
+          "鸭吉吉",
+          "铠甲虫"
+        ],
+        "dom": [
+          "魔力猫 属性不在本地名单里 第 1 位",
+          "草头鸭 属性不在本地名单里 第 2 位",
+          "恶魔叮 属性不在本地名单里 第 3 位",
+          "恶魔狼 属性不在本地名单里 第 4 位",
+          "鸭吉吉 属性不在本地名单里 第 5 位",
+          "铠甲虫 属性不在本地名单里 第 6 位"
+        ]
+      }
+    },
+    {
+      "name": "shownAt 是渲染那一刻（倒计时未结束时 closedAt=null）",
+      "pass": true,
+      "detail": {
+        "key": "s1-kxemebd1:0/pet_000007,1/pet_000008,2/pet_000009,3/pet_000010,4/pet_000011,5/pet_000012",
+        "shownAt": 381.5,
+        "shownAtISO": "2026-09-30T11:55:07.149Z",
+        "closedAt": null,
+        "closedBy": null,
+        "rows_n": 6
+      }
+    },
+    {
+      "name": "倒计时文字是可读的文字替代",
+      "pass": true,
+      "detail": {
+        "countdown": "知道了（5 秒后自动关闭）"
+      }
+    },
+    {
+      "name": "真实鼠标点「知道了」：closedBy=button、浮层移除、焦点归还",
+      "pass": true,
+      "detail": {
+        "click": {
+          "ok": true,
+          "via": "mouse",
+          "rect": {
+            "x": 701,
+            "y": 528,
+            "w": 522,
+            "h": 44,
+            "inside": true,
+            "hitTag": "BUTTON"
+          }
+        },
+        "open": false,
+        "closedBy": "button",
+        "shownAt": 381.5,
+        "closedAt": 1536.1000000238419,
+        "duration_ms": 1155,
+        "focus": "coach-entry"
+      }
+    },
+    {
+      "name": "同一局同一份 view 再喂一次**不再弹**（回看不重复触发）",
+      "pass": true,
+      "detail": {
+        "overlay": false,
+        "key_same": true,
+        "closedBy": "button"
+      }
+    },
+    {
+      "name": "Esc 关闭：closedBy=esc、浮层移除、焦点归还",
+      "pass": true,
+      "detail": {
+        "open": false,
+        "closedBy": "esc",
+        "shownAt": 1896.2000000476837,
+        "closedAt": 1901.7000000476837,
+        "duration_ms": 6,
+        "focus": "coach-entry"
+      }
+    },
+    {
+      "name": "自动关闭：约 5.5s 后 closedBy=auto，且 shownAt 不变",
+      "pass": true,
+      "detail": {
+        "open": false,
+        "closedBy": "auto",
+        "shownAt": 2138.400000035763,
+        "closedAt": 7639.5,
+        "duration_ms": 5501,
+        "focus": "coach-entry",
+        "shownAt_before": 2138.400000035763,
+        "shownAt_unchanged": true
+      }
+    },
+    {
+      "name": "浮层里没有个体面板字样（stats/天赋/性格/个体/六维）",
+      "pass": true,
+      "detail": {
+        "text_has_forbidden": false,
+        "html_has_forbidden": false,
+        "text": "开局预览：对手的 6 只 知道了（5 秒后自动关闭） 这是开局那一刻对手亮明的成员（按出场位次）。关掉之后可以在「已见阵容」里随时回看——它不会替你做任何决定。 🌿 魔力猫 🌿草系 第 1 位 🌿 草头鸭 🌿草系 第 2 位 🌑 恶魔叮 🌑恶系 🪶翼系 第 3 位 🌑 恶魔狼 🌑恶系 第 4 位 🐾 鸭吉吉 🐾普通系 第 5 位 铠甲虫 🐛虫系 第 6 位 知道了（5 秒后自动关闭）",
+        "html_bytes": 3488
+      }
+    },
+    {
+      "name": "物种属性 join：名单到了就补齐（六行都不再写「不在本地名单里」）",
+      "pass": true,
+      "detail": {
+        "first_paint": [
+          "魔力猫 属性不在本地名单里 第 1 位",
+          "草头鸭 属性不在本地名单里 第 2 位",
+          "恶魔叮 属性不在本地名单里 第 3 位",
+          "恶魔狼 属性不在本地名单里 第 4 位",
+          "鸭吉吉 属性不在本地名单里 第 5 位",
+          "铠甲虫 属性不在本地名单里 第 6 位"
+        ],
+        "after_index": [
+          "🌿 魔力猫 🌿草系 第 1 位",
+          "🌿 草头鸭 🌿草系 第 2 位",
+          "🌑 恶魔叮 🌑恶系 🪶翼系 第 3 位",
+          "🌑 恶魔狼 🌑恶系 第 4 位",
+          "🐾 鸭吉吉 🐾普通系 第 5 位",
+          "铠甲虫 🐛虫系 第 6 位"
+        ]
+      }
+    },
+    {
+      "name": "反例：无预览模式（真 legacy 3v3 视图）不出现浮层",
+      "pass": true,
+      "detail": {
+        "overlay": false,
+        "role": null,
+        "aria_modal": null,
+        "labelledby": null,
+        "list_label": null,
+        "title": null,
+        "countdown": null,
+        "focused": "coach-entry",
+        "rows_n": 0,
+        "rows": [],
+        "state": {
+          "key": "s1-kxemebd1:0/pet_000007,1/pet_000008,2/pet_000009,3/pet_000010,4/pet_000011,5/pet_000012",
+          "shownAt": 381.5,
+          "shownAtISO": "2026-09-30T11:55:07.149Z",
+          "closedAt": 1536.1000000238419,
+          "closedBy": "button",
+          "rows_n": 6
+        }
+      }
+    },
+    {
+      "name": "390px：无横向溢出、关闭按钮在屏内、六行单列",
+      "pass": true,
+      "detail": {
+        "overlay": true,
+        "innerWidth": 390,
+        "scrollWidth": 390,
+        "overflow": false,
+        "box": {
+          "x": 16,
+          "y": 98,
+          "w": 358,
+          "h": 648
+        },
+        "close_btn": {
+          "x": 35,
+          "y": 685,
+          "w": 320,
+          "h": 44,
+          "onscreen": true
+        },
+        "rows_n": 6,
+        "cols": "320px"
+      }
+    },
+    {
+      "name": "02.3 入口：紧凑按钮出现且数字=已亮明只数",
+      "pass": true,
+      "detail": {
+        "text": "已见阵容 6",
+        "click": {
+          "ok": true,
+          "via": "mouse",
+          "rect": {
+            "x": 1363,
+            "y": 176,
+            "w": 66,
+            "h": 26,
+            "inside": true,
+            "hitTag": "BUTTON"
+          }
+        }
+      }
+    },
+    {
+      "name": "02.3 回看：面板按来源分组、六行、入口 aria-expanded=true、焦点进面板",
+      "pass": true,
+      "detail": {
+        "groups": [
+          {
+            "title": "开局预览（6）",
+            "rows": 6
+          }
+        ],
+        "focus": "seen-roster-close",
+        "title": "已见阵容（6 只）"
+      }
+    },
+    {
+      "name": "02.3 换人/补位后回看：新来源**按来源追加**（出现非「开局预览」的组）",
+      "pass": true,
+      "detail": {
+        "after": [
+          {
+            "title": "补位上场（1）",
+            "rows": 1
+          }
+        ],
+        "before": [
+          {
+            "title": "开局预览（6）",
+            "rows": 6
+          }
+        ],
+        "engine": {
+          "battle_id": "s4-ufsc7adm",
+          "steps": 7,
+          "has_seen_roster": true,
+          "seen_roster": [
+            {
+              "slot": 1,
+              "pet_id": "pet_000190",
+              "via": "replacement",
+              "turn": 6
+            }
+          ],
+          "revealed_skill_pets": [
+            "pet_000225"
+          ]
+        }
+      }
+    },
+    {
+      "name": "02.3 回看**不发任何 /api/roco/* 请求**（点入口→面板渲染完）",
+      "pass": true,
+      "detail": {
+        "while_open_no_switch": [],
+        "after_switch_apply": [],
+        "note": "「回看」这一下（点入口→面板渲染完）不许发任何 /api/roco/*；换人那一份 view 是脚本喂的，它自己会触发页面重画（可能有立绘请求）"
+      }
+    },
+    {
+      "name": "02.3 Esc 关面板且焦点回到入口",
+      "pass": true,
+      "detail": {
+        "open": false,
+        "focus": "seen-roster-entry",
+        "closedBy": "esc",
+        "aria_expanded": "false"
+      }
+    },
+    {
+      "name": "02.3 Coach 引用同一份已见阵容（seen_roster + 已公开技能）",
+      "pass": true,
+      "detail": {
+        "coach_rows": [
+          {
+            "slot": 1,
+            "pet_id": "pet_000190",
+            "name": "海豹船长",
+            "revealed_via": "replacement",
+            "revealed_turn": 6
+          }
+        ],
+        "engine_rows": [
+          {
+            "slot": 1,
+            "pet_id": "pet_000190",
+            "via": "replacement",
+            "turn": 6
+          }
+        ],
+        "revealed_skills": {
+          "pet_000225": [
+            "龙血",
+            "诡刺"
+          ]
+        },
+        "engine_revealed_skill_pets": [
+          "pet_000225"
+        ]
+      }
+    },
+    {
+      "name": "02.3 反例：无预览模式（真 legacy 3v3 视图）入口与面板都消失",
+      "pass": true,
+      "detail": {
+        "entry": false,
+        "panel": false,
+        "has_seen_roster": false
+      }
+    }
+  ],
+  "shots": [
+    "reports/roco/product-execution/02/shots/preview-desktop-01-open.png",
+    "reports/roco/product-execution/02/shots/preview-desktop-02-no-preview-counterexample.png",
+    "reports/roco/product-execution/02/shots/preview-390-01-open.png",
+    "reports/roco/product-execution/02/shots/preview-390-02-auto-closed.png",
+    "reports/roco/product-execution/02/shots/seen-roster-desktop-01-open.png",
+    "reports/roco/product-execution/02/shots/seen-roster-desktop-02-after-switch.png",
+    "reports/roco/product-execution/02/shots/seen-roster-desktop-03-no-preview-counterexample.png"
+  ],
+  "multi_source_view": {
+    "battle_id": "s4-ufsc7adm",
+    "steps": 7,
+    "has_seen_roster": true,
+    "seen_roster": [
+      {
+        "slot": 1,
+        "pet_id": "pet_000190",
+        "via": "replacement",
+        "turn": 6
+      }
+    ],
+    "revealed_skill_pets": [
+      "pet_000225"
+    ]
+  },
+  "views": {
+    "preview": {
+      "battle_id": "s1-kxemebd1",
+      "mode_id": "pvp-standard-six-pet",
+      "has_seen_roster": true,
+      "rows": [
+        {
+          "slot": 0,
+          "pet_id": "pet_000007",
+          "name": "魔力猫",
+          "revealed_via": "opening_preview",
+          "revealed_turn": 1
+        },
+        {
+          "slot": 1,
+          "pet_id": "pet_000008",
+          "name": "草头鸭",
+          "revealed_via": "opening_preview",
+          "revealed_turn": 1
+        },
+        {
+          "slot": 2,
+          "pet_id": "pet_000009",
+          "name": "恶魔叮",
+          "revealed_via": "opening_preview",
+          "revealed_turn": 1
+        },
+        {
+          "slot": 3,
+          "pet_id": "pet_000010",
+          "name": "恶魔狼",
+          "revealed_via": "opening_preview",
+          "revealed_turn": 1
+        },
+        {
+          "slot": 4,
+          "pet_id": "pet_000011",
+          "name": "鸭吉吉",
+          "revealed_via": "opening_preview",
+          "revealed_turn": 1
+        },
+        {
+          "slot": 5,
+          "pet_id": "pet_000012",
+          "name": "铠甲虫",
+          "revealed_via": "opening_preview",
+          "revealed_turn": 1
+        }
+      ]
+    },
+    "no_preview": {
+      "battle_id": "s3-9fwygwzb",
+      "mode_id": null,
+      "has_seen_roster": false
+    }
+  },
+  "first_show": {
+    "overlay": true,
+    "role": "dialog",
+    "aria_modal": "true",
+    "labelledby": "opening-preview-title",
+    "list_label": "对手亮明的成员",
+    "title": "开局预览：对手的 6 只",
+    "countdown": "知道了（6 秒后自动关闭）",
+    "focused": "opening-preview-close",
+    "rows_n": 6,
+    "rows": [
+      {
+        "slot": "0",
+        "pet": "pet_000007",
+        "text": "魔力猫 属性不在本地名单里 第 1 位",
+        "has_img": true,
+        "img_loaded": false,
+        "img_src": "/api/roco/sprite?id=pet_000007&name=%E9%AD%94%E5%8A%9B%E7%8C%AB&v=default&size=battle"
+      },
+      {
+        "slot": "1",
+        "pet": "pet_000008",
+        "text": "草头鸭 属性不在本地名单里 第 2 位",
+        "has_img": true,
+        "img_loaded": false,
+        "img_src": "/api/roco/sprite?id=pet_000008&name=%E8%8D%89%E5%A4%B4%E9%B8%AD&v=default&size=battle"
+      },
+      {
+        "slot": "2",
+        "pet": "pet_000009",
+        "text": "恶魔叮 属性不在本地名单里 第 3 位",
+        "has_img": true,
+        "img_loaded": false,
+        "img_src": "/api/roco/sprite?id=pet_000009&name=%E6%81%B6%E9%AD%94%E5%8F%AE&v=default&size=battle"
+      },
+      {
+        "slot": "3",
+        "pet": "pet_000010",
+        "text": "恶魔狼 属性不在本地名单里 第 4 位",
+        "has_img": true,
+        "img_loaded": false,
+        "img_src": "/api/roco/sprite?id=pet_000010&name=%E6%81%B6%E9%AD%94%E7%8B%BC&v=default&size=battle"
+      },
+      {
+        "slot": "4",
+        "pet": "pet_000011",
+        "text": "鸭吉吉 属性不在本地名单里 第 5 位",
+        "has_img": true,
+        "img_loaded": false,
+        "img_src": "/api/roco/sprite?id=pet_000011&name=%E9%B8%AD%E5%90%89%E5%90%89&v=default&size=battle"
+      },
+      {
+        "slot": "5",
+        "pet": "pet_000012",
+        "text": "铠甲虫 属性不在本地名单里 第 6 位",
+        "has_img": true,
+        "img_loaded": false,
+        "img_src": "/api/roco/sprite?id=pet_000012&name=%E9%93%A0%E7%94%B2%E8%99%AB&v=default&size=battle"
+      }
+    ],
+    "state": {
+      "key": "s1-kxemebd1:0/pet_000007,1/pet_000008,2/pet_000009,3/pet_000010,4/pet_000011,5/pet_000012",
+      "shownAt": 381.5,
+      "shownAtISO": "2026-09-30T11:55:07.149Z",
+      "closedAt": null,
+      "closedBy": null,
+      "rows_n": 6
+    }
+  },
+  "countdown_text": "知道了（5 秒后自动关闭）",
+  "dom_leak_scan": {
+    "text_has_forbidden": false,
+    "html_has_forbidden": false,
+    "text": "开局预览：对手的 6 只 知道了（5 秒后自动关闭） 这是开局那一刻对手亮明的成员（按出场位次）。关掉之后可以在「已见阵容」里随时回看——它不会替你做任何决定。 🌿 魔力猫 🌿草系 第 1 位 🌿 草头鸭 🌿草系 第 2 位 🌑 恶魔叮 🌑恶系 🪶翼系 第 3 位 🌑 恶魔狼 🌑恶系 第 4 位 🐾 鸭吉吉 🐾普通系 第 5 位 铠甲虫 🐛虫系 第 6 位 知道了（5 秒后自动关闭）",
+    "html_bytes": 3488
+  },
+  "rows_first_paint": [
+    "魔力猫 属性不在本地名单里 第 1 位",
+    "草头鸭 属性不在本地名单里 第 2 位",
+    "恶魔叮 属性不在本地名单里 第 3 位",
+    "恶魔狼 属性不在本地名单里 第 4 位",
+    "鸭吉吉 属性不在本地名单里 第 5 位",
+    "铠甲虫 属性不在本地名单里 第 6 位"
+  ],
+  "images_first_paint": [
+    "/api/roco/sprite?id=pet_000007&name=%E9%AD%94%E5%8A%9B%E7%8C%AB&v=default&size=battle",
+    "/api/roco/sprite?id=pet_000008&name=%E8%8D%89%E5%A4%B4%E9%B8%AD&v=default&size=battle",
+    "/api/roco/sprite?id=pet_000009&name=%E6%81%B6%E9%AD%94%E5%8F%AE&v=default&size=battle",
+    "/api/roco/sprite?id=pet_000010&name=%E6%81%B6%E9%AD%94%E7%8B%BC&v=default&size=battle",
+    "/api/roco/sprite?id=pet_000011&name=%E9%B8%AD%E5%90%89%E5%90%89&v=default&size=battle",
+    "/api/roco/sprite?id=pet_000012&name=%E9%93%A0%E7%94%B2%E8%99%AB&v=default&size=battle"
+  ],
+  "sprite_http": {
+    "status": 404,
+    "type": "application/json; charset=utf-8"
+  },
+  "button_close": {
+    "click": {
+      "ok": true,
+      "via": "mouse",
+      "rect": {
+        "x": 701,
+        "y": 528,
+        "w": 522,
+        "h": 44,
+        "inside": true,
+        "hitTag": "BUTTON"
+      }
+    },
+    "open": false,
+    "closedBy": "button",
+    "shownAt": 381.5,
+    "closedAt": 1536.1000000238419,
+    "duration_ms": 1155,
+    "focus": "coach-entry"
+  },
+  "same_view_twice": {
+    "overlay": false,
+    "key_same": true,
+    "closedBy": "button"
+  },
+  "no_preview_counterexample": {
+    "overlay": false,
+    "role": null,
+    "aria_modal": null,
+    "labelledby": null,
+    "list_label": null,
+    "title": null,
+    "countdown": null,
+    "focused": "coach-entry",
+    "rows_n": 0,
+    "rows": [],
+    "state": {
+      "key": "s1-kxemebd1:0/pet_000007,1/pet_000008,2/pet_000009,3/pet_000010,4/pet_000011,5/pet_000012",
+      "shownAt": 381.5,
+      "shownAtISO": "2026-09-30T11:55:07.149Z",
+      "closedAt": 1536.1000000238419,
+      "closedBy": "button",
+      "rows_n": 6
+    }
+  },
+  "esc_close": {
+    "open": false,
+    "closedBy": "esc",
+    "shownAt": 1896.2000000476837,
+    "closedAt": 1901.7000000476837,
+    "duration_ms": 6,
+    "focus": "coach-entry"
+  },
+  "narrow_open": {
+    "overlay": true,
+    "innerWidth": 390,
+    "scrollWidth": 390,
+    "overflow": false,
+    "box": {
+      "x": 16,
+      "y": 98,
+      "w": 358,
+      "h": 648
+    },
+    "close_btn": {
+      "x": 35,
+      "y": 685,
+      "w": 320,
+      "h": 44,
+      "onscreen": true
+    },
+    "rows_n": 6,
+    "cols": "320px"
+  },
+  "rows_after_index": [
+    "🌿 魔力猫 🌿草系 第 1 位",
+    "🌿 草头鸭 🌿草系 第 2 位",
+    "🌑 恶魔叮 🌑恶系 🪶翼系 第 3 位",
+    "🌑 恶魔狼 🌑恶系 第 4 位",
+    "🐾 鸭吉吉 🐾普通系 第 5 位",
+    "铠甲虫 🐛虫系 第 6 位"
+  ],
+  "images_after_wait": [
+    {
+      "src": null,
+      "complete": null,
+      "w": 0,
+      "icon": true,
+      "sprite": "none"
+    },
+    {
+      "src": null,
+      "complete": null,
+      "w": 0,
+      "icon": true,
+      "sprite": "none"
+    },
+    {
+      "src": null,
+      "complete": null,
+      "w": 0,
+      "icon": true,
+      "sprite": "none"
+    },
+    {
+      "src": null,
+      "complete": null,
+      "w": 0,
+      "icon": true,
+      "sprite": "none"
+    },
+    {
+      "src": null,
+      "complete": null,
+      "w": 0,
+      "icon": true,
+      "sprite": "none"
+    },
+    {
+      "src": "/api/roco/sprite?id=pet_000012&name=%E9%93%A0%E7%94%B2%E8%99%AB&v=default&size=battle",
+      "complete": true,
+      "w": 384,
+      "icon": false,
+      "sprite": "ok"
+    }
+  ],
+  "auto_close": {
+    "open": false,
+    "closedBy": "auto",
+    "shownAt": 2138.400000035763,
+    "closedAt": 7639.5,
+    "duration_ms": 5501,
+    "focus": "coach-entry",
+    "shownAt_before": 2138.400000035763,
+    "shownAt_unchanged": true
+  },
+  "seen_entry_text": "已见阵容 6",
+  "seen_panel": {
+    "click": {
+      "ok": true,
+      "via": "mouse",
+      "rect": {
+        "x": 1363,
+        "y": 176,
+        "w": 66,
+        "h": 26,
+        "inside": true,
+        "hitTag": "BUTTON"
+      }
+    },
+    "open": true,
+    "title": "已见阵容（6 只）",
+    "groups": [
+      {
+        "title": "开局预览（6）",
+        "rows": 6
+      }
+    ],
+    "rows_n": 6,
+    "skills_n": 0,
+    "aria_expanded": "true",
+    "focus": "seen-roster-close",
+    "text": "已见阵容（6 只） 只列已经亮明的成员，按亮明来源分组；回看不触发任何新事件。 开局预览（6） 第 1 位 魔力猫 🌿草系 开局预览 · 第 1 回合亮明 第 2 位 草头鸭 🌿草系 开局预览 · 第 1 回合亮明 第 3 位 恶魔叮 🌑恶系 🪶翼系 开局预览 · 第 1 回合亮明 第 4 位 恶魔狼 🌑恶系 开局预览 · 第 1 回合亮明 第 5 位 鸭吉吉 🐾普通系 开局预览 · 第 1 回合亮明 第 6 位 铠甲虫 🐛虫系 开局预览 · 第 1 回合亮明 关闭"
+  },
+  "seen_after_switch": {
+    "open": true,
+    "title": "已见阵容（1 只）",
+    "groups": [
+      {
+        "title": "补位上场（1）",
+        "rows": 1
+      }
+    ],
+    "rows_n": 1,
+    "skills_n": 0,
+    "aria_expanded": "true",
+    "focus": "",
+    "text": "已见阵容（1 只） 只列已经亮明的成员，按亮明来源分组；回看不触发任何新事件。 补位上场（1） 第 2 位 海豹船长 🥊武系 💧水系 补位上场 · 第 6 回合亮明 关闭"
+  },
+  "seen_review_requests": {
+    "while_open_no_switch": [],
+    "after_switch_apply": [],
+    "note": "「回看」这一下（点入口→面板渲染完）不许发任何 /api/roco/*；换人那一份 view 是脚本喂的，它自己会触发页面重画（可能有立绘请求）"
+  },
+  "seen_esc": {
+    "open": false,
+    "focus": "seen-roster-entry",
+    "closedBy": "esc",
+    "aria_expanded": "false"
+  },
+  "coach_snapshot": {
+    "turn": 7,
+    "battle_id": "s4-ufsc7adm",
+    "state_version": 32,
+    "phase": "battle",
+    "result": null,
+    "self": [
+      {
+        "pet_id": "pet_000225",
+        "name": "寂灭骨龙",
+        "hp": 35,
+        "max_hp": 425,
+        "energy": 4,
+        "alive": true
+      },
+      {
+        "pet_id": "pet_000190",
+        "name": "海豹船长",
+        "hp": 374,
+        "max_hp": 374,
+        "energy": 0,
+        "alive": true
+      },
+      {
+        "pet_id": "pet_000445",
+        "name": "黑猫巫师",
+        "hp": 474,
+        "max_hp": 474,
+        "energy": 0,
+        "alive": true
+      }
+    ],
+    "self_active": 1,
+    "self_energy_max": 6,
+    "foe": [
+      {
+        "pet_id": "pet_000190",
+        "name": "海豹船长",
+        "hp": 374,
+        "max_hp": 374,
+        "energy": 0,
+        "alive": true
+      }
+    ],
+    "foe_living_count": 2,
+    "needs_replacement": [],
+    "foe_bench": [
+      {
+        "slot": 0,
+        "fainted": true
+      },
+      {
+        "slot": 2,
+        "fainted": false
+      }
+    ],
+    "seen_roster": [
+      {
+        "slot": 1,
+        "pet_id": "pet_000190",
+        "name": "海豹船长",
+        "revealed_via": "replacement",
+        "revealed_turn": 6
+      }
+    ],
+    "revealed_skills": {
+      "pet_000225": [
+        "龙血",
+        "诡刺"
+      ]
+    },
+    "legal": [
+      {
+        "label": "取念",
+        "kind": "skill"
+      },
+      {
+        "label": "气波",
+        "kind": "skill"
+      },
+      {
+        "label": "换上第1位",
+        "kind": "switch"
+      },
+      {
+        "label": "换上第3位",
+        "kind": "switch"
+      },
+      {
+        "label": "使用净化药",
+        "kind": "item"
+      },
+      {
+        "label": "使用回复药",
+        "kind": "item"
+      },
+      {
+        "label": "使用能量果",
+        "kind": "item"
+      },
+      {
+        "label": "撤退",
+        "kind": "escape"
+      }
+    ]
+  },
+  "seen_counterexample": {
+    "entry": false,
+    "panel": false,
+    "has_seen_roster": false
+  },
+  "summary": {
+    "total": 21,
+    "pass": 21,
+    "fail": 0
+  },
+  "finished_at": "2026-09-30T11:55:16.491Z",
+  "status": "finished"
+}
