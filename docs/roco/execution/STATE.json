@@ -498,6 +498,22 @@
       "owner": "plan00-closer（勘察）· lead（裁决 D-32）· **用户**（招募试用者）",
       "status": "waiting_external",
       "rule": "涉及真人的事项（招募/联系/采集）**必须由用户决定**，团队只能准备材料与判定设计；记录一律用代号（P1–P5）、保留 ≤30 天、要求即删、不采集无关个人信息/密钥/未匿名原话"
+    },
+    {
+      "id": "O-32",
+      "what": "玩家可见文本的**口径不统一是系统性问题**（不是个别笔误）：一处 `show()` 口径被用 57 次，其余 5 个模块 0 次、全是裸插值 ⇒ 脏值/单位/精度三类缺陷都能冒出来",
+      "evidence": "plan00-closer 横切审计（`reports/roco/product-execution/crosscut/player-text-audit.md`，sha16 `e58dd71ac457c805`）：**真渲染 91 条语料**（进程内真引擎、不绑端口），先注入假样本自证非恒真（长浮点/假 ID/脏值三类全红）。命中：**H1**（真缺陷）`teacher.js:120/152` 对无威力技能把 `hit/guarded` 置 `null` 后直接拼句 ⇒ 渲染原文「伤害来自 engine.damage（不防御 **null**／防御 **null**）…」，玩家路径 `experience.js:623-629 → roco.js:3524`（提示展开区）；**H2** 同一事实三种叫法（`血`44/`HP`6/`生命`2；`豆`20 vs `能量`5）；**H3** 「评分」四种精度（1/2/3 位）+ `toFixed(1)` 把整数写成 `930.0` 而 `show()` 写 `930`；**H4** 写死串（默认规则集 id 两处、`roco.js:901` 内部术语「本局状态版本 N」直出）。误报自查：`#events-raw` 的 JSON 在默认折叠抽屉、`roco.js:1057` 只进 dataset ⇒ 不算命中。边界：只代表这 91 条语料（DOM 文案与 Python 侧字符串未渲染）",
+      "owner": "plan00-closer（审计）· plan06-recon（H1）· plan05-recon（H4）· plan00-closer（task-33 共用口径与门禁）",
+      "status": "fix_in_flight",
+      "rule": "**面向玩家的文本必须走统一口径**（数字：整数原样/非整数 1 位；单位：一份词表；脏值：显式占位而**不是** `null`/`undefined`/`NaN` 字面），并把这类检查做成**门禁判据**（注入假样本必须红）；新文案上线前必须**真渲染**验证，不许只看源码"
+    },
+    {
+      "id": "O-33",
+      "what": "**两条既有判据互相打架**：`tests/evals/player-copy.test.js`（禁内部词「分支」）要求改，而 `tests/roco-review-body-fallback.test.js:59`（A21）**逐字要求**保留「缺当时的分支记录」",
+      "evidence": "plan06-recon 在 task-28/D-31 冻结时实测：`node --test --test-concurrency=1 tests/evals/player-copy.test.js` ⇒ **exit 1 · tests 2 / pass 1 / fail 1**（根因 `teacher.js:329/342/350` 玩家可见文案含禁用词「分支」，**HEAD 里就有、非本轮引入**）；而 A21 的断言逐字钉住同一句话。两条判据不可能同时绿",
+      "owner": "plan06-recon（按裁决改）· lead（裁决）",
+      "status": "fix_in_flight",
+      "rule": "**判据冲突时按「产品规则 > 旧文案钉子」裁决**：面向玩家的禁用词/大白话规则优先，被钉住的旧文案按改钉规矩更新（原断言逐字留档 + 独立运行时报据 + 最小修订理由 + 两向变异），并要求**两条判据同时绿**才算闭环"
     }
   ],
   "handoff": {
