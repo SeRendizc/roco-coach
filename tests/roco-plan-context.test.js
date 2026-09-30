@@ -428,6 +428,11 @@ test('⑧d 04.4：引擎的 robustness/declarations 带出来；缺 declarations
       '被压下去的动作期望更高 —— 这正是反例②的要点，必须留着可核对');
     assert.equal(receipt.robustness.is_probability, false);
     assert.deepEqual(receipt.robustness.tied_with_top, []);
+    // 04.6：两个「预算」必须**分开命名**（工具自己的超时 ≠ 引擎的搜索预算），不许混成一个数
+    assert.equal(receipt.search.budget_ms, 8000, '工具层超时（ROCO_PLAN_TIMEOUT_MS）');
+    assert.equal(receipt.search.engineBudgetMs, null,
+      '假引擎没给 budget_ms ⇒ engineBudgetMs 必须是 null（不许拿工具超时冒充）');
+    assert.notEqual(receipt.search.budget_ms, receipt.search.engineBudgetMs);
   } finally {
     harness.done();
   }

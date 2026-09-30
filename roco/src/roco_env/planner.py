@@ -142,6 +142,26 @@ def estimate_declarations() -> Dict[str, Any]:
     }
 
 
+def _json_safe(value: Any, paths: List[str], prefix: str = "$") -> Any:
+    """04.6：**非有限数不得进 JSON** —— `inf` / `-inf` / `nan` 一律换成 `None` 并登记路径。
+
+    为什么必须做在出口：`json.dumps` 默认 `allow_nan=True`，会把它们写成
+    `Infinity` / `-Infinity` / `NaN` —— 那是**非法 JSON**，JS 的 `JSON.parse` 直接抛。
+    真实对局里 `expected` 等一般是有限数，但「所有分支都算不出来」这类极端局面存在
+    ⇒ 与其等桥报协议错，不如在出口换成 `null` + 逐路径说明原因（上层看得出「这里是未知」）。
+    """
+    if isinstance(value, float):
+        if value != value or value in (float("inf"), float("-inf")):
+            paths.append(prefix)
+            return None
+        return value
+    if isinstance(value, dict):
+        return {key: _json_safe(item, paths, f"{prefix}.{key}") for key, item in value.items()}
+    if isinstance(value, list):
+        return [_json_safe(item, paths, f"{prefix}[{i}]") for i, item in enumerate(value)]
+    return value
+
+
 @dataclass
 class PlanResult:
     """规划回执。每个数字都要能被上层追问「这个数怎么来的」。"""
@@ -207,7 +227,7 @@ class PlanResult:
     opponent_model_detail: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        out = {
             "recommended": self.recommended.to_dict() if self.recommended else None,
             "recommended_label": self.recommended_label,
             "expected": round(self.expected, 4),
@@ -242,6 +262,13 @@ class PlanResult:
             **({"opponent_model_detail": dict(self.opponent_model_detail)}
                if self.opponent_model_detail else {}),
         }
+        # 04.6：非有限数**不得进 JSON**（`Infinity`/`NaN` 是非法 JSON，JS `JSON.parse` 会抛）。
+        # 逐路径登记到 `non_finite_sanitized`（只在真的发生时才出现 ⇒ 金标逐字段不变）。
+        bad: List[str] = []
+        safe = _json_safe(out, bad)
+        if bad:
+            safe["non_finite_sanitized"] = bad
+        return safe
 
 
 # ── 局面评估 ────────────────────────────────────────────────────────────

@@ -11,6 +11,14 @@
 // 两条单测都绿而真实链路对不上，是完全可能的（T02 阶段就发生过：
 // 桥发 state、服务要 public，两边单测都绿）。所以这里必须起**真的** Python 服务。
 //
+// ⚠⚠ **本文件的判据是「条件性覆盖」**（2026-10-01 · 04 收口时登记，来自 C-2/C-3 的教训）：
+//   不设 `ROCO_PYTHON` 时 `probePython('python3')` 失败 ⇒ **整个文件 skip**（`pass N · skipped M`）。
+//   **skip 不等于绿**：C-2（`rules_version` 的 `/`）与 C-3（`unverified_overrides[].path`）
+//   两条 P0「真机上工具完全不可调用」的缺陷，在这条 e2e **skip 的每一天里都没被发现** ——
+//   单元测试里那些字段是造的短串，只有真公开面才有那个形状。
+//   ⇒ 复跑本文件必须带 `ROCO_PYTHON=<真解释器>`；看到 skipped 就要当成「这一层**没验**」，
+//     而不是「验过了没事」。
+//
 // 五条线：
 //   ① 公开状态来自引擎本身：用 scripts/roco/gen-plan-state.py 生成，
 //      而不是在测试里手抄 —— 手抄的 fixture 会随引擎改动悄悄过期；
@@ -265,7 +273,20 @@ test('工具 × 真公开面 扫面：validToolArgs 必须全绿（新增 rulese
     rows.push(['evaluate_team', '训练场3只', {team: six.slice(0, 3), state_version: genPub.state_version}]);
     rows.push(['compare_team_change', '换一只', {team_before: six.slice(0, 3),
       team_after: [six[0], six[1], six[3]], state_version: genPub.state_version}]);
-    rows.push(['summarize_battle', '记录', {record: {match_id: 'm1', turns: 3},
+    // ⑦ 复盘记录的 `record` 必须是**真产物**（verifier 04.5 复核：先前的 `{match_id:'m1',turns:3}`
+    //    是手写字面量 ⇒ 弱覆盖）。`summarize_battle` 的契约上限是 4200B（整份真视图 ~10KB 过不了），
+    //    所以用**真视图的投影**：每个字段的值都**读自真引擎产物**，并逐字段钉住（手写字面量必红）。
+    const realView = (await service.battleView({battle_id: begun.battle_id})).view;
+    assert.ok(realView && Array.isArray(realView.self?.pets) && realView.self.pets.length >= 1,
+      'record 的字段必须来自真产物（真公开视图）');
+    const realRecord = {match_id: realView.match_id, turn: realView.turn,
+      result: realView.battle_result ?? realView.result ?? null,
+      self_active: realView.self?.active ?? null,
+      foe_hp: realView.opponent?.field?.hp ?? null};
+    assert.equal(realRecord.match_id, realView.match_id, '身份必须读自真视图（字面量必红）');
+    assert.ok(Number.isInteger(realRecord.turn) && realRecord.turn >= 1, 'turn 必须来自真视图');
+    assert.ok(JSON.stringify(realRecord).length < 4200, '记录必须在契约上限内');
+    rows.push(['summarize_battle', '真视图投影', {record: realRecord,
       state_version: genPub.state_version}]);
   } finally {
     await service.stop();
