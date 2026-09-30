@@ -84,11 +84,20 @@ def resolve_claims(skill: Any, capabilities: Optional[Dict[str, bool]] = None,
         parsed = parse_mod.resolve_per_layer_cost(skill, declared=True, parsed=parsed)
         claimed.append(f"动态能耗修正（每 {int(parsed.per_layer_cost['layer_step'])} 层 "
                        f"{int(parsed.per_layer_cost['delta'])} 能量）")
-    if caps.get("multi_hit") and parsed.hit_count and parsed.hit_count > 1:
+    if caps.get("multi_hit") and parsed.hit_count:
+        # 同上（`classify_skill` 那一处）：N=1 也算认领，动态连击标记照旧留着。
         kept = [row for row in parsed.unparsed if "动态" in str(row) or "连击" not in str(row)]
         if len(kept) != len(parsed.unparsed):
             claimed.append(f"连击×{parsed.hit_count}")
         parsed.unparsed = kept
+    # 2026-09-30（协作链对齐）：**扩展族也必须在这条链里认领** ——
+    # `resolve_claims` 的 docstring 写着它是「唯一实现，`classify_skill` 与判据都调它」，
+    # 而 `test_effect_coverage:534-578` 正是拿**它的**输出去算 `residual_mechanic_spans`，
+    # 并要求「台账判了可模拟的行，残余片段必须为空」。只在 `_apply_capability_resolvers`
+    # 里认领（不进这条链）⇒ 判据那条路看不到认领 ⇒ skill_000252 这类行被误报成
+    # 「可模拟却还有残余片段」。所以扩展族接在九步之后，**同一条链、同一份证据尺子**。
+    parsed, _family_claimed = _apply_capability_resolvers(skill, caps, parsed)
+    claimed.extend(_family_claimed)
     return parsed, claimed
 
 
@@ -160,7 +169,13 @@ def classify_skill(skill: Any, *, foe_energy_loss_declared: bool = False,
         parsed = parse_mod.resolve_per_layer_cost(skill, declared=True, parsed=parsed)
         claimed.append(f"动态能耗修正（每 {int(parsed.per_layer_cost['layer_step'])} 层 "
                        f"{int(parsed.per_layer_cost['delta'])} 能量）")
-    if multi_hit_declared and parsed.hit_count and parsed.hit_count > 1:
+    # 2026-09-30（task-28 改钉）：**N=1 也算已结算** —— 描述里明写「1连击」时，解析层
+    # 真的读出了 `hit_count=1`、引擎也真的按它出兵（一击就是普通伤害路径）⇒ 那条标记
+    # 没有任何"没实现"的成分，留着它等于**假免责**（`test_respond_override:
+    # test_static_one_hit_is_credited_under_v3` 逐字要求 257/514/304 在 v3 下翻正、
+    # 在 legacy 下仍不翻正）。⚠ 只摘「连击」那一条：`动态连击数` 必须留着
+    # （姊妹判据 `test_unreadable_hits_phrase_stays_leftover` 钉的就是它）。
+    if multi_hit_declared and parsed.hit_count:
         # 只摘静态连击那一条；动态连击仍算未实现（见 parse.resolve_hit_count 的同一处判据）。
         kept = [row for row in parsed.unparsed if "动态" in str(row) or "连击" not in str(row)]
         if len(kept) != len(parsed.unparsed):
@@ -1455,8 +1470,10 @@ def settlement_verdict(skill: Any, *, declared: Optional[Dict[str, bool]] = None
     """
     declared = declared_capabilities_of() if declared is None else declared
     parsed = parse_mod.parse_skill(skill)
-    parsed, _head_claimed = resolve_claims(skill, declared, parsed=parsed)
-    parsed, _family_claimed = _apply_capability_resolvers(skill, declared, parsed)
+    # 一条链跑到底：`resolve_claims` 现在**既跑九步既有能力、也跑扩展族**
+    # （见它末尾那段"协作链对齐"注释）—— 所以这里**不再**另外调一次扩展族，
+    # 否则 resolver 会跑两遍、效果重复计入（那会让"已认领"变成假的）。
+    parsed, _claimed = resolve_claims(skill, declared, parsed=parsed)
     desc = str(getattr(skill, "desc", "") or "")
     flags = _flags_of(declared)
     claimed_words = claimed_mechanic_words(parsed, flags)
