@@ -121,13 +121,13 @@
     "03": {
       "title": "对手候选与证据更新",
       "status": "in_progress",
-      "step": "03.1 收尾 + 03.2 候选协议已冻结（2253c2e）；F-03-1（在线段审计实际为空）本轮修 → 再冻 03.3–03.5",
-      "code": "partial（03.2 落地：readOpponentView + buildOpponentCandidates + 合法性/多解/截断 + R2 通用分支）",
-      "isolated": "unverified（本地 25/25 · 相关 32/32；verifier 在 2253c2e 上复验中）",
+      "step": "03.1 + 03.2 + F-03-1（在线段假覆盖 68→2079 行/14-14 入口）+ F-03-2（条件③补断言，两向变异必红）已冻结在 b744739；03.3 进行中",
+      "code": "partial（03.2 候选协议 + F-03 批落地；03.3–03.5/R7 未做）",
+      "isolated": "unverified（本地 26/26 · 相关 32/32；verifier 在 b744739 上复验 F-03 批中）",
       "player": "unverified",
-      "evidence": "reports/roco/product-execution/03/{03.1-recon.md,03.1-wrapup.md,03.2-candidates.md,raw-03.1-*,raw-03.2-*,verify-03.1-baseline.md,verify-03.1-wrapup.md} + logs: docs/roco/RC-604-OPPONENT-BELIEF.md（按实测同步）+ reports/roco/rc604/opponent-belief.json（只由生成器写）",
-      "commit": "2253c2e",
-      "remote_sha": "2253c2e3d75290c20a39ecd7c08bc6fceadb0c6e"
+      "evidence": "reports/roco/product-execution/03/{03.1-recon.md,03.1-wrapup.md,03.2-candidates.md,03.2-F-03-1-online-section.md,03.2-F-03-2-contradiction-guards.md,raw-03.*,verify-03.*} + docs/roco/RC-604-OPPONENT-BELIEF.md + reports/roco/rc604/opponent-belief.json（只由生成器写）",
+      "commit": "b744739",
+      "remote_sha": "b7447396d85617b9efc65d80c9519918b00ace77"
     },
     "04": {
       "title": "有限分支比较与稳健动作排序",
