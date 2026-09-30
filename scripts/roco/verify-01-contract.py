@@ -17,6 +17,7 @@
 """
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import re
@@ -57,14 +58,20 @@ def collect_keys(node, acc=None):
 
 
 def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--no-preview", action="store_true",
+                    help="不请求开局预览（默认请求，因为预览事件只在显式请求时产生）")
+    args = ap.parse_args()
     rs = D.load_ruleset()
     svc = S.RocoService()
     cand = list(rs.candidate_movesets)
     team, foe = cand[0:6], cand[6:12]
-    status, env = svc.battle_new({
-        "ruleset_id": getattr(rs, "ruleset_id", None), "state_version": 0,
-        "team": team, "enemy_team": foe, "seed": 11,
-        "strategy": "greedy_damage", "ruleset_config_id": "mobile_s4_candidate_v3"})
+    body = {"ruleset_id": getattr(rs, "ruleset_id", None), "state_version": 0,
+            "team": team, "enemy_team": foe, "seed": 11,
+            "strategy": "greedy_damage", "ruleset_config_id": "mobile_s4_candidate_v3"}
+    if not args.no_preview:
+        body["opening_preview"] = True
+    status, env = svc.battle_new(body)
     res = (env or {}).get("result") or {}
     pub = res.get("public") or {}
     ui = res.get("ui") or {}
@@ -124,37 +131,58 @@ def main() -> int:
     if isinstance(events, list) and sv is not None and int(sv) != len(events):
         fails.append(f"state_version({sv}) != len(state.events)({len(events)})")
 
-    # C5 event_seq
-    seqs = [e.get("event_seq") for e in events] if isinstance(events, list) else []
-    if not any(s is not None for s in seqs):
-        absent.append("event_seq")
+    # C5 事件序号：**契约里的 `event_seq` 是每个事件行上的 `seq`**（信封行），顶层没有这个键。
+    # ⚠ 本探针第一版把期望写成「事件里要有 `event_seq` 键 / 回执要有顶层 `event_seq`」——
+    #   那是**探针期望写错**（Lead 2026-09-30 裁定，我复核后同意）：
+    #   `state.events` 是引擎内部事实（不带序号），`_sim_envelope` 给**每一行**加 `seq`。
+    rows = res.get("events") or []
+    seqs = [r.get("seq") for r in rows]
+    if not rows:
+        # 本跳没有新增事件（例如 battle_new 只有预览那一条，它落在 state.events 里）
+        print(f"C5 envelope_rows=0（本跳无新增事件行；state.events 有 {len(events or [])} 条）")
+    elif any(s is None for s in seqs):
+        absent.append("envelope row seq")
     else:
-        print(f"C5 event_seq={seqs}")
-        if seqs != list(range(len(seqs))):
-            # 允许「序号是 state_version 链」的等价口径：必须严格递增且首尾与 state_version 自洽
-            fails.append(f"event_seq 不是 0..n-1 连续：{seqs}")
+        n_state = len(events or [])
+        expect = list(range(n_state - len(rows), n_state))
+        print(f"C5 envelope seqs={seqs} expect={expect} state_events={n_state}")
+        if seqs != expect:
+            fails.append(f"事件行 seq 与 state.events 下标不符：{seqs} != {expect}")
 
-    # C6 opening_roster_revealed：回执 + state.events 同源；预览载荷不得含四技能/隐藏个体
+    # C6 opening_roster_revealed：`state.events` 与回执 **`result.opening_reveal`** 同源。
+    # ⚠ 第二版修正（Lead 裁定后我复核同意）：回执那一份在 `result.opening_reveal`，
+    #   **不在** `result.events` —— `battle_new` 一跳没有「新增事件行」，`result.events` 是空数组。
+    receipt_prev = res.get("opening_reveal")
     kinds_receipt = [e.get("kind") for e in (res.get("events") or []) if isinstance(e, dict)]
+    if isinstance(receipt_prev, dict):
+        kinds_receipt = kinds_receipt + [receipt_prev.get("kind")]
     kinds_state = [e.get("kind") for e in (events or []) if isinstance(e, dict)]
-    has_preview = "opening_roster_revealed" in kinds_receipt or "opening_roster_revealed" in kinds_state
-    print(f"C6 kinds receipt={kinds_receipt} state={kinds_state}")
+    has_preview = ("opening_roster_revealed" in kinds_receipt
+                   or "opening_roster_revealed" in kinds_state)
+    print(f"C6 kinds receipt={kinds_receipt} state={kinds_state} "
+          f"receipt_opening_reveal={'present' if isinstance(receipt_prev, dict) else 'absent'}")
     if not has_preview:
-        absent.append("opening_roster_revealed")
+        absent.append("opening_roster_revealed（本次未请求）")
     else:
-        prev_receipt = [e for e in (res.get("events") or [])
-                        if isinstance(e, dict) and e.get("kind") == "opening_roster_revealed"]
         prev_state = [e for e in (events or [])
                       if isinstance(e, dict) and e.get("kind") == "opening_roster_revealed"]
-        if not prev_receipt or not prev_state:
-            fails.append(f"预览事件未两处同源：receipt={len(prev_receipt)} state={len(prev_state)}")
+        row_prev = [e for e in (res.get("events") or [])
+                    if isinstance(e, dict) and e.get("kind") == "opening_roster_revealed"]
+        se = (row_prev or prev_state or [None])[0]
+        re_ = receipt_prev if isinstance(receipt_prev, dict) else (row_prev[0] if row_prev else None)
+        if se is None or re_ is None:
+            fails.append(f"预览事件未两处齐备：state={len(prev_state)} receipt={re_ is not None}")
         else:
-            a = json.dumps(prev_receipt[0].get("detail"), ensure_ascii=False, sort_keys=True)
-            b = json.dumps(prev_state[0].get("detail"), ensure_ascii=False, sort_keys=True)
-            print(f"C6 same_source {a == b}")
-            if a != b:
-                fails.append("预览事件在回执与 state.events 里载荷不同（不是同源）")
-            detail = prev_receipt[0].get("detail")
+            core = lambda d: json.dumps({k: d.get(k) for k in ("kind", "turn", "detail")},  # noqa: E731
+                                        ensure_ascii=False, sort_keys=True)
+            extra = sorted(set(re_) - set(se))
+            print(f"C6 same_source(kind/turn/detail)={core(se) == core(re_)} "
+                  f"receipt_extra_keys={extra}")
+            if core(se) != core(re_):
+                fails.append("预览事件与回执那一份的实质载荷不同（不是同源）")
+            if set(extra) - {"seq", "text"}:
+                fails.append(f"回执预览多出非信封键：{sorted(set(extra) - {'seq', 'text'})}")
+            detail = se.get("detail")
             # 预览只该展示「阵容」：出现任何 skill_* / 隐藏个体字段都算越界
             leaked_skills = sorted(collect_skill_ids(detail))
             forbidden = sorted(collect_keys(detail) & {"seed", "individuals", "talent",
@@ -173,7 +201,7 @@ def main() -> int:
     if not has_preview and bad_bench:
         fails.append(f"未发预览事件却已给后备身份：{bad_bench[:2]}")
 
-    print(f"ABSENT（尚未实现，冻结时对照）{absent}")
+    print(f"ABSENT/NOT-REQUESTED（按设计不出现或本次未请求）{absent}")
     print(f"CONTRACT_FAILS {len(fails)}")
     for f in fails:
         print(f"  FAIL {f}")

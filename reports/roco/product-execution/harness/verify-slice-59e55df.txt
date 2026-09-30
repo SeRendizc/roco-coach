@@ -1,0 +1,109 @@
+
+===== [1] 逐 id 差分：2e30a4f -> 59e55df（期望恰好 3 行：313/581/584）=====
+DUMP /mnt/e/roco-coach/reports/roco/product-execution/harness/readings-59e55df-all.json n=579 scope=all totals={'battle_skills': 579, 'traits': 245, 'entities': 824, 'simulatable_entities': 309, 'simulatable_ratio': 0.375}
+DUMP stamp={"coverage.py": "e3e330090b91cf67f9715dd836b2cb6b3527353c91a598e6e84d151d77e80df3", "service.py": "a2b0742d2a33d867e01a8f5c2919e80fe8f75ed79d7ead99b46b4660eeb88668", "data.py": "d92786ef8c1a9584afbbb7b57640793111d52737be8e97cbc0efee12aa6f9e2a"}
+A /mnt/e/roco-coach/reports/roco/product-execution/harness/readings-2e30a4f-all.json stamp={"coverage.py": "877dbbb51e370d936e90837e25e65322f345a090cf7a45819b0a02dbcca6ddba", "data.py": "d92786ef8c1a9584afbbb7b57640793111d52737be8e97cbc0efee12aa6f9e2a", "service.py": "74f53be59fb01dc19db51dd401dfb25039aea69fc238662991b3484445fcad33"} totals={'battle_skills': 579, 'entities': 824, 'simulatable_entities': 306, 'simulatable_ratio': 0.3714, 'traits': 245}
+B /mnt/e/roco-coach/reports/roco/product-execution/harness/readings-59e55df-all.json stamp={"coverage.py": "e3e330090b91cf67f9715dd836b2cb6b3527353c91a598e6e84d151d77e80df3", "data.py": "d92786ef8c1a9584afbbb7b57640793111d52737be8e97cbc0efee12aa6f9e2a", "service.py": "a2b0742d2a33d867e01a8f5c2919e80fe8f75ed79d7ead99b46b4660eeb88668"} totals={'battle_skills': 579, 'entities': 824, 'simulatable_entities': 309, 'simulatable_ratio': 0.375, 'traits': 245}
+CHANGED_IDS 4 / 579
+  DIFF skill_000313 fields=['tier', 'resolved', 'unsettled']
+      tier: "PARTIAL" -> "SIMULATABLE_UNVERIFIED"
+      resolved: false -> true
+      unsettled: ["迸发"] -> []
+  DIFF skill_000581 fields=['tier', 'resolved', 'unsettled']
+      tier: "PARTIAL" -> "SIMULATABLE_UNVERIFIED"
+      resolved: false -> true
+      unsettled: ["迸发"] -> []
+  DIFF skill_000584 fields=['tier', 'resolved', 'unsettled']
+      tier: "PARTIAL" -> "SIMULATABLE_UNVERIFIED"
+      resolved: false -> true
+      unsettled: ["迸发"] -> []
+  DIFF skill_000587 fields=['unsettled']
+      unsettled: ["获得：迸发：本技能获得所有生效过的迸发", "获得：每获得1种", "每：每获得1种", "迸发"] -> ["获得：迸发：本技能获得所有生效过的迸发", "获得：每获得1种", "每：每获得1种"]
+step1_exit=0（0=有变化；4=无变化）
+
+===== [2] 迸发专项（含运行时控件 + 四条守卫）=====
+    desc=造成魔伤，迸发：本技能获得所有生效过的迸发，每获得1种，本技能能耗+1，威力+10。
+    runtime={"power_used": 65.0, "conditional_reason": "迸发 → 威力 +10.0"}
+skill_000598 双联脉冲 | 非威力型 | power=50 | effects=[] | diag=['使用次数', '迸发'] | tier=PARTIAL | resolved=False | settled=['伤害']
+    desc=造成魔伤，迸发：本技能使用次数+1。
+    runtime={"power_used": 50.0, "conditional_reason": null}
+skill_000607 踏雷 | 非威力型 | power=None | effects=['escape'] | diag=['迸发'] | tier=PARTIAL | resolved=False | settled=['应对']
+    desc=自己回合结束时返场，携带的攻击技能下回合获得1个已触发过的迸发效果，应对防御：改为获得所有触发过的迸发效果。
+    runtime={"power_used": 0, "conditional_reason": null}
+POWER_TYPE 3 -> ['skill_000313', 'skill_000581', 'skill_000584']
+NON_POWER_TYPE 4 -> ['skill_000583', 'skill_000587', 'skill_000598', 'skill_000607']
+TIER_SUMMARY {"skill_000313": "SIMULATABLE_UNVERIFIED", "skill_000581": "SIMULATABLE_UNVERIFIED", "skill_000583": "PARTIAL", "skill_000584": "SIMULATABLE_UNVERIFIED", "skill_000587": "PARTIAL", "skill_000598": "PARTIAL", "skill_000607": "PARTIAL"}
+CTL power_type_bonus_applied ['skill_000313', 'skill_000581', 'skill_000584']
+CTL non_power_type_still_unresolved ['skill_000583', 'skill_000587', 'skill_000598', 'skill_000607']
+CTL non_power_type_wrongly_resolved []（必须为空）
+step2_exit=0
+
+===== [3] 台账逐行 vs 306 钉（控件 + 差分）=====
+STAMP data.py        d92786ef8c1a9584afbbb7b57640793111d52737be8e97cbc0efee12aa6f9e2a /mnt/e/roco-scratch/verify-59e55df/roco/src/roco_env/data.py
+CONTROL identity_zero_diff PASS net=0
+CONTROL detect_down PASS skill_000246 down=['skill_000246']
+CONTROL detect_up PASS skill_000253 up=['skill_000253']
+CONTROL detect_missing_entity PASS skill_000246
+CONTROL detect_extra_entity PASS
+CONTROL detect_band_change PASS skill_000253 band=['skill_000253']
+CONTROL_SUMMARY ALL_PASS
+step3a_exit=0
+STAMP coverage.py    e3e330090b91cf67f9715dd836b2cb6b3527353c91a598e6e84d151d77e80df3 /mnt/e/roco-scratch/verify-59e55df/roco/src/roco_env/coverage.py
+STAMP service.py     a2b0742d2a33d867e01a8f5c2919e80fe8f75ed79d7ead99b46b4660eeb88668 /mnt/e/roco-scratch/verify-59e55df/roco/src/roco_env/service.py
+STAMP data.py        d92786ef8c1a9584afbbb7b57640793111d52737be8e97cbc0efee12aa6f9e2a /mnt/e/roco-scratch/verify-59e55df/roco/src/roco_env/data.py
+REPO /mnt/e/roco-scratch/verify-59e55df
+BASELINE /mnt/e/roco-scratch/verify-59e55df/reports/roco/rc401/effect-coverage.json
+TOTALS baseline_simulatable=306 current_simulatable=309 delta=3 (up-down)
+SUPPORT_LEVELS baseline={"battle_skills": {"FULL_VERIFIED": 0, "SIMULATABLE_UNVERIFIED": 298, "PARTIAL": 279, "KNOWLEDGE_ONLY": 2, "REFUSED": 0}, "traits": {"FULL_VERIFIED": 8, "SIMULATABLE_UNVERIFIED": 0, "PARTIAL": 5, "KNOWLEDGE_ONLY": 228, "REFUSED": 4}}
+SUPPORT_LEVELS current ={"battle_skills": {"FULL_VERIFIED": 0, "SIMULATABLE_UNVERIFIED": 301, "PARTIAL": 277, "KNOWLEDGE_ONLY": 1, "REFUSED": 0}, "traits": {"FULL_VERIFIED": 8, "SIMULATABLE_UNVERIFIED": 0, "PARTIAL": 5, "KNOWLEDGE_ONLY": 228, "REFUSED": 4}}
+CONTROL_RUN skipped
+
+== skills == only_base=0 only_cur=0 翻正=3 翻负=0 同带内变更=1
+   翻正 skill_000313 PARTIAL -> SIMULATABLE_UNVERIFIED | 纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理
+   翻正 skill_000581 PARTIAL -> SIMULATABLE_UNVERIFIED | 纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理
+   翻正 skill_000762 PARTIAL -> SIMULATABLE_UNVERIFIED | 描述被完整读出（1 条效果），且没有未认领片段
+   同带内变更 skill_000684 KNOWLEDGE_ONLY -> PARTIAL | 读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：应对：选择：本次技能威力+20或应对状态时本次技能威力+140
+
+== traits == only_base=0 only_cur=0 翻正=0 翻负=0 同带内变更=0
+
+WROTE /mnt/e/roco-coach/reports/roco/product-execution/harness/ledger-59e55df.json
+step3b_exit=0
+
+===== [4] 并集 + totals =====
+STAMP data.py d92786ef8c1a9584afbbb7b57640793111d52737be8e97cbc0efee12aa6f9e2a /mnt/e/roco-scratch/verify-59e55df/roco/src/roco_env/data.py
+census_ids=427 union_mismatches=0
+totals.simulatable_entities=309 totals.keys=['battle_skills', 'entities', 'simulatable_entities', 'simulatable_ratio', 'traits']
+step4_exit=0
+
+===== [5] 关闸反证（含控件）=====
+BASELINE_MISMATCHES 0
+GATES_OFF_MISMATCHES 5
+CONTROL_FLIPS 23 (关闸后 resolved 翻正的技能数；0 = 补丁空转 ⇒ 本次测量作废)
+DIRECTIONS ['判据 true / 档位 PARTIAL']
+  MM skill_000412 | 判据 true / 档位 PARTIAL
+  MM skill_000510 | 判据 true / 档位 PARTIAL
+  MM skill_000539 | 判据 true / 档位 PARTIAL
+  MM skill_000671 | 判据 true / 档位 PARTIAL
+  MM skill_000694 | 判据 true / 档位 PARTIAL
+step5_exit=0
+
+===== [6] 隔离验收 =====
+[acceptance] skill_detail       passed   http=200  ok=True tier=SIMULATABLE_UNVERIFIED
+[acceptance] PASS  exit_code=0  {"steps_total": 6, "steps_passed": 6, "steps_failed": 0, "steps_skipped": 0, "failed_steps": []}
+[acceptance] last-run -> /mnt/e/roco-scratch/verify-59e55df/reports/roco/product-execution/harness/last-run.json
+step6_exit=0
+
+===== [7] 树 hash =====
+ROOT roco/src 4b5f6137e0f6dc76dec183cda6a58d0b2a2b87c9b0a24140e8f2c77be18fd5bc files=19 bytes=1190986
+ROOT roco/tests 5ea7472f6da29cef7af8292c4504c778bab191f977ef6e1505b933ca1800288c files=83 bytes=2111210
+TREE 644d7b4a2ee6759624cd5b019b481a42a8aa0cce3cfd4f5f4dae4d0c69afa312
+
+===== [8] 全量（约 200s）=====
+step8_exit=1 elapsed=200s
+17:Ran 872 tests in 164.470s
+19:FAILED (failures=1, skipped=2)
+--- FAIL/ERROR ---
+8:FAIL: test_counter_proof_disabling_the_shared_gates_brings_them_back (test_tier_verdict_agreement.TierAndVerdictAgreeTest)
+--- 断言原文 ---
+14:AssertionError: 5 not greater than or equal to 8 : 关掉两道共用闸之后必须重新出现打架（否则这条判据是空的）
+===== DONE 2026-09-30T18:56:51+08:00 =====

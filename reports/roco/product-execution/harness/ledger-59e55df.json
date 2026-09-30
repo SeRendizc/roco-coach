@@ -1,0 +1,55 @@
+{
+  "baseline": "/mnt/e/roco-scratch/verify-59e55df/reports/roco/rc401/effect-coverage.json",
+  "diff": {
+    "_totals": {
+      "baseline": 306,
+      "current": 309
+    },
+    "skills": {
+      "band_change": [
+        [
+          "skill_000684",
+          "KNOWLEDGE_ONLY",
+          "PARTIAL",
+          "读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：应对：选择：本次技能威力+20或应对状态时本次技能威力+140"
+        ]
+      ],
+      "down": [],
+      "only_base": [],
+      "only_cur": [],
+      "up": [
+        [
+          "skill_000313",
+          "PARTIAL",
+          "SIMULATABLE_UNVERIFIED",
+          "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理"
+        ],
+        [
+          "skill_000581",
+          "PARTIAL",
+          "SIMULATABLE_UNVERIFIED",
+          "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理"
+        ],
+        [
+          "skill_000762",
+          "PARTIAL",
+          "SIMULATABLE_UNVERIFIED",
+          "描述被完整读出（1 条效果），且没有未认领片段"
+        ]
+      ]
+    },
+    "traits": {
+      "band_change": [],
+      "down": [],
+      "only_base": [],
+      "only_cur": [],
+      "up": []
+    }
+  },
+  "repo": "/mnt/e/roco-scratch/verify-59e55df",
+  "stamp": {
+    "coverage.py": "e3e330090b91cf67f9715dd836b2cb6b3527353c91a598e6e84d151d77e80df3",
+    "data.py": "d92786ef8c1a9584afbbb7b57640793111d52737be8e97cbc0efee12aa6f9e2a",
+    "service.py": "a2b0742d2a33d867e01a8f5c2919e80fe8f75ed79d7ead99b46b4660eeb88668"
+  }
+}

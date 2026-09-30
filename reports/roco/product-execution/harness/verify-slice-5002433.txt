@@ -1,0 +1,67 @@
+===== B) [1] 定向 5 模块 =====
+B1_exit=0
+2:Ran 122 tests in 15.685s
+4:OK
+
+===== B) [2] 01 契约探针（浅 + 深）=====
+CONTROL_SCANNER ['skill_900001']
+HTTP 200 ok=True
+C1 match_id {"result": "m-5454100e863ec5f4", "public": "m-5454100e863ec5f4", "ui": "m-5454100e863ec5f4"}
+C2 decision_id='m-5454100e863ec5f4:v0' state_version=0 derived='m-5454100e863ec5f4':v0
+C3 rules_version='roco-world-s4-2026-09-10/mobile_s4_candidate_v3' (ruleset_id='roco-world-s4-2026-09-10')
+C4 state_version=0 len(state.events)=0
+C6 kinds receipt=[] state=[]
+C7 preview_emitted=False bench_identity_free=True bench_keys=['fainted', 'slot']
+ABSENT（尚未实现，冻结时对照）['event_seq', 'opening_roster_revealed']
+CONTRACT_FAILS 0
+B2a_exit=0
+D1 match_id same_team_same_rules_diff_seed: 'm-5454100e863ec5f4' vs 'm-5454100e863ec5f4' -> True
+D1 own_team_change: 'm-5454100e863ec5f4' -> 'm-c3c03c82fd893caf' differs=True
+D1 config_change:   'm-5454100e863ec5f4' -> 'm-f3a4c9affd66ef3d' differs=True
+D2 decision_id='m-5454100e863ec5f4:v1' match_id='m-5454100e863ec5f4' state_version=1
+D3 state_version=1 len(state.events)=1 state_event_seqs=[None] envelope_rows=0
+D2b advanced status=200 decision_id='m-5454100e863ec5f4:v4' state_version=4 len(state.events)=4 envelope_seqs=[1, 2, 3]
+D4 preview_in_state=1 receipt_opening_reveal=present
+D4 same_source(kind/turn/detail)=True receipt_extra_keys=['seq', 'text']
+D4 roster_rows=6 row_keys=['name', 'pet_id', 'slot'] forbidden_in_blob=[]
+D5 no_preview events=[] state_version=0 opening_reveal_key=False
+D5 hidden_truth_change public_same=True ui_same=True obs_same=True (opponent loadout swapped=True)
+D6 roster_B=['pet_000474', 'pet_000451', 'pet_000124', 'pet_000608', 'pet_000601', 'pet_000611'] roster_C=['pet_000001', 'pet_000002', 'pet_000003', 'pet_000004', 'pet_000005', 'pet_000006'] differ=True
+DEEP_FAILS 0
+B2b_exit=0
+
+===== B) [3] 公开面差分控件 =====
+A_total_leaked_ids 0
+B_keys_aligned_literally False identity_free True obs_keys=['active', 'fainted', 'field', 'slot']
+C_invariance {"seed_change_public_identical": true, "bench_hp_energy_change_identical": [true, true, true], "surfaces": ["public_planner_state", "ui_public_view", "observation_for"]}
+D_receipt {"http_status": 200, "ok": true, "has_match_id": true, "has_event_seq": false, "has_decision_id": true, "has_rules_version": true, "has_opening_roster_revealed": false, "state_events_n": 0, "state_version": 0, "event_kinds": [], "top_level_keys": ["coverage", "error", "error_type", "evidence_ids", "latency_ms", "ok", "protocol_version", "result", "ruleset_id", "service", "service_version", "snapshot_fingerprint", "state_version", "unsupported"]}
+FAILS 0
+WROTE /mnt/e/roco-coach/reports/roco/product-execution/harness/verify-01-surface-5002433.json
+B3_exit=0
+
+===== B) [4] 并集 + totals =====
+STAMP data.py d92786ef8c1a9584afbbb7b57640793111d52737be8e97cbc0efee12aa6f9e2a /mnt/e/roco-scratch/verify-5002433/roco/src/roco_env/data.py
+census_ids=427 union_mismatches=0
+totals.simulatable_entities=306 totals.keys=['battle_skills', 'entities', 'simulatable_entities', 'simulatable_ratio', 'traits']
+B4_exit=0
+
+===== B) [5] 隔离验收 =====
+[acceptance] skill_detail       passed   http=200  ok=True tier=SIMULATABLE_UNVERIFIED
+[acceptance] PASS  exit_code=0  {"steps_total": 6, "steps_passed": 6, "steps_failed": 0, "steps_skipped": 0, "failed_steps": []}
+[acceptance] last-run -> /mnt/e/roco-scratch/verify-5002433/reports/roco/product-execution/harness/last-run.json
+B5_exit=0
+
+===== B) [6] 树 hash =====
+ROOT roco/src 6dc07a8312ae4ca0dbe29b96f396ccb60ccd1d0febfebe67f84b30e736ffc8ad files=19 bytes=1187283
+ROOT roco/tests 7e9859d05897d56872cb017d4a5f6fc465172f3f38c8d553abafd9cad45a3a16 files=83 bytes=2109297
+TREE b62fac0b59a1bfebb2580cf7eeb33b4701177af6577d2bc299a7c77e0ca8746a
+
+===== B) [7] 全量（约 200s）=====
+B7_exit=1 elapsed=197s
+17:Ran 872 tests in 162.004s
+19:FAILED (failures=1, skipped=2)
+--- FAIL/ERROR ---
+8:FAIL: test_counter_proof_disabling_the_shared_gates_brings_them_back (test_tier_verdict_agreement.TierAndVerdictAgreeTest)
+--- 断言原文 ---
+14:AssertionError: 5 not greater than or equal to 8 : 关掉两道共用闸之后必须重新出现打架（否则这条判据是空的）
+===== DONE 2026-09-30T18:49:14+08:00 =====
