@@ -17,8 +17,10 @@ import {
   checkSourceMarkers, checkDoubleSource, checkVersion, checkSampleReview, checkAgeAndMode, checkDeletionProbe,
 } from '../scripts/roco/verify-rules-corpus.mjs';
 import {loadCorpus} from '../src/coach/rag-index.js';
+import {fileURLToPath} from 'node:url';
 
-const ROOT = new URL('..', import.meta.url).pathname;
+// 2026-09-30（task-24）：`.pathname` 在 Windows 上给出 `/E:/…`（带前导斜杠、没有盘符）⇒ 字符串拼接出 `E:\E:\…`；改用 fileURLToPath。旧写法留档（改钉不删）：new URL('..', import.meta.url).pathname
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const readJson = (rel) => JSON.parse(readFileSync(`${ROOT}${rel}`, 'utf8'));
 const clone = (value) => JSON.parse(JSON.stringify(value));
 

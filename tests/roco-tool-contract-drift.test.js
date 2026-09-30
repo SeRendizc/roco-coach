@@ -14,8 +14,10 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 
 import {validToolArgs} from '../src/coach/toolbox.js';
+import {fileURLToPath} from 'node:url';
 
-const ROOT = new URL('..', import.meta.url).pathname;
+// 2026-09-30（task-24）：`.pathname` 在 Windows 上给出 `/E:/…`（带前导斜杠、没有盘符）⇒ 字符串拼接出 `E:\E:\…`；改用 fileURLToPath。旧写法留档（改钉不删）：new URL('..', import.meta.url).pathname
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const TOOLBOX_SRC = readFileSync(`${ROOT}src/coach/toolbox.js`, 'utf8');
 const SERVICE_SRC = readFileSync(`${ROOT}roco/src/roco_env/service.py`, 'utf8');
 

@@ -14,8 +14,10 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 
 import {checkGroundedAnswer} from '../src/coach/runtime.js';
+import {fileURLToPath} from 'node:url';
 
-const ROOT = new URL('..', import.meta.url).pathname;
+// 2026-09-30（task-24）：`.pathname` 在 Windows 上给出 `/E:/…`（带前导斜杠、没有盘符）⇒ 字符串拼接出 `E:\E:\…`；改用 fileURLToPath。旧写法留档（改钉不删）：new URL('..', import.meta.url).pathname
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const RUNTIME_SRC = readFileSync(`${ROOT}src/coach/runtime.js`, 'utf8');
 
 /** 一份"本轮真的发出去过"的引擎回执（形状照轨迹里的 `trace[].receipt`）。 */
