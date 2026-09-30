@@ -423,8 +423,9 @@
       "what": "**Windows 侧 Node 判据并非全绿**：9 个判据文件用 `dirname(new URL(import.meta.url).pathname)` 取路径，在 Windows 上得到 `/E:/…` ⇒ `join` 出 `E:\\E:\\…` ⇒ `ENOENT` 而红（POSIX 侧正常，所以长期没被发现）",
       "evidence": "plan02-front 逐文件真跑分类（`reports/roco/product-execution/07/07.1-recon.md` §1.3）：**已修** `tests/roco-memory-three-classes.test.js`（改前 Windows `exit 1 · 17/14 pass/3 fail` ⇒ 改后 `exit 0 · 17/17`；WSL 侧零回归；sha16 `625bcf3e5b031953`→`cd45e9cd74edb44f`）。**待修 8 个**（task-24）：`roco-planner-attribution:20` · `roco-citation-grounding:18` · `roco-agent-metrics:23` · `roco-agent-stops:18` · `roco-corpus-verification:21` · `roco-reward-hacking-invariant:26` · `roco-single-agent-invariant:20` · `roco-tool-contract-drift:18`。**Lead 自己抽验两条确认**：`tests/roco-planner-attribution.test.js` ⇒ `ENOENT … open 'E:\\E:\\roco-coach\\src\\coach\\runtime.js'`；`tests/roco-single-agent-invariant.test.js` ⇒ `ENOENT … scandir 'E:\\E:\\roco-coach\\src\\coach'`。另有 2 个文件写法相同但**红因不同**（`roco-pvp-fairness:23` 缺 `docs/roco/PVP-FAIRNESS-RULES.md`；`roco-individuals-context:15` 断言「真数据集也要补得出天分」未满足）—— 单列待裁决",
       "owner": "plan02-front（修）· lead（抽验 + 登记）",
-      "status": "fix_in_flight",
-      "rule": "**判据文件取自身路径一律用 `fileURLToPath(import.meta.url)`**（不许 `.pathname`）；「套件在 Windows 上能跑」是前提条件（用户实际环境是 Windows，而跨机复验跑 POSIX ⇒ 两边都必须绿）；任何「套件全绿」的声称必须**声明跑在哪个 OS**"
+      "status": "closed",
+      "rule": "**判据文件取自身路径一律用 `fileURLToPath(import.meta.url)`**（不许 `.pathname`）；「套件在 Windows 上能跑」是前提条件（用户实际环境是 Windows，而跨机复验跑 POSIX ⇒ 两边都必须绿）；任何「套件全绿」的声称必须**声明跑在哪个 OS**",
+      "closed_by": "**11/11 清光**（task-20 修 1 + task-24 修 8 + task-26 修 2）：改前 Windows 这 11 个文件**全红**；改后合并一次 `node --test` ⇒ **Windows 68/67/1 与 WSL 68/67/1 逐字一致**，唯一红是**产物过期**的 `roco-corpus-verification`（留 04 收口重算）。口径澄清：task-20 报的「17」是两个文件合跑（`roco-teaching-loop` 7 + `roco-memory-three-classes` 10），单看后者是 10 条"
     },
     {
       "id": "O-23",
@@ -441,6 +442,30 @@
       "owner": "harness-verifier（复验）",
       "status": "closed",
       "rule": "门槛例外的**依据**必须能被独立复现（本例已复现 ⇒ 例外成立）；登记时须写明「验的是 HEAD 还是工作树」以及工作树是否为在飞未提交态"
+    },
+    {
+      "id": "O-25",
+      "what": "**9（+1）个判据文件「绿着，但永远不会被执行」** —— 不在任何 npm script、也不在登记表里 ⇒ 单独跑绿却从不进流水线（套件级假绿）",
+      "evidence": "plan05-recon（task-23 §4）与 plan06-recon **各自独立发现**：`tests/evals/structure-contract.test.js:900` 在 `216195c` 上**就已经红**，孤儿 9 个：`roco-advice-snapshot-consistency` · `roco-battle-advice-legality` · `roco-companion-contextual` · `roco-experience-petof` · `roco-needs-replacement-flow` · `roco-observation-contract` · `roco-review-body-fallback` · `roco-skill-support-fact` · `roco-teacher-review-text`；其中**前两个正是 05.2 要依赖的判据**（数字同源 / 对照收益 / 状态转移）。第 10 个是 task-25 新建的 `roco-plan-projection.test.js`。修复 = task-27",
+      "owner": "plan05-recon（task-27 修复）",
+      "status": "fix_in_flight",
+      "rule": "**新判据必须同时登记进执行入口**（否则「写了判据」等于没写）；任何「套件/判据全绿」的声称必须**说明是哪个入口跑的**；定期用元判据扫孤儿"
+    },
+    {
+      "id": "O-26",
+      "what": "06 的**必做反例（固定当时信息、只改以后发生的事 ⇒ 复盘结论不变）今天不成立**：复盘结论被锚点之后的事件污染；另发现 `decision_id` 两口径在带预览局 off-by-one、补位（replace）不写 joint history 行",
+      "evidence": "plan06-recon 真局实测（`reports/roco/product-execution/06/06.1-recon.md` + 探针/raw）：整局判「第 5 回合打属性抵抗」为失误、理由引用第 6 回合；**只改 turn 6** ⇒ 理由句换成「第 8 与第 9 回合…（共 3 次）」；**截到锚点之前** ⇒ 复盘**整个变 null**。预览局 `state_version=1`/视图 `:v1`，而由 `history[0]` 反推得 `:v0`（预览事件进了 `history[0].events`）；`step_replace` 只 `_bump`、不写 joint 行 ⇒ 观察序列在补位处断裂。**同时登记正面证据**（四类终局判定相同、不硬造替代、缺口声明齐备）⇒ 06 应做「寻址 + 判定隔离」，不是重写文案",
+      "owner": "plan06-recon（发现）· lead（裁决待发）",
+      "status": "registered",
+      "rule": "复盘/评价类功能必须**先证明「不换后见之明」**（锚点之后的输入变化不得改变锚点处的判定与理由），否则不许上线；`decision_id` 推导口径必须唯一"
+    },
+    {
+      "id": "O-27",
+      "what": "**11 端到端勘察实测：不带 `state_version` 的 `advance {auto:true}` 返回 200 且真的推进** ⇒ 「重复结算」敞口**现场存在**（D-23 Q4 要修的就是它）",
+      "evidence": "plan00-closer 在 `git archive 45fa2270` 隔离副本 + 独立端口 8899/8898（按 PID 停）实测：`advance ⇒ 200 turn 1→2 sv 0→5`；**不带 `state_version` ⇒ 200 且 sv 5→10 turn 2→3**；代码 `src/server/roco-service.js:2451-2452` 自认「不带就不查」。同批读出链路主干在隔离实例上真的走通（6 页 200 · 练习局 `legal=9` · **六宠局 `battle/new {mode:'pvp-standard-six-pet',team:6,opening_preview:true} ⇒ 200 sv=1 legal=12`** + `plan`/`advance` 全 200）；另 P2 刷新即丢局 · P4 `/api/coach` 无服务端新鲜度硬闸 · P5 `state_version` 是**事件计数**（一手 5 跳，界面易误读成回合）· P6 `roco.js:353` 指向不存在的判据文件 · P8 物种级/实例级 id 两套并存",
+      "owner": "plan00-closer（发现）· lead（D-23 Q4 已批 fail closed）",
+      "status": "registered",
+      "rule": "**「试用/交付」前必须消除可重复改状态的敞口**（缺新鲜度校验 ⇒ fail closed）；界面展示 `state_version` 必须注明它是**事件计数**而非回合数"
     }
   ],
   "handoff": {
