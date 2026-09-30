@@ -12,7 +12,16 @@
  * 纪律：
  *   · **只读**：不写任何文件、不绑端口、不启动服务；
  *   · **确定性**：对局由固定种子（1/3/17）真跑，没有随机、没有时间依赖；
- *   · **可移植**：路径全部相对本文件解析，不写死机器路径。
+ *   · **可移植**：路径全部相对本文件解析，不写死机器路径；
+ *   · **只收「玩家可见字段」，整对象 walk 是错的**（2026-10-01 实测两个坑）：
+ *       ① `makeQuiz`/`practiceQuestion` 的 `id`/`sourceId`/`variantOf` 里带 `pet_000118` 这类**内部 id**
+ *          —— 整对象 walk 会把它当文案收进来，制造**假** `internal-id` 命中（不是产品缺陷）；
+ *       ② `coachContext` 这种上下文字典带时间戳（`…16.100Z`），会被 `precision` 判据误报。
+ *       所以每个渲染器都**逐字段点名**（题干/讲解/依据/选项/正文），不写通用 walk。
+ *   · **0 覆盖 = 失败**（文件末尾的 `CORPUS_PRODUCERS` + `auditProducerCoverage`）：
+ *       曾经 `practiceQuestion` 渲染器 `return` 的是**对象**，而 `add()` 只收字符串/字符串数组
+ *       ⇒ 它在 `byApi` 里**根本不存在**，而没有任何判据会红（「假覆盖」）。现在登记表 + 审计
+ *       把「静默 0 条」变成**器材自己报错**，不靠人记得检查。
  */
 import { pathToFileURL } from 'node:url';
 
@@ -50,10 +59,82 @@ function playSteps(engine, seed, steps) {
 const SEEDS = [1, 3, 17];
 
 /**
- * 渲染语料。
- * @returns {Promise<{entries: {file:string, api:string, text:string}[], failures:{api:string,err:string}[]}>}
+ * **已登记的生产者**：每一个都必须至少贡献 `min` 条字符串（`prefix:true` 时按「api 前缀」计，
+ * 例：`makeQuiz(v0..v5)` 记在 `makeQuiz` 名下）。
+ *
+ * 为什么要有这张表（2026-10-01，Lead 裁决）：`practiceQuestion` 渲染器曾经 `return` 对象、
+ * 被 `add()` **静默丢掉** ⇒ 这条关键生产者在门禁里根本不存在，而且**没有任何判据会红**。
+ * 光补数据治不了根：**要让 0 覆盖本身变成失败**。所以 `collectCorpus()` 结束时跑审计，
+ * 有登记却没贡献 ⇒ 直接抛错（`strict:true`，默认）；CLI 也据此 exit 1。
  */
-export async function collectCorpus() {
+export const CORPUS_PRODUCERS = Object.freeze([
+  { api: 'reviewMatch', min: 1 },
+  { api: 'matchStatsLine', min: 1 },
+  { api: 'compareTurnAlternatives', min: 1 },
+  { api: 'practiceQuestion', min: 1 },
+  { api: 'makeQuiz', min: 6, prefix: true },
+  { api: 'attentionText', min: 1 },
+  { api: 'hoverLabel', min: 1 },
+  { api: 'skillLesson', min: 4, prefix: true },
+  { api: 'lessonFor', min: 1 },
+  { api: 'chatReply', min: 1 },
+  { api: 'memoryItems', min: 1 },
+  { api: 'memorySummary', min: 1 },
+  { api: 'transferAssessment', min: 1 },
+  { api: 'coachSelfAudit', min: 1 },
+  { api: 'adviceComparisonReport', min: 1 },
+  { api: 'proactiveText', min: 1, prefix: true },
+  { api: 'indistinguishableAdviceText', min: 1 },
+  { api: 'rulesSections', min: 1 },
+]);
+
+/**
+ * **允许 0 条的渲染调用**：它们要么是别条渲染器的**输入**（返回对象），要么设计上返回 null，
+ * 要么**取决于局面**（真为 null 不是被丢）。每一条都要写清理由 —— 没写理由的调用会在审计里
+ * 落进 `unregistered`（同样报错），这样「新增一个渲染器但忘了登记」也躲不过去。
+ */
+export const OPTIONAL_PRODUCERS = Object.freeze([
+  { api: 'summarizeMatch', why: '返回对象，是 reviewMatch/matchStatsLine 的输入（不直接给玩家）' },
+  { api: 'observe(mid)', why: '返回对象，是 lessonFor/attentionText 的输入' },
+  { api: 'rememberBattle', why: '设计上返回 null（只为构造 memory）' },
+  { api: 'decisiveOpportunity(mid)', why: '取决于局面：这一组夹具确实没有收尾机会（null = 真的没有，不是被丢）' },
+  { api: 'companionFacts', why: '返回对象，是 proactiveText/chatReply 的输入' },
+  { api: 'coachContext', why: '返回对象；整对象含时间戳与内部字段（实测 `…16.100Z` 会被 precision 误报），只作输入' },
+  { api: 'companionSignals', why: '返回对象，是 proactiveText 的输入' },
+]);
+
+/** 一条调用的计数：`prefix:true` 按前缀汇总（`makeQuiz(v0)` → `makeQuiz`）。 */
+export function producerCounts(entries) {
+  const counts = {};
+  for (const entry of entries) {
+    const api = String(entry?.api ?? '');
+    const base = api.includes('(') ? api.slice(0, api.indexOf('(')) : api;
+    counts[api] = (counts[api] ?? 0) + 1;
+    if (base !== api) counts[base] = (counts[base] ?? 0) + 1;
+  }
+  return counts;
+}
+
+/**
+ * 覆盖审计：**登记的生产者必须够数；出现过的调用必须登记过**（登记表或可选表）。
+ * @returns {{ok:boolean, counts:object, missing:{api:string,min:number,got:number}[], unregistered:string[]}}
+ */
+export function auditProducerCoverage({ entries = [], attempted = [] } = {}) {
+  const counts = producerCounts(entries);
+  const missing = CORPUS_PRODUCERS
+    .map((row) => ({ api: row.api, min: row.min, got: counts[row.api] ?? 0 }))
+    .filter((row) => row.got < row.min);
+  const known = new Set([...CORPUS_PRODUCERS.map((r) => r.api), ...OPTIONAL_PRODUCERS.map((r) => r.api)]);
+  const unregistered = [...new Set(attempted)].filter((api) => !known.has(api) && !known.has(api.replace(/\(.*$/, '')));
+  return { ok: missing.length === 0 && unregistered.length === 0, counts, missing, unregistered };
+}
+
+/**
+ * 渲染语料。
+ * @param {{strict?:boolean}} [options] `strict:true`（默认）时，覆盖审计不过就抛错 —— 器材自己红。
+ * @returns {Promise<{entries:{file:string,api:string,text:string}[], failures:{api:string,err:string}[], coverage:object}>}
+ */
+export async function collectCorpus({ strict = true } = {}) {
   const engine = await imp('src/game/engine.js');
   const teacher = await imp('src/coach/teacher.js');
   const experience = await imp('src/coach/experience.js');
@@ -66,11 +147,13 @@ export async function collectCorpus() {
 
   const entries = [];
   const failures = [];
+  const attempted = [];
   const add = (file, api, text) => {
     if (typeof text === 'string' && text.trim()) entries.push({ file, api, text });
     else if (Array.isArray(text)) text.forEach((t) => add(file, api, t));
   };
   const tryRender = (api, file, fn) => {
+    attempted.push(api);
     try { const v = fn(); add(file, api, v); return v; } catch (e) { failures.push({ api, err: String(e?.message || e) }); return null; }
   };
 
@@ -86,10 +169,12 @@ export async function collectCorpus() {
       return [packet.brief, packet.text, ...(packet.evidence || []), ...(packet.choices || [])];
     });
     tryRender('matchStatsLine', 'teacher.js:237', () => teacher.matchStatsLine(m));
-    tryRender('compareTurnAlternatives', 'teacher.js:473', () => {
+    tryRender('compareTurnAlternatives', 'teacher.js:491', () => {
       const turns = (g.history || []).filter((x) => x?.type === 'turn');
       const h = turns[1] || turns[0];
-      return h ? teacher.compareTurnAlternatives(h) : null;
+      const r = h ? teacher.compareTurnAlternatives(h) : null;
+      // 玩家可见字段：每个回合的差值句 / 「怎么读」 / 单回合完整句（`rows`/`gap` 是内部估值，不收）
+      return r ? [r.line, r.rule, r.text].filter((x) => typeof x === 'string') : null;
     });
     tryRender('practiceQuestion', 'teacher.js:434', () => {
       const d = teacher.keyDecisionOf?.(m) ?? m.keyDecision;
@@ -119,7 +204,11 @@ export async function collectCorpus() {
   midGames.forEach((g) => {
     const hint = tryRender('observe(mid)', 'experience.js:12', () => experience.observe(g));
     if (hint) {
-      tryRender('lessonFor', 'experience.js:50', () => experience.lessonFor(hint));
+      tryRender('lessonFor', 'experience.js:50', () => {
+        const L = experience.lessonFor(hint);
+        // 玩家可见字段：题干 / 两个选项 / 讲解（`id` 是内部标签，不收）
+        return L ? [L.question, L.yes, L.no, L.explanation].filter((x) => typeof x === 'string') : null;
+      });
       const act = engine.legalActions(g).find((a) => a.kind === 'skill');
       if (act) tryRender('attentionText', 'experience.js:113', () => experience.attentionText(g, act));
     }
@@ -142,7 +231,11 @@ export async function collectCorpus() {
     const t = memoryMod.transferAssessment(mem, Object.keys(mem.reflections || {})[0] || '先手');
     return t ? [t.label, t.status, t.reason].filter((x) => typeof x === 'string') : null;
   });
-  tryRender('coachSelfAudit', 'memory.js', () => memoryMod.coachSelfAudit?.(mem));
+  tryRender('coachSelfAudit', 'memory.js:236', () => {
+    const row = memoryMod.coachSelfAudit?.(mem);
+    // 玩家在记忆面板里读到的是这一句「接下来怎么办」（其余是计数与证据 id，不收）
+    return row ? [row.action].filter((x) => typeof x === 'string') : null;
+  });
 
   // 陪练（裸插值最多的那一族）
   games.forEach((g) => {
@@ -156,7 +249,11 @@ export async function collectCorpus() {
       });
     }
     if (facts) {
-      tryRender('chatReply', 'companion.js', () => companionMod.chatReply({ message: '你好', memory: mem, facts, intent: 'chat' }));
+      tryRender('chatReply', 'companion.js:1886', () => {
+        const r = companionMod.chatReply({ message: '你好', memory: mem, facts, intent: 'chat' });
+        // 玩家读到的就是 `text`（`parts`/`evidence` 是内部拼装件，不收）
+        return r ? [r.text].filter((x) => typeof x === 'string') : null;
+      });
     }
   });
 
@@ -171,9 +268,12 @@ export async function collectCorpus() {
       { kind: 'skill', label: '防御', skill: { name: '防御', energy: 0, power: 0, element: '普通系' } },
       { kind: 'switch', label: '换上第2位' }],
   };
-  tryRender('adviceComparisonReport', 'runtime.js', () => {
+  tryRender('adviceComparisonReport', 'runtime.js:2154', () => {
     const r = runtimeMod.adviceComparisonReport(BATTLE);
-    return typeof r === 'string' ? r : [r?.text, r?.headline, ...(r?.lines || [])].filter(Boolean);
+    // 玩家可见字段：`detail`（「有对照 / 只给了首选，没有与任何替代对照」那一句）。
+    // ⚠ 它返回的是**对象**（`text`/`headline`/`lines` 都不存在）—— 旧渲染器正是因此静默 0 条。
+    if (typeof r === 'string') return r;
+    return r ? [r.detail].filter((x) => typeof x === 'string') : null;
   });
   tryRender('indistinguishableAdviceText', 'runtime.js', () => runtimeMod.indistinguishableAdviceText?.(BATTLE));
 
@@ -185,15 +285,40 @@ export async function collectCorpus() {
     return sections.flatMap((s) => (Array.isArray(s?.lines) ? s.lines : [])).filter((x) => typeof x === 'string');
   });
 
-  return { entries, failures };
+  const coverage = auditProducerCoverage({ entries, attempted });
+  if (!coverage.ok && strict) {
+    const missing = coverage.missing.map((r) => `${r.api}(登记≥${r.min}，实际 ${r.got})`).join(' · ') || '（无）';
+    const unknown = coverage.unregistered.join(' · ') || '（无）';
+    throw new Error(
+      `语料覆盖审计不过：登记却没贡献够的生产者=${missing}；出现过但没登记的渲染调用=${unknown}。`
+      + '（「静默 0 条」= 这条生产者在门禁里不存在，而没有任何判据会红 —— 所以这里直接失败；'
+      + '确属可选/纯输入的调用请登记进 OPTIONAL_PRODUCERS 并写明理由。）');
+  }
+  return { entries, failures, coverage };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const { entries, failures } = await collectCorpus();
+  let result = null;
+  let auditFailed = false;
+  try {
+    result = await collectCorpus();
+  } catch (error) {
+    // 覆盖审计不过 ⇒ 器材自己红：把读数打全，再以非零码退出
+    auditFailed = true;
+    result = await collectCorpus({ strict: false });
+    console.log(String(error?.message || error));
+  }
+  const { entries, failures, coverage } = result;
   const byApi = {};
   for (const e of entries) byApi[e.api] = (byApi[e.api] ?? 0) + 1;
   const producers = new Set(entries.map((e) => e.file.split(':')[0]));
   console.log(`语料条目=${entries.length} | 生产者文件=${producers.size} | 失败渲染器=${failures.length}`);
   console.log('按 API：' + Object.entries(byApi).map(([k, v]) => `${k}×${v}`).join(' · '));
   if (failures.length) console.log('失败渲染器：' + failures.map((f) => `${f.api}(${f.err})`).join(' | '));
+  console.log(`覆盖审计：${coverage.ok ? 'ok' : '**不过**'}（登记生产者 ${CORPUS_PRODUCERS.length} 个 · 可选 ${OPTIONAL_PRODUCERS.length} 个）`);
+  if (!coverage.ok) {
+    for (const row of coverage.missing) console.log(`  ✖ 登记却没贡献够：${row.api}（min ${row.min}，实际 ${row.got}）`);
+    for (const api of coverage.unregistered) console.log(`  ✖ 出现过但没登记：${api}`);
+  }
+  process.exitCode = auditFailed || !coverage.ok ? 1 : 0;
 }
