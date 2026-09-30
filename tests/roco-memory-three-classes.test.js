@@ -17,7 +17,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync, writeFileSync, mkdirSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
-import {pathToFileURL} from 'node:url';
+import {fileURLToPath, pathToFileURL} from 'node:url';
 import {dirname, join} from 'node:path';
 import {freshMemory, readMemory, rememberBattle, rememberDecision, rememberPreference, recordCoachEvent,
  purgeDerived, memoryItems, deleteMemoryItem, correctMemoryItem, clearMemory, memoryDerivations,
@@ -28,7 +28,13 @@ import {freshMemory, readMemory, rememberBattle, rememberDecision, rememberPrefe
 import {RAG_INPUTS, PLAYER_INPUTS} from '../src/coach/rag-index.js';
 import {createGame} from '../src/game/engine.js';
 
-const HERE=dirname(new URL(import.meta.url).pathname);
+// 2026-09-30（task-20，**只修路径、不动判据语义**）：
+// 旧写法 `dirname(new URL(import.meta.url).pathname)` 在 Windows 上得到 `/E:/roco-coach/tests`
+// （**带前导斜杠、没有盘符**），下面的 `join(HERE,'..','tmp')` 于是拼出 `/E:/roco-coach/tmp`，
+// Node 把它解析成「当前盘根 + `E:\…`」⇒ `mkdir 'E:\E:\roco-coach\tmp'`（ENOENT）⇒ 三条变异反证在本机起不来。
+// `fileURLToPath` 是跨平台正确写法（POSIX 侧行为逐字不变）。
+// 旧写法留档（改钉不删）：const HERE=dirname(new URL(import.meta.url).pathname);
+const HERE=dirname(fileURLToPath(import.meta.url));
 const MEMORY_SRC=join(HERE,'..','src','coach','memory.js');
 const log=(...xs)=>console.log('[实际]',...xs);
 
