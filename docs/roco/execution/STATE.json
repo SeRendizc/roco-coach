@@ -1,8 +1,8 @@
 {
   "schema": "roco-dsh-execution/v1",
-  "updated_at": "2026-09-30T17:06:21+08:00",
+  "updated_at": "2026-09-30T17:25:54+08:00",
   "active_plan": "01",
-  "next_action": "接手后：① 读交接文档与 START-HERE；② 复跑三条命令确认基线（import / 847·2F / 并集 0 · totals 313 / harness 6-6 exit 0）；③ 按族②→族③收窄 00 残余（每族跑 并集0 + totals + 全量）；④ 01 继续：先灭 ui.legal.enemy 泄漏，再对齐三协议，两条 pet_id 断言一起改钉。",
+  "next_action": "新机（Windows+WSL，/mnt/e/roco-coach，python3 3.10.12）接手已完成基线复跑：import OK · Ran 847·2F+0E · union 0 · totals 313 · harness 6/6 exit 0 · 远端 SHA=83ed968。下一步：① task-1 族② RESPOND 整句跳步收窄 → task-2 族③ global_skill_mods 认领要求 env 写点（每族跑 union0+totals+全量）；③ task-3 01 引擎侧：opening_roster_revealed（service.battle_new + state.events 同源）+ match_id/event_seq/decision_id 契约 + Node 转发；④ task-4 独立复跑验收（含反证 5 vs 记载 6 的复现）。00 残余收口后把 00 标 passed、active_plan 切 02→…。8765 在本机没在跑（curl exit 7）⇒ player 栏只登记，不许自行启动。",
   "plan_order": [
     "00",
     "01",
@@ -19,24 +19,35 @@
     "12"
   ],
   "write_owners": {
-    "roco/src/roco_env/coverage.py": "lead",
-    "roco/src/roco_env/env.py": "plan01-recon",
-    "roco/src/roco_env/schema.py": "plan01-recon",
-    "roco/src/roco_env/service.py": "plan01-recon（自 lead 让渡）",
-    "scripts/roco/**": "harness-verifier / lead",
-    "reports/roco/product-execution/**": "harness-verifier(harness/) · plan01-recon(01/) · lead(00/)",
-    "roco/tests/**": "仅确证判据陈旧时，附独立证据+最小修订理由",
+    "roco/src/roco_env/coverage.py": "plan00-closer（自 lead 让渡）",
+    "roco/tests/test_effect_coverage.py": "plan00-closer",
+    "roco/tests/test_tier_verdict_agreement.py": "plan00-closer",
+    "roco/src/roco_env/env.py": "plan01-engine（自 plan01-recon 让渡）",
+    "roco/src/roco_env/schema.py": "plan01-engine",
+    "roco/src/roco_env/service.py": "plan01-engine",
+    "roco/src/roco_env/regression.py": "plan01-engine（Lead 已授权：state_digest 剔除 history）",
+    "roco/tests/test_public_planner.py": "plan01-engine",
+    "roco/tests/test_ui_public_view.py": "plan01-engine",
+    "roco/tests/test_turn_order_fail_closed.py": "plan01-engine",
+    "roco/tests/test_regression_set.py": "plan01-engine",
+    "roco/tests/test_opponents.py": "plan01-engine",
+    "src/server/roco-service.js": "plan01-engine",
+    "scripts/roco/**": "harness-verifier",
+    "reports/roco/product-execution/harness/**": "harness-verifier",
+    "reports/roco/product-execution/00/**": "plan00-closer（verify-* 归 harness-verifier）",
+    "reports/roco/product-execution/01/**": "plan01-engine（verify-* 归 harness-verifier）",
+    "reports/roco/product-execution/HANDOFF-*.md": "lead",
     "README.md": "codex-planner",
     "docs/roco/PRODUCT-VISION-AND-ROADMAP.md": "codex-planner",
     "docs/roco/execution/STATE.json": "lead（单独更新）",
-    "roco/src/roco_env/regression.py": "plan01-recon（Lead 已授权：state_digest 剔除 history）"
+    "_git_index_and_commits": "lead 独占（成员禁止 git 写命令，避免 index 竞争）"
   },
   "blockers": [
     {
       "id": "B1",
       "what": "玩家常驻版本与整局验收",
       "status": "waiting_external",
-      "reason": "不得重启用户服务；8765 available:true 仅证明探活"
+      "reason": "新机 8765 根本没在跑（curl -m5 exit 7 / http=000）⇒ 连探活都拿不到；不许自行启动或重启用户服务；player 栏只能如实登记为不可得"
     }
   ],
   "plans": {
@@ -48,9 +59,9 @@
       "isolated": "passed",
       "player": "observed_healthy_pending_resident_version",
       "evidence": "reports/roco/product-execution/00/ledger-delta-audit.txt + harness/last-run.json(6/6)",
-      "commit": "PENDING_HANDOFF_COMMIT",
-      "remote_sha": null,
-      "note": "本轮把「诊断形状缺」那一族修完（补回 10 个形状，按 evidence 覆盖天然按半句判）：328 → 313（钉 306，差 +7）。并集打架 0 保持。剩：② RESPOND 整句跳步 2 行（398/637）· ③ global_skill_mods 不看写点 6 行（430/441/531/532/534/682）· 反证 6<8（只登记不拟合）· 762 属判据侧陈旧（补 SETTLED_PATTERNS 扣能类）。",
+      "commit": "83ed968",
+      "remote_sha": "83ed968696e7d8136e6b9fd89a7e42cea45ef473",
+      "note": "本轮把「诊断形状缺」那一族修完（补回 10 个形状，按 evidence 覆盖天然按半句判）：328 → 313（钉 306，差 +7）。并集打架 0 保持。剩：② RESPOND 整句跳步 2 行（398/637）· ③ global_skill_mods 不看写点 6 行（430/441/531/532/534/682）· 反证 6<8（只登记不拟合）· 762 属判据侧陈旧（补 SETTLED_PATTERNS 扣能类）。【新机接手 2026-09-30 17:2x】三条命验逐条对上：import OK · Ran 847·2F+0E · union 0 · totals 313 · harness 6/6 exit 0 · 远端 SHA=本机 HEAD；8765 在本机没在跑（curl exit 7）。族②③ 已派 plan00-closer（task-1/task-2，串行同文件）。",
       "residuals": [
         {
           "id": "R-00-a",
@@ -211,6 +222,22 @@
       "evidence": "controlled A/B：把事故前 coverage.py 换回后仍红 ⇒ 与我的改动无关；src 树 git-clean、data/ 无 15:00 后改动、pycache 清空后仍红",
       "owner": "plan10-recon（异常恢复与运行版本验收）待立",
       "status": "open"
+    },
+    {
+      "id": "O-2",
+      "what": "反证计数与记载不符：交接文档/result.json 记「关掉 respond_clause_gaps + UNSETTLED_WORDS 后打架回来 6 条」，新机在 HEAD=83ed968 稳定读到 5 条（412/510/539/671/694，全部同一方向「判据 true / 档位 PARTIAL」）",
+      "evidence": "① 6 个 PYTHONHASHSEED(0-5)+unset 全部 =5，非哈希随机；② 受控 A/B：把 0196316（补诊断形状之前）的 coverage.py 临时换回后**仍是 5**（还原后 sha256=36650edf…逐字节一致）⇒ 与族① 改动无关；③ 四种关闸口径（只关 gaps / 只关 words / 两闸全关 / 再关 claimed_mechanic_words）分别得 4/1/5/24，无一得 6；④ 台账 427 行无重复 skill_id（排除按行数重复计数）。⇒ 记载的 6 在 83ed968 上**不可复现**，且该记载自 0196316 起逐字沿用、未复测",
+      "owner": "harness-verifier（独立复跑中）· lead（A/B 已做）",
+      "status": "open",
+      "rule": "只登记不拟合：5 与 6 都 < 判据要求的 8，红/绿结论不变；禁止为凑 6 或凑 8 动任何闸"
+    },
+    {
+      "id": "O-3",
+      "what": "新机全量 skipped=2（记载为 1），两条 skip 原因均已查实且非回归",
+      "evidence": "① test_stat_gain.TestResolvedSkillsHaveAReadPoint 因 tmp/skill-slice-inventory.json 不在而 skip —— tmp/ 在 .gitignore（第 6 行）且仓库 0 跟踪，属未随 git 迁移的本地盘点产物，测试自己声明「盘点产物，不是引擎事实源」；② test_microcases.TestTraits.test_cold_light_source_reads_last_turn_wing_skill 因「月使鹭纳当前没有翼系合法动作」skip，属数据/规则相关",
+      "owner": "lead",
+      "status": "open",
+      "note": "另一条 test_six_pet_battle...No module named 'tests' 的 ERROR 是 lead 自写列举脚本的 sys.path 假象（脚本放在 /mnt/e/roco-scratch，未把 cwd 入 sys.path），权威跑法 python3 -m unittest discover -s tests 是 2F+0E，勿把该 ERROR 当真实失败"
     }
   ],
   "handoff": {

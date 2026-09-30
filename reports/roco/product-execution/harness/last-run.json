@@ -1,24 +1,19 @@
 {
   "tool": "scripts/roco/isolated-acceptance.py",
   "tool_version": 1,
-  "generated_at": "2026-09-30T16:47:50+08:00",
-  "finished_at": "2026-09-30T16:47:50+08:00",
+  "generated_at": "2026-09-30T17:16:05+08:00",
+  "finished_at": "2026-09-30T17:16:07+08:00",
   "git": {
     "branch": "wip/roco-coach-2026-09-30-1418",
-    "head": "4345045f348b4c8a50b403017dcdafd6fc13d395",
-    "dirty": [
-      "M roco/src/roco_env/coverage.py",
-      "?? reports/roco/product-execution/01/",
-      "?? reports/roco/product-execution/harness/",
-      "?? scripts/roco/isolated-acceptance.py"
-    ],
+    "head": "83ed968696e7d8136e6b9fd89a7e42cea45ef473",
+    "dirty": [],
     "error": null
   },
-  "src": "/Users/serendizc/Developer/roco-coach/roco/src",
+  "src": "/mnt/e/roco-coach/roco/src",
   "src_is_repo_default": true,
-  "repo_root": "/Users/serendizc/Developer/roco-coach",
-  "coverage_file_sha256": "a2ef570ff682e1188e45ddba276939a69fbc4fd4f845a2feb28309e8d5eb2013",
-  "coverage_file_sha256_at_end": "a2ef570ff682e1188e45ddba276939a69fbc4fd4f845a2feb28309e8d5eb2013",
+  "repo_root": "/mnt/e/roco-coach",
+  "coverage_file_sha256": "36650edf4f2e87f36947b459bdeb4bcc5e7eecee225331ca74047839bf577022",
+  "coverage_file_sha256_at_end": "36650edf4f2e87f36947b459bdeb4bcc5e7eecee225331ca74047839bf577022",
   "source_stable_during_run": true,
   "fault_inject": null,
   "ruleset_config_id": "mobile_s4_candidate_v3",
@@ -26,7 +21,7 @@
   "strategy": "greedy_damage",
   "service": {
     "argv": [
-      "/Library/Developer/CommandLineTools/usr/bin/python3",
+      "/usr/bin/python3",
       "-m",
       "roco_env.service",
       "--host",
@@ -34,25 +29,25 @@
       "--port",
       "0",
       "--repo-root",
-      "/Users/serendizc/Developer/roco-coach",
+      "/mnt/e/roco-coach",
       "--parent-pid",
-      "28195"
+      "1029"
     ],
-    "src": "/Users/serendizc/Developer/roco-coach/roco/src",
-    "repo_root": "/Users/serendizc/Developer/roco-coach",
+    "src": "/mnt/e/roco-coach/roco/src",
+    "repo_root": "/mnt/e/roco-coach",
     "requested_port": 0,
-    "pid": 28197,
-    "port": 59252,
+    "pid": 1031,
+    "port": 46386,
     "host": "127.0.0.1",
     "ready": true,
-    "ready_raw": "ROCO_SERVICE_READY {\"protocol_version\": 1, \"service\": \"roco_env\", \"service_version\": \"0.1.0\", \"host\": \"127.0.0.1\", \"port\": 59252, \"pid\": 28197, \"ruleset_id\": \"roco-world-s4-2026-09-10\", \"ruleset_ok\": true, \"ruleset_error\": null, \"snapshot_fingerprint\": \"4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc\"}",
+    "ready_raw": "ROCO_SERVICE_READY {\"protocol_version\": 1, \"service\": \"roco_env\", \"service_version\": \"0.1.0\", \"host\": \"127.0.0.1\", \"port\": 46386, \"pid\": 1031, \"ruleset_id\": \"roco-world-s4-2026-09-10\", \"ruleset_ok\": true, \"ruleset_error\": null, \"snapshot_fingerprint\": \"4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc\"}",
     "ready_line": {
       "protocol_version": 1,
       "service": "roco_env",
       "service_version": "0.1.0",
       "host": "127.0.0.1",
-      "port": 59252,
-      "pid": 28197,
+      "port": 46386,
+      "pid": 1031,
       "ruleset_id": "roco-world-s4-2026-09-10",
       "ruleset_ok": true,
       "ruleset_error": null,
@@ -61,10 +56,10 @@
     "startup_error": null,
     "exit_code": 0,
     "log_tail": [
-      "ROCO_SERVICE_READY {\"protocol_version\": 1, \"service\": \"roco_env\", \"service_version\": \"0.1.0\", \"host\": \"127.0.0.1\", \"port\": 59252, \"pid\": 28197, \"ruleset_id\": \"roco-world-s4-2026-09-10\", \"ruleset_ok\": true, \"ruleset_error\": null, \"snapshot_fingerprint\": \"4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc\"}"
+      "ROCO_SERVICE_READY {\"protocol_version\": 1, \"service\": \"roco_env\", \"service_version\": \"0.1.0\", \"host\": \"127.0.0.1\", \"port\": 46386, \"pid\": 1031, \"ruleset_id\": \"roco-world-s4-2026-09-10\", \"ruleset_ok\": true, \"ruleset_error\": null, \"snapshot_fingerprint\": \"4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc\"}"
     ]
   },
-  "port": 59252,
+  "port": 46386,
   "snapshot_fingerprint": "4d5c169fd528874cb629d0b8224504f151b5f8870aceffd7722bbdb2f52760bc",
   "steps": [
     {
@@ -74,7 +69,7 @@
       "http_status": 200,
       "ok": true,
       "status": "passed",
-      "latency_ms": 5.7,
+      "latency_ms": 17.8,
       "request_sha256": null,
       "error_type": null,
       "error": null,
@@ -143,7 +138,7 @@
           "env": true,
           "ruleset": false
         },
-        "service_pid": 28197
+        "service_pid": 1031
       }
     },
     {
@@ -210,7 +205,7 @@
       "http_status": 200,
       "ok": true,
       "status": "passed",
-      "latency_ms": 1.9,
+      "latency_ms": 19.9,
       "request_sha256": "8a417b19b4ed5754d53a0d23a99f116a44532d7762e8268a2da4b4c77a4125b6",
       "error_type": null,
       "error": null,
@@ -353,7 +348,7 @@
       "http_status": 200,
       "ok": true,
       "status": "passed",
-      "latency_ms": 1.0,
+      "latency_ms": 4.4,
       "request_sha256": "d0ad7fc5dd763514719d5ce0b9e43b3b8021454bb06f04e4a9bfd95e48fe855f",
       "error_type": null,
       "error": null,
@@ -450,7 +445,7 @@
       "http_status": 200,
       "ok": true,
       "status": "passed",
-      "latency_ms": 2.8,
+      "latency_ms": 8.9,
       "request_sha256": "4d153fd3038ec2739d206365efdb60b9df9f33e5513d1d6eb6a9ed10a999c8c8",
       "error_type": null,
       "error": null,
@@ -535,7 +530,7 @@
       "http_status": 200,
       "ok": true,
       "status": "passed",
-      "latency_ms": 0.7,
+      "latency_ms": 2.3,
       "request_sha256": "a2b2ef2aa32c3ce66f7f9957cdeb5b90710446d4a9d649ea71275042ec2f4611",
       "error_type": null,
       "error": null,
