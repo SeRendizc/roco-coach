@@ -121,13 +121,13 @@
     "03": {
       "title": "对手候选与证据更新",
       "status": "in_progress",
-      "step": "03.1 勘察完成（结论：候选生成真用公开物种+冻结图鉴，但只到物种级；本模块未接任何在线路径、无 view→publicFacts 适配器；起点 1 条红是报告陈旧）→ 按 D-15 收尾 03.1 并进入 03.2",
-      "code": "unverified",
-      "isolated": "unverified",
+      "step": "03.1 收尾 + 03.2 候选协议已冻结（2253c2e）；F-03-1（在线段审计实际为空）本轮修 → 再冻 03.3–03.5",
+      "code": "partial（03.2 落地：readOpponentView + buildOpponentCandidates + 合法性/多解/截断 + R2 通用分支）",
+      "isolated": "unverified（本地 25/25 · 相关 32/32；verifier 在 2253c2e 上复验中）",
       "player": "unverified",
-      "evidence": "reports/roco/product-execution/03/03.1-recon.md + raw-03.1-*（隐藏值读点 H1–H5 · 无依据先验 R1–R7 · G9 实测确认）",
-      "commit": null,
-      "remote_sha": null
+      "evidence": "reports/roco/product-execution/03/{03.1-recon.md,03.1-wrapup.md,03.2-candidates.md,raw-03.1-*,raw-03.2-*,verify-03.1-baseline.md,verify-03.1-wrapup.md} + logs: docs/roco/RC-604-OPPONENT-BELIEF.md（按实测同步）+ reports/roco/rc604/opponent-belief.json（只由生成器写）",
+      "commit": "2253c2e",
+      "remote_sha": "2253c2e3d75290c20a39ecd7c08bc6fceadb0c6e"
     },
     "04": {
       "title": "有限分支比较与稳健动作排序",
