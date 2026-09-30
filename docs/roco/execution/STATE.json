@@ -1,0 +1,168 @@
+{
+  "schema": "roco-dsh-execution/v1",
+  "updated_at": null,
+  "active_plan": "00",
+  "next_action": "复核 DSH 当前 P0 修复，导入现有证据后继续 00 的未完成步骤",
+  "plan_order": [
+    "00",
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "09",
+    "10",
+    "11",
+    "12"
+  ],
+  "write_owners": {},
+  "blockers": [],
+  "plans": {
+    "00": {
+      "title": "服务恢复与规则契约收口",
+      "status": "pending",
+      "step": null,
+      "code": "unverified",
+      "isolated": "unverified",
+      "player": "unverified",
+      "evidence": null,
+      "commit": null,
+      "remote_sha": null
+    },
+    "01": {
+      "title": "公开观察与决策快照契约",
+      "status": "pending",
+      "step": null,
+      "code": "unverified",
+      "isolated": "unverified",
+      "player": "unverified",
+      "evidence": null,
+      "commit": null,
+      "remote_sha": null
+    },
+    "02": {
+      "title": "开局预览与已见阵容回看",
+      "status": "pending",
+      "step": null,
+      "code": "unverified",
+      "isolated": "unverified",
+      "player": "unverified",
+      "evidence": null,
+      "commit": null,
+      "remote_sha": null
+    },
+    "03": {
+      "title": "对手候选与证据更新",
+      "status": "pending",
+      "step": null,
+      "code": "unverified",
+      "isolated": "unverified",
+      "player": "unverified",
+      "evidence": null,
+      "commit": null,
+      "remote_sha": null
+    },
+    "04": {
+      "title": "有限分支比较与稳健动作排序",
+      "status": "pending",
+      "step": null,
+      "code": "unverified",
+      "isolated": "unverified",
+      "player": "unverified",
+      "evidence": null,
+      "commit": null,
+      "remote_sha": null
+    },
+    "05": {
+      "title": "局内建议路由与真实交互",
+      "status": "pending",
+      "step": null,
+      "code": "unverified",
+      "isolated": "unverified",
+      "player": "unverified",
+      "evidence": null,
+      "commit": null,
+      "remote_sha": null
+    },
+    "06": {
+      "title": "按当时信息做关键决策复盘",
+      "status": "pending",
+      "step": null,
+      "code": "unverified",
+      "isolated": "unverified",
+      "player": "unverified",
+      "evidence": null,
+      "commit": null,
+      "remote_sha": null
+    },
+    "07": {
+      "title": "问答老师与无提示迁移练习",
+      "status": "pending",
+      "step": null,
+      "code": "unverified",
+      "isolated": "unverified",
+      "player": "unverified",
+      "evidence": null,
+      "commit": null,
+      "remote_sha": null
+    },
+    "08": {
+      "title": "配队打法与目标培养闭环",
+      "status": "pending",
+      "step": null,
+      "code": "unverified",
+      "isolated": "unverified",
+      "player": "unverified",
+      "evidence": null,
+      "commit": null,
+      "remote_sha": null
+    },
+    "09": {
+      "title": "情境陪伴、可控记忆与休息提醒",
+      "status": "pending",
+      "step": null,
+      "code": "unverified",
+      "isolated": "unverified",
+      "player": "unverified",
+      "evidence": null,
+      "commit": null,
+      "remote_sha": null
+    },
+    "10": {
+      "title": "异常恢复与运行版本验收",
+      "status": "pending",
+      "step": null,
+      "code": "unverified",
+      "isolated": "unverified",
+      "player": "unverified",
+      "evidence": null,
+      "commit": null,
+      "remote_sha": null
+    },
+    "11": {
+      "title": "完整玩家链路与版本候选",
+      "status": "pending",
+      "step": null,
+      "code": "unverified",
+      "isolated": "unverified",
+      "player": "unverified",
+      "evidence": null,
+      "commit": null,
+      "remote_sha": null
+    },
+    "12": {
+      "title": "真人试用与下一轮产品决策",
+      "status": "pending",
+      "step": null,
+      "code": "unverified",
+      "isolated": "unverified",
+      "player": "unverified",
+      "evidence": null,
+      "commit": null,
+      "remote_sha": null
+    }
+  }
+}
