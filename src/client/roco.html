@@ -764,7 +764,11 @@
    <div class="dev-body">
     <p><span id="engine-status" class="chip">规则服务：未启动</span></p>
     <p>结算由 <strong>Python 规则引擎</strong>按手游子集完成，规则快照
-     <code id="about-ruleset">roco-world-s4-2026-09-10</code>。</p>
+     <code id="about-ruleset">正在读取…</code>。</p>
+    <!-- H4（2026-10-01）：这里以前写死了默认规则集 id（与 `roco.js` 的 `MODE_MIRROR` 是第二份）。
+         现在**只留占位**，真值由 `roco.js` 从生成产物 `type-affinity.data.js` 的 `RULESET_ID` 填。
+         为什么连"默认值"都不留：两份字面量不同步时，页面会拿一个 draft 值当"这一局的规则快照"，
+         而这一格在验收里是**必须等于引擎回执**的那一格（`scripts/roco/dev-drawer-checks.mjs` 的 rulesetProblems）。 -->
     <p><strong>游戏数据里现在还没有「魔力 / 心」这个量</strong>，所以战斗页那一栏只显示
      「还没核对过」，<strong>不画计数器、也不补一个 4</strong>。
      等实机录制确认之后才会补上（这一项还没有实机录过）。</p>

@@ -28,11 +28,17 @@ export function rulesetProblems(facts = {}) {
   if (version === null) bad.push('引擎公开视图里没有 state_version（读不到就无从核对，算红）');
   if (!shown) bad.push('抽屉里的规则快照是空的');
   if (id && version !== null) {
-    const want = `${id} · 本局状态版本 ${version}`;
+    // ⚠ 2026-10-01 H4 **改钉**（Lead 批准；原断言逐字留档，别再改回来）：
+    //     const want = `${id} · 本局状态版本 ${version}`;
+    // 为什么改：`state_version` 是**事件计数**（O-27/P5），不是回合、也不是「第 N 手」；
+    // 「本局状态版本」是内部术语，不该出现在玩家可见文本里（`tests/roco-player-text-gate` 的
+    // internal-term 一类就是管这个的）。**意图一个字没松**：id 与次数都必须逐字来自引擎回执。
+    const want = `${id} · 本局已收到 ${version} 次局面更新`;
     if (shown !== want) bad.push(`抽屉里写的是「${shown}」，引擎回执是「${want}」`);
   }
   // 写死的样例（README 里那种「roco-world-s4-2026-09-10」裸快照）必须被抓住
-  if (id && shown === id) bad.push('只写了规则集 id、没有本局状态版本 —— 那是写死的样例，不是这一局的回执');
+  // H4 改钉（原句留档）：……'只写了规则集 id、没有本局状态版本 —— 那是写死的样例，不是这一局的回执'
+  if (id && shown === id) bad.push('只写了规则集 id、没有局面更新次数 —— 那是写死的样例，不是这一局的回执');
   return bad;
 }
 

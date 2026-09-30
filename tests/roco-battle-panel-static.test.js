@@ -160,3 +160,29 @@ test('发消息时不许把玩家第二条弄丢（审计高 11）：飞行中�
     '守卫必须排在清空输入框之前（先清空就会丢掉玩家打的那句话）');
 });
 
+// ── H4（2026-10-01，横切文本审计）：默认规则集 id 的两份字面量收敛到一处 ──────────
+test('⑥ 默认规则集 id 只许一处来源：模板不写死、页面脚本只引用生成的常量', () => {
+  // 与上面 ①② 同族：模板里写死的那个值**看起来像**"这一局的规则快照"，其实是一份 draft；
+  // 而 H4 之前它有两份（`roco.html` 的 `#about-ruleset` 初值 + `roco.js` 的 `MODE_MIRROR.engine`），
+  // 不同步就会互相矛盾。现在只许引用生成产物 `type-affinity.data.js` 的 `RULESET_ID`
+  // （那个文件由 `scripts/roco/build-client-type-affinity.mjs` 从冻结真值生成，文件头写着来源与 sha256）。
+  const ID = 'roco-world-s4-2026-09-10';
+  const slot = /<code id="about-ruleset">([\s\S]*?)<\/code>/.exec(HTML);
+  assert.ok(slot, '模板里必须有 #about-ruleset 这个落点（否则 JS 无处可填）');
+  assert.ok(!slot[1].includes(ID), `模板不许写死默认规则集 id，实际写的是「${slot[1]}」`);
+  assert.ok(slot[1].trim().length > 0, '留占位也要有字（空元素会渲染成「规则快照 。」）');
+  assert.doesNotMatch(CLIENT, /['"]roco-world-s4-2026-09-10['"]/,
+    '页面脚本里不许再出现这个 id 的字面量（第二份不同步的来源）');
+  assert.match(CLIENT, /import \{RULESET_ID\} from '\.\/type-affinity\.data\.js'/,
+    '唯一来源必须是生成产物 type-affinity.data.js 的 RULESET_ID');
+  assert.match(CLIENT, /engine: \{team_size: 3, ruleset_id: RULESET_ID\}/,
+    'MODE_MIRROR 的引擎绑定要引用那一个常量，而不是重写一份');
+  // 反证：同一条探测器对"写死模板 + 第二份字面量"的旧形状**必须为真**（否则它是恒假的摆设）
+  const probeSlot = (html) => /<code id="about-ruleset">([\s\S]*?)<\/code>/.exec(html)?.[1] ?? '';
+  const probeLiteral = (src) => /['"]roco-world-s4-2026-09-10['"]/.test(src);
+  assert.ok(probeSlot('<code id="about-ruleset">roco-world-s4-2026-09-10</code>').includes(ID),
+    '探测器对写死的旧模板必须为真');
+  assert.ok(probeLiteral("engine: {team_size: 3, ruleset_id: 'roco-world-s4-2026-09-10'},"),
+    '探测器对第二份字面量必须为真');
+});
+

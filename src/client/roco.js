@@ -67,6 +67,13 @@ import {mountStalePageBanner} from './stale-page.js';
 // 从冻结真值 `data/roco/normalized/<ruleset>/types.json` 生成（不是手写的倍率表）。
 // 它与技能格那条**进攻向**倍率（引擎 `damage_preview.samples`）是**两件事**，用途不许互换。
 import {incomingAffinity} from './type-affinity.js';
+// H4（2026-10-01）：**默认规则集 id 的唯一来源**。
+// 这一页以前把这个 id 手写了两份（模板里的 `#about-ruleset` 初值 + 下面 `MODE_MIRROR` 的引擎绑定），
+// 两份不同步就会互相矛盾。现在只从**生成产物**里读：`type-affinity.data.js` 由
+// `scripts/roco/build-client-type-affinity.mjs` 从冻结真值 `data/roco/normalized/<ruleset>/types.json`
+// 生成（文件头逐字写着来源与 sha256），所以它才是那个 id 在页面侧的事实源。
+// ⚠ 本文件与 `roco.html` **都不许再出现那个 id 的字面量**（判据：`tests/roco-battle-panel-static.test.js` ⑥）。
+import {RULESET_ID} from './type-affinity.data.js';
 
 // ── 页面状态 ────────────────────────────────────────────────────────────────
 const state = {
@@ -813,7 +820,8 @@ const MODE_MIRROR = Object.freeze({
   status: 'CANDIDATE',
   confidence: 'CROSS_SOURCE_SUPPORTED',
   parameters: {team_size: 6, active_count: 1, mana_pool: 4, faint_mana_cost: 1},
-  engine: {team_size: 3, ruleset_id: 'roco-world-s4-2026-09-10'},
+  // H4：引擎绑定里的默认规则集 id 引用**唯一来源** `RULESET_ID`（生成产物，见文件头那条 import）。
+  engine: {team_size: 3, ruleset_id: RULESET_ID},
   unknowns_count: 4,
   prematch: {visibility: 'UNKNOWN_PREMATCH', evidence_id: 'EV-PVP-UNKNOWN-OPPONENT'},
 });
@@ -898,7 +906,14 @@ function render() {
   $('engine-status').dataset.rocoStatus = view ? 'ready' : 'idle';
   const aboutVersion = $('about-ruleset');
   if (aboutVersion && view?.ruleset_id) {
-    aboutVersion.textContent = `${view.ruleset_id} · 本局状态版本 ${view.state_version}`;
+    // H4（2026-10-01，横切文本审计；Lead 批准）：这里以前写「本局状态版本 N」。
+    // 两件事都不对：①「本局状态版本」是**内部术语**，不该出现在玩家可见文本里；
+    // ② `state_version` 是**事件计数**（O-27/P5），既不是回合数、也不是「第 N 手」。
+    // 现在保留信息、换成**人话**：值仍逐字来自引擎公开视图 —— RC-802 的 `rulesetProblems`
+    // 仍按这一句核对「抽屉里的值来自回执，不是写死的样例」。
+    // 旧写法原文留档（改钉不删，别再改回来）：
+    //   aboutVersion.textContent = `${view.ruleset_id} · 本局状态版本 ${view.state_version}`;
+    aboutVersion.textContent = `${view.ruleset_id} · 本局已收到 ${view.state_version} 次局面更新`;
   }
   // 结算结果是引擎给的英文（win/loss/draw/escaped）。玩家不该在界面上看到 `win`。
   // 2026-09-22（人类 P0）：补位阶段必须说清**谁**要补位 —— 用户实测「我把对面打倒，自己也被
