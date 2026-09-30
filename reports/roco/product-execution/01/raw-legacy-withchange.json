@@ -1,0 +1,132 @@
+{
+  "label": "withchange",
+  "legacy_default_config": "legacy_sim_v1",
+  "per_seed": {
+    "1000": {
+      "F1_decision_digest": "b38dffa19506a84d",
+      "F2_events_digest": "b11029b0567df394",
+      "F3_state_no_history_digest": "ac26753a3ced6015",
+      "F4_history_digest": "5e1ac1c1f610d66e",
+      "F5_obs_digest": "5aada1bec6fbe8eb",
+      "actions_n": 39,
+      "events_n": 212,
+      "history_n": 37,
+      "result": "win",
+      "turn": 37,
+      "unsupported_n": 30
+    },
+    "1001": {
+      "F1_decision_digest": "4d8f5c5440a561ff",
+      "F2_events_digest": "3d7f7b793a7cdd52",
+      "F3_state_no_history_digest": "f370a7d53fc14e99",
+      "F4_history_digest": "f3bcf4d6d7bec609",
+      "F5_obs_digest": "79709b157a51441c",
+      "actions_n": 21,
+      "events_n": 118,
+      "history_n": 17,
+      "result": "win",
+      "turn": 17,
+      "unsupported_n": 13
+    },
+    "1002": {
+      "F1_decision_digest": "30fee9493da7db50",
+      "F2_events_digest": "037a9520db47e145",
+      "F3_state_no_history_digest": "f219b32f022bdfcb",
+      "F4_history_digest": "4c29d91620617cf7",
+      "F5_obs_digest": "f753d84f2584cd11",
+      "actions_n": 30,
+      "events_n": 145,
+      "history_n": 26,
+      "result": "loss",
+      "turn": 26,
+      "unsupported_n": 7
+    },
+    "1003": {
+      "F1_decision_digest": "7f889ead5898e7aa",
+      "F2_events_digest": "fd36fa8db78d5a8d",
+      "F3_state_no_history_digest": "ecc4aa55497f603a",
+      "F4_history_digest": "099fd3e0217f324c",
+      "F5_obs_digest": "f6a218161227be7f",
+      "actions_n": 21,
+      "events_n": 118,
+      "history_n": 18,
+      "result": "win",
+      "turn": 18,
+      "unsupported_n": 16
+    },
+    "1004": {
+      "F1_decision_digest": "e8ba3fe40b6d9fee",
+      "F2_events_digest": "78700023ec17b1d3",
+      "F3_state_no_history_digest": "87503137163ca9da",
+      "F4_history_digest": "069d580f72b972b1",
+      "F5_obs_digest": "38aaad08220b6249",
+      "actions_n": 19,
+      "events_n": 96,
+      "history_n": 16,
+      "result": "win",
+      "turn": 16,
+      "unsupported_n": 7
+    },
+    "1005": {
+      "F1_decision_digest": "2dab05f40eec32ec",
+      "F2_events_digest": "334b639cb742d74d",
+      "F3_state_no_history_digest": "f62878439d467165",
+      "F4_history_digest": "6d7fb771aa2ebb57",
+      "F5_obs_digest": "6c4a235a4fd5c8c8",
+      "actions_n": 38,
+      "events_n": 191,
+      "history_n": 36,
+      "result": "win",
+      "turn": 36,
+      "unsupported_n": 47
+    }
+  },
+  "short_scripted": {
+    "F1_picks_digest": "e4220d1eebe93a9e",
+    "F2_events_digest": "0b6199f990ce8fbe",
+    "F3_state_no_history_digest": "0a0d828a6632ceb8",
+    "F4_history_digest": "6fdb49526bf67ff4",
+    "picks": [
+      [
+        {
+          "kind": "skill",
+          "skill_id": "skill_000576"
+        },
+        {
+          "kind": "skill",
+          "skill_id": "skill_000418"
+        }
+      ],
+      [
+        {
+          "kind": "skill",
+          "skill_id": "skill_000750"
+        },
+        {
+          "kind": "skill",
+          "skill_id": "skill_000305"
+        }
+      ],
+      [
+        {
+          "kind": "skill",
+          "skill_id": "skill_000750"
+        },
+        {
+          "kind": "skill",
+          "skill_id": "skill_000418"
+        }
+      ],
+      [
+        {
+          "kind": "skill",
+          "skill_id": "skill_000576"
+        },
+        {
+          "kind": "skill",
+          "skill_id": "skill_000305"
+        }
+      ]
+    ]
+  }
+}

@@ -1,8 +1,8 @@
 {
   "schema": "roco-dsh-execution/v1",
-  "updated_at": "2026-09-30T16:48:27+08:00",
+  "updated_at": "2026-09-30T16:59:36+08:00",
   "active_plan": "01",
-  "next_action": "1) 收 22 行差额审计 → 逐行有据则按最小修订把 test_effect_coverage:853 的 306 改钉为实测值（附审计读数）；发现判宽行则收紧对应闸（不许放宽）。2) 反证 6<8 只登记不拟合。3) 01 并行：plan01-recon 先修 ui.legal.enemy 泄漏与三协议对齐，交付需含「仅改对手隐藏个体 ⇒ 公开输入逐字段相同」反例（U1 缺入口则标 blocked）。4) 每步绿了就 commit+push 并推进 00/01 状态。",
+  "next_action": "00：按四族收窄（① 补回诊断形状，按半句判，11 行；② RESPOND 跳步只跳命中段，2 行；③ global_skill_mods 认领要求 env 写点，6 行；④ 本轮已收窄待复测）；每收一族就跑 并集打架(必须 0) + totals + 全量；收到 306 或给出逐行运行时报据证明差异合法后再谈改钉。01：plan01-recon 继续（ui.legal.enemy 泄漏优先 + 三协议对齐 + 两条 pet_id 断言一起改钉）。",
   "plan_order": [
     "00",
     "01",
@@ -46,23 +46,29 @@
       "code": "fixed",
       "isolated": "passed",
       "player": "observed_healthy_pending_resident_version",
-      "evidence": "reports/roco/product-execution/00/** + harness/last-run.json（6/6 exit=0）",
-      "commit": "9717e5c",
+      "evidence": "reports/roco/product-execution/00/ledger-delta-audit.txt + harness/last-run.json(6/6)",
+      "commit": "3e5ddea",
       "remote_sha": null,
-      "note": "隔离基线已通过（00 自动续接条款）：import OK · isolated 6/6 · 三栏分列 · 红线（残余片段/SIM）OK。两条残余登记在案，不阻断 01。",
+      "note": "本轮已修：462 resolver 顺序（基础子句先于覆盖体）· 483 号位认领 effect 在两条链链尾成对补 · elif claimed 收窄。并集打架保持 0（硬指标）。",
       "residuals": [
         {
           "id": "R-00-a",
-          "test": "test_effect_coverage.test_report_has_no_simulatable_with_unclaimed_mechanic_spans",
-          "reading": "残余片段已归零；同一方法末尾钉 simulatable_entities==306，实测 328（+22）",
-          "status": "逐行审计中（子代理枚举 当前SIM−HEAD SIM 差额）",
-          "rule": "不拟合 306：审计通过才按最小修订改钉数字"
+          "what": "台账可模拟总数 328 vs 真基线 306（差 22 = 24 翻正 − 2 翻负）",
+          "baseline": "reports/roco/rc401/effect-coverage.json（丢失层留下的台账产物，totals=306，逐行可对照）",
+          "verdict": "24 翻正里仅 3 条有运行时报据（313/581/762）；21 条判宽，分四族",
+          "families": [
+            "① 诊断形状缺 11 行：_DIAGNOSTIC_SHAPE_PATTERNS 只剩 2 条（体重/体重差/生命大于N%/混血/固定能耗/面板比值/使用次数）——须按半句判（313/581 的迸发-威力真结算，583 能耗/598 次数没结算）",
+            "② RESPOND_POWER_SETTLED_RE 整句跳步 2 行（398/637）：只许跳命中那一段，同句其余仍须 evidence 覆盖",
+            "③ global_skill_mods 认领不看 env 写点 6 行（430/441/531/532/534/682）：防御支/敌方方向/无条件子句都没有 global_skill_mod_applied",
+            "④ elif claimed 只凭 传动×1 放行 2 行（473/489）——本轮已收窄，待复测"
+          ],
+          "also": "⑤ build_coverage 走裸 classify_skill，未吃\"比结论\"；若改走 classify_skill_declared 必须同时给 SETTLED_PATTERNS 补\"回复/回能/扣能\"类，否则 273/344/346/472/756/762 被误降（实测它们真结算）",
+          "reverted": "上一版 328 改钉已撤回（依据不足：误把 782 行 HEAD 当 306 那一版，且\"判据也说 True\"是循环）"
         },
         {
           "id": "R-00-b",
-          "test": "test_tier_verdict_agreement.test_counter_proof_disabling_the_shared_gates_brings_them_back",
-          "reading": "关两闸后打架 6 条，判据要求 >=8",
-          "status": "未拟合；已确认是另有闸在兜的覆盖面问题，不是恒真",
+          "what": "反证关两闸后打架 6 条 < 8",
+          "status": "只登记不拟合",
           "rule": "不许为凑数量放宽或收紧闸"
         }
       ]
@@ -200,5 +206,14 @@
       "commit": null,
       "remote_sha": null
     }
-  }
+  },
+  "observations": [
+    {
+      "id": "O-1",
+      "what": "test_turn_order_fail_closed 两条 legacy 黄金指纹 + test_regression_set 在**全量运行**时红、单模块隔离运行绿（3/3 模块 OK）",
+      "evidence": "controlled A/B：把事故前 coverage.py 换回后仍红 ⇒ 与我的改动无关；src 树 git-clean、data/ 无 15:00 后改动、pycache 清空后仍红",
+      "owner": "plan10-recon（异常恢复与运行版本验收）待立",
+      "status": "open"
+    }
+  ]
 }

@@ -1,0 +1,200 @@
+{
+  "A_foe_loadout_recovery": {
+    "mean_recovery_ratio": 1.0,
+    "rows": [
+      {
+        "foe_active": "pet_000062",
+        "real_loadout_n": 4,
+        "recovered_n": 4,
+        "recovery_ratio": 1.0,
+        "seed": 11,
+        "visible_n": 4
+      },
+      {
+        "foe_active": "pet_000062",
+        "real_loadout_n": 4,
+        "recovered_n": 4,
+        "recovery_ratio": 1.0,
+        "seed": 29,
+        "visible_n": 4
+      },
+      {
+        "foe_active": "pet_000062",
+        "real_loadout_n": 4,
+        "recovered_n": 4,
+        "recovery_ratio": 1.0,
+        "seed": 47,
+        "visible_n": 4
+      },
+      {
+        "foe_active": "pet_000062",
+        "real_loadout_n": 4,
+        "recovered_n": 4,
+        "recovery_ratio": 1.0,
+        "seed": 222,
+        "visible_n": 4
+      },
+      {
+        "foe_active": "pet_000062",
+        "real_loadout_n": 4,
+        "recovered_n": 4,
+        "recovery_ratio": 1.0,
+        "seed": 519,
+        "visible_n": 4
+      },
+      {
+        "foe_active": "pet_000062",
+        "real_loadout_n": 4,
+        "recovered_n": 4,
+        "recovery_ratio": 1.0,
+        "seed": 646,
+        "visible_n": 4
+      },
+      {
+        "foe_active": "pet_000062",
+        "real_loadout_n": 4,
+        "recovered_n": 4,
+        "recovery_ratio": 1.0,
+        "seed": 758,
+        "visible_n": 4
+      },
+      {
+        "foe_active": "pet_000062",
+        "real_loadout_n": 4,
+        "recovered_n": 4,
+        "recovery_ratio": 1.0,
+        "seed": 900,
+        "visible_n": 4
+      },
+      {
+        "foe_active": "pet_000062",
+        "real_loadout_n": 4,
+        "recovered_n": 4,
+        "recovery_ratio": 1.0,
+        "seed": 991,
+        "visible_n": 4
+      }
+    ],
+    "seeds_with_full_recovery": 9,
+    "total_seeds": 9,
+    "ui_legal_enemy_present": false
+  },
+  "B_bench_keys": {
+    "all_three_aligned": false,
+    "field_still_has_pet_id": true,
+    "obs_bench_id_free": false,
+    "obs_bench_name_free": false,
+    "obs_bench_raw": [
+      {
+        "active": false,
+        "fainted": false,
+        "field": false,
+        "name": "雪影娃娃",
+        "pet_id": "pet_000112",
+        "slot": 1
+      },
+      {
+        "active": false,
+        "fainted": false,
+        "field": false,
+        "name": "圆号鱼",
+        "pet_id": "pet_000417",
+        "slot": 2
+      },
+      {
+        "active": false,
+        "fainted": false,
+        "field": false,
+        "name": "寂灭骨龙",
+        "pet_id": "pet_000225",
+        "slot": 3
+      },
+      {
+        "active": false,
+        "fainted": false,
+        "field": false,
+        "name": "海豹船长",
+        "pet_id": "pet_000190",
+        "slot": 4
+      },
+      {
+        "active": false,
+        "fainted": false,
+        "field": false,
+        "name": "黑猫巫师",
+        "pet_id": "pet_000445",
+        "slot": 5
+      }
+    ],
+    "observation_for": [
+      "active",
+      "fainted",
+      "field",
+      "name",
+      "pet_id",
+      "slot"
+    ],
+    "public_bench_id_free": false,
+    "public_bench_raw": [
+      {
+        "fainted": false,
+        "pet_id": "pet_000112",
+        "slot": 1
+      },
+      {
+        "fainted": false,
+        "pet_id": "pet_000417",
+        "slot": 2
+      },
+      {
+        "fainted": false,
+        "pet_id": "pet_000225",
+        "slot": 3
+      },
+      {
+        "fainted": false,
+        "pet_id": "pet_000190",
+        "slot": 4
+      },
+      {
+        "fainted": false,
+        "pet_id": "pet_000445",
+        "slot": 5
+      }
+    ],
+    "public_planner_state": [
+      "fainted",
+      "pet_id",
+      "slot"
+    ],
+    "ui_public_view": [
+      "fainted",
+      "slot"
+    ]
+  },
+  "C_envelope_legal_enemy": {
+    "count": 12,
+    "has_skill_ids": true,
+    "note": "`service._sim_envelope` 的 `result.legal.enemy`（私有域回执）**未改**；cpu_legal_count 依赖它"
+  },
+  "D_invariance": {
+    "D1_seed_change_public_identical": true,
+    "D2_hidden_bench_hp_energy_change_public_identical": true,
+    "D2_hidden_bench_hp_energy_change_ui_identical": true,
+    "D3_individual_panel_change": "blocked:needs_injection_entry",
+    "D3_why": "`reset(individuals=...)` 只按玩家位次解析（env.py:249 resolve_snapshots(individuals, list(team))），对手侧 panel 恒为 {}（实测 Q4c）。引擎没有对局内改对手个体的入口 ⇒ 不猜、不静默跳过。"
+  },
+  "label": "before",
+  "ruleset_config_id": "mobile_s4_candidate_v3",
+  "seeds": [
+    11,
+    29,
+    47,
+    222,
+    519,
+    646,
+    758,
+    900,
+    991
+  ]
+}
