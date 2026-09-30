@@ -2,7 +2,7 @@
   "schema": "roco-dsh-execution/v1",
   "updated_at": "2026-09-30T22:05:00+08:00",
   "active_plan": "04",
-  "next_action": "① **04.1 只读勘察**（已派 plan03-belief）：核对规划器现有深度/合法动作/对手选择时机/评估函数；明确同时行动规则，**禁止「先看对手选择再决定我方动作」**；产出「规划路径与目标函数说明」+ 隐藏值读点清单。② 04.2 冻结后把切片交给 **lead-mac 跨机复验**（一次给可复跑判据；指令逐条自测路径，见 O-20）。③ 常驻登记：O-4（反证 5>=8 已登记偏差）· O-6（damage_global_skill_mod_text 死门 + 531/534 方向丢失）· O-7（文档失真 3 例）· O-8（迸发两链不同源）· O-12（截图规则）· O-13（干净副本差分口径）· O-14（STATE 提交前必须 lint）· O-15（冻结节奏）· O-16（打印即证据）· O-17（降级分支无断言，03 已闭合）· O-18（coop 钩子解释器）· O-19（跨机 skip 不可直接比）· O-20（跨机指令必须自测路径）。④ 每次要用户裁决前先 pushplus 通知；每步切片提交后核对远端 SHA。",
+  "next_action": "**流水线（600 轮目标）**：① **04 实现**（`plan04-engine`，task-12）：先补完 04.2 四项（变异 B「扰动缺省路径 ⇒ 金标必红」· `service.py` 注入（可选字段 + 400 fail closed + 缺省逐字段不变 + 依据回显）· P3 显式残留与「scenario-driven vs assumption-driven 分开写」· 证据件 04.2-scenarios.md）→ 按 recon §7 做 04.3–04.6；每步冻结后由 Lead 提交推送。② **只读勘察并行**：05（`plan05-recon`，task-13）· 06（`plan06-recon`，task-14）· 07（`plan02-front`，task-15）· 08（`plan01-engine`，task-16）· 10（`plan00-closer`，task-17）—— 各写各的 `reports/roco/product-execution/<NN>/`，勘察报告 + 裁决后再放实现。③ **双轨验收**：`harness-verifier` 先独立复验 04.1 的「同时行动红线」，04.2 冻结点名复验（04.3–04.6 逐个点名）；**lead-mac 跨机复验**每计划一片（04.2 冻结后给，指令逐条自测路径、先声明 `tmp/` 产物再比 skip 数）。④ 常驻登记：O-4/O-6/O-7/O-8/O-12/O-13/O-14（STATE 提交前必须 lint）/O-15/O-16/O-17/O-18/O-19/O-20。⑤ 要用户裁决前先 pushplus；每步提交后核对远端 SHA。",
   "plan_order": [
     "00",
     "01",
