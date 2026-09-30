@@ -28,6 +28,7 @@ import json
 import os
 from typing import Any, Dict, List, Optional
 
+from . import effects as fx
 from . import parse as parse_mod
 from . import traits as traits_mod
 
@@ -1268,10 +1269,14 @@ _DIAGNOSTIC_SHAPE_PATTERNS = (
     #   `plan00-584-burst-evidence.md` 的逐项读数）。
     #   ✅ **运行时那半句是对的**：`effects.py:270-277` + `env.py:1266` 真的按迸发窗口加威力
     #   —— 真打一手 `power_used` 60→90（313）/ 80→120（581）/ 35→55（584），
-    #   `conditional_reason="迸发 → 威力 +N"`。⇒ 即：**引擎真结算，但诊断形状仍记缺口**，
-    #   这是「306 vs 309」那条**待裁决**的分叉（584 取证件 §5 给了三个选项），**本轮不动结论**。
-    #   而 `583 超导`「迸发：本技能能耗-2」、`598 双联脉冲`「使用次数+1」**运行时也确实不结算**
-    #   （583 真打一手两回合都付 3 点能耗、`power_used` 不变）⇒ 记缺口是对的。
+    #   `conditional_reason="迸发 → 威力 +N"`。⇒ 即：**引擎真结算，但诊断形状仍记缺口**。
+    #   ▶ 2026-09-30（分计划 00 · A 案 · **用户裁决后已落地**）：这一条加了**同源豁免** ——
+    #     `_burst_power_is_settled()` 直接调 `effects.effective_power()`（窗口开/关各跑一次，
+    #     只认它自己给的 reason）+ `has_static_power` 守卫 ⇒ `313/581/584` 转
+    #     `SIMULATABLE_UNVERIFIED`（`totals 306 → 309`，改钉见 `test_effect_coverage` 末段）。
+    #     ⚠ **四条守卫仍 PARTIAL（实测）**：`583 超导`（能耗-2，差值 0）· `598 双联脉冲`
+    #     （使用次数+1，差值 0）· `607 踏雷`（无静态威力 ⇒ 守卫 False）· `587 雷暴`
+    #     （被豁免但**另有三条残余缺口** `获得：…`×2 / `每：…`）。读数见 `plan00-burst-exemption.md`。
     #   这一条正是审计里「21 行判宽」的第 ① 族（11 行）。
     ("条件：生命阈值", _re.compile(r"生命\s*(?:大于|小于|高于|低于|不低于|不超过)\s*\d+\s*%")),
     ("体重/吨位条件", _re.compile(r"体重|吨位")),
@@ -1562,6 +1567,53 @@ def _settlers_on(names: Any, caps: Optional[Dict[str, bool]] = None) -> bool:
     return any(bool(caps.get(str(n), False)) for n in names)
 
 
+class _BurstProbe:
+    """只为调 `effects.effective_power()` 造的**最小替身**（它只读这几个属性）。
+
+    不引入任何游戏状态：两个实例只在 `_burst_active`（`env.py:1266` 设的那个迸发窗口）上不同。
+    """
+
+    __slots__ = ("energy", "_respond_succeeded", "_burst_active")
+
+    def __init__(self, burst_active: bool) -> None:
+        self.energy = 0
+        self._respond_succeeded = False
+        self._burst_active = bool(burst_active)
+
+
+def _burst_power_is_settled(skill: Any) -> bool:
+    """「迸发」那一段：**引擎真的会加威力**吗？—— 直接问加威力的那一处，不另抄形状清单。
+
+    2026-09-30（分计划 00 · A 案 · 用户裁决）：`diagnostic_shape_gaps` 对「迸发」只按
+    "形状在 desc 里、且没有效果 evidence 覆盖" 判 —— 而**威力那半**根本不是解析层产出的效果，
+    是**结算期**由 `effects.effective_power()`（`:270-277` 的迸发支，窗口由 `env.py:1266` 的
+    `_burst_active` 设）算出来的 ⇒ 三行被判"未结算"（`313`/`581`/`584`，**假阴性**）。
+
+    判法（**与结算同一把尺子**）：把**同一个函数**跑两遍 —— 窗口开 / 窗口关，其余状态逐字相同，
+    只看它**自己给出的** `reason` 里有没有「迸发 →」。这样判据与结算不会像上次那样
+    "判据侧另抄一张形状清单、一漂就散"（判据侧抄漂过一次，见 `plan00-584-burst-evidence.md`）。
+
+    守卫（一律 fail closed）：
+      · `has_static_power=False` ⇒ 直接 False（无静态威力时 `effective_power` 会抛，且引擎也不走伤害支）；
+      · 函数抛任何异常 ⇒ False（**不把"问不出来"当成"已结算"**）。
+    实测（`p00-a-pre.out.txt`；真打一手读数见 `plan00-burst-exemption.md`）：
+      · `313`/`581`/`584` 窗口开 = 90/120/55（+30/+40/+20，reason 逐字）⇒ 豁免 ✓；
+      · `583 超导`「迸发：本技能能耗-2」差值 **0** ⇒ **不豁免**（仍在 PARTIAL）；
+      · `598 双联脉冲`「使用次数+1」差值 **0** ⇒ 不豁免；
+      · `607 踏雷` 无静态威力 ⇒ 守卫 False；
+      · `587 雷暴` 的 `_extract_plus` 会读到句中的「威力+10」⇒ 豁免，但它**另有三条残余缺口**
+        （`获得：…`×2 / `每：…`）⇒ 仍 PARTIAL（如实登记，见证据件 §4）。
+    """
+    if not getattr(skill, "has_static_power", False):
+        return False
+    try:
+        res = fx.effective_power(skill, attacker=_BurstProbe(True),
+                                 defender=_BurstProbe(False), rs=None)
+    except Exception:                            # noqa: BLE001 —— fail closed：问不出来就不豁免
+        return False
+    return "迸发" in str(getattr(res, "reason", "") or "")
+
+
 def diagnostic_shape_gaps(skill: Any, parsed: Any) -> List[str]:
     """**诊断形状缺口**：描述里有这个形状、却没有任何效果覆盖它 ⇒ 记缺口。
 
@@ -1570,6 +1622,9 @@ def diagnostic_shape_gaps(skill: Any, parsed: Any) -> List[str]:
     它**有 settler**：`cond_self_debuff_power` 的 resolver 产出一条带 `evidence` 的效果
     ⇒ 形状被盖住、缺口消失；能力位一关，缺口立刻回来 —— 这就是
     `test_cond_self_debuff_power:101-113` 那条反证的机制。
+
+    ⚠ 「迸发」这一条另有**已结算形状豁免**：威力那半由结算期的 `effects.effective_power()`
+    算（解析层零产出）⇒ 单独问 `_burst_power_is_settled()`（**同源**，不是另抄清单）。
     """
     desc = str(getattr(skill, "desc", "") or "")
     ranges = _evidence_ranges(skill, parsed)
@@ -1581,6 +1636,8 @@ def diagnostic_shape_gaps(skill: Any, parsed: Any) -> List[str]:
         lo, hi = m.span()
         if any(lo >= a and hi <= b for a, b, _kind in ranges):
             continue                      # 形状被某条效果的 evidence 盖住 ⇒ 已认领
+        if label == "迸发" and _burst_power_is_settled(skill):
+            continue                      # 「迸发：本次技能威力+N」引擎真的加 ⇒ 不算缺口
         out.append(label)
     return out
 

@@ -1,0 +1,134 @@
+
+===== [1] defectB 探针（四条 + 7 条运行时反例）=====
+BASELINE_SNAPSHOT /mnt/e/roco-coach/reports/roco/product-execution/harness/readings-78766db-all.json stamp={"coverage.py": "21b80d3fe4dddf4c249a6a1ee1d53f4f2fe764be867ec9cba99c9885e2631006", "data.py": "d92786ef8c1a9584afbbb7b57640793111d52737be8e97cbc0efee12aa6f9e2a", "service.py": "74f53be59fb01dc19db51dd401dfb25039aea69fc238662991b3484445fcad33"}
+SETTLED_CHANGED_ROWS 38（其中未带动 tier/resolved 的 32）
+   skill_000246 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000273 settled [] -> ['回复生命'] | tier_resolved_changed=True
+   skill_000282 settled ['应对'] -> ['应对', '回复生命'] | tier_resolved_changed=False
+   skill_000337 settled ['双攻升降'] -> ['双攻升降', '回能'] | tier_resolved_changed=False
+   skill_000338 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000342 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000344 settled [] -> ['回能'] | tier_resolved_changed=True
+   skill_000346 settled [] -> ['回复生命'] | tier_resolved_changed=True
+   skill_000347 settled ['双攻升降'] -> ['双攻升降', '回能'] | tier_resolved_changed=False
+   skill_000351 settled [] -> ['回复生命'] | tier_resolved_changed=False
+   skill_000353 settled ['减伤', '应对'] -> ['减伤', '应对', '回复生命'] | tier_resolved_changed=False
+   skill_000365 settled [] -> ['回复生命'] | tier_resolved_changed=False
+   skill_000368 settled ['伤害', '应对'] -> ['伤害', '应对', '回复生命'] | tier_resolved_changed=False
+   skill_000371 settled ['伤害', '应对'] -> ['伤害', '应对', '回复生命'] | tier_resolved_changed=False
+   skill_000372 settled ['伤害'] -> ['伤害', '回复生命'] | tier_resolved_changed=False
+   skill_000373 settled [] -> ['回复生命'] | tier_resolved_changed=False
+   skill_000374 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000375 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000378 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000418 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000472 settled [] -> ['回能'] | tier_resolved_changed=True
+   skill_000529 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000558 settled ['伤害', '持续状态层数/回合'] -> ['伤害', '持续状态层数/回合', '回能'] | tier_resolved_changed=False
+   skill_000569 settled [] -> ['回复生命'] | tier_resolved_changed=False
+   skill_000636 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000640 settled [] -> ['回能'] | tier_resolved_changed=False
+   skill_000641 settled [] -> ['回复生命'] | tier_resolved_changed=False
+   skill_000659 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000670 settled ['应对', '双攻升降'] -> ['应对', '双攻升降', '回复生命'] | tier_resolved_changed=False
+   skill_000683 settled ['双攻升降'] -> ['双攻升降', '回复生命'] | tier_resolved_changed=False
+   skill_000723 settled ['萌化标记'] -> ['萌化标记', '回复生命'] | tier_resolved_changed=False
+   skill_000741 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000756 settled [] -> ['吸取能量'] | tier_resolved_changed=True
+   skill_000762 settled [] -> ['扣能'] | tier_resolved_changed=True
+   skill_000764 settled ['伤害'] -> ['伤害', '吸取能量'] | tier_resolved_changed=False
+   skill_000765 settled [] -> ['吸取能量'] | tier_resolved_changed=False
+   skill_000766 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+   skill_000807 settled ['伤害'] -> ['伤害', '回能'] | tier_resolved_changed=False
+CHANGED_ROWS 6 -> ['skill_000273', 'skill_000344', 'skill_000346', 'skill_000472', 'skill_000756', 'skill_000762']
+EXPECTED      6 -> ['skill_000273', 'skill_000344', 'skill_000346', 'skill_000472', 'skill_000756', 'skill_000762']
+  skill_000273 tier=SIMULATABLE_UNVERIFIED resolved=True settled=['回复生命'] unsettled=[]
+  skill_000344 tier=SIMULATABLE_UNVERIFIED resolved=True settled=['回能'] unsettled=[]
+  skill_000346 tier=SIMULATABLE_UNVERIFIED resolved=True settled=['回复生命'] unsettled=[]
+  skill_000472 tier=SIMULATABLE_UNVERIFIED resolved=True settled=['回能'] unsettled=[]
+  skill_000756 tier=SIMULATABLE_UNVERIFIED resolved=True settled=['吸取能量'] unsettled=[]
+  skill_000762 tier=SIMULATABLE_UNVERIFIED resolved=True settled=['扣能'] unsettled=[]
+GUARD_ROWS（改前有目标类效果但未结算）15 -> 被误翻正 0 []
+GUARD_ROWS_B（改前未结算且 unsettled 非空）274 -> 被误翻正 0 []
+GUARD 269 吞噬 resolved=False unsettled=['回复：回复6能量', '若：若使用本技能击败敌方'] effects=[]
+TOTALS 306（期望 306）
+UNION_MISMATCHES 0 []（期望 0）
+GATES_OFF_COUNT 5 ['skill_000412', 'skill_000510', 'skill_000539', 'skill_000671', 'skill_000694']（期望 5）
+RUNTIME_GUARD {"skill_id": "skill_000269", "desc": "造成物伤，若使用本技能击败敌方，回复6能量。", "tried": 12, "attributed_events": [], "sample_event_kinds": ["turn_start,defense,damage", "turn_start,damage,damage,energy_gain,effects_registered_unsupported"]}
+RUNTIME_GUARD {"skill_id": "skill_000366", "desc": "为场下每个精灵回复3能量。", "tried": 12, "attributed_events": [], "sample_event_kinds": ["turn_start,defense,status_unsupported", "turn_start,damage,energy_gain,effects_registered_unsupported,status_un"]}
+RUNTIME_GUARD {"skill_id": "skill_000369", "desc": "造成魔伤，为场下所有精灵回复1能量。", "tried": 12, "attributed_events": [], "sample_event_kinds": ["turn_start,defense,damage", "turn_start,damage,energy_gain,effects_registered_unsupported,damage"]}
+RUNTIME_GUARD {"skill_id": "skill_000537", "desc": "回复能量，回复值等于敌方技能总能耗的一半。", "tried": 12, "attributed_events": [], "sample_event_kinds": ["turn_start,defense,status_unsupported", "turn_start,damage,energy_gain,effects_registered_unsupported,status_un"]}
+RUNTIME_GUARD {"skill_id": "skill_000745", "desc": "敌方失去3能量，应对防御：改为敌方失去6能量。", "tried": 12, "attributed_events": [], "sample_event_kinds": ["turn_start,respond_override_unsupported,status_unsupported,defense", "turn_start,damage,energy_gain,effects_registered_unsupported,respond_o"]}
+RUNTIME_GUARD {"skill_id": "skill_000760", "desc": "敌方下回合回复的能量-5，冷却2回合。", "tried": 12, "attributed_events": [], "sample_event_kinds": ["turn_start,defense,status_unsupported", "turn_start,damage,energy_gain,effects_registered_unsupported,status_un"]}
+RUNTIME_GUARD {"skill_id": "skill_000793", "desc": "若敌方本回合回复生命，改为失去2倍（含溢出的回复量）。先手+1。", "tried": 12, "attributed_events": [], "sample_event_kinds": ["turn_start,status_unsupported,defense", "turn_start,status_unsupported,damage"]}
+DEFECT_B_FAILS 0
+step1_exit=0
+
+===== [2] 三把尺子分歧 =====
+LEDGER_VS_PRODUCT_DIVERGENCE 0
+skill            build_coverage             classify_declared          product_tier               verd   base306                    settled
+
+其中 ledger=SIM 而 product 非 SIM 的： 0
+step2_exit=0
+
+===== [3] 台账逐行 vs 306（控件 + 差分）=====
+STAMP coverage.py    877dbbb51e370d936e90837e25e65322f345a090cf7a45819b0a02dbcca6ddba /mnt/e/roco-scratch/verify-2e30a4f/roco/src/roco_env/coverage.py
+STAMP service.py     74f53be59fb01dc19db51dd401dfb25039aea69fc238662991b3484445fcad33 /mnt/e/roco-scratch/verify-2e30a4f/roco/src/roco_env/service.py
+STAMP data.py        d92786ef8c1a9584afbbb7b57640793111d52737be8e97cbc0efee12aa6f9e2a /mnt/e/roco-scratch/verify-2e30a4f/roco/src/roco_env/data.py
+CONTROL identity_zero_diff PASS net=0
+CONTROL detect_down PASS skill_000246 down=['skill_000246']
+CONTROL detect_up PASS skill_000253 up=['skill_000253']
+CONTROL detect_missing_entity PASS skill_000246
+CONTROL detect_extra_entity PASS
+CONTROL detect_band_change PASS skill_000253 band=['skill_000253']
+CONTROL_SUMMARY ALL_PASS
+step3a_exit=0
+STAMP coverage.py    877dbbb51e370d936e90837e25e65322f345a090cf7a45819b0a02dbcca6ddba /mnt/e/roco-scratch/verify-2e30a4f/roco/src/roco_env/coverage.py
+STAMP service.py     74f53be59fb01dc19db51dd401dfb25039aea69fc238662991b3484445fcad33 /mnt/e/roco-scratch/verify-2e30a4f/roco/src/roco_env/service.py
+STAMP data.py        d92786ef8c1a9584afbbb7b57640793111d52737be8e97cbc0efee12aa6f9e2a /mnt/e/roco-scratch/verify-2e30a4f/roco/src/roco_env/data.py
+REPO /mnt/e/roco-scratch/verify-2e30a4f
+BASELINE /mnt/e/roco-scratch/verify-2e30a4f/reports/roco/rc401/effect-coverage.json
+TOTALS baseline_simulatable=306 current_simulatable=306 delta=0 (up-down)
+SUPPORT_LEVELS baseline={"battle_skills": {"FULL_VERIFIED": 0, "SIMULATABLE_UNVERIFIED": 298, "PARTIAL": 279, "KNOWLEDGE_ONLY": 2, "REFUSED": 0}, "traits": {"FULL_VERIFIED": 8, "SIMULATABLE_UNVERIFIED": 0, "PARTIAL": 5, "KNOWLEDGE_ONLY": 228, "REFUSED": 4}}
+SUPPORT_LEVELS current ={"battle_skills": {"FULL_VERIFIED": 0, "SIMULATABLE_UNVERIFIED": 298, "PARTIAL": 280, "KNOWLEDGE_ONLY": 1, "REFUSED": 0}, "traits": {"FULL_VERIFIED": 8, "SIMULATABLE_UNVERIFIED": 0, "PARTIAL": 5, "KNOWLEDGE_ONLY": 228, "REFUSED": 4}}
+CONTROL_RUN skipped
+
+== skills == only_base=0 only_cur=0 翻正=1 翻负=1 同带内变更=1
+   翻正 skill_000762 PARTIAL -> SIMULATABLE_UNVERIFIED | 描述被完整读出（1 条效果），且没有未认领片段
+   翻负 skill_000584 SIMULATABLE_UNVERIFIED -> PARTIAL | 读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：迸发
+   同带内变更 skill_000684 KNOWLEDGE_ONLY -> PARTIAL | 读出了 0 条效果，但描述里还有 1 段机制**引擎没结算**（会被写进 unsupported）：应对：选择：本次技能威力+20或应对状态时本次技能威力+140
+
+== traits == only_base=0 only_cur=0 翻正=0 翻负=0 同带内变更=0
+
+WROTE /mnt/e/roco-coach/reports/roco/product-execution/harness/ledger-2e30a4f.json
+step3b_exit=0
+
+===== [4] 并集 + totals =====
+STAMP coverage.py 877dbbb51e370d936e90837e25e65322f345a090cf7a45819b0a02dbcca6ddba /mnt/e/roco-scratch/verify-2e30a4f/roco/src/roco_env/coverage.py
+STAMP service.py 74f53be59fb01dc19db51dd401dfb25039aea69fc238662991b3484445fcad33 /mnt/e/roco-scratch/verify-2e30a4f/roco/src/roco_env/service.py
+STAMP data.py d92786ef8c1a9584afbbb7b57640793111d52737be8e97cbc0efee12aa6f9e2a /mnt/e/roco-scratch/verify-2e30a4f/roco/src/roco_env/data.py
+census_ids=427 union_mismatches=0
+totals.simulatable_entities=306 totals.keys=['battle_skills', 'entities', 'simulatable_entities', 'simulatable_ratio', 'traits']
+step4_exit=0
+
+===== [5] 隔离验收 =====
+[acceptance] battle_advance     passed   http=200  ok=True events=['turn_start', 'defense', 'damage']
+[acceptance] skill_detail       passed   http=200  ok=True tier=SIMULATABLE_UNVERIFIED
+[acceptance] PASS  exit_code=0  {"steps_total": 6, "steps_passed": 6, "steps_failed": 0, "steps_skipped": 0, "failed_steps": []}
+[acceptance] last-run -> /mnt/e/roco-scratch/verify-2e30a4f/reports/roco/product-execution/harness/last-run.json
+step5_exit=0
+
+===== [6] 树 hash =====
+ROOT roco/src 06036bf291a1d68e970f4247276d78b0953e86e8e4a40272fd7825a3a007fee3 files=19 bytes=1159843
+ROOT roco/tests e98b8abef998c1a43c6a8cab4921e860d9eb21d624e53496183857fee6e5069d files=83 bytes=2076357
+TREE 81fa0753180e6766d901ec8fa9e554dd83254b48be88afd4a53f850d414eb81b
+
+===== [7] 全量 =====
+step7_exit=1 elapsed=204s
+32:Ran 847 tests in 170.773s
+34:FAILED (failures=2, skipped=2)
+8:FAIL: test_every_done_item_has_existing_evidence (test_microcase_harness.TestProgressDashboard)
+23:FAIL: test_counter_proof_disabling_the_shared_gates_brings_them_back (test_tier_verdict_agreement.TierAndVerdictAgreeTest)
+13:AssertionError: Lists differ: ['docs/roadmap/DSH-EXECUTION-STATE.md'] != []
+29:AssertionError: 5 not greater than or equal to 8 : 关掉两道共用闸之后必须重新出现打架（否则这条判据是空的）
+===== DONE 2026-09-30T18:38:34+08:00 =====
