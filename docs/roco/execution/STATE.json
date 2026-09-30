@@ -1,8 +1,8 @@
 {
   "schema": "roco-dsh-execution/v1",
-  "updated_at": "2026-09-30T16:59:36+08:00",
+  "updated_at": "2026-09-30T17:02:53+08:00",
   "active_plan": "01",
-  "next_action": "00：按四族收窄（① 补回诊断形状，按半句判，11 行；② RESPOND 跳步只跳命中段，2 行；③ global_skill_mods 认领要求 env 写点，6 行；④ 本轮已收窄待复测）；每收一族就跑 并集打架(必须 0) + totals + 全量；收到 306 或给出逐行运行时报据证明差异合法后再谈改钉。01：plan01-recon 继续（ui.legal.enemy 泄漏优先 + 三协议对齐 + 两条 pet_id 断言一起改钉）。",
+  "next_action": "接手后：① 读交接文档与 START-HERE；② 复跑三条命令确认基线（import / 847·2F / 并集 0 · totals 313 / harness 6-6 exit 0）；③ 按族②→族③收窄 00 残余（每族跑 并集0 + totals + 全量）；④ 01 继续：先灭 ui.legal.enemy 泄漏，再对齐三协议，两条 pet_id 断言一起改钉。",
   "plan_order": [
     "00",
     "01",
@@ -47,29 +47,25 @@
       "isolated": "passed",
       "player": "observed_healthy_pending_resident_version",
       "evidence": "reports/roco/product-execution/00/ledger-delta-audit.txt + harness/last-run.json(6/6)",
-      "commit": "3e5ddea",
+      "commit": "PENDING_HANDOFF_COMMIT",
       "remote_sha": null,
-      "note": "本轮已修：462 resolver 顺序（基础子句先于覆盖体）· 483 号位认领 effect 在两条链链尾成对补 · elif claimed 收窄。并集打架保持 0（硬指标）。",
+      "note": "本轮把「诊断形状缺」那一族修完（补回 10 个形状，按 evidence 覆盖天然按半句判）：328 → 313（钉 306，差 +7）。并集打架 0 保持。剩：② RESPOND 整句跳步 2 行（398/637）· ③ global_skill_mods 不看写点 6 行（430/441/531/532/534/682）· 反证 6<8（只登记不拟合）· 762 属判据侧陈旧（补 SETTLED_PATTERNS 扣能类）。",
       "residuals": [
         {
           "id": "R-00-a",
-          "what": "台账可模拟总数 328 vs 真基线 306（差 22 = 24 翻正 − 2 翻负）",
-          "baseline": "reports/roco/rc401/effect-coverage.json（丢失层留下的台账产物，totals=306，逐行可对照）",
-          "verdict": "24 翻正里仅 3 条有运行时报据（313/581/762）；21 条判宽，分四族",
-          "families": [
-            "① 诊断形状缺 11 行：_DIAGNOSTIC_SHAPE_PATTERNS 只剩 2 条（体重/体重差/生命大于N%/混血/固定能耗/面板比值/使用次数）——须按半句判（313/581 的迸发-威力真结算，583 能耗/598 次数没结算）",
-            "② RESPOND_POWER_SETTLED_RE 整句跳步 2 行（398/637）：只许跳命中那一段，同句其余仍须 evidence 覆盖",
-            "③ global_skill_mods 认领不看 env 写点 6 行（430/441/531/532/534/682）：防御支/敌方方向/无条件子句都没有 global_skill_mod_applied",
-            "④ elif claimed 只凭 传动×1 放行 2 行（473/489）——本轮已收窄，待复测"
+          "what": "totals 313 vs pin 306（+7）",
+          "done": "族① 诊断形状（11 行）已修 328→313；族④ elif claimed 已收窄",
+          "todo": [
+            "族② RESPOND_POWER_SETTLED_RE 只跳命中段（398/637）",
+            "族③ global_skill_mods 认领要求 env 写点（430/441/531/532/534/682）",
+            "若改走 classify_skill_declared 必须先补 SETTLED_PATTERNS 的 回复/回能/扣能 类（否则 273/344/346/472/756/762 误降）"
           ],
-          "also": "⑤ build_coverage 走裸 classify_skill，未吃\"比结论\"；若改走 classify_skill_declared 必须同时给 SETTLED_PATTERNS 补\"回复/回能/扣能\"类，否则 273/344/346/472/756/762 被误降（实测它们真结算）",
-          "reverted": "上一版 328 改钉已撤回（依据不足：误把 782 行 HEAD 当 306 那一版，且\"判据也说 True\"是循环）"
+          "rule": "不许为凑 306 拟合；改判据须逐行运行时报据 + 原值留档"
         },
         {
           "id": "R-00-b",
-          "what": "反证关两闸后打架 6 条 < 8",
-          "status": "只登记不拟合",
-          "rule": "不许为凑数量放宽或收紧闸"
+          "what": "反证 6<8",
+          "status": "只登记不拟合"
         }
       ]
     },
@@ -215,5 +211,16 @@
       "owner": "plan10-recon（异常恢复与运行版本验收）待立",
       "status": "open"
     }
-  ]
+  ],
+  "handoff": {
+    "to": "下一台电脑 / 下一个 DSH 会话",
+    "doc": "reports/roco/product-execution/HANDOFF-2026-09-30-TO-NEXT-MACHINE.md",
+    "read_order": [
+      "docs/roco/execution/START-HERE.md",
+      "MASTER-PLAN.md",
+      "STATE.json",
+      "当前 active_plan 分计划",
+      "交接文档"
+    ]
+  }
 }
