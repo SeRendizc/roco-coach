@@ -1,6 +1,11 @@
-import test from 'node:test';import assert from 'node:assert/strict';
+import test,{before,after} from 'node:test';import assert from 'node:assert/strict';
 import {battleAdvice} from '../src/coach/coach-advice.js';
 import {runCoach} from '../src/coach/runtime.js';import {freshMemory} from '../src/coach/memory.js';
+import {configureRocoTools,resetRocoTools} from '../src/coach/toolbox.js';
+// This file checks routing, not live rule-tool accuracy. Fail closed explicitly:
+// no subprocess, cache, network tool or model response substitutes for the task.
+before(()=>configureRocoTools({factory:()=>{throw Error('offline routing counterexample: rule bridge deliberately unavailable');}}));
+after(()=>resetRocoTools());
 const battle={battle_id:'current',state_version:2,turn:1,phase:'battle',self:[{pet_id:'a',name:'喵喵',hp:100,max_hp:100},{pet_id:'b',name:'缇塔',hp:100,max_hp:100}],self_active:0,legal:[{kind:'skill',label:'防御'}],affinity:{source:'src/client/type-affinity.data.js@public-revision',rows:[{pet_id:'a',multiplier:2,vs_type:'火'},{pet_id:'b',multiplier:1,vs_type:'火'}]}};
 test('player comparison explains public provenance without printing implementation path',()=>{
  const a=battleAdvice({battle,message:'喵喵与缇塔承伤比较'});assert.doesNotMatch(a.text,/src\/|\.js@|public-revision/);assert.match(a.text,/公开属性/);assert.equal(a.evidence.source,battle.affinity.source);
@@ -23,4 +28,12 @@ test('bounded current request without a live snapshot says unavailable instead o
 test('actual companion reading bundle preserves Roco live context and blocks last-match material',async()=>{
  const {companion}=await import('../src/coach/companion.js');const memory={...freshMemory(),events:[{id:'previous',result:'loss',turns:7,stage:'PREVIOUS-MARKER',turnLog:[]}]};
  const a=companion({roco_battle:battle},memory,'帮我看当前局');assert.doesNotMatch(a.text,/上一局|PREVIOUS-MARKER/);
+});
+test('negated historical clause cannot hijack a positive mechanism or fact task',async()=>{
+ const memory={...freshMemory(),events:[{id:'previous',result:'loss',turns:7,stage:'PREVIOUS-MARKER',turnLog:[]}]};
+ for(const question of ['当前局喵喵为什么怕火','当前局火系克制什么属性','帮我看当前局，火系克制什么属性']){
+ const plain=await runCoach({message:question,context:{roco_battle:battle},memory,conversation:[]});
+ const negated=await runCoach({message:'不要讲上一局，'+question,context:{roco_battle:battle},memory,conversation:[]});
+ assert.equal(negated.text,plain.text,`positive task must retain its original consumer: ${question}`);assert.equal(negated.route,plain.route);assert.doesNotMatch(negated.text,/^当前局：第 1 回合/);
+ }
 });

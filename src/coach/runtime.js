@@ -2531,7 +2531,7 @@ if(role==='auto')route=factAsk?'teacher':(refusesReview?'companion':/培养|加�
    if(battleReply){
     packet={text:battleReply.text,evidence:battleReply.evidence};
     locked=true;route='strategist';next.lastTopic='strategist';
-   }else if(routingText!==rawRoutingText && !rocoAdviceAsk(routingText)){
+   }else if(routingText!==rawRoutingText && /^(?:帮我|请)?看(?:看)?(?:当前局|这一局|本局)[。！？?!\s]*$/.test(routingText)){
     // The bounded request asks to see this match, not to recall historical material.
     const b=context.roco_battle,me=b?.self?.[b?.self_active??0];
     const turn=Number.isInteger(b?.turn)?`第 ${b.turn} 回合，`:'';

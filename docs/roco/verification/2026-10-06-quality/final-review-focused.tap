@@ -1,13 +1,13 @@
-✔ 05.1a ①：局中三个建议类问句必须落建议层（`rocoAdvice` 在场） (10.649792ms)
-✔ 05.1a ②：硬断言 —— 局中任何一格都不许说「开一局之后」 (1.355667ms)
-✔ 05.1a ③：硬断言 —— 局末任何一格都不许再谈「这一手 / 首选行动」 (0.757125ms)
-✔ 05.1a ④：局外任何一格都不许装作知道局面（不许出现「第 N 回合」） (0.714166ms)
-✔ 05.1b ①：局中「有啥可以改进」必须引用当前局面（或明确指路复盘） (0.460416ms)
-✔ 05.1b ②：局中「这招能不能用」必须落建议层（合法性是该层的看家本事） (0.359708ms)
-✔ 05.1c（结构）：两套建议词表不许各自漂移 —— 局中建议问句在两个入口都命中 (0.192583ms)
-✔ 第3步 ①：`rocoAdviceKind` 三态分类（比较 / 推荐 / 事实） (0.085292ms)
-✔ 第3步 ②：比较类回答**真的做比较** —— 两个有出处的倍率 + 谁更扛 + 不出现「首选行动」 (0.2535ms)
-✔ 第3步 ④：诚实性 —— 拿不到倍率必须写「读不到」且**一个数字都不编** (0.161459ms)
+✔ 05.1a ①：局中三个建议类问句必须落建议层（`rocoAdvice` 在场） (10.598042ms)
+✔ 05.1a ②：硬断言 —— 局中任何一格都不许说「开一局之后」 (1.546667ms)
+✔ 05.1a ③：硬断言 —— 局末任何一格都不许再谈「这一手 / 首选行动」 (0.784625ms)
+✔ 05.1a ④：局外任何一格都不许装作知道局面（不许出现「第 N 回合」） (0.985958ms)
+✔ 05.1b ①：局中「有啥可以改进」必须引用当前局面（或明确指路复盘） (0.14525ms)
+✔ 05.1b ②：局中「这招能不能用」必须落建议层（合法性是该层的看家本事） (0.354583ms)
+✔ 05.1c（结构）：两套建议词表不许各自漂移 —— 局中建议问句在两个入口都命中 (0.182125ms)
+✔ 第3步 ①：`rocoAdviceKind` 三态分类（比较 / 推荐 / 事实） (0.089584ms)
+✔ 第3步 ②：比较类回答**真的做比较** —— 两个有出处的倍率 + 谁更扛 + 不出现「首选行动」 (0.253291ms)
+✔ 第3步 ④：诚实性 —— 拿不到倍率必须写「读不到」且**一个数字都不编** (0.155084ms)
   A 连输2 → {"count":2,"wins":0,"losses":2}
   B 刚赢1 → {"count":1,"wins":1,"losses":0}
   C 一波5局 → {"count":5,"wins":0,"losses":5}
@@ -40,32 +40,33 @@
   正① 句子逐字： 这么晚了，这一波你已经打了5局。 / 这一局打完就到这儿也行。
   正② 句子逐字： 这么晚了。 / 这一局打完就到这儿也行。
   反 读数： 
-✔ ㊱ 陪练·跨局账本按局面变（连输2 / 刚赢1 / 一波5局 ⇒ 三样不同） (1.48375ms)
-✔ ㊲ 陪练·这一局的账（连输 vs 刚赢 ⇒ 事实不同） (0.333875ms)
-✔ ㊳ 陪练·时段：3 个钟点 ⇒ 三种问候，且每个时段都有话（半夜那档在） (0.093583ms)
-✔ ㊴ 引擎信号随局面变（同一局 vs 打了4回合 vs 换一队 ⇒ 信号不同） (25.368834ms)
-✔ ㊵ 反证：同一个 input 喂三次 ⇒ 输出一字不差（不许随机/不许抖） (0.197041ms)
-✔ ㊶ 对照：`proactiveRegister` 是**粗粒度**映射（0/1 ⇒ R1 · 5 ⇒ R3），不是常量 (0.091125ms)
-✔ ㊶b 长时/深夜是**已有的权限类别**（`PERMISSION_REQUIRED`），但"劝休息"被禁用词表挡着 (0.072917ms)
-✔ ㊷ `companionReadings` 随**跨局账本**变（连输2 / 刚赢1 / 一波5局 ⇒ 三样不同） (21.877292ms)
-✔ ㊸ `companionReadings` 随 **这一局的信号**（打了 0 / 4 / 8 回合 ⇒ 三样不同） (52.323292ms)
-✔ ㊸b 【如实】`context.goal` 只改**顺序**，不改读点集合（粗维度，不是常量） (20.30925ms)
-✔ ㊹ 反证：**同一个 input 连喂三次 ⇒ 读点一字不差**（不许随机/不许抖） (19.713583ms)
-✔ ㊺ 【缺口·如实】时段（凌晨/上午/晚上）**没有**传到 `companionReadings` 这一层 (19.180125ms)
-✔ 正①：凌晨 3 点 + 有 run ⇒ 出现 late-night，句含「这一波你已经打了 N 局」 (19.605459ms)
-✔ 正②：凌晨 3 点 + 无 run（首页，还没开始打）⇒ 也出现 late-night，句为「这么晚了。」 (0.104458ms)
-✔ 反：上午 9 点 + 无 run ⇒ 不出现 late-night (0.051042ms)
-✔ 反证：把 `nowLate` 从条件里去掉 ⇒ 正②（首页那一半）会红 (0.808333ms)
-✔ player comparison explains public provenance without printing implementation path (0.512417ms)
-✔ explicitly negated historical clause plus current request stays current (7.700625ms)
-✔ positive previous-match request and current question keep their separate scopes (0.749375ms)
-✔ bounded current request without a live snapshot says unavailable instead of historical substitution (0.304875ms)
-✔ actual companion reading bundle preserves Roco live context and blocks last-match material (2.347667ms)
-ℹ tests 31
+✔ ㊱ 陪练·跨局账本按局面变（连输2 / 刚赢1 / 一波5局 ⇒ 三样不同） (1.428917ms)
+✔ ㊲ 陪练·这一局的账（连输 vs 刚赢 ⇒ 事实不同） (0.397542ms)
+✔ ㊳ 陪练·时段：3 个钟点 ⇒ 三种问候，且每个时段都有话（半夜那档在） (0.102041ms)
+✔ ㊴ 引擎信号随局面变（同一局 vs 打了4回合 vs 换一队 ⇒ 信号不同） (25.301209ms)
+✔ ㊵ 反证：同一个 input 喂三次 ⇒ 输出一字不差（不许随机/不许抖） (0.198ms)
+✔ ㊶ 对照：`proactiveRegister` 是**粗粒度**映射（0/1 ⇒ R1 · 5 ⇒ R3），不是常量 (0.085667ms)
+✔ ㊶b 长时/深夜是**已有的权限类别**（`PERMISSION_REQUIRED`），但"劝休息"被禁用词表挡着 (0.071417ms)
+✔ ㊷ `companionReadings` 随**跨局账本**变（连输2 / 刚赢1 / 一波5局 ⇒ 三样不同） (22.05975ms)
+✔ ㊸ `companionReadings` 随 **这一局的信号**（打了 0 / 4 / 8 回合 ⇒ 三样不同） (52.47075ms)
+✔ ㊸b 【如实】`context.goal` 只改**顺序**，不改读点集合（粗维度，不是常量） (20.814583ms)
+✔ ㊹ 反证：**同一个 input 连喂三次 ⇒ 读点一字不差**（不许随机/不许抖） (19.195334ms)
+✔ ㊺ 【缺口·如实】时段（凌晨/上午/晚上）**没有**传到 `companionReadings` 这一层 (18.942541ms)
+✔ 正①：凌晨 3 点 + 有 run ⇒ 出现 late-night，句含「这一波你已经打了 N 局」 (19.458542ms)
+✔ 正②：凌晨 3 点 + 无 run（首页，还没开始打）⇒ 也出现 late-night，句为「这么晚了。」 (0.100084ms)
+✔ 反：上午 9 点 + 无 run ⇒ 不出现 late-night (0.042875ms)
+✔ 反证：把 `nowLate` 从条件里去掉 ⇒ 正②（首页那一半）会红 (0.761708ms)
+✔ player comparison explains public provenance without printing implementation path (0.446375ms)
+✔ explicitly negated historical clause plus current request stays current (7.7505ms)
+✔ positive previous-match request and current question keep their separate scopes (0.75375ms)
+✔ bounded current request without a live snapshot says unavailable instead of historical substitution (0.307375ms)
+✔ actual companion reading bundle preserves Roco live context and blocks last-match material (2.619833ms)
+✔ negated historical clause cannot hijack a positive mechanism or fact task (12.46525ms)
+ℹ tests 32
 ℹ suites 0
-ℹ pass 31
+ℹ pass 32
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 222.324333
+ℹ duration_ms 220.290833

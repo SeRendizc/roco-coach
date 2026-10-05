@@ -1,0 +1,35 @@
+✔ player comparison explains public provenance without printing implementation path (0.471125ms)
+✔ explicitly negated historical clause plus current request stays current (7.231917ms)
+✔ positive previous-match request and current question keep their separate scopes (0.691625ms)
+✔ bounded current request without a live snapshot says unavailable instead of historical substitution (0.280208ms)
+✔ actual companion reading bundle preserves Roco live context and blocks last-match material (2.179417ms)
+✖ negated historical clause cannot hijack a positive mechanism or fact task (1.107291ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 5
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 56.029458
+
+✖ failing tests:
+
+test at tests/roco-quality-final-wording-20261006.test.js:27:1
+✖ negated historical clause cannot hijack a positive mechanism or fact task (1.107291ms)
+  AssertionError [ERR_ASSERTION]: positive task must retain its original consumer: 当前局喵喵为什么怕火
+  + actual - expected
+  
+  + '当前局：第 1 回合，我方场上是喵喵，100/100 血。想看哪一个选择，可以接着问。'
+  - '你想问哪一段，我再说一遍。'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-final-wording-20261006.test.js:32:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '当前局：第 1 回合，我方场上是喵喵，100/100 血。想看哪一个选择，可以接着问。',
+    expected: '你想问哪一段，我再说一遍。',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
