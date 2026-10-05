@@ -1,0 +1,30 @@
+✔ player comparison explains public provenance without printing implementation path (0.4565ms)
+✖ explicitly negated historical clause plus current request stays current (7.878625ms)
+✔ positive previous-match request and current question keep their separate scopes (2.139208ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 2
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 51.111375
+
+✖ failing tests:
+
+test at tests/roco-quality-final-wording-20261006.test.js:8:1
+✖ explicitly negated historical clause plus current request stays current (7.878625ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /第 1 回合|当前局.*读不到/. Input:
+  
+  '我在。聊游戏里的都行。'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-final-wording-20261006.test.js:11:192)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '我在。聊游戏里的都行。',
+    expected: /第 1 回合|当前局.*读不到/,
+    operator: 'match',
+    diff: 'simple'
+  }

@@ -2254,7 +2254,14 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  // 只说一句「你好」，也会被当成老师在要求复盘——陪练包根本没生成，
  // /api/coach 返回的 meta 是 route:'teacher'。把附加说明切掉再路由，规则包照旧带着它。
  const answerRequirements='\n回答要求：';
- const routingText=String(message||'').split(answerRequirements)[0];
+ const originalMessage=message;
+ const rawRoutingText=String(message||'').split(answerRequirements)[0];
+ // Bounded negation: only discard an explicitly rejected historical clause when
+ // the same sentence explicitly asks about the current match.
+ const routingText=rawRoutingText.replace(/(?:不要|别|不用)(?:讲|说|聊|看|复盘|回顾)(?:上一局|上一场|上个局)[，,；;。]\s*(?=.{0,12}(?:当前局|这一局|本局))/g,'');
+ // The deterministic consumers also classify the message; give them the same
+ // bounded intent while retaining the player's original line in dialogue history.
+ if(routingText!==rawRoutingText)message=routingText+String(message).slice(rawRoutingText.length);
  // An explicit historical question must not consume today's live snapshot.
  if (/上一局|上一场|上个局/.test(routingText)) {
   const liveId=context?.roco_battle?.battle_id??context?.battle?.id??null;
@@ -2524,6 +2531,14 @@ if(role==='auto')route=factAsk?'teacher':(refusesReview?'companion':/培养|加�
    if(battleReply){
     packet={text:battleReply.text,evidence:battleReply.evidence};
     locked=true;route='strategist';next.lastTopic='strategist';
+   }else if(routingText!==rawRoutingText && !rocoAdviceAsk(routingText)){
+    // The bounded request asks to see this match, not to recall historical material.
+    const b=context.roco_battle,me=b?.self?.[b?.self_active??0];
+    const turn=Number.isInteger(b?.turn)?`第 ${b.turn} 回合，`:'';
+    const hp=Number.isFinite(me?.hp)&&Number.isFinite(me?.max_hp)?`，${me.hp}/${me.max_hp} 血`:'';
+    packet={text:typeof me?.name==='string'?`当前局：${turn}我方场上是${me.name}${hp}。想看哪一个选择，可以接着问。`
+      :'当前局的公开快照我这里读不到，不能拿上一局记录替代。',evidence:['来源：当前局公开快照；缺字段不补猜。']};
+    locked=true;route='companion';next.lastTopic='companion';
    }else if(factAsk){
     packet={text:FACT_DRAFT,evidence:[]};
     next.lastTopic='rules';
@@ -2841,7 +2856,7 @@ if(role==='auto')route=factAsk?'teacher':(refusesReview?'companion':/培养|加�
     ...(answerCorrection?{attempts:2,answerCorrection:correctionUsage}:{}),
     ...speakPlain,
     reasons:[],scope:modelGrounding.scope};
- next.dialogue=[...previous,{role:'user',content:message},{role:'assistant',content:finalText}].slice(-8);
+ next.dialogue=[...previous,{role:'user',content:originalMessage},{role:'assistant',content:finalText}].slice(-8);
  // 2026-09-25：判定口径的**影子记录**（`ROCO_JUDGE=shadow|on`）——**只多一个字段、绝不改行为**；
  // `off`（默认）时这一句不产生任何字段 ⇒ 回执与 baseline 逐字节一致。
  const judgment=judgeMode()==='off'?null:judgeToolNeed(message,context);

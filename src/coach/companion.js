@@ -2007,7 +2007,8 @@ export function playerWords(message){return String(message??'').split(ANSWER_REQ
  // （两者本来就由 memory.js 的 syncKinds 同步，这里只是不再各读各的）。
  const style=['brief','detailed'].includes(f.chatStyle)?f.chatStyle:(['brief','detailed'].includes(f.preference)?f.preference:null);
  const cross=companionLedger(memory,liveGame(context),now);
- const bundle={cross,signals:emptySignals(),context:{goal:f.goal,turn:f.live?.turn||null},now};
+ const bundle={cross,signals:emptySignals(),context:{goal:f.goal,turn:f.live?.turn||null,
+  ...(context.roco_battle?{roco_battle:context.roco_battle}:{})},now};
  const readings=companionReadings(bundle);
  // 拒绝生效期间，可供挑选的观察里没有跨局回顾那一类；本局正在发生的事照旧可选。
  const pick=classes=>readings.find(r=>classes.includes(r.klass)&&!(noReview&&REVIEW_CLASSES.includes(r.klass)))||null;

@@ -1,0 +1,11 @@
+✔ player comparison explains public provenance without printing implementation path (0.446042ms)
+✔ explicitly negated historical clause plus current request stays current (9.175ms)
+✔ positive previous-match request and current question keep their separate scopes (0.747583ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 51.123375

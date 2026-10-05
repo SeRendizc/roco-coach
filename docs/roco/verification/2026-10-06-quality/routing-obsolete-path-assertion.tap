@@ -1,0 +1,34 @@
+✔ 05.1a ①：局中三个建议类问句必须落建议层（`rocoAdvice` 在场） (9.691417ms)
+✔ 05.1a ②：硬断言 —— 局中任何一格都不许说「开一局之后」 (1.198083ms)
+✔ 05.1a ③：硬断言 —— 局末任何一格都不许再谈「这一手 / 首选行动」 (0.6945ms)
+✔ 05.1a ④：局外任何一格都不许装作知道局面（不许出现「第 N 回合」） (0.987833ms)
+✔ 05.1b ①：局中「有啥可以改进」必须引用当前局面（或明确指路复盘） (0.193ms)
+✔ 05.1b ②：局中「这招能不能用」必须落建议层（合法性是该层的看家本事） (0.425167ms)
+✔ 05.1c（结构）：两套建议词表不许各自漂移 —— 局中建议问句在两个入口都命中 (0.178459ms)
+✔ 第3步 ①：`rocoAdviceKind` 三态分类（比较 / 推荐 / 事实） (0.087167ms)
+✖ 第3步 ②：比较类回答**真的做比较** —— 两个有出处的倍率 + 谁更扛 + 不出现「首选行动」 (0.441417ms)
+✔ 第3步 ④：诚实性 —— 拿不到倍率必须写「读不到」且**一个数字都不编** (0.145ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 57.063833
+
+✖ failing tests:
+
+test at tests/roco-advice-routing.test.js:132:1
+✖ 第3步 ②：比较类回答**真的做比较** —— 两个有出处的倍率 + 谁更扛 + 不出现「首选行动」 (0.441417ms)
+  AssertionError [ERR_ASSERTION]: 倍率要带出处
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-advice-routing.test.js:143:10)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '第 3 回合。对手场上：雪影娃娃。比一比：喵喵 承伤 0.5（火系）、缇塔 承伤 1（火系）。喵喵 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置。这些倍率依据公开属性相性表，比较的是这两只对来袭属性的抗性。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。',
+    expected: /源：src\/client\/type-affinity\.data\.js@/,
+    operator: 'match',
+    diff: 'simple'
+  }

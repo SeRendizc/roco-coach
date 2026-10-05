@@ -1,0 +1,49 @@
+✖ player comparison explains public provenance without printing implementation path (0.630208ms)
+✖ explicitly negated historical clause plus current request stays current (4.509292ms)
+✔ positive previous-match request and current question keep their separate scopes (3.111209ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 1
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 50.378625
+
+✖ failing tests:
+
+test at tests/roco-quality-final-wording-20261006.test.js:5:1
+✖ player comparison explains public provenance without printing implementation path (0.630208ms)
+  AssertionError [ERR_ASSERTION]: The input was expected to not match the regular expression /src\/|\.js@|public-revision/. Input:
+  
+  '第 1 回合。比一比：喵喵 承伤 2（火）、缇塔 承伤 1（火）。缇塔 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置。倍率来自公开承伤相性读数（源：src/client/type-affinity.data.js@public-revision）。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-final-wording-20261006.test.js:6:60)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.start (node:internal/test_runner/test:1257:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '第 1 回合。比一比：喵喵 承伤 2（火）、缇塔 承伤 1（火）。缇塔 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置。倍率来自公开承伤相性读数（源：src/client/type-affinity.data.js@public-revision）。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。',
+    expected: /src\/|\.js@|public-revision/,
+    operator: 'doesNotMatch',
+    diff: 'simple'
+  }
+
+test at tests/roco-quality-final-wording-20261006.test.js:8:1
+✖ explicitly negated historical clause plus current request stays current (4.509292ms)
+  AssertionError [ERR_ASSERTION]: The input was expected to not match the regular expression /上一局|PREVIOUS-MARKER/. Input:
+  
+  '上一局我这边只有结果，没有逐回合的关键回合记录 —— 所以我没有可复盘的判断依据，也不会拿最后一回合冒充关键回合。打完一整局再来复盘，或者直接问我某一回合发生了什么，我按那一段的记录说。'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-final-wording-20261006.test.js:11:107)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '上一局我这边只有结果，没有逐回合的关键回合记录 —— 所以我没有可复盘的判断依据，也不会拿最后一回合冒充关键回合。打完一整局再来复盘，或者直接问我某一回合发生了什么，我按那一段的记录说。',
+    expected: /上一局|PREVIOUS-MARKER/,
+    operator: 'doesNotMatch',
+    diff: 'simple'
+  }

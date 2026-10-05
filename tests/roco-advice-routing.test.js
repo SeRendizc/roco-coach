@@ -140,7 +140,11 @@ test('第3步 ②：比较类回答**真的做比较** —— 两个有出处的
   }
   assert.match(advice.text, /更扛|倍率越小/, `要说清谁更扛（0.5 < 1 的含义）：${advice.text}`);
   assert.match(advice.text, /第 1 回合|第 3 回合/, '要引用当前局面');
-  assert.match(advice.text, /源：src\/client\/type-affinity\.data\.js@/, '倍率要带出处');
+  // 2026-10-06: player-visible implementation paths are not useful provenance.
+  // Original exact assertion is retained in verification final-review.md.
+  assert.match(advice.text, /公开属性相性表/, '玩家要看得懂倍率的公开依据');
+  assert.doesNotMatch(advice.text, /src\/|\.js@/, '实现路径不进入玩家正文');
+  assert.equal(advice.evidence.source, COMPARE_BATTLE.affinity.source, '机器回执保留原始来源');
   // 登记缺口：反向对照（推荐类仍必须被强制）在 `runtime.js` 的 `enforceBattleAdvice`，
   // 归 plan00-closer 的半步 —— 本文件不替它背书。
 });

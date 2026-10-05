@@ -1,0 +1,71 @@
+✔ 05.1a ①：局中三个建议类问句必须落建议层（`rocoAdvice` 在场） (10.649792ms)
+✔ 05.1a ②：硬断言 —— 局中任何一格都不许说「开一局之后」 (1.355667ms)
+✔ 05.1a ③：硬断言 —— 局末任何一格都不许再谈「这一手 / 首选行动」 (0.757125ms)
+✔ 05.1a ④：局外任何一格都不许装作知道局面（不许出现「第 N 回合」） (0.714166ms)
+✔ 05.1b ①：局中「有啥可以改进」必须引用当前局面（或明确指路复盘） (0.460416ms)
+✔ 05.1b ②：局中「这招能不能用」必须落建议层（合法性是该层的看家本事） (0.359708ms)
+✔ 05.1c（结构）：两套建议词表不许各自漂移 —— 局中建议问句在两个入口都命中 (0.192583ms)
+✔ 第3步 ①：`rocoAdviceKind` 三态分类（比较 / 推荐 / 事实） (0.085292ms)
+✔ 第3步 ②：比较类回答**真的做比较** —— 两个有出处的倍率 + 谁更扛 + 不出现「首选行动」 (0.2535ms)
+✔ 第3步 ④：诚实性 —— 拿不到倍率必须写「读不到」且**一个数字都不编** (0.161459ms)
+  A 连输2 → {"count":2,"wins":0,"losses":2}
+  B 刚赢1 → {"count":1,"wins":1,"losses":0}
+  C 一波5局 → {"count":5,"wins":0,"losses":5}
+  A 事实摘要长度 1173 | B 事实摘要长度 941
+  late「这么晚了还在努力奋战呢。」 · morning「上午好——今天这才刚开头。」 · evening「晚上好——今天快到头了。」
+  三局信号长度： 237 / 440 / 237
+  去重后： 2 种 · 第1局片段： {"turns":0,"dealt":0,"taken":0,"healedByEnemy":0,"dealtSeries":[],"takenBy":{},"activeTurn
+  ledger 去重后 1 种 | proactiveRegister 去重后 1 种
+  lossStreak 0/1/5 → R1 / R1 / R3 （去重 2 种）
+  PERMISSION_REQUIRED = ["late-night","long-session"]
+  连输2: 3 条 → blunder:blunder:4:烬尾狐 | habit:hazard:烬尾狐 | live:soak:烬尾狐
+     首句逐字：第4回合烬尾狐只剩13点，对面那记毒孢子正好打出13点，两边撞在了一起。
+  刚赢1: 2 条 → blunder:blunder:4:烬尾狐 | live:soak:烬尾狐
+     首句逐字：第4回合烬尾狐只剩13点，对面那记毒孢子正好打出13点，两边撞在了一起。
+  一波5局: 5 条 → blunder:blunder:4:烬尾狐 | long-session:long-session:5 | habit:hazard:烬尾狐 | live:soak:烬尾狐 | trend:today:5
+     首句逐字：第4回合烬尾狐只剩13点，对面那记毒孢子正好打出13点，两边撞在了一起。
+  一波5局里含「连着第5局了」： true
+  打了0回合: 2 条 → habit:hazard:烬尾狐 | trend:today:3
+  打了4回合: 4 条 → blunder:blunder:4:烬尾狐 | habit:hazard:烬尾狐 | live:soak:烬尾狐 | trend:today:3
+  打了8回合: 3 条 → habit:hazard:烬尾狐 | live:soak:烬尾狐 | trend:today:3
+  blunder:blunder:4:烬尾狐 | habit:hazard:烬尾狐 | live:soak:烬尾狐 | trend:today:3
+  blunder:blunder:4:烬尾狐 | live:soak:烬尾狐 | habit:hazard:烬尾狐 | trend:today:3
+  blunder:blunder:4:烬尾狐 | habit:hazard:烬尾狐 | live:soak:烬尾狐 | trend:today:3
+  三次去重后 1 种 | 读点条数 3
+  空输入三次去重后 1 种（条数 1 ）
+  3 点: 4 条 → blunder:blunder:4:烬尾狐 | late-night:late-night:2:0 | habit:hazard:烬尾狐 | live:soak:烬尾狐
+  9 点: 3 条 → blunder:blunder:4:烬尾狐 | habit:hazard:烬尾狐 | live:soak:烬尾狐
+  22 点: 3 条 → blunder:blunder:4:烬尾狐 | habit:hazard:烬尾狐 | live:soak:烬尾狐
+  三档是否相同： false
+  正① 句子逐字： 这么晚了，这一波你已经打了5局。 / 这一局打完就到这儿也行。
+  正② 句子逐字： 这么晚了。 / 这一局打完就到这儿也行。
+  反 读数： 
+✔ ㊱ 陪练·跨局账本按局面变（连输2 / 刚赢1 / 一波5局 ⇒ 三样不同） (1.48375ms)
+✔ ㊲ 陪练·这一局的账（连输 vs 刚赢 ⇒ 事实不同） (0.333875ms)
+✔ ㊳ 陪练·时段：3 个钟点 ⇒ 三种问候，且每个时段都有话（半夜那档在） (0.093583ms)
+✔ ㊴ 引擎信号随局面变（同一局 vs 打了4回合 vs 换一队 ⇒ 信号不同） (25.368834ms)
+✔ ㊵ 反证：同一个 input 喂三次 ⇒ 输出一字不差（不许随机/不许抖） (0.197041ms)
+✔ ㊶ 对照：`proactiveRegister` 是**粗粒度**映射（0/1 ⇒ R1 · 5 ⇒ R3），不是常量 (0.091125ms)
+✔ ㊶b 长时/深夜是**已有的权限类别**（`PERMISSION_REQUIRED`），但"劝休息"被禁用词表挡着 (0.072917ms)
+✔ ㊷ `companionReadings` 随**跨局账本**变（连输2 / 刚赢1 / 一波5局 ⇒ 三样不同） (21.877292ms)
+✔ ㊸ `companionReadings` 随 **这一局的信号**（打了 0 / 4 / 8 回合 ⇒ 三样不同） (52.323292ms)
+✔ ㊸b 【如实】`context.goal` 只改**顺序**，不改读点集合（粗维度，不是常量） (20.30925ms)
+✔ ㊹ 反证：**同一个 input 连喂三次 ⇒ 读点一字不差**（不许随机/不许抖） (19.713583ms)
+✔ ㊺ 【缺口·如实】时段（凌晨/上午/晚上）**没有**传到 `companionReadings` 这一层 (19.180125ms)
+✔ 正①：凌晨 3 点 + 有 run ⇒ 出现 late-night，句含「这一波你已经打了 N 局」 (19.605459ms)
+✔ 正②：凌晨 3 点 + 无 run（首页，还没开始打）⇒ 也出现 late-night，句为「这么晚了。」 (0.104458ms)
+✔ 反：上午 9 点 + 无 run ⇒ 不出现 late-night (0.051042ms)
+✔ 反证：把 `nowLate` 从条件里去掉 ⇒ 正②（首页那一半）会红 (0.808333ms)
+✔ player comparison explains public provenance without printing implementation path (0.512417ms)
+✔ explicitly negated historical clause plus current request stays current (7.700625ms)
+✔ positive previous-match request and current question keep their separate scopes (0.749375ms)
+✔ bounded current request without a live snapshot says unavailable instead of historical substitution (0.304875ms)
+✔ actual companion reading bundle preserves Roco live context and blocks last-match material (2.347667ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 222.324333

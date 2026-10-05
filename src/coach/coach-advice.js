@@ -1469,7 +1469,7 @@ function compareAdvice(battle, message) {
     evidence: {turn, targets, compared: rows, source: typeof view.affinity?.source === 'string' ? view.affinity.source : null},
     actionLabel: null, legalActionId: null, legalIndex: null, phase: 'compare',
     text: `${head}比一比：${pairs}。${meaning}。`
-      + (typeof view.affinity?.source === 'string' ? `倍率来自公开承伤相性读数（源：${view.affinity.source}）。` : '')
+      + (typeof view.affinity?.source === 'string' ? '这些倍率依据公开属性相性表，比较的是这两只对来袭属性的抗性。' : '')
       + unknown.join('；') + '。'};
 }
 
