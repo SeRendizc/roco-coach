@@ -1,0 +1,16 @@
+✔ actual adoption handler blocks still-legal action from previous battle (0.666625ms)
+✔ actual adoption handler blocks still-legal action from previous state after switch (0.209917ms)
+✔ actual adoption handler rejects unversioned or illegal advice (0.196458ms)
+✔ view never executes; fresh adopted card and cloned duplicate execute once (0.229ms)
+✔ battleAdvice recommendation carries actual battle identity and version (0.967209ms)
+✔ late-response stamp changes on new match, version and active pet; ordinary context remains stable (0.063084ms)
+✔ current Roco battle identity cannot fall back to previous lastMatch id (9.394458ms)
+✔ explicit previous match request uses history and never describes it as current (4.87825ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 50.228875

@@ -1,0 +1,14 @@
+✔ actual adoption handler blocks still-legal action from previous battle (0.747417ms)
+✔ actual adoption handler blocks still-legal action from previous state after switch (0.302417ms)
+✔ actual adoption handler rejects unversioned or illegal advice (0.229834ms)
+✔ view never executes; fresh adopted card and cloned duplicate execute once (0.2745ms)
+✔ battleAdvice recommendation carries actual battle identity and version (1.017792ms)
+✔ late-response stamp changes on new match, version and active pet; ordinary context remains stable (0.069625ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 38.234875

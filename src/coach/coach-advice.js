@@ -1056,7 +1056,7 @@ export function rocoAdviceAsk(message) {
  */
 function isCompareAsk(text) {
   return (/(谁|哪(?:一)?只|哪个|这两只|这两个)/.test(text) && /(更|比较)/.test(text)
-      && /(承伤|挨打|耐打|抗打|扛得住|顶得住|站得住)/.test(text))
+      && /(承伤|挨打|耐打|抗打|更扛|扛得住|顶得住|站得住)/.test(text))
     || /(承伤|挨打|耐打|抗打).{0,16}(更低|更少|更小|怎么比|如何比|比较一下|比较|哪个更好)/.test(text)
     || /(扛得住|顶得住|站得住).{0,6}(吗|么|这一下|这一手|这一招)/.test(text);
 }
@@ -1403,8 +1403,9 @@ function situationLine(pos) {
  */
 export function battleAdvice({battle = null, plan = null, message = null} = {}) {
   // 比较类问句**不走推荐契约**（见 `rocoAdviceKind` 的注释）：它要的是"比一比"，不是"出哪一手"。
-  if (rocoAdviceKind(message) === 'compare') return compareAdvice(battle, message);
-  return withAffinityLimits(adviceForPosition(positionFromSnapshot(battle, plan), plan), battle);
+  const advice = rocoAdviceKind(message) === 'compare' ? compareAdvice(battle, message)
+    : withAffinityLimits(adviceForPosition(positionFromSnapshot(battle, plan), plan), battle);
+  return advice ? {...advice, battleId: typeof battle?.battle_id === 'string' ? battle.battle_id : null} : null;
 }
 
 /**
@@ -1423,46 +1424,53 @@ function compareAdvice(battle, message) {
   const self = Array.isArray(view.self) ? view.self : [];
   const foe = Array.isArray(view.foe) ? view.foe[0] : null;
   const turn = Number.isInteger(view.turn) ? view.turn : null;
-  const nameOf = new Map(self.filter((row) => row && typeof row.pet_id === 'string')
-    .map((row) => [row.pet_id, typeof row.name === 'string' && row.name ? row.name : '场上一只']));
-  const rows = (Array.isArray(view.affinity?.rows) ? view.affinity.rows : [])
-    .filter((row) => row && Number.isFinite(row.multiplier))
-    .map((row) => ({name: nameOf.get(row.pet_id) ?? '场上一只', multiplier: row.multiplier,
-      vsType: typeof row.vs_type === 'string' ? row.vs_type : null}));
-  const unknown = [];
-  for (const row of (Array.isArray(view.affinity?.unavailable) ? view.affinity.unavailable : [])) {
-    if (row && typeof row.reason === 'string' && row.reason) {
-      unknown.push(`「${nameOf.get(row.pet_id) ?? '场上一只'}」这一只的承伤相性我没有：${row.reason}`);
-    }
-  }
   const head = `${turn === null ? '' : `第 ${turn} 回合。`}${foe?.name ? `对手场上：${foe.name}。` : ''}`;
-  if (!rows.length) {
-    // 拿不到倍率 ⇒ **如实说读不到**（不许编），但仍要把"能比的"说清楚：没有可比的两个数。
-    return {kind: 'compare', headline: '比一比', reason: '这一局送上来的承伤相性读数里没有可比的两个倍率',
-      upside: null, risk: null, alternates: [], unknown,
-      evidence: {turn, compared: [], source: null}, actionLabel: null, legalActionId: null, legalIndex: null,
-      text: `${head}要比承伤，我**读不到**这一局的承伤倍率（它不在送上来的公开快照里）——`
-        + '我不编数字。要是你先开一局、或告诉我这两只分别对什么系挨打，我按公开属性给你算得出来的那部分。'
-        + (unknown.length ? `另外：${unknown.join('；')}。` : '')};
+  const unread = (reason, targets = []) => ({kind: 'compare', headline: '比一比', reason,
+    upside: null, risk: null, alternates: [], unknown: [reason],
+    evidence: {turn, targets, compared: [], source: null},
+    actionLabel: null, legalActionId: null, legalIndex: null, text: `${head}${reason}。`});
+  // Bind only names actually present in the public roster. Unknown aliases and duplicate
+  // individual names require clarification; neither a ranking nor a species id resolves them.
+  const names = new Map();
+  for (const pet of self) {
+    if (typeof pet?.name !== 'string' || !pet.name || typeof pet.pet_id !== 'string') continue;
+    if (!names.has(pet.name)) names.set(pet.name, []);
+    names.get(pet.name).push(pet);
   }
-  const sorted = [...rows].sort((a, b) => a.multiplier - b.multiplier);
-  const best = sorted[0];
-  const worst = sorted[sorted.length - 1];
+  const mentioned = [...names.entries()].filter(([name]) => String(message ?? '').includes(name));
+  const ambiguous = mentioned.find(([, pets]) => pets.length !== 1);
+  if (ambiguous) return unread(`「${ambiguous[0]}」有同名个体，对象不明确，请说明要比较哪一只`);
+  if (mentioned.length !== 2) return unread('请点名公开队伍中要比较的两只；未识别的名字或别名请先确认');
+  mentioned.sort(([a], [b]) => String(message).indexOf(a) - String(message).indexOf(b));
+  const targets = mentioned.map(([, pets]) => ({pet_id: pets[0].pet_id, name: pets[0].name}));
+  const rows = [];
+  for (const target of targets) {
+    const matches = (Array.isArray(view.affinity?.rows) ? view.affinity.rows : [])
+      .filter((row) => row?.pet_id === target.pet_id && Number.isFinite(row.multiplier));
+    if (matches.length !== 1) return unread(`「${target.name}」的承伤倍率读不到或不明确，不能用其他宠物替代`, targets);
+    rows.push({...target, multiplier: matches[0].multiplier,
+      vsType: typeof matches[0].vs_type === 'string' ? matches[0].vs_type : null});
+  }
   const pairs = rows.map((row) => `${row.name} 承伤 ${row.multiplier}`
     + (row.vsType ? `（${row.vsType}）` : '')).join('、');
-  const meaning = best.multiplier < worst.multiplier
-    ? `${best.name} 只吃 ${best.multiplier} 倍，${worst.name} 是 ${worst.multiplier} 倍 —— 同样挨这一手，`
-      + `**${best.name} 更扛**（倍率越小越抗打）。`
-    : `两只的倍率一样（都是 ${best.multiplier}）—— 挨同一手掉得差不多。`;
-  // 公开面之外的必须点名（不许让玩家以为我连"对手要出什么"也算了）
-  unknown.push('对手这一手具体出什么系、我方技能面板与道具，都不在这一局的公开快照里 —— 上面只按**对手场上属性**推承伤。');
+  const [first, second] = rows;
+  let meaning;
+  if (!first.vsType || first.vsType !== second.vsType) {
+    meaning = '这些倍率对应的来袭属性不同或未知，不能当作同一招直接排承伤高低';
+  } else if (first.multiplier === second.multiplier) {
+    meaning = '两只对这个属性的承伤倍率相同；实际伤害还取决于技能、攻防与个体配置，不能据此判断掉血多少';
+  } else {
+    const lower = first.multiplier < second.multiplier ? first : second;
+    meaning = `${lower.name} 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置`;
+  }
+  const unknown = ['这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测'];
   return {kind: 'compare', headline: '比一比：' + pairs, reason: meaning, upside: null, risk: null,
     alternates: [], unknown,
-    evidence: {turn, compared: rows, source: typeof view.affinity?.source === 'string' ? view.affinity.source : null},
+    evidence: {turn, targets, compared: rows, source: typeof view.affinity?.source === 'string' ? view.affinity.source : null},
     actionLabel: null, legalActionId: null, legalIndex: null, phase: 'compare',
-    text: `${head}比一比：${pairs}。${meaning}`
-      + (typeof view.affinity?.source === 'string' ? `倍率来自这一局送上来的承伤相性读数（源：${view.affinity.source}）。` : '')
-      + `我这里读不到的：${unknown.join('；')}。`};
+    text: `${head}比一比：${pairs}。${meaning}。`
+      + (typeof view.affinity?.source === 'string' ? `倍率来自公开承伤相性读数（源：${view.affinity.source}）。` : '')
+      + unknown.join('；') + '。'};
 }
 
 /**
@@ -1605,4 +1613,18 @@ export function battleAdviceText(advice, pos = null) {
   }
   lines.push('以上都来自这一轮的公开局面与引擎估算（不是胜率）；我不会自动替你出招，采用与否由你决定。');
   return lines.join('');
+}
+
+/** A card is usable only in the battle and version for which it was produced. */
+export function adviceSnapshotFresh(advice, battleId, view) {
+  return typeof battleId === 'string' && battleId.length > 0 && advice?.battleId === battleId
+    && Number.isInteger(advice?.stateVersion) && advice.stateVersion === view?.state_version
+    && !view?.battle_result && view?.phase !== 'ended';
+}
+
+/** Public battle identity for late-response checks; no hidden state participates. */
+export function coachBattleStamp(context) {
+  const b = context?.roco_battle;
+  if (!b) return null;
+  return JSON.stringify([b.battle_id ?? null, b.state_version ?? null, b.turn ?? null, b.self_active ?? null, b.phase ?? null, b.result ?? null]);
 }

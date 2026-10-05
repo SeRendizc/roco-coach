@@ -1,0 +1,22 @@
+✔ named pairs change actual evidence and never choose whole-team extremes (0.894375ms)
+✔ missing named reading cannot substitute an unrelated pet (0.124208ms)
+✔ duplicate public name is ambiguous and cannot silently bind a species id (0.059208ms)
+✔ unnamed comparison asks for exactly two objects (0.081417ms)
+✔ equal multipliers do not imply equal damage (0.083166ms)
+✔ different incoming types cannot be ranked as one hit (0.079875ms)
+✔ real runtime consumes message bound comparison rather than recommending (7.559417ms)
+✔ comparison text cannot become an actionable recommendation card in real UI consumer (3.321209ms)
+✔ actual adoption handler blocks still-legal action from previous battle (0.719292ms)
+✔ actual adoption handler blocks still-legal action from previous state after switch (0.218458ms)
+✔ actual adoption handler rejects unversioned or illegal advice (0.2075ms)
+✔ view never executes; fresh adopted card and cloned duplicate execute once (0.242208ms)
+✔ battleAdvice recommendation carries actual battle identity and version (1.082875ms)
+✔ late-response stamp changes on new match, version and active pet; ordinary context remains stable (0.085ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 53.069458

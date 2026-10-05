@@ -1,0 +1,1 @@
+{"checks":[{"name":"comparison","result":"captured"},{"name":"adoption","result":{"blocked":0,"executed":1,"version":6}},{"name":"late-switch","result":"captured"},{"name":"late-new-battle","result":"captured"}],"chromePid":7124,"profile":"/var/folders/c5/hc8ntlx52wd8h5kl14zml4bm0000gn/T/roco-quality-20261006-ANiWTI","models":"no model calls; local runtime + delayed transport"}

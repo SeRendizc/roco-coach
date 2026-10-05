@@ -2255,6 +2255,20 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  // /api/coach 返回的 meta 是 route:'teacher'。把附加说明切掉再路由，规则包照旧带着它。
  const answerRequirements='\n回答要求：';
  const routingText=String(message||'').split(answerRequirements)[0];
+ // An explicit historical question must not consume today's live snapshot.
+ if (/上一局|上一场|上个局/.test(routingText)) {
+  const liveId=context?.roco_battle?.battle_id??context?.battle?.id??null;
+  const events=Array.isArray(memory?.events)?memory.events:[];
+  const validHistory=e=>typeof e?.id==='string' && e.id.length>0 && e.id!==liveId
+   && ['win','loss','draw'].includes(e.result) && Number.isInteger(e.turns??e.rounds);
+  const historical=context?.matchScope==='previous' && validHistory(context.lastMatch)
+   ? context.lastMatch : [...events].reverse().find(validHistory);
+  if(!historical)return {text:'我这里没有可确认的上一局记录，不能用当前局替代。',
+   route:'teacher',provider:'local',memory,evidence:['上一局记录缺少有效对局编号、结果或回合摘要。']};
+  context={...context,matchScope:'previous',activeMatchId:historical?.id??null,
+   lastMatch:historical??null,lastTurn:null,battle:null,roco_battle:null,roco_plan:null,evidenceIndex:[]};
+ }
+
  // **把教练档位透传下去**（第 45 轮，陪练审计发现）。
  //
  // `decideRegister` 里有一道闸门 `context.preference==='quiet'`，而这条链上从来没人

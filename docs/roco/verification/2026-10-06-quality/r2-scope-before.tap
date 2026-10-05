@@ -1,0 +1,52 @@
+✔ actual adoption handler blocks still-legal action from previous battle (0.688583ms)
+✔ actual adoption handler blocks still-legal action from previous state after switch (0.230083ms)
+✔ actual adoption handler rejects unversioned or illegal advice (0.198875ms)
+✔ view never executes; fresh adopted card and cloned duplicate execute once (0.231208ms)
+✔ battleAdvice recommendation carries actual battle identity and version (0.965333ms)
+✔ late-response stamp changes on new match, version and active pet; ordinary context remains stable (0.06275ms)
+✖ current Roco battle identity cannot fall back to previous lastMatch id (9.479791ms)
+✖ explicit previous match request uses history and never describes it as current (4.812209ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 6
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 55.624292
+
+✖ failing tests:
+
+test at tests/roco-quality-adoption-20261006.test.js:28:1
+✖ current Roco battle identity cannot fall back to previous lastMatch id (9.479791ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  'old' !== 'new'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-adoption-20261006.test.js:29:73)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'old',
+    expected: 'new',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/roco-quality-adoption-20261006.test.js:31:1
+✖ explicit previous match request uses history and never describes it as current (4.812209ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /上一局/. Input:
+  
+  '暂时没有可用的完整对局记录。旧版只存了最后一回合的历史无法还原整局。新版本会保存完整对局；如果当前对局还在页面里，可直接从现有记录复盘。'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-adoption-20261006.test.js:35:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '暂时没有可用的完整对局记录。旧版只存了最后一回合的历史无法还原整局。新版本会保存完整对局；如果当前对局还在页面里，可直接从现有记录复盘。',
+    expected: /上一局/,
+    operator: 'match',
+    diff: 'simple'
+  }

@@ -1,3 +1,4 @@
+import {coachBattleStamp} from '../coach/coach-advice.js';
 // 小芽的**一份**实现：单独的小芽页面 + 其它页面右上角的弹出式入口。
 //
 // 为什么要有这个模块（人类 2026-09-25 纠偏①）：
@@ -843,7 +844,7 @@ export function sanitizeAdviceText(value) {
  * 「你自己定 / 说说你倾向哪边」那类没有结论的话（那是 U08 要修的原话）。
  */
 export function adviceCardOf(advice) {
-  if (!advice || typeof advice !== 'object') return null;
+  if (!advice || typeof advice !== 'object' || advice.kind === 'compare') return null;
   const action = advice.action && typeof advice.action === 'object' ? advice.action : null;
   const headline = sanitizeAdviceText(advice.headline)
     || sanitizeAdviceText(action?.display) || sanitizeAdviceText(action?.label);
@@ -1095,6 +1096,7 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
     addEntry('你', message);
     setStatus('正在读取依据…');
     const epoch = (state.epoch += 1);
+    let requestStamp;
     try {
       // 上下文由**唯一**那个构造器给出；`coachAllowed` 与营地页一致（这一页没有对局，
       // buildContext(null, …) 正是营地页问「怎么培养」时走的那条路）。
@@ -1154,9 +1156,16 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
       if (resolved.snapshot) context.focusDetail = {...resolved.snapshot, live: resolved.source !== 'last'};
       if (resolved.failure) context.focusFailure = resolved.failure;
       updateFocusChip(focusProvider.getContext(), resolved);
+      requestStamp = coachBattleStamp(context);
       const answer = await requestCoach({message, role: state.role, context, memory: state.memory,
         conversation: state.conversation.slice(-8), stateToken: epoch});
       if (epoch !== state.epoch) return;                        // 又开了一段对话：这条回答作废
+      const latest = await readHostContext(contextProvider);
+      if (epoch !== state.epoch) return;
+      if (latest.failure || requestStamp !== coachBattleStamp(latest.context.extra)) {
+        setStatus('局面已经变化，这条迟到的回答已作废，请重新问当前这一手。');
+        return;
+      }
       // ⚠ 2026-09-30 **撤回一处抢跑的修改**（task-13 甲④-2），把审计过程留档在这里：
       //   我一度在**这一支**补了 `rememberPreference(state.memory, message)`（+ 与服务端那份合并），
       //   依据是 `demo-acceptance` 的「她记住了什么」读到 `{"rows":[]}` ⇒ 判定"真功能丢失"。
@@ -1199,6 +1208,12 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
       // 记忆那一块也重画：这一轮里她可能刚记住/改了一条。
       renderMemoryList();
     } catch (error) {
+      if (epoch !== state.epoch) return;
+      const latest = await readHostContext(contextProvider);
+      if (requestStamp !== undefined && requestStamp !== coachBattleStamp(latest.context.extra)) {
+        setStatus('局面已经变化，这条迟到的回答已作废，请重新问当前这一手。');
+        return;
+      }
       persist(message, '');
       addEntry('小芽', '这次没有完成分析，请重试。');
       setStatus(error?.message ?? '请求失败');

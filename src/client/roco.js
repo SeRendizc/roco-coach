@@ -1,3 +1,4 @@
+import {adviceSnapshotFresh, coachBattleStamp} from '../coach/coach-advice.js';
 // 手游规则演示页：**无聊天入口**的主动教练。
 //
 // 这个页面的存在理由是 F01：小芽要能在「玩家没打开聊天」的情况下出现，
@@ -5852,6 +5853,7 @@ async function say(text) {
 }
 
 async function sayOnce(message) {
+  const initialStamp = coachBattleStamp({roco_battle: coachRocoBattle()});
   // 说了话就把这一栏打开：输入框与回复必须在**同一屏**（P0-2）——
   // 玩家不会在看不见的地方得到回复。
   if (!state.coach.open) openCompanion({focus: false});
@@ -5911,6 +5913,8 @@ async function sayOnce(message) {
     const context = coachCampContext();
     if (rocoBattle) context.roco_battle = rocoBattle;
     if (rocoPlan) context.roco_plan = rocoPlan;
+    const requestStamp = coachBattleStamp(context);
+    const requestToken = coachStateToken();
     // 丙①（task-12）：**当前聚焦对象**走 `xiaoya.js` 那一份**共享**实现，这里只做接线
     //（不许在本文件里再写一份焦点逻辑）。取到就把那一份培养快照挂进上下文，
     // 于是「我在工作台点开哪一只」= 小芽嘴里的那一只（与盒子详情页同一份取值）。
@@ -5922,8 +5926,12 @@ async function sayOnce(message) {
       context,
       memory: state.memory,
       conversation: (state.memory?.dialogue ?? []).slice(-6),
-      stateToken: coachStateToken(),
+      stateToken: requestToken,
     });
+    if (requestStamp !== coachBattleStamp({roco_battle: coachRocoBattle()})) {
+      sayStatus('局面已经变化，这条迟到的回答已作废，请重新问当前这一手。');
+      return null;
+    }
     const text = typeof data?.text === 'string' ? data.text : null;
     if (text) {
       // 2026-09-25（人类投诉「小芽啥都不行，说的不知道在说啥」）：这里原来把 `/api/coach` 的
@@ -5959,6 +5967,7 @@ async function sayOnce(message) {
     }
     delete document.body.dataset.rocoCompanionBoundary;
   } catch (error) {
+    if (initialStamp !== coachBattleStamp({roco_battle: coachRocoBattle()})) return null;
     // 模型这一步失败也**不装作没发生**：说清原因，保留规则事实那一份。
     $('say-reply').textContent = `${reply}（模型这一步没答上来：${error.message}）`;
     document.body.dataset.rocoCompanionSource = 'offline';
@@ -6100,6 +6109,10 @@ function bind() {
       const mode = event?.detail?.mode === 'adopt' ? 'adopt' : 'view';
       const target = advice?.action ?? null;
       if (!target) return;
+      if (!adviceSnapshotFresh(advice, state.battleId, state.view)) {
+        sayStatus('这条建议对应的对局或局面已经变了，请重新问当前这一手。');
+        return;
+      }
       const resolved = resolveAdvisedAction(target);
       if (!resolved) {
         sayStatus('这条建议对应的动作已经不在这一手的合法集合里了（局面变过），我不替你执行——请按现在能点的来。');

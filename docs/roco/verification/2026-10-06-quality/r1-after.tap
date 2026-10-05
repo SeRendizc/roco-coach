@@ -1,0 +1,31 @@
+✔ ① 新局 + 上一局都在（面板路径：宿主没给 game）⇒ 只依据当前局，回答不出现上一局内容 (122.77925ms)
+✔ ② 无当前局 + 有上一局 ⇒ 允许回落，且**正文必须显式标注「上一局」** (83.303292ms)
+✔ ⑤ `companionFacts` 也走同一个判定：作用域写清 + 当前局字段优先 (82.663166ms)
+✔ ④ `roco_battle` 有值 ⇒ 也算"当前局存在"（Codex 报的第二条入口） (0.308166ms)
+✔ ③ 非恒真：判定在四种配置上各给唯一结果（不是"总能过"） (0.332333ms)
+✔ ⑥ 客户端盲补（`xiaoya.js` 那条路）也走同一个判定：有当前局 ⇒ 不补上一局；没当前局 ⇒ 补但必须标注 (0.068959ms)
+✔ 05.1a ①：局中三个建议类问句必须落建议层（`rocoAdvice` 在场） (10.400666ms)
+✔ 05.1a ②：硬断言 —— 局中任何一格都不许说「开一局之后」 (1.55425ms)
+✔ 05.1a ③：硬断言 —— 局末任何一格都不许再谈「这一手 / 首选行动」 (0.798417ms)
+✔ 05.1a ④：局外任何一格都不许装作知道局面（不许出现「第 N 回合」） (1.087875ms)
+✔ 05.1b ①：局中「有啥可以改进」必须引用当前局面（或明确指路复盘） (0.158583ms)
+✔ 05.1b ②：局中「这招能不能用」必须落建议层（合法性是该层的看家本事） (0.403042ms)
+✔ 05.1c（结构）：两套建议词表不许各自漂移 —— 局中建议问句在两个入口都命中 (0.189583ms)
+✔ 第3步 ①：`rocoAdviceKind` 三态分类（比较 / 推荐 / 事实） (0.088875ms)
+✔ 第3步 ②：比较类回答**真的做比较** —— 两个有出处的倍率 + 谁更扛 + 不出现「首选行动」 (0.257334ms)
+✔ 第3步 ④：诚实性 —— 拿不到倍率必须写「读不到」且**一个数字都不编** (0.1575ms)
+✔ named pairs change actual evidence and never choose whole-team extremes (0.826ms)
+✔ missing named reading cannot substitute an unrelated pet (0.109459ms)
+✔ duplicate public name is ambiguous and cannot silently bind a species id (0.058667ms)
+✔ unnamed comparison asks for exactly two objects (0.071542ms)
+✔ equal multipliers do not imply equal damage (0.0795ms)
+✔ different incoming types cannot be ranked as one hit (0.080958ms)
+✔ real runtime consumes message bound comparison rather than recommending (8.134125ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 334.769125

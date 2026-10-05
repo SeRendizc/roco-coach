@@ -1,0 +1,215 @@
+✖ named pairs change actual evidence and never choose whole-team extremes (0.970833ms)
+✖ missing named reading cannot substitute an unrelated pet (0.224083ms)
+✖ duplicate public name is ambiguous and cannot silently bind a species id (0.139417ms)
+✖ unnamed comparison asks for exactly two objects (1.178042ms)
+✖ equal multipliers do not imply equal damage (0.124959ms)
+✖ different incoming types cannot be ranked as one hit (0.06025ms)
+✖ real runtime consumes message bound comparison rather than recommending (7.787875ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 0
+ℹ fail 7
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 54.867667
+
+✖ failing tests:
+
+test at tests/roco-quality-20261006.test.js:11:1
+✖ named pairs change actual evidence and never choose whole-team extremes (0.970833ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   undefined,
+  +   undefined,
+  +   undefined,
+  +   undefined
+  -   'a',
+  -   'b'
+    ]
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-20261006.test.js:13:24)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.start (node:internal/test_runner/test:1257:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ undefined, undefined, undefined, undefined ],
+    expected: [ 'a', 'b' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/roco-quality-20261006.test.js:15:1
+✖ missing named reading cannot substitute an unrelated pet (0.224083ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + [
+  +   {
+  +     multiplier: 2,
+  +     name: '喵喵',
+  +     vsType: '火'
+  +   },
+  +   {
+  +     multiplier: 0.5,
+  +     name: '水蓝蓝',
+  +     vsType: '火'
+  +   },
+  +   {
+  +     multiplier: 0.25,
+  +     name: '火花',
+  +     vsType: '火'
+  +   }
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-20261006.test.js:17:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { name: '喵喵', multiplier: 2, vsType: '火' }, { name: '水蓝蓝', multiplier: 0.5, vsType: '火' }, { name: '火花', multiplier: 0.25, vsType: '火' } ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/roco-quality-20261006.test.js:19:1
+✖ duplicate public name is ambiguous and cannot silently bind a species id (0.139417ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + [
+  +   {
+  +     multiplier: 2,
+  +     name: '喵喵',
+  +     vsType: '火'
+  +   },
+  +   {
+  +     multiplier: 1,
+  +     name: '缇塔',
+  +     vsType: '火'
+  +   },
+  +   {
+  +     multiplier: 0.5,
+  +     name: '水蓝蓝',
+  +     vsType: '火'
+  +   },
+  +   {
+  +     multiplier: 0.25,
+  +     name: '火花',
+  +     vsType: '火'
+  +   }
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-20261006.test.js:21:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { name: '喵喵', multiplier: 2, vsType: '火' }, { name: '缇塔', multiplier: 1, vsType: '火' }, { name: '水蓝蓝', multiplier: 0.5, vsType: '火' }, { name: '火花', multiplier: 0.25, vsType: '火' } ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/roco-quality-20261006.test.js:23:1
+✖ unnamed comparison asks for exactly two objects (1.178042ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  
+  undefined !== []
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-20261006.test.js:24:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/roco-quality-20261006.test.js:26:1
+✖ equal multipliers do not imply equal damage (0.124959ms)
+  AssertionError [ERR_ASSERTION]: The input was expected to not match the regular expression /掉得差不多|掉血一样|伤害相同/. Input:
+  
+  '第 2 回合。对手场上：对手。比一比：喵喵 承伤 1（火）、缇塔 承伤 1（火）、水蓝蓝 承伤 1（火）、火花 承伤 1（火）。两只的倍率一样（都是 1）—— 挨同一手掉得差不多。倍率来自这一局送上来的承伤相性读数（源：public-type-chart）。我这里读不到的：对手这一手具体出什么系、我方技能面板与道具，都不在这一局的公开快照里 —— 上面只按**对手场上属性**推承伤。。'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-20261006.test.js:28:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '第 2 回合。对手场上：对手。比一比：喵喵 承伤 1（火）、缇塔 承伤 1（火）、水蓝蓝 承伤 1（火）、火花 承伤 1（火）。两只的倍率一样（都是 1）—— 挨同一手掉得差不多。倍率来自这一局送上来的承伤相性读数（源：public-type-chart）。我这里读不到的：对手这一手具体出什么系、我方技能面板与道具，都不在这一局的公开快照里 —— 上面只按**对手场上属性**推承伤。。',
+    expected: /掉得差不多|掉血一样|伤害相同/,
+    operator: 'doesNotMatch',
+    diff: 'simple'
+  }
+
+test at tests/roco-quality-20261006.test.js:30:1
+✖ different incoming types cannot be ranked as one hit (0.06025ms)
+  AssertionError [ERR_ASSERTION]: The input was expected to not match the regular expression /更扛/. Input:
+  
+  '火花 只吃 0.25 倍，喵喵 是 2 倍 —— 同样挨这一手，**火花 更扛**（倍率越小越抗打）。'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-20261006.test.js:32:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '火花 只吃 0.25 倍，喵喵 是 2 倍 —— 同样挨这一手，**火花 更扛**（倍率越小越抗打）。',
+    expected: /更扛/,
+    operator: 'doesNotMatch',
+    diff: 'simple'
+  }
+
+test at tests/roco-quality-20261006.test.js:34:1
+✖ real runtime consumes message bound comparison rather than recommending (7.787875ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   undefined,
+  +   undefined,
+  +   undefined,
+  +   undefined
+  -   'a',
+  -   'b'
+    ]
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-20261006.test.js:36:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ undefined, undefined, undefined, undefined ],
+    expected: [ 'a', 'b' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

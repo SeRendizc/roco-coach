@@ -53,7 +53,7 @@ export function effectiveMatchScope(context={}){
 export function activeMatchIdOf(context={}){
  const scope=effectiveMatchScope(context);
  if(scope==='previous')return context?.lastMatch?.id??null;
- if(scope==='current')return context?.battle?.id??context?.roco_battle?.id??context?.lastMatch?.id??null;
+ if(scope==='current')return context?.roco_battle?.battle_id??context?.battle?.id??context?.roco_battle?.id??context?.lastMatch?.id??null;
  return null;
 }
 

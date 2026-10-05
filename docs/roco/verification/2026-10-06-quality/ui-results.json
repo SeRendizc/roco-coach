@@ -1,0 +1,2439 @@
+{
+  "checks": [
+    {
+      "name": "comparison",
+      "result": {
+        "requests": [
+          {
+            "message": "喵喵与缇塔的承伤比较\n回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释。游戏按回合结算，不按秒；不要编造技能冷却。道具名称只能使用回复药、净化药、能量果，不要把它们叫作解药或以太。双方同时决定，不能先看对手本回合出招再决定自己的行动。复盘中hpBefore是回合开始、hpAfter是结束，不能把行动前生命称作打完还剩。逐回合核对实际事件：行动取消不能说成打出了伤害，事前预测和事后结算必须分开。",
+            "role": "auto",
+            "context": {
+              "evidenceIndex": [],
+              "mode": "camp",
+              "focus": "own-0001",
+              "stageId": "meadow",
+              "profile": {
+                "pets": [
+                  {
+                    "id": "own-0001",
+                    "species_id": "pet_000001",
+                    "name": "喵喵",
+                    "types": [
+                      "草系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「氧循环」：使用草系技能后，回复10%生命。"
+                  },
+                  {
+                    "id": "own-0002",
+                    "species_id": "pet_000002",
+                    "name": "水蓝蓝",
+                    "types": [
+                      "水系"
+                    ],
+                    "level": 60,
+                    "role": "辅助",
+                    "mechanism": "特性「浸润」：使用水系技能后，全技能能耗-1。"
+                  },
+                  {
+                    "id": "own-0003",
+                    "species_id": "pet_000003",
+                    "name": "火花",
+                    "types": [
+                      "火系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「助燃」：使用火系技能后，获得双攻+20%。"
+                  },
+                  {
+                    "id": "own-0004",
+                    "species_id": "pet_000004",
+                    "name": "迪莫",
+                    "types": [
+                      "光系"
+                    ],
+                    "level": 60,
+                    "role": "辅助",
+                    "mechanism": "特性「最好的伙伴」：造成克制伤害后，获得攻防速+20%，并回复2能量。"
+                  },
+                  {
+                    "id": "own-0005",
+                    "species_id": "pet_000005",
+                    "name": "水灵",
+                    "types": [
+                      "水系"
+                    ],
+                    "level": 60,
+                    "role": "坦克",
+                    "mechanism": "特性「浸润」：使用水系技能后，全技能能耗-1。"
+                  },
+                  {
+                    "id": "own-0006",
+                    "species_id": "pet_000006",
+                    "name": "火神",
+                    "types": [
+                      "火系"
+                    ],
+                    "level": 60,
+                    "role": "输出",
+                    "mechanism": "特性「助燃」：使用火系技能后，获得双攻+20%。"
+                  },
+                  {
+                    "id": "own-0007",
+                    "species_id": "pet_000007",
+                    "name": "魔力猫",
+                    "types": [
+                      "草系"
+                    ],
+                    "level": 60,
+                    "role": "坦克",
+                    "mechanism": "特性「氧循环」：使用草系技能后，回复10%生命。"
+                  },
+                  {
+                    "id": "own-0008",
+                    "species_id": "pet_000008",
+                    "name": "草头鸭",
+                    "types": [
+                      "草系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「得寸进尺」：天气为雨天，或处于其他水系环境中时，获得双攻+100%。"
+                  },
+                  {
+                    "id": "own-0009",
+                    "species_id": "pet_000009",
+                    "name": "恶魔叮",
+                    "types": [
+                      "恶系",
+                      "翼系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「渴求」：入场时获得50%吸血。"
+                  },
+                  {
+                    "id": "own-0010",
+                    "species_id": "pet_000010",
+                    "name": "恶魔狼",
+                    "types": [
+                      "恶系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「悲悯」：己方队伍中每有1只力竭的精灵，自己获得双攻+30%。"
+                  },
+                  {
+                    "id": "own-0011",
+                    "species_id": "pet_000011",
+                    "name": "鸭吉吉（蓬松的样子）",
+                    "types": [
+                      "普通系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「挺起胸脯」：携带的能耗为1的技能，威力+50%。"
+                  },
+                  {
+                    "id": "own-0012",
+                    "species_id": "pet_000012",
+                    "name": "铠甲虫",
+                    "types": [
+                      "虫系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。"
+                  },
+                  {
+                    "id": "own-0013",
+                    "species_id": "pet_000013",
+                    "name": "阿米亚特",
+                    "types": [
+                      "地系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「石头大餐」：能量不足时，消耗5%生命，代替1能量。"
+                  },
+                  {
+                    "id": "own-0014",
+                    "species_id": "pet_000014",
+                    "name": "阿米樱",
+                    "types": [
+                      "地系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「石头大餐」：能量不足时，消耗5%生命，代替1能量。"
+                  },
+                  {
+                    "id": "own-0015",
+                    "species_id": "pet_000015",
+                    "name": "罗隐",
+                    "types": [
+                      "地系",
+                      "恶系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「石头大餐」：能量不足时，消耗5%生命，代替1能量。"
+                  },
+                  {
+                    "id": "own-0016",
+                    "species_id": "pet_000016",
+                    "name": "蹦蹦种子（海神球形态）",
+                    "types": [
+                      "草系",
+                      "毒系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「生物碱」：使用草系技能时，敌方获得2层中毒。"
+                  },
+                  {
+                    "id": "own-0017",
+                    "species_id": "pet_000017",
+                    "name": "蹦蹦草（海神球形态）",
+                    "types": [
+                      "草系",
+                      "毒系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「生物碱」：使用草系技能时，敌方获得2层中毒。"
+                  },
+                  {
+                    "id": "own-0018",
+                    "species_id": "pet_000018",
+                    "name": "蹦蹦花（海神球形态）",
+                    "types": [
+                      "草系",
+                      "毒系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「生物碱」：使用草系技能时，敌方获得2层中毒。"
+                  },
+                  {
+                    "id": "own-0019",
+                    "species_id": "pet_000019",
+                    "name": "地鼠（枯水期的样子）",
+                    "types": [
+                      "地系"
+                    ],
+                    "level": 60,
+                    "role": "辅助",
+                    "mechanism": "特性「警惕」：回合结束时，若自己能量为0则脱离。"
+                  },
+                  {
+                    "id": "own-0020",
+                    "species_id": "pet_000020",
+                    "name": "遁鼠（枯水期的样子）",
+                    "types": [
+                      "地系"
+                    ],
+                    "level": 60,
+                    "role": "辅助",
+                    "mechanism": "特性「警惕」：回合结束时，若自己能量为0则脱离。"
+                  },
+                  {
+                    "id": "own-0021",
+                    "species_id": "pet_000021",
+                    "name": "遁地鼠（枯水期的样子）",
+                    "types": [
+                      "地系"
+                    ],
+                    "level": 60,
+                    "role": "输出",
+                    "mechanism": "特性「警惕」：回合结束时，若自己能量为0则脱离。"
+                  },
+                  {
+                    "id": "own-0022",
+                    "species_id": "pet_000022",
+                    "name": "喵呜",
+                    "types": [
+                      "草系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「氧循环」：使用草系技能后，回复10%生命。"
+                  },
+                  {
+                    "id": "own-0023",
+                    "species_id": "pet_000023",
+                    "name": "绿草精灵",
+                    "types": [
+                      "草系",
+                      "幻系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「木桶戏法」：离场后，更换入场的精灵以木桶状态登场。"
+                  },
+                  {
+                    "id": "own-0024",
+                    "species_id": "pet_000024",
+                    "name": "蒲公英娃娃",
+                    "types": [
+                      "草系",
+                      "萌系"
+                    ],
+                    "level": 60,
+                    "role": "辅助",
+                    "mechanism": "特性「勇敢」：携带的能耗大于3的技能，威力+40%。"
+                  },
+                  {
+                    "id": "own-0025",
+                    "species_id": "pet_000025",
+                    "name": "冬羽雀",
+                    "types": [
+                      "翼系"
+                    ],
+                    "level": 60,
+                    "role": "辅助",
+                    "mechanism": "特性「顺风」：若先于敌方攻击，本次技能威力+50%。"
+                  },
+                  {
+                    "id": "own-0026",
+                    "species_id": "pet_000026",
+                    "name": "奇丽草",
+                    "types": [
+                      "草系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「养分重吸收」：回合结束时，回复3能量。"
+                  },
+                  {
+                    "id": "own-0027",
+                    "species_id": "pet_000027",
+                    "name": "奇丽叶",
+                    "types": [
+                      "草系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「养分重吸收」：回合结束时，回复3能量。"
+                  },
+                  {
+                    "id": "own-0028",
+                    "species_id": "pet_000028",
+                    "name": "奇丽花",
+                    "types": [
+                      "草系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「养分重吸收」：回合结束时，回复3能量。"
+                  },
+                  {
+                    "id": "own-0029",
+                    "species_id": "pet_000029",
+                    "name": "焰火",
+                    "types": [
+                      "火系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「助燃」：使用火系技能后，获得双攻+20%。"
+                  },
+                  {
+                    "id": "own-0030",
+                    "species_id": "pet_000030",
+                    "name": "波波拉",
+                    "types": [
+                      "水系"
+                    ],
+                    "level": 60,
+                    "role": "辅助",
+                    "mechanism": "特性「浸润」：使用水系技能后，全技能能耗-1。"
+                  },
+                  {
+                    "id": "own-0031",
+                    "species_id": "pet_000031",
+                    "name": "蒲公英",
+                    "types": [
+                      "草系",
+                      "萌系"
+                    ],
+                    "level": 60,
+                    "role": "辅助",
+                    "mechanism": "特性「勇敢」：携带的能耗大于3的技能，威力+40%。"
+                  },
+                  {
+                    "id": "own-0032",
+                    "species_id": "pet_000032",
+                    "name": "魔草巫灵",
+                    "types": [
+                      "草系",
+                      "幻系"
+                    ],
+                    "level": 60,
+                    "role": "坦克",
+                    "mechanism": "特性「木桶戏法」：离场后，更换入场的精灵以木桶状态登场。"
+                  },
+                  {
+                    "id": "own-0033",
+                    "species_id": "pet_000033",
+                    "name": "鸭吉吉（紧实的样子）",
+                    "types": [
+                      "普通系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「挺起胸脯」：携带的能耗为1的技能，威力+50%。"
+                  },
+                  {
+                    "id": "own-0034",
+                    "species_id": "pet_000034",
+                    "name": "岚鸟",
+                    "types": [
+                      "翼系"
+                    ],
+                    "level": 60,
+                    "role": "输出",
+                    "mechanism": "特性「顺风」：若先于敌方攻击，本次技能威力+50%。"
+                  },
+                  {
+                    "id": "own-0035",
+                    "species_id": "pet_000035",
+                    "name": "小甲虫",
+                    "types": [
+                      "虫系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。"
+                  },
+                  {
+                    "id": "own-0036",
+                    "species_id": "pet_000036",
+                    "name": "叮叮恶魔",
+                    "types": [
+                      "恶系",
+                      "翼系"
+                    ],
+                    "level": 60,
+                    "role": "输出",
+                    "mechanism": "特性「渴求」：入场时获得50%吸血。"
+                  },
+                  {
+                    "id": "own-0037",
+                    "species_id": "pet_000037",
+                    "name": "丢丢（草地附近的样子）",
+                    "types": [
+                      "草系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「诈死」：自己力竭时，少损失1点魔力。"
+                  },
+                  {
+                    "id": "own-0038",
+                    "species_id": "pet_000038",
+                    "name": "卡卡虫（草地附近的样子）",
+                    "types": [
+                      "草系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「诈死」：自己力竭时，少损失1点魔力。"
+                  },
+                  {
+                    "id": "own-0039",
+                    "species_id": "pet_000039",
+                    "name": "卡瓦重（草地附近的样子）",
+                    "types": [
+                      "草系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「诈死」：自己力竭时，少损失1点魔力。"
+                  },
+                  {
+                    "id": "own-0040",
+                    "species_id": "pet_000040",
+                    "name": "伊贝儿",
+                    "types": [
+                      "草系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「腐植循环」：每回复1能量，同时回复5%生命。"
+                  },
+                  {
+                    "id": "own-0041",
+                    "species_id": "pet_000041",
+                    "name": "伊贝粉粉",
+                    "types": [
+                      "草系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「腐植循环」：每回复1能量，同时回复5%生命。"
+                  },
+                  {
+                    "id": "own-0042",
+                    "species_id": "pet_000042",
+                    "name": "锥尾羊",
+                    "types": [
+                      "幽系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「碰瓷」：自己使用恶系技能后，敌方失去2能量。"
+                  },
+                  {
+                    "id": "own-0043",
+                    "species_id": "pet_000043",
+                    "name": "铃兰羊",
+                    "types": [
+                      "幽系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「碰瓷」：自己使用恶系技能后，敌方失去2能量。"
+                  },
+                  {
+                    "id": "own-0044",
+                    "species_id": "pet_000044",
+                    "name": "花影羚羊",
+                    "types": [
+                      "幽系",
+                      "恶系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「碰瓷」：自己使用恶系技能后，敌方失去2能量。"
+                  },
+                  {
+                    "id": "own-0045",
+                    "species_id": "pet_000045",
+                    "name": "白发懒人",
+                    "types": [
+                      "普通系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「慢热型」：初始能量为0，入场前己方精灵每成功应对1次，回复5能量。"
+                  },
+                  {
+                    "id": "own-0046",
+                    "species_id": "pet_000046",
+                    "name": "记忆石",
+                    "types": [
+                      "地系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「不移」：携带的无额外效果的攻击技能，威力+30%。"
+                  },
+                  {
+                    "id": "own-0047",
+                    "species_id": "pet_000047",
+                    "name": "板板壳",
+                    "types": [
+                      "水系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「缩壳」：携带的防御技能能耗-2。"
+                  },
+                  {
+                    "id": "own-0048",
+                    "species_id": "pet_000048",
+                    "name": "咔咔壳",
+                    "types": [
+                      "水系"
+                    ],
+                    "level": 60,
+                    "role": "回复",
+                    "mechanism": "特性「缩壳」：携带的防御技能能耗-2。"
+                  }
+                ],
+                "pool_summary": {
+                  "total": 542,
+                  "source": "owned",
+                  "note": "名单来自精灵盒子（我的）；持有总数见 total。"
+                }
+              },
+              "lastMatch": null,
+              "matchScope": null,
+              "activeMatchId": null,
+              "evidenceRulesVersion": "unknown",
+              "requestedTurn": null,
+              "lastTurn": null,
+              "battle": null,
+              "roco_battle": {
+                "turn": 1,
+                "battle_id": "s1-6qcyffb4",
+                "state_version": 1,
+                "phase": "battle",
+                "result": null,
+                "self": [
+                  {
+                    "pet_id": "pet_000001",
+                    "name": "喵喵",
+                    "hp": 495,
+                    "max_hp": 495,
+                    "energy": 10,
+                    "alive": true
+                  },
+                  {
+                    "pet_id": "pet_000327",
+                    "name": "缇塔",
+                    "hp": 508,
+                    "max_hp": 508,
+                    "energy": 10,
+                    "alive": true
+                  },
+                  {
+                    "pet_id": "pet_000002",
+                    "name": "水蓝蓝",
+                    "hp": 298,
+                    "max_hp": 298,
+                    "energy": 10,
+                    "alive": true
+                  },
+                  {
+                    "pet_id": "pet_000007",
+                    "name": "魔力猫",
+                    "hp": 354,
+                    "max_hp": 354,
+                    "energy": 10,
+                    "alive": true
+                  },
+                  {
+                    "pet_id": "pet_000009",
+                    "name": "恶魔叮",
+                    "hp": 323,
+                    "max_hp": 323,
+                    "energy": 10,
+                    "alive": true
+                  },
+                  {
+                    "pet_id": "pet_000011",
+                    "name": "鸭吉吉",
+                    "hp": 768,
+                    "max_hp": 768,
+                    "energy": 10,
+                    "alive": true
+                  }
+                ],
+                "self_active": 0,
+                "self_energy_max": 10,
+                "foe": [
+                  {
+                    "pet_id": "pet_000003",
+                    "name": "火花",
+                    "hp": 340,
+                    "max_hp": 340,
+                    "energy": 10,
+                    "alive": true
+                  }
+                ],
+                "foe_living_count": 6,
+                "needs_replacement": [],
+                "foe_bench": [
+                  {
+                    "slot": 1,
+                    "fainted": false
+                  },
+                  {
+                    "slot": 2,
+                    "fainted": false
+                  },
+                  {
+                    "slot": 3,
+                    "fainted": false
+                  },
+                  {
+                    "slot": 4,
+                    "fainted": false
+                  },
+                  {
+                    "slot": 5,
+                    "fainted": false
+                  }
+                ],
+                "seen_roster": [
+                  {
+                    "slot": 0,
+                    "pet_id": "pet_000003",
+                    "name": "火花",
+                    "revealed_via": "opening_preview",
+                    "revealed_turn": 1
+                  },
+                  {
+                    "slot": 1,
+                    "pet_id": "pet_000004",
+                    "name": "迪莫",
+                    "revealed_via": "opening_preview",
+                    "revealed_turn": 1
+                  },
+                  {
+                    "slot": 2,
+                    "pet_id": "pet_000005",
+                    "name": "水灵",
+                    "revealed_via": "opening_preview",
+                    "revealed_turn": 1
+                  },
+                  {
+                    "slot": 3,
+                    "pet_id": "pet_000006",
+                    "name": "火神",
+                    "revealed_via": "opening_preview",
+                    "revealed_turn": 1
+                  },
+                  {
+                    "slot": 4,
+                    "pet_id": "pet_000008",
+                    "name": "草头鸭",
+                    "revealed_via": "opening_preview",
+                    "revealed_turn": 1
+                  },
+                  {
+                    "slot": 5,
+                    "pet_id": "pet_000010",
+                    "name": "恶魔狼",
+                    "revealed_via": "opening_preview",
+                    "revealed_turn": 1
+                  }
+                ],
+                "legal": [
+                  {
+                    "label": "抓挠",
+                    "kind": "skill"
+                  },
+                  {
+                    "label": "防御",
+                    "kind": "skill"
+                  },
+                  {
+                    "label": "仙人掌刺击",
+                    "kind": "skill"
+                  },
+                  {
+                    "label": "腐化",
+                    "kind": "skill"
+                  },
+                  {
+                    "label": "聚能",
+                    "kind": "charge"
+                  },
+                  {
+                    "label": "换上第2位",
+                    "kind": "switch"
+                  },
+                  {
+                    "label": "换上第3位",
+                    "kind": "switch"
+                  },
+                  {
+                    "label": "换上第4位",
+                    "kind": "switch"
+                  },
+                  {
+                    "label": "换上第5位",
+                    "kind": "switch"
+                  },
+                  {
+                    "label": "换上第6位",
+                    "kind": "switch"
+                  },
+                  {
+                    "label": "愿力强化",
+                    "kind": "magic"
+                  },
+                  {
+                    "label": "投降",
+                    "kind": "surrender"
+                  }
+                ],
+                "affinity": {
+                  "source": "src/client/type-affinity.data.js@roco-world-s4-2026-09-10",
+                  "rows": [
+                    {
+                      "pet_id": "pet_000001",
+                      "multiplier": 2,
+                      "known": true,
+                      "vs_type": "火系"
+                    },
+                    {
+                      "pet_id": "pet_000327",
+                      "multiplier": 2,
+                      "known": true,
+                      "vs_type": "火系"
+                    },
+                    {
+                      "pet_id": "pet_000002",
+                      "multiplier": 0.5,
+                      "known": true,
+                      "vs_type": "火系"
+                    },
+                    {
+                      "pet_id": "pet_000007",
+                      "multiplier": 2,
+                      "known": true,
+                      "vs_type": "火系"
+                    },
+                    {
+                      "pet_id": "pet_000009",
+                      "multiplier": 1,
+                      "known": true,
+                      "vs_type": "火系"
+                    },
+                    {
+                      "pet_id": "pet_000011",
+                      "multiplier": 1,
+                      "known": true,
+                      "vs_type": "火系"
+                    }
+                  ],
+                  "unavailable": [],
+                  "vs_types": [
+                    "火系"
+                  ]
+                }
+              },
+              "coachAllowed": true,
+              "focusDetail": {
+                "instance_id": null,
+                "source": "battle",
+                "live": true,
+                "battle_only": true,
+                "name": "喵喵",
+                "species_id": "pet_000001",
+                "level": null,
+                "nature": null,
+                "talent": null,
+                "talent_tier": null,
+                "traits": [],
+                "skills": []
+              }
+            },
+            "memory": {
+              "version": 1,
+              "preference": null,
+              "lessons": [],
+              "events": [],
+              "pendingQuiz": null,
+              "dialogue": [],
+              "lastTopic": null,
+              "journal": [],
+              "reflections": {},
+              "goal": null,
+              "favorite": null,
+              "ruleReferenceId": null,
+              "quizCount": 0,
+              "watches": [],
+              "stated": [],
+              "mood": null,
+              "quizLog": [],
+              "habits": null,
+              "skill": null,
+              "acceptance": null
+            },
+            "conversation": [],
+            "stateToken": 1
+          }
+        ],
+        "replies": [
+          {
+            "text": "第 1 回合。对手场上：火花。比一比：喵喵 承伤 2（火系）、缇塔 承伤 2（火系）。两只对这个属性的承伤倍率相同；实际伤害还取决于技能、攻防与个体配置，不能据此判断掉血多少。倍率来自公开承伤相性读数（源：src/client/type-affinity.data.js@roco-world-s4-2026-09-10）。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。",
+            "evidence": [
+              "本机对战记录：已结束0场，0胜0负（来源：memory.events，最多保留12场，预制场景不写入）。",
+              "语气档位 R0（不说）：该档位需要的事实在本机记录里一条都找不到，降到最短承接句。",
+              "档位依据：最近0局0胜0负，momentum=0（来源：memory.events）；近7天有0次主动关闭提示，consideration=2（来源：memory.journal 的 dismiss）；本轮由玩家发起，意图=other，engagement=2（来源：本轮消息）。",
+              "你的设置：交流偏好未设置、玩法目标未设置、本命未设置、怎么称呼你未设置（来源：你明确表达过才会记录）。",
+              "这一手已经按当前局面算好一条首选行动（rocoAdvice.legalActionId=null）：回答必须以它为准 —— 允许补充解释，但不许换成「你自己定 / 说说你倾向哪边」这类没有结论的话。",
+              "这一局实际带的六只在 rocoLineup 里（来源：第 1 回合的引擎公开视图，**这一局的权威**，每只都带血量/能量/是否倒下）；roster 只是候选池的一页，不代表你带的队。"
+            ],
+            "register": "R0",
+            "companionState": {
+              "register": "R0",
+              "engagement": 2,
+              "consideration": 2,
+              "momentum": 0,
+              "lossStreak": 0,
+              "winStreak": 0,
+              "reasons": [
+                "最近0局0胜0负，momentum=0（来源：memory.events）",
+                "近7天有0次主动关闭提示，consideration=2（来源：memory.journal 的 dismiss）",
+                "本轮由玩家发起，意图=other，engagement=2（来源：本轮消息）",
+                "判定：本机还没有记录：只接住这句话本身，不补造任何过去"
+              ]
+            },
+            "replyConstraints": {
+              "register": "R0",
+              "voice": "companion",
+              "maxChars": 24,
+              "maxQuestions": 0,
+              "allowAdvice": false,
+              "forbid": [
+                "复述屏幕上已经写着的事",
+                "播报自己的情绪（「我看得有点急」这类第一人称感受）",
+                "空泛安慰",
+                "评价玩家水平",
+                "说教",
+                "给建议",
+                "战术指挥",
+                "速度对比与先手判断（「速度38比它34快」「可以先动」「先手在你」）",
+                "提任何过去的事（「上次」「之前」「上回」这类说法）",
+                "播报本机有没有记录（「记录还是空的」「一局都还没记上」），或者把玩家推去开一局（「去开一局吧」「打完我就能接上话」）",
+                "提对局、记录、回合数或胜负（安静档只回玩家这一句话）"
+              ],
+              "allow": [
+                "对真实事件的可惜/漂亮/悬/憋屈/松口气（必须落在具体回合、数字或记录上）",
+                "跨局记录与偏好（玩家以前说过、打过的事）"
+              ],
+              "instruction": "本轮档位 R0（不说）：正文不超过24字，不要问句，只写有本机记录支撑的事实。这一轮是安静档/线上竞技：她**不主动开口**，只回玩家这一句话本身（他用的那个词要原样接住），不问、不劝、不说教；对局、记录、回合数、胜负一个字都不要提。本机还没有任何对战记录（memory.events 为空）：不许提过去，也不许编一局出来；也不要说「记录还是空的／一局都还没记上」这类关于本机数据的话——没有历史就不聊历史，直接不聊它。速度对比（「速度38比它34快」）、先手判断（「可以先动」「先手在你」）、以及任何告诉玩家这一手该出什么的说法，都属于军师的活：陪练一句都不给。不要复述屏幕上已经写着的事（谁被克制、还剩几只、第几回合的进度），也不要说自己的感受——情绪要落在这一局真实发生的事上（可惜、漂亮、悬、憋屈、松口气），不是落在你自己身上。"
+            },
+            "intent": "other",
+            "chatThread": null,
+            "chatContinued": false,
+            "silent": true,
+            "rocoAdvice": {
+              "kind": "compare",
+              "headline": "比一比：喵喵 承伤 2（火系）、缇塔 承伤 2（火系）",
+              "reason": "两只对这个属性的承伤倍率相同；实际伤害还取决于技能、攻防与个体配置，不能据此判断掉血多少",
+              "upside": null,
+              "risk": null,
+              "alternates": [],
+              "unknown": [
+                "这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测"
+              ],
+              "evidence": {
+                "turn": 1,
+                "targets": [
+                  {
+                    "pet_id": "pet_000001",
+                    "name": "喵喵"
+                  },
+                  {
+                    "pet_id": "pet_000327",
+                    "name": "缇塔"
+                  }
+                ],
+                "compared": [
+                  {
+                    "pet_id": "pet_000001",
+                    "name": "喵喵",
+                    "multiplier": 2,
+                    "vsType": "火系"
+                  },
+                  {
+                    "pet_id": "pet_000327",
+                    "name": "缇塔",
+                    "multiplier": 2,
+                    "vsType": "火系"
+                  }
+                ],
+                "source": "src/client/type-affinity.data.js@roco-world-s4-2026-09-10"
+              },
+              "actionLabel": null,
+              "legalActionId": null,
+              "legalIndex": null,
+              "phase": "compare",
+              "text": "第 1 回合。对手场上：火花。比一比：喵喵 承伤 2（火系）、缇塔 承伤 2（火系）。两只对这个属性的承伤倍率相同；实际伤害还取决于技能、攻防与个体配置，不能据此判断掉血多少。倍率来自公开承伤相性读数（源：src/client/type-affinity.data.js@roco-world-s4-2026-09-10）。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。",
+              "battleId": "s1-6qcyffb4"
+            },
+            "roster": [
+              {
+                "id": "own-0001",
+                "species_id": "pet_000001",
+                "name": "喵喵",
+                "types": [
+                  "草系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「氧循环」：使用草系技能后，回复10%生命。",
+                "talent": {
+                  "hp": 7,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 10,
+                  "spd": 0,
+                  "spe": 9
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "稳重",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0002",
+                "species_id": "pet_000002",
+                "name": "水蓝蓝",
+                "types": [
+                  "水系"
+                ],
+                "level": 60,
+                "role": "辅助",
+                "mechanism": "特性「浸润」：使用水系技能后，全技能能耗-1。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 0,
+                  "spd": 0,
+                  "spe": 7
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "稳重",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0003",
+                "species_id": "pet_000003",
+                "name": "火花",
+                "types": [
+                  "火系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「助燃」：使用火系技能后，获得双攻+20%。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 8,
+                  "def": 0,
+                  "spa": 10,
+                  "spd": 0,
+                  "spe": 7
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "悠闲",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0004",
+                "species_id": "pet_000004",
+                "name": "迪莫",
+                "types": [
+                  "光系"
+                ],
+                "level": 60,
+                "role": "辅助",
+                "mechanism": "特性「最好的伙伴」：造成克制伤害后，获得攻防速+20%，并回复2能量。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 7,
+                  "def": 10,
+                  "spa": 0,
+                  "spd": 7,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "专注",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0005",
+                "species_id": "pet_000005",
+                "name": "水灵",
+                "types": [
+                  "水系"
+                ],
+                "level": 60,
+                "role": "坦克",
+                "mechanism": "特性「浸润」：使用水系技能后，全技能能耗-1。",
+                "talent": {
+                  "hp": 9,
+                  "atk": 7,
+                  "def": 0,
+                  "spa": 0,
+                  "spd": 7,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "坦率",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0006",
+                "species_id": "pet_000006",
+                "name": "火神",
+                "types": [
+                  "火系"
+                ],
+                "level": 60,
+                "role": "输出",
+                "mechanism": "特性「助燃」：使用火系技能后，获得双攻+20%。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 7,
+                  "spa": 0,
+                  "spd": 0,
+                  "spe": 7
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "专注",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0007",
+                "species_id": "pet_000007",
+                "name": "魔力猫",
+                "types": [
+                  "草系"
+                ],
+                "level": 60,
+                "role": "坦克",
+                "mechanism": "特性「氧循环」：使用草系技能后，回复10%生命。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 7,
+                  "spa": 0,
+                  "spd": 10,
+                  "spe": 7
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "悠闲",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0008",
+                "species_id": "pet_000008",
+                "name": "草头鸭",
+                "types": [
+                  "草系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「得寸进尺」：天气为雨天，或处于其他水系环境中时，获得双攻+100%。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 8,
+                  "spd": 10,
+                  "spe": 8
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "调皮",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0009",
+                "species_id": "pet_000009",
+                "name": "恶魔叮",
+                "types": [
+                  "恶系",
+                  "翼系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「渴求」：入场时获得50%吸血。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 8,
+                  "spd": 8,
+                  "spe": 7
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "聪明",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0010",
+                "species_id": "pet_000010",
+                "name": "恶魔狼",
+                "types": [
+                  "恶系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「悲悯」：己方队伍中每有1只力竭的精灵，自己获得双攻+30%。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 10,
+                  "spd": 0,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "温顺",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0011",
+                "species_id": "pet_000011",
+                "name": "鸭吉吉（蓬松的样子）",
+                "types": [
+                  "普通系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「挺起胸脯」：携带的能耗为1的技能，威力+50%。",
+                "talent": {
+                  "hp": 10,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 0,
+                  "spd": 0,
+                  "spe": 9
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "忧郁",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0012",
+                "species_id": "pet_000012",
+                "name": "铠甲虫",
+                "types": [
+                  "虫系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 9,
+                  "spa": 0,
+                  "spd": 7,
+                  "spe": 7
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "懒散",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0013",
+                "species_id": "pet_000013",
+                "name": "阿米亚特",
+                "types": [
+                  "地系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「石头大餐」：能量不足时，消耗5%生命，代替1能量。",
+                "talent": {
+                  "hp": 8,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 10,
+                  "spd": 0,
+                  "spe": 10
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "害羞",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0014",
+                "species_id": "pet_000014",
+                "name": "阿米樱",
+                "types": [
+                  "地系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「石头大餐」：能量不足时，消耗5%生命，代替1能量。",
+                "talent": {
+                  "hp": 10,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 9,
+                  "spd": 0,
+                  "spe": 10
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "懒散",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0015",
+                "species_id": "pet_000015",
+                "name": "罗隐",
+                "types": [
+                  "地系",
+                  "恶系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「石头大餐」：能量不足时，消耗5%生命，代替1能量。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 8,
+                  "spa": 9,
+                  "spd": 0,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "坦率",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0016",
+                "species_id": "pet_000016",
+                "name": "蹦蹦种子（海神球形态）",
+                "types": [
+                  "草系",
+                  "毒系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「生物碱」：使用草系技能时，敌方获得2层中毒。",
+                "talent": {
+                  "hp": 7,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 0,
+                  "spd": 0,
+                  "spe": 9
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "懒散",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0017",
+                "species_id": "pet_000017",
+                "name": "蹦蹦草（海神球形态）",
+                "types": [
+                  "草系",
+                  "毒系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「生物碱」：使用草系技能时，敌方获得2层中毒。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 10,
+                  "spd": 7,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "坦率",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0018",
+                "species_id": "pet_000018",
+                "name": "蹦蹦花（海神球形态）",
+                "types": [
+                  "草系",
+                  "毒系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「生物碱」：使用草系技能时，敌方获得2层中毒。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 9,
+                  "def": 8,
+                  "spa": 0,
+                  "spd": 10,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "冷静",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0019",
+                "species_id": "pet_000019",
+                "name": "地鼠（枯水期的样子）",
+                "types": [
+                  "地系"
+                ],
+                "level": 60,
+                "role": "辅助",
+                "mechanism": "特性「警惕」：回合结束时，若自己能量为0则脱离。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 9,
+                  "spd": 7,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "忧郁",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0020",
+                "species_id": "pet_000020",
+                "name": "遁鼠（枯水期的样子）",
+                "types": [
+                  "地系"
+                ],
+                "level": 60,
+                "role": "辅助",
+                "mechanism": "特性「警惕」：回合结束时，若自己能量为0则脱离。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 10,
+                  "def": 0,
+                  "spa": 7,
+                  "spd": 7,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "粗心",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0021",
+                "species_id": "pet_000021",
+                "name": "遁地鼠（枯水期的样子）",
+                "types": [
+                  "地系"
+                ],
+                "level": 60,
+                "role": "输出",
+                "mechanism": "特性「警惕」：回合结束时，若自己能量为0则脱离。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 8,
+                  "spd": 0,
+                  "spe": 7
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "聪明",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0022",
+                "species_id": "pet_000022",
+                "name": "喵呜",
+                "types": [
+                  "草系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「氧循环」：使用草系技能后，回复10%生命。",
+                "talent": {
+                  "hp": 10,
+                  "atk": 8,
+                  "def": 0,
+                  "spa": 0,
+                  "spd": 0,
+                  "spe": 8
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "急躁",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0023",
+                "species_id": "pet_000023",
+                "name": "绿草精灵",
+                "types": [
+                  "草系",
+                  "幻系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「木桶戏法」：离场后，更换入场的精灵以木桶状态登场。",
+                "talent": {
+                  "hp": 8,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 0,
+                  "spd": 0,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "忧郁",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0024",
+                "species_id": "pet_000024",
+                "name": "蒲公英娃娃",
+                "types": [
+                  "草系",
+                  "萌系"
+                ],
+                "level": 60,
+                "role": "辅助",
+                "mechanism": "特性「勇敢」：携带的能耗大于3的技能，威力+40%。",
+                "talent": {
+                  "hp": 10,
+                  "atk": 0,
+                  "def": 7,
+                  "spa": 0,
+                  "spd": 0,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "莽撞",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0025",
+                "species_id": "pet_000025",
+                "name": "冬羽雀",
+                "types": [
+                  "翼系"
+                ],
+                "level": 60,
+                "role": "辅助",
+                "mechanism": "特性「顺风」：若先于敌方攻击，本次技能威力+50%。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 9,
+                  "def": 0,
+                  "spa": 0,
+                  "spd": 0,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "沉默",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0026",
+                "species_id": "pet_000026",
+                "name": "奇丽草",
+                "types": [
+                  "草系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「养分重吸收」：回合结束时，回复3能量。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 10,
+                  "def": 0,
+                  "spa": 0,
+                  "spd": 0,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "坦率",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0027",
+                "species_id": "pet_000027",
+                "name": "奇丽叶",
+                "types": [
+                  "草系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「养分重吸收」：回合结束时，回复3能量。",
+                "talent": {
+                  "hp": 8,
+                  "atk": 0,
+                  "def": 9,
+                  "spa": 0,
+                  "spd": 8,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "踏实",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0028",
+                "species_id": "pet_000028",
+                "name": "奇丽花",
+                "types": [
+                  "草系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「养分重吸收」：回合结束时，回复3能量。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 10,
+                  "def": 0,
+                  "spa": 0,
+                  "spd": 0,
+                  "spe": 9
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "焦虑",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0029",
+                "species_id": "pet_000029",
+                "name": "焰火",
+                "types": [
+                  "火系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「助燃」：使用火系技能后，获得双攻+20%。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 0,
+                  "spd": 0,
+                  "spe": 9
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "莽撞",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0030",
+                "species_id": "pet_000030",
+                "name": "波波拉",
+                "types": [
+                  "水系"
+                ],
+                "level": 60,
+                "role": "辅助",
+                "mechanism": "特性「浸润」：使用水系技能后，全技能能耗-1。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 10,
+                  "def": 0,
+                  "spa": 7,
+                  "spd": 0,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "偏执",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0031",
+                "species_id": "pet_000031",
+                "name": "蒲公英",
+                "types": [
+                  "草系",
+                  "萌系"
+                ],
+                "level": 60,
+                "role": "辅助",
+                "mechanism": "特性「勇敢」：携带的能耗大于3的技能，威力+40%。",
+                "talent": {
+                  "hp": 10,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 9,
+                  "spd": 8,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "踏实",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0032",
+                "species_id": "pet_000032",
+                "name": "魔草巫灵",
+                "types": [
+                  "草系",
+                  "幻系"
+                ],
+                "level": 60,
+                "role": "坦克",
+                "mechanism": "特性「木桶戏法」：离场后，更换入场的精灵以木桶状态登场。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 8,
+                  "spd": 10,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "害羞",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0033",
+                "species_id": "pet_000033",
+                "name": "鸭吉吉（紧实的样子）",
+                "types": [
+                  "普通系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「挺起胸脯」：携带的能耗为1的技能，威力+50%。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 10,
+                  "def": 0,
+                  "spa": 0,
+                  "spd": 10,
+                  "spe": 8
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "害羞",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0034",
+                "species_id": "pet_000034",
+                "name": "岚鸟",
+                "types": [
+                  "翼系"
+                ],
+                "level": 60,
+                "role": "输出",
+                "mechanism": "特性「顺风」：若先于敌方攻击，本次技能威力+50%。",
+                "talent": {
+                  "hp": 8,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 0,
+                  "spd": 0,
+                  "spe": 9
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "冷静",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0035",
+                "species_id": "pet_000035",
+                "name": "小甲虫",
+                "types": [
+                  "虫系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 8,
+                  "def": 0,
+                  "spa": 0,
+                  "spd": 9,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "急躁",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0036",
+                "species_id": "pet_000036",
+                "name": "叮叮恶魔",
+                "types": [
+                  "恶系",
+                  "翼系"
+                ],
+                "level": 60,
+                "role": "输出",
+                "mechanism": "特性「渴求」：入场时获得50%吸血。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 9,
+                  "spd": 0,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "专注",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0037",
+                "species_id": "pet_000037",
+                "name": "丢丢（草地附近的样子）",
+                "types": [
+                  "草系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「诈死」：自己力竭时，少损失1点魔力。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 7,
+                  "spa": 0,
+                  "spd": 0,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "调皮",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0038",
+                "species_id": "pet_000038",
+                "name": "卡卡虫（草地附近的样子）",
+                "types": [
+                  "草系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「诈死」：自己力竭时，少损失1点魔力。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 8,
+                  "spa": 0,
+                  "spd": 10,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "平和",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0039",
+                "species_id": "pet_000039",
+                "name": "卡瓦重（草地附近的样子）",
+                "types": [
+                  "草系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「诈死」：自己力竭时，少损失1点魔力。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 9,
+                  "def": 9,
+                  "spa": 0,
+                  "spd": 0,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "踏实",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0040",
+                "species_id": "pet_000040",
+                "name": "伊贝儿",
+                "types": [
+                  "草系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「腐植循环」：每回复1能量，同时回复5%生命。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 8,
+                  "spd": 10,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "冷静",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0041",
+                "species_id": "pet_000041",
+                "name": "伊贝粉粉",
+                "types": [
+                  "草系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「腐植循环」：每回复1能量，同时回复5%生命。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 10,
+                  "spa": 8,
+                  "spd": 0,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "固执",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0042",
+                "species_id": "pet_000042",
+                "name": "锥尾羊",
+                "types": [
+                  "幽系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「碰瓷」：自己使用恶系技能后，敌方失去2能量。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 7,
+                  "spa": 10,
+                  "spd": 0,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "聪明",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0043",
+                "species_id": "pet_000043",
+                "name": "铃兰羊",
+                "types": [
+                  "幽系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「碰瓷」：自己使用恶系技能后，敌方失去2能量。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 10,
+                  "spd": 0,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "理性",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0044",
+                "species_id": "pet_000044",
+                "name": "花影羚羊",
+                "types": [
+                  "幽系",
+                  "恶系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「碰瓷」：自己使用恶系技能后，敌方失去2能量。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 7,
+                  "def": 0,
+                  "spa": 7,
+                  "spd": 0,
+                  "spe": 8
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "温顺",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0045",
+                "species_id": "pet_000045",
+                "name": "白发懒人",
+                "types": [
+                  "普通系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「慢热型」：初始能量为0，入场前己方精灵每成功应对1次，回复5能量。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 0,
+                  "spd": 0,
+                  "spe": 8
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "勇敢",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0046",
+                "species_id": "pet_000046",
+                "name": "记忆石",
+                "types": [
+                  "地系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「不移」：携带的无额外效果的攻击技能，威力+30%。",
+                "talent": {
+                  "hp": 9,
+                  "atk": 9,
+                  "def": 0,
+                  "spa": 0,
+                  "spd": 0,
+                  "spe": 0
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "聪明",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0047",
+                "species_id": "pet_000047",
+                "name": "板板壳",
+                "types": [
+                  "水系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「缩壳」：携带的防御技能能耗-2。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 7,
+                  "def": 0,
+                  "spa": 10,
+                  "spd": 0,
+                  "spe": 8
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "沉默",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              },
+              {
+                "id": "own-0048",
+                "species_id": "pet_000048",
+                "name": "咔咔壳",
+                "types": [
+                  "水系"
+                ],
+                "level": 60,
+                "role": "回复",
+                "mechanism": "特性「缩壳」：携带的防御技能能耗-2。",
+                "talent": {
+                  "hp": 0,
+                  "atk": 0,
+                  "def": 0,
+                  "spa": 9,
+                  "spd": 0,
+                  "spe": 10
+                },
+                "talent_source": "rolled（原版随机生成；种子化掷点：先掷激活 1–3 条、激活的那几条 7–10、其余 0 —— 条数与取值都是建模的，非官方概率）",
+                "nature": "理性",
+                "nature_source": "rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）"
+              }
+            ],
+            "poolSummary": {
+              "total": 542,
+              "source": "owned",
+              "note": "名单来自精灵盒子（我的）；持有总数见 total。"
+            },
+            "rocoBattle": {
+              "turn": 1,
+              "battle_id": "s1-6qcyffb4",
+              "state_version": 1,
+              "phase": "battle",
+              "result": null,
+              "self": [
+                {
+                  "pet_id": "pet_000001",
+                  "name": "喵喵",
+                  "hp": 495,
+                  "max_hp": 495,
+                  "energy": 10,
+                  "alive": true
+                },
+                {
+                  "pet_id": "pet_000327",
+                  "name": "缇塔",
+                  "hp": 508,
+                  "max_hp": 508,
+                  "energy": 10,
+                  "alive": true
+                },
+                {
+                  "pet_id": "pet_000002",
+                  "name": "水蓝蓝",
+                  "hp": 298,
+                  "max_hp": 298,
+                  "energy": 10,
+                  "alive": true
+                },
+                {
+                  "pet_id": "pet_000007",
+                  "name": "魔力猫",
+                  "hp": 354,
+                  "max_hp": 354,
+                  "energy": 10,
+                  "alive": true
+                },
+                {
+                  "pet_id": "pet_000009",
+                  "name": "恶魔叮",
+                  "hp": 323,
+                  "max_hp": 323,
+                  "energy": 10,
+                  "alive": true
+                },
+                {
+                  "pet_id": "pet_000011",
+                  "name": "鸭吉吉",
+                  "hp": 768,
+                  "max_hp": 768,
+                  "energy": 10,
+                  "alive": true
+                }
+              ],
+              "self_active": 0,
+              "self_energy_max": 10,
+              "foe": [
+                {
+                  "pet_id": "pet_000003",
+                  "name": "火花",
+                  "hp": 340,
+                  "max_hp": 340,
+                  "energy": 10,
+                  "alive": true
+                }
+              ],
+              "foe_living_count": 6,
+              "needs_replacement": [],
+              "foe_bench": [
+                {
+                  "slot": 1,
+                  "fainted": false
+                },
+                {
+                  "slot": 2,
+                  "fainted": false
+                },
+                {
+                  "slot": 3,
+                  "fainted": false
+                },
+                {
+                  "slot": 4,
+                  "fainted": false
+                },
+                {
+                  "slot": 5,
+                  "fainted": false
+                }
+              ],
+              "seen_roster": [
+                {
+                  "slot": 0,
+                  "pet_id": "pet_000003",
+                  "name": "火花",
+                  "revealed_via": "opening_preview",
+                  "revealed_turn": 1
+                },
+                {
+                  "slot": 1,
+                  "pet_id": "pet_000004",
+                  "name": "迪莫",
+                  "revealed_via": "opening_preview",
+                  "revealed_turn": 1
+                },
+                {
+                  "slot": 2,
+                  "pet_id": "pet_000005",
+                  "name": "水灵",
+                  "revealed_via": "opening_preview",
+                  "revealed_turn": 1
+                },
+                {
+                  "slot": 3,
+                  "pet_id": "pet_000006",
+                  "name": "火神",
+                  "revealed_via": "opening_preview",
+                  "revealed_turn": 1
+                },
+                {
+                  "slot": 4,
+                  "pet_id": "pet_000008",
+                  "name": "草头鸭",
+                  "revealed_via": "opening_preview",
+                  "revealed_turn": 1
+                },
+                {
+                  "slot": 5,
+                  "pet_id": "pet_000010",
+                  "name": "恶魔狼",
+                  "revealed_via": "opening_preview",
+                  "revealed_turn": 1
+                }
+              ],
+              "legal": [
+                {
+                  "label": "抓挠",
+                  "kind": "skill"
+                },
+                {
+                  "label": "防御",
+                  "kind": "skill"
+                },
+                {
+                  "label": "仙人掌刺击",
+                  "kind": "skill"
+                },
+                {
+                  "label": "腐化",
+                  "kind": "skill"
+                },
+                {
+                  "label": "聚能",
+                  "kind": "charge"
+                },
+                {
+                  "label": "换上第2位",
+                  "kind": "switch"
+                },
+                {
+                  "label": "换上第3位",
+                  "kind": "switch"
+                },
+                {
+                  "label": "换上第4位",
+                  "kind": "switch"
+                },
+                {
+                  "label": "换上第5位",
+                  "kind": "switch"
+                },
+                {
+                  "label": "换上第6位",
+                  "kind": "switch"
+                },
+                {
+                  "label": "愿力强化",
+                  "kind": "magic"
+                },
+                {
+                  "label": "投降",
+                  "kind": "surrender"
+                }
+              ],
+              "affinity": {
+                "source": "src/client/type-affinity.data.js@roco-world-s4-2026-09-10",
+                "rows": [
+                  {
+                    "pet_id": "pet_000001",
+                    "multiplier": 2,
+                    "known": true,
+                    "vs_type": "火系"
+                  },
+                  {
+                    "pet_id": "pet_000327",
+                    "multiplier": 2,
+                    "known": true,
+                    "vs_type": "火系"
+                  },
+                  {
+                    "pet_id": "pet_000002",
+                    "multiplier": 0.5,
+                    "known": true,
+                    "vs_type": "火系"
+                  },
+                  {
+                    "pet_id": "pet_000007",
+                    "multiplier": 2,
+                    "known": true,
+                    "vs_type": "火系"
+                  },
+                  {
+                    "pet_id": "pet_000009",
+                    "multiplier": 1,
+                    "known": true,
+                    "vs_type": "火系"
+                  },
+                  {
+                    "pet_id": "pet_000011",
+                    "multiplier": 1,
+                    "known": true,
+                    "vs_type": "火系"
+                  }
+                ],
+                "unavailable": [],
+                "vs_types": [
+                  "火系"
+                ]
+              }
+            },
+            "rocoLineup": [
+              {
+                "pet_id": "pet_000001",
+                "name": "喵喵",
+                "hp": 495,
+                "max_hp": 495,
+                "energy": 10,
+                "alive": true,
+                "slot": 1,
+                "active": true
+              },
+              {
+                "pet_id": "pet_000327",
+                "name": "缇塔",
+                "hp": 508,
+                "max_hp": 508,
+                "energy": 10,
+                "alive": true,
+                "slot": 2,
+                "active": false
+              },
+              {
+                "pet_id": "pet_000002",
+                "name": "水蓝蓝",
+                "hp": 298,
+                "max_hp": 298,
+                "energy": 10,
+                "alive": true,
+                "slot": 3,
+                "active": false
+              },
+              {
+                "pet_id": "pet_000007",
+                "name": "魔力猫",
+                "hp": 354,
+                "max_hp": 354,
+                "energy": 10,
+                "alive": true,
+                "slot": 4,
+                "active": false
+              },
+              {
+                "pet_id": "pet_000009",
+                "name": "恶魔叮",
+                "hp": 323,
+                "max_hp": 323,
+                "energy": 10,
+                "alive": true,
+                "slot": 5,
+                "active": false
+              },
+              {
+                "pet_id": "pet_000011",
+                "name": "鸭吉吉",
+                "hp": 768,
+                "max_hp": 768,
+                "energy": 10,
+                "alive": true,
+                "slot": 6,
+                "active": false
+              }
+            ],
+            "publicState": null,
+            "latestEvents": [],
+            "playerMessage": "喵喵与缇塔的承伤比较\n回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释。游戏按回合结算，不按秒；不要编造技能冷却。道具名称只能使用回复药、净化药、能量果，不要把它们叫作解药或以太。双方同时决定，不能先看对手本回合出招再决定自己的行动。复盘中hpBefore是回合开始、hpAfter是结束，不能把行动前生命称作打完还剩。逐回合核对实际事件：行动取消不能说成打出了伤害，事前预测和事后结算必须分开。",
+            "conversation": [],
+            "taskState": {
+              "topic": "strategist",
+              "pendingQuestion": null
+            },
+            "interfaceContext": {
+              "screen": "首页营地与培养",
+              "focus": "own-0001",
+              "stageId": "meadow"
+            },
+            "activity": {
+              "words": [],
+              "sources": [
+                "你选的六只",
+                "你的名单"
+              ],
+              "corrected": false,
+              "answerCorrected": false,
+              "fallback": false,
+              "fallbackReason": null,
+              "steps": 0,
+              "fallbackNote": null
+            },
+            "activityLine": "依据：你选的六只 · 你的名单",
+            "localText": "第 1 回合。对手场上：火花。比一比：喵喵 承伤 2（火系）、缇塔 承伤 2（火系）。两只对这个属性的承伤倍率相同；实际伤害还取决于技能、攻防与个体配置，不能据此判断掉血多少。倍率来自公开承伤相性读数（源：src/client/type-affinity.data.js@roco-world-s4-2026-09-10）。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。",
+            "memory": {
+              "version": 1,
+              "preference": null,
+              "lessons": [],
+              "events": [],
+              "pendingQuiz": null,
+              "dialogue": [
+                {
+                  "role": "user",
+                  "content": "喵喵与缇塔的承伤比较\n回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释。游戏按回合结算，不按秒；不要编造技能冷却。道具名称只能使用回复药、净化药、能量果，不要把它们叫作解药或以太。双方同时决定，不能先看对手本回合出招再决定自己的行动。复盘中hpBefore是回合开始、hpAfter是结束，不能把行动前生命称作打完还剩。逐回合核对实际事件：行动取消不能说成打出了伤害，事前预测和事后结算必须分开。"
+                },
+                {
+                  "role": "assistant",
+                  "content": "第 1 回合。对手场上：火花。比一比：喵喵 承伤 2（火系）、缇塔 承伤 2（火系）。两只对这个属性的承伤倍率相同；实际伤害还取决于技能、攻防与个体配置，不能据此判断掉血多少。倍率来自公开承伤相性读数（源：src/client/type-affinity.data.js@roco-world-s4-2026-09-10）。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。"
+                }
+              ],
+              "lastTopic": "strategist",
+              "journal": [],
+              "reflections": {},
+              "goal": null,
+              "favorite": null,
+              "ruleReferenceId": null,
+              "quizCount": 0,
+              "watches": [],
+              "stated": [],
+              "mood": null,
+              "quizLog": [],
+              "habits": null,
+              "skill": null,
+              "acceptance": null
+            },
+            "route": "strategist",
+            "provider": "local",
+            "verified": true,
+            "localOnly": false,
+            "receiptConsistency": {
+              "consistent": true,
+              "reasons": [],
+              "scope": "local template: engine-generated, not a paraphrase of the receipts",
+              "checkedText": "local-template"
+            },
+            "validation": {
+              "valid": true,
+              "checked_by": "server",
+              "checkedText": "local-template",
+              "deliveredText": "local-template",
+              "rejected": false,
+              "rejectedReason": null,
+              "reasons": [],
+              "scope": "local template: engine-generated, not a paraphrase of the receipts"
+            },
+            "usage": null,
+            "tokenAudit": null,
+            "stateToken": 1,
+            "cache": "miss"
+          }
+        ],
+        "text": "✦ 小芽\n收起\n×\n本地规则核验 · 依据可展开查看\n资料：问一句就拉起 · 云端未连接\n设置\n小芽\n\n我是小芽。随便问：你的伙伴、属性相性、技能与规则。\n\n你\n喵喵与缇塔的承伤比较\n小芽\n\n第 1 回合。对手场上：火花。比一比：喵喵 承伤 2（火系）、缇塔 承伤 2（火系）。两只对这个属性的承伤倍率相同；实际伤害还取决于技能、攻防与个体配置，不能据此判断掉血多少。倍率来自公开承伤相性读数（源：src/client/type-affinity.data.js@roco-world-s4-2026-09-10）。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。\n\n依据：你选的六只 · 你的名单\n\n依据\n我一共有多少只精灵？\n雨天水系伤害加多少？\n火系克制什么属性？\n你能做什么\n发送"
+      }
+    },
+    {
+      "name": "adoption",
+      "result": {
+        "blocked": 0,
+        "executed": 1,
+        "version": 6
+      }
+    },
+    {
+      "name": "late-switch",
+      "before": {
+        "battleId": "s1-6qcyffb4",
+        "version": 6,
+        "active": 0
+      },
+      "result": {
+        "status": "✦ 小芽\n收起\n×\n局面已经变化，这条迟到的回答已作废，请重新问当前这一手。\n资料：问一句就拉起 · 云端未连接\n设置\n小芽\n\n我是小芽。随便问：你的伙伴、属性相性、技能与规则。\n\n你\n喵喵与缇塔的承伤比较\n小芽\n\n第 1 回合。对手场上：火花。比一比：喵喵 承伤 2（火系）、缇塔 承伤 2（火系）。两只对这个属性的承伤倍率相同；实际伤害还取决于技能、攻防与个体配置，不能据此判断掉血多少。倍率来自公开承伤相性读数（源：src/client/type-affinity.data.js@roco-world-s4-2026-09-10）。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。\n\n依据：你选的六只 · 你的名单\n\n依据\n你\n喵喵与缇塔的承伤比较\n我一共有多少只精灵？\n雨天水系伤害加多少？\n火系克制什么属性？\n你能做什么\n发送",
+        "battleId": "s1-6qcyffb4",
+        "version": 9,
+        "active": 1
+      }
+    },
+    {
+      "name": "late-new-battle",
+      "before": {
+        "battleId": "s1-6qcyffb4",
+        "version": 9,
+        "active": 1
+      },
+      "result": {
+        "status": "✦ 小芽\n收起\n×\n局面已经变化，这条迟到的回答已作废，请重新问当前这一手。\n资料：问一句就拉起 · 云端未连接\n设置\n小芽\n\n我是小芽。随便问：你的伙伴、属性相性、技能与规则。\n\n你\n喵喵与缇塔的承伤比较\n小芽\n\n第 1 回合。对手场上：火花。比一比：喵喵 承伤 2（火系）、缇塔 承伤 2（火系）。两只对这个属性的承伤倍率相同；实际伤害还取决于技能、攻防与个体配置，不能据此判断掉血多少。倍率来自公开承伤相性读数（源：src/client/type-affinity.data.js@roco-world-s4-2026-09-10）。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。\n\n依据：你选的六只 · 你的名单\n\n依据\n你\n喵喵与缇塔的承伤比较\n你\n喵喵与缇塔的承伤比较\n我一共有多少只精灵？\n雨天水系伤害加多少？\n火系克制什么属性？\n你能做什么\n发送",
+        "battleId": "s2-3fpitoil",
+        "version": 0,
+        "active": 0
+      }
+    }
+  ],
+  "chromePid": 7124,
+  "profile": "/var/folders/c5/hc8ntlx52wd8h5kl14zml4bm0000gn/T/roco-quality-20261006-ANiWTI"
+}
