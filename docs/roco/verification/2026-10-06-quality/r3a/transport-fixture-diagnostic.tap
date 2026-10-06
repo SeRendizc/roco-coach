@@ -1,0 +1,30 @@
+✖ real provider transport failure yields HTTP error, then an honest local companion fallback (51.9455ms)
+ℹ {"http":[{"status":400,"body":{"error":"教练上下文无效"},"payload":{"message":"今天有点烦，想聊聊\n回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释。游戏按回合结算，不按秒；不要编造技能冷却。道具名称只能使用回复药、净化药、能量果，不要把它们叫作解药或以太。双方同时决定，不能先看对手本回合出招再决定自己的行动。复盘中hpBefore是回合开始、hpAfter是结束，不能把行动前生命称作打完还剩。逐回合核对实际事件：行动取消不能说成打出了伤害，事前预测和事后结算必须分开。","role":"companion","context":{"mode":"camp","coachAllowed":true,"evidenceIndex":[]},"memory":{"version":1,"preference":null,"lessons":[],"events":[],"pendingQuiz":null,"dialogue":[],"lastTopic":null,"journal":[],"reflections":{},"goal":null,"favorite":null,"ruleReferenceId":null,"quizCount":0,"watches":[],"stated":[],"mood":null,"quizLog":[],"habits":null,"skill":null,"acceptance":null},"stateToken":"r3a-current-camp","conversation":[]}}],"answer":{"text":"烦啊——烦就先搁着，不聊对局也行。","evidence":["本机对战记录：已结束0场，0胜0负（来源：memory.events，最多保留12场，预制场景不写入）。","闲聊线程「self」：你这一轮说的是「今天有点烦，想聊聊」，开了一个新话题（来源：本轮消息 + memory.dialogue 的上一轮）。","跨局记录：memory.events 里一局都还没有（没有记录）。这一轮只接住玩家这句话本身，不许提任何过去、不许念「0胜0负」、也不许把人推去开一局；玩家自己问账本时才讲账本。","语气档位 R2（具体关切）：玩家本轮倾诉，但真实记录里没有连败（连败0局，momentum=0）。","档位依据：最近0局0胜0负，momentum=0（来源：memory.events）；近7天有0次主动关闭提示，consideration=2（来源：memory.journal 的 dismiss）；本轮由玩家发起，意图=emotion，engagement=2（来源：本轮消息）。","你的设置：交流偏好未设置、玩法目标未设置、本命未设置、怎么称呼你未设置（来源：你明确表达过才会记录）。","情绪假设（不是结论）：你最近一次自己说的是「烦」，置信度 0.3，01:21 前有效（假设：只根据玩家自己这一轮说的话，30 分钟内有效，可被下一句覆盖）。这一轮只接住这个状态，不要据此评价你这个人。"],"register":"R2","companionState":{"register":"R2","engagement":2,"consideration":2,"momentum":0,"lossStreak":0,"winStreak":0,"reasons":["最近0局0胜0负，momentum=0（来源：memory.events）","近7天有0次主动关闭提示，consideration=2（来源：memory.journal 的 dismiss）","本轮由玩家发起，意图=emotion，engagement=2（来源：本轮消息）","判定：玩家本轮倾诉，但真实记录里没有连败（连败0局，momentum=0）"]},"replyConstraints":{"register":"R2","voice":"companion","maxChars":120,"maxQuestions":1,"allowAdvice":true,"forbid":["复述屏幕上已经写着的事","播报自己的情绪（「我看得有点急」这类第一人称感受）","空泛安慰","评价玩家水平","说教","战术指挥","速度对比与先手判断（「速度38比它34快」「可以先动」「先手在你」）","提任何过去的事（「上次」「之前」「上回」这类说法）","播报本机有没有记录（「记录还是空的」「一局都还没记上」），或者把玩家推去开一局（「去开一局吧」「打完我就能接上话」）","提对局、记录、回合数或胜负（他这一轮说的是自己的状态，先接住他）"],"allow":["对真实事件的可惜/漂亮/悬/憋屈/松口气（必须落在具体回合、数字或记录上）","跨局记录与偏好（玩家以前说过、打过的事）"],"instruction":"本轮档位 R2（具体关切）：正文不超过120字，最多一个问句，这一轮玩家说的是他自己的心情或状态：先用他用的那个词原样接住（他说「累」就回「累」，不许换成「疲惫／辛苦」；说「没睡好」就回「没睡好」），然后把话停在他的状态上——最后一句要落在他身上。对局、记录、回合数、胜负一个字都不要提：想拐回对局也是后面几轮的事，不是这一轮。也不要说教（「你该睡了」「早点睡」这类话一个字都不许有）。这一轮**不需要**任何跨局记录或跨回合统计：他说的是自己的状态，不是来听战报的；接住他这句话本身，比任何数字都该说。这一轮是玩家主动搭话：先用一句话回他这句话本身（问候就回问候，说累就接住累，想聊天就应一声），再顺着说下去；不要用「等你打完一回合再来」「打完我就能接上话了」这类把人挡回去的说法，不要念「0胜0负」这种全零的账，也不要把话题列成选项菜单。速度对比（「速度38比它34快」）、先手判断（「可以先动」「先手在你」）、以及任何告诉玩家这一手该出什么的说法，都属于军师的活：陪练一句都不给。不要复述屏幕上已经写着的事（谁被克制、还剩几只、第几回合的进度），也不要说自己的感受——情绪要落在这一局真实发生的事上（可惜、漂亮、悬、憋屈、松口气），不是落在你自己身上。"},"intent":"emotion","chatThread":"self","chatContinued":false,"silent":false,"latestEvents":[],"playerMessage":"今天有点烦，想聊聊\n回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释。游戏按回合结算，不按秒；不要编造技能冷却。道具名称只能使用回复药、净化药、能量果，不要把它们叫作解药或以太。双方同时决定，不能先看对手本回合出招再决定自己的行动。复盘中hpBefore是回合开始、hpAfter是结束，不能把行动前生命称作打完还剩。逐回合核对实际事件：行动取消不能说成打出了伤害，事前预测和事后结算必须分开。","conversation":[],"taskState":{"topic":"companion","pendingQuestion":null},"interfaceContext":{"screen":"首页营地与培养"},"activity":{"words":[],"sources":[],"corrected":false,"answerCorrected":false,"fallback":false,"fallbackReason":null,"steps":0,"fallbackNote":null},"activityLine":null,"localText":"烦啊——烦就先搁着，不聊对局也行。","memory":{"version":1,"preference":null,"lessons":[],"events":[],"pendingQuiz":null,"dialogue":[{"role":"user","content":"今天有点烦，想聊聊\n回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释。游戏按回合结算，不按秒；不要编造技能冷却。道具名称只能使用回复药、净化药、能量果，不要把它们叫作解药或以太。双方同时决定，不能先看对手本回合出招再决定自己的行动。复盘中hpBefore是回合开始、hpAfter是结束，不能把行动前生命称作打完还剩。逐回合核对实际事件：行动取消不能说成打出了伤害，事前预测和事后结算必须分开。"},{"role":"assistant","content":"烦啊——烦就先搁着，不聊对局也行。"}],"lastTopic":"companion","journal":[],"reflections":{},"goal":null,"favorite":null,"ruleReferenceId":null,"quizCount":0,"watches":[],"stated":[],"mood":{"id":"mood:烦","label":"烦","confidence":0.3,"time":"2026-10-06T00:51:21.572Z","expiresAt":1791249681572,"source":"player-stated","text":"今天有点烦，想聊聊\n回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释。游戏按回合结算，不按秒；不要编造技","basis":"假设：只根据玩家自己这一轮说的话，30 分钟内有效，可被下一句覆盖","overwritable":true},"quizLog":[],"habits":null,"skill":null,"acceptance":null},"route":"companion","provider":"local-fallback","verified":true,"localOnly":false,"receiptConsistency":{"consistent":true,"reasons":[],"scope":"local template: engine-generated, not a paraphrase of the receipts","checkedText":"local-template"},"validation":{"valid":true,"checked_by":"server","checkedText":"local-template","deliveredText":"local-template","rejected":false,"rejectedReason":null,"reasons":[],"scope":"local template: engine-generated, not a paraphrase of the receipts"},"fallbackReason":"这次没能把局面传给模型，先按本局规则给你结论","execution":"local-fallback","allowAdvice":null,"askedMessage":"今天有点烦，想聊聊","stateToken":"r3a-current-camp","contextAudit":{"task":"review","window":200000,"outputReserve":4096,"systemReserve":4096,"toolReserve":2048,"estimatedInput":1038,"estimate":"UTF-8 byte upper budget; not exact model token count","retainedEvidenceIds":[]}}}
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 120.282583
+
+✖ failing tests:
+
+test at tests/roco-quality-transport-20261006.test.js:9:1
+✖ real provider transport failure yields HTTP error, then an honest local companion fallback (51.9455ms)
+  AssertionError [ERR_ASSERTION]: non-deterministic request really reaches server provider.generate
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-transport-20261006.test.js:26:9)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

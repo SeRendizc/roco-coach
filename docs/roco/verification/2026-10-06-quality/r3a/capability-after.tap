@@ -1,0 +1,11 @@
+✔ actual answer evidence distinguishes fallback, local facts and cached cloud output (0.340917ms)
+✔ actual model-state merger gives configuration no response credit and never revives a failed answer (0.063666ms)
+✔ player capability wording describes configuration or this answer, without connection or generation claims (0.11325ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 43.320292

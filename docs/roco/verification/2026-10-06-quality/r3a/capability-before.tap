@@ -1,0 +1,64 @@
+✖ actual answer evidence distinguishes fallback, local facts and cached cloud output (0.569417ms)
+✖ actual model-state merger gives configuration no response credit and never revives a failed answer (0.061416ms)
+✖ player capability wording describes configuration or this answer, without connection or generation claims (0.148584ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 0
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 45.759125
+
+✖ failing tests:
+
+test at tests/roco-quality-capability-20261006.test.js:3:1
+✖ actual answer evidence distinguishes fallback, local facts and cached cloud output (0.569417ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  null !== 'fallback'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-capability-20261006.test.js:4:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.start (node:internal/test_runner/test:1257:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: 'fallback',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/roco-quality-capability-20261006.test.js:9:1
+✖ actual model-state merger gives configuration no response credit and never revives a failed answer (0.061416ms)
+  TypeError: xiaoya.modelCapabilityOf is not a function
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-capability-20261006.test.js:11:22)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
+
+test at tests/roco-quality-capability-20261006.test.js:17:1
+✖ player capability wording describes configuration or this answer, without connection or generation claims (0.148584ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /已配置/. Input:
+  
+  '资料：问一句就拉起 · 云端状态未知'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-capability-20261006.test.js:22:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '资料：问一句就拉起 · 云端状态未知',
+    expected: /已配置/,
+    operator: 'match',
+    diff: 'simple'
+  }

@@ -1,0 +1,2 @@
+[roco] 对手候选（我的可用物种）: 536 pet_000003,pet_000004,pet_000005,pet_000006,pet_000008,pet_000010,pet_000012,pet_000013
+{"checks":["transport-error-visible","late-error-switch","late-error-new-battle"],"transportCalls":3,"serverPid":10284,"chromePid":10293}

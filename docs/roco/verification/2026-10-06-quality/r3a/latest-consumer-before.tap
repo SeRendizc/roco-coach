@@ -1,0 +1,52 @@
+✖ actual latest-answer consumer clears previous cloud source after local (0.69525ms)
+✖ actual latest-answer consumer clears previous cloud source after cache (0.110541ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 47.784167
+
+✖ failing tests:
+
+test at tests/roco-quality-latest-source-20261006.test.js:11:144
+✖ actual latest-answer consumer clears previous cloud source after local (0.69525ms)
+  AssertionError [ERR_ASSERTION]: a received local/cached answer must clear the preceding cloud receipt
+  
+  'ok' !== null
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-latest-source-20261006.test.js:17:64)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.start (node:internal/test_runner/test:1257:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'ok',
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/roco-quality-latest-source-20261006.test.js:11:144
+✖ actual latest-answer consumer clears previous cloud source after cache (0.110541ms)
+  AssertionError [ERR_ASSERTION]: a received local/cached answer must clear the preceding cloud receipt
+  
+  'ok' !== null
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-latest-source-20261006.test.js:17:64)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'ok',
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

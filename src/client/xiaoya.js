@@ -713,6 +713,7 @@ function decorate(entry, answer) {
 /** 连接状态那句话：与营地页同一条口径（模型没接上就明说只能给规则事实）。 */
 function statusLine(answer) {
   if (answer.fallbackReason) return answer.fallbackReason;
+  if (answer.cache === 'hit') return '显示缓存回答 · 这次未请求云端生成';
   if (answer.provider === 'deepseek') return 'DeepSeek 已回答 · 依据可展开查看';
   return '本地规则核验 · 依据可展开查看';
 }
@@ -729,7 +730,7 @@ function statusLine(answer) {
  * 于是从"答完"到"探针回来"之间（探针本身也可能读不到）页面就停在一句**过期的话**上。
  *
  * 口径（只拿回答里真的有的东西，不猜）：
- *   · `provider === 'deepseek'` ⇒ 云端模型**此刻确实在**（这一句就是它生成的）；
+ *   · 非缓存 `provider === 'deepseek'` ⇒ 这次正文来自云端；回退正文明确来自本地；
  *   · `toolTrace` 非空 ⇒ 本机规则服务**刚刚真的跑过**（工具回执是它给的）；
  *   · `taskFailure.missing` 点到规则服务 ⇒ 它现在**确实不在**（如实说不在，别说"未知"）；
  *   · `ruleset_config_id` 从**这一问的上下文**里取（页面那一局绑定的规则配置就是它）。
@@ -738,7 +739,8 @@ function statusLine(answer) {
  */
 export function capabilityEvidenceOf(answer, context = null) {
   const out = {model: null, tools: null, rulesetId: null};
-  if (answer && typeof answer === 'object' && answer.provider === 'deepseek') out.model = 'ok';
+  if (answer?.provider === 'deepseek' && answer.cache !== 'hit') out.model = 'ok';
+  if (answer?.provider === 'local-fallback' || answer?.execution === 'local-fallback') out.model = 'fallback';
   const trace = Array.isArray(answer?.toolTrace) ? answer.toolTrace : [];
   if (trace.length) out.tools = 'ok';
   const missing = answer?.taskFailure?.missing ?? null;
@@ -749,9 +751,15 @@ export function capabilityEvidenceOf(answer, context = null) {
   return out;
 }
 
+// Configuration is not a response receipt. Only this match's answer can override it.
+export function modelCapabilityOf({probeReady = null, evidence = null, evidenceMatchId = null, currentMatchId = null} = {}) {
+  if (evidenceMatchId === currentMatchId && ['ok', 'fallback'].includes(evidence)) return evidence;
+  return probeReady === true ? 'configured' : probeReady === false ? 'off' : 'unknown';
+}
+
 /**
  * 那两行状态文案的**唯一**渲染处（给人读的字与机器读的钩子都由它派生，免得两处措辞漂）。
- * `tools`/`model` 都是三态，与探针同一条口径：`ok` 在 / `down`·`off` 明确不在 / `unknown` 不知道。
+ * tools 保留三态；model 另区分配置与当前局回答来源，不把探针当响应回执。
  */
 export function capabilityLines({tools = 'unknown', model = 'unknown', rulesetId = null, missing = null} = {}) {
   const lack = Array.isArray(missing) ? missing[0] : (typeof missing === 'string' && missing ? missing : null);
@@ -767,7 +775,11 @@ export function capabilityLines({tools = 'unknown', model = 'unknown', rulesetId
       : `资料查询：待唤醒（规则服务是第一次查询才启动的；问一句就会唤醒它）`
         + `${rulesetId ? ` · 本机规则集 ${rulesetId}` : ''}`;
   const modelLine = model === 'ok'
-    ? '云端模型：已连接 —— 自由发挥的文字由它生成'
+    ? '本次回答：云端生成（来自这次非缓存回答的回执）'
+    : model === 'fallback'
+      ? '本次回答：本地回退，未使用云端正文'
+    : model === 'configured'
+      ? '云端模型：已配置；尚未证明本次请求成功'
     : model === 'off'
       ? '云端模型：未连接 —— 只影响自由发挥的文字，上面那些资料查询照常'
       : '云端模型：状态未知（只影响自由发挥的文字）';
@@ -789,7 +801,8 @@ export function capabilityLines({tools = 'unknown', model = 'unknown', rulesetId
  */
 export function capabilityChipText({tools = 'unknown', model = 'unknown'} = {}) {
   const toolsShort = tools === 'ok' ? '资料可用' : tools === 'down' ? '资料不可用' : '资料：问一句就拉起';
-  const modelShort = model === 'ok' ? '云端已连接' : model === 'off' ? '云端未连接' : '云端状态未知';
+  const modelShort = model === 'ok' ? '本次云端回答' : model === 'fallback' ? '本次本地回答'
+    : model === 'configured' ? '云端已配置' : model === 'off' ? '云端未连接' : '云端状态未知';
   return `${toolsShort} · ${modelShort}`;
 }
 
@@ -1367,6 +1380,9 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
   newChat.textContent = '新对话';
   newChat.title = '开一段新对话；这一段留在记录里，跨局记忆不动。';
   newChat.onclick = () => {
+    answerEvidence.model = null;
+    answerEvidence.matchId = null;
+    paintCapability(probeInfo);
     state.chatStore = beginNewChatSession(state.chatStore);
     writeStored(CHAT_KEY, serializeChatStore(state.chatStore));
     state.conversation = chatConversation(activeChatSession(state.chatStore));
@@ -1379,6 +1395,9 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
   clearChat.textContent = '清空本次对话';
   clearChat.title = '只清这一段对话的轮次；跨局记忆（学到的东西、偏好）不动。';
   clearChat.onclick = () => {
+    answerEvidence.model = null;
+    answerEvidence.matchId = null;
+    paintCapability(probeInfo);
     state.chatStore = clearActiveChatSession(state.chatStore);
     writeStored(CHAT_KEY, serializeChatStore(state.chatStore));
     state.conversation = [];
@@ -1616,33 +1635,30 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
   let capabilityAt = 0;
   //: 最近一次探针回执（`null` = 还没读到）；回答证据要跟它合并，所以要留着。
   let probeInfo = null;
-  //: 回答**自己**证明的那几件事（`capabilityEvidenceOf`）。只增不减地覆盖："刚刚真的发生过"优先。
-  const answerEvidence = {model: null, tools: null, rulesetId: null};
+  // 回答证明的来源与工具状态。模型证据限当前局；配置探针不能覆盖本地回退。
+  const answerEvidence = {model: null, tools: null, rulesetId: null, matchId: null};
+  let capabilityMatchId = null;
+  const capabilityMatchIdOf = (context) => context?.roco_battle?.battle_id ?? context?.battle?.id ?? null;
   /**
-   * 两行状态的**唯一**画法。合并规则（U07 第 4 条：不许自相矛盾）：
-   *   · 探针说 `true` ⇒ 在；说 `false` ⇒ 明确不在（这两档都以探针为准）；
-   *   · 探针说 `null`（还没拉起来过）⇒ 看**回答证据**（工具回执 ⇒ 刚刚真的跑过 ⇒ 可用）；
-   *   · 回答证明模型答过（`provider:'deepseek'`）⇒ 云端模型这一行**必须**是"已连接"，
-   *     哪怕探针那一份还是过期的 `modelReady:false` —— 两句自相矛盾的话里，
-   *     有实时证据的那一句赢（截图 08 的矛盾就是这里出来的）。
+   * 两行状态共用一个模型门控：探针只证明配置；当前局非缓存云回答或本地回退
+   * 决定回答来源。工具状态仍保留原来的探针与回执合并规则。
    */
   const paintCapability = (info) => {
     const cap = info?.capabilities ?? null;
     if (info) probeInfo = info;
     // 三态：`true` 在 / `false` 明确不在 / `null` **还没拉起来过**（惰性启动，不许报成"坏了"）。
     const probeTools = cap?.toolsReady === true ? 'ok' : cap?.toolsReady === false ? 'down' : 'unknown';
-    const probeModel = cap?.modelReady === true ? 'ok' : cap?.modelReady === false ? 'off' : 'unknown';
     const tools = answerEvidence.tools === 'ok' || probeTools === 'ok' ? 'ok'
       : answerEvidence.tools === 'down' || probeTools === 'down' ? 'down' : 'unknown';
-    const model = answerEvidence.model === 'ok' || probeModel === 'ok' ? 'ok'
-      : probeModel === 'off' ? 'off' : 'unknown';
+    const model = modelCapabilityOf({probeReady: cap?.modelReady, evidence: answerEvidence.model,
+      evidenceMatchId: answerEvidence.matchId, currentMatchId: capabilityMatchId});
     // 规则集：探针那一份优先，其次**这一问的上下文**里那一局绑定的配置（已知就要写出来）。
     const rulesetId = cap?.rulesetId ?? answerEvidence.rulesetId ?? null;
     document.body.dataset.xyCapability = `tools=${tools};model=${model};server=${cap?.serverReady === true ? 'ok' : 'unknown'}`;
     // 判据 `live-model-status` 读的钩子（旧面板由 `renderModelChip()` 写；甲④ 之后由这里写）。
-    // **不许为了绿而写假的**：`connected` 只在真的连上模型时写（`model === 'ok'`）。
-    capEl.dataset.rocoModel = model === 'ok' ? 'connected' : 'offline';
-    document.body.dataset.rocoModelConfigured = model === 'ok' ? 'yes' : 'no';
+    // 数据钩子区分已配置/本次回答来源，不写连接成功。
+    capEl.dataset.rocoModel = model === 'ok' ? 'answered' : model === 'configured' ? 'configured' : model === 'fallback' ? 'local-fallback' : 'offline';
+    document.body.dataset.rocoModelConfigured = info?.configured === true ? 'yes' : 'no';
     // 文案只有一份渲染处（`capabilityLines`）：人读的两行与钩子不会各说各的。
     // ⚠ 「未连接」三个字必须保留：判据 `live-model-status`（`scripts/roco/browser-live-acceptance.mjs`）
     //   要求「没连模型时**明说**」（正则 `/未连接|没连|未连/`），而「没有连」**不匹配**
@@ -1663,6 +1679,12 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
     // 那之后页面上那两行才准（不许停在过期的那一句上）。
     if (!force && Date.now() - capabilityAt < 1000) return;
     capabilityAt = Date.now();
+    const current = await readHostContext(contextProvider);
+    capabilityMatchId = capabilityMatchIdOf(current.context.extra);
+    if (answerEvidence.matchId !== capabilityMatchId) {
+      answerEvidence.model = null;
+      answerEvidence.matchId = null;
+    }
     try { paintCapability(await connectionStatus()); }
     catch {
       // 读不到探针时**只说自己知道的那一件事**：没有"已连接"的证据 ⇒ 绝不标 connected。
@@ -1670,10 +1692,11 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
       //（"没连模型却标 null"），而"读不到"与"连上了"是两件事，前者不能冒充后者。
       // ⚠ 答过之后（有回答证据）就按证据说：不能因为探针读不到，把"这一句就是模型答的"改口成"未连接"。
       const tools = answerEvidence.tools ?? 'unknown';
-      const model = answerEvidence.model === 'ok' ? 'ok' : 'unknown';
+      const model = modelCapabilityOf({evidence: answerEvidence.model,
+        evidenceMatchId: answerEvidence.matchId, currentMatchId: capabilityMatchId});
       document.body.dataset.xyCapability = `tools=${tools};model=${model};server=unknown`;
-      capEl.dataset.rocoModel = model === 'ok' ? 'connected' : 'offline';
-      document.body.dataset.rocoModelConfigured = model === 'ok' ? 'yes' : 'no';
+      capEl.dataset.rocoModel = model === 'ok' ? 'answered' : model === 'fallback' ? 'local-fallback' : 'offline';
+      document.body.dataset.rocoModelConfigured = probeInfo?.configured === true ? 'yes' : 'no';
       if (answerEvidence.model || answerEvidence.tools) {
         const {toolsLine, modelLine} = capabilityLines({tools, model,
           rulesetId: answerEvidence.rulesetId, missing: null});
@@ -1699,7 +1722,9 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
    */
   const noteAnswerEvidence = (answer, context = null) => {
     const seen = capabilityEvidenceOf(answer, context);
-    if (seen.model) answerEvidence.model = seen.model;
+    answerEvidence.model = seen.model;
+    answerEvidence.matchId = capabilityMatchIdOf(context);
+    capabilityMatchId = answerEvidence.matchId;
     if (seen.tools) answerEvidence.tools = seen.tools;
     if (seen.rulesetId) answerEvidence.rulesetId = seen.rulesetId;
     paintCapability(probeInfo);
@@ -1731,7 +1756,7 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
     open: () => { if (panel && !panel.isOpen()) panel.setOpen(true); },
     close: () => { if (panel && panel.isOpen()) panel.setOpen(false); },
     render: () => {
-      drawHistory();
+      if (!state.asking) drawHistory();
       renderMemoryList();
       void refreshCapability(true);
       updateFocusChip(focusProvider.getContext());

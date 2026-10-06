@@ -1,0 +1,10 @@
+✔ ㉒ U07-④ 连通状态不自相矛盾：答完那一句自己的证据必须写进状态行 (1.246833ms)
+✔ ㉘ R06：默认顶部只有一个展开入口，`#model-chip` 是**短**读法（长句进二级） (0.696625ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 52.506084

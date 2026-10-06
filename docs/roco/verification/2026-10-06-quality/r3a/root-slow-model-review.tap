@@ -1,0 +1,14 @@
+✔ a slow model answer is aborted when the player acts first, so no stale text is delivered (366.350625ms)
+✔ after a fast action only the newest position is delivered (149.384166ms)
+✔ the same position asked twice is merged into one upstream call (no duplicate delivery) (148.419708ms)
+✔ three rapid actions in a row deliver exactly one answer: the last one (131.21275ms)
+✔ the client layer never speaks: no speech call exists on the answer path (3.210542ms)
+✔ a slow answer that arrives after the deadline is not resurrected (806.369417ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1657.489208

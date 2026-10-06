@@ -1,0 +1,28 @@
+✖ direct skill facts use generated engine knowledge and preserve follow-up evidence (5.265375ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 57.774
+
+✖ failing tests:
+
+test at tests/evals/agent.test.js:154:1
+✖ direct skill facts use generated engine knowledge and preserve follow-up evidence (5.265375ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /消耗4豆/. Input:
+  
+  '蓄能放电：消耗4能量，基础威力40（不是最终伤害），行动优先级0。高消耗雷系爆发，注意后续能量。'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/evals/agent.test.js:156:39)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '蓄能放电：消耗4能量，基础威力40（不是最终伤害），行动优先级0。高消耗雷系爆发，注意后续能量。',
+    expected: /消耗4豆/,
+    operator: 'match',
+    diff: 'simple'
+  }

@@ -1,0 +1,14 @@
+▶ real provider transport failure yields HTTP error, then an honest local companion fallback
+  ✔ fallback memory retains only the original player question (0.321667ms)
+  ✔ fallback status describes the actual local response without an elapsed-time claim (0.073ms)
+  ✔ two actual HTTP session failures do not promise an ongoing reconnect (8.713208ms)
+  ✔ cancelling an in-flight transport remains AbortError, not a fallback answer (4.510917ms)
+✔ real provider transport failure yields HTTP error, then an honest local companion fallback (51.623833ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 117.194333

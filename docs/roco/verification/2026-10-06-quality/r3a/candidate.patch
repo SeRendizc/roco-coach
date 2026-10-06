@@ -1,0 +1,394 @@
+diff --git a/src/client/roco.js b/src/client/roco.js
+index b451a9b0..a3081512 100644
+--- a/src/client/roco.js
++++ b/src/client/roco.js
+@@ -4933,6 +4933,7 @@ async function startBattle() {
+     const data = await api('/api/roco/battle/new', body);
+     state.battleId = data.battle_id;
+     applyResult(data);
++    mountRocoXiaoya()?.render();
+     // 教程在开局后自动收起（第 64 轮）：三步的动作此刻已经做完了。
+     dismissOnboard();
+     await requestPlan({reason: 'match-start'});
+@@ -6392,6 +6393,7 @@ async function startStandardPvp() {
+     state.battleId = data.battle_id;
+     state.mode = data.mode ? {...data.mode, contract_id: data.mode.id} : state.mode;
+     applyResult(data);
++    mountRocoXiaoya()?.render();
+     dismissOnboard();
+     // 试玩/按需推算的配招不在默认名单里：开局后补一次全量名单（只取一次），
+     // 取回来再重画，让「灰置配招」有真实数据可摆（拿不到就不画）。
+@@ -6558,7 +6560,7 @@ window.rocoDemo = {state, startBattle, playAction, autoTurn, requestPlan, say, r
+   mechanismSourceNote, MODE_MIRROR,
+   // 这几条渲染入口也给出去：验收脚本要在**不点按钮**的前提下把某一页/某一栏重画一次，
+   // 而它必须走页面自己的渲染，不能在脚本里另写一份 DOM。
+-  renderCompanion, renderFilterMenus, renderMode,
++  renderFilterMenus, renderMode,
+   MANA_UNVERIFIED, MECHANISM_UNKNOWN, ACTION_GROUPS, STAT_FIELDS, STAT_MISSING};
+ 
+ // 2026-09-25：这里原来往页眉**注入**一个内联样式的「培养（二级）」链接 —— 人类点名
+diff --git a/src/client/xiaoya.js b/src/client/xiaoya.js
+index 3e3ef827..ae218ec8 100644
+--- a/src/client/xiaoya.js
++++ b/src/client/xiaoya.js
+@@ -713,6 +713,7 @@ function decorate(entry, answer) {
+ /** 连接状态那句话：与营地页同一条口径（模型没接上就明说只能给规则事实）。 */
+ function statusLine(answer) {
+   if (answer.fallbackReason) return answer.fallbackReason;
++  if (answer.cache === 'hit') return '显示缓存回答 · 这次未请求云端生成';
+   if (answer.provider === 'deepseek') return 'DeepSeek 已回答 · 依据可展开查看';
+   return '本地规则核验 · 依据可展开查看';
+ }
+@@ -729,7 +730,7 @@ function statusLine(answer) {
+  * 于是从"答完"到"探针回来"之间（探针本身也可能读不到）页面就停在一句**过期的话**上。
+  *
+  * 口径（只拿回答里真的有的东西，不猜）：
+- *   · `provider === 'deepseek'` ⇒ 云端模型**此刻确实在**（这一句就是它生成的）；
++ *   · 非缓存 `provider === 'deepseek'` ⇒ 这次正文来自云端；回退正文明确来自本地；
+  *   · `toolTrace` 非空 ⇒ 本机规则服务**刚刚真的跑过**（工具回执是它给的）；
+  *   · `taskFailure.missing` 点到规则服务 ⇒ 它现在**确实不在**（如实说不在，别说"未知"）；
+  *   · `ruleset_config_id` 从**这一问的上下文**里取（页面那一局绑定的规则配置就是它）。
+@@ -738,7 +739,8 @@ function statusLine(answer) {
+  */
+ export function capabilityEvidenceOf(answer, context = null) {
+   const out = {model: null, tools: null, rulesetId: null};
+-  if (answer && typeof answer === 'object' && answer.provider === 'deepseek') out.model = 'ok';
++  if (answer?.provider === 'deepseek' && answer.cache !== 'hit') out.model = 'ok';
++  if (answer?.provider === 'local-fallback' || answer?.execution === 'local-fallback') out.model = 'fallback';
+   const trace = Array.isArray(answer?.toolTrace) ? answer.toolTrace : [];
+   if (trace.length) out.tools = 'ok';
+   const missing = answer?.taskFailure?.missing ?? null;
+@@ -749,9 +751,15 @@ export function capabilityEvidenceOf(answer, context = null) {
+   return out;
+ }
+ 
++// Configuration is not a response receipt. Only this match's answer can override it.
++export function modelCapabilityOf({probeReady = null, evidence = null, evidenceMatchId = null, currentMatchId = null} = {}) {
++  if (evidenceMatchId === currentMatchId && ['ok', 'fallback'].includes(evidence)) return evidence;
++  return probeReady === true ? 'configured' : probeReady === false ? 'off' : 'unknown';
++}
++
+ /**
+  * 那两行状态文案的**唯一**渲染处（给人读的字与机器读的钩子都由它派生，免得两处措辞漂）。
+- * `tools`/`model` 都是三态，与探针同一条口径：`ok` 在 / `down`·`off` 明确不在 / `unknown` 不知道。
++ * tools 保留三态；model 另区分配置与当前局回答来源，不把探针当响应回执。
+  */
+ export function capabilityLines({tools = 'unknown', model = 'unknown', rulesetId = null, missing = null} = {}) {
+   const lack = Array.isArray(missing) ? missing[0] : (typeof missing === 'string' && missing ? missing : null);
+@@ -767,7 +775,11 @@ export function capabilityLines({tools = 'unknown', model = 'unknown', rulesetId
+       : `资料查询：待唤醒（规则服务是第一次查询才启动的；问一句就会唤醒它）`
+         + `${rulesetId ? ` · 本机规则集 ${rulesetId}` : ''}`;
+   const modelLine = model === 'ok'
+-    ? '云端模型：已连接 —— 自由发挥的文字由它生成'
++    ? '本次回答：云端生成（来自这次非缓存回答的回执）'
++    : model === 'fallback'
++      ? '本次回答：本地回退，未使用云端正文'
++    : model === 'configured'
++      ? '云端模型：已配置；尚未证明本次请求成功'
+     : model === 'off'
+       ? '云端模型：未连接 —— 只影响自由发挥的文字，上面那些资料查询照常'
+       : '云端模型：状态未知（只影响自由发挥的文字）';
+@@ -789,7 +801,8 @@ export function capabilityLines({tools = 'unknown', model = 'unknown', rulesetId
+  */
+ export function capabilityChipText({tools = 'unknown', model = 'unknown'} = {}) {
+   const toolsShort = tools === 'ok' ? '资料可用' : tools === 'down' ? '资料不可用' : '资料：问一句就拉起';
+-  const modelShort = model === 'ok' ? '云端已连接' : model === 'off' ? '云端未连接' : '云端状态未知';
++  const modelShort = model === 'ok' ? '本次云端回答' : model === 'fallback' ? '本次本地回答'
++    : model === 'configured' ? '云端已配置' : model === 'off' ? '云端未连接' : '云端状态未知';
+   return `${toolsShort} · ${modelShort}`;
+ }
+ 
+@@ -1367,6 +1380,9 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
+   newChat.textContent = '新对话';
+   newChat.title = '开一段新对话；这一段留在记录里，跨局记忆不动。';
+   newChat.onclick = () => {
++    answerEvidence.model = null;
++    answerEvidence.matchId = null;
++    paintCapability(probeInfo);
+     state.chatStore = beginNewChatSession(state.chatStore);
+     writeStored(CHAT_KEY, serializeChatStore(state.chatStore));
+     state.conversation = chatConversation(activeChatSession(state.chatStore));
+@@ -1379,6 +1395,9 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
+   clearChat.textContent = '清空本次对话';
+   clearChat.title = '只清这一段对话的轮次；跨局记忆（学到的东西、偏好）不动。';
+   clearChat.onclick = () => {
++    answerEvidence.model = null;
++    answerEvidence.matchId = null;
++    paintCapability(probeInfo);
+     state.chatStore = clearActiveChatSession(state.chatStore);
+     writeStored(CHAT_KEY, serializeChatStore(state.chatStore));
+     state.conversation = [];
+@@ -1616,33 +1635,30 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
+   let capabilityAt = 0;
+   //: 最近一次探针回执（`null` = 还没读到）；回答证据要跟它合并，所以要留着。
+   let probeInfo = null;
+-  //: 回答**自己**证明的那几件事（`capabilityEvidenceOf`）。只增不减地覆盖："刚刚真的发生过"优先。
+-  const answerEvidence = {model: null, tools: null, rulesetId: null};
++  // 回答证明的来源与工具状态。模型证据限当前局；配置探针不能覆盖本地回退。
++  const answerEvidence = {model: null, tools: null, rulesetId: null, matchId: null};
++  let capabilityMatchId = null;
++  const capabilityMatchIdOf = (context) => context?.roco_battle?.battle_id ?? context?.battle?.id ?? null;
+   /**
+-   * 两行状态的**唯一**画法。合并规则（U07 第 4 条：不许自相矛盾）：
+-   *   · 探针说 `true` ⇒ 在；说 `false` ⇒ 明确不在（这两档都以探针为准）；
+-   *   · 探针说 `null`（还没拉起来过）⇒ 看**回答证据**（工具回执 ⇒ 刚刚真的跑过 ⇒ 可用）；
+-   *   · 回答证明模型答过（`provider:'deepseek'`）⇒ 云端模型这一行**必须**是"已连接"，
+-   *     哪怕探针那一份还是过期的 `modelReady:false` —— 两句自相矛盾的话里，
+-   *     有实时证据的那一句赢（截图 08 的矛盾就是这里出来的）。
++   * 两行状态共用一个模型门控：探针只证明配置；当前局非缓存云回答或本地回退
++   * 决定回答来源。工具状态仍保留原来的探针与回执合并规则。
+    */
+   const paintCapability = (info) => {
+     const cap = info?.capabilities ?? null;
+     if (info) probeInfo = info;
+     // 三态：`true` 在 / `false` 明确不在 / `null` **还没拉起来过**（惰性启动，不许报成"坏了"）。
+     const probeTools = cap?.toolsReady === true ? 'ok' : cap?.toolsReady === false ? 'down' : 'unknown';
+-    const probeModel = cap?.modelReady === true ? 'ok' : cap?.modelReady === false ? 'off' : 'unknown';
+     const tools = answerEvidence.tools === 'ok' || probeTools === 'ok' ? 'ok'
+       : answerEvidence.tools === 'down' || probeTools === 'down' ? 'down' : 'unknown';
+-    const model = answerEvidence.model === 'ok' || probeModel === 'ok' ? 'ok'
+-      : probeModel === 'off' ? 'off' : 'unknown';
++    const model = modelCapabilityOf({probeReady: cap?.modelReady, evidence: answerEvidence.model,
++      evidenceMatchId: answerEvidence.matchId, currentMatchId: capabilityMatchId});
+     // 规则集：探针那一份优先，其次**这一问的上下文**里那一局绑定的配置（已知就要写出来）。
+     const rulesetId = cap?.rulesetId ?? answerEvidence.rulesetId ?? null;
+     document.body.dataset.xyCapability = `tools=${tools};model=${model};server=${cap?.serverReady === true ? 'ok' : 'unknown'}`;
+     // 判据 `live-model-status` 读的钩子（旧面板由 `renderModelChip()` 写；甲④ 之后由这里写）。
+-    // **不许为了绿而写假的**：`connected` 只在真的连上模型时写（`model === 'ok'`）。
+-    capEl.dataset.rocoModel = model === 'ok' ? 'connected' : 'offline';
+-    document.body.dataset.rocoModelConfigured = model === 'ok' ? 'yes' : 'no';
++    // 数据钩子区分已配置/本次回答来源，不写连接成功。
++    capEl.dataset.rocoModel = model === 'ok' ? 'answered' : model === 'configured' ? 'configured' : model === 'fallback' ? 'local-fallback' : 'offline';
++    document.body.dataset.rocoModelConfigured = info?.configured === true ? 'yes' : 'no';
+     // 文案只有一份渲染处（`capabilityLines`）：人读的两行与钩子不会各说各的。
+     // ⚠ 「未连接」三个字必须保留：判据 `live-model-status`（`scripts/roco/browser-live-acceptance.mjs`）
+     //   要求「没连模型时**明说**」（正则 `/未连接|没连|未连/`），而「没有连」**不匹配**
+@@ -1663,6 +1679,12 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
+     // 那之后页面上那两行才准（不许停在过期的那一句上）。
+     if (!force && Date.now() - capabilityAt < 1000) return;
+     capabilityAt = Date.now();
++    const current = await readHostContext(contextProvider);
++    capabilityMatchId = capabilityMatchIdOf(current.context.extra);
++    if (answerEvidence.matchId !== capabilityMatchId) {
++      answerEvidence.model = null;
++      answerEvidence.matchId = null;
++    }
+     try { paintCapability(await connectionStatus()); }
+     catch {
+       // 读不到探针时**只说自己知道的那一件事**：没有"已连接"的证据 ⇒ 绝不标 connected。
+@@ -1670,10 +1692,11 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
+       //（"没连模型却标 null"），而"读不到"与"连上了"是两件事，前者不能冒充后者。
+       // ⚠ 答过之后（有回答证据）就按证据说：不能因为探针读不到，把"这一句就是模型答的"改口成"未连接"。
+       const tools = answerEvidence.tools ?? 'unknown';
+-      const model = answerEvidence.model === 'ok' ? 'ok' : 'unknown';
++      const model = modelCapabilityOf({evidence: answerEvidence.model,
++        evidenceMatchId: answerEvidence.matchId, currentMatchId: capabilityMatchId});
+       document.body.dataset.xyCapability = `tools=${tools};model=${model};server=unknown`;
+-      capEl.dataset.rocoModel = model === 'ok' ? 'connected' : 'offline';
+-      document.body.dataset.rocoModelConfigured = model === 'ok' ? 'yes' : 'no';
++      capEl.dataset.rocoModel = model === 'ok' ? 'answered' : model === 'fallback' ? 'local-fallback' : 'offline';
++      document.body.dataset.rocoModelConfigured = probeInfo?.configured === true ? 'yes' : 'no';
+       if (answerEvidence.model || answerEvidence.tools) {
+         const {toolsLine, modelLine} = capabilityLines({tools, model,
+           rulesetId: answerEvidence.rulesetId, missing: null});
+@@ -1699,7 +1722,9 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
+    */
+   const noteAnswerEvidence = (answer, context = null) => {
+     const seen = capabilityEvidenceOf(answer, context);
+-    if (seen.model) answerEvidence.model = seen.model;
++    answerEvidence.model = seen.model;
++    answerEvidence.matchId = capabilityMatchIdOf(context);
++    capabilityMatchId = answerEvidence.matchId;
+     if (seen.tools) answerEvidence.tools = seen.tools;
+     if (seen.rulesetId) answerEvidence.rulesetId = seen.rulesetId;
+     paintCapability(probeInfo);
+@@ -1731,7 +1756,7 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
+     open: () => { if (panel && !panel.isOpen()) panel.setOpen(true); },
+     close: () => { if (panel && panel.isOpen()) panel.setOpen(false); },
+     render: () => {
+-      drawHistory();
++      if (!state.asking) drawHistory();
+       renderMemoryList();
+       void refreshCapability(true);
+       updateFocusChip(focusProvider.getContext());
+diff --git a/src/coach/client.js b/src/coach/client.js
+index 39784568..8bdc4c01 100644
+--- a/src/coach/client.js
++++ b/src/coach/client.js
+@@ -110,14 +110,16 @@ async function executeCoach(payload,signal){
+   // 服务端这一轮没成：本地那一份只当**底稿**，而且**不许**拿它冒充服务端的资料。
+   // `runCoach` 自己会在"规则资料工具跑不起来"时给出**点名缺哪一项**的失败句
+   // （见 runtime.js 的 `serverDataFailure`），这里只负责把它端出去 + 记结构化回执。
+-  const fallback=await runCoach(payload);
++  const fallback=await runCoach({...payload,message:originalMessage});
+   const why=error?.message||'网络异常';
+   const need=fallback?.taskFailure??null;
++  const localReply=fallback?.route==='companion'?'先用本地陪你聊':'先用本地回答';
+   const friendly=need?`连不上服务端的资料，缺的是「${need.missing}」`
+-   :/超时|aborted|timeout/i.test(why)?'等模型太久了，先按本局规则给你结论'
+-   :/上下文无效|invalid|400/.test(why)?'这次没能把局面传给模型，先按本局规则给你结论'
+-   :/403|鉴权|auth|会话/.test(why)?'模型连接过期了，正在重连；先按本局规则给你结论'
+-   :'模型暂时没答上来，先按本局规则给你结论';
++   :/网络连接失败/.test(why)?`云端连接失败或超时，${localReply}`
++   :/超时|aborted|timeout/i.test(why)?`模型这次超时了，${localReply}`
++   :/上下文无效|invalid|400/.test(why)?`这次没能把请求交给教练服务，${localReply}`
++   :/403|鉴权|auth|会话/.test(why)?`教练连接未恢复，${localReply}`
++   :`教练服务这次未完成，${localReply}`;
+   return {...fallback,provider:'local-fallback',fallbackReason:friendly,execution:'local-fallback',
+    // ⚠ task-28：网络这一路同样不许丢提问语境 —— `route` 由本机那一份带着（`runtime.js` 的返回），
+    //   `intent` 本机给了就用本机的，没给就用**同一张表**（`intentOf`）按玩家原话算；
+diff --git a/tests/roco-xiaoya-context.test.js b/tests/roco-xiaoya-context.test.js
+index 0e3fa667..97cf9480 100644
+--- a/tests/roco-xiaoya-context.test.js
++++ b/tests/roco-xiaoya-context.test.js
+@@ -942,7 +942,7 @@ function fakeDom() {
+ }
+ 
+ test('㉒ U07-④ 连通状态不自相矛盾：答完那一句自己的证据必须写进状态行', async () => {
+-  const {capabilityEvidenceOf, capabilityLines} = await import('../src/client/xiaoya.js');
++  const {capabilityEvidenceOf, capabilityLines, modelCapabilityOf} = await import('../src/client/xiaoya.js');
+   // ① 云端答过 ⇒ 证据说"模型此刻在"；这一行就**不许**再写"状态未知"（截图 08 的逐字矛盾）
+   const deep = capabilityEvidenceOf({provider: 'deepseek', text: '嗯', toolTrace: [{tool: 'query_rules'}]},
+     {roco_battle: {ruleset_config_id: 'mobile_s4_candidate_v3'}});
+@@ -950,7 +950,8 @@ test('㉒ U07-④ 连通状态不自相矛盾：答完那一句自己的证据
+   assert.equal(deep.tools, 'ok', '带了工具回执 ⇒ 本机规则服务刚刚真的跑过');
+   assert.equal(deep.rulesetId, 'mobile_s4_candidate_v3', '这一局绑定的规则配置要从上下文里取出来（已知就要写出来）');
+   const lines = capabilityLines({tools: deep.tools, model: deep.model, rulesetId: deep.rulesetId});
+-  assert.match(lines.modelLine, /云端模型：已连接/, '模型答过就必须写"已连接"');
++  assert.match(lines.modelLine, /本次回答：云端生成/, '回答回执只能说明这次正文来源');
++  assert.doesNotMatch(lines.modelLine, /已连接|自由发挥的文字由它生成/, '回答回执不证明后续请求连通');
+   assert.doesNotMatch(lines.modelLine, /状态未知|未连接/, '同一屏里不许一边说模型答了、一边说不知道模型在不在');
+   assert.match(lines.toolsLine, /资料查询：可用/, '工具刚跑过就必须写"可用"');
+   assert.match(lines.toolsLine, /规则集 mobile_s4_candidate_v3/, '规则集已知要逐字写出来');
+@@ -980,8 +981,10 @@ test('㉒ U07-④ 连通状态不自相矛盾：答完那一句自己的证据
+     '先按证据重画（同步），再刷新探针（异步）');
+   assert.match(src, /noteAnswerEvidence\(answer, context\);/, 'ask() 里要真的调它（函数对了不等于接上了）');
+   // ⑥ 探针读不到时也不许把刚证实的真相改口（"这一句就是模型答的"不能说成"未连接"）
+-  assert.match(src, /const model = answerEvidence\.model === 'ok' \? 'ok' : 'unknown';/,
+-    '探针失败那一支要按回答证据说，不许一律写 offline');
++  assert.match(src, /const model = modelCapabilityOf\(\{evidence: answerEvidence\.model/, '探针失败也调用实际共享门控');
++  assert.equal(modelCapabilityOf({evidence: 'ok'}), 'ok');
++  assert.equal(modelCapabilityOf({probeReady: true, evidence: 'fallback'}), 'fallback');
++  assert.equal(modelCapabilityOf({probeReady: true}), 'configured');
+ });
+ 
+ test('㉓ U07-③ 新消息不许顶掉阅读位置：贴底才跟随，否则原地不动 + 提示', async () => {
+@@ -1089,7 +1092,7 @@ test('㉘ R06：默认顶部只有一个展开入口，`#model-chip` 是**短**
+   assert.doesNotMatch(capabilityChipText({tools: 'ok', model: 'off'}), /规则集|roco-world/,
+     '短读法里不许带规则集 ID（它进二级）');
+   assert.equal(capabilityChipText({tools: 'ok', model: 'off'}), '资料可用 · 云端未连接');
+-  assert.equal(capabilityChipText({tools: 'ok', model: 'ok'}), '资料可用 · 云端已连接');
++  assert.equal(capabilityChipText({tools: 'ok', model: 'ok'}), '资料可用 · 本次云端回答');
+   // ⚠ 2026-09-29 **改钉不删**（第五轮⑤）：「资料未拉起」读起来像故障。旧断言原文留档：
+   //     assert.equal(capabilityChipText({tools: 'unknown', model: 'unknown'}), '资料未拉起 · 云端状态未知');
+   assert.equal(capabilityChipText({tools: 'unknown', model: 'unknown'}), '资料：问一句就拉起 · 云端状态未知');
+diff --git a/tests/roco-quality-transport-20261006.test.js b/tests/roco-quality-transport-20261006.test.js
+new file mode 100644
+index 00000000..95b1a150
+--- /dev/null
++++ b/tests/roco-quality-transport-20261006.test.js
+@@ -0,0 +1,47 @@
++import {writeFileSync} from 'node:fs';
++import test from 'node:test';import assert from 'node:assert/strict';
++import {createCoachServer} from '../src/server/index.js';
++import {requestCoach,invalidateCoachRequests} from '../src/coach/client.js';
++import {buildContext} from '../src/coach/runtime.js';
++import {newProfile} from '../src/game/progression.js';
++import {freshMemory} from '../src/coach/memory.js';
++import {configureRocoTools,resetRocoTools} from '../src/coach/toolbox.js';
++// Process-only fixture; never inspect or use a real credential. All provider HTTP is injected.
++delete process.env.DEEPSEEK_API_KEY;process.env.DEEPSEEK_API_KEY='sk-offline_fixture_not_a_credential';
++process.env.ROCO_LOCAL_MODEL='off';
++test('real provider transport failure yields HTTP error, then an honest local companion fallback',async(t)=>{
++ let rejectCsrf=false,holdTransport=false,transportArrived;const transports=[];const server=createCoachServer({semantic:false,fetchImpl:async(url,options)=>{
++  transports.push({url,body:JSON.parse(options.body)});if(holdTransport){transportArrived();await new Promise((resolve,reject)=>options.signal.addEventListener('abort',()=>reject(new DOMException('fixture cancelled','AbortError')),{once:true}));}throw Error('offline transport failure; forbidden external network');
++ },localModelFactory:()=>{throw Error('offline local model forbidden')}});
++ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
++ const realFetch=globalThis.fetch,base='http://127.0.0.1:'+server.address().port;let cookie='';const http=[];
++ configureRocoTools({factory:()=>{throw Error('offline rule bridge unavailable')}});
++ t.after(async()=>{globalThis.fetch=realFetch;resetRocoTools();server.closeAllConnections?.();await new Promise(resolve=>server.close(resolve));});
++ globalThis.fetch=async(url,options={})=>{
++  assert.ok(String(url).startsWith('/api/'),'client may only call the isolated local HTTP fixture');
++  const r=await realFetch(base+url,{...options,headers:{...options.headers,Origin:base,...(cookie?{Cookie:cookie}:{}),...(rejectCsrf?{'X-Coach-CSRF':'invalid-csrf'}:{})}});
++  if(r.headers.get('set-cookie'))cookie=r.headers.get('set-cookie').split(';')[0];
++  if(String(url)==='/api/coach')http.push({status:r.status,body:await r.clone().json(),payload:JSON.parse(options.body)});
++  return r;
++ };
++ const message='今天有点烦，想聊聊';const answer=await requestCoach({message,role:'companion',context:buildContext(null,newProfile(),null),memory:freshMemory(),stateToken:'r3a-current-camp'});
++ assert.equal(transports.length,1,'non-deterministic request really reaches server provider.generate');
++ const packet=JSON.parse(transports[0].body.messages.at(-1).content);
++ assert.ok(packet.player_message.startsWith(message));assert.equal(packet.role,'companion');
++ assert.equal(http.length,1);assert.equal(http[0].status,502);assert.deepEqual(http[0].body,{error:'DeepSeek 网络连接失败或超时，请稍后重试'});
++ assert.equal(answer.provider,'local-fallback');assert.equal(answer.execution,'local-fallback');assert.equal(answer.route,'companion');
++ assert.equal(answer.askedMessage,message);assert.equal(answer.stateToken,'r3a-current-camp');
++ assert.match(answer.text,/烦/);assert.doesNotMatch(answer.text,/首选|伤害|血量/);
++ await t.test('fallback memory retains only the original player question',()=>{assert.equal(answer.memory.dialogue.at(-2).content,message);});
++ await t.test('fallback status describes the actual local response without an elapsed-time claim',()=>{assert.doesNotMatch(answer.fallbackReason,/本局规则|给你结论|等模型太久/,'HTTP failure must not misdescribe companion fallback or assert elapsed time');
++ assert.match(answer.fallbackReason,/本地/);assert.match(answer.fallbackReason,/失败|没答|未完成|没有完成/);});
++ if(process.env.ROCO_R3A_EVIDENCE)writeFileSync(process.env.ROCO_R3A_EVIDENCE,JSON.stringify({transports,http,answer},null,2));
++ await t.test('two actual HTTP session failures do not promise an ongoing reconnect',async()=>{
++  rejectCsrf=true;const before=http.length;const a=await requestCoach({message,role:'companion',context:buildContext(null,newProfile(),null),memory:freshMemory(),stateToken:'r3a-session-failure'});
++  assert.deepEqual(http.slice(before).map(r=>r.status),[403,403]);assert.equal(a.provider,'local-fallback');assert.equal(a.askedMessage,message);assert.match(a.fallbackReason,/连接未恢复/);assert.doesNotMatch(a.fallbackReason,/正在重连|本局规则/);rejectCsrf=false;
++ });
++ await t.test('cancelling an in-flight transport remains AbortError, not a fallback answer',async()=>{
++  holdTransport=true;const arrived=new Promise(resolve=>transportArrived=resolve);
++  const pending=requestCoach({message,role:'companion',context:buildContext(null,newProfile(),null),memory:freshMemory(),stateToken:'r3a-cancelled'});await arrived;invalidateCoachRequests();await assert.rejects(pending,e=>e.name==='AbortError');
++ });
++});
+diff --git a/tests/roco-quality-capability-20261006.test.js b/tests/roco-quality-capability-20261006.test.js
+new file mode 100644
+index 00000000..6b803f3c
+--- /dev/null
++++ b/tests/roco-quality-capability-20261006.test.js
+@@ -0,0 +1,26 @@
++import test from 'node:test';import assert from 'node:assert/strict';
++import * as xiaoya from '../src/client/xiaoya.js';
++test('actual answer evidence distinguishes fallback, local facts and cached cloud output',()=>{
++ assert.equal(xiaoya.capabilityEvidenceOf({provider:'local-fallback',execution:'local-fallback'}).model,'fallback');
++ assert.equal(xiaoya.capabilityEvidenceOf({provider:'local'}).model,null);
++ assert.equal(xiaoya.capabilityEvidenceOf({provider:'deepseek',cache:'hit'}).model,null);
++ assert.equal(xiaoya.capabilityEvidenceOf({provider:'deepseek',cache:'miss'}).model,'ok');
++});
++test('actual model-state merger gives configuration no response credit and never revives a failed answer',()=>{
++ const same={evidenceMatchId:'current',currentMatchId:'current'};
++ assert.equal(xiaoya.modelCapabilityOf({probeReady:true}),'configured');
++ for(const probeReady of [true,false,null])assert.equal(xiaoya.modelCapabilityOf({...same,probeReady,evidence:'fallback'}),'fallback');
++ assert.equal(xiaoya.modelCapabilityOf({...same,probeReady:true,evidence:'ok'}),'ok');
++ assert.equal(xiaoya.modelCapabilityOf({...same,probeReady:true,evidence:'ok',currentMatchId:'new'}),'configured');
++ assert.equal(xiaoya.modelCapabilityOf({probeReady:false}),'off');assert.equal(xiaoya.modelCapabilityOf({}),'unknown');
++});
++test('player capability wording describes configuration or this answer, without connection or generation claims',()=>{
++ for(const model of ['configured','fallback']){
++  assert.doesNotMatch(xiaoya.capabilityChipText({model}),/已连接/);
++  assert.doesNotMatch(xiaoya.capabilityLines({model}).modelLine,/由它生成/);
++ }
++ assert.match(xiaoya.capabilityChipText({model:'configured'}),/已配置/);
++ assert.match(xiaoya.capabilityChipText({model:'fallback'}),/本地/);
++ assert.match(xiaoya.capabilityChipText({model:'ok'}),/本次云端回答/);
++ assert.match(xiaoya.capabilityLines({model:'fallback'}).modelLine,/本地/);
++});
+diff --git a/tests/roco-quality-latest-source-20261006.test.js b/tests/roco-quality-latest-source-20261006.test.js
+new file mode 100644
+index 00000000..1ca0af37
+--- /dev/null
++++ b/tests/roco-quality-latest-source-20261006.test.js
+@@ -0,0 +1,19 @@
++import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
++import {capabilityEvidenceOf,modelCapabilityOf} from '../src/client/xiaoya.js';
++const source=readFileSync(new URL('../src/client/xiaoya.js',import.meta.url),'utf8');
++const start=source.indexOf('const noteAnswerEvidence = (answer, context = null) => {');
++const end=source.indexOf('\n  void refreshCapability(true);',start);
++let consumer=source.slice(start,end).replace(/^const noteAnswerEvidence = /,'').replace(/;\s*$/,'');
++// The baseline is the preceding candidate's exact if(seen.model) assignment contract,
++// not the original f33 capability implementation. UI/HTTP observations remain immutable.
++if(process.env.ROCO_R3A_LATEST_BASELINE==='1')consumer=consumer.replace('answerEvidence.model = seen.model;\n    answerEvidence.matchId = capabilityMatchIdOf(context);\n    capabilityMatchId = answerEvidence.matchId;',"if (seen.model) {\n      answerEvidence.model = seen.model;\n      answerEvidence.matchId = capabilityMatchIdOf(context);\n      capabilityMatchId = answerEvidence.matchId;\n    }");
++const evidence=JSON.parse(readFileSync(new URL('../docs/roco/verification/2026-10-06-quality/r3a/ui-results.json',import.meta.url),'utf8'));
++for(const [name,recordName] of [['local','cloud-then-local-clears-cloud-source'],['cache','cloud-then-real-server-cache-clears-cloud-source']])test('actual latest-answer consumer clears previous cloud source after '+name,()=>{
++ const cloud=evidence.checks.find(c=>c.name==='synthetic-non-cached-cloud-receipt');const next=evidence.checks.find(c=>c.name===recordName);assert.ok(cloud&&next,'requires actual recorded UI/HTTP consumer evidence');
++ const answerEvidence={model:null,tools:null,rulesetId:null,matchId:null},frames=[];
++ const idOf=context=>context?.roco_battle?.battle_id??context?.battle?.id??null;
++ const handle=Function('capabilityEvidenceOf','answerEvidence','capabilityMatchIdOf','paintCapability','probeInfo','refreshCapability','let capabilityMatchId=null;return ('+consumer+');')(capabilityEvidenceOf,answerEvidence,idOf,()=>frames.push(modelCapabilityOf({probeReady:true,evidence:answerEvidence.model,evidenceMatchId:answerEvidence.matchId,currentMatchId:idOf(cloud.request.request.context)})),{},()=>{});
++ handle(cloud.request.body,cloud.request.request.context);assert.equal(answerEvidence.model,'ok');
++ handle(next.request.body,next.request.request.context);assert.equal(answerEvidence.model,null,'a received local/cached answer must clear the preceding cloud receipt');assert.deepEqual(frames,['ok','configured']);
++ assert.equal(next.request.body.provider,name==='local'?'local':'deepseek');if(name==='cache')assert.equal(next.request.body.cache,'hit');
++});

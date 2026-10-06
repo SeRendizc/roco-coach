@@ -1,0 +1,25 @@
+✔ a slow model answer is aborted when the player acts first, so no stale text is delivered (364.696625ms)
+✔ after a fast action only the newest position is delivered (149.395042ms)
+✔ the same position asked twice is merged into one upstream call (no duplicate delivery) (147.227875ms)
+✔ three rapid actions in a row deliver exactly one answer: the last one (131.316541ms)
+✔ the client layer never speaks: no speech call exists on the answer path (3.530959ms)
+✔ a slow answer that arrives after the deadline is not resurrected (806.920042ms)
+✔ actual answer evidence distinguishes fallback, local facts and cached cloud output (0.38325ms)
+✔ actual model-state merger gives configuration no response credit and never revives a failed answer (0.072834ms)
+✔ player capability wording describes configuration or this answer, without connection or generation claims (0.1385ms)
+✔ actual latest-answer consumer clears previous cloud source after local (0.682417ms)
+✔ actual latest-answer consumer clears previous cloud source after cache (0.085667ms)
+▶ real provider transport failure yields HTTP error, then an honest local companion fallback
+  ✔ fallback memory retains only the original player question (0.308292ms)
+  ✔ fallback status describes the actual local response without an elapsed-time claim (0.0725ms)
+  ✔ two actual HTTP session failures do not promise an ongoing reconnect (7.1765ms)
+  ✔ cancelling an in-flight transport remains AbortError, not a fallback answer (5.279125ms)
+✔ real provider transport failure yields HTTP error, then an honest local companion fallback (71.681292ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1661.21975

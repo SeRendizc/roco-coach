@@ -1,0 +1,9 @@
+AssertionError [ERR_ASSERTION]: owned Chrome started: 
+    at file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/docs/roco/verification/2026-10-06-quality/r3a/ui-probe.mjs:22:9 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: undefined,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

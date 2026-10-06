@@ -1,0 +1,9 @@
+Original assertions replaced for a changed, counterexample-backed source contract. Exact baseline lines:
+
+  assert.match(lines.modelLine, /云端模型：已连接/, '模型答过就必须写"已连接"');
+  assert.doesNotMatch(lines.modelLine, /状态未知|未连接/, '同一屏里不许一边说模型答了、一边说不知道模型在不在');
+
+  assert.match(src, /const model = answerEvidence\.model === 'ok' \? 'ok' : 'unknown';/,
+    '探针失败那一支要按回答证据说，不许一律写 offline');
+
+  assert.equal(capabilityChipText({tools: 'ok', model: 'ok'}), '资料可用 · 云端已连接');

@@ -4933,6 +4933,7 @@ async function startBattle() {
     const data = await api('/api/roco/battle/new', body);
     state.battleId = data.battle_id;
     applyResult(data);
+    mountRocoXiaoya()?.render();
     // 教程在开局后自动收起（第 64 轮）：三步的动作此刻已经做完了。
     dismissOnboard();
     await requestPlan({reason: 'match-start'});
@@ -6392,6 +6393,7 @@ async function startStandardPvp() {
     state.battleId = data.battle_id;
     state.mode = data.mode ? {...data.mode, contract_id: data.mode.id} : state.mode;
     applyResult(data);
+    mountRocoXiaoya()?.render();
     dismissOnboard();
     // 试玩/按需推算的配招不在默认名单里：开局后补一次全量名单（只取一次），
     // 取回来再重画，让「灰置配招」有真实数据可摆（拿不到就不画）。
@@ -6558,7 +6560,7 @@ window.rocoDemo = {state, startBattle, playAction, autoTurn, requestPlan, say, r
   mechanismSourceNote, MODE_MIRROR,
   // 这几条渲染入口也给出去：验收脚本要在**不点按钮**的前提下把某一页/某一栏重画一次，
   // 而它必须走页面自己的渲染，不能在脚本里另写一份 DOM。
-  renderCompanion, renderFilterMenus, renderMode,
+  renderFilterMenus, renderMode,
   MANA_UNVERIFIED, MECHANISM_UNKNOWN, ACTION_GROUPS, STAT_FIELDS, STAT_MISSING};
 
 // 2026-09-25：这里原来往页眉**注入**一个内联样式的「培养（二级）」链接 —— 人类点名

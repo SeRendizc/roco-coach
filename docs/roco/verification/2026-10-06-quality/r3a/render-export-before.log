@@ -1,0 +1,4 @@
+[roco] 对手候选（我的可用物种）: 536 pet_000003,pet_000004,pet_000005,pet_000006,pet_000008,pet_000010,pet_000012,pet_000013
+Error: timeout: window.__bootstraps>1
+    at wait (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/docs/roco/verification/2026-10-06-quality/r3a/ui-probe.mjs:27:98)
+    at async file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/docs/roco/verification/2026-10-06-quality/r3a/ui-probe.mjs:41:92

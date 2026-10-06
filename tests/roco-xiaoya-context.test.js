@@ -942,7 +942,7 @@ function fakeDom() {
 }
 
 test('㉒ U07-④ 连通状态不自相矛盾：答完那一句自己的证据必须写进状态行', async () => {
-  const {capabilityEvidenceOf, capabilityLines} = await import('../src/client/xiaoya.js');
+  const {capabilityEvidenceOf, capabilityLines, modelCapabilityOf} = await import('../src/client/xiaoya.js');
   // ① 云端答过 ⇒ 证据说"模型此刻在"；这一行就**不许**再写"状态未知"（截图 08 的逐字矛盾）
   const deep = capabilityEvidenceOf({provider: 'deepseek', text: '嗯', toolTrace: [{tool: 'query_rules'}]},
     {roco_battle: {ruleset_config_id: 'mobile_s4_candidate_v3'}});
@@ -950,7 +950,8 @@ test('㉒ U07-④ 连通状态不自相矛盾：答完那一句自己的证据�
   assert.equal(deep.tools, 'ok', '带了工具回执 ⇒ 本机规则服务刚刚真的跑过');
   assert.equal(deep.rulesetId, 'mobile_s4_candidate_v3', '这一局绑定的规则配置要从上下文里取出来（已知就要写出来）');
   const lines = capabilityLines({tools: deep.tools, model: deep.model, rulesetId: deep.rulesetId});
-  assert.match(lines.modelLine, /云端模型：已连接/, '模型答过就必须写"已连接"');
+  assert.match(lines.modelLine, /本次回答：云端生成/, '回答回执只能说明这次正文来源');
+  assert.doesNotMatch(lines.modelLine, /已连接|自由发挥的文字由它生成/, '回答回执不证明后续请求连通');
   assert.doesNotMatch(lines.modelLine, /状态未知|未连接/, '同一屏里不许一边说模型答了、一边说不知道模型在不在');
   assert.match(lines.toolsLine, /资料查询：可用/, '工具刚跑过就必须写"可用"');
   assert.match(lines.toolsLine, /规则集 mobile_s4_candidate_v3/, '规则集已知要逐字写出来');
@@ -980,8 +981,10 @@ test('㉒ U07-④ 连通状态不自相矛盾：答完那一句自己的证据�
     '先按证据重画（同步），再刷新探针（异步）');
   assert.match(src, /noteAnswerEvidence\(answer, context\);/, 'ask() 里要真的调它（函数对了不等于接上了）');
   // ⑥ 探针读不到时也不许把刚证实的真相改口（"这一句就是模型答的"不能说成"未连接"）
-  assert.match(src, /const model = answerEvidence\.model === 'ok' \? 'ok' : 'unknown';/,
-    '探针失败那一支要按回答证据说，不许一律写 offline');
+  assert.match(src, /const model = modelCapabilityOf\(\{evidence: answerEvidence\.model/, '探针失败也调用实际共享门控');
+  assert.equal(modelCapabilityOf({evidence: 'ok'}), 'ok');
+  assert.equal(modelCapabilityOf({probeReady: true, evidence: 'fallback'}), 'fallback');
+  assert.equal(modelCapabilityOf({probeReady: true}), 'configured');
 });
 
 test('㉓ U07-③ 新消息不许顶掉阅读位置：贴底才跟随，否则原地不动 + 提示', async () => {
@@ -1089,7 +1092,7 @@ test('㉘ R06：默认顶部只有一个展开入口，`#model-chip` 是**短**�
   assert.doesNotMatch(capabilityChipText({tools: 'ok', model: 'off'}), /规则集|roco-world/,
     '短读法里不许带规则集 ID（它进二级）');
   assert.equal(capabilityChipText({tools: 'ok', model: 'off'}), '资料可用 · 云端未连接');
-  assert.equal(capabilityChipText({tools: 'ok', model: 'ok'}), '资料可用 · 云端已连接');
+  assert.equal(capabilityChipText({tools: 'ok', model: 'ok'}), '资料可用 · 本次云端回答');
   // ⚠ 2026-09-29 **改钉不删**（第五轮⑤）：「资料未拉起」读起来像故障。旧断言原文留档：
   //     assert.equal(capabilityChipText({tools: 'unknown', model: 'unknown'}), '资料未拉起 · 云端状态未知');
   assert.equal(capabilityChipText({tools: 'unknown', model: 'unknown'}), '资料：问一句就拉起 · 云端状态未知');

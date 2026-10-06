@@ -1,0 +1,46 @@
+✖ ㉒ U07-④ 连通状态不自相矛盾：答完那一句自己的证据必须写进状态行 (0.710916ms)
+✖ ㉘ R06：默认顶部只有一个展开入口，`#model-chip` 是**短**读法（长句进二级） (0.265291ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 47.916833
+
+✖ failing tests:
+
+test at tests/roco-xiaoya-context.test.js:944:1
+✖ ㉒ U07-④ 连通状态不自相矛盾：答完那一句自己的证据必须写进状态行 (0.710916ms)
+  AssertionError [ERR_ASSERTION]: 模型答过就必须写"已连接"
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-xiaoya-context.test.js:953:10)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '本次回答：云端生成（来自这次非缓存回答的回执）',
+    expected: /云端模型：已连接/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests/roco-xiaoya-context.test.js:1085:1
+✖ ㉘ R06：默认顶部只有一个展开入口，`#model-chip` 是**短**读法（长句进二级） (0.265291ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '资料可用 · 本次云端回答'
+  - '资料可用 · 云端已连接'
+            ^
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-xiaoya-context.test.js:1092:10)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '资料可用 · 本次云端回答',
+    expected: '资料可用 · 云端已连接',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

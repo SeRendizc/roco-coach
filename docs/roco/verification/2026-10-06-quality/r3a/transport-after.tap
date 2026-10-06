@@ -1,0 +1,12 @@
+▶ real provider transport failure yields HTTP error, then an honest local companion fallback
+  ✔ fallback memory retains only the original player question (0.329375ms)
+  ✔ fallback status describes the actual local response without an elapsed-time claim (0.07625ms)
+✔ real provider transport failure yields HTTP error, then an honest local companion fallback (44.665708ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 112.593208

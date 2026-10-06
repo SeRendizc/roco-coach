@@ -110,14 +110,16 @@ async function executeCoach(payload,signal){
   // 服务端这一轮没成：本地那一份只当**底稿**，而且**不许**拿它冒充服务端的资料。
   // `runCoach` 自己会在"规则资料工具跑不起来"时给出**点名缺哪一项**的失败句
   // （见 runtime.js 的 `serverDataFailure`），这里只负责把它端出去 + 记结构化回执。
-  const fallback=await runCoach(payload);
+  const fallback=await runCoach({...payload,message:originalMessage});
   const why=error?.message||'网络异常';
   const need=fallback?.taskFailure??null;
+  const localReply=fallback?.route==='companion'?'先用本地陪你聊':'先用本地回答';
   const friendly=need?`连不上服务端的资料，缺的是「${need.missing}」`
-   :/超时|aborted|timeout/i.test(why)?'等模型太久了，先按本局规则给你结论'
-   :/上下文无效|invalid|400/.test(why)?'这次没能把局面传给模型，先按本局规则给你结论'
-   :/403|鉴权|auth|会话/.test(why)?'模型连接过期了，正在重连；先按本局规则给你结论'
-   :'模型暂时没答上来，先按本局规则给你结论';
+   :/网络连接失败/.test(why)?`云端连接失败或超时，${localReply}`
+   :/超时|aborted|timeout/i.test(why)?`模型这次超时了，${localReply}`
+   :/上下文无效|invalid|400/.test(why)?`这次没能把请求交给教练服务，${localReply}`
+   :/403|鉴权|auth|会话/.test(why)?`教练连接未恢复，${localReply}`
+   :`教练服务这次未完成，${localReply}`;
   return {...fallback,provider:'local-fallback',fallbackReason:friendly,execution:'local-fallback',
    // ⚠ task-28：网络这一路同样不许丢提问语境 —— `route` 由本机那一份带着（`runtime.js` 的返回），
    //   `intent` 本机给了就用本机的，没给就用**同一张表**（`intentOf`）按玩家原话算；

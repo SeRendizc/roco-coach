@@ -1,0 +1,60 @@
+▶ real provider transport failure yields HTTP error, then an honest local companion fallback
+  ✖ fallback memory retains only the original player question (0.601041ms)
+  ✖ fallback status describes the actual local response without an elapsed-time claim (0.114208ms)
+✖ real provider transport failure yields HTTP error, then an honest local companion fallback (40.531125ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 0
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 106.45025
+
+✖ failing tests:
+
+test at tests/roco-quality-transport-20261006.test.js:34:10
+✖ fallback memory retains only the original player question (0.601041ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '今天有点烦，想聊聊\n' +
+  +   '回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释。游戏按回合结算，不按秒；不要编造技能冷却。道具名称只能使用回复药、净化药、能量果，不要把它们叫作解药或以太。双方同时决定，不能先看对手本回合出招再决定自己的行动。复盘中hpBefore是回合开始、hpAfter是结束，不能把行动前生命称作打完还剩。逐回合核对实际事件：行动取消不能说成打出了伤害，事前预测和事后结算必须分开。'
+  - '今天有点烦，想聊聊'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-transport-20261006.test.js:34:87)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.start (node:internal/test_runner/test:1257:17)
+      at TestContext.test (node:internal/test_runner/test:399:20)
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-transport-20261006.test.js:34:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '今天有点烦，想聊聊\n回答要求：不要向玩家报内部局面评分，用可见的宠物、技能和状态解释。游戏按回合结算，不按秒；不要编造技能冷却。道具名称只能使用回复药、净化药、能量果，不要把它们叫作解药或以太。双方同时决定，不能先看对手本回合出招再决定自己的行动。复盘中hpBefore是回合开始、hpAfter是结束，不能把行动前生命称作打完还剩。逐回合核对实际事件：行动取消不能说成打出了伤害，事前预测和事后结算必须分开。',
+    expected: '今天有点烦，想聊聊',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/roco-quality-transport-20261006.test.js:35:10
+✖ fallback status describes the actual local response without an elapsed-time claim (0.114208ms)
+  AssertionError [ERR_ASSERTION]: HTTP failure must not misdescribe companion fallback or assert elapsed time
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-transport-20261006.test.js:35:111)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.start (node:internal/test_runner/test:1257:17)
+      at TestContext.test (node:internal/test_runner/test:399:20)
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-quality-transport-20261006.test.js:35:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '等模型太久了，先按本局规则给你结论',
+    expected: /本局规则|给你结论|等模型太久/,
+    operator: 'doesNotMatch',
+    diff: 'simple'
+  }
