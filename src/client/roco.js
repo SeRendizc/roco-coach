@@ -1385,13 +1385,14 @@ function skillSlotHtml(slot, actions, disabled) {
       <span class="skill-meta">${escapeHtml([move.element, categoryCn(move.category)].filter(Boolean).join(' · '))}</span>
       <span class="skill-dmg flat" data-roco-damage-chip="yes">${
         damage !== null ? `预计 ${damage}${slot.damageVerified ? '' : '（未核验）'}` : '预计伤害：算不出'}</span>
-      ${supportNote ? `<small class="act-none skill-support" data-roco-skill-support="yes" `
+      ${supportNote && slot.support?.settled !== true ? `<small class="act-none skill-support" data-roco-skill-support="yes" `
         + `data-roco-support-tier="${escapeAttr(String(slot.support?.tier ?? ''))}" `
         + `style="color:#ffb4b4">${escapeHtml(supportNote)}</small>` : ''}
       ${reason ? `<small class="act-none" data-roco-skill-reason="yes">${escapeHtml(reason)}</small>` : ''}
     </button>
     <details class="skill-detail"><summary>详情</summary>
       ${move.desc ? `<small>${escapeHtml(move.desc)}</small>` : ''}
+      ${supportNote ? `<small>${escapeHtml(supportNote)}</small>` : ''}
       <small class="skill-why" data-roco-damage-why="yes">${
         damage !== null
           ? (slot.damageVerified ? '伤害来自引擎（已核验公式）' : '伤害来自引擎（公式未核验）')
@@ -2408,7 +2409,7 @@ function renderB3Panels(view) {
     // task-6：引擎说「这一手还算不出来」时，格子里加一行**事实**（玩家点之前就看得见）。
     // 这一格是玩家真正点的那一个（`data-b3-action` 就写在这里），所以标记必须落在这里。
     // 纪律：**不**加 `disabled`、**不**动 `data-b3-action` —— 引擎说它合法，界面就让它可点。
-    const supportNote = typeof act?.support?.note === 'string' ? act.support.note.trim() : '';
+    const supportNote = act?.support?.settled !== true && typeof act?.support?.note === 'string' ? act.support.note.trim() : '';
     let supportEl = slot.querySelector('[data-b3-skill-support]');
     if (supportNote) {
       if (!supportEl) {
@@ -3226,7 +3227,8 @@ function b3SkillDetailRows(mv, act) {
     ? (supportRaw.settled === true ? 'supported'
       : (String(supportRaw.tier ?? '').includes('PARTIAL') ? 'partial' : 'unsupported'))
     : supportRaw;
-  rows.push(['未实现部分', B3_SKILL_SUPPORT_TEXT[support]
+  const sourceNote = typeof supportRaw?.note === 'string' && supportRaw.note.trim() ? supportRaw.note.trim() : null;
+  rows.push([support === 'supported' ? '结算依据' : '未实现部分', sourceNote || B3_SKILL_SUPPORT_TEXT[support]
     || (support ? `引擎标了「${String(support)}」（未核验，不猜）` : '引擎没有标这条效果的结算档位')]);
   return rows;
 }

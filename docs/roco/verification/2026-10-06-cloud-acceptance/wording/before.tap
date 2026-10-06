@@ -1,0 +1,65 @@
+✖ actual skill HTML hides normal warning but keeps gap, estimate and expandable source (2.289666ms)
+✖ actual reused battle slot removes supported warning and retains exact incomplete note (0.82975ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 37.777625
+
+✖ failing tests:
+
+test at tests/roco-skill-support-wording.test.js:9:1
+✖ actual skill HTML hides normal warning but keeps gap, estimate and expandable source (2.289666ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(!result.includes('data-roco-skill-support="yes"'))
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-skill-support-wording.test.js:11:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.start (node:internal/test_runner/test:1257:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at tests/roco-skill-support-wording.test.js:15:1
+✖ actual reused battle slot removes supported warning and retains exact incomplete note (0.82975ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + {
+  +   className: 'b3-support',
+  +   dataset: {
+  +     b3SkillSupport: 'yes',
+  +     b3SupportTier: 'FULL_VERIFIED'
+  +   },
+  +   remove: [Function: remove],
+  +   style: {
+  +     cssText: 'font-size:11.5px;line-height:1.35;color:#ffb4b4;margin-top:2px;'
+  +   },
+  +   textContent: '引擎会结算这条效果。'
+  + }
+  - null
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-skill-support-wording.test.js:22:57)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [Object],
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

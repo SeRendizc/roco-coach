@@ -1,0 +1,15 @@
+✔ ① 可算档位 ⇒ 不再返回 null，且 settled===true（本次修复点） (0.353583ms)
+✔ ② 真未知（没有 support_tier）⇒ 仍然 null（不许把 fail-closed 放宽） (0.336833ms)
+✔ ③ 负向控制：不可算档位 ⇒ 带 tier + note，且 settled 不为 true (0.156417ms)
+✔ ④ 对照实验：同一批输入喂旧实现 ⇒ ① 必须红（判据真的有牙） (0.058291ms)
+✔ ⑤ 搬移干净：roco-service.js 里那四个定义 0 处，且是从新模块 import 的 (0.634625ms)
+✔ actual skill HTML hides normal warning but keeps gap, estimate and expandable source (0.448291ms)
+✔ actual reused battle slot removes supported warning and retains exact incomplete note (0.992375ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 35.266375
