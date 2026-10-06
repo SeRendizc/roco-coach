@@ -42,12 +42,12 @@
 需要 Node.js 和 Python 3。Node 服务使用 ES modules 与内置 API；Roco 规则服务默认通过 `python3` 启动，也可用 `ROCO_PYTHON` 指定解释器。`package.json` 没有 npm 运行依赖。
 
 ```sh
-git clone --branch wip/roco-coach-2026-09-30-1418 https://gitee.com/serendizc/roco-coach.git
+git clone https://github.com/SeRendizc/roco-coach.git
 cd roco-coach
 npm start
 ```
 
-上述命令取当前开发分支，并非稳定发布版。默认访问 [http://127.0.0.1:8765/](http://127.0.0.1:8765/)。已有服务占用该端口时，在另一个终端使用独立端口：
+上述命令取当前主分支，项目仍处于开发与验收阶段。Gitee镜像的当前默认分支为 `wip/roco-coach-2026-09-30-1418`，同步保存代码版本。默认访问 [http://127.0.0.1:8765/](http://127.0.0.1:8765/)。已有服务占用该端口时，在另一个终端使用独立端口：
 
 ```sh
 PORT=8899 npm start

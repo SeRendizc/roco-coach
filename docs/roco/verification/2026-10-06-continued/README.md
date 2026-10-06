@@ -6,7 +6,7 @@
 
 - [明确类型比较](explicit-intent/README.md)：主句绑定两个公开对象，条件里的第三个对象不顶替；明确属性不被当前对手属性替换。实际客户端 producer → HTTP 的前红后绿证明了公开属性不再丢失。纯比较没有可执行行动，交付时不误判成“缺合法首选”的行动回退。
 - [复盘到变式练习](learning-loop/README.md)：一场新自然比赛，21 次推进全量留档；实际选中的换宠复盘课题可以打开、作答并看到反馈。决策当时的公开快照与终局版本分开绑定。未证实补位课题自然选中后的同等链路；未验证真人学习收益。
-- 根定向回归 `npm run test:roco-quality`：71/71（高能量修复后）。服务端、公开战况契约与冻结属性表相邻回归：37/37；见 `root/quality-energy-final.tap` 与 `root/producer-adjacent.tap`。
+- 根最终定向回归 `npm run test:roco-quality`：75/75（含立绘回退）。服务端与属性表相邻复跑33/33；此前公开战况契约等37/37，均有重叠，不相加。见 `root/quality-final-all.tap`、`root/sprite-server-adjacent.tap` 与 `root/producer-adjacent.tap`。
 - 核心候选 `20cb3346` 的完整单测：2024 通过、37 失败、21 跳过；基线 `fc4a3db4`：2023 通过、38 失败、21 跳过。失败名称集合没有新增，一项测试登记结构契约失败消除。此轮包含 producer、纯比较交付与高能量风险修复；后续立绘回退修复另跑定向 HTTP/单测。详见 `root/energy-final-unit-summary.json`。全仓单测仍非全绿。
 - 根第一次 8765 页面实测发现真实 producer 丢属性：当前对手迪莫光系，询问喵喵/水蓝蓝火系承伤得到“读不到”。该失败推动了第二轮修复；不能把此前手工快照通过当作真实页面已通过。
 
@@ -30,6 +30,16 @@ npm run test:unit
 - 根独立逐条核对自然比赛22条NDJSON与raw receipts完全相同、21advance、自然loss、事件时v4和终局v86分开；见 `root/natural-receipt-review.json`。点击作答由子agent完成，不把它写成真人迁移效果。
 
 8765 从独立主分支工作区启动，规则服务 `available:true`。保留原 `/Users/serendizc/Developer/roco-coach` 的脏文件和其它进程；仅按自己记录的PID更新本轮服务。界面已刷新为当前版本，未清除原阵容或对话历史。
+
+## 新克隆的立绘回退与最终页面
+
+根实际截图发现战斗立绘空白。新工作区没有被 Git 忽略的512px大图，但已有跟踪的256px缩略图；原选择逻辑没有按注释回退到小图，而是404。子agent仅修同物种图的存在性选择，未复制、下载或上传新素材，保留full=1只取原件的行为。
+
+生产代码候选 `40c395a6` 已在8765和无云端8898生效：喵喵、火神、魔力猫两端真实GET均200、variant=thumb，响应字节SHA与跟踪的该物种缩略图完全相同。见 `root/sprite-http-before.json`、`root/sprite-http-after.json` 与 [选择合同证据](sprite-fallback/README.md)。最终实际页面能显示双方角色；问“喵喵和水蓝蓝谁更扛光系？如果迪莫下一招不是光系呢？”得到0.5与1，第三对象没有顶替比较对象；条件里的新攻击属性未指定时要求澄清，而不编造下一招。见 `root/local-ui-final.txt/.jpg`。这是本地规则回答，不是模型回答。
+
+最终完整回归比较执行于核心候选20cb3346；随后图片选择段只加2行/删3行，独立选择合同、真实HTTP及服务端回归通过。没有把前一版本的完整回归写成图片修复后又跑过全仓。全仓失败清单见 `root/energy-final-unit-summary.json`。
+
+主分支工作区：`/Users/serendizc/Codex/Internship/work/roco-main-20261006`；对外入口：`http://127.0.0.1:8765/roco.html`。服务启动版本保存在本机 `tmp/player-service.json`；此后若只追加验证文档，生产代码与启动版本保持相同。临时8898与其浏览器页验收后关闭，8765保留。
 
 ## 云端验收审批缺口
 
