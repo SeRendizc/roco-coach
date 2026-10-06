@@ -1,0 +1,19 @@
+{
+  "enforced": true,
+  "reason": "advice-state-transition:建议的行动不在这一回合的合法动作表里",
+  "text": "公开比较",
+  "legality": {
+    "ok": false,
+    "reasons": [
+      "建议的行动不在这一回合的合法动作表里",
+      "没有给出「为什么是它」",
+      "没有给出「主要风险」"
+    ],
+    "action": null,
+    "state": {
+      "hp": null,
+      "energy": null,
+      "alive": null
+    }
+  }
+}

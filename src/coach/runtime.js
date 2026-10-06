@@ -2198,6 +2198,9 @@ export function indistinguishableAdviceText({advice,battle}={}){
 export function enforceBattleAdvice(advice,text){
  const body=typeof text==='string'?text:'';
  if(!advice||typeof advice!=='object')return {enforced:false,reason:null,text:body};
+ // A comparison has no executable first choice. Answer grounding and snapshot
+ // checks still run before this gate; the action contract applies to recommendations.
+ if(advice.kind==='compare')return {enforced:false,reason:null,text:body};
  // ⓪ **交付的就是引擎自己那份正文** ⇒ 无需"保障"（2026-09-30 真实读数踩到）：
  //   `replace-required`（引擎说必须补位）那一支**没有 `risk` 字段**，于是下面 ① 会判它"缺主要风险"
  //   ⇒ `enforced:true` + 回执写「模型回答没有点出那一手的合法首选行动…」——**玩家看到的是同一份正文，

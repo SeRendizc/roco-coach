@@ -1,0 +1,18 @@
+producer HTTP comparison: {"produced":{"turn":1,"battle_id":"producer-http-type-test","state_version":1,"phase":"battle","result":null,"self":[{"pet_id":"pet_000001","name":"喵喵","hp":366,"max_hp":366,"energy":6,"alive":true,"types":["草系"]},{"pet_id":"pet_000007","name":"水蓝蓝","hp":366,"max_hp":366,"energy":6,"alive":true,"types":["水系"]},{"pet_id":"pet_000417","name":"缇塔","hp":345,"max_hp":345,"energy":6,"alive":true,"types":["机械系"]}],"self_active":0,"self_energy_max":6,"foe":[{"pet_id":"pet_000250","name":"迪莫","hp":300,"max_hp":300,"energy":6,"alive":true,"types":["光系"]}],"foe_living_count":1,"needs_replacement":[],"legal":[{"label":"抓挠","kind":"skill"},{"label":"防御","kind":"skill"},{"label":"换上第2位","kind":"switch"}],"affinity":{"source":"src/client/type-affinity.data.js@roco-world-s4-2026-09-10","rows":[{"pet_id":"pet_000001","multiplier":0.5,"known":true,"vs_type":"光系"},{"pet_id":"pet_000007","multiplier":1,"known":true,"vs_type":"光系"},{"pet_id":"pet_000417","multiplier":1,"known":true,"vs_type":"光系"}],"unavailable":[],"vs_types":["光系"]}},"result":{"text":"第 1 回合。对手场上：迪莫。比一比：喵喵 承伤 2（火系）、水蓝蓝 承伤 0.5（火系）。水蓝蓝 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置。这些倍率依据公开属性相性表，比较的是这两只对来袭属性的抗性。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。","provider":"local","rocoAdvice":{"kind":"compare","headline":"比一比：喵喵 承伤 2（火系）、水蓝蓝 承伤 0.5（火系）","reason":"水蓝蓝 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置","upside":null,"risk":null,"alternates":[],"unknown":["这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测"],"evidence":{"turn":1,"targets":[{"pet_id":"pet_000001","name":"喵喵"},{"pet_id":"pet_000007","name":"水蓝蓝"}],"compared":[{"pet_id":"pet_000001","name":"喵喵","multiplier":2,"vsType":"火系"},{"pet_id":"pet_000007","name":"水蓝蓝","multiplier":0.5,"vsType":"火系"}],"source":"wiki-rocom-snapshot@d2b4d0eaebd466905871cd7d55fc9a54e545b3ea676ae6d8c53e3e60d371defc"},"actionLabel":null,"legalActionId":null,"legalIndex":null,"phase":"compare","text":"第 1 回合。对手场上：迪莫。比一比：喵喵 承伤 2（火系）、水蓝蓝 承伤 0.5（火系）。水蓝蓝 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置。这些倍率依据公开属性相性表，比较的是这两只对来袭属性的抗性。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。","battleId":"producer-http-type-test"}}}
+invalid public types HTTP: {"invalidTypes":"草系","status":400,"error":{"error":"六宠战况无效：self.types"}}
+invalid public types HTTP: {"invalidTypes":null,"status":400,"error":{"error":"六宠战况无效：self.types"}}
+invalid public types HTTP: {"invalidTypes":["草系","水系","火系"],"status":400,"error":{"error":"六宠战况无效：self.types"}}
+invalid public types HTTP: {"invalidTypes":["草系",1],"status":400,"error":{"error":"六宠战况无效：self.types"}}
+invalid public types HTTP: {"invalidTypes":[""],"status":400,"error":{"error":"六宠战况无效：self.types"}}
+invalid public types HTTP: {"invalidTypes":[" 草系"],"status":400,"error":{"error":"六宠战况无效：self.types"}}
+invalid public types HTTP: {"invalidTypes":["草系","草系"],"status":400,"error":{"error":"六宠战况无效：self.types"}}
+✔ actual coachRocoBattle producer carries public types through real HTTP to fire comparison (100.698416ms)
+✔ actual producer forwards at most two well-formed public types and leaves unknown unknown (14.434416ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 157.920625

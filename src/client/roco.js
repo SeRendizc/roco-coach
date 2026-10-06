@@ -5638,6 +5638,11 @@ function coachRocoBattle() {
     }
     if (typeof p.alive === 'boolean') out.alive = p.alive;
     else if (Number.isFinite(p.hp)) out.alive = p.hp > 0;   // 视图只给血量时如实推导，不猜
+    // Only the engine's public row supplies types; never repair from the candidate pool.
+    // Malformed labels stay unknown. Copy at most the two public type slots.
+    if (Array.isArray(p.types) && p.types.length
+      && p.types.every((type) => typeof type === 'string' && /^[\u4e00-\u9fff]{1,6}系$/.test(type))
+      && new Set(p.types).size === p.types.length) out.types = p.types.slice(0, 2);
     if (typeof p.status === 'string' && p.status) out.status = p.status;
     return out;
   };

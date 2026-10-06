@@ -341,6 +341,9 @@ export function validateChat(b){
    if(needId&&(typeof p.pet_id!=='string'||!p.pet_id))throw fail(400,`六宠战况无效：${side} 缺 pet_id`);
    if(p.pet_id!==undefined&&p.pet_id!==null&&typeof p.pet_id!=='string')throw fail(400,`六宠战况无效：${side}.pet_id`);
    if(p.name!==undefined&&(typeof p.name!=='string'||p.name.length>24))throw fail(400,`六宠战况无效：${side}.name`);
+   if(p.types!==undefined&&(!Array.isArray(p.types)||p.types.length>2
+    ||p.types.some(type=>typeof type!=='string'||!(/^[\u4e00-\u9fff]{1,6}系$/).test(type))
+    ||new Set(p.types).size!==p.types.length))throw fail(400,`六宠战况无效：${side}.types`);
    for(const key of ['hp','max_hp','energy'])if(p[key]!==undefined&&!Number.isFinite(p[key]))throw fail(400,`六宠战况无效：${side}.${key}`);
    if(p.alive!==undefined&&typeof p.alive!=='boolean')throw fail(400,`六宠战况无效：${side}.alive`);
    if(p.status!==undefined&&p.status!==null&&(typeof p.status!=='string'||p.status.length>24))throw fail(400,`六宠战况无效：${side}.status`);

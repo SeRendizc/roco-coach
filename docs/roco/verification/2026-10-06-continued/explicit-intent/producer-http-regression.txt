@@ -1,0 +1,113 @@
+✔ 05.1a ①：局中三个建议类问句必须落建议层（`rocoAdvice` 在场） (11.268709ms)
+✔ 05.1a ②：硬断言 —— 局中任何一格都不许说「开一局之后」 (1.879333ms)
+✔ 05.1a ③：硬断言 —— 局末任何一格都不许再谈「这一手 / 首选行动」 (1.026583ms)
+✔ 05.1a ④：局外任何一格都不许装作知道局面（不许出现「第 N 回合」） (0.842542ms)
+✔ 05.1b ①：局中「有啥可以改进」必须引用当前局面（或明确指路复盘） (0.504667ms)
+✔ 05.1b ②：局中「这招能不能用」必须落建议层（合法性是该层的看家本事） (0.418917ms)
+✔ 05.1c（结构）：两套建议词表不许各自漂移 —— 局中建议问句在两个入口都命中 (0.167458ms)
+✔ 第3步 ①：`rocoAdviceKind` 三态分类（比较 / 推荐 / 事实） (0.095084ms)
+✔ 第3步 ②：比较类回答**真的做比较** —— 两个有出处的倍率 + 谁更扛 + 不出现「首选行动」 (0.322208ms)
+✔ 第3步 ④：诚实性 —— 拿不到倍率必须写「读不到」且**一个数字都不编** (0.177625ms)
+✔ ① 透传：带 roco_battle 时原样进包，不带时这个键不出现 (29.114791ms)
+✔ ② 加性校验：合法形状放行，畸形一律 400 并点名 (0.674958ms)
+✔ ③ 老的三宠合同一个字没松（加性改动的底线） (0.081209ms)
+✔ ④ 结构性：/api/coach 真的调用校验；客户端从公开视图构造并送出 (0.39025ms)
+✔ 必红反证：拿掉 roco_battle，② 里那些畸形输入不再被这条规则拒绝 (0.061ms)
+✔ ⑥ 事实守卫必须认得战况里的数字（否则引用真数据会被判成凭空） (0.18275ms)
+✔ ③ 六宠快照下的分支模拟：回执要说清"要服务端会话"，不许说"没有进行中的对局" (0.345ms)
+✔ ⑤ 六宠快照带对局编号 ⇒ 工具回执是**引擎**算的走法结果（含反证：没编号时说清算不了） (0.289875ms)
+✔ ⑥ 六宠对局里的建议问句**强制**先取引擎估值；没有编号或线上竞技时不许强制 (0.267ms)
+✔ ⑦ 对局编号的边界：合法字符串放行，畸形一律 400 (0.149875ms)
+✔ ⑧ 结构性：客户端快照真的带编号、服务端真的注入读口、工具真的用它 (1.41175ms)
+✔ ⑨ 结构性：`state.view` 只许被条件式覆盖（响应不带 view ⇒ 保留当前局面） (2.824208ms)
+✔ ⑩ B3①：页面读数 = 在场 + 候选，且倍率与渲染**同源**（同一个 incomingAffinity、同一组输入） (1.041625ms)
+✔ ⑩ B3②：`known:false` 不许给数字，必须逐条进 `unavailable` 并写明理由 (0.851667ms)
+✔ ⑩ B3③：服务端**只校验形状**且 fail closed（known:false 带数字 / 缺 unavailable / 越界 一律 400） (0.245458ms)
+✔ ⑩ B3④：加性红线 —— 不带 `affinity` 时与改动前完全一样 (0.821708ms)
+✔ ⑩ B3⑤：机制证据 —— 带读数时，引用「承伤 0.5」的正文**不再**被打回（不带时报 ungrounded） (4.400208ms)
+✔ ⑪ B2①：比较类命中、事实/机制题**不许**被吞（窄表的两个方向） (0.09925ms)
+✖ ⑪ B2②：页面读数里「读不到的那几只」并进建议的「不知道」，且只用玩家看得懂的名字 (0.436291ms)
+✔ ① 产物与冻结真值**逐字节**同源（重新生成一遍再比） (2.288459ms)
+✔ ② 2160 格逐格复算：产物与冻结真值一格都不许差 (0.918208ms)
+✔ ②-反证 改掉冻结表里的一格，同一条复算必须红 (0.288875ms)
+✔ ③ 未登记组合 ⇒ 未知，**不是**中性（不许替引擎宣称"无影响"） (0.161292ms)
+✔ ④ 反向键按集合语义命中（冻结表每对只登记一个方向） (0.061708ms)
+✔ ⑤ 方向与文案：同函数换属性必须换结果（防"固定箭头"假修） (0.142875ms)
+✔ ⑥ 中性只有"真的算过"才写；档位与真值表逐字对应 (0.045958ms)
+✔ ① 页面往上下文里放的顶层字段，必须是已接线的那几个 (0.968417ms)
+✔ ② profile 里的字段同样要接线（每个都要在服务端校验 + 运行时进包） (0.337083ms)
+✔ ③ 每个已接线的字段都要有来源说明（模型不该猜这份数据是什么） (0.1255ms)
+✔ ④ 反证：这套判据量的是**接线**，不是文案 —— 拿掉一个已知接线点必须红 (0.382833ms)
+✔ explicit light attack binds named pair rather than current fire opponent (10.304291ms)
+✔ player numbers are not evidence; non-light condition keeps its type unknown (0.994792ms)
+✔ recommendation with current turn, legal first choice and risk routes to battle advice (2.27825ms)
+✔ comparison does not substitute wrong-type evidence or trust invented values (0.098166ms)
+✔ unknown public types and missing live legal actions never invent results (0.810042ms)
+✔ negated or multiple incoming types require clarification rather than current foe substitution (1.670208ms)
+✔ existing who-tanks wording binds named pair and retains current public fire type (0.38875ms)
+✔ existing who-tanks wording with explicit light binds the requested type (0.248791ms)
+✔ all frozen single attack type labels survive parsing through runCoach (2.791167ms)
+producer HTTP comparison: {"produced":{"turn":1,"battle_id":"producer-http-type-test","state_version":1,"phase":"battle","result":null,"self":[{"pet_id":"pet_000001","name":"喵喵","hp":366,"max_hp":366,"energy":6,"alive":true,"types":["草系"]},{"pet_id":"pet_000007","name":"水蓝蓝","hp":366,"max_hp":366,"energy":6,"alive":true,"types":["水系"]},{"pet_id":"pet_000417","name":"缇塔","hp":345,"max_hp":345,"energy":6,"alive":true,"types":["机械系"]}],"self_active":0,"self_energy_max":6,"foe":[{"pet_id":"pet_000250","name":"迪莫","hp":300,"max_hp":300,"energy":6,"alive":true,"types":["光系"]}],"foe_living_count":1,"needs_replacement":[],"legal":[{"label":"抓挠","kind":"skill"},{"label":"防御","kind":"skill"},{"label":"换上第2位","kind":"switch"}],"affinity":{"source":"src/client/type-affinity.data.js@roco-world-s4-2026-09-10","rows":[{"pet_id":"pet_000001","multiplier":0.5,"known":true,"vs_type":"光系"},{"pet_id":"pet_000007","multiplier":1,"known":true,"vs_type":"光系"},{"pet_id":"pet_000417","multiplier":1,"known":true,"vs_type":"光系"}],"unavailable":[],"vs_types":["光系"]}},"result":{"text":"第 1 回合。对手场上：迪莫。比一比：喵喵 承伤 2（火系）、水蓝蓝 承伤 0.5（火系）。水蓝蓝 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置。这些倍率依据公开属性相性表，比较的是这两只对来袭属性的抗性。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。","provider":"local","rocoAdvice":{"kind":"compare","headline":"比一比：喵喵 承伤 2（火系）、水蓝蓝 承伤 0.5（火系）","reason":"水蓝蓝 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置","upside":null,"risk":null,"alternates":[],"unknown":["这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测"],"evidence":{"turn":1,"targets":[{"pet_id":"pet_000001","name":"喵喵"},{"pet_id":"pet_000007","name":"水蓝蓝"}],"compared":[{"pet_id":"pet_000001","name":"喵喵","multiplier":2,"vsType":"火系"},{"pet_id":"pet_000007","name":"水蓝蓝","multiplier":0.5,"vsType":"火系"}],"source":"wiki-rocom-snapshot@d2b4d0eaebd466905871cd7d55fc9a54e545b3ea676ae6d8c53e3e60d371defc"},"actionLabel":null,"legalActionId":null,"legalIndex":null,"phase":"compare","text":"第 1 回合。对手场上：迪莫。比一比：喵喵 承伤 2（火系）、水蓝蓝 承伤 0.5（火系）。水蓝蓝 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置。这些倍率依据公开属性相性表，比较的是这两只对来袭属性的抗性。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。","battleId":"producer-http-type-test"}}}
+invalid public types HTTP: {"invalidTypes":"草系","status":400,"error":{"error":"六宠战况无效：self.types"}}
+invalid public types HTTP: {"invalidTypes":null,"status":400,"error":{"error":"六宠战况无效：self.types"}}
+invalid public types HTTP: {"invalidTypes":["草系","水系","火系"],"status":400,"error":{"error":"六宠战况无效：self.types"}}
+invalid public types HTTP: {"invalidTypes":["草系",1],"status":400,"error":{"error":"六宠战况无效：self.types"}}
+invalid public types HTTP: {"invalidTypes":[""],"status":400,"error":{"error":"六宠战况无效：self.types"}}
+invalid public types HTTP: {"invalidTypes":[" 草系"],"status":400,"error":{"error":"六宠战况无效：self.types"}}
+invalid public types HTTP: {"invalidTypes":["草系","草系"],"status":400,"error":{"error":"六宠战况无效：self.types"}}
+✔ actual coachRocoBattle producer carries public types through real HTTP to fire comparison (91.903292ms)
+✔ actual producer forwards at most two well-formed public types and leaves unknown unknown (12.955333ms)
+✔ browser-compatible ciphertext loads a memory-only credential and status never exposes it (32.424291ms)
+✔ encryption nonce is single-use and malformed ciphertext is rejected (25.935292ms)
+✔ cross-origin, missing CSRF, DNS rebinding and server source requests are blocked (45.427166ms)
+✔ verification reaches only official HTTPS endpoint with bearer auth and marks verified (19.533583ms)
+✔ invalid authentication reports safe errors without reflecting upstream response (43.172542ms)
+✔ unconfigured coach runs locally; configured coach uses model and preserves evidence (60.672375ms)
+✔ PVP gating occurs before remote invocation even when configured (66.80725ms)
+✔ disconnect clears configuration; blank output and malformed input fail safely (24.467375ms)
+✔ network errors are sanitized (34.342917ms)
+✔ client disconnect aborts the upstream model request (42.200792ms)
+✔ every local mode the client can send is accepted by the coach endpoint (85.928667ms)
+✔ 整局复盘：给模型的指令写清了 0 值口径，而 0 值数据照给模型 (100.234084ms)
+✔ shadow 档不许改变玩家看到的结果：工具选择也必须是 base 的决定（第 38 轮的回归） (62.748291ms)
+✔ UI 视图与模型协议必须分开：页面拿到真名，规划协议一个字段都不多 (0.544542ms)
+✔ R4①：同一请求第二次命中缓存（上游只调一次，回执标 cache:hit） (24.056958ms)
+✔ R4②（反证）：改 stateToken 必须 miss (59.944625ms)
+✔ R4③：同一 key 并发 ⇒ 合并（上游一次、第二条标 dedup:joined） (61.464291ms)
+✔ R4③（反证）：两个**不同消息**并发不许合并 (89.995666ms)
+✔ R4④：被守卫拒/降级的答案不入缓存（省下的必须是一次真云端调用） (45.050959ms)
+✔ R4⑤：缺 stateToken 的请求不许命中缓存，也不许被合并（审计实测的「缓存串局」） (65.21775ms)
+✔ R6①：出招带旧版本 ⇒ 409 stale_state，不许把玩家那一手静默吞掉 (12.418958ms)
+✔ R6②：出招必须在**第一次 await 之前同步占位**（真机复验：只比对版本挡不住并发） (0.47825ms)
+✔ R7①：被合并的那条请求在首个请求失败时**也要返回**（审计高 10：原来挂到 45s 超时） (167.417291ms)
+✔ R8①：引擎不可用要报 503（不是 400），且玩家文案里不许出现内部地址（审计高 5） (1.256208ms)
+✔ R8②：被信号杀死的引擎必须能被**重新拉起**（真机复验：原来永不重启） (0.376125ms)
+✔ task-15：会话表满了仍有出口（LRU 淘汰）；旧行为必须被同一套判据判红 (448.36125ms)
+ℹ tests 77
+ℹ suites 0
+ℹ pass 76
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2485.799334
+
+✖ failing tests:
+
+test at tests/roco-battle-context.test.js:455:1
+✖ ⑪ B2②：页面读数里「读不到的那几只」并进建议的「不知道」，且只用玩家看得懂的名字 (0.436291ms)
+  AssertionError [ERR_ASSERTION]: 要用公开面里的名字：请点名公开队伍中要比较的两只；未识别的名字或别名请先确认
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-battle-context.test.js:462:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '请点名公开队伍中要比较的两只；未识别的名字或别名请先确认',
+    expected: /潮甲龟/,
+    operator: 'match',
+    diff: 'simple'
+  }

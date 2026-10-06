@@ -1,0 +1,52 @@
+✖ actual coachRocoBattle producer carries public types through real HTTP to fire comparison (97.651375ms)
+✖ actual producer forwards at most two well-formed public types and leaves unknown unknown (21.620541ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 167.61475
+
+✖ failing tests:
+
+test at tests/roco-explicit-intent-20261006.test.js:106:1
+✖ actual coachRocoBattle producer carries public types through real HTTP to fire comparison (97.651375ms)
+  AssertionError [ERR_ASSERTION]: {"error":"教练上下文无效"}
+  
+  400 !== 200
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-explicit-intent-20261006.test.js:118:42)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 400,
+    expected: 200,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/roco-explicit-intent-20261006.test.js:124:1
+✖ actual producer forwards at most two well-formed public types and leaves unknown unknown (21.620541ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + undefined
+  - [
+  -   '草系'
+  - ]
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-explicit-intent-20261006.test.js:136:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: [ '草系' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

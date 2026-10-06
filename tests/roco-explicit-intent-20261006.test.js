@@ -84,3 +84,64 @@ test('all frozen single attack type labels survive parsing through runCoach',asy
   assert.equal(out.rocoAdvice?.evidence.compared.length,2,out.text);
  }
 });
+
+function realProducer(view){
+ return import('node:fs').then(async({readFileSync})=>{
+  const source=readFileSync(process.env.ROCO_INTENT_PRODUCER_SOURCE ?? new URL('../src/client/roco.js',import.meta.url),'utf8');
+  const start=source.indexOf('function coachRocoBattle() {');
+  const end=source.indexOf('  return snapshot;\n}',start)+'  return snapshot;\n}'.length;
+  const affinityStart=source.indexOf('function affinityReadingsOf(');
+  const affinityEnd=source.indexOf('\nfunction coachRocoBattle()',affinityStart);
+  const {incomingAffinity,RULESET_ID}=await import('../src/client/type-affinity.js');
+  const produce=new Function('state','incomingAffinity','RULESET_ID',source.slice(affinityStart,affinityEnd)+'\n'+source.slice(start,end)+'\nreturn coachRocoBattle();');
+  return produce({view,battleId:'producer-http-type-test'},incomingAffinity,RULESET_ID);
+ });
+}
+function publicEngineView(){
+ return {turn:1,state_version:1,phase:'battle',battle_result:null,
+ self:{active:0,energy_max:6,pets:battle.self.map(p=>({...p}))},
+ opponent:{living_count:1,field:{pet_id:'pet_000250',name:'迪莫',types:['光系'],hp:300,max_hp:300,energy:6,alive:true},bench:[]},
+ legal:battle.legal,needs_replacement:[]};
+}
+test('actual coachRocoBattle producer carries public types through real HTTP to fire comparison',async()=>{
+ const {createCoachServer}=await import('../src/server/index.js');
+ const server=createCoachServer({fetchImpl:async()=>{throw new Error('cloud network forbidden in producer HTTP probe');}});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ const base=`http://127.0.0.1:${server.address().port}`;
+ try{
+  const bootRes=await fetch(base+'/api/bootstrap');const boot=await bootRes.json();
+  assert.equal(boot.configured,false,'no model credentials or model calls');
+  const produced=await realProducer(publicEngineView());
+  assert.deepEqual(produced.affinity.vs_types,['光系']);
+  const response=await fetch(base+'/api/coach',{method:'POST',headers:{Origin:base,Cookie:bootRes.headers.get('set-cookie')??'',
+   'Content-Type':'application/json','X-Coach-CSRF':boot.csrf},body:JSON.stringify({message:'只比较喵喵和水蓝蓝对火系的承伤倍率，不比较当前迪莫。',
+   role:'auto',context:{mode:'pvp-local',matchScope:'current',roco_battle:produced,profile:{pets:[]}},memory:freshMemory()})});
+  const out=await response.json();assert.equal(response.status,200,JSON.stringify(out));
+  console.log('producer HTTP comparison:',JSON.stringify({produced,result:{text:out.text,provider:out.provider,rocoAdvice:out.rocoAdvice}}));
+  assert.deepEqual(out.rocoAdvice?.evidence.compared.map(x=>[x.name,x.vsType,x.multiplier]),[['喵喵','火系',2],['水蓝蓝','火系',0.5]],out.text);
+  assert.equal(out.rocoAdvice.legalActionId,null);
+  for(const invalidTypes of ['草系',null,['草系','水系','火系'],['草系',1],[''],[' 草系'],['草系','草系']]){
+   const malformed=structuredClone(produced);malformed.self[0].types=invalidTypes;
+   const invalidResponse=await fetch(base+'/api/coach',{method:'POST',headers:{Origin:base,Cookie:bootRes.headers.get('set-cookie')??'',
+    'Content-Type':'application/json','X-Coach-CSRF':boot.csrf},body:JSON.stringify({message:'比较喵喵和水蓝蓝对火系承伤',role:'auto',
+    context:{mode:'pvp-local',roco_battle:malformed,profile:{pets:[]}},memory:freshMemory()})});
+   const invalidOut=await invalidResponse.json();
+   console.log('invalid public types HTTP:',JSON.stringify({invalidTypes,status:invalidResponse.status,error:invalidOut}));
+   assert.equal(invalidResponse.status,400,JSON.stringify(invalidOut));assert.match(JSON.stringify(invalidOut),/self\.types/);
+  }
+ }finally{await new Promise(resolve=>server.close(resolve));}
+});
+test('actual producer forwards at most two well-formed public types and leaves unknown unknown',async()=>{
+ for(const types of [undefined,null,'草系',[],['草系',null],['草系',1],[''],[' 草系'],['超长不可接受公开属性系'],['草系','草系']]){
+  const view=publicEngineView();view.self.pets[0].types=types;
+  const produced=await realProducer(view);
+  assert.equal(Object.hasOwn(produced.self[0],'types'),false,JSON.stringify({types,produced:produced.self[0]}));
+  // An unrelated profile candidate does not repair missing public battle types.
+  const out=await runCoach({message:'比较喵喵和水蓝蓝对火系的承伤',role:'auto',context:{mode:'pvp-local',roco_battle:produced,
+   profile:{pets:[{name:'喵喵',pet_id:'pet_000001',types:['草系']}]}},memory:freshMemory()});
+  assert.equal(out.rocoAdvice.evidence.compared.length,0,out.text);
+ }
+ for(const types of [['草系'],['草系','水系'],['未知系'],['草系','水系','火系']]){
+  const view=publicEngineView();view.self.pets[0].types=types;
+  assert.deepEqual((await realProducer(view)).self[0].types,types.slice(0,2));
+ }
+});

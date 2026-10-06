@@ -48,3 +48,30 @@ node --test --test-name-pattern='existing who-tanks|all frozen single' tests/roc
 ```
 
 The latest `targeted-regression.txt` is now 57/57 using the same seven-file command above. Historical red/green files retain their original six-case scope. No additional browser/model/live service validation was performed. Writing has stopped again for independent re-review.
+
+## Producer boundary repair on 3bd8ad24
+
+Base source revision: `3bd8ad24691d6536eb71e2ac831c718d1e276980`. Actual `coachRocoBattle()` omitted public pet types, so the earlier hand-built snapshot proof did not establish producer correctness. This repair adds only the public row projection in `src/client/roco.js` and the optional `types` shape check in `src/server/index.js`'s `validateChat.petRow`. No runtime/model consumer code was edited by this subagent in this round; concurrent parent changes are separate.
+
+Producer: use only `state.view` public `pet.types`, require a distinct array of valid Chinese type labels, copy at most two entries; malformed/missing/empty values stay absent. No candidate-pool or profile enrichment. An unrecognized but well-shaped `未知系` remains present and the frozen-table consumer fails closed. Server: optional type array, at most two distinct nonempty bounded type-label strings; malformed wire input returns 400 `self.types`/`foe.types`.
+
+The test extracts the actual producer and its actual affinity reader from client source, supplies an engine-shaped public view with current opponent 迪莫光系, and sends the produced snapshot through real `/api/coach` HTTP into `runCoach`. It asks the reported sentence `只比较喵喵和水蓝蓝对火系的承伤倍率，不比较当前迪莫。` It does not hand-fill snapshot types. The isolated server listens on port 0, uses `createCoachServer({fetchImpl: async () => { throw ... }})` to prohibit cloud transport, verifies no credentials (`bootstrap.configured === false`), and closes in `finally`. No generated/model requests were made.
+
+`producer-http-before-red.txt`: the same test uses actual 3bd8 producer source via `ROCO_INTENT_PRODUCER_SOURCE`; HTTP 200 but the answer says 喵喵火系倍率读不到, so 0/2. `producer-http-after-green.txt`: current actual producer, 2/2; HTTP answer is 喵喵火系2、水蓝蓝火系0.5, no executable action ID. It also saves real HTTP 400 counterexamples for scalar/null/three entries/nonstring/empty/space-prefixed/duplicate type values. Producer tests cover missing and malformed types without repairing them from a profile candidate, plus one/two/three valid public entries (three is bounded to the first two).
+
+The first probe incorrectly used context mode `battle` and received unrelated `教练上下文无效`; it is preserved as `producer-http-preflight-invalid-mode.txt`. The corrected probe uses the actual accepted `pvp-local` mode. That preflight failure is not counted as a product red.
+
+Exact commands from this checkout:
+
+```sh
+git show 3bd8ad24691d6536eb71e2ac831c718d1e276980:src/client/roco.js > /private/tmp/roco-explicit-intent-producer-3bd8ad24.js
+ROCO_INTENT_PRODUCER_SOURCE=/private/tmp/roco-explicit-intent-producer-3bd8ad24.js node --test --test-name-pattern='actual coachRocoBattle|actual producer forwards' tests/roco-explicit-intent-20261006.test.js
+node --test --test-name-pattern='actual coachRocoBattle|actual producer forwards' tests/roco-explicit-intent-20261006.test.js
+node --test tests/roco-explicit-intent-20261006.test.js tests/roco-battle-context.test.js tests/roco-coach-context-contract.test.js tests/roco-advice-routing.test.js tests/roco-client-type-affinity.test.js tests/server.test.js
+node --test tests/roco-explicit-intent-20261006.test.js tests/roco-coach-context-contract.test.js tests/roco-advice-routing.test.js tests/roco-client-type-affinity.test.js tests/server.test.js
+git diff --check
+```
+
+Six-file run `producer-http-regression.txt`: 76/77. The existing battle-context B2② fixture asks 喵喵/缇塔 when its public roster is 寂灭骨龙/潮甲龟, yet expects a 潮甲龟 unknown note. The exact same predicate fails on 3bd8 source in isolated `/private/tmp/roco-producer-baseline-3bd8ad24`; retained in `producer-battle-context-baseline-failure.txt`. It was not edited or silently excluded from the reported six-file result. The five-file command separately passes 58/58 in `producer-supported-regression.txt`.
+
+No CUA, live 8765 restart, real model request, full-suite claim, or Git write was performed. Candidate stopped pending independent review and the parent's live integration/retest.
