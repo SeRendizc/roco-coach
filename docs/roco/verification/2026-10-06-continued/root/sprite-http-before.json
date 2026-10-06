@@ -1,0 +1,20 @@
+{
+  "revision": "20cb334635d22ed2514cfa81f99f9c816378babb",
+  "rows": [
+    {
+      "id": "pet_000001",
+      "status": 404,
+      "body": "{\"ok\":false,\"error\":\"清单里没有这只精灵的立绘\"}"
+    },
+    {
+      "id": "pet_000006",
+      "status": 404,
+      "body": "{\"ok\":false,\"error\":\"清单里没有这只精灵的立绘\"}"
+    },
+    {
+      "id": "pet_000007",
+      "status": 404,
+      "body": "{\"ok\":false,\"error\":\"清单里没有这只精灵的立绘\"}"
+    }
+  ]
+}

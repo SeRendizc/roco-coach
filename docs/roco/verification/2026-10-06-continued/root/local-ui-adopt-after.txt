@@ -1,0 +1,115 @@
+- main:
+  - heading "小芽 · 洛克王国：世界 训练场" [level=1]
+  - button "打开小芽":
+    - generic: ✦
+    - text: 小芽
+  - text: ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ + + + + + + ▾
+  - generic "我方存活": ●●●●●●
+  - generic: ♥♥♥♥
+  - generic: PVP · AI模拟
+  - generic: 第 2 回合
+  - generic: ♥♥♥♥
+  - generic "对手存活": ●●●●●●
+  - button "已见阵容 6"
+  - generic: ⭐ 0
+  - generic: 火苗
+  - generic "点一下显示系别名":
+    - generic: 🔥
+    - generic: 火系
+  - generic: 攻击
+  - generic: 预期伤害 115
+  - generic: 引擎会结算这条效果。
+  - button "看「火苗」的技能详情": ⓘ ⓘ
+  - generic: ⭐ 1
+  - generic: 防御
+  - generic: ⚪
+  - generic: 普通系
+  - generic: 防御
+  - generic: 预期伤害 —
+  - generic: 引擎会结算这条效果。
+  - button "看「防御」的技能详情": ⓘ ⓘ
+  - generic: ⭐ 5
+  - generic: 火云车
+  - generic: 🔥
+  - generic: 火系
+  - generic: 攻击
+  - generic: 预期伤害 539
+  - generic: 引擎会结算这条效果。
+  - button "看「火云车」的技能详情": ⓘ ⓘ
+  - generic: ⭐ 3
+  - generic: 龙之利爪
+  - generic: 🐉
+  - generic: 龙系
+  - generic: 攻击
+  - generic: 预期伤害 167
+  - generic: 这招有一部分引擎还不会算：蓄力
+  - button "看「龙之利爪」的技能详情": ⓘ ⓘ
+  - generic: 火神
+  - generic: 🔥
+  - generic: 火系
+  - generic: 60 级
+  - generic: ⭐ 10
+  - generic: 生命 369 / 369
+  - generic: 100%
+  - generic "火系 对对手（草系）的承伤：草系 ×0.5（按对手属性系推算；来源 ruleset roco-world-s4-2026-09-10，防御组合 火系）": 火神 承伤 草系 ×0.5（抵抗）
+  - generic: 60 级
+  - generic: 🌿
+  - generic: 草系
+  - generic: 魔力猫
+  - generic: 100%
+  - generic: 生命 405 / 405
+  - generic: ⭐ 9
+  - heading "战报" [level=4]
+  - generic: 第 1 回合（最新）
+  - paragraph: 第 1 回合开始。
+  - paragraph: 我方换上第 6 位精灵。
+  - paragraph: 对方使用防御，本回合减伤约 70%。
+  - button "聚能 ⭐ 10 / 10":
+    - generic: 聚能
+    - generic: ⭐ 10 / 10
+  - tablist:
+    - tab "技能"
+    - tab "更换"
+    - tab "物品"
+    - tab "逃跑"
+  - text: ▾
+- dialog "和小芽说话":
+  - strong: ✦ 小芽
+  - button "收起小芽面板" [expanded]: 收起
+  - button "关闭小芽": ×
+  - status: 已把「采用建议」交给这一页 —— 真正出招由页面按现在合法的动作表来。
+  - status "资料查询：可用（本机规则服务已连，规则集 roco-world-s4-2026-09-10）；云端模型：未连接 —— 只影响自由发挥的文字，上面那些资料查询照常（点这里去模型设置）": 资料可用 · 云端未连接
+  - generic "设置 ▾":
+    - generic: 设置
+    - text: ▾
+  - text: ▾
+  - strong: 小芽
+  - paragraph: 我是小芽。这一局第 1 回合，你有 4 个技能可以点：问「现在怎么办」，我按当前血量、能量和队伍比这一手。
+  - strong: 你
+  - text: 这一手的合法首选和主要风险是什么？
+  - strong: 小芽
+  - paragraph: 第 1 回合：喵喵（495/495 血，能量 10），对手是魔力猫（405/405 血）。首选行动：换火神上场（引擎给的合法动作：换上第6位）。为什么是它：引擎把这一回合的双方应对算过一遍（96 个分支），推荐的就是这一项，而且推荐在多个分析种子里是稳的。收益：换火神上来（369/369 血）；这一手会把回合用掉。主要风险：换人先结算，但上来的那一只照样可能吃对面这一手；魔力猫 能量 10；对手下一招与伤害未知，不能仅凭能量断定会击倒。备选：抓挠（按未核验公式估 26 点）；防御（没有估算数据）。我这里不知道的：对手下一招的属性、选择与伤害未知，需要更多公开信息才能比较换宠承伤。以上都来自这一轮的公开局面与引擎估算（不是胜率）；我不会自动替你出招，采用与否由你决定。
+  - paragraph: 依据：本回合的规划（引擎算的） · 你选的六只 · 你的名单
+  - generic "依据"
+  - generic "首选行动：换火神上场 ▴"
+  - paragraph:
+    - generic: 理由
+    - generic: 引擎把这一回合的双方应对算过一遍（96 个分支），推荐的就是这一项，而且推荐在多个分析种子里是稳的
+  - paragraph:
+    - generic: 收益
+    - generic: 换火神上来（369/369 血）；这一手会把回合用掉
+  - paragraph:
+    - generic: 风险
+    - generic: 换人先结算，但上来的那一只照样可能吃对面这一手；魔力猫 能量 10；对手下一招与伤害未知，不能仅凭能量断定会击倒
+  - paragraph:
+    - generic: 备选
+    - generic: 抓挠（按未核验公式估 26 点）；防御（没有估算数据）
+  - button "查看"
+  - button "采用建议" [active]
+  - paragraph: 我不自动替你出招：点「查看」只看，点「采用建议」才真的走这一手。
+  - button "我一共有多少只精灵？"
+  - button "雨天水系伤害加多少？"
+  - button "火系克制什么属性？"
+  - button "你能做什么"
+  - textbox "问小芽：怎么培养 / 出一道小测验"
+  - button "发送"

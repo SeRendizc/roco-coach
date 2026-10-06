@@ -1,0 +1,41 @@
+✔ ① 产物与冻结真值**逐字节**同源（重新生成一遍再比） (2.2395ms)
+✔ ② 2160 格逐格复算：产物与冻结真值一格都不许差 (0.851833ms)
+✔ ②-反证 改掉冻结表里的一格，同一条复算必须红 (0.352375ms)
+✔ ③ 未登记组合 ⇒ 未知，**不是**中性（不许替引擎宣称"无影响"） (0.204208ms)
+✔ ④ 反向键按集合语义命中（冻结表每对只登记一个方向） (0.070625ms)
+✔ ⑤ 方向与文案：同函数换属性必须换结果（防"固定箭头"假修） (0.140833ms)
+✔ ⑥ 中性只有"真的算过"才写；档位与真值表逐字对应 (0.050958ms)
+✔ browser-compatible ciphertext loads a memory-only credential and status never exposes it (43.63575ms)
+✔ encryption nonce is single-use and malformed ciphertext is rejected (61.885875ms)
+✔ cross-origin, missing CSRF, DNS rebinding and server source requests are blocked (68.31375ms)
+✔ verification reaches only official HTTPS endpoint with bearer auth and marks verified (17.445042ms)
+✔ invalid authentication reports safe errors without reflecting upstream response (18.404708ms)
+✔ unconfigured coach runs locally; configured coach uses model and preserves evidence (44.605208ms)
+✔ PVP gating occurs before remote invocation even when configured (16.349375ms)
+✔ disconnect clears configuration; blank output and malformed input fail safely (17.654958ms)
+✔ network errors are sanitized (7.99425ms)
+✔ client disconnect aborts the upstream model request (27.432333ms)
+✔ every local mode the client can send is accepted by the coach endpoint (62.146958ms)
+✔ 整局复盘：给模型的指令写清了 0 值口径，而 0 值数据照给模型 (78.952416ms)
+✔ shadow 档不许改变玩家看到的结果：工具选择也必须是 base 的决定（第 38 轮的回归） (70.170041ms)
+✔ UI 视图与模型协议必须分开：页面拿到真名，规划协议一个字段都不多 (0.515667ms)
+✔ R4①：同一请求第二次命中缓存（上游只调一次，回执标 cache:hit） (52.168084ms)
+✔ R4②（反证）：改 stateToken 必须 miss (57.434875ms)
+✔ R4③：同一 key 并发 ⇒ 合并（上游一次、第二条标 dedup:joined） (76.942625ms)
+✔ R4③（反证）：两个**不同消息**并发不许合并 (67.156042ms)
+✔ R4④：被守卫拒/降级的答案不入缓存（省下的必须是一次真云端调用） (36.34975ms)
+✔ R4⑤：缺 stateToken 的请求不许命中缓存，也不许被合并（审计实测的「缓存串局」） (48.767917ms)
+✔ R6①：出招带旧版本 ⇒ 409 stale_state，不许把玩家那一手静默吞掉 (21.625625ms)
+✔ R6②：出招必须在**第一次 await 之前同步占位**（真机复验：只比对版本挡不住并发） (0.49625ms)
+✔ R7①：被合并的那条请求在首个请求失败时**也要返回**（审计高 10：原来挂到 45s 超时） (145.828666ms)
+✔ R8①：引擎不可用要报 503（不是 400），且玩家文案里不许出现内部地址（审计高 5） (1.332583ms)
+✔ R8②：被信号杀死的引擎必须能被**重新拉起**（真机复验：原来永不重启） (0.45375ms)
+✔ task-15：会话表满了仍有出口（LRU 淘汰）；旧行为必须被同一套判据判红 (418.491959ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2405.220125

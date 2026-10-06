@@ -893,9 +893,8 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
           const big=hit?.battle_file?join('battle',String(hit.battle_file)):null;
           const small=hit?.thumb_file?join('thumb',String(hit.thumb_file)):null;
           const original=hit?.original_file?join('originals',String(hit.original_file)):null;
-          const wanted=wantFull?original:(wantBattle?(big??small):(small??big));
-          const fallback=original&&original!==wanted?original:null;
-          const rel=wanted??fallback;
+          const candidates=wantFull?[original]:(wantBattle?[big,small,original]:[small,big,original]);
+          const rel=candidates.find((candidate)=>candidate&&existsSync(join(capRoot,candidate)))??null;
           const filePath=rel?join(capRoot,rel):null;
           if(filePath&&existsSync(filePath)){
             const buf=readFileSync(filePath);

@@ -1,0 +1,81 @@
+✖ battle missing but tracked thumb exists falls to same-pet thumb (0.985375ms)
+✖ normal thumb missing but battle exists falls to same-pet battle (0.681584ms)
+✔ both previews preserve requested priority and no files stays absent (0.650209ms)
+✖ original fallback is tried after both previews; explicit full only uses original (0.229292ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 1
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 40.466583
+
+✖ failing tests:
+
+test at tests/sprite-capture-fallback.test.js:15:1
+✖ battle missing but tracked thumb exists falls to same-pet thumb (0.985375ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + null
+  - 'thumb/same.png'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/sprite-capture-fallback.test.js:15:83)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.start (node:internal/test_runner/test:1257:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: 'thumb/same.png',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/sprite-capture-fallback.test.js:16:1
+✖ normal thumb missing but battle exists falls to same-pet battle (0.681584ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + null
+  - 'battle/same.png'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/sprite-capture-fallback.test.js:16:83)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: 'battle/same.png',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/sprite-capture-fallback.test.js:21:1
+✖ original fallback is tried after both previews; explicit full only uses original (0.229292ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + null
+  - 'originals/same.png'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/sprite-capture-fallback.test.js:22:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: 'originals/same.png',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

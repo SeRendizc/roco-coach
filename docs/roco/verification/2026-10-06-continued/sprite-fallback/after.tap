@@ -1,0 +1,12 @@
+✔ battle missing but tracked thumb exists falls to same-pet thumb (0.902458ms)
+✔ normal thumb missing but battle exists falls to same-pet battle (0.745042ms)
+✔ both previews preserve requested priority and no files stays absent (1.077666ms)
+✔ original fallback is tried after both previews; explicit full only uses original (0.60725ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 44.259959

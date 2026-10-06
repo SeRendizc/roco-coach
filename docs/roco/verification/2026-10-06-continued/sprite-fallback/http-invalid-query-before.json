@@ -1,0 +1,19 @@
+{
+  "baseline": "20cb334635d22ed2514cfa81f99f9c816378babb",
+  "petId": "pet_000001",
+  "name": "喵喵",
+  "request": "GET /api/roco/sprite?pet_id=pet_000001&size=battle",
+  "status": 404,
+  "source": null,
+  "variant": null,
+  "contentType": "application/json; charset=utf-8",
+  "responseSha256": "99f90f773da9b16c0f06949d3ea6c4fcd00e8dee4cafeb473b07af321f8f4c93",
+  "thumbSha256": "bf91bd4442bf7f9b87da22a9512836f52d85657a0289e3157d0456b0c7330036",
+  "exists": {
+    "thumb": true,
+    "battle": false,
+    "original": false
+  },
+  "externalCalls": 0,
+  "isolatedPort": 65133
+}
