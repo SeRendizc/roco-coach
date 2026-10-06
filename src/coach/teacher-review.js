@@ -1,3 +1,4 @@
+import {decisionEvidenceAt} from './decision-evidence.js';
 // 老师（teacher）这一角色的局末复盘与后续验证。
 //
 // 三个角色不许互相顶替：军师管局内该不该提醒（`coach-advice.js`）、陪练管情绪与偏好
@@ -897,7 +898,7 @@ const ALTERNATIVE_HEDGE = '这里只说当时有这一项可选，不代表换�
  *   `field.claimed === true` 才表示**真的声称了**「当时合法集合里有 X」；
  *   拿不到表时 `field.unknown` 写清哪一项未知，`sentence` 给出现在就能做的一步。
  */
-function alternativeFor({goal, chosen, facts, game, names, legalByTurn, isMistake}) {
+function alternativeFor({goal, chosen, facts, game, names, legalByTurn, decisionRecords, isMistake}) {
   const rule = Object.hasOwn(GOAL_ALTERNATIVE, goal) ? GOAL_ALTERNATIVE[goal] : null;
   const anchor = Number.isInteger(chosen.turn) ? chosen.turn : null;
   const viewTurn = viewTurnOf(game);
@@ -919,19 +920,22 @@ function alternativeFor({goal, chosen, facts, game, names, legalByTurn, isMistak
     };
   }
   // ④ 找表：先按回合查调用方给的表，再看局面视图能不能为**这一回合**作证。
-  const fromCaller = lookupLegalByTurn(legalByTurn, anchor);
+  const identityRequired=game?.roco?.self?.pets?.length===6||decisionRecords!==undefined;
+  const bound=decisionEvidenceAt(decisionRecords,{matchId:game?.id,publicMatchId:game?.roco?.match_id,turn:anchor,taken:actionsTakenAt(facts,anchor)});
+  if(bound)Object.assign(field,{match_id:bound.matchId,public_match_id:bound.publicMatchId,decision_id:bound.decisionId,state_version:bound.stateVersion,phase:bound.phase});
+  const fromCaller = identityRequired ? null : lookupLegalByTurn(legalByTurn, anchor);
   // 两种形状都认（与 `nameBook` 同一口径）：`rocoGameView` 的投影在 `roco.legal`，
   // 而手工拼出来的局面对象常见的是顶层 `legal`——它们的「属于哪一回合」都由 `viewTurnOf` 判。
   const rawLegal = asObject(asObject(game).roco).legal ?? asObject(game).legal;
   const viewVouches = viewTurn === anchor && Array.isArray(rawLegal) && rawLegal.length > 0;
-  const source = fromCaller?.length ? 'legal-by-turn' : (viewVouches ? 'live-view' : null);
-  const table = source === 'legal-by-turn' ? fromCaller : (source === 'live-view' ? rawLegal : null);
+  const source = bound ? 'decision-evidence' : (identityRequired ? null : (fromCaller?.length ? 'legal-by-turn' : (viewVouches ? 'live-view' : null)));
+  const table = bound ? bound.legal : (source === 'legal-by-turn' ? fromCaller : (source === 'live-view' ? rawLegal : null));
   if (!table) {
-    const unknown = '那一回合的合法行动表没有随复盘送来';
+    const unknown = identityRequired ? '该次主动决策的身份绑定合法表未确认' : '那一回合的合法行动表没有随复盘送来';
     const holder = viewTurn === null ? '手里也没有带合法表的局面' : `手里那份局面属于第 ${viewTurn} 回合`;
     return {
       field: {...field, unknown},
-      sentence: `第 ${anchor} 回合的合法行动表没有随复盘送来，所以这里不能说「当时合法动作里有哪一项」——这是查不到，不是没有。能照做的还是学习点里那一句。`,
+      sentence: `${identityRequired ? `第 ${anchor} 回合的主动决策身份未确认` : `第 ${anchor} 回合的合法行动表没有随复盘送来`}，所以这里不能说「当时合法动作里有哪一项」——这是查不到，不是没有。能照做的还是学习点里那一句。`,
       evidence: `第 ${anchor} 回合的合法行动表查不到（${holder}）。未知项：${unknown}。`,
     };
   }
@@ -942,7 +946,7 @@ function alternativeFor({goal, chosen, facts, game, names, legalByTurn, isMistak
     if (label && !menu.includes(label)) menu.push(label);
     if (menu.length >= 6) break;
   }
-  const taken = actionsTakenAt(facts, anchor);
+  const taken = bound ? [{kind:bound.submittedAction.kind,skillId:bound.submittedAction.skill_id,toSlot:bound.submittedAction.target_index,label:bound.submittedAction.label}] : actionsTakenAt(facts, anchor);
   const takenSkillIds = new Set(taken.filter((row) => row.kind === 'skill' && row.skillId).map((row) => row.skillId));
   const takenItem = taken.some((row) => row.kind === 'item');
   const takenSwitch = taken.some((row) => row.kind === 'switch');
@@ -967,7 +971,7 @@ function alternativeFor({goal, chosen, facts, game, names, legalByTurn, isMistak
     picked = {kind, label, skill: row.skill_id ?? null, item: row.item_id ?? null};
     break;
   }
-  const sourceText = source === 'legal-by-turn'
+  const sourceText = bound ? `来自本局 ${bound.decisionId} 的主动决策合法表（状态版本 ${bound.stateVersion}）` : source === 'legal-by-turn'
     ? '来自调用方逐回合送来的合法表'
     : `来自第 ${viewTurn} 回合那份可行动局面的合法表（就是这一回合）`;
   if (!picked) {
@@ -997,7 +1001,7 @@ function alternativeFor({goal, chosen, facts, game, names, legalByTurn, isMistak
     const labels = [];
     for (const row of taken) {
       if (row.kind === 'skill') {
-        const name = skillNameOf(row.skillId, names);
+        const name = row.label || skillNameOf(row.skillId, names);
         if (name) labels.push(name);
       } else if (row.kind === 'item') {
         labels.push(`使用${row.item ?? '道具'}`);
@@ -1005,7 +1009,7 @@ function alternativeFor({goal, chosen, facts, game, names, legalByTurn, isMistak
         labels.push(Number.isInteger(row.toSlot) ? `换上第 ${row.toSlot + 1} 位` : '换人');
       }
     }
-    return labels.length ? `，当时你做的是「${labels.join('、')}」` : '';
+    return labels.length ? `，当时你${bound ? '提交' : '做'}的是「${labels.join('、')}」` : '';
   })();
   return {
     field: {...field, claimed: true, source, menu, label: picked.label, reason, kind: picked.kind},
@@ -1162,7 +1166,7 @@ function hpEvidence(game, side, slot) {
  */
 export function reviewMatch({
   events = [], turns = null, result = null, game = null, memory = null,
-  skills = null, bag = null, legalByTurn = undefined, matchId = null,
+  skills = null, bag = null, legalByTurn = undefined, decisionRecords = undefined, matchId = null,
 } = {}) {
   const facts = teacherMatchFacts({events});
   const names = nameBook(game, skills);
@@ -1251,9 +1255,9 @@ export function reviewMatch({
     : {...repeatField({detected: false, action: 'none'}), via: null, streak: 0};
 
   // ── 合法替代：那一回合当时还能选什么（只在调用方给了 `legalByTurn` 时才开口）──
-  const alternative = (legalByTurn === undefined || legalByTurn === null)
+  const alternative = (legalByTurn == null && decisionRecords === undefined && game?.roco?.self?.pets?.length!==6)
     ? null
-    : alternativeFor({goal, chosen, facts, game, names, legalByTurn, isMistake: teachingAMistake});
+    : alternativeFor({goal, chosen, facts, game, names, legalByTurn, decisionRecords, isMistake: teachingAMistake});
 
   const outcome = resultOf({result, game});
   const outcomeSentence = outcomeText(outcome, facts);

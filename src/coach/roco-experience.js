@@ -1023,7 +1023,7 @@ export function rocoMatchReview({
   // 所以「转折点那一回合当时还能选什么」只能由调用方边打边攒（`{回合号: view.legal}`）。
   // 不送（`undefined`）时行为与以前**逐字节相同**（复盘不提合法替代）；
   // 送 `{}`＝「明确要这一栏但手里没有表」⇒ 复盘如实写「查不到，不编」。
-  legalByTurn = undefined,
+  legalByTurn = undefined, decisionRecords = undefined,
 } = {}) {
   const finalGame = rocoGameView(finalView, {matchId});
   const reviewGame = lastLiveView ? rocoGameView(lastLiveView, {matchId}) : finalGame;
@@ -1035,6 +1035,7 @@ export function rocoMatchReview({
     game: reviewGame,
     memory,
     ...(legalByTurn === undefined ? {} : {legalByTurn}),
+    ...(decisionRecords === undefined ? {} : {decisionRecords}),
   });
   // ── 更深一层的事实（关键片段 / 资源账 / 一条有条件的下一步）────────────────
   //

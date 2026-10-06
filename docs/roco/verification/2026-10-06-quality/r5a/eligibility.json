@@ -1,0 +1,178 @@
+{
+  "baseline": "16300a0ba55d7196990031f66f1c0498cb3d24ee",
+  "actualDomGoal": "switch-out-of-the-bad-matchup",
+  "actualMatchId": "s1-btebcpeg",
+  "publicViewMatchId": "m-8df9b314a589a18a",
+  "selfPetCount": 6,
+  "stateVersion": 86,
+  "finalOpponent": {
+    "slot": 1,
+    "name": "迪莫",
+    "types": [
+      "光系"
+    ]
+  },
+  "publicSequence": {
+    "firstEnemyFaint": {
+      "index": 34,
+      "turn": 6,
+      "side": "enemy",
+      "slot": 0
+    },
+    "firstEnemyReplacement": {
+      "index": 37,
+      "turn": 6,
+      "side": "enemy",
+      "slot": 4
+    },
+    "nextOwnHitAtThatSlot": {
+      "index": 39,
+      "turn": 7,
+      "side": "player",
+      "skillId": "skill_000421",
+      "targetSlot": 4,
+      "damage": 81,
+      "multiplier": 0.5
+    }
+  },
+  "source": null,
+  "notEligibleReasons": [
+    "actual DOM goal is not read-the-replacement-first",
+    "final public opponent slot differs from first replacement slot; current adapter only binds matching final public slot"
+  ],
+  "statuses": [
+    {
+      "url": "/api/roco/battle/new",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 1
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 4
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 11
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 12
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 20
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 25
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 30
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 37
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 39
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 46
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 47
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 50
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 53
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 56
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 59
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 62
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 65
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 70
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 71
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 76
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 78
+    },
+    {
+      "url": "/api/roco/battle/advance",
+      "status": 200,
+      "matchId": "s1-btebcpeg",
+      "stateVersion": 86
+    }
+  ],
+  "boundary": "Node extraction describes public receipt shapes; actual page teacher goal is authoritative. No changed goal or adapter bypass."
+}

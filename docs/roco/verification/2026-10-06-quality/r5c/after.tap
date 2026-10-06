@@ -1,0 +1,13 @@
+✔ real turn2 decision uses battle v4 menu not later forced v11 menu (6.488375ms)
+✔ missing/manual-auto-absent record does not credit forced turn table (1.07875ms)
+✔ mismatched version/decision/match/unaccepted/replace record fail closed (1.216083ms)
+✔ switch only in later replace table cannot be earlier alternative (0.265875ms)
+✔ real voluntary v4 switch stays legal without promising win (0.501625ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 47.281125

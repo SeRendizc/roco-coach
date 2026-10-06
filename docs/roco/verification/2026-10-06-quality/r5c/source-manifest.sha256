@@ -1,0 +1,5 @@
+74122fa4f880a148a29605d59d13e2307f4cb14b5683dd9842ed4cb060695288  src/client/roco.js
+ea12be4c557e2d85f6317b2f8330fe77f161db6aff2c38d67d30c21538b4ede2  src/coach/roco-experience.js
+703108115ca40fa039604b5aa92c71246f73b14e51da001d82373adb2ea04627  src/coach/teacher-review.js
+df1591c8b50728a40997c61f8a1af798ad335433fd195023b06a036c3f1e3aac  src/coach/decision-evidence.js
+691ebd0263935fe89740f26f5ac439521ec51552d6abda58669657241043840c  tests/teacher-decision-identity.test.js

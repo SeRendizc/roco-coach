@@ -1,0 +1,12 @@
+{
+  "psExit": null,
+  "profileExists": false,
+  "serverPid": 13177,
+  "chromePid": 13188,
+  "sandboxPs": "spawn disallowed; psExit null is not proof of absence",
+  "approvedExactPidPs": {
+    "exit": 1,
+    "output": "PID PPID COMMAND (header only)",
+    "meaning": "both known owned PIDs absent"
+  }
+}

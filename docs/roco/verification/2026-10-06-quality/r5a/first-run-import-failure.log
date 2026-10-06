@@ -1,0 +1,4 @@
+[roco] 对手候选（我的可用物种）: 536 pet_000003,pet_000004,pet_000005,pet_000006,pet_000008,pet_000010,pet_000012,pet_000013
+Error: TypeError: Failed to fetch dynamically imported module: http://127.0.0.1:8899/coach/teacher-review.js
+    at js (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/docs/roco/verification/2026-10-06-quality/r5a/natural-probe.mjs:19:147)
+    at async file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/docs/roco/verification/2026-10-06-quality/r5a/natural-probe.mjs:42:19

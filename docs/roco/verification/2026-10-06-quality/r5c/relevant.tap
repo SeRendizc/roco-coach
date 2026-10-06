@@ -1,0 +1,31 @@
+✔ 复盘由事件决定：我方倒下时要点名那一回合与那一只 (1.3735ms)
+✔ 没有值得一提的事件就沉默：返回 null，不编号一个「关键回合」 (0.098ms)
+✔ 转折点可以不是减员：没有减员时按累计伤害差翻盘挑 (0.352083ms)
+✔ 同一局里有「做对的课」也有「做错的课」时，先讲要改的那一处（第 45 轮反模板） (0.432ms)
+✔ 两局不同的对局 → 不同的复盘与不同的学习点（反模板） (0.373167ms)
+✔ 在后续局验证：没有讲过的课就什么都不说 (0.146875ms)
+✔ 在后续局验证：局面没再出现 → improved 为 null，并明说没出现证明不了什么 (0.911417ms)
+✔ 挂账的回合必须是「这门课的局面」那一回合，不是转折点那一回合（第 45 轮实测抓到） (0.451584ms)
+✔ 在后续局验证：局面重复、处理方式一样 → improved 为 false (0.191416ms)
+✔ 在后续局验证：局面重复、处理方式变了 → improved 为 true，且依据点名两个回合 (0.186833ms)
+✔ 在后续局验证：局面重复但这一课的前提不在 → 也不给改善结论 (0.116209ms)
+✔ 禁止词汇：复盘与核对产出的每一句都不许出现承诺或工程术语 (0.320417ms)
+✔ 反向对照 ①：固定问句换汤不换药，反模板判据抓得住 (2.39375ms)
+✔ 反向对照 ②：没有重复出现就宣称「有改善」是抓得住的假结论 (0.180458ms)
+✔ 反向对照 ③：没有转折点就编一个「关键回合」是抓得住的 (0.050667ms)
+✔ 对手倒下那一只：拿不到名字时只写位次，绝不拿场上那一只顶替（含只给投影的入参） (0.160125ms)
+✔ real turn2 decision uses battle v4 menu not later forced v11 menu (6.765917ms)
+✔ missing/manual-auto-absent record does not credit forced turn table (1.073917ms)
+✔ mismatched version/decision/match/unaccepted/replace record fail closed (1.470667ms)
+✔ switch only in later replace table cannot be earlier alternative (0.398375ms)
+✔ real voluntary v4 switch stays legal without promising win (0.297292ms)
+✔ actual dispatch helper snapshots public legal identity before request (0.252917ms)
+✔ only exact dispatched version and successful same-match receipt can accept a record (0.070042ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 48.607584

@@ -1,3 +1,4 @@
+import {captureDecisionEvidence, confirmDecisionEvidence} from '../coach/decision-evidence.js';
 import {replacementPracticeSource, replacementQuiz, submitReplacementPractice} from '../coach/replacement-practice.js';
 import {adviceSnapshotFresh, coachBattleStamp} from '../coach/coach-advice.js';
 // 手游规则演示页：**无聊天入口**的主动教练。
@@ -92,6 +93,7 @@ const state = {
   //: 「转折点那一回合当时还能选什么」—— 那份表不攒就永远拿不到（除非引擎改合同）。
   //: 只做搬运：`finishMatch()` 原样交给 `rocoMatchReview`，页面**不解释**它。
   legalByTurn: {},
+  decisionRecords: [],
   //: 第五轮④（2026-09-29）：**逐回合的前后局面**（每推进一次攒一条 `{type:'turn',before,after,…}`）。
   //: 为什么客户端要攒：`coach/memory.js` 的 `turnLogOf(game)` 只认 `game.history` 里
   //: `type==='turn'` 的那些条（它给"复盘上一局"提供「第N回合 / 谁剩多少血 / 你用了哪一手」），
@@ -4907,6 +4909,7 @@ async function startBattle() {
     resetReplacementPractice();
     // U10：新的一局从**空的动作表**开始（旧局的回合号会与这一局重号，留着就是错的事实）。
     state.legalByTurn = {};
+    state.decisionRecords = [];
     // 第五轮④：逐回合前后局面同理 —— 留着上一局的那份会被当成这一局的记录（复盘就讲错了局面）。
     state.matchHistory = [];
     state.lastLiveView = null;
@@ -4985,6 +4988,9 @@ async function playAction(action) {
 }
 
 async function playActionOnce(action) {
+  const dispatchMatchId=state.battleId;
+  const decision=captureDecisionEvidence({view:state.view,matchId:dispatchMatchId,action});
+  if(decision)state.decisionRecords=[...state.decisionRecords,decision];
   const before = state.view?.state_version ?? null;
   const wasMagic = action.kind === 'magic';
   // ④：高亮只对「刚用过的这一下」有意义 —— 任何一次行动都先熄掉，再由引擎事件重新点灯。
@@ -4997,8 +5003,9 @@ async function playActionOnce(action) {
     const path = wasMagic ? '/api/roco/battle/free' : '/api/roco/battle/advance';
     // 带上"我看到的局面版本"：服务端据此做一次版本 CAS —— 两个标签页并发出招时，
     // 后一条会被 409 挡住（而不是把先出的那一手**静默吞掉**，审计高 3 实测过）。
-    const data = await api(path, {battle_id: state.battleId, action,
-      state_version: state.view?.state_version ?? null});
+    const data = await api(path, {battle_id: dispatchMatchId, action,
+      state_version: before});
+    confirmDecisionEvidence(decision,{response:data,currentMatchId:state.battleId,requestStateVersion:before});
     applyResult(data);
     if (wasMagic) {
       // ④ 用了愿力强化 → 回技能页 + 高亮换上来的「愿力冲击」（解除那一下不点灯）。
@@ -5205,6 +5212,7 @@ async function finishMatch() {
     // U10（2026-09-29）：**逐回合合法表**原样交给复盘层 —— 「转折点那一回合当时还能选什么」
     // 只能由页面边打边攒（引擎每次只回当前回合的 `legal`）。页面不解释、不筛选、不补。
     legalByTurn: state.legalByTurn,
+    decisionRecords: state.decisionRecords,
   });
 
   // 陪练（轻量气泡）：局末用一句人话接住，不打断、也不冒充复盘。
@@ -6394,6 +6402,7 @@ async function startStandardPvp() {
     resetReplacementPractice();
     // U10：新的一局从**空的动作表**开始（旧局的回合号会与这一局重号，留着就是错的事实）。
     state.legalByTurn = {};
+    state.decisionRecords = [];
     // 第五轮④：逐回合前后局面同理 —— 留着上一局的那份会被当成这一局的记录（复盘就讲错了局面）。
     state.matchHistory = [];
     state.lastLiveView = null;
@@ -6486,6 +6495,7 @@ function returnHome() {
   // U10（2026-09-29）：**逐回合合法表**也随这一局一起清 —— 开下一局时旧局的动作表
   // 留在手里，复盘就会拿"上一局的合法动作"去讲这一局的回合（那是编）。
   state.legalByTurn = {};
+    state.decisionRecords = [];
   // 第五轮④：逐回合前后局面同理（与上面两处开新局同一条口径）。
   state.matchHistory = [];
   state.lastLiveView = null;

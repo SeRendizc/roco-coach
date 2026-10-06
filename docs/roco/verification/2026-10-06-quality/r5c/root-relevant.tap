@@ -1,0 +1,42 @@
+✔ 复盘由事件决定：我方倒下时要点名那一回合与那一只 (1.722417ms)
+✔ 没有值得一提的事件就沉默：返回 null，不编号一个「关键回合」 (0.106667ms)
+✔ 转折点可以不是减员：没有减员时按累计伤害差翻盘挑 (0.413584ms)
+✔ 同一局里有「做对的课」也有「做错的课」时，先讲要改的那一处（第 45 轮反模板） (0.467625ms)
+✔ 两局不同的对局 → 不同的复盘与不同的学习点（反模板） (0.281ms)
+✔ 在后续局验证：没有讲过的课就什么都不说 (0.1585ms)
+✔ 在后续局验证：局面没再出现 → improved 为 null，并明说没出现证明不了什么 (0.8885ms)
+✔ 挂账的回合必须是「这门课的局面」那一回合，不是转折点那一回合（第 45 轮实测抓到） (0.247458ms)
+✔ 在后续局验证：局面重复、处理方式一样 → improved 为 false (0.158542ms)
+✔ 在后续局验证：局面重复、处理方式变了 → improved 为 true，且依据点名两个回合 (0.371958ms)
+✔ 在后续局验证：局面重复但这一课的前提不在 → 也不给改善结论 (0.263917ms)
+✔ 禁止词汇：复盘与核对产出的每一句都不许出现承诺或工程术语 (0.387542ms)
+✔ 反向对照 ①：固定问句换汤不换药，反模板判据抓得住 (0.229625ms)
+✔ 反向对照 ②：没有重复出现就宣称「有改善」是抓得住的假结论 (0.133209ms)
+✔ 反向对照 ③：没有转折点就编一个「关键回合」是抓得住的 (0.041291ms)
+✔ 对手倒下那一只：拿不到名字时只写位次，绝不拿场上那一只顶替（含只给投影的入参） (0.142625ms)
+✔ actual adoption handler blocks still-legal action from previous battle (0.854292ms)
+✔ actual adoption handler blocks still-legal action from previous state after switch (0.257ms)
+✔ actual adoption handler rejects unversioned or illegal advice (0.215459ms)
+✔ view never executes; fresh adopted card and cloned duplicate execute once (0.268167ms)
+✔ battleAdvice recommendation carries actual battle identity and version (1.232ms)
+✔ late-response stamp changes on new match, version and active pet; ordinary context remains stable (0.095125ms)
+✔ current Roco battle identity cannot fall back to previous lastMatch id (11.528125ms)
+✔ explicit previous match request uses history and never describes it as current (6.13525ms)
+✔ empty or invalid historical records cannot become a previous match (0.223125ms)
+✔ real turn2 decision uses battle v4 menu not later forced v11 menu (8.027875ms)
+✔ missing/manual-auto-absent record does not credit forced turn table (1.40725ms)
+✔ mismatched version/decision/match/unaccepted/replace record fail closed (1.672041ms)
+✔ switch only in later replace table cannot be earlier alternative (0.642041ms)
+✔ real voluntary v4 switch stays legal without promising win (0.347875ms)
+✔ actual dispatch helper snapshots public legal identity before request (0.282875ms)
+✔ only exact dispatched version and successful same-match receipt can accept a record (0.144416ms)
+✔ actual saved skill event does not bind another legal submitted skill (0.335ms)
+✔ item kind alone is not exact identity; empty events permit unique confirmed record only (0.119458ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 34
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 58.32

@@ -1,0 +1,83 @@
+✔ real turn2 decision uses battle v4 menu not later forced v11 menu (6.504291ms)
+✔ missing/manual-auto-absent record does not credit forced turn table (1.049959ms)
+✔ mismatched version/decision/match/unaccepted/replace record fail closed (1.211375ms)
+✔ switch only in later replace table cannot be earlier alternative (0.44925ms)
+✔ real voluntary v4 switch stays legal without promising win (0.292791ms)
+✔ actual dispatch helper snapshots public legal identity before request (0.22075ms)
+✔ only exact dispatched version and successful same-match receipt can accept a record (0.067125ms)
+✖ actual saved skill event does not bind another legal submitted skill (0.51025ms)
+✖ item kind alone is not exact identity; empty events permit unique confirmed record only (0.378917ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 7
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 49.07725
+
+✖ failing tests:
+
+test at tests/teacher-decision-identity.test.js:22:1
+✖ actual saved skill event does not bind another legal submitted skill (0.51025ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/teacher-decision-identity.test.js:23:93)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/teacher-decision-identity.test.js:25:1
+✖ item kind alone is not exact identity; empty events permit unique confirmed record only (0.378917ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + {
+  +   accepted: true,
+  +   decisionId: 'm-8df9b314a589a18a:v4',
+  +   legal: [
+  +     {
+  +       item_id: 'fixture-potion',
+  +       kind: 'item'
+  +     }
+  +   ],
+  +   matchId: 's1-btebcpeg',
+  +   needsReplacement: [],
+  +   phase: 'battle',
+  +   publicMatchId: 'm-8df9b314a589a18a',
+  +   requestStateVersion: 4,
+  +   stateVersion: 4,
+  +   submittedAction: {
+  +     item_id: 'fixture-potion',
+  +     kind: 'item'
+  +   },
+  +   turn: 2
+  + }
+  - null
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/teacher-decision-identity.test.js:27:106)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { matchId: 's1-btebcpeg', publicMatchId: 'm-8df9b314a589a18a', decisionId: 'm-8df9b314a589a18a:v4', stateVersion: 4, requestStateVersion: 4, turn: 2, phase: 'battle', needsReplacement: [], legal: [ [Object] ], submittedAction: { kind: 'item', item_id: 'fixture-potion' }, accepted: true },
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
