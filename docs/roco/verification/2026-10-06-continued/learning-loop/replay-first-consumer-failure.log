@@ -1,0 +1,12 @@
+AssertionError [ERR_ASSERTION]: The input did not match the regular expression /状态版本 4/. Input:
+
+''
+
+    at file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/docs/roco/verification/2026-10-06-continued/learning-loop/replay-probe.mjs:38:46 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '',
+  expected: /状态版本 4/,
+  operator: 'match',
+  diff: 'simple'
+}

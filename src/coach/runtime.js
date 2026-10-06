@@ -44,7 +44,8 @@ import {speakPlainly} from './plain-words.js';
 // 它是模型自己组出来的。提示词能提高概率，但「必须给一个当前合法且有价值的首选行动」
 // 是硬要求，所以这里用确定性的局面比较算出结构（`rocoAdvice`），回答层再拿它兜底：
 // 模型正文没有点出那一手时，直接换成交付这一份（见 `enforceBattleAdvice`）。
-import {battleAdvice,rocoAdviceAsk} from './coach-advice.js';
+import {DEFENCE_SCALE_BY_COMBO,SOURCE_ID as AFFINITY_SOURCE_ID,SOURCE_SHA256 as AFFINITY_SOURCE_SHA256} from '../client/type-affinity.data.js';
+import {battleAdvice,rocoAdviceAsk,comparisonTypeRequest} from './coach-advice.js';
 import {rememberPreference,playerWishes,quizMastery,QUIZ_MASTERY} from './memory.js';
 // Local provider boundary. Future server provider may phrase this evidence packet with DeepSeek.
 export const localProvider={name:'local',async generate(packet){return packet.text;}};
@@ -2447,7 +2448,8 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  if(!packet&&followup&&['review','match-review'].includes(memory.lastTopic)){packet=memory.lastTopic==='match-review'?reviewMatch(context):review(context);route='teacher';locked=true;}
  const factPolicy=policyFor(message,context);
  const factArgs=factPolicy.need?withRuntimeStateVersion(factPolicy.need,defaultArgsFor(factPolicy.need,context,message),context):null;
- const pureFact=Boolean((factPolicy.need==='query_rules'&&factArgs&&validToolArgs(factPolicy.need,factArgs))
+ const liveAdviceAsk=Boolean(context?.roco_battle && !context.roco_battle.result && rocoAdviceAsk(routingText));
+ const pureFact=!liveAdviceAsk && Boolean((factPolicy.need==='query_rules'&&factArgs&&validToolArgs(factPolicy.need,factArgs))
   || localFactAsk(message,factPolicy,context));
  let factAnswer=null;
  // 在 `pureFact` 块**之前**声明：`useModel`（块外）要用它；写成块内 `const` 会 TDZ
@@ -2568,17 +2570,43 @@ if(role==='auto')route=factAsk?'teacher':(refusesReview?'companion':/培养|加�
  let rocoAdvice=null;
  if(rocoBattle&&rocoAdviceAsk(routingText)){
   try{
-   rocoAdvice=battleAdvice({battle:rocoBattle,plan:freshPlan,message:routingText});
+   // Explicit incoming types are recomputed only from the existing frozen table
+   // and publicly supplied defender types. Player numbers are never inputs.
+   const requested=comparisonTypeRequest(routingText);
+   let comparisonBattle=rocoBattle;
+   if(requested.attackType){
+    const knownAttack=Object.hasOwn(DEFENCE_SCALE_BY_COMBO,requested.attackType);
+    const rows=(Array.isArray(rocoBattle.self)?rocoBattle.self:[]).flatMap(pet=>{
+     const types=Array.isArray(pet.types)?pet.types:[];
+     const combo=types.join('|');
+     const values=DEFENCE_SCALE_BY_COMBO[combo]??DEFENCE_SCALE_BY_COMBO[[...types].reverse().join('|')];
+     if(!knownAttack||!values)return [];
+     const scale=new Map(values).get(requested.attackType)??4;
+     return [{pet_id:pet.pet_id,vs_type:requested.attackType,multiplier:scale/4,known:true,
+      source:`${AFFINITY_SOURCE_ID}@${AFFINITY_SOURCE_SHA256}`}];
+    });
+    // Matching public affinity rows remain useful when the snapshot omits types.
+    const supplied=(Array.isArray(rocoBattle.affinity?.rows)?rocoBattle.affinity.rows:[])
+     .filter(row=>row.vs_type===requested.attackType&&!rows.some(r=>r.pet_id===row.pet_id));
+    comparisonBattle={...rocoBattle,affinity:{source:rows.length ? `${AFFINITY_SOURCE_ID}@${AFFINITY_SOURCE_SHA256}` : rocoBattle.affinity?.source,
+     vs_types:[requested.attackType],rows:[...rows,...supplied]}};
+   }
+   rocoAdvice=battleAdvice({battle:comparisonBattle,plan:freshPlan,message:routingText});
   }catch(error){
    // 建议层出问题**不许**把整页搞挂：如实记一条，这一问照旧走原来的路。
    rocoAdvice=null;
    packet={...packet,rocoAdviceError:{message:String(error?.message??error).slice(0,200)}};
   }
  }
+ if(liveAdviceAsk&&!rocoAdvice&&!rocoBattle?.result){
+  packet={text:'这一局的当前合法行动或公开场上状态读不到，不能据此编一个首选；请刷新当前战况后再问。',evidence:['当前公开战况未能生成合法建议。']};
+  route='strategist';
+ }
  if(rocoAdvice){
   packet={...packet,text:rocoAdvice.text,rocoAdvice,
    evidence:[...(Array.isArray(packet.evidence)?packet.evidence:[]),
-    `这一手已经按当前局面算好一条首选行动（rocoAdvice.legalActionId=${rocoAdvice.legalActionId}）：`
+    rocoAdvice.kind==='compare' ? '这是点名对象的公开属性比较，不包含执行行动；条件问题中未指定的攻击属性保持未知。'
+    : `这一手已经按当前局面算好一条首选行动（rocoAdvice.legalActionId=${rocoAdvice.legalActionId}）：`
     +'回答必须以它为准 —— 允许补充解释，但不许换成「你自己定 / 说说你倾向哪边」这类没有结论的话。']};
   route='strategist';
   next.lastTopic='strategist';

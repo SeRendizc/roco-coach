@@ -1,0 +1,28 @@
+✔ saved natural selected switch lesson can reach a source without changing goal (1.213208ms)
+✔ switch source rejects missing or mismatched decision and public source identities (0.723041ms)
+✔ replacement uses event-time public field, never terminal slot or name (0.553708ms)
+✔ replacement cannot use a missing event-time disclosure or ambiguous receipt (0.158833ms)
+✔ actual public snapshot producer keeps only disclosed field and rejects wrong receipt identity (0.247959ms)
+✔ source version remains the decision while current terminal version gates submission (0.155875ms)
+✔ only complete six-pet public replacement sequence permits a source (1.222083ms)
+✔ changed public condition changes correct choice, not just option order (0.307667ms)
+✔ explicit correct/wrong and hinted outcomes; repeat counts once; source survives read (1.219375ms)
+✔ old match/version, running battle and invalid choices cannot write attempt (0.11075ms)
+✔ next match without replacement is unknown, not improvement (1.211541ms)
+✔ real turn2 decision uses battle v4 menu not later forced v11 menu (7.788292ms)
+✔ missing/manual-auto-absent record does not credit forced turn table (1.508ms)
+✔ mismatched version/decision/match/unaccepted/replace record fail closed (1.665875ms)
+✔ switch only in later replace table cannot be earlier alternative (0.36875ms)
+✔ real voluntary v4 switch stays legal without promising win (0.572333ms)
+✔ actual dispatch helper snapshots public legal identity before request (0.269667ms)
+✔ only exact dispatched version and successful same-match receipt can accept a record (0.082625ms)
+✔ actual saved skill event does not bind another legal submitted skill (0.280791ms)
+✔ item kind alone is not exact identity; empty events permit unique confirmed record only (0.126833ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 60.296458

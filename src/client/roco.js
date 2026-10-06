@@ -1,5 +1,5 @@
 import {captureDecisionEvidence, confirmDecisionEvidence} from '../coach/decision-evidence.js';
-import {replacementPracticeSource, replacementQuiz, submitReplacementPractice} from '../coach/replacement-practice.js';
+import {capturePracticeSnapshot, replacementPracticeSource, replacementQuiz, submitReplacementPractice} from '../coach/replacement-practice.js';
 import {adviceSnapshotFresh, coachBattleStamp} from '../coach/coach-advice.js';
 // 手游规则演示页：**无聊天入口**的主动教练。
 //
@@ -94,6 +94,7 @@ const state = {
   //: 只做搬运：`finishMatch()` 原样交给 `rocoMatchReview`，页面**不解释**它。
   legalByTurn: {},
   decisionRecords: [],
+  practiceSnapshots: [],
   //: 第五轮④（2026-09-29）：**逐回合的前后局面**（每推进一次攒一条 `{type:'turn',before,after,…}`）。
   //: 为什么客户端要攒：`coach/memory.js` 的 `turnLogOf(game)` 只认 `game.history` 里
   //: `type==='turn'` 的那些条（它给"复盘上一局"提供「第N回合 / 谁剩多少血 / 你用了哪一手」），
@@ -4148,6 +4149,8 @@ function applyResult(data) {
   //   · 上一个局面还能行动 → 它是「最后一个可决策的局面」，复盘要用它；
   //   · 这一次推进产生的事件 → 追加进整局事件流。
   if (Array.isArray(state.view?.legal) && state.view.legal.length) state.lastLiveView = state.view;
+  const practiceSnapshot=capturePracticeSnapshot({response:data,matchId:state.battleId,eventStart:state.matchEvents.length});
+  if(practiceSnapshot)state.practiceSnapshots.push(practiceSnapshot);
   const fresh = Array.isArray(data.view?.events) ? data.view.events : null;
   if (fresh) state.matchEvents = [...state.matchEvents, ...fresh];
   // ── 第五轮④（2026-09-29）：攒**逐回合的前后局面**（复盘要的 `turnLog` 的唯一来源）────────
@@ -4910,6 +4913,7 @@ async function startBattle() {
     // U10：新的一局从**空的动作表**开始（旧局的回合号会与这一局重号，留着就是错的事实）。
     state.legalByTurn = {};
     state.decisionRecords = [];
+    state.practiceSnapshots = [];
     // 第五轮④：逐回合前后局面同理 —— 留着上一局的那份会被当成这一局的记录（复盘就讲错了局面）。
     state.matchHistory = [];
     state.lastLiveView = null;
@@ -5169,7 +5173,7 @@ function bindReplacementPractice(){
  $('replacement-practice-open').onclick=()=>showReplacementQuiz();
  $('replacement-practice-variant').onclick=()=>showReplacementQuiz(replacementPractice?.quiz?.variantOf==='refreshed'?'stale':'refreshed');
  $('replacement-practice-skip').onclick=()=>{$('replacement-practice-body').hidden=true;};
- $('replacement-practice-hint').onclick=()=>{if(!replacementPractice?.quiz)return;replacementPractice.hinted=true;$('replacement-practice-feedback').textContent='提示：先判断资料属于旧对手还是新对手；使用提示后的答对不算独立证据。';};
+ $('replacement-practice-hint').onclick=()=>{if(!replacementPractice?.quiz)return;replacementPractice.hinted=true;$('replacement-practice-feedback').textContent=replacementPractice.quiz.skillKey==='switch-out-of-the-bad-matchup'?'提示：先区分还能主动行动与倒下后必须补位；使用提示后的答对不算独立证据。':'提示：先判断资料属于旧对手还是新对手；使用提示后的答对不算独立证据。';};
  $('replacement-practice-submit').onclick=()=>{
   const current=replacementPractice;if(!current?.quiz)return;
   const answer=document.querySelector('input[name="replacement-answer"]:checked')?.value;
@@ -5259,7 +5263,7 @@ async function finishMatch() {
     document.body.dataset.rocoTeacherImproved = progress.improved === true
       ? 'yes'
       : (progress.improved === false ? 'no' : 'unknown');
-    const practiceSource=replacementPracticeSource({review,view,matchId:state.battleId,events:state.matchEvents});
+    const practiceSource=replacementPracticeSource({review,view,matchId:state.battleId,events:state.matchEvents,publicSnapshots:state.practiceSnapshots,decisionRecords:state.decisionRecords});
     if(practiceSource){replacementPractice={source:practiceSource,hinted:false};$('replacement-practice').hidden=false;}
     state.memory = recordTeacherReview(state.memory, {matchId: state.battleId, review});
     state.memory = recordLearningCheck(state.memory, {
@@ -6403,6 +6407,7 @@ async function startStandardPvp() {
     // U10：新的一局从**空的动作表**开始（旧局的回合号会与这一局重号，留着就是错的事实）。
     state.legalByTurn = {};
     state.decisionRecords = [];
+    state.practiceSnapshots = [];
     // 第五轮④：逐回合前后局面同理 —— 留着上一局的那份会被当成这一局的记录（复盘就讲错了局面）。
     state.matchHistory = [];
     state.lastLiveView = null;
@@ -6496,6 +6501,7 @@ function returnHome() {
   // 留在手里，复盘就会拿"上一局的合法动作"去讲这一局的回合（那是编）。
   state.legalByTurn = {};
     state.decisionRecords = [];
+    state.practiceSnapshots = [];
   // 第五轮④：逐回合前后局面同理（与上面两处开新局同一条口径）。
   state.matchHistory = [];
   state.lastLiveView = null;

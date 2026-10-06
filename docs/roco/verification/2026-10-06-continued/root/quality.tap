@@ -1,0 +1,159 @@
+
+> test:roco-quality
+> node --test --test-concurrency=1 tests/replacement-practice.test.js tests/roco-quality-20261006.test.js tests/roco-quality-adoption-20261006.test.js tests/roco-quality-capability-20261006.test.js tests/roco-quality-final-wording-20261006.test.js tests/roco-quality-latest-source-20261006.test.js tests/roco-quality-transport-20261006.test.js tests/teacher-decision-identity.test.js tests/learning-loop-natural.test.js tests/roco-explicit-intent-20261006.test.js
+
+✔ saved natural selected switch lesson can reach a source without changing goal (1.131667ms)
+✔ switch source rejects missing or mismatched decision and public source identities (0.682875ms)
+✔ replacement uses event-time public field, never terminal slot or name (0.438833ms)
+✔ replacement cannot use a missing event-time disclosure or ambiguous receipt (0.127625ms)
+✔ actual public snapshot producer keeps only disclosed field and rejects wrong receipt identity (0.174666ms)
+✔ source version remains the decision while current terminal version gates submission (0.097459ms)
+✔ only complete six-pet public replacement sequence permits a source (0.975084ms)
+✔ changed public condition changes correct choice, not just option order (0.206292ms)
+✔ explicit correct/wrong and hinted outcomes; repeat counts once; source survives read (0.976375ms)
+✔ old match/version, running battle and invalid choices cannot write attempt (0.075208ms)
+✔ next match without replacement is unknown, not improvement (0.835625ms)
+✔ explicit light attack binds named pair rather than current fire opponent (8.8665ms)
+✔ player numbers are not evidence; non-light condition keeps its type unknown (0.897125ms)
+✔ recommendation with current turn, legal first choice and risk routes to battle advice (2.111709ms)
+✔ comparison does not substitute wrong-type evidence or trust invented values (0.095958ms)
+✔ unknown public types and missing live legal actions never invent results (0.684125ms)
+✔ negated or multiple incoming types require clarification rather than current foe substitution (1.293125ms)
+✖ existing who-tanks wording binds named pair and retains current public fire type (0.750542ms)
+✖ existing who-tanks wording with explicit light binds the requested type (0.285583ms)
+✖ all frozen single attack type labels survive parsing through runCoach (0.764083ms)
+✔ named pairs change actual evidence and never choose whole-team extremes (0.906167ms)
+✔ missing named reading cannot substitute an unrelated pet (0.108541ms)
+✔ duplicate public name is ambiguous and cannot silently bind a species id (0.058958ms)
+✔ unnamed comparison asks for exactly two objects (0.081375ms)
+✔ equal multipliers do not imply equal damage (0.081583ms)
+✔ different incoming types cannot be ranked as one hit (0.080166ms)
+✔ real runtime consumes message bound comparison rather than recommending (7.217875ms)
+✔ comparison text cannot become an actionable recommendation card in real UI consumer (3.398166ms)
+✔ actual adoption handler blocks still-legal action from previous battle (1.060209ms)
+✔ actual adoption handler blocks still-legal action from previous state after switch (0.23075ms)
+✔ actual adoption handler rejects unversioned or illegal advice (0.205917ms)
+✔ view never executes; fresh adopted card and cloned duplicate execute once (0.238583ms)
+✔ battleAdvice recommendation carries actual battle identity and version (0.993417ms)
+✔ late-response stamp changes on new match, version and active pet; ordinary context remains stable (0.068375ms)
+✔ current Roco battle identity cannot fall back to previous lastMatch id (9.553208ms)
+✔ explicit previous match request uses history and never describes it as current (4.723292ms)
+✔ empty or invalid historical records cannot become a previous match (0.172458ms)
+✔ actual answer evidence distinguishes fallback, local facts and cached cloud output (0.312917ms)
+✔ actual model-state merger gives configuration no response credit and never revives a failed answer (0.064667ms)
+✔ player capability wording describes configuration or this answer, without connection or generation claims (0.144292ms)
+✔ player comparison explains public provenance without printing implementation path (0.527833ms)
+✔ explicitly negated historical clause plus current request stays current (7.188125ms)
+✔ positive previous-match request and current question keep their separate scopes (0.774541ms)
+✔ bounded current request without a live snapshot says unavailable instead of historical substitution (0.288375ms)
+✔ actual companion reading bundle preserves Roco live context and blocks last-match material (2.100208ms)
+✔ negated historical clause cannot hijack a positive mechanism or fact task (11.037042ms)
+✔ actual latest-answer consumer clears previous cloud source after local (0.574083ms)
+✔ actual latest-answer consumer clears previous cloud source after cache (0.066334ms)
+▶ real provider transport failure yields HTTP error, then an honest local companion fallback
+  ✔ fallback memory retains only the original player question (0.393291ms)
+  ✔ fallback status describes the actual local response without an elapsed-time claim (0.075542ms)
+  ✔ two actual HTTP session failures do not promise an ongoing reconnect (7.1735ms)
+  ✔ cancelling an in-flight transport remains AbortError, not a fallback answer (5.071583ms)
+✔ real provider transport failure yields HTTP error, then an honest local companion fallback (92.831459ms)
+✔ real turn2 decision uses battle v4 menu not later forced v11 menu (6.572292ms)
+✔ missing/manual-auto-absent record does not credit forced turn table (1.170792ms)
+✔ mismatched version/decision/match/unaccepted/replace record fail closed (1.245833ms)
+✔ switch only in later replace table cannot be earlier alternative (0.271125ms)
+✔ real voluntary v4 switch stays legal without promising win (0.478583ms)
+✔ actual dispatch helper snapshots public legal identity before request (0.24525ms)
+✔ only exact dispatched version and successful same-match receipt can accept a record (0.074916ms)
+✔ actual saved skill event does not bind another legal submitted skill (0.233708ms)
+✔ item kind alone is not exact identity; empty events permit unique confirmed record only (0.083291ms)
+ℹ tests 62
+ℹ suites 0
+ℹ pass 59
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 586.051375
+
+✖ failing tests:
+
+test at tests/roco-explicit-intent-20261006.test.js:55:1
+✖ existing who-tanks wording binds named pair and retains current public fire type (0.750542ms)
+  AssertionError [ERR_ASSERTION]: 第 1 回合。对手场上：火花。请点名公开队伍中要比较的两只；未识别的名字或别名请先确认。
+  + actual - expected
+  
+  + []
+  - [
+  -   [
+  -     '喵喵',
+  -     '火系',
+  -     2
+  -   ],
+  -   [
+  -     '水蓝蓝',
+  -     '火系',
+  -     0.5
+  -   ]
+  - ]
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-explicit-intent-20261006.test.js:58:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ [ '喵喵', '火系', 2 ], [ '水蓝蓝', '火系', 0.5 ] ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/roco-explicit-intent-20261006.test.js:61:1
+✖ existing who-tanks wording with explicit light binds the requested type (0.285583ms)
+  AssertionError [ERR_ASSERTION]: 第 1 回合。对手场上：火花。请点名公开队伍中要比较的两只；未识别的名字或别名请先确认。
+  + actual - expected
+  
+  + []
+  - [
+  -   [
+  -     '喵喵',
+  -     '光系',
+  -     0.5
+  -   ],
+  -   [
+  -     '水蓝蓝',
+  -     '光系',
+  -     1
+  -   ]
+  - ]
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-explicit-intent-20261006.test.js:64:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ [ '喵喵', '光系', 0.5 ], [ '水蓝蓝', '光系', 1 ] ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/roco-explicit-intent-20261006.test.js:67:1
+✖ all frozen single attack type labels survive parsing through runCoach (0.764083ms)
+  AssertionError [ERR_ASSERTION]: 第 1 回合。对手场上：火花。请点名公开队伍中要比较的两只；未识别的名字或别名请先确认。
+  + actual - expected
+  
+  + []
+  - [
+  -   '光系',
+  -   '光系'
+  - ]
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-explicit-intent-20261006.test.js:78:10)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ '光系', '光系' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,99 @@
+✖ explicit light attack binds named pair rather than current fire opponent (9.058291ms)
+✖ player numbers are not evidence; non-light condition keeps its type unknown (1.233125ms)
+✖ recommendation with current turn, legal first choice and risk routes to battle advice (0.933375ms)
+✖ comparison does not substitute wrong-type evidence or trust invented values (0.105208ms)
+✖ unknown public types and missing live legal actions never invent results (0.525166ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 0
+ℹ fail 5
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 57.707167
+
+✖ failing tests:
+
+test at tests/roco-explicit-intent-20261006.test.js:14:1
+✖ explicit light attack binds named pair rather than current fire opponent (9.058291ms)
+  AssertionError [ERR_ASSERTION]: 第 1 回合。对手场上：火花。比一比：喵喵 承伤 2（火系）、水蓝蓝 承伤 0.5（火系）。水蓝蓝 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置。这些倍率依据公开属性相性表，比较的是这两只对来袭属性的抗性。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。
+  + actual - expected
+  
+    [
+  +   '火系',
+  +   '火系'
+  -   '光系',
+  -   '光系'
+    ]
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-explicit-intent-20261006.test.js:17:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ '火系', '火系' ],
+    expected: [ '光系', '光系' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/roco-explicit-intent-20261006.test.js:22:1
+✖ player numbers are not evidence; non-light condition keeps its type unknown (1.233125ms)
+  AssertionError [ERR_ASSERTION]: 第 1 回合。对手场上：火花。比一比：喵喵 承伤 2（火系）、缇塔 承伤 1（火系）。缇塔 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置。这些倍率依据公开属性相性表，比较的是这两只对来袭属性的抗性。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-explicit-intent-20261006.test.js:24:63)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at tests/roco-explicit-intent-20261006.test.js:28:1
+✖ recommendation with current turn, legal first choice and risk routes to battle advice (0.933375ms)
+  AssertionError [ERR_ASSERTION]: 这条我没依据，换个说法或点名一只精灵。
+  + actual - expected
+  
+  + 'companion'
+  - 'strategist'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-explicit-intent-20261006.test.js:30:32)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'companion',
+    expected: 'strategist',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/roco-explicit-intent-20261006.test.js:34:1
+✖ comparison does not substitute wrong-type evidence or trust invented values (0.105208ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  2 !== 0
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-explicit-intent-20261006.test.js:36:46)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 2,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/roco-explicit-intent-20261006.test.js:38:1
+✖ unknown public types and missing live legal actions never invent results (0.525166ms)
+  TypeError: Cannot read properties of undefined (reading 'evidence')
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-explicit-intent-20261006.test.js:40:34)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7)

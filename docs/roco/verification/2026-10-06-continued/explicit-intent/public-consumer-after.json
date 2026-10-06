@@ -1,0 +1,290 @@
+{
+  "scope": "public runCoach / localProvider, no real model or browser",
+  "battle": {
+    "battle_id": "explicit-intent",
+    "state_version": 1,
+    "turn": 1,
+    "phase": "battle",
+    "result": null,
+    "self_active": 0,
+    "self": [
+      {
+        "pet_id": "pet_000001",
+        "name": "喵喵",
+        "types": [
+          "草系"
+        ],
+        "hp": 366,
+        "max_hp": 366,
+        "energy": 6,
+        "alive": true
+      },
+      {
+        "pet_id": "pet_000007",
+        "name": "水蓝蓝",
+        "types": [
+          "水系"
+        ],
+        "hp": 366,
+        "max_hp": 366,
+        "energy": 6,
+        "alive": true
+      },
+      {
+        "pet_id": "pet_000417",
+        "name": "缇塔",
+        "types": [
+          "机械系"
+        ],
+        "hp": 345,
+        "max_hp": 345,
+        "energy": 6,
+        "alive": true
+      }
+    ],
+    "foe": [
+      {
+        "pet_id": "pet_000004",
+        "name": "火花",
+        "types": [
+          "火系"
+        ],
+        "hp": 366,
+        "max_hp": 366,
+        "energy": 6,
+        "alive": true
+      }
+    ],
+    "legal": [
+      {
+        "label": "抓挠",
+        "kind": "skill"
+      },
+      {
+        "label": "防御",
+        "kind": "skill"
+      },
+      {
+        "label": "换上第2位",
+        "kind": "switch"
+      }
+    ],
+    "affinity": {
+      "source": "public-current-fire",
+      "vs_types": [
+        "火系"
+      ],
+      "rows": [
+        {
+          "pet_id": "pet_000001",
+          "multiplier": 2,
+          "vs_type": "火系",
+          "known": true
+        },
+        {
+          "pet_id": "pet_000007",
+          "multiplier": 0.5,
+          "vs_type": "火系",
+          "known": true
+        },
+        {
+          "pet_id": "pet_000417",
+          "multiplier": 1,
+          "vs_type": "火系",
+          "known": true
+        }
+      ]
+    }
+  },
+  "results": [
+    {
+      "message": "那只比较喵喵和水蓝蓝对光系的承伤倍率，不比较当前火花。",
+      "route": "strategist",
+      "provider": "local",
+      "text": "第 1 回合。对手场上：火花。比一比：喵喵 承伤 0.5（光系）、水蓝蓝 承伤 1（光系）。喵喵 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置。这些倍率依据公开属性相性表，比较的是这两只对来袭属性的抗性。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。",
+      "advice": {
+        "kind": "compare",
+        "headline": "比一比：喵喵 承伤 0.5（光系）、水蓝蓝 承伤 1（光系）",
+        "reason": "喵喵 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置",
+        "upside": null,
+        "risk": null,
+        "alternates": [],
+        "unknown": [
+          "这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测"
+        ],
+        "evidence": {
+          "turn": 1,
+          "targets": [
+            {
+              "pet_id": "pet_000001",
+              "name": "喵喵"
+            },
+            {
+              "pet_id": "pet_000007",
+              "name": "水蓝蓝"
+            }
+          ],
+          "compared": [
+            {
+              "pet_id": "pet_000001",
+              "name": "喵喵",
+              "multiplier": 0.5,
+              "vsType": "光系"
+            },
+            {
+              "pet_id": "pet_000007",
+              "name": "水蓝蓝",
+              "multiplier": 1,
+              "vsType": "光系"
+            }
+          ],
+          "source": "wiki-rocom-snapshot@d2b4d0eaebd466905871cd7d55fc9a54e545b3ea676ae6d8c53e3e60d371defc"
+        },
+        "actionLabel": null,
+        "legalActionId": null,
+        "legalIndex": null,
+        "phase": "compare",
+        "text": "第 1 回合。对手场上：火花。比一比：喵喵 承伤 0.5（光系）、水蓝蓝 承伤 1（光系）。喵喵 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置。这些倍率依据公开属性相性表，比较的是这两只对来袭属性的抗性。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。",
+        "battleId": "explicit-intent"
+      }
+    },
+    {
+      "message": "喵喵光系承伤0.5与缇塔1如何比较？如果迪莫的招式不是光系呢？",
+      "route": "strategist",
+      "provider": "local",
+      "text": "第 1 回合。对手场上：火花。比一比：喵喵 承伤 0.5（光系）、缇塔 承伤 1（光系）。喵喵 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置。这些倍率依据公开属性相性表，比较的是这两只对来袭属性的抗性。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测；如果招式不是光系，新的攻击属性未指定，不能继续沿用这些倍率；请说明具体攻击属性再比较。",
+      "advice": {
+        "kind": "compare",
+        "headline": "比一比：喵喵 承伤 0.5（光系）、缇塔 承伤 1（光系）",
+        "reason": "喵喵 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置",
+        "upside": null,
+        "risk": null,
+        "alternates": [],
+        "unknown": [
+          "这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测",
+          "如果招式不是光系，新的攻击属性未指定，不能继续沿用这些倍率；请说明具体攻击属性再比较"
+        ],
+        "evidence": {
+          "turn": 1,
+          "targets": [
+            {
+              "pet_id": "pet_000001",
+              "name": "喵喵"
+            },
+            {
+              "pet_id": "pet_000417",
+              "name": "缇塔"
+            }
+          ],
+          "compared": [
+            {
+              "pet_id": "pet_000001",
+              "name": "喵喵",
+              "multiplier": 0.5,
+              "vsType": "光系"
+            },
+            {
+              "pet_id": "pet_000417",
+              "name": "缇塔",
+              "multiplier": 1,
+              "vsType": "光系"
+            }
+          ],
+          "source": "wiki-rocom-snapshot@d2b4d0eaebd466905871cd7d55fc9a54e545b3ea676ae6d8c53e3e60d371defc"
+        },
+        "actionLabel": null,
+        "legalActionId": null,
+        "legalIndex": null,
+        "phase": "compare",
+        "text": "第 1 回合。对手场上：火花。比一比：喵喵 承伤 0.5（光系）、缇塔 承伤 1（光系）。喵喵 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置。这些倍率依据公开属性相性表，比较的是这两只对来袭属性的抗性。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测；如果招式不是光系，新的攻击属性未指定，不能继续沿用这些倍率；请说明具体攻击属性再比较。",
+        "battleId": "explicit-intent"
+      }
+    },
+    {
+      "message": "现在第1回合对火花，这一手的合法首选和主要风险是什么？",
+      "route": "strategist",
+      "provider": "local",
+      "text": "第 1 回合：喵喵（366/366 血，能量 6），对手是火花（366/366 血）。首选行动：出「抓挠」（引擎给的合法动作：抓挠）。为什么是它：这一轮没有可比较的伤害估算（包里没有引擎的规划），所以只按「现在就能出手」挑：它是合法招里的第一条。收益：这一条是现在就能出手的合法行动（这一轮没有它的伤害估算）。主要风险：对面换人可以先躲掉这一下（换人比技能先动）；这一手没有伤害估算，打多少要打完才知道。备选：防御（没有估算数据）；水蓝蓝（换上去 366 血）。我这里不知道的：这一手的伤害估算（这一轮没有 damage_preview）；对手这一回合会做什么。以上都来自这一轮的公开局面与引擎估算（不是胜率）；我不会自动替你出招，采用与否由你决定。",
+      "advice": {
+        "headline": "出「抓挠」",
+        "reason": "这一轮没有可比较的伤害估算（包里没有引擎的规划），所以只按「现在就能出手」挑：它是合法招里的第一条",
+        "upside": "这一条是现在就能出手的合法行动（这一轮没有它的伤害估算）",
+        "risk": "对面换人可以先躲掉这一下（换人比技能先动）；这一手没有伤害估算，打多少要打完才知道",
+        "alternates": [
+          {
+            "label": "防御",
+            "kind": "skill",
+            "legalActionId": "skill#防御",
+            "legalIndex": 1,
+            "note": "没有估算数据"
+          },
+          {
+            "label": "水蓝蓝",
+            "kind": "switch",
+            "legalActionId": "switch#1",
+            "legalIndex": 2,
+            "note": "换上去 366 血"
+          }
+        ],
+        "actionLabel": "抓挠",
+        "actionKind": "skill",
+        "legalActionId": "skill#抓挠",
+        "legalIndex": 0,
+        "action": {
+          "legalActionId": "skill#抓挠",
+          "legalIndex": 0,
+          "kind": "skill",
+          "label": "抓挠",
+          "display": "抓挠"
+        },
+        "legalLabel": "抓挠",
+        "turn": 1,
+        "phase": "battle",
+        "stateVersion": 1,
+        "fingerprint": "1@battle@1@skill:抓挠|skill:防御|switch:换上第2位",
+        "unknown": [
+          "这一手的伤害估算（这一轮没有 damage_preview）",
+          "对手这一回合会做什么"
+        ],
+        "kind": "primary-action",
+        "evidence": {
+          "turn": 1,
+          "my": {
+            "name": "喵喵",
+            "hp": 366,
+            "maxHp": 366,
+            "energy": 6
+          },
+          "foe": {
+            "name": "火花",
+            "hp": 366,
+            "maxHp": 366,
+            "energy": 6
+          },
+          "legal": [
+            {
+              "legalActionId": "skill#抓挠",
+              "kind": "skill",
+              "label": "抓挠"
+            },
+            {
+              "legalActionId": "skill#防御",
+              "kind": "skill",
+              "label": "防御"
+            },
+            {
+              "legalActionId": "switch#1",
+              "kind": "switch",
+              "label": "换上第2位"
+            }
+          ],
+          "estimate": null,
+          "plan_recommendation": null,
+          "plan_branches": null
+        },
+        "text": "第 1 回合：喵喵（366/366 血，能量 6），对手是火花（366/366 血）。首选行动：出「抓挠」（引擎给的合法动作：抓挠）。为什么是它：这一轮没有可比较的伤害估算（包里没有引擎的规划），所以只按「现在就能出手」挑：它是合法招里的第一条。收益：这一条是现在就能出手的合法行动（这一轮没有它的伤害估算）。主要风险：对面换人可以先躲掉这一下（换人比技能先动）；这一手没有伤害估算，打多少要打完才知道。备选：防御（没有估算数据）；水蓝蓝（换上去 366 血）。我这里不知道的：这一手的伤害估算（这一轮没有 damage_preview）；对手这一回合会做什么。以上都来自这一轮的公开局面与引擎估算（不是胜率）；我不会自动替你出招，采用与否由你决定。",
+        "battleId": "explicit-intent"
+      }
+    }
+  ]
+}

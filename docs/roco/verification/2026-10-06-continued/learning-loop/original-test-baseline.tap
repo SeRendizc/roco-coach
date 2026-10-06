@@ -1,0 +1,13 @@
+✔ only complete six-pet public replacement sequence permits a source (0.988084ms)
+✔ changed public condition changes correct choice, not just option order (0.237083ms)
+✔ explicit correct/wrong and hinted outcomes; repeat counts once; source survives read (1.14825ms)
+✔ old match/version, running battle and invalid choices cannot write attempt (0.091416ms)
+✔ next match without replacement is unknown, not improvement (0.960166ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 41.3895

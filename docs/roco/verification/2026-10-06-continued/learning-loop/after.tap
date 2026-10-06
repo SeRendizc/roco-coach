@@ -1,0 +1,12 @@
+✔ saved natural selected switch lesson can reach a source without changing goal (1.752ms)
+✔ switch source rejects missing or mismatched decision and public source identities (0.332125ms)
+✔ replacement uses event-time public field, never terminal slot or name (0.450833ms)
+✔ replacement cannot use a missing event-time disclosure or ambiguous receipt (0.127875ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 52.445292

@@ -1027,7 +1027,8 @@ export const COACH_ADVICE_KINDS = Object.freeze(Object.keys(KIND_PRIORITY));
 export function rocoAdviceAsk(message) {
   const text = String(message ?? '');
   if (!text) return false;
-  return /现在(该怎么办|怎么办|做什么|该做什么|该干什么|该怎么打|该出什么|出什么|打什么|怎么打|该干嘛)/
+  return /(?:这一?手|这(?:一)?回合|本回合|当前回合).{0,16}(?:合法首选|首选行动|推荐行动|主要风险)/.test(text)
+    || /现在(该怎么办|怎么办|做什么|该做什么|该干什么|该怎么打|该出什么|出什么|打什么|怎么打|该干嘛)/
     .test(text)
     || /(这|本|下)(一)?(手|回合|轮)(该)?(怎么打|怎么办|该出什么|出什么|出哪(一)?招|怎么出|该干嘛|打什么)/.test(text)
     || /该出什么|出什么(招|好)|(该|要)用什么招|出哪一?招|这一手出什么/.test(text)
@@ -1055,7 +1056,8 @@ export function rocoAdviceAsk(message) {
  * 答非所问的战术建议 —— 这比沉默更糟」。只说「承伤是什么」是机制题，归事实层。
  */
 function isCompareAsk(text) {
-  return (/(谁|哪(?:一)?只|哪个|这两只|这两个)/.test(text) && /(更|比较)/.test(text)
+  return /(?:比较|对比).{0,32}(?:承伤|挨打|耐打|抗打)/.test(text)
+    || (/(谁|哪(?:一)?只|哪个|这两只|这两个)/.test(text) && /(更|比较)/.test(text)
       && /(承伤|挨打|耐打|抗打|更扛|扛得住|顶得住|站得住)/.test(text))
     || /(承伤|挨打|耐打|抗打).{0,16}(更低|更少|更小|怎么比|如何比|比较一下|比较|哪个更好)/.test(text)
     || /(扛得住|顶得住|站得住).{0,6}(吗|么|这一下|这一手|这一招)/.test(text);
@@ -1419,16 +1421,32 @@ export function battleAdvice({battle = null, plan = null, message = null} = {}) 
  *      本层**不重算**；拿不到 ⇒ 正文写「读不到」，**一个数字都不编**；
  *   ③ 结构化字段照旧给（`kind:'compare'`），调用方按 `kind` 跳过强制层（跨文件 API 已冻结）。
  */
+/** Explicit incoming type belongs to the requested comparison, never to the current foe.
+ * Negated/conditional clauses are separate questions: “not light” supplies no substitute type.
+ */
+export function comparisonTypeRequest(message) {
+  const clauses = String(message ?? '').split(/[。！？?；;]/).filter(Boolean);
+  const comparison = (clauses.find(c => /承伤|挨打|耐打|抗打|更扛|扛得住|顶得住|站得住/.test(c)) ?? '').split(/(?:如果|假如|若|要是)/)[0];
+  const positive = comparison.replace(/(?:不比较|不是|非|不要|不用|别用)[^，,]*/g, '');
+  const types = [...new Set(positive.match(/(?:普通|机械|[\u4e00-\u9fff])系/g) ?? [])];
+  const normalized = types.filter(t => t !== '关系');
+  const unspecified = !normalized.length && /(?:不是|非).{0,3}系/.test(comparison);
+  const conditional = clauses.some(c => /(?:如果|假如|若|要是).*(?:不是|非).{0,3}系/.test(c));
+  return {comparisonText: positive, attackType: normalized.length === 1 ? normalized[0] : null,
+    ambiguous: normalized.length > 1 || unspecified, conditional};
+}
+
 function compareAdvice(battle, message) {
   const view = battle && typeof battle === 'object' ? battle : {};
   const self = Array.isArray(view.self) ? view.self : [];
   const foe = Array.isArray(view.foe) ? view.foe[0] : null;
   const turn = Number.isInteger(view.turn) ? view.turn : null;
   const head = `${turn === null ? '' : `第 ${turn} 回合。`}${foe?.name ? `对手场上：${foe.name}。` : ''}`;
+  const request = comparisonTypeRequest(message);
   const unread = (reason, targets = []) => ({kind: 'compare', headline: '比一比', reason,
     upside: null, risk: null, alternates: [], unknown: [reason],
     evidence: {turn, targets, compared: [], source: null},
-    actionLabel: null, legalActionId: null, legalIndex: null, text: `${head}${reason}。`});
+    actionLabel: null, legalActionId: null, legalIndex: null, text: `${head}${reason}。` + (request.conditional ? '如果招式不是原比较属性，新的攻击属性未指定，请说明具体攻击属性再比较。' : '')});
   // Bind only names actually present in the public roster. Unknown aliases and duplicate
   // individual names require clarification; neither a ranking nor a species id resolves them.
   const names = new Map();
@@ -1437,17 +1455,19 @@ function compareAdvice(battle, message) {
     if (!names.has(pet.name)) names.set(pet.name, []);
     names.get(pet.name).push(pet);
   }
-  const mentioned = [...names.entries()].filter(([name]) => String(message ?? '').includes(name));
+  const mentioned = [...names.entries()].filter(([name]) => request.comparisonText.includes(name));
   const ambiguous = mentioned.find(([, pets]) => pets.length !== 1);
   if (ambiguous) return unread(`「${ambiguous[0]}」有同名个体，对象不明确，请说明要比较哪一只`);
   if (mentioned.length !== 2) return unread('请点名公开队伍中要比较的两只；未识别的名字或别名请先确认');
-  mentioned.sort(([a], [b]) => String(message).indexOf(a) - String(message).indexOf(b));
+  mentioned.sort(([a], [b]) => request.comparisonText.indexOf(a) - request.comparisonText.indexOf(b));
   const targets = mentioned.map(([, pets]) => ({pet_id: pets[0].pet_id, name: pets[0].name}));
+  if (request.ambiguous) return unread('来袭属性不明确，请指定要比较哪一种攻击属性', targets);
   const rows = [];
   for (const target of targets) {
     const matches = (Array.isArray(view.affinity?.rows) ? view.affinity.rows : [])
-      .filter((row) => row?.pet_id === target.pet_id && Number.isFinite(row.multiplier));
-    if (matches.length !== 1) return unread(`「${target.name}」的承伤倍率读不到或不明确，不能用其他宠物替代`, targets);
+      .filter((row) => row?.pet_id === target.pet_id && row.known !== false && Number.isFinite(row.multiplier)
+        && (!request.attackType || row.vs_type === request.attackType));
+    if (matches.length !== 1) return unread(`「${target.name}」${request.attackType ? `对${request.attackType}` : ''}的承伤倍率读不到或不明确，不能用其他属性或宠物替代`, targets);
     rows.push({...target, multiplier: matches[0].multiplier,
       vsType: typeof matches[0].vs_type === 'string' ? matches[0].vs_type : null});
   }
@@ -1464,6 +1484,7 @@ function compareAdvice(battle, message) {
     meaning = `${lower.name} 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置`;
   }
   const unknown = ['这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测'];
+  if (request.conditional) unknown.push(`如果招式不是${request.attackType ?? '原比较属性'}，新的攻击属性未指定，不能继续沿用这些倍率；请说明具体攻击属性再比较`);
   return {kind: 'compare', headline: '比一比：' + pairs, reason: meaning, upside: null, risk: null,
     alternates: [], unknown,
     evidence: {turn, targets, compared: rows, source: typeof view.affinity?.source === 'string' ? view.affinity.source : null},

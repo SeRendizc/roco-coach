@@ -1,0 +1,2 @@
+[roco] 对手候选（我的可用物种）: 536 pet_000003,pet_000004,pet_000005,pet_000006,pet_000008,pet_000010,pet_000012,pet_000013
+[{"round":1,"advances":21,"result":"loss","goal":"switch-out-of-the-bad-matchup","practiceHidden":false,"source":{"skillKey":"switch-out-of-the-bad-matchup","matchId":"s1-odmeumaq","sourceTurn":2,"stateVersion":4,"endStateVersion":86,"decisionId":"m-8df9b314a589a18a:v4","name":"火花","types":["火系"],"evidenceIds":["s1-odmeumaq:event:2:turn:1","s1-odmeumaq:decision:m-8df9b314a589a18a:v4"]}}]

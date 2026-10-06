@@ -1,0 +1,9 @@
+✔ 结构契约：每个 Node 测试文件都必须被某个 npm script 或自检登记表引用 (1.922542ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 87.447584

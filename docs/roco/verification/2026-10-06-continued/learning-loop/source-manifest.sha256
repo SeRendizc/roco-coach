@@ -1,0 +1,5 @@
+79c1b33250a3e81ca8581b529397e0482738d88a558325fea6b390bff34406f9  src/coach/replacement-practice.js
+5637eb431a9693992d79c5105f1dbfd47f01de04c24ddeb28774c9ce65be6f3b  src/client/roco.js
+fb8c5a0051a59029a7b65fcc30e984d605b0dbe84a6bec3ed47a7c9a584ff7be  src/client/roco.html
+63da599b9f9c802903364537186b055884a22fb2fd42b337961388e351f28eea  tests/replacement-practice.test.js
+e448692e58a8e8fd2e25465e2e3192ce8b1c3d9fd7eaeac318fc5e66b563c491  tests/learning-loop-natural.test.js

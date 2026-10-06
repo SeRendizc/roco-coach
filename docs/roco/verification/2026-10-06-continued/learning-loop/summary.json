@@ -1,0 +1,333 @@
+{
+  "baseline": "fc4a3db471c1f0fc86660e8eb7cd3a9021a84208",
+  "firstRun": "this continued stage runs exactly one new match; each receipt persisted through CDP binding before analysis",
+  "rounds": [
+    {
+      "round": 1,
+      "advances": 21,
+      "budgetSurrender": false,
+      "result": "loss",
+      "goal": "switch-out-of-the-bad-matchup",
+      "practiceHidden": false,
+      "source": {
+        "skillKey": "switch-out-of-the-bad-matchup",
+        "matchId": "s1-odmeumaq",
+        "sourceTurn": 2,
+        "stateVersion": 4,
+        "endStateVersion": 86,
+        "decisionId": "m-8df9b314a589a18a:v4",
+        "name": "火花",
+        "types": [
+          "火系"
+        ],
+        "evidenceIds": [
+          "s1-odmeumaq:event:2:turn:1",
+          "s1-odmeumaq:decision:m-8df9b314a589a18a:v4"
+        ]
+      },
+      "faints": [
+        {
+          "index": 8,
+          "turn": 2,
+          "side": "player",
+          "slot": 0
+        },
+        {
+          "index": 34,
+          "turn": 6,
+          "side": "enemy",
+          "slot": 0
+        },
+        {
+          "index": 43,
+          "turn": 7,
+          "side": "player",
+          "slot": 2
+        },
+        {
+          "index": 66,
+          "turn": 14,
+          "side": "player",
+          "slot": 1
+        },
+        {
+          "index": 72,
+          "turn": 15,
+          "side": "enemy",
+          "slot": 4
+        },
+        {
+          "index": 82,
+          "turn": 16,
+          "side": "player",
+          "slot": 4
+        }
+      ],
+      "replacements": [
+        {
+          "index": 10,
+          "turn": 2,
+          "side": "player",
+          "slot": 1
+        },
+        {
+          "index": 36,
+          "turn": 6,
+          "side": "player",
+          "slot": 2
+        },
+        {
+          "index": 37,
+          "turn": 6,
+          "side": "enemy",
+          "slot": 4
+        },
+        {
+          "index": 45,
+          "turn": 7,
+          "side": "player",
+          "slot": 1
+        },
+        {
+          "index": 69,
+          "turn": 14,
+          "side": "player",
+          "slot": 3
+        },
+        {
+          "index": 75,
+          "turn": 15,
+          "side": "player",
+          "slot": 4
+        },
+        {
+          "index": 76,
+          "turn": 15,
+          "side": "enemy",
+          "slot": 1
+        }
+      ],
+      "blows": [
+        {
+          "index": 1,
+          "turn": 1,
+          "side": "player",
+          "skillId": "skill_000340",
+          "targetSlot": 0,
+          "damage": 104,
+          "multiplier": 0.5
+        },
+        {
+          "index": 2,
+          "turn": 1,
+          "side": "enemy",
+          "skillId": "skill_000392",
+          "targetSlot": 0,
+          "damage": 480,
+          "multiplier": 2
+        },
+        {
+          "index": 4,
+          "turn": 2,
+          "side": "player",
+          "skillId": "skill_000246",
+          "targetSlot": 0,
+          "damage": 32,
+          "multiplier": 1
+        },
+        {
+          "index": 7,
+          "turn": 2,
+          "side": "enemy",
+          "skillId": "skill_000392",
+          "targetSlot": 0,
+          "damage": 15,
+          "multiplier": 2
+        },
+        {
+          "index": 12,
+          "turn": 3,
+          "side": "enemy",
+          "skillId": "skill_000378",
+          "targetSlot": 1,
+          "damage": 73,
+          "multiplier": 2
+        },
+        {
+          "index": 17,
+          "turn": 3,
+          "side": "player",
+          "skillId": "skill_000481",
+          "targetSlot": 0,
+          "damage": 113,
+          "multiplier": 0.5
+        },
+        {
+          "index": 22,
+          "turn": 4,
+          "side": "player",
+          "skillId": "skill_000481",
+          "targetSlot": 0,
+          "damage": 33,
+          "multiplier": 0.5
+        },
+        {
+          "index": 25,
+          "turn": 5,
+          "side": "enemy",
+          "skillId": "skill_000378",
+          "targetSlot": 1,
+          "damage": 73,
+          "multiplier": 2
+        },
+        {
+          "index": 28,
+          "turn": 5,
+          "side": "player",
+          "skillId": "skill_000476",
+          "targetSlot": 0,
+          "damage": 34,
+          "multiplier": 0.5
+        },
+        {
+          "index": 30,
+          "turn": 6,
+          "side": "enemy",
+          "skillId": "skill_000378",
+          "targetSlot": 1,
+          "damage": 73,
+          "multiplier": 2
+        },
+        {
+          "index": 33,
+          "turn": 6,
+          "side": "player",
+          "skillId": "skill_000476",
+          "targetSlot": 0,
+          "damage": 24,
+          "multiplier": 0.5
+        },
+        {
+          "index": 39,
+          "turn": 7,
+          "side": "player",
+          "skillId": "skill_000421",
+          "targetSlot": 4,
+          "damage": 81,
+          "multiplier": 0.5
+        },
+        {
+          "index": 42,
+          "turn": 7,
+          "side": "enemy",
+          "skillId": "skill_000362",
+          "targetSlot": 2,
+          "damage": 298,
+          "multiplier": 2
+        },
+        {
+          "index": 48,
+          "turn": 8,
+          "side": "enemy",
+          "skillId": "skill_000678",
+          "targetSlot": 1,
+          "damage": 66,
+          "multiplier": 2
+        },
+        {
+          "index": 51,
+          "turn": 9,
+          "side": "player",
+          "skillId": "skill_000476",
+          "targetSlot": 4,
+          "damage": 18,
+          "multiplier": 1
+        },
+        {
+          "index": 54,
+          "turn": 10,
+          "side": "player",
+          "skillId": "skill_000476",
+          "targetSlot": 4,
+          "damage": 63,
+          "multiplier": 1
+        },
+        {
+          "index": 56,
+          "turn": 11,
+          "side": "enemy",
+          "skillId": "skill_000678",
+          "targetSlot": 1,
+          "damage": 220,
+          "multiplier": 2
+        },
+        {
+          "index": 57,
+          "turn": 11,
+          "side": "player",
+          "skillId": "skill_000476",
+          "targetSlot": 4,
+          "damage": 63,
+          "multiplier": 1
+        },
+        {
+          "index": 60,
+          "turn": 12,
+          "side": "player",
+          "skillId": "skill_000476",
+          "targetSlot": 4,
+          "damage": 18,
+          "multiplier": 1
+        },
+        {
+          "index": 63,
+          "turn": 13,
+          "side": "player",
+          "skillId": "skill_000476",
+          "targetSlot": 4,
+          "damage": 63,
+          "multiplier": 1
+        },
+        {
+          "index": 65,
+          "turn": 14,
+          "side": "enemy",
+          "skillId": "skill_000678",
+          "targetSlot": 1,
+          "damage": 3,
+          "multiplier": 2
+        },
+        {
+          "index": 71,
+          "turn": 15,
+          "side": "player",
+          "skillId": "skill_000340",
+          "targetSlot": 4,
+          "damage": 71,
+          "multiplier": 1
+        },
+        {
+          "index": 79,
+          "turn": 16,
+          "side": "player",
+          "skillId": "skill_000687",
+          "targetSlot": 1,
+          "damage": 136,
+          "multiplier": 1
+        },
+        {
+          "index": 81,
+          "turn": 16,
+          "side": "enemy",
+          "skillId": "skill_000456",
+          "targetSlot": 4,
+          "damage": 323,
+          "multiplier": 2
+        }
+      ]
+    }
+  ],
+  "serverPid": 21745,
+  "chromePid": 21754,
+  "profile": "/var/folders/c5/hc8ntlx52wd8h5kl14zml4bm0000gn/T/roco-learning-natural-5m3SZP"
+}

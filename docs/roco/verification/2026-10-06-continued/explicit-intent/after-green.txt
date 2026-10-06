@@ -1,0 +1,14 @@
+✔ explicit light attack binds named pair rather than current fire opponent (8.995959ms)
+✔ player numbers are not evidence; non-light condition keeps its type unknown (0.899833ms)
+✔ recommendation with current turn, legal first choice and risk routes to battle advice (2.053584ms)
+✔ comparison does not substitute wrong-type evidence or trust invented values (0.092709ms)
+✔ unknown public types and missing live legal actions never invent results (0.685542ms)
+✔ negated or multiple incoming types require clarification rather than current foe substitution (0.672833ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 58.05425

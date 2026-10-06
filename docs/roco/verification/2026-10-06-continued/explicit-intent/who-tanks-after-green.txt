@@ -1,0 +1,11 @@
+✔ existing who-tanks wording binds named pair and retains current public fire type (8.150375ms)
+✔ existing who-tanks wording with explicit light binds the requested type (1.038292ms)
+✔ all frozen single attack type labels survive parsing through runCoach (4.451042ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 56.678458

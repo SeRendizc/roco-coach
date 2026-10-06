@@ -1,0 +1,81 @@
+{
+  "label": "SAVED REAL PUBLIC TRAJECTORY REPLAY, NOT NEW NATURAL MATCH",
+  "goal": "switch-out-of-the-bad-matchup",
+  "before": {
+    "question": "假设变式：刚吃到一次属性克制的伤害，当前精灵仍可行动，界面列出了合法换人选项。这时怎么判断？",
+    "source": "来源局 s1-btebcpeg，第 2 回合，状态版本 4；公开依据：s1-btebcpeg:event:2:turn:1、s1-btebcpeg:decision:m-8df9b314a589a18a:v4。改变条件：仍可主动行动且有合法换人选项。",
+    "log": []
+  },
+  "answer": {
+    "feedback": "答对了：仍可主动行动且有合法换人选项，可以先比较换人；不能保证换人一定少受伤或赢下比赛。 这次记录只代表一次作答。一次答对不构成掌握。",
+    "log": [
+      {
+        "id": "practice:quiz:switch:s1-btebcpeg:m-8df9b314a589a18a:v4:refreshed:1",
+        "quizId": "switch:s1-btebcpeg:m-8df9b314a589a18a:v4:refreshed",
+        "variantOf": "refreshed",
+        "skillKey": "switch-out-of-the-bad-matchup",
+        "answer": "compare-switch",
+        "correct": true,
+        "hinted": false,
+        "independent": true,
+        "source": "quiz-attempt",
+        "confidence": 0.6,
+        "time": "2026-10-06T06:54:54.522Z",
+        "matchId": "s1-btebcpeg",
+        "sourceTurn": 2,
+        "stateVersion": 4,
+        "evidenceIds": [
+          "s1-btebcpeg:event:2:turn:1",
+          "s1-btebcpeg:decision:m-8df9b314a589a18a:v4"
+        ]
+      }
+    ]
+  },
+  "hinted": {
+    "feedback": "答对了：倒下后的补位与此前主动换宠是不同机会，不能用补位菜单证明上一手能主动换宠。 已使用提示，不算独立答对。一次答对不构成掌握。",
+    "log": [
+      {
+        "id": "practice:quiz:switch:s1-btebcpeg:m-8df9b314a589a18a:v4:refreshed:1",
+        "quizId": "switch:s1-btebcpeg:m-8df9b314a589a18a:v4:refreshed",
+        "variantOf": "refreshed",
+        "skillKey": "switch-out-of-the-bad-matchup",
+        "answer": "compare-switch",
+        "correct": true,
+        "hinted": false,
+        "independent": true,
+        "source": "quiz-attempt",
+        "confidence": 0.6,
+        "time": "2026-10-06T06:54:54.522Z",
+        "matchId": "s1-btebcpeg",
+        "sourceTurn": 2,
+        "stateVersion": 4,
+        "evidenceIds": [
+          "s1-btebcpeg:event:2:turn:1",
+          "s1-btebcpeg:decision:m-8df9b314a589a18a:v4"
+        ]
+      },
+      {
+        "id": "practice:quiz:switch:s1-btebcpeg:m-8df9b314a589a18a:v4:stale:2",
+        "quizId": "switch:s1-btebcpeg:m-8df9b314a589a18a:v4:stale",
+        "variantOf": "stale",
+        "skillKey": "switch-out-of-the-bad-matchup",
+        "answer": "mandatory-only",
+        "correct": true,
+        "hinted": true,
+        "independent": false,
+        "source": "quiz-attempt",
+        "confidence": 0.6,
+        "time": "2026-10-06T06:54:54.524Z",
+        "matchId": "s1-btebcpeg",
+        "sourceTurn": 2,
+        "stateVersion": 4,
+        "evidenceIds": [
+          "s1-btebcpeg:event:2:turn:1",
+          "s1-btebcpeg:decision:m-8df9b314a589a18a:v4"
+        ]
+      }
+    ],
+    "question": "假设变式：当前精灵已经倒下，界面只要求补位。这时怎么判断？"
+  },
+  "modelRequests": 0
+}
