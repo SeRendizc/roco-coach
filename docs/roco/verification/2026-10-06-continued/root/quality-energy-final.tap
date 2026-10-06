@@ -1,0 +1,92 @@
+
+> test:roco-quality
+> node --test --test-concurrency=1 tests/replacement-practice.test.js tests/roco-quality-20261006.test.js tests/roco-quality-adoption-20261006.test.js tests/roco-quality-capability-20261006.test.js tests/roco-quality-final-wording-20261006.test.js tests/roco-quality-latest-source-20261006.test.js tests/roco-quality-transport-20261006.test.js tests/teacher-decision-identity.test.js tests/learning-loop-natural.test.js tests/roco-explicit-intent-20261006.test.js tests/roco-compare-delivery-20261006.test.js tests/roco-energy-warning-20261006.test.js
+
+✔ saved natural selected switch lesson can reach a source without changing goal (1.147166ms)
+✔ switch source rejects missing or mismatched decision and public source identities (0.647708ms)
+✔ replacement uses event-time public field, never terminal slot or name (0.409875ms)
+✔ replacement cannot use a missing event-time disclosure or ambiguous receipt (0.122041ms)
+✔ actual public snapshot producer keeps only disclosed field and rejects wrong receipt identity (0.174667ms)
+✔ source version remains the decision while current terminal version gates submission (0.093875ms)
+✔ only complete six-pet public replacement sequence permits a source (0.998583ms)
+✔ changed public condition changes correct choice, not just option order (0.224375ms)
+✔ explicit correct/wrong and hinted outcomes; repeat counts once; source survives read (0.928291ms)
+✔ old match/version, running battle and invalid choices cannot write attempt (0.065625ms)
+✔ next match without replacement is unknown, not improvement (0.806417ms)
+✔ model phrasing of a pure comparison does not require an executable action (0.484667ms)
+✔ an unreadable comparison remains a clarification rather than action fallback (0.050334ms)
+✔ recommendations still enforce an invalid action contract (0.079375ms)
+✔ full energy does not force the earlier full-health water slot over legal planner choice (1.429791ms)
+✔ real runCoach without plan retains honest first-legal fallback and warning rather than switching (7.244667ms)
+✔ high energy warning does not override damage comparison when planner choice is absent (0.212625ms)
+✔ existing low-health switch and mandatory replacement keep their earlier evidence-based paths (0.246417ms)
+✔ explicit light attack binds named pair rather than current fire opponent (8.91475ms)
+✔ player numbers are not evidence; non-light condition keeps its type unknown (0.889375ms)
+✔ recommendation with current turn, legal first choice and risk routes to battle advice (2.043208ms)
+✔ comparison does not substitute wrong-type evidence or trust invented values (0.091292ms)
+✔ unknown public types and missing live legal actions never invent results (0.675708ms)
+✔ negated or multiple incoming types require clarification rather than current foe substitution (1.312459ms)
+✔ existing who-tanks wording binds named pair and retains current public fire type (0.414375ms)
+✔ existing who-tanks wording with explicit light binds the requested type (0.251458ms)
+✔ all frozen single attack type labels survive parsing through runCoach (2.396084ms)
+producer HTTP comparison: {"produced":{"turn":1,"battle_id":"producer-http-type-test","state_version":1,"phase":"battle","result":null,"self":[{"pet_id":"pet_000001","name":"喵喵","hp":366,"max_hp":366,"energy":6,"alive":true,"types":["草系"]},{"pet_id":"pet_000007","name":"水蓝蓝","hp":366,"max_hp":366,"energy":6,"alive":true,"types":["水系"]},{"pet_id":"pet_000417","name":"缇塔","hp":345,"max_hp":345,"energy":6,"alive":true,"types":["机械系"]}],"self_active":0,"self_energy_max":6,"foe":[{"pet_id":"pet_000250","name":"迪莫","hp":300,"max_hp":300,"energy":6,"alive":true,"types":["光系"]}],"foe_living_count":1,"needs_replacement":[],"legal":[{"label":"抓挠","kind":"skill"},{"label":"防御","kind":"skill"},{"label":"换上第2位","kind":"switch"}],"affinity":{"source":"src/client/type-affinity.data.js@roco-world-s4-2026-09-10","rows":[{"pet_id":"pet_000001","multiplier":0.5,"known":true,"vs_type":"光系"},{"pet_id":"pet_000007","multiplier":1,"known":true,"vs_type":"光系"},{"pet_id":"pet_000417","multiplier":1,"known":true,"vs_type":"光系"}],"unavailable":[],"vs_types":["光系"]}},"result":{"text":"第 1 回合。对手场上：迪莫。比一比：喵喵 承伤 2（火系）、水蓝蓝 承伤 0.5（火系）。水蓝蓝 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置。这些倍率依据公开属性相性表，比较的是这两只对来袭属性的抗性。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。","provider":"local","rocoAdvice":{"kind":"compare","headline":"比一比：喵喵 承伤 2（火系）、水蓝蓝 承伤 0.5（火系）","reason":"水蓝蓝 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置","upside":null,"risk":null,"alternates":[],"unknown":["这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测"],"evidence":{"turn":1,"targets":[{"pet_id":"pet_000001","name":"喵喵"},{"pet_id":"pet_000007","name":"水蓝蓝"}],"compared":[{"pet_id":"pet_000001","name":"喵喵","multiplier":2,"vsType":"火系"},{"pet_id":"pet_000007","name":"水蓝蓝","multiplier":0.5,"vsType":"火系"}],"source":"wiki-rocom-snapshot@d2b4d0eaebd466905871cd7d55fc9a54e545b3ea676ae6d8c53e3e60d371defc"},"actionLabel":null,"legalActionId":null,"legalIndex":null,"phase":"compare","text":"第 1 回合。对手场上：迪莫。比一比：喵喵 承伤 2（火系）、水蓝蓝 承伤 0.5（火系）。水蓝蓝 对这个属性的承伤倍率更低（倍率越小，属性减伤越有利）；实际伤害还取决于技能、攻防与个体配置。这些倍率依据公开属性相性表，比较的是这两只对来袭属性的抗性。这里只比较公开属性相性；对手下一招的属性和隐藏配置未知，不代表实际伤害预测。","battleId":"producer-http-type-test"}}}
+invalid public types HTTP: {"invalidTypes":"草系","status":400,"error":{"error":"六宠战况无效：self.types"}}
+invalid public types HTTP: {"invalidTypes":null,"status":400,"error":{"error":"六宠战况无效：self.types"}}
+invalid public types HTTP: {"invalidTypes":["草系","水系","火系"],"status":400,"error":{"error":"六宠战况无效：self.types"}}
+invalid public types HTTP: {"invalidTypes":["草系",1],"status":400,"error":{"error":"六宠战况无效：self.types"}}
+invalid public types HTTP: {"invalidTypes":[""],"status":400,"error":{"error":"六宠战况无效：self.types"}}
+invalid public types HTTP: {"invalidTypes":[" 草系"],"status":400,"error":{"error":"六宠战况无效：self.types"}}
+invalid public types HTTP: {"invalidTypes":["草系","草系"],"status":400,"error":{"error":"六宠战况无效：self.types"}}
+✔ actual coachRocoBattle producer carries public types through real HTTP to fire comparison (73.587333ms)
+✔ actual producer forwards at most two well-formed public types and leaves unknown unknown (11.870333ms)
+✔ named pairs change actual evidence and never choose whole-team extremes (0.923042ms)
+✔ missing named reading cannot substitute an unrelated pet (0.10775ms)
+✔ duplicate public name is ambiguous and cannot silently bind a species id (0.057791ms)
+✔ unnamed comparison asks for exactly two objects (0.060625ms)
+✔ equal multipliers do not imply equal damage (0.076375ms)
+✔ different incoming types cannot be ranked as one hit (0.072709ms)
+✔ real runtime consumes message bound comparison rather than recommending (7.299334ms)
+✔ comparison text cannot become an actionable recommendation card in real UI consumer (3.4085ms)
+✔ actual adoption handler blocks still-legal action from previous battle (0.995875ms)
+✔ actual adoption handler blocks still-legal action from previous state after switch (0.219875ms)
+✔ actual adoption handler rejects unversioned or illegal advice (0.197625ms)
+✔ view never executes; fresh adopted card and cloned duplicate execute once (0.23775ms)
+✔ battleAdvice recommendation carries actual battle identity and version (0.983166ms)
+✔ late-response stamp changes on new match, version and active pet; ordinary context remains stable (0.067875ms)
+✔ current Roco battle identity cannot fall back to previous lastMatch id (9.5865ms)
+✔ explicit previous match request uses history and never describes it as current (4.785291ms)
+✔ empty or invalid historical records cannot become a previous match (0.179291ms)
+✔ actual answer evidence distinguishes fallback, local facts and cached cloud output (0.325209ms)
+✔ actual model-state merger gives configuration no response credit and never revives a failed answer (0.066959ms)
+✔ player capability wording describes configuration or this answer, without connection or generation claims (0.108417ms)
+✔ player comparison explains public provenance without printing implementation path (0.533083ms)
+✔ explicitly negated historical clause plus current request stays current (7.294875ms)
+✔ positive previous-match request and current question keep their separate scopes (0.790667ms)
+✔ bounded current request without a live snapshot says unavailable instead of historical substitution (0.279917ms)
+✔ actual companion reading bundle preserves Roco live context and blocks last-match material (2.081541ms)
+✔ negated historical clause cannot hijack a positive mechanism or fact task (11.087083ms)
+✔ actual latest-answer consumer clears previous cloud source after local (0.584ms)
+✔ actual latest-answer consumer clears previous cloud source after cache (0.066916ms)
+▶ real provider transport failure yields HTTP error, then an honest local companion fallback
+  ✔ fallback memory retains only the original player question (0.262167ms)
+  ✔ fallback status describes the actual local response without an elapsed-time claim (0.055917ms)
+  ✔ two actual HTTP session failures do not promise an ongoing reconnect (6.543875ms)
+  ✔ cancelling an in-flight transport remains AbortError, not a fallback answer (5.093208ms)
+✔ real provider transport failure yields HTTP error, then an honest local companion fallback (57.786917ms)
+✔ real turn2 decision uses battle v4 menu not later forced v11 menu (6.425792ms)
+✔ missing/manual-auto-absent record does not credit forced turn table (1.122709ms)
+✔ mismatched version/decision/match/unaccepted/replace record fail closed (1.14825ms)
+✔ switch only in later replace table cannot be earlier alternative (0.2545ms)
+✔ real voluntary v4 switch stays legal without promising win (0.43375ms)
+✔ actual dispatch helper snapshots public legal identity before request (0.21525ms)
+✔ only exact dispatched version and successful same-match receipt can accept a record (0.06725ms)
+✔ actual saved skill event does not bind another legal submitted skill (0.236625ms)
+✔ item kind alone is not exact identity; empty events permit unique confirmed record only (0.081167ms)
+ℹ tests 71
+ℹ suites 0
+ℹ pass 71
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 709.356833

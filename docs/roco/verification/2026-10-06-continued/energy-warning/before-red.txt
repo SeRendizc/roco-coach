@@ -1,0 +1,71 @@
+✖ full energy does not force the earlier full-health water slot over legal planner choice (1.417833ms)
+✖ real runCoach without plan retains honest first-legal fallback and warning rather than switching (7.194042ms)
+✖ high energy warning does not override damage comparison when planner choice is absent (0.184625ms)
+✔ existing low-health switch and mandatory replacement keep their earlier evidence-based paths (0.24475ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 1
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 50.352958
+
+✖ failing tests:
+
+test at tests/roco-energy-warning-20261006.test.js:15:1
+✖ full energy does not force the earlier full-health water slot over legal planner choice (1.417833ms)
+  AssertionError [ERR_ASSERTION]: 第 1 回合：喵喵（495/495 血，能量 10），对手是魔力猫（405/405 血）。首选行动：换水蓝蓝上场（引擎给的合法动作：换上第2位）。为什么是它：魔力猫 能量已经攒到 10（上限 10），这一轮随时放得出重招。收益：换水蓝蓝上来（298/298 血）；这一手会把回合用掉。主要风险：这一下硬接可能直接倒一只，先把厚的那只留在场上。备选：抓挠（按未核验公式估 35~50 点）；防御（按未核验公式估 0 点）。以上都来自这一轮的公开局面与引擎估算（不是胜率）；我不会自动替你出招，采用与否由你决定。
+  
+  '水蓝蓝' !== '抓挠'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-energy-warning-20261006.test.js:20:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.start (node:internal/test_runner/test:1257:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '水蓝蓝',
+    expected: '抓挠',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/roco-energy-warning-20261006.test.js:25:1
+✖ real runCoach without plan retains honest first-legal fallback and warning rather than switching (7.194042ms)
+  AssertionError [ERR_ASSERTION]: 第 1 回合：喵喵（495/495 血，能量 10），对手是魔力猫（405/405 血）。首选行动：换水蓝蓝上场（引擎给的合法动作：换上第2位）。为什么是它：魔力猫 能量已经攒到 10（上限 10），这一轮随时放得出重招。收益：换水蓝蓝上来（298/298 血）；这一手会把回合用掉。主要风险：这一下硬接可能直接倒一只，先把厚的那只留在场上。备选：抓挠（没有估算数据）；防御（没有估算数据）。以上都来自这一轮的公开局面与引擎估算（不是胜率）；我不会自动替你出招，采用与否由你决定。
+  
+  '水蓝蓝' !== '抓挠'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-energy-warning-20261006.test.js:28:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '水蓝蓝',
+    expected: '抓挠',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/roco-energy-warning-20261006.test.js:33:1
+✖ high energy warning does not override damage comparison when planner choice is absent (0.184625ms)
+  AssertionError [ERR_ASSERTION]: 第 1 回合：喵喵（495/495 血，能量 10），对手是魔力猫（405/405 血）。首选行动：换水蓝蓝上场（引擎给的合法动作：换上第2位）。为什么是它：魔力猫 能量已经攒到 10（上限 10），这一轮随时放得出重招。收益：换水蓝蓝上来（298/298 血）；这一手会把回合用掉。主要风险：这一下硬接可能直接倒一只，先把厚的那只留在场上。备选：抓挠（按未核验公式估 35~50 点）；防御（按未核验公式估 0 点）。以上都来自这一轮的公开局面与引擎估算（不是胜率）；我不会自动替你出招，采用与否由你决定。
+  
+  '水蓝蓝' !== '抓挠'
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-energy-warning-20261006.test.js:35:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '水蓝蓝',
+    expected: '抓挠',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

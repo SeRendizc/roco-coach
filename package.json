@@ -107,6 +107,6 @@
     "roco:mobile-sweep": "node scripts/roco/browser-mobile-sweep.mjs",
     "roco:live-acceptance": "node scripts/roco/browser-live-acceptance.mjs",
     "roco:battle-coach-acceptance": "node scripts/roco/browser-battle-coach-acceptance.mjs",
-    "test:roco-quality": "node --test --test-concurrency=1 tests/replacement-practice.test.js tests/roco-quality-20261006.test.js tests/roco-quality-adoption-20261006.test.js tests/roco-quality-capability-20261006.test.js tests/roco-quality-final-wording-20261006.test.js tests/roco-quality-latest-source-20261006.test.js tests/roco-quality-transport-20261006.test.js tests/teacher-decision-identity.test.js tests/learning-loop-natural.test.js tests/roco-explicit-intent-20261006.test.js tests/roco-compare-delivery-20261006.test.js"
+    "test:roco-quality": "node --test --test-concurrency=1 tests/replacement-practice.test.js tests/roco-quality-20261006.test.js tests/roco-quality-adoption-20261006.test.js tests/roco-quality-capability-20261006.test.js tests/roco-quality-final-wording-20261006.test.js tests/roco-quality-latest-source-20261006.test.js tests/roco-quality-transport-20261006.test.js tests/teacher-decision-identity.test.js tests/learning-loop-natural.test.js tests/roco-explicit-intent-20261006.test.js tests/roco-compare-delivery-20261006.test.js tests/roco-energy-warning-20261006.test.js"
   }
 }

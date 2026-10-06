@@ -1,0 +1,12 @@
+✔ full energy does not force the earlier full-health water slot over legal planner choice (1.377792ms)
+✔ real runCoach without plan retains honest first-legal fallback and warning rather than switching (7.237667ms)
+✔ high energy warning does not override damage comparison when planner choice is absent (0.225042ms)
+✔ existing low-health switch and mandatory replacement keep their earlier evidence-based paths (0.233333ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 49.115708

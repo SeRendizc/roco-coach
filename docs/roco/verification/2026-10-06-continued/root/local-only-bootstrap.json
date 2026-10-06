@@ -1,0 +1,8 @@
+{
+  "port": 8898,
+  "configured": false,
+  "cloudTransport": "disabled by injected fetch",
+  "available": true,
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "scope": "Local-only alternative after cloud UI action was rejected. No model requests."
+}

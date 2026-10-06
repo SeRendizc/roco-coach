@@ -1,0 +1,25 @@
+{
+  "receipts_equal_ndjson": true,
+  "receipts": 22,
+  "advances": 21,
+  "natural_result": "loss",
+  "budget_surrender": false,
+  "source": {
+    "skillKey": "switch-out-of-the-bad-matchup",
+    "matchId": "s1-odmeumaq",
+    "sourceTurn": 2,
+    "stateVersion": 4,
+    "endStateVersion": 86,
+    "decisionId": "m-8df9b314a589a18a:v4",
+    "name": "火花",
+    "types": [
+      "火系"
+    ],
+    "evidenceIds": [
+      "s1-odmeumaq:event:2:turn:1",
+      "s1-odmeumaq:decision:m-8df9b314a589a18a:v4"
+    ]
+  },
+  "scope": "Root independently compared saved raw transport receipts and bound source. Browser clicking done by subagent; this is not a new match or human learning evidence.",
+  "ndjson_sha256": "850e2feab5c7c93956c9b6d65927c2e65ad960163c0ce2d5de2c7f645ef0d46e"
+}
