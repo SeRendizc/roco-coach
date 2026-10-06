@@ -1,0 +1,57 @@
+✖ only complete six-pet public replacement sequence permits a source (0.361416ms)
+✖ changed public condition changes correct choice, not just option order (0.079542ms)
+✖ explicit correct/wrong and hinted outcomes; repeat counts once; source survives read (0.073917ms)
+✖ old match/version, running battle and invalid choices cannot write attempt (0.08575ms)
+✔ next match without replacement is unknown, not improvement (2.044334ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 1
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 38.328333
+
+✖ failing tests:
+
+test at tests/replacement-practice.test.js:9:1
+✖ only complete six-pet public replacement sequence permits a source (0.361416ms)
+  TypeError: Cannot read properties of null (reading 'evidenceIds')
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/replacement-practice.test.js:10:23)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.start (node:internal/test_runner/test:1257:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+
+test at tests/replacement-practice.test.js:13:1
+✖ changed public condition changes correct choice, not just option order (0.079542ms)
+  TypeError: Cannot read properties of null (reading 'options')
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/replacement-practice.test.js:14:103)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
+
+test at tests/replacement-practice.test.js:16:1
+✖ explicit correct/wrong and hinted outcomes; repeat counts once; source survives read (0.073917ms)
+  TypeError: Cannot read properties of null (reading 'answer')
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/replacement-practice.test.js:17:103)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7)
+
+test at tests/replacement-practice.test.js:22:1
+✖ old match/version, running battle and invalid choices cannot write attempt (0.08575ms)
+  TypeError: Cannot read properties of null (reading 'answer')
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/replacement-practice.test.js:22:228)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7)

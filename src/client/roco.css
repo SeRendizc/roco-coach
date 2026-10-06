@@ -1312,3 +1312,7 @@ body[data-roco-view="ready"] #nav-nurture{display:none}
 .b3-skill-detail-row{margin:0 0 5px}
 .b3-skill-detail-row:last-child{margin-bottom:0}
 .b3-skill-detail-row b{color:#9fc4d8;font-weight:600;margin-right:2px}
+
+#replacement-practice{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+#replacement-practice-options label{display:block;padding:8px 0}
+#replacement-practice-options input{margin-right:8px}

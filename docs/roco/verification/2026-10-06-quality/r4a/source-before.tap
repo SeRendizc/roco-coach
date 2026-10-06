@@ -1,0 +1,49 @@
+✖ only complete six-pet public replacement sequence permits a source (0.979167ms)
+✔ changed public condition changes correct choice, not just option order (0.583458ms)
+✔ explicit correct/wrong and hinted outcomes; repeat counts once; source survives read (1.017125ms)
+✔ old match/version, running battle and invalid choices cannot write attempt (0.091292ms)
+✔ next match without replacement is unknown, not improvement (0.859917ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 4
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 37.241667
+
+✖ failing tests:
+
+test at tests/replacement-practice.test.js:9:1
+✖ only complete six-pet public replacement sequence permits a source (0.979167ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + {
+  +   evidenceIds: [
+  +     'fixture:event:0:turn:1',
+  +     'fixture:event:1:turn:1',
+  +     'fixture:event:2:turn:2'
+  +   ],
+  +   matchId: 'fixture',
+  +   name: '公开对手',
+  +   sourceTurn: 1,
+  +   stateVersion: -1,
+  +   types: [
+  +     '草系'
+  +   ]
+  + }
+  - null
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/replacement-practice.test.js:11:536)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.start (node:internal/test_runner/test:1257:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { matchId: 'fixture', sourceTurn: 1, stateVersion: -1, name: '公开对手', types: [ '草系' ], evidenceIds: [ 'fixture:event:0:turn:1', 'fixture:event:1:turn:1', 'fixture:event:2:turn:2' ] },
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

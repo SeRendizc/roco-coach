@@ -1,0 +1,1207 @@
+{
+  "checks": [
+    {
+      "label": "ARTIFICIAL PUBLIC SCENE; NOT NATURAL MATCH",
+      "goal": "read-the-replacement-first",
+      "card": "✦ 局末复盘\n一个关键点 + 下一局练一件事\n\n这一局一共 3 个回合，最后判负（这一局是我方投降，不是全队被打倒）。第 1 回合 对方 火花 倒下，这是全场第一次减员。对面补上新的一只之后，我方的下一手打上去还是被抵抗。全场最重的一次伤害在第 2 回合（我方，约 10 点）。\n\n下一局练一件事这一局学到一件事：对面补上新的一只之后，先确认它是谁、什么系，再决定这一手打谁。 下一次对面补位之后（这一局第 1 回合就补过一次），先确认它是谁、什么系，再决定这一手打谁。\n\n完整复盘与依据（默认收起）\n做一个假设练习（可选）\n\n收起这次复盘",
+      "practiceEntry": true,
+      "battleId": "s1-n2g9tc7s",
+      "pets": 6,
+      "receipts": [
+        {
+          "original": {
+            "ok": true,
+            "battle_id": "s1-n2g9tc7s",
+            "view": {
+              "schema_version": 1,
+              "ruleset_id": "roco-world-s4-2026-09-10",
+              "state_version": 3,
+              "turn": 1,
+              "phase": "ended",
+              "battle_result": "loss",
+              "match_id": "m-8df9b314a589a18a",
+              "rules_version": "roco-world-s4-2026-09-10/mobile_s4_candidate_v3",
+              "decision_id": "m-8df9b314a589a18a:v3",
+              "seen_roster": [
+                {
+                  "slot": 0,
+                  "pet_id": "pet_000003",
+                  "name": "火花",
+                  "revealed_via": "opening_preview",
+                  "revealed_turn": 1
+                },
+                {
+                  "slot": 1,
+                  "pet_id": "pet_000004",
+                  "name": "迪莫",
+                  "revealed_via": "opening_preview",
+                  "revealed_turn": 1
+                },
+                {
+                  "slot": 2,
+                  "pet_id": "pet_000005",
+                  "name": "水灵",
+                  "revealed_via": "opening_preview",
+                  "revealed_turn": 1
+                },
+                {
+                  "slot": 3,
+                  "pet_id": "pet_000006",
+                  "name": "火神",
+                  "revealed_via": "opening_preview",
+                  "revealed_turn": 1
+                },
+                {
+                  "slot": 4,
+                  "pet_id": "pet_000008",
+                  "name": "草头鸭",
+                  "revealed_via": "opening_preview",
+                  "revealed_turn": 1
+                },
+                {
+                  "slot": 5,
+                  "pet_id": "pet_000010",
+                  "name": "恶魔狼",
+                  "revealed_via": "opening_preview",
+                  "revealed_turn": 1
+                }
+              ],
+              "self": {
+                "active": 0,
+                "energy_max": 10,
+                "energy_charge": 5,
+                "pets": [
+                  {
+                    "slot": 0,
+                    "pet_id": "pet_000001",
+                    "name": "喵喵",
+                    "hp": 495,
+                    "max_hp": 495,
+                    "energy": 10,
+                    "fainted": false,
+                    "statuses": {},
+                    "marks": {},
+                    "buffs": {},
+                    "defense_cooldown": 0,
+                    "charging": false,
+                    "stats_source": "individual-snapshot",
+                    "individual_id": "own-0001",
+                    "panel_projection": "panel-pvp-60-5star/v1",
+                    "individual_level": 60,
+                    "types": [
+                      "草系"
+                    ],
+                    "stats": {
+                      "hp": 495,
+                      "atk": 125,
+                      "spa": 331,
+                      "def": 120,
+                      "spd": 160,
+                      "spe": 275
+                    },
+                    "class": null,
+                    "stage": null
+                  },
+                  {
+                    "slot": 1,
+                    "pet_id": "pet_000327",
+                    "name": "缇塔",
+                    "hp": 508,
+                    "max_hp": 508,
+                    "energy": 10,
+                    "fainted": false,
+                    "statuses": {},
+                    "marks": {},
+                    "buffs": {},
+                    "defense_cooldown": 0,
+                    "charging": false,
+                    "stats_source": "individual-snapshot",
+                    "individual_id": "own-0325",
+                    "panel_projection": "panel-pvp-60-5star/v1",
+                    "individual_level": 60,
+                    "types": [
+                      "机械系"
+                    ],
+                    "stats": {
+                      "hp": 508,
+                      "atk": 157,
+                      "spa": 281,
+                      "def": 168,
+                      "spd": 141,
+                      "spe": 139
+                    },
+                    "class": null,
+                    "stage": null
+                  },
+                  {
+                    "slot": 2,
+                    "pet_id": "pet_000002",
+                    "name": "水蓝蓝",
+                    "hp": 298,
+                    "max_hp": 298,
+                    "energy": 10,
+                    "fainted": false,
+                    "statuses": {},
+                    "marks": {},
+                    "buffs": {},
+                    "defense_cooldown": 0,
+                    "charging": false,
+                    "stats_source": "individual-snapshot",
+                    "individual_id": "own-0002",
+                    "panel_projection": "panel-pvp-60-5star/v1",
+                    "individual_level": 60,
+                    "types": [
+                      "水系"
+                    ],
+                    "stats": {
+                      "hp": 298,
+                      "atk": 94,
+                      "spa": 144,
+                      "def": 129,
+                      "spd": 147,
+                      "spe": 255
+                    },
+                    "class": null,
+                    "stage": null
+                  },
+                  {
+                    "slot": 3,
+                    "pet_id": "pet_000007",
+                    "name": "魔力猫",
+                    "hp": 354,
+                    "max_hp": 354,
+                    "energy": 10,
+                    "fainted": false,
+                    "statuses": {},
+                    "marks": {},
+                    "buffs": {},
+                    "defense_cooldown": 0,
+                    "charging": false,
+                    "stats_source": "individual-snapshot",
+                    "individual_id": "own-0007",
+                    "panel_projection": "panel-pvp-60-5star/v1",
+                    "individual_level": 60,
+                    "types": [
+                      "草系"
+                    ],
+                    "stats": {
+                      "hp": 354,
+                      "atk": 180,
+                      "spa": 180,
+                      "def": 312,
+                      "spd": 424,
+                      "spe": 238
+                    },
+                    "class": null,
+                    "stage": null
+                  },
+                  {
+                    "slot": 4,
+                    "pet_id": "pet_000009",
+                    "name": "恶魔叮",
+                    "hp": 323,
+                    "max_hp": 323,
+                    "energy": 10,
+                    "fainted": false,
+                    "statuses": {},
+                    "marks": {},
+                    "buffs": {},
+                    "defense_cooldown": 0,
+                    "charging": false,
+                    "stats_source": "individual-snapshot",
+                    "individual_id": "own-0009",
+                    "panel_projection": "panel-pvp-60-5star/v1",
+                    "individual_level": 60,
+                    "types": [
+                      "恶系",
+                      "翼系"
+                    ],
+                    "stats": {
+                      "hp": 323,
+                      "atk": 158,
+                      "spa": 287,
+                      "def": 148,
+                      "spd": 280,
+                      "spe": 291
+                    },
+                    "class": null,
+                    "stage": null
+                  },
+                  {
+                    "slot": 5,
+                    "pet_id": "pet_000011",
+                    "name": "鸭吉吉",
+                    "hp": 768,
+                    "max_hp": 768,
+                    "energy": 10,
+                    "fainted": false,
+                    "statuses": {},
+                    "marks": {},
+                    "buffs": {},
+                    "defense_cooldown": 0,
+                    "charging": false,
+                    "stats_source": "individual-snapshot",
+                    "individual_id": "own-0011",
+                    "panel_projection": "panel-pvp-60-5star/v1",
+                    "individual_level": 60,
+                    "types": [
+                      "普通系"
+                    ],
+                    "stats": {
+                      "hp": 768,
+                      "atk": 165,
+                      "spa": 99,
+                      "def": 114,
+                      "spd": 110,
+                      "spe": 354
+                    },
+                    "class": null,
+                    "stage": null
+                  }
+                ],
+                "skills": [
+                  {
+                    "skill_id": "skill_000246",
+                    "name": "抓挠",
+                    "element": "普通系",
+                    "category": "攻击",
+                    "energy": 0,
+                    "power": 35,
+                    "power_status": "static_value_present",
+                    "damage_class": "物攻",
+                    "desc": "造成物伤，自己回复1能量。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000249",
+                    "name": "扫尾",
+                    "element": "普通系",
+                    "category": "攻击",
+                    "energy": 2,
+                    "power": 90,
+                    "power_status": "static_value_present",
+                    "damage_class": "物攻",
+                    "desc": "对敌方精灵造成物理伤害。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000286",
+                    "name": "防御",
+                    "element": "普通系",
+                    "category": "防御",
+                    "energy": 1,
+                    "power": null,
+                    "power_status": "not_provided_by_source",
+                    "damage_class": null,
+                    "desc": "减伤70%，应对攻击。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000298",
+                    "name": "复写",
+                    "element": "普通系",
+                    "category": "状态",
+                    "energy": 0,
+                    "power": null,
+                    "power_status": "not_provided_by_source",
+                    "damage_class": null,
+                    "desc": "每回合随机变成自己未携带的技能，且该技能能耗-2。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000314",
+                    "name": "吨位压制",
+                    "element": "普通系",
+                    "category": "攻击",
+                    "energy": 3,
+                    "power": 160,
+                    "power_status": "static_value_present",
+                    "damage_class": "物攻",
+                    "desc": "造成物伤，敌方体重越低，本次技能威力越高。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000340",
+                    "name": "仙人掌刺击",
+                    "element": "草系",
+                    "category": "攻击",
+                    "energy": 6,
+                    "power": 150,
+                    "power_status": "static_value_present",
+                    "damage_class": "物攻",
+                    "desc": "对敌方精灵造成物理伤害。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000418",
+                    "name": "甩水",
+                    "element": "水系",
+                    "category": "攻击",
+                    "energy": 0,
+                    "power": 30,
+                    "power_status": "static_value_present",
+                    "damage_class": "魔攻",
+                    "desc": "造成魔伤，自己回复1能量。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000421",
+                    "name": "水炮",
+                    "element": "水系",
+                    "category": "攻击",
+                    "energy": 5,
+                    "power": 110,
+                    "power_status": "static_value_present",
+                    "damage_class": "魔攻",
+                    "desc": "造成魔伤，每次使用后，本技能能耗永久-1。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000476",
+                    "name": "拆卸",
+                    "element": "机械系",
+                    "category": "攻击",
+                    "energy": 0,
+                    "power": 40,
+                    "power_status": "static_value_present",
+                    "damage_class": "物攻",
+                    "desc": "对敌方精灵造成物理伤害。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000481",
+                    "name": "齿轮切开",
+                    "element": "机械系",
+                    "category": "攻击",
+                    "energy": 5,
+                    "power": 130,
+                    "power_status": "static_value_present",
+                    "damage_class": "物攻",
+                    "desc": "造成物伤，本技能位于1号或3号位时能耗-2，传动1。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000610",
+                    "name": "连续毒针",
+                    "element": "毒系",
+                    "category": "攻击",
+                    "energy": 2,
+                    "power": 15,
+                    "power_status": "static_value_present",
+                    "damage_class": "物攻",
+                    "desc": "造成物伤，2连击，每次连击使敌方获得1层中毒。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000624",
+                    "name": "腐化",
+                    "element": "毒系",
+                    "category": "状态",
+                    "energy": 1,
+                    "power": null,
+                    "power_status": "not_provided_by_source",
+                    "damage_class": null,
+                    "desc": "敌方每有1层中毒效果，敌方获得双攻-30%。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000687",
+                    "name": "扇风",
+                    "element": "翼系",
+                    "category": "攻击",
+                    "energy": 3,
+                    "power": 75,
+                    "power_status": "static_value_present",
+                    "damage_class": "物攻",
+                    "desc": "造成物伤，若先于敌方攻击，本次技能威力+50%。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000808",
+                    "name": "多维击打",
+                    "element": "幻系",
+                    "category": "攻击",
+                    "energy": 4,
+                    "power": 15,
+                    "power_status": "static_value_present",
+                    "damage_class": "魔攻",
+                    "desc": "造成魔伤，1连击，敌方每有1层星陨印记，本次技能连击数+1。",
+                    "is_trait": false
+                  }
+                ],
+                "loadouts": {
+                  "pet_000001": [
+                    "skill_000246",
+                    "skill_000286",
+                    "skill_000340",
+                    "skill_000624"
+                  ],
+                  "pet_000327": [
+                    "skill_000476",
+                    "skill_000286",
+                    "skill_000481",
+                    "skill_000610"
+                  ],
+                  "pet_000002": [
+                    "skill_000418",
+                    "skill_000286",
+                    "skill_000421",
+                    "skill_000808"
+                  ],
+                  "pet_000007": [
+                    "skill_000246",
+                    "skill_000286",
+                    "skill_000340",
+                    "skill_000624"
+                  ],
+                  "pet_000009": [
+                    "skill_000246",
+                    "skill_000286",
+                    "skill_000687",
+                    "skill_000610"
+                  ],
+                  "pet_000011": [
+                    "skill_000314",
+                    "skill_000286",
+                    "skill_000249",
+                    "skill_000298"
+                  ]
+                },
+                "magic": {
+                  "uses_left": 2,
+                  "cooldown": 0,
+                  "swapped": {},
+                  "cooldown_set_turn": null
+                }
+              },
+              "opponent": {
+                "active": 0,
+                "living_count": 6,
+                "energy_max": 10,
+                "field": {
+                  "slot": 0,
+                  "pet_id": "pet_000003",
+                  "name": "火花",
+                  "hp": 340,
+                  "max_hp": 340,
+                  "energy": 10,
+                  "fainted": false,
+                  "statuses": {},
+                  "marks": {},
+                  "defense_cooldown": 0,
+                  "charging": false,
+                  "stats_source": "species-panel",
+                  "panel_projection": "panel-pvp-60-5star/v1",
+                  "types": [
+                    "火系"
+                  ],
+                  "stats": {
+                    "hp": 340,
+                    "atk": 152.4,
+                    "def": 121.60000000000001,
+                    "spa": 101.3224,
+                    "spd": 121.43,
+                    "spe": 191.6008
+                  },
+                  "class": null,
+                  "stage": null
+                },
+                "bench": [
+                  {
+                    "slot": 1,
+                    "fainted": false
+                  },
+                  {
+                    "slot": 2,
+                    "fainted": false
+                  },
+                  {
+                    "slot": 3,
+                    "fainted": false
+                  },
+                  {
+                    "slot": 4,
+                    "fainted": false
+                  },
+                  {
+                    "slot": 5,
+                    "fainted": false
+                  }
+                ]
+              },
+              "legal": [],
+              "cpu_legal_count": 0,
+              "needs_replacement": [],
+              "events": [
+                {
+                  "turn": 1,
+                  "kind": "turn_start",
+                  "side": null,
+                  "detail": {
+                    "turn": 1,
+                    "speed_provenance": {
+                      "panel_scale": true,
+                      "speeds": {
+                        "player": {
+                          "value": 275,
+                          "source": "individual-panel",
+                          "pet_id": "pet_000001",
+                          "individual_id": "own-0001"
+                        },
+                        "enemy": {
+                          "value": 191.6008,
+                          "source": "species-panel",
+                          "pet_id": "pet_000003"
+                        }
+                      }
+                    }
+                  },
+                  "extra": {
+                    "seq": 1
+                  },
+                  "text": "第 1 回合开始。",
+                  "evidence": []
+                },
+                {
+                  "turn": 1,
+                  "kind": "surrender",
+                  "side": null,
+                  "detail": {
+                    "side": "player",
+                    "result": "loss"
+                  },
+                  "extra": {
+                    "seq": 2
+                  },
+                  "text": "我方投降，对局结束（投降的结算语义未核验，本局按投降方判负处理）。",
+                  "evidence": []
+                }
+              ],
+              "strategy": {
+                "name": "greedy_damage",
+                "version": 1
+              },
+              "assumptions": {
+                "opponent_bench": "full_hp_nominal_loadout",
+                "note": "对手后备的血量、配招与物种都不在公开信息里，重建搜索状态时按满血 + 规范配招 + 占位物种建模；任何依赖对手后备精确构成或精确血量的结论都会因此偏乐观。"
+              },
+              "unsupported_count": 1,
+              "mana": {
+                "self": 4,
+                "opponent": 4,
+                "pool": 4
+              },
+              "unverified_overrides": [
+                {
+                  "path": "turn_order.speed_tie",
+                  "value": "random_seeded",
+                  "confidence": "ENGINE_HYPOTHESIS",
+                  "reason": "同速平手裁决在候选配置里是 UNKNOWN（MC-E05 未录制）。不声明它就打不下去（引擎按纪律抛错）；这里显式按 legacy 那份已登记的工程权宜 random_seeded 走，界面同样要标未核验",
+                  "microcase_id": "MC-E05",
+                  "unverified": true
+                }
+              ],
+              "unverified_notes": [
+                "候选规则：turn_order.speed_tie 按假设值 random_seeded（ENGINE_HYPOTHESIS，待录 MC-E05）开局 —— 不是实机结论，界面须标「未核验」"
+              ],
+              "mode_id": null,
+              "ruleset_config_id": "mobile_s4_candidate_v3"
+            }
+          },
+          "injected": {
+            "ok": true,
+            "battle_id": "s1-n2g9tc7s",
+            "view": {
+              "schema_version": 1,
+              "ruleset_id": "roco-world-s4-2026-09-10",
+              "state_version": 3,
+              "turn": 3,
+              "phase": "ended",
+              "battle_result": "loss",
+              "match_id": "m-8df9b314a589a18a",
+              "rules_version": "roco-world-s4-2026-09-10/mobile_s4_candidate_v3",
+              "decision_id": "m-8df9b314a589a18a:v3",
+              "seen_roster": [
+                {
+                  "slot": 0,
+                  "pet_id": "pet_000003",
+                  "name": "火花",
+                  "revealed_via": "opening_preview",
+                  "revealed_turn": 1
+                },
+                {
+                  "slot": 1,
+                  "pet_id": "pet_000004",
+                  "name": "迪莫",
+                  "revealed_via": "opening_preview",
+                  "revealed_turn": 1
+                },
+                {
+                  "slot": 2,
+                  "pet_id": "pet_000005",
+                  "name": "水灵",
+                  "revealed_via": "opening_preview",
+                  "revealed_turn": 1
+                },
+                {
+                  "slot": 3,
+                  "pet_id": "pet_000006",
+                  "name": "火神",
+                  "revealed_via": "opening_preview",
+                  "revealed_turn": 1
+                },
+                {
+                  "slot": 4,
+                  "pet_id": "pet_000008",
+                  "name": "草头鸭",
+                  "revealed_via": "opening_preview",
+                  "revealed_turn": 1
+                },
+                {
+                  "slot": 5,
+                  "pet_id": "pet_000010",
+                  "name": "恶魔狼",
+                  "revealed_via": "opening_preview",
+                  "revealed_turn": 1
+                }
+              ],
+              "self": {
+                "active": 0,
+                "energy_max": 10,
+                "energy_charge": 5,
+                "pets": [
+                  {
+                    "slot": 0,
+                    "pet_id": "pet_000001",
+                    "name": "喵喵",
+                    "hp": 495,
+                    "max_hp": 495,
+                    "energy": 10,
+                    "fainted": false,
+                    "statuses": {},
+                    "marks": {},
+                    "buffs": {},
+                    "defense_cooldown": 0,
+                    "charging": false,
+                    "stats_source": "individual-snapshot",
+                    "individual_id": "own-0001",
+                    "panel_projection": "panel-pvp-60-5star/v1",
+                    "individual_level": 60,
+                    "types": [
+                      "草系"
+                    ],
+                    "stats": {
+                      "hp": 495,
+                      "atk": 125,
+                      "spa": 331,
+                      "def": 120,
+                      "spd": 160,
+                      "spe": 275
+                    },
+                    "class": null,
+                    "stage": null
+                  },
+                  {
+                    "slot": 1,
+                    "pet_id": "pet_000327",
+                    "name": "缇塔",
+                    "hp": 508,
+                    "max_hp": 508,
+                    "energy": 10,
+                    "fainted": false,
+                    "statuses": {},
+                    "marks": {},
+                    "buffs": {},
+                    "defense_cooldown": 0,
+                    "charging": false,
+                    "stats_source": "individual-snapshot",
+                    "individual_id": "own-0325",
+                    "panel_projection": "panel-pvp-60-5star/v1",
+                    "individual_level": 60,
+                    "types": [
+                      "机械系"
+                    ],
+                    "stats": {
+                      "hp": 508,
+                      "atk": 157,
+                      "spa": 281,
+                      "def": 168,
+                      "spd": 141,
+                      "spe": 139
+                    },
+                    "class": null,
+                    "stage": null
+                  },
+                  {
+                    "slot": 2,
+                    "pet_id": "pet_000002",
+                    "name": "水蓝蓝",
+                    "hp": 298,
+                    "max_hp": 298,
+                    "energy": 10,
+                    "fainted": false,
+                    "statuses": {},
+                    "marks": {},
+                    "buffs": {},
+                    "defense_cooldown": 0,
+                    "charging": false,
+                    "stats_source": "individual-snapshot",
+                    "individual_id": "own-0002",
+                    "panel_projection": "panel-pvp-60-5star/v1",
+                    "individual_level": 60,
+                    "types": [
+                      "水系"
+                    ],
+                    "stats": {
+                      "hp": 298,
+                      "atk": 94,
+                      "spa": 144,
+                      "def": 129,
+                      "spd": 147,
+                      "spe": 255
+                    },
+                    "class": null,
+                    "stage": null
+                  },
+                  {
+                    "slot": 3,
+                    "pet_id": "pet_000007",
+                    "name": "魔力猫",
+                    "hp": 354,
+                    "max_hp": 354,
+                    "energy": 10,
+                    "fainted": false,
+                    "statuses": {},
+                    "marks": {},
+                    "buffs": {},
+                    "defense_cooldown": 0,
+                    "charging": false,
+                    "stats_source": "individual-snapshot",
+                    "individual_id": "own-0007",
+                    "panel_projection": "panel-pvp-60-5star/v1",
+                    "individual_level": 60,
+                    "types": [
+                      "草系"
+                    ],
+                    "stats": {
+                      "hp": 354,
+                      "atk": 180,
+                      "spa": 180,
+                      "def": 312,
+                      "spd": 424,
+                      "spe": 238
+                    },
+                    "class": null,
+                    "stage": null
+                  },
+                  {
+                    "slot": 4,
+                    "pet_id": "pet_000009",
+                    "name": "恶魔叮",
+                    "hp": 323,
+                    "max_hp": 323,
+                    "energy": 10,
+                    "fainted": false,
+                    "statuses": {},
+                    "marks": {},
+                    "buffs": {},
+                    "defense_cooldown": 0,
+                    "charging": false,
+                    "stats_source": "individual-snapshot",
+                    "individual_id": "own-0009",
+                    "panel_projection": "panel-pvp-60-5star/v1",
+                    "individual_level": 60,
+                    "types": [
+                      "恶系",
+                      "翼系"
+                    ],
+                    "stats": {
+                      "hp": 323,
+                      "atk": 158,
+                      "spa": 287,
+                      "def": 148,
+                      "spd": 280,
+                      "spe": 291
+                    },
+                    "class": null,
+                    "stage": null
+                  },
+                  {
+                    "slot": 5,
+                    "pet_id": "pet_000011",
+                    "name": "鸭吉吉",
+                    "hp": 768,
+                    "max_hp": 768,
+                    "energy": 10,
+                    "fainted": false,
+                    "statuses": {},
+                    "marks": {},
+                    "buffs": {},
+                    "defense_cooldown": 0,
+                    "charging": false,
+                    "stats_source": "individual-snapshot",
+                    "individual_id": "own-0011",
+                    "panel_projection": "panel-pvp-60-5star/v1",
+                    "individual_level": 60,
+                    "types": [
+                      "普通系"
+                    ],
+                    "stats": {
+                      "hp": 768,
+                      "atk": 165,
+                      "spa": 99,
+                      "def": 114,
+                      "spd": 110,
+                      "spe": 354
+                    },
+                    "class": null,
+                    "stage": null
+                  }
+                ],
+                "skills": [
+                  {
+                    "skill_id": "skill_000246",
+                    "name": "抓挠",
+                    "element": "普通系",
+                    "category": "攻击",
+                    "energy": 0,
+                    "power": 35,
+                    "power_status": "static_value_present",
+                    "damage_class": "物攻",
+                    "desc": "造成物伤，自己回复1能量。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000249",
+                    "name": "扫尾",
+                    "element": "普通系",
+                    "category": "攻击",
+                    "energy": 2,
+                    "power": 90,
+                    "power_status": "static_value_present",
+                    "damage_class": "物攻",
+                    "desc": "对敌方精灵造成物理伤害。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000286",
+                    "name": "防御",
+                    "element": "普通系",
+                    "category": "防御",
+                    "energy": 1,
+                    "power": null,
+                    "power_status": "not_provided_by_source",
+                    "damage_class": null,
+                    "desc": "减伤70%，应对攻击。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000298",
+                    "name": "复写",
+                    "element": "普通系",
+                    "category": "状态",
+                    "energy": 0,
+                    "power": null,
+                    "power_status": "not_provided_by_source",
+                    "damage_class": null,
+                    "desc": "每回合随机变成自己未携带的技能，且该技能能耗-2。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000314",
+                    "name": "吨位压制",
+                    "element": "普通系",
+                    "category": "攻击",
+                    "energy": 3,
+                    "power": 160,
+                    "power_status": "static_value_present",
+                    "damage_class": "物攻",
+                    "desc": "造成物伤，敌方体重越低，本次技能威力越高。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000340",
+                    "name": "仙人掌刺击",
+                    "element": "草系",
+                    "category": "攻击",
+                    "energy": 6,
+                    "power": 150,
+                    "power_status": "static_value_present",
+                    "damage_class": "物攻",
+                    "desc": "对敌方精灵造成物理伤害。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000418",
+                    "name": "甩水",
+                    "element": "水系",
+                    "category": "攻击",
+                    "energy": 0,
+                    "power": 30,
+                    "power_status": "static_value_present",
+                    "damage_class": "魔攻",
+                    "desc": "造成魔伤，自己回复1能量。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000421",
+                    "name": "水炮",
+                    "element": "水系",
+                    "category": "攻击",
+                    "energy": 5,
+                    "power": 110,
+                    "power_status": "static_value_present",
+                    "damage_class": "魔攻",
+                    "desc": "造成魔伤，每次使用后，本技能能耗永久-1。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000476",
+                    "name": "拆卸",
+                    "element": "机械系",
+                    "category": "攻击",
+                    "energy": 0,
+                    "power": 40,
+                    "power_status": "static_value_present",
+                    "damage_class": "物攻",
+                    "desc": "对敌方精灵造成物理伤害。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000481",
+                    "name": "齿轮切开",
+                    "element": "机械系",
+                    "category": "攻击",
+                    "energy": 5,
+                    "power": 130,
+                    "power_status": "static_value_present",
+                    "damage_class": "物攻",
+                    "desc": "造成物伤，本技能位于1号或3号位时能耗-2，传动1。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000610",
+                    "name": "连续毒针",
+                    "element": "毒系",
+                    "category": "攻击",
+                    "energy": 2,
+                    "power": 15,
+                    "power_status": "static_value_present",
+                    "damage_class": "物攻",
+                    "desc": "造成物伤，2连击，每次连击使敌方获得1层中毒。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000624",
+                    "name": "腐化",
+                    "element": "毒系",
+                    "category": "状态",
+                    "energy": 1,
+                    "power": null,
+                    "power_status": "not_provided_by_source",
+                    "damage_class": null,
+                    "desc": "敌方每有1层中毒效果，敌方获得双攻-30%。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000687",
+                    "name": "扇风",
+                    "element": "翼系",
+                    "category": "攻击",
+                    "energy": 3,
+                    "power": 75,
+                    "power_status": "static_value_present",
+                    "damage_class": "物攻",
+                    "desc": "造成物伤，若先于敌方攻击，本次技能威力+50%。",
+                    "is_trait": false
+                  },
+                  {
+                    "skill_id": "skill_000808",
+                    "name": "多维击打",
+                    "element": "幻系",
+                    "category": "攻击",
+                    "energy": 4,
+                    "power": 15,
+                    "power_status": "static_value_present",
+                    "damage_class": "魔攻",
+                    "desc": "造成魔伤，1连击，敌方每有1层星陨印记，本次技能连击数+1。",
+                    "is_trait": false
+                  }
+                ],
+                "loadouts": {
+                  "pet_000001": [
+                    "skill_000246",
+                    "skill_000286",
+                    "skill_000340",
+                    "skill_000624"
+                  ],
+                  "pet_000327": [
+                    "skill_000476",
+                    "skill_000286",
+                    "skill_000481",
+                    "skill_000610"
+                  ],
+                  "pet_000002": [
+                    "skill_000418",
+                    "skill_000286",
+                    "skill_000421",
+                    "skill_000808"
+                  ],
+                  "pet_000007": [
+                    "skill_000246",
+                    "skill_000286",
+                    "skill_000340",
+                    "skill_000624"
+                  ],
+                  "pet_000009": [
+                    "skill_000246",
+                    "skill_000286",
+                    "skill_000687",
+                    "skill_000610"
+                  ],
+                  "pet_000011": [
+                    "skill_000314",
+                    "skill_000286",
+                    "skill_000249",
+                    "skill_000298"
+                  ]
+                },
+                "magic": {
+                  "uses_left": 2,
+                  "cooldown": 0,
+                  "swapped": {},
+                  "cooldown_set_turn": null
+                }
+              },
+              "opponent": {
+                "active": 0,
+                "living_count": 6,
+                "energy_max": 10,
+                "field": {
+                  "slot": 1,
+                  "pet_id": "pet_000003",
+                  "name": "公开夹具对手",
+                  "hp": 340,
+                  "max_hp": 340,
+                  "energy": 10,
+                  "fainted": false,
+                  "statuses": {},
+                  "marks": {},
+                  "defense_cooldown": 0,
+                  "charging": false,
+                  "stats_source": "species-panel",
+                  "panel_projection": "panel-pvp-60-5star/v1",
+                  "types": [
+                    "草系"
+                  ],
+                  "stats": {
+                    "hp": 340,
+                    "atk": 152.4,
+                    "def": 121.60000000000001,
+                    "spa": 101.3224,
+                    "spd": 121.43,
+                    "spe": 191.6008
+                  },
+                  "class": null,
+                  "stage": null
+                },
+                "bench": [
+                  {
+                    "slot": 1,
+                    "fainted": false
+                  },
+                  {
+                    "slot": 2,
+                    "fainted": false
+                  },
+                  {
+                    "slot": 3,
+                    "fainted": false
+                  },
+                  {
+                    "slot": 4,
+                    "fainted": false
+                  },
+                  {
+                    "slot": 5,
+                    "fainted": false
+                  }
+                ]
+              },
+              "legal": [],
+              "cpu_legal_count": 0,
+              "needs_replacement": [],
+              "events": [
+                {
+                  "kind": "faint",
+                  "turn": 1,
+                  "detail": {
+                    "side": "enemy",
+                    "slot": 0
+                  }
+                },
+                {
+                  "kind": "replacement",
+                  "turn": 1,
+                  "detail": {
+                    "side": "enemy",
+                    "slot": 1
+                  }
+                },
+                {
+                  "kind": "damage",
+                  "turn": 2,
+                  "detail": {
+                    "side": "player",
+                    "target_slot": 1,
+                    "skill_id": "public-fixture-skill",
+                    "damage": 10,
+                    "type_multiplier": 0.5
+                  }
+                },
+                {
+                  "kind": "surrender",
+                  "turn": 3,
+                  "detail": {
+                    "side": "player"
+                  }
+                }
+              ],
+              "strategy": {
+                "name": "greedy_damage",
+                "version": 1
+              },
+              "assumptions": {
+                "opponent_bench": "full_hp_nominal_loadout",
+                "note": "对手后备的血量、配招与物种都不在公开信息里，重建搜索状态时按满血 + 规范配招 + 占位物种建模；任何依赖对手后备精确构成或精确血量的结论都会因此偏乐观。"
+              },
+              "unsupported_count": 1,
+              "mana": {
+                "self": 4,
+                "opponent": 4,
+                "pool": 4
+              },
+              "unverified_overrides": [
+                {
+                  "path": "turn_order.speed_tie",
+                  "value": "random_seeded",
+                  "confidence": "ENGINE_HYPOTHESIS",
+                  "reason": "同速平手裁决在候选配置里是 UNKNOWN（MC-E05 未录制）。不声明它就打不下去（引擎按纪律抛错）；这里显式按 legacy 那份已登记的工程权宜 random_seeded 走，界面同样要标未核验",
+                  "microcase_id": "MC-E05",
+                  "unverified": true
+                }
+              ],
+              "unverified_notes": [
+                "候选规则：turn_order.speed_tie 按假设值 random_seeded（ENGINE_HYPOTHESIS，待录 MC-E05）开局 —— 不是实机结论，界面须标「未核验」"
+              ],
+              "mode_id": null,
+              "ruleset_config_id": "mobile_s4_candidate_v3"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "serverPid": 12922,
+  "chromePid": 12931
+}

@@ -1,3 +1,4 @@
+import {replacementPracticeSource, replacementQuiz, submitReplacementPractice} from '../coach/replacement-practice.js';
 import {adviceSnapshotFresh, coachBattleStamp} from '../coach/coach-advice.js';
 // 手游规则演示页：**无聊天入口**的主动教练。
 //
@@ -4903,6 +4904,7 @@ async function startBattle() {
     state.planStaleDiscards = [];
     state.events = [];
     state.matchEvents = [];
+    resetReplacementPractice();
     // U10：新的一局从**空的动作表**开始（旧局的回合号会与这一局重号，留着就是错的事实）。
     state.legalByTurn = {};
     // 第五轮④：逐回合前后局面同理 —— 留着上一局的那份会被当成这一局的记录（复盘就讲错了局面）。
@@ -5134,9 +5136,47 @@ function matchStats(events, view) {
   return rows.join(' · ');
 }
 
+let replacementPractice=null;
+function resetReplacementPractice(){
+ replacementPractice=null;
+ const root=$('replacement-practice');if(root)root.hidden=true;
+ const body=$('replacement-practice-body');if(body)body.hidden=true;
+}
+function showReplacementQuiz(variant='refreshed'){
+ if(!replacementPractice)return;
+ const quiz=replacementQuiz(replacementPractice.source,variant);
+ replacementPractice={...replacementPractice,quiz};
+ $('replacement-practice-body').hidden=false;
+ $('replacement-practice-question').textContent=quiz.question;
+ const choices=$('replacement-practice-options');choices.replaceChildren();
+ const legend=document.createElement('legend');legend.textContent='先做什么？';choices.append(legend);
+ for(const option of quiz.options){const label=document.createElement('label'),input=document.createElement('input');input.type='radio';input.name='replacement-answer';input.value=option.id;label.append(input,document.createTextNode(option.text));choices.append(label);}
+ const recorded=state.memory.quizLog?.find(a=>a.quizId===quiz.id);
+ $('replacement-practice-feedback').textContent=recorded
+  ? `本题已记录：${recorded.correct?'答对':'未答对'}。${recorded.hinted?'已使用提示，不算独立答对。':'未使用提示。'} ${quiz.explanation} 一次答对不构成掌握。`
+  : (replacementPractice.hinted?'本来源练习已看过提示，后续变式的答对都不算独立证据。':'');
+ $('replacement-practice-submit').disabled=Boolean(recorded);
+ $('replacement-practice-source').textContent=`来源局 ${quiz.matchId}，第 ${quiz.sourceTurn} 回合，状态版本 ${quiz.stateVersion}；公开依据：${quiz.evidenceIds.join('、')}。改变条件：${quiz.changedCondition}。`;
+}
+function bindReplacementPractice(){
+ $('replacement-practice-open').onclick=()=>showReplacementQuiz();
+ $('replacement-practice-variant').onclick=()=>showReplacementQuiz(replacementPractice?.quiz?.variantOf==='refreshed'?'stale':'refreshed');
+ $('replacement-practice-skip').onclick=()=>{$('replacement-practice-body').hidden=true;};
+ $('replacement-practice-hint').onclick=()=>{if(!replacementPractice?.quiz)return;replacementPractice.hinted=true;$('replacement-practice-feedback').textContent='提示：先判断资料属于旧对手还是新对手；使用提示后的答对不算独立证据。';};
+ $('replacement-practice-submit').onclick=()=>{
+  const current=replacementPractice;if(!current?.quiz)return;
+  const answer=document.querySelector('input[name="replacement-answer"]:checked')?.value;
+  const result=submitReplacementPractice(state.memory,{quiz:current.quiz,answer,hinted:current.hinted,matchId:state.battleId,stateVersion:state.view?.state_version,ended:Boolean(state.view?.battle_result)});
+  if(!result.attempt){$('replacement-practice-feedback').textContent=result.reason;return;}
+  state.memory=result.memory;saveMemory();$('replacement-practice-submit').disabled=true;
+  $('replacement-practice-feedback').textContent=`${result.attempt.correct?'答对了':'这次选择不符合假设条件'}：${current.quiz.explanation} ${current.hinted?'已使用提示，不算独立答对。':'这次记录只代表一次作答。'}一次答对不构成掌握。`;
+ };
+}
+
 async function finishMatch() {
   const view = state.view;
   if (!view?.battle_result) return;
+  resetReplacementPractice();
   $('result-verdict').textContent = RESULT_CN[view.battle_result] ?? view.battle_result;
   $('result-turns').textContent = `${view.turn} 回合 · 训练场`;
   $('result-stats').textContent = matchStats(state.matchEvents, view);
@@ -5211,6 +5251,8 @@ async function finishMatch() {
     document.body.dataset.rocoTeacherImproved = progress.improved === true
       ? 'yes'
       : (progress.improved === false ? 'no' : 'unknown');
+    const practiceSource=replacementPracticeSource({review,view,matchId:state.battleId,events:state.matchEvents});
+    if(practiceSource){replacementPractice={source:practiceSource,hinted:false};$('replacement-practice').hidden=false;}
     state.memory = recordTeacherReview(state.memory, {matchId: state.battleId, review});
     state.memory = recordLearningCheck(state.memory, {
       matchId: state.battleId, check: progress, goal: progress.goal,
@@ -6047,6 +6089,7 @@ function bind() {
     if (box) box.scrollTop = 0;
     syncBottomBars();
   });
+  bindReplacementPractice();
   $('lesson-close').addEventListener('click', () => {
     $('lesson-card').hidden = true;
   });
@@ -6348,6 +6391,7 @@ async function startStandardPvp() {
     state.planStaleDiscards = [];
     state.events = [];
     state.matchEvents = [];
+    resetReplacementPractice();
     // U10：新的一局从**空的动作表**开始（旧局的回合号会与这一局重号，留着就是错的事实）。
     state.legalByTurn = {};
     // 第五轮④：逐回合前后局面同理 —— 留着上一局的那份会被当成这一局的记录（复盘就讲错了局面）。
@@ -6438,6 +6482,7 @@ function returnHome() {
   state.view = null;
   state.events = [];
   state.matchEvents = [];
+    resetReplacementPractice();
   // U10（2026-09-29）：**逐回合合法表**也随这一局一起清 —— 开下一局时旧局的动作表
   // 留在手里，复盘就会拿"上一局的合法动作"去讲这一局的回合（那是编）。
   state.legalByTurn = {};

@@ -317,10 +317,18 @@ export function readMood(raw){
  if(typeof raw.label!=='string'||!raw.label||!Number.isFinite(raw.expiresAt)||!Number.isFinite(raw.confidence)||typeof raw.time!=='string')return null;
  return {id:typeof raw.id==='string'?raw.id:`mood:${slug(raw.label)}`,label:raw.label.slice(0,12),confidence:Math.min(1,Math.max(0,raw.confidence)),time:raw.time,expiresAt:raw.expiresAt,source:typeof raw.source==='string'?raw.source:STATED_SOURCE,basis:typeof raw.basis==='string'?raw.basis:'假设：只根据玩家自己说过的话',overwritable:true};
 }
+function quizSourceFields(a){
+ const out={};
+ if(typeof a.matchId==='string'&&a.matchId.length>0&&a.matchId.length<=200)out.matchId=a.matchId;
+ if(Number.isInteger(a.sourceTurn)&&a.sourceTurn>=0)out.sourceTurn=a.sourceTurn;
+ if(Number.isInteger(a.stateVersion)&&a.stateVersion>=0)out.stateVersion=a.stateVersion;
+ if(Array.isArray(a.evidenceIds))out.evidenceIds=a.evidenceIds.filter(e=>typeof e==='string'&&e.length>0&&e.length<=300).slice(0,12);
+ return out;
+}
 export function readQuizLog(raw){
  if(!Array.isArray(raw))return [];
  return raw.filter(a=>a&&typeof a.id==='string'&&typeof a.quizId==='string'&&typeof a.time==='string'&&typeof a.answer==='string')
-  .map(a=>({id:a.id,quizId:a.quizId,variantOf:a.variantOf||a.quizId,skillKey:a.skillKey||null,answer:a.answer,correct:Boolean(a.correct),hinted:Boolean(a.hinted),independent:Boolean(a.independent),source:'quiz-attempt',confidence:.6,time:a.time})).slice(-24);
+  .map(a=>({id:a.id,quizId:a.quizId,variantOf:a.variantOf||a.quizId,skillKey:a.skillKey||null,answer:a.answer,correct:Boolean(a.correct),hinted:Boolean(a.hinted),independent:Boolean(a.independent),source:'quiz-attempt',confidence:.6,time:a.time,...quizSourceFields(a)})).slice(-24);
 }
 // 一条消息里能记下来的东西。只在玩家**明说**时产生，推测一律不写进 stated。
 export function statedFromMessage(message,{now=Date.now()}={}){
@@ -449,7 +457,7 @@ export function recordQuizAttempt(memory,{quiz,answer,hinted=false,now=Date.now(
  const id=`practice:quiz:${quiz.id}:${m.quizLog.length+1}`;
  const correct=Boolean(quiz.answer)&&answer===quiz.answer;
  // 「独立」= 没看过提示而且答对。看提示后答对只算「被提示后答对」，不参与掌握判断。
- const attempt={id,quizId:quiz.id,variantOf:quiz.variantOf||quiz.id,skillKey:quiz.skillKey||null,answer,correct,hinted:Boolean(hinted),independent:correct&&!hinted,source:'quiz-attempt',confidence:.6,time:new Date(now).toISOString()};
+ const attempt={id,quizId:quiz.id,variantOf:quiz.variantOf||quiz.id,skillKey:quiz.skillKey||null,answer,correct,hinted:Boolean(hinted),independent:correct&&!hinted,source:'quiz-attempt',confidence:.6,time:new Date(now).toISOString(),...quizSourceFields(quiz)};
  m.quizLog=[...m.quizLog,attempt].slice(-24);
  return {memory:m,attempt};
 }

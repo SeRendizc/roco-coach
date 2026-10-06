@@ -1,0 +1,87 @@
+✔ 复盘由事件决定：我方倒下时要点名那一回合与那一只 (1.5ms)
+✔ 没有值得一提的事件就沉默：返回 null，不编号一个「关键回合」 (0.097792ms)
+✔ 转折点可以不是减员：没有减员时按累计伤害差翻盘挑 (0.371292ms)
+✔ 同一局里有「做对的课」也有「做错的课」时，先讲要改的那一处（第 45 轮反模板） (0.443333ms)
+✔ 两局不同的对局 → 不同的复盘与不同的学习点（反模板） (0.257333ms)
+✔ 在后续局验证：没有讲过的课就什么都不说 (0.14725ms)
+✔ 在后续局验证：局面没再出现 → improved 为 null，并明说没出现证明不了什么 (0.767875ms)
+✔ 挂账的回合必须是「这门课的局面」那一回合，不是转折点那一回合（第 45 轮实测抓到） (0.288334ms)
+✔ 在后续局验证：局面重复、处理方式一样 → improved 为 false (0.517875ms)
+✔ 在后续局验证：局面重复、处理方式变了 → improved 为 true，且依据点名两个回合 (0.20225ms)
+✔ 在后续局验证：局面重复但这一课的前提不在 → 也不给改善结论 (0.123208ms)
+✔ 禁止词汇：复盘与核对产出的每一句都不许出现承诺或工程术语 (0.29875ms)
+✔ 反向对照 ①：固定问句换汤不换药，反模板判据抓得住 (0.227625ms)
+✔ 反向对照 ②：没有重复出现就宣称「有改善」是抓得住的假结论 (0.15325ms)
+✔ 反向对照 ③：没有转折点就编一个「关键回合」是抓得住的 (0.044875ms)
+✔ 对手倒下那一只：拿不到名字时只写位次，绝不拿场上那一只顶替（含只给投影的入参） (0.145208ms)
+✔ only complete six-pet public replacement sequence permits a source (0.600041ms)
+✔ changed public condition changes correct choice, not just option order (0.515ms)
+✔ explicit correct/wrong and hinted outcomes; repeat counts once; source survives read (1.062542ms)
+✔ old match/version, running battle and invalid choices cannot write attempt (0.082917ms)
+✔ next match without replacement is unknown, not improvement (0.9305ms)
+[实际] 读数条数 = 9 ；分组 = habits,skill,acceptance
+[实际] 够数的读数 = habits.lowHpChoice=0.38(8) habits.afterHintChange=0.39(7) skill.mechanism=0.75(3) skill.transfer=0.6666666666666666(10) skill.progress=1(6) skill.decision=0.61(18)
+[实际] 单档够数：rate = 0 ；存下来 value = 0
+[实际] RAG_INPUTS = pack,ledger,rulesetDir,heldout,report,evalFixtures ；PLAYER_INPUTS = owned ；三类 = habits,skill,acceptance
+[实际] 来源串 = stats:journal stats:quiz+journal stats:stated+journal
+[实际] 删掉 = m8:decision:5 ；删除后 habits/skill 缓存还在吗 = false false
+[实际] 删掉 3 条换宠依据后 = 0.43 （原 0.5）
+[实际] 阈值 = 5 ；QUIZ_MASTERY = {"minIndependent":3,"minVariants":2}
+[实际] 空记忆： habits.lowHpChoice=null(n=0,insufficient=true) habits.afterHintChange=null(n=0,insufficient=true) skill.mechanism=null(n=0,insufficient=true) skill.transfer=null(n=0,insufficient=true) skill.progress=null(n=0,insufficient=true) skill.decision=null(n=0,insufficient=true) acceptance.advice=null(n=0,insufficient=true) acceptance.review=null(n=0,insufficient=true) acceptance.talk=null(n=0,insufficient=true)
+[实际] 4 条依据 ⇒ {"value":null,"sampleN":4,"insufficient":true,"note":"只有 4 条依据，不够 5 条，不出数"}
+[实际] 5 条依据 ⇒ {"value":0.8,"sampleN":5,"insufficient":false}
+[实际] REFUSAL_TTL_MS = 21600000 ；DISMISS_WINDOW_MS = 604800000 ；ROLE_SILENCE_MS = 1800000 ；MOOD_TTL_MS = 1800000
+[实际] 点掉折算 = advice: 0 review: 1 talk: 0
+[实际] 三档 = advice:n=1,v=null review:n=1,v=null talk:n=1,v=null ；acceptRate = null ；evidencedChannels = 0
+[实际] 沉默前 = {"rate":null,"n":1,"evidenced":0,"lastDismissAt":"2026-10-02T13:25:07.841Z","channels":{"advice":{"value":null,"sampleN":1,"evidenceIds":["stated:refusal:advice"],"insufficient":true},"review":{"value":null,"sampleN":0,"evidenceIds":[],"insufficient":true},"talk":{"value":null,"sampleN":0,"evidenceIds":[],"insufficient":true}}}
+[实际] 沉默后 = {"rate":null,"n":1,"evidenced":0,"lastDismissAt":"2026-10-02T13:25:07.841Z","channels":{"advice":{"value":null,"sampleN":1,"evidenceIds":["stated:refusal:advice"],"insufficient":true},"review":{"value":null,"sampleN":0,"evidenceIds":[],"insufficient":true},"talk":{"value":null,"sampleN":0,"evidenceIds":[],"insufficient":true}}}
+[实际] 再点掉一次后 = {"rate":null,"n":1,"evidenced":0,"lastDismissAt":"2026-10-06T01:25:07.841Z","channels":{"advice":{"value":null,"sampleN":1,"evidenceIds":["stated:refusal:advice"],"insufficient":true},"review":{"value":null,"sampleN":0,"evidenceIds":[],"insufficient":true},"talk":{"value":null,"sampleN":0,"evidenceIds":[],"insufficient":true}}}
+[实际] 真引擎局面： 烬尾狐 29/98 (阈值 0.3)→ lowHp=true
+[实际] 5 条真残血记录 → value=0 sampleN=5 label=残血时更常继续攻击
+[实际] 改坏 purgeDerived 后：
+  [实际] 断言失败：级联删除：删掉一条 decision 之后习惯读数必须跟着变｜缓存读数没被清掉
+  [实际] 通过：样本不足不许断言：1 个样本不许出数
+  [实际] 通过：三档时长互不相等且各自生效（6h / 7天 / 30分钟）
+  [实际] 通过：沉默不改变接受度读数
+  [实际] 结果：3/4 条判据通过；失败 = 级联删除：删掉一条 decision 之后习惯读数必须跟着变
+  [实际-失败] 级联删除：删掉一条 decision 之后习惯读数必须跟着变｜缓存读数没被清掉
+  
+  true !== false
+[实际] 把 MEMORY_MIN_SAMPLES 改成 0 后：
+  [实际] 通过：级联删除：删掉一条 decision 之后习惯读数必须跟着变
+  [实际] 断言失败：样本不足不许断言：1 个样本不许出数｜1 < 5：必须说样本不够
+  [实际] 通过：三档时长互不相等且各自生效（6h / 7天 / 30分钟）
+  [实际] 通过：沉默不改变接受度读数
+  [实际] 结果：3/4 条判据通过；失败 = 样本不足不许断言：1 个样本不许出数
+  [实际-失败] 样本不足不许断言：1 个样本不许出数｜1 < 5：必须说样本不够
+  
+  false !== true
+[实际] 把三个时长统一成一个数后：
+  [实际] 通过：级联删除：删掉一条 decision 之后习惯读数必须跟着变
+  [实际] 通过：样本不足不许断言：1 个样本不许出数
+  [实际] 断言失败：三档时长互不相等且各自生效（6h / 7天 / 30分钟）｜点掉一次 7 天
+  [实际] 通过：沉默不改变接受度读数
+  [实际] 结果：3/4 条判据通过；失败 = 三档时长互不相等且各自生效（6h / 7天 / 30分钟）
+  [实际-失败] 三档时长互不相等且各自生效（6h / 7天 / 30分钟）｜点掉一次 7 天
+  + actual - expected
+  
+  + 86400000
+  - 604800000
+✔ 判据① 三类的每条读数都带 source + evidenceIds + sampleN，且证据指向真实条目 (4.696042ms)
+✔ 判据② 三类的存储键与 RAG_INPUTS / PLAYER_INPUTS 的 key 交集为空 (0.178333ms)
+✔ 判据③ 删掉一条 decision ⇒ 习惯读数与水平维度一起变，缓存读数一起消失 (6.156208ms)
+✔ 判据④ 四个样本不出数，第五个才出数；没证据的读数连 value 都没有 (0.393375ms)
+✔ 判据⑤ 三个时长互不相等，且各自有独立判据（明说 6h / 点掉 7 天 / 安静 30 分钟） (1.478333ms)
+✔ 判据⑥ 沉默（不点掉、不说话、连败）不改变接受度读数 (0.432583ms)
+✔ 判据⑦ 真引擎局面喂得进「残血」判据（字段对不上就会是永远 0 样本） (0.416166ms)
+✔ 反证① 把 purgeDerived 短路 ⇒ 级联删除的判据必须红 (27.806625ms)
+✔ 反证② 把样本门槛改成 0 ⇒「用 1 个样本断言习惯」的判据必须红 (28.880083ms)
+✔ 反证③ 把三个时长统一 ⇒ 时长判据必须红 (25.941417ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 135.158083

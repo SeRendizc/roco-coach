@@ -1,0 +1,36 @@
+✔ only complete six-pet public replacement sequence permits a source (0.881333ms)
+✖ changed public condition changes correct choice, not just option order (7.087084ms)
+✔ explicit correct/wrong and hinted outcomes; repeat counts once; source survives read (0.995542ms)
+✔ old match/version, running battle and invalid choices cannot write attempt (0.075167ms)
+✔ next match without replacement is unknown, not improvement (0.827334ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 4
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 44.229417
+
+✖ failing tests:
+
+test at tests/replacement-practice.test.js:13:1
+✖ changed public condition changes correct choice, not just option order (7.087084ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(!b.question.includes(source().name))
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/replacement-practice.test.js:14:372)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
