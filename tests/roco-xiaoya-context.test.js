@@ -18,7 +18,7 @@ import {
   focusFromUrl, focusSnapshotFrom, mergeFocusIntoProfile, detectFocus, createFocusProvider,
   focusFromClick, hostContextOf, FOCUS_KEY, FOCUS_EVENT,
   // ㉛（第五轮④）：两份记忆共用一个键，页面与面板各自的合并语义是这条的判据核心。
-  mergeMemories, capabilityChipText, capabilityLines,
+  mergeMemories, capabilityChipText, capabilityLines, modelCapabilityOf, capabilityEvidenceOf,
 } from '../src/client/xiaoya.js';
 import {focusAsk, focusFactAnswer, focusAdviceAnswer, focusIntent, focusDetailOf,
   localFactAsk, runCoach, buildContext} from '../src/coach/runtime.js';
@@ -774,6 +774,19 @@ test('⑲ 模型格搬进 xiaoya —— 同名 id/class、同一数据源、不�
   assert.match(roco, /async function renderModelList\(\)/, '旧面板的 renderModelList 甲④ 之前不许删');
 });
 
+// Execute the actual nested paint consumer with minimal DOM sinks; no copied rendering logic.
+function paintCapabilityHarness(){
+  const src=read('src/client/xiaoya.js');
+  const start=src.indexOf('  const paintCapability = (info) => {');
+  const end=src.indexOf('  const refreshCapability = async',start);
+  assert.ok(start>=0&&end>start,'actual paintCapability block must exist');
+  const document={body:{dataset:{}}},capEl={dataset:{}},capDetail={},chip={};
+  const evidence={model:null,tools:null,rulesetId:null,matchId:null};
+  const factory=new Function('document','capEl','capDetail','chip','modelCapabilityOf','capabilityLines','capabilityChipText','answerEvidence','capabilityMatchId',
+    `let probeInfo=null;${src.slice(start,end)}return {paint:paintCapability,setMatchId:value=>capabilityMatchId=value};`);
+  return {...factory(document,capEl,capDetail,chip,modelCapabilityOf,capabilityLines,capabilityChipText,evidence,'match-A'),document,capEl,capDetail,chip,evidence};
+}
+
 test('⑳ 甲②③：activityLine 逐字渲染 + popup 也有 role 选择 + `#model-chip` 由 xiaoya 写', () => {
   const src = read('src/client/xiaoya.js');
   // ① activityLine：用服务端给的那一句，页面不重拼（重拼=第二份事实）
@@ -798,9 +811,32 @@ test('⑳ 甲②③：activityLine 逐字渲染 + popup 也有 role 选择 + `#m
   // ③ `#model-chip`：甲④ 退役后由 xiaoya 这一块写（判据 live-model-status 的读取点）
   assert.match(src, /capEl\.id = 'model-chip'/, '能力状态那一块就叫 #model-chip（同名同语义，不是再加一个）');
   assert.match(src, /capEl\.href = 'connect\.html'/, '判据要"连接入口"，玩家也要点得动');
-  assert.match(src, /capEl\.dataset\.rocoModel = model === 'ok' \? 'connected' : 'offline'/,
-    '要写判据读的那个钩子，且**只按真实状态**写（不许为了绿写假的）');
-  assert.match(src, /document\.body\.dataset\.rocoModelConfigured = model === 'ok' \? 'yes' : 'no'/);
+  // 2026-10-06 R3c: old connected/configured-by-model regexes retained verbatim in
+  // docs/roco/verification/2026-10-06-quality/r3c/old-assertions.txt.
+  // Configuration is not evidence that a cloud answer was received. Execute the actual consumer.
+  const h=paintCapabilityHarness();
+  const configured={configured:true,capabilities:{modelReady:true,toolsReady:true}};
+  h.paint(configured);
+  assert.equal(h.capEl.dataset.rocoModel,'configured');
+  assert.equal(h.document.body.dataset.rocoModelConfigured,'yes');
+  assert.match(h.capEl.textContent,/已配置/);
+  // Repeated ready probes, still no answer, must not produce answered.
+  h.paint(configured);assert.equal(h.capEl.dataset.rocoModel,'configured');
+  Object.assign(h.evidence,capabilityEvidenceOf({provider:'deepseek',cache:'miss'}),{matchId:'match-A'});
+  h.paint(configured);
+  assert.equal(h.capEl.dataset.rocoModel,'answered');
+  assert.match(h.capEl.textContent,/本次云端回答/);
+  Object.assign(h.evidence,capabilityEvidenceOf({provider:'local-fallback',execution:'local-fallback'}),{matchId:'match-A'});
+  h.paint(configured);
+  assert.equal(h.capEl.dataset.rocoModel,'local-fallback');
+  assert.equal(h.document.body.dataset.rocoModelConfigured,'yes');
+  assert.match(h.capDetail.textContent,/本地/);
+  Object.assign(h.evidence,capabilityEvidenceOf({provider:'deepseek',cache:'miss'}),{matchId:'match-A'});
+  h.setMatchId('match-B');h.paint(configured);
+  assert.equal(h.capEl.dataset.rocoModel,'configured','old match cloud receipt cannot answer for new match');
+  assert.doesNotMatch(h.capEl.textContent,/本次云端回答/);
+  h.paint({...configured,configured:false});
+  assert.equal(h.document.body.dataset.rocoModelConfigured,'no','configured flag comes from config receipt, not modelReady');
   assert.doesNotMatch(src, /xy-capability'|xiaoya-capability'/, '不再有第二个能力状态元素（同一件东西一个名字）');
 });
 
