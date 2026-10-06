@@ -1,0 +1,75 @@
+✔ a slow model answer is aborted when the player acts first, so no stale text is delivered (366.399041ms)
+✔ after a fast action only the newest position is delivered (150.318416ms)
+✔ the same position asked twice is merged into one upstream call (no duplicate delivery) (147.849542ms)
+✔ three rapid actions in a row deliver exactly one answer: the last one (127.794708ms)
+✔ the client layer never speaks: no speech call exists on the answer path (2.928834ms)
+✔ a slow answer that arrives after the deadline is not resurrected (807.378958ms)
+✔ ① 地址上这一只：只认 box.js 那一个参数名（`?pet=`），形状不对就 null (0.942458ms)
+✔ ② 同一份配置：快照逐字来自页面那条 ?detail= 回执，缺的不猜 (0.291167ms)
+✔ ②b 并入名单是**就地**的：条数一个都不变（计数类回答不许被焦点带偏） (0.082334ms)
+✔ ③ 换一只跟着变：焦点变了，同一段会话里下一问的答案跟着变 (7.968625ms)
+✔ ③b 认的是"眼前这一只"：点名了别的一只就不许答（会把 A 说成 B） (0.227541ms)
+✔ ③c 事实回答走本地单发：0 次模型正文、正文与页面那一栏逐字一致 (0.528958ms)
+✔ ③d 对战场上那一只：只有物种级公开信息，拿不到的照实说拿不到 (0.118375ms)
+✔ ④ 焦点探测：DOM 优先于地址、地址优先于旧记录，旧记录要标成 last (0.179709ms)
+✔ ④b provider：焦点换了才重新取详情（同一只不重复请求），订阅能收到变化 (0.391708ms)
+✔ ⑤ 历史可见：重载读到旧轮次；「新对话」「清空本次对话」两件事各自成立 (0.368584ms)
+✔ ⑥ 不许跨域串味（P0-05 ④）：洛手的焦点问到的是洛手的数据，不是旧游戏那三只 (0.878833ms)
+✔ ⑦ 反漂移：小芽读的那几个页面钩子必须还在（改一边不改另一边会红） (1.093208ms)
+✔ ⑧ 缺字段不许炸：六种形状 × 五个问句，全部要么短答要么如实说"读不到" (1.413541ms)
+✔ ⑨ 意图分叉：事实问短答，建议问给建议 + 理由（不许把建议问降级成复述） (0.285292ms)
+✔ ⑨b 建议答：有推荐 + 有理由 + 指得到依据；拿不到依据的层如实说拿不到 (8.184333ms)
+✔ ⑩ 同一只刷新/回滚：失效条件看的是**培养指纹 + 刷新计数**，不是只看个体编号 (0.574792ms)
+✔ ⑪ 培养那几样与页面**同一份来源**：注入本机记录时不许再念服务端回执里那份 (0.067625ms)
+✔ ⑨c 端到端路由（这一条是**改钉**：函数对了不等于路由接上了） (0.464083ms)
+✔ ⑫ 点第 N 格 → 焦点是**这一格的个体 id**（不许按名字猜物种） (1.112208ms)
+✔ ⑬ 点完**立刻**就是焦点（不许滞后一拍）：状态里同步换人，不用等下一次 resolve (0.068209ms)
+✔ ⑭ 兜底不许把**没过守卫的模型正文**漏给玩家（值守卫拦下的东西不许从降级路出去） (12.346ms)
+✔ ⑮ 丙：产品页的焦点只用共享实现；断线档不许再退回"请配置密钥" (1.847292ms)
+✔ ⑯ 甲①：宿主动局上下文口（`mountXiaoya({contextProvider})`）—— 局中不许退成"没有对战况" (0.239459ms)
+✔ ⑰ 甲③：两套记忆键合并 —— 旧键有数据 ⇒ 迁移后新键读得到（不许丢玩家记忆） (1.076292ms)
+✔ ⑱ 甲②①：记忆面板搬进 xiaoya —— 同一套语义/同一批函数/同一套 id，且不许"两个名字" (1.371709ms)
+✔ ⑲ 模型格搬进 xiaoya —— 同名 id/class、同一数据源、不写 chip；**27B 与调试连接已按 R07 移除** (1.331333ms)
+✖ ⑳ 甲②③：activityLine 逐字渲染 + popup 也有 role 选择 + `#model-chip` 由 xiaoya 写 (0.646083ms)
+✔ ㉑ U07-① 每页只有一套入口：`entryButton:false` 不造 `#xiaoya-open`，把手走**真开关** (154.454584ms)
+✔ ㉒ U07-④ 连通状态不自相矛盾：答完那一句自己的证据必须写进状态行 (1.377333ms)
+✔ ㉓ U07-③ 新消息不许顶掉阅读位置：贴底才跟随，否则原地不动 + 提示 (0.640584ms)
+✔ ㉔ U07-② 版式：标题栏与输入行固定、对话区独立滚动、次级区默认收起 (1.204291ms)
+✔ ㉘ R06：默认顶部只有一个展开入口，`#model-chip` 是**短**读法（长句进二级） (1.0225ms)
+✔ ㉙ R07：27B 与「调试连接」退出产品入口（权重/服务端一个字没动） (1.103333ms)
+✔ ㉕ U08：建议卡片的五段与两个按钮（风险永远在；只有 action 才画「采用建议」） (0.46825ms)
+✔ ㉖ U08：卡片真的画进气泡里（最小 DOM 上跑真函数）—— 默认收起 + 只广播，不执行 (1.04525ms)
+✔ ㉗ U08/U09：内部 token 不许上屏（hint-budget / below-threshold 那一类） (0.104209ms)
+✔ ㉛ 第五轮④：记忆两个写入者互不覆盖 + 逐回合 turnLog 的来源（客户端那一半） (1.794083ms)
+✔ ㉚ 第三轮③：面板是**纯叠加层**（开关不改正文 rect）+ 桌面可收起 (1.082ms)
+✔ ㉜ 复盘「对面那一列」：投影后 `enemy.pets[enemy.active]` 必须就是场上那只（不是后备） (0.806125ms)
+✔ ㉝ 反证 A：图鉴里查不到那个物种 ⇒ 照实写「（名字未登记）」，**绝不编一个名字** (0.126708ms)
+✔ ㉞ 同一回合的两段（battle→replace→battle）必须并成一行；不同回合一律各自成行 (1.551708ms)
+ℹ tests 47
+ℹ suites 0
+ℹ pass 46
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1652.36775
+
+✖ failing tests:
+
+test at tests/roco-xiaoya-context.test.js:777:1
+✖ ⑳ 甲②③：activityLine 逐字渲染 + popup 也有 role 选择 + `#model-chip` 由 xiaoya 写 (0.646083ms)
+  AssertionError [ERR_ASSERTION]: 要写判据读的那个钩子，且**只按真实状态**写（不许为了绿写假的）
+      at TestContext.<anonymous> (file:///Users/serendizc/Codex/Internship/work/roco-quality-20261006/tests/roco-xiaoya-context.test.js:801:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'import {coachBattleStamp} from \'../coach/coach-advice.js\';\n// 小芽的**一份**实现：单独的小芽页面 + 其它页面右上角的弹出式入口。\n//\n// 为什么要有这个模块（人类 2026-09-25 纠偏①）：\n//   · 「小芽就直接出一个单独的小芽页面，这个可以大点」——`xiaoya.html`；\n//   · 「其他所有页面都要有右上角小芽和弹出式小芽」——培养页（nurture）与精灵盒子\n//     （box）原来**完全没有**小芽，由这里的 `mountXiaoya({mode:\'popup\'})` 注入。\n//\n// 一条硬口径：**不另起一套对话能力**。这里的每一次提问都走营地页/训练场页同一条链：\n//   `/api/coach`（`src/coach/client.js` 的 requestCoach）\n//   + 同一份跨局记忆（localStorage `xiaoya-memory-v1`）\n//   + 同一段对话记录（localStorage `xiaoya-chats-v1`，与营地页共用）。\n// 所以「在小芽页面里聊过的」在营地页的小芽里接着看得到，反之亦然。\n// 另写一份 payload 拼装是这类模块最常见的漂移来源（两份模板迟早不一致），\n// 上下文一律用 `src/coach/runtime.js` 的 `buildContext()` 这一份构造器。\nimport {requestCoach, connectionStatus, readChatStore, serializeChatStore,\n  activeChatSession, chatConversation, appendChatTurn, startChatSession, emptyChatStore,\n  beginNewChatSession, clearActiveChatSession, invalidateCoachRequests} from \'../coach/client.js\';\nimport {buildContext} from \'../coach/runtime.js\';\n// P1-B（task-46）：补 `lastMatch` 之前要过"这一问依据哪一局"的**同一个判定**（叶子模块，浏览器安全）。\nimport {hydrationOfPreviousMatch} from \'../coach/match-scope.js\';\nimport {freshMemory, readMemory, memoryItems, deleteMemoryItem, MEMORY_GROUPS,\n  rememberPreference} from \'../coach/memory.js\';\n// 培养那几样（性格 / 六项资质 / 天分档位）的**唯一**投影：页面读它，小芽也读它 ——\n// 刷新/回滚之后两边必须一起变（Codex 监工第 2 条；A7 之后页面上那一栏就是从这条读的）。\nimport {cultivationOf} from \'../coach/individuals.js\';\n// 本机个体记录的唯一读入口（`roco.box.individuals.v1`）——与 box.js 的 `individualOf` 同一个。\nimport {localIndividualById, localCardById} from \'./box-individuals.js\';\nimport {newProfile, loadProfile, PROFILE_STORAGE_KEY} from \'../game/progression.js\';\nimport {mountStalePageBanner} from \'./stale-page.js\';\n// 回答里的 `**加粗**` 要走 markdown 渲染：这个页面原来用 `createTextNode`（纯文本），\n// 于是玩家看到的是**字面星号**（人类 2026-09-26：「说的是人话吗」那一批里的一个）。\n// `markdown()` 先转义 HTML 再做少量替换，所以可以安全地插进 DOM。\nimport {markdown} from \'../coach/experience.js\';\nimport {playerEvidence} from \'./evidence-view.js\';\n//: 2026-09-30（半成品排查 P0）：**不渲染 markdown 的落点**（`textContent`）要过 `plain()` ——\n//: 实测展开「依据」后玩家看到字面 `**`（来源 `coach/runtime.js:80`）。`plain()` 是仓库现成件\n//:（`plain-text.js` 自己的注释就写着"判 R6 必须看落点，不能看字符串"），**不自己写第二份**。\nimport {plain} from \'./plain-text.js\';\n\n//: 与 `src/client/app.js` **逐字相同**的两个键（改一个必须同时改另一个，否则小芽会分裂成两个）。\nconst MEMORY_KEY = \'xiaoya-memory-v1\';\nconst CHAT_KEY = \'xiaoya-chats-v1\';\n// 键与营地/培养页**同一处来源**（`progression.js` 的 PROFILE_STORAGE_KEY），不在这里另写一份。\nconst PROFILE_KEY = PROFILE_STORAGE_KEY;\n//: 三个开场问题：都能在**没有对局**的情况下回答（营地问答里最常被点的三个）。\n// 2026-09-25（人类原话：「这个小芽不是 UI 的问题，是**内容**啊内容！你自己测试一下啊，\n// 还有老版的宠物名字」）：这一页原来把教练上下文建成**本仓 MVP 练习局**那份存档\n// （`pet-coach-growth-v1`：烬尾狐/潮甲龟/林鹿三只自研宠），于是满口老版宠物名 ——\n// 而产品是《洛克王国：世界》的 622 图鉴。现在上下文改从手游那一侧来\n// （`/api/roco/box?kind=mine`：48 只持有、真名/真属性/真等级），快捷问题也换成人手一只的手游问法。\nconst QUICK = [\'我一共有多少只精灵？\', \'雨天水系伤害加多少？\', \'火系克制什么属性？\', \'你能做什么\'];\n\nconst readStored = (key) => { try { return localStorage.getItem(key); } catch { return null; } };\nconst writeStored = (key, value) => { try { localStorage.setItem(key, value); } catch {} };\nconst esc = (text) => String(text ?? \'\').replace(/[&<>"]/g, (ch) => ({\'&\': \'&amp;\', \'<\': \'&lt;\', \'>\': \'&gt;\', \'"\': \'&quot;\'}[ch]));\n//: 没有对局时交给教练的关卡 id。用营地页的初始值（`app.js` 的 `stageId=\'meadow\'`），\n//: 不许自造：本地教练会拿它去查真实关卡表，查不到就抛「关卡不存在」。\nconst CAMPAIGN_STAGE_ID = \'meadow\';\n\n/**\n * 小芽的一段会话状态（页面与弹窗各持有一份，但读写的是同一份存档）。\n *\n * 为什么把 `profile` 也读进来：`buildContext()` 要一份玩家档案（它会把档案里的\n * 伙伴与培养进度交给教练）。营地页有自己的那份；这里读的是**同一个存档键**，\n * 所以「我的精灵/培养到哪了」两个页面说的是同一件事。\n */\n/**\n * 手游那一侧的玩家档案：**持有的精灵**（`/api/roco/box?kind=mine`）。\n *\n * 为什么不用本仓 MVP 存档（`pet-coach-growth-v1`）：那一份是**练习局夹具**\n * （烬尾狐/潮甲龟/林鹿三只自研宠），与 622 图鉴不是一套数据 —— 2026-09-25 人类实测\n * 这一页「还有老版的宠物名字」，根因就在这里。\n *\n * 形状与训练场页 `coachCampContext()` 一致（`{id,name,types,level,role,mechanism}` +\n * `pool_summary`），所以名单/阵容/属性问题在两个页面走同一套判据。\n * 拿不到（服务没起来 / 接口报错）⇒ 返回 `{pets: [], pool_summary: {}, unavailable: true}`：\n * 教练据此如实说"看不到你的名单"，**绝不**退回 MVP 那三只（那正是被点名的老版内容）。\n */\nasync function loadMobileProfile(fetchImpl = globalThis.fetch?.bind(globalThis)) {\n  try {\n    const response = await fetchImpl(\'/api/roco/box?kind=mine&limit=48\', {cache: \'no-store\'});\n    if (!response?.ok) throw new Error(\'box \' + response?.status);\n    const body = await response.json();\n    const player = body?.player;\n    const cards = Array.isArray(player?.cards) ? player.cards : [];\n    const pets = cards.map((card) => ({\n      // `id` 用个体 id（own-XXXX，引擎的阵容评估要它）；\n      // `species_id` 是**物种** id（pet_XXXXXX）—— 「我这几只里谁抗龙系」那类交集只能按物种比。\n      id: card.select ?? card.group ?? null,\n      species_id: typeof card.group === \'string\' && /^pet_\\d{6}$/.test(card.group) ? card.group : null,\n      name: card.name ?? null,\n      types: Array.isArray(card.types) ? card.types : [],\n      level: Number.isFinite(card.level) ? card.level : null,\n      role: card.role_label ?? null,\n      mechanism: card.mechanism?.line ?? null,\n    })).filter((pet) => pet.id && pet.name);\n    if (!pets.length) throw new Error(\'empty box\');\n    return {\n      pets,\n      pool_summary: {\n        ...(Number.isFinite(player.total) ? {total: player.total} : {}),\n        source: \'owned\',\n        note: \'名单来自精灵盒子（我的）；持有总数见 total。\',\n      },\n    };\n  } catch {\n    return {pets: [], pool_summary: {}, unavailable: true};\n  }\n}\n\n// ── 当前聚焦对象：一份 host context provider（P0-05）──────────────────────────\n//\n// 修的是什么（人类原话：「小芽当前对象/资料通路同步修复」；Codex P0-05）：\n//   ① 上下文里那个 `focus` 一直是**名单第一只** —— `:237` 写的是 `activeProfile.pets[0].id`，\n//      于是玩家在盒子详情页点开第 4 只、问「这只是什么性格」，小芽答的是**第 1 只**（或者干脆\n//      说"这条我没依据"）。这不是措辞问题，是**取错了对象**；\n//   ② 名单走 `/api/roco/box?kind=mine&limit=48` —— 那一份**没有培养细节**（没有性格/资质/四个技能），\n//      所以就算对象取对了，也答不出页面上那一栏。页面自己用的是另一条：\n//      `/api/roco/box?detail=<个体 id>`（`box.js:700`）。\n//\n// 所以这一层的两件事只有两句：\n//   · **知道我在看谁**：地址 `?pet=` 与页面钩子（`body[data-box-pet]`）都认，改动即生效；\n//   · **用同一份取值**：拿的就是页面那一条 `?detail=` 回执，**不另拉一份名单**。\n//     `focusSnapshotFrom()` 只挑页面上真的画出来的那几项（traits / skills），\n//     所以"页面那一栏"与"小芽嘴里那一句"不可能指向两份数据。\n//\n// 这个 provider 的形状对齐 Codex P0-05 提的契约（`getContext` / `subscribeContextChanged`），\n// 但只实现**这一层真的用得上**的部分：scene / focusInstanceId / stateToken / visibleSnapshot。\n// 「配队六槽」「对战场上」这两处页面各自的写域在别的模块里（`team-workshop.js` / `roco.js`），\n// 这一层只**读**它们已经画在 DOM 上的钩子（`[data-tw-instance]`、`window.rocoDemo`），\n// 一个字节都不改它们。\n//: 六维标签 → 键（与 `box.js` 的 `STAT_KEY_OF_LABEL` 同一张表：页面画什么，这里就读什么）。\nconst FOCUS_STAT_BY_LABEL = Object.freeze({血量: \'hp\', 物攻: \'atk\', 物防: \'def\',\n  魔攻: \'spa\', 魔防: \'spd\', 速度: \'spe\'});\nexport const FOCUS_KEY = \'xiaoya-focus-v1\';\n//: 跨页广播聚焦变化的**唯一**事件名。别的页面只要 `dispatchEvent(new CustomEvent(\'xiaoya:focus\'))`\n//: 就能让小芽重读一次焦点；`detail` 可带 `{instanceId, scene, name}`（不带就按 DOM/地址重算）。\nexport const FOCUS_EVENT = \'xiaoya:focus\';\n\n/**\n * 地址上这一只：参数名与 `box.js` 的 `petParams()` **逐字相同**（`box.html?pet=own-XXXX`）。\n * 形状不对（空、带空格、超长）就返回 `null` —— 不拿一个像 id 的东西去查。\n */\nexport function focusFromUrl(search = \'\') {\n  let raw = \'\';\n  try { raw = (new URLSearchParams(search).get(\'pet\') ?? \'\').trim(); } catch { raw = \'\'; }\n  return /^[A-Za-z0-9_-]{1,40}$/.test(raw) ? raw : null;\n}\n\n/**\n * 一个个体详情（`/api/roco/box?detail=`）→ 小芽要用的那一小份。\n *\n * ⚠ 取值一律**照抄**，不做换算、不做四舍五入、不补 0：\n *   · **物种冻结事实**（名字/系别/技能/等级上限/特长/血脉）来自服务端回执 —— 刷新改不了它们；\n *   · **培养那几样**（性格 / 六项资质 / 天分档位）来自 `cultivation`（`coach/individuals.js`\n *     的 `cultivationOf`，读的是本机记录）—— **与页面上那一栏同一份来源**。\n *     2026-09-29（A7 改钉）：页面那一栏已经从服务端回执改成读本机记录了\n *     （`box.js` 的 `buildSnapshotOf`），小芽要是还念服务端那份，**刷新之后两边就会不一样**。\n *   · `cultivation` 没传（还没读本机记录 / 图鉴物种页）时才退回回执里的 `traits`。\n *   · 读不出来（没有那一栏）就是 `null` + 一句 `*_reason`，绝不猜一个值。\n */\nexport function focusSnapshotFrom(player, {instanceId = null, source = null, cultivation = null,\n  skillsReason = null} = {}) {\n  if (!player || typeof player !== \'object\') return null;\n  const traits = (Array.isArray(player.traits) ? player.traits : []).map((trait) => ({\n    label: trait?.label ?? null,\n    value: trait?.value ?? null,\n    status: trait?.status ?? (trait?.value === null || trait?.value === undefined || trait?.value === \'\' ? \'unknown\' : \'known\'),\n    reason: trait?.reason ?? null,\n  }));\n  const raw = (label) => {\n    const hit = traits.find((trait) => trait.label === label);\n    return hit && hit.value !== null && hit.value !== undefined && hit.value !== \'\' ? hit.value : null;\n  };\n  const rawReason = (label) => {\n    const hit = traits.find((trait) => trait.label === label);\n    return hit && (hit.value === null || hit.value === undefined || hit.value === \'\') ? (hit.reason ?? null) : null;\n  };\n  const text = (label) => (typeof raw(label) === \'string\' ? raw(label) : null);\n  const object = (label) => {\n    const value = raw(label);\n    return value && typeof value === \'object\' && !Array.isArray(value) ? value : null;\n  };\n  const grown = cultivation && typeof cultivation === \'object\' ? cultivation : null;\n  // 种族值（六维）**从页面这一份回执里读**：`metrics` 就是「六维（60 级）」那一格下面写着的\n  // 「种族 N」。⚠ 不许在这一层调 `nature-advice.js` 的 `raceOf()`：它走\n  // `import(\'node:fs\')` 读归一化图鉴 —— **浏览器里那条路是断的**（真机实测：建议问整支抛异常、\n  // 被上层吞掉，玩家拿到的是陪练那句「哪句不清楚，我再讲一遍」）。这里用页面同一份数，\n  // 来源逐字一致，而且不依赖 Node。\n  const race = {};\n  for (const row of Array.isArray(player.metrics) ? player.metrics : []) {\n    const key = FOCUS_STAT_BY_LABEL[row?.label] ?? null;\n    if (key && Number.isFinite(Number(row?.value))) race[key] = Number(row.value);\n  }\n  // 本机记录那三栏的"没有"要按**页面上的那句话**说（`box.js` 的 `petTraitsOf`），逐字同一口径。\n  const grownNature = grown ? (typeof grown.nature === \'string\' && grown.nature ? grown.nature : null) : null;\n  const grownTalent = grown && grown.talent && typeof grown.talent === \'object\' ? grown.talent : null;\n  const grownTier = grown && grown.tier && typeof grown.tier === \'object\' ? grown.tier : null;\n  return {\n    instance_id: instanceId,\n    source,\n    //: 培养那三栏是从哪儿来的（判据与排障读它；玩家看不见这个键）。\n    cultivation_source: grown ? \'local-record\' : \'server-detail\',\n    name: player.name ?? null,\n    species_id: typeof player.group === \'string\' ? player.group : null,\n    level: Number.isFinite(Number(grown?.level)) ? Number(grown.level)\n      : (Number.isFinite(Number(player.level)) ? Number(player.level) : null),\n    natur'... 79030 more characters,
+    expected: /capEl\.dataset\.rocoModel = model === 'ok' \? 'connected' : 'offline'/,
+    operator: 'match',
+    diff: 'simple'
+  }

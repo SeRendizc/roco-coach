@@ -15,7 +15,7 @@ import {coachBattleStamp} from '../coach/coach-advice.js';
 // 上下文一律用 `src/coach/runtime.js` 的 `buildContext()` 这一份构造器。
 import {requestCoach, connectionStatus, readChatStore, serializeChatStore,
   activeChatSession, chatConversation, appendChatTurn, startChatSession, emptyChatStore,
-  beginNewChatSession, clearActiveChatSession} from '../coach/client.js';
+  beginNewChatSession, clearActiveChatSession, invalidateCoachRequests} from '../coach/client.js';
 import {buildContext} from '../coach/runtime.js';
 // P1-B（task-46）：补 `lastMatch` 之前要过"这一问依据哪一局"的**同一个判定**（叶子模块，浏览器安全）。
 import {hydrationOfPreviousMatch} from '../coach/match-scope.js';
@@ -1127,6 +1127,7 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
       // （与页面同一条取值）挂进上下文。`focus` 不再默认取 `pets[0]` ——
       // 没有聚焦对象时才退回原来的口径（老行为只在"真的没在看某一只"时保留）。
       const resolved = await focusProvider.resolve();
+      if (epoch !== state.epoch) return;
       // 「同一份配置」：把聚焦那一只的培养数据**就地**并进手游档案（`mergeFocusIntoProfile`
       // 只补缺、不增删行 ⇒ 计数类回答一个数都不变）。并进去之后，档案里那一行
       // 与页面上那一栏是同一份来源，`individualOf()` 那几族（面板/性格建议）也走它。
@@ -1138,6 +1139,7 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
         ?? (Array.isArray(activeProfile.pets) ? (activeProfile.pets[0]?.id ?? null) : state.pet);
       // **宿主动局上下文口**（甲①）：有对局就把对局交给 `buildContext`，没有就照老行为（`null`）。
       const incoming = await readHostContext(contextProvider);
+      if (epoch !== state.epoch) return;
       // ── 第五轮④（2026-09-29）：提问前先把记忆**对齐磁盘上那一份** ──────────────────────
       // `state.memory` 是**挂载时的快照**：玩家打完一局（页面往同一个键写了 `events`/`journal`）
       // 再回来问，面板手里那份还是旧的 ⇒ 服务端拿到的是"没有这一局"的记忆，复盘自然说
@@ -1223,6 +1225,7 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
     } catch (error) {
       if (epoch !== state.epoch) return;
       const latest = await readHostContext(contextProvider);
+      if (epoch !== state.epoch) return;
       if (requestStamp !== undefined && requestStamp !== coachBattleStamp(latest.context.extra)) {
         setStatus('局面已经变化，这条迟到的回答已作废，请重新问当前这一手。');
         return;
@@ -1231,8 +1234,10 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
       addEntry('小芽', '这次没有完成分析，请重试。');
       setStatus(error?.message ?? '请求失败');
     } finally {
-      state.asking = false;
-      if (send) send.disabled = false;
+      if (epoch === state.epoch) {
+        state.asking = false;
+        if (send) send.disabled = false;
+      }
     }
   }
 
@@ -1379,7 +1384,14 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
   newChat.id = 'xiaoya-new-chat';
   newChat.textContent = '新对话';
   newChat.title = '开一段新对话；这一段留在记录里，跨局记忆不动。';
+  const invalidateChatRequest = () => {
+    state.epoch += 1;
+    invalidateCoachRequests();
+    state.asking = false;
+    if (send) send.disabled = false;
+  };
   newChat.onclick = () => {
+    invalidateChatRequest();
     answerEvidence.model = null;
     answerEvidence.matchId = null;
     paintCapability(probeInfo);
@@ -1395,6 +1407,7 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
   clearChat.textContent = '清空本次对话';
   clearChat.title = '只清这一段对话的轮次；跨局记忆（学到的东西、偏好）不动。';
   clearChat.onclick = () => {
+    invalidateChatRequest();
     answerEvidence.model = null;
     answerEvidence.matchId = null;
     paintCapability(probeInfo);

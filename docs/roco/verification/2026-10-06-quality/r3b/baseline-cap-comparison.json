@@ -1,0 +1,9 @@
+{
+  "test": "tests/roco-xiaoya-context.test.js:801",
+  "baseline": "f071a1d9d20ee52069b8aceed282cfd7c6e0daa3",
+  "expectedPattern": "capEl\\.dataset\\.rocoModel = model === 'ok' \\? 'connected' : 'offline'",
+  "baselineMatches": false,
+  "candidateMatches": false,
+  "method": "exact existing assertion regex evaluated against git-show baseline and candidate; not a full baseline test run",
+  "reason": "old configured/last-answer source contract assertion already false on baseline; not changed in R3b"
+}

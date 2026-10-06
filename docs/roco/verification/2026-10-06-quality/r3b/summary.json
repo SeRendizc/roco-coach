@@ -1,0 +1,74 @@
+{
+  "productBaseline": "f071a1d9d20ee52069b8aceed282cfd7c6e0daa3",
+  "documentationHead": "ad0f9815f5e4e1ff202d9a3e44a56acebcd604ea",
+  "beforeViolations": [
+    "new-success: reset did not unlock current ask",
+    "new-success: old receipt changed active persisted session",
+    "new-success: old receipt polluted visible log",
+    "new-failure: reset did not unlock current ask",
+    "new-failure: old receipt changed active persisted session",
+    "clear-success: reset did not unlock current ask",
+    "clear-success: old receipt changed active persisted session",
+    "clear-success: old receipt polluted visible log",
+    "clear-failure: reset did not unlock current ask",
+    "clear-failure: old receipt changed active persisted session"
+  ],
+  "afterViolations": [],
+  "cases": [
+    {
+      "id": "new-success",
+      "oldHTTP": 200,
+      "resetUnlocks": true,
+      "activeUnchangedAfterOld": true,
+      "newSendStillBusyAfterOld": true,
+      "newStatusAfterOld": "正在读取依据…",
+      "oldVisible": false,
+      "oldPersisted": false,
+      "currentPersisted": true,
+      "finalTurns": 2,
+      "finalSendUnlocked": true
+    },
+    {
+      "id": "new-failure",
+      "oldHTTP": 502,
+      "resetUnlocks": true,
+      "activeUnchangedAfterOld": true,
+      "newSendStillBusyAfterOld": true,
+      "newStatusAfterOld": "正在读取依据…",
+      "oldVisible": false,
+      "oldPersisted": false,
+      "currentPersisted": true,
+      "finalTurns": 2,
+      "finalSendUnlocked": true
+    },
+    {
+      "id": "clear-success",
+      "oldHTTP": 200,
+      "resetUnlocks": true,
+      "activeUnchangedAfterOld": true,
+      "newSendStillBusyAfterOld": true,
+      "newStatusAfterOld": "正在读取依据…",
+      "oldVisible": false,
+      "oldPersisted": false,
+      "currentPersisted": true,
+      "finalTurns": 2,
+      "finalSendUnlocked": true
+    },
+    {
+      "id": "clear-failure",
+      "oldHTTP": 502,
+      "resetUnlocks": true,
+      "activeUnchangedAfterOld": true,
+      "newSendStillBusyAfterOld": true,
+      "newStatusAfterOld": "正在读取依据…",
+      "oldVisible": false,
+      "oldPersisted": false,
+      "currentPersisted": true,
+      "finalTurns": 2,
+      "finalSendUnlocked": true
+    }
+  ],
+  "serverPid": 14312,
+  "chromePid": 14321,
+  "profileRemoved": true
+}

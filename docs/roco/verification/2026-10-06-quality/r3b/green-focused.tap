@@ -1,0 +1,20 @@
+✔ a slow model answer is aborted when the player acts first, so no stale text is delivered (365.410541ms)
+✔ after a fast action only the newest position is delivered (147.315416ms)
+✔ the same position asked twice is merged into one upstream call (no duplicate delivery) (144.942541ms)
+✔ three rapid actions in a row deliver exactly one answer: the last one (129.3095ms)
+✔ the client layer never speaks: no speech call exists on the answer path (2.830542ms)
+✔ a slow answer that arrives after the deadline is not resurrected (807.24925ms)
+▶ real provider transport failure yields HTTP error, then an honest local companion fallback
+  ✔ fallback memory retains only the original player question (0.337208ms)
+  ✔ fallback status describes the actual local response without an elapsed-time claim (0.082542ms)
+  ✔ two actual HTTP session failures do not promise an ongoing reconnect (7.373125ms)
+  ✔ cancelling an in-flight transport remains AbortError, not a fallback answer (5.207875ms)
+✔ real provider transport failure yields HTTP error, then an honest local companion fallback (67.213291ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1646.323125
