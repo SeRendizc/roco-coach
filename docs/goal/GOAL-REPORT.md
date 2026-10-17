@@ -46,6 +46,7 @@
 - 标签：`interview-2026-10-17`、`typechart-3x-fix`；均已推 **gitee + GitHub**。
 - 敏感物：CV（含个人联系方式）与 DeepSeek key 均**未进公开仓库**；推送前敏感串扫描 0 命中。
 - 证据自包含：干净克隆 `gitee` 分支后，复现器/两组新判据/quality 全部通过（见 `evidence/clean-clone-verification.md`）。
+- 安全复核（最终 HEAD `e61bfa25` 的 fresh clone）：`docs/interview/cv` 不存在；全仓扫描无真实密钥；3 处命中均为文档占位示例（`sk-...`/`sk-…`）或既有脚本注释，非泄露。
 - 演示实例：8910 起在修复分支上（当前 `configured=false`，等用户在 `/connect.html` 输入 key；输入后一次真实 DS 验证会写进 `evidence/`）。
 - 当前 `test:unit` 失败集合与基线逐条相同（14 条 pre-existing），**零新增红**。
 

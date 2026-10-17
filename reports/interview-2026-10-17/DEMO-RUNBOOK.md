@@ -124,7 +124,7 @@ curl -s -o /dev/null -w '8765 still HTTP %{http_code}\n' http://127.0.0.1:8765/a
 `/api/models` → cloud-deepseek connected）。本目录的 8910 隔离演练**未配 key**（零付费，provider=local / fail-closed）。
 
 要在 8910 或现场演示真实 DS，二选一：
-1. 启动前：`DEEPSEEK_API_KEY=sk-... PORT=8910 npm start`（服务只存进程内存，不落盘）；
+1. 启动前：`DEEPSEEK_API_KEY=<你的 key> PORT=8910 npm start`（服务只存进程内存，不落盘）；
 2. 启动后：打开 `http://127.0.0.1:8910/connect.html` 填 key 并验证（同样只存进程内存）。
 
 验证（会发 1 次付费请求，别重复跑）：
