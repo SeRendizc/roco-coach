@@ -38,7 +38,16 @@
 | `npm run test:env` | 仅 1 条 pre-existing 红（tier 反证；基线同样红） |
 | `npm run test:roco-quality` | **77/77** |
 | 官方 Bad Case | Python **6/6**；Node **7/7**；复现器三层 **×3 一致** |
-| 分支推送 | 两端 HEAD：fix `f9ac7e06`、interview `391ac8d4` |
+| 分支推送 | 两端 HEAD：fix `f9ac7e06`、interview `530c8bd3`（后续提交继续推） |
+
+## 4b. 最终仓库状态（2026-10-17 晚）
+
+- 分支：`interview/2026-10-17`（HEAD 见文末）、`fix/typechart-official-3x` @ `f9ac7e06`；**master/wip 未动**。
+- 标签：`interview-2026-10-17`、`typechart-3x-fix`；均已推 **gitee + GitHub**。
+- 敏感物：CV（含个人联系方式）与 DeepSeek key 均**未进公开仓库**；推送前敏感串扫描 0 命中。
+- 证据自包含：干净克隆 `gitee` 分支后，复现器/两组新判据/quality 全部通过（见 `evidence/clean-clone-verification.md`）。
+- 演示实例：8910 起在修复分支上（当前 `configured=false`，等用户在 `/connect.html` 输入 key；输入后一次真实 DS 验证会写进 `evidence/`）。
+- 当前 `test:unit` 失败集合与基线逐条相同（14 条 pre-existing），**零新增红**。
 
 ## 5. 残余风险与边界（面试必须如实说）
 
@@ -55,6 +64,13 @@
 - [ ] 演示前确认实例 `configured`；无 key 就走离线三件套，不演「局中问该谁」
 - [ ] 简历用 Overleaf XeLaTeX 重编译（本机 PDF 是验证版）
 - [ ] 被问「哪行是你改的」→ 打开 `CODE-TRACE-2026-10-17.md` 的 6 跳与 3 个可改点
+- [ ] LLM/Agent 追问 → 用 `AGENT-DRILL-2026-10-17.md`（12 主题 + 对抗速查）练 2 轮
+
+## 8. 待用户完成的一件小事
+
+- **8910 演示实例还没配 key**（`/api/models` → 「还没有配置 API key」）。刷新 `http://127.0.0.1:8910/connect.html`
+  输入一次即可：Keychain 优先、失败写 `$HOME/.config/roco/deepseek.key`(0600)（都不进仓库）。
+  输入后 Lead 会自动做一次真实 DS 请求并归档；不做也不影响目标 ①–⑤（8765 已有连接证据）。
 
 ## 7. 轮次索引
 
