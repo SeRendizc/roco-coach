@@ -24,6 +24,15 @@
 建议下一轮：给 policy 增加「洛克上下文 + 显式相性问句 ⇒ 必调 query_rules type_multiplier」，
 并配红→绿判据；同时把 camp/洛克 上下文混淆做一个守卫（E 的情况）。
 
+## 政策修复后的复测（同一晚，修复分支重启后）
+
+- 「电系打翠顶夫人（翼系+水系）几倍」：工具轨迹 **`query_rules`**，回执 `multiplier=3`；
+  provider=**deepseek**，1,433ms，正文：
+  > 电系打翠顶夫人（翼系+水系）是 3 倍伤害，属于强力克制。依据是规则表同源查询查到的记录（multiplier=3），这条不是推断。
+- 修复内容：① 政策新增 `type-multiplier-ask`（从含精灵名/括号双属性的问句解析出攻击+1..2 防守属性）；
+  ② 服务层 `_answer_type_multiplier` 曾是**第四份独立算术**（双弱 ×4），现已收口到 `TypeChart.multiplier`。
+- 附带验证：复盘构建函数在真 13 回合对局上产出了回合号/伤害/合法替代/资源账（见 `review-detail-verification.md`）。
+
 ## 费用与安全
 
 - 本轮共约 **6 次**云端请求（含 1 次被守卫替换），输出合计 < 1k tokens；金额很小但确实产生费用。
