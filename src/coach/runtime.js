@@ -4820,6 +4820,31 @@ export function checkGroundedAnswer(answer,{ragCitations=false}={}){
  // 由客户端降级为本地规则结论，而不是把错误名称展示给玩家。
  const drift=text.match(/解药|解毒药|以太|回血药|血瓶|蓝瓶|复活药|清醒药/g);
  if(drift)reasons.push('item-name-drift:'+[...new Set(drift)].join('/'));
+ // ── 属性等级词守卫（2026-10-17，官方「斯嘉丽」公开 Bad Case 同族）──────────────────
+ // 官方采访里 AI 把「克制」与「强力克制」当近义词：电系打翠顶夫人（翼+水）实际是
+ // 3×「强力克制」，写成「2 倍」是错的。数字校验拦不住它：`2`/`3` 是规则常量、
+ // 中文数字量词表里又没有「倍」。这里只做**窄判据**：只在正文谈属性相性、且证据里
+ // 确实有属性倍率时，要求正文声称的倍率能在证据里找到；「强力克制」必须对应 3；
+ // 旧的「双弱 ×4」一律判退役口径（官方/上游实现/游戏数据三处都是 3）。
+ const typeContext=/克制|抵抗|相性|属性|(?:光|暗|幽|幻|恶|毒|萌|虫|龙|翼|地|水|火|草|冰|电|武|机械|普通)系/.test(text);
+ // 只在本轮回执真的带了**洛克手游相性事实**时才判（否则自研小兽的 1.5/0.75 规则常量会被误伤）：
+ const affinityFacts=/(?:[光暗幽幻恶毒萌虫龙翼地水火草冰电武机械普通]系)\|(?:[光暗幽幻恶毒萌虫龙翼地水火草冰电武机械普通]系)|克制（weak）|type_multiplier|相性表/.test(facts);
+ if(typeContext&&affinityFacts){
+  const supportedType=new Set();
+  for(const m of facts.matchAll(/(?:×|x|X)\s*(\d+(?:\.\d+)?)/g))supportedType.add(Number(m[1]));
+  for(const m of facts.matchAll(/["']multiplier["']\s*:\s*(\d+(?:\.\d+)?)/g))supportedType.add(Number(m[1]));
+  for(const m of facts.matchAll(/(\d+(?:\.\d+)?)\s*倍/g))supportedType.add(Number(m[1]));
+  const CN_MULT={一:1,二:2,两:2,三:3,四:4,五:5,六:6,七:7,八:8,九:9,十:10};
+  const tierClaims=[];
+  if(/强力克制|极大克制/.test(text))tierClaims.push(3);
+  for(const m of text.matchAll(/(?:×|x|X)\s*(\d+(?:\.\d+)?)/g))tierClaims.push(Number(m[1]));
+  for(const m of text.matchAll(/(\d+(?:\.\d+)?)\s*倍/g))tierClaims.push(Number(m[1]));
+  for(const m of text.matchAll(/([一两二三四五六七八九十])\s*倍/g)){const v=CN_MULT[m[1]];if(v!==undefined)tierClaims.push(v);}
+  for(const v of [...new Set(tierClaims)]){
+   if(v===4){reasons.push('retired-dual-weak-tier:4x');continue;}
+   if(!supportedType.has(v))reasons.push('unsupported-type-tier:'+v);
+  }
+ }
  // 因果校验：事件里某一方的行动被注明「取消」时，正文不得声称该方造成了伤害。
  // 实测模型会把「原定行动取消」写成「命中了」，数字校验抓不到——因为根本没有数字。
  const events=(answer.latestEvents||[]).map(e=>typeof e==='string'?e:JSON.stringify(e));
@@ -4894,7 +4919,7 @@ export function checkGroundedAnswer(answer,{ragCitations=false}={}){
  if(ragCitations){
   for(const id of text.match(RAG_CITATION_RE)||[])if(!delivered.has(id))reasons.push('unsupported-citation:'+id);
  }
- return {valid:reasons.length===0,reasons:[...new Set(reasons)],scope:'Narrow numeric/citation/certainty guard; not a proof of all natural language correctness'};
+ return {valid:reasons.length===0,reasons:[...new Set(reasons)],scope:'Narrow numeric/citation/certainty/type-tier guard; not a proof of all natural language correctness'};
 }
 // ── 「不要说不知道」（人类 2026-09-25 口径）在**代码里**的那一半 ──────────────────────
 //
