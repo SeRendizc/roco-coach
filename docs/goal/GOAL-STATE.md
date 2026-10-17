@@ -100,6 +100,9 @@
 - Round 19：tag 指向最终 HEAD（f1dba1c7→后续 d7e2d4c4）、远端逐项核对（master/wip 未动）、最终验收快照。
 - Round 20：**启动器用户视角冒烟** —— `start-demo.sh` 在 8912（无 key）与 8913（文件兜底假 key）两路径均通过；
   0 付费调用；临时实例已停、假 key 已删；8765/8910 未受影响。证据 `evidence/launcher-smoke.md`。
+- Round 21：**公开仓库安全复核** —— 从 gitee fresh clone 最终分支：`docs/interview/cv` 不存在；
+  全仓扫描无真实密钥（3 处命中均为占位示例/既有注释）；runbook 的 `sk-...` 改成 `<你的 key>`；
+  报告补安全复核记录；提交 4ce3959f，tag 跟到最新（两端）。
 - 下一步：最终报告定稿 + 标记目标完成（用户已允许 20 轮后停止）。
 
 
