@@ -57,4 +57,18 @@
   · Bad Case 复现器（修复后）：电×翼|水、火×虫|草 三层全部 ×3；灼烧免疫已由回归判据覆盖。
   · 产出 `docs/interview/MOCK-INTERVIEW-2026-10-17.md`（16 问 + 对抗追问 + 演示降级 + 三次演练表）。
   · 证据：`docs/goal/evidence/round8-demo.md`。
-- 下一步（Round 9）：总体目标审计（A–I 逐项证据）、清理临时物、更新最终报告骨架；随后起草 20 轮总结。
+- Round 9：仓库内面试口径统一 ——
+  · 5 个被面试官可能点开的文档加「2026-10-17 复核横幅」（22 stopped / 2084·187 / 15 红不可说全绿 /
+    27 只是清单 / 48 只是目录名 / 四臂 RAG 只能引归档 / 修复分支 2091 条）。
+  · `RULE-EVIDENCE-LEDGER` 新增 14b：3× 新裁决 + 三条证据 + 代码入口；14 旧裁决逐字保留。
+  · 结构契约恢复为仅 1 条 pre-existing 红；`test:roco-quality` 77/77。提交 2b2b651d 并推送。
+  · CV 移到 `docs/interview/cv/`（personal，加 .gitignore 不进公开分支）；删掉误留的 pnpm-lock.yaml。
+- Round 10：**CV v2.1** —— Roco B5 加入「官方 Bad Case（翠顶夫人 3×、火神免疫灼烧）13 条回归判据 +
+  修复引擎/RAG/UI 三层口径不一致」；tectonic 重编译 **1 页、0 Overfull**；已同步 `~/Documents/CV`；
+  CV 目录 gitignore，不进公开分支。提交 f9c670ed。
+- Round 11：**终局验证** —— `test:unit` **2091/2076/14/1**：新增红=0、比基线少 1 条（结构契约顶层条目恢复）；
+  `test:env` 仅 1 条 pre-existing；quality 77/77；Bad Case Python 6/6 + Node 7/7；复现器三层 ×3。
+  证据：`docs/goal/evidence/final-verification.md`；材料补「修复分支状态」；DEMO-RUNBOOK 补
+  「接真实 DeepSeek 的两种方式 + 8765 已连接的只读证据」。
+- 下一步（Round 12）：最终报告 `docs/goal/GOAL-REPORT.md` 起草；清理 `.baseline` worktree 与测试副作用；
+  核对远端两个分支 HEAD 与本地一致。

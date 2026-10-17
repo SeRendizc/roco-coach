@@ -115,3 +115,21 @@ curl -s -o /dev/null -w '8765 still HTTP %{http_code}\n' http://127.0.0.1:8765/a
 ```
 
 今天实测结果：`PORT_AFTER_CLOSE: closed`、`lsof -i tcp:8910 → 无监听`、`8765 HTTP 200`（用户服务未受影响）。
+
+---
+
+## 接真实 DeepSeek（可选，付费；2026-10-17 补）
+
+只读事实：**8765 正常实例已接 DS**（`/api/bootstrap` → configured=true / verified=true / provider=deepseek；
+`/api/models` → cloud-deepseek connected）。本目录的 8910 隔离演练**未配 key**（零付费，provider=local / fail-closed）。
+
+要在 8910 或现场演示真实 DS，二选一：
+1. 启动前：`DEEPSEEK_API_KEY=sk-... PORT=8910 npm start`（服务只存进程内存，不落盘）；
+2. 启动后：打开 `http://127.0.0.1:8910/connect.html` 填 key 并验证（同样只存进程内存）。
+
+验证（会发 1 次付费请求，别重复跑）：
+```bash
+curl -s :8910/api/models                      # cloud-deepseek connected=true / verified=true
+# 然后在小芽界面问一个非纯事实问题，回包 provider 应为 deepseek；失败要检查是否回退 local
+```
+纪律：不要把 key 写进仓库/文档/截图；演示完可重启服务清空内存中的 key。

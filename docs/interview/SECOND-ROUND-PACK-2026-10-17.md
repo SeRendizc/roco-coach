@@ -19,6 +19,7 @@
 **事实基线**
 
 - 仓库：`/Users/serendizc/Developer/roco-coach`，公开 commit `2e62a73b`（2026-10-06）。
+- **修复分支状态**：`interview/2026-10-17` / `fix/typechart-official-3x` 已推送；3× 规则、状态免疫、等级词守卫三笔修复 + 官方 Bad Case 回归判据（Python 6/6、Node 7/7）；分支 `test:unit` 2,091 条、零新增红（见 `docs/goal/evidence/final-verification.md`）。
 - 项目：Roco Coach「小芽」——《洛克王国：世界》里的 AI 教练原型：规则引擎（Python）+ Node 服务
   + 浏览器页面，三个角色：军师（局内建议）、老师（复盘/练习）、陪练（陪伴）。
 - 本人角色（必须如实说）：**产品需求、交互、体验验收，AI 协作实现**；下面每条链是“我追过、能定位、
