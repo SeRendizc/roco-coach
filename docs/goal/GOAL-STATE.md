@@ -97,8 +97,11 @@
   · `test:unit` 复跑 **2091/2076/14/1**，失败集合与上一轮**逐条相同**（零新增红，keychain 改动无副作用）；
     server 26/26、quality 77/77、BadCase 6/6、tier 7/7、复现器三层 ×3。
   · GOAL-REPORT 增 §4b 最终仓库状态 + §8 待用户配 key 一件小事；提交 3912921e 并推送。
-- 下一步（Round 19）：最终一致性收尾——核对 8765 用户实例未被影响、8910 演示实例保持可用、
-  tag 指向最终 HEAD（force 更新两端 tag）、检查工作树仅 gitignored 文件。
+- Round 19：tag 指向最终 HEAD（f1dba1c7→后续 d7e2d4c4）、远端逐项核对（master/wip 未动）、最终验收快照。
+- Round 20：**启动器用户视角冒烟** —— `start-demo.sh` 在 8912（无 key）与 8913（文件兜底假 key）两路径均通过；
+  0 付费调用；临时实例已停、假 key 已删；8765/8910 未受影响。证据 `evidence/launcher-smoke.md`。
+- 下一步：最终报告定稿 + 标记目标完成（用户已允许 20 轮后停止）。
+
 
 
 ## 最终验收快照（Round 19）
