@@ -124,3 +124,11 @@
   `typechart-3x-fix` 保留。gitee/GitHub 已同步；master/wip 未动。
 - 最终复验：`test:unit` 2091/2076/14/1（失败集合与基线逐条相同）；quality 77/77；server 26/26；
   BadCase Python 6/6；tier Node 7/7；复现器三层 ×3；fresh-clone 复验通过。
+
+## 后续（goal 完成后的用户追加工作）
+
+- 真实 DeepSeek 联调 + 相性问句路由修复（typeMultiplierAsk / 服务层第四份算术收口）：`a0d6f8bc`，证据 `evidence/real-ds-verification.md`。
+- 复盘细节验证：`evidence/review-detail-verification.md`（回合号/伤害/合法替代/资源账可见）。
+- 给 Codex 的交接报告 + 转接 Prompt：`docs/handoff/CODEX-REPORT-2026-10-17.md`、`CODEX-TRANSFER-PROMPT-2026-10-17.md`。
+- DS 代做 Task A：**第五处**独立算术（`_answer_weakness_summary`）收口 + `_answer_type_chart` 自检改口径 + RAG `typeChartBody` 去死代码；证据 `evidence/rule-arithmetic-audit.md`。
+- DS 代做 Task C v1：离线 Agent 政策评测（`npm run eval:agent-policy`，14/14，含「改坏必红」判据）；证据 `evidence/agent-policy-eval-report.md`。

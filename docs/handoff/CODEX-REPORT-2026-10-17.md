@@ -88,6 +88,10 @@ DS 负责把结果压成面试可讲的东西。每周产出应至少包含：�
 ## 5. 请你（Codex）优先做的 4 件事（按 ROI）
 
 ### 任务 A：对「四层口径」做**对抗式复核**（最高优先，0 付费）
+
+> **DS 已先做了一版**：见 `docs/goal/evidence/rule-arithmetic-audit.md`（发现并修掉**第五处**：
+> `_answer_weakness_summary` 的逐属性相乘；`_answer_type_chart` 自检口径也改为「引擎 vs 快照 0 格 + 41 格历史」）。
+> 你可以**独立复跑并挑战这版结论**，或直接做 B/C/D。
 - 复跑：`cd roco && PYTHONPATH=src python3 -m unittest tests.test_type_multiplier_ruling tests.test_scarlett_bad_cases`；
   `node --test tests/roco-rag-typechart.test.js tests/roco-scarlett-tier-grounding.test.js tests/roco-type-multiplier-ask.test.js`。
 - 检查是否还有**第五处**独立算术/口径（grep `_single_multiplier`、`combination_rule`、`snapshot_value`、
@@ -104,6 +108,9 @@ DS 负责把结果压成面试可讲的东西。每周产出应至少包含：�
 - 产出：`codex-review-2026-10-17/Routing-and-context.md` + 最小补丁 + 测试。
 
 ### 任务 C：给「Agent 能力」建一个可复跑的小评测（0 付费，离线桩）
+
+> **DS 已先做 v1**：`npm run eval:agent-policy`（16 任务/计分 14/known-gap 2，14/14 通过；
+> `tests/roco-agent-policy-eval.test.js` 含「改坏期望必红」反证）。建议你把它扩到 25–30 条并加「该不调」反例。
 - 规模建议 20–30 条：相性问句（含官方 Bad Case 同族）/ 该调工具与不该调 / 证据不足时降级 /
   camp 与洛克混淆 / 旧建议过期。指标：工具选择正确率（分桶）、答案是否引用回执、错误类型分布、分母=全部任务。
 - 产出：`codex-review-2026-10-17/agent-eval/`（任务集 + runner + 一页报告），并接一条 `test:unit` 或独立 npm script。
