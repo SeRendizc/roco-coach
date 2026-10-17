@@ -116,3 +116,11 @@
 - 实例：8765（用户正常实例，DS 已连接）HTTP 200；8910（修复分支演示实例）HTTP 200，等用户输入 key。
 - 公开仓库安全：CV/Key 未入库；推送前敏感串扫描 0 命中。
 - 待用户：8910 `/connect.html` 输入一次 key（Keychain/0600 双通道）→ Lead 补一次真实 DS 证据。
+
+## 收口记录（Round 19/20）
+
+- 目标完成声明已写入 `GOAL-REPORT.md` §9b；五项全达成，唯一用户侧遗留为 8910 key（不影响目标）。
+- 最终分支 `interview/2026-10-17`，tag `interview-2026-10-17` 指向最终 HEAD；`fix/typechart-official-3x` 与
+  `typechart-3x-fix` 保留。gitee/GitHub 已同步；master/wip 未动。
+- 最终复验：`test:unit` 2091/2076/14/1（失败集合与基线逐条相同）；quality 77/77；server 26/26；
+  BadCase Python 6/6；tier Node 7/7；复现器三层 ×3；fresh-clone 复验通过。
