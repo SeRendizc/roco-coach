@@ -148,9 +148,11 @@ for (const r of result.official_bad_cases) {
 }
 console.log('');
 console.log(`第三类：${BURN_CASE.title} —— 官方口径「${BURN_CASE.official}」。`);
-console.log('  · 引擎 effects.py 的 END_OF_TURN_STATUS 已声明 灼烧 immune_element=火系；');
-console.log('  · 但技能施加状态路径 env.py::_apply_status_effects 没有消费 immune_element，');
-console.log('    只有天气路径（env.py::_end_of_turn_weather）会判免疫 ⇒ 技能挂上的灼烧不免疫。');
+console.log('  · 已修复（2026-10-17）：env.py 新增 _status_immune，术语 1001/1002/1008 的');
+console.log('    immune_element 成为唯一实现，技能施加 + 「每驱散 1 层」两条路径都消费；');
+console.log('    免疫时记 status_immune 事件、不写层数。回归判据：roco/tests/test_scarlett_bad_cases.py（6/6）。');
+console.log('  · 修复前（历史留痕）：只有天气路径（env.py::_end_of_turn_weather）判免疫，');
+console.log('    技能挂上的灼烧不会被免疫 —— 与官方采访「火神也不吃灼烧」相反。');
 console.log('');
 console.log('结论：三层对同一格给出不同答案时，先修「谁是真源」，再改判据 —— 不能只改文案。');
-console.log('修复分支：fix/typechart-official-3x（本仓 .work/typechart-3x，未合入）。');
+console.log('修复分支：fix/typechart-official-3x（已推送 gitee/GitHub；未改 master/wip）。');

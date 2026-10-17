@@ -16,7 +16,7 @@
 | F | 全量套件验证（Python + Node） | **完成** | Python：仅 1 条 pre-existing 红（tier）；Node：2084/2068/15/1，与基线**失败集合逐条相同**（diff 为空）⇒ 零新增红 |
 | G | 面试材料/简历/台账数字一致 | 待做 | docs/interview、cv、reports |
 | H | 公开仓库分支推送（不改 master/wip） | **完成** | gitee+origin 已推 `fix/typechart-official-3x`、`interview/2026-10-17` |
-| I | 隔离演示演练 + 模拟面试 | 待做 | 日志/截图 |
+| I | 隔离演示演练 + 模拟面试 | **完成（脚本+演练证据）** | docs/goal/evidence/round8-demo.md；MOCK-INTERVIEW 文档 |
 
 ## 轮次日志
 
@@ -51,5 +51,10 @@
   · `interview/2026-10-17`（基于 fix 分支）收录 docs/interview + reports/interview-2026-10-17 +
     docs/goal + scripts/interview + 成长方案（39 文件，46016 行），已推两端；**未改 master/wip**。
   · 推送凭据走 store（gitee）/ gh（github）；无密钥写入仓库；推送前做过敏感串扫描（0 命中）。
-- 下一步（Round 8）：材料数字一致性（台账附录、README/速记卡加「修复分支已推送」）、
-  然后隔离实例演示演练。
+- Round 8：**I 完成** ——
+  · 隔离实例 `PORT=8910`：status available=true、6 个页面全 200、battle/new→plan→advance 全通；
+    无 key 局中提问 fail-closed（13.7ms，不伪造建议）；服务已停止，8765/8896/8899 未动。
+  · Bad Case 复现器（修复后）：电×翼|水、火×虫|草 三层全部 ×3；灼烧免疫已由回归判据覆盖。
+  · 产出 `docs/interview/MOCK-INTERVIEW-2026-10-17.md`（16 问 + 对抗追问 + 演示降级 + 三次演练表）。
+  · 证据：`docs/goal/evidence/round8-demo.md`。
+- 下一步（Round 9）：总体目标审计（A–I 逐项证据）、清理临时物、更新最终报告骨架；随后起草 20 轮总结。
