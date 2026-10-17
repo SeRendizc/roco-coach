@@ -138,6 +138,6 @@ curl -s :8910/api/models                      # cloud-deepseek connected=true / 
 
 ```bash
 bash scripts/interview/start-demo.sh 8910
-# 首次：浏览器打开 http://127.0.0.1:8910/connect.html 输入 key（会存入 Keychain: roco-deepseek）
+# 首次：浏览器打开 http://127.0.0.1:8910/connect.html 输入 key（Keychain 优先；若被拒则存 `$HOME/.config/roco/deepseek.key` 0600，两者都不在仓库内）
 # 之后：启动器自动从 Keychain 读取，不需要再输入
 ```

@@ -981,11 +981,27 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
      // 供演示启动器 `scripts/interview/start-demo.sh` 下次复用。默认关闭：
      // 只有启动时设了 `ROCO_KEYCHAIN_SERVICE` 才写；仓库/测试/默认路径行为不变。
      // 不落盘到仓库；Keychain 不可用时忽略，不影响本次连接。
-     if(process.env.ROCO_KEYCHAIN_SERVICE){
-       try{
-         const {execFileSync}=await import('node:child_process');
-         execFileSync('security',['add-generic-password','-U','-s',String(process.env.ROCO_KEYCHAIN_SERVICE),'-a',process.env.USER||'roco','-w',payload.key],{stdio:'ignore'});
-       }catch{/* Keychain 不可用：内存凭据仍然有效 */ }
+     if(process.env.ROCO_KEYCHAIN_SERVICE||process.env.ROCO_CREDENTIAL_FILE){
+       // 顺序：Keychain 优先；失败再退回 0600 文件（路径由启动器给，默认不在仓库内）。
+       let stored=false;
+       if(process.env.ROCO_KEYCHAIN_SERVICE){
+         try{
+           const {execFileSync}=await import('node:child_process');
+           execFileSync('security',['add-generic-password','-U','-s',String(process.env.ROCO_KEYCHAIN_SERVICE),'-a',process.env.USER||'roco','-w',payload.key],{stdio:'ignore'});
+           stored=true;
+         }catch{/* 继续尝试文件 */ }
+       }
+       if(!stored&&process.env.ROCO_CREDENTIAL_FILE){
+         try{
+           const fs=await import('node:fs');
+           const path=await import('node:path');
+           const file=String(process.env.ROCO_CREDENTIAL_FILE);
+           fs.mkdirSync(path.dirname(file),{recursive:true,mode:0o700});
+           fs.writeFileSync(file,payload.key,{mode:0o600});
+           fs.chmodSync(file,0o600);
+           stored=true;
+         }catch{/* 存储失败不影响本次连接 */ }
+       }
      }
      // 换凭据/换模型 ⇒ 旧缓存作废（key 里带 model，但换 key 不体现在 key 里）。
      answerCache.clear();inflightByKey.clear();

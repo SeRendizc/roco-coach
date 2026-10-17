@@ -5,8 +5,12 @@ set -euo pipefail
 PORT="${1:-8910}"
 SERVICE="${ROCO_KEYCHAIN_SERVICE:-roco-deepseek}"
 KEY="${DEEPSEEK_API_KEY:-}"
+CRED_FILE="${ROCO_CREDENTIAL_FILE:-$HOME/.config/roco/deepseek.key}"
 if [ -z "$KEY" ] && command -v security >/dev/null 2>&1; then
   KEY="$(security find-generic-password -s "$SERVICE" -w 2>/dev/null || true)"
+fi
+if [ -z "$KEY" ] && [ -f "$CRED_FILE" ]; then
+  KEY="$(cat "$CRED_FILE")"
 fi
 if [ -n "$KEY" ]; then
   export DEEPSEEK_API_KEY="$KEY"
@@ -16,4 +20,4 @@ else
 fi
 echo "[start-demo] URL: http://127.0.0.1:${PORT}/connect.html"
 echo "[start-demo] 健康检查: curl -s http://127.0.0.1:${PORT}/api/models"
-ROCO_KEYCHAIN_SERVICE="$SERVICE" PORT="$PORT" exec npm start
+ROCO_KEYCHAIN_SERVICE="$SERVICE" ROCO_CREDENTIAL_FILE="$CRED_FILE" PORT="$PORT" exec npm start

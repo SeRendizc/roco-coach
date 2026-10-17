@@ -83,5 +83,9 @@
   （优先 env/Keychain，否则提示到 /connect.html 输入一次）；server 测试 26/26 不受影响；
   8910 已用启动器起好（当前未配 key，connect 页 200），URL 交给用户输入。
   提交并推 tag（`interview-2026-10-17`、`typechart-3x-fix`）。
-- 下一步：用户输入 key 后 → 在 8910 跑 **一次**真实 DS 请求（修好的规则 + 真模型），
-  记录 provider/延迟/回退到 evidence；随后回到 LLM/Agent 面试主线（模拟面试与叙事），收尾 20 轮。
+- Round 16：**凭据持久化修好** —— 第一次 8910 实例在 sandbox 内启动，`security` 写 Keychain 被拒
+  （Operation not permitted，已用探针证实）；已给 `/api/connect` 加「Keychain 优先、失败退回
+  `$HOME/.config/roco/deepseek.key`(0600)」双通道（仍然 env-gated，默认关闭），并用**沙箱外权限**
+  重启 8910（探针验证 Keychain add/read/delete 均 OK）。用户需在同一 URL 再输入一次 key（重启丢了内存）。
+- 下一步：用户重新输入后 → 验证 Keychain 已存 → 跑**一次**真实 DS 请求（修复分支 + 真模型），
+  记录 provider/延迟/回退；随后回到 LLM/Agent 主线收尾。
