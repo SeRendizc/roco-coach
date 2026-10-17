@@ -100,3 +100,13 @@
 - 下一步（Round 19）：最终一致性收尾——核对 8765 用户实例未被影响、8910 演示实例保持可用、
   tag 指向最终 HEAD（force 更新两端 tag）、检查工作树仅 gitignored 文件。
 
+
+## 最终验收快照（Round 19）
+
+- 分支：`interview/2026-10-17`（HEAD 见提交）、`fix/typechart-official-3x` @ `f9ac7e06`；`master`/`wip` 未动。
+- 标签：`interview-2026-10-17`（指向最终 HEAD）、`typechart-3x-fix`（指向 f9ac7e06）；gitee + GitHub 同步。
+- 复验：`test:unit` 2091/2076/14/1（失败集合与基线逐条相同）；`test:env` 仅 1 条 pre-existing；
+  quality 77/77；server 26/26；BadCase Python 6/6 + Node 7/7；复现器三层 ×3；干净克隆验收通过。
+- 实例：8765（用户正常实例，DS 已连接）HTTP 200；8910（修复分支演示实例）HTTP 200，等用户输入 key。
+- 公开仓库安全：CV/Key 未入库；推送前敏感串扫描 0 命中。
+- 待用户：8910 `/connect.html` 输入一次 key（Keychain/0600 双通道）→ Lead 补一次真实 DS 证据。
