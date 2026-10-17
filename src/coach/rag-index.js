@@ -494,30 +494,21 @@ function rulesetChunks(data, ledgerById) {
  * ① 全库「倍率」的 idf 会被这 120 条拉低、② 某条短正文会顶掉那条台账 ——
  * 那正是「新文档抢旧查询的 top-1」。数值本身用 `×N` 逐字给全，信息一点没少。
  *
- * 【2026-09-25 人类裁决：双属性按两系相乘】原话「属性双属性叠加：快照 3×（现用）
- * vs 两个社区源 4×，差 41 格。**使用社区源**」。所以双属性条目的正文数值
- * **不能**再照抄 `types.json` 那一行的封顶值（×3），必须写成**两条单属性相乘**
- * 的结果（×4）—— 台账 EV-TYPE-MULTIPLIER（RECORDED_IN_GAME）与
- * `roco/src/roco_env/data.py::TypeChart.multiplier` 同一口径。
- * **旧口径留痕**：本条原文写「倍率写成 `X系 ×N`，N 与 types.json 逐字相同」；
- * 那句话对**单属性**仍然成立（18/18 逐字不变），对双属性已被裁决取代。
- * 单属性的行为一个字都没动：它继续逐字照抄快照那一行。
+ * 【2026-10-17 复核（提案分支，未合入）：双属性改回快照逐字值（双弱封顶 ×3）】
+ * 旧裁决（2026-09-25）原话「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，
+ * 差 41 格。**使用社区源**」⇒ 双属性正文按两系相乘写 ×4。**该裁决现被新证据推翻**，
+ * 旧文逐字保留（改钉不删）。新证据：① types.json 对 102 条双属性键逐字给 3；
+ * ② 上游模拟器 damage_calc.py 注释「双属性均弱 → 3x（强力克制，非乘算的 4x）」；
+ * ③ 官方采访里电系打翠顶夫人（翼+水）玩家答「三倍」。故正文重新逐字照抄
+ * types.json 那一行，与客户端 type-affinity 及引擎新口径三处一致。
  */
 function typeChartBody(entry, singleRows = null) {
   const key = String(entry.key ?? '');
   const parts = key.split('|').filter(Boolean);
-  // 双属性：值 = 两条单属性行的倍率相乘（缺单属性行时按中性 1 参与相乘）。
-  // 归类（weak / resist / 中性）也按**相乘后**的值判定：乘积为 1 的项从两侧都消失。
-  const multiply = parts.length === 2 && singleRows ? parts : null;
-  const valueOf = (attackType, fallback) => {
-    if (!multiply) return fallback;
-    let product = 1;
-    for (const part of multiply) {
-      const row = singleRows.get(part);
-      product *= row ? (row.get(attackType) ?? 1) : 1;
-    }
-    return product;
-  };
+  // 2026-10-17 复核：双属性**逐字照抄** types.json 那一行（双弱封顶 ×3），
+  // 不再按两条单属性相乘（旧裁决 ×4 已推翻，理由见函数上方注释）。
+  const multiply = null;
+  const valueOf = (attackType, fallback) => fallback;
   const candidates = [];
   const push = (item) => {
     if (item && item.type && !candidates.some((row) => row.type === item.type)) candidates.push(item);
