@@ -15,7 +15,7 @@
 | E | 派生件/金标/门禁 | **E1/E2 完成**（金标 3 种子 + 回归集重建） | 旧值存 PRIOR_2026_10_17；tier 为 pre-existing |
 | F | 全量套件验证（Python + Node） | **完成** | Python：仅 1 条 pre-existing 红（tier）；Node：2084/2068/15/1，与基线**失败集合逐条相同**（diff 为空）⇒ 零新增红 |
 | G | 面试材料/简历/台账数字一致 | 待做 | docs/interview、cv、reports |
-| H | 公开仓库分支推送（不改 master/wip） | 待做 | gitee/origin dry-run |
+| H | 公开仓库分支推送（不改 master/wip） | **完成** | gitee+origin 已推 `fix/typechart-official-3x`、`interview/2026-10-17` |
 | I | 隔离演示演练 + 模拟面试 | 待做 | 日志/截图 |
 
 ## 轮次日志
@@ -46,4 +46,10 @@
   （含「证据 ×2 时同一句 2 倍不许被拦」反证），已登记进 test:unit。
   `test:unit` 2091/2075/15/1：失败集合与基线**逐条相同**（零新增红）；自研小兽 1.5/0.75 不误伤。
   提交 f9ac7e06。
-- 下一步（Round 7）：材料/台账/简历数字一致性 + 建 `interview/2026-10-17` 分支（含文档/证据）并推送。
+- Round 7：**H 完成** ——
+  · `fix/typechart-official-3x` 已推 gitee + GitHub（3 个提交：3× 规则 / 状态免疫 / 等级词守卫）。
+  · `interview/2026-10-17`（基于 fix 分支）收录 docs/interview + reports/interview-2026-10-17 +
+    docs/goal + scripts/interview + 成长方案（39 文件，46016 行），已推两端；**未改 master/wip**。
+  · 推送凭据走 store（gitee）/ gh（github）；无密钥写入仓库；推送前做过敏感串扫描（0 命中）。
+- 下一步（Round 8）：材料数字一致性（台账附录、README/速记卡加「修复分支已推送」）、
+  然后隔离实例演示演练。

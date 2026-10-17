@@ -114,3 +114,18 @@
 - RL：**1152** 参数、留出 **8/16→15/16**（三种子一致，今天沙箱复跑逐位一致）。
 - 云端样本：3 次真实请求、HTTP 200、`raw==delivered==UI`、`fallback=0`、provider=deepseek（归档 2026-10-06，今天只对账不重发）。
 - 演示服务：`PORT=8910 npm start` 起得来、5 个页面 200、规则服务 `available=true`、开局/规划/推进 API 链跑通；离线回退 p50 **8.71ms** / p95 **15.96ms**（n=12，非模型）。
+
+---
+
+## 附录 Z：2026-10-17 修复分支复测（`fix/typechart-official-3x` / `interview/2026-10-17`）
+
+> 本节数字**不是公开主干**（主干仍是 `2e62a73b`），而是修复分支上的复测；面试引用时要说清分支。
+
+| # | 主张 | 命令 | 实测 | 判定 |
+|---|---|---|---|---|
+| Z1 | 双属性相性 = 快照逐字 3×（三层统一） | `node scripts/interview/replay-scarlett-bad-cases.mjs` | 官方 Bad Case：引擎/RAG/客户端 全部 ×3（主干时 4/4/3） | verified（分支） |
+| Z2 | 状态免疫（火免灼烧等） | `cd roco && PYTHONPATH=src python3 -m unittest tests.test_scarlett_bad_cases` | 6/6 通过；含「移除免疫 ⇒ 火神被挂 10 层」必红反证 | verified |
+| Z3 | grounded 等级词守卫 | `node --test tests/roco-scarlett-tier-grounding.test.js` | 7/7；「2 倍 vs 证据 ×3」被拦、「强力克制 vs ×2」被拦、×4 判退役 | verified |
+| Z4 | 全量零新增红（Python） | `npm run test:env` | 仅 1 条 pre-existing（tier 反证；基线 2e62a73 同样红） | verified |
+| Z5 | 全量零新增红（Node） | `npm run test:unit` | 2091 / 2075 过 / 15 红 / 1 skip；失败集合与主干**逐条相同** | verified |
+| Z6 | 金标/回归集按纪律重建 | `git show fix/typechart-official-3x` | 金标 3 种子（1000/1004/1005）旧值存 `GOLDEN_*_PRIOR_2026_10_17`；回归集仅 status/type-sweep-恶系 2 场景变 | verified |
