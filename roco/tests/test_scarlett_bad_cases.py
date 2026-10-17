@@ -156,5 +156,46 @@ class ScarlettBurnImmunityTest(unittest.TestCase):
               f"回合末后={layers} ⇒ 判据 B（要求免疫）必红")
 
 
+class ServiceTypeMultiplierReadTest(unittest.TestCase):
+    """服务层读口（`query_rules kind=type_multiplier`）必须与引擎结算同一个数。
+
+    2026-10-17：这里曾是**第四份独立算术**（服务层自己把两条单属性相乘，双弱 4×），
+    与 TypeChart/客户端/RAG 都不一致——真实模型链路里模型答 3、回执给 4，被守卫整条打回。
+    """
+
+    def test_read_returns_snapshot_tier_three(self):
+        from roco_env.service import RocoService
+        svc = RocoService()
+        cases = [
+            ("电系", ["翼系", "水系"]),   # 官方 Bad Case 1：电系打翠顶夫人 = 3
+            ("火系", ["虫系", "草系"]),   # 官方 Bad Case 2：花衣蝶被火神三倍克制
+            ("地系", ["火系", "冰系"]),   # 旧裁决点名的 2×2 例子：快照也是 3
+        ]
+        for attack, defenders in cases:
+            answer = svc._answer_type_multiplier(RS, {"attack_element": attack, "defender_types": defenders})
+            mult = (answer.result or {}).get("multiplier")
+            self.assertEqual(mult, 3.0, f"{attack} 打 {'|'.join(defenders)} 的服务读口不是 3×：{answer.result}")
+            self.assertEqual((answer.result or {}).get("combination_rule"), "snapshot_row",
+                             "读口必须声明与快照/引擎同源（不再是服务层自己相乘）")
+            self.assertNotEqual(mult, 4.0, "旧的「双弱 ×4」不许再出现在读口")
+
+    def test_read_missing_combination_fails_closed(self):
+        from roco_env.service import RocoService
+        svc = RocoService()
+        singles = [key[0] for key in RS.type_chart.rows if len(key) == 1]
+        missing = None
+        for i, a in enumerate(singles):
+            for b in singles[i + 1:]:
+                if not RS.type_chart.has_row((a, b)):
+                    missing = (a, b)
+                    break
+            if missing:
+                break
+        self.assertIsNotNone(missing, "测试前提：快照必须有缺行组合（18 选 2 共 153，快照只给 86）")
+        answer = svc._answer_type_multiplier(RS, {"attack_element": "电系", "defender_types": list(missing)})
+        self.assertIsNone(answer.result, f"缺行组合必须 fail closed，不许猜：{answer.result}")
+        self.assertTrue(str(answer.error_type).startswith("unsupported"), f"缺行要报 unsupported：{answer.error_type}")
+
+
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()

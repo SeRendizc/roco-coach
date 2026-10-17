@@ -3074,6 +3074,8 @@ export function policyFor(message='',context={}){
  // 2026-09-25（P0-a）：**按属性找精灵** —— 比 type_chart（属性层面）更具体，排它前面。
  // 相性问句**先**判（2026-09-26）：`catalogAsk` 是「按属性找精灵」，它比相性更宽 ——
  // 反过来的话「光系和暗系谁克谁」会被它抢走，去查"哪些精灵是光系"，答非所问。
+ // 2026-10-17：点名倍率的相性问句（含「精灵名 + 括号双属性」）必须直接查 type_multiplier。
+ if(typeMultiplierAsk(text))return {need:'query_rules',reason:'type-multiplier-ask'};
  if(typeChartAsk(text))return {need:'query_rules',reason:'type-chart-ask'};
  if(catalogAsk(text,context))return {need:'query_rules',reason:'catalog-ask'};
  // 2026-09-25（人类：「不要说不知道！预测就说预测」）：**两只之间的对位问题**也必须去查。
@@ -3473,6 +3475,34 @@ export function typePairAsk(text=''){
  if(!attacker||!defender)return null;
  return {attacker:norm(attacker),defender:norm(defender)};
 }
+/**
+ * 「**X系打 Y系+Z系** 是几倍」这种**点名倍率**的相性问句（2026-10-17 加）。
+ *
+ * 为什么单独一条：官方公开 Bad Case「电系打翠顶夫人（翼+水）= 三倍」在真实模型链路上
+ * 落在 `policy-no-tool` —— 因为问句里既有精灵名（翠顶夫人）、又有括号里的双属性，
+ * 旧的 `TYPE_PAIR_ASK` 只认「A系打B系」，于是引擎相性表根本不去查，模型只能答「查不到」。
+ * 本函数把「攻击属性 + 1..2 个防守属性」从问句里取出来（取不到就 null，不猜），
+ * 政策再用它强制调 `query_rules {kind:'type_multiplier'}` —— 拿引擎那一格的倍率。
+ */
+const TYPE_MULT_ELEMENT='[\u4e00-\u9fa5]{1,3}(?:系|属性)';
+export function typeMultiplierAsk(text=''){
+ const t=String(text).trim();
+ const attack=new RegExp(`(${TYPE_MULT_ELEMENT})\\s*(?:打|对|克)`).exec(t);
+ if(!attack)return null;
+ const norm=(v)=>v.replace(/属性$/,'系');
+ // 防守方：优先取括号里的属性（可双属性）；否则取「打/对/克」后面紧跟的属性。
+ const paren=new RegExp(`[（(]\\s*(${TYPE_MULT_ELEMENT})\\s*(?:[+＋、和与/]\\s*(${TYPE_MULT_ELEMENT}))?\\s*[)）]`).exec(t);
+ const after=new RegExp(`(?:打|对|克)\\s*(${TYPE_MULT_ELEMENT})\\s*(?:[+＋、和与/]\\s*(${TYPE_MULT_ELEMENT}))?`).exec(t);
+ const found=paren??after;
+ if(!found)return null;
+ const defenders=[found[1],found[2]].filter(Boolean).map(norm).slice(0,2);
+ if(!defenders.length)return null;
+ const cue=/几倍|多少倍|倍率|强力克制|相性倍率|强克/.test(t);
+ // 单属性且没有「倍」类线索时，交给旧的 type_row 路径（行为不变）；双属性或点名倍率才升级。
+ if(!cue&&defenders.length<2)return null;
+ return {kind:'type_multiplier',attack_element:norm(attack[1]),defender_types:defenders};
+}
+
 /** 这是不是一句「某系克什么／被什么克」的相性表问句。 */
 /**
  * 规则**策略**问句（目前只有天气）：「雨天水系伤害加多少」「沙暴有什么效果」。
@@ -4407,7 +4437,10 @@ export function defaultArgsFor(name,context,message){
   // 「下一个该带谁」：先要**整张引擎相性表**（`type_chart` 不吃参数），再按名单点名。
   // 一对一问句（「水系打火系有优势吗」）要的是**攻击方那一行**：整张表既不必要、回执也大。
   // 其余相性问句照旧拿整张表（`type_chart` 不吃参数）。
-  if(typeChartAsk(text)){
+  // 2026-10-17：点名倍率/双属性的相性问句 → 直接问引擎「这一格几倍」。
+ const mult=typeMultiplierAsk(text);
+ if(mult)return mult;
+ if(typeChartAsk(text)){
    const pair=typePairAsk(text);
    return pair?{kind:'type_row',type:pair.attacker}:{kind:'type_chart'};
   }

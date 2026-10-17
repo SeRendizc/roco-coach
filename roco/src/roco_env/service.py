@@ -107,6 +107,7 @@ import time
 import traceback
 
 from . import events_text
+from . import data as rdata
 from . import coverage as coverage_mod
 from . import effects as fx
 from .coverage import classify_skill_declared
@@ -2060,26 +2061,35 @@ class RocoService:
                 defender_types=uniq,
             )
         if len(uniq) == 2:
-            # 2026-09-25 人类裁决：「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。
-            # **使用社区源**」⇒ 双属性 = 两系相乘（台账 EV-TYPE-MULTIPLIER，RECORDED_IN_GAME）。
-            # 快照那一行的值只用来做**对照**，不作为结算口径。
-            a, b = uniq
-            value = self._single_multiplier(rows, a, element) * self._single_multiplier(rows, b, element)
+            # **2026-10-17 复核（推翻 2026-09-25 裁决，改钉不删）**：
+            # 旧裁决原话「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。**使用社区源**」
+            # ⇒ 旧实现 = 两条单属性相乘（双弱 4×）。新证据（官方 2026-08-15 采访「电系打翠顶夫人=三倍」、
+            # 上游 sim `damage_calc.py` 注释「双弱 → 3x，非乘算 4x」、`types.json` 双属性行逐字 3）
+            # ⇒ 现在**只信一个源**：`TypeChart.multiplier`（与战斗结算同一份实现），快照那一行逐字为准。
+            # 这里曾经是第四份独立算术（服务层自己再乘一次）—— 与引擎/客户端/RAG 都不一致，已收口。
+            try:
+                value = float(rs.type_chart.multiplier(tuple(uniq), element))
+            except rdata.TypeCombinationUnknown:
+                return _unsupported(
+                    "type_combination_missing",
+                    "该双属性组合不在快照的显式行里 —— 不可查：不用别的组合顶、也不猜中性值（fail closed）",
+                    defender_types=uniq,
+                )
             snapshot_value, snapshot_from_table = self._row_lookup(row, element)
+            snap = float(snapshot_value) if snapshot_from_table else 1.0
             return Answer(
                 result={
                     "record": "type_multiplier",
                     "defender_types": uniq,
                     "attack_element": element,
-                    "multiplier": float(value),
-                    "combination_rule": "multiply",
-                    "combination_rule_source": "人类裁决 2026-09-25（台账 EV-TYPE-MULTIPLIER，RECORDED_IN_GAME）",
+                    "multiplier": value,
+                    "combination_rule": "snapshot_row",
+                    "combination_rule_source": "2026-10-17 复核：双属性逐字遵循 types.json（与 TypeChart.multiplier 同源）",
                     "neutral_inferred": False,
-                    "source": f"types.json 的单属性行相乘（{a} × {b}）；组合可查性来自 {row.get('key')}",
-                    # 快照的封顶值一并给出：41 格上它与裁决口径不同（3 vs 4），差异要看得见。
-                    "snapshot_value": float(snapshot_value) if snapshot_from_table else 1.0,
-                    "snapshot_agrees": abs((snapshot_value if snapshot_from_table else 1.0) - value) < 1e-9,
-                    # 相乘口径**不是**未核验假设：它是人类裁决（RECORDED_IN_GAME）。
+                    "source": f"types.json 那一行（{row.get('key')}）；与引擎结算同一实现",
+                    "snapshot_value": snap,
+                    "snapshot_agrees": abs(snap - value) < 1e-9,
+                    # 快照口径不是未核验假设：它是游戏数据转录（RECORDED_IN_GAME）。
                     "assumption_free": True,
                 },
                 evidence_ids=[ev(rs.ruleset_id, "types.json", str(row.get("key")))],
