@@ -142,7 +142,7 @@ language correctness'`。这说明项目是**知道**这个边界的——但官
 | 项 | 结果 | 命令/位置 |
 |---|---|---|
 | 提交 | `81ec0d45` 3× 规则 → `a972f57b` 状态免疫 → `f9ac7e06` 等级词守卫（分支，未合入主干） | `git log --oneline fix/typechart-official-3x` |
-| 规则修复验证 | Python 全量仅 1 条 pre-existing 红（tier）；Node 2091/2075/15/1，失败集合与基线**逐条相同** | `npm run test:env`；`npm run test:unit`（日志 /tmp/goal-unit-fix3.log） |
+| 规则修复验证 | Python 全量仅 1 条 pre-existing 红（tier）；Node **2091 / 2076 过 / 14 红 / 1 skip**（新增红 0；比基线少 1 条） | `npm run test:env`；`npm run test:unit`（见 docs/goal/evidence/final-verification.md） |
 | 官方 Bad Case 判据 | Python `tests.test_scarlett_bad_cases` 6/6；Node `tests/roco-scarlett-tier-grounding` 7/7 | 两文件直接 `run` |
 | 状态免疫 | 火/毒/草分别免疫灼烧/中毒/寄生（术语 1001/1002/1008），技能路径 + 每驱散层路径都消费 | `_status_immune`（env.py） |
 | 引擎行为 | 双弱 3×（翼+水受电、虫+草受火） | `.work/typechart-3x/roco` 下 `python3` 直接调 `TypeChart.multiplier` |

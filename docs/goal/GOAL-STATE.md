@@ -70,5 +70,13 @@
   `test:env` 仅 1 条 pre-existing；quality 77/77；Bad Case Python 6/6 + Node 7/7；复现器三层 ×3。
   证据：`docs/goal/evidence/final-verification.md`；材料补「修复分支状态」；DEMO-RUNBOOK 补
   「接真实 DeepSeek 的两种方式 + 8765 已连接的只读证据」。
-- 下一步（Round 12）：最终报告 `docs/goal/GOAL-REPORT.md` 起草；清理 `.baseline` worktree 与测试副作用；
-  核对远端两个分支 HEAD 与本地一致。
+- Round 12：**报告草稿 + 清理** —— `GOAL-REPORT.md`（目标逐条审计/验证读数/残余风险/面试验收清单）；
+  删除 `.baseline` worktree、恢复测试副作用；提交 14ed2d00。
+- Round 13：**干净克隆验收** —— 从 gitee `--depth 1` clone `interview/2026-10-17`（HEAD 0c200fc7 与本地一致），
+  在克隆体里：复现器三层 ×3、tier 守卫 7/7、RAG 11/11、quality 77/77、Python 14 OK；
+  CV 不在克隆中（已 gitignore）；证据链自包含。见 `evidence/clean-clone-verification.md`。
+- Round 14：**材料准确性复核** —— 全量扫描 docs/interview 的 stale 数字，修掉 BRIEF 两处「48 只可模拟」
+  （改为可玩 530 / 冻结 542 / 按需 80，并注明 48 只是目录名）；REPLAY 的 Node 读数改为最终
+  **2091/2076/14/1**；本地 markdown 链接检查 **0 missing**。
+- 下一步（Round 15）：最终一页纸（面试速记卡 PDF 与 BC 文档）复核排版；更新 GOAL-REPORT 为最终数字；
+  之后收尾。
