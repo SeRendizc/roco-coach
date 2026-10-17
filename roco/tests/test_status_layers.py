@@ -55,7 +55,10 @@ def _learnable(pid):
             out |= {str(x) for x in values}
     return out
 TEAM6 = ["pet_000445", "pet_000001", "pet_000007", "pet_000022", "pet_000118", "pet_000137"]
-FOES6 = ["pet_000003", "pet_000004", "pet_000005", "pet_000006", "pet_000009", "pet_000010"]
+# 2026-10-17 改钉：**火系/毒系/草系分别免疫灼烧/中毒/寄生**（术语 1001/1002/1008 原文「免疫此效果」）。
+# 本文件测的是「层数与持续回合」，夹具原来把火系（火花 pet_000003）放在对手首位当灼烧目标 ——
+# 那是免疫未实现时的偶然成立。现在把光系迪莫放首位，判据意图（叠层/封顶/刷新）不变。
+FOES6 = ["pet_000004", "pet_000003", "pet_000005", "pet_000006", "pet_000009", "pet_000010"]
 TEAM3 = TEAM6[:3]
 FOES3 = FOES6[:3]
 
@@ -207,17 +210,19 @@ class BeforeAfterSameSeedTest(unittest.TestCase):
         # 老路径的 detail 只有三个键（`test_turn_order_fail_closed` 的 golden 指纹钉着它）
         self.assertEqual(added_v2, {"side": "enemy", "status": "灼烧", "layers": 10})
         self.assertNotIn("turns_left", added_v2, "老口径没有持续回合概念")
-        self.assertEqual(tick_v2["damage"], 6)
-        self.assertEqual(tick_v2, {"side": "enemy", "status": "灼烧", "damage": 6, "layers_after": 5},
+        # 2026-10-17 改钉：夹具从火系（火花，免疫灼烧之后无法作为目标）换成光系迪莫，
+        # 最大生命 425 ⇒ 老口径固定 2% = 8（四舍五入向下）；判据意图（老口径不看层数）不变。
+        self.assertEqual(tick_v2["damage"], 8)
+        self.assertEqual(tick_v2, {"side": "enemy", "status": "灼烧", "damage": 8, "layers_after": 5},
                          "老口径的 status_tick 必须逐键不变")
         self.assertNotIn("turns_left_after", tick_v2)
         self.assertEqual(tick_v2["layers_after"], 5)
 
-        # 改后（本地规则）：10 层 + 4 回合；伤害按层数放大（11% × 340 = 37）
+        # 改后（本地规则）：10 层 + 4 回合；伤害按层数放大（11% × 425 = 46，当前血量 425）
         self.assertEqual(added_v3["layers_total"], 10)
         self.assertEqual(added_v3["turns_left"], 4)
         self.assertEqual(added_v3["damage_rule"], "LOCAL_RULE")
-        self.assertEqual(tick_v3["damage"], 37)
+        self.assertEqual(tick_v3["damage"], 46)
         self.assertEqual(tick_v3["layers_after"], 5)
         self.assertEqual(tick_v3["turns_left_after"], 3)
 

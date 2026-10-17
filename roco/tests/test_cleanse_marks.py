@@ -30,7 +30,10 @@ RS = rdata.load_ruleset()
 CFG = RC.get_rule_config("mobile_s4_candidate_v3")      # 声明了 damage.cleanse_marks
 V2 = RC.get_rule_config("mobile_s4_candidate_v2")       # 没声明 ⇒ 连结构都不产出
 TEAM = ["pet_000062", "pet_000002", "pet_000040", "pet_000083", "pet_000086", "pet_000127"]
-FOES = ["pet_000550", "pet_000225", "pet_000190", "pet_000445", "pet_000417", "pet_000124"]
+# 2026-10-17 改钉：火系免疫灼烧（术语 1002）。夹具原来把火系（烈火战神 pet_000550）放首位，
+# 「驱散 6 层 ⇒ 敌方获得 30 层灼烧」在这条官方规则下会被 status_immune 挡掉；换骨龙（龙/幽）首位，
+# 判据意图（每驱散 1 层给 5 层灼烧、封顶 10）不变。
+FOES = ["pet_000225", "pet_000550", "pet_000190", "pet_000445", "pet_000417", "pet_000124"]
 BURN, EXHAUST, SCAVENGE, BAPTISM = "skill_000408", "skill_000415", "skill_000652", "skill_000441"
 FEATHER, MELT = "skill_000703", "skill_000628"
 
