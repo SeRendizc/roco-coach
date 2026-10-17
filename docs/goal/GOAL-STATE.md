@@ -78,5 +78,10 @@
 - Round 14：**材料准确性复核** —— 全量扫描 docs/interview 的 stale 数字，修掉 BRIEF 两处「48 只可模拟」
   （改为可玩 530 / 冻结 542 / 按需 80，并注明 48 只是目录名）；REPLAY 的 Node 读数改为最终
   **2091/2076/14/1**；本地 markdown 链接检查 **0 missing**。
-- 下一步（Round 15）：最终一页纸（面试速记卡 PDF 与 BC 文档）复核排版；更新 GOAL-REPORT 为最终数字；
-  之后收尾。
+- Round 15：**演示凭据接线（用户授权）** —— `/api/connect` 增加**默认关闭**的 Keychain 持久化
+  （仅当启动设了 `ROCO_KEYCHAIN_SERVICE`）；新增 `scripts/interview/start-demo.sh`
+  （优先 env/Keychain，否则提示到 /connect.html 输入一次）；server 测试 26/26 不受影响；
+  8910 已用启动器起好（当前未配 key，connect 页 200），URL 交给用户输入。
+  提交并推 tag（`interview-2026-10-17`、`typechart-3x-fix`）。
+- 下一步：用户输入 key 后 → 在 8910 跑 **一次**真实 DS 请求（修好的规则 + 真模型），
+  记录 provider/延迟/回退到 evidence；随后回到 LLM/Agent 面试主线（模拟面试与叙事），收尾 20 轮。

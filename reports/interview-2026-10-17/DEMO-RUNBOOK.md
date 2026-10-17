@@ -133,3 +133,11 @@ curl -s :8910/api/models                      # cloud-deepseek connected=true / 
 # 然后在小芽界面问一个非纯事实问题，回包 provider 应为 deepseek；失败要检查是否回退 local
 ```
 纪律：不要把 key 写进仓库/文档/截图；演示完可重启服务清空内存中的 key。
+
+### 一条命令起演示实例（含 Keychain 复用）
+
+```bash
+bash scripts/interview/start-demo.sh 8910
+# 首次：浏览器打开 http://127.0.0.1:8910/connect.html 输入 key（会存入 Keychain: roco-deepseek）
+# 之后：启动器自动从 Keychain 读取，不需要再输入
+```

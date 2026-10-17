@@ -977,6 +977,16 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
      s.nonce=null;
      if(typeof payload.key!=='string'||!/^[\x21-\x7e]{16,128}$/.test(payload.key))throw fail(400,'密钥长度或字符不正确');
      credential=payload.key;model=b.model;verified=false;generation++;
+     // 2026-10-17（用户授权「你自己想办法存储」）：可选把凭据写入 **macOS Keychain**，
+     // 供演示启动器 `scripts/interview/start-demo.sh` 下次复用。默认关闭：
+     // 只有启动时设了 `ROCO_KEYCHAIN_SERVICE` 才写；仓库/测试/默认路径行为不变。
+     // 不落盘到仓库；Keychain 不可用时忽略，不影响本次连接。
+     if(process.env.ROCO_KEYCHAIN_SERVICE){
+       try{
+         const {execFileSync}=await import('node:child_process');
+         execFileSync('security',['add-generic-password','-U','-s',String(process.env.ROCO_KEYCHAIN_SERVICE),'-a',process.env.USER||'roco','-w',payload.key],{stdio:'ignore'});
+       }catch{/* Keychain 不可用：内存凭据仍然有效 */ }
+     }
      // 换凭据/换模型 ⇒ 旧缓存作废（key 里带 model，但换 key 不体现在 key 里）。
      answerCache.clear();inflightByKey.clear();
      return json(res,200,{...status(),capabilities:await capabilities()});
