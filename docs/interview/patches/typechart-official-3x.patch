@@ -1,0 +1,95 @@
+From 81ec0d453236d72f5f49ed66ad928fd737b1102f Mon Sep 17 00:00:00 2001
+From: roco-lead <lead@local>
+Date: Sat, 17 Oct 2026 19:22:47 +0800
+Subject: [PATCH] =?UTF-8?q?proposal(rule):=20=E5=8F=8C=E5=B1=9E=E6=80=A7?=
+ =?UTF-8?q?=E7=9B=B8=E6=80=A7=E6=94=B9=E5=9B=9E=E5=BF=AB=E7=85=A7=E9=80=90?=
+ =?UTF-8?q?=E5=AD=97=E5=80=BC=EF=BC=88=E5=8F=8C=E5=BC=B1=203=C3=97?=
+ =?UTF-8?q?=EF=BC=89=E2=80=94=E2=80=94=E5=AE=98=E6=96=B9=E9=87=87=E8=AE=BF?=
+ =?UTF-8?q?/=E4=B8=8A=E6=B8=B8=E5=AE=9E=E7=8E=B0/=E5=AE=A2=E6=88=B7?=
+ =?UTF-8?q?=E7=AB=AF=E4=B8=89=E5=B1=82=E5=AF=B9=E9=BD=90?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- 旧裁决 2026-09-25 用社区源相乘口径：双弱 4×。新证据：官方 2026-08-15 采访
+  电系打翠顶夫人（翼+水）= 三倍；上游 sim damage_calc.py 注释「3x 强力克制，非乘算 4x」；
+  types.json 双属性行逐字 3。
+- 同 commit 修复三层不一致：引擎/RAG 语料原为 4×，客户端 type-affinity 一直按快照 3×。
+- 行为已验证：翼|水 受电 = 3.0；虫|草 受火 = 3.0。
+- 未完成（有意不偷改）：test_type_multiplier_ruling.py / roco-rag-typechart.test.js 仍钉旧裁决；
+  Python 全量实测 6 红（3 旧裁决 + 金标 + 派生件 + tier），Node 定向 3 红。
+  按本仓纪律需「改钉+留痕+重建派生件+金标送审」后再合入。
+---
+ roco/src/roco_env/data.py |  9 ++++++++-
+ src/coach/rag-index.js    | 31 +++++++++++--------------------
+ 2 files changed, 19 insertions(+), 21 deletions(-)
+
+diff --git a/roco/src/roco_env/data.py b/roco/src/roco_env/data.py
+index 23210b70..c9de0ff4 100644
+--- a/roco/src/roco_env/data.py
++++ b/roco/src/roco_env/data.py
+@@ -200,7 +200,14 @@ class TypeChart:
+             return row.get(attack_element, self.DEFAULT)
+         if len(key) != 2 or key not in self.rows:
+             raise TypeCombinationUnknown(defender_types)
+-        return self.fallback_multiplier(key, attack_element)
++        # 2026-10-17 复核（提案分支，未合入）：双属性改回快照那一行的逐字值（双弱封顶 3×）。
++        # 新证据：① Types.lua 转写 types.json 对 102 条双属性键逐字给 3；② 上游模拟器
++        # rocom-data/sim/damage_calc.py 注释「双属性均弱 → 3x（强力克制，非乘算的 4x）」；
++        # ③ 官方 2026-08-07「斯嘉丽」采访里电系打翠顶夫人（翼+水）玩家答「三倍」。
++        # 旧裁决（2026-09-25 社区源相乘 4×）原话保留在文件头注释与
++        # roco/tests/test_type_multiplier_ruling.py，不删除。
++        row = self.rows[key]
++        return row.get(attack_element, self.DEFAULT)
+ 
+     def has_row(self, defender_types: Tuple[str, ...]) -> bool:
+         """快照里有没有这一组合的显式行。
+diff --git a/src/coach/rag-index.js b/src/coach/rag-index.js
+index 950a1542..44a4fb1d 100644
+--- a/src/coach/rag-index.js
++++ b/src/coach/rag-index.js
+@@ -494,30 +494,21 @@ function rulesetChunks(data, ledgerById) {
+  * ① 全库「倍率」的 idf 会被这 120 条拉低、② 某条短正文会顶掉那条台账 ——
+  * 那正是「新文档抢旧查询的 top-1」。数值本身用 `×N` 逐字给全，信息一点没少。
+  *
+- * 【2026-09-25 人类裁决：双属性按两系相乘】原话「属性双属性叠加：快照 3×（现用）
+- * vs 两个社区源 4×，差 41 格。**使用社区源**」。所以双属性条目的正文数值
+- * **不能**再照抄 `types.json` 那一行的封顶值（×3），必须写成**两条单属性相乘**
+- * 的结果（×4）—— 台账 EV-TYPE-MULTIPLIER（RECORDED_IN_GAME）与
+- * `roco/src/roco_env/data.py::TypeChart.multiplier` 同一口径。
+- * **旧口径留痕**：本条原文写「倍率写成 `X系 ×N`，N 与 types.json 逐字相同」；
+- * 那句话对**单属性**仍然成立（18/18 逐字不变），对双属性已被裁决取代。
+- * 单属性的行为一个字都没动：它继续逐字照抄快照那一行。
++ * 【2026-10-17 复核（提案分支，未合入）：双属性改回快照逐字值（双弱封顶 ×3）】
++ * 旧裁决（2026-09-25）原话「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，
++ * 差 41 格。**使用社区源**」⇒ 双属性正文按两系相乘写 ×4。**该裁决现被新证据推翻**，
++ * 旧文逐字保留（改钉不删）。新证据：① types.json 对 102 条双属性键逐字给 3；
++ * ② 上游模拟器 damage_calc.py 注释「双属性均弱 → 3x（强力克制，非乘算的 4x）」；
++ * ③ 官方采访里电系打翠顶夫人（翼+水）玩家答「三倍」。故正文重新逐字照抄
++ * types.json 那一行，与客户端 type-affinity 及引擎新口径三处一致。
+  */
+ function typeChartBody(entry, singleRows = null) {
+   const key = String(entry.key ?? '');
+   const parts = key.split('|').filter(Boolean);
+-  // 双属性：值 = 两条单属性行的倍率相乘（缺单属性行时按中性 1 参与相乘）。
+-  // 归类（weak / resist / 中性）也按**相乘后**的值判定：乘积为 1 的项从两侧都消失。
+-  const multiply = parts.length === 2 && singleRows ? parts : null;
+-  const valueOf = (attackType, fallback) => {
+-    if (!multiply) return fallback;
+-    let product = 1;
+-    for (const part of multiply) {
+-      const row = singleRows.get(part);
+-      product *= row ? (row.get(attackType) ?? 1) : 1;
+-    }
+-    return product;
+-  };
++  // 2026-10-17 复核：双属性**逐字照抄** types.json 那一行（双弱封顶 ×3），
++  // 不再按两条单属性相乘（旧裁决 ×4 已推翻，理由见函数上方注释）。
++  const multiply = null;
++  const valueOf = (attackType, fallback) => fallback;
+   const candidates = [];
+   const push = (item) => {
+     if (item && item.type && !candidates.some((row) => row.type === item.type)) candidates.push(item);
+-- 
+2.55.0
+

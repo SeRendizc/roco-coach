@@ -1,0 +1,163 @@
+{
+ "base": "http://127.0.0.1:8910",
+ "measuredAt": "2026-10-17T11:17:34.719Z",
+ "steps": [
+  {
+   "id": "bootstrap",
+   "ok": true,
+   "detail": {
+    "configured": false,
+    "model": "deepseek-flash",
+    "serverStartedAt": "2026-10-17T11:17:34.290Z"
+   }
+  },
+  {
+   "id": "GET /api/roco/roster",
+   "ok": true,
+   "detail": {
+    "http": 200,
+    "ok": true,
+    "rows": 542
+   }
+  },
+  {
+   "id": "GET /api/roco/box",
+   "ok": false,
+   "detail": {
+    "http": 400,
+    "ok": false
+   }
+  },
+  {
+   "id": "GET /api/models",
+   "ok": true,
+   "detail": {
+    "http": 200,
+    "models": [
+     {
+      "id": "cloud-deepseek",
+      "connected": false
+     },
+     {
+      "id": "local-qwen35-4b",
+      "connected": false
+     }
+    ]
+   }
+  },
+  {
+   "id": "POST /api/roco/battle/new",
+   "ok": true,
+   "detail": {
+    "ok": true,
+    "battle_id": "s1-1an3f6d4",
+    "turn": 1,
+    "phase": "battle",
+    "self": [
+     {
+      "name": "寂灭骨龙",
+      "hp": 425,
+      "max_hp": 425,
+      "energy": 2,
+      "types": [
+       "龙系",
+       "幽系"
+      ]
+     },
+     {
+      "name": "海豹船长",
+      "hp": 374,
+      "max_hp": 374,
+      "energy": 0,
+      "types": [
+       "武系",
+       "水系"
+      ]
+     },
+     {
+      "name": "黑猫巫师",
+      "hp": 474,
+      "max_hp": 474,
+      "energy": 0,
+      "types": [
+       "普通系"
+      ]
+     }
+    ],
+    "opponent": {
+     "name": "寂灭骨龙",
+     "hp": 425,
+     "max_hp": 425
+    },
+    "legal": [
+     "龙血",
+     "集中",
+     "诡刺",
+     "换上第2位",
+     "换上第3位",
+     "使用净化药",
+     "使用回复药",
+     "使用能量果",
+     "撤退"
+    ],
+    "events": []
+   }
+  },
+  {
+   "id": "POST /api/roco/plan",
+   "ok": true,
+   "detail": {
+    "ok": true,
+    "keys": [
+     "ok",
+     "battle_id",
+     "state_version",
+     "recommendation",
+     "recommendation_stable",
+     "recommended_by_seed",
+     "analysis_seeds",
+     "main_counter",
+     "expected",
+     "worst",
+     "first_second_margin",
+     "branches_evaluated",
+     "depth_searched",
+     "damage_preview",
+     "risk"
+    ],
+    "planHead": "{\"ok\":true,\"battle_id\":\"s1-1an3f6d4\",\"state_version\":0,\"recommendation\":\"使用能量果\",\"recommendation_stable\":true,\"recommended_by_seed\":{\"11\":\"使用能量果\",\"29\":\"使用能量果\",\"47\":\"使用能量果\"},\"analysis_seeds\":[11,29,47],\"main_counter\":\"诡刺\",\"expected\":{\"min\":1.7059,\"max\":1.7059,\"mean\":1.7059},\"worst\":{\"min\":1.6124,\"max\""
+   }
+  },
+  {
+   "id": "POST /api/roco/battle/advance",
+   "ok": true,
+   "detail": {
+    "ok": true,
+    "turn": 2,
+    "phase": "battle",
+    "result": null,
+    "events": [
+     "对方使用龙血，本回合减伤约 70%。",
+     "我方的能量回到 1。",
+     "对方的能量回到 1。"
+    ]
+   }
+  },
+  {
+   "id": "POST /api/coach（局中问「该换谁」）",
+   "ok": true,
+   "detail": {
+    "elapsedMs": 14.02,
+    "provider": "local",
+    "verified": true,
+    "localOnly": true,
+    "textHead": "这一局的当前合法行动或公开场上状态读不到，不能据此编一个首选；请刷新当前战况后再问。",
+    "evidenceCount": 2,
+    "activityLine": "依据：你选的六只 · 你的名单"
+   }
+  }
+ ],
+ "configured": false,
+ "model": "deepseek-flash",
+ "battleId": "s1-1an3f6d4"
+}

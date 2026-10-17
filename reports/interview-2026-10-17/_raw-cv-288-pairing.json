@@ -1,0 +1,84 @@
+{
+ "checkedAt": "2026-10-17T11:25:08.595Z",
+ "head": "2e62a73b82ecd0c998fca4ddcd1b7206e4570365",
+ "modelArtifact": {
+  "path": "tests/evals/agent-trajectories-model-v1.jsonl",
+  "sha16": "c72d4edcc1d8f774",
+  "records": 1752,
+  "passed": 1695,
+  "docClaimsSha16": "77a1c84f6e6808e8"
+ },
+ "modelArtifactAtDoc": {
+  "source": "git show 1ce56f01:tests/evals/agent-trajectories-model-v1.jsonl",
+  "sha16": "77a1c84f6e6808e8",
+  "records": 1752,
+  "passed": 1240
+ },
+ "policyRuns": {
+  "run1Sha16": "def5509d12e456cc",
+  "run2Sha16": "e8244084a59d2ce8"
+ },
+ "againstCurrentHeadArtifact": {
+  "run1": {
+   "pfN": 288,
+   "paired": 288,
+   "same": 285,
+   "failToPass": 3,
+   "passToFail": 0,
+   "modelPass": 283,
+   "modelRate": 98.3,
+   "policyPass": 286,
+   "policyRate": 99.3,
+   "flipCategories": {
+    "roster_constraint": 3
+   }
+  },
+  "run2": {
+   "pfN": 288,
+   "paired": 288,
+   "same": 283,
+   "failToPass": 5,
+   "passToFail": 0,
+   "modelPass": 283,
+   "modelRate": 98.3,
+   "policyPass": 288,
+   "policyRate": 100,
+   "flipCategories": {
+    "rules_lookup": 2,
+    "roster_constraint": 3
+   }
+  }
+ },
+ "againstDocArtifact": {
+  "run1": {
+   "pfN": 288,
+   "paired": 288,
+   "same": 234,
+   "failToPass": 54,
+   "passToFail": 0,
+   "modelPass": 232,
+   "modelRate": 80.6,
+   "policyPass": 286,
+   "policyRate": 99.3,
+   "flipCategories": {
+    "rules_lookup": 30,
+    "roster_constraint": 24
+   }
+  },
+  "run2": {
+   "pfN": 288,
+   "paired": 288,
+   "same": 232,
+   "failToPass": 56,
+   "passToFail": 0,
+   "modelPass": 232,
+   "modelRate": 80.6,
+   "policyPass": 288,
+   "policyRate": 100,
+   "flipCategories": {
+    "rules_lookup": 32,
+    "roster_constraint": 24
+   }
+  }
+ }
+}

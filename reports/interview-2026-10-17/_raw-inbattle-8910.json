@@ -1,0 +1,101 @@
+{
+ "base": "http://127.0.0.1:8910",
+ "measuredAt": "2026-10-17T11:18:36.302Z",
+ "plan": {
+  "ok": true,
+  "state_version": 0,
+  "recommendation": "使用能量果",
+  "expected": {
+   "min": 1.7059,
+   "max": 1.7059,
+   "mean": 1.7059
+  },
+  "worst": {
+   "min": 1.6124,
+   "max": 1.6124
+  },
+  "branches_evaluated": 96,
+  "depth_searched": 2,
+  "recommendation_stable": true
+ },
+ "battle": {
+  "ok": true,
+  "battle_id": "s1-59nl91kk",
+  "turn": 1,
+  "phase": "battle",
+  "self": [
+   {
+    "name": "寂灭骨龙",
+    "hp": 425,
+    "energy": 2
+   },
+   {
+    "name": "海豹船长",
+    "hp": 374,
+    "energy": 0
+   },
+   {
+    "name": "黑猫巫师",
+    "hp": 474,
+    "energy": 0
+   }
+  ],
+  "opponent": {
+   "pet_id": "pet_000225",
+   "name": "寂灭骨龙",
+   "hp": 425,
+   "max_hp": 425,
+   "energy": 2,
+   "alive": true,
+   "types": [
+    "龙系",
+    "幽系"
+   ]
+  },
+  "legal": [
+   "龙血",
+   "集中",
+   "诡刺",
+   "换上第2位",
+   "换上第3位",
+   "使用净化药",
+   "使用回复药",
+   "使用能量果",
+   "撤退"
+  ]
+ },
+ "askWhoToSwap": {
+  "message": "现在该换谁？",
+  "elapsedMs": 15.84,
+  "provider": "local",
+  "verified": true,
+  "localOnly": true,
+  "text": "这一局的当前合法行动或公开场上状态读不到，不能据此编一个首选；请刷新当前战况后再问。",
+  "error": null,
+  "activityLine": "依据：本回合的规划（引擎算的） · 你选的六只 · 你的名单",
+  "evidenceCount": 2,
+  "advice": null
+ },
+ "askWhatNow": {
+  "message": "现在怎么办？",
+  "elapsedMs": 13.36,
+  "provider": "local",
+  "verified": true,
+  "localOnly": false,
+  "text": "这一局的当前合法行动或公开场上状态读不到，不能据此编一个首选；请刷新当前战况后再问。",
+  "error": null,
+  "activityLine": "依据：本回合的规划（引擎算的） · 你选的六只 · 你的名单",
+  "evidenceCount": 2,
+  "advice": null
+ },
+ "advance": {
+  "ok": true,
+  "turn": 2,
+  "phase": "battle",
+  "events": [
+   "对方使用龙血，本回合减伤约 70%。",
+   "我方的能量回到 1。",
+   "对方的能量回到 1。"
+  ]
+ }
+}

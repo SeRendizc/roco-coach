@@ -1,0 +1,68 @@
+% !TeX program = xelatex
+% 二面速记卡（A4 一页，打印用）· 2026-10-17
+% 数字口径以 reports/interview-2026-10-17/EVIDENCE-LEDGER.md 为准。
+\documentclass[10pt,a4paper,fontset=fandol]{ctexart}
+\usepackage[top=1.05cm,bottom=1.05cm,left=1.15cm,right=1.15cm]{geometry}
+\usepackage{xcolor,enumitem,titlesec,fontspec,xeCJK,tabularx,hyperref}
+\usepackage{array}
+\definecolor{mainblue}{HTML}{0E5484}
+\definecolor{subgray}{HTML}{4F5965}
+\definecolor{rulegray}{HTML}{AFC5D3}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.2pt}
+\linespread{1.02}
+\hypersetup{colorlinks=true,urlcolor=mainblue}
+\setlist[itemize]{leftmargin=1.05em,itemsep=1.0pt,topsep=1.0pt,parsep=0pt,label=\textcolor{mainblue}{\scriptsize\textbullet}}
+\titleformat{\section}{\fontsize{10.8pt}{12pt}\selectfont\bfseries\color{mainblue}}{}{0pt}{}[\vspace{-3pt}\color{rulegray}\titlerule]
+\titlespacing*{\section}{0pt}{5pt}{2pt}
+\newcommand{\x}[1]{\textcolor{mainblue}{\textbf{#1}}}
+\begin{document}
+{\LARGE\bfseries 二面速记卡}\hfill{\small\color{subgray}腾讯 IEG · 洛克王国：世界 · 斯嘉丽 Coach Agent}\par
+\vspace{1pt}
+{\scriptsize\color{subgray}仓库 roco-coach @ 2e62a73b（2026-10-06）· 数字见 EVIDENCE-LEDGER · 不跑全量测试、不报“全绿”}\par
+
+\section*{一、开口六句}
+\begin{enumerate}[leftmargin=1.4em,itemsep=1.2pt,topsep=1pt]
+\item \x{规则引擎决定事实，模型只决定措辞。}（伤害/合法性/顺序/状态由引擎算；模型只理解、查证、组织语言）
+\item \x{该不该调工具由代码定；调哪个、下一步看回执由模型定。}回执上限 3，首枪后最多再规划 2 次；\x{stopped 22 种}取值域有判据。
+\item \x{回答里的数字/技能名/因果必须命中证据包}，否则整条降级成本地结论；但只保证“有出处”，不保证“语义对”。
+\item \x{旧建议三层失效}：epoch 取消在途、交付前验 stateToken、客户端断连则服务端中止上游。
+\item \x{检索我没赢}：四臂最好臂只 +2.68pp、不显著（p=0.45，CI 含 0）；保留关键词基线、公开负结论。
+\item \x{学习是可修正假设}：只算没提示的独立行动，3 次跨局才说“出现迁移迹象”，不写“已掌握”。
+\end{enumerate}
+
+\section*{二、八个数字（都能现场指到文件）}
+{\small
+\begin{itemize}
+\item \x{22} 种停止原因 / \x{12} 个工具合同 / 回执上限 3 / 首枪后再规划 2 次
+\item \x{2,084} 条判据 / \x{187} 文件（今天 2,068 过 / 15 红 / 1 skip） / \x{27} 个发布门禁套件（清单，不写全绿）
+\item \x{15/15} 注入自检翻红 / \x{1,152} 参数工具路由头，16 条留出 \x{8→15}
+\item 四臂（128 条，归档）：关键词 88.39\% / 混合 90.18\% / 反例臂 91.07\%；最好臂 +2.68pp、p=0.45 不显著
+\item policy-first：两轮 \x{286–288/288}、0 条由通转败（单臂 local\_4b，方差大）
+\item \x{622} 图鉴 / \x{530} 可玩 / \x{542} 冻结 / \x{540} 六维 / \x{80} 按需；「48」只是目录名
+\item 云端 3 轮：HTTP200、raw==delivered==UI、fallback=0（2026-10-06 归档，今天未重发）
+\end{itemize}}
+
+\section*{三、五个追问的落点}
+\begin{itemize}
+\item \textbf{“多步/ReAct？”} 真 Agent 只有 \texttt{gatherAgentEvidenceOnce}；真实模型记录最大 1 次工具，多步只有确定性测试——不把代码能力冒充模型能力。
+\item \textbf{“RAG 价值？”} 不是准确率，是带条件/反例/版本的可核查证据；没赢的实测 + 负例拒答 56.25\% 一起讲。
+\item \textbf{“怎么防过期？”} \texttt{scheduler.js} epoch+abort、\texttt{app.js} stateToken/身份、服务端断连中止。
+\item \textbf{“怎么证明学习？”} 只算无提示独立行动；阈值 3 次/2 局/合理率≥75\%；没有真人数据就直说没有。
+\item \textbf{“你本人做了什么？”} 需求、交互、验收、AI 协作实现；不把 AI 代码说成手写；现场给变体就按“定位→找守卫→写反例→最小改→验证”走。
+\end{itemize}
+
+\section*{四、演示与安全命令}
+{\small
+\texttt{npm run test:roco-quality}（77/77）\par
+\texttt{npm run test:slow-model}\par
+\texttt{node -e "...AGENT\_STOPS.length"}（22）\par
+\textbf{不要}跑：\texttt{test:unit}（今天 15 红）、\texttt{verify:release}（不可跑）、任何 \texttt{eval:live}（付费）。
+演示服务：\texttt{PORT=8910 npm start} + \texttt{curl :8910/api/roco/status}；挂了就用离线三件套/录屏。\par}
+
+\section*{五、反问与红线}
+\textbf{反问（选 2）}：三引擎里最耗人力是哪一环？\quad “什么时候不说/要不要主动干预”有显式判据吗？\quad 实习生先补游戏理解还是 Agent 工程？\par
+\textbf{红线}：不说“训练/微调了 DeepSeek”“做了多 Agent 系统”“RAG 显著提升”“已接入游戏”“准确率 90\%”“比斯嘉丽强”；
+不把团队成绩、AI 生成代码说成个人独立完成；官方数字（100 万条/82\%/90\%+/40s→2-10s/+20\%）必须带“采访里提到”。
+\end{document}

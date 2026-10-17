@@ -1,0 +1,545 @@
+{
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+  "method": "REINFORCE with batch baseline and KL regularization",
+  "trainableParameters": 1152,
+  "tools": [
+    "read_state",
+    "search_rules"
+  ],
+  "data": {
+    "train": 24,
+    "validation": 8,
+    "test": 16
+  },
+  "untrained": {
+    "n": 16,
+    "accuracy": 0.5,
+    "predictions": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "alwaysReadStateAccuracy": 0.5,
+  "runs": [
+    {
+      "seed": 17,
+      "selectedEpoch": 50,
+      "validation": {
+        "n": 8,
+        "accuracy": 1.0,
+        "predictions": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "test": {
+        "n": 16,
+        "accuracy": 0.9375,
+        "predictions": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "curve": [
+        {
+          "epoch": 10,
+          "reward": 0.75,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 20,
+          "reward": 0.8333333134651184,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 30,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 40,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 50,
+          "reward": 1.0,
+          "validationAccuracy": 1.0
+        },
+        {
+          "epoch": 60,
+          "reward": 0.9166666865348816,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 70,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 80,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 90,
+          "reward": 1.0,
+          "validationAccuracy": 1.0
+        },
+        {
+          "epoch": 100,
+          "reward": 0.9166666865348816,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 110,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 120,
+          "reward": 1.0,
+          "validationAccuracy": 1.0
+        },
+        {
+          "epoch": 130,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 140,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 150,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 160,
+          "reward": 1.0,
+          "validationAccuracy": 1.0
+        },
+        {
+          "epoch": 170,
+          "reward": 1.0,
+          "validationAccuracy": 1.0
+        },
+        {
+          "epoch": 180,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 190,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 200,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 210,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 220,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 230,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 240,
+          "reward": 1.0,
+          "validationAccuracy": 1.0
+        },
+        {
+          "epoch": 250,
+          "reward": 1.0,
+          "validationAccuracy": 0.75
+        }
+      ],
+      "parameterDeltaL2": 0.9743880033493042
+    },
+    {
+      "seed": 71,
+      "selectedEpoch": 60,
+      "validation": {
+        "n": 8,
+        "accuracy": 1.0,
+        "predictions": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "test": {
+        "n": 16,
+        "accuracy": 0.9375,
+        "predictions": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "curve": [
+        {
+          "epoch": 10,
+          "reward": 0.75,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 20,
+          "reward": 0.9166666865348816,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 30,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 40,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 50,
+          "reward": 0.9166666865348816,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 60,
+          "reward": 1.0,
+          "validationAccuracy": 1.0
+        },
+        {
+          "epoch": 70,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 80,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 90,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 100,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 110,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 120,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 130,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 140,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 150,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 160,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 170,
+          "reward": 0.9166666865348816,
+          "validationAccuracy": 1.0
+        },
+        {
+          "epoch": 180,
+          "reward": 1.0,
+          "validationAccuracy": 1.0
+        },
+        {
+          "epoch": 190,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 200,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 210,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 220,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 230,
+          "reward": 1.0,
+          "validationAccuracy": 1.0
+        },
+        {
+          "epoch": 240,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 250,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        }
+      ],
+      "parameterDeltaL2": 0.9529545307159424
+    },
+    {
+      "seed": 199,
+      "selectedEpoch": 50,
+      "validation": {
+        "n": 8,
+        "accuracy": 1.0,
+        "predictions": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "test": {
+        "n": 16,
+        "accuracy": 0.9375,
+        "predictions": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "curve": [
+        {
+          "epoch": 10,
+          "reward": 0.5833333134651184,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 20,
+          "reward": 0.9166666865348816,
+          "validationAccuracy": 0.75
+        },
+        {
+          "epoch": 30,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 40,
+          "reward": 0.9166666865348816,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 50,
+          "reward": 1.0,
+          "validationAccuracy": 1.0
+        },
+        {
+          "epoch": 60,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 70,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 80,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 90,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 100,
+          "reward": 0.9166666865348816,
+          "validationAccuracy": 0.75
+        },
+        {
+          "epoch": 110,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 120,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 130,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 140,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 150,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 160,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 170,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 180,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 190,
+          "reward": 1.0,
+          "validationAccuracy": 1.0
+        },
+        {
+          "epoch": 200,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 210,
+          "reward": 1.0,
+          "validationAccuracy": 0.875
+        },
+        {
+          "epoch": 220,
+          "reward": 1.0,
+          "validationAccuracy": 1.0
+        },
+        {
+          "epoch": 230,
+          "reward": 1.0,
+          "validationAccuracy": 1.0
+        },
+        {
+          "epoch": 240,
+          "reward": 1.0,
+          "validationAccuracy": 0.75
+        },
+        {
+          "epoch": 250,
+          "reward": 1.0,
+          "validationAccuracy": 1.0
+        }
+      ],
+      "parameterDeltaL2": 0.9148892760276794
+    }
+  ],
+  "scope": "Hand-authored English binary tool-choice bandit. Cached frozen LM features, trained two output rows. Actual parameter updates; not multi-step Agent Lightning, not DeepSeek finetuning, not proof of player learning. All test prompts excluded from training and checkpoint selection."
+}

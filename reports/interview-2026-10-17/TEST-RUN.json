@@ -1,0 +1,192 @@
+{
+  "schema": "interview-evidence-test-run/v1",
+  "date": "2026-10-17",
+  "timezone": "Asia/Shanghai",
+  "repo": "/Users/serendizc/Developer/roco-coach",
+  "head": "2e62a73b82ecd0c998fca4ddcd1b7206e4570365",
+  "headDate": "2026-10-06T16:39:38+08:00",
+  "environment": {
+    "os": "macOS (darwin)",
+    "node": "v24.20.0",
+    "npm": "11.19.0",
+    "python": "python3 (repo roco/src), .venv-agent = torch 2.8.0 / transformers 4.57.6",
+    "paidModelCalls": 0,
+    "paidModelNote": "No API key was configured in any process started by this audit. The only network contact with the user's live 8765 service was a read-only GET /api/bootstrap, made by the repo's own tests/roco-live-eval-artifacts.test.js (its --from-raw branch skips model generation, verified in scripts/eval-live-s04.js). No generation request was issued.",
+    "ports": {
+      "8765": "user's live service - only read-only GET /api/bootstrap probes; never killed",
+      "8896": "not touched",
+      "8899": "not touched",
+      "8910": "audit demo server, started/stopped 3 times, no residual listener at end"
+    }
+  },
+  "runs": [
+    {
+      "id": "quality-77",
+      "command": "npm run test:roco-quality",
+      "cwd": "repo root",
+      "exitCode": 0,
+      "durationMs": 898.47,
+      "summary": {"tests": 77, "pass": 77, "fail": 0, "skipped": 0, "cancelled": 0},
+      "rawLog": "reports/interview-2026-10-17/_raw-test-roco-quality.log",
+      "verdict": "verified"
+    },
+    {
+      "id": "unit-full",
+      "command": "npm run test:unit",
+      "cwd": "repo root",
+      "exitCode": 1,
+      "durationMs": 229767.82,
+      "summary": {"tests": 2084, "pass": 2068, "fail": 15, "skipped": 1, "cancelled": 0, "todo": 0},
+      "rawLog": "reports/interview-2026-10-17/_raw-test-unit.log",
+      "failing": [
+        "tests/coach.test.js:9 strategist gives a legal action grounded in current state (TypeError undefined[0])",
+        "tests/evals/agent.test.js:154 direct skill facts ... expected /消耗4豆/, actual 消耗4能量 (code/test wording drift)",
+        "tests/evals/roco/agent-trajectories.test.js:151 verify-agent-trajectories.mjs --quiet exit 1 (recorded receipt hash 9ded66545614 vs now af3ce33185d6)",
+        "tests/evals/state-doc.test.js:64 state doc HEAD is 187 commits behind current HEAD (real stale doc)",
+        "tests/evals/structure-contract.test.js:874 docs/roco/verification/2026-10-06-cloud-acceptance/capture-server.mjs -> ../src/server/index.js points to nonexistent docs/src (real, introduced by HEAD commit)",
+        "tests/evals/structure-contract.test.js:964 top-level untracked pnpm-lock.yaml (environment artifact; not in public git tree)",
+        "tests/evals/tool-arguments.test.js:349 R06 README command blocks parsed only 8 (real doc/test drift)",
+        "tests/offline.test.js:179 fallback wording drift (actual 教练服务这次未完成，先用本地回答)",
+        "tests/offline.test.js:212 fallback wording drift (same actual text)",
+        "tests/roco-answer-level-correction.test.js:172 key-table regression: actions/knowledge/method missing vs expected baseline",
+        "tests/roco-battle-context.test.js:455 expected name 潮甲龟, actual fail-closed ask-to-name text",
+        "tests/roco-battle-panel-static.test.js:105 expected stateToken: coachStateToken(), actual requestToken",
+        "tests/roco-corpus-verification.test.js:38 on-disk corpus verification artifact differs from recompute (provenance checked 125 vs 136)",
+        "tests/roco-plain-speak.test.js:130 engineering-tone ratchet src/client/xiaoya.js 0 -> 1 (line 540 本次回答：云端生成…)",
+        "tests/roco-rag-eval.test.js:66 on-disk reports/roco/rag/rag-eval.json differs from recompute (--check criterion)"
+      ],
+      "classification": "14 committed-state failures + 1 environment artifact (pnpm-lock.yaml). Not caused by this audit's read-only helper commands.",
+      "verdict": "red (current public HEAD does NOT pass full unit)"
+    },
+    {
+      "id": "guard-selftest",
+      "command": "node scripts/roco/guard-selftest.mjs --json",
+      "cwd": "repo root",
+      "exitCode": 0,
+      "durationNote": "exceeded 60s shell foreground budget, completed in background; exact wall time not captured",
+      "summary": {"checked": 15, "ok": 15, "still_green": [], "skipped": [], "verdict": "pass"},
+      "rawLog": "reports/interview-2026-10-17/_raw-guard-selftest.json",
+      "verdict": "verified"
+    },
+    {
+      "id": "status",
+      "command": "node scripts/roco/status.mjs",
+      "cwd": "repo root",
+      "exitCode": 0,
+      "outputDigest": "判据文件 187 个（test:unit 手写清单）；发版门禁 failed —— 未通过：unit（2026-09-28 14:29）；演示服务 8765 HTTP 200；工作区 3 个文件有改动（当时）",
+      "verdict": "verified (read-only inventory; gate artifact is stale from 2026-09-28)"
+    },
+    {
+      "id": "targeted-data-agentstops",
+      "command": "node --test tests/roco-agent-stops.test.js tests/evals/roco/data-acceptance.test.js tests/roco-owned-pets.test.js reports/roco/local-model/verdict.test.mjs",
+      "cwd": "repo root",
+      "exitCode": 0,
+      "summary": {"tests": 45, "pass": 44, "fail": 0, "skipped": 1},
+      "skipReason": "data-acceptance skips the raw-Lua cross-check because data/roco/raw/extracted is git-ignored in a clean checkout",
+      "rawLog": "/tmp/targeted-1.log",
+      "verdict": "verified (agent-stops 22-value domain + data counts)"
+    },
+    {
+      "id": "rag-gate-check",
+      "command": "node scripts/roco/eval-rag-retrieval.mjs --check",
+      "cwd": "repo root",
+      "exitCode": 1,
+      "summary": "FAIL: on-disk report != recompute. baseline_searchKnowledge Recall@10 disk=0 recalc=0; baseline_lexical_pack Recall@10 disk=0.9117647058823529 recalc=0.8823529411764706; rag_index Recall@10 disk=1 recalc=1",
+      "verdict": "red (committed RAG gate artifact is stale wrt current code/data)"
+    },
+    {
+      "id": "rag-gate-current-json",
+      "command": "node scripts/roco/eval-rag-retrieval.mjs --json",
+      "cwd": "repo root",
+      "exitCode": 0,
+      "summary": "rag_index Recall@1/3/10=1.0, MRR=1.0, entity_hit=1.0, version_hit=1.0; heldout 45 (34 answerable/11 abstain); corpus 2489 documents; baseline_lexical_pack Recall@10=0.8823529411764706",
+      "rawLog": "reports/interview-2026-10-17/_raw-rag-eval-current.json",
+      "verdict": "verified (current rAG index metrics; --check red is a separate criterion)"
+    },
+    {
+      "id": "rag-four-arm-repro-attempt",
+      "command": "cd /tmp/roco-audit-rag && node scripts/eval-retrieval-extended.js",
+      "cwd": "sandbox /tmp/roco-audit-rag (src+tests symlinked to repo, reports/ local)",
+      "exitCode": 1,
+      "summary": "Error: 未知检索策略 hybrid：searchKnowledge 只实现 lexical / semantic / fusion; src/coach/strategist.js:160 throws. The 2026-09-17 four-arm script cannot run against HEAD.",
+      "verdict": "retracted-for-live-demo (artifact-only; command listed in docs is broken today)"
+    },
+    {
+      "id": "live-eval-reanalysis-before",
+      "command": "RAW=reports/live-model-eval-before.json OUT=reports/interview-2026-10-17/_analysis-before.json node scripts/analyze-live-eval.js",
+      "cwd": "repo root",
+      "exitCode": 0,
+      "summary": {"unnecessaryToolCallRate": 0.75, "overCallsInNoToolCases": 9, "missedCallRate": 0, "plannerChoseToStopItself": 0.03225806451612903, "toolChoiceCorrectRate": 0.90625, "toolSelectionCorrectnessRate": 0.3125},
+      "verdict": "verified (offline recomputation of archived 44-case run; no new model calls)"
+    },
+    {
+      "id": "live-eval-reanalysis-pass2",
+      "command": "RAW=reports/live-model-eval-pass2.json OUT=reports/interview-2026-10-17/_analysis-pass2.json node scripts/analyze-live-eval.js",
+      "cwd": "repo root",
+      "exitCode": 0,
+      "summary": {"unnecessaryToolCallRate": 0.3333333333333333, "overCallsInNoToolCases": 4, "missedCallRate": 0.21875, "plannerChoseToStopItself": 0.967741935483871, "toolChoiceCorrectRate": 0.78125, "toolSelectionCorrectnessRate": 0.5, "expected_call_cases": 19, "called": 12, "choice_ok_among_called": "12/12", "missed": "7/19"},
+      "verdict": "verified (offline recomputation; archived single run 2026-09-25, no CI)"
+    },
+    {
+      "id": "tool-router-rl-rerun",
+      "command": "cd /tmp/roco-audit-rl && /Users/serendizc/Developer/roco-coach/.venv-agent/bin/python scripts/train-tool-router.py",
+      "cwd": "sandbox /tmp/roco-audit-rl (script copied, .models symlinked to repo cache)",
+      "exitCode": 0,
+      "durationMs": 21914,
+      "summary": "Bytes-identical metrics to the committed artifact: trainableParameters=1152, data 24/8/16, untrained 8/16, all 3 seeds test 15/16 (0.9375 at epochs 50/60/50), parameterDeltaL2 identical to all printed digits, test predictions identical.",
+      "rawArtifact": "reports/interview-2026-10-17/_raw-tool-router-rl-rerun.json",
+      "rawTrajectories": "reports/interview-2026-10-17/_raw-tool-router-trajectories-rerun.jsonl",
+      "verdict": "verified (deterministic rerun, local CPU only, no paid API)"
+    },
+    {
+      "id": "cloud-acceptance-crosscheck",
+      "command": "node -e \"…compare real-cloud-results.json rawModelText/deliveredText/round*-ui.txt, totals, provider, validation…\"",
+      "cwd": "repo root",
+      "exitCode": 0,
+      "summary": "3/3 rounds http=200 provider=deepseek rejected=false; rawModelText===deliveredText 3/3; deliveredText appears verbatim in round*-ui.txt 3/3; totals {realModelRequests:3, modelAnswerAccepted:3, fallback:0, promptTokens:40549, completionTokens:257}; productCommit 7aa338ee is an ancestor of HEAD; wording/source-manifest sha256 matches current src/client/roco.js and tests/roco-skill-support-wording.test.js",
+      "verdict": "verified as archived record + today's file/commit cross-check (not re-run: paid calls prohibited)"
+    },
+    {
+      "id": "demo-server-8910",
+      "command": "PORT=8910 npm start   (+ curl health/pages/API probes, then graceful kill)",
+      "cwd": "repo root",
+      "exitCode": 0,
+      "summary": "/api/bootstrap READY after 2 polls; pages / /roco.html /box.html /workshop.html /xiaoya.html /connect.html = HTTP 200 (16880/62575/9453/1993/3662/2468 bytes), unknown path HTTP 404; /api/roco/status available=true health.ruleset_id=roco-world-s4-2026-09-10; /api/roco/roster total=542; POST /api/roco/battle/new ok turn=1 phase=battle six pet names; POST /api/roco/plan ok recommendation=使用能量果 branches_evaluated=96 depth=2 stable=true; POST /api/roco/battle/advance ok turn=2 with 3 Chinese events; server stopped, port 8910 closed, no leftover listener, 8765 still HTTP 200.",
+      "rawLogs": [
+        "reports/interview-2026-10-17/_raw-server-8910.log",
+        "reports/interview-2026-10-17/_raw-8910-bootstrap.json",
+        "reports/interview-2026-10-17/_raw-8910-roco-status.json",
+        "reports/interview-2026-10-17/_raw-demo-chain-8910.json",
+        "reports/interview-2026-10-17/_raw-inbattle-8910.json",
+        "reports/interview-2026-10-17/_raw-latency-8910.json"
+      ],
+      "verdict": "verified"
+    },
+    {
+      "id": "latency-offline-local",
+      "command": "node /tmp/roco-audit-8910.mjs   (12 sequential POST /api/coach against PORT=8910, no API key)",
+      "cwd": "repo root",
+      "exitCode": 0,
+      "summary": {"n": 12, "ok": 12, "provider": "local", "p50Ms": 8.71, "p95Ms": 15.96, "meanMs": 9.41, "minMs": 8.24, "maxMs": 15.96, "cache": "miss x12"},
+      "rawLog": "reports/interview-2026-10-17/_raw-latency-8910.json",
+      "verdict": "verified (offline deterministic fallback only; NOT a real-model latency number)"
+    },
+    {
+      "id": "inbattle-coach-offline",
+      "command": "node /tmp/roco-audit-inbattle.mjs   (battle/new -> plan -> POST /api/coach with roco_battle+roco_plan -> advance)",
+      "cwd": "repo root",
+      "exitCode": 0,
+      "summary": "ask「现在该换谁？」and「现在怎么办？」 both HTTP 200, provider=local, elapsed 15.84ms/13.36ms, but text is the fail-closed line 「这一局的当前合法行动或公开场上状态读不到…」 (advice=null). Engine plan itself worked (recommendation 使用能量果). Without a configured model the in-battle advice step degrades honestly, not with a fabricated suggestion.",
+      "rawLog": "reports/interview-2026-10-17/_raw-inbattle-8910.json",
+      "verdict": "verified (honest boundary to state in the interview)"
+    },
+    {
+      "id": "side-effects-cleanup",
+      "command": "git checkout -- reports/live-model-eval-only.json reports/roco/agent-trajectories-verification.json; rm -rf .work",
+      "cwd": "repo root",
+      "exitCode": 0,
+      "summary": "The repo's own test:unit rewrote two tracked evidence artifacts and created .work/typechart-3x; both tracked files were restored to HEAD and .work removed after the run. No source file was modified by this audit.",
+      "verdict": "clean"
+    }
+  ]
+}

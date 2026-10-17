@@ -1,0 +1,28 @@
+
+> start
+> node src/server/index.js
+
+小兽训练场：http://127.0.0.1:8910/
+加密配置：http://127.0.0.1:8910/connect.html
+密钥仅保存在当前进程内存，不写入文件。
+
+> start
+> node src/server/index.js
+
+小兽训练场：http://127.0.0.1:8910/
+加密配置：http://127.0.0.1:8910/connect.html
+密钥仅保存在当前进程内存，不写入文件。
+
+> start
+> node src/server/index.js
+
+小兽训练场：http://127.0.0.1:8910/
+加密配置：http://127.0.0.1:8910/connect.html
+密钥仅保存在当前进程内存，不写入文件。
+
+> start
+> node src/server/index.js
+
+小兽训练场：http://127.0.0.1:8910/
+加密配置：http://127.0.0.1:8910/connect.html
+密钥仅保存在当前进程内存，不写入文件。
