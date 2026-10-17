@@ -1,0 +1,16 @@
+{
+  "captured_at_utc": "2026-10-17T14:53:08.621894+00:00",
+  "repo": "/Users/serendizc/Developer/roco-coach",
+  "head": "b2ccfb8c07e57c333c86534c9f8c77f74f2620dd",
+  "branch": "interview/2026-10-17",
+  "status": " M package.json\n M reports/live-model-eval-only.json\n M reports/roco/agent-trajectories-verification.json\n M roco/src/roco_env/service.py\n?? node_modules/\n?? output/roco-next-20261017/\n?? scripts/roco/agent-policy-eval.mjs\n?? tests/evals/roco/agent-policy-tasks.json\n?? tests/roco-agent-policy-eval.test.js\n",
+  "files": 1448,
+  "paid_model_calls": 0,
+  "source_sha256": {
+    "roco/src/roco_env/service.py": "8dba9efb034473f1f9298d538346ccab3af9541c7cc88acee3bcc2c679105b25",
+    "roco/src/roco_env/data.py": "17a4413be140245260b2fa9ac0ca3ee1d94e2ee337cd9d860f2950ad43c48416",
+    "src/coach/rag-index.js": "ace74866baa242382c78e910a6a5489b438fe537fac445a07590e31b569bf851",
+    "src/coach/runtime.js": "2e893af0b3398e65b874eaa25cae56ec9a341b4044e7b8ae0fd54ed8815a8948",
+    "src/client/type-affinity.data.js": "48d721cb4e10adfc5b5f35642f2371ab8851d022fb0fa3502fdff34c1aa0565f"
+  }
+}

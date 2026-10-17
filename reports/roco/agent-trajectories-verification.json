@@ -122,31 +122,31 @@
    {
     "traj_id": "rl-skill-f0-01@camp-locked-0#replay",
     "problems": [
-     "回放 query_rules 的回执与记录不一致（记录 9ded66545614，现在 681423da18be）"
+     "回放 query_rules 的回执与记录不一致（记录 9ded66545614，现在 af3ce33185d6）"
     ]
    },
    {
     "traj_id": "rl-skill-f0-01@camp-locked-0#baseline",
     "problems": [
-     "回放 query_rules 的回执与记录不一致（记录 9ded66545614，现在 681423da18be）"
+     "回放 query_rules 的回执与记录不一致（记录 9ded66545614，现在 af3ce33185d6）"
     ]
    },
    {
     "traj_id": "rl-skill-f0-01@camp-locked-0#stubborn",
     "problems": [
-     "回放 query_rules 的回执与记录不一致（记录 9ded66545614，现在 681423da18be）"
+     "回放 query_rules 的回执与记录不一致（记录 9ded66545614，现在 af3ce33185d6）"
     ]
    },
    {
     "traj_id": "rl-skill-f0-01@camp-locked-0#drop_args",
     "problems": [
-     "回放 query_rules 的回执与记录不一致（记录 9ded66545614，现在 681423da18be）"
+     "回放 query_rules 的回执与记录不一致（记录 9ded66545614，现在 af3ce33185d6）"
     ]
    },
    {
     "traj_id": "rl-skill-f0-01@camp-locked-0#blind",
     "problems": [
-     "回放 query_rules 的回执与记录不一致（记录 9ded66545614，现在 681423da18be）"
+     "回放 query_rules 的回执与记录不一致（记录 9ded66545614，现在 af3ce33185d6）"
     ]
    }
   ],

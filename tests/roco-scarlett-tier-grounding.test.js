@@ -76,3 +76,27 @@ test('⑦ 守卫 scope 必须如实写「不是万能语义证明」', () => {
   assert.match(result.scope, /type-tier/);
   assert.match(result.scope, /not a proof/);
 });
+
+
+// ── 2026-10-17（吸收 Codex 混合证据反例）：倍率必须绑定到对象 ──────────────────
+// 旧实现把所有证据里的 ×N 收进一个集合，于是「电系打翠顶夫人是 2 倍」+ 任意一条无关 ×2
+// 就能过守卫。下面三条是同一反例族的正反控制。
+test('对象绑定：同对象冲突倍率必须拒绝（不能拿无关/冲突 ×2 抵账）', () => {
+ const wrong = {text: '电系打翠顶夫人是 2 倍伤害',
+  evidence: [TYPE_EVIDENCE_3X, TYPE_EVIDENCE_2X], toolTrace: []};
+ const result = checkGroundedAnswer(wrong);
+ assert.equal(result.valid, false, '同对象同时有 ×3/×2 时，2 倍断言必须 fail closed');
+ assert.ok(result.reasons.some((r) => /conflicting-type-tier|unsupported-type-tier/.test(r)),
+  JSON.stringify(result.reasons));
+});
+
+test('对象绑定：只是无关属性的 ×2 不许抵账（3 倍正解必须放行）', () => {
+ const unrelated = {kind: 'type_multiplier', text: '草系 受 地系 ×2', multiplier: 2};
+ const right = {text: '电系打翠顶夫人是 3 倍伤害', evidence: [TYPE_EVIDENCE_3X, unrelated], toolTrace: []};
+ assert.deepEqual(checkGroundedAnswer(right).reasons, [], '无关属性纪录不该影响 3 倍正解');
+});
+
+test('对象绑定：同攻击属性出现冲突倍率时保守拒绝（3 倍正解也不放行）', () => {
+ const right = {text: '电系打翠顶夫人是 3 倍伤害', evidence: [TYPE_EVIDENCE_3X, TYPE_EVIDENCE_2X], toolTrace: []};
+ assert.equal(checkGroundedAnswer(right).valid, false, '证据自身冲突时应保守拒绝');
+});

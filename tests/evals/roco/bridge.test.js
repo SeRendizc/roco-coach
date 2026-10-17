@@ -436,9 +436,9 @@ test('桥：拒绝携带隐藏信息，连发都不发', { skip: SKIP }, async (
   });
 });
 
-// ── 8. 相性：双属性按两系相乘（人类裁决），缺行仍 unsupported ─────────────
+// ── 8. 相性：双属性逐字读快照行（2026-10-17 复核；旧「两系相乘」裁决留痕）────
 
-test('桥：双属性相性 = 两系相乘（人类裁决），快照原值可对账，缺行仍 unsupported', { skip: SKIP }, async () => {
+test('桥：双属性相性 = 快照行（2026-10-17 复核），旧裁决留痕，缺行仍 unsupported', { skip: SKIP }, async () => {
   await withService(async (client) => {
     // **2026-09-25 人类裁决：属性双属性改用社区源的相乘口径 ⇒ 期望由 3 改成 4。**
     // 人类原话：「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。使用社区源」。
@@ -451,16 +451,20 @@ test('桥：双属性相性 = 两系相乘（人类裁决），快照原值可�
     //   ~~assert.notEqual(capped.result.multiplier, 4);~~
     const product = await client.typeMultiplier(['光系', '地系'], '草系');
     assert.equal(product.ok, true, `显式行应当能直接取到：${product.message || ''}`);
-    assert.equal(product.result.multiplier, 4);
-    assert.notEqual(product.result.multiplier, 3);
+    // 2026-10-17 复核推翻 2026-09-25 裁决；旧钉逐字留痕（改钉不删）：
+    // assert.equal(product.result.multiplier, 4);
+    // assert.notEqual(product.result.multiplier, 3);
+    assert.equal(product.result.multiplier, 3);
+    assert.notEqual(product.result.multiplier, 4);
     assert.equal(product.result.snapshot_value, 3, '快照那一行仍要能对账：它就是封顶的 3');
-    assert.equal(product.result.snapshot_agrees, false, '这一格正是「快照与裁决口径不同」的 41 格之一');
-    assert.equal(product.result.combination_rule, 'multiply');
+    // 旧钉（已退役）：snapshot_agrees=false；combination_rule='multiply'
+    assert.equal(product.result.snapshot_agrees, true, '2026-10-17：服务读口与快照相同');
+    assert.equal(product.result.combination_rule, 'snapshot_row');
     // `assumption_free` 的含义（重新说清）：它表示「这个倍率没有用**未核验的**假设补值」。
     // 新口径下它来自**两条单属性行相乘** —— 相乘是**人类裁决的规则**（台账 EV-TYPE-MULTIPLIER，
     // RECORDED_IN_GAME），不是我们的工程假设，所以这里仍然是 true；单属性那条同理（直读快照那一行）。
     assert.equal(product.result.assumption_free, true,
-      'assumption_free = 「没有用未核验假设补值」；相乘是裁决的规则，不是假设');
+      'assumption_free = 「没有用未核验假设补值」；现口径逐字读快照');
 
     const single = await client.typeMultiplier(['龙系'], '冰系');
     assert.equal(single.ok, true);

@@ -145,3 +145,26 @@ DS 负责把结果压成面试可讲的东西。每周产出应至少包含：�
 - 启动器冒烟：`docs/goal/evidence/launcher-smoke.md`
 - 规则真源对账：`docs/interview/SCARLETT-BAD-CASE-REPLAY-2026-10-17.md`
 - 20 轮执行报告：`docs/goal/GOAL-REPORT.md`
+
+## 11. Codex 审计已整合（2026-10-17 深夜，DS/Lead 回复）
+
+Codex 的 `rule-audit.md`（A1–A5）已逐条验收并落地；原文、补丁、命令记录归档在
+`docs/goal/evidence/codex-audit-2026-10-17/`，逐条处置见 `docs/goal/evidence/codex-audit-acceptance.md`。
+
+| 编号 | 处置 |
+|---|---|
+| A1 活动台账仍写 ×4、检索返回旧 claim | ✅ 已修：claim/notes/sources 改新口径；旧全文进 `retired_*`（不渲染）；`user-in-game-reports` 增复核留档；M07 anchors 改 ×3；meta-prior 生成器同步重建 |
+| A2 服务回执文字仍解释相乘 | ✅ 已修：`weakness_summary.multiplier_rule`、`type_row.note` 改快照口径；吸收 Codex 的 4 条契约测试 |
+| A3 bridge 测试仍钉 4/multiply | ✅ 已改钉为 3/true/snapshot_row（旧断言留注释）；确认该文件此前不在 `test:unit` 里 |
+| A4 等级词守卫无对象绑定 | ✅ 已修：攻击属性+防守属性/对象绑定；同对象冲突倍率 fail closed；无关 ×2 不再抵账；新增 3 条正反控制 |
+| A5 meta-prior/M07/注释旧口径 | ✅ 已修生成器+派生件+M07；服务文案已修；`data.py`/`opponents.py` 旧裁决注释按「改钉不删」保留并标注复核 |
+
+**实施中新踩到的一条链**（Codex 审计未覆盖）：改台账会让 `derived_from_ledger_sha256` 失效，
+必须重建 rulesets → pack → readiness → owned-pets → rag-eval，再重建 meta-prior + rc602 报告。
+`node scripts/roco/rebuild-derived-chain.mjs --check` 现已 5 环全过。
+
+**整合后读数**：`test:unit` 2101/2088/12/1（失败集合 = 基线 14 条里**修好 2 条派生报告红**，
+无新增红）；`test:env` 仅 1 条 pre-existing；quality 77/77；RAG 语料 8/8；
+Codex gate 两条自然问句 PASS；bridge 单跑 10/11（剩 1 条在未改 HEAD 上同样红）。
+**0 次付费调用。** Codex 侧后续可做的仍是 B（camp/洛克上下文隔离）与 D（面试说法打假），
+以及把 bridge 全量并入 `test:unit` 前先修那条 pre-existing。

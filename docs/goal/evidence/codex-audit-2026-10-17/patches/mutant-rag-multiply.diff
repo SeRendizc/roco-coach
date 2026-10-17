@@ -1,0 +1,13 @@
+--- a/src/coach/rag-index.js
++++ b/src/coach/rag-index.js
+@@ -507,8 +507,8 @@
+   const parts = key.split('|').filter(Boolean);
+   // 2026-10-17 复核：双属性**逐字照抄** types.json 那一行（双弱封顶 ×3），
+   // 不再按两条单属性相乘（旧裁决 ×4 已推翻，理由见函数上方注释）。
+-  const multiply = null;
+-  const valueOf = (attackType, fallback) => fallback;
++  const multiply = parts.length === 2 ? parts : null;
++  const valueOf = (attackType, fallback) => multiply ? multiply.reduce((product, part) => product * (singleRows.get(part)?.get(attackType) ?? 1), 1) : fallback;
+   const candidates = [];
+   const push = (item) => {
+     if (item && item.type && !candidates.some((row) => row.type === item.type)) candidates.push(item);

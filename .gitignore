@@ -84,3 +84,6 @@ reports/roco/**/*.png
 
 # 个人简历（含联系方式）只保留在本地/~/Documents/CV，不进公开仓库
 docs/interview/cv/
+
+# Codex/DS 联审工作目录（审计快照/日志/补丁，171MB；结论已归档到 docs/goal/evidence/codex-audit-2026-10-17/）
+/output/roco-next-*/

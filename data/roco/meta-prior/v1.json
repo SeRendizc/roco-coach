@@ -19,11 +19,11 @@
           "ref": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md"
         },
         {
-          "claim": "台账 EV-TYPE-MULTIPLIER（topic type.multiplier，RECORDED_IN_GAME）：2026-09-25 人类裁决「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。使用社区源」⇒ **双属性按两系相乘**（双克制 ×4、双抵抗 ×0.25、一克一抗 ×1.0；单属性仍 ×2 / ×0.5 / ×1）。这是本先验的 coverage / synergy 判据所依赖的那种倍率。",
+          "claim": "台账 EV-TYPE-MULTIPLIER（topic type.multiplier，RECORDED_IN_GAME）：2026-10-17 复核（Lead 批准）«官方采访 + 上游 sim 注释 + types.json 三源» ⇒ **单属性与双属性均逐字读取快照行**（双弱封顶 ×3、双抵抗 ×0.25、一克一抗 ×1.0；单属性仍 ×2 / ×0.5 / ×1）。这是本先验的 coverage / synergy 判据所依赖的那种倍率；旧「两系相乘（双弱 ×4）」裁决已退役（原文见台账 retired_*）。",
           "confidence": "RECORDED_IN_GAME",
-          "date": "2026-09-21",
+          "date": "2026-08-15",
           "ledger_entry": "EV-TYPE-MULTIPLIER",
-          "ref": "https://wiki.biligame.com/nrc/深渊罗隐"
+          "ref": "https://www.36kr.com/p/3939411707919744"
         }
       ],
       "feature_axes": [
@@ -322,11 +322,11 @@
           "ref": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md"
         },
         {
-          "claim": "台账 EV-TYPE-MULTIPLIER（topic type.multiplier，RECORDED_IN_GAME）：2026-09-25 人类裁决「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。使用社区源」⇒ **双属性按两系相乘**（双克制 ×4、双抵抗 ×0.25、一克一抗 ×1.0；单属性仍 ×2 / ×0.5 / ×1）。这是本先验的 coverage / synergy 判据所依赖的那种倍率。",
+          "claim": "台账 EV-TYPE-MULTIPLIER（topic type.multiplier，RECORDED_IN_GAME）：2026-10-17 复核（Lead 批准）«官方采访 + 上游 sim 注释 + types.json 三源» ⇒ **单属性与双属性均逐字读取快照行**（双弱封顶 ×3、双抵抗 ×0.25、一克一抗 ×1.0；单属性仍 ×2 / ×0.5 / ×1）。这是本先验的 coverage / synergy 判据所依赖的那种倍率；旧「两系相乘（双弱 ×4）」裁决已退役（原文见台账 retired_*）。",
           "confidence": "RECORDED_IN_GAME",
-          "date": "2026-09-21",
+          "date": "2026-08-15",
           "ledger_entry": "EV-TYPE-MULTIPLIER",
-          "ref": "https://wiki.biligame.com/nrc/深渊罗隐"
+          "ref": "https://www.36kr.com/p/3939411707919744"
         },
         {
           "claim": "台账 EV-LEAVE-SEMANTICS：「离场」包括主动更换或触发脱离效果，不包括力竭后下场；ACTIVE_SWITCH != SKILL_LEAVE != FAINT_REPLACEMENT。",
@@ -493,11 +493,11 @@
           "ref": "https://news.17173.com/content/03182026/104940843.shtml"
         },
         {
-          "claim": "台账 EV-TYPE-MULTIPLIER（topic type.multiplier，RECORDED_IN_GAME）：2026-09-25 人类裁决「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。使用社区源」⇒ **双属性按两系相乘**（双克制 ×4、双抵抗 ×0.25、一克一抗 ×1.0；单属性仍 ×2 / ×0.5 / ×1）。这是本先验的 coverage / synergy 判据所依赖的那种倍率。",
+          "claim": "台账 EV-TYPE-MULTIPLIER（topic type.multiplier，RECORDED_IN_GAME）：2026-10-17 复核（Lead 批准）«官方采访 + 上游 sim 注释 + types.json 三源» ⇒ **单属性与双属性均逐字读取快照行**（双弱封顶 ×3、双抵抗 ×0.25、一克一抗 ×1.0；单属性仍 ×2 / ×0.5 / ×1）。这是本先验的 coverage / synergy 判据所依赖的那种倍率；旧「两系相乘（双弱 ×4）」裁决已退役（原文见台账 retired_*）。",
           "confidence": "RECORDED_IN_GAME",
-          "date": "2026-09-21",
+          "date": "2026-08-15",
           "ledger_entry": "EV-TYPE-MULTIPLIER",
-          "ref": "https://wiki.biligame.com/nrc/深渊罗隐"
+          "ref": "https://www.36kr.com/p/3939411707919744"
         }
       ],
       "feature_axes": [
@@ -585,17 +585,17 @@
     {
       "path": "data/roco/evidence/rule-evidence-ledger.json",
       "role": "rule_evidence_ledger",
-      "sha256": "267e9b4eeb85342947c7168587650b610c1aa63172a4823772ab8f629bdb0bd8"
+      "sha256": "f8319e44e475b6b32ce58c9fb7c914d1c095edd66407833783d3a90f35290634"
     },
     {
       "path": "data/roco/game-data-pack/v2/pack.json",
       "role": "game_data_pack",
-      "sha256": "d264cef5a1aa1838f3ca7d27baf2b6b9ce989c0c863acd48c31d9010927ce379"
+      "sha256": "3a6211f42ca00fcb376f70c43014ecd05dc5d5f8e3c59f204249645723616457"
     },
     {
       "path": "data/roco/rulesets/legacy-sim-v1.json",
       "role": "ruleset_config",
-      "sha256": "9f7740dedee8d025c39e65408f1a4291b68d9c5b09e273bf9407a1cecf3d3044"
+      "sha256": "03e3e693b54c7edce94bffe3054222a00a3cf6320eb690f5bde44607e5f1738c"
     },
     {
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
@@ -743,7 +743,7 @@
       "value": 0.142857
     }
   ],
-  "meta_prior_id": "roco-meta-prior/v1#2a982b3b8c8e6ab0",
+  "meta_prior_id": "roco-meta-prior/v1#5e290c991d596f54",
   "schema": "roco-meta-prior/v1",
   "usage": {
     "consumer": "RC-304（对未知对手的队伍强度口径）。本先验是它的**唯一**版本化环境输入：没有先验就无法把「队伍强不强」写成对环境的期望，只能退化成对单只精灵的描述。",

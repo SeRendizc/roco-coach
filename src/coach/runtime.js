@@ -4877,6 +4877,54 @@ export function checkGroundedAnswer(answer,{ragCitations=false}={}){
    if(v===4){reasons.push('retired-dual-weak-tier:4x');continue;}
    if(!supportedType.has(v))reasons.push('unsupported-type-tier:'+v);
   }
+  // ── 2026-10-17（吸收 Codex 混合证据反例）：倍率必须**绑定到对象**，不能拿全包任意 ×N 抵账。
+  // 反例：正文「电系打翠顶夫人是 2 倍」+ 证据 [{翼水 受 电 ×3}, {翼水 受 电 ×2}]（无关/冲突记录）
+  // 旧实现把全包的 2 收进 supportedType ⇒ 放行。现在：抽取正文里「A系打<目标>是 N 倍」的成对断言，
+  // 到证据里按 **攻击属性 + 防守属性/对象** 找记录；同一对象出现冲突倍率则 fail closed。
+  const ELEMENT='(?:光|暗|幽|幻|恶|毒|萌|虫|龙|翼|地|水|火|草|冰|电|武|机械|普通)系';
+  const claimPairRe=new RegExp('('+ELEMENT+')\\s*(?:打|对|克)\\s*([^，。；！？\\n]{1,20}?)\\s*(?:是|为|造成|打出|有)?\\s*(?:×|x|X)?\\s*(\\d+(?:\\.\\d+)?|[一两二三四五六七八九十])\\s*倍','g');
+  const CN={一:1,二:2,两:2,三:3,四:4,五:5,六:6,七:7,八:8,九:9,十:10};
+  const typeRecords=[];
+  const collect=(entry)=>{
+   const raw=typeof entry==='string'?entry:JSON.stringify(entry??'');
+   if(!raw.includes('type_multiplier'))return;
+   const attack=/"(?:attack_element|attackElement)"\s*:\s*"([^"]+)"/.exec(raw)?.[1]??null;
+   const defendersRaw=/"(?:defender_types|defenderTypes)"\s*:\s*\[([^\]]*)\]/.exec(raw)?.[1]??'';
+   const defenders=[...defendersRaw.matchAll(/"([^"]+)"/g)].map((m)=>m[1]);
+   const mult=/"multiplier"\s*:\s*(\d+(?:\.\d+)?)/.exec(raw)?.[1];
+   const paired=new RegExp('('+ELEMENT+')(?:\\|('+ELEMENT+'))?\\s*受\\s*('+ELEMENT+')\\s*[×xX]\\s*(\\d+(?:\\.\\d+)?)').exec(raw);
+   if(paired){
+    typeRecords.push({attack:attack??paired[3],
+     defenders:defenders.length?defenders:[paired[1],paired[2]].filter(Boolean),
+     multiplier:Number(mult??paired[4]),raw});
+   }else if(Number.isFinite(Number(mult))){
+    typeRecords.push({attack,defenders,multiplier:Number(mult),raw});
+   }
+  };
+  for(const entry of answer.evidence??[])collect(entry);
+  for(const entry of answer.toolTrace??[])collect(entry);
+  for(const m of text.matchAll(claimPairRe)){
+   const attack=m[1];
+   const target=String(m[2]??'');
+   const val=CN[m[3]]??Number(m[3]);
+   if(!Number.isFinite(val))continue;
+   const dtypes=[...target.matchAll(new RegExp('('+ELEMENT+')','g'))].map((x)=>x[1]);
+   const subj=(rec)=>{
+    if(rec.attack&&rec.attack!==attack)return false;
+    if(dtypes.length)return dtypes.some((t)=>rec.defenders.includes(t)||rec.raw.includes(t));
+    // 目标里没有属性（如「翠顶夫人」）：靠对象名匹配；证据里没有名字时退化为「唯一候选倍率」判定。
+    const token=target.replace(/[（(].*$/s,'').replace(/\s/g,'');
+    return token.length>0&&rec.raw.includes(token);
+   };
+   const scoped=typeRecords.filter(subj);
+   // 目标只有精灵名（证据里往往没有名字）时，退化为「同攻击属性的记录」再判：
+   // 不相关属性的 ×N 不许抵账，同攻击属性出现冲突倍率则 fail closed（保守）。
+   const pool=scoped.length?scoped:typeRecords.filter((rec)=>!rec.attack||rec.attack===attack);
+   if(!pool.length)continue; // 证据里没有可绑定记录：交给上面的全局 supportedType 判据
+   const values=[...new Set(pool.map((r)=>r.multiplier))];
+   if(!values.includes(val))reasons.push('unsupported-type-tier-binding:'+val);
+   else if(values.length>1)reasons.push('conflicting-type-tier:'+values.join('/'));
+  }
  }
  // 因果校验：事件里某一方的行动被注明「取消」时，正文不得声称该方造成了伤害。
  // 实测模型会把「原定行动取消」写成「命中了」，数字校验抓不到——因为根本没有数字。

@@ -1,0 +1,12 @@
+--- a/roco/src/roco_env/data.py
++++ b/roco/src/roco_env/data.py
+@@ -206,8 +206,7 @@
+         # ③ 官方 2026-08-07「斯嘉丽」采访里电系打翠顶夫人（翼+水）玩家答「三倍」。
+         # 旧裁决（2026-09-25 社区源相乘 4×）原话保留在文件头注释与
+         # roco/tests/test_type_multiplier_ruling.py，不删除。
+-        row = self.rows[key]
+-        return row.get(attack_element, self.DEFAULT)
++        return self.fallback_multiplier(key, attack_element)
+ 
+     def has_row(self, defender_types: Tuple[str, ...]) -> bool:
+         """快照里有没有这一组合的显式行。

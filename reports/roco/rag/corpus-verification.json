@@ -1,11 +1,11 @@
 {
  "schema": "roco-rules-corpus-verification/v1",
  "generated_by": "scripts/roco/verify-rules-corpus.mjs",
- "generated_at": "2026-09-29T14:32:54.531Z",
+ "generated_at": "2026-10-17T15:49:09.382Z",
  "scope": "语料本身对不对（检索器对不对由 eval-rag-retrieval.mjs 的 13 组判据负责）",
  "inputs": {
   "ledger": "data/roco/evidence/rule-evidence-ledger.json",
-  "ledger_sha256": "267e9b4eeb85342947c7168587650b610c1aa63172a4823772ab8f629bdb0bd8",
+  "ledger_sha256": "f8319e44e475b6b32ce58c9fb7c914d1c095edd66407833783d3a90f35290634",
   "ledger_entries": 29,
   "ruleset_dir": "data/roco/rulesets",
   "pack": "data/roco/game-data-pack/v2/pack.json"
@@ -30,8 +30,8 @@
     },
     {
      "marker": "official_reproduction",
-     "used_entries": 6,
-     "declared_count": 6,
+     "used_entries": 7,
+     "declared_count": 7,
      "claims_none": false
     },
     {
@@ -42,14 +42,14 @@
     },
     {
      "marker": "community",
-     "used_entries": 16,
-     "declared_count": 16,
+     "used_entries": 15,
+     "declared_count": 15,
      "claims_none": false
     },
     {
      "marker": "repo_internal",
-     "used_entries": 7,
-     "declared_count": 7,
+     "used_entries": 8,
+     "declared_count": 8,
      "claims_none": false
     },
     {
@@ -179,8 +179,8 @@
     {
      "id": "EV-TYPE-MULTIPLIER",
      "confidence": "RECORDED_IN_GAME",
-     "sources": 5,
-     "distinct_urls": 5,
+     "sources": 4,
+     "distinct_urls": 4,
      "has_official_first_party": false,
      "has_recorded_gameplay": true
     },
@@ -301,7 +301,7 @@
   "provenance_resolvable": {
    "ok": true,
    "problems": [],
-   "checked": 125
+   "checked": 136
   },
   "version_consistent": {
    "ok": true,
@@ -326,7 +326,7 @@
       "ruleset_label": "S4「月涌狂想」赛季",
       "ruleset_config_id": "legacy_sim_v1",
       "ruleset_config_path": "data/roco/rulesets/legacy-sim-v1.json",
-      "ruleset_config_sha256": "9f7740dedee8d025c39e65408f1a4291b68d9c5b09e273bf9407a1cecf3d3044",
+      "ruleset_config_sha256": "03e3e693b54c7edce94bffe3054222a00a3cf6320eb690f5bde44607e5f1738c",
       "ruleset_config_is_default": true,
       "ruleset_configs_available": [
        {
@@ -346,7 +346,7 @@
       "frozen_revision": "aff808eb60003457fe8a260d1ac3c9bd95d53872",
       "frozen_revision_date": "2026-09-10T08:46:18Z",
       "evidence_ledger_path": "data/roco/evidence/rule-evidence-ledger.json",
-      "evidence_ledger_sha256": "267e9b4eeb85342947c7168587650b610c1aa63172a4823772ab8f629bdb0bd8",
+      "evidence_ledger_sha256": "f8319e44e475b6b32ce58c9fb7c914d1c095edd66407833783d3a90f35290634",
       "reconciliation_report_path": "reports/roco/reconciliation/catalog-reconciliation.json",
       "reconciliation_report_sha256": "977610773868a0c00191614df476282fa317ec3e859cdbb2c58ef1842ac71422",
       "sources_path": "data/roco/sources.yaml",
@@ -497,8 +497,8 @@
      "id": "EV-TYPE-MULTIPLIER",
      "topic": "type.multiplier",
      "topic_known": true,
-     "sources": 5,
-     "dated": 5
+     "sources": 4,
+     "dated": 4
     },
     {
      "id": "EV-TURN-ORDER-MECHANISMS-EXIST",
