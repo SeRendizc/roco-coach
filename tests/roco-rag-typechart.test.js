@@ -59,27 +59,21 @@ const SINGLE_TABLES = new Map(SINGLE_KEYS.map((key) => [key, singleTable(key)]))
 /**
  * 语料正文**应当**写出的 weak / resist —— 本文件独立复算，不读产物。
  *
- * 2026-09-25 人类裁决：「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。
- * **使用社区源**」⇒ 双属性的值 = 两条单属性行相乘；乘积为 1 的项从 weak / resist 两侧都消失。
- * 单属性继续逐字照抄快照那一行（18/18，一个字都没动）。
+ * **2026-10-17 复核（推翻 2026-09-25 裁决）**：双属性**逐字照抄快照那一行**（双弱封顶 ×3）。
+ * 旧裁决原话（改钉不删）：「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。
+ * **使用社区源**」⇒ 当时双属性按两条单属性相乘写 ×4；该口径已被新证据推翻：
+ * 官方 2026-08-15 采访（电系打翠顶夫人=三倍）、上游 sim `damage_calc.py` 注释
+ * 「3x 强力克制，非乘算 4x」、types.json 双属性行逐字 3。
+ * 旧口径的实现与 41 格账留在 `multipliedValue()` / 判据④（历史留痕 + 必红反证）。
  */
 function expectedRows(key) {
-  const parts = String(key).split('|');
-  if (parts.length !== 2) {
-    return {weak: truth.types[key].weak ?? [], resist: truth.types[key].resist ?? []};
-  }
-  const candidates = [];
-  const push = (item) => {
-    if (item?.type && !candidates.some((row) => row.type === item.type)) candidates.push({type: item.type});
-  };
-  for (const item of truth.types[key].weak ?? []) push(item);
-  for (const item of truth.types[key].resist ?? []) push(item);
-  for (const part of parts) for (const attack of SINGLE_TABLES.get(part).keys()) push({type: attack});
-  const valued = candidates.map(({type}) => ({
-    type,
-    multiplier: parts.reduce((product, part) => product * (SINGLE_TABLES.get(part).get(type) ?? 1), 1),
-  }));
-  return {weak: valued.filter((row) => row.multiplier > 1), resist: valued.filter((row) => row.multiplier < 1)};
+  return {weak: truth.types[key].weak ?? [], resist: truth.types[key].resist ?? []};
+}
+
+/** 旧裁决口径（两系相乘）的逐格值：只用于「41 格留痕 + 必红反证」，**不是**现行期望。 */
+function multipliedValue(key, attack) {
+  return String(key).split('|')
+    .reduce((product, part) => product * (SINGLE_TABLES.get(part)?.get(attack) ?? 1), 1);
 }
 
 /** 快照那一行的逐字倍率（未列出 = 中性 1.0）—— 用来做「与旧口径差在哪 41 格」的对账。 */
@@ -137,7 +131,7 @@ function sentenceRows(body) {
   return rows;
 }
 
-/** 倍率复算：把正文里的方向句与**裁决口径**（单属性逐字 / 双属性相乘）逐条对，返回问题清单。 */
+/** 倍率复算：把正文里的方向句与**快照口径**（单属性、双属性都逐字）逐条对，返回问题清单。 */
 function verifySentenceRows(body, key) {
   const problems = [];
   const rows = expectedRows(key);
@@ -348,20 +342,21 @@ test('反证② 删条：把「冰系」从真源内存副本里删掉 ⇒ 同�
 // 4. 判据③ 反向：档位与自研引擎无交集（不许把两个引擎混起来）
 // ─────────────────────────────────────────────────────────────────────────
 
-test('判据③ 档位：快照是 {0.25, 0.5, 2, 3}，而**语料按裁决是 {0.25, 0.5, 2, 4}**；两者与自研引擎的 1.5 / 0.75 都无交集', () => {
+test('判据③ 档位：快照与语料都是 {0.25, 0.5, 2, 3}（旧裁决的 ×4 不再出现）；两者与自研引擎的 1.5 / 0.75 都无交集', () => {
   const fromTruth = tiersOf(TRUTH_KEYS.flatMap((key) => ['weak', 'resist']
     .flatMap((dir) => truth.types[key][dir].map((item) => item.multiplier))));
   const fromDocs = tiersOf(l3Docs.flatMap((doc) => ['克制（weak）', '抵抗（resist）']
     .flatMap((label) => compactRow(doc.body, label).map((item) => item.multiplier))));
   log('[实际] types.json（快照）的档位 =', JSON.stringify(fromTruth),
     '；L3 文档正文（= 裁决口径）的档位 =', JSON.stringify(fromDocs));
-  assert.deepEqual(fromTruth, [0.25, 0.5, 2, 3], '快照里有 ×3：它正是那 41 格的封顶值');
-  // **2026-09-25 人类裁决**：双属性按两系相乘 ⇒ 语料里出现 ×4，**不**出现封顶的 ×3。
-  // （改钉不删：本条旧断言原话是 `assert.deepEqual(fromDocs, fromTruth);`，
-  //   并另有 `for (const tier of [1.5, 0.75, 4])` 要求 ×4 不出现 —— 那两条已被裁决取代。）
-  assert.deepEqual(fromDocs, [0.25, 0.5, 2, 4]);
-  assert.equal(fromTruth.includes(4), false, '快照里本来就没有 ×4（相乘的那一档只存在于裁决口径）');
-  assert.equal(fromDocs.includes(3), false, 'L3 正文里不该再出现封顶的 ×3（那是被裁决取代的旧口径）');
+  assert.deepEqual(fromTruth, [0.25, 0.5, 2, 3], '快照里的封顶档：双弱 = 3');
+  // **2026-10-17 复核（推翻 2026-09-25 裁决）**：双属性恢复逐字照抄快照 ⇒ 语料档位 = 快照档位，
+  // ×3 出现、×4 不再出现。
+  // 改钉不删：本条旧断言原话是 `assert.deepEqual(fromDocs, [0.25, 0.5, 2, 4]);` 且要求
+  // `fromDocs.includes(3) === false` —— 该期望已随裁决翻转，旧原话留在此处。
+  assert.deepEqual(fromDocs, fromTruth, '语料档位必须与快照完全一致（双属性逐字照抄）');
+  assert.equal(fromDocs.includes(3), true, 'L3 正文必须按快照写 ×3（双弱封顶）');
+  assert.equal(fromDocs.includes(4), false, 'L3 正文里不该再出现旧裁决的 ×4');
   const engineTiers = tiersOf([RULES.typeAdvantage, RULES.typeResist]);
   assert.deepEqual(engineTiers, [0.75, 1.5]);
   for (const tier of [1.5, 0.75]) {
@@ -402,11 +397,11 @@ test('判据①-补 单属性 18/18：正文与快照那一行逐字相同（裁
 // 4c. 判据②-补 双属性三条（人类点名的例子）+ 全量「等于两系相乘」
 // ─────────────────────────────────────────────────────────────────────────
 
-test('判据②-补 双属性 = 两系相乘：三条点名例子 + 102 条键全量复算 + 反写一致', () => {
+test('判据②-补 双属性 = 逐字照抄快照：三条点名例子 + 102 条键全量复算 + 反写一致', () => {
   const cases = [
-    ['冰系|地系', '火系', 1.0, '冰系抵抗火系 0.5 × 地系被火系克制 2'],
-    ['火系|冰系', '地系', 4.0, '2 × 2'],
-    ['虫系|草系', '火系', 4.0, '2 × 2'],
+    ['翼系|水系', '电系', 3.0, '官方采访 Bad Case：电系打翠顶夫人（翼+水）= 三倍'],
+    ['虫系|草系', '火系', 3.0, '官方采访 Bad Case：花衣蝶（虫+草）被火神三倍克制'],
+    ['火系|冰系', '地系', 3.0, '旧裁决里的 2×2 例子：快照封顶 3'],
   ];
   for (const [key, attack, expected, why] of cases) {
     assert.equal(bodyMultiplier(key, attack), expected, `${key} 受 ${attack} 应为 ${expected}（${why}）`);
@@ -434,17 +429,16 @@ test('判据②-补 双属性 = 两系相乘：三条点名例子 + 102 条键�
 // 5. 判据④ 双属性：**按两系相乘**，与旧快照恰好差 41 格（逐格列出）
 // ─────────────────────────────────────────────────────────────────────────
 
-test('判据④ 双属性按两系相乘：与旧快照恰好差 41 格（×3 → ×4），逐格对账', () => {
-  // ① 全部 120 条键逐条复算（单属性逐字 + 双属性相乘），顺序与倍率都要对得上。
+test('判据④ 双属性逐字照抄快照：语料与快照差 0 格；旧裁决的 41 格（×3→×4）原样留痕 + 必红反证', () => {
+  // ① 全部 120 条键逐条复算（单属性、双属性都逐字），顺序与倍率都要对得上。
   for (const key of TRUTH_KEYS) {
     const body = index.byId.get(`type_chart::${key}`).body;
     const expected = expectedRows(key);
-    assert.deepEqual(compactRow(body, '克制（weak）'), expected.weak, `${key} 的 weak 与裁决口径不一致`);
-    assert.deepEqual(compactRow(body, '抵抗（resist）'), expected.resist, `${key} 的 resist 与裁决口径不一致`);
-    assert.deepEqual(verifySentenceRows(body, key), [], `${key} 的方向句与裁决口径不一致`);
+    assert.deepEqual(compactRow(body, '克制（weak）'), expected.weak, `${key} 的 weak 与快照不一致`);
+    assert.deepEqual(compactRow(body, '抵抗（resist）'), expected.resist, `${key} 的 resist 与快照不一致`);
+    assert.deepEqual(verifySentenceRows(body, key), [], `${key} 的方向句与快照不一致`);
   }
   // ② 16 对「同一组合的两种写法」：内容逐字相同（键的写法不同，相性内容必须一样）。
-  //    双向都查一遍（32 条键），但**对数**只数一次 —— 两个方向各有键，逐条数会得 32。
   const pairs = new Set();
   let mirroredRows = 0;
   for (const key of DUAL_KEYS) {
@@ -461,45 +455,45 @@ test('判据④ 双属性按两系相乘：与旧快照恰好差 41 格（×3 �
   log('[实际] 互为反写的键 =', mirroredRows, '条 =', pairs.size, '对');
   assert.equal(mirroredRows, 32);
   assert.equal(pairs.size, 16, '同一组合的两种写法应当是 16 对');
-  // ③ **41 格**：语料正文（= 相乘口径）与旧快照逐格对账，差异必须恰好是手写的那 41 格，
-  //    且全部是「快照 3 → 裁决 4」。
-  //    改钉不删：本条旧口径的原话是
-  //      「41 格冲突维持快照口径（×3，不是相乘的 ×4）… 本仓**维持快照口径**：台账
-  //        EV-TYPE-MULTIPLIER 已经表过态（可观察到 ×3 / ×2 / ×0.5 / ×0.25 四档，
-  //        不再沿用「所有双弱 ×4」的旧说法）。要改成 4× 是改台账 + 改判据，不是改一句话」
-  //    —— 2026-09-25 人类裁决正是「改台账 + 改判据」：**使用社区源的相乘口径**。
+
+  // ③ **0 格**：语料正文（= 快照口径）与快照逐格对账，差异必须为 0。
   const cells = diffCellsAgainstSnapshot((key, attack) => bodyMultiplier(key, attack));
-  log('[实际] 语料正文与旧快照的差异格 =', cells.length, '（手写清单 =', FORTY_ONE_CELLS.length, '）');
-  assert.deepEqual(cells, [...FORTY_ONE_CELLS].sort(), '41 格的清单与裁决时登记的清单不一致');
-  assert.equal(cells.length, 41);
-  for (const cell of cells) {
+  log('[实际] 语料正文与快照的差异格 =', cells.length, '（期望 0）');
+  assert.deepEqual(cells, [], '语料正文必须逐格等于快照（双属性逐字照抄）');
+
+  // ④ 旧裁决留痕：用旧「两系相乘」口径重算，与快照差异必须恰好是手写的那 41 格（×3 → ×4）。
+  //    改钉不删：旧裁决原话「快照 3× vs 两个社区源 4×，差 41 格；使用社区源」留在本条与文件头。
+  const legacyCells = diffCellsAgainstSnapshot((key, attack) => multipliedValue(key, attack));
+  log('[实际] 旧裁决（两系相乘）与快照的差异 =', legacyCells.length, '格（手写清单 =', FORTY_ONE_CELLS.length, '）');
+  assert.deepEqual(legacyCells, [...FORTY_ONE_CELLS].sort(), '41 格的清单与 2026-09-25 裁决时登记的清单不一致');
+  assert.equal(legacyCells.length, 41);
+  for (const cell of legacyCells) {
     const [a, b, attack] = cell.split('|');
-    const snap = snapshotMap(`${a}|${b}`).get(attack);
-    assert.equal(snap, 3, `${cell} 的快照值不是 3`);
-    assert.equal(bodyMultiplier(`${a}|${b}`, attack), 4, `${cell} 的语料值不是 4`);
-    assert.match(index.byId.get(`type_chart::${a}|${b}`).body, new RegExp(`${attack}克制${a}\\|${b} ×4`),
-      `${a}|${b} 的 ${attack} 必须按裁决写 ×4`);
+    assert.equal(snapshotMap(`${a}|${b}`).get(attack), 3, `${cell} 的快照值不是 3`);
+    assert.equal(multipliedValue(`${a}|${b}`, attack), 4, `${cell} 的旧相乘值不是 4`);
+    // 现行语料必须照抄快照 ×3（不是旧裁决的 ×4）。
+    assert.equal(bodyMultiplier(`${a}|${b}`, attack), 3, `${cell} 的语料值不是 3（旧裁决才是 4）`);
+    assert.match(index.byId.get(`type_chart::${a}|${b}`).body, new RegExp(`${attack}克制${a}\\|${b} ×3`),
+      `${a}|${b} 的 ${attack} 必须按快照写 ×3`);
   }
-  // 整库正文里一个封顶的 ×3 都不许有；而 ×4 必须真的存在（否则「改成相乘」是空话）。
-  const withThree = l3Docs.filter((doc) => /×3(?![0-9.])/.test(doc.body)).map((doc) => doc.id);
-  assert.deepEqual(withThree, [], `这些正文还在写快照的封顶值 ×3：${withThree.join(',')}`);
+  // 整库正文里一个旧裁决的 ×4 都不许有；而 ×3 必须真的存在（否则「照抄快照」是空话）。
   const withFour = l3Docs.filter((doc) => /×4(?![0-9.])/.test(doc.body)).map((doc) => doc.id);
-  assert.ok(withFour.length > 0, '改口之后必须真的有文档写 ×4');
+  assert.deepEqual(withFour, [], `这些正文还在写旧裁决的 ×4：${withFour.join(',')}`);
+  const withThree = l3Docs.filter((doc) => /×3(?![0-9.])/.test(doc.body)).map((doc) => doc.id);
+  assert.ok(withThree.length > 0, '照抄快照之后必须真的有文档写 ×3');
   // 判据的牙：探测器对「×3 / ×4」必须真的敏感（否则上面两条是空的）。
   assert.equal(/×3(?![0-9.])/.test('草系克制光系|地系 ×3'), true);
   assert.equal(/×4(?![0-9.])/.test('草系克制光系|地系 ×4'), true);
-  log('[实际] 写 ×4 的文档 =', withFour.length, '条；样例 =',
-    cells.slice(0, 3).map((cell) => {
+
+  // ⑤ **必红反证**：把语料换回「两系相乘」旧口径，同一个对账必须报 41 格 ⇒ 判据③（要求 0 格）必红。
+  log('[实际] 反证：旧口径（两系相乘）与快照的差异 =', legacyCells.length, '格 ⇒ 判据③ 必红（0 ≠ 41）；',
+    '现行口径 =', cells.length, '格');
+  assert.notEqual(legacyCells.length, cells.length, '两种口径必须给出不同的格数，否则这条反证没有牙');
+  log('[实际] 写 ×3 的文档 =', withThree.length, '条；样例 =',
+    legacyCells.slice(0, 3).map((cell) => {
       const [a, b, attack] = cell.split('|');
-      return `${a}|${b} 受 ${attack}：快照 ×3 → 裁决 ×4`;
+      return `${a}|${b} 受 ${attack}：快照 ×3（旧裁决 ×4）`;
     }).join('；'));
-  // ④ **必红反证**：把语料换回「读快照那一行」的旧口径，同一个对账必须给出 0 格
-  //    —— 判据③（要求恰好 41 格）因此必红。这里把两种口径的数一起打出来。
-  const cappedCells = diffCellsAgainstSnapshot((key, attack) => snapshotMap(key).get(attack) ?? 1.0);
-  log('[实际] 反证：旧口径（照抄快照行）与快照的差异 =', cappedCells.length,
-    '格 ⇒ 判据③ 必红（41 ≠ 0）；裁决口径 =', cells.length, '格');
-  assert.equal(cappedCells.length, 0, '旧口径本该与快照逐格相同（它的值就是从快照读的）');
-  assert.notEqual(cappedCells.length, cells.length, '两种口径必须给出不同的格数，否则这条反证没有牙');
 });
 
 // ─────────────────────────────────────────────────────────────────────────
