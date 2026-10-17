@@ -87,5 +87,10 @@
   （Operation not permitted，已用探针证实）；已给 `/api/connect` 加「Keychain 优先、失败退回
   `$HOME/.config/roco/deepseek.key`(0600)」双通道（仍然 env-gated，默认关闭），并用**沙箱外权限**
   重启 8910（探针验证 Keychain add/read/delete 均 OK）。用户需在同一 URL 再输入一次 key（重启丢了内存）。
-- 下一步：用户重新输入后 → 验证 Keychain 已存 → 跑**一次**真实 DS 请求（修复分支 + 真模型），
-  记录 provider/延迟/回退；随后回到 LLM/Agent 主线收尾。
+- Round 17：用户暂未重输 key；**按用户「以 LLM/Agent 为主」的要求**，产出
+  `docs/interview/AGENT-DRILL-2026-10-17.md`：12 个主题（A 为什么需要 LLM / B 真 Agent / C 工具合同 /
+  D grounded 边界（含今天修的等级词）/ E 信息边界 / F 过期取消 / G 评测方法 / H RAG 没赢 /
+  I 记忆学习 / J 后训练边界 / K 推理服务 / L 五个失败复盘 / M 进组 90 天计划）+ 对抗速查。
+  已进 README 阅读顺序；提交 53986405 并推送。
+- 下一步（Round 18）：若 key 已输入 → 持久化检查 + 一次真实 DS 请求证据；否则收尾 GOAL-REPORT
+  （最终提交哈希/推送状态/验收清单），准备最终答复。
