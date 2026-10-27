@@ -2907,10 +2907,24 @@ if(role==='auto')route=factAsk?'teacher':(refusesReview?'companion':/培养|加�
  // 会回退到 base（引擎模板），而回执如果还写 `provider:'mlx-local'`，那就是**谎报**——
  // 玩家以为这句话是模型说的。有 `lastFallback` 就报 `local-fallback` 并把原因带上。
  const localFallback=useModel&&!rejected?provider?.lastFallback??null:null;
+ // Keep the checked detailed answer intact. Short local summaries are a separate
+ // presentation field and never replace an accepted model answer.
+ let displayText=finalText;
+ const wantsDetail=/详细|逐回合|全部记录|展开/.test(playerQuestion(originalMessage));
+ const localDelivery=!useModel||rejected||adviceEnforced||Boolean(localFallback);
+ if(!wantsDetail&&localDelivery){
+  if(packet.rocoAdvice?.playerSummary){
+   const short=speakPlainly(packet.rocoAdvice.playerSummary).text;
+   const checked=gateAdviceDelivery({advice:packet.rocoAdvice,text:short,battle:rocoBattle});
+   displayText=enforceBattleAdvice(packet.rocoAdvice,checked.text).text;
+  }else if(['review','match-review'].includes(next.lastTopic)&&typeof packet.playerSummary==='string'&&packet.playerSummary){
+   displayText=speakPlainly(packet.playerSummary).text;
+  }
+ }
  // `localText` = **引擎/工具算出来的那一份正文**（`scrubbedText`），与 `text`（可能是模型说的）分开。
  // 浏览器侧在「模型正文没过事实守卫」时要用它降级 —— 修前那个降级是浏览器自己再跑一遍 `runCoach`，
  // 而浏览器里资料工具跑不起来（P0-01 的根因），降级出来的东西与洛手无关。这里由服务端直接给出。
- return {...packet,...(judgment?{judgment}:{}),activity,activityLine:activityLine(activity),text:finalText,localText:scrubbedText,memory:next,route,
+ return {...packet,...(judgment?{judgment}:{}),activity,activityLine:activityLine(activity),text:finalText,displayText,displayKind:displayText===finalText?'checked-answer':'local-summary',localText:scrubbedText,memory:next,route,
   // U08 的机器可读回执：客户端据此渲染「查看 / 采用建议」，并靠 `legalActionId`
   // 把它回填到**当前合法动作表**里的那一项（不在合法集合里的行动根本产生不出来）。
   ...(adviceEnforced?{adviceEnforced:{reason:adviceCheck.reason,actionLabel:packet.rocoAdvice.actionLabel,

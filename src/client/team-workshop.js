@@ -348,6 +348,8 @@ import {markdown as renderMarkdown} from '../coach/experience.js';
 // 它产出「强度判断 / 两条短板 / 一个优先调整 / 基本打法」，评估侧栏与 6×4 推荐都读它，
 // 保证「评估」和「推荐」不会各算一份（task-11 的硬要求）。
 import {buildTeamPlan, sixByFourComplete} from '../coach/team-plan.js';
+import {buildTeamAlternatives} from '../coach/team-alternatives.js';
+import {bindWorkshopSlotIdentities} from '../coach/team-slot-identity.js';
 // 属性相性用页面自己那一份（来源 `data/roco/normalized/.../types.json`，有生成与校验脚本）。
 import {defenceMultiplier} from './type-affinity.js';
 // ⚠ 2026-09-29 补（`art-finish` 报的实况故障，Lead 复核并实测）：
@@ -940,7 +942,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
           现在：应用 = 把这六个槽位 × 四个技能写进本机记录 roco.workshop.teamconfig.v1 并当众核对合法性；
           撤销 = 一步退回上一份（与个体的回滚一样：只能退一步）；重新读取 = 不带参数打开这一页时读回来。 -->
      <div class="tw-knobs tw-knobs--right" id="tw-config-knobs">
-      <button class="tw-btn" id="tw-plan-build">小芽给一套 6×4</button>
+      <button class="tw-btn" id="tw-plan-build">给我三套备选 6×4</button>
        <button class="tw-btn" id="tw-config-check">核对六只四技能</button>
       <button class="tw-btn" id="tw-config-apply">应用这套配置</button>
       <button class="tw-btn" id="tw-config-undo">撤销上一次应用</button>
@@ -1117,6 +1119,11 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     replaceArm: null,
     /** 6 只 × 4 招整套配置的预览（点「小芽给一套 6×4」才建）。 */
     plan: null,
+    planAlternatives: [],
+    planBuildSeq: 0,
+    rosterFacts: null,
+    slotIdentities: new WeakMap(),
+    teamDisplaySlots: [],
     ownedBySpecies: new Map(),      // 物种 → [{select: 个体, name, ...}]
     ownedByInstance: new Map(),     // 个体 → {speciesId, name}
     ambiguousNames: new Set(),      // 持有名单里重名的名字（不猜是哪一只，但知道「你有」）
@@ -1156,6 +1163,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
 
   /** 槽位 → 物种 id（公开层不带 id；按名字在持有名单里**唯一**匹配，重名不猜）。 */
   function speciesOfSlot(slot) {
+    // Identity from the same API receipt takes priority over a possibly shared display name.
+    if (slot && state.slotIdentities.has(slot)) return state.slotIdentities.get(slot).species;
     const direct = typeof slot?.species_id === 'string' && slot.species_id ? slot.species_id : null;
     if (direct) return direct;
     const name = typeof slot?.name === 'string' ? slot.name : '';
@@ -1436,8 +1445,9 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
 
   // ── 队伍六个槽位 ───────────────────────────────────────────────────────
   function renderTeam(player) {
-    const slots = Array.isArray(player?.slots) ? player.slots : [];
-    $('tw-slots').innerHTML = slots.map((slot) => {
+    const slots = state.teamDisplaySlots.length ? state.teamDisplaySlots
+      : (Array.isArray(player?.slots) ? player.slots : []);
+    $('tw-slots').innerHTML = slots.map((slot, displayIndex) => {
       if (slot.state === 'filled') {
         // 首层：名字 / 系别 / 构建档 / **一行**机制（超出省略，全文在「详情」里）。
         // 六张卡等高（CSS 的 grid-auto-rows:minmax(min-content,1fr)，卡内每一行定高），选前选后不跳。
@@ -1470,19 +1480,20 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
         // 六格全错位；「移除第 N 格」也跟着移错人。现在两边都按**物种**解析：
         // 钩子给的是"这一格里那只的个体 id"，移除按钮带的是"这一格那只的物种"。
         const slotInstance = instanceOfSlot(slot);
+        const slotLabel = state.ownedByInstance.get(slotInstance)?.name ?? slot.name ?? NO_ITEM;
         // 定位（角色）：与候选行**同一份数据** —— `/api/roco/box?kind=mine` 的卡上就有 `role_label`，
         // 在 `loadOwnedIndex()` 里随个体一起记下来。拿不到就**不写这一栏**，不编一个定位。
         const role = slotInstance ? (state.ownedByInstance.get(slotInstance)?.role_label ?? null) : null;
         const locked = slotLocked(slot);
-        return `<article class="tw-slot on" role="listitem" data-tw-slot="${slot.index}"
+        return `<article class="tw-slot on" role="listitem" data-tw-slot="${displayIndex + 1}"
           data-tw-slot-instance="${escapeAttr(slotInstance ?? '')}"
           data-tw-slot-species="${escapeAttr(species ?? '')}"
-          data-tw-slot-name="${escapeAttr(slot.name ?? '')}"
+          data-tw-slot-name="${escapeAttr(slotLabel)}"
           data-tw-slot-role="${escapeAttr(role ?? '')}"
           ${state.replaceArm && slotInstance && state.replaceArm === slotInstance
     ? 'data-tw-replace-armed="yes"' : ''}
           data-tw-state="filled" data-tw-fieldable="${held || sameNameHeld ? 'yes' : 'no'}">
-         <div class="tw-row">${twArtHtml({group: species, art: state.artBySpecies?.get?.(String(species ?? '')) === true}, {size: 32})}<span class="tw-who">${escapeHtml(slot.name ?? NO_ITEM)}</span>
+         <div class="tw-row">${twArtHtml({group: species, art: state.artBySpecies?.get?.(String(species ?? '')) === true}, {size: 32})}<span class="tw-who">${escapeHtml(slotLabel)}</span>
           ${locked ? '<span class="tw-lock">锁定</span>' : ''}
           <button class="tw-slot-remove" data-tw-remove-slot="${escapeAttr(species ?? '')}"
             ${locked ? 'disabled' : ''}
@@ -1497,8 +1508,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
          ${diagnosticsHtml(slot, species)}
         </article>`;
       }
-      return `<article class="tw-slot" role="listitem" data-tw-slot="${slot.index}" data-tw-state="empty">
-        <div class="tw-meta">第 ${slot.index} 槽位（空）</div>
+      return `<article class="tw-slot" role="listitem" data-tw-slot="${displayIndex + 1}" data-tw-state="empty">
+        <div class="tw-meta">第 ${displayIndex + 1} 槽位（空）</div>
         <div class="tw-meta">${escapeHtml(slot.empty_hint ?? '')}</div>
        </article>`;
     }).join('');
@@ -1707,7 +1718,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     }))};
   }
 
-  const PLAN_ORIGIN = Object.freeze({team: '队里这一只', recommended: '小芽推荐的下一只', box: '从你的盒子里补的'});
+  const PLAN_ORIGIN = Object.freeze({team: '队里这一只', recommended: '按这套目标挑选', box: '从你的盒子里补的'});
 
   /**
    * ⭐ 2026-09-29 U04 第 5 条：**6 只 × 4 招整套配置的预览**。
@@ -1719,11 +1730,14 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
    * 四个技能：玩家选过的 > 引擎给这一只的 > 盒子详情里它自己带着的那四个（同一份引擎来源）。
    * **不用随机、不用模板**：一条真实数据都没有的那一格就明写「还没有四个技能」。
    */
-  async function buildPlan({renderPreview = true} = {}) {
-    const rows = [];
+  async function buildPlan({renderPreview = true, alternative = null} = {}) {
+    const selectionKey = `${state.selected.join(',')}|${state.locked.join(',')}`;
+    const buildSeq = ++state.planBuildSeq;
+    const rows = alternative ? alternative.rows.map((r) => ({...r,
+      origin: state.selected.includes(r.instance) ? 'team' : 'recommended'})) : [];
     const usedInstances = new Set();
     const usedSpecies = new Set();
-    for (const one of configSlots()) {
+    for (const one of (alternative ? [] : configSlots())) {
       if (!one.instance) continue;
       rows.push({instance: one.instance, species: one.species ?? '', name: one.name ?? null,
         origin: 'team', locked: state.locked.includes(one.instance)});
@@ -1740,11 +1754,14 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       usedSpecies.add(species);
     };
     const recommendNames = [
+      ...(state.payload?.next_candidates ?? []),
       ...(state.payload?.player?.next_candidates ?? []),
       ...(state.payload?.player?.entrance?.candidates ?? []),
-    ].map((row) => String(row?.name ?? '')).filter(Boolean);
-    for (const name of recommendNames) pushSpecies(state.speciesByName?.get(name) ?? null, 'recommended', name);
-    for (const [species, list] of state.ownedBySpecies) pushSpecies(species, 'box', list?.[0]?.name ?? null);
+    ].map((row) => String(row?.species_name ?? row?.name ?? '')).filter(Boolean);
+    if (!alternative) {
+      for (const name of recommendNames) pushSpecies(state.speciesByName?.get(name) ?? null, 'recommended', name);
+      for (const [species, list] of state.ownedBySpecies) pushSpecies(species, 'box', list?.[0]?.name ?? null);
+    }
     const out = [];
     for (const row of rows.slice(0, TEAM_SLOTS)) {
       const four = await fourSkillsFor(row.species, row.instance);
@@ -1770,7 +1787,9 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       });
       out.push({...row, skills: four.skills, skillSource: four.source, movesForJudgement});
     }
-    state.plan = {rows: out, at: new Date().toISOString()};
+    if (buildSeq !== state.planBuildSeq
+      || selectionKey !== `${state.selected.join(',')}|${state.locked.join(',')}`) return null;
+    state.plan = {rows: out, alternative, selectionKey, at: new Date().toISOString()};
     // ── R02/R03：把这一份**真实队伍 + 真实四招 + 真实学招表**交给判断层 ──────────────
     // 判断只算一次（`state.teamPlan`），评估侧栏（R03）与 6×4 推荐（R02）都读它。
     // 六只的类型从两处取：屏幕上那一队来自 `configSlots()`（payload 的 slot 带 types），
@@ -1813,6 +1832,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
           instance: row.instance, species: row.species, name: row.name, origin: row.origin, locked: row.locked,
           // 先按物种 id 查；查不到**按名字**兜底（槽没有 species_id，只有 name —— 见上面的注释）。
           types: slotTypes.get(row.species) ?? typesByName.get(row.name) ?? [],
+          stats: row.stats ?? null,
           moves: row.movesForJudgement ?? (row.skills ?? []).map((s2) => ({...s2, effectSupport: s2.effectSupport ?? null})),
         })),
         pool: [],
@@ -1840,6 +1860,41 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     return state.plan;
   }
 
+  async function buildAlternatives() {
+    const selectionKey = `${state.selected.join(',')}|${state.locked.join(',')}`;
+    // One public local-engine read, cached for this mount. Owned ids still come from the box.
+    if (!state.rosterFacts) {
+      const response = await getJson(`${apiBase}/roster`);
+      if (!response.ok || !Array.isArray(response.pets)) throw new Error('精灵数值暂时没读到，稍后再试。');
+      state.rosterFacts = response.pets;
+    }
+    if (!state.evolutionFamilies) {
+      try {
+        const response = await getJson(`${apiBase}/evolution-families`);
+        if (!response.ok || !response.families) throw new Error('进化链资料暂不可用');
+        state.evolutionFamilies = response.families;
+      } catch {
+        // A missing supplemental graph does not invent relationships or block
+        // the already available species/instance constraints.
+        state.evolutionFamilies = {};
+      }
+    }
+    if (selectionKey !== `${state.selected.join(',')}|${state.locked.join(',')}`) return null;
+    const owned = [...state.ownedByInstance].map(([instance, p]) => ({...p, instance,
+      species: p.speciesId, types: state.ownedBySpecies.get(p.speciesId)?.find((r) => r.select === instance)?.types ?? []}));
+    const result = buildTeamAlternatives({owned, roster: state.rosterFacts,
+      selected: state.selected, locked: state.locked, typeMultiplier: defenceMultiplier,
+      evolutionFamilies: state.evolutionFamilies});
+    state.planAlternatives = result.alternatives;
+    state.planAlternativesFor = selectionKey;
+    state.planAlternativesNote = result.note ?? result.unavailable;
+    if (!result.alternatives.length) {
+      state.plan = null; renderPlan();
+      setConfigNote(result.unavailable); return null;
+    }
+    return buildPlan({alternative: result.alternatives[0]});
+  }
+
   /** 预览表：逐格给名字 + 四个技能名 + 这一行是哪来的。六只 × 四个技能就是「6×4」。 */
   function renderPlan() {
     const box = $('tw-plan-box');
@@ -1854,6 +1909,14 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       return;
     }
     const rows = plan.rows;
+    const alternatives = state.planAlternativesFor === plan.selectionKey ? state.planAlternatives : [];
+    const choices = alternatives.map((a, i) => `<button class="tw-btn" data-tw-plan-choice="${i}"
+      aria-pressed="${a.id === plan.alternative?.id}">${escapeHtml(a.label)} · ${escapeHtml(a.difference)}</button>`).join('');
+    const choiceInfo = plan.alternative ? `<div class="tw-knobs">${choices}</div>
+      <p class="tw-note">${escapeHtml(plan.alternative.reason)}</p>
+      <p class="tw-note">锁定的精灵保留，其余位置按各套目标重新挑选；点「一键换上这套」前只是预览。</p>
+      <p class="tw-note">${escapeHtml(plan.alternative.limits.join(' '))}</p>
+      ${state.planAlternativesNote ? `<p class="tw-note">${escapeHtml(state.planAlternativesNote)}</p>` : ''}` : '';
     const skillCount = rows.reduce((n, row) => n + (row.skills ?? []).length, 0);
     const complete = rows.length === TEAM_SLOTS
       && rows.every((row) => (row.skills ?? []).length === SHARED_LOADOUT_SLOTS);
@@ -1870,6 +1933,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     box.hidden = false;
     box.innerHTML = `<div class="tw-head"><h3>小芽给的整套配置（6 只 × 4 招）</h3>
       <span class="tw-sub">${rows.length} 只 · ${skillCount} 个技能</span></div>
+     ${choiceInfo}
      <table class="tw-plan"><thead><tr><th>#</th><th>精灵</th><th>四个技能</th></tr></thead><tbody>
       ${rows.map((row, at) => `<tr data-tw-plan-row="${escapeAttr(row.instance ?? '')}"
         data-tw-plan-species="${escapeAttr(row.species ?? '')}" data-tw-plan-origin="${escapeAttr(row.origin ?? '')}"
@@ -1906,6 +1970,10 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     const plan = state.plan;
     if (!plan || plan.rows.length !== TEAM_SLOTS) {
       setConfigNote('这套配置还没凑满六只：先让它补齐，再换上。');
+      return false;
+    }
+    if (plan.selectionKey !== `${state.selected.join(',')}|${state.locked.join(',')}`) {
+      setConfigNote('队伍或锁定变了，请重新生成备选再换上。');
       return false;
     }
     const instances = plan.rows.map((row) => row.instance).filter(Boolean);
@@ -1947,6 +2015,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
    *（`speciesOfSlot`）；同一物种在队里不可能有两只（服务端按 RC-301 拒重复）⇒ 这个解析唯一。
    */
   function instanceOfSlot(slot) {
+    if (slot && state.slotIdentities.has(slot)) return state.slotIdentities.get(slot).instance;
     const species = speciesOfSlot(slot);
     if (!species) return null;
     return state.selected.find((id) => (state.ownedByInstance.get(id)?.speciesId ?? null) === species) ?? null;
@@ -1957,12 +2026,12 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     const species = state.ownedByInstance.get(instance)?.speciesId ?? null;
     if (!species) return null;
     const slots = Array.isArray(state.payload?.player?.slots) ? state.payload.player.slots : [];
-    return slots.find((slot) => slot?.state === 'filled' && speciesOfSlot(slot) === species) ?? null;
+    return slots.find((slot) => slot?.state === 'filled' && instanceOfSlot(slot) === instance) ?? null;
   }
 
   /** 这一屏某个个体在界面上叫什么（它自己那一格的槽位名 → 持有索引 → 退回编号）。 */
   function slotNameOf(instance) {
-    return slotOfInstance(instance)?.name ?? state.ownedByInstance.get(instance)?.name ?? instance;
+    return state.ownedByInstance.get(instance)?.name ?? slotOfInstance(instance)?.name ?? instance;
   }
 
   /** 这一屏六个槽位各自的事实：装的是哪个个体、什么物种、会带哪四个技能（与 `emit()` 同一处口径）。 */
@@ -1985,7 +2054,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
         types: (Array.isArray(slot?.types) && slot.types.length ? slot.types : null)
           ?? (Array.isArray(known?.types) && known.types.length ? known.types : null)
           ?? [],
-        name: slot?.name ?? known?.name ?? instance,
+        name: known?.name ?? slot?.name ?? instance,
         // 四个技能 = `loadoutOf(slot).ids`（玩家选过就是玩家的，否则引擎规范配招）——
         // 与 `emit()` 交给开局的 `loadouts` 同一处，所以这一份就是"会进对局的那一份"。
         skills: slot ? loadoutOf(slot).ids.slice(0, SHARED_LOADOUT_SLOTS)
@@ -3224,6 +3293,9 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
    */
   function applyPayload(payload, stage = 'full') {
     state.payload = payload;
+    const binding = bindWorkshopSlotIdentities(payload, {selected: state.selected, ownedByInstance: state.ownedByInstance});
+    state.slotIdentities = binding.identities;
+    state.teamDisplaySlots = binding.slots;
     state.error = null;
     const player = payload.player ?? {};
     rootEl.dataset.twStage = stage;
@@ -3727,6 +3799,15 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       setPickNote('取消替换。');
       return;
     }
+    const choice = event.target?.closest?.('[data-tw-plan-choice]');
+    if (choice) {
+      if (state.planAlternativesFor !== `${state.selected.join(',')}|${state.locked.join(',')}`) {
+        setConfigNote('队伍或锁定变了，请重新生成备选。'); return;
+      }
+      const alternative = state.planAlternatives[Number(choice.dataset.twPlanChoice)];
+      if (alternative) void buildPlan({alternative});
+      return;
+    }
     if (event.target?.closest?.('[data-tw-plan-adopt]')) { void adoptPlan(); return; }
     if (event.target?.closest?.('[data-tw-plan-hide]')) {
       state.plan = null;
@@ -3734,14 +3815,17 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       setConfigNote('预览收起来了：再点一次「小芽给一套 6×4」可以重新看。');
     }
   });
-  $('tw-plan-build').addEventListener('click', () => {
-    setConfigNote('正在按你的队伍与盒子拼这套 6×4（只用真实数据，不编配招）…');
-    void buildPlan().then((plan) => {
-      const rows = plan?.rows?.length ?? 0;
-      setConfigNote(rows
-        ? `预览好了：${rows} 只 × 每个四个技能（下面那张表，逐格可核）。`
-        : '这套还拼不出来：你盒子里现在没有可用的个体。');
-    });
+  $('tw-plan-build').addEventListener('click', async () => {
+    const button = $('tw-plan-build');
+    if (button.disabled) return;
+    button.disabled = true;
+    setConfigNote('正在按当前盒子个体（冻结演示数据）、锁定与数值生成备选…');
+    try {
+      const plan = await buildAlternatives();
+      if (plan) setConfigNote(`找到 ${state.planAlternatives.length} 套不同备选：点方案名比较，再决定是否换上。`);
+    } catch (error) {
+      setConfigNote(`备选没生成：${error?.message ?? '本机资料读取失败'}。`);
+    } finally {button.disabled = false;}
   });
 
   $('tw-config-check').addEventListener('click', () => { void checkLegality(); });

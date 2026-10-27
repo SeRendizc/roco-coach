@@ -408,8 +408,11 @@ test('复盘加厚层落在「不点开也看得见」的两个节点上（不�
   assert.match(exp, /if \(depth\.summary\) review\.text = /, '加厚的 summary 必须接进正文（否则不点开看不到）');
   assert.match(exp, /review\.depth = depth/, '装配层要把整个 depth 带出去');
   // ② 页面可见节点：正文那一行 + 「下一局练一件事」
-  assert.match(page, /\$\('lesson-question'\)\.textContent = review\.text/,
-    '正文那一行必须写 review.text（含加厚 summary）');
+  // 2026-10-27 用户要求默认具体简报：旧断言强制 review.text（全部详情）进首层。
+  // 详情仍保留在 review.text；首层优先经证据生成的 displayText/playerSummary。
+  // 真实装配行为另由 roco-review-usefulness / roco-hr-integration 验证。
+  assert.match(page, /\$\('lesson-question'\)\.textContent = review\.displayText \|\| review\.playerSummary \|\| review\.text/,
+    '正文优先具体简报，旧数据没有简报时才使用详情');
   // ── 改钉（2026-10-01，P1-C）：旧断言原文（**逐字留档，别删**）────────────────────
   //   assert.match(page, /const nextStep = review\.depth\?\.next_step\?\.text/, '页面要取加厚层的 next_step');
   //   const learning = page.match(/\$\('lesson-learning'\)\.textContent = \[([\s\S]{0,300}?)\]\.filter\(Boolean\)/);

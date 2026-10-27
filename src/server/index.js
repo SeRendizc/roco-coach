@@ -15,6 +15,7 @@ import {cloudDecision,taskLabelOf} from '../coach/model-routing.js';
 import {answerCacheKey,createAnswerCache,shouldCache} from '../coach/answer-cache.js';
 import {decideOpponentAction,DIFFICULTY_BRIEFING,OPPONENT_TIMEOUT_MS} from './opponent.js';
 import {createRocoService} from './roco-service.js';
+import {evolutionFamilyMetadata} from './evolution-families.js';
 import {productionPlannerSystem} from '../coach/planner-prompt.js';
 // RC-205：诊断面如实报出 RAG 模式（默认 shadow）——见 status()。
 import {ragMode,LOCAL_PLAN_TOOLS,rocoToolsStatus} from '../coach/toolbox.js';
@@ -935,6 +936,7 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
     // （参数白名单在 rocoService.roster 里）。第 61 轮起回执多了出处的键
     // （顶层 `evidence_ids` + 逐只/逐招的 `evidence_ids`）——**加性**变更，旧键没动。
     if(path==='/api/roco/roster'&&req.method==='GET')return json(res,200,await rocoService.roster(Object.fromEntries(new URL(req.url,origin).searchParams)));
+    if(path==='/api/roco/evolution-families'&&req.method==='GET')return json(res,200,evolutionFamilyMetadata());
     // 精灵盒子（RC-205）：我的盒子 / 全图鉴 / 个体详情 / 两个同种个体比较。
     // 与上面两条同一条先例——只读、公开数据、不要 CSRF；它读的是磁盘上的冻结产物，
     // 所以规则服务没起来也能用（盒子不做任何模拟）。
