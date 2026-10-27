@@ -494,76 +494,28 @@ function rulesetChunks(data, ledgerById) {
  * ① 全库「倍率」的 idf 会被这 120 条拉低、② 某条短正文会顶掉那条台账 ——
  * 那正是「新文档抢旧查询的 top-1」。数值本身用 `×N` 逐字给全，信息一点没少。
  *
- * 【2026-09-25 人类裁决：双属性按两系相乘】原话「属性双属性叠加：快照 3×（现用）
- * vs 两个社区源 4×，差 41 格。**使用社区源**」。所以双属性条目的正文数值
- * **不能**再照抄 `types.json` 那一行的封顶值（×3），必须写成**两条单属性相乘**
- * 的结果（×4）—— 台账 EV-TYPE-MULTIPLIER（RECORDED_IN_GAME）与
- * `roco/src/roco_env/data.py::TypeChart.multiplier` 同一口径。
- * **旧口径留痕**：本条原文写「倍率写成 `X系 ×N`，N 与 types.json 逐字相同」；
- * 那句话对**单属性**仍然成立（18/18 逐字不变），对双属性已被裁决取代。
- * 单属性的行为一个字都没动：它继续逐字照抄快照那一行。
+ * 【2026-10-17 复核（提案分支，未合入）：双属性改回快照逐字值（双弱封顶 ×3）】
+ * 旧裁决（2026-09-25）原话「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，
+ * 差 41 格。**使用社区源**」⇒ 双属性正文按两系相乘写 ×4。**该裁决现被新证据推翻**，
+ * 旧文逐字保留（改钉不删）。新证据：① types.json 对 102 条双属性键逐字给 3；
+ * ② 上游模拟器 damage_calc.py 注释「双属性均弱 → 3x（强力克制，非乘算的 4x）」；
+ * ③ 官方采访里电系打翠顶夫人（翼+水）玩家答「三倍」。故正文重新逐字照抄
+ * types.json 那一行，与客户端 type-affinity 及引擎新口径三处一致。
  */
-function typeChartBody(entry, singleRows = null) {
-  const key = String(entry.key ?? '');
-  const parts = key.split('|').filter(Boolean);
-  // 双属性：值 = 两条单属性行的倍率相乘（缺单属性行时按中性 1 参与相乘）。
-  // 归类（weak / resist / 中性）也按**相乘后**的值判定：乘积为 1 的项从两侧都消失。
-  const multiply = parts.length === 2 && singleRows ? parts : null;
-  const valueOf = (attackType, fallback) => {
-    if (!multiply) return fallback;
-    let product = 1;
-    for (const part of multiply) {
-      const row = singleRows.get(part);
-      product *= row ? (row.get(attackType) ?? 1) : 1;
-    }
-    return product;
-  };
-  const candidates = [];
-  const push = (item) => {
-    if (item && item.type && !candidates.some((row) => row.type === item.type)) candidates.push(item);
-  };
-  for (const item of entry.weak ?? []) push(item);
-  for (const item of entry.resist ?? []) push(item);
-  if (multiply) {
-    // 相乘后可能出现快照那一行没列的攻击属性（或反过来），所以候选集要把
-    // 两条单属性行里出现过的攻击属性都算上 —— 否则「正文=真源」只是碰巧成立。
-    for (const part of multiply) {
-      const row = singleRows.get(part);
-      if (!row) continue;
-      for (const attackType of row.keys()) push({type: attackType});
-    }
-  }
-  const weak = candidates
-    .map((item) => ({type: item.type, multiplier: valueOf(item.type, item.multiplier)}))
-    .filter((item) => item.multiplier > 1);
-  const resist = candidates
-    .map((item) => ({type: item.type, multiplier: valueOf(item.type, item.multiplier)}))
-    .filter((item) => item.multiplier < 1);
+function typeChartBody(entry) {
+  const weak = (entry.weak ?? []).filter((item) => item && item.type && Number(item.multiplier) > 1);
+  const resist = (entry.resist ?? []).filter((item) => item && item.type && Number(item.multiplier) < 1);
   const rows = [
     RECORD_KIND_LABELS.type_chart,
     '记录种类 type_chart',
     `条目 ${entry.key}`,
     `防御方属性 ${entry.key}`,
   ];
-  if (multiply) rows.push(`双属性叠加 ${multiply.join('|')} 按两系相乘`);
   for (const item of weak) rows.push(`${item.type}克制${entry.key} ×${item.multiplier}`);
   for (const item of resist) rows.push(`${entry.key}抵抗${item.type} ×${item.multiplier}`);
   rows.push(`克制（weak） ${weak.map((item) => `${item.type} ×${item.multiplier}`).join(' ') || '无'}`);
   rows.push(`抵抗（resist） ${resist.map((item) => `${item.type} ×${item.multiplier}`).join(' ') || '无'}`);
   return rows.join(' \n ');
-}
-
-/** 单属性行 → `Map(攻击属性 → 倍率)`。双属性条目正文的**唯一**取数口。 */
-function singleTypeRows(types) {
-  const out = new Map();
-  for (const [key, row] of Object.entries(types ?? {})) {
-    if (String(key).includes('|')) continue;
-    const table = new Map();
-    for (const item of row?.weak ?? []) table.set(item.type, Number(item.multiplier));
-    for (const item of row?.resist ?? []) if (!table.has(item.type)) table.set(item.type, Number(item.multiplier));
-    out.set(key, table);
-  }
-  return out;
 }
 
 /**
@@ -858,8 +810,7 @@ export function buildDocuments(corpus, {includeProvenance = true, root = REPO_RO
   if (typeChartSpec && corpus.typeChart?.types) {
     const sourceId = corpus.typeChart.source_id ?? 'wiki-rocom-snapshot';
     const levels = [entitySourceLevel(sourceId)];
-    // 单属性行只算一次：双属性条目的正文 = 两条单属性相乘（2026-09-25 人类裁决）。
-    const singleRows = singleTypeRows(corpus.typeChart.types);
+    // 2026-10-17 复核：正文逐字照抄快照那一行（旧「两系相乘」裁决已推翻，改钉不删）。
     for (const key of Object.keys(corpus.typeChart.types)) {
       const entry = corpus.typeChart.types[key] ?? {};
       builder.add({
@@ -887,7 +838,7 @@ export function buildDocuments(corpus, {includeProvenance = true, root = REPO_RO
         unresolved_conflict_id: null,
         flags: {},
         aliases: typeChartAliases(key),
-        body: typeChartBody(entry, singleRows),
+        body: typeChartBody(entry),
       });
     }
   }

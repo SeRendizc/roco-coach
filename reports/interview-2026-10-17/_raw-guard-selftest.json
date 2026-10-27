@@ -1,0 +1,115 @@
+  ✔ 红 browser-node-import
+  ✔ 红 coach-core-node-import
+  ✔ 红 coach-core-client-import
+  ✔ 红 coach-core-dom-read
+  ✔ 红 layer-never-active
+  ✔ 红 report-prompt-digest-null
+  ✔ 红 error-class-unmatchable
+  ✔ 红 generator-artifact-drift
+  ✔ 红 companion-sayable-gone
+  ✔ 红 dedup-gone
+  ✔ 红 energy-literal-outside-ruleset
+  ✔ 红 match-review-depth-fabricated-number
+  ✔ 红 gold-revision-drift-blind
+  ✔ 红 gold-reviewer-allowlist-blind
+  ✔ 红 gold-status-vocabulary-widened
+{
+ "checked": 15,
+ "ok": 15,
+ "still_green": [],
+ "skipped": [],
+ "rows": [
+  {
+   "id": "browser-node-import",
+   "status": "ok",
+   "guard": "src/coach/intervention-model.js 不许在浏览器模块图里静态 import node:*",
+   "catches": "页面整条 import 链静默断掉：标题与按钮在，但开不了局（第 24 轮真发生过）"
+  },
+  {
+   "id": "coach-core-node-import",
+   "status": "ok",
+   "guard": "Coach 核心（game-adapter / compare-model 的静态 import 图）到不了页面层、也不依赖 node:*",
+   "catches": "契约核心悄悄绑上 Node 宿主（读盘/读进程）：核心不再只消费契约，「换一个宿主还能不能跑」当场失效，而所有既有测试照常绿"
+  },
+  {
+   "id": "coach-core-client-import",
+   "status": "ok",
+   "guard": "Coach 核心（game-adapter / compare-model 的静态 import 图）到不了页面层、也不依赖 node:*",
+   "catches": "核心反过来依赖页面层：核心不再是「只吃契约」，而是绑死在某一个具体页面上。coach-advice.test.js 里那条同题检查只看说明符文本里有没有 src/client，换成 ../client/… 就漏过去了"
+  },
+  {
+   "id": "coach-core-dom-read",
+   "status": "ok",
+   "guard": "Coach 核心图的 src/coach/** 不读 document / window 这类浏览器全局",
+   "catches": "比较模型偷偷读页面状态就不再是纯函数：mock 宿主、评测脚本、报告拿到的东西会随浏览器环境变，而它在浏览器模块图里，正是「页面只渲染、核心算模型」这条分工的破口"
+  },
+  {
+   "id": "layer-never-active",
+   "status": "ok",
+   "guard": "判定层在 on 模式下必须真的激活",
+   "catches": "判定层接上了但永不生效（第 21 轮真发生过一次同类问题）"
+  },
+  {
+   "id": "report-prompt-digest-null",
+   "status": "ok",
+   "guard": "阴影回放的报告装配必须带提示摘要",
+   "catches": "两份报告只有提示不同时分不出来，对比结论无法核对（第 23 轮补的字段）"
+  },
+  {
+   "id": "error-class-unmatchable",
+   "status": "ok",
+   "guard": "每个失败分类都必须能被样本触发（空桶 = 判据写错）",
+   "catches": "分类永不可达，等于「这个失败模式没出现」，把真问题藏起来"
+  },
+  {
+   "id": "generator-artifact-drift",
+   "status": "ok",
+   "guard": "生成器改了、产物没重跑必须被发现",
+   "catches": "任务集里出现工具不接受的参数键，任务不可完成而所有测试仍绿（W4-01 真发生过）"
+  },
+  {
+   "id": "companion-sayable-gone",
+   "status": "ok",
+   "guard": "陪练的「有没有素材可说」这道筛子必须还在",
+   "catches": "陪练在没有素材时也开口，等于把「宁可少说，不说废话」这条纪律去掉（P1 沉默率会掉）"
+  },
+  {
+   "id": "dedup-gone",
+   "status": "ok",
+   "guard": "同一件事一局内不许说第二遍",
+   "catches": "同一事实反复说，最典型的打扰（P5 去重）"
+  },
+  {
+   "id": "energy-literal-outside-ruleset",
+   "status": "ok",
+   "guard": "能量上限/回能/初始能量的字面量只许住在规则配置里（RC-101）",
+   "catches": "引擎能量上限又出现第二份来源：规则配置改了，教练层的上下文仍报旧上限，而所有既有测试照常绿"
+  },
+  {
+   "id": "match-review-depth-fabricated-number",
+   "status": "ok",
+   "guard": "局末复盘加厚层（rocoMatchDepth）里的每个数字都必须能在事件里指认出来",
+   "catches": "复盘的「依据」里多出一个事件里没有的数字：玩家照着回合去战报回查会对不上，而页面照常显示、没有任何东西会红（红线①「数字只由引擎产生」的破口）"
+  },
+  {
+   "id": "gold-revision-drift-blind",
+   "status": "ok",
+   "guard": "金标内容一变就必须重新送审（指纹漂移不许被吞掉）",
+   "catches": "标准答案被改而审阅状态不更新：报告照跑、数字照出，没有任何东西会红（人类明确说过\"审之前不许拿去刷指标\"）"
+  },
+  {
+   "id": "gold-reviewer-allowlist-blind",
+   "status": "ok",
+   "guard": "批准只能由允许名单里的人写（agent 不许自我批准金标）",
+   "catches": "任何人写一句 reviewed_by 就能把未审的金标变成\"已审\"，闸门于是变成一个布尔值装饰（口径 1 的送审流程当场作废）"
+  },
+  {
+   "id": "gold-status-vocabulary-widened",
+   "status": "ok",
+   "guard": "金标状态取值域封闭（draft / approved 之外不许有别的值）",
+   "catches": "取值域被放宽后，一个既不是 draft 也不是 approved 的状态会被当成\"不是非法值\"放过去，而 approved 的判定却在别处 —— 两种口径从此可以各说各话"
+  }
+ ],
+ "verdict": "pass",
+ "note": "这只证明**登记过的**守卫会红；没登记的就是没验过。"
+}

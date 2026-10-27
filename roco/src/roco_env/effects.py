@@ -470,9 +470,9 @@ def compute_damage(attacker: Any, defender: Any, skill: Any, rs: Ruleset,
     try:
         type_mult = rs.type_chart.multiplier(defender_species.types, skill.element)
     except _data.TypeCombinationUnknown as exc:
-        # 2026-09-25：双属性按两系**相乘**（人类裁决），但只有快照给出显式行的
-        # 86 个组合可查；另外 67 个组合没有数据 ⇒ **不猜**（既不中性、也不用别的组合顶），
-        # 如实转成「这个机制没核验」的既有通道。
+        # 2026-10-17 复核（推翻 2026-09-25「两系相乘」裁决，改钉不删）：双属性**逐字遵循快照**
+        # （双弱封顶 3×）。快照给出显式行的 86 个组合可查；另外 67 个组合没有数据 ⇒ **不猜**
+        # （既不中性、也不用别的组合顶），如实转成「这个机制没核验」的既有通道。
         raise UnsupportedEffect(
             f"属性相性（{'|'.join(defender_species.types)}）", str(exc),
             "data/roco/normalized/*/types.json（可查组合 = 快照显式行）") from exc

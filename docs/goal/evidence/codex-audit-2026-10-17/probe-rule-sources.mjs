@@ -1,0 +1,11 @@
+import {pathToFileURL} from 'node:url';
+import {resolve} from 'node:path';
+import {readFileSync} from 'node:fs';
+const root=resolve(process.argv[2]);
+const {loadCorpus,createRagIndex,searchIndex}=await import(pathToFileURL(root+'/src/coach/rag-index.js'));
+const corpus=loadCorpus();
+const index=createRagIndex(corpus);
+const legacy=index.byId.get('EV-TYPE-MULTIPLIER');
+const l3=index.byId.get('type_chart::翼系|水系');
+const queries=['属性倍率有哪些档位？','EV-TYPE-MULTIPLIER','双属性双克制是几倍？'];
+console.log(JSON.stringify({active_ledger:{id:legacy.id,evidence_level:legacy.evidence_level,lib_id:legacy.lib_id,first_lines:legacy.body.split('\n').slice(0,5)},l3:{id:l3.id,electric_line:l3.body.split('\n').filter(x=>x.includes('电系'))},queries:queries.map(q=>({query:q,...searchIndex(index,q,{limit:3})})),prior_claim:JSON.parse(readFileSync(root+'/data/roco/meta-prior/v1.json','utf8')).sources?.['ledger-EV-TYPE-MULTIPLIER']??null},null,2));

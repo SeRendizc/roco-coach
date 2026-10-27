@@ -107,6 +107,7 @@ import time
 import traceback
 
 from . import events_text
+from . import data as rdata
 from . import coverage as coverage_mod
 from . import effects as fx
 from .coverage import classify_skill_declared
@@ -1641,8 +1642,9 @@ class RocoService:
         名单里的属性 × 快照相性表，逐属性数一遍就行 —— 数字全部来自引擎，不涉及概率。
 
         口径：
-          · **倍率 > 1.0 才算"怕"**（快照的 2×、双属性相乘的 4×……），且用的是 `_single_multiplier`
-            与 `type_multiplier` **同一套**乘法（不另立一份算术）；
+          · **倍率 > 1.0 才算"怕"**（快照的 ×2 / ×3 档），且直接调 `rs.type_chart.multiplier`
+            （与战斗结算、type_multiplier 读口**同一个实现**；旧文「双属性相乘的 4×」已随
+            2026-10-17 复核作废，改钉不删留在此处）；
           · 双属性组合**快照没有那一行**时（18 选 2 里缺 67 个）⇒ 那只**不计入**任何一栏，
             整只列进 `unknown_combination_pet_ids`（fail closed，不猜中性值）；
           · 不认识的 id 列进 `unknown_pet_ids`；每栏的宠物清单最多给 12 个（计数仍然是全量）。
@@ -1680,9 +1682,9 @@ class RocoService:
                 continue
             counted += 1
             for element in elements:
-                value = 1.0
-                for type_name in types:
-                    value *= self._single_multiplier(rows, type_name, element)
+                # 2026-10-17：这里曾是**第五处**独立算术（两条单属性相乘 → 双弱 4×）。
+                # 现在只信 TypeChart.multiplier（与结算/读口同源）；组合可查性已在上面预筛。
+                value = float(rs.type_chart.multiplier(tuple(types), element))
                 if value > 1.0:
                     row = counts[element]
                     row["count"] += 1
@@ -1700,9 +1702,10 @@ class RocoService:
                 "by_element": present,
                 "top": present[:5],
                 "list_cap_per_element": 12,
-                "multiplier_rule": "怕 = 该属性打这只的倍率 > 1.0；双属性按两系**相乘**"
-                                   "（人类裁决 2026-09-25，台账 EV-TYPE-MULTIPLIER）——"
-                                   "与 type_multiplier 用的是同一套乘法",
+                # 旧返回文案留痕（2026-09-25，2026-10-17 已退役）：
+                # 双属性按两系**相乘**；与 type_multiplier 用的是同一套乘法。
+                "multiplier_rule": "怕 = 该属性打这只的倍率 > 1.0；双属性逐字读取快照行"
+                                   "（2026-10-17 复核，双弱 ×3）；与 type_multiplier 同用 TypeChart.multiplier",
                 "note": "这是**名单级的相性计数**（几只怕哪个属性），不是胜率、不是强度排序；"
                         "双属性组合在快照里没有那一行的，整只不计入（列在 unknown_combination_pet_ids），"
                         "不猜一个中性值。每栏的宠物清单最多 12 个，计数是全部。",
@@ -2002,10 +2005,10 @@ class RocoService:
                 # 进攻向：这个属性打哪些属性是几倍（单属性表里逐行数出来的）
                 "offense": offense,
                 "neutral_default": 1.0,
-                # 这条记录是**快照原文**（数据查询）。引擎结算用的倍率见 type_multiplier：
-                # 双属性按两系相乘（2026-09-25 人类裁决），与快照的封顶行在 41 格上不同。
+                # 旧返回文案留痕（2026-09-25，2026-10-17 已退役）：
+                # 双属性按两系相乘，与快照的封顶行在 41 格上不同。
                 "note": "本记录是 types.json 的逐字转录（数据面）；**结算**用 type_multiplier，"
-                        "双属性按两系相乘（台账 EV-TYPE-MULTIPLIER，2026-09-25 人类裁决）。"
+                        "单属性与双属性均逐字读取快照行（2026-10-17 复核，双弱 ×3）。"
                         "`weak`/`resist` 是防守向（怕什么/抗什么），`offense` 是进攻向（克制谁）。",
             },
             evidence_ids=[ev(rs.ruleset_id, "types.json", key)],
@@ -2060,26 +2063,35 @@ class RocoService:
                 defender_types=uniq,
             )
         if len(uniq) == 2:
-            # 2026-09-25 人类裁决：「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。
-            # **使用社区源**」⇒ 双属性 = 两系相乘（台账 EV-TYPE-MULTIPLIER，RECORDED_IN_GAME）。
-            # 快照那一行的值只用来做**对照**，不作为结算口径。
-            a, b = uniq
-            value = self._single_multiplier(rows, a, element) * self._single_multiplier(rows, b, element)
+            # **2026-10-17 复核（推翻 2026-09-25 裁决，改钉不删）**：
+            # 旧裁决原话「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。**使用社区源**」
+            # ⇒ 旧实现 = 两条单属性相乘（双弱 4×）。新证据（官方 2026-08-15 采访「电系打翠顶夫人=三倍」、
+            # 上游 sim `damage_calc.py` 注释「双弱 → 3x，非乘算 4x」、`types.json` 双属性行逐字 3）
+            # ⇒ 现在**只信一个源**：`TypeChart.multiplier`（与战斗结算同一份实现），快照那一行逐字为准。
+            # 这里曾经是第四份独立算术（服务层自己再乘一次）—— 与引擎/客户端/RAG 都不一致，已收口。
+            try:
+                value = float(rs.type_chart.multiplier(tuple(uniq), element))
+            except rdata.TypeCombinationUnknown:
+                return _unsupported(
+                    "type_combination_missing",
+                    "该双属性组合不在快照的显式行里 —— 不可查：不用别的组合顶、也不猜中性值（fail closed）",
+                    defender_types=uniq,
+                )
             snapshot_value, snapshot_from_table = self._row_lookup(row, element)
+            snap = float(snapshot_value) if snapshot_from_table else 1.0
             return Answer(
                 result={
                     "record": "type_multiplier",
                     "defender_types": uniq,
                     "attack_element": element,
-                    "multiplier": float(value),
-                    "combination_rule": "multiply",
-                    "combination_rule_source": "人类裁决 2026-09-25（台账 EV-TYPE-MULTIPLIER，RECORDED_IN_GAME）",
+                    "multiplier": value,
+                    "combination_rule": "snapshot_row",
+                    "combination_rule_source": "2026-10-17 复核：双属性逐字遵循 types.json（与 TypeChart.multiplier 同源）",
                     "neutral_inferred": False,
-                    "source": f"types.json 的单属性行相乘（{a} × {b}）；组合可查性来自 {row.get('key')}",
-                    # 快照的封顶值一并给出：41 格上它与裁决口径不同（3 vs 4），差异要看得见。
-                    "snapshot_value": float(snapshot_value) if snapshot_from_table else 1.0,
-                    "snapshot_agrees": abs((snapshot_value if snapshot_from_table else 1.0) - value) < 1e-9,
-                    # 相乘口径**不是**未核验假设：它是人类裁决（RECORDED_IN_GAME）。
+                    "source": f"types.json 那一行（{row.get('key')}）；与引擎结算同一实现",
+                    "snapshot_value": snap,
+                    "snapshot_agrees": abs(snap - value) < 1e-9,
+                    # 快照口径不是未核验假设：它是游戏数据转录（RECORDED_IN_GAME）。
                     "assumption_free": True,
                 },
                 evidence_ids=[ev(rs.ruleset_id, "types.json", str(row.get("key")))],
@@ -2104,7 +2116,11 @@ class RocoService:
 
     @staticmethod
     def _single_multiplier(rows: Dict[str, Any], type_key: str, element: str) -> float:
-        """单属性行的倍率（未列出 = 中性 1.0）。相乘口径的**唯一**取数口。"""
+        """单属性行的倍率（未列出 = 中性 1.0）。
+
+        **旧「两系相乘」口径的取数口**：2026-10-17 复核后现行结算不再相乘（改信 TypeChart），
+        保留它只为「41 格旧账」历史对账（见 `_answer_type_chart` 的 legacy 段）。
+        """
         row = rows.get(type_key)
         if row is None:
             return 1.0
@@ -2112,69 +2128,59 @@ class RocoService:
         return 1.0 if value is None else float(value)
 
     def _answer_type_chart(self, rs: Ruleset) -> Answer:
-        """相性表自检：把「两系相乘」与快照显式行对拍，把差异**暴露出来**（只报告，不改数）。
+        """相性表自检：**引擎结算值 vs 快照逐字值**逐格对拍（期望 0 差异）。
 
-        2026-09-25 之前这条自检是「证明快照才对、相乘是假设」；人类裁决改用社区源的相乘
-        口径之后，它反过来变成「快照有 41 格与我们的结算口径不同」的**对账表** ——
-        数字一个字没改，读法变了：那 41 格是**快照**的偏差，不是引擎的。
+        2026-10-17 复核后：结算口径 = 快照那一行（双弱封顶 3×）。旧「两系相乘」口径与快照的
+        **41 格差异**仍作为**历史留痕**单独统计（改钉不删），但它不再是现行口径。
         """
         rows, why = self._type_rows(rs)
         if rows is None:
             return _bad_request(f"相性表不可用：{why}")
         singles = [k for k in rows if "|" not in k]
         duals = [k for k in rows if "|" in k]
-        checked = 0
-        mismatches: List[Dict[str, Any]] = []
 
-        def single_mult(type_key: str, element: str) -> float:
+        def snap(type_key: str, element: str) -> float:
             value, _ = self._row_lookup(rows[type_key], element)
-            return 1.0 if value is None else value
+            return 1.0 if value is None else float(value)
 
+        checked = 0
+        engine_mismatch = 0
+        examples: List[Dict[str, Any]] = []
+        legacy_mismatch = 0
         for key in duals:
             a, b = key.split("|", 1)
             if a not in rows or b not in rows:
                 continue
             for element in singles:
                 checked += 1
-                product = single_mult(a, element) * single_mult(b, element)
-                actual, _ = self._row_lookup(rows[key], element)
-                actual = 1.0 if actual is None else actual
-                if abs(product - actual) > 1e-9 and len(mismatches) < 8:
-                    mismatches.append(
-                        {
-                            "row": key,
-                            "attack_element": element,
-                            "product_of_singles": product,
-                            "snapshot_value": actual,
-                        }
-                    )
-        # 统计全部差异（示例只留 8 条）
-        total_mismatch = 0
-        for key in duals:
-            a, b = key.split("|", 1)
-            if a not in rows or b not in rows:
-                continue
-            for element in singles:
-                product = single_mult(a, element) * single_mult(b, element)
-                actual, _ = self._row_lookup(rows[key], element)
-                actual = 1.0 if actual is None else actual
+                actual = snap(key, element)
+                engine = float(rs.type_chart.multiplier((a, b), element))
+                if abs(engine - actual) > 1e-9:
+                    engine_mismatch += 1
+                    if len(examples) < 8:
+                        examples.append({"row": key, "attack_element": element,
+                                         "engine": engine, "snapshot_value": actual})
+                product = snap(a, element) * snap(b, element)
                 if abs(product - actual) > 1e-9:
-                    total_mismatch += 1
+                    legacy_mismatch += 1
         return Answer(
             result={
                 "record": "type_chart",
                 "singles": len(singles),
                 "dual_rows_in_snapshot": len(duals),
-                "consistency_vs_product_assumption": {
+                "consistency_vs_snapshot": {
                     "checked": checked,
-                    "mismatches": total_mismatch,
-                    "examples": mismatches,
+                    "mismatches": engine_mismatch,
+                    "examples": examples,
+                    "note": "2026-10-17 复核：双属性逐字遵循 types.json（双弱封顶 3×），"
+                            "所以引擎结算值与快照应当**逐格一致**（0 差异）。",
+                },
+                "legacy_multiply_vs_snapshot": {
+                    "mismatches": legacy_mismatch,
                     "note": (
-                        "2026-09-25 人类裁决改用社区源的**相乘**口径（台账 EV-TYPE-MULTIPLIER，"
-                        "RECORDED_IN_GAME）：「快照 3×（现用）vs 两个社区源 4×，差 41 格。使用社区源」。"
-                        "所以 data.py 的 TypeChart.multiplier 双属性分支就是两系相乘，"
-                        "上面这 41 处不一致是**快照封顶行**与结算口径的差（快照在 2×2 处给 3.0）。"
-                        "本服务的 type_multiplier 与引擎同口径（相乘），并把快照值放在 snapshot_value 里对账。"
+                        "2026-09-25 旧裁决原话（改钉不删）：「快照 3×（现用）vs 两个社区源 4×，差 41 格。"
+                        "使用社区源」⇒ 旧实现按两系相乘。2026-10-17 复核用官方采访/上游实现/游戏数据"
+                        "推翻该裁决后，这 41 格差异只作历史留痕保留，**不再是现行口径**。"
                     ),
                 },
             },

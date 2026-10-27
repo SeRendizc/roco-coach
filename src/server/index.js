@@ -15,6 +15,7 @@ import {cloudDecision,taskLabelOf} from '../coach/model-routing.js';
 import {answerCacheKey,createAnswerCache,shouldCache} from '../coach/answer-cache.js';
 import {decideOpponentAction,DIFFICULTY_BRIEFING,OPPONENT_TIMEOUT_MS} from './opponent.js';
 import {createRocoService} from './roco-service.js';
+import {evolutionFamilyMetadata} from './evolution-families.js';
 import {productionPlannerSystem} from '../coach/planner-prompt.js';
 // RC-205：诊断面如实报出 RAG 模式（默认 shadow）——见 status()。
 import {ragMode,LOCAL_PLAN_TOOLS,rocoToolsStatus} from '../coach/toolbox.js';
@@ -935,6 +936,7 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
     // （参数白名单在 rocoService.roster 里）。第 61 轮起回执多了出处的键
     // （顶层 `evidence_ids` + 逐只/逐招的 `evidence_ids`）——**加性**变更，旧键没动。
     if(path==='/api/roco/roster'&&req.method==='GET')return json(res,200,await rocoService.roster(Object.fromEntries(new URL(req.url,origin).searchParams)));
+    if(path==='/api/roco/evolution-families'&&req.method==='GET')return json(res,200,evolutionFamilyMetadata());
     // 精灵盒子（RC-205）：我的盒子 / 全图鉴 / 个体详情 / 两个同种个体比较。
     // 与上面两条同一条先例——只读、公开数据、不要 CSRF；它读的是磁盘上的冻结产物，
     // 所以规则服务没起来也能用（盒子不做任何模拟）。
@@ -977,6 +979,32 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
      s.nonce=null;
      if(typeof payload.key!=='string'||!/^[\x21-\x7e]{16,128}$/.test(payload.key))throw fail(400,'密钥长度或字符不正确');
      credential=payload.key;model=b.model;verified=false;generation++;
+     // 2026-10-17（用户授权「你自己想办法存储」）：可选把凭据写入 **macOS Keychain**，
+     // 供演示启动器 `scripts/interview/start-demo.sh` 下次复用。默认关闭：
+     // 只有启动时设了 `ROCO_KEYCHAIN_SERVICE` 才写；仓库/测试/默认路径行为不变。
+     // 不落盘到仓库；Keychain 不可用时忽略，不影响本次连接。
+     if(process.env.ROCO_KEYCHAIN_SERVICE||process.env.ROCO_CREDENTIAL_FILE){
+       // 顺序：Keychain 优先；失败再退回 0600 文件（路径由启动器给，默认不在仓库内）。
+       let stored=false;
+       if(process.env.ROCO_KEYCHAIN_SERVICE){
+         try{
+           const {execFileSync}=await import('node:child_process');
+           execFileSync('security',['add-generic-password','-U','-s',String(process.env.ROCO_KEYCHAIN_SERVICE),'-a',process.env.USER||'roco','-w',payload.key],{stdio:'ignore'});
+           stored=true;
+         }catch{/* 继续尝试文件 */ }
+       }
+       if(!stored&&process.env.ROCO_CREDENTIAL_FILE){
+         try{
+           const fs=await import('node:fs');
+           const path=await import('node:path');
+           const file=String(process.env.ROCO_CREDENTIAL_FILE);
+           fs.mkdirSync(path.dirname(file),{recursive:true,mode:0o700});
+           fs.writeFileSync(file,payload.key,{mode:0o600});
+           fs.chmodSync(file,0o600);
+           stored=true;
+         }catch{/* 存储失败不影响本次连接 */ }
+       }
+     }
      // 换凭据/换模型 ⇒ 旧缓存作废（key 里带 model，但换 key 不体现在 key 里）。
      answerCache.clear();inflightByKey.clear();
      return json(res,200,{...status(),capabilities:await capabilities()});

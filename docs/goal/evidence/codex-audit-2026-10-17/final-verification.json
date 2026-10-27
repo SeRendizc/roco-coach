@@ -1,0 +1,16 @@
+{
+  "checked_at_utc": "2026-10-17T15:03:44.989593+00:00",
+  "head": "b2ccfb8c07e57c333c86534c9f8c77f74f2620dd",
+  "a52c1dfd_is_ancestor": true,
+  "status": " M package.json\n M reports/live-model-eval-only.json\n M reports/roco/agent-trajectories-verification.json\n M roco/src/roco_env/effects.py\n M roco/src/roco_env/service.py\n M src/coach/rag-index.js\n?? docs/goal/evidence/agent-policy-eval-report.md\n?? docs/goal/evidence/rule-arithmetic-audit.md\n?? node_modules/\n?? output/roco-next-20261017/\n?? scripts/roco/agent-policy-eval.mjs\n?? tests/evals/roco/agent-policy-tasks.json\n?? tests/roco-agent-policy-eval.test.js\n",
+  "changed_since_latest_overlay": [],
+  "paid_model_calls": 0,
+  "delivered": [
+    "commands.md",
+    "gold-review-request.md",
+    "rule-audit.md",
+    "patches/001-service-regression-tests.patch",
+    "patches/002-service-active-text.patch",
+    "patches/003-bridge-ruling-proposal.patch"
+  ]
+}

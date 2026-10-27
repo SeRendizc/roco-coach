@@ -1043,10 +1043,13 @@ export const EVIDENCE_REFS = Object.freeze({
     // 原文（改钉不删）：claim: '台账 EV-TYPE-MULTIPLIER（topic type.multiplier）：当前 BWIKI 条目可观察到
     //   ×3、×2、×0.5、×0.25 四档，不再沿用旧资料「所有双弱 ×4」。这是本先验的 coverage / synergy
     //   判据所依赖的那种倍率。',
-    claim: '台账 EV-TYPE-MULTIPLIER（topic type.multiplier，RECORDED_IN_GAME）：2026-09-25 人类裁决'
-      + '「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。使用社区源」⇒ **双属性按两系相乘**'
-      + '（双克制 ×4、双抵抗 ×0.25、一克一抗 ×1.0；单属性仍 ×2 / ×0.5 / ×1）。这是本先验的'
-      + ' coverage / synergy 判据所依赖的那种倍率。',
+    // 2026-10-17 复核（Lead 批准）推翻 2026-09-25「两系相乘」裁决；旧 claim 逐字留痕：
+    // claim: '…2026-09-25 人类裁决「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。使用社区源」'
+    //   + ' ⇒ **双属性按两系相乘**（双克制 ×4、双抵抗 ×0.25、一克一抗 ×1.0…）'
+    claim: '台账 EV-TYPE-MULTIPLIER（topic type.multiplier，RECORDED_IN_GAME）：2026-10-17 复核（Lead 批准）'
+      + '«官方采访 + 上游 sim 注释 + types.json 三源» ⇒ **单属性与双属性均逐字读取快照行**'
+      + '（双弱封顶 ×3、双抵抗 ×0.25、一克一抗 ×1.0；单属性仍 ×2 / ×0.5 / ×1）。这是本先验的'
+      + ' coverage / synergy 判据所依赖的那种倍率；旧「两系相乘（双弱 ×4）」裁决已退役（原文见台账 retired_*）。',
   }),
   'ledger-EV-ENERGY-MAX': Object.freeze({
     ledger_entry: 'EV-ENERGY-MAX',

@@ -2064,8 +2064,19 @@ def _apply_effect_batch(state: GameState, rs: Ruleset, side: str, skill,
                 )
                 continue
             tgt = foe.field_pet
-            prev = tgt.statuses.get(name, {})
             added = int(v["layers"])
+            # 2026-10-17（官方 Bad Case）：火系免疫灼烧（术语 1002）。免疫时**不写层数**，
+            # 如实记 `status_immune` 事件；`applied += 1` 表示这条效果已被「处理」，
+            # 不能被后面的 unsupported 登记当成未实现。
+            _immune_hit = _status_immune(rs, tgt, spec)
+            if _immune_hit:
+                applied += 1
+                _bump(state, "status_immune", {"side": "enemy", "status": name,
+                                               "layers": added, "immune_element": _immune_hit},
+                      evidence=(spec.get("term", ""),))
+                state.log.append(f"{_pet_display_name(rs, tgt)}是{_immune_hit}，免疫{name}。")
+                continue
+            prev = tgt.statuses.get(name, {})
             # 2026-09-29（第三轮⑥）：**声明了本地规则**的状态才有层数上限与持续回合。
             # `local_rule=None`（legacy / v2）⇒ 事件 detail 与状态形状**逐位不变**：
             # 老路径的 `status_added` 只有 `{side, status, layers}` 三个键
@@ -2218,21 +2229,31 @@ def _apply_effect_batch(state: GameState, rs: Ruleset, side: str, skill,
                 else:
                     _local = (getattr(cfg, "status_end_of_turn", None) or {}).get(_name)
                     _tg = foe.field_pet
-                    _prev = int((_tg.statuses.get(_name) or {}).get("layers", 0))
-                    _total_l = _prev + _give
-                    if _local:
-                        _cap = int(_local.get("max_layers", _total_l))
-                        _total_l = min(_total_l, _cap)
-                        _tg.statuses[_name] = {"layers": _total_l,
-                                               "turns_left": int(_local.get("duration_turns", 1))}
+                    _immune2 = _status_immune(rs, _tg, _spec)
+                    if _immune2:
+                        # 2026-10-17：免疫状态不写层数（与技能施加路径同一口径）。
+                        applied += 1
+                        _bump(state, "status_immune", {"side": "enemy", "status": _name,
+                                                       "layers": _give, "immune_element": _immune2,
+                                                       "from": "per_cleansed_layer"},
+                              evidence=(_spec.get("term", ""),))
+                        state.log.append(f"{_pet_display_name(rs, _tg)}是{_immune2}，免疫{_name}。")
                     else:
-                        _tg.statuses[_name] = {"layers": _total_l}
-                    applied += 1
-                    _bump(state, "status_added", {"side": "enemy", "status": _name, "layers": _give,
-                                                  "layers_total": _total_l,
-                                                  "from": "per_cleansed_layer",
-                                                  "per_layer": _each, "cleansed_layers": _n},
-                          evidence=(_spec.get("term", ""),))
+                        _prev = int((_tg.statuses.get(_name) or {}).get("layers", 0))
+                        _total_l = _prev + _give
+                        if _local:
+                            _cap = int(_local.get("max_layers", _total_l))
+                            _total_l = min(_total_l, _cap)
+                            _tg.statuses[_name] = {"layers": _total_l,
+                                                   "turns_left": int(_local.get("duration_turns", 1))}
+                        else:
+                            _tg.statuses[_name] = {"layers": _total_l}
+                        applied += 1
+                        _bump(state, "status_added", {"side": "enemy", "status": _name, "layers": _give,
+                                                      "layers_total": _total_l,
+                                                      "from": "per_cleansed_layer",
+                                                      "per_layer": _each, "cleansed_layers": _n},
+                              evidence=(_spec.get("term", ""),))
             elif inner.get("kind") == "self_stat":
                 _delta = int(inner.get("delta_pct") or 0) * _n
                 for _stat in (inner.get("stats") or []):
@@ -3602,6 +3623,20 @@ def _weather_effect_of(cfg: RuleConfig, name: str) -> Optional[Dict[str, Any]]:
 def _pet_types(rs: Ruleset, pet: PetState) -> Tuple[str, ...]:
     species = rs.pets.get(pet.pet_id)
     return tuple(species.types) if species is not None else ()
+
+
+def _status_immune(rs: Ruleset, pet: PetState, spec: Optional[Dict[str, Any]]) -> Optional[str]:
+    """状态免疫：术语声明了 `immune_element` 且目标含该属性 ⇒ 返回该属性名；否则 None。
+
+    2026-10-17（官方斯嘉丽公开 Bad Case 回归）：术语 1002 原文写死
+    「（火系精灵免疫此效果）」。过去只有天气路径（`_end_of_turn_weather`）消费
+    `immune_element`，**技能施加状态的分支不判** —— 于是「灼烧打火神」会被算成有效，
+    与官方采访里「火神也不吃灼烧」相反。这里抽成唯一实现，两处状态施加点共用。
+    """
+    immune = str((spec or {}).get("immune_element") or "")
+    if not immune:
+        return None
+    return immune if immune in _pet_types(rs, pet) else None
 
 
 def _pet_display_name(rs: Ruleset, pet: PetState) -> str:

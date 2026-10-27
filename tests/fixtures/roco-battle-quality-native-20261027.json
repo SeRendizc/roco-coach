@@ -1,0 +1,755 @@
+{
+  "evidenceClass": "isolated-native-public-development-receipt",
+  "source": "createRocoService with frozen local data; 2026-10-27 client date; seed stays server-side",
+  "view": {
+    "schema_version": 1,
+    "ruleset_id": "roco-world-s4-2026-09-10",
+    "state_version": 0,
+    "turn": 1,
+    "phase": "battle",
+    "battle_result": null,
+    "match_id": "m-6491e1e6d15f5331",
+    "rules_version": "roco-world-s4-2026-09-10/mobile_s4_candidate_v3",
+    "decision_id": "m-6491e1e6d15f5331:v0",
+    "self": {
+      "active": 0,
+      "energy_max": 10,
+      "energy_charge": 5,
+      "pets": [
+        {
+          "slot": 0,
+          "pet_id": "pet_000001",
+          "name": "喵喵",
+          "hp": 332,
+          "max_hp": 332,
+          "energy": 10,
+          "fainted": false,
+          "statuses": {},
+          "marks": {},
+          "buffs": {},
+          "defense_cooldown": 0,
+          "charging": false,
+          "stats_source": "species-race",
+          "types": [
+            "草系"
+          ],
+          "stats": {
+            "hp": 65,
+            "atk": 66,
+            "def": 49,
+            "spa": 66,
+            "spd": 91,
+            "spe": 33
+          },
+          "class": null,
+          "stage": null
+        },
+        {
+          "slot": 1,
+          "pet_id": "pet_000002",
+          "name": "水蓝蓝",
+          "hp": 348,
+          "max_hp": 348,
+          "energy": 10,
+          "fainted": false,
+          "statuses": {},
+          "marks": {},
+          "buffs": {},
+          "defense_cooldown": 0,
+          "charging": false,
+          "stats_source": "species-race",
+          "types": [
+            "水系"
+          ],
+          "stats": {
+            "hp": 75,
+            "atk": 35,
+            "def": 56,
+            "spa": 76,
+            "spd": 79,
+            "spe": 51
+          },
+          "class": null,
+          "stage": null
+        },
+        {
+          "slot": 2,
+          "pet_id": "pet_000003",
+          "name": "火花",
+          "hp": 340,
+          "max_hp": 340,
+          "energy": 10,
+          "fainted": false,
+          "statuses": {},
+          "marks": {},
+          "buffs": {},
+          "defense_cooldown": 0,
+          "charging": false,
+          "stats_source": "species-race",
+          "types": [
+            "火系"
+          ],
+          "stats": {
+            "hp": 70,
+            "atk": 84,
+            "def": 56,
+            "spa": 37,
+            "spd": 43,
+            "spe": 78
+          },
+          "class": null,
+          "stage": null
+        },
+        {
+          "slot": 3,
+          "pet_id": "pet_000004",
+          "name": "迪莫",
+          "hp": 425,
+          "max_hp": 425,
+          "energy": 10,
+          "fainted": false,
+          "statuses": {},
+          "marks": {},
+          "buffs": {},
+          "defense_cooldown": 0,
+          "charging": false,
+          "stats_source": "species-race",
+          "types": [
+            "光系"
+          ],
+          "stats": {
+            "hp": 120,
+            "atk": 80,
+            "def": 105,
+            "spa": 80,
+            "spd": 105,
+            "spe": 92
+          },
+          "class": null,
+          "stage": null
+        },
+        {
+          "slot": 4,
+          "pet_id": "pet_000005",
+          "name": "水灵",
+          "hp": 434,
+          "max_hp": 434,
+          "energy": 10,
+          "fainted": false,
+          "statuses": {},
+          "marks": {},
+          "buffs": {},
+          "defense_cooldown": 0,
+          "charging": false,
+          "stats_source": "species-race",
+          "types": [
+            "水系"
+          ],
+          "stats": {
+            "hp": 125,
+            "atk": 58,
+            "def": 94,
+            "spa": 127,
+            "spd": 132,
+            "spe": 85
+          },
+          "class": null,
+          "stage": null
+        },
+        {
+          "slot": 5,
+          "pet_id": "pet_000006",
+          "name": "火神",
+          "hp": 420,
+          "max_hp": 420,
+          "energy": 10,
+          "fainted": false,
+          "statuses": {},
+          "marks": {},
+          "buffs": {},
+          "defense_cooldown": 0,
+          "charging": false,
+          "stats_source": "species-race",
+          "types": [
+            "火系"
+          ],
+          "stats": {
+            "hp": 117,
+            "atk": 139,
+            "def": 94,
+            "spa": 61,
+            "spd": 72,
+            "spe": 130
+          },
+          "class": null,
+          "stage": null
+        }
+      ],
+      "skills": [
+        {
+          "skill_id": "skill_000246",
+          "name": "抓挠",
+          "element": "普通系",
+          "category": "攻击",
+          "energy": 0,
+          "power": 35,
+          "power_status": "static_value_present",
+          "damage_class": "物攻",
+          "desc": "造成物伤，自己回复1能量。",
+          "is_trait": false
+        },
+        {
+          "skill_id": "skill_000286",
+          "name": "防御",
+          "element": "普通系",
+          "category": "防御",
+          "energy": 1,
+          "power": null,
+          "power_status": "not_provided_by_source",
+          "damage_class": null,
+          "desc": "减伤70%，应对攻击。",
+          "is_trait": false
+        },
+        {
+          "skill_id": "skill_000340",
+          "name": "仙人掌刺击",
+          "element": "草系",
+          "category": "攻击",
+          "energy": 6,
+          "power": 150,
+          "power_status": "static_value_present",
+          "damage_class": "物攻",
+          "desc": "对敌方精灵造成物理伤害。",
+          "is_trait": false
+        },
+        {
+          "skill_id": "skill_000359",
+          "name": "棘突",
+          "element": "草系",
+          "category": "攻击",
+          "energy": 3,
+          "power": 100,
+          "power_status": "static_value_present",
+          "damage_class": "魔攻",
+          "desc": "对敌方精灵造成魔法伤害。",
+          "is_trait": false
+        },
+        {
+          "skill_id": "skill_000368",
+          "name": "抽枝",
+          "element": "草系",
+          "category": "攻击",
+          "energy": 4,
+          "power": 90,
+          "power_status": "static_value_present",
+          "damage_class": "物攻",
+          "desc": "造成物伤，应对状态：自己回复50%生命和5能量。",
+          "is_trait": false
+        },
+        {
+          "skill_id": "skill_000378",
+          "name": "火苗",
+          "element": "火系",
+          "category": "攻击",
+          "energy": 0,
+          "power": 30,
+          "power_status": "static_value_present",
+          "damage_class": "物攻",
+          "desc": "造成物伤，自己回复1能量。",
+          "is_trait": false
+        },
+        {
+          "skill_id": "skill_000392",
+          "name": "火云车",
+          "element": "火系",
+          "category": "攻击",
+          "energy": 5,
+          "power": 140,
+          "power_status": "static_value_present",
+          "damage_class": "物攻",
+          "desc": "对敌方精灵造成物理伤害。",
+          "is_trait": false
+        },
+        {
+          "skill_id": "skill_000418",
+          "name": "甩水",
+          "element": "水系",
+          "category": "攻击",
+          "energy": 0,
+          "power": 30,
+          "power_status": "static_value_present",
+          "damage_class": "魔攻",
+          "desc": "造成魔伤，自己回复1能量。",
+          "is_trait": false
+        },
+        {
+          "skill_id": "skill_000421",
+          "name": "水炮",
+          "element": "水系",
+          "category": "攻击",
+          "energy": 5,
+          "power": 110,
+          "power_status": "static_value_present",
+          "damage_class": "魔攻",
+          "desc": "造成魔伤，每次使用后，本技能能耗永久-1。",
+          "is_trait": false
+        },
+        {
+          "skill_id": "skill_000456",
+          "name": "光刃",
+          "element": "光系",
+          "category": "攻击",
+          "energy": 4,
+          "power": 120,
+          "power_status": "static_value_present",
+          "damage_class": "物攻",
+          "desc": "对敌方精灵造成物理伤害。",
+          "is_trait": false
+        },
+        {
+          "skill_id": "skill_000567",
+          "name": "龙之利爪",
+          "element": "龙系",
+          "category": "攻击",
+          "energy": 3,
+          "power": 130,
+          "power_status": "static_value_present",
+          "damage_class": "物攻",
+          "desc": "蓄力，造成物伤并吸血50%。",
+          "is_trait": false
+        },
+        {
+          "skill_id": "skill_000624",
+          "name": "腐化",
+          "element": "毒系",
+          "category": "状态",
+          "energy": 1,
+          "power": null,
+          "power_status": "not_provided_by_source",
+          "damage_class": null,
+          "desc": "敌方每有1层中毒效果，敌方获得双攻-30%。",
+          "is_trait": false
+        },
+        {
+          "skill_id": "skill_000808",
+          "name": "多维击打",
+          "element": "幻系",
+          "category": "攻击",
+          "energy": 4,
+          "power": 15,
+          "power_status": "static_value_present",
+          "damage_class": "魔攻",
+          "desc": "造成魔伤，1连击，敌方每有1层星陨印记，本次技能连击数+1。",
+          "is_trait": false
+        }
+      ],
+      "loadouts": {
+        "pet_000001": [
+          "skill_000246",
+          "skill_000286",
+          "skill_000340",
+          "skill_000624"
+        ],
+        "pet_000002": [
+          "skill_000418",
+          "skill_000286",
+          "skill_000421",
+          "skill_000808"
+        ],
+        "pet_000003": [
+          "skill_000378",
+          "skill_000286",
+          "skill_000392",
+          "skill_000567"
+        ],
+        "pet_000004": [
+          "skill_000456",
+          "skill_000286",
+          "skill_000359",
+          "skill_000368"
+        ],
+        "pet_000005": [
+          "skill_000418",
+          "skill_000286",
+          "skill_000421",
+          "skill_000808"
+        ],
+        "pet_000006": [
+          "skill_000378",
+          "skill_000286",
+          "skill_000392",
+          "skill_000567"
+        ]
+      },
+      "magic": {
+        "uses_left": 2,
+        "cooldown": 0,
+        "swapped": {},
+        "cooldown_set_turn": null
+      }
+    },
+    "opponent": {
+      "active": 0,
+      "living_count": 6,
+      "energy_max": 10,
+      "field": {
+        "slot": 0,
+        "pet_id": "pet_000007",
+        "name": "魔力猫",
+        "hp": 405,
+        "max_hp": 405,
+        "energy": 10,
+        "fainted": false,
+        "statuses": {},
+        "marks": {},
+        "defense_cooldown": 0,
+        "charging": false,
+        "stats_source": "species-race",
+        "types": [
+          "草系"
+        ],
+        "stats": {
+          "hp": 108,
+          "atk": 109,
+          "def": 81,
+          "spa": 109,
+          "spd": 151,
+          "spe": 55
+        },
+        "class": null,
+        "stage": null
+      },
+      "bench": [
+        {
+          "slot": 1,
+          "fainted": false
+        },
+        {
+          "slot": 2,
+          "fainted": false
+        },
+        {
+          "slot": 3,
+          "fainted": false
+        },
+        {
+          "slot": 4,
+          "fainted": false
+        },
+        {
+          "slot": 5,
+          "fainted": false
+        }
+      ]
+    },
+    "legal": [
+      {
+        "kind": "skill",
+        "label": "抓挠",
+        "skill_id": "skill_000246",
+        "skill_name": "抓挠",
+        "magic_id": null,
+        "skill": {
+          "name": "抓挠",
+          "element": "普通系",
+          "category": "攻击",
+          "energy": 0,
+          "power": 35,
+          "power_status": "static_value_present",
+          "damage_class": "物攻",
+          "desc": "造成物伤，自己回复1能量。",
+          "is_trait": false,
+          "effect_support": "unsupported"
+        },
+        "target_index": null,
+        "item_id": null
+      },
+      {
+        "kind": "skill",
+        "label": "防御",
+        "skill_id": "skill_000286",
+        "skill_name": "防御",
+        "magic_id": null,
+        "skill": {
+          "name": "防御",
+          "element": "普通系",
+          "category": "防御",
+          "energy": 1,
+          "power": null,
+          "power_status": "not_provided_by_source",
+          "damage_class": null,
+          "desc": "减伤70%，应对攻击。",
+          "is_trait": false,
+          "effect_support": "unsupported"
+        },
+        "target_index": null,
+        "item_id": null
+      },
+      {
+        "kind": "skill",
+        "label": "仙人掌刺击",
+        "skill_id": "skill_000340",
+        "skill_name": "仙人掌刺击",
+        "magic_id": null,
+        "skill": {
+          "name": "仙人掌刺击",
+          "element": "草系",
+          "category": "攻击",
+          "energy": 6,
+          "power": 150,
+          "power_status": "static_value_present",
+          "damage_class": "物攻",
+          "desc": "对敌方精灵造成物理伤害。",
+          "is_trait": false,
+          "effect_support": "unsupported"
+        },
+        "target_index": null,
+        "item_id": null
+      },
+      {
+        "kind": "skill",
+        "label": "腐化",
+        "skill_id": "skill_000624",
+        "skill_name": "腐化",
+        "magic_id": null,
+        "skill": {
+          "name": "腐化",
+          "element": "毒系",
+          "category": "状态",
+          "energy": 1,
+          "power": null,
+          "power_status": "not_provided_by_source",
+          "damage_class": null,
+          "desc": "敌方每有1层中毒效果，敌方获得双攻-30%。",
+          "is_trait": false,
+          "effect_support": "unsupported"
+        },
+        "target_index": null,
+        "item_id": null
+      },
+      {
+        "kind": "charge",
+        "label": "聚能",
+        "skill_id": null,
+        "skill_name": null,
+        "magic_id": null,
+        "skill": null,
+        "target_index": null,
+        "item_id": null
+      },
+      {
+        "kind": "switch",
+        "label": "换上第2位",
+        "skill_id": null,
+        "skill_name": null,
+        "magic_id": null,
+        "skill": null,
+        "target_index": 1,
+        "item_id": null
+      },
+      {
+        "kind": "switch",
+        "label": "换上第3位",
+        "skill_id": null,
+        "skill_name": null,
+        "magic_id": null,
+        "skill": null,
+        "target_index": 2,
+        "item_id": null
+      },
+      {
+        "kind": "switch",
+        "label": "换上第4位",
+        "skill_id": null,
+        "skill_name": null,
+        "magic_id": null,
+        "skill": null,
+        "target_index": 3,
+        "item_id": null
+      },
+      {
+        "kind": "switch",
+        "label": "换上第5位",
+        "skill_id": null,
+        "skill_name": null,
+        "magic_id": null,
+        "skill": null,
+        "target_index": 4,
+        "item_id": null
+      },
+      {
+        "kind": "switch",
+        "label": "换上第6位",
+        "skill_id": null,
+        "skill_name": null,
+        "magic_id": null,
+        "skill": null,
+        "target_index": 5,
+        "item_id": null
+      },
+      {
+        "kind": "magic",
+        "label": "愿力强化",
+        "skill_id": null,
+        "skill_name": null,
+        "magic_id": "wish_power_up",
+        "skill": null,
+        "target_index": null,
+        "item_id": null
+      },
+      {
+        "kind": "surrender",
+        "label": "投降",
+        "skill_id": null,
+        "skill_name": null,
+        "magic_id": null,
+        "skill": null,
+        "target_index": null,
+        "item_id": null
+      }
+    ],
+    "cpu_legal_count": 12,
+    "needs_replacement": [],
+    "events": [],
+    "strategy": {
+      "name": "greedy_damage",
+      "version": 1
+    },
+    "assumptions": {
+      "opponent_bench": "full_hp_nominal_loadout",
+      "note": "对手后备的血量、配招与物种都不在公开信息里，重建搜索状态时按满血 + 规范配招 + 占位物种建模；任何依赖对手后备精确构成或精确血量的结论都会因此偏乐观。"
+    },
+    "unsupported_count": 0,
+    "mana": {
+      "self": 4,
+      "opponent": 4,
+      "pool": 4
+    },
+    "unverified_overrides": [
+      {
+        "path": "turn_order.speed_tie",
+        "value": "random_seeded",
+        "confidence": "ENGINE_HYPOTHESIS",
+        "reason": "同速平手裁决在候选配置里是 UNKNOWN（MC-E05 未录制）。不声明它就打不下去（引擎按纪律抛错）；这里显式按 legacy 那份已登记的工程权宜 random_seeded 走，界面同样要标未核验",
+        "microcase_id": "MC-E05",
+        "unverified": true
+      }
+    ],
+    "unverified_notes": [
+      "候选规则：turn_order.speed_tie 按假设值 random_seeded（ENGINE_HYPOTHESIS，待录 MC-E05）开局 —— 不是实机结论，界面须标「未核验」"
+    ],
+    "mode_id": null,
+    "ruleset_config_id": "mobile_s4_candidate_v3"
+  },
+  "plan": {
+    "ok": true,
+    "battle_id": "s1-sfz08lpn",
+    "state_version": 0,
+    "recommendation": "换上第6位",
+    "recommendation_stable": true,
+    "recommended_by_seed": {
+      "11": "换上第6位",
+      "29": "换上第6位",
+      "47": "换上第6位"
+    },
+    "analysis_seeds": [
+      11,
+      29,
+      47
+    ],
+    "main_counter": "仙人掌刺击",
+    "expected": {
+      "min": 0.8927,
+      "max": 0.8927,
+      "mean": 0.8927
+    },
+    "worst": {
+      "min": 0.1787,
+      "max": 0.1787
+    },
+    "first_second_margin": {
+      "min": 0.0172,
+      "max": 0.0172,
+      "mean": 0.0172,
+      "scale": "one-ply-value",
+      "note": "枚举第一与第二名的估值差（一手推演尺度）。只用于判断「这一手是不是真的两难」，**不是胜率、不是游戏机制的分差**。量纲按本引擎标定，不要与旧演示引擎的分数直接比较。"
+    },
+    "branches_evaluated": 96,
+    "depth_searched": 2,
+    "damage_preview": {
+      "available": true,
+      "reason": null,
+      "min": 28,
+      "max": 180,
+      "best_label": "仙人掌刺击",
+      "lethal": false,
+      "lethal_stable": true,
+      "foe_hp": 405,
+      "formula_verified": false,
+      "damage_model": "community-hypothesis-v1",
+      "samples": [
+        {
+          "label": "仙人掌刺击",
+          "min": 180,
+          "max": 180,
+          "multiplier": 1,
+          "multiplier_element": "草系",
+          "multiplier_defender_types": [
+            "草系"
+          ]
+        },
+        {
+          "label": "抓挠",
+          "min": 28,
+          "max": 28,
+          "multiplier": 1,
+          "multiplier_element": "普通系",
+          "multiplier_defender_types": [
+            "草系"
+          ]
+        }
+      ],
+      "skipped_skills": [],
+      "candidates": 2,
+      "note": "原始伤害范围：**未核验公式**的输出（COMMUNITY_HYPOTHESIS_V1），不是游戏内实测值。`lethal` 表示所有分析种子都能一击收掉；`lethal_stable` 为假表示结论随分析种子变化，别当保证。状态技能/道具/换人不产生伤害，列在 skipped_kinds 里。"
+    },
+    "risk": {
+      "downside_min": 0.714,
+      "downside_max": 0.714,
+      "fragile": false,
+      "threshold": 1.2,
+      "top_risks": [
+        {
+          "opponent_action": "仙人掌刺击",
+          "score": 0.1787,
+          "loss_vs_expected": 0.714
+        },
+        {
+          "opponent_action": "抓挠",
+          "score": 1.4406,
+          "loss_vs_expected": -0.5479
+        },
+        {
+          "opponent_action": "腐化",
+          "score": 1.5202,
+          "loss_vs_expected": -0.6275
+        }
+      ],
+      "note": "risk 只描述推荐那一手的落差：`downside` 是期望到最坏的举例，`fragile` 表示落差超过产品阈值（用于措辞分级，不是游戏机制）。对手仍是启发式分布建模，不是真人行为。"
+    },
+    "coverage": 1,
+    "timed_out": false,
+    "unsupported": [],
+    "limitations": [
+      "估值是启发式局面分，**不是胜率**；expected 不能读成「赢的概率」",
+      "对手后备血量与配招不在公开信息里，按满血+规范配招建模（见 public.assumptions）",
+      "随机性用与真实对局无关的 analysis_seeds，并跨种子聚合；结论不依赖真实 seed",
+      "对手按启发式分布建模，不是真实对手行为模型",
+      "这是**分析**状态，不是权威对局状态；实际结算以游戏内为准",
+      "coverage 是**计数比**（见 coverage_detail.by_seed 的分子/分母），不是「结论有多可靠」的把握度；被束宽裁掉的候选逐条见 truncation.dropped，深度/预算是否到顶见 budget",
+      "排序是**稳健优先**（见 robustness.ordering）：先避「有证据的重大损失」，再比期望（资源与后手都在期望里）；相近动作并列列出（`tied_with_top_stable`），不假装一条严格更优",
+      "expected/worst/first_second_margin/coverage 的口径见 declarations：**不是胜率、不是概率、不是把握度**（启发式估值 + 计数比）"
+    ],
+    "note": "推荐来自公开信息 + 固定分析种子集合的跨种子聚合；真实对局 seed 没有参与。"
+  }
+}

@@ -307,6 +307,8 @@ function readPosition(game) {
   const needsReplacement = Array.isArray(raw?.needs_replacement) ? raw.needs_replacement : [];
 
   return {
+    battleId: str(raw?.battle_id) ?? str(game.battleId),
+    stateVersion: Number.isInteger(raw?.state_version) ? raw.state_version : null,
     phase: str(game.phase) ?? str(raw?.phase),
     turn: num(game.turn) ?? num(raw?.turn),
     result: game.result ?? raw?.battle_result ?? null,
@@ -334,6 +336,16 @@ function readPosition(game) {
 /** 合法技能动作（只认 `kind === 'skill'` 且名字已知的那些）。 */
 function legalSkills(pos) {
   return pos.legal.filter((a) => a.kind === 'skill' && a.name);
+}
+
+// 同样能收尾时才比较省能量。能耗有任何一边没给，就不编一个默认值。
+function finishOrder(a, b, pos) {
+  const left = legalByName(pos, a.label);
+  const right = legalByName(pos, b.label);
+  if (num(left?.energy) !== null && num(right?.energy) !== null && left.energy !== right.energy) {
+    return left.energy - right.energy;
+  }
+  return b.max - a.max;
 }
 
 /**
@@ -505,19 +517,25 @@ function switchActionOf(entry) {
 function alternatesOf(pos, primaryRef, plan) {
   const estimates = estimateTable(pos, plan);
   const rows = [];
-  for (const [index, action] of pos.legal.entries()) {
+  // 先列真正能比较的一招，再给不同代价的换人/道具。数组先后不是强弱依据。
+  const ordered = pos.legal.map((action, index) => ({action, index})).sort((a, b) => {
+    const rank = (row) => estimates.has(row.action.label) ? 0 : row.action.kind === 'switch' ? 1 : row.action.kind === 'item' ? 2 : 3;
+    return rank(a) - rank(b) || (estimates.get(b.action.label)?.max ?? -Infinity) - (estimates.get(a.action.label)?.max ?? -Infinity) || a.index - b.index;
+  });
+  for (const {action, index} of ordered) {
     if (primaryRef && action.kind === primaryRef.kind && action.label === primaryRef.label) continue;
     const target = action.kind === 'switch'
-      ? switchIndexFromLabel(action.label)
+      ? action.targetIndex ?? switchIndexFromLabel(action.label)
       : null;
     const pet = target === null ? null : pos.myPets[target] ?? null;
     const label = action.kind === 'switch' && pet?.name ? pet.name : (action.label ?? action.name ?? '这一项');
     const est = estimates.get(action.label ?? '') ?? null;
-    const note = est
+    let note = est
       ? `按未核验公式估 ${estimateText(est.min, est.max)} 点`
       : (action.kind === 'switch'
         ? `换上去 ${pet && pet.hp !== null ? `${show(pet.hp)} 血` : '血量没给'}`
         : (action.kind === 'item' ? '用一件道具（这一手就不能出招了）' : '没有估算数据'));
+    if (action.kind === 'skill' && num(action.energy) !== null) note += `，耗 ${show(action.energy)} 能量`;
     rows.push({label, kind: action.kind ?? null, legalActionId: legalActionIdOf(action, index),
       legalIndex: index, note});
     if (rows.length >= 2) break;
@@ -639,7 +657,11 @@ function detectKo(pos, plan) {
   // 只有**合法**的招才算「现在能收」：估算用的是配招表，里面可能有这一轮放不出的招。
   const castable = samples.filter((s) => legalByName(pos, s.label));
   if (!castable.length) return null;
-  const steady = castable.filter((s) => s.min !== null && s.min >= foeHp).sort((a, b) => b.max - a.max)[0] ?? null;
+  const steadyRows = castable.filter((s) => s.min !== null && s.min >= foeHp);
+  const materialLoss = new Set((Array.isArray(plan?.robustness?.material_loss_actions) ? plan.robustness.material_loss_actions : [])
+    .map((row) => str(row?.action)).filter(Boolean));
+  const safeFinishers = steadyRows.filter((row) => !materialLoss.has(row.label));
+  const steady = (safeFinishers.length ? safeFinishers : steadyRows).sort((a, b) => finishOrder(a, b, pos))[0] ?? null;
   const maybe = castable.filter((s) => s.max >= foeHp).sort((a, b) => b.max - a.max)[0] ?? null;
   const foeName = pos.foe?.name ?? null;
   if (steady) {
@@ -968,10 +990,19 @@ export function coachAdvice({game, plan, session, host} = {}) {
   // 没有这一条时，属性/速度那些检测器仍会对着一个"没有按钮可点"的局面开口
   //（实测：对手补位的那一手会给出一句「你速度更快，先手压上去」）—— 那是噪声，不是建议。
   if (!pos.legal.length) return null;
+  plan = boundedPlan(pos, plan);
 
   for (const detect of DETECTORS) {
     const picked = detect(pos, isObj(plan) ? plan : null);
     if (!picked) continue;
+    // 有完整、同局同版规划时，速度慢等单因素只决定是否提醒，不能推翻已算过的选择。
+    if (picked.kind !== 'replace-required' && reliablePlan(pos, plan)) {
+      const planned = adviceForPosition(pos, plan);
+      if (planned?.evidence?.source === 'public-planner') {
+        if (alreadySaid(session, normaliseAdviceShape(planned.playerSummary))) return null;
+        return {...planned, text: planned.playerSummary, why: planned.reason};
+      }
+    }
     // 同一句（数字不同也算同一句）已经说过就不再重复：重复本身就是在浪费玩家的注意力。
     if (alreadySaid(session, normaliseAdviceShape(picked.text))) return null;
     return {
@@ -979,7 +1010,7 @@ export function coachAdvice({game, plan, session, host} = {}) {
       why: picked.why,
       risk: picked.risk,
       kind: picked.kind,
-      evidence: {...picked.evidence},
+      evidence: {...picked.evidence, ...(plan?.estimate_only === true ? {source: 'legacy-estimate'} : {})},
       // U09/U08 的机器可读那一栏：这一条建议**指向哪个合法动作**。
       // 加性字段 —— 老的调用方（只读 text/why/risk/evidence）逐字节不变。
       action: actionRefOf(pos, picked.action),
@@ -1114,6 +1145,7 @@ function positionFromSnapshot(battle, plan = null) {
   }));
   const legal = (Array.isArray(battle.legal) ? battle.legal : []).map((one, index) => readAction(one, index)).filter(Boolean);
   return {
+    battleId: str(battle.battle_id),
     phase: str(battle.phase),
     turn: num(battle.turn),
     result: battle.result ?? null,
@@ -1125,7 +1157,8 @@ function positionFromSnapshot(battle, plan = null) {
     foeBench,
     energyMax: num(battle.self_energy_max),
     legal,
-    skills: [],
+    skills: (Array.isArray(battle.self_skills) ? battle.self_skills : [])
+      .map(readSkillRow).filter(Boolean),
     events: [],
     //: 2026-09-30（P0 旁路缺陷收口）：**这里原来写死 `[]`** ⇒ 引擎给的 `needs_replacement` 被丢掉 ✗
     //:  下游有**五个**消费者直接 `.includes(...)`（`:567` `:604` `:605` `:1118` `:1393`）⇒
@@ -1188,14 +1221,16 @@ function primaryFromFacts(pos, plan) {
       ?? null;
     if (hit) {
       const branches = num(plan?.branches_evaluated);
-      const stable = plan?.recommendation_stable === true;
+      const stable = reliablePlan(pos, plan);
       return {
+        source: 'planner-label',
         ref: refOf(hit.kind === 'switch' ? {...hit, targetName: switchPetName(pos, hit)} : hit),
-        reason: `引擎把这一回合的双方应对算过一遍${branches === null ? '' : `（${show(branches)} 个分支）`}，推荐的就是这一项`
-          + `${stable ? '，而且推荐在多个分析种子里是稳的' : ''}`,
+        reason: stable
+          ? `引擎把这一回合的双方应对算过一遍（${show(branches)} 个分支），推荐的就是这一项，而且推荐在多个分析种子里是稳的`
+          : `传入的推荐标签是「${hit.label}」，这一项仍在当前合法表里；没有完整的同局同版规划证明，暂作候选`,
         upside: upsideOfAction(pos, plan, hit),
         risk: riskOfAction(pos, hit, plan),
-        unknown: stable ? [] : ['引擎的推荐只在部分分析种子里成立（不稳），换一个种子可能换一手'],
+        unknown: stable ? [] : ['这份推荐缺少完整的同局同版分支证据，不能当成稳定规划结论'],
       };
     }
   }
@@ -1236,7 +1271,8 @@ function primaryFromFacts(pos, plan) {
     .filter((row) => row.est && (row.est.max !== null || row.est.min !== null));
   const lethal = foeHp === null ? [] : legalWithEst.filter((row) => row.est.min !== null && row.est.min >= foeHp);
   const ranked = (lethal.length ? lethal : legalWithEst)
-    .sort((a, b) => ((b.est.max ?? b.est.min ?? -Infinity) - (a.est.max ?? a.est.min ?? -Infinity))
+    .sort((a, b) => (lethal.length && num(a.action.energy) !== null && num(b.action.energy) !== null ? a.action.energy - b.action.energy : 0)
+      || ((b.est.max ?? b.est.min ?? -Infinity) - (a.est.max ?? a.est.min ?? -Infinity))
       || (a.action.legalIndex ?? 0) - (b.action.legalIndex ?? 0));
   if (ranked.length) {
     const best = ranked[0].action;
@@ -1337,6 +1373,11 @@ function upsideOfAction(pos, plan, action) {
 /** 主要风险那一栏：一条，具体的，能对上公开事实的。 */
 function riskOfAction(pos, action, plan) {
   if (!action) return null;
+  const riskRows = Array.isArray(plan?.risk?.worst_seed_risks) ? plan.risk.worst_seed_risks : plan?.risk?.top_risks;
+  const adverse = Array.isArray(riskRows) ? riskRows[0] : null;
+  if (labelKey(plan?.recommendation) === labelKey(action.label) && str(adverse?.opponent_action)) {
+    return `在引擎已经算过的应对里，要防对手「${adverse.opponent_action}」；这是一条可能分支，不代表对手一定这么选`;
+  }
   if (action.kind === 'switch') return '换人先结算，但上来的那一只照样可能吃对面这一手';
   if (action.kind === 'item') return '这一轮只吃道具不出招，对面会趁这一轮压过来';
   const key = labelKey(action.label);
@@ -1544,9 +1585,62 @@ export function adviceForView(view, plan = null, {session = null} = {}) {
 }
 
 /** 建议的**唯一**装配点：局面 → 结构 + 正文（`battleAdvice` 与 `adviceForView` 都走它）。 */
+function decisionComparison(pos, ref, plan) {
+  const primary = pos.legal.find((one) => one.kind === ref.kind && one.label === ref.label);
+  if (!primary || primary.kind !== 'skill') return null;
+  const estimates = estimateTable(pos, plan);
+  const own = estimates.get(primary.label);
+  if (!own) return null;
+  const alternatives = pos.legal.filter((one) => one.kind === 'skill' && one.label !== primary.label && estimates.has(one.label));
+  if (!alternatives.length) return null;
+  const hp = num(pos.foe?.hp);
+  const ownFinishes = hp !== null && own.min !== null && own.min >= hp;
+  const other = alternatives.find((one) => {
+    const est = estimates.get(one.label);
+    return ownFinishes && (est.max < hp || (est.min >= hp && num(primary.energy) !== null && num(one.energy) !== null && primary.energy < one.energy));
+  }) ?? alternatives.sort((a, b) => (estimates.get(b.label).max ?? -Infinity) - (estimates.get(a.label).max ?? -Infinity))[0];
+  const rival = estimates.get(other.label);
+  const amounts = `「${primary.label}」估 ${estimateText(own.min, own.max)} 点，「${other.label}」估 ${estimateText(rival.min, rival.max)} 点`;
+  const cost = num(primary.energy) !== null && num(other.energy) !== null
+    ? `；分别耗 ${show(primary.energy)}、${show(other.energy)} 能量` : '';
+  const implication = ownFinishes && rival.max !== null && rival.max < hp
+    ? `，对面剩 ${show(hp)} 血，前者按估算够收，后者不够`
+    : ownFinishes && rival.min !== null && rival.min >= hp && num(primary.energy) !== null && num(other.energy) !== null && primary.energy < other.energy
+      ? '，两招按估算都够收，先留住能量' : '';
+  return {text: `${amounts}${cost}${implication}；伤害来自未核验公式，对手换人或先行动会改变结果`,
+    primary: primary.label, alternative: other.label, primaryEstimate: {...own}, alternativeEstimate: {...rival},
+    primaryEnergy: num(primary.energy), alternativeEnergy: num(other.energy), foeHp: hp};
+}
+
+function boundedPlan(pos, plan) {
+  if (!isObj(plan)) return null;
+  if (plan.ok === true && (!str(plan.battle_id) || !str(pos.battleId) || plan.battle_id !== pos.battleId)) {
+    // 旧纯估算调用没有会话身份，也没有分支证明。只保留估算，不继承“成功规划”的信用。
+    if (!str(plan.battle_id) && !str(pos.battleId) && !(num(plan.branches_evaluated) > 0)) {
+      plan = {estimate_only: true, state_version: plan.state_version, damage_preview: plan.damage_preview};
+    } else return null;
+  }
+  if (str(plan.battle_id) && plan.battle_id !== pos.battleId) return null;
+  if (Number.isInteger(plan.state_version) && Number.isInteger(pos.stateVersion) && plan.state_version !== pos.stateVersion) return null;
+  if (plan.ok === true && (!Number.isInteger(plan.state_version) || !Number.isInteger(pos.stateVersion))) return null;
+  if (num(plan.damage_preview?.foe_hp) !== null && num(pos.foe?.hp) !== null && plan.damage_preview.foe_hp !== pos.foe.hp) {
+    return {...plan, damage_preview: null};
+  }
+  return plan;
+}
+
+function reliablePlan(pos, plan) {
+  return plan?.ok === true && plan.recommendation_stable === true && plan.timed_out === false
+    && Number.isInteger(pos.stateVersion) && plan.state_version === pos.stateVersion
+    && num(plan.branches_evaluated) !== null && plan.branches_evaluated > 0
+    && Boolean(str(plan.battle_id)) && Boolean(str(pos.battleId)) && plan.battle_id === pos.battleId;
+}
+
 export function adviceForPosition(pos, plan = null) {
   if (!pos || pos.result || pos.phase === 'ended') return null;
   if (!pos.legal.length) return null;
+  // 即使调用者忘了版本门控，也不能拿另一回合/另一血线的估算讲当前选择。
+  plan = boundedPlan(pos, plan);
 
   // 检波器先来：它按「哪一条局面事实最值得说」排序（补位 > 收线 > 换血 > 能量 > …），
   // 命中时它的措辞比通用比较准。一条都不命中（平稳回合）才退回最小真实比较。
@@ -1556,7 +1650,10 @@ export function adviceForPosition(pos, plan = null) {
   const mustReplace = pos.needsReplacement.includes('player')
     || pos.mine?.fainted === true || (mineHpForKind !== null && mineHpForKind <= 0);
   const picked = DETECTORS.map((detect) => detect(pos, isObj(plan) ? plan : null)).find(Boolean) ?? null;
-  const base = (picked ? adviceFromCandidate(pos, picked, plan) : null) ?? primaryFromFacts(pos, plan);
+  const plannerCandidate = !mustReplace && reliablePlan(pos, plan) ? primaryFromFacts(pos, plan) : null;
+  const plannerChoice = plannerCandidate?.source === 'planner-label' ? {...plannerCandidate, source: 'public-planner'} : null;
+  const base = plannerChoice
+    ?? (picked ? adviceFromCandidate(pos, picked, plan) : null) ?? primaryFromFacts(pos, plan);
   if (!base?.ref) return null;
   // An energy-only warning supplies no action: keep the existing legal planner /
   // damage comparison / honest fallback, and carry the bounded warning alongside it.
@@ -1576,12 +1673,14 @@ export function adviceForPosition(pos, plan = null) {
   const unknown = [...new Set(base.unknown ?? [])].filter((row) => typeof row === 'string' && row);
   const estimates = estimateTable(pos, plan);
   const est = ref.kind === 'skill' ? estimates.get(ref.label) ?? null : null;
+  const comparison = decisionComparison(pos, ref, plan);
 
   const advice = {
     headline,
     reason: base.reason,
     upside: base.upside,
     risk: base.risk,
+    comparison: comparison?.text ?? null,
     alternates: alternatesOf(pos, ref, plan),
     actionLabel,
     actionKind: ref.kind ?? null,
@@ -1599,8 +1698,9 @@ export function adviceForPosition(pos, plan = null) {
     unknown,
     // 这一条建议属于哪一类局面事实。**兜底那一支也必须给一个契约里的 kind** ——
     // 客户端的浮条按「有没有 kind」判有没有信息量，null 会被当成「没话说」而把气泡藏掉。
-    kind: base.kind ?? picked?.kind ?? (mustReplace ? 'replace-required' : 'primary-action'),
+    kind: base.source === 'public-planner' ? 'primary-action' : base.kind ?? picked?.kind ?? (mustReplace ? 'replace-required' : 'primary-action'),
     evidence: {
+      source: plan?.estimate_only === true ? 'legacy-estimate' : base.source ?? 'public-facts',
       turn: pos.turn,
       my: pos.mine ? {name: pos.mine.name, hp: pos.mine.hp, maxHp: pos.mine.maxHp, energy: pos.mine.energy} : null,
       foe: pos.foe ? {name: pos.foe.name, hp: pos.foe.hp, maxHp: pos.foe.maxHp, energy: pos.foe.energy} : null,
@@ -1608,12 +1708,25 @@ export function adviceForPosition(pos, plan = null) {
       estimate: est ? {min: est.min, max: est.max} : null,
       plan_recommendation: str(plan?.recommendation),
       plan_branches: num(plan?.branches_evaluated),
+      comparison,
     },
     // 结构化字段之外的**可读正文**：无模型档直接用它；有模型时它是兜底与校对基准。
     text: null,
   };
   advice.text = battleAdviceText(advice, pos);
+  advice.playerSummary = battleAdviceSummary(advice, pos);
   return advice;
+}
+
+/** 默认对话只讲这一次选择；完整分段说明仍保存在 text 与 evidence。 */
+export function battleAdviceSummary(advice, pos = null) {
+  if (!advice) return null;
+  const target = pos?.foe?.name ? `，对面是${pos.foe.name}${num(pos.foe.hp) !== null ? `（${show(pos.foe.hp)} 血）` : ''}` : '';
+  const turn = Number.isInteger(advice.turn) ? `第 ${advice.turn} 回合，` : '';
+  const action = `${turn}先${advice.headline}${target}。`;
+  const why = advice.comparison ?? [advice.reason, advice.upside].filter(Boolean).join('；');
+  const risk = advice.risk ? `留意：${advice.risk}。` : '';
+  return `${action}${why ? `${why}。` : ''}${risk}`;
 }
 
 /**
@@ -1631,6 +1744,7 @@ export function battleAdviceText(advice, pos = null) {
   lines.push(`首选行动：${advice.headline}（引擎给的合法动作：${advice.legalLabel ?? advice.actionLabel}）。`);
   if (advice.reason) lines.push(`为什么是它：${advice.reason}。`);
   if (advice.upside) lines.push(`收益：${advice.upside}。`);
+  if (advice.comparison) lines.push(`和另一手相比：${advice.comparison}。`);
   if (advice.risk) lines.push(`主要风险：${advice.risk}。`);
   if (Array.isArray(advice.alternates) && advice.alternates.length) {
     lines.push(`备选：${advice.alternates.map((row) => `${row.label}（${row.note}）`).join('；')}。`);

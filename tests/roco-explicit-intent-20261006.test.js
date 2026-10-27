@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {runCoach, adviceLegalityReport} from '../src/coach/runtime.js';
 import {freshMemory} from '../src/coach/memory.js';
 import {battleAdvice,rocoAdviceKind} from '../src/coach/coach-advice.js';
+import {publicSkillMetadata, publicLegalMetadata} from '../src/coach/public-action-projection.js';
 const battle={battle_id:'explicit-intent',state_version:1,turn:1,phase:'battle',result:null,self_active:0,
  self:[{pet_id:'pet_000001',name:'喵喵',types:['草系'],hp:366,max_hp:366,energy:6,alive:true},
  {pet_id:'pet_000007',name:'水蓝蓝',types:['水系'],hp:366,max_hp:366,energy:6,alive:true},
@@ -93,8 +94,10 @@ function realProducer(view){
   const affinityStart=source.indexOf('function affinityReadingsOf(');
   const affinityEnd=source.indexOf('\nfunction coachRocoBattle()',affinityStart);
   const {incomingAffinity,RULESET_ID}=await import('../src/client/type-affinity.js');
-  const produce=new Function('state','incomingAffinity','RULESET_ID',source.slice(affinityStart,affinityEnd)+'\n'+source.slice(start,end)+'\nreturn coachRocoBattle();');
-  return produce({view,battleId:'producer-http-type-test'},incomingAffinity,RULESET_ID);
+  // The extracted producer now preserves public skill metadata via these imports.
+  // Supply the actual helpers; all original public-type/HTTP assertions stay intact.
+  const produce=new Function('state','incomingAffinity','RULESET_ID','publicSkillMetadata','publicLegalMetadata',source.slice(affinityStart,affinityEnd)+'\n'+source.slice(start,end)+'\nreturn coachRocoBattle();');
+  return produce({view,battleId:'producer-http-type-test'},incomingAffinity,RULESET_ID,publicSkillMetadata,publicLegalMetadata);
  });
 }
 function publicEngineView(){

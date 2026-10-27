@@ -281,8 +281,8 @@ export function reviewMatch(context){
  if(!hasMatch||!readsAsPreviousMatch(context)||out.text.startsWith('暂时没有可用的完整对局记录'))return out;
  // 正文自己已经用「这一局」开头时，把那个词换成「上一局」—— 避免「上一局：这一局…」这种自相矛盾的写法
  //（`tests/roco-teacher-review-text.test.js` 的兜底钉原本断的就是这个位置，改钉理由见文件内注释）。
- if(out.text.startsWith('这一局'))return {...out,text:`上一局${out.text.slice(3)}`};
- return {...out,text:`上一局：${out.text}`};
+ if(out.text.startsWith('这一局'))return {...out,text:`上一局${out.text.slice(3)}`,playerSummary:out.playerSummary?`上一局：${out.playerSummary}`:undefined};
+ return {...out,text:`上一局：${out.text}`,playerSummary:out.playerSummary?`上一局：${out.playerSummary}`:undefined};
 }
 function reviewBody(context){
  const m=context.lastMatch;if(!m)return {text:'暂时没有可用的完整对局记录。旧版只存了最后一回合的历史无法还原整局。新版本会保存完整对局；如果当前对局还在页面里，可直接从现有记录复盘。',evidence:[],scope:'match'};
@@ -406,10 +406,40 @@ function reviewBody(context){
   ...(decision?[decisionEvidence(decision)]:[]),
   ...keyTurns.map(k=>`第${k.turn}回合：${(k.events??[]).join(' ')}\n${k.analysis??''}${k.alternatives?`\n${k.alternatives.line}`:''}`),
   keyTurns.find(k=>k.alternatives)?.alternatives.rule].filter(Boolean);
- return {brief,textFacts:safe,text,scope:'match',matchId:safe.id,
+ const playerSummary = matchPlayerSummary({decision, row:biggest, outcome});
+ return {brief,textFacts:safe,text,playerSummary,scope:'match',matchId:safe.id,
   keyDecision:decision,practice,evidence,choices:keyTurns.map(k=>`详看第${k.turn}回合`),
   method:'逐回合摘要与关键决策（事前快照）→ 四段正文（关键回合/合法替代/下一手/风险）；事件流水只进依据'};
 }
+// 默认聊天正文使用一个关键决策；旧的完整四段与流水仍可展开核对。
+// turnLog 缺技能名/执行结果时明确报缺项，不从掉血多少补一个技能出来。
+export function matchPlayerSummary({decision = null, row = null, outcome = null} = {}) {
+ const result=typeof outcome==='string'&&outcome?`这局${outcome}。`:'';
+ if(decision){
+  const s=decision.situation??{}, c=decision.consequence??{};
+  const name=decision.chosen?.name||'记录中的这一手';
+  const facts=`第${decision.turn}回合，${s.playerPet??'我方'} ${playerQuantity(s.playerHp,'hp',{fallback:'未知'})}，对面${s.enemyPet??'目标'} ${playerQuantity(s.enemyHp,'hp',{fallback:'未知'})}；你选了「${name}」。`;
+  const happened=c.cancelled?'这手在行动前被取消，不能算作已经打出。'
+   :c.enemyFallen?.length?`结算后${c.enemyFallen.join('、')}倒下；这只说明当回合结果。`
+    :`结算后我方 ${playerQuantity(c.playerHp,'hp',{fallback:'未知'})}，对方 ${playerQuantity(c.enemyHp,'hp',{fallback:'未知'})}。`;
+  const alt=(decision.options||[]).find(o=>JSON.stringify(o.action)!==JSON.stringify(decision.chosen?.action));
+  const next=alt?`下次遇到同样血线，先比较「${name}」与「${alt.name}」的出手代价；记录只支持当时可选，不能保证换招后整局更好。`
+   :'当时其他可选动作未记录；下一局在出招前留一份当前菜单，再比较其他选择。';
+  return result+facts+happened+next;
+ }
+ if(!row)return result+'没有可点名的回合记录，暂时不能给出具体改法。';
+ const action=row.action??{};
+ const skill=typeof action.id==='string'?SKILLS[action.id]:null;
+ const label=typeof action.label==='string'&&action.label?action.label:skill?.name;
+ const did=action.kind==='switch'?'换了人':action.kind==='guard'||action.id==='guard'?'选择防御'
+  :action.kind==='item'?'用了道具':label?`选择「${label}」`:'出了技能（名字未知）';
+ const you=row.you?.name??'我方',foe=row.foe?.name??'对方';
+ const facts=`第${row.turn}回合，${you} ${playerQuantity(row.you?.hp,'hp',{fallback:'未知'})}，${foe} ${playerQuantity(row.foe?.hp,'hp',{fallback:'未知'})}；你${did}。`;
+ const receipts=(Array.isArray(row.events)?row.events:[]).filter(e=>typeof e==='string'&&e).slice(0,2);
+ const happened=receipts.length?`记录：${receipts.join('；')}。`:'执行结果未记录，不能只按前后血量判断技能是否打出。';
+ return result+facts+happened+'当时其他合法选择和分支结果未保存；下一局先留出招前的菜单，才有依据比较该换人还是继续打。';
+}
+
 // 一局只留一个「最值得看」的决策：按事前差值（gap）排，取最大的那个。
 // gap 都一样时取回合更早的那个（先发生的更接近「当时的取舍」，不会被后面的连锁结果带偏）。
 export function keyDecisionOf(match){

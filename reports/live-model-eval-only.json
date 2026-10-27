@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-30T02:22:20.475Z",
-  "runStarted": "2026-09-30T02:22:20.186Z",
-  "runEnded": "2026-09-30T02:22:20.186Z",
+  "generatedAt": "2026-10-17T15:47:35.283Z",
+  "runStarted": "2026-10-17T15:47:35.151Z",
+  "runEnded": "2026-10-17T15:47:35.151Z",
   "target": "http://127.0.0.1:8765",
   "model": "deepseek-flash",
-  "provider": "local",
-  "serverConfigured": false,
-  "serverVerified": false,
+  "provider": "deepseek",
+  "serverConfigured": true,
+  "serverVerified": true,
   "scope": "Real DeepSeek calls through the running app server. One request per case, no retries, no simulated provider.",
   "caseSetSize": 54,
   "executed": 1,
@@ -100,7 +100,7 @@
     "outputOffPeak": 0.6,
     "outputPeak": 1.2,
     "peakWindowUTC": "01:00-04:00 and 06:00-10:00 UTC, Monday-Friday",
-    "runBand": "peak"
+    "runBand": "off-peak"
   },
   "metrics": {
     "casesExecuted": 1,
@@ -272,10 +272,10 @@
       "apiOutput": 70
     },
     "costUSD": {
-      "band": "peak",
-      "inputRatePer1M": 0.3,
-      "outputRatePer1M": 1.2,
-      "estimated": 0.0013772999999999997,
+      "band": "off-peak",
+      "inputRatePer1M": 0.15,
+      "outputRatePer1M": 0.6,
+      "estimated": 0.0006886499999999999,
       "peakBound": 0.0013772999999999997,
       "offPeakBound": 0.0006886499999999999
     },
@@ -345,7 +345,7 @@
       "validation": {
         "valid": true,
         "reasons": [],
-        "scope": "Narrow numeric/citation/certainty guard; not a proof of all natural language correctness"
+        "scope": "Narrow numeric/citation/certainty/type-tier guard; not a proof of all natural language correctness"
       },
       "evidence": [
         "潮甲龟：55/132 HP，能量 2，速度 13。",

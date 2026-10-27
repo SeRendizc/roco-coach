@@ -87,6 +87,14 @@ GOLDEN_STATE_DIGESTS = {
     "1005": "e156ca566a1f7b4f1ac2234e5835227a30bb36e7b51159e45d5d65078fce5adf",
 }
 GOLDEN_EVENT_DIGESTS = {
+    "1000": "96d3b2d623ecae95a89b5020fa0de2bbe7fefb8cb9132a9dfe181ff805194168",
+    "1001": "3d7f7b793a7cdd52310816e7571a7333baab65653b6acb55f9d3c8813178bfd0",
+    "1002": "037a9520db47e1455f04c9c69a18beb80b3d5358349e94f0253388cdece4ad22",
+    "1003": "fd36fa8db78d5a8d90bf7f58c096315dc587d0bf52690fe2bab7c926325607f5",
+    "1004": "6a96c3b147c7980c5b02a7a8b9e8a423bc9584ed7854b574c8519a0bcd6b7da2",
+    "1005": "d414c3969c66ed020a18bb524c2201934aaed8bdc4207fd11f14ede69a9024a5",
+}
+GOLDEN_EVENT_DIGESTS_PRIOR_2026_10_17 = {
     "1000": "b11029b0567df39465066085c4126f978ead92551ba0168e3f63c53e35a47f9b",
     "1001": "3d7f7b793a7cdd52310816e7571a7333baab65653b6acb55f9d3c8813178bfd0",
     "1002": "037a9520db47e1455f04c9c69a18beb80b3d5358349e94f0253388cdece4ad22",
@@ -94,6 +102,8 @@ GOLDEN_EVENT_DIGESTS = {
     "1004": "78700023ec17b1d39b18906866b7c071f44a23111cedbc589bc935e8ff6471bf",
     "1005": "334b639cb742d74d7ce48731971172b20b1c78dcee8fd25a758e7d327cfa22b0",
 }
+## 2026-10-17 改钉留档：规则修复（双属性 4x→3x）前的原值，逐位保留。
+#: 任务 = 斯嘉丽 Bad Case 回归；旧值可在分支 fix/typechart-official-3x 的上一提交复现。
 #: 短局（seed=3 的四回合固定动作）**未受影响**：逐位与 PRIOR 那对数相同。
 GOLDEN_SHORT_STATE = "244e53d35370f824cfd7352d52413bf8956ced9b2996353c96eee4052b8f70e6"
 GOLDEN_SHORT_EVENTS = "1458c52ee892de4b5806d761186569fbcb155f7627b0c06ab32c940147a42a87"
@@ -139,6 +149,14 @@ GOLDEN_SHORT_STATE_PRIOR_2026_09_30 = "244e53d35370f824cfd7352d52413bf8956ced9b2
 #: 结算状态指纹（`serialize()` **剔除 `history`**）。六局的 `events` 指纹未变，沿用上面那份。
 #: 六局的这一枚在改动前后**逐位相同** —— 这正是「引擎没被改」的直接读数。
 GOLDEN_STATE_NO_HISTORY_DIGESTS = {
+    "1000": "ce7fa73bb2be6a630f5c4c894b5b4e97d1b48650b1f2b27118d89afc9ce7d000",
+    "1001": "f370a7d53fc14e99b59caecfc8783c784dd1075390d7977d1559bd7aa271e449",
+    "1002": "f219b32f022bdfcb6da46248156e3951d276e97f0c4262006fb7339151f69cea",
+    "1003": "ecc4aa55497f603acb0f84c9e6bcddd32677a479de829f9f1fc4fd6df5162450",
+    "1004": "b50d775e30eac677359e9c2cde112ca0b30f7172bbfc9c3c967133126885013d",
+    "1005": "38d0fcf25fa29fe872cfc65e6a2d8190b0f0b263ecd903aad96b7713a98586bd",
+}
+GOLDEN_STATE_NO_HISTORY_DIGESTS_PRIOR_2026_10_17 = {
     "1000": "ac26753a3ced6015191848b40b0bad89c4888544a7dde49840578f480b9fc8d2",
     "1001": "f370a7d53fc14e99b59caecfc8783c784dd1075390d7977d1559bd7aa271e449",
     "1002": "f219b32f022bdfcb6da46248156e3951d276e97f0c4262006fb7339151f69cea",
@@ -146,6 +164,8 @@ GOLDEN_STATE_NO_HISTORY_DIGESTS = {
     "1004": "87503137163ca9da0ee6c4467e8839b41086c33d52f6265c4e4065134194d4de",
     "1005": "f62878439d467165cefa2735a871663227c3c402fec86071406029df5bc8d393",
 }
+## 2026-10-17 改钉留档：规则修复（双属性 4x→3x）前的原值，逐位保留。
+#: 任务 = 斯嘉丽 Bad Case 回归；旧值可在分支 fix/typechart-official-3x 的上一提交复现。
 #: `history`（**决策前观察载荷**）单独一枚：口径收窄不得掩盖它的变化。
 #: 补充：`history` 在改动前是 `{上面那六个数}`（逐位见
 #: `reports/roco/product-execution/01/raw-legacy-athead.json` 的 `F4_history_digest`），
@@ -169,6 +189,14 @@ GOLDEN_STATE_NO_HISTORY_DIGESTS = {
 #:     `settlement_unchanged=True / events_unchanged=True` × 6 + 短局）。
 #: ⇒ 结论：收窄后的结算指纹没有掩盖任何结算变化；观察载荷的变化如实红在**这一枚**上。
 GOLDEN_HISTORY_DIGESTS = {
+    "1000": "1a2fb89a0d557b086866c3bccd65f682dae0ab982772d34ed20e431454d27250",
+    "1001": "dc124685ff3da9c4fc1837ef31231b489607cb2c77911a695ba5867df704378d",
+    "1002": "3b6da93e466159c7f6eebfce522c6c041650ab6ed44d740ffa29a8eb88e6ecfd",
+    "1003": "1b39bd9d57d510eed8366dbccc0a6e12aba034f1fde75bf3f9922c00c7ffba26",
+    "1004": "7713ce21aab451b2101b3e9221bcce90d7c46afa46ae9df66ddd7117d89f284b",
+    "1005": "680930f31f030de8b8b47e7daf77a1ea5573e5d672b38d8caa9c9e6accb8ba06",
+}
+GOLDEN_HISTORY_DIGESTS_PRIOR_2026_10_17 = {
     "1000": "5b2d20fc64ace7ab1f0211a62ef564396e22784385621c1cd707615f32d6b4a5",
     "1001": "dc124685ff3da9c4fc1837ef31231b489607cb2c77911a695ba5867df704378d",
     "1002": "3b6da93e466159c7f6eebfce522c6c041650ab6ed44d740ffa29a8eb88e6ecfd",
@@ -176,6 +204,8 @@ GOLDEN_HISTORY_DIGESTS = {
     "1004": "9e384860acc776d5975808f09f13e2a9a33fc6d91834cb21f50d44c6d019618b",
     "1005": "12db5f10c81c7d7246a72d370a7b9b97be9758894990bf445f3a7a5ad575f828",
 }
+## 2026-10-17 改钉留档：规则修复（双属性 4x→3x）前的原值，逐位保留。
+#: 任务 = 斯嘉丽 Bad Case 回归；旧值可在分支 fix/typechart-official-3x 的上一提交复现。
 #: 第一次改钉（步骤 A：后备身份收窄）之后、**01.3 之前**的那六个数。留档用。
 GOLDEN_HISTORY_PRIOR_2026_09_30_REVEAL = {
     "1000": "5e1ac1c1f610d66e15bc0d62cbff5b84fc4f3d1cf8bd547a6bdc2477e2f0ebae",

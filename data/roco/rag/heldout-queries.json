@@ -350,11 +350,15 @@
     "kind": "ledger_entry",
     "ref": "ledger:EV-TYPE-MULTIPLIER",
     "anchors": [
-     "×4",
+     "×3",
      "×0.25"
     ]
    },
-   "why": "出处=台账 EV-TYPE-MULTIPLIER（type.multiplier，RECORDED_IN_GAME）：2026-09-25 人类裁决改用社区源的**相乘**口径 ⇒ 双属性双克制 ×4、双抵抗 ×0.25、一克一抗 ×1.0，于是档位变成 ×4、×2、×0.5、×0.25 四档。**旧口径原话保留（改钉不删）**：出处=台账 EV-TYPE-MULTIPLIER（type.multiplier，COMMUNITY_CURRENT）：可观察到 ×3、×2、×0.5、×0.25 四档，不再沿用旧资料「所有双弱 ×4」。"
+   "why": "出处=台账 EV-TYPE-MULTIPLIER（type.multiplier，RECORDED_IN_GAME）：2026-10-17 复核（Lead 批准）推翻旧相乘裁决 ⇒ 双属性逐字读快照行：双弱封顶 ×3、双抵抗 ×0.25、一克一抗 ×1.0，单属性仍 ×2/×0.5/×1，于是可观察档位是 ×3、×2、×0.5、×0.25。旧 why 原话保留（改钉不删）：出处=台账 EV-TYPE-MULTIPLIER（type.multiplier，RECORDED_IN_GAME）：2026-09-25 人类裁决改用社区源的**相乘**口径 ⇒ 双属性双克制 ×4、双抵抗 ×0.25、一克一抗 ×1.0，于是档位变成 ×4、×2、×0.5、×0.25 四档。**旧口径原话保留（改钉不删）**：出处=台账 EV-TYPE-MULTIPLIER（type.multiplier，COMMUNITY_CURRENT）：可观察到 ×3、×2、×0.5、×0.25 四档，不再沿用旧资料「所有双弱 ×4」。",
+   "retired_anchors": [
+    "×4",
+    "×0.25"
+   ]
   },
   {
    "id": "M08",

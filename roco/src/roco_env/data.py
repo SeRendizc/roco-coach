@@ -200,7 +200,14 @@ class TypeChart:
             return row.get(attack_element, self.DEFAULT)
         if len(key) != 2 or key not in self.rows:
             raise TypeCombinationUnknown(defender_types)
-        return self.fallback_multiplier(key, attack_element)
+        # 2026-10-17 复核（提案分支，未合入）：双属性改回快照那一行的逐字值（双弱封顶 3×）。
+        # 新证据：① Types.lua 转写 types.json 对 102 条双属性键逐字给 3；② 上游模拟器
+        # rocom-data/sim/damage_calc.py 注释「双属性均弱 → 3x（强力克制，非乘算的 4x）」；
+        # ③ 官方 2026-08-07「斯嘉丽」采访里电系打翠顶夫人（翼+水）玩家答「三倍」。
+        # 旧裁决（2026-09-25 社区源相乘 4×）原话保留在文件头注释与
+        # roco/tests/test_type_multiplier_ruling.py，不删除。
+        row = self.rows[key]
+        return row.get(attack_element, self.DEFAULT)
 
     def has_row(self, defender_types: Tuple[str, ...]) -> bool:
         """快照里有没有这一组合的显式行。

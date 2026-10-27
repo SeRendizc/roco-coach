@@ -654,6 +654,16 @@ function createSession() {
 
 /** 把回答里可展开的那两层（依据 / 查了什么）画进一条对话里，与营地页同一套口径。 */
 function decorate(entry, answer) {
+  if (typeof answer?.displayText === 'string' && typeof answer?.text === 'string' && answer.displayText !== answer.text) {
+    const details = document.createElement('details');
+    details.className = 'coach-details';
+    const summary = document.createElement('summary');
+    summary.textContent = '展开详情';
+    const content = document.createElement('div');
+    content.innerHTML = markdown(answer.text);
+    details.append(summary, content);
+    entry.append(details);
+  }
   // 甲②③：**服务端算好的那一行活动说明**（`activityLine`）—— 旧面板把它渲染成回答下面的一段
   //（`.say-basis`），这里同样渲染出来，**逐字用服务端给的那一句**，页面不重新拼一遍
   //（重拼就是第二份事实，措辞迟早漂；活动说明的措辞由 `src/coach/activity.js` 与判据钉着）。
@@ -1201,7 +1211,7 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
       const incomingMemory = answer.memory ?? state.memory;
       state.memory = mergeMemories(readMemory(readStored(MEMORY_KEY)), incomingMemory);
       writeStored(MEMORY_KEY, JSON.stringify(state.memory));
-      const entry = addEntry('小芽', answer.text || '（这次没有拿到回答）', answer);
+      const entry = addEntry('小芽', answer.displayText || answer.text || '（这次没有拿到回答）', answer);
       // 小测验的选项直接可点（与营地页一致）：点一下就等于追问那个选项。
       if (Array.isArray(answer.choices)) {
         const row = document.createElement('div');
@@ -1215,7 +1225,7 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
         }
         entry.append(row);
       }
-      persist(message, answer.text ?? '');
+      persist(message, answer.displayText || answer.text || '');
       setStatus(statusLine(answer));
       // 答完那一刻先把**这一条回答自己的证据**落进状态行（同步），再问一次探针（异步）：
       // 修的是用户截图 08 的逐字矛盾（标题「DeepSeek 已回答」+ 状态行「云端模型：状态未知」）。

@@ -983,7 +983,7 @@
     "skill_000766"
    ],
    "type_multipliers": [
-    4.0,
+    3.0,
     2.0,
     0.5,
     0.5
@@ -1023,8 +1023,8 @@
     "status_unsupported": 6,
     "turn_start": 21
    },
-   "state_digest": "566c79aadff168b507581351386c20bb6200c8fc8a566ef2fea6c66848f622e1",
-   "history_digest": "5cc452070aae6d7af1805222c4c9b00cbaa0975ea623772c61ccfb78a333d11d",
+   "state_digest": "b61bb7755f265926d9a51bff1ef9a2ff89f5a48eaf6de2b293a7722d62fbe75f",
+   "history_digest": "350d729bb040983128a53c4f2721f4548bd3193ce59810267b01bc48080bea3c",
    "key_events": [
     {
      "kind": "damage",
@@ -2071,14 +2071,13 @@
     "skill_000766"
    ],
    "type_multipliers": [
-    4.0,
-    4.0,
-    4.0,
-    4.0,
-    4.0,
-    4.0,
-    0.5,
-    1.0,
+    3.0,
+    3.0,
+    3.0,
+    3.0,
+    3.0,
+    3.0,
+    3.0,
     1.0
    ],
    "first_damage_by_turn": {
@@ -2091,21 +2090,21 @@
     "7": "enemy",
     "8": "enemy",
     "9": "enemy",
-    "10": "player"
+    "10": "enemy"
    },
    "event_kinds": {
-    "action_cancelled": 1,
+    "action_cancelled": 2,
     "damage": 16,
-    "defense": 3,
-    "effects_registered_unsupported": 9,
-    "energy_gain": 9,
-    "faint": 2,
-    "mana_loss": 2,
+    "defense": 2,
+    "effects_registered_unsupported": 8,
+    "energy_gain": 8,
+    "faint": 3,
+    "mana_loss": 3,
     "replacement": 2,
     "turn_start": 10
    },
-   "state_digest": "8bbecbe36015b1381a3e5f0e81900359434a82be7e912db7bebc6a95269628e5",
-   "history_digest": "fa42a0d58b5f279ec8010211d8ae725bcd202d4a4f62632cfd0f145e7bd94ce6",
+   "state_digest": "9a9959484cbd85223068c056a72bcc09caa057f7da17713f7b1dcf28e50fa02f",
+   "history_digest": "82962f32f0ec29001b93363cda4df90b575cb8a7d015209dbaf4a806261d554e",
    "key_events": [
     {
      "kind": "damage",

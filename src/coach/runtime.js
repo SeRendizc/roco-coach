@@ -2907,10 +2907,24 @@ if(role==='auto')route=factAsk?'teacher':(refusesReview?'companion':/培养|加�
  // 会回退到 base（引擎模板），而回执如果还写 `provider:'mlx-local'`，那就是**谎报**——
  // 玩家以为这句话是模型说的。有 `lastFallback` 就报 `local-fallback` 并把原因带上。
  const localFallback=useModel&&!rejected?provider?.lastFallback??null:null;
+ // Keep the checked detailed answer intact. Short local summaries are a separate
+ // presentation field and never replace an accepted model answer.
+ let displayText=finalText;
+ const wantsDetail=/详细|逐回合|全部记录|展开/.test(playerQuestion(originalMessage));
+ const localDelivery=!useModel||rejected||adviceEnforced||Boolean(localFallback);
+ if(!wantsDetail&&localDelivery){
+  if(packet.rocoAdvice?.playerSummary){
+   const short=speakPlainly(packet.rocoAdvice.playerSummary).text;
+   const checked=gateAdviceDelivery({advice:packet.rocoAdvice,text:short,battle:rocoBattle});
+   displayText=enforceBattleAdvice(packet.rocoAdvice,checked.text).text;
+  }else if(['review','match-review'].includes(next.lastTopic)&&typeof packet.playerSummary==='string'&&packet.playerSummary){
+   displayText=speakPlainly(packet.playerSummary).text;
+  }
+ }
  // `localText` = **引擎/工具算出来的那一份正文**（`scrubbedText`），与 `text`（可能是模型说的）分开。
  // 浏览器侧在「模型正文没过事实守卫」时要用它降级 —— 修前那个降级是浏览器自己再跑一遍 `runCoach`，
  // 而浏览器里资料工具跑不起来（P0-01 的根因），降级出来的东西与洛手无关。这里由服务端直接给出。
- return {...packet,...(judgment?{judgment}:{}),activity,activityLine:activityLine(activity),text:finalText,localText:scrubbedText,memory:next,route,
+ return {...packet,...(judgment?{judgment}:{}),activity,activityLine:activityLine(activity),text:finalText,displayText,displayKind:displayText===finalText?'checked-answer':'local-summary',localText:scrubbedText,memory:next,route,
   // U08 的机器可读回执：客户端据此渲染「查看 / 采用建议」，并靠 `legalActionId`
   // 把它回填到**当前合法动作表**里的那一项（不在合法集合里的行动根本产生不出来）。
   ...(adviceEnforced?{adviceEnforced:{reason:adviceCheck.reason,actionLabel:packet.rocoAdvice.actionLabel,
@@ -3074,6 +3088,8 @@ export function policyFor(message='',context={}){
  // 2026-09-25（P0-a）：**按属性找精灵** —— 比 type_chart（属性层面）更具体，排它前面。
  // 相性问句**先**判（2026-09-26）：`catalogAsk` 是「按属性找精灵」，它比相性更宽 ——
  // 反过来的话「光系和暗系谁克谁」会被它抢走，去查"哪些精灵是光系"，答非所问。
+ // 2026-10-17：点名倍率的相性问句（含「精灵名 + 括号双属性」）必须直接查 type_multiplier。
+ if(typeMultiplierAsk(text))return {need:'query_rules',reason:'type-multiplier-ask'};
  if(typeChartAsk(text))return {need:'query_rules',reason:'type-chart-ask'};
  if(catalogAsk(text,context))return {need:'query_rules',reason:'catalog-ask'};
  // 2026-09-25（人类：「不要说不知道！预测就说预测」）：**两只之间的对位问题**也必须去查。
@@ -3473,6 +3489,34 @@ export function typePairAsk(text=''){
  if(!attacker||!defender)return null;
  return {attacker:norm(attacker),defender:norm(defender)};
 }
+/**
+ * 「**X系打 Y系+Z系** 是几倍」这种**点名倍率**的相性问句（2026-10-17 加）。
+ *
+ * 为什么单独一条：官方公开 Bad Case「电系打翠顶夫人（翼+水）= 三倍」在真实模型链路上
+ * 落在 `policy-no-tool` —— 因为问句里既有精灵名（翠顶夫人）、又有括号里的双属性，
+ * 旧的 `TYPE_PAIR_ASK` 只认「A系打B系」，于是引擎相性表根本不去查，模型只能答「查不到」。
+ * 本函数把「攻击属性 + 1..2 个防守属性」从问句里取出来（取不到就 null，不猜），
+ * 政策再用它强制调 `query_rules {kind:'type_multiplier'}` —— 拿引擎那一格的倍率。
+ */
+const TYPE_MULT_ELEMENT='[\u4e00-\u9fa5]{1,3}(?:系|属性)';
+export function typeMultiplierAsk(text=''){
+ const t=String(text).trim();
+ const attack=new RegExp(`(${TYPE_MULT_ELEMENT})\\s*(?:打|对|克)`).exec(t);
+ if(!attack)return null;
+ const norm=(v)=>v.replace(/属性$/,'系');
+ // 防守方：优先取括号里的属性（可双属性）；否则取「打/对/克」后面紧跟的属性。
+ const paren=new RegExp(`[（(]\\s*(${TYPE_MULT_ELEMENT})\\s*(?:[+＋、和与/]\\s*(${TYPE_MULT_ELEMENT}))?\\s*[)）]`).exec(t);
+ const after=new RegExp(`(?:打|对|克)\\s*(${TYPE_MULT_ELEMENT})\\s*(?:[+＋、和与/]\\s*(${TYPE_MULT_ELEMENT}))?`).exec(t);
+ const found=paren??after;
+ if(!found)return null;
+ const defenders=[found[1],found[2]].filter(Boolean).map(norm).slice(0,2);
+ if(!defenders.length)return null;
+ const cue=/几倍|多少倍|倍率|强力克制|相性倍率|强克/.test(t);
+ // 单属性且没有「倍」类线索时，交给旧的 type_row 路径（行为不变）；双属性或点名倍率才升级。
+ if(!cue&&defenders.length<2)return null;
+ return {kind:'type_multiplier',attack_element:norm(attack[1]),defender_types:defenders};
+}
+
 /** 这是不是一句「某系克什么／被什么克」的相性表问句。 */
 /**
  * 规则**策略**问句（目前只有天气）：「雨天水系伤害加多少」「沙暴有什么效果」。
@@ -4407,7 +4451,10 @@ export function defaultArgsFor(name,context,message){
   // 「下一个该带谁」：先要**整张引擎相性表**（`type_chart` 不吃参数），再按名单点名。
   // 一对一问句（「水系打火系有优势吗」）要的是**攻击方那一行**：整张表既不必要、回执也大。
   // 其余相性问句照旧拿整张表（`type_chart` 不吃参数）。
-  if(typeChartAsk(text)){
+  // 2026-10-17：点名倍率/双属性的相性问句 → 直接问引擎「这一格几倍」。
+ const mult=typeMultiplierAsk(text);
+ if(mult)return mult;
+ if(typeChartAsk(text)){
    const pair=typePairAsk(text);
    return pair?{kind:'type_row',type:pair.attacker}:{kind:'type_chart'};
   }
@@ -4820,6 +4867,79 @@ export function checkGroundedAnswer(answer,{ragCitations=false}={}){
  // 由客户端降级为本地规则结论，而不是把错误名称展示给玩家。
  const drift=text.match(/解药|解毒药|以太|回血药|血瓶|蓝瓶|复活药|清醒药/g);
  if(drift)reasons.push('item-name-drift:'+[...new Set(drift)].join('/'));
+ // ── 属性等级词守卫（2026-10-17，官方「斯嘉丽」公开 Bad Case 同族）──────────────────
+ // 官方采访里 AI 把「克制」与「强力克制」当近义词：电系打翠顶夫人（翼+水）实际是
+ // 3×「强力克制」，写成「2 倍」是错的。数字校验拦不住它：`2`/`3` 是规则常量、
+ // 中文数字量词表里又没有「倍」。这里只做**窄判据**：只在正文谈属性相性、且证据里
+ // 确实有属性倍率时，要求正文声称的倍率能在证据里找到；「强力克制」必须对应 3；
+ // 旧的「双弱 ×4」一律判退役口径（官方/上游实现/游戏数据三处都是 3）。
+ const typeContext=/克制|抵抗|相性|属性|(?:光|暗|幽|幻|恶|毒|萌|虫|龙|翼|地|水|火|草|冰|电|武|机械|普通)系/.test(text);
+ // 只在本轮回执真的带了**洛克手游相性事实**时才判（否则自研小兽的 1.5/0.75 规则常量会被误伤）：
+ const affinityFacts=/(?:[光暗幽幻恶毒萌虫龙翼地水火草冰电武机械普通]系)\|(?:[光暗幽幻恶毒萌虫龙翼地水火草冰电武机械普通]系)|克制（weak）|type_multiplier|相性表/.test(facts);
+ if(typeContext&&affinityFacts){
+  const supportedType=new Set();
+  for(const m of facts.matchAll(/(?:×|x|X)\s*(\d+(?:\.\d+)?)/g))supportedType.add(Number(m[1]));
+  for(const m of facts.matchAll(/["']multiplier["']\s*:\s*(\d+(?:\.\d+)?)/g))supportedType.add(Number(m[1]));
+  for(const m of facts.matchAll(/(\d+(?:\.\d+)?)\s*倍/g))supportedType.add(Number(m[1]));
+  const CN_MULT={一:1,二:2,两:2,三:3,四:4,五:5,六:6,七:7,八:8,九:9,十:10};
+  const tierClaims=[];
+  if(/强力克制|极大克制/.test(text))tierClaims.push(3);
+  for(const m of text.matchAll(/(?:×|x|X)\s*(\d+(?:\.\d+)?)/g))tierClaims.push(Number(m[1]));
+  for(const m of text.matchAll(/(\d+(?:\.\d+)?)\s*倍/g))tierClaims.push(Number(m[1]));
+  for(const m of text.matchAll(/([一两二三四五六七八九十])\s*倍/g)){const v=CN_MULT[m[1]];if(v!==undefined)tierClaims.push(v);}
+  for(const v of [...new Set(tierClaims)]){
+   if(v===4){reasons.push('retired-dual-weak-tier:4x');continue;}
+   if(!supportedType.has(v))reasons.push('unsupported-type-tier:'+v);
+  }
+  // ── 2026-10-17（吸收 Codex 混合证据反例）：倍率必须**绑定到对象**，不能拿全包任意 ×N 抵账。
+  // 反例：正文「电系打翠顶夫人是 2 倍」+ 证据 [{翼水 受 电 ×3}, {翼水 受 电 ×2}]（无关/冲突记录）
+  // 旧实现把全包的 2 收进 supportedType ⇒ 放行。现在：抽取正文里「A系打<目标>是 N 倍」的成对断言，
+  // 到证据里按 **攻击属性 + 防守属性/对象** 找记录；同一对象出现冲突倍率则 fail closed。
+  const ELEMENT='(?:光|暗|幽|幻|恶|毒|萌|虫|龙|翼|地|水|火|草|冰|电|武|机械|普通)系';
+  const claimPairRe=new RegExp('('+ELEMENT+')\\s*(?:打|对|克)\\s*([^，。；！？\\n]{1,20}?)\\s*(?:是|为|造成|打出|有)?\\s*(?:×|x|X)?\\s*(\\d+(?:\\.\\d+)?|[一两二三四五六七八九十])\\s*倍','g');
+  const CN={一:1,二:2,两:2,三:3,四:4,五:5,六:6,七:7,八:8,九:9,十:10};
+  const typeRecords=[];
+  const collect=(entry)=>{
+   const raw=typeof entry==='string'?entry:JSON.stringify(entry??'');
+   if(!raw.includes('type_multiplier'))return;
+   const attack=/"(?:attack_element|attackElement)"\s*:\s*"([^"]+)"/.exec(raw)?.[1]??null;
+   const defendersRaw=/"(?:defender_types|defenderTypes)"\s*:\s*\[([^\]]*)\]/.exec(raw)?.[1]??'';
+   const defenders=[...defendersRaw.matchAll(/"([^"]+)"/g)].map((m)=>m[1]);
+   const mult=/"multiplier"\s*:\s*(\d+(?:\.\d+)?)/.exec(raw)?.[1];
+   const paired=new RegExp('('+ELEMENT+')(?:\\|('+ELEMENT+'))?\\s*受\\s*('+ELEMENT+')\\s*[×xX]\\s*(\\d+(?:\\.\\d+)?)').exec(raw);
+   if(paired){
+    typeRecords.push({attack:attack??paired[3],
+     defenders:defenders.length?defenders:[paired[1],paired[2]].filter(Boolean),
+     multiplier:Number(mult??paired[4]),raw});
+   }else if(Number.isFinite(Number(mult))){
+    typeRecords.push({attack,defenders,multiplier:Number(mult),raw});
+   }
+  };
+  for(const entry of answer.evidence??[])collect(entry);
+  for(const entry of answer.toolTrace??[])collect(entry);
+  for(const m of text.matchAll(claimPairRe)){
+   const attack=m[1];
+   const target=String(m[2]??'');
+   const val=CN[m[3]]??Number(m[3]);
+   if(!Number.isFinite(val))continue;
+   const dtypes=[...target.matchAll(new RegExp('('+ELEMENT+')','g'))].map((x)=>x[1]);
+   const subj=(rec)=>{
+    if(rec.attack&&rec.attack!==attack)return false;
+    if(dtypes.length)return dtypes.some((t)=>rec.defenders.includes(t)||rec.raw.includes(t));
+    // 目标里没有属性（如「翠顶夫人」）：靠对象名匹配；证据里没有名字时退化为「唯一候选倍率」判定。
+    const token=target.replace(/[（(].*$/s,'').replace(/\s/g,'');
+    return token.length>0&&rec.raw.includes(token);
+   };
+   const scoped=typeRecords.filter(subj);
+   // 目标只有精灵名（证据里往往没有名字）时，退化为「同攻击属性的记录」再判：
+   // 不相关属性的 ×N 不许抵账，同攻击属性出现冲突倍率则 fail closed（保守）。
+   const pool=scoped.length?scoped:typeRecords.filter((rec)=>!rec.attack||rec.attack===attack);
+   if(!pool.length)continue; // 证据里没有可绑定记录：交给上面的全局 supportedType 判据
+   const values=[...new Set(pool.map((r)=>r.multiplier))];
+   if(!values.includes(val))reasons.push('unsupported-type-tier-binding:'+val);
+   else if(values.length>1)reasons.push('conflicting-type-tier:'+values.join('/'));
+  }
+ }
  // 因果校验：事件里某一方的行动被注明「取消」时，正文不得声称该方造成了伤害。
  // 实测模型会把「原定行动取消」写成「命中了」，数字校验抓不到——因为根本没有数字。
  const events=(answer.latestEvents||[]).map(e=>typeof e==='string'?e:JSON.stringify(e));
@@ -4894,7 +5014,7 @@ export function checkGroundedAnswer(answer,{ragCitations=false}={}){
  if(ragCitations){
   for(const id of text.match(RAG_CITATION_RE)||[])if(!delivered.has(id))reasons.push('unsupported-citation:'+id);
  }
- return {valid:reasons.length===0,reasons:[...new Set(reasons)],scope:'Narrow numeric/citation/certainty guard; not a proof of all natural language correctness'};
+ return {valid:reasons.length===0,reasons:[...new Set(reasons)],scope:'Narrow numeric/citation/certainty/type-tier guard; not a proof of all natural language correctness'};
 }
 // ── 「不要说不知道」（人类 2026-09-25 口径）在**代码里**的那一半 ──────────────────────
 //

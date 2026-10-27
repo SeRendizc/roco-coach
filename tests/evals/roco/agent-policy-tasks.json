@@ -1,0 +1,22 @@
+{
+  "schema": "roco-agent-policy-eval/v1",
+  "note": "离线政策路由小评测（0 模型调用）。每条 = 问句 + 上下文 + 期望『该不该调工具、调哪个、参数关键字段』。known_gap=true 的条目只报告、不计入阈值。",
+  "tasks": [
+    {"id": "T01", "category": "type-multiplier", "context": "roco", "message": "电系打翠顶夫人（翼系+水系）是几倍伤害？", "expect": {"reason": "type-multiplier-ask", "tool": "query_rules", "args": {"kind": "type_multiplier", "attack_element": "电系", "defender_types": ["翼系", "水系"]}}},
+    {"id": "T02", "category": "type-multiplier", "context": "roco", "message": "火系打虫系+草系是几倍", "expect": {"reason": "type-multiplier-ask", "tool": "query_rules", "args": {"kind": "type_multiplier", "attack_element": "火系", "defender_types": ["虫系", "草系"]}}},
+    {"id": "T03", "category": "type-multiplier", "context": "camp", "message": "电系打翼系+水系", "expect": {"reason": "type-multiplier-ask", "tool": "query_rules", "args": {"kind": "type_multiplier", "attack_element": "电系", "defender_types": ["翼系", "水系"]}}},
+    {"id": "T04", "category": "type-chart", "context": "camp", "message": "水系打火系有优势吗？", "expect": {"reason": "type-chart-ask", "tool": "query_rules", "args": {"kind": "type_row", "type": "水系"}}},
+    {"id": "T05", "category": "type-chart", "context": "camp", "message": "龙系克制哪些属性？", "expect": {"reason": "type-chart-ask", "tool": "query_rules", "args": {"kind": "type_chart"}}},
+    {"id": "T06", "category": "battle-advice", "context": "roco", "message": "现在该换谁？", "expect": {"reason": "roco-battle-advice", "tool": "simulate_branch"}},
+    {"id": "T07", "category": "battle-advice", "context": "roco", "message": "这回合该怎么打？", "expect": {"reason": "roco-battle-advice", "tool": "simulate_branch"}},
+    {"id": "T08", "category": "battle-advice", "context": "roco", "message": "现在该防御还是出招？", "expect": {"reason": "roco-battle-advice", "tool": "simulate_branch"}},
+    {"id": "T09", "category": "branch-compare", "context": "camp", "message": "我用能量果还是出招？", "expect": {"reason": "branch-comparison", "tool": "simulate_branch"}},
+    {"id": "T10", "category": "no-tool", "context": "camp", "message": "你好", "expect": {"reason": "chitchat-or-parametric", "tool": null}},
+    {"id": "T11", "category": "no-tool", "context": "camp", "message": "音速犬这个精灵怎么样？", "expect": {"reason": "state-in-packet", "tool": null}},
+    {"id": "T12", "category": "no-tool", "context": "camp", "message": "它打它几倍？", "expect": {"reason": "state-in-packet", "tool": null}},
+    {"id": "T13", "category": "lookup", "context": "camp", "message": "应对是什么意思？", "expect": {"reason": "term-ask", "tool": "query_rules", "args": {"kind": "term", "name": "应对"}}},
+    {"id": "T14", "category": "lookup", "context": "camp", "message": "有哪些龙系精灵？", "expect": {"reason": "catalog-ask", "tool": "query_rules", "args": {"kind": "catalog", "element": "龙系"}}},
+    {"id": "T15", "category": "known-gap", "context": "camp", "message": "翠顶夫人怕什么？", "known_gap": true, "expect": {"reason": "type-chart-ask", "tool": "query_rules"}, "note": "现实：state-in-packet（没有把『X怕什么』接上相性表；只认『X系怕什么』）—— 列为已知缺口"},
+    {"id": "T16", "category": "known-gap", "context": "camp", "message": "现在该换谁？", "known_gap": true, "expect": {"reason": "roco-battle-advice", "tool": "simulate_branch"}, "note": "现实：camp 没有洛克对局 ⇒ 0 工具（可接受，但应明确说『没有对局』；列为体验缺口）"}
+  ]
+}

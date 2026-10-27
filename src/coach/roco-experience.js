@@ -1045,7 +1045,10 @@ export function rocoMatchReview({
   const depth = rocoMatchDepth({events, game: reviewGame, turns, skills});
   if (review) {
     review.evidence = [...(Array.isArray(review.evidence) ? review.evidence : []), ...depth.evidence];
+    // text 保留旧详细复盘契约；页面默认先读 displayText，展开后才展示详情。
     if (depth.summary) review.text = `${review.text}${depth.summary}`;
+    review.displayText = typeof review.playerSummary === 'string' && review.playerSummary
+      ? review.playerSummary : review.text;
     review.depth = depth;
   }
   return {finalGame, reviewGame, progress, review, depth, usedLastLiveView: Boolean(lastLiveView)};
@@ -1073,7 +1076,9 @@ export function rocoIntervention({view = null, session = null, plan = null, host
   const askSession = host.explicit === true
     ? {...session, dismissed: false, hints: 0, lastAt: -Infinity, said: new Set()}
     : session;
-  const game = rocoGameView(view, { matchId: host.matchId ?? null });
+  const boundView = typeof host.battleId === 'string' && host.battleId
+    ? {...view, battle_id: host.battleId} : view;
+  const game = rocoGameView(boundView, { matchId: host.matchId ?? null });
   const planFeatures = rocoPlanFeatures(plan);
   // 装配走经验层自己的那一个函数（只此一处字段清单），这里不重抄一遍。
   const features = interventionFeaturesOfGame({
@@ -1153,7 +1158,7 @@ export function rocoIntervention({view = null, session = null, plan = null, host
   if (!detail.advice && speakWanted && !detail.advice_error) {
     try {
       // 与上面同一份 `adviceSession`：决定性那一档不看 `said`，于是两次渲染给出**同一份结论**。
-      const fallback = adviceForView(view, planStale ? null : plan, {session: adviceSession});
+      const fallback = adviceForView(boundView, planStale ? null : plan, {session: adviceSession});
       if (fallback) {
         detail.advice = fallback;
         detail.advice_source = 'deterministic-fallback';

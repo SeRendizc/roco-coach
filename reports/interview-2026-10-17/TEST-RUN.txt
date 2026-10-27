@@ -1,0 +1,174 @@
+# TEST-RUN — 2026-10-17 现场实测记录（只追加；机器可读版见 TEST-RUN.json）
+
+- 仓库：`/Users/serendizc/Developer/roco-coach`
+- HEAD：`2e62a73b82ecd0c998fca4ddcd1b7206e4570365`（2026-10-06 16:39:38 +0800，公开可见状态）
+- 环境：macOS / Node v24.20.0 / npm 11.19.0 / python3；`.venv-agent` = torch 2.8.0 + transformers 4.57.6
+- 纪律：**0 次真实付费模型调用**；未占用/未杀 8765、8896、8899；自启服务只用 8910 且已清理。
+- 说明：`npm run test:unit` 被完整跑完（非抽样），耗时 229.8s；仓库自带测试会写两个 tracked 产物（`reports/live-model-eval-only.json`、`reports/roco/agent-trajectories-verification.json`）并建 `.work/`，跑完已恢复/删除，未改源码。
+
+---
+
+## 1) `npm run test:roco-quality` → exit 0（898.47ms）
+
+```
+ℹ tests 77
+ℹ pass 77
+ℹ fail 0
+ℹ skipped 0
+ℹ duration_ms 898.470708
+EXIT:0
+```
+
+原始日志：`_raw-test-roco-quality.log`
+
+## 2) `npm run test:unit` → **exit 1**（229767.82ms）
+
+```
+ℹ tests 2084
+ℹ pass 2068
+ℹ fail 15
+ℹ skipped 1
+ℹ duration_ms 229767.817
+EXIT:1
+```
+
+15 条红（逐条原文见 `_raw-test-unit.log` 第 5927 行起）：
+
+1. `tests/coach.test.js:9` strategist gives a legal action grounded in current state — `TypeError: Cannot read properties of undefined (reading '0')`
+2. `tests/evals/agent.test.js:154` — 期望 `/消耗4豆/`，实际 `消耗4能量…`（措辞迁移未同步测试）
+3. `tests/evals/roco/agent-trajectories.test.js:151` — `verify-agent-trajectories.mjs --quiet` exit 1（回执哈希 记录 `9ded66545614` vs 现在 `af3ce33185d6`）
+4. `tests/evals/state-doc.test.js:64` — 状态文档 HEAD **落后当前 187 个提交**
+5. `tests/evals/structure-contract.test.js:874` — `docs/roco/verification/2026-10-06-cloud-acceptance/capture-server.mjs -> ../src/server/index.js` 指向不存在的 `docs/src/...`（**公开 HEAD 自带缺陷**）
+6. `tests/evals/structure-contract.test.js:964` — 仓库顶层出现未登记条目 `pnpm-lock.yaml`（**本机环境产物，公开 git 树没有**）
+7. `tests/evals/tool-arguments.test.js:349` — R06 README 命令块只解析出 8 条
+8. `tests/offline.test.js:179` — 降级原因措辞漂移（实际「教练服务这次未完成，先用本地回答」）
+9. `tests/offline.test.js:212` — 同上（「模型暂时没答上来…」vs 实际）
+10. `tests/roco-answer-level-correction.test.js:172` — 干净路径键表与改前基线不一致（少 `actions/knowledge/method`）
+11. `tests/roco-battle-context.test.js:455` — 期望点名 `潮甲龟`，实际 fail-closed「请点名公开队伍中要比较的两只…」
+12. `tests/roco-battle-panel-static.test.js:105` — 期望 `stateToken: coachStateToken()`，实际 `requestToken`
+13. `tests/roco-corpus-verification.test.js:38` — 语料核验产物与重算不一致（provenance checked 125 vs 136）
+14. `tests/roco-plain-speak.test.js:130` — `src/client/xiaoya.js` 工程语气 0→1（`:540 本次回答：云端生成…`）
+15. `tests/roco-rag-eval.test.js:66` — 磁盘 `reports/roco/rag/rag-eval.json` 与重算不一致（与下条 `--check` 同源）
+
+分类：**14 条是公开提交状态下的真实红**（第 6 条是本机未跟踪 `pnpm-lock.yaml` 造成的环境红）。
+注意：测试过程中 `tests/roco-live-eval-artifacts.test.js` 会对 **8765 发一次只读 `GET /api/bootstrap`**（`--from-raw` 分支 `selected=[]`，不产生生成调用；代码见 `scripts/eval-live-s04.js:568-623`），**没有产生付费调用**。
+
+## 3) `node scripts/roco/guard-selftest.mjs --json` → exit 0
+
+```
+  ✔ 红 browser-node-import
+  …（15 条逐条注入，全部翻红）
+{
+ "checked": 15, "ok": 15, "still_green": [], "skipped": [], "verdict": "pass",
+ "note": "这只证明**登记过的**守卫会红；没登记的就是没验过。"
+}
+EXIT:0
+```
+原始：`_raw-guard-selftest.json`
+
+## 4) `node scripts/roco/status.mjs` → exit 0
+
+```
+  判据文件          187 个（test:unit 手写清单）
+  单元判据          未通过
+  发版门禁          failed —— 未通过：unit（2026-09-28 14:29）
+  演示服务          8765 HTTP 200
+```
+状态脚本自己报的门禁产物停在 **2026-09-28**，与今天 unit 红方向一致、但时间戳是旧的。
+
+## 5) `node --test tests/roco-agent-stops.test.js tests/evals/roco/data-acceptance.test.js tests/roco-owned-pets.test.js reports/roco/local-model/verdict.test.mjs` → exit 0
+
+```
+ℹ tests 45
+ℹ pass 44
+ℹ fail 0
+ℹ skipped 1
+```
+唯一 skip 是 data-acceptance 的原始 Lua 对拍（`data/roco/raw/extracted` 被 gitignore，干净 checkout 没有）。
+
+## 6) `node scripts/roco/eval-rag-retrieval.mjs --check` → **exit 1**
+
+```
+[rag-eval] --check FAIL：磁盘报告与重算不一致
+  baseline_searchKnowledge Recall@10 磁盘=0 重算=0
+  baseline_lexical_pack Recall@10 磁盘=0.9117647058823529 重算=0.8823529411764706
+  rag_index Recall@10 磁盘=1 重算=1
+```
+`--json`（只读，exit 0）当前值：`rag_index Recall@1/3/10=1.0、MRR=1.0`；held-out 45 条（34 可答/11 应弃答）；语料 **2489** 篇。
+
+## 7) `RAW=reports/live-model-eval-before.json OUT=reports/interview-2026-10-17/_analysis-before.json node scripts/analyze-live-eval.js` → exit 0
+## 8) `RAW=reports/live-model-eval-pass2.json OUT=reports/interview-2026-10-17/_analysis-pass2.json node scripts/analyze-live-eval.js` → exit 0
+
+离线重算（**不调模型**）复现出的口径：
+
+| 指标 | 改前 | 改后（第2轮） |
+|---|---|---|
+| 多余工具调用率 | 75.00%（9/12） | 33.33%（4/12） |
+| 模型自停率 | 3.23%（1/31） | 96.77%（30/31） |
+| 漏调 | 0/19 | 7/19 |
+| 预期应调且调了之后的工具选择 | 16/19 | **12/12** |
+| 首选工具在允许集合内（全 32） | 90.63% | 78.13% |
+| 严格正确率 | 31.25% | 50.00% |
+
+## 9) 工具路由 RL 复跑（沙箱内，本地 CPU，无付费 API）→ exit 0（21.9s）
+
+```
+cd /tmp/roco-audit-rl && <repo>/.venv-agent/bin/python scripts/train-tool-router.py
+```
+与已提交产物**逐项一致**：`trainableParameters=1152`，data 24/8/16，untrained 8/16，三种子 test 均 **15/16**（0.9375；selected epoch 50/60/50），`parameterDeltaL2` 与 test predictions 完全相同。
+沙箱产物：`_raw-tool-router-rl-rerun.json`、`_raw-tool-router-trajectories-rerun.jsonl`（脚本写盘落在沙箱，未污染仓库）。
+
+## 10) 2026-09-17 四臂 RAG 脚本复现尝试（沙箱）→ **exit 1**
+
+```
+cd /tmp/roco-audit-rag && node scripts/eval-retrieval-extended.js
+Error: 未知检索策略 hybrid：searchKnowledge 只实现 lexical / semantic / fusion
+    at src/coach/strategist.js:160
+```
+即 `reports/retrieval-extended-summary.md` 里那条复现命令**今天跑不起来**（只保留 2026-09-17 的产物）。
+
+## 11) 云端验收记录对账（只读文件 + git）→ 全部一致
+
+- `real-cloud-results.json`：3 轮 `httpStatus=200`、`provider=deepseek`、`validation.rejected=false`；
+  `rawModelText === deliveredText` 3/3；交付文字逐字出现在 `round{1,2,3}-ui.txt` 3/3；
+  `totals={realModelRequests:3, modelAnswerAccepted:3, fallback:0, promptTokens:40549, completionTokens:257}`。
+- `git merge-base --is-ancestor 7aa338ee… HEAD` → **是**；`wording/source-manifest.sha256` 与当前 `src/client/roco.js`、`tests/roco-skill-support-wording.test.js` 的 sha256 **完全一致**。
+- `wording/root-quality.tap`：`pass 77 / fail 0`（与今天 `test:roco-quality` 77/77 同数）。
+
+## 12) 演示服务 `PORT=8910 npm start`（离线、无 key）→ 全绿，已清理
+
+- `/api/bootstrap` READY（2 次轮询内）；页面：`/` `/roco.html` `/box.html` `/workshop.html` `/xiaoya.html` `/connect.html` = **200**，未知路径 = **404**。
+- `/api/roco/status`：`available=true`，`health.ruleset_id=roco-world-s4-2026-09-10`，`protocol_version=1`。
+- `/api/roco/roster`：`total=542`。
+- 对局链路：`battle/new`（turn=1，六只：寂灭骨龙/海豹船长/黑猫巫师…）→ `plan`（recommendation=`使用能量果`，branches=96，depth=2，stable=true）→ `battle/advance`（turn=2，3 条中文事件）。
+- 收尾：SIGTERM 监听进程 → `PORT_AFTER_CLOSE: closed`，`lsof -i tcp:8910` 无监听，8765 仍 HTTP 200。
+- 原始：`_raw-server-8910.log`、`_raw-8910-bootstrap.json`、`_raw-8910-roco-status.json`、`_raw-demo-chain-8910.json`。
+
+## 13) 离线延迟（`_raw-latency-8910.json`，n=12）→ exit 0
+
+```
+provider=local（无 key，确定性回退；无规则服务、无缓存命中）
+p50=8.71ms  p95=15.96ms  mean=9.41ms  min=8.24  max=15.96  12/12 HTTP 200
+```
+**这不是真实模型延迟**；真实模型延迟今天被禁止复测，旧数字只能标 archived/unverified（见 LATENCY.md）。
+
+## 14) 对局内问「该换谁」（无 key 回退）→ 200 但 fail-closed
+
+`_raw-inbattle-8910.json`：`provider=local`，15.84ms/13.36ms，两次回答都是
+「这一局的当前合法行动或公开场上状态读不到，不能据此编一个首选；请刷新当前战况后再问。」
+（引擎 plan 本身成功：recommendation=`使用能量果`）。这是**如实降级**，不是伪造建议。
+
+## 15) 数据读数命令（全部 exit 0）
+
+```
+node -e "console.log(require('./data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json').pets.length)"        # 622
+node -e "…full-catalog.provenance.stats_override.matched…"                                                              # 540
+node -e "…layer-playable-48/support-matrix.json.pet_count…"                                                             # 530
+node -e "…owned-pets.json.counts…"                                                                                      # instances 542 / species 542 / in_layer 530 / outside 12
+node -e "…on-demand-builds.json.summary…"                                                                               # FULL_VERIFIED 542 / SIMULATABLE_UNVERIFIED 80
+```
+
+## 16) 收尾状态
+
+- 已恢复测试副作用文件、删除测试建出的 `.work/`；本审计**未修改任何源码**。
+- 本目录之外的未跟踪目录（`cv/`、`docs/interview/`、`scripts/interview/`）属于其他并行任务，本审计未触碰。

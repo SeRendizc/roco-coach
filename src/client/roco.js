@@ -1,6 +1,7 @@
 import {captureDecisionEvidence, confirmDecisionEvidence} from '../coach/decision-evidence.js';
 import {capturePracticeSnapshot, replacementPracticeSource, replacementQuiz, submitReplacementPractice} from '../coach/replacement-practice.js';
 import {adviceSnapshotFresh, coachBattleStamp} from '../coach/coach-advice.js';
+import {publicSkillMetadata, publicLegalMetadata} from '../coach/public-action-projection.js';
 // 手游规则演示页：**无聊天入口**的主动教练。
 //
 // 这个页面的存在理由是 F01：小芽要能在「玩家没打开聊天」的情况下出现，
@@ -3503,6 +3504,7 @@ function refreshHint({reason = 'turn', plan = state.plan, explicit = false} = {}
     plan,
     now: Date.now(),
     host: {
+      battleId: state.battleId,
       preference: state.mode ?? 'gentle',
       stale: false,
       ended: Boolean(view.battle_result),
@@ -5248,7 +5250,7 @@ async function finishMatch() {
   };
 
   if (review) {
-    $('lesson-question').textContent = review.text;
+    $('lesson-question').textContent = review.displayText || review.playerSummary || review.text;
     // 老师那一条照旧，后面接一句**有条件**的下一步（条件来自这一局真出现过的事件）。
     applyGoalRow(lessonGoalRow({review, depth: review.depth}));
     $('lesson-progress').textContent = progress.checked && progress.recurred && progress.note
@@ -5256,7 +5258,7 @@ async function finishMatch() {
       : '';
     $('lesson-note').textContent = evidence.length ? `依据：${evidence.join(' ')}` : '';
     $('lesson-card').hidden = false;
-    $('lesson').textContent = `关键转折在第 ${review.turning_point.turn ?? '—'} 回合（这一局 ${view.turn} 个回合）。`;
+    $('lesson').textContent = `这一局先回看第 ${review.moment?.turn ?? review.turning_point?.turn ?? '—'} 回合（这一局 ${view.turn} 个回合）。`;
     document.body.dataset.rocoLesson = 'shown';
     document.body.dataset.rocoTeacherGoal = String(review.goal ?? '');
     document.body.dataset.rocoTeacherPoint = String(review.turning_point.rule ?? '');
@@ -5648,7 +5650,13 @@ function coachRocoBattle() {
     if (typeof p.status === 'string' && p.status) out.status = p.status;
     return out;
   };
-  const selfPets = view.self.pets.map(row).filter(Boolean);
+  const selfPets = view.self.pets.map((pet) => {
+    const projected = row(pet);
+    if (!projected) return null;
+    const skills = (Array.isArray(pet.skills) ? pet.skills : []).map(publicSkillMetadata).filter(Boolean);
+    if (skills.length) projected.skills = skills;
+    return projected;
+  }).filter(Boolean);
   // 校验要求我方每只都有 id：拿不到就整条不发（宁可不发，也不发一份缺 id 的战况）。
   if (!selfPets.length || selfPets.some((p) => !p.pet_id)) return null;
   const snapshot = {
@@ -5666,6 +5674,8 @@ function coachRocoBattle() {
     self_energy_max: Number.isInteger(view.self.energy_max) ? view.self.energy_max : null,
   };
   const field = row(view.opponent?.field);
+  const selfSkills = (Array.isArray(view.self.skills) ? view.self.skills : []).map(publicSkillMetadata).filter(Boolean);
+  if (selfSkills.length) snapshot.self_skills = selfSkills;
   if (field) snapshot.foe = [field];
   if (Number.isInteger(view.opponent?.living_count)) snapshot.foe_living_count = view.opponent.living_count;
   // U09（2026-09-29，T2 点名）：**「谁要补位」的权威信号只有 `needs_replacement`**。
@@ -5709,7 +5719,7 @@ function coachRocoBattle() {
   const legal = (view.legal ?? []).slice(0, 12).map((a) => {
     const label = typeof a?.label === 'string' ? a.label : (typeof a?.name === 'string' ? a.name : null);
     if (!label) return null;
-    const item = {label: label.slice(0, 40)};
+    const item = {label: label.slice(0, 40), ...publicLegalMetadata(a)};
     if (typeof a.kind === 'string') item.kind = a.kind.slice(0, 16);
     return item;
   }).filter(Boolean);
@@ -5994,7 +6004,7 @@ async function sayOnce(message) {
       sayStatus('局面已经变化，这条迟到的回答已作废，请重新问当前这一手。');
       return null;
     }
-    const text = typeof data?.text === 'string' ? data.text : null;
+    const text = typeof data?.displayText === 'string' ? data.displayText : (typeof data?.text === 'string' ? data.text : null);
     if (text) {
       // 2026-09-25（人类投诉「小芽啥都不行，说的不知道在说啥」）：这里原来把 `/api/coach` 的
       // `evidence` **直接拼进玩家可见的回复**（`\n依据：${…}`），而 companion 侧的 evidence 装的是
@@ -6009,6 +6019,7 @@ async function sayOnce(message) {
       const basis = typeof data?.activityLine === 'string' && data.activityLine ? `\n\n${data.activityLine}` : '';
       // 走 markdown 渲染（加粗/行内码/换行）；`activityLine` 单独一段，措辞照旧由服务端给。
       $('say-reply').innerHTML = markdown(text)
+        + (data.displayText && data.displayText !== data.text ? `<details><summary>展开详情</summary>${markdown(data.text)}</details>` : '')
         + (basis ? `<p class="say-basis">${markdown(basis.trim())}</p>` : '');
       if (basis) {
         document.body.dataset.rocoCompanionActivity = basis.trim().slice(0, 240);

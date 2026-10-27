@@ -66,9 +66,9 @@ export const TEACHER_TURNING_POINT_RULES = Object.freeze(['first-faint', 'damage
 
 /** 每门课对应的一句「下次怎么做」。必须能照做，不能是「要更小心」这类空话。 */
 const GOAL_LESSON = Object.freeze({
-  'use-item-before-danger-line': '血线掉下一半时先把回复药吃掉，再决定继续输出还是换人。',
-  'switch-out-of-the-bad-matchup': '吃到一次属性克制的伤害之后，下一回合先换掉这一只，别让它继续站在场上。',
-  'treat-status-before-it-stacks': '身上开始扣异常状态伤害之后，下一回合就把它处理掉（换人或净化），别让它连着扣。',
+  'use-item-before-danger-line': '再遇到本局这种血线，先确认回复药可用，再比较回复药、换宠和继续出招；有药不等于立刻用药。',
+  'switch-out-of-the-bad-matchup': '再遇到属性克制伤害，先看主动换宠是否可选；若准备换掉这一只，要比较替补承伤与留场出招，别只看属性。',
+  'treat-status-before-it-stacks': '再次出现本局的连续异常扣血时，先查可用的净化手段，再比较处理状态与继续出招的代价；换人是否解除状态要看规则。',
   'read-the-replacement-first': '对面补上新的一只之后，先确认它是谁、什么系，再决定这一手打谁。',
   'stop-attacking-into-resistance': '打在抵抗上的那一手不要连着出，换一只或者换一个系别的技能。',
 });
@@ -402,7 +402,7 @@ function nameBook(game, skills) {
       if (typeof id !== 'string' || !id || table[id]) continue;
       // 合法动作里三种写法都见过：`skill_name`（`ui_legal_actions` 加的）、
       // `skill.name`（`ui_action_public` 加的）、以及 `label`（动作名＝技能名）。
-      const label = [action.skill_name, action?.skill?.name, action?.label]
+      const label = [action.skill_name, action?.skill?.name, action?.label, action?.name]
         .find((value) => typeof value === 'string' && value);
       if (label) table[id] = label;
     }
@@ -1164,6 +1164,87 @@ function hpEvidence(game, side, slot) {
  * }}
  * 返回 null ＝ 这一局没有可说的：没有转折点，或者挑不出该讲哪一课。宁可沉默。
  */
+// 默认展示只讲一个可核对的回合；详细转折点与课程账保留在 text/evidence。
+// 这里只从事件读执行效果。已受理的提交可说明选了什么，不能单独说明执行成功。
+export function publicReviewMoment({events = [], game = null, skills = null, turn = null, decisionRecords = undefined} = {}) {
+  if (!Number.isInteger(turn)) return null;
+  const names = nameBook(game, skills);
+  const rows = (Array.isArray(events) ? events : []).map((event, index) => ({event, index, detail: detailOf(event)}))
+    .filter(({event}) => event?.turn === turn);
+  if (!rows.length) return null;
+  const own = rows.filter(({detail}) => sideOf(detail.side) === PLAYER);
+  const cancelled = own.find(({event}) => event.kind === 'action_cancelled');
+  const effect = own.find(({event}) => ['damage', 'defense', 'item', 'switch', 'heal'].includes(event.kind));
+  const selected = cancelled ?? effect;
+  const bound = decisionEvidenceAt(decisionRecords, {matchId: game?.id, publicMatchId: game?.roco?.match_id,
+    turn, taken: actionsTakenAt(teacherMatchFacts({events}), turn)});
+  const submitted = bound?.submittedAction;
+  const skillId = selected?.detail?.skill_id ?? (cancelled ? submitted?.skill_id : null) ?? null;
+  const label = selected?.detail?.skill_name ?? skillNameOf(skillId, names)
+    ?? (submitted?.skill_id === skillId ? submitted?.label : null) ?? null;
+  const unknown = [];
+  let execution = cancelled ? 'cancelled' : effect ? 'executed' : 'unknown';
+  let action = label ? `「${label}」` : null;
+  if (!action && selected?.event.kind === 'switch') {
+    const slot = selected.detail.to_slot;
+    action = Number.isInteger(slot) ? `换上第 ${slot + 1} 位` : '换宠';
+  }
+  if (!action && selected?.event.kind === 'defense') action = '防御';
+  if (!action && selected?.event.kind === 'item') action = selected.detail.item ? `使用${selected.detail.item}` : '使用道具';
+  if (!action) { action = '这一手'; unknown.push('技能名'); }
+  const parts = [];
+  const anchors = [];
+  if (selected) anchors.push(selected.index);
+  if (cancelled) {
+    parts.push(`第 ${turn} 回合，你的${action}被取消${cancelled.detail.reason === 'fainted' ? '（行动前已倒下）' : ''}，不能把提交当作打出。`);
+  } else if (effect?.event.kind === 'damage') {
+    const targetSlot = Number.isInteger(effect.detail.target_slot) ? effect.detail.target_slot : null;
+    const target = targetSlot === null ? '目标未记录' : describePet(game, ENEMY, targetSlot).label;
+    const value = numberOf(effect.detail.damage);
+    const multiplier = numberOf(effect.detail.type_multiplier);
+    if (targetSlot === null) unknown.push('目标');
+    if (value === null) unknown.push('伤害');
+    if (multiplier === null) unknown.push('属性倍率');
+    parts.push(`第 ${turn} 回合，你用${action}打向${target}${value === null ? '，伤害未记录' : `，实际记录 ${value} 点伤害`}${multiplier === null ? '' : `（记录倍率 ${multiplier}）`}。`);
+  } else if (effect) {
+    const detail = effect.detail;
+    const value = numberOf(detail.healed ?? detail.amount);
+    parts.push(`第 ${turn} 回合，你${action}${value === null ? '' : `，记录效果 ${value} 点`}。`);
+  } else {
+    parts.push(`第 ${turn} 回合，我方所选技能和执行结果未记录。`);
+    unknown.push('我方行动', '执行结果');
+  }
+  const incoming = rows.find(({event, detail}) => event.kind === 'damage' && sideOf(detail.side) === ENEMY);
+  if (incoming && numberOf(incoming.detail.damage) !== null) {
+    const slot = Number.isInteger(incoming.detail.target_slot) ? incoming.detail.target_slot : null;
+    const target = slot === null ? '我方目标（位次未记录）' : describePet(game, PLAYER, slot).label;
+    parts.push(`同回合${target}承受 ${incoming.detail.damage} 点伤害。`);
+    anchors.push(incoming.index);
+  }
+  const unsupported = own.find(({event,detail}) => /unsupported/.test(event.kind) && (!skillId || !detail.skill_id || detail.skill_id === skillId));
+  if (unsupported) { parts.push('这招有附带效果未结算，这份记录不能评价完整招式收益。'); anchors.push(unsupported.index); }
+  if (unknown.length) parts.push(`${[...new Set(unknown)].join('、')}未知。`);
+  return {turn, action, skillId, execution, targetSlot: effect?.detail.target_slot ?? null,
+    damage: effect?.event.kind === 'damage' ? numberOf(effect.detail.damage) : null,
+    typeMultiplier: effect?.event.kind === 'damage' ? numberOf(effect.detail.type_multiplier) : null,
+    unknown: [...new Set(unknown)], anchors: [...new Set(anchors)], source: 'public-event-receipts', text: parts.join('')};
+}
+
+function playerReviewSummary({moment, alternative, goal, turn}) {
+  const next = alternative?.claimed && alternative.label
+    ? `下次再遇到第 ${turn} 回合这种局面，先把「${alternative.label}」与留场这一手比较；它当时可选，尚未证明效果更好。`
+    : moment?.execution === 'cancelled'
+      ? '下一局出招前先确认行动顺序和当前血线；若仍可能先倒下，再比较当前可用的防御或换宠，别只看技能伤害。'
+      : goal === 'stop-attacking-into-resistance'
+      ? '下一局若第一手被抵抗，第二手先查当前合法菜单里的其他技能和换宠，再决定是否重复。'
+      : goal === 'read-the-replacement-first'
+        ? '下次对方补位，先认新上场的目标，再选下一手，别沿用上一只的判断。'
+        : goal === 'treat-status-before-it-stacks'
+          ? '下次回合末再次因状态扣血，先查当前是否有净化手段，再比较占掉这一回合的代价。'
+          : '下次遇到相近血线，先查当前可选的回复、换宠与出招；本回合的替代收益未验证。';
+  return `${moment?.text ?? `第 ${turn} 回合的行动记录不全，不能判断哪一手更好。`}${next}`;
+}
+
 export function reviewMatch({
   events = [], turns = null, result = null, game = null, memory = null,
   skills = null, bag = null, legalByTurn = undefined, decisionRecords = undefined, matchId = null,
@@ -1195,7 +1276,30 @@ export function reviewMatch({
     if (evaluation.applies !== true) continue;
     candidates.push({goal: candidate, evaluation});
   }
-  if (!candidates.length) return null;
+  if (!candidates.length) {
+    // 原生局已经发生减员但不命中五门固定课时，仍能复盘已发生的行动；不伪造一门课。
+    // 旧三宠教学输入保留原契约，原生六宠入口用明确事件事实兜底。
+    if (game?.roco?.self?.pets?.length !== 6) return null;
+    const moment = publicReviewMoment({events, game, skills, turn: point.turn, decisionRecords});
+    if (!moment) return null;
+    const next = moment.execution === 'executed' && moment.damage !== null
+      ? '下一局遇到收尾时，出招前比较当时的伤害预估和目标血量，再确认出手顺序；这一击不能证明整局策略更好。'
+      : '这一回合的选择还不足以评价；下次出招前先保留当前菜单和血线，方便比较实际选择。';
+    const summary = moment.text + next;
+    const outcome = resultOf({result, game});
+    const category = safeResultToken(outcome);
+    const review = {matchId: currentMatchId, text: summary, playerSummary: summary, moment,
+      turning_point: {turn: point.turn, rule: point.rule, candidates: point.candidates, what: point.what, evidence: point.evidence},
+      learning: null, goal: null, check: null, repeat: false, candidates: [],
+      mistake_available: false, teaching_a_mistake: false, alternative: null,
+      evidence: [...point.evidence, moment.text],
+      outcome: {result: outcome, category: category && BATTLE_RESULTS.includes(category) ? category : (category ? 'unknown' : 'missing'), sentence: outcomeText(outcome, facts), event: null},
+      repeat_avoided: {detected: false, action: 'none'},
+      repeat_detail: {already_taught: false, same_match: false, previous_match: false},
+      summaryOnly: true};
+    review.ledger = matchReviewLedgerOf(review, {matchId: currentMatchId});
+    return review;
+  }
   const rank = (row) => HANDLING_RANK[row.evaluation.handling];
   const untaught = (row) => teachingPlan(memory, {lesson: row.goal}).teach !== false;
   const mistakes = candidates.filter((row) => rank(row) === 1);
@@ -1320,6 +1424,9 @@ export function reviewMatch({
     teaching_a_mistake: teachingAMistake,
     candidates: candidates.map((row) => row.goal),
   };
+  const focusTurn = Number.isInteger(chosen.turn) ? chosen.turn : point.turn;
+  review.moment = publicReviewMoment({events, game, skills, turn: focusTurn, decisionRecords});
+  review.playerSummary = playerReviewSummary({moment: review.moment, alternative: review.alternative, goal, turn: focusTurn});
   // 这一局的记账对象（开下一局时用 `resetMatchReview()` 换一份全新的，别把旧局的结论带过去）。
   review.ledger = matchReviewLedgerOf(review, {matchId: currentMatchId});
   return review;

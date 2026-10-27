@@ -1,0 +1,30 @@
+--- a/roco/src/roco_env/service.py
++++ b/roco/src/roco_env/service.py
+@@ -1702,9 +1702,10 @@
+                 "by_element": present,
+                 "top": present[:5],
+                 "list_cap_per_element": 12,
+-                "multiplier_rule": "怕 = 该属性打这只的倍率 > 1.0；双属性按两系**相乘**"
+-                                   "（人类裁决 2026-09-25，台账 EV-TYPE-MULTIPLIER）——"
+-                                   "与 type_multiplier 用的是同一套乘法",
++                # 旧返回文案留痕（2026-09-25，2026-10-17 已退役）：
++                # 双属性按两系**相乘**；与 type_multiplier 用的是同一套乘法。
++                "multiplier_rule": "怕 = 该属性打这只的倍率 > 1.0；双属性逐字读取快照行"
++                                   "（2026-10-17 复核，双弱 ×3）；与 type_multiplier 同用 TypeChart.multiplier",
+                 "note": "这是**名单级的相性计数**（几只怕哪个属性），不是胜率、不是强度排序；"
+                         "双属性组合在快照里没有那一行的，整只不计入（列在 unknown_combination_pet_ids），"
+                         "不猜一个中性值。每栏的宠物清单最多 12 个，计数是全部。",
+@@ -2004,10 +2005,10 @@
+                 # 进攻向：这个属性打哪些属性是几倍（单属性表里逐行数出来的）
+                 "offense": offense,
+                 "neutral_default": 1.0,
+-                # 这条记录是**快照原文**（数据查询）。引擎结算用的倍率见 type_multiplier：
+-                # 双属性按两系相乘（2026-09-25 人类裁决），与快照的封顶行在 41 格上不同。
++                # 旧返回文案留痕（2026-09-25，2026-10-17 已退役）：
++                # 双属性按两系相乘，与快照的封顶行在 41 格上不同。
+                 "note": "本记录是 types.json 的逐字转录（数据面）；**结算**用 type_multiplier，"
+-                        "双属性按两系相乘（台账 EV-TYPE-MULTIPLIER，2026-09-25 人类裁决）。"
++                        "单属性与双属性均逐字读取快照行（2026-10-17 复核，双弱 ×3）。"
+                         "`weak`/`resist` 是防守向（怕什么/抗什么），`offense` 是进攻向（克制谁）。",
+             },
+             evidence_ids=[ev(rs.ruleset_id, "types.json", key)],
