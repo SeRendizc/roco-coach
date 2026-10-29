@@ -16,6 +16,8 @@ import {answerCacheKey,createAnswerCache,shouldCache} from '../coach/answer-cach
 import {decideOpponentAction,DIFFICULTY_BRIEFING,OPPONENT_TIMEOUT_MS} from './opponent.js';
 import {createRocoService} from './roco-service.js';
 import {evolutionFamilyMetadata} from './evolution-families.js';
+import {recommendOwnedTeams,loadOwnedTeamCatalog} from './team-recommendations.js';
+import {parseTeamRequestIntent,resolveTeamEntityChanges,teamWorkshopIdentity} from '../coach/team-request-intent.js';
 import {productionPlannerSystem} from '../coach/planner-prompt.js';
 // RC-205：诊断面如实报出 RAG 模式（默认 shadow）——见 status()。
 import {ragMode,LOCAL_PLAN_TOOLS,rocoToolsStatus} from '../coach/toolbox.js';
@@ -229,6 +231,21 @@ export function validateChat(b){
  if(!b||typeof b.message!=='string'||b.message.length<1||b.message.length>1000||!['auto','strategist','teacher','companion'].includes(b.role))throw fail(400,'消息或角色无效');
  const c=b.context,m=b.memory;
  if(!c||!['camp','pve','pvp-local','pvp-live'].includes(c.mode)||!c.profile?.pets||!m||m.version!==1)throw fail(400,'教练上下文无效');
+ if(c.team_workshop!==undefined){
+  const w=c.team_workshop;
+  if(!w||typeof w!=='object'||Array.isArray(w)||w.mode!=='pvp-standard-six-pet')throw fail(400,'配队上下文模式无效');
+  for(const key of ['selected','locked','must_include','must_exclude']){
+   if(w[key]!==undefined&&(!Array.isArray(w[key])||w[key].length>(['selected','locked'].includes(key)?6:600)
+     ||w[key].some(id=>typeof id!=='string'||!id||id.length>100)))throw fail(400,`配队上下文 ${key} 无效`);
+  }
+  if(w.goal!==undefined&&!['coverage','attack','bulk'].includes(w.goal))throw fail(400,'配队目标无效');
+  if(w.refresh!==undefined&&typeof w.refresh!=='boolean')throw fail(400,'配队换批标记无效');
+  if(w.selectionKey!==undefined&&(typeof w.selectionKey!=='string'||w.selectionKey.length>100000))throw fail(400,'配队身份无效');
+  if(w.loadouts!==undefined&&(!w.loadouts||typeof w.loadouts!=='object'||Array.isArray(w.loadouts)||Object.keys(w.loadouts).length>600
+    ||Object.values(w.loadouts).some(xs=>!Array.isArray(xs)||xs.length>4||xs.some(id=>typeof id!=='string'||!id||id.length>100))))throw fail(400,'配队四招上下文无效');
+  if(w.seenTeams!==undefined&&(!Array.isArray(w.seenTeams)||w.seenTeams.length>200
+    ||w.seenTeams.some(xs=>!Array.isArray(xs)||xs.length!==6||new Set(xs).size!==6||xs.some(id=>typeof id!=='string'||!id||id.length>100))))throw fail(400,'配队已看记录无效');
+ }
  // 2026-09-25：**玩家当前选的那六只**（工作台公开层的名字/系别）可以随上下文送上来。
  // 加性：不送就整段不执行。**只收公开层真有的东西** —— 公开层给不出物种 id 时页面本来就不写，
  // 这里也就不要求 id（但 id 与 name 至少要有一个，否则这一条没有任何信息）。
@@ -551,6 +568,7 @@ export function localModelReport(env=process.env){
 }
 
 export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=false,roco=null,
+  teamRecommender=recommendOwnedTeams,teamCatalogLoader=loadOwnedTeamCatalog,
   // 本地模型工厂。**注入点是为了测试**：默认实现会真的拉起 3 GB 的 MLX 子进程，
   // 单测里绝不该这么干（第 38 轮实测：直接跑会把测试挂死到超时，还留下孤儿进程）。
   localModelFactory=()=>new LocalModel()}={}){
@@ -560,6 +578,58 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
  const {publicKey,privateKey}=generateKeyPairSync('rsa',{modulusLength:2048});
  const spki=publicKey.export({type:'spki',format:'der'}).toString('base64');
  const sessions=new Map();let credential='',model='deepseek-flash',verified=false,generation=0,inflight=false;
+ const rememberTeamRequest=(session,identity,request,epoch)=>{
+  if(session.teamRequestEpoch===epoch)session.teamRequestState={identity,request:structuredClone(request)};
+ };
+ const teamAnswer=(b,text,result=null)=>({text,displayText:text,localText:text,route:'strategist',provider:'system',
+  source:'owned-team-search',execution:'system-team-search',modelUsed:false,verified:true,localOnly:true,
+  memory:{...b.memory,lastTopic:'team-recommendation',dialogue:[...(Array.isArray(b.memory?.dialogue)?b.memory.dialogue:[]),
+    {role:'user',content:b.message},{role:'assistant',content:text}].slice(-8)},
+  evidence:['配队来自完整持有范围与可用配招；静态搭配评分不代表竞技胜率。'],
+  usage:null,tokenAudit:null,stateToken:b.stateToken,cache:'miss',...(result?{teamRecommendation:result}:{})});
+ async function teamChat(b,session,signal){
+  const workshop=b.context?.team_workshop;
+  if(b.context?.mode==='pvp-live')return null;
+  const identity=teamWorkshopIdentity(workshop);
+  const previous=identity&&session.teamRequestState?.identity===identity?session.teamRequestState.request:null;
+  const intent=parseTeamRequestIntent({message:b.message,workshop,previousRequest:previous});
+  if(!intent.handled)return null;
+  if(intent.cancelled||intent.clarify)return teamAnswer(b,intent.message);
+  const epoch=(session.teamRequestEpoch??0)+1;session.teamRequestEpoch=epoch;
+  let request=intent.request;
+  if(intent.entityChanges.length){
+   let catalog;
+   try{catalog=await teamCatalogLoader({service:rocoService});}
+   catch{return teamAnswer(b,'这次没能读到完整持有资料，保留原条件，稍后再试。',{ok:false,error:'完整持有资料暂时不可用',request});}
+   const resolved=resolveTeamEntityChanges({intent,owned:catalog.owned});
+   if(!resolved.ok){
+    if(intent.requireKnownEntity)return null;
+    return teamAnswer(b,resolved.error,{ok:false,error:resolved.error,needs:resolved.needs,request});
+   }
+   request=resolved.request;
+  }
+  if(signal?.aborted)return null;
+  // 成功解析的过滤条件在工具失败后仍保留，且只属于这一份选人/锁定/配招身份。
+  rememberTeamRequest(session,identity,request,epoch);
+  let result;
+  try{result=await teamRecommender({service:rocoService,request});}
+  catch{result={ok:false,error:'配队资料暂时不可用，请稍后重试'};}
+  if(signal?.aborted)return null;
+  result={...result,request:result?.request??request,selectionKey:workshop.selectionKey??null,
+    requestVersion:workshop.requestVersion??null,previewOnly:true};
+  if(result.ok){
+   const seen=[...(request.seenTeams??[]),...(result.alternatives??[]).map(one=>one.team)].slice(-80);
+   rememberTeamRequest(session,identity,{...result.request,seenTeams:seen},epoch);
+  }
+  let text;
+  if(!result.ok)text=result.error??'这次没有生成可用阵容，已有条件保留。';
+  else if(!result.alternatives?.length)text=result.message??'当前条件下没有更多未看过的可行阵容，可以调整保留或排除条件。';
+  else text=`按完整持有与当前配招，给你 ${result.alternatives.length} 套六宠备选：\n`
+    +result.alternatives.map((one,index)=>`${index+1}. ${one.label}：${one.rows.map(row=>row.name).join('、')}`).join('\n')
+    +'\n可以预览每只的四招，再选择采用。';
+  if(b.context?.roco_battle&&!b.context.roco_battle.result)text+=' 当前对局仍在继续，这些方案只作预览。';
+  return teamAnswer(b,text,result);
+ }
  // ── 会话层：上限 + TTL + **主动淘汰**（task-15）────────────────────────────────
  //
  // 事实经过（Lead 复现 + 我在独立实例上量过，读数见 `reports/roco/build-snapshot/session-cap.json`）：
@@ -971,6 +1041,19 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
     // "建得早"而被当成最久没用过的那个淘汰掉（那正是"不许打断已有会话"要防的事）。
     touchSession(sid,s);
     const b=await body(req);
+    if(path==='/api/roco/team/recommend'){
+     const input=b?.request??b;
+     if(!input||typeof input!=='object'||Array.isArray(input))throw fail(400,'配队请求必须是对象');
+     const {selectionKey,requestVersion,...request}=input;
+     const identity=teamWorkshopIdentity(request),epoch=(s.teamRequestEpoch??0)+1;s.teamRequestEpoch=epoch;
+     let r;
+     try{r=await teamRecommender({service:rocoService,request});}
+     catch{r={ok:false,error:'配队资料暂时不可用，请稍后重试'};}
+     if(r.ok&&identity)rememberTeamRequest(s,identity,{...(r.request??request),
+       seenTeams:[...(request.seenTeams??[]),...(r.alternatives??[]).map(one=>one.team)].slice(-80)},epoch);
+     return json(res,r.ok?200:400,{...r,selectionKey:typeof selectionKey==='string'?selectionKey:null,
+       requestVersion:requestVersion??null,previewOnly:true});
+    }
     if(path==='/api/connect'){
      if(typeof b.encryptedKey!=='string'||b.encryptedKey.length>500||typeof b.model!=='string'||!/^deepseek-[a-zA-Z0-9._-]{1,70}$/.test(b.model))throw fail(400,'配置格式无效');
      let clear;try{clear=privateDecrypt({key:privateKey,padding:constants.RSA_PKCS1_OAEP_PADDING,oaepHash:'sha256'},Buffer.from(b.encryptedKey,'base64'));}catch{throw fail(400,'加密配置无效，请刷新页面后重试');}
@@ -1019,6 +1102,9 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
     }
     if(path==='/api/coach'){
      validateChat(b);const cancelled=new AbortController();res.once('close',()=>{if(!res.writableEnded)cancelled.abort();});
+     const teamReply=await teamChat(b,s,cancelled.signal);
+     if(cancelled.signal.aborted)return;
+     if(teamReply)return json(res,200,teamReply);
      // ── R4：缓存 key 在**请求进来时**就能算出来（身份全在请求里）──
      // 2026-09-27（审计实测，高 2）：**没有 `stateToken` 就不许进缓存/不许去重**。
     // 事实经过：训练场页那两条 `/api/coach` 从不发 `stateToken`，于是 key 退化成

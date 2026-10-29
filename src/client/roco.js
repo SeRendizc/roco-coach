@@ -5453,6 +5453,8 @@ function mountRocoXiaoya() {
       const plan = coachRocoPlan();
       if (battle) extra.roco_battle = battle;
       if (plan) extra.roco_plan = plan;
+      const workshop=window.rocoTeamWorkshop?.getRecommendationContext?.();
+      if(workshop) extra.team_workshop=workshop;
       return {stageId: 'meadow', extra};
     },
   }) ?? null;
@@ -6322,6 +6324,7 @@ function mountWorkshop() {
       initialSelected: teamFromUrl(),
       // 盒子「锁定这一只去配队」带过来的锁定：与选人分开传，服务端分开校验。
       initialLocked: locksFromUrl(),
+      requestRecommendations: request => api('/api/roco/team/recommend',request),
       onTeamChange: (detail) => {
         state.teamWorkshop = detail;
         // 六槽一变，开局按钮的可用性就跟着变（判据在 updateStandardPvpBar 里）。
@@ -6336,6 +6339,24 @@ function mountWorkshop() {
     root.dataset.twError = String(error?.message ?? error);
   }
 }
+
+document.addEventListener('xiaoya:team-recommendation',event=>{
+  const detail=event.detail;
+  try{
+    const workshop=window.rocoTeamWorkshop;
+    if(!workshop)throw new Error('配队区还未就绪，请稍后重试。');
+    workshop.receiveRecommendations(detail.result,{selectionKey:detail.selectionKey,requestVersion:detail.requestVersion});
+    detail.accepted=true;
+  }catch(error){detail.error=error.message;}
+});
+document.addEventListener('xiaoya:team-choice',async event=>{
+  const detail=event.detail;
+  try{
+    if(detail.adopt&&state.battleId&&!state.view?.battle_result)throw new Error('当前对局正在进行。请结束对局后再换上下一局阵容。');
+    await window.rocoTeamWorkshop.chooseRecommendation(detail.result,detail.id,{adopt:detail.adopt});
+    detail.notify?.(detail.adopt?'已换上六只和对应配招，可以开局。':'配队区已显示这套六只和四招，尚未采用。');
+  }catch(error){detail.notify?.(error.message);}
+});
 
 /**
  * 标准 PVP 开局按钮（RC-106）。

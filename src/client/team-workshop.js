@@ -350,6 +350,7 @@ import {markdown as renderMarkdown} from '../coach/experience.js';
 import {buildTeamPlan, sixByFourComplete} from '../coach/team-plan.js';
 import {buildTeamAlternatives} from '../coach/team-alternatives.js';
 import {bindWorkshopSlotIdentities} from '../coach/team-slot-identity.js';
+import {recommendationSelectionKey, recommendationConstraintKey, validateRecommendationRows} from '../coach/team-recommendation-client.js';
 // 属性相性用页面自己那一份（来源 `data/roco/normalized/.../types.json`，有生成与校验脚本）。
 import {defenceMultiplier} from './type-affinity.js';
 // ⚠ 2026-09-29 补（`art-finish` 报的实况故障，Lead 复核并实测）：
@@ -898,6 +899,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   // 抽屉里「让小芽说人话」用**宿主页**的教练通道（同一条 /api/coach、同一份记忆）：
   // 这个模块是 shadow DOM 里的纯展示件，不该自己攒一套会话/CSRF。没给就如实说没接上。
   const askCoach = typeof opts.askCoach === 'function' ? opts.askCoach : null;
+  const requestRecommendations = typeof opts.requestRecommendations === 'function' ? opts.requestRecommendations : null;
   let lastPlayer = null;   // 最近一次渲染用的评估结果（小芽按钮读它拼题面）
 
   const shadow = rootEl.shadowRoot ?? rootEl.attachShadow({mode: 'open'});
@@ -1120,6 +1122,10 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     /** 6 只 × 4 招整套配置的预览（点「小芽给一套 6×4」才建）。 */
     plan: null,
     planAlternatives: [],
+    recommendationRequest: {},
+    recommendationIdentity: null,
+    seenTeams: [],
+    recommendationEpoch: 0,
     planBuildSeq: 0,
     rosterFacts: null,
     slotIdentities: new WeakMap(),
@@ -1764,7 +1770,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     }
     const out = [];
     for (const row of rows.slice(0, TEAM_SLOTS)) {
-      const four = await fourSkillsFor(row.species, row.instance);
+      const four = Array.isArray(row.skills) && row.skills.length === SHARED_LOADOUT_SLOTS
+        ? {source:'verified-team-service',skills:row.skills} : await fourSkillsFor(row.species, row.instance);
       // ⚠⚠ R03 根因（2026-09-29 Lead 在真 8765 上逐层量出来的）：`fourSkillsFor` 的**前几支**
       //   （玩家自选 / 引擎槽位 / payload）只回 `{skill_id, name}` —— **没有 `power`/`energy`/
       //   `element`/`effect_support`**。而判断层正是靠这几个字段判断"这一招会不会结算、够不够重"，
@@ -1860,39 +1867,91 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     return state.plan;
   }
 
-  async function buildAlternatives() {
-    const selectionKey = `${state.selected.join(',')}|${state.locked.join(',')}`;
-    // One public local-engine read, cached for this mount. Owned ids still come from the box.
-    if (!state.rosterFacts) {
-      const response = await getJson(`${apiBase}/roster`);
-      if (!response.ok || !Array.isArray(response.pets)) throw new Error('精灵数值暂时没读到，稍后再试。');
-      state.rosterFacts = response.pets;
-    }
-    if (!state.evolutionFamilies) {
-      try {
-        const response = await getJson(`${apiBase}/evolution-families`);
-        if (!response.ok || !response.families) throw new Error('进化链资料暂不可用');
-        state.evolutionFamilies = response.families;
-      } catch {
-        // A missing supplemental graph does not invent relationships or block
-        // the already available species/instance constraints.
-        state.evolutionFamilies = {};
+  function getRecommendationContext() {
+    const base={mode:'pvp-standard-six-pet',selected:state.selected.slice(),locked:state.locked.slice(),
+      loadouts:Object.fromEntries([...loadouts].map(([key,ids])=>[key,ids.slice()]))};
+    const selectionKey=recommendationSelectionKey(base);
+    if(state.recommendationIdentity!==selectionKey){
+      state.recommendationIdentity=selectionKey;
+      state.seenTeams=[];
+      state.lastRecommendation=null;
+      $('tw-plan-build').textContent='给我三套备选 6×4';
+      state.recommendationEpoch++;
+      if(state.plan?.recommendationIdentity&&state.plan.recommendationIdentity!==selectionKey){
+        state.plan=null;state.planAlternatives=[];renderPlan();
       }
     }
-    if (selectionKey !== `${state.selected.join(',')}|${state.locked.join(',')}`) return null;
-    const owned = [...state.ownedByInstance].map(([instance, p]) => ({...p, instance,
-      species: p.speciesId, types: state.ownedBySpecies.get(p.speciesId)?.find((r) => r.select === instance)?.types ?? []}));
-    const result = buildTeamAlternatives({owned, roster: state.rosterFacts,
-      selected: state.selected, locked: state.locked, typeMultiplier: defenceMultiplier,
-      evolutionFamilies: state.evolutionFamilies});
-    state.planAlternatives = result.alternatives;
-    state.planAlternativesFor = selectionKey;
-    state.planAlternativesNote = result.note ?? result.unavailable;
-    if (!result.alternatives.length) {
-      state.plan = null; renderPlan();
-      setConfigNote(result.unavailable); return null;
+    const previous=state.recommendationRequest;
+    return {...base,goal:previous.goal??'coverage',must_include:previous.must_include??[],
+      must_exclude:previous.must_exclude??[],seenTeams:state.seenTeams.map(team=>team.slice()),
+      refresh:state.seenTeams.length>0,selectionKey,requestVersion:state.recommendationEpoch};
+  }
+
+  function receiveRecommendations(result,{selectionKey=getRecommendationContext().selectionKey,
+    requestVersion=null,show=true}={}) {
+    const current=getRecommendationContext();
+    if(selectionKey!==current.selectionKey||(requestVersion!==null&&requestVersion!==state.recommendationEpoch)){
+      throw new Error('选人、锁定或配招已经变化，旧推荐已作废，请重新推荐。');
     }
-    return buildPlan({alternative: result.alternatives[0]});
+    if(result?.request){
+      if(recommendationConstraintKey(state.recommendationRequest)!==recommendationConstraintKey(result.request)){
+        state.seenTeams=[];state.plan=null;state.planAlternatives=[];state.lastRecommendation=null;renderPlan();
+      }
+      state.recommendationRequest={...state.recommendationRequest,...result.request};
+    }
+    if(!result?.ok||!Array.isArray(result.alternatives)){
+      state.recommendationEpoch++;
+      throw new Error(result?.error||'没有拿到可用的配队结果。');
+    }
+    for(const alternative of result.alternatives){
+      const problem=validateRecommendationRows(alternative,state.ownedByInstance,state.locked);
+      if(problem)throw new Error(problem);
+      for(const row of alternative.rows)for(const skill of row.skills){
+        if(skill.name)skillNames.set(skill.skill_id,skill.name);
+      }
+    }
+    state.recommendationRequest={...state.recommendationRequest,...result.request};
+    const seen=new Map(state.seenTeams.map(team=>[[...team].sort().join('|'),team]));
+    for(const alternative of result.alternatives){
+      const team=alternative.rows.map(row=>row.instance);
+      seen.set([...team].sort().join('|'),team);
+    }
+    state.seenTeams=[...seen.values()];
+    state.recommendationEpoch++;
+    state.planAlternatives=result.alternatives;
+    state.planAlternativesFor=`${state.selected.join(',')}|${state.locked.join(',')}`;
+    state.planAlternativesNote=result.message||'先比较这批方案；“再换一批”会继续搜索未看过的成员组合。';
+    state.lastRecommendation=result;
+    state.lastRecommendationSelection=selectionKey;
+    $('tw-plan-build').textContent=state.seenTeams.length?'再换一批备选 6×4':'给我三套备选 6×4';
+    if(show&&result.alternatives.length)showRecommendation(result.alternatives[0].id);
+    else if(!result.alternatives.length){state.plan=null;renderPlan();}
+    setConfigNote(result.message||(result.alternatives.length?`找到 ${result.alternatives.length} 套可用备选，尚未替换当前队伍。`:'没有更多满足条件的新方案，保留原约束。'));
+    return result;
+  }
+
+  function showRecommendation(id) {
+    const current=getRecommendationContext();
+    const alternative=state.planAlternatives.find(row=>row.id===id);
+    if(!alternative||!state.lastRecommendation||state.lastRecommendationSelection!==current.selectionKey)
+      throw new Error('这套方案已经失效，请重新推荐。');
+    const problem=validateRecommendationRows(alternative,state.ownedByInstance,state.locked);
+    if(problem)throw new Error(problem);
+    state.plan={rows:alternative.rows.map(row=>({...row,origin:row.origin??'recommended',skillSource:'verified-team-service'})),
+      alternative,selectionKey:`${state.selected.join(',')}|${state.locked.join(',')}`,
+      recommendationIdentity:current.selectionKey,
+      recommendationConstraints:recommendationConstraintKey(state.recommendationRequest),at:new Date().toISOString()};
+    renderPlan();
+    return state.plan;
+  }
+
+  async function buildAlternatives() {
+    if(!requestRecommendations)throw new Error('配队服务未连接，请从新版训练场入口打开。');
+    const request=getRecommendationContext();
+    const requestVersion=++state.recommendationEpoch;
+    const result=await requestRecommendations({...request,requestVersion});
+    receiveRecommendations(result,{selectionKey:request.selectionKey,requestVersion});
+    return state.plan;
   }
 
   /** 预览表：逐格给名字 + 四个技能名 + 这一行是哪来的。六只 × 四个技能就是「6×4」。 */
@@ -1972,6 +2031,10 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       setConfigNote('这套配置还没凑满六只：先让它补齐，再换上。');
       return false;
     }
+    if(plan.recommendationIdentity&&(plan.recommendationIdentity!==getRecommendationContext().selectionKey
+      ||plan.recommendationConstraints!==recommendationConstraintKey(state.recommendationRequest))){
+      setConfigNote('选人、锁定、配招或配队条件已经变化，这套旧方案不能再采用。');return false;
+    }
     if (plan.selectionKey !== `${state.selected.join(',')}|${state.locked.join(',')}`) {
       setConfigNote('队伍或锁定变了，请重新生成备选再换上。');
       return false;
@@ -1997,7 +2060,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     state.replaceIncoming = null;
     state.replaceArm = null;
     renderReplaceBox();
-    setConfigNote('已经按预览把六只与它们的四个技能装到屏幕上了：核对无误后点「应用这套配置」。');
+    state.config.reason='已经按预览把六只与它们的四个技能装到屏幕上了：核对无误后点「应用这套配置」。';
+    setConfigNote(state.config.reason);
     await reload();
     await buildPlan();
     return true;
@@ -3256,6 +3320,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   }
 
   function emit() {
+    getRecommendationContext();
     const detail = {
       team: state.selected.slice(),
       // 本局成员的**物种 id**：由**持有实例**解析（`ownedByInstance` 是 个体→{speciesId}）。
@@ -3767,6 +3832,9 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   // （RC-801 / 「保留锁定迪莫」），清掉它等于把玩家的约束悄悄丢了。现在：解锁定的不动，
   // 只清能动的，并把这件事写在反馈行上。
   $('tw-reset').addEventListener('click', () => {
+    state.plan=null;state.planAlternatives=[];state.lastRecommendation=null;
+    state.seenTeams=[];state.recommendationEpoch++;renderPlan();
+    $('tw-plan-build').textContent='给我三套备选 6×4';
     const kept = state.selected.filter((id) => state.locked.includes(id));
     const dropped = state.selected.length - kept.length;
     state.selected = kept;
@@ -3805,7 +3873,10 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
         setConfigNote('队伍或锁定变了，请重新生成备选。'); return;
       }
       const alternative = state.planAlternatives[Number(choice.dataset.twPlanChoice)];
-      if (alternative) void buildPlan({alternative});
+      if (alternative) {
+        try { showRecommendation(alternative.id); }
+        catch(error) { setConfigNote(error.message); }
+      }
       return;
     }
     if (event.target?.closest?.('[data-tw-plan-adopt]')) { void adoptPlan(); return; }
@@ -3836,6 +3907,15 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     root: rootEl,
     shadow,
     getTeam: () => state.selected.slice(),
+    getRecommendationContext,
+    receiveRecommendations,
+    chooseRecommendation: async (result,id,{adopt=false}={}) => {
+      getRecommendationContext();
+      if(result!==state.lastRecommendation)throw new Error('这批方案已经过期，请重新推荐后再选择。');
+      showRecommendation(id);
+      if(adopt&&!await adoptPlan())throw new Error('未能换上这套，请查看配队区提示。');
+      return true;
+    },
     getPayload: () => state.payload,
     /** 选阵容阶段的 Coach 短结论（纯数据，同一份评估算出来的）。 */
     coachSummary: () => buildCoachSummary(state.payload?.player ?? null),
