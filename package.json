@@ -5,6 +5,7 @@
   "scripts": {
     "test": "npm run test:unit && npm run test:browser",
     "start": "node src/server/index.js",
+    "test:team-recommendation": "node --test tests/roco-team-refresh-core-20261029.test.js tests/roco-team-chat-intent-20261029.test.js tests/server-team-recommendation-20261029.test.js tests/roco-team-recommendation-client-20261029.test.js tests/roco-team-evolution-20261027.test.js tests/roco-team-slot-identity-20261027.test.js",
     "test:opponent": "node --test tests/opponent.test.js",
     "test:knowledge": "node --test tests/knowledge.test.js",
     "test:pvp": "node --test tests/pvp.test.js",

@@ -894,6 +894,36 @@ export function adviceCardOf(advice) {
  * 返回值就是那张卡（`null` = 没画）。两个按钮的 id 只在这一张卡上（新卡出现时把旧的摘掉，
  * 页面里永远只有一组 `#xiaoya-advice-view` / `#xiaoya-advice-adopt`，"最新那一条"才点得动）。
  */
+export function decorateTeamRecommendation(entry,result,notify=null,error=null){
+  if(!entry||!result?.ok||!Array.isArray(result.alternatives))return null;
+  const card=document.createElement('div');card.className='xy-team';card.dataset.xyTeam='yes';
+  const note=document.createElement('p');
+  note.textContent=error||'按当前持有个体和配招规则搜索；点“换上”后才会修改队伍。';card.append(note);
+  for(const alternative of result.alternatives){
+    const section=document.createElement('section');section.dataset.xyTeamAlternative=alternative.id;
+    const fold=document.createElement('details');
+    const summary=document.createElement('summary');
+    summary.textContent=`${alternative.label}：${alternative.rows.map(row=>row.name).join('、')}`;
+    const rows=document.createElement('ol');
+    for(const row of alternative.rows){
+      const item=document.createElement('li');
+      item.textContent=`${row.name}${row.locked?'（锁定）':''}：${row.skills.map(skill=>skill.name).join(' / ')}`;
+      rows.append(item);
+    }
+    fold.append(summary,rows);section.append(fold);
+    const reason=document.createElement('p');reason.textContent=alternative.reason;section.append(reason);
+    const actions=document.createElement('div');actions.className='xy-quick';
+    for(const [label,adopt] of [['预览这套',false],['换上这套',true]]){
+      const button=document.createElement('button');button.type='button';button.textContent=label;
+      button.disabled=Boolean(error);button.dataset.xyTeamAction=adopt?'adopt':'preview';
+      button.onclick=()=>document.dispatchEvent(new CustomEvent('xiaoya:team-choice',{
+        detail:{result,id:alternative.id,adopt,notify}}));actions.append(button);
+    }
+    section.append(actions);card.append(section);
+  }
+  entry.append(card);return card;
+}
+
 export function decorateAdvice(entry, advice, notify = null) {
   const card = adviceCardOf(advice);
   if (!card || !entry) return null;
@@ -1093,6 +1123,7 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
     // U08：**局中建议卡片**（客户端那一半）—— 画在正文下方、依据折叠区之外，
     // `<details>` 默认收起，点了只广播事件（执行不在这一层）。
     if (answer?.rocoAdvice) decorateAdvice(entry, answer.rocoAdvice, setStatus);
+    if (answer?.teamRecommendation) decorateTeamRecommendation(entry,answer.teamRecommendation,setStatus,answer.teamClientError);
     log?.append(entry);
     if (log) {
       if (following) log.scrollTop = log.scrollHeight;
@@ -1211,6 +1242,12 @@ export function mountXiaoya({mode = 'popup', host = null, contextProvider = null
       const incomingMemory = answer.memory ?? state.memory;
       state.memory = mergeMemories(readMemory(readStored(MEMORY_KEY)), incomingMemory);
       writeStored(MEMORY_KEY, JSON.stringify(state.memory));
+      if(answer.teamRecommendation){
+        const detail={result:answer.teamRecommendation,selectionKey:context.team_workshop?.selectionKey,
+          requestVersion:context.team_workshop?.requestVersion,accepted:false};
+        document.dispatchEvent(new CustomEvent('xiaoya:team-recommendation',{detail}));
+        if(!detail.accepted)answer.teamClientError=detail.error||'配队页面已经变化，请重新推荐。';
+      }
       const entry = addEntry('小芽', answer.displayText || answer.text || '（这次没有拿到回答）', answer);
       // 小测验的选项直接可点（与营地页一致）：点一下就等于追问那个选项。
       if (Array.isArray(answer.choices)) {
